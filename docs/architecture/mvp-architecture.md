@@ -4,7 +4,7 @@ This document records the intended MVP architecture. It is an architecture basel
 
 ## Continuous Engineering Iteration Loop
 
-The MVP is organized around a continuous feedback-driven loop:
+The MVP is organized around the AI-native Software Production Loop, a continuous feedback-driven loop:
 
 ```text
 Human Intent → Design Lead AI → Planning / VS / Task Generation
@@ -14,6 +14,39 @@ Human Intent → Design Lead AI → Planning / VS / Task Generation
 
 Design is not permanently frozen after development starts. Implementation feedback can challenge design assumptions, and verification can trigger design refinement. Human intervention focuses on important decisions rather than every execution step.
 
+
+## Origin and MVP Goal
+
+### Origin
+
+The MVP design originates from real ChatGPT + Codex collaboration practice. That practice exposed context synchronization, manual task orchestration, multi-environment execution state, and the separation between AI execution and engineering governance.
+
+### MVP Goal
+
+The MVP is not defined as moving ChatGPT + Codex into a new platform. Its goal is to build a minimum viable AI-native Software Production Loop in which AI can, based on project goals, perform planning, task decomposition, execution coordination, result verification, and iteration advancement.
+
+The MVP validates whether:
+
+- AI can drive the engineering rhythm
+- AI can continuously understand project state
+- AI can adjust the next path based on execution results
+- Humans can move from executors to governors
+
+## Design Lead AI: MVP Intelligence Mode
+
+The MVP uses **Single Intelligence Mode**:
+
+```text
+Human Goal
+    ↓
+Design Lead AI
+    ↓
+Design / Planning / Task Decomposition
+    ↓
+Execution Loop
+```
+
+This mode exists to quickly validate the AI-native software production loop. It does not define Design Lead AI as a permanently fixed super Agent.
 ## Engineering Hierarchy
 
 ```text
@@ -46,7 +79,7 @@ Reasoning → Generate Execution Instruction → Executor Run
     → Result Feedback → Evaluation → Continue or Correct
 ```
 
-An Iteration is one complete reasoning-execution-feedback cycle. It is distinct from the VS lifecycle, Task lifecycle, and code lifecycle.
+An Iteration is one complete production cycle in which AI understands the goal, plans, executes, observes, reflects, and adjusts the path until it approaches a trusted target state. It is distinct from the VS lifecycle, Task lifecycle, and code lifecycle.
 
 ## MVP Core Components
 
@@ -56,7 +89,32 @@ Supports AI roles participating in software production. The initial role is Desi
 
 ### Design Lead AI
 
-Understands project goals, maintains focus, produces product and architecture design, decomposes VSs and Tasks, generates execution instructions, reviews results, and decides whether to continue or revise. It is a governed engineering role, not a generic chatbot.
+The Design Lead AI is the core coordination role in the AI-native software production process and a **Design Authority / Evolution Governance Role**, not merely an architecture design assistant or an advanced chat Agent.
+
+It is responsible for:
+
+- Understanding project goals and long-term direction
+- Maintaining the overall design intent
+- Understanding capability boundaries and architecture constraints
+- Tracking key design decisions
+- Judging whether a Task or change has deviated from approved goals
+- Driving the Design → Implementation → Verification loop
+
+Its authority is expressed through:
+
+- Why
+- What
+- Direction
+- Boundary
+
+It does not:
+
+- Preserve all code-level details
+- Replace the Coding Executor
+- Replace Guardian
+- Become the sole source of truth
+
+It remains a governed engineering role, not a generic chatbot.
 
 ### Context Layer
 
@@ -66,6 +124,31 @@ Provides lightweight context management for project understanding, current basel
 
 Manages lifecycle states, drives iteration loops, tracks transitions, and permits returning to previous states. It does not enforce rigid waterfall stages; verification may lead to a design challenge, design refinement, and re-execution.
 
+
+### Engineering State Management
+
+Engineering State Management is AI-native software production state awareness and governance capability. It is not traditional Project Management, a Gantt chart maintenance tool, a static plan tracking tool, or a system for manually entering progress.
+
+Its purpose is to keep the Human Governor and AI Production System aware of:
+
+- The project's current real state
+- What is currently happening
+- Which capabilities are complete
+- Which Tasks are executing
+- Which issues block progress
+- What should happen next
+
+The MVP provides a minimum viable software production state view across:
+
+- Project state
+- Capability / Module state
+- Vertical Slice state
+- Work Item state
+- Execution state
+- Current work in progress
+- Basic progress presentation
+
+This state view supports understanding and governance; it does not introduce AI delay prediction, automatic resource optimization, enterprise Portfolio management, complex portfolio analysis, or advanced production economics analysis.
 ### Task / VS Management
 
 Maintains VSs, Tasks, execution status, and associated artifacts. This is engineering production state management, not traditional project management.
@@ -105,3 +188,64 @@ Iteration 1 → Iteration 2 → Iteration 3 → Iteration 4
 ## MVP Scope Boundary
 
 The MVP does not include full CI/CD, automated deployment, production monitoring, full Guardian or ECF implementations, model routing, benchmarking, intelligent branching or merge, or complete SaaS multi-tenancy.
+
+
+## Evolution Governance Boundary in the MVP
+
+The following capabilities are long-term architecture directions, not MVP implementations:
+
+- Software Evolution Governance
+- Engineering Change Intelligence
+- Feature Consistency automation
+- Architecture Drift Detection
+- Engineering Branching
+- Intelligent Executor Routing
+
+During the MVP, the Human Governor temporarily performs Feature Consistency Check, Architecture Direction Judgment, and High-impact Change Review.
+
+The MVP focus remains:
+
+- Design Lead AI
+- Project / Work Management
+- Executor
+- Workspace
+- Verification Loop
+- Human Governance
+
+The ChatGPT + Codex collaboration pattern is the origin of the MVP, while the objective is to validate an AI-driven software production process for real projects.
+
+
+
+
+## Decision Capability Boundary
+
+Decision Capability is an external intelligence capability in the software production system. Its responsibility is to answer:
+
+> What should we do?
+
+A future Decision Request may contain:
+
+- Question
+- Context
+- Constraints
+- Options
+- Required Outcome
+- Risk Level
+
+A future Decision Artifact may contain:
+
+- Recommendation
+- Reasoning Summary
+- Alternatives
+- Risks
+- Assumptions
+- Confidence
+- Human Review Requirement
+
+### MVP Provider Principle
+
+The MVP does not directly depend on YiJue. YiJue remains an independently evolving product. To avoid coupling the MVP to an unfinished external system, the architecture may use a **Minimal Decision Capability Provider** as a temporary, lightweight capability boundary.
+
+This provider must not replicate YiJue, build a Decision Room, define a complete Decision Schema, or build a multi-role decision system. Its purpose is only to validate that the Design Lead AI workflow can use Decision Capability. It remains replaceable by a future YiJue provider.
+
+No YiJue adapter, concrete API, or YiJue implementation is defined here.
