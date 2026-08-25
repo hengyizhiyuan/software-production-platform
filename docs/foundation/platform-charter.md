@@ -203,3 +203,4 @@ The core abstractions are:
 - Gate
 
 The platform organizes how intelligence participates in production; it does not primarily manage how many bots exist.
+

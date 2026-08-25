@@ -11,7 +11,7 @@ Includes:
 - Project Bootstrap
 - Lightweight Context Management
 - Task Initiative
-- Design Lead AI
+- Production Planner
 - Role System
 - Executor Integration
 - Guardian Integration
@@ -27,4 +27,6 @@ Future expansion areas:
 - Production Economics
 
 This maturity model intentionally does not expand implementation details.
+
+
 

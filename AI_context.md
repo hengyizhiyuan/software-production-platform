@@ -61,3 +61,4 @@ The long-term challenge is to organize intelligence for complex software product
 Human defines intent. AI amplifies capability. System ensures trust.
 
 The platform's first-class abstraction is Role, not Agent. Its core concerns are Responsibility, Authority, Context, Artifact, and Gate.
+

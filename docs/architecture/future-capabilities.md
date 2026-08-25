@@ -11,7 +11,7 @@ Decision Capability Contract
         ↓
 Minimal Decision Capability Provider
         ↓
-YiJue Decision Intelligence
+Decision Intelligence Capability
 ```
 
 YiJue may become an advanced Decision Intelligence Provider. It is not an internal module of the Software Production Platform.
@@ -27,9 +27,9 @@ The contract is recorded as a future capability boundary only; no concrete API i
 Future AI-native organizational capabilities may remain layered and independently owned:
 
 ```text
-Decision Intelligence
+Decision Intelligence Capability
         ↓
-YiJue
+Provider implementations, including YiJue Product
 
 Production Intelligence
         ↓
@@ -46,25 +46,25 @@ ECF
 
 These systems collaborate while preserving Ownership Separation, Source of Truth Separation, and Lifecycle Independence.
 
-## Design Lead AI Boundary
+## Production Planner Boundary
 
-Design Lead AI is responsible for:
+Production Planner is responsible for:
 
 - Project Intelligence
 - Production Intelligence
 - Iteration Management
 - Task Orchestration
 
-It is not responsible for enterprise strategic decisions, product direction selection, major value judgments, or replacing YiJue Decision Intelligence. A future major Decision Point may invoke YiJue through the Decision Capability Contract.
+It is not responsible for enterprise strategic decisions, product direction selection, major value judgments, or replacing Decision Intelligence Capability. A future major Decision Point may invoke YiJue through the Decision Capability Contract.
 
 ## Design Intelligence Capability Evolution
 
-This is a long-term architecture vision, not an MVP requirement. Design Lead AI should evolve from a specific Agent implementation into a **Design Leadership Capability**.
+This is a long-term architecture vision, not an MVP requirement. Production Planner is a **Production Planning Capability**, independent of any one Agent implementation.
 
 A Role may have different implementations while its Role Contract remains stable:
 
 ```text
-Role: Design Leadership
+Role: Production Planning
 
 MVP:      Single AI Model
 Future:   Multi-role Decision System
@@ -73,13 +73,13 @@ Advanced: Human + AI Decision Council
 
 ### Decision Intelligence Integration Vision
 
-YiJue (Decision Intelligence System) may become an enhanced implementation of Design Leadership Capability. YiJue does not replace Design Lead AI; it provides a future intelligence implementation for the same stable capability.
+YiJue (Consumer Product / Application) may provide a future Decision Intelligence Provider implementation that Production Planner may invoke through a capability contract. YiJue does not replace Production Planner or implement Production Planning Capability.
 
 ```text
-Design Leadership Capability
-        ├── Single AI             (MVP)
-        └── Decision Intelligence (Future)
-                └── YiJue
+Production Planning Capability
+        └── Production Planner
+                └── may invoke Decision Intelligence Capability (Future)
+                        └── Provider implementations, including YiJue Product
 ```
 
 ### Decision Intelligence Interface
@@ -144,7 +144,7 @@ Decision Intelligence
         ↓
 Intent Formation
         ↓
-Design Leadership
+Production Planning
         ↓
 Execution
         ↓
@@ -273,6 +273,69 @@ This records the integration direction only and does not design Guardian interna
 These benchmark directions are not current MVP requirements. They should be developed only after sufficient production experience has established the relevant evidence and evaluation needs.
 
 
+
+
+
+
+## Software Production Pattern Library
+
+This is a Future Capability and Architecture Direction, Not Implemented in the MVP.
+
+A Software Production Pattern Library is analogous to a manufacturing process-route library. It does not primarily store code. It may preserve:
+
+- Production objectives
+- Production flows
+- Task decomposition approaches
+- Capability combinations
+- Verification approaches
+- Risk patterns
+- Improvement history
+
+This is a Production Intelligence Asset. YiJue may preserve Decision Intelligence Assets describing how to make better decisions; the platform may preserve Production Intelligence Assets describing how to produce software reliably.
+
+## Production Workflow Philosophy
+
+The future workflow uses a Hybrid Model:
+
+```text
+Production Policy + Production Pattern + AI Adaptive Planning
+```
+
+- **Policy** defines rules that cannot be violated, such as a Security Gate.
+- **Pattern** preserves a verified production route, such as a Feature Development Pattern.
+- **AI Adaptive Planning** adjusts the route based on Project Context, Risk, and Current State.
+
+This is a Future Capability and Architecture Direction, Not Implemented in the MVP.
+
+## Engineering Conflict Evolution
+
+AI-native conflict is broader than a Git Merge Conflict. Future conflict understanding may include:
+
+```text
+Conflict
+├── Text Conflict
+├── Code Conflict
+├── Contract Conflict
+├── Architecture Conflict
+├── Behavior Conflict
+└── Intent Conflict
+```
+
+The long-term concern is semantic engineering consistency, not only textual mergeability. This is a Future Capability and Architecture Direction, Not Implemented in the MVP.
+
+## Engineering Branching
+
+Engineering Branching is a Future Capability and Architecture Direction, Not Implemented in the MVP. A branch may represent an independent engineering state space containing:
+
+- Intent
+- Context
+- Decision
+- Design
+- Task
+- Code
+- Evidence
+
+Its purpose is to support alternative exploration, parallel production, and controlled integration. Project State should not be conceptually bound to one chat window or one execution environment.
 
 
 

@@ -7,7 +7,7 @@ This document records the intended MVP architecture. It is an architecture basel
 The MVP is organized around the AI-native Software Production Loop, a continuous feedback-driven loop:
 
 ```text
-Human Intent → Design Lead AI → Planning / VS / Task Generation
+Human Intent → Production Planner → Planning / VS / Task Generation
     → Executor → Workspace Execution → Verification → Reality Feedback
     → Design Refinement → Next Iteration
 ```
@@ -32,21 +32,21 @@ The MVP validates whether:
 - AI can adjust the next path based on execution results
 - Humans can move from executors to governors
 
-## Design Lead AI: MVP Intelligence Mode
+## Production Planner: MVP Intelligence Mode
 
 The MVP uses **Single Intelligence Mode**:
 
 ```text
 Human Goal
     ↓
-Design Lead AI
+Production Planner
     ↓
 Design / Planning / Task Decomposition
     ↓
 Execution Loop
 ```
 
-This mode exists to quickly validate the AI-native software production loop. It does not define Design Lead AI as a permanently fixed super Agent.
+This mode exists to quickly validate the AI-native software production loop. It does not define Production Planner as a permanently fixed super Agent.
 ## Engineering Hierarchy
 
 ```text
@@ -85,11 +85,11 @@ An Iteration is one complete production cycle in which AI understands the goal, 
 
 ### Role Runtime
 
-Supports AI roles participating in software production. The initial role is Design Lead AI; the architecture permits future Product AI, Architecture AI, QA AI, and DevOps AI roles.
+Supports AI roles participating in software production. The initial role is Production Planner; the architecture permits future Product AI, Architecture AI, QA AI, and DevOps AI roles.
 
-### Design Lead AI
+### Production Planner
 
-The Design Lead AI is the core coordination role in the AI-native software production process and a **Design Authority / Evolution Governance Role**, not merely an architecture design assistant or an advanced chat Agent.
+Production Planner is the SPG capability responsible for transforming approved production intent into adaptive software production blueprints and production plans. It is not Production Planner AI: AI is only one possible implementation approach.
 
 It is responsible for:
 
@@ -116,6 +116,37 @@ It does not:
 
 It remains a governed engineering role, not a generic chatbot.
 
+
+### Production Planner Responsibilities
+
+#### Blueprint Generation
+
+Generates a Software Production Blueprint containing:
+
+- Architecture Impact
+- Value Slice
+- Work Breakdown
+- Required Capability
+- Verification Strategy
+- Risk Boundary
+
+#### Production Plan Generation
+
+Transforms:
+
+```text
+Software Production Blueprint → Production Plan → Iteration → Work Item
+```
+
+#### Plan Adaptation
+
+Adapts the plan based on production reality:
+
+```text
+Execution Evidence → Impact Analysis → Plan Update
+```
+
+Production Planner does not own Business Decision, Product Strategy, Value Judgment, whether a product should exist, or General Decision Intelligence.
 ### Context Layer
 
 Provides lightweight context management for project understanding, current baseline, important decisions, documentation references, and historical artifacts. It uses a Context Provider abstraction so roles do not remain permanently coupled to raw files. Future ECF integration is reserved but not implemented here.
@@ -205,7 +236,7 @@ During the MVP, the Human Governor temporarily performs Feature Consistency Chec
 
 The MVP focus remains:
 
-- Design Lead AI
+- Production Planner
 - Project / Work Management
 - Executor
 - Workspace
@@ -246,6 +277,24 @@ A future Decision Artifact may contain:
 
 The MVP does not directly depend on YiJue. YiJue remains an independently evolving product. To avoid coupling the MVP to an unfinished external system, the architecture may use a **Minimal Decision Capability Provider** as a temporary, lightweight capability boundary.
 
-This provider must not replicate YiJue, build a Decision Room, define a complete Decision Schema, or build a multi-role decision system. Its purpose is only to validate that the Design Lead AI workflow can use Decision Capability. It remains replaceable by a future YiJue provider.
+This provider must not replicate YiJue, build a Decision Room, define a complete Decision Schema, or build a multi-role decision system. Its purpose is only to validate that the Production Planner workflow can use Decision Capability. It remains replaceable by a future YiJue provider.
 
 No YiJue adapter, concrete API, or YiJue implementation is defined here.
+
+## MVP Capability Boundary
+
+The MVP supports the basic Production Planner production loop, Project State, Iteration, VS, Work Item, Artifact recording, Executor invocation, Human Console, basic Production Reality View, and Capability Boundary.
+
+The MVP does not implement:
+
+- Real YiJue integration
+- Multi-user parallel development
+- Engineering Branching
+- Complete Software Production Pattern Library
+- Automatic Model Routing
+- Complete Guardian
+- Complete ECF
+
+All other capability evolution described in the architecture documents is a Future Capability, Architecture Direction, and Not Implemented in the MVP unless explicitly stated above.
+
+

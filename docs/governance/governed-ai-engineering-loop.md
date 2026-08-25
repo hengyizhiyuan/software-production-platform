@@ -10,9 +10,9 @@ Responsible for:
 - Acceptance
 - Major Trade-off
 
-## Design Lead AI
+## Production Planner
 
-The Design Lead AI is the core coordination role in the AI-native software production process and the Design Authority / Evolution Governance Role.
+Production Planner is the core coordination capability in the AI-native software production process.
 
 Responsible for:
 
@@ -46,8 +46,10 @@ During the MVP, the Human Governor temporarily performs part of the Evolution Go
 - Architecture Direction Judgment
 - High-impact Change Review
 
-As the platform matures, lower-value manual checks may be assisted or replaced by Design Lead AI, ECF, Guardian, and Engineering Change Intelligence.
+As the platform matures, lower-value manual checks may be assisted or replaced by Production Planner, ECF, Guardian, and Engineering Change Intelligence.
 
 ## Human and AI Responsibility Boundary
 
 The governed loop uses Controlled Autonomy. AI coordinates understanding, planning, decomposition, execution, feedback analysis, and adjustment. The Human Governor retains Goal Authority, Strategic Direction, Major Trade-off, Risk Acceptance, and Final Governance.
+
+

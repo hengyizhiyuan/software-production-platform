@@ -6,3 +6,4 @@ Not every action requires manual confirmation. High-frequency, low-risk tasks ma
 
 High-impact, high-risk, strategic, or uncertain tasks retain a Human Governance Point.
 
+

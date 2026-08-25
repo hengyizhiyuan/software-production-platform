@@ -20,3 +20,4 @@ Every Role should naturally support a Pool in the future, including:
 
 For the MVP, a Pool may contain only one instance. The architecture must not prevent future expansion.
 
+

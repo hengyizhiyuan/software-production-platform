@@ -29,7 +29,7 @@ The long-term system keeps three responsibilities distinct:
 Executor
    | responsible for production speed
    ↓
-Design Lead AI
+Production Planner
    | responsible for evolution direction and design consistency
    ↓
 Guardian
@@ -40,3 +40,24 @@ ECF
 ```
 
 This relationship is an architectural direction. It does not define new MVP implementations or internal designs for Guardian or ECF.
+
+## Production Intelligence Architecture
+
+The system organizes capabilities under Human Governance and the Production Planner Role:
+
+```text
+Human Governor
+        ↓
+Production Planner Role
+        ↓
+Capability Contract Layer
+  Decision Intelligence Capability (Providers may include YiJue — Future)
+  Production Execution (Executor)
+  Assurance Intelligence (Guardian — Future)
+  Context Intelligence (ECF)
+```
+
+The Production Planner coordinates capability execution; it does not own every domain intelligence capability.
+
+
+

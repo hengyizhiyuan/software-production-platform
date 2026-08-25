@@ -12,3 +12,4 @@ This Initial Baseline records the following principles for the AI-Native Softwar
 
 These principles guide future architecture and do not constitute a complete implementation design.
 
+

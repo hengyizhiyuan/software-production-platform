@@ -252,18 +252,59 @@ Each capability should have:
 
 ## Capability Contract Layer
 
-Design Lead AI should not implement every intelligence capability directly. It may invoke domain capabilities through a Capability Contract Layer.
+Production Planner should not implement every intelligence capability directly. It may invoke domain capabilities through a Capability Contract Layer.
 
 ```text
-Design Lead AI
+Production Planner
         ↓
 Capability Contract Layer
    ┌───────────┬────────────┬───────────┐
    │ Decision  │ Production │ Assurance │
-   │ YiJue     │ Executor   │ Guardian  │
+   │ Decision  │ Executor   │ Guardian  │
    └───────────┴────────────┴───────────┘
         ↓
 ECF Context Layer
 ```
 
-Design Lead AI understands the production goal, advances the engineering process, and coordinates capabilities. It does not absorb every domain intelligence responsibility.
+Production Planner understands the production goal, advances the engineering process, and coordinates capabilities. It does not absorb every domain intelligence responsibility.
+
+## Production Planner as a Role
+
+Production Planner is an **AI Native Software Production Governor**: an AI Role responsible for keeping the software production process continuously convergent.
+
+It is not a Coding Agent, Project Management Tool, Super Agent, or Chatbot. Its core responsibilities are:
+
+- Maintain Production Intent
+- Maintain Project Intelligence
+- Drive the Production Iteration Loop
+- Maintain Engineering Coherence
+- Coordinate Capability Execution
+
+## AI Role vs Agent Instance Separation
+
+Production Planner is a system Role, not a single Agent instance. A runtime may use one instance, multiple instances, or different capability configurations. The Role must not be frozen as one model plus one prompt.
+
+## Production Intelligence over Single Intelligence
+
+The AI-native production system should combine bounded intelligence capabilities rather than construct one all-purpose AI. Each capability has independent responsibility, Source of Truth, Authority Boundary, and explicit input/output Contract.
+
+
+## Capability-oriented Naming Principle
+
+AI-native systems should define core components by responsibility and capability, not by implementation technology or anthropomorphic role.
+
+AI is an implementation approach, not the capability definition. Production Planner may be implemented through AI Reasoning, Rule Engine, Pattern Library, Optimization Logic, Human Input, or a combination of these.
+
+## Production Planner
+
+Production Planner is the capability responsible for transforming approved production intent into adaptive software production blueprints and production plans.
+
+It is responsible for:
+
+- Blueprint Generation
+- Production Plan Generation
+- Plan Adaptation
+
+It is not responsible for Business Decision, Product Strategy, Value Judgment, deciding whether a product should exist, or general-purpose Decision Intelligence. Those belong to Human Governor, Decision Intelligence Capability, or Architecture / Product Authority.
+
+

@@ -50,3 +50,17 @@ The MVP does not implement:
 Engineering Portfolio Intelligence is a future enterprise capability for CTOs, technical leaders, and enterprise administrators. It may support unified observation of project state, risk, AI execution, resource usage, Assurance status, and production health across multiple projects.
 
 This document records architecture direction only and does not expand the MVP implementation scope.
+
+## Production Reality View
+
+AI-native progress is not traditional project percentage. The state view should represent production reality, including:
+
+- Current objective
+- Current Baseline
+- Current Iteration
+- Active VS
+- Blocking Issue
+- Next Action
+
+A multi-project dashboard is a Future Capability and Architecture Direction, Not Implemented in the MVP. The MVP keeps the view minimal.
+

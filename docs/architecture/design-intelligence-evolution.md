@@ -7,7 +7,7 @@ The MVP uses Single Intelligence Mode:
 ```text
 Human Goal
     ↓
-Design Lead AI
+Production Planner
     ↓
 Design / Planning / Task Decomposition
     ↓
@@ -16,14 +16,14 @@ Execution Loop
 
 This is a validation mode for the AI-native software production loop.
 
-Long term, Design Lead AI should be understood as **Design Leadership Capability**, not as a fixed super AI Architect Agent.
+Long term, Production Planner should be understood as a **Production Planning Capability**, not as a fixed super AI Architect Agent.
 
 ## Stable Role, Evolving Intelligence
 
 A Role can have different implementations while its Role Contract remains stable:
 
 ```text
-Role: Design Leadership
+Role: Production Planning
 
 MVP:      Single AI Model
 Future:   Multi-role Decision System
@@ -34,15 +34,15 @@ The platform preserves the capability boundary while allowing the intelligence i
 
 ## Decision Intelligence Integration
 
-YiJue, as a Decision Intelligence System, may become an enhanced implementation of Design Leadership Capability.
+YiJue, as a Consumer Product / Application, may provide a future Decision Intelligence Provider implementation invoked by Production Planner through a capability contract.
 
-It does not replace Design Lead AI. The relationship is:
+It does not replace Production Planner or implement Production Planning Capability. The relationship is:
 
 ```text
-Design Leadership Capability
-        ├── Single AI             (MVP)
-        └── Decision Intelligence (Future)
-                └── YiJue
+Production Planning Capability
+        └── Production Planner
+                └── may invoke Decision Intelligence Capability (Future)
+                        └── Provider implementations, including YiJue Product
 ```
 
 ## Decision Intelligence Interface
@@ -85,7 +85,7 @@ How to trust better
 The broader relationship is:
 
 ```text
-Decision Intelligence → Intent Formation → Design Leadership
+Decision Intelligence → Intent Formation → Production Planning
     → Execution → Verification → Assurance → Continuous Evolution
 ```
 
@@ -96,7 +96,7 @@ This document records a Long-term Architecture Vision and Future Evolution Direc
 The MVP remains focused on:
 
 ```text
-Human Goal → Design Lead AI → Task Planning → Executor
+Human Goal → Production Planner → Task Planning → Executor
     → Verification → Iteration
 ```
 
@@ -115,16 +115,20 @@ Guardian answers:
 
 > How do we trust it?
 
-The platform does not directly embed Decision Intelligence. It reserves a Capability Contract Layer through which Design Lead AI may coordinate domain capabilities.
+The platform does not directly embed Decision Intelligence. It reserves a Capability Contract Layer through which Production Planner may coordinate domain capabilities.
 
 ## Boundary Rules
 
-Design Lead AI is responsible for Project Intelligence, Production Intelligence, Iteration Management, and Task Orchestration.
+Production Planner is responsible for Project Intelligence, Production Intelligence, Iteration Management, and Task Orchestration.
 
-It does not own enterprise strategic decisions, product direction selection, major value judgments, or YiJue Decision Intelligence.
+It does not own enterprise strategic decisions, product direction selection, major value judgments, or Decision Intelligence Capability.
 
 ## MVP and Future Boundary
 
 The MVP may use a Minimal Decision Capability Provider as a lightweight, replaceable boundary for validating workflow needs. It does not replicate YiJue, build a Decision Room, define a complete Decision Schema, build a multi-role decision system, or implement a YiJue adapter.
 
 YiJue integration is a Future Capability and Architecture Direction only.
+
+
+
+
