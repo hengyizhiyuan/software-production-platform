@@ -47,25 +47,20 @@ Production Planning Capability
 
 ## Decision Intelligence Interface
 
-The platform may reserve a future Decision Intelligence Interface for complex problem scenarios.
+The platform defines a provider-independent Decision Intelligence Interface as an architecture contract. A concrete API and provider integration remain future implementation choices.
 
-Potential input:
+Contract input:
 
-- Problem Context
+- Human Intent
+- Background
 - Constraints
-- Current Baseline
-- Decision Question
+- Expected Outcome
 
-Potential output:
+Contract output:
 
-- Decision
-- Rationale
-- Trade-off
-- Recommendation
-- Approved Direction
-- Decision Artifact
+- Decision Artifact Candidate
 
-The MVP does not implement this interface.
+SPG consumes the Decision Artifact Contract rather than a provider-specific response format. The contract does not require the MVP to implement an API or integrate YiJue.
 
 ## Complementary System Relationship
 
@@ -91,7 +86,7 @@ Decision Intelligence → Intent Formation → Production Planning
 
 ## Scope Boundary
 
-This document records a Long-term Architecture Vision and Future Evolution Direction. It is not an MVP Requirement or Current Implementation Scope.
+This document records a current architecture contract plus a Long-term Architecture Vision and Future Evolution Direction. The contract does not make its provider implementations an MVP Requirement or Current Implementation Scope.
 
 The MVP remains focused on:
 
@@ -115,7 +110,7 @@ Guardian answers:
 
 > How do we trust it?
 
-The platform does not directly embed Decision Intelligence. It reserves a Capability Contract Layer through which Production Planner may coordinate domain capabilities.
+The platform does not directly embed or own Decision Intelligence. It uses a Capability Contract Layer through which Production Planner may coordinate a replaceable provider.
 
 ## Boundary Rules
 
@@ -125,10 +120,8 @@ It does not own enterprise strategic decisions, product direction selection, maj
 
 ## MVP and Future Boundary
 
-The MVP may use a Minimal Decision Capability Provider as a lightweight, replaceable boundary for validating workflow needs. It does not replicate YiJue, build a Decision Room, define a complete Decision Schema, build a multi-role decision system, or implement a YiJue adapter.
+The MVP may use a Minimal Decision Capability Provider as a lightweight, replaceable boundary for validating workflow needs. Such a provider may use an LLM, Governed Prompt, and Limited Context Assembly. Its purpose is to bootstrap the SPG loop, validate the Decision Artifact Contract, and expose real capability gaps; it does not replicate or replace YiJue, build a Decision Room, define a complete Decision Schema, build a multi-role decision system, or implement a YiJue adapter.
 
 YiJue integration is a Future Capability and Architecture Direction only.
-
-
 
 

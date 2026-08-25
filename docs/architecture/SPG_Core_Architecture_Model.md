@@ -2,6 +2,8 @@
 
 This document records the current SPG architecture model and its future architecture directions. It is an Architecture Decision record, not an implementation specification. Future Capability and Architecture Hypothesis statements are not current capabilities.
 
+The minimum current domain-object and contract view is consolidated in [SPG Lite Domain Model and Contract Boundary Baseline](spg-lite-domain-contract-baseline.md). That document refines SPG Lite semantics without narrowing or expanding the full SPG architecture described here.
+
 ## Software Production Governor (SPG)
 
 SPG is the Software Production Governor: a capability-oriented software production governance layer.
@@ -60,10 +62,12 @@ Provides queries over current production reality.
 
 | Responsibility | Owner |
 |---|---|
-| Business Decision | YiJue / Human |
+| Business / Strategic Decision | Human Authority, supported by Decision Intelligence Capability |
 | Production Planning | Production Planner |
 | Quality Assurance | Guardian |
 | Engineering Context | ECF |
+
+YiJue may support Business / Strategic Decision as a Decision Intelligence Provider; the responsibility is not assigned to the YiJue product itself.
 
 ## Event-driven Production State Model
 
@@ -560,7 +564,7 @@ It maintains production coherence across time and interaction.
 
 ## Relationship with Other Systems
 
-- **YiJue:** evaluates Decision Frame changes and helps answer “Should we change direction?”
+- **Decision Intelligence Capability:** evaluates Decision Frame changes and helps answer “Should we change direction?” YiJue may provide this capability through the provider-independent contract.
 - **SPG:** governs Production Frame changes and answers “How should production continue?”
 - **ECF:** provides Context and historical facts.
 - **Guardian:** verifies whether a change is trustworthy.
@@ -659,9 +663,9 @@ Executor
 
 This is not a traditional organizational hierarchy. It represents different types of responsibility and authority.
 
-## SPG and YiJue Authority Boundary
+## SPG and Decision Intelligence Authority Boundary
 
-YiJue is responsible for **Should**, Decision Validity, and Business / Strategic Choice.
+Decision Intelligence Capability structures and evaluates **Should**, Decision Validity, and Business / Strategic Choice. Human Authority retains applicable approval and accountability. YiJue may provide the capability as an independently evolving Consumer Product / provider implementation.
 
 SPG is responsible for **How**, Production Planning, and Production Execution.
 
@@ -955,6 +959,52 @@ The MVP retains:
 
 These retained capabilities do not imply that branch creation or semantic merging is implemented.
 
+## Production Work Unit Generalization Principle
+
+> Production Work Unit represents a governed production activity that transforms intent into a validated production outcome. It is not limited to coding activities.
+
+Production Work Unit is a production-governance abstraction rather than a synonym for Coding Task. Categories may include:
+
+- **Implementation Work Unit:** code implementation, API development, configuration changes.
+- **Documentation Work Unit:** architecture document update, API specification, Decision Record.
+- **Context Preparation Work Unit:** repository analysis, context package generation, knowledge extraction.
+- **Analysis Work Unit:** root cause analysis, impact analysis, architecture analysis.
+- **Verification Work Unit:** test execution, security verification, benchmark evaluation.
+- **Planning Work Unit:** production planning, migration planning, refactoring planning.
+
+The categories define production responsibility only. They do not require dedicated runtimes, workflows, or MVP features.
+
+## Production Artifact Domain
+
+> Production Artifact represents all governed outputs generated during software production.
+
+```text
+Production Artifact Domain
+   ├── Code Artifact
+   ├── Documentation Artifact
+   ├── Context Artifact
+   ├── Analysis Artifact
+   └── Verification Artifact
+```
+
+Production Artifact is the domain category. **Work Product Artifact** is a concrete output of a Production Work Unit.
+
+A Verification Artifact is a raw Work Product from verification activity; Verification Evidence is qualified within the Guardian / Assurance authority boundary. A Context Artifact is a generated Work Product; an authoritative Context Projection remains governed by ECF. The taxonomy does not transfer Guardian or ECF ownership to SPG.
+
+```text
+Production Intent
+        ↓
+Production Work Unit
+        ↓
+Work Product Artifact
+        ↓
+Verification Evidence
+        ↓
+Trusted Production State
+```
+
+The producing Execution System or Capability Provider retains ownership of the generated artifact. SPG governs the Work Unit and coordinates artifact lifecycle, lineage, and production-state transitions; it does not become a Coding Platform, Documentation System, Knowledge Management System, or universal artifact repository.
+
 ## From Resource Management to Capability Management
 
 Traditional software organization often follows:
@@ -1164,6 +1214,8 @@ Capability Allocation
         ↓
 Execution
         ↓
+Work Product Artifact
+        ↓
 Guardian Verification
         ↓
 Production State Update
@@ -1293,18 +1345,15 @@ The long-term capability relationship is:
 
 ```text
 Decision Intelligence Capability
-        ↓
-SPG
-Production Governance
-        ↓
-Guardian
-Assurance
-        ↓
-ECF
-Engineering Context
-        ↓
-Production State
-Software Evolution Management
+        │ Decision Artifact Contract
+        v
+SPG Production Governance ───────→ Execution
+        ^                              │
+        │                              v
+ECF Engineering Context          Guardian Assurance
+                                       │ Evidence
+                                       v
+                              SPG Production State
 ```
 
 Each system retains separate responsibility, ownership, Source of Truth, authority, and lifecycle boundaries.
@@ -1318,9 +1367,8 @@ The current objective is not to build a complete AI Software Factory. The guidin
 The current SPG design should:
 
 - Support rapid YiJue development
+- Remain operable without waiting for YiJue Decision Engine completion
 - Validate the AI-native engineering loop
 - Preserve future extension boundaries
 
 Future directions may include Capability Management, Production State Platform, Semantic Merge, and Enterprise Governance. These are not current MVP implementations.
-
-

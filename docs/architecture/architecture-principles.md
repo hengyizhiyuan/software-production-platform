@@ -268,6 +268,78 @@ ECF Context Layer
 
 Production Planner understands the production goal, advances the engineering process, and coordinates capabilities. It does not absorb every domain intelligence responsibility.
 
+## Capability Contract Before Capability Implementation
+
+The platform should define a capability's responsibility boundary, input/output semantics, authority, and artifact contract before selecting or requiring a concrete provider implementation.
+
+```text
+Capability Boundary
+        ↓
+Capability Contract
+        ↓
+Bootstrap Provider
+        ↓
+Production-loop Validation
+        ↓
+Replaceable Mature Provider
+```
+
+Consumers depend on the Contract, not on a product, model, Agent, prompt, data source, or runtime. This allows capability implementations to evolve without reversing ownership or dependency direction.
+
+For Decision Intelligence, SPG depends on the Decision Intelligence Interface and consumes the Decision Artifact Contract. A lightweight provider may validate that boundary before a mature YiJue or enterprise provider is integrated. This is an architecture principle, not a current implementation commitment.
+
+## Ownership Before Integration
+
+System integration must follow capability ownership. Ownership must not be assigned according to implementation order, existing product boundaries, or current technical convenience.
+
+Consumers depend on contracts owned by the responsible capability. Integration does not transfer responsibility, Source of Truth, authority, or artifact ownership to the orchestrating system.
+
+## Generated Does Not Equal Trusted
+
+AI-generated or tool-generated output must not automatically become trusted production truth.
+
+```text
+Generated Output
+        ↓
+Verification
+        ↓
+Admission
+        ↓
+Applicable Authority
+        ↓
+Trusted Production State
+```
+
+Verification does not equal Acceptance. Trust requires evidence, governed admission, and the applicable authority decision.
+
+## Contract Before Implementation
+
+Stable responsibility, authority, and artifact contracts should be defined before implementations are replaced, integrated, or scaled. A Contract is an architecture boundary; it does not imply a current API, service, provider integration, or MVP commitment.
+
+## Production Work Unit Generalization Principle
+
+> Production Work Unit represents a governed production activity that transforms intent into a validated production outcome. It is not limited to coding activities.
+
+A Production Work Unit may represent implementation, documentation, context preparation, analysis, verification, or planning. SPG governs and coordinates the production activity; it does not become the domain system that performs or owns every type of work.
+
+```text
+Production Intent
+        ↓
+Production Work Unit
+        ↓
+Work Product Artifact
+        ↓
+Verification Evidence
+        ↓
+Trusted Production State
+```
+
+## Production Artifact Domain
+
+Production Artifact is the domain category for all governed outputs generated during software production, including Code, Documentation, Context, Analysis, and Verification Artifacts. **Work Product Artifact** is the concrete output of a Production Work Unit.
+
+The producing Execution System or Capability Provider retains artifact ownership. Verification Artifact does not replace Guardian-qualified Verification Evidence, and Context Artifact does not replace an ECF-governed Context Projection. SPG coordinates lifecycle and governance without becoming a Coding Platform, Documentation System, Knowledge Management System, or universal artifact repository. This terminology clarification does not expand MVP scope.
+
 ## Production Planner as a Role
 
 Production Planner is an **AI Native Software Production Governor**: an AI Role responsible for keeping the software production process continuously convergent.
@@ -306,5 +378,3 @@ It is responsible for:
 - Plan Adaptation
 
 It is not responsible for Business Decision, Product Strategy, Value Judgment, deciding whether a product should exist, or general-purpose Decision Intelligence. Those belong to Human Governor, Decision Intelligence Capability, or Architecture / Product Authority.
-
-

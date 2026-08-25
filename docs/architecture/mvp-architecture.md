@@ -1,5 +1,7 @@
 # MVP Architecture
 
+The current SPG Lite domain objects and logical capability contracts are consolidated in [SPG Lite Domain Model and Contract Boundary Baseline](spg-lite-domain-contract-baseline.md). That baseline guides semantic alignment; it does not add MVP modules, APIs, schemas, or integrations.
+
 This document records the intended MVP architecture. It is an architecture baseline, not a runtime implementation specification.
 
 ## Continuous Engineering Iteration Loop
@@ -254,7 +256,7 @@ Decision Capability is an external intelligence capability in the software produ
 
 > What should we do?
 
-A future Decision Request may contain:
+At the architecture-contract level, a Decision Request may contain:
 
 - Question
 - Context
@@ -263,7 +265,7 @@ A future Decision Request may contain:
 - Required Outcome
 - Risk Level
 
-A future Decision Artifact may contain:
+At the architecture-contract level, a Decision Artifact may contain:
 
 - Recommendation
 - Reasoning Summary
@@ -275,9 +277,9 @@ A future Decision Artifact may contain:
 
 ### MVP Provider Principle
 
-The MVP does not directly depend on YiJue. YiJue remains an independently evolving product. To avoid coupling the MVP to an unfinished external system, the architecture may use a **Minimal Decision Capability Provider** as a temporary, lightweight capability boundary.
+The MVP does not directly depend on YiJue. YiJue remains an independently evolving product. To avoid coupling the MVP to an unfinished external system, the architecture may use a **Minimal Decision Capability Provider** as a temporary, lightweight capability boundary. A bootstrap implementation may use an LLM, Governed Prompt, and Limited Context Assembly.
 
-This provider must not replicate YiJue, build a Decision Room, define a complete Decision Schema, or build a multi-role decision system. Its purpose is only to validate that the Production Planner workflow can use Decision Capability. It remains replaceable by a future YiJue provider.
+This provider must not replicate or replace YiJue, build a Decision Room, define a complete Decision Schema, or build a multi-role decision system. Its purpose is only to bootstrap the SPG loop, validate that the Production Planner workflow can consume the Decision Artifact Contract, and reveal capability gaps through production evidence. It remains replaceable by a future YiJue or other provider.
 
 No YiJue adapter, concrete API, or YiJue implementation is defined here.
 
@@ -296,5 +298,3 @@ The MVP does not implement:
 - Complete ECF
 
 All other capability evolution described in the architecture documents is a Future Capability, Architecture Direction, and Not Implemented in the MVP unless explicitly stated above.
-
-

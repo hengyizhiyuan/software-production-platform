@@ -20,6 +20,15 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 This is an Initial Baseline and does not represent a final frozen design.
 
+## Program-level Architecture Source of Truth
+
+The current system-level architecture baseline is:
+
+- [AI Native Software Production System Architecture Baseline v0.1](docs/architecture/system-architecture-baseline-v0.1.md)
+- [SPG Lite Domain Model and Contract Boundary Baseline](docs/architecture/spg-lite-domain-contract-baseline.md)
+
+The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
+
 ## Core Principles
 
 - Human Agency First
@@ -28,6 +37,12 @@ This is an Initial Baseline and does not represent a final frozen design.
 - Role over Agent
 - Executor Independence
 - Platform Capability over Application Duplication
+- Capability Contract Before Capability Implementation
+- Dependency Direction Follows Capability Ownership
+- Production Work Unit Generalization
+- Ownership Before Integration
+- Generated Does Not Equal Trusted
+- Contract Before Implementation
 - Source of Truth over Conversation History
 - Controlled Autonomy
 - AI Capability Evolution Independence
@@ -61,4 +76,3 @@ The long-term challenge is to organize intelligence for complex software product
 Human defines intent. AI amplifies capability. System ensures trust.
 
 The platform's first-class abstraction is Role, not Agent. Its core concerns are Responsibility, Authority, Context, Artifact, and Gate.
-

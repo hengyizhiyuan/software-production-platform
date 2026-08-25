@@ -26,18 +26,18 @@ The platform target is a **Governed AI Engineering Loop** in which human governa
 The long-term system keeps three responsibilities distinct:
 
 ```text
-Executor
-   | responsible for production speed
-   ↓
-Production Planner
-   | responsible for evolution direction and design consistency
-   ↓
-Guardian
-   | responsible for trusted boundaries and Assurance
-   ↓
-ECF
-   | provides Context, Source of Truth, and Engineering State
+ECF Engineering Context ──┬──→ Production Planner
+                          └──→ Guardian
+Human Governance ─────────────→ Production Planner
+
+Production Planner ──→ Executor ──→ Guardian
+        │                 │              │
+        └── Plan Event ───┴─ Execution ──┴─ Assurance Evidence
+                              ↓
+                      SPG Production State
 ```
+
+Production Planner is responsible for production direction and coherence, Executor for production execution, Guardian for independent Assurance, ECF for canonical engineering context and factual projections, and SPG for Production State. ECF is not a downstream stage after Guardian, and Guardian does not own Production State.
 
 This relationship is an architectural direction. It does not define new MVP implementations or internal designs for Guardian or ECF.
 
@@ -51,7 +51,8 @@ Human Governor
 Production Planner Role
         ↓
 Capability Contract Layer
-  Decision Intelligence Capability (Providers may include YiJue — Future)
+  Decision Intelligence Capability
+    (replaceable providers; YiJue integration is Future)
   Production Execution (Executor)
   Assurance Intelligence (Guardian — Future)
   Context Intelligence (ECF)
@@ -59,5 +60,4 @@ Capability Contract Layer
 
 The Production Planner coordinates capability execution; it does not own every domain intelligence capability.
 
-
-
+SPG depends on the Decision Intelligence Interface and Decision Artifact Contract, not on YiJue or another concrete provider. A lightweight provider may bootstrap production-loop validation before a mature provider is integrated.

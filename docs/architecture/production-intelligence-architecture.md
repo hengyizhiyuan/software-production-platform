@@ -27,13 +27,15 @@ Human Governor
 Production Planner Role
         ↓
 Capability Contract Layer
-  Decision Intelligence Capability (Provider such as YiJue — Future)
+  Decision Intelligence Capability (replaceable provider; concrete integration is Future)
   Production Execution (Executor)
   Assurance Intelligence (Guardian — Future)
   Context Intelligence (ECF)
 ```
 
 Each capability preserves independent responsibility, Source of Truth, Authority Boundary, and input/output Contract.
+
+Production Planner consumes the Decision Intelligence Interface and Decision Artifact Contract. It does not depend on YiJue, a provider-specific API, or provider internals.
 
 ## Production Iteration Cycle (PIC)
 
@@ -148,5 +150,4 @@ The formal name **Production Planner** replaces Design Lead AI because:
 4. Production Planner better describes the responsibility of transforming approved production intent into adaptive production plans.
 
 The name deliberately omits “AI” because AI is an implementation method, not the capability definition.
-
 

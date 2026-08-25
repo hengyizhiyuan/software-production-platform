@@ -2,16 +2,16 @@
 
 ## Decision Capability Evolution
 
-This is a Future Capability and Architecture Direction. It is not implemented in the MVP.
+The provider-independent Decision Capability Contract is a current architecture principle. Provider implementations and integrations described here are Future Capabilities and are not implemented in the MVP.
 
 ```text
 Software Production Platform
         ↓
 Decision Capability Contract
-        ↓
-Minimal Decision Capability Provider
-        ↓
-Decision Intelligence Capability
+        ├── Minimal Decision Capability Provider
+        ├── YiJue Decision Engine
+        ├── Enterprise Internal Decision Engine
+        └── Third-party Decision Provider
 ```
 
 YiJue may become an advanced Decision Intelligence Provider. It is not an internal module of the Software Production Platform.
@@ -20,7 +20,7 @@ YiJue may become an advanced Decision Intelligence Provider. It is not an intern
 
 Decision Capability answers **What should we do?** It may accept a Decision Request containing Question, Context, Constraints, Options, Required Outcome, and Risk Level. It may return a Decision Artifact containing Recommendation, Reasoning Summary, Alternatives, Risks, Assumptions, Confidence, and Human Review Requirement.
 
-The contract is recorded as a future capability boundary only; no concrete API is defined.
+The contract records the capability boundary now; no concrete API, adapter, or provider implementation is defined.
 
 ## Capability Relationship
 
@@ -55,7 +55,7 @@ Production Planner is responsible for:
 - Iteration Management
 - Task Orchestration
 
-It is not responsible for enterprise strategic decisions, product direction selection, major value judgments, or replacing Decision Intelligence Capability. A future major Decision Point may invoke YiJue through the Decision Capability Contract.
+It is not responsible for enterprise strategic decisions, product direction selection, major value judgments, or replacing Decision Intelligence Capability. A future major Decision Point may invoke a Decision Intelligence Provider, including YiJue, through the Decision Capability Contract.
 
 ## Design Intelligence Capability Evolution
 
@@ -84,25 +84,20 @@ Production Planning Capability
 
 ### Decision Intelligence Interface
 
-The platform may reserve a future Decision Intelligence Interface for invoking multi-role decision capability in complex problem contexts.
+The platform defines a provider-independent Decision Intelligence Interface at the architecture level. A concrete API and provider integration remain future implementation work.
 
-Potential input:
+Contract input:
 
-- Problem Context
+- Human Intent
+- Background
 - Constraints
-- Current Baseline
-- Decision Question
+- Expected Outcome
 
-Potential output:
+Contract output:
 
-- Decision
-- Rationale
-- Trade-off
-- Recommendation
-- Approved Direction
-- Decision Artifact
+- Decision Artifact Candidate
 
-This interface is a long-term architectural direction only. The MVP does not implement it.
+SPG consumes the Decision Artifact Contract, not provider internals. This architectural contract does not assert that the MVP implements an interface API.
 
 ### Intelligence Pattern Selection
 
@@ -336,7 +331,6 @@ Engineering Branching is a Future Capability and Architecture Direction, Not Imp
 - Evidence
 
 Its purpose is to support alternative exploration, parallel production, and controlled integration. Project State should not be conceptually bound to one chat window or one execution environment.
-
 
 
 
