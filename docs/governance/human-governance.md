@@ -16,4 +16,13 @@ Human / Policy Final Acceptance primarily targets an exact sealed Baseline Candi
 
 Human, AI, Executor, Guardian, and other actors are governed participants with different Responsibility / Authority. Equal submission to production governance does not imply equal authority. Human strategic, risk, and acceptance authority remains intact.
 
+## Distributed Responsibility and Governed Adjudication
+
+**No Actor Owns Production Truth Alone.** Human, Planner, Executor, Guardian, Context Provider, and other participants contribute domain-owned decisions, proposals, facts, artifacts, or evidence. Production Governance Runtime adjudicates admission through explicit contracts, policy, and transition rules; it is not the sole creator or owner of all truth.
+
+This is not majority voting. Human intent, strategic direction, constraints, risk ownership, exceptions, and applicable final acceptance retain their distinct authority. Human Authority does not bypass runtime consistency or allow observed production facts to be rewritten.
+
+Physical provider consolidation does not collapse logical authority. The same model may supply multiple capabilities, but capability reuse does not authorize unilateral self-acceptance or Commit. Stronger models may receive policy-bounded autonomy, not unrestricted production authority.
+
+See the [architecture principles](../architecture/architecture-principles.md) and [Reconciliation & Recovery Closure](../architecture/spg-reconciliation-recovery.md). C. Completion & Trust is NEXT, NOT STARTED; these governance principles do not begin its detailed design.
 

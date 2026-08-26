@@ -32,6 +32,45 @@ Models provide intelligence capability. The platform provides a production syste
 >
 > Platform capability determines production reliability, scalability, and sustainability.
 
+## The System Consumes Capabilities, Not Intelligence Prestige
+
+**Confirmed Architecture Principle:** The software production system evaluates and consumes models according to their ability to provide a required Production Capability under governed production conditions, rather than generic model prestige, provider brand, or overall intelligence ranking.
+
+The relevant question is how effectively a provider performs the specific production responsibility assigned to it. Examples include Production Planning, Architecture Analysis, Implementation, Documentation, Verification, Context Preparation, Reconciliation, Migration Planning, and Test Generation. These examples do not add capabilities to the MVP or transfer governance authority to a model.
+
+A model is not a Capability. One model/provider may supply multiple Capabilities, with different performance in each. Future evaluation should use capability-relative profiles and Capability × Task / PWU characteristics, not a single global intelligence score. The [Runtime Benchmark Strategy](spg-runtime-verification-benchmarks.md) records the future evidence framework; no scoring scale or model ranking is selected.
+
+### Non-normative Senior / Junior Engineer Analogy
+
+Two providers may eventually achieve the same production objective, just as a senior and a junior engineer may complete the same task with different production characteristics:
+
+| Weaker demonstrated production capability | Stronger demonstrated production capability |
+|---|---|
+| Smaller safe PWUs; more detailed decomposition | Larger safe PWUs; coarser decomposition |
+| More trial-and-error, retries, and rework | Better up-front reasoning and higher first-pass success |
+| More verification burden and human intervention | Less rework and supervision |
+| Longer time to trusted completion | Faster trusted completion |
+
+This is an explanatory analogy about production behavior, not human worth, model identity, or a universal ranking. The same provider may exhibit either pattern depending on Capability, Context, and task. All comparisons retain the required trust and authority boundaries.
+
+## Task Decomposition Is Also Resource Allocation
+
+**Confirmed Architecture Principle; future adaptive behavior:** Production planning should adapt the shape and granularity of work to the capability and observed reliability of the assigned provider, within the Production Goal, Engineering Context, Risk / Authority Boundary, and Autonomy Policy.
+
+The [Production Planner direction](production-intelligence-architecture.md#task-decomposition-is-also-resource-allocation) records the implications. This principle does not implement adaptive decomposition or change SPG Lite scope.
+
+## Price Should Correspond to Observable Production Value
+
+**Confirmed Product / Architecture Principle for future pricing:** If models, strategies, or autonomy configurations have different user-facing prices, those differences should be explainable through benchmark- and production-backed outcomes: trusted completion, speed, safe autonomy, and total production cost, including Human Attention Cost.
+
+Higher model execution cost may be justified by lower observed rework, intervention, or trusted change lead time; price alone establishes none of those benefits. The [future transparent strategy selection direction](future-capabilities.md#benchmark-backed-model--production-strategy-selection) records how evidence may support a user's choice. No commercial prices, billing plans, or subscription tiers are defined.
+
+## No Model Prestige Pricing
+
+**Confirmed Product / Architecture Principle:** Model price or user-facing production price must not be justified solely by model prestige, opaque branding, or generic benchmark rankings unrelated to the assigned Production Capability.
+
+The platform purchases a Production Capability contribution, not the model's full abstract intelligence identity. As a non-normative role analogy, a person may have many talents, while the contribution relevant to a particular engagement is performance in that role. This does not define human worth or a compensation policy.
+
 ## Model Independence
 
 The platform should preserve engineering understanding independently of model versions. It should not rely on a model to permanently store:
@@ -243,6 +282,51 @@ Authority is expressed through governed goal / direction decisions, constraint d
 > Equal submission to production governance does not imply equal responsibility or equal authority.
 
 Human and Machine do not have identical authority. Humans retain strategic judgment, risk ownership, and applicable final acceptance; machines receive operational autonomy within policy. Neither may silently bypass authoritative state-transition rules.
+
+## No Actor Owns Production Truth Alone
+
+**Confirmed Architecture Principle:** No individual Human, AI model, Executor, Planner, Guardian, Context Provider, plugin, or other production participant may unilaterally define authoritative production truth.
+
+Each contributes according to its Responsibility and Authority:
+
+| Participant | Domain-owned contribution |
+|---|---|
+| Human | Intent, constraints, risk decisions, applicable acceptance |
+| Production Planner | Plan and replanning proposals |
+| Executor | Execution facts and Work Product Artifacts |
+| Guardian / Verification | Evidence, findings, assurance conclusions |
+| Context Capability | Governed Context |
+| Production Governance Runtime | Governed adjudication and authoritative state transitions |
+
+Production truth emerges through governed composition of facts, artifacts, evidence, contracts, policy, authority decisions, and state-transition rules. This is **not majority voting** and does not make all actors equally authoritative. Human strategic judgment, intent, risk ownership, and applicable final acceptance remain meaningful.
+
+## Distributed Responsibility, Governed Adjudication
+
+**Confirmed Architecture Principle:** Responsibility and intelligence are distributed across production participants, while authoritative production-state admission is governed through explicit contracts and transition rules.
+
+Production Governance Runtime remains logical transition authority. It does **not** itself invent all truth or own every input domain; it adjudicates authoritative state changes using inputs owned by other domains. A sole logical transition boundary is not a sole creator/owner of production truth and does not require one physical service.
+
+This complements Human Authority Does Not Imply Runtime Bypass and Human Agency First. Authority may change governance decisions but cannot rewrite observed production facts.
+
+## Provider Consolidation Does Not Collapse Authority Boundaries
+
+**Confirmed Architecture Principle for future provider evolution:** A single powerful model or provider may implement planning, implementation, analysis, review, or several other capabilities. Physical provider consolidation must not collapse logical Responsibility, Contract, or Authority boundaries.
+
+The same provider must not gain permission to propose → execute → self-verify → self-accept → Commit production reality merely because it is highly capable. Every output remains subject to the relevant capability contract and governed transition/authority rules.
+
+This does not prohibit reuse of the same model or require a different provider for every role. It preserves independent governance semantics rather than mandating physical-service separation.
+
+## Replaceable Intelligence, Durable Governance
+
+**Strategic Architecture Principle / Design Consequence:** Intelligence providers may be replaced, upgraded, specialized, or consolidated without redefining the fundamental governance and trust semantics of software production.
+
+Model capability can evolve quickly; Contract and Authority boundaries should remain comparatively stable. Stronger models may receive wider autonomy through policy, but they do not automatically inherit unrestricted production authority. This does not claim all models are equally capable.
+
+True model decoupling goes beyond API-level switching. The [future Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) evaluates whether governance remains consistent across provider behavior, without statically assigning autonomy by model brand or price.
+
+Capability differences should manifest through performance, safe autonomy, PWU granularity, production cost, verification burden, and Human attention requirements. They must not require redefining Production Contracts, State semantics, the Authority model, Guardian's trust model, or governance invariants. Stronger models improve production performance without absorbing platform ownership or bypassing assurance and acceptance gates.
+
+These principles accompany the [B Reconciliation & Recovery Closure](spg-reconciliation-recovery.md); they introduce no implementation module or new MVP capability.
 
 ## Authority Before Convenience
 

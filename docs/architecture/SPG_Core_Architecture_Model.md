@@ -8,9 +8,9 @@ The minimum current domain-object and contract view is consolidated in [SPG Lite
 
 The [Runtime Findings Review](spg-runtime-findings-review.md) records the closed tabletop exercise and failure-mode discovery. Issue Discovery Scope is FROZEN; Runtime Architecture Refinement remains IN PROGRESS.
 
-The [State Foundation Closure](spg-state-foundation.md) is the authoritative detailed record of A's confirmed logical state / commit semantics, 20 invariants, and Human–Machine governance. **A. State Foundation is CLOSED; A1 / A2 are CLOSED; A3 Closure Review PASSED. NEXT: B. Reconciliation & Recovery — NOT STARTED.** This documentation task does not begin B; C and D remain NOT STARTED.
+The [State Foundation Closure](spg-state-foundation.md) preserves A's confirmed logical state / commit semantics and 20 invariants. **A is CLOSED; A1/A2 CLOSED; A3 PASSED. B. Reconciliation & Recovery is CLOSED; B1/B2/B3 CLOSED; B4 PASSED.** The [B closure](spg-reconciliation-recovery.md) records all 20 Recovery principles. **NEXT: Runtime Architecture Refinement → C. Completion & Trust.** C is NOT STARTED; D remains NOT STARTED. This documentation task does not begin them.
 
-Architecture Baseline remains **v0.1**. Execution Attempt and State Transition Journal are confirmed concepts / requirements. **Baseline Candidate** is the confirmed term replacing the earlier Integration Candidate. The three-part logical responsibility model below is confirmed, not an Architecture Hypothesis. Design Artifact taxonomy, Production Issue representation, Completion Contract placement, Artifact Manifest, and detailed B/C/D mechanisms remain pending; they are not silently finalized.
+Architecture Baseline remains **v0.1**. Execution Attempt and State Transition Journal are confirmed concepts / requirements. **Baseline Candidate** replaces the earlier Integration Candidate. The three-part logical responsibility model below is confirmed. B additionally confirms Execution Lease, fencing, Attempt isolation, Production Validity Basis, Revalidate / Reconcile / Replan, Recovery Barrier, and idempotent recovery semantics. Their implementation mechanisms remain unselected. Design Artifact taxonomy, Production Issue representation, Completion Contract placement, Artifact Manifest, and detailed C/D design remain pending.
 
 Event-driven / Event-sourced Production State remains a Future Direction. Confirmed durable history and projection requirements do not commit MVP to Event Sourcing, a new runtime module, API, schema, feature, or physical service.
 
@@ -32,6 +32,8 @@ Production State Projection
 
 Executor reports execution facts / artifacts; Verification / Guardian reports verification / assurance facts; Human Governor issues authority decisions. None directly mutate authoritative production reality. Runtime owns transition semantics, not Human Authority, business decisions, artifact content, or Assurance Truth.
 
+**No Actor Owns Production Truth Alone; Distributed Responsibility, Governed Adjudication.** Runtime adjudicates domain-owned inputs through explicit contracts and transition rules; it does not invent or solely own all truth. This is not majority voting. Provider consolidation must not collapse logical Authority / Contract boundaries. **Replaceable Intelligence, Durable Governance** allows stronger providers wider policy-bounded autonomy, not unrestricted authority or an assumption of equal model capability. See [architecture principles](architecture-principles.md).
+
 The model is frozen **only as logical responsibility decomposition**, not deployable services or microservices. The capability descriptions below are read under this authority boundary.
 
 ## State Foundation and Human–Machine Governance
@@ -47,6 +49,8 @@ Only successful Commit changes Current Trusted Baseline authority, after validat
 PWU obligations use the working semantic term **Satisfied**; Human / Policy Final Acceptance primarily targets an exact Baseline Candidate, not every PWU by default. Integrated is derived lineage/integration state, not a mandatory primary PWU terminal state. Detailed completion semantics remain for C.
 
 See the [closed State Foundation record](spg-state-foundation.md) for definitions, failure boundaries, all 20 invariants, and the explicit MVP complexity guard.
+
+The [closed Reconciliation & Recovery record](spg-reconciliation-recovery.md) distinguishes execution success from production validity and restores coherent governance before execution resumes. The [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) is future verification work only, including the incident-derived regression candidate; it implements no tests and does not start C.
 
 ## Software Production Governor (SPG)
 
@@ -1182,19 +1186,23 @@ Capability evolution is a Future Capability / Architecture Direction.
 
 ## Capability Performance Feedback
 
-Future capability evaluation should be evidence-based rather than based only on subjective scores:
+**The System Consumes Capabilities, Not Intelligence Prestige.** Future evaluation should describe performance for a specific Provider × Capability under governed Task / PWU conditions, not reduce a model to one global intelligence score. One provider may have different performance profiles in Planning, Implementation, Documentation, Architecture Analysis, and Verification.
 
 ```text
-Capability Execution
+Controlled benchmarks + Governed Capability Execution history
         ↓
-Guardian Verification
+Verification / Guardian Evidence + Production telemetry
         ↓
-Outcome Evidence
+Governed outcome evidence
         ↓
-Capability Performance Model
+Capability Performance Profile (Provider × Capability)
 ```
 
-This model may support future capability selection and optimization. It is not implemented in the MVP.
+A **Capability Performance Profile** is a future benchmark- and production-history-backed description, not provider marketing or a frozen scoring schema. See the [Runtime Benchmark Strategy](spg-runtime-verification-benchmarks.md#51-capability-performance-profile) for candidate dimensions, equivalent-outcome comparison, and the feedback relationship to Planner decomposition, routing, autonomy, verification, and user strategy selection.
+
+**Task Decomposition Is Also Resource Allocation:** capability and reliability may influence safe PWU granularity. Wider autonomy requires capability-specific evidence and policy permission, not a model's brand or price. These are design principles; profiles, adaptive allocation, and routing remain future capabilities, not MVP implementations.
+
+This feedback preserves **Replaceable Intelligence, Durable Governance**. Provider performance cannot redefine Production Contracts, State semantics, Authority, Guardian's trust model, or governance invariants. Evidence informs choices without transferring authoritative state-transition responsibility to the provider.
 
 ## Production Capability Graph
 
@@ -1302,17 +1310,15 @@ AI value is not limited to replacing execution. It also improves the efficiency 
 
 ## Cost per Trusted Change
 
-> Cost per Trusted Change is the comprehensive cost of moving one software change from Intent to a trusted Production State.
+> Trusted Production Cost, expressed as Cost per Trusted Change, is the total cost required to produce an accepted Trusted Production Change, not the model API cost of one request.
 
-It may include:
+The conceptual cost decomposition includes Model / Executor Cost, Planning / Decomposition Cost, Verification / Assurance Cost, Retry Cost, Rework Cost, Human Attention Cost, Recovery Cost, Delay Cost, and Failure Propagation Cost. Governance coordination remains part of the relevant production effort; future accounting must avoid counting overlapping effort twice. This is not a frozen accounting formula or a new production-state object.
 
-- Planning Cost
-- Execution Cost
-- Verification Cost
-- Governance Cost
-- Rework Cost
+A higher-cost provider may reduce retries, rework, verification rounds, and Human attention or support larger safe PWUs and longer autonomous runs. Safe autonomy is therefore a potential economic output. **The cheapest model call is not necessarily the cheapest production capability**; higher price alone does not establish lower total cost.
 
-The strategic competition is not simply about the lowest code-generation cost. It is about the lowest cost of trusted software production.
+The [Runtime Benchmark Strategy](spg-runtime-verification-benchmarks.md#6-future-production-economics-measurement) is the detailed reference for this cost decomposition and the **Trusted Change Efficiency** candidate metric family, measured against equivalent governed production objectives. Metric definitions, weights, and thresholds remain future work.
+
+**Price Should Correspond to Observable Production Value** and **No Model Prestige Pricing** guide [future strategy selection](future-capabilities.md#benchmark-backed-model--production-strategy-selection). Users may eventually choose production-economic configurations backed by evidence, not opaque model labels. No prices, billing plans, tiers, or MVP capabilities are introduced.
 
 ## AI-native Production Bottleneck Shift
 

@@ -2,6 +2,8 @@
 
 This document records future benchmark and evaluation cases for the Software Production Governor. These are Future Capabilities / Evaluation Directions, not MVP features.
 
+The complementary [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) records future A/B invariant verification, failure injection, production scenarios, provider robustness, trusted production cost measurement, and the reported Codex wrong-task/wrong-completion incident as a regression benchmark candidate. It tests the production system, not merely model coding quality; no tests or benchmarks are implemented by that record.
+
 ## Production Intent Continuity Benchmark
 
 > Evaluate whether an AI-native software production system can preserve long-running production intent, agenda, and reasoning continuity under frequent interruptions, explorations, and contextual shifts.

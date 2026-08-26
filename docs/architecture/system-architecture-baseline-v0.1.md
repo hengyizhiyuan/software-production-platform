@@ -422,6 +422,16 @@ Production Planner → Production Governance Runtime → Production State Projec
 
 Git retains code-history authority. Artifact producers, Decision Intelligence, Guardian, ECF, and Human Governance retain their domain ownership; SPG's governed composition does not absorb their truth. Detailed invariants and failure boundaries are in the linked closure record.
 
+### Reconciliation & Recovery Closure — Current Logical Semantics
+
+The [B closure](spg-reconciliation-recovery.md) records B CLOSED, B1/B2/B3 CLOSED, and B4 PASSED, with all 20 Recovery principles. Failure differs from Divergence; execution success does not prove current validity. Resume preserves Attempt identity; Retry creates new history. Execution Lease, fencing, isolation, validity evaluation, and Recovery Barrier are confirmed logical semantics, not chosen infrastructure.
+
+Recovery preserves maximum still-valid work, expands scope only when necessary, and reconstructs governed knowledge before restarting execution. Runtime recovery restores governance control rather than silently finishing product work. Its completion means production authority/state is coherent, not that all production work is complete.
+
+**No Actor Owns Production Truth Alone; Distributed Responsibility, Governed Adjudication.** Runtime adjudicates authoritative transitions from domain-owned inputs rather than inventing all truth. This is not majority voting and does not weaken Human Authority. Provider consolidation preserves logical Responsibility / Contract / Authority boundaries: **Replaceable Intelligence, Durable Governance** does not imply equal model capability or automatic unrestricted autonomy.
+
+The [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) records future verification requirements and benchmark candidates only. No test, benchmark, model routing, or billing implementation is introduced.
+
 ### Future Direction
 
 A more complete SPG Governance State Preservation capability may explicitly maintain:
@@ -432,7 +442,7 @@ A more complete SPG Governance State Preservation capability may explicitly main
 - Pending Decisions.
 - Next Valid Transition.
 
-The closed State Foundation settles the logical state / Commit foundation only. Remaining recovery, detailed completion, side-effect governance, persistence architecture, transition implementation, and autonomous behavior are future design work. B. Reconciliation & Recovery is NEXT, NOT STARTED. This baseline does not introduce an implementation commitment.
+The closed A/B records settle logical state / Commit and Reconciliation & Recovery semantics. Detailed completion, side-effect governance, persistence architecture, concrete recovery mechanisms, transition implementation, and autonomous behavior remain future design work. The exact next valid step is **Runtime Architecture Refinement → C. Completion & Trust**; C is NEXT, NOT STARTED, and D is NOT STARTED. This baseline does not introduce an implementation commitment or begin C.
 
 ## 12. Future Directions
 
@@ -495,6 +505,8 @@ This baseline governs program-level system boundaries. Detailed documents remain
 - [SPG Lite Domain Model and Contract Boundary Baseline](spg-lite-domain-contract-baseline.md) records the current SPG Lite domain objects, autonomy boundary, Human Decision model, and capability-contract ownership.
 - [SPG Core Architecture Model](SPG_Core_Architecture_Model.md) details SPG concepts and future directions.
 - [SPG State Foundation Closure](spg-state-foundation.md) records confirmed state / Commit semantics, 20 invariants, and Human–Machine governance under v0.1; [Runtime Findings Review](spg-runtime-findings-review.md) preserves the discovery scope and current agenda.
+- [SPG Reconciliation & Recovery Closure](spg-reconciliation-recovery.md) records B1/B2/B3 CLOSED, B4 PASSED, confirmed recovery semantics, and all 20 B-level principles under v0.1.
+- [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) records future invariant verification, fault injection, provider-independent benchmarks, and the real incident-derived regression candidate, not current implementation scope.
 - [MVP Architecture](mvp-architecture.md) defines the current MVP boundary.
 - [Guardian Integration](../assurance/guardian-integration.md) and [ECF Integration](../context/ecf-integration.md) define integration boundaries without redesigning those systems.
 - Product-specific documents retain product internals and implementation decisions.

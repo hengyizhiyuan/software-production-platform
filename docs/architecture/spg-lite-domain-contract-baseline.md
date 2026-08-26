@@ -20,7 +20,7 @@ This baseline:
 
 It does not define a database schema, class model, service decomposition, endpoint, event protocol, or implementation commitment.
 
-The [State Foundation Closure](spg-state-foundation.md) records confirmed runtime state / Commit semantics and 20 invariants under this baseline. This document explicitly aligns the former simplified PWU Acceptance path and Human authority wording with that closure. B. Reconciliation & Recovery is NEXT, not started; no new Architecture Baseline is created.
+The [State Foundation Closure](spg-state-foundation.md) records confirmed runtime state / Commit semantics and 20 invariants under this baseline. The [Reconciliation & Recovery Closure](spg-reconciliation-recovery.md) now records B CLOSED, B1/B2/B3 CLOSED, B4 PASSED and 20 Recovery principles. Execution Lease, fencing, validity, and Recovery Barrier are logical semantics, not selected infrastructure. C. Completion & Trust is NEXT, NOT STARTED; D remains NOT STARTED. Architecture Baseline remains v0.1.
 
 ## 2. Governing Principles
 
@@ -140,7 +140,7 @@ Production: exact Baseline Candidate → Authority Acceptance → Commit
 
 Every executable PWU binds to an explicit source Baseline and Plan Revision, not “the current plan”. After a PWU creates an Execution Attempt, its executable semantics cannot be silently rewritten. Material changes require explicit revision, replacement, or supersession; the final revision implementation mechanism is not frozen.
 
-Detailed completion remains for C. Completion & Trust. Failure, conflict, retry, and supersession behavior remain for B. Reconciliation & Recovery. This clarification does not fully redesign the PWU state machine.
+Detailed completion remains for C. Completion & Trust, NEXT but NOT STARTED. The [closed B semantics](spg-reconciliation-recovery.md) govern failure/divergence, Resume/Retry, validity, supersession, and recovery: Resume preserves Attempt identity, Retry creates new history, and technically successful work can be STALE. Concrete lifecycle representation remains unselected; this does not fully redesign the PWU state machine.
 
 ### 4.3 Context Package
 

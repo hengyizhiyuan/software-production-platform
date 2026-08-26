@@ -96,6 +96,37 @@ Policy defines non-violable rules. Pattern preserves a verified production route
 
 This is a Future Capability and Architecture Direction, Not Implemented in the MVP.
 
+## Task Decomposition Is Also Resource Allocation
+
+**Confirmed planning principle; Future Capability / Architecture Direction for adaptive implementation — NOT IMPLEMENTED in the MVP.** Appropriate Production Work Unit granularity depends partly on the capability and reliability of the available Executor, not only on the objective's logical structure.
+
+Future Production Planner decomposition should consider:
+
+```text
+Production Goal
+  + Engineering Context
+  + Risk / Authority Boundary
+  + Available Capability Providers
+  + Observed Executor Reliability
+  + Autonomy Policy
+      → Proposed PWU shape and granularity
+```
+
+For the same Risk Tracking backend objective, illustrative alternatives are:
+
+| Demonstrated Implementation Capability | Possible decomposition |
+|---|---|
+| Stronger capability within the applicable policy | A larger PWU: implement the complete Risk Tracking backend capability |
+| Capability requiring narrower scope and more coordination | Separate PWUs: analyze current domain model; propose schema changes; implement persistence; implement service behavior; add tests |
+
+Both may produce the same governed outcome, but with different planning, orchestration, verification, and Human attention costs. This is not a schema design, assigned task list, fixed provider classification, or claim that any model safely supports the larger PWU. Required capabilities, outputs, evidence, and authority remain explicit in either decomposition.
+
+Future decisions should consume a [Capability Performance Profile](spg-runtime-verification-benchmarks.md#51-capability-performance-profile) for the relevant Provider × Capability, qualified by Task / PWU characteristics and governed historical evidence. Reliability in Documentation does not establish reliability in Architecture Analysis or Implementation. Model brand or price is not an autonomy grant.
+
+Larger PWUs and longer autonomous runs are potential economic benefits only where evidence and policy permit them. Planner proposes decomposition; Production Governance Runtime retains authoritative transition responsibility. Executor retains generated-artifact ownership; Guardian retains assurance authority; ECF retains Context authority. This direction does not modify YiJue architecture or make it an SPG dependency.
+
+Adaptive PWU decomposition, automatic routing, and the benchmark feedback loop remain future work. This side refinement does not reopen B or start C; the next mainline transition remains **Runtime Architecture Refinement → C. Completion & Trust**.
+
 ## Engineering Conflict Evolution
 
 Future conflict understanding may include:
@@ -150,4 +181,3 @@ The formal name **Production Planner** replaces Design Lead AI because:
 4. Production Planner better describes the responsibility of transforming approved production intent into adaptive production plans.
 
 The name deliberately omits “AI” because AI is an implementation method, not the capability definition.
-

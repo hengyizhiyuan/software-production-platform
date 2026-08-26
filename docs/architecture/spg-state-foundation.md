@@ -6,7 +6,7 @@
 - **Review and agenda:** [Runtime Findings Review](spg-runtime-findings-review.md)
 - **Scope:** Confirmed logical architecture semantics; not an implementation specification or a new Architecture Baseline
 
-This document records the supplied closure conclusions: A1 Core State Semantics and A2 Transition & Commit Semantics were reviewed, and A3 State Foundation Closure Review passed. It does not claim a new runtime test or implemented capability. Architecture Baseline remains **v0.1**. B. Reconciliation & Recovery is NEXT, **NOT STARTED**; this documentation task does not begin it.
+This document preserves the supplied A closure conclusions: A1 Core State Semantics and A2 Transition & Commit Semantics were reviewed, and A3 State Foundation Closure Review passed. It does not claim a new runtime test or implemented capability. Architecture Baseline remains **v0.1**. The subsequent [B Reconciliation & Recovery Closure](spg-reconciliation-recovery.md) is now CLOSED (B1/B2/B3 CLOSED; B4 PASSED). Current NEXT is C. Completion & Trust, NOT STARTED; this synchronization does not begin C.
 
 ## 1. Confirmed Logical State Architecture
 
@@ -169,7 +169,7 @@ Authoritative Baseline switch
 
 Authoritative production reality is determined by governance authority state, not UI state, cache state, progress display, or the success of every derived projection.
 
-These failure boundaries do not introduce distributed transactions or Event Sourcing. Recovery mechanisms remain for B; they are not designed in this task.
+These failure boundaries do not introduce distributed transactions or Event Sourcing. The subsequent [B closure](spg-reconciliation-recovery.md) defines logical recovery semantics on this foundation; concrete implementation mechanisms remain unselected.
 
 ## 9. Git / Production Reality Boundary
 
@@ -309,7 +309,7 @@ Ownership remains unchanged:
 - ECF retains canonical Context / Context Projection authority, not SPG production-state authority.
 - Human Governance retains strategic, risk, exception, and applicable final-acceptance authority.
 
-Production Issue representation, Design Artifact taxonomy refinement, Completion Contract placement, Artifact Manifest, and Execution Lease are not finalized by this closure. References to issues or design revisions in the state model do not silently freeze those outstanding models. No new Feature ID, code, runtime module, schema, API, or MVP implementation commitment is introduced.
+Production Issue representation, Design Artifact taxonomy refinement, Completion Contract placement, and Artifact Manifest remain unresolved. Execution Lease was not finalized by A; the subsequent [B closure](spg-reconciliation-recovery.md) confirms Lease and fencing as logical recovery semantics only. References to issues or design revisions do not freeze outstanding models. No new Feature ID, code, runtime module, schema, API, or MVP implementation commitment is introduced.
 
 ## 15. Current Architecture Workflow and Next Valid Step
 
@@ -323,10 +323,14 @@ Production Issue representation, Design Artifact taxonomy refinement, Completion
 | A1. Core State Semantics | CLOSED — reviewed |
 | A2. Transition & Commit Semantics | CLOSED — reviewed |
 | A3. State Foundation Closure Review | PASSED |
-| B. Reconciliation & Recovery | NEXT — NOT STARTED |
-| C. Completion & Trust | NOT STARTED |
+| B. Reconciliation & Recovery | CLOSED |
+| B1. Divergence & Recovery Semantics | CLOSED |
+| B2. Execution Recovery | CLOSED |
+| B3. Reconciliation & Replanning | CLOSED |
+| B4. Recovery Closure | PASSED |
+| C. Completion & Trust | NEXT — NOT STARTED |
 | D. Side-effect Governance | NOT STARTED |
 
-The next valid design step is exactly **Runtime Architecture Refinement → B. Reconciliation & Recovery**.
+The next valid design step is exactly **Runtime Architecture Refinement → C. Completion & Trust**.
 
-This task records A's closure only. It does not begin B, C, D, Coding Readiness Review, or implementation. A subsequent generic “continue” resolves to B, not coding. The original 12-area discovery scope remains frozen; only real new evidence may justify reopening it.
+This document preserves A's closed semantics and all 20 invariants; its current workflow view is synchronized with the subsequent B closure. C and D are not started. A generic “continue” resolves to C, not Coding Readiness Review or implementation. The original 12-area discovery scope remains frozen; only real new evidence may justify reopening it.

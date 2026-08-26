@@ -206,10 +206,11 @@ The intended evolution is Stage 1: Snapshot + Restore; Stage 2: Branch Creation;
 
 ## Intelligent Executor Routing
 
-The platform may eventually select suitable executors based on task type, risk, cost, latency, and quality requirements. This is capability-based executor routing, not only model routing.
+The platform may eventually select suitable executors based on Capability × Task / PWU characteristics, risk, authority, observed reliability, total trusted cost, latency, and quality requirements. This is capability-based executor routing, not only model routing.
 
-Examples include stronger reasoning for architecture tasks, lower-cost execution for simple coding, and stronger models plus stronger assurance for high-risk changes.
+Future selection should use [Capability Performance Profiles](spg-runtime-verification-benchmarks.md#51-capability-performance-profile), not one global intelligence score or fixed model-name hierarchy. The same provider may be well suited to Documentation but need narrower PWUs and stronger verification for Architecture Change. Strong demonstrated capability may support larger PWUs and wider policy-bounded autonomy; provider price or brand does not establish either.
 
+Routing must remain compatible with general-purpose frontier models, smaller specialized models, enterprise private models, customer-provided models, future local models, and specialized capability providers. The globally strongest model is not necessarily the economically optimal provider for every Production Capability. No provider is hard-coded as superior, and no automatic routing is implemented in the MVP.
 
 ## AI Software Production Benchmark
 
@@ -219,13 +220,9 @@ Its purpose is to measure how different AI models and executors perform inside t
 
 ### Executor Capability Benchmark
 
-Future evaluation may compare coding and design executors using dimensions such as:
+Future evaluation compares providers for specific Production Capabilities, including Planning, Architecture Analysis, Implementation, Documentation, Verification, Context Preparation, Reconciliation, Migration Planning, and Test Generation. A model is not a Capability; one provider may supply several with different observed performance.
 
-- Completion quality
-- Success rate
-- Execution time
-- Token/resource consumption
-- Rework frequency
+The [Runtime Benchmark Strategy](spg-runtime-verification-benchmarks.md) is the detailed evaluation reference for Capability Performance Profiles, candidate performance dimensions, equivalent governed production objectives, Trusted Production Cost, and the Trusted Change Efficiency metric family. Evidence comes from controlled benchmarks, production telemetry, and governed history, not provider marketing claims. No scoring scale, weights, concrete rankings, or benchmark implementation are defined.
 
 ### Workflow Benchmark
 
@@ -263,9 +260,58 @@ The platform may integrate with Guardian to measure assurance effectiveness, fin
 
 This records the integration direction only and does not design Guardian internals.
 
+## Benchmark-Backed Model / Production Strategy Selection
+
+**Future Product Capability / Architecture Direction — NOT IMPLEMENTED; not part of the SPG Lite MVP.** Users may eventually compare models or select a Production Strategy through transparent, evidence-backed production characteristics.
+
+The system consumes capabilities, not intelligence prestige. A useful selection answers: for this production objective, which capability configuration gives the best combination of trusted outcome, speed, safe autonomy, and total cost?
+
+Potential user-facing information includes:
+
+- Expected model / provider execution cost.
+- Expected Trusted Production Cost per accepted Trusted Production Change.
+- Expected completion time and PWU granularity.
+- Observed first-pass success.
+- Expected retry and rework burden.
+- Expected Human intervention frequency.
+- Expected Verification burden.
+- Estimated safe autonomy level under the applicable policy.
+
+Unexplained labels such as “Cheap,” “Balanced,” or “Best” are insufficient. Future displays should distinguish observed evidence from estimates, expose relevant benchmark / production conditions and limitations, and avoid implying guaranteed outcomes. Comparisons use equivalent governed production objectives; they do not assume identical token budgets, PWU counts, or orchestration effort.
+
+### Price Should Correspond to Observable Production Value
+
+**Confirmed transparency principle for future pricing:** Differences in model, strategy, or autonomy pricing should be explainable through benchmark- and production-backed value. A higher model execution cost might be accompanied by less observed Human intervention, less rework, shorter trusted change lead time, or larger safe PWUs. Those benefits need evidence; they cannot be inferred from price or branding alone.
+
+**No Model Prestige Pricing:** The platform purchases a Production Capability contribution, not a model's full abstract intelligence identity. Generic model ranking or prestige alone cannot justify user-facing production price. Model/API cost and total Trusted Production Cost must remain distinguishable, including Human Attention Cost and autonomy value.
+
+This records a product principle, not a price-setting algorithm or a commitment to charge differently. No real percentages, prices, billing rules, subscription tiers, or plans are defined.
+
+### Production Strategy Rather Than Raw Model Selection
+
+A user may eventually select a production-economic strategy while the system internally routes different Capability Providers. The following are **illustrative configurations only**, not offered products, subscription tiers, guaranteed behaviors, or predefined provider assignments:
+
+| Conceptual strategy | Illustrative trade-off |
+|---|---|
+| Economy | Lower model/API cost; smaller PWUs, stricter verification, and more Human attention may be needed |
+| Balanced | Optimize total production economics across model cost, planning, verification, rework, Human attention, and other trusted-production costs |
+| High Autonomy | Stronger demonstrated capability providers may support larger PWUs, fewer Human interventions, and deeper safe autonomous runs despite higher model cost |
+
+Every configuration retains required governance, assurance, and acceptance gates. Additional verification burden may differ; mandatory trust requirements do not become purchasable exceptions. The same provider may receive different autonomy envelopes for different Capabilities.
+
+The [future benchmark feedback relationship](spg-runtime-verification-benchmarks.md#7-future-benchmark-feedback-and-transparent-selection) connects Capability Performance Profiles to Planner decomposition, Model / Capability Routing, Autonomy Policy, Verification Policy, Production Strategy, and user-facing cost / autonomy / speed choices. It informs decisions within existing authority boundaries; it neither implements policy feedback nor allows benchmark results to grant authority by themselves.
+
+### Future Capability Marketplace / Strategy Selector
+
+A benchmark-backed production capability marketplace or strategy selector could make provider choice transparent and economically meaningful. Provider flexibility includes frontier, specialized, enterprise-private, customer-provided, local, and other capability providers; the best global model is not assumed to be the best provider for every role.
+
+This is a Future Capability, not a current product commitment or MVP feature. **Replaceable Intelligence, Durable Governance** remains intact: provider differences may change performance, granularity, cost, safe autonomy, verification burden, and Human attention, but not Production Contracts, State semantics, Authority, Guardian's trust model, or governance invariants.
+
 ## Scope Boundary
 
 These benchmark directions are not current MVP requirements. They should be developed only after sufficient production experience has established the relevant evidence and evaluation needs.
+
+Capability profiles, adaptive decomposition, routing, benchmark-backed strategy selection, and the marketplace are future directions; metric families are candidates. This side refinement introduces no implementation, pricing plan, MVP expansion, or Architecture Baseline version increment. Baseline remains v0.1. A and B remain CLOSED; B1/B2/B3 remain CLOSED; B4 PASSED; C is NEXT — NOT STARTED; D is NOT STARTED. The exact next mainline step remains **Runtime Architecture Refinement → C. Completion & Trust**.
 
 
 
@@ -331,6 +377,5 @@ Engineering Branching is a Future Capability and Architecture Direction, Not Imp
 - Evidence
 
 Its purpose is to support alternative exploration, parallel production, and controlled integration. Project State should not be conceptually bound to one chat window or one execution environment.
-
 
 

@@ -18,7 +18,7 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **Runtime Architecture Refinement — IN PROGRESS**
 
-Architecture Baseline remains **v0.1**. A. State Foundation is CLOSED: A1 / A2 were reviewed and are CLOSED; A3 Closure Review PASSED. This records confirmed logical architecture, not implemented capability or a new architecture baseline.
+Architecture Baseline remains **v0.1**. A. State Foundation is CLOSED: A1 / A2 are CLOSED; A3 Closure Review PASSED. B. Reconciliation & Recovery is CLOSED: B1 / B2 / B3 are CLOSED; B4 Recovery Closure PASSED. These are supplied architecture review conclusions, not implemented capabilities or newly executed Runtime tests.
 
 | Architecture workflow item | Status |
 |---|---|
@@ -30,16 +30,20 @@ Architecture Baseline remains **v0.1**. A. State Foundation is CLOSED: A1 / A2 w
 | A1. Core State Semantics | CLOSED — reviewed |
 | A2. Transition & Commit Semantics | CLOSED — reviewed |
 | A3. State Foundation Closure Review | PASSED |
-| B. Reconciliation & Recovery | NEXT — NOT STARTED |
-| C. Completion & Trust | NOT STARTED |
+| B. Reconciliation & Recovery | CLOSED |
+| B1. Divergence & Recovery Semantics | CLOSED |
+| B2. Execution Recovery | CLOSED |
+| B3. Reconciliation & Replanning | CLOSED |
+| B4. Recovery Closure | PASSED |
+| C. Completion & Trust | NEXT — NOT STARTED |
 | D. Side-effect Governance | NOT STARTED |
-| NEXT | B. Reconciliation & Recovery |
+| NEXT | C. Completion & Trust |
 
-The next valid design transition is **Runtime Architecture Refinement → B. Reconciliation & Recovery**. A generic instruction such as "continue" resolves to this transition, not coding, database schema, API design, runtime implementation, Runtime Flow expansion, or Coding Readiness Review. B is NEXT but NOT STARTED; the State Foundation documentation task does not begin it.
+The next valid design transition is exactly **Runtime Architecture Refinement → C. Completion & Trust**. A generic instruction such as "continue" resolves to this transition, not coding, database schema, API design, runtime implementation, Runtime Flow expansion, or Coding Readiness Review. C is NEXT but NOT STARTED; this B-closure documentation task does not begin C or D.
 
 Refinement proceeds in order: **A. State Foundation → B. Reconciliation & Recovery → C. Completion & Trust → D. Side-effect Governance**. The 12-area discovery scope is frozen; reopen discovery only when real new evidence requires it.
 
-The [Runtime Findings Review](docs/architecture/spg-runtime-findings-review.md) records findings and the remaining agenda. The [State Foundation Closure](docs/architecture/spg-state-foundation.md) records confirmed state / commit semantics, 20 invariants, and Human–Machine governance. Execution Attempt, State Transition Journal, Baseline Candidate, and the Planner → Governance Runtime → State Projection logical responsibility model are confirmed architecture semantics, not implementation claims. Other explicitly labeled candidates and future questions remain unresolved.
+The [Runtime Findings Review](docs/architecture/spg-runtime-findings-review.md) records findings and the remaining agenda. The [State Foundation Closure](docs/architecture/spg-state-foundation.md) preserves 20 A-level invariants. The [Reconciliation & Recovery Closure](docs/architecture/spg-reconciliation-recovery.md) records confirmed B semantics and all 20 B-level principles, including Execution Lease, fencing, isolation, validity, and Recovery Barrier. These are logical semantics, not selected infrastructure mechanisms. The [Runtime Verification and Benchmark Strategy](docs/architecture/spg-runtime-verification-benchmarks.md) records future verification requirements and benchmark candidates, not implemented tests. Other explicitly labeled candidates and detailed C/D questions remain unresolved.
 
 ## Program-level Architecture Source of Truth
 
@@ -55,6 +59,10 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Human Agency First — meaningful Human authority, not unrestricted runtime privilege
 - Human Authority Does Not Imply Runtime Bypass
 - Governed Participants — shared governance rules, different Responsibility / Authority
+- No Actor Owns Production Truth Alone
+- Distributed Responsibility, Governed Adjudication — not majority voting
+- Provider Consolidation Does Not Collapse Authority Boundaries
+- Replaceable Intelligence, Durable Governance
 - Context before Execution
 - Evidence before Acceptance
 - Role over Agent

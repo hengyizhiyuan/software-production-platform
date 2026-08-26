@@ -1,26 +1,30 @@
 # SPG Runtime Flow Findings and Failure-Mode Review
 
 - **Record date:** 2026-08-26
-- **Purpose:** Findings record, State Foundation closure synchronization, and remaining design agenda
+- **Purpose:** Findings record, A/B closure synchronization, and remaining design agenda
 - **Confirmed State Foundation semantics:** [State Foundation Closure](spg-state-foundation.md)
+- **Confirmed recovery semantics:** [Reconciliation & Recovery Closure](spg-reconciliation-recovery.md)
+- **Future verification only:** [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md)
 - **Governing architecture:** [Architecture Baseline v0.1](system-architecture-baseline-v0.1.md)
 - **Domain and contract baseline:** [SPG Lite baseline](spg-lite-domain-contract-baseline.md)
 - **Architecture Baseline:** remains v0.1; this record is not a new baseline
 
 ## 1. Interpretation and Evidence Boundary
 
-This record preserves the outcomes of the user-reported Runtime Flow Tabletop Exercise and Runtime Failure-Mode Discovery, and now records the supplied A1 / A2 review and A3 PASSED closure conclusions. It does not claim newly executed runtime tests or implemented capabilities. A. State Foundation is CLOSED; this update does not conduct B. Reconciliation & Recovery.
+This record preserves the user-reported Runtime Flow Tabletop Exercise and Runtime Failure-Mode Discovery, the supplied A closure, and the subsequent B1/B2/B3 review and B4 PASSED closure conclusions. A and B are CLOSED. It does not claim newly executed Runtime tests or implemented capabilities. C is NEXT, NOT STARTED; this update does not begin C or D.
 
 | Label | Meaning in this review |
 |---|---|
 | Confirmed Requirement | A production-runtime problem or required behavior identified by the review; not a selected implementation or a new MVP feature |
-| Confirmed Architecture Semantics | A logical concept, responsibility, or invariant accepted by State Foundation closure; not a schema, deployed service, or implementation claim |
+| Confirmed Architecture Semantics | A logical concept, responsibility, or invariant accepted by A/B closure; not a schema, deployed service, or implementation claim |
 | Architecture Principle | A governing constraint used to assess future designs |
 | Candidate Mechanism | A possible concept or mechanism pending formal confirmation; not a frozen domain object, schema, or implemented capability |
 | Architecture Hypothesis | A proposed responsibility decomposition to validate during refinement; not final architecture |
 | Future Design Question | An unresolved question for the bounded refinement agenda; not an invitation to expand discovery |
+| Future Verification Requirement | An eventual executable verification obligation; not a test implemented here |
+| Benchmark Candidate | A proposed future scenario, including incident-derived regressions; not an executed benchmark |
 
-Candidate fields, event names, states, and pipelines below are conceptual illustrations. They do not define APIs, persistence schemas, or final transition protocols. Existing capability ownership remains authoritative. Status changes are explicit: the linked State Foundation closure confirms Execution Attempt, State Transition Journal, Baseline Candidate, state / commit semantics, and the three-part logical responsibility decomposition; other labeled candidates remain unresolved.
+Candidate fields, event names, states, and pipelines below are conceptual illustrations, not APIs, persistence schemas, or final transition implementations. Existing capability ownership remains authoritative. A confirms Execution Attempt, State Transition Journal, Baseline Candidate, state / Commit semantics, and logical responsibility decomposition. B confirms Execution Lease, fencing, isolation, divergence/validity distinctions, Revalidate / Reconcile / Replan, Recovery Barrier, and idempotent recovery. Unpromoted labeled candidates remain unresolved. Concrete implementation mechanisms are not selected.
 
 ## 2. Review Closure and Current State
 
@@ -36,10 +40,14 @@ The reported prior work includes Responsibility Boundary Review, PWU Lifecycle D
 | A1. Core State Semantics | CLOSED — reviewed |
 | A2. Transition & Commit Semantics | CLOSED — reviewed |
 | A3. State Foundation Closure Review | PASSED |
-| B. Reconciliation & Recovery | NEXT — NOT STARTED |
-| C. Completion & Trust | NOT STARTED |
+| B. Reconciliation & Recovery | CLOSED |
+| B1. Divergence & Recovery Semantics | CLOSED |
+| B2. Execution Recovery | CLOSED |
+| B3. Reconciliation & Replanning | CLOSED |
+| B4. Recovery Closure | PASSED |
+| C. Completion & Trust | NEXT — NOT STARTED |
 | D. Side-effect Governance | NOT STARTED |
-| NEXT | B. Reconciliation & Recovery |
+| NEXT | C. Completion & Trust |
 
 ### Validated logical flow
 
@@ -135,7 +143,7 @@ Design examples include Architecture Decision, Domain Model, Interface Contract,
 
 Possible responses include Retry, Resume, Rework, Replan, Block, Escalate, and Cancel. A production-control record does not replace, reinterpret, or take ownership of a Guardian Finding.
 
-**Future Design Question:** Refine representation and response semantics without merging production-control and Assurance Truth ownership.
+**Remaining Design Question:** Production Issue representation remains unresolved. B closes the logical recovery responses without merging production-control and Assurance Truth ownership or selecting an issue schema.
 
 ### 4.3 Completion Contract
 
@@ -173,7 +181,7 @@ New Engineering Baseline
 
 **Confirmed Requirement:** Artifact lineage and production identity must be established before, or durably associated with, execution. They must not be reconstructed only after execution. This prevents orphan output whose origin, plan, context, or lifecycle is unknown. SPG coordinates lineage without taking ownership of generated content or canonical ECF context.
 
-**Future Design Question:** Refine reconciliation and admission responsibilities while preserving design, execution, assurance, and context authority.
+**Confirmed B Semantics:** Revalidation, reconciliation, and Plan Revision carry-forward preserve still-valid production work and domain ownership. Detailed completion/admission qualification remains for C, NOT STARTED; no documentation synchronization implementation is selected.
 
 ### 4.5 Exception & Recovery
 
@@ -192,7 +200,7 @@ Attempt #2 — PASS
 
 After restart, the system must determine what definitely completed, what was in progress, what is safe to resume, what requires reconciliation, and what requires retry or escalation.
 
-**Remaining Design Question — B, NOT STARTED:** Durable transition history is confirmed by A. Recovery / reconciliation behavior still requires refinement; no recovery engine is designed here. Event-driven / Event-sourced Production State remains a future architecture direction only. No Event Sourcing implementation is committed for MVP.
+**Confirmed B Semantics — CLOSED:** Failure and Divergence differ. Classify before recover; use the lowest sufficient recovery scope; preserve maximum valid work. Resume preserves Attempt identity while Retry creates history. Recovery reconstructs knowledge before execution, uses a logical Recovery Barrier, preserves unreconciled reality, and is idempotent. Recovery completion restores coherent authority/state, not product completion. See all 20 principles in [B Closure](spg-reconciliation-recovery.md). Rollback/compensation mechanisms remain for D. No recovery engine, Event Sourcing, or implementation is introduced.
 
 ### 4.6 Integration Atomicity
 
@@ -204,7 +212,7 @@ Commit Eligibility, Commit Authorization, and Commit Execution are separate. Acc
 
 Failure before authoritative Baseline switching leaves the previous Baseline authoritative. Derived projection, cache, UI, or follow-up synchronization failure after switching does not undo the committed Baseline. See [State Foundation](spg-state-foundation.md) for the closed semantics.
 
-**Remaining Boundary:** Candidate lifecycle and implementation mechanisms are not frozen. These conclusions introduce neither distributed transactions nor Event Sourcing; operational recovery remains for B.
+**Confirmed B Boundary:** A stale Candidate may not commit directly; revalidation, reconciliation, supersession, or replanning is required. Reconciled content creates a new exact Candidate revision rather than mutating an accepted snapshot. Full Candidate lifecycle and implementation mechanisms remain unselected; these conclusions introduce neither distributed transactions nor Event Sourcing.
 
 ### 4.7 Duplicate Execution / Concurrency
 
@@ -212,17 +220,17 @@ Failure before authoritative Baseline switching leaves the previous Baseline aut
 
 **Confirmed Architecture Semantics:** Execution Attempt is a concrete immutable historical fact bound to PWU, Plan Revision, source Baseline, relevant Context, Executor / Capability Provider, and result. Attempts do not overwrite one another. Expected source-Baseline validation is a confirmed Commit requirement.
 
-**Candidate Mechanism:** Execution Lease remains unconfirmed. No lease, locking, or attempt storage implementation is selected.
+**Confirmed B Semantics:** Execution Lease expresses temporary Attempt authority. Expiry does not prove physical execution stopped. Fencing / generation prevents late or zombie results from regaining authoritative rights, while retaining observed facts in history. Attempts require sufficient isolation; deliberate parallel Attempts must be an explicit strategy. No lease, lock, or storage implementation is selected.
 
-**Remaining Design Question — B, NOT STARTED:** Refine duplicate execution, stale work, concurrency, and reconciliation behavior on the closed State Foundation.
+**Confirmed B Safety Boundary:** Observation loss is not proof of failure. Never retry under unresolved execution uncertainty without safe fencing/isolation; an old Attempt must be terminated, fenced, isolated, or otherwise unable to corrupt current authoritative work. Infrastructure-specific realization remains future work.
 
 ### 4.8 Staleness & Invalidation
 
 **Confirmed Requirement:** Work must be evaluated against the engineering reality from which it was created. A PWU or execution attempt may depend on Plan Revision, Baseline Revision, Context Revision, and Contract Revision. Materially relevant dependency changes may make old work stale.
 
-Possible future outcomes are continue, revalidate, replan, supersede, cancel, or discard.
+**Confirmed B Semantics:** Production Validity Basis may include source Trusted Baseline, Plan / Context / Contract revisions, design assumptions, and dependency artifacts. VALID, REVALIDATION_REQUIRED, and STALE are distinct; STALE is not FAILED. A successful execution may be stale.
 
-**Future Design Question:** Determine material relevance and invalidation behavior during refinement. No invalidation algorithm is frozen here.
+Baseline advancement triggers dependency-based impact evaluation, not automatic global invalidation. Work is directly invalidated, indirectly affected, or unaffected; valid work can carry forward. Revalidate / Reconcile / Replan are distinct, and replanning does not silently change the authorized destination. Cancelled means no longer required; Superseded means replaced while the objective remains relevant. Detailed impact algorithms are not frozen.
 
 ### 4.9 Verification / Acceptance Freshness
 
@@ -234,7 +242,7 @@ Possible future outcomes are continue, revalidate, replan, supersede, cancel, or
 
 **Architecture Principle:** Human approval of one production snapshot must not authorize materially different later output.
 
-**Remaining Design Question — C, NOT STARTED:** Refine detailed Verification freshness and PWU Completion semantics under the confirmed exact-candidate acceptance boundary, without assigning Guardian qualification or Human Acceptance authority to SPG.
+**Remaining Design Question — C, NEXT / NOT STARTED:** Refine detailed Verification freshness and PWU Completion semantics under the confirmed exact-candidate acceptance boundary, without assigning Guardian qualification or Human Acceptance authority to SPG.
 
 ### 4.10 External Side Effects & Compensation
 
@@ -296,13 +304,17 @@ SPG additionally deals with persistent artifacts and external side effects, requ
 | A1. Core State Semantics | CLOSED — reviewed | Core state semantics recorded |
 | A2. Transition & Commit Semantics | CLOSED — reviewed | Transition and Commit semantics recorded |
 | A3. State Foundation Closure Review | PASSED | Supplied closure result recorded |
-| B. Reconciliation & Recovery | NEXT — NOT STARTED | Retry; resume; rework; replan; stale work; duplicate execution; cancellation; supersession; recovery reconciliation |
-| C. Completion & Trust | NOT STARTED | Artifact Manifest; Completion Contract; PWU completion; partial success; Verification freshness; detailed Acceptance freshness |
+| B. Reconciliation & Recovery | CLOSED | Confirmed divergence, execution recovery, validity, reconciliation/replanning, and crash recovery semantics |
+| B1. Divergence & Recovery Semantics | CLOSED | Classification and recovery scope |
+| B2. Execution Recovery | CLOSED | Resume / Retry, observation uncertainty, Lease, fencing, isolation |
+| B3. Reconciliation & Replanning | CLOSED | Validity basis, impact propagation, Candidate staleness, carry-forward |
+| B4. Recovery Closure | PASSED | Barrier, anchor, orphan reality, idempotence, coherent recovery completion |
+| C. Completion & Trust | NEXT — NOT STARTED | Artifact Manifest; Completion Contract; PWU completion; partial success; Verification freshness; detailed Acceptance freshness |
 | D. Side-effect Governance | NOT STARTED | Execution reproducibility; permission boundary; external side effects; rollback / compensation |
 
-**Current next valid transition: Runtime Architecture Refinement → B. Reconciliation & Recovery.**
+**Current next valid transition: Runtime Architecture Refinement → C. Completion & Trust.**
 
-A generic "continue" means this design transition. It must not jump to coding, database schemas, API design, runtime implementation, Runtime Flow expansion, or Coding Readiness Review. This documentation update records A's closure and does not begin B. The frozen discovery scope is reopened only when real new evidence requires it.
+A generic "continue" means this design transition. It must not jump to coding, database schemas, API design, runtime implementation, Runtime Flow expansion, or Coding Readiness Review. This documentation update records B's supplied closure and does not begin C or D. Future benchmark candidates do not reopen the frozen discovery scope.
 
 ## 7. SPG Core Logical Responsibility Model — Confirmed
 
@@ -332,12 +344,18 @@ The model is frozen only as logical responsibility decomposition, not physical s
 
 See the [State Foundation Closure](spg-state-foundation.md) for the complete definitions, 20 invariants, and commit-failure boundaries.
 
+### Distributed governance and future verification
+
+**No Actor Owns Production Truth Alone; Distributed Responsibility, Governed Adjudication.** Runtime admits domain-owned inputs through explicit contracts and transition rules rather than inventing or solely owning all truth. This is not majority voting or a reduction of Human authority. Physical provider consolidation must not collapse logical Responsibility / Contract / Authority boundaries. **Replaceable Intelligence, Durable Governance** permits policy-bounded autonomy to evolve without assuming identical model capability or unrestricted production authority.
+
+The [B Closure](spg-reconciliation-recovery.md) preserves all 20 Recovery principles. The [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) maps frozen invariants and failure modes toward future verification, records provider-independent benchmark categories and trusted production cost measurement, and preserves the user-reported Codex wrong-task/wrong-completion incident as a real incident-derived regression candidate. No tests or benchmarks are implemented or executed here, and C remains NOT STARTED.
+
 ## 8. Baseline and Boundary Consistency
 
 - Architecture Baseline remains **v0.1**. State Foundation clarification and the PWU Acceptance correction are explicitly linked from the existing baselines; no new Architecture Baseline is created.
 - Design Artifact taxonomy remains a proposed refinement. References to Design revisions in a Trusted Baseline do not finalize the taxonomy.
-- PWU **Satisfied** describes meeting production obligations. Human / Policy Final Acceptance primarily targets an exact Baseline Candidate, not every PWU. **Integrated** is derived lineage/integration state; detailed completion and abnormal paths remain for B/C.
-- Completion Contract placement, Artifact Manifest, Production Issue representation, and Execution Lease remain pending.
+- PWU **Satisfied** describes meeting production obligations. Human / Policy Final Acceptance primarily targets an exact Baseline Candidate, not every PWU. **Integrated** is derived lineage/integration state; detailed completion remains for C while logical recovery paths are closed by B.
+- Completion Contract placement, Artifact Manifest, and Production Issue representation remain pending. Execution Lease and fencing are confirmed B logical semantics, not chosen infrastructure.
 - Execution Attempt, State Transition Journal, Baseline Candidate, state / commit invariants, and the three-part logical responsibility model are now confirmed architecture semantics, not implementation claims.
 - Decision Intelligence Domain owns Decision Artifact semantics; YiJue remains an independent Consumer Product / possible Provider.
 - SPG owns production planning, PWU coordination, lineage relationships, and production-governance state. Producers retain artifact content ownership; Git retains code history.
@@ -345,10 +363,10 @@ See the [State Foundation Closure](spg-state-foundation.md) for the complete def
 - ECF retains canonical engineering context and Context Projection authority; it does not own SPG Production State.
 - Human Governance retains Decision approval, Risk Acceptance, and applicable Final Acceptance. Verification does not automatically grant acceptance, and Human Authority does not bypass governed state-transition or Commit rules.
 
-The former hypothesis/candidate labels and simplified PWU Acceptance path are explicitly corrected. No capability-ownership conflict is introduced. Remaining taxonomy, completion, recovery, and side-effect questions are not resolved by this closure. New Trusted Production Baseline denotes production reality, not a new version of this repository's Architecture Baseline.
+The former hypothesis/candidate labels and simplified PWU Acceptance path are explicitly corrected, including Execution Lease's promotion by B. No capability-ownership conflict is introduced. Remaining taxonomy, completion, side-effect questions, and concrete recovery implementation are not resolved here. New Trusted Production Baseline denotes production reality, not a new version of this repository's Architecture Baseline.
 
 ## 9. Scope Guard
 
 This record does not expand MVP scope or create Feature IDs, production code, runtime modules, database schemas, or APIs. Confirmed semantics do not require Event Sourcing, distributed transactions, a distributed state store, complex workflow engine, graph database, distributed locking, Production State Branching, or microservices. Guardian and ECF are not redesigned.
 
-The next work is exactly **Runtime Architecture Refinement → B. Reconciliation & Recovery**. B is NOT STARTED. This task records the supplied State Foundation closure only; other candidates remain subject to their explicit review.
+The next work is exactly **Runtime Architecture Refinement → C. Completion & Trust**. C is NEXT, NOT STARTED; D is NOT STARTED. This task records supplied B closure and future verification strategy only; other candidates remain subject to their explicit review.
