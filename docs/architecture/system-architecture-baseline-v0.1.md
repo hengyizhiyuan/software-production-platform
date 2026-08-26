@@ -3,7 +3,7 @@
 - **Status:** Program-level Architecture Source of Truth
 - **Version:** 0.1
 - **Baseline date:** 2026-08-25
-- **Clarification:** Production Work Unit and Production Artifact terminology refined without changing the architecture version
+- **Clarification:** Production Work Unit / Production Artifact terminology and State Foundation logical semantics refined without changing the architecture version
 
 ## 1. Purpose and Interpretation
 
@@ -410,6 +410,18 @@ The current baseline does not commit the MVP to build:
 
 Long-running production continuity must rely on Explicit Production State rather than Conversation History or a single Agent's memory. New input must not silently replace the active production objective or invalidate prior decisions.
 
+### State Foundation Closure — Current Logical Semantics
+
+The [State Foundation Closure](spg-state-foundation.md) records A CLOSED, A1 / A2 CLOSED, and A3 PASSED. It refines this v0.1 baseline without changing capability ownership, MVP scope, or the architecture version.
+
+Trusted Production Baseline is an immutable reference set, distinct from evolving Working Production State. Execution Attempt and State Transition Journal preserve historical facts. Exact sealed Baseline Candidates pass through distinct Eligibility, Authorization, and Commit semantics. Only successful Commit, with expected source-Baseline validation, changes Current Trusted Baseline authority.
+
+Production Planner → Production Governance Runtime → Production State Projection is confirmed **only as logical responsibility decomposition**. Runtime is the sole logical authority for authoritative SPG state transitions; projections are rebuildable views, not final authority. This does not define physical services.
+
+**Human Authority Does Not Imply Runtime Bypass.** Human and Machine are governed participants with different responsibilities and authority. Human Agency First preserves strategic, risk, and applicable final-acceptance authority, not unrestricted runtime privilege. Final production acceptance primarily targets an exact Baseline Candidate, not every PWU by default.
+
+Git retains code-history authority. Artifact producers, Decision Intelligence, Guardian, ECF, and Human Governance retain their domain ownership; SPG's governed composition does not absorb their truth. Detailed invariants and failure boundaries are in the linked closure record.
+
 ### Future Direction
 
 A more complete SPG Governance State Preservation capability may explicitly maintain:
@@ -420,7 +432,7 @@ A more complete SPG Governance State Preservation capability may explicitly main
 - Pending Decisions.
 - Next Valid Transition.
 
-The complete state model, transition protocol, persistence architecture, and autonomous behavior are Future Design. This baseline creates no implementation commitment beyond preserving the explicit-state boundary.
+The closed State Foundation settles the logical state / Commit foundation only. Remaining recovery, detailed completion, side-effect governance, persistence architecture, transition implementation, and autonomous behavior are future design work. B. Reconciliation & Recovery is NEXT, NOT STARTED. This baseline does not introduce an implementation commitment.
 
 ## 12. Future Directions
 
@@ -482,6 +494,7 @@ This baseline governs program-level system boundaries. Detailed documents remain
 - [Program-level Architecture Decisions](program-architecture-decisions.md) records individual program decisions and rationale.
 - [SPG Lite Domain Model and Contract Boundary Baseline](spg-lite-domain-contract-baseline.md) records the current SPG Lite domain objects, autonomy boundary, Human Decision model, and capability-contract ownership.
 - [SPG Core Architecture Model](SPG_Core_Architecture_Model.md) details SPG concepts and future directions.
+- [SPG State Foundation Closure](spg-state-foundation.md) records confirmed state / Commit semantics, 20 invariants, and Human–Machine governance under v0.1; [Runtime Findings Review](spg-runtime-findings-review.md) preserves the discovery scope and current agenda.
 - [MVP Architecture](mvp-architecture.md) defines the current MVP boundary.
 - [Guardian Integration](../assurance/guardian-integration.md) and [ECF Integration](../context/ecf-integration.md) define integration boundaries without redesigning those systems.
 - Product-specific documents retain product internals and implementation decisions.

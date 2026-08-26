@@ -1,6 +1,6 @@
 # Long-term Architecture Principles
 
-This is a living architecture document. It records long-term directions and does not freeze the target architecture or expand the current MVP.
+This is a living architecture document. It records long-term directions and explicitly labeled Current Architecture Principles. The [closed State Foundation](spg-state-foundation.md) confirms logical governance semantics under Architecture Baseline v0.1, not implementation or physical-service design. No section expands the current MVP.
 ## AI-Native Software Production System
 
 The platform is not an AI coding tool. It solves how humans and AI can continuously produce trustworthy software through a governed production loop.
@@ -225,6 +225,38 @@ Human defines Intent, Goal, Value Judgment, Risk Tolerance, Governance Authority
 AI amplifies Analysis, Design, Execution, Verification, and Optimization.
 
 The system provides Context, Coordination, Evidence, and Trust.
+
+**Current Architecture Principle — State Foundation clarification:** Human Agency First does not mean an unrestricted production superuser. Humans retain meaningful authority over intent, direction, organizational constraints, risk ownership, high-impact exceptions, and final acceptance where policy requires it. They do not directly mutate authoritative production state outside governance rules.
+
+## Human Authority Does Not Imply Runtime Bypass
+
+**Current Architecture Principle**, confirmed by [State Foundation closure](spg-state-foundation.md).
+
+Human participants may possess higher-level authority over intent, direction, constraints, risk acceptance, and final production acceptance. That authority does not grant unrestricted privilege to bypass production consistency, lineage, state-transition, or Commit rules.
+
+Authority is expressed through governed goal / direction decisions, constraint decisions, exception decisions, risk acceptance, and acceptance of an exact Baseline Candidate. Production Governance Runtime determines how those authorized decisions may consistently change production reality. It is the sole logical transition authority, not the owner of Human Authority or Assurance Truth.
+
+## Governed Participant Principle
+
+**Current Architecture Principle:** Human, AI, Executor, Guardian, and other production actors are governed participants, each with Responsibility, Authority, Capability, Context, and Policy Boundary.
+
+> Equal submission to production governance does not imply equal responsibility or equal authority.
+
+Human and Machine do not have identical authority. Humans retain strategic judgment, risk ownership, and applicable final acceptance; machines receive operational autonomy within policy. Neither may silently bypass authoritative state-transition rules.
+
+## Authority Before Convenience
+
+**Current Architecture Principle:** Authoritative production reality is determined by governance authority state, not UI, cache, progress display, or successful completion of all derived projections.
+
+Only successful Commit of an exact sealed Baseline Candidate changes Current Trusted Baseline authority, after expected source-Baseline validation. Failure before the authoritative switch leaves the previous Baseline authoritative; failure of derived views or follow-up synchronization after the switch does not undo it.
+
+Trusted Baselines are immutable. Working State is distinct from Trusted State. Recorded historical production facts are preserved even when current views change. These are logical constraints, not Event Sourcing, distributed transaction, schema, or service requirements.
+
+## Architecture Reserves Future; Product Does Not Consume Future
+
+State Foundation semantics may be expressed through ordinary persistent storage, explicit records / revisions, transition history, Git references, and simple controlled commit logic. No particular implementation is selected here.
+
+They do not require SPG Lite to implement Event Sourcing, distributed transactions, a distributed state store, a complex workflow engine, a graph database, distributed locking, Production State Branching, or microservices.
 
 ## Intelligence Organization over Agent Accumulation
 

@@ -16,9 +16,30 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 ## Current Stage
 
-**Architecture Foundation Establishment**
+**Runtime Architecture Refinement — IN PROGRESS**
 
-This is an Initial Baseline and does not represent a final frozen design.
+Architecture Baseline remains **v0.1**. A. State Foundation is CLOSED: A1 / A2 were reviewed and are CLOSED; A3 Closure Review PASSED. This records confirmed logical architecture, not implemented capability or a new architecture baseline.
+
+| Architecture workflow item | Status |
+|---|---|
+| Runtime Flow Tabletop Exercise | CLOSED |
+| Runtime Failure-Mode Discovery | CLOSED |
+| Issue Discovery Scope | FROZEN |
+| Runtime Architecture Refinement | IN PROGRESS |
+| A. State Foundation | CLOSED |
+| A1. Core State Semantics | CLOSED — reviewed |
+| A2. Transition & Commit Semantics | CLOSED — reviewed |
+| A3. State Foundation Closure Review | PASSED |
+| B. Reconciliation & Recovery | NEXT — NOT STARTED |
+| C. Completion & Trust | NOT STARTED |
+| D. Side-effect Governance | NOT STARTED |
+| NEXT | B. Reconciliation & Recovery |
+
+The next valid design transition is **Runtime Architecture Refinement → B. Reconciliation & Recovery**. A generic instruction such as "continue" resolves to this transition, not coding, database schema, API design, runtime implementation, Runtime Flow expansion, or Coding Readiness Review. B is NEXT but NOT STARTED; the State Foundation documentation task does not begin it.
+
+Refinement proceeds in order: **A. State Foundation → B. Reconciliation & Recovery → C. Completion & Trust → D. Side-effect Governance**. The 12-area discovery scope is frozen; reopen discovery only when real new evidence requires it.
+
+The [Runtime Findings Review](docs/architecture/spg-runtime-findings-review.md) records findings and the remaining agenda. The [State Foundation Closure](docs/architecture/spg-state-foundation.md) records confirmed state / commit semantics, 20 invariants, and Human–Machine governance. Execution Attempt, State Transition Journal, Baseline Candidate, and the Planner → Governance Runtime → State Projection logical responsibility model are confirmed architecture semantics, not implementation claims. Other explicitly labeled candidates and future questions remain unresolved.
 
 ## Program-level Architecture Source of Truth
 
@@ -31,7 +52,9 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 
 ## Core Principles
 
-- Human Agency First
+- Human Agency First — meaningful Human authority, not unrestricted runtime privilege
+- Human Authority Does Not Imply Runtime Bypass
+- Governed Participants — shared governance rules, different Responsibility / Authority
 - Context before Execution
 - Evidence before Acceptance
 - Role over Agent

@@ -4,6 +4,50 @@ This document records the current SPG architecture model and its future architec
 
 The minimum current domain-object and contract view is consolidated in [SPG Lite Domain Model and Contract Boundary Baseline](spg-lite-domain-contract-baseline.md). That document refines SPG Lite semantics without narrowing or expanding the full SPG architecture described here.
 
+## Runtime Review Status and Refinement Boundary
+
+The [Runtime Findings Review](spg-runtime-findings-review.md) records the closed tabletop exercise and failure-mode discovery. Issue Discovery Scope is FROZEN; Runtime Architecture Refinement remains IN PROGRESS.
+
+The [State Foundation Closure](spg-state-foundation.md) is the authoritative detailed record of A's confirmed logical state / commit semantics, 20 invariants, and Human–Machine governance. **A. State Foundation is CLOSED; A1 / A2 are CLOSED; A3 Closure Review PASSED. NEXT: B. Reconciliation & Recovery — NOT STARTED.** This documentation task does not begin B; C and D remain NOT STARTED.
+
+Architecture Baseline remains **v0.1**. Execution Attempt and State Transition Journal are confirmed concepts / requirements. **Baseline Candidate** is the confirmed term replacing the earlier Integration Candidate. The three-part logical responsibility model below is confirmed, not an Architecture Hypothesis. Design Artifact taxonomy, Production Issue representation, Completion Contract placement, Artifact Manifest, and detailed B/C/D mechanisms remain pending; they are not silently finalized.
+
+Event-driven / Event-sourced Production State remains a Future Direction. Confirmed durable history and projection requirements do not commit MVP to Event Sourcing, a new runtime module, API, schema, feature, or physical service.
+
+## SPG Core Logical Responsibility Model — Confirmed
+
+```text
+Production Planner
+        ↓
+Production Governance Runtime
+        ↓
+Production State Projection
+```
+
+| Logical responsibility | Responsibility boundary |
+|---|---|
+| Production Planner | Owns production planning and adaptive plan evolution; proposes plans / production changes |
+| Production Governance Runtime | Sole logical authority validating, admitting, and performing authoritative SPG production-state transitions |
+| Production State Projection | Produces current understandable views from persisted production facts; not the final production authority |
+
+Executor reports execution facts / artifacts; Verification / Guardian reports verification / assurance facts; Human Governor issues authority decisions. None directly mutate authoritative production reality. Runtime owns transition semantics, not Human Authority, business decisions, artifact content, or Assurance Truth.
+
+The model is frozen **only as logical responsibility decomposition**, not deployable services or microservices. The capability descriptions below are read under this authority boundary.
+
+## State Foundation and Human–Machine Governance
+
+Trusted Production Baseline → Working Production State → exact sealed Baseline Candidate → Eligibility → Authorization → Commit → New Trusted Production Baseline.
+
+Trusted Baselines are immutable reference sets. Working State has stable identity and evolving projections with preserved history. Executable PWUs bind to explicit source Baseline / Plan Revision; material plan changes create new revisions, and executable PWU meaning cannot be silently rewritten after an attempt starts. Execution Attempts preserve concrete execution facts; State Transition Journal durably preserves material governance transitions.
+
+Only successful Commit changes Current Trusted Baseline authority, after validating the expected source Baseline. Failure before the authoritative switch leaves the previous Baseline authoritative; failure of derived views or follow-up synchronization after the switch does not undo it. Git remains authoritative for code history, not the entire governed production reality.
+
+**Human Authority Does Not Imply Runtime Bypass.** Human Agency First preserves intent, direction, constraints, risk, exceptions, and applicable final acceptance; it does not make the human an unrestricted production superuser. Human, AI, Executor, Guardian, and other actors are governed participants with different Responsibility / Authority. Equal submission to governance does not mean identical authority.
+
+PWU obligations use the working semantic term **Satisfied**; Human / Policy Final Acceptance primarily targets an exact Baseline Candidate, not every PWU by default. Integrated is derived lineage/integration state, not a mandatory primary PWU terminal state. Detailed completion semantics remain for C.
+
+See the [closed State Foundation record](spg-state-foundation.md) for definitions, failure boundaries, all 20 invariants, and the explicit MVP complexity guard.
+
 ## Software Production Governor (SPG)
 
 SPG is the Software Production Governor: a capability-oriented software production governance layer.
@@ -35,15 +79,15 @@ Production State answers:
 
 ## Production State Manager
 
-Production State Manager is responsible for **Reality Tracking + State Transition Governance**.
+Production State Manager remains a capability grouping for **Reality Tracking + State Transition Governance**, not an additional authority. Under the confirmed logical decomposition, authoritative transitions belong exclusively to Production Governance Runtime; consumable state views belong to Production State Projection.
 
 ### State Projection
 
-Derives current state from production events.
+Derives current views from persisted production facts. The view may be rebuilt and is not the final authority; this does not require Event Sourcing.
 
 ### State Transition Governance
 
-Governs whether a state transition is valid.
+Uses Production Governance Runtime to validate, admit, and perform governed state transitions. This capability grouping does not directly mutate authoritative state.
 
 ### Reality Synchronization
 
@@ -131,7 +175,7 @@ Observes current Production State.
 
 ### Transition Decision
 
-Determines the next permitted action from current state and applicable boundaries.
+Coordinates the next permitted action from current state and applicable boundaries. Authoritative production-state changes must pass through Production Governance Runtime; Runtime Orchestrator is not a parallel transition authority.
 
 ### Capability Routing
 
@@ -182,7 +226,7 @@ Software Production Governor (SPG)
 └── Progress Intelligence
 ```
 
-SPG uses Capability-oriented Architecture, not AI Employee Architecture. This snapshot is a capability model and does not require each capability to be a separate runtime module.
+SPG uses Capability-oriented Architecture, not AI Employee Architecture. This snapshot remains a capability inventory, read under the confirmed Planner → Governance Runtime → State Projection logical responsibility model above. It does not establish competing state authorities or require each capability to be a separate runtime module.
 
 ## SPG Production Loop
 
