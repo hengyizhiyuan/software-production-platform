@@ -16,5 +16,6 @@ This Initial Baseline records the following principles for the AI-Native Softwar
 - Contract Before Implementation
 - Architecture Reserves Future; Product Does Not Consume Future
 - Source of Truth over Conversation History
+- Conversation-to-Contract: raw conversation is provenance/source material, not execution authority
 
 These principles guide future architecture and do not constitute a complete implementation design.

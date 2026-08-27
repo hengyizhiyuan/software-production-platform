@@ -16,7 +16,7 @@ This document records the supplied B1 / B2 / B3 review conclusions and B4 PASSED
 | Benchmark candidate | A proposed future executable/evaluated scenario; not a completed benchmark |
 | Implementation mechanism | A concrete technical realization; none is selected by this closure |
 
-The next valid design step is exactly **Runtime Architecture Refinement → C. Completion & Trust**. C is NEXT, NOT STARTED; D remains NOT STARTED. This documentation task does not begin either.
+The subsequent [C Completion & Trust](spg-completion-trust.md) and [D Side-effect Governance](spg-side-effect-governance.md) layers are CLOSED. D reuses B's reconciliation semantics for External Reality Divergence. The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED; Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS.
 
 ## 1. B1 — Divergence & Recovery Semantics: CLOSED
 
@@ -79,7 +79,7 @@ This is **not a mandatory sequential workflow**. Recovery scope expands only whe
 - Artifacts were partially produced.
 - External side effects occurred.
 
-Unknown execution reality must be represented explicitly rather than guessed. Mentioning side effects here records recovery uncertainty only; D. Side-effect Governance is not started.
+Unknown execution reality must be represented explicitly rather than guessed. The subsequent [D closure](spg-side-effect-governance.md) confirms Unknown External Reality, stable Effect Operation Identity, observation, and reconciliation without changing this B principle.
 
 ### Resume and Retry
 
@@ -180,7 +180,7 @@ A new Production Plan Revision does not discard all prior work. Prior PWUs and a
 - **Cancelled:** the production activity is no longer required.
 - **Superseded:** the underlying objective remains relevant, but a newer production path or Work Unit replaces the particular one.
 
-Superseded work is not failed merely because production reality changed. Cancellation does not erase already committed Trusted Production Reality. A committed reality change requires a future governed production change / compensation path; this closure does not design that path or begin D.
+Superseded work is not failed merely because production reality changed. Cancellation does not erase already committed Trusted Production Reality. The subsequent [D closure](spg-side-effect-governance.md) confirms Compensation as a new governed production action that appends history.
 
 ### Baseline Candidate Staleness
 
@@ -256,7 +256,7 @@ Recovery completes when:
 - Production State Projection is coherent.
 - No unresolved authority ambiguity prevents safe continuation.
 
-Recovery completion does **not** require all production work to be complete. It means: **the system reliably knows where production currently stands**. This is recovery closure, not the design of C. Completion & Trust.
+Recovery completion does **not** require all production work to be complete. It means: **the system reliably knows where production currently stands**. The subsequent [C closure](spg-completion-trust.md) separately defines Production Completion and Trusted Completion; this B-layer meaning remains unchanged.
 
 ## 5. Reconciliation & Recovery Principles — CLOSED
 
@@ -301,14 +301,24 @@ This closure does not implement production/runtime code, tests, benchmarks, sche
 
 | Item | Status |
 |---|---|
-| Runtime Architecture Refinement | IN PROGRESS |
+| Runtime Architecture Refinement | CLOSED |
 | A. State Foundation | CLOSED |
 | B. Reconciliation & Recovery | CLOSED |
 | B1. Divergence & Recovery Semantics | CLOSED |
 | B2. Execution Recovery | CLOSED |
 | B3. Reconciliation & Replanning | CLOSED |
 | B4. Recovery Closure | PASSED |
-| C. Completion & Trust | NEXT — NOT STARTED |
-| D. Side-effect Governance | NOT STARTED |
+| C. Completion & Trust | CLOSED |
+| C1. Completion Semantics | CLOSED — reviewed |
+| C2. Verification & Trust Freshness | CLOSED — reviewed |
+| C3. Acceptance & Trusted Completion | CLOSED — reviewed |
+| C4. Completion & Trust Closure | PASSED |
+| D. Side-effect Governance | CLOSED |
+| D1. Side-effect Semantics & Boundary | CLOSED — reviewed |
+| D2. Side-effect Authority & Execution Safety | CLOSED — reviewed |
+| D3. Compensation & External Reality | CLOSED — reviewed |
+| D4. Side-effect Governance Closure | PASSED |
+| Final Closure / Architecture Readiness Review | PASSED |
+| Runtime Architecture Readiness | PASS |
 
-The exact next valid design step is **Runtime Architecture Refinement → C. Completion & Trust**. A generic “continue” follows that step, not implementation or discovery expansion. The 12-area discovery scope remains FROZEN. Recording a regression benchmark candidate within existing failure modes does not reopen discovery.
+The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The current next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**. The 12-area discovery scope remains FROZEN and reopens only on new material evidence.

@@ -1,22 +1,23 @@
 # SPG Runtime Flow Findings and Failure-Mode Review
 
 - **Record date:** 2026-08-26
-- **Purpose:** Findings record, A/B closure synchronization, and remaining design agenda
+- **Purpose:** Frozen findings record and A/B/C/D plus Final Readiness closure synchronization
 - **Confirmed State Foundation semantics:** [State Foundation Closure](spg-state-foundation.md)
 - **Confirmed recovery semantics:** [Reconciliation & Recovery Closure](spg-reconciliation-recovery.md)
 - **Future verification only:** [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md)
 - **Governing architecture:** [Architecture Baseline v0.1](system-architecture-baseline-v0.1.md)
 - **Domain and contract baseline:** [SPG Lite baseline](spg-lite-domain-contract-baseline.md)
+- **Final closure:** [Runtime Architecture Final Closure and Readiness](spg-runtime-architecture-readiness.md)
 - **Architecture Baseline:** remains v0.1; this record is not a new baseline
 
 ## 1. Interpretation and Evidence Boundary
 
-This record preserves the user-reported Runtime Flow Tabletop Exercise and Runtime Failure-Mode Discovery, the supplied A closure, and the subsequent B1/B2/B3 review and B4 PASSED closure conclusions. A and B are CLOSED. It does not claim newly executed Runtime tests or implemented capabilities. C is NEXT, NOT STARTED; this update does not begin C or D.
+This record preserves the user-reported Runtime Flow Tabletop Exercise and Runtime Failure-Mode Discovery and the supplied A/B/C/D closure conclusions. A, B, C, and D are CLOSED; Final Closure / Architecture Readiness Review is PASSED; Runtime Architecture Refinement is CLOSED; Runtime Architecture Readiness is PASS. It does not claim newly executed Runtime tests or implemented capabilities.
 
 | Label | Meaning in this review |
 |---|---|
 | Confirmed Requirement | A production-runtime problem or required behavior identified by the review; not a selected implementation or a new MVP feature |
-| Confirmed Architecture Semantics | A logical concept, responsibility, or invariant accepted by A/B closure; not a schema, deployed service, or implementation claim |
+| Confirmed Architecture Semantics | A logical concept, responsibility, or invariant accepted by A/B/C closure; not a schema, deployed service, or implementation claim |
 | Architecture Principle | A governing constraint used to assess future designs |
 | Candidate Mechanism | A possible concept or mechanism pending formal confirmation; not a frozen domain object, schema, or implemented capability |
 | Architecture Hypothesis | A proposed responsibility decomposition to validate during refinement; not final architecture |
@@ -35,7 +36,7 @@ The reported prior work includes Responsibility Boundary Review, PWU Lifecycle D
 | Runtime Flow Tabletop Exercise | CLOSED |
 | Runtime Failure-Mode Discovery | CLOSED |
 | Issue Discovery Scope | FROZEN |
-| Runtime Architecture Refinement | IN PROGRESS |
+| Runtime Architecture Refinement | CLOSED |
 | A. State Foundation | CLOSED |
 | A1. Core State Semantics | CLOSED — reviewed |
 | A2. Transition & Commit Semantics | CLOSED — reviewed |
@@ -45,9 +46,21 @@ The reported prior work includes Responsibility Boundary Review, PWU Lifecycle D
 | B2. Execution Recovery | CLOSED |
 | B3. Reconciliation & Replanning | CLOSED |
 | B4. Recovery Closure | PASSED |
-| C. Completion & Trust | NEXT — NOT STARTED |
-| D. Side-effect Governance | NOT STARTED |
-| NEXT | C. Completion & Trust |
+| C. Completion & Trust | CLOSED |
+| C1. Completion Semantics | CLOSED — reviewed |
+| C2. Verification & Trust Freshness | CLOSED — reviewed |
+| C3. Acceptance & Trusted Completion | CLOSED — reviewed |
+| C4. Completion & Trust Closure | PASSED |
+| D. Side-effect Governance | CLOSED |
+| D1. Side-effect Semantics & Boundary | CLOSED — reviewed |
+| D2. Side-effect Authority & Execution Safety | CLOSED — reviewed |
+| D3. Compensation & External Reality | CLOSED — reviewed |
+| D4. Side-effect Governance Closure | PASSED |
+| Final Closure / Architecture Readiness Review | PASSED |
+| Runtime Architecture Readiness | PASS |
+| SPG Lite Runtime — Implementation Contract / Runtime MVP Design | CLOSED |
+| Coding Readiness | PASS |
+| NEXT | Architecture Lead Reality Review |
 
 ### Validated logical flow
 
@@ -128,7 +141,7 @@ Production Artifact
 
 Design examples include Architecture Decision, Domain Model, Interface Contract, Migration Design, and Data Model Design. The candidate classification does not transfer their authority to SPG.
 
-**Future Design Question:** Confirm the refined taxonomy during Runtime Architecture Refinement. Design Artifact is not yet added to the approved v0.1 or SPG Lite domain taxonomy.
+**Deferred taxonomy question:** Design Artifact is not added to the approved v0.1 or SPG Lite domain taxonomy. Revisit it only through explicit future architecture review supported by implementation or Reality Check evidence.
 
 ### 4.2 Production Issue
 
@@ -153,9 +166,7 @@ Possible responses include Retry, Resume, Rework, Replan, Block, Escalate, and C
 Execution Finished ≠ PWU Produced ≠ Production Complete ≠ Outcome Achieved
 ```
 
-**Candidate Mechanism — contract placement:** A Production Plan could contain an objective-level Completion Contract covering required PWUs, required artifacts, required verification, and blocking conditions. Each PWU retains its own required outputs, acceptance criteria, and verification requirement.
-
-**Future Design Question:** Confirm placement and the relationship between objective completion and PWU completion. No database schema or concrete API contract is specified.
+**Confirmed C Contract Semantics:** [Completion & Trust closure](spg-completion-trust.md) confirms versioned PWU Completion Contract and Plan Completion Contract semantics. PWU Contracts contain Output Obligations, Verification Obligations, Required Conditions, and Blocking Conditions; Plan completion is governed by Plan-level obligations, not green task rows. No schema or API is specified.
 
 ### 4.4 Baseline / Documentation Synchronization
 
@@ -181,7 +192,7 @@ New Engineering Baseline
 
 **Confirmed Requirement:** Artifact lineage and production identity must be established before, or durably associated with, execution. They must not be reconstructed only after execution. This prevents orphan output whose origin, plan, context, or lifecycle is unknown. SPG coordinates lineage without taking ownership of generated content or canonical ECF context.
 
-**Confirmed B Semantics:** Revalidation, reconciliation, and Plan Revision carry-forward preserve still-valid production work and domain ownership. Detailed completion/admission qualification remains for C, NOT STARTED; no documentation synchronization implementation is selected.
+**Confirmed B/C Semantics:** Revalidation, reconciliation, and Plan Revision carry-forward preserve still-valid production work and domain ownership. The [C closure](spg-completion-trust.md) confirms Completion / admission qualification semantics; no documentation synchronization or Completion engine is implemented.
 
 ### 4.5 Exception & Recovery
 
@@ -200,7 +211,7 @@ Attempt #2 — PASS
 
 After restart, the system must determine what definitely completed, what was in progress, what is safe to resume, what requires reconciliation, and what requires retry or escalation.
 
-**Confirmed B Semantics — CLOSED:** Failure and Divergence differ. Classify before recover; use the lowest sufficient recovery scope; preserve maximum valid work. Resume preserves Attempt identity while Retry creates history. Recovery reconstructs knowledge before execution, uses a logical Recovery Barrier, preserves unreconciled reality, and is idempotent. Recovery completion restores coherent authority/state, not product completion. See all 20 principles in [B Closure](spg-reconciliation-recovery.md). Rollback/compensation mechanisms remain for D. No recovery engine, Event Sourcing, or implementation is introduced.
+**Confirmed B Semantics — CLOSED:** Failure and Divergence differ. Classify before recover; use the lowest sufficient recovery scope; preserve maximum valid work. Resume preserves Attempt identity while Retry creates history. Recovery reconstructs knowledge before execution, uses a logical Recovery Barrier, preserves unreconciled reality, and is idempotent. Recovery completion restores coherent authority/state, not product completion. See all 20 principles in [B Closure](spg-reconciliation-recovery.md). The subsequent [D Closure](spg-side-effect-governance.md) confirms Rollback / Compensation semantics; no recovery or compensation engine, Event Sourcing, or implementation is introduced.
 
 ### 4.6 Integration Atomicity
 
@@ -242,23 +253,21 @@ Baseline advancement triggers dependency-based impact evaluation, not automatic 
 
 **Architecture Principle:** Human approval of one production snapshot must not authorize materially different later output.
 
-**Remaining Design Question — C, NEXT / NOT STARTED:** Refine detailed Verification freshness and PWU Completion semantics under the confirmed exact-candidate acceptance boundary, without assigning Guardian qualification or Human Acceptance authority to SPG.
+**Confirmed C Semantics:** Verification PASS is contextual to an explicit Verification Basis. Evidence Quality and Freshness are distinct; relevant change may yield VALID, REVALIDATION_REQUIRED, or INVALIDATED logical conclusions. Baseline advancement triggers impact evaluation, not global invalidation. Human / Policy Acceptance is scoped to an exact Candidate and policy-driven. Guardian retains assurance truth; SPG governs Evidence use in transition eligibility.
 
 ### 4.10 External Side Effects & Compensation
 
 **Confirmed Requirement:** Autonomy and recovery must account for effects beyond repository changes. Future PWUs may involve deployment, database migration, infrastructure mutation, external API calls, resource deletion, or publishing, with different reversibility characteristics.
 
-**Candidate Mechanism — classification:** Reversible; Compensatable; Irreversible / Destructive.
+**Confirmed D Semantics:** External Side Effects cross the disposable execution boundary. Logical classification considers repeatability, compensability / reversibility, durability, and blast radius. Side-effect Intent, scoped Permit / Authorization, and stable Effect Operation Identity remain distinct. Rollback differs from Compensation; Compensation is governed production that appends history.
 
-**Candidate Mechanism — future Execution Contract metadata:** Side-effect classification, required authority, and rollback / compensation strategy.
-
-**Future Design Question:** Refine side-effect governance and its relationship to Autonomy Policy. Do not add deployment automation or a compensation engine to MVP.
+Observed External Reality remains distinct from physical and Trusted Production Reality. Permit freshness, Attempt fencing at the external boundary, external preconditions, observation, reconciliation, and compensation govern safe effects. No deployment automation, compensation engine, schema, or authorization infrastructure is added to MVP. See [D Closure](spg-side-effect-governance.md).
 
 ### 4.11 Partial Output / Artifact Manifest
 
 **Confirmed Requirement:** Executor completion alone cannot mark a PWU as Produced. All required output conditions must be satisfied; a PWU may require several outputs.
 
-**Candidate Mechanism:** Artifact Manifest may describe required versus produced outputs. For example:
+**Confirmed C Runtime Semantic:** Output Obligation Manifest (preferred term; earlier working term Artifact Manifest) describes REQUIRED, CONDITIONAL, and OPTIONAL production-output obligations. It is not a changed-file list. For example:
 
 ```text
 Required Output
@@ -269,17 +278,17 @@ Required Output
 
 These are illustrative output labels, not new approved taxonomy entries.
 
-**Future Design Question:** Confirm partial-output and required-output semantics. Artifact Manifest remains a candidate, with no frozen schema.
+**Confirmed C Semantic:** Partial production preserves valid artifacts but does not satisfy a PWU while required obligations are missing. The Manifest is confirmed logically; DSL, schema, and physical representation remain deferred.
 
 ### 4.12 Execution Reproducibility & Permission Boundary
 
 **Confirmed Requirement:** Every execution result must be traceable to the engineering environment in which it was produced. Governance authority must propagate to the execution boundary.
 
-**Candidate Mechanism:** Execution Snapshot information may include repository revision, branch/worktree, dependency lock, runtime/toolchain version, and relevant environment identity.
+**Confirmed D Boundary:** External execution Intent and Context must be reproducibly inspectable, including Operation, target, parameters, Artifact / Candidate revision, production state, Authority, preconditions, Provider, and Operation Identity. Credential provenance may preserve reference, role, scope, and issuer, but never raw secrets. Physical execution need not be universally reproducible.
 
 Future bounded Execution Request semantics may include allowed repository scope, allowed tools, allowed external side effects, credential boundary, and destructive-operation constraints.
 
-**Future Design Question:** Define minimum reproducibility and authority propagation semantics during refinement. This review does not define an API or build a security platform.
+**Deferred implementation-contract question:** Choose the minimum representation that preserves the confirmed reproducibility and Authority-propagation semantics. This review does not define an API or build a security platform.
 
 ## 5. Non-Normative Architecture Note: React Fiber Analogy
 
@@ -309,12 +318,12 @@ SPG additionally deals with persistent artifacts and external side effects, requ
 | B2. Execution Recovery | CLOSED | Resume / Retry, observation uncertainty, Lease, fencing, isolation |
 | B3. Reconciliation & Replanning | CLOSED | Validity basis, impact propagation, Candidate staleness, carry-forward |
 | B4. Recovery Closure | PASSED | Barrier, anchor, orphan reality, idempotence, coherent recovery completion |
-| C. Completion & Trust | NEXT — NOT STARTED | Artifact Manifest; Completion Contract; PWU completion; partial success; Verification freshness; detailed Acceptance freshness |
-| D. Side-effect Governance | NOT STARTED | Execution reproducibility; permission boundary; external side effects; rollback / compensation |
+| C. Completion & Trust | CLOSED; C1/C2/C3 CLOSED; C4 PASSED | Output Obligation Manifest; PWU/Plan Completion Contracts; Produced/Satisfied; Verification Basis; Evidence Freshness; Trusted Completion; exact Candidate Authority |
+| D. Side-effect Governance | CLOSED; D1/D2/D3 CLOSED; D4 PASSED | External Side Effect; Intent / Permit / Operation Identity; fencing; External Reality; Compensation; Governed Integration Atomicity |
 
-**Current next valid transition: Runtime Architecture Refinement → C. Completion & Trust.**
+**Current next governed step: Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains.**
 
-A generic "continue" means this design transition. It must not jump to coding, database schemas, API design, runtime implementation, Runtime Flow expansion, or Coding Readiness Review. This documentation update records B's supplied closure and does not begin C or D. Future benchmark candidates do not reopen the frozen discovery scope.
+The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED, and the [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The repository remains Greenfield; no specific slice, schema, API, test, or code is authorized here. Future benchmark candidates do not reopen the frozen discovery scope.
 
 ## 7. SPG Core Logical Responsibility Model — Confirmed
 
@@ -348,14 +357,14 @@ See the [State Foundation Closure](spg-state-foundation.md) for the complete def
 
 **No Actor Owns Production Truth Alone; Distributed Responsibility, Governed Adjudication.** Runtime admits domain-owned inputs through explicit contracts and transition rules rather than inventing or solely owning all truth. This is not majority voting or a reduction of Human authority. Physical provider consolidation must not collapse logical Responsibility / Contract / Authority boundaries. **Replaceable Intelligence, Durable Governance** permits policy-bounded autonomy to evolve without assuming identical model capability or unrestricted production authority.
 
-The [B Closure](spg-reconciliation-recovery.md) preserves all 20 Recovery principles. The [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) maps frozen invariants and failure modes toward future verification, records provider-independent benchmark categories and trusted production cost measurement, and preserves the user-reported Codex wrong-task/wrong-completion incident as a real incident-derived regression candidate. No tests or benchmarks are implemented or executed here, and C remains NOT STARTED.
+The [B Closure](spg-reconciliation-recovery.md), [C Closure](spg-completion-trust.md), and [D Closure](spg-side-effect-governance.md) preserve their respective 20-principle / invariant sets. The [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) maps them toward future verification and preserves the incident-derived regression candidate. No tests or benchmarks are implemented or executed here; Final Closure / Architecture Readiness Review is PASSED.
 
 ## 8. Baseline and Boundary Consistency
 
 - Architecture Baseline remains **v0.1**. State Foundation clarification and the PWU Acceptance correction are explicitly linked from the existing baselines; no new Architecture Baseline is created.
 - Design Artifact taxonomy remains a proposed refinement. References to Design revisions in a Trusted Baseline do not finalize the taxonomy.
 - PWU **Satisfied** describes meeting production obligations. Human / Policy Final Acceptance primarily targets an exact Baseline Candidate, not every PWU. **Integrated** is derived lineage/integration state; detailed completion remains for C while logical recovery paths are closed by B.
-- Completion Contract placement, Artifact Manifest, and Production Issue representation remain pending. Execution Lease and fencing are confirmed B logical semantics, not chosen infrastructure.
+- PWU / Plan Completion Contracts and Output Obligation Manifest are confirmed C logical semantics. Their schema / DSL / physical representations remain deferred. Production Issue representation remains pending. Execution Lease and fencing are confirmed B logical semantics, not chosen infrastructure.
 - Execution Attempt, State Transition Journal, Baseline Candidate, state / commit invariants, and the three-part logical responsibility model are now confirmed architecture semantics, not implementation claims.
 - Decision Intelligence Domain owns Decision Artifact semantics; YiJue remains an independent Consumer Product / possible Provider.
 - SPG owns production planning, PWU coordination, lineage relationships, and production-governance state. Producers retain artifact content ownership; Git retains code history.
@@ -363,10 +372,10 @@ The [B Closure](spg-reconciliation-recovery.md) preserves all 20 Recovery princi
 - ECF retains canonical engineering context and Context Projection authority; it does not own SPG Production State.
 - Human Governance retains Decision approval, Risk Acceptance, and applicable Final Acceptance. Verification does not automatically grant acceptance, and Human Authority does not bypass governed state-transition or Commit rules.
 
-The former hypothesis/candidate labels and simplified PWU Acceptance path are explicitly corrected, including Execution Lease's promotion by B. No capability-ownership conflict is introduced. Remaining taxonomy, completion, side-effect questions, and concrete recovery implementation are not resolved here. New Trusted Production Baseline denotes production reality, not a new version of this repository's Architecture Baseline.
+The former hypothesis/candidate labels and simplified PWU Acceptance path are explicitly corrected, including Execution Lease's promotion by B. No capability-ownership conflict is introduced. Remaining taxonomy and concrete implementation choices are not resolved here. New Trusted Production Baseline denotes production reality, not a new version of this repository's Architecture Baseline.
 
 ## 9. Scope Guard
 
 This record does not expand MVP scope or create Feature IDs, production code, runtime modules, database schemas, or APIs. Confirmed semantics do not require Event Sourcing, distributed transactions, a distributed state store, complex workflow engine, graph database, distributed locking, Production State Branching, or microservices. Guardian and ECF are not redesigned.
 
-The next work is exactly **Runtime Architecture Refinement → C. Completion & Trust**. C is NEXT, NOT STARTED; D is NOT STARTED. This task records supplied B closure and future verification strategy only; other candidates remain subject to their explicit review.
+A/B/C/D and Runtime Architecture Refinement are CLOSED; Runtime Architecture Readiness is PASS; the Implementation Contract is CLOSED; Coding Readiness is PASS. The exact next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**. Coding and implementation did not begin; remaining candidates and deferred mechanisms retain their labels.

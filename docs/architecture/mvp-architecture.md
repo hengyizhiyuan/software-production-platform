@@ -222,6 +222,10 @@ Iteration 1 → Iteration 2 → Iteration 3 → Iteration 4
 
 The MVP does not include full CI/CD, automated deployment, production monitoring, full Guardian or ECF implementations, model routing, benchmarking, intelligent branching or merge, or complete SaaS multi-tenancy.
 
+The [Runtime Architecture Final Closure and Readiness](spg-runtime-architecture-readiness.md) is PASS. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records Implementation Contract / Runtime MVP Design CLOSED and Coding Readiness PASS. Controlled slices are permitted only after explicit Architecture Lead authorization; this admission does not authorize one, expand MVP, promote deferred capabilities, or select physical implementation.
+
+Architecture Baseline remains **v0.1**.
+
 
 ## Evolution Governance Boundary in the MVP
 

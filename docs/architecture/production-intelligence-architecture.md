@@ -125,7 +125,7 @@ Future decisions should consume a [Capability Performance Profile](spg-runtime-v
 
 Larger PWUs and longer autonomous runs are potential economic benefits only where evidence and policy permit them. Planner proposes decomposition; Production Governance Runtime retains authoritative transition responsibility. Executor retains generated-artifact ownership; Guardian retains assurance authority; ECF retains Context authority. This direction does not modify YiJue architecture or make it an SPG dependency.
 
-Adaptive PWU decomposition, automatic routing, and the benchmark feedback loop remain future work. This side refinement does not reopen B or start C; the next mainline transition remains **Runtime Architecture Refinement → C. Completion & Trust**.
+Adaptive PWU decomposition, automatic routing, and the benchmark feedback loop remain future work. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS without promoting these capabilities. A controlled slice still requires explicit Architecture Lead authorization.
 
 ## Engineering Conflict Evolution
 

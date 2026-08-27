@@ -432,9 +432,47 @@ Recovery preserves maximum still-valid work, expands scope only when necessary, 
 
 The [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) records future verification requirements and benchmark candidates only. No test, benchmark, model routing, or billing implementation is introduced.
 
+### Completion & Trust Closure — Current Logical Semantics
+
+The [C closure](spg-completion-trust.md) records C CLOSED, C1/C2/C3 CLOSED, and C4 PASSED, with all 20 C-level invariants. Completion remains layered; Produced differs from Satisfied; PWU / Plan Completion Contracts and Output Obligation Manifest are confirmed logical Contracts / semantics.
+
+Verification PASS is contextual to an explicit Verification Basis. Verification Artifact and Guardian-qualified Evidence remain distinct. Evidence Quality and Freshness differ; Baseline advancement triggers impact evaluation rather than global invalidation.
+
+Trusted Completion is obligation satisfaction for an exact Baseline Candidate, not a Trust Score or a committed Baseline. Commit Eligibility and Authorization differ. Human Final Acceptance is policy-driven; Risk Acceptance / governed Exception may change permission but cannot rewrite facts, Findings, or Evidence. Only successful Commit changes Trusted Production Reality.
+
+**Validity Is Relational.** No actor owns production truth alone. SPG adjudicates Completion / transition eligibility but does not own Guardian assurance truth, Human Authority, artifact content, or all production facts. These semantics do not require the deferred mechanisms or expand MVP.
+
+### Side-effect Governance Closure — Current Logical Semantics
+
+The [D closure](spg-side-effect-governance.md) records D CLOSED, D1/D2/D3 CLOSED, and D4 PASSED, with all 20 D-level invariants. External Side Effect crosses the disposable execution boundary. Physical Change, Authoritative Production Change, and Observed External Reality remain distinct.
+
+Execution capability does not imply Side-effect Authority. Intent, scoped Permit / Authorization, and Effect Operation Identity differ. Permit freshness and Attempt fencing reach the external boundary; Runtime assumes neither universal exactly-once execution nor broad permanent Executor production privilege.
+
+External Reality Divergence reuses B reconciliation. Compensation is governed production based on current observed reality and appends history. Observed reality is not automatically Trusted Reality. Governed Integration Atomicity provides identity, Authority, observation, reconciliation, and recovery without claiming universal cross-system physical atomicity or ordering.
+
+SPG governs Effect Intent, identity, Authority coordination, observations, reconciliation, and compensation orchestration. Guardian / Verification retains Evidence, Findings, Qualification, Gates, and assurance truth. Human Authority cannot erase observed facts. These semantics do not select deferred infrastructure or expand MVP.
+
+### Runtime Architecture Final Closure — Current Readiness
+
+The [Runtime Architecture Final Closure and Readiness](spg-runtime-architecture-readiness.md) records Runtime Architecture Refinement CLOSED, Final Closure / Architecture Readiness Review PASSED, and Runtime Architecture Readiness PASS. A/B/C/D form one coherent Runtime Governance Model whose cross-layer semantics, end-to-end lifecycle, ownership boundaries, provider decoupling, failure containment, deferred scope, and SPG Lite feasibility passed final review.
+
+Readiness means enough architecture is stable to enter the next governed iteration safely. It does not mean every future question is solved, deferred capabilities are promoted, implementation is complete, or later Reality Check evidence cannot drive governed revision.
+
+Architecture Baseline remains **v0.1** because the refinement clarified Runtime semantics without replacing the Five Capability Plane model, capability ownership, Human Governance, Decision Intelligence boundary, or MVP boundary.
+
+
+### SPG Lite Runtime Implementation Contract — Current Controlled Readiness
+
+The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records I1 Minimal Runtime Contract & Domain Spine CLOSED, I2 State Transition & Persistence Design CLOSED, I3 Capability Interfaces & End-to-End MVP Loop CLOSED, I4 Coding Readiness Closure PASSED, and Coding Readiness PASS.
+
+Implementation Governance is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. This permits only explicitly authorized, repository-grounded slices after Architecture Lead Reality Review. It does not authorize a specific slice, select language/framework/database, populate `src/`, or promote deferred capabilities.
+
+The repository remains Greenfield. Relational transactional persistence, materialized state, append-oriented history, optimistic version checks, generation fencing, and local transactions are implementation guidance; physical technology remains NOT SELECTED.
+
 ### Future Direction
 
 A more complete SPG Governance State Preservation capability may explicitly maintain:
+
 
 - Current Objective.
 - Current Stage.
@@ -442,7 +480,7 @@ A more complete SPG Governance State Preservation capability may explicitly main
 - Pending Decisions.
 - Next Valid Transition.
 
-The closed A/B records settle logical state / Commit and Reconciliation & Recovery semantics. Detailed completion, side-effect governance, persistence architecture, concrete recovery mechanisms, transition implementation, and autonomous behavior remain future design work. The exact next valid step is **Runtime Architecture Refinement → C. Completion & Trust**; C is NEXT, NOT STARTED, and D is NOT STARTED. This baseline does not introduce an implementation commitment or begin C.
+The closed A/B/C/D records settle Runtime architecture semantics. The admitted Implementation Contract now permits controlled implementation while persistence technology, physical mechanisms, autonomous behavior, and deferred capabilities remain governed future work. The exact next governed step is Architecture Lead Reality Review against the reconciled Source of Truth; no implementation slice is authorized here.
 
 ## 12. Future Directions
 
@@ -503,9 +541,10 @@ This baseline governs program-level system boundaries. Detailed documents remain
 
 - [Program-level Architecture Decisions](program-architecture-decisions.md) records individual program decisions and rationale.
 - [SPG Lite Domain Model and Contract Boundary Baseline](spg-lite-domain-contract-baseline.md) records the current SPG Lite domain objects, autonomy boundary, Human Decision model, and capability-contract ownership.
+- [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records the closed I1–I4 design, Greenfield reality, Runtime spine, controlled implementation boundary, and first-wave invariants.
 - [SPG Core Architecture Model](SPG_Core_Architecture_Model.md) details SPG concepts and future directions.
-- [SPG State Foundation Closure](spg-state-foundation.md) records confirmed state / Commit semantics, 20 invariants, and Human–Machine governance under v0.1; [Runtime Findings Review](spg-runtime-findings-review.md) preserves the discovery scope and current agenda.
-- [SPG Reconciliation & Recovery Closure](spg-reconciliation-recovery.md) records B1/B2/B3 CLOSED, B4 PASSED, confirmed recovery semantics, and all 20 B-level principles under v0.1.
+- [SPG State Foundation Closure](spg-state-foundation.md), [SPG Reconciliation & Recovery Closure](spg-reconciliation-recovery.md), [SPG Completion & Trust Closure](spg-completion-trust.md), and [SPG Side-effect Governance Closure](spg-side-effect-governance.md) record the closed A/B/C/D semantics and their respective 20-invariant sets under v0.1.
+- [Runtime Findings Review](spg-runtime-findings-review.md) preserves the discovery scope and current agenda.
 - [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) records future invariant verification, fault injection, provider-independent benchmarks, and the real incident-derived regression candidate, not current implementation scope.
 - [MVP Architecture](mvp-architecture.md) defines the current MVP boundary.
 - [Guardian Integration](../assurance/guardian-integration.md) and [ECF Integration](../context/ecf-integration.md) define integration boundaries without redesigning those systems.

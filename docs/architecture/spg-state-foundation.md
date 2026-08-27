@@ -6,7 +6,7 @@
 - **Review and agenda:** [Runtime Findings Review](spg-runtime-findings-review.md)
 - **Scope:** Confirmed logical architecture semantics; not an implementation specification or a new Architecture Baseline
 
-This document preserves the supplied A closure conclusions: A1 Core State Semantics and A2 Transition & Commit Semantics were reviewed, and A3 State Foundation Closure Review passed. It does not claim a new runtime test or implemented capability. Architecture Baseline remains **v0.1**. The subsequent [B Reconciliation & Recovery Closure](spg-reconciliation-recovery.md) is now CLOSED (B1/B2/B3 CLOSED; B4 PASSED). Current NEXT is C. Completion & Trust, NOT STARTED; this synchronization does not begin C.
+This document preserves the supplied A closure conclusions and remains governed by Architecture Baseline **v0.1**. The subsequent [B Reconciliation & Recovery](spg-reconciliation-recovery.md), [C Completion & Trust](spg-completion-trust.md), and [D Side-effect Governance](spg-side-effect-governance.md) layers are CLOSED. The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED; Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS.
 
 ## 1. Confirmed Logical State Architecture
 
@@ -265,7 +265,7 @@ Commit
 Trusted Production Baseline
 ```
 
-This is a semantic distinction, not a complete PWU state machine or frozen enum. Detailed PWU Completion semantics remain for **C. Completion & Trust**.
+This is a semantic distinction, not a complete PWU state machine or frozen enum. The subsequent [C closure](spg-completion-trust.md) confirms layered Completion, Produced / Satisfied, PWU and Plan Completion Contracts, and Trusted Completion while deferring physical lifecycle representation.
 
 **Integrated** is derived lineage/integration state associated with artifacts/PWUs included in a committed Baseline, not a mandatory primary PWU terminal state.
 
@@ -309,7 +309,7 @@ Ownership remains unchanged:
 - ECF retains canonical Context / Context Projection authority, not SPG production-state authority.
 - Human Governance retains strategic, risk, exception, and applicable final-acceptance authority.
 
-Production Issue representation, Design Artifact taxonomy refinement, Completion Contract placement, and Artifact Manifest remain unresolved. Execution Lease was not finalized by A; the subsequent [B closure](spg-reconciliation-recovery.md) confirms Lease and fencing as logical recovery semantics only. References to issues or design revisions do not freeze outstanding models. No new Feature ID, code, runtime module, schema, API, or MVP implementation commitment is introduced.
+Production Issue representation and Design Artifact taxonomy refinement remain unresolved. The subsequent [B closure](spg-reconciliation-recovery.md) confirms Lease and fencing as logical recovery semantics only. The [C closure](spg-completion-trust.md) confirms PWU / Plan Completion Contract and Output Obligation Manifest semantics while deferring schema, DSL, and physical representation. References to issues or design revisions do not freeze outstanding models. No new Feature ID, code, runtime module, schema, API, or MVP implementation commitment is introduced.
 
 ## 15. Current Architecture Workflow and Next Valid Step
 
@@ -318,7 +318,7 @@ Production Issue representation, Design Artifact taxonomy refinement, Completion
 | Runtime Flow Tabletop Exercise | CLOSED |
 | Runtime Failure-Mode Discovery | CLOSED |
 | Issue Discovery Scope | FROZEN |
-| Runtime Architecture Refinement | IN PROGRESS |
+| Runtime Architecture Refinement | CLOSED |
 | A. State Foundation | CLOSED |
 | A1. Core State Semantics | CLOSED — reviewed |
 | A2. Transition & Commit Semantics | CLOSED — reviewed |
@@ -328,9 +328,19 @@ Production Issue representation, Design Artifact taxonomy refinement, Completion
 | B2. Execution Recovery | CLOSED |
 | B3. Reconciliation & Replanning | CLOSED |
 | B4. Recovery Closure | PASSED |
-| C. Completion & Trust | NEXT — NOT STARTED |
-| D. Side-effect Governance | NOT STARTED |
+| C. Completion & Trust | CLOSED |
+| C1. Completion Semantics | CLOSED — reviewed |
+| C2. Verification & Trust Freshness | CLOSED — reviewed |
+| C3. Acceptance & Trusted Completion | CLOSED — reviewed |
+| C4. Completion & Trust Closure | PASSED |
+| D. Side-effect Governance | CLOSED |
+| D1. Side-effect Semantics & Boundary | CLOSED — reviewed |
+| D2. Side-effect Authority & Execution Safety | CLOSED — reviewed |
+| D3. Compensation & External Reality | CLOSED — reviewed |
+| D4. Side-effect Governance Closure | PASSED |
+| Final Closure / Architecture Readiness Review | PASSED |
+| Runtime Architecture Readiness | PASS |
 
-The next valid design step is exactly **Runtime Architecture Refinement → C. Completion & Trust**.
+The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The current next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**.
 
-This document preserves A's closed semantics and all 20 invariants; its current workflow view is synchronized with the subsequent B closure. C and D are not started. A generic “continue” resolves to C, not Coding Readiness Review or implementation. The original 12-area discovery scope remains frozen; only real new evidence may justify reopening it.
+This document preserves A's closed semantics and all 20 invariants; its workflow view is synchronized through Coding Readiness. The original discovery scope remains frozen. This A-closure record did not itself perform implementation design or coding.

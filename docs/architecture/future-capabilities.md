@@ -311,7 +311,7 @@ This is a Future Capability, not a current product commitment or MVP feature. **
 
 These benchmark directions are not current MVP requirements. They should be developed only after sufficient production experience has established the relevant evidence and evaluation needs.
 
-Capability profiles, adaptive decomposition, routing, benchmark-backed strategy selection, and the marketplace are future directions; metric families are candidates. This side refinement introduces no implementation, pricing plan, MVP expansion, or Architecture Baseline version increment. Baseline remains v0.1. A and B remain CLOSED; B1/B2/B3 remain CLOSED; B4 PASSED; C is NEXT — NOT STARTED; D is NOT STARTED. The exact next mainline step remains **Runtime Architecture Refinement → C. Completion & Trust**.
+Capability profiles, adaptive decomposition, routing, benchmark-backed strategy selection, and the marketplace remain future directions. This introduces no implementation, pricing plan, MVP expansion, or Baseline increment. Baseline remains v0.1. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS, but these deferred capabilities are not promoted and no implementation slice is authorized here.
 
 
 

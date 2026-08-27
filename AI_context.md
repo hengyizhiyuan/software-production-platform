@@ -16,16 +16,16 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 ## Current Stage
 
-**Runtime Architecture Refinement — IN PROGRESS**
+**Runtime Architecture Refinement — CLOSED**
 
-Architecture Baseline remains **v0.1**. A. State Foundation is CLOSED: A1 / A2 are CLOSED; A3 Closure Review PASSED. B. Reconciliation & Recovery is CLOSED: B1 / B2 / B3 are CLOSED; B4 Recovery Closure PASSED. These are supplied architecture review conclusions, not implemented capabilities or newly executed Runtime tests.
+Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, Coding Readiness PASS, and **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. The repository remains Greenfield; no specific implementation slice is authorized.
 
 | Architecture workflow item | Status |
 |---|---|
 | Runtime Flow Tabletop Exercise | CLOSED |
 | Runtime Failure-Mode Discovery | CLOSED |
 | Issue Discovery Scope | FROZEN |
-| Runtime Architecture Refinement | IN PROGRESS |
+| Runtime Architecture Refinement | CLOSED |
 | A. State Foundation | CLOSED |
 | A1. Core State Semantics | CLOSED — reviewed |
 | A2. Transition & Commit Semantics | CLOSED — reviewed |
@@ -35,15 +35,31 @@ Architecture Baseline remains **v0.1**. A. State Foundation is CLOSED: A1 / A2 a
 | B2. Execution Recovery | CLOSED |
 | B3. Reconciliation & Replanning | CLOSED |
 | B4. Recovery Closure | PASSED |
-| C. Completion & Trust | NEXT — NOT STARTED |
-| D. Side-effect Governance | NOT STARTED |
-| NEXT | C. Completion & Trust |
+| C. Completion & Trust | CLOSED |
+| C1. Completion Semantics | CLOSED — reviewed |
+| C2. Verification & Trust Freshness | CLOSED — reviewed |
+| C3. Acceptance & Trusted Completion | CLOSED — reviewed |
+| C4. Completion & Trust Closure | PASSED |
+| D. Side-effect Governance | CLOSED |
+| D1. Side-effect Semantics & Boundary | CLOSED — reviewed |
+| D2. Side-effect Authority & Execution Safety | CLOSED — reviewed |
+| D3. Compensation & External Reality | CLOSED — reviewed |
+| D4. Side-effect Governance Closure | PASSED |
+| Final Closure / Architecture Readiness Review | PASSED |
+| Runtime Architecture Readiness | PASS |
+| SPG Lite Runtime — Implementation Contract / Runtime MVP Design | CLOSED |
+| I1. Minimal Runtime Contract & Domain Spine | CLOSED |
+| I2. State Transition & Persistence Design | CLOSED |
+| I3. Capability Interfaces & End-to-End MVP Loop | CLOSED |
+| I4. Coding Readiness Closure | PASSED |
+| Coding Readiness | PASS |
+| Implementation Governance | AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
 
-The next valid design transition is exactly **Runtime Architecture Refinement → C. Completion & Trust**. A generic instruction such as "continue" resolves to this transition, not coding, database schema, API design, runtime implementation, Runtime Flow expansion, or Coding Readiness Review. C is NEXT but NOT STARTED; this B-closure documentation task does not begin C or D.
+The exact next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**. This documentation admission does not authorize that slice or begin coding, schemas, APIs, tests, CI, infrastructure, or technology selection.
 
-Refinement proceeds in order: **A. State Foundation → B. Reconciliation & Recovery → C. Completion & Trust → D. Side-effect Governance**. The 12-area discovery scope is frozen; reopen discovery only when real new evidence requires it.
+The completed refinement order is **A. State Foundation → B. Reconciliation & Recovery → C. Completion & Trust → D. Side-effect Governance → Final Readiness Review**. Runtime Failure Discovery remains CLOSED and its 12-area scope remains frozen; reopen it only when implementation, dogfood, or Reality Check evidence requires it.
 
-The [Runtime Findings Review](docs/architecture/spg-runtime-findings-review.md) records findings and the remaining agenda. The [State Foundation Closure](docs/architecture/spg-state-foundation.md) preserves 20 A-level invariants. The [Reconciliation & Recovery Closure](docs/architecture/spg-reconciliation-recovery.md) records confirmed B semantics and all 20 B-level principles, including Execution Lease, fencing, isolation, validity, and Recovery Barrier. These are logical semantics, not selected infrastructure mechanisms. The [Runtime Verification and Benchmark Strategy](docs/architecture/spg-runtime-verification-benchmarks.md) records future verification requirements and benchmark candidates, not implemented tests. Other explicitly labeled candidates and detailed C/D questions remain unresolved.
+The [Runtime Findings Review](docs/architecture/spg-runtime-findings-review.md) preserves the frozen discovery scope. [State Foundation](docs/architecture/spg-state-foundation.md), [Reconciliation & Recovery](docs/architecture/spg-reconciliation-recovery.md), [Completion & Trust](docs/architecture/spg-completion-trust.md), and [Side-effect Governance](docs/architecture/spg-side-effect-governance.md) preserve the closed A/B/C/D semantics and their respective 20-invariant sets. These are logical semantics, not selected infrastructure mechanisms. The [Runtime Verification and Benchmark Strategy](docs/architecture/spg-runtime-verification-benchmarks.md) remains future verification work. Architecture readiness means enough semantics are stable for the next governed iteration, not that all future architecture or implementation is complete.
 
 ## Program-level Architecture Source of Truth
 
@@ -51,6 +67,8 @@ The current system-level architecture baseline is:
 
 - [AI Native Software Production System Architecture Baseline v0.1](docs/architecture/system-architecture-baseline-v0.1.md)
 - [SPG Lite Domain Model and Contract Boundary Baseline](docs/architecture/spg-lite-domain-contract-baseline.md)
+- [SPG Runtime Architecture Final Closure and Readiness](docs/architecture/spg-runtime-architecture-readiness.md)
+- [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -65,6 +83,12 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Replaceable Intelligence, Durable Governance
 - Context before Execution
 - Evidence before Acceptance
+- Completion Semantics Are Layered
+- Validity Is Relational
+- Trust Is Obligation Satisfaction Before It Is a Score
+- Execution Capability Does Not Imply Side-effect Authority
+- Observed External Reality Does Not Automatically Become Trusted Reality
+- Governed Integration Atomicity over Assumed Physical Atomicity
 - Role over Agent
 - Executor Independence
 - Platform Capability over Application Duplication
@@ -75,6 +99,7 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Generated Does Not Equal Trusted
 - Contract Before Implementation
 - Source of Truth over Conversation History
+- Conversation-to-Contract — raw conversation is never authoritative execution input
 - Controlled Autonomy
 - AI Capability Evolution Independence
 

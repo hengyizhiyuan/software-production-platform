@@ -6,11 +6,11 @@ The minimum current domain-object and contract view is consolidated in [SPG Lite
 
 ## Runtime Review Status and Refinement Boundary
 
-The [Runtime Findings Review](spg-runtime-findings-review.md) records the closed tabletop exercise and failure-mode discovery. Issue Discovery Scope is FROZEN; Runtime Architecture Refinement remains IN PROGRESS.
+The [Runtime Findings Review](spg-runtime-findings-review.md) records the closed tabletop exercise and frozen failure-mode discovery. The [Runtime Architecture Final Closure and Readiness](spg-runtime-architecture-readiness.md) records Runtime Architecture Refinement CLOSED and Runtime Architecture Readiness PASS.
 
-The [State Foundation Closure](spg-state-foundation.md) preserves A's confirmed logical state / commit semantics and 20 invariants. **A is CLOSED; A1/A2 CLOSED; A3 PASSED. B. Reconciliation & Recovery is CLOSED; B1/B2/B3 CLOSED; B4 PASSED.** The [B closure](spg-reconciliation-recovery.md) records all 20 Recovery principles. **NEXT: Runtime Architecture Refinement → C. Completion & Trust.** C is NOT STARTED; D remains NOT STARTED. This documentation task does not begin them.
+[State Foundation](spg-state-foundation.md), [Reconciliation & Recovery](spg-reconciliation-recovery.md), [Completion & Trust](spg-completion-trust.md), and [Side-effect Governance](spg-side-effect-governance.md) preserve the closed A/B/C/D semantics. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, Coding Readiness PASS, and **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. No specific implementation slice is authorized here.
 
-Architecture Baseline remains **v0.1**. Execution Attempt and State Transition Journal are confirmed concepts / requirements. **Baseline Candidate** replaces the earlier Integration Candidate. The three-part logical responsibility model below is confirmed. B additionally confirms Execution Lease, fencing, Attempt isolation, Production Validity Basis, Revalidate / Reconcile / Replan, Recovery Barrier, and idempotent recovery semantics. Their implementation mechanisms remain unselected. Design Artifact taxonomy, Production Issue representation, Completion Contract placement, Artifact Manifest, and detailed C/D design remain pending.
+Architecture Baseline remains **v0.1**. A confirms State / Commit foundations; B confirms Reconciliation / Recovery; C confirms Completion / Trust; D confirms External Side Effect, Intent / Permit / Operation Identity, external fencing, Observed External Reality, Compensation, and Governed Integration Atomicity. The cross-layer semantic, ownership, failure-containment, provider-decoupling, and SPG Lite feasibility reviews passed. Physical mechanisms, Design Artifact taxonomy, Production Issue representation, and deferred capabilities remain unselected.
 
 Event-driven / Event-sourced Production State remains a Future Direction. Confirmed durable history and projection requirements do not commit MVP to Event Sourcing, a new runtime module, API, schema, feature, or physical service.
 
@@ -50,7 +50,7 @@ PWU obligations use the working semantic term **Satisfied**; Human / Policy Fina
 
 See the [closed State Foundation record](spg-state-foundation.md) for definitions, failure boundaries, all 20 invariants, and the explicit MVP complexity guard.
 
-The [closed Reconciliation & Recovery record](spg-reconciliation-recovery.md) distinguishes execution success from production validity and restores coherent governance before execution resumes. The [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) is future verification work only, including the incident-derived regression candidate; it implements no tests and does not start C.
+The [closed Reconciliation & Recovery record](spg-reconciliation-recovery.md) distinguishes execution success from production validity and restores coherent governance before execution resumes. The [closed Completion & Trust record](spg-completion-trust.md) distinguishes Produced, Satisfied, Trusted Completion, and Commit. The [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) remains future verification work only; it implements no tests or trust mechanisms.
 
 ## Software Production Governor (SPG)
 
@@ -364,63 +364,40 @@ The Human Governor does not approve every individual step. Human responsibility 
 
 Within the authorized boundary, AI may perform Planning, Execution, and Adaptation.
 
-## Production Completion Intelligence
+## Production Completion Intelligence — Confirmed C Semantics
 
-> SPG must understand when software production has reached an acceptable completion state.
+> SPG must understand when software production has reached an acceptable and trustworthy completion state.
 
-Completion is not equivalent to `Task Completed`. It is:
-
-> Production Reality Meets Completion Contract.
-
-### Completion Layers
-
-SPG Completion Judgment may distinguish:
-
-- **Intent Completion:** whether the goal remains valid
-- **Plan Completion:** whether the production plan is complete
-- **Artifact Completion:** whether required production artifacts are complete
-- **Engineering Completion:** whether engineering quality and verification requirements are met
-- **Outcome Completion:** whether the intended real-world value is achieved
-
-Responsibility is separated across systems:
+Completion is layered:
 
 ```text
-Decision Validity       → Decision Intelligence Capability
-Production Completion   → SPG
-Engineering Trust       → Guardian
-Business Outcome        → Reality / External System
+Execution Attempt Finished
+!= Work Product Produced
+!= PWU Satisfied
+!= Production Plan Complete
+!= Trusted Completion
+!= Committed Trusted Production Change
 ```
 
-Production Completion Intelligence is a Future Capability / Architecture Direction, not a current implementation capability.
+The [C closure](spg-completion-trust.md) confirms Output Obligation Manifest, versioned PWU / Plan Completion Contracts, Verification Basis, Evidence Freshness, policy-driven Authority, and Trusted Completion. Completion criteria precede claims; Executor self-report cannot establish Satisfaction. Production Completion remains distinct from Business Outcome Achievement.
 
-## Completion State Model
+Trusted Completion means an exact Baseline Candidate satisfies required Completion, Verification, Policy, and Authority obligations. It is not itself Trusted Production Reality; only successful Commit changes the Trusted Production Baseline.
 
-A future completion model should not be a simple Boolean:
+Guardian / Verification retains assurance truth and Evidence qualification. SPG owns Completion Contracts, required Verification obligations, state-transition eligibility, Candidate admissibility use, and Commit governance. These are confirmed architecture semantics, not an implemented Completion engine, Guardian, Trust Score, schema, or workflow.
 
-```text
-PLANNING
-    ↓
-IMPLEMENTING
-    ↓
-VERIFYING
-    ↓
-PRODUCTION_COMPLETE
-    ↓
-OUTCOME_PENDING
-    ↓
-OUTCOME_CONFIRMED
-```
+### MVP boundary
 
-## Completion Contract
+SPG Lite may use simple explicit Completion, Verification, and Authorization records. Trust Graphs, Evidence ontologies, Policy DSL, multi-authority engines, Trust scoring, full Verification orchestration, and other deferred mechanisms are not MVP requirements.
 
-A future Completion Contract defines before production what conditions constitute completion. It may include:
+## Side-effect Governance — Confirmed D Semantics
 
-- Expected Artifact
-- Verification Requirement
-- Quality Gate
-- Acceptance Condition
+The [D closure](spg-side-effect-governance.md) confirms that External Side Effects cross the disposable execution boundary. Physical Change, Authoritative Production Change, and Observed External Reality remain distinct.
 
-Completion Contract is a Future Capability / Architecture Direction and is not fully implemented in the MVP.
+Side-effect Intent, scoped Permit / Authorization, and stable Effect Operation Identity are separate logical semantics. Execution capability does not imply Side-effect Authority; Permit freshness and Attempt fencing extend to the external boundary. Runtime does not assume universal CAS, exactly-once execution, or broad permanent Executor credentials.
+
+Observed External Reality may diverge from Trusted Reality and reuses B-level reconciliation. Compensation is new governed production based on current observed reality and appends history. **Governed Integration Atomicity** makes transitions identifiable, authorized, observable, reconcilable, and recoverable without claiming universal physical atomicity.
+
+These are architecture semantics, not Side-effect Gateway, deployment automation, Saga, 2PC, compensation engine, schema, API, or implementation readiness.
 
 ## Planning Continuity Principle
 

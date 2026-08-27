@@ -2,14 +2,14 @@
 
 ## Current Architecture Review State
 
-Architecture Baseline remains **v0.1**. The [Runtime Findings Review](../architecture/spg-runtime-findings-review.md) records the agenda; the [State Foundation Closure](../architecture/spg-state-foundation.md) and [Reconciliation & Recovery Closure](../architecture/spg-reconciliation-recovery.md) record confirmed A/B logical semantics. The [Runtime Verification and Benchmark Strategy](../architecture/spg-runtime-verification-benchmarks.md) records future verification work only. This update does not change maturity stages or MVP scope below.
+Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and Readiness](../architecture/spg-runtime-architecture-readiness.md) is PASS, and the [SPG Lite Runtime Implementation Contract](../architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, Coding Readiness PASS, and controlled-implementation governance. The repository remains Greenfield and maturity stages below are unchanged.
 
 | Review item | Status |
 |---|---|
 | Runtime Flow Tabletop Exercise | CLOSED |
 | Runtime Failure-Mode Discovery | CLOSED |
 | Issue Discovery Scope | FROZEN |
-| Runtime Architecture Refinement | IN PROGRESS |
+| Runtime Architecture Refinement | CLOSED |
 | A. State Foundation | CLOSED |
 | A1. Core State Semantics | CLOSED — reviewed |
 | A2. Transition & Commit Semantics | CLOSED — reviewed |
@@ -19,13 +19,29 @@ Architecture Baseline remains **v0.1**. The [Runtime Findings Review](../archite
 | B2. Execution Recovery | CLOSED |
 | B3. Reconciliation & Replanning | CLOSED |
 | B4. Recovery Closure | PASSED |
-| C. Completion & Trust | NEXT — NOT STARTED |
-| D. Side-effect Governance | NOT STARTED |
-| NEXT | C. Completion & Trust |
+| C. Completion & Trust | CLOSED |
+| C1. Completion Semantics | CLOSED — reviewed |
+| C2. Verification & Trust Freshness | CLOSED — reviewed |
+| C3. Acceptance & Trusted Completion | CLOSED — reviewed |
+| C4. Completion & Trust Closure | PASSED |
+| D. Side-effect Governance | CLOSED |
+| D1. Side-effect Semantics & Boundary | CLOSED — reviewed |
+| D2. Side-effect Authority & Execution Safety | CLOSED — reviewed |
+| D3. Compensation & External Reality | CLOSED — reviewed |
+| D4. Side-effect Governance Closure | PASSED |
+| Final Closure / Architecture Readiness Review | PASSED |
+| Runtime Architecture Readiness | PASS |
+| SPG Lite Runtime — Implementation Contract / Runtime MVP Design | CLOSED |
+| I1. Minimal Runtime Contract & Domain Spine | CLOSED |
+| I2. State Transition & Persistence Design | CLOSED |
+| I3. Capability Interfaces & End-to-End MVP Loop | CLOSED |
+| I4. Coding Readiness Closure | PASSED |
+| Coding Readiness | PASS |
+| Implementation Governance | AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
 
-The exact next valid transition is **Runtime Architecture Refinement → C. Completion & Trust**. A generic "continue" follows that transition. C remains NOT STARTED and is not begun by this B-closure documentation task. This does not authorize coding, tests, benchmarks, API/schema design, runtime implementation, Runtime Flow expansion, or Coding Readiness Review.
+The exact next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**. No specific slice is authorized by this status update.
 
-The refinement order remains A → B → C → D. A and B are CLOSED; B1/B2/B3 are CLOSED; B4 PASSED; C is NEXT and NOT STARTED; D is NOT STARTED. All 12 discovery areas remain frozen. Only the supplied A/B closure conclusions are promoted to confirmed semantics; detailed completion, side-effect governance, remaining labeled candidates, and concrete implementation mechanisms stay open. Future Runtime benchmarks do not add a maturity-stage implementation commitment.
+The refinement order A → B → C → D and Final Review is complete. All 12 discovery areas remain frozen. The closure confirms logical Runtime semantics, ownership boundaries, deferred-scope clarity, and SPG Lite feasibility without selecting physical mechanisms or expanding MVP.
 
 ## Stage 0 — Architecture Foundation
 

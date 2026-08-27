@@ -14,7 +14,7 @@ Each Role includes:
 
 Every Role should naturally support a Pool in the future, including:
 
-- Design Lead Pool
+- Production Planner Pool
 - Executor Pool
 - Guardian Pool
 

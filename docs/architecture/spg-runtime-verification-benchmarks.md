@@ -5,7 +5,7 @@
 - **Architecture:** [Baseline v0.1](system-architecture-baseline-v0.1.md), [State Foundation Closure](spg-state-foundation.md), and [Reconciliation & Recovery Closure](spg-reconciliation-recovery.md)
 - **Related evaluation direction:** [Production Benchmarks](production-benchmarks.md)
 
-This document records a future verification strategy derived from frozen Runtime invariants, failure modes, and governance boundaries, together with capability-based provider evaluation and production economics. It adds no test, benchmark, model-routing, adaptive-decomposition, pricing, or billing implementation, and no SPG Lite MVP commitment. It does not start C. Completion & Trust or D. Side-effect Governance.
+This document records a future verification strategy derived from frozen Runtime invariants and governance boundaries. It adds no test, benchmark, routing, pricing, or MVP implementation. The subsequent [C Completion & Trust](spg-completion-trust.md) and [D Side-effect Governance](spg-side-effect-governance.md) layers are CLOSED; the [Final Architecture Readiness Review](spg-runtime-architecture-readiness.md) is PASSED. This strategy implements none of those reviewed semantics.
 
 ## 1. Verification Principle and Traceability
 
@@ -133,7 +133,7 @@ Expected future governed-system behavior:
 
 **Executor self-reported completion cannot establish PWU completion.** A successful message is not a substitute for task identity, required output, or an admitted state transition.
 
-This expected rejection preserves the already-recorded partial-output and production-identity boundary. It does not define the full Completion Contract, Artifact Manifest, PWU completion algorithm, or C. Completion & Trust design.
+This expected rejection is now interpreted under the [closed C semantics](spg-completion-trust.md): Executor self-report cannot establish Satisfaction; Output Obligation Manifest and Completion Contract govern the claim. The benchmark remains future work and does not implement a PWU completion algorithm, Manifest schema, or Contract engine.
 
 Codex is named only to preserve incident provenance. The same scenario and expected boundary should apply to any Executor/provider that exhibits equivalent behavior; it is not a model-brand qualification verdict.
 
@@ -184,7 +184,7 @@ The following are **future evaluation dimensions**, not selected metrics, weight
 | Recovery Burden | Interruptions, stale work, recovery incidents, production divergence introduced |
 | Safe Autonomy | Safe autonomous execution depth and amount of policy-bounded work without Human Authority intervention |
 
-Completion-related observations use the applicable governed obligations; they do not define new PWU completion semantics or treat Executor self-report as satisfaction. Detailed C. Completion & Trust design remains unstarted.
+Completion-related observations use the applicable governed obligations from the [C closure](spg-completion-trust.md); they do not redefine PWU Completion or treat Executor self-report as Satisfaction. Benchmark execution and scoring remain future work.
 
 ### 5.3 Equivalent Governed Production Objectives
 
@@ -288,4 +288,4 @@ Confirmed principles include capability-oriented evaluation, equivalent-outcome 
 
 Capability Performance Profiles, adaptive decomposition, routing, policy feedback, strategy selection, and a capability marketplace remain **Future Capabilities / Architecture Directions**. Performance dimensions and Trusted Change Efficiency remain **candidate metrics**. All verification requirements and benchmark cases, including the incident-derived candidate, remain future work. Test fixtures, executable assertions, fault injectors, model thresholds, infrastructure mechanisms, and scoring implementation remain unselected and unimplemented. No actual prices, commercial tiers, or vendor rankings are defined.
 
-Architecture Baseline remains **v0.1** and SPG Lite MVP scope is unchanged. A is CLOSED; A1/A2 are CLOSED; A3 PASSED. B is CLOSED; B1/B2/B3 are CLOSED; B4 PASSED. C is NEXT, NOT STARTED; D is NOT STARTED. The exact next valid design step is **Runtime Architecture Refinement → C. Completion & Trust**. This architecture / product-strategy side refinement neither reopens B nor begins C or D.
+Architecture Baseline remains **v0.1** and SPG Lite MVP scope is unchanged. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The incident-derived regression remains a future benchmark candidate and is not claimed as implemented; no tests or specific slice are authorized here.

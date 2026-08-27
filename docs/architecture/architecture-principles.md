@@ -267,9 +267,40 @@ The system provides Context, Coordination, Evidence, and Trust.
 
 **Current Architecture Principle — State Foundation clarification:** Human Agency First does not mean an unrestricted production superuser. Humans retain meaningful authority over intent, direction, organizational constraints, risk ownership, high-impact exceptions, and final acceptance where policy requires it. They do not directly mutate authoritative production state outside governance rules.
 
+## Runtime Parent Governance Principles
+
+**Confirmed Architecture Constitution**, consolidated by the [Runtime Architecture Final Closure and Readiness](spg-runtime-architecture-readiness.md).
+
+The detailed A/B/C/D invariants are interpreted under eight parent principles:
+
+| Parent principle | Governing meaning |
+|---|---|
+| Facts Before Claims | Participant claims do not substitute for observable, traceable production facts. |
+| Observed Does Not Mean Admitted | Existing, generated, retrieved, or observed reality does not automatically become admitted Trusted Production Reality. |
+| Validity Is Relational | Validity is governed relative to specific reality, revisions, dependencies, Context, policy, and Authority conditions. |
+| History Is Appended, Not Rewritten | New reality creates governed history rather than rewriting prior material facts. |
+| Authority Changes Permission, Not Facts | Authority may change what is permitted but cannot fabricate or erase observed facts, Findings, or Evidence. |
+| No Actor Owns Production Truth Alone | Production truth is composed from domain-owned inputs and governed transitions; this is not majority voting. |
+| Recover Coherence, Not Appearance | Recovery restores truthful, consistent, governable state rather than cosmetic success. |
+| Replaceable Intelligence, Durable Governance | Provider evolution does not redefine fundamental Contract, Responsibility, Authority, and trust semantics. |
+
+Together they govern State Authority, execution and observation, recovery and reconciliation, Completion and Trust, Commit, governed External Effects, and observed convergence as one Runtime loop.
+
+## Preserve Semantic Separability Before Physical Separability
+
+**Implementation Guidance**, not a physical architecture commitment:
+
+> Distinct architecture semantics must remain distinguishable even when the first implementation represents them using shared physical structures.
+
+Production Validity Basis, Verification Basis, Authority Requirement, and Side-effect Permit may share a physical representation without becoming the same semantic. Likewise, Side-effect Intent, Permit, and Effect Operation may coexist inside a thin External Effect Record while retaining distinct meanings.
+
+Do not create one service, class, database, or table per architecture noun by default. This protects SPG Lite feasibility while preserving later evolution.
+
+
 ## Human Authority Does Not Imply Runtime Bypass
 
 **Current Architecture Principle**, confirmed by [State Foundation closure](spg-state-foundation.md).
+
 
 Human participants may possess higher-level authority over intent, direction, constraints, risk acceptance, and final production acceptance. That authority does not grant unrestricted privilege to bypass production consistency, lineage, state-transition, or Commit rules.
 
@@ -307,6 +338,44 @@ Production truth emerges through governed composition of facts, artifacts, evide
 Production Governance Runtime remains logical transition authority. It does **not** itself invent all truth or own every input domain; it adjudicates authoritative state changes using inputs owned by other domains. A sole logical transition boundary is not a sole creator/owner of production truth and does not require one physical service.
 
 This complements Human Authority Does Not Imply Runtime Bypass and Human Agency First. Authority may change governance decisions but cannot rewrite observed production facts.
+
+## Validity Is Relational
+
+**Confirmed Architecture Principle:**
+
+> Validity is not a permanent intrinsic property carried by an object. It is a governed conclusion relative to specific production reality, versions, Context, dependencies, policies, and constraints.
+
+PWU Validity is relative to Production Validity Basis; Evidence Freshness to Verification Basis; Authority Decision validity to exact Candidate / Policy; Commit Eligibility to current Baseline and required obligations. This connects A's exact-revision state semantics, B's validity and reconciliation semantics, and the [C Completion & Trust closure](spg-completion-trust.md).
+
+The principle rejects `verified = true forever`, `approved = true forever`, `accepted = true forever`, and `valid = true forever`. It does not define a Materiality engine, Evidence dependency graph, policy implementation, or database representation.
+
+## Trust Is Obligation Satisfaction Before It Is a Score
+
+**Confirmed Architecture Principle:** Trusted Completion primarily means required Completion, Verification, Evidence freshness, Hard Gate, Authority, and blocking-condition obligations are satisfied for an exact Baseline Candidate.
+
+A future confidence or Trust Score may support prioritization, decision support, additional Verification, or Autonomy Policy. It cannot replace hard governance Contracts or become the authoritative Commit gate. Hard Gates block eligibility unless governed Exception is permitted; Soft Signals inform risk, confidence, routing, or review intensity without automatically blocking Commit.
+
+## Execution Capability Does Not Imply Side-effect Authority
+
+**Confirmed Architecture Principle:** Technical ability to deploy, migrate, publish, delete, provision, or mutate external systems does not grant authority to perform that effect. Material effects require explicit governed Intent, scoped Authorization, least Authority / blast radius, freshness, and provenance.
+
+Human Authority may authorize a governed effect but cannot bypass Runtime consistency or fabricate external facts. Attempt fencing must deny stale execution at the external-effect boundary.
+
+## External Reality Is Observed, Not Assumed
+
+**Confirmed Architecture Principle:** Command or API acknowledgement does not establish external convergence. Physical Change, Authoritative Production Change, and Observed External Reality remain distinct. Partial, Unknown, and Divergent external reality must be represented rather than guessed.
+
+Observed reality does not automatically become Trusted Production Reality. It must be compensated or enter the normal governed Plan / Verification / Authority / Commit path.
+
+## Compensation Appends History
+
+**Confirmed Architecture Principle:** Rollback and Compensation differ. Compensation is a new governed production action based on current observed reality; it preserves the original effect and may itself fail. Hidden cleanup and blind inverse operations are not governance.
+
+## Governed Integration Atomicity
+
+**Confirmed Architecture Principle:** Across independent systems without universal physical atomicity, coherent production governance is preserved by making intended external transitions identifiable, authorized, observable, reconcilable, and recoverable.
+
+This provides no invisible transition, unexplained partial state, silent Authority bypass, guessed external truth, or overwritten effect history. It does not promise simultaneous Git / Database / Cloud / external API changes, universal CAS, exactly-once delivery, 2PC, or one Commit / Effect ordering.
 
 ## Provider Consolidation Does Not Collapse Authority Boundaries
 
@@ -427,6 +496,35 @@ Trusted Production State
 ```
 
 Verification does not equal Acceptance. Trust requires evidence, governed admission, and the applicable authority decision.
+
+## Conversation-to-Contract Principle
+
+**Confirmed Architecture Principle:**
+
+> Raw conversation content is source material for extracting candidate engineering information, but it is never an authoritative execution basis.
+
+Execution authority requires governed transformation:
+
+```text
+Conversation
+→ extraction / refinement
+→ governed admission
+→ Artifact / Contract
+→ Context Package
+→ execution
+```
+
+`Raw Conversation → Executor` is prohibited as an authoritative execution dependency. Conversation may remain provenance for an admitted Artifact, audit evidence, Human review, interaction history, or later extraction. A PWU may depend on an admitted Decision derived from conversation; it must not depend directly on a raw chat message.
+
+Context Assembly / future ECF may include only admitted, versioned, traceable engineering inputs as task Authority. Conversation / Interaction Store records what was said; governed Engineering Artifacts record what was admitted; Production State records what is authoritative; Context Package records what execution may rely upon.
+
+This principle is concretized by the [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md).
+
+## Artifact-Agnostic Production and Horizon
+
+**Confirmed Implementation Guardrail:** SPG Lite Runtime must not require Code Artifact as the universal terminal for PWU Satisfaction, Plan Completion, Production Run Completion, Candidate formation, or Trusted Baseline formation.
+
+Production Horizon defines the authorized stopping boundary and Target Outcome of a Production Run. Production Planner may not extend work beyond that Horizon merely because downstream work is technically possible. Analysis, Design, Documentation, Implementation, and other admitted Artifact outcomes share the same governed Runtime semantics.
 
 ## Contract Before Implementation
 

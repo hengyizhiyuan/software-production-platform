@@ -20,7 +20,7 @@ This baseline:
 
 It does not define a database schema, class model, service decomposition, endpoint, event protocol, or implementation commitment.
 
-The [State Foundation Closure](spg-state-foundation.md) records confirmed runtime state / Commit semantics and 20 invariants under this baseline. The [Reconciliation & Recovery Closure](spg-reconciliation-recovery.md) now records B CLOSED, B1/B2/B3 CLOSED, B4 PASSED and 20 Recovery principles. Execution Lease, fencing, validity, and Recovery Barrier are logical semantics, not selected infrastructure. C. Completion & Trust is NEXT, NOT STARTED; D remains NOT STARTED. Architecture Baseline remains v0.1.
+[State Foundation](spg-state-foundation.md), [Reconciliation & Recovery](spg-reconciliation-recovery.md), [Completion & Trust](spg-completion-trust.md), and [Side-effect Governance](spg-side-effect-governance.md) record the closed A/B/C/D semantics. The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED, and the [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records Implementation Contract / Runtime MVP Design CLOSED and Coding Readiness PASS. External Effect and related D-layer concepts remain logical semantics rather than selected infrastructure. Architecture Baseline remains v0.1; the repository remains Greenfield.
 
 ## 2. Governing Principles
 
@@ -140,7 +140,7 @@ Production: exact Baseline Candidate → Authority Acceptance → Commit
 
 Every executable PWU binds to an explicit source Baseline and Plan Revision, not “the current plan”. After a PWU creates an Execution Attempt, its executable semantics cannot be silently rewritten. Material changes require explicit revision, replacement, or supersession; the final revision implementation mechanism is not frozen.
 
-Detailed completion remains for C. Completion & Trust, NEXT but NOT STARTED. The [closed B semantics](spg-reconciliation-recovery.md) govern failure/divergence, Resume/Retry, validity, supersession, and recovery: Resume preserves Attempt identity, Retry creates new history, and technically successful work can be STALE. Concrete lifecycle representation remains unselected; this does not fully redesign the PWU state machine.
+The [closed C semantics](spg-completion-trust.md) confirm that Produced and Satisfied differ; Satisfaction is adjudicated against a versioned PWU Completion Contract, not Executor self-report. The [closed B semantics](spg-reconciliation-recovery.md) govern failure/divergence, Resume/Retry, validity, supersession, and recovery. Concrete lifecycle representation remains unselected; these closures do not freeze a PWU state enum.
 
 ### 4.3 Context Package
 
@@ -221,7 +221,40 @@ The [closed State Foundation](spg-state-foundation.md) refines this minimum doma
 
 Commit Eligibility, Commit Authorization, and Commit Execution are distinct. Only successful Commit changes Current Trusted Baseline authority, after checking the expected source Baseline. Failure before the authoritative switch preserves the previous authority; derived-view or follow-up synchronization failure after the switch does not undo Commit.
 
-The confirmed core decomposition is Production Planner → Production Governance Runtime → Production State Projection, **logical responsibilities only**, not deployable services. These semantics do not finalize Production Issue representation, artifact taxonomy, Completion Contract placement, detailed lifecycle, schema, or API.
+The confirmed core decomposition is Production Planner → Production Governance Runtime → Production State Projection, **logical responsibilities only**, not deployable services. These semantics do not finalize Production Issue representation, artifact taxonomy, detailed lifecycle, schema, or API. The subsequent C closure confirms logical PWU / Plan Completion Contract placement and Output Obligation Manifest while deferring their physical representation.
+
+### 4.8 Confirmed Completion & Trust Semantics
+
+The [C closure](spg-completion-trust.md) confirms:
+
+- Execution Attempt Finished, Produced, Satisfied, Plan Complete, Trusted Completion, and Commit remain distinct.
+- Output Obligation Manifest describes REQUIRED, CONDITIONAL, and OPTIONAL output obligations; it is not a changed-file list.
+- Versioned PWU Completion Contract governs Satisfaction; Plan Completion Contract governs plan completion.
+- Verification PASS is contextual to a Verification Basis; Verification Artifact remains distinct from Guardian-qualified Evidence.
+- Evidence Quality and Freshness are separate. Baseline advancement triggers impact evaluation, not global invalidation.
+- Trusted Completion targets an exact Baseline Candidate and is obligation-based before any future score.
+- Commit Eligibility and Authorization differ. Human Final Acceptance is policy-driven; Required Authority must be satisfied.
+- Risk Acceptance / governed Exception may change permission but cannot rewrite facts, Findings, or Evidence.
+- Only successful Commit changes Trusted Production Reality.
+
+SPG coordinates Completion / Authority requirements and adjudicates transition eligibility. Guardian / Verification retains assurance truth, Evidence interpretation, Findings, Qualification, and Gate results. This does not require a full Guardian, Trust Graph, Evidence ontology, Policy DSL, approval engine, Trust Score, schema, API, or new MVP module.
+
+### 4.9 Confirmed Side-effect Governance Semantics
+
+The [D closure](spg-side-effect-governance.md) confirms:
+
+- External Side Effect crosses the disposable execution boundary; it is not any file mutation.
+- Physical, Authoritative Production, and Observed External Reality remain distinct.
+- Side-effect Intent, scoped Permit / Authorization, and stable Effect Operation Identity differ.
+- Execution capability does not grant Side-effect Authority; least Authority / blast radius and Attempt fencing extend to the external boundary.
+- External preconditions and Permit freshness are governed without requiring universal CAS.
+- Execution Retry differs from retrying delivery / observation of the same Effect Operation; SPG does not assume universal exactly-once execution.
+- Partial and Unknown External Reality remain explicit. API acknowledgement does not prove convergence.
+- External Reality Divergence reuses B reconciliation. Compensation is a new governed action based on current reality and appends history.
+- Governed Integration Atomicity preserves identity, Authority, observation, reconciliation, and recovery without universal physical atomicity.
+- Observed reality requires normal governed admission before becoming Trusted Production Reality.
+
+A thin future External Effect Record may preserve equivalent semantics, but no permanent Permit entity, Effect Group engine, Side-effect Gateway, Saga, 2PC, compensation engine, deployment platform, schema, API, or implementation is required by SPG Lite.
 
 ## 5. Autonomy and Authority Boundary
 
