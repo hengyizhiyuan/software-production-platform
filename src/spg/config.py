@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     runtime_profile: str = Field(default="local-fvs", min_length=1)
     repository_path: Path = Field(default_factory=Path.cwd)
     workspace_root: Path = Path(".spg/workspaces")
-    database_dsn: str | None = None
+    database_url: str | None = Field(
+        default=None,
+        pattern=r"^postgresql(?:\+psycopg)?://\S+$",
+        description="PostgreSQL URL supplied through SPG_DATABASE_URL",
+    )
     executor_adapter: str = "unconfigured"
-

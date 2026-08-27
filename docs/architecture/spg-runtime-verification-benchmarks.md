@@ -292,7 +292,7 @@ The [FVS-1 Governed Documentation Production Loop Contract](spg-fvs-1-implementa
 - real PostgreSQL/Git/filesystem/worktree semantics where those behaviors are claimed;
 - at least one controlled real Codex documentation dogfood run.
 
-This is **ADMITTED / NOT YET IMPLEMENTED / NOT YET PASSED**. It does not promote the broader benchmark, scoring, routing, pricing, or Capability Performance Profile directions. F3-D is CLOSED, but S1-A implements only project-foundation smoke tests; T01–T18 and Runtime invariant verification remain for later authorized slices.
+This is **ADMITTED / NOT YET IMPLEMENTED / NOT YET PASSED**. It does not promote the broader benchmark, scoring, routing, pricing, or Capability Performance Profile directions. F3-D is CLOSED. S1-B supplies DB-01–DB-06 persistence-foundation evidence only; T01–T18 and Runtime domain invariant verification remain for later authorized slices.
 
 ## 9. Status and Scope Guard
 

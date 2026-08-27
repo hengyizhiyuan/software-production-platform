@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1,<2",
+    "psycopg[binary]>=3,<4",
     "pydantic>=2,<3",
     "pydantic-settings>=2,<3",
     "sqlalchemy>=2,<3",
@@ -26,7 +27,9 @@ spg = "spg.cli:main"
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+markers = [
+    "postgresql: requires the explicitly configured real PostgreSQL test database",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-

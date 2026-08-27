@@ -61,7 +61,7 @@ each slice is verified before expansion
 
 > Ready for implementation does not mean ready for uncontrolled bulk generation.
 
-This Runtime-level document did not itself authorize the first implementation slice. F3-D subsequently closed, and the explicit S1-A task authorizes only the Runtime Project Foundation.
+This Runtime-level document did not itself authorize implementation slices. F3-D subsequently closed; explicit bounded tasks authorized S1-A and then S1-B without authorizing the Runtime domain lifecycle or later integrations.
 
 ## 3. Implementation reality evolution
 
@@ -79,20 +79,20 @@ Current implementation reality remains:
 
 | Area | Reality |
 | --- | --- |
-| SPG Runtime code | S1-A project foundation IMPLEMENTED; Runtime lifecycle NOT IMPLEMENTED |
+| SPG Runtime code | S1-A and S1-B CLOSED / PASS; Runtime lifecycle NOT IMPLEMENTED |
 | Runtime language/framework | Python 3.13.15 local validation; Modular Monolith foundation IMPLEMENTED; not a platform-wide mandate |
-| Database | PostgreSQL dependency/direction declared; no connection or schema |
-| ORM | SQLAlchemy 2.x dependency declared; no models/repositories |
-| Migration framework | Alembic dependency declared; no migration environment or revisions |
+| Database | Real PostgreSQL 17.6 development/test path and non-destructive connectivity check IMPLEMENTED; no Runtime schema |
+| ORM | SQLAlchemy 2.x engine/session, explicit Unit of Work, and optimistic update primitive IMPLEMENTED; no Runtime models/repositories |
+| Migration framework | Alembic environment IMPLEMENTED and load/connect validation PASS; no Runtime revisions |
 | API/CLI | CLI-first foundation IMPLEMENTED; no HTTP/Web API |
 | Executor Adapter | NOT IMPLEMENTED |
 | Context Assembly | NOT IMPLEMENTED |
 | Verification Provider | NOT IMPLEMENTED |
-| Tests | S1-A smoke foundation IMPLEMENTED; 5 tests PASS |
+| Tests | 5 S1-A tests PASS; 19 total tests PASS, including DB-01–DB-06 and Alembic against real PostgreSQL |
 | CI | NOT IMPLEMENTED |
 | Deployment | NOT IMPLEMENTED |
 
-This is **S1-A Foundation Reality**. It proves project startup only and is not permission to invent the unimplemented Runtime lifecycle.
+This is **S1-B Persistent Runtime Foundation CLOSED / PASS Reality**. It proves local persistence mechanics only and is not permission to invent the unimplemented Runtime lifecycle.
 
 ## 4. I1 — Minimal Runtime Contract and domain spine
 
@@ -636,4 +636,4 @@ F3-C. Executable Test & Failure Contract               REVIEWED / ADMITTED
 F3-D. FVS Coding Authorization Closure                 CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION
 ```
 
-S1-A Runtime Project Foundation is implemented with local validation PASS. The next governed step is Architecture Lead S1-A Reality Review; S1-B must not begin before that review and a stable Git checkpoint.
+S1-A Runtime Project Foundation and S1-B Persistent Runtime Foundation are CLOSED / PASS. S1-C Bootstrap Baseline & Minimal Durable Runtime Spine is NEXT — NOT STARTED. The next governed step is Architecture Lead confirmation of S1-B SOT closure followed by explicit S1-C authorization; this closure does not begin S1-C.

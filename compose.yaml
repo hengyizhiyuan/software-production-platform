@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: spg_test
+      POSTGRES_USER: spg
+      POSTGRES_PASSWORD: spg-local-dev
+    ports:
+      - "127.0.0.1:54329:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - spg-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  spg-postgres-data:

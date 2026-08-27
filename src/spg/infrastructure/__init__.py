@@ -1,2 +1,1 @@
-"""Infrastructure package boundary; persistence and Git integration are deferred."""
-
+"""Infrastructure package boundary; Git integration remains deferred."""

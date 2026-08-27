@@ -383,7 +383,13 @@ F3-D. FVS Coding Authorization Closure
     CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION
 
 S1-A. Runtime Project Foundation
-    IMPLEMENTED — LOCAL VALIDATION PASS
+    CLOSED / PASS
+
+S1-B. Persistent Runtime Foundation
+    CLOSED / PASS
+
+S1-C. Bootstrap Baseline & Minimal Durable Runtime Spine
+    NEXT — NOT STARTED
 ```
 
-S1-A implements only typed configuration and local project startup; it does not implement Runtime Profile resolution or provider adapters. The next governed step is Architecture Lead S1-A Reality Review; S1-B must not begin before that review.
+S1-A implements typed configuration and local project startup. S1-B adds PostgreSQL configuration and local persistence composition without implementing Runtime Profile resolution or provider adapters. The next governed step is explicit authorization of S1-C after S1-B SOT closure; this admission does not begin S1-C.

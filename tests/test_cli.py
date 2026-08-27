@@ -22,3 +22,12 @@ def test_cli_help_exits_successfully(capsys) -> None:
 
     assert result.value.code == 0
     assert "Software Production Governor runtime foundation" in capsys.readouterr().out
+
+
+def test_cli_database_check_requires_configuration(monkeypatch, capsys) -> None:
+    monkeypatch.delenv("SPG_DATABASE_URL", raising=False)
+
+    exit_code = main(["db", "check"])
+
+    assert exit_code == 1
+    assert "SPG_DATABASE_URL is required" in capsys.readouterr().err

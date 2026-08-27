@@ -11,6 +11,5 @@ def test_settings_load_from_environment(monkeypatch) -> None:
 
     assert settings.runtime_profile == "test-fvs"
     assert settings.repository_path == Path(".")
-    assert settings.database_dsn is None
+    assert settings.database_url is None
     assert settings.executor_adapter == "unconfigured"
-

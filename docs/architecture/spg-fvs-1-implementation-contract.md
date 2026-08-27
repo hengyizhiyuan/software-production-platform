@@ -22,9 +22,9 @@ It admits the reviewed F1, F2, F3-A, F3-B, and F3-C conclusions into Repository 
     F3-D. FVS Coding Authorization Closure
         CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION
 
-> FVS-1 is AUTHORIZED FOR CONTROLLED IMPLEMENTATION through explicitly bounded slice tasks. S1-A is the first authorized slice.
+> FVS-1 is AUTHORIZED FOR CONTROLLED IMPLEMENTATION through explicitly bounded slice tasks. S1-A and S1-B are CLOSED / PASS; S1-C is NEXT — NOT STARTED.
 
-Overall Implementation Governance remains **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. Authorization remains slice-bounded: S1-A permits only the Runtime project foundation and does not authorize Runtime lifecycle, persistence, provider execution, repository integration, containers, or dogfood execution.
+Overall Implementation Governance remains **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. Authorization remains slice-bounded: S1-B permits only the persistent Runtime foundation and local PostgreSQL provisioning. It does not authorize Runtime lifecycle, provider execution, repository integration, or dogfood execution.
 
 The contract uses these classifications:
 
@@ -36,7 +36,7 @@ The contract uses these classifications:
 | Confirmed Verification Contract | Mandatory executable scenario or invariant coverage obligation |
 | Implementation Guidance | Permitted physical shaping that may be refined without changing semantics |
 | Deferred Scope | Explicitly outside FVS-1 |
-| Authorization State | Implementation requires an explicit bounded slice; S1-A is authorized while later slices remain unauthorized |
+| Authorization State | Implementation requires an explicit bounded slice; S1-A and S1-B have been explicitly authorized while later slices remain unauthorized |
 
 ## 2. Slice identity and proof objective
 
@@ -825,26 +825,42 @@ FVS-1 is a controlled implementation refinement under v0.1; it does not incremen
 
 ## 38. Coding authorization closure and slice boundary
 
-Admission of this Contract provides governed Source-of-Truth authority for F1/F2/F3-A/F3-B/F3-C conclusions. The later explicit S1-A task closed F3-D for controlled, slice-bounded implementation.
+Admission of this Contract provides governed Source-of-Truth authority for F1/F2/F3-A/F3-B/F3-C conclusions. Explicit S1-A and S1-B tasks subsequently exercise that controlled, slice-bounded authorization.
 
     F3-D. FVS Coding Authorization Closure
         CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION
 
-S1-A permits Python project metadata, package boundaries, typed Settings, application Bootstrap, CLI, dependency declaration, and smoke tests only. It does not authorize the Runtime domain, PostgreSQL connection/schema, Executor, Git integration, Docker, or any deferred capability.
+S1-A permitted Python project metadata, package boundaries, typed Settings, application Bootstrap, CLI, dependency declaration, and smoke tests only. S1-B subsequently authorized PostgreSQL/SQLAlchemy/Alembic infrastructure and a PostgreSQL-only local Compose service, but no Runtime domain entity, production schema, Executor, Git integration, or deferred capability.
 
 ## 39. S1-A implementation reality
 
-S1-A Runtime Project Foundation is **IMPLEMENTED — LOCAL VALIDATION PASS**:
+S1-A Runtime Project Foundation is **CLOSED / PASS**:
 
 - CPython 3.13.15 was selected from the existing uv-managed local environment;
 - project compatibility is declared as Python 3.12 or newer without freezing a minor version;
 - pyproject.toml and uv.lock define the project and reproducible dependency set;
 - src/spg provides minimal Modular Monolith boundaries, typed environment Settings, explicit Bootstrap, and CLI-first startup;
 - five S1-A tests pass for import, Settings, Bootstrap, CLI status, and CLI help;
-- no Runtime lifecycle, database connection/schema/migration, Executor, Git mutation/integration, or Docker artifact exists.
+- its stable checkpoint authorized the next bounded persistence slice.
+
+## 40. S1-B implementation reality
+
+S1-B Persistent Runtime Foundation is **CLOSED / PASS**. The Architecture Lead independently reviewed and accepted the implementation Reality and its validation evidence:
+
+- Python 3.13.15 runs the existing Python 3.12+ project contract;
+- PostgreSQL 17.6 runs as the only Docker Compose service and is reached through `psycopg`;
+- typed `SPG_DATABASE_URL` configuration rejects non-PostgreSQL URLs and commits no real secret;
+- SQLAlchemy 2.x engine/session composition, explicit Unit of Work commit/rollback, disposal, and a reusable expected-version update primitive are implemented;
+- Alembic loads configuration through typed Settings and connects to PostgreSQL, with empty production metadata and no speculative Runtime revision;
+- the `spg db check` command provides non-destructive database reachability evidence while `spg status` remains database-independent;
+- test-only schema remains under integration tests and is created/cleaned without touching unrelated data;
+- DB-01 through DB-06 pass against real PostgreSQL; all 19 current tests pass, including the five S1-A regressions;
+- no Runtime domain lifecycle, Bootstrap Baseline, Executor, Git integration, or Runtime Commit is implemented.
+
+This admission changes implementation status only. It does not change Architecture Baseline v0.1, add an architecture requirement, or begin S1-C.
 
 The exact next governed step is:
 
-> Architecture Lead S1-A Reality Review → if PASS, establish a stable Git checkpoint and continue with S1-B Persistent Runtime Foundation.
+> Architecture Lead confirms S1-B SOT closure → authorize S1-C Bootstrap Baseline & Minimal Durable Runtime Spine.
 
-S1-B must not begin before that review.
+S1-C is NEXT — NOT STARTED and remains subject to explicit bounded authorization.

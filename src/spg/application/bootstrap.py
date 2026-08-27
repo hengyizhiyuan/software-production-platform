@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 
 from spg.config import Settings
+from spg.infrastructure.persistence import Database
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,9 +21,13 @@ class Application:
             "runtime_profile": self.settings.runtime_profile,
         }
 
+    def persistence(self) -> Database:
+        """Compose persistence explicitly without affecting foundation status."""
+
+        return Database.from_settings(self.settings)
+
 
 def bootstrap(settings: Settings | None = None) -> Application:
     """Construct the application explicitly from typed settings."""
 
     return Application(settings=settings or Settings())
-

@@ -230,7 +230,7 @@ Containerized packaging with Docker and Docker Compose is the preferred FVS/loca
 
 The [FVS-1 Governed Documentation Production Loop Contract](spg-fvs-1-implementation-contract.md) is ADMITTED under Baseline v0.1. It selects the bounded FVS technical foundation and records the real documentation-production loop, narrow Repository Integration protocol, and T01–T18 executable obligations.
 
-F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1-A Runtime Project Foundation is implemented with local validation PASS; S1-B remains pending Architecture Lead S1-A Reality Review.
+F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1-A Runtime Project Foundation and S1-B Persistent Runtime Foundation are CLOSED / PASS. S1-C Bootstrap Baseline & Minimal Durable Runtime Spine is NEXT — NOT STARTED.
 
 ## MVP Scope Boundary
 

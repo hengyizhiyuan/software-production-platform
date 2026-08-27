@@ -474,9 +474,9 @@ Architecture Baseline remains **v0.1** because the refinement clarified Runtime 
 
 The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records I1 Minimal Runtime Contract & Domain Spine CLOSED, I2 State Transition & Persistence Design CLOSED, I3 Capability Interfaces & End-to-End MVP Loop CLOSED, I4 Coding Readiness Closure PASSED, and Coding Readiness PASS.
 
-Implementation Governance is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1-A is the first explicitly authorized bounded slice.
+Implementation Governance is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1-A and S1-B are CLOSED / PASS; later slices still require explicit authorization.
 
-The repository has entered controlled implementation. S1-A implements the Python project/package foundation, typed Settings, explicit Bootstrap, CLI-first startup, dependency declarations, and pytest smoke tests. Runtime domain lifecycle, PostgreSQL connection/schema, ORM models, migrations, Executor, Git integration, and deployment remain unimplemented. These FVS choices are not platform-wide mandates.
+The repository has entered controlled implementation. S1-A implements the Python project/package foundation, typed Settings, explicit Bootstrap, CLI-first startup, dependency declarations, and pytest smoke tests. S1-B implements real PostgreSQL connectivity, generic SQLAlchemy persistence/transaction/concurrency infrastructure, Alembic infrastructure without a Runtime revision, and PostgreSQL-only local Compose provisioning. Runtime domain lifecycle/schema/models, Executor, Git integration, and Runtime Commit remain unimplemented. These FVS choices are not platform-wide mandates.
 
 ### Future Direction
 
@@ -489,7 +489,7 @@ A more complete SPG Governance State Preservation capability may explicitly main
 - Pending Decisions.
 - Next Valid Transition.
 
-The closed A/B/C/D records settle Runtime architecture semantics. The Runtime Implementation Contract remains CLOSED. F3-D is CLOSED and S1-A has local validation PASS. The next governed step is Architecture Lead S1-A Reality Review; S1-B remains unauthorized until that review.
+The closed A/B/C/D records settle Runtime architecture semantics. The Runtime Implementation Contract remains CLOSED. F3-D is CLOSED; S1-A and S1-B are CLOSED / PASS. S1-C is NEXT — NOT STARTED and requires explicit bounded authorization. This closure admission does not begin S1-C.
 
 ## 12. Future Directions
 
@@ -557,7 +557,7 @@ This baseline governs program-level system boundaries. Detailed documents remain
 - [SPG Lite Domain Model and Contract Boundary Baseline](spg-lite-domain-contract-baseline.md) records the current SPG Lite domain objects, autonomy boundary, Human Decision model, and capability-contract ownership.
 - [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records the closed I1–I4 design, Greenfield reality, Runtime spine, controlled implementation boundary, and first-wave invariants.
 - [Runtime Profile, Provider Placement, and Containerized Deployment](runtime-profile-provider-deployment.md) records provider binding, regional/enterprise profile, adapter, local-first, containerization, and future placement/residency boundaries.
-- [SPG FVS-1 — Governed Documentation Production Loop Implementation Contract](spg-fvs-1-implementation-contract.md) records the admitted slice contract, selected FVS technology, Repository Integration protocol, T01–T18 obligations, F3-D closure, and current S1-A foundation reality.
+- [SPG FVS-1 — Governed Documentation Production Loop Implementation Contract](spg-fvs-1-implementation-contract.md) records the admitted slice contract, selected FVS technology, Repository Integration protocol, T01–T18 obligations, F3-D closure, and current S1-A/S1-B foundation reality.
 - [SPG Core Architecture Model](SPG_Core_Architecture_Model.md) details SPG concepts and future directions.
 - [SPG State Foundation Closure](spg-state-foundation.md), [SPG Reconciliation & Recovery Closure](spg-reconciliation-recovery.md), [SPG Completion & Trust Closure](spg-completion-trust.md), and [SPG Side-effect Governance Closure](spg-side-effect-governance.md) record the closed A/B/C/D semantics and their respective 20-invariant sets under v0.1.
 - [Runtime Findings Review](spg-runtime-findings-review.md) preserves the discovery scope and current agenda.
