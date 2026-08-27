@@ -11,6 +11,8 @@ from spg.infrastructure.persistence.database import (
     configured_database_url,
 )
 from spg.infrastructure.persistence.metadata import metadata
+from spg.infrastructure.persistence.runtime_schema import runtime_tables
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.unit_of_work import UnitOfWork
 
 __all__ = [
@@ -18,8 +20,10 @@ __all__ = [
     "DatabaseConfigurationError",
     "DatabaseHealth",
     "OptimisticConcurrencyConflict",
+    "RuntimeStore",
     "UnitOfWork",
     "configured_database_url",
     "metadata",
+    "runtime_tables",
     "update_versioned_row",
 ]

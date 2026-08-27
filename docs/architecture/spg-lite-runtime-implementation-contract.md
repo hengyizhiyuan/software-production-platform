@@ -79,7 +79,7 @@ Current implementation reality remains:
 
 | Area | Reality |
 | --- | --- |
-| SPG Runtime code | S1-A and S1-B CLOSED / PASS; Runtime lifecycle NOT IMPLEMENTED |
+| SPG Runtime code | S1-A, S1-B, and S1-C CLOSED / PASS |
 | Runtime language/framework | Python 3.13.15 local validation; Modular Monolith foundation IMPLEMENTED; not a platform-wide mandate |
 | Database | Real PostgreSQL 17.6 development/test path and non-destructive connectivity check IMPLEMENTED; no Runtime schema |
 | ORM | SQLAlchemy 2.x engine/session, explicit Unit of Work, and optimistic update primitive IMPLEMENTED; no Runtime models/repositories |
@@ -636,4 +636,4 @@ F3-C. Executable Test & Failure Contract               REVIEWED / ADMITTED
 F3-D. FVS Coding Authorization Closure                 CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION
 ```
 
-S1-A Runtime Project Foundation and S1-B Persistent Runtime Foundation are CLOSED / PASS. S1-C Bootstrap Baseline & Minimal Durable Runtime Spine is NEXT — NOT STARTED. The next governed step is Architecture Lead confirmation of S1-B SOT closure followed by explicit S1-C authorization; this closure does not begin S1-C.
+S1-A Runtime Project Foundation, S1-B Persistent Runtime Foundation, and S1-C Bootstrap Baseline & Minimal Durable Runtime Spine are CLOSED / PASS. The FVS-1 Contract records S2, S2-A, and S2-B CLOSED / PASS. S3 is NEXT / NOT STARTED and is not authorized.

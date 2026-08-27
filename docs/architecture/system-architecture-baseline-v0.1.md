@@ -474,9 +474,9 @@ Architecture Baseline remains **v0.1** because the refinement clarified Runtime 
 
 The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records I1 Minimal Runtime Contract & Domain Spine CLOSED, I2 State Transition & Persistence Design CLOSED, I3 Capability Interfaces & End-to-End MVP Loop CLOSED, I4 Coding Readiness Closure PASSED, and Coding Readiness PASS.
 
-Implementation Governance is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1-A and S1-B are CLOSED / PASS; later slices still require explicit authorization.
+Implementation Governance is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1, S1-A, S1-B, S1-C, S2, S2-A, and S2-B are CLOSED / PASS. S3 is NEXT / NOT STARTED and is not authorized.
 
-The repository has entered controlled implementation. S1-A implements the Python project/package foundation, typed Settings, explicit Bootstrap, CLI-first startup, dependency declarations, and pytest smoke tests. S1-B implements real PostgreSQL connectivity, generic SQLAlchemy persistence/transaction/concurrency infrastructure, Alembic infrastructure without a Runtime revision, and PostgreSQL-only local Compose provisioning. Runtime domain lifecycle/schema/models, Executor, Git integration, and Runtime Commit remain unimplemented. These FVS choices are not platform-wide mandates.
+The repository has entered controlled implementation. S1-A implements the Python project/package foundation, typed Settings, explicit application composition, CLI-first startup, dependency declarations, and pytest smoke tests. S1-B implements real PostgreSQL connectivity, generic SQLAlchemy persistence/transaction/concurrency infrastructure, Alembic infrastructure, and PostgreSQL-only local Compose provisioning. S1-C implements the bounded durable Runtime identity/lineage spine, explicit Bootstrap Trusted Baseline admission, read-only exact Git observation, Governance Record, Transition History, and Attempt generation foundation. S2-A implements Context Package Lite and exact Attempt preparation. S2-B implements provider-neutral governed dispatch, Provider Report persistence, independent worktree observation, and observed Work Product References. Completion evaluation, Verification, Candidate Governance, Repository Integration, and Runtime Candidate Commit remain unimplemented. These FVS choices are not platform-wide mandates.
 
 ### Future Direction
 
@@ -489,7 +489,7 @@ A more complete SPG Governance State Preservation capability may explicitly main
 - Pending Decisions.
 - Next Valid Transition.
 
-The closed A/B/C/D records settle Runtime architecture semantics. The Runtime Implementation Contract remains CLOSED. F3-D is CLOSED; S1-A and S1-B are CLOSED / PASS. S1-C is NEXT — NOT STARTED and requires explicit bounded authorization. This closure admission does not begin S1-C.
+The closed A/B/C/D records settle Runtime architecture semantics. The Runtime Implementation Contract remains CLOSED. F3-D is CLOSED; S1, S1-A, S1-B, S1-C, S2, S2-A, and S2-B are CLOSED / PASS. S3 is NEXT / NOT STARTED and is not authorized.
 
 ## 12. Future Directions
 

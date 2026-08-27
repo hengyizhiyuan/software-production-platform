@@ -3,6 +3,9 @@
 from dataclasses import dataclass
 
 from spg.config import Settings
+from spg.application.runtime import RuntimeService
+from spg.application.preparation import PreparationService
+from spg.application.execution import ExecutionService
 from spg.infrastructure.persistence import Database
 
 
@@ -25,6 +28,23 @@ class Application:
         """Compose persistence explicitly without affecting foundation status."""
 
         return Database.from_settings(self.settings)
+
+    def runtime(self, database: Database | None = None) -> RuntimeService:
+        """Compose governed Runtime operations over explicit persistence."""
+
+        return RuntimeService(database or self.persistence())
+
+    def preparation(self, database: Database | None = None) -> PreparationService:
+        """Compose S2-A preparation without composing or dispatching an Executor."""
+
+        return PreparationService(database or self.persistence())
+
+    def execution(self, database: Database | None = None) -> ExecutionService:
+        """Compose S2-B Runtime orchestration without selecting a real provider."""
+
+        selected_database = database or self.persistence()
+        preparation = PreparationService(selected_database)
+        return ExecutionService(selected_database, preparation=preparation)
 
 
 def bootstrap(settings: Settings | None = None) -> Application:

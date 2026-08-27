@@ -2,7 +2,7 @@
 
 This repository contains the controlled implementation of the Software Production Governor Runtime.
 
-The current implementation includes the FVS-1 project and persistent Runtime foundations. Runtime domain lifecycle, Executor integration, repository integration, and Runtime Commit are not implemented.
+The current implementation includes the FVS-1 project and persistence foundations, the S1-C minimum durable Runtime spine, and the closed S2 governed artifact-production path: S2-A Context Package / Attempt preparation plus S2-B governed dispatch, provider-report, independent observation, and Work Product References. S3 Completion evaluation, Verification/Qualification, Candidate governance, Repository Integration, and Runtime Candidate Commit are not implemented or started.
 
 ## Local setup
 
@@ -24,7 +24,17 @@ Start the development/test PostgreSQL service and configure the explicit databas
 Check non-destructive PostgreSQL connectivity and Alembic configuration:
 
     uv run spg db check
+    uv run alembic upgrade head
     uv run alembic current
+
+The governed Runtime commands are explicit:
+
+    uv run spg bootstrap --repository-path /path/to/clean/repository --repository-identity repo:example --repository-ref refs/heads/main --authority-identity authority:example
+    uv run spg baseline show
+    uv run spg run create --intent-ref intent:example --goal "Update documentation" --horizon DOCUMENTATION --pwu-objective "Produce the update" --completion-contract completion-contract.json
+    uv run spg run inspect RUN_UUID
+
+Bootstrap observes a clean repository and exact commit through read-only Git commands. It never silently admits the current working directory or dynamic `HEAD` as the Trusted Baseline.
 
 Run tests:
 
@@ -34,4 +44,4 @@ Stop PostgreSQL when it is no longer needed:
 
     docker compose down
 
-The Compose credentials are local development values only. No Runtime domain tables or substantive Alembic revision exist yet; the first Runtime schema migration is deferred to its authorized slice.
+The Compose credentials are local development values only. Alembic revision `20260827_01` owns the eight S1-C Runtime tables, `20260828_02` adds the two S2-A preparation tables, and `20260828_03` adds the four S2-B dispatch/report/observation/reference tables.

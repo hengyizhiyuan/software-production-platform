@@ -147,7 +147,7 @@ def test_db_06_optimistic_version_conflict(
     assert record.version == 1
 
 
-def test_alembic_environment_connects_without_runtime_schema(
+def test_alembic_environment_reports_s1c_migration_head(
     postgres_database: Database,
     monkeypatch,
 ) -> None:
@@ -155,4 +155,6 @@ def test_alembic_environment_connects_without_runtime_schema(
     monkeypatch.setenv("SPG_DATABASE_URL", database_url)
     project_root = Path(__file__).resolve().parents[2]
 
-    command.current(Config(project_root / "alembic.ini"))
+    config = Config(project_root / "alembic.ini")
+    command.upgrade(config, "head")
+    command.current(config, check_heads=True)

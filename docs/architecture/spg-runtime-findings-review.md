@@ -69,7 +69,7 @@ The reported prior work includes Responsibility Boundary Review, PWU Lifecycle D
 | F3-D. FVS Coding Authorization Closure | CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
 | S1-A. Runtime Project Foundation | CLOSED / PASS |
 | S1-B. Persistent Runtime Foundation | CLOSED / PASS |
-| S1-C. Bootstrap Baseline & Minimal Durable Runtime Spine | NEXT — NOT STARTED |
+| S1-C. Bootstrap Baseline & Minimal Durable Runtime Spine | CLOSED / PASS |
 
 ### Validated logical flow
 
@@ -330,9 +330,9 @@ SPG additionally deals with persistent artifacts and external side effects, requ
 | C. Completion & Trust | CLOSED; C1/C2/C3 CLOSED; C4 PASSED | Output Obligation Manifest; PWU/Plan Completion Contracts; Produced/Satisfied; Verification Basis; Evidence Freshness; Trusted Completion; exact Candidate Authority |
 | D. Side-effect Governance | CLOSED; D1/D2/D3 CLOSED; D4 PASSED | External Side Effect; Intent / Permit / Operation Identity; fencing; External Reality; Compensation; Governed Integration Atomicity |
 
-**Current next governed step: Architecture Lead confirms S1-B SOT closure → authorize S1-C Bootstrap Baseline & Minimal Durable Runtime Spine.**
+**Current next governed step: Architecture Lead confirms S2 SOT closure → define the bounded S3 contract for Completion evaluation, Verification/Qualification, Candidate formation, and Governance.**
 
-The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED, and the [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. S1-A and S1-B are CLOSED / PASS. Runtime lifecycle and later slices remain outside this findings record. Future benchmark candidates do not reopen the frozen discovery scope.
+The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED, and the [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. S1-A, S1-B, and S1-C are CLOSED / PASS; later slices remain outside this findings record. Future benchmark candidates do not reopen the frozen discovery scope.
 
 ## 7. SPG Core Logical Responsibility Model — Confirmed
 
@@ -387,4 +387,4 @@ The former hypothesis/candidate labels and simplified PWU Acceptance path are ex
 
 This record does not expand MVP scope or create Feature IDs, production code, runtime modules, database schemas, or APIs. Confirmed semantics do not require Event Sourcing, distributed transactions, a distributed state store, complex workflow engine, graph database, distributed locking, Production State Branching, or microservices. Guardian and ECF are not redesigned.
 
-A/B/C/D and Runtime Architecture Refinement are CLOSED; Runtime Architecture Readiness is PASS; the Runtime Implementation Contract is CLOSED; Coding Readiness is PASS. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) records F3-D CLOSED and S1-A/S1-B CLOSED / PASS. S1-C is NEXT — NOT STARTED and requires explicit authorization; remaining candidates and deferred mechanisms retain their labels.
+A/B/C/D and Runtime Architecture Refinement are CLOSED; Runtime Architecture Readiness is PASS; the Runtime Implementation Contract is CLOSED; Coding Readiness is PASS. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) records F3-D CLOSED and S1-A/S1-B/S1-C CLOSED / PASS. Remaining candidates and deferred mechanisms retain their labels.

@@ -22,9 +22,9 @@ It admits the reviewed F1, F2, F3-A, F3-B, and F3-C conclusions into Repository 
     F3-D. FVS Coding Authorization Closure
         CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION
 
-> FVS-1 is AUTHORIZED FOR CONTROLLED IMPLEMENTATION through explicitly bounded slice tasks. S1-A and S1-B are CLOSED / PASS; S1-C is NEXT — NOT STARTED.
+> FVS-1 is AUTHORIZED FOR CONTROLLED IMPLEMENTATION through explicitly bounded slice tasks. S1-A, S1-B, and S1-C are CLOSED / PASS.
 
-Overall Implementation Governance remains **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. Authorization remains slice-bounded: S1-B permits only the persistent Runtime foundation and local PostgreSQL provisioning. It does not authorize Runtime lifecycle, provider execution, repository integration, or dogfood execution.
+Overall Implementation Governance remains **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. Authorization remains slice-bounded: S1-C permits only Bootstrap Baseline and the minimum durable Runtime identity/lineage spine. It does not authorize provider execution, artifact production, repository integration, or dogfood execution.
 
 The contract uses these classifications:
 
@@ -36,7 +36,7 @@ The contract uses these classifications:
 | Confirmed Verification Contract | Mandatory executable scenario or invariant coverage obligation |
 | Implementation Guidance | Permitted physical shaping that may be refined without changing semantics |
 | Deferred Scope | Explicitly outside FVS-1 |
-| Authorization State | Implementation requires an explicit bounded slice; S1-A and S1-B have been explicitly authorized while later slices remain unauthorized |
+| Authorization State | Implementation requires an explicit bounded slice; S1-A, S1-B, and S1-C have been explicitly authorized while later slices remain unauthorized |
 
 ## 2. Slice identity and proof objective
 
@@ -825,7 +825,7 @@ FVS-1 is a controlled implementation refinement under v0.1; it does not incremen
 
 ## 38. Coding authorization closure and slice boundary
 
-Admission of this Contract provides governed Source-of-Truth authority for F1/F2/F3-A/F3-B/F3-C conclusions. Explicit S1-A and S1-B tasks subsequently exercise that controlled, slice-bounded authorization.
+Admission of this Contract provides governed Source-of-Truth authority for F1/F2/F3-A/F3-B/F3-C conclusions. Explicit S1-A, S1-B, and S1-C tasks subsequently exercise that controlled, slice-bounded authorization.
 
     F3-D. FVS Coding Authorization Closure
         CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION
@@ -857,10 +857,204 @@ S1-B Persistent Runtime Foundation is **CLOSED / PASS**. The Architecture Lead i
 - DB-01 through DB-06 pass against real PostgreSQL; all 19 current tests pass, including the five S1-A regressions;
 - no Runtime domain lifecycle, Bootstrap Baseline, Executor, Git integration, or Runtime Commit is implemented.
 
-This admission changes implementation status only. It does not change Architecture Baseline v0.1, add an architecture requirement, or begin S1-C.
+That S1-B closure admission changed implementation status only and did not change Architecture Baseline v0.1. A subsequent explicit bounded task authorized S1-C; its current result is recorded below.
+
+## 41. S1-C implementation reality
+
+S1-C Bootstrap Baseline & Minimal Durable Runtime Spine is **CLOSED / PASS**. Architecture Lead Reality Review accepted the repository evidence with zero architecture blockers, zero implementation blockers, and no scope leakage.
+
+The implementation adds one substantive Alembic revision with exactly the admitted Snapshot, Current Trusted Baseline Pointer, Run, Plan Revision, PWU, Execution Attempt, Governance Record, and Transition History tables. An explicit application operation observes a clean repository and exact commit through read-only Git, then atomically admits Bootstrap Snapshot B0, authority provenance, pointer, and history. A deterministic application path atomically constructs an OPEN Documentation Run, active Plan Revision 1, and PROPOSED generic PWU with a typed durable Completion Contract. Lower-level application operations create immutable Attempt identities, advance retry generations, and detect stale Attempts without dispatching an Executor.
+
+RS-01 through RS-17 pass against PostgreSQL 17.6 and ephemeral real Git repositories. The full suite passes **40/40**, retaining the accepted S1-A and S1-B evidence and adding an end-to-end bounded CLI proof. No Executor, Work Product, Completion evaluation, Verification, Candidate, Repository Integration, Runtime Candidate Commit, deferred schema, or active-development-repository bootstrap was introduced.
+
+Architecture Baseline remains **v0.1**. S1 is CLOSED / PASS. The subsequently admitted S2 stage and its current implementation Reality are defined below.
+
+## 42. S2 Governed Artifact Production stage contract
+
+This section records the reviewed implementation-stage decomposition admitted into Repository Source of Truth. At contract-definition admission time it did not authorize or begin S2-A or S2-B implementation; subsequent governed implementation Reality is recorded in Sections 43 and 44.
+
+```text
+S2 — Governed Artifact Production
+    CLOSED / PASS
+
+S2-A — Context & Execution Preparation Foundation
+    CLOSED / PASS
+
+S2-B — Isolated Execution & Independent Artifact Observation
+    CLOSED / PASS
+```
+
+S2 connects durable PWU state to governed artifact production while preserving the separation between execution preparation, actual execution, independent observation, completion evaluation, Verification, and trust. Its bounded outcome is:
+
+```text
+PWU
+↓
+prepared executable Attempt
+↓
+isolated execution
+↓
+independently observed Work Product References
+```
+
+S2 does not determine Completion Contract satisfaction, Verification, Candidate eligibility, Trusted Baseline advancement, or Repository Integration.
+
+### 42.1 S2-A — Context and execution preparation
+
+S2-A owns preparation prerequisites only:
+
+- **Context Package Lite:** a durable, versioned execution context assembled from admitted engineering artifacts. It binds the relevant Source Trusted Baseline, approved documents and constraints, Completion Contract, and repository reality. It preserves the future ECF ownership boundary; it is not a replacement for ECF.
+- **Executor Capability Contract:** SPG Runtime depends on a provider-neutral Executor Capability Contract, which is implemented by an Executor Adapter bound to an actual provider or tool. SPG Core does not depend directly on Codex, OpenAI, or model identity.
+- **Attempt Preparation:** a prepared Attempt binds the exact PWU, Plan Revision, Source Trusted Baseline, Context Package, Executor binding, isolated workspace, and current execution generation.
+- **Isolated Workspace:** the FVS-1 preference is an Attempt-specific Git worktree derived from exact repository reality. A later Executor may mutate only the Attempt workspace and may not mutate authoritative repository refs.
+- **Execution readiness:** PWU existence is not execution readiness. Readiness requires the implemented preparation prerequisites; S2-A does not dispatch the Executor.
+
+```text
+Raw Conversation
+MUST NOT
+directly become Executor Context
+```
+
+### 42.2 S2-B — Isolated execution and independent observation
+
+S2-B owns the actual bounded dispatch and observation lifecycle after S2-A produces an execution-ready Attempt:
+
+- **Governed Dispatch:** Attempt identity and applicable prepared state must already be durable before provider dispatch.
+- **Provider Report:** Executor/provider self-report is an observation or claim, not Production Truth.
+- **Independent Repository / Artifact Observation:** SPG independently observes Attempt workspace reality, including applicable added, modified, and deleted files; exact repository/tree reality; artifact existence; and unexpected mutations. Observation does not depend solely on Executor prose.
+- **Work Product References:** references derive from independently observed reality and preserve lineage to the Run, PWU, Attempt, Plan Revision, Source Baseline, workspace/repository reality, and observed artifact.
+- **False-success foundation:** S2-B makes the state “Executor reports SUCCESS but a required artifact is absent” observable without deciding Completion Contract satisfaction.
+
+```text
+Executor SUCCESS
+!=
+Production Truth
+```
+
+The admitted dependency is:
+
+```text
+Durable PWU
+↓
+S2-A:
+Context Package Lite
++ Executor Capability Binding
++ Attempt Preparation
++ Isolated Workspace
+↓
+Execution-ready Attempt
+↓
+S2-B:
+Dispatch
++ Provider Report
++ Independent Repository / Artifact Observation
+↓
+Observed Work Product References
+```
+
+### 42.3 Explicit S2 boundaries
+
+1. S2-A does not dispatch an Executor.
+2. PWU existence alone does not imply `READY` or execution readiness.
+3. S2-B owns the actual dispatch and observe lifecycle.
+4. Provider self-report is not Production Truth.
+5. Work Product References derive from independent observation.
+6. Work Product observation does not imply Completion.
+7. Completion evaluation remains later.
+8. Verification remains later.
+9. Candidate formation and Trusted Baseline advancement remain later.
+10. Repository Integration remains later.
+11. An Executor cannot mutate authoritative repository refs.
+12. A stale Attempt generation cannot regain current execution authority.
+13. Production Horizon `DOCUMENTATION` remains valid without Code Artifact assumptions.
+14. Context Package Lite preserves the future ECF ownership boundary.
+15. The Executor Capability Contract remains provider-neutral.
+
+### 42.4 Governed implementation sequence
+
+```text
+S1 — Runtime Foundation & Persistent Spine
+    CLOSED / PASS
+
+S2 — Governed Artifact Production
+    S2-A — Context & Execution Preparation Foundation
+    S2-B — Isolated Execution & Independent Artifact Observation
+
+S3 — Verification / Candidate / Governance
+S4 — Repository Integration & Runtime Commit
+S5 — Failure / Recovery Hardening
+S6 — Real Codex Dogfood & FVS Closure
+```
+
+S3 through S6 are boundary labels only; this admission does not redefine or authorize them. Current implementation Reality is recorded below.
+
+## 43. S2-A implementation reality
+
+At S2-A closure, S2 was **IN PROGRESS**, S2-A Context & Execution Preparation Foundation was **CLOSED / PASS**, and S2-B was recorded as **NEXT / NOT STARTED**. Architecture Lead Reality Review accepted the S2-A repository evidence with zero architecture blockers, zero implementation blockers, and no scope leakage. Subsequent S2-B implementation and S2 closure Reality is recorded in Section 44.
+
+Alembic revision `20260828_02` adds exactly two S2-A production tables: immutable/versioned `context_packages` and one authoritative `attempt_preparations` binding per Attempt. No Work Product, Verification, Candidate, Production Issue, External Effect, or Provider Registry table was added.
+
+Context Package Lite is an execution-facing FVS projection rather than SPG ownership of universal Engineering Context. It records exact PWU/Run/Plan/Source Baseline lineage, a typed repository-artifact manifest with semantic role/path/source revision/blob identity, a stable package fingerprint, and the exact Completion Contract fingerprint. Assembly reads blobs from the Source Baseline commit rather than mutable HEAD or the working tree. The typed input has no raw-conversation path; material context change produces a new package identity/version, while identical assembly is idempotent.
+
+The provider-neutral Executor Capability Contract defines a future dispatch boundary but S2-A provides no adapter and makes no dispatch call. Attempt preparation binds the exact Context Package, capability/profile binding, generation, repository identity, Source Baseline revision, and stable Attempt-specific detached Git worktree. The worktree is created outside the authoritative working tree from the exact Source Baseline without moving an authoritative ref. Existing matching workspace Reality is reconciled after failure; mismatched or stale preparation is rejected.
+
+No unsupported PWU or Attempt lifecycle condition was introduced. PWU remains `PROPOSED`, Attempt remains `CREATED`, and execution readiness is represented by the durable preparation binding plus a revalidating `is_execution_ready` predicate. Transition History records Context Package assembly and Attempt preparation without rewriting Attempt history.
+
+S2A-01 through S2A-18 pass using PostgreSQL 17.6, ephemeral real Git repositories, and real Git worktrees. The prior S1 regression suite remains **40/40 PASS**, and the full suite is **61/61 PASS**. Migration downgrade to `20260827_01` and re-upgrade to `20260828_02` pass.
+
+No Executor dispatch, deterministic Test Executor execution, Work Product, post-execution Artifact Observation, Completion evaluation, Verification, Candidate, Repository Integration, or Runtime Commit was implemented.
+
+The governed handoff recorded at S2-A closure was:
+
+> Architecture Lead confirms S2-A SOT closure → authorize S2-B Isolated Execution & Independent Artifact Observation.
+
+## 44. S2-B implementation reality
+
+S2-B Isolated Execution & Independent Artifact Observation is **CLOSED / PASS**. Together, S2-A and S2-B satisfy the admitted S2 Governed Artifact Production contract, so S2 is **CLOSED / PASS**. S1 and S2-A remain CLOSED / PASS. S3 is **NEXT / NOT STARTED** and is not authorized.
+
+Alembic revision `20260828_03` adds exactly four S2-B production tables: `execution_dispatches`, `provider_execution_reports`, `repository_observations`, and `work_product_references`. No Completion, Verification, Candidate, Production Issue, Repository Integration, Runtime Commit, External Effect, Provider Registry, or deferred-capability table was added.
+
+Runtime revalidates the complete relational S2-A preparation binding under current-generation control, persists a stable dispatch identity/fact before invoking the provider-neutral Executor Capability Contract, and rejects duplicate normal dispatch for the same Attempt. The Deterministic Test Executor implements that same capability contract through structured file operations and makes no Codex, OpenAI, model, prompt, or raw-conversation dependency part of SPG Core.
+
+Provider output is normalized and durably recorded with exact dispatch, Attempt, generation, Executor Binding, provider reference, reported outcome, timestamps, metadata, and summary lineage. A Provider `SUCCESS` remains only a claim and has no path to Completion, PWU `PRODUCED` / `SATISFIED`, Verification, Candidate, Trusted Baseline, or Repository Integration authority.
+
+After provider execution, SPG independently inspects the real Attempt worktree relative to its exact Source Baseline. It preserves added, modified, deleted, and no-change Reality using structured manifests and exact Git blob identities where applicable. One stable observation fingerprint makes identical re-observation idempotent; a changed workspace after authoritative observation is rejected rather than silently rewriting history. Authoritative repository refs are observed before dispatch and required to remain unchanged through observation.
+
+Work Product References are created only from independently observed change entries. Each reference preserves Run, PWU, Plan Revision, Attempt, generation, Source Baseline, Repository Observation, artifact path/change type, and source/observed fingerprint lineage. Deletions remain first-class factual changes without requiring current content.
+
+No newly authorized Attempt lifecycle condition was available for actual dispatch/finish. S2-B therefore leaves PWU at `PROPOSED` and Attempt at `CREATED`, while preserving dispatch, report, and observation as independent appended facts. This is a bounded implementation Reality finding rather than a silent `ACTIVE` / `SUCCEEDED` / `FAILED` enum expansion. A stale post-execution generation retains its report, observation, and Work Product history but gains no current PWU authority.
+
+The explicit local ordering is preparation persisted → dispatch fact persisted → provider execution → Provider Report persisted → independent observation and Work Product References persisted. It does not claim a global PostgreSQL/provider/filesystem/Git transaction or exactly-once provider execution. General crash/`UNKNOWN` reconciliation across these boundaries remains S5 work.
+
+S2B-01 through S2B-19 and the S2-B migration validation pass against PostgreSQL 17.6, ephemeral real Git repositories, and real Attempt worktrees. S2B-20 Existing Regression is satisfied by the retained S1-A **5/5**, S1-B **14/14**, S1-C **21/21**, and S2-A **21/21** results. The full suite is **81/81 PASS**. Downgrade to `20260828_02` and re-upgrade to `20260828_03` pass.
+
+The factual combinations Provider `SUCCESS` with expected work absent, Provider `SUCCESS` with unrelated work, Provider `SUCCESS` with no workspace change, and Provider `FAILURE` with real artifact changes are executable and durable. None is converted into a Completion judgment in S2-B.
+
+The accepted S2 path is:
+
+```text
+Durable PWU
+↓
+Context Package Lite
+↓
+Executor Capability Binding
+↓
+Attempt-specific isolated workspace
+↓
+execution-readiness revalidation
+↓
+Runtime-controlled dispatch
+↓
+Provider Report
+↓
+independent Repository / Artifact Observation
+↓
+Observed Work Product References
+```
+
+The closure preserves `Provider SUCCESS != Observed Work Product != PWU Produced != PWU Satisfied != Verification PASS != Trusted Baseline`. Execution Reality remains represented by append-oriented Attempt, Preparation Binding, Dispatch Fact, Provider Report, Repository Observation, and Work Product Reference facts without adding unauthorized `PREPARED`, `RUNNING`, or `FINISHED` Attempt states. Provider Report and independently observed repository Reality remain separate dimensions. No arbitrary-crash exactly-once execution is claimed; general cross-system reconciliation/recovery remains later work.
+
+The next bounded stage is the trust path from observed Work Product Reality through Completion evaluation, PWU Produced/Satisfaction semantics, Verification/Qualification, and Candidate/Governance. This closure records S3 only as **NEXT / NOT STARTED** and does not authorize or define its implementation.
 
 The exact next governed step is:
 
-> Architecture Lead confirms S1-B SOT closure → authorize S1-C Bootstrap Baseline & Minimal Durable Runtime Spine.
-
-S1-C is NEXT — NOT STARTED and remains subject to explicit bounded authorization.
+> Architecture Lead confirms S2 SOT closure → define the bounded S3 contract for Completion evaluation, Verification/Qualification, Candidate formation, and Governance.

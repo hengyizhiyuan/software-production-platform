@@ -389,7 +389,7 @@ S1-B. Persistent Runtime Foundation
     CLOSED / PASS
 
 S1-C. Bootstrap Baseline & Minimal Durable Runtime Spine
-    NEXT — NOT STARTED
+    CLOSED / PASS
 ```
 
-S1-A implements typed configuration and local project startup. S1-B adds PostgreSQL configuration and local persistence composition without implementing Runtime Profile resolution or provider adapters. The next governed step is explicit authorization of S1-C after S1-B SOT closure; this admission does not begin S1-C.
+S1-A implements typed configuration and local project startup. S1-B adds PostgreSQL configuration and local persistence composition. S1-C adds the bounded durable Runtime spine and read-only exact Git observation. S2-A adds a provider-neutral Executor capability/profile binding and preparation request. S2-B implements governed dispatch through that provider-neutral boundary with a Deterministic Test Executor, independent repository observation, and Work Product References. S2, S2-A, and S2-B are CLOSED / PASS. S3 is NEXT / NOT STARTED and is not authorized. Real Codex/model execution and Runtime Profile administration remain later work.

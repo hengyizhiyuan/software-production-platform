@@ -41,7 +41,7 @@ It means:
 
 > Enough architecture is stable to implement the next governed iteration safely.
 
-The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) closes the next governed design stage with Coding Readiness PASS. The later [FVS-1 Contract](spg-fvs-1-implementation-contract.md) admits the slice and records F3-D CLOSED. S1-A Runtime Project Foundation and S1-B Persistent Runtime Foundation are CLOSED / PASS; S1-C is NEXT — NOT STARTED.
+The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) closes the next governed design stage with Coding Readiness PASS. The later [FVS-1 Contract](spg-fvs-1-implementation-contract.md) admits the slice and records F3-D CLOSED. S1-A Runtime Project Foundation, S1-B Persistent Runtime Foundation, and S1-C Bootstrap Baseline & Minimal Durable Runtime Spine are CLOSED / PASS.
 
 Neither closure record nor the later Runtime Profile clarification independently authorizes implementation.
 
@@ -390,4 +390,4 @@ Runtime Architecture Refinement is **CLOSED**. Final Closure / Architecture Read
 
 This Runtime Architecture closure did not itself produce an implementation contract. The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) now records Implementation Contract / Runtime MVP Design CLOSED and Coding Readiness PASS without changing the Runtime closure or Baseline v0.1.
 
-This closure originally handed off to Architecture Lead Reality Review. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) now records F3-D CLOSED and S1-A/S1-B CLOSED / PASS. The next governed step is explicit S1-C authorization after S1-B SOT closure; S1-C has not started.
+This closure originally handed off to Architecture Lead Reality Review. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) now records F3-D CLOSED and S1-A/S1-B/S1-C/S2/S2-A/S2-B CLOSED / PASS. S3 is NEXT / NOT STARTED and is not authorized.

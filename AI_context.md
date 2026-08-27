@@ -18,7 +18,7 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **Runtime Architecture Refinement — CLOSED**
 
-Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1-A Runtime Project Foundation and S1-B Persistent Runtime Foundation are CLOSED / PASS. S1-C Bootstrap Baseline & Minimal Durable Runtime Spine is NEXT — NOT STARTED. Runtime domain lifecycle, Executor, Git integration, and Runtime Commit remain unimplemented.
+Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine and S2 Governed Artifact Production are CLOSED / PASS, including S2-A Context & Execution Preparation Foundation and S2-B Isolated Execution & Independent Artifact Observation. S3 is NEXT / NOT STARTED and is not authorized. Completion evaluation, Verification, Candidate lifecycle, Repository Integration, and Runtime Commit remain unimplemented.
 
 | Architecture workflow item | Status |
 |---|---|
@@ -61,11 +61,16 @@ Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSE
 | F3-B. Repository Integration / Commit Semantics | REVIEWED / ADMITTED |
 | F3-C. Executable Test & Failure Contract | REVIEWED / ADMITTED |
 | F3-D. FVS Coding Authorization Closure | CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
+| S1 — Runtime Foundation & Persistent Spine | CLOSED / PASS |
 | S1-A. Runtime Project Foundation | CLOSED / PASS |
 | S1-B. Persistent Runtime Foundation | CLOSED / PASS |
-| S1-C. Bootstrap Baseline & Minimal Durable Runtime Spine | NEXT — NOT STARTED |
+| S1-C. Bootstrap Baseline & Minimal Durable Runtime Spine | CLOSED / PASS |
+| S2 — Governed Artifact Production | CLOSED / PASS |
+| S2-A — Context & Execution Preparation Foundation | CLOSED / PASS |
+| S2-B — Isolated Execution & Independent Artifact Observation | CLOSED / PASS |
+| S3 — Completion / Verification / Candidate Governance | NEXT / NOT STARTED |
 
-The exact next governed step is **Architecture Lead confirms S1-B SOT closure → authorize S1-C Bootstrap Baseline & Minimal Durable Runtime Spine**. This closure admission does not begin or authorize S1-C implementation.
+The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md#44-s2-b-implementation-reality) records the accepted S2-B Reality and S2 closure. The exact next governed step is **Architecture Lead confirms S2 SOT closure → define the bounded S3 contract for Completion evaluation, Verification/Qualification, Candidate formation, and Governance**. S3 remains unauthorized and not started.
 
 The completed refinement order is **A. State Foundation → B. Reconciliation & Recovery → C. Completion & Trust → D. Side-effect Governance → Final Readiness Review**. Runtime Failure Discovery remains CLOSED and its 12-area scope remains frozen; reopen it only when implementation, dogfood, or Reality Check evidence requires it.
 
