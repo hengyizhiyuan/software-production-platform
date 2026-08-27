@@ -20,7 +20,7 @@ This baseline:
 
 It does not define a database schema, class model, service decomposition, endpoint, event protocol, or implementation commitment.
 
-[State Foundation](spg-state-foundation.md), [Reconciliation & Recovery](spg-reconciliation-recovery.md), [Completion & Trust](spg-completion-trust.md), and [Side-effect Governance](spg-side-effect-governance.md) record the closed A/B/C/D semantics. The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED, and the [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records Implementation Contract / Runtime MVP Design CLOSED and Coding Readiness PASS. External Effect and related D-layer concepts remain logical semantics rather than selected infrastructure. Architecture Baseline remains v0.1; the repository remains Greenfield.
+[State Foundation](spg-state-foundation.md), [Reconciliation & Recovery](spg-reconciliation-recovery.md), [Completion & Trust](spg-completion-trust.md), and [Side-effect Governance](spg-side-effect-governance.md) record the closed A/B/C/D semantics. The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED, and the [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records Implementation Contract / Runtime MVP Design CLOSED and Coding Readiness PASS. External Effect and related D-layer concepts remain logical semantics rather than selected infrastructure. Architecture Baseline remains v0.1; S1-A now provides only the executable project foundation and does not implement this domain baseline.
 
 ## 2. Governing Principles
 

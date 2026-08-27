@@ -41,11 +41,9 @@ It means:
 
 > Enough architecture is stable to implement the next governed iteration safely.
 
-The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) closes the next governed design stage with Coding Readiness PASS. The current next governed step is:
+The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) closes the next governed design stage with Coding Readiness PASS. The later [FVS-1 Contract](spg-fvs-1-implementation-contract.md) admits the slice and records F3-D CLOSED. S1-A Runtime Project Foundation is implemented with local validation PASS and awaits Architecture Lead Reality Review.
 
-> **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains.**
-
-No specific implementation slice is authorized by either closure record.
+Neither closure record nor the later Runtime Profile clarification independently authorizes implementation.
 
 ## 4. Coherent A/B/C/D Runtime Governance Model
 
@@ -392,6 +390,4 @@ Runtime Architecture Refinement is **CLOSED**. Final Closure / Architecture Read
 
 This Runtime Architecture closure did not itself produce an implementation contract. The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) now records Implementation Contract / Runtime MVP Design CLOSED and Coding Readiness PASS without changing the Runtime closure or Baseline v0.1.
 
-The exact next valid mainline task is:
-
-> **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains.**
+This closure originally handed off to Architecture Lead Reality Review. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) now records F3-D CLOSED and the S1-A foundation implementation. The next governed step is Architecture Lead S1-A Reality Review before S1-B.

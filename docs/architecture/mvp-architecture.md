@@ -218,9 +218,23 @@ The platform should maintain engineering history across iterations, and users sh
 Iteration 1 → Iteration 2 → Iteration 3 → Iteration 4
 ```
 
+## FVS Runtime and Deployment Profile Boundary
+
+The [Runtime Profile architecture clarification](runtime-profile-provider-deployment.md) preserves one SPG product architecture and one primary codebase across Global, Mainland, enterprise-private, and future custom profiles. A Runtime Profile binds logical capabilities to configured providers, models, adapters, and deployment placements without redefining SPG domain or governance semantics.
+
+The first FVS is local-first and architecturally provider-neutral but operationally simple. It requires provider abstraction, an Executor adapter boundary, and a configuration boundary; one real provider path is sufficient. It does not require dual Global/Mainland providers, enterprise-private deployment, provider-management UI, Provider Registry implementation, distributed workers, residency policy automation, or Kubernetes.
+
+Containerized packaging with Docker and Docker Compose is the preferred FVS/local deployment direction. This is packaging/infrastructure guidance, not a new domain component or authorization to create deployment artifacts in this documentation task.
+
+### Current FVS-1 contract
+
+The [FVS-1 Governed Documentation Production Loop Contract](spg-fvs-1-implementation-contract.md) is ADMITTED under Baseline v0.1. It selects the bounded FVS technical foundation and records the real documentation-production loop, narrow Repository Integration protocol, and T01–T18 executable obligations.
+
+F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1-A Runtime Project Foundation is implemented with local validation PASS; S1-B remains pending Architecture Lead S1-A Reality Review.
+
 ## MVP Scope Boundary
 
-The MVP does not include full CI/CD, automated deployment, production monitoring, full Guardian or ECF implementations, model routing, benchmarking, intelligent branching or merge, or complete SaaS multi-tenancy.
+The MVP does not include full CI/CD, automated deployment, production monitoring, full Guardian or ECF implementations, model routing, benchmarking, intelligent branching or merge, complete SaaS multi-tenancy, Provider Marketplace, provider-management UI, residency Policy Engine, or multi-region orchestration.
 
 The [Runtime Architecture Final Closure and Readiness](spg-runtime-architecture-readiness.md) is PASS. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records Implementation Contract / Runtime MVP Design CLOSED and Coding Readiness PASS. Controlled slices are permitted only after explicit Architecture Lead authorization; this admission does not authorize one, expand MVP, promote deferred capabilities, or select physical implementation.
 

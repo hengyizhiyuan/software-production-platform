@@ -321,4 +321,4 @@ This closure does not implement production/runtime code, tests, benchmarks, sche
 | Final Closure / Architecture Readiness Review | PASSED |
 | Runtime Architecture Readiness | PASS |
 
-The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The current next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**. The 12-area discovery scope remains FROZEN and reopens only on new material evidence.
+The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) records F3-D CLOSED, but S1-A implements no recovery or Repository Integration behavior. The 12-area discovery scope remains FROZEN and reopens only on new material evidence.

@@ -341,6 +341,6 @@ Production Issue representation and Design Artifact taxonomy refinement remain u
 | Final Closure / Architecture Readiness Review | PASSED |
 | Runtime Architecture Readiness | PASS |
 
-The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The current next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**.
+The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) records F3-D CLOSED. S1-A implements no state object, transition, persistence, Baseline, Attempt, or invariant path; those remain for later explicitly authorized slices.
 
 This document preserves A's closed semantics and all 20 invariants; its workflow view is synchronized through Coding Readiness. The original discovery scope remains frozen. This A-closure record did not itself perform implementation design or coding.

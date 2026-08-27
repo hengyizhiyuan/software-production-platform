@@ -2,7 +2,7 @@
 
 ## Current Architecture Review State
 
-Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and Readiness](../architecture/spg-runtime-architecture-readiness.md) is PASS, and the [SPG Lite Runtime Implementation Contract](../architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, Coding Readiness PASS, and controlled-implementation governance. The repository remains Greenfield and maturity stages below are unchanged.
+Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and Readiness](../architecture/spg-runtime-architecture-readiness.md) is PASS, and the [SPG Lite Runtime Implementation Contract](../architecture/spg-lite-runtime-implementation-contract.md) remains CLOSED. The [FVS-1 Implementation Contract](../architecture/spg-fvs-1-implementation-contract.md) is ADMITTED, F3-D is CLOSED, and FVS-1 is authorized for controlled implementation. S1-A Runtime Project Foundation is implemented with local validation PASS and awaits Architecture Lead Reality Review.
 
 | Review item | Status |
 |---|---|
@@ -38,8 +38,16 @@ Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and 
 | I4. Coding Readiness Closure | PASSED |
 | Coding Readiness | PASS |
 | Implementation Governance | AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
+| FVS-1 Implementation Contract | ADMITTED |
+| F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
+| F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
+| F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
+| F3-B. Repository Integration / Commit Semantics | REVIEWED / ADMITTED |
+| F3-C. Executable Test & Failure Contract | REVIEWED / ADMITTED |
+| F3-D. FVS Coding Authorization Closure | CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
+| S1-A. Runtime Project Foundation | IMPLEMENTED — LOCAL VALIDATION PASS; PENDING ARCHITECTURE LEAD REALITY REVIEW |
 
-The exact next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**. No specific slice is authorized by this status update.
+The exact next governed step is **Architecture Lead S1-A Reality Review → if PASS, establish a stable Git checkpoint and continue with S1-B Persistent Runtime Foundation**. Do not start S1-B before that review.
 
 The refinement order A → B → C → D and Final Review is complete. All 12 discovery areas remain frozen. The closure confirms logical Runtime semantics, ownership boundaries, deferred-scope clarity, and SPG Lite feasibility without selecting physical mechanisms or expanding MVP.
 
@@ -59,8 +67,14 @@ Includes:
 - Executor Integration
 - Verification and Guardian Assurance Extension Point
 - Decision Intelligence Contract validation through the internal production loop
+- Provider-neutral Capability Contract, Executor adapter, and Runtime/Profile configuration boundaries
+- Local-first validation with container-ready packaging; Docker and Docker Compose are the preferred FVS/local deployment direction
 
 A lightweight Decision Intelligence Provider may be used to exercise the contract. This is a bootstrap option, not a commitment to build a complete Decision Engine or integrate YiJue in Stage 1.
+
+One real provider path is sufficient for the first FVS. Dual Global/Mainland providers, provider-management UI, cross-region topology, residency policy automation, and Kubernetes are not Stage 1 prerequisites.
+
+For FVS-1 specifically, S1-A implements only the Python Modular Monolith package foundation, CLI-first startup, Pydantic Settings, dependency declarations, and pytest smoke tests. PostgreSQL/SQLAlchemy/Alembic remain declarations for S1-B; Git worktree integration and Codex CLI Executor Adapter remain unimplemented.
 
 ## Stage 2 — Mature Capability Provider Integration
 
@@ -79,6 +93,8 @@ Future expansion areas:
 - Runtime Feedback
 - Production Economics
 - Multiple Enterprise Decision Providers
+- Runtime Profile management, provider/model adapters, and enterprise-private bindings
+- Provider placement and data-residency governance
 
 The governing evolution sequence is:
 

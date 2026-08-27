@@ -384,6 +384,12 @@ Architecture may preserve extension points and compatible boundaries for Future 
 
 An extension point is not an implementation. A future provider option is not a current dependency. A target architecture is not an MVP commitment.
 
+### One Product Architecture, Multiple Runtime Profiles
+
+The [Runtime Profile architecture clarification](runtime-profile-provider-deployment.md) preserves one SPG product architecture, one domain model, one Runtime governance model, and one primary codebase. Global, Mainland, enterprise-private, and custom Runtime Profiles bind logical capabilities to provider/model configuration, adapters, and deployment placement without redefining core Runtime semantics.
+
+Provider/model identity is configuration rather than SPG domain logic. Model Provider and Executor Provider remain distinct abstractions. Containerization is packaging/infrastructure guidance and does not alter capability ownership, Authority, Completion, Governance, Commit, or Trusted Baseline semantics.
+
 ## 10. MVP Boundary — Current Baseline
 
 The current focus is the minimum governed production loop:
@@ -403,6 +409,9 @@ The current baseline does not commit the MVP to build:
 - Complete ECF Integration.
 - Mature YiJue Decision Engine Integration.
 - Multiple Enterprise Decision Providers.
+- Multiple real provider chains, provider-management UI, or automatic capability discovery.
+- Distributed/cross-region provider orchestration or a data-residency Policy Engine.
+- Kubernetes or a complete deployment platform.
 
 ## 11. Governance State Preservation
 
@@ -465,9 +474,9 @@ Architecture Baseline remains **v0.1** because the refinement clarified Runtime 
 
 The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records I1 Minimal Runtime Contract & Domain Spine CLOSED, I2 State Transition & Persistence Design CLOSED, I3 Capability Interfaces & End-to-End MVP Loop CLOSED, I4 Coding Readiness Closure PASSED, and Coding Readiness PASS.
 
-Implementation Governance is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. This permits only explicitly authorized, repository-grounded slices after Architecture Lead Reality Review. It does not authorize a specific slice, select language/framework/database, populate `src/`, or promote deferred capabilities.
+Implementation Governance is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1-A is the first explicitly authorized bounded slice.
 
-The repository remains Greenfield. Relational transactional persistence, materialized state, append-oriented history, optimistic version checks, generation fencing, and local transactions are implementation guidance; physical technology remains NOT SELECTED.
+The repository has entered controlled implementation. S1-A implements the Python project/package foundation, typed Settings, explicit Bootstrap, CLI-first startup, dependency declarations, and pytest smoke tests. Runtime domain lifecycle, PostgreSQL connection/schema, ORM models, migrations, Executor, Git integration, and deployment remain unimplemented. These FVS choices are not platform-wide mandates.
 
 ### Future Direction
 
@@ -480,7 +489,7 @@ A more complete SPG Governance State Preservation capability may explicitly main
 - Pending Decisions.
 - Next Valid Transition.
 
-The closed A/B/C/D records settle Runtime architecture semantics. The admitted Implementation Contract now permits controlled implementation while persistence technology, physical mechanisms, autonomous behavior, and deferred capabilities remain governed future work. The exact next governed step is Architecture Lead Reality Review against the reconciled Source of Truth; no implementation slice is authorized here.
+The closed A/B/C/D records settle Runtime architecture semantics. The Runtime Implementation Contract remains CLOSED. F3-D is CLOSED and S1-A has local validation PASS. The next governed step is Architecture Lead S1-A Reality Review; S1-B remains unauthorized until that review.
 
 ## 12. Future Directions
 
@@ -492,6 +501,8 @@ The following directions are compatible with v0.1 but are not current capabiliti
 - Independent Production State Platform evolution.
 - Rich Governance State Preservation and transition control.
 - Enterprise Provider Contract standardization.
+- Runtime Profiles, Provider Registry, provider/model adapters, and enterprise-private provider bindings.
+- Provider placement and data-residency policy, without changing Runtime semantics.
 
 Future work must preserve the ownership and dependency-direction rules in this baseline unless superseded by an explicit program-level architecture decision.
 
@@ -520,6 +531,8 @@ The following questions remain open and do not block v0.1:
 - Capability Contract precedes Provider implementation.
 - Artifacts, evidence, and explicit state—not Conversation History—form the collaboration baseline.
 - Architecture may reserve Future Directions, while products must not consume them early.
+- One product architecture supports multiple Runtime Profiles; provider/model identity remains configuration.
+- Containerization remains an infrastructure/package concern rather than a domain semantic.
 
 ### Future Direction
 
@@ -534,6 +547,7 @@ The following questions remain open and do not block v0.1:
 - Decision Artifact to Engineering Baseline mapping.
 - Enterprise Provider Contract.
 - Production State Platform evolution path.
+- Runtime Profile persistence/management shape and provider-placement policy.
 
 ## 15. Relationship to Detailed Documents
 
@@ -542,6 +556,8 @@ This baseline governs program-level system boundaries. Detailed documents remain
 - [Program-level Architecture Decisions](program-architecture-decisions.md) records individual program decisions and rationale.
 - [SPG Lite Domain Model and Contract Boundary Baseline](spg-lite-domain-contract-baseline.md) records the current SPG Lite domain objects, autonomy boundary, Human Decision model, and capability-contract ownership.
 - [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records the closed I1–I4 design, Greenfield reality, Runtime spine, controlled implementation boundary, and first-wave invariants.
+- [Runtime Profile, Provider Placement, and Containerized Deployment](runtime-profile-provider-deployment.md) records provider binding, regional/enterprise profile, adapter, local-first, containerization, and future placement/residency boundaries.
+- [SPG FVS-1 — Governed Documentation Production Loop Implementation Contract](spg-fvs-1-implementation-contract.md) records the admitted slice contract, selected FVS technology, Repository Integration protocol, T01–T18 obligations, F3-D closure, and current S1-A foundation reality.
 - [SPG Core Architecture Model](SPG_Core_Architecture_Model.md) details SPG concepts and future directions.
 - [SPG State Foundation Closure](spg-state-foundation.md), [SPG Reconciliation & Recovery Closure](spg-reconciliation-recovery.md), [SPG Completion & Trust Closure](spg-completion-trust.md), and [SPG Side-effect Governance Closure](spg-side-effect-governance.md) record the closed A/B/C/D semantics and their respective 20-invariant sets under v0.1.
 - [Runtime Findings Review](spg-runtime-findings-review.md) preserves the discovery scope and current agenda.

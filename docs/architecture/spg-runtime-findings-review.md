@@ -60,7 +60,14 @@ The reported prior work includes Responsibility Boundary Review, PWU Lifecycle D
 | Runtime Architecture Readiness | PASS |
 | SPG Lite Runtime — Implementation Contract / Runtime MVP Design | CLOSED |
 | Coding Readiness | PASS |
-| NEXT | Architecture Lead Reality Review |
+| Architecture Lead Reality Review | COMPLETED |
+| F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
+| F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
+| F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
+| F3-B. Repository Integration / Commit Semantics | REVIEWED / ADMITTED |
+| F3-C. Executable Test & Failure Contract | REVIEWED / ADMITTED |
+| F3-D. FVS Coding Authorization Closure | CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
+| NEXT: S1-A Reality Review | PENDING ARCHITECTURE LEAD REVIEW |
 
 ### Validated logical flow
 
@@ -321,9 +328,9 @@ SPG additionally deals with persistent artifacts and external side effects, requ
 | C. Completion & Trust | CLOSED; C1/C2/C3 CLOSED; C4 PASSED | Output Obligation Manifest; PWU/Plan Completion Contracts; Produced/Satisfied; Verification Basis; Evidence Freshness; Trusted Completion; exact Candidate Authority |
 | D. Side-effect Governance | CLOSED; D1/D2/D3 CLOSED; D4 PASSED | External Side Effect; Intent / Permit / Operation Identity; fencing; External Reality; Compensation; Governed Integration Atomicity |
 
-**Current next governed step: Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains.**
+**Current next governed step: Architecture Lead S1-A Reality Review → if PASS, establish a stable Git checkpoint and continue with S1-B Persistent Runtime Foundation.**
 
-The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED, and the [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The repository remains Greenfield; no specific slice, schema, API, test, or code is authorized here. Future benchmark candidates do not reopen the frozen discovery scope.
+The [Final Closure and Readiness Review](spg-runtime-architecture-readiness.md) is PASSED, and the [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. S1-A now supplies only the executable project foundation; Runtime lifecycle and later slices remain outside this findings record. Future benchmark candidates do not reopen the frozen discovery scope.
 
 ## 7. SPG Core Logical Responsibility Model — Confirmed
 
@@ -378,4 +385,4 @@ The former hypothesis/candidate labels and simplified PWU Acceptance path are ex
 
 This record does not expand MVP scope or create Feature IDs, production code, runtime modules, database schemas, or APIs. Confirmed semantics do not require Event Sourcing, distributed transactions, a distributed state store, complex workflow engine, graph database, distributed locking, Production State Branching, or microservices. Guardian and ECF are not redesigned.
 
-A/B/C/D and Runtime Architecture Refinement are CLOSED; Runtime Architecture Readiness is PASS; the Implementation Contract is CLOSED; Coding Readiness is PASS. The exact next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**. Coding and implementation did not begin; remaining candidates and deferred mechanisms retain their labels.
+A/B/C/D and Runtime Architecture Refinement are CLOSED; Runtime Architecture Readiness is PASS; the Runtime Implementation Contract is CLOSED; Coding Readiness is PASS. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) records F3-D CLOSED and S1-A local validation PASS. S1-B remains pending Architecture Lead S1-A Reality Review; remaining candidates and deferred mechanisms retain their labels.

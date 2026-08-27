@@ -18,7 +18,7 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **Runtime Architecture Refinement — CLOSED**
 
-Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, Coding Readiness PASS, and **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. The repository remains Greenfield; no specific implementation slice is authorized.
+Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1-A Runtime Project Foundation is IMPLEMENTED with LOCAL VALIDATION PASS and awaits Architecture Lead Reality Review. Runtime lifecycle, persistence, Executor, Git integration, and deployment remain unimplemented.
 
 | Architecture workflow item | Status |
 |---|---|
@@ -54,12 +54,20 @@ Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSE
 | I4. Coding Readiness Closure | PASSED |
 | Coding Readiness | PASS |
 | Implementation Governance | AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
+| FVS-1 Implementation Contract | ADMITTED |
+| F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
+| F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
+| F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
+| F3-B. Repository Integration / Commit Semantics | REVIEWED / ADMITTED |
+| F3-C. Executable Test & Failure Contract | REVIEWED / ADMITTED |
+| F3-D. FVS Coding Authorization Closure | CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
+| S1-A. Runtime Project Foundation | IMPLEMENTED — LOCAL VALIDATION PASS; PENDING ARCHITECTURE LEAD REALITY REVIEW |
 
-The exact next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**. This documentation admission does not authorize that slice or begin coding, schemas, APIs, tests, CI, infrastructure, or technology selection.
+The exact next governed step is **Architecture Lead S1-A Reality Review → if PASS, establish a stable Git checkpoint and continue with S1-B Persistent Runtime Foundation**. Do not start S1-B before that review.
 
 The completed refinement order is **A. State Foundation → B. Reconciliation & Recovery → C. Completion & Trust → D. Side-effect Governance → Final Readiness Review**. Runtime Failure Discovery remains CLOSED and its 12-area scope remains frozen; reopen it only when implementation, dogfood, or Reality Check evidence requires it.
 
-The [Runtime Findings Review](docs/architecture/spg-runtime-findings-review.md) preserves the frozen discovery scope. [State Foundation](docs/architecture/spg-state-foundation.md), [Reconciliation & Recovery](docs/architecture/spg-reconciliation-recovery.md), [Completion & Trust](docs/architecture/spg-completion-trust.md), and [Side-effect Governance](docs/architecture/spg-side-effect-governance.md) preserve the closed A/B/C/D semantics and their respective 20-invariant sets. These are logical semantics, not selected infrastructure mechanisms. The [Runtime Verification and Benchmark Strategy](docs/architecture/spg-runtime-verification-benchmarks.md) remains future verification work. Architecture readiness means enough semantics are stable for the next governed iteration, not that all future architecture or implementation is complete.
+The [Runtime Findings Review](docs/architecture/spg-runtime-findings-review.md) preserves the frozen discovery scope. [State Foundation](docs/architecture/spg-state-foundation.md), [Reconciliation & Recovery](docs/architecture/spg-reconciliation-recovery.md), [Completion & Trust](docs/architecture/spg-completion-trust.md), and [Side-effect Governance](docs/architecture/spg-side-effect-governance.md) preserve the closed A/B/C/D semantics and their respective 20-invariant sets. The broader [Runtime Verification and Benchmark Strategy](docs/architecture/spg-runtime-verification-benchmarks.md) remains future work; FVS-1 now admits only its bounded T01–T18 and 12/12 executable obligations, which are not yet implemented or passed. Architecture readiness means enough semantics are stable for the next governed iteration, not that all future architecture or implementation is complete.
 
 ## Program-level Architecture Source of Truth
 
@@ -69,6 +77,8 @@ The current system-level architecture baseline is:
 - [SPG Lite Domain Model and Contract Boundary Baseline](docs/architecture/spg-lite-domain-contract-baseline.md)
 - [SPG Runtime Architecture Final Closure and Readiness](docs/architecture/spg-runtime-architecture-readiness.md)
 - [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md)
+- [Runtime Profile, Provider Placement, and Containerized Deployment](docs/architecture/runtime-profile-provider-deployment.md)
+- [SPG FVS-1 — Governed Documentation Production Loop Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -81,6 +91,10 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Distributed Responsibility, Governed Adjudication — not majority voting
 - Provider Consolidation Does Not Collapse Authority Boundaries
 - Replaceable Intelligence, Durable Governance
+- One Product Architecture, Multiple Runtime Profiles
+- Provider / Model Selection Is Configuration, Not Domain Logic
+- Model Provider and Executor Provider Are Distinct
+- Containerization Is Packaging / Infrastructure, Not Domain Semantics
 - Context before Execution
 - Evidence before Acceptance
 - Completion Semantics Are Layered

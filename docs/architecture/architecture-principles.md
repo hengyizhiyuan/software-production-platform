@@ -377,6 +377,18 @@ Observed reality does not automatically become Trusted Production Reality. It mu
 
 This provides no invisible transition, unexplained partial state, silent Authority bypass, guessed external truth, or overwritten effect history. It does not promise simultaneous Git / Database / Cloud / external API changes, universal CAS, exactly-once delivery, 2PC, or one Commit / Effect ordering.
 
+### FVS-1 Repository Integration specialization
+
+The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) specializes this principle for one narrow REPOSITORY_REF_ADVANCE effect:
+
+    Git Commit Object
+    !=
+    Repository Integration
+    !=
+    SPG Runtime Commit
+
+FVS-1 uses stable operation identity, expected-source Git ref CAS, observed convergence, eligibility re-check, then a local PostgreSQL Runtime Commit. **Repository Reality First, Trusted Baseline Commit Second** is frozen only for this FVS effect and must not be generalized to every future External Effect. Git and PostgreSQL do not form one global transaction.
+
 ## Provider Consolidation Does Not Collapse Authority Boundaries
 
 **Confirmed Architecture Principle for future provider evolution:** A single powerful model or provider may implement planning, implementation, analysis, review, or several other capabilities. Physical provider consolidation must not collapse logical Responsibility, Contract, or Authority boundaries.
@@ -396,6 +408,22 @@ True model decoupling goes beyond API-level switching. The [future Runtime Verif
 Capability differences should manifest through performance, safe autonomy, PWU granularity, production cost, verification burden, and Human attention requirements. They must not require redefining Production Contracts, State semantics, the Authority model, Guardian's trust model, or governance invariants. Stronger models improve production performance without absorbing platform ownership or bypassing assurance and acceptance gates.
 
 These principles accompany the [B Reconciliation & Recovery Closure](spg-reconciliation-recovery.md); they introduce no implementation module or new MVP capability.
+
+## One Product Architecture, Multiple Runtime Profiles
+
+**Current Architecture Principle:** SPG maintains one product architecture, one domain model, one Runtime governance model, and one primary codebase while deployment environments bind capabilities through Runtime Profiles.
+
+Global, Mainland, enterprise-private, and future custom profiles may differ in provider/model configuration, adapters, placement, and future residency policy. They must not redefine Production Run, PWU, Attempt, Completion, Governance, Commit, or Trusted Baseline semantics. Separate regional products are not the intended architecture. See [Runtime Profile, Provider Placement, and Containerized Deployment](runtime-profile-provider-deployment.md).
+
+## Provider and Model Selection Is Configuration
+
+Provider identity, model identity, and model version are capability-binding/configuration concerns, not SPG domain logic. SPG Core consumes stable Capability Contracts. Regional or vendor differences belong behind Runtime Profile bindings and compatibility adapters.
+
+Model Provider and Executor Provider remain distinct abstractions. An Executor may internally bind a model/provider, but model identity does not replace the governed Execution Capability Contract.
+
+## Containerization Does Not Redefine Domain Architecture
+
+Containerization is an infrastructure and packaging concern. Docker and Docker Compose are the preferred FVS/local deployment direction, but containers must not redefine capability ownership, Authority, state semantics, or trusted-transition rules. Local-first validation and container-ready packaging do not select a production region, production database topology, distributed worker design, or Kubernetes.
 
 ## Authority Before Convenience
 

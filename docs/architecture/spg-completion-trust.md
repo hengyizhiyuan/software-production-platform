@@ -525,6 +525,6 @@ This is architecture closure, not implementation or test completion.
 | Final Closure / Architecture Readiness Review | PASSED |
 | Runtime Architecture Readiness | PASS |
 
-The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The current next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**.
+The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) records F3-D CLOSED, but S1-A implements no Completion, Verification, Candidate, or Trusted Baseline behavior. The FVS executable proof remains not implemented or passed.
 
 The Final Review and Implementation Contract preserve C's semantics and all 20 C-level invariants. The original discovery scope remains FROZEN. This C-closure record did not itself design or implement schemas, APIs, tests, or code.

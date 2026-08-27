@@ -212,6 +212,14 @@ Future selection should use [Capability Performance Profiles](spg-runtime-verifi
 
 Routing must remain compatible with general-purpose frontier models, smaller specialized models, enterprise private models, customer-provided models, future local models, and specialized capability providers. The globally strongest model is not necessarily the economically optimal provider for every Production Capability. No provider is hard-coded as superior, and no automatic routing is implemented in the MVP.
 
+## Runtime Profile and Provider Management Evolution
+
+The [Runtime Profile architecture](runtime-profile-provider-deployment.md) reserves future Provider Registry, Capability Descriptor, profile validation, enterprise-private bindings, provider/model compatibility adapters, provider-management control surface, and provider-placement/data-residency policy.
+
+These are Future Capabilities, not first-FVS requirements. Capability Descriptor records technical support, while Capability Performance Profile records observed governed production performance; the two must not be merged. The future control surface configures persisted bindings and does not become an independent Source of Truth for SPG domain semantics.
+
+Global, Mainland, and enterprise-private deployments remain profiles of one product architecture and one primary codebase. Distributed cross-region execution, automatic discovery/routing, Provider Marketplace, residency Policy Engine, and Kubernetes are not implemented in the MVP.
+
 ## AI Software Production Benchmark
 
 AI Software Production Benchmark is a long-term capability direction. This document does not define its implementation details.

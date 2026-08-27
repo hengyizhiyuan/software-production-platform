@@ -282,10 +282,22 @@ Future price differences should correspond to observable production value, not o
 
 Consistent with **Replaceable Intelligence, Durable Governance**, capability differences affect performance, granularity, safe autonomy, cost, verification burden, and Human attention, not Production Contracts, State semantics, Authority, Guardian's trust model, or governance invariants. Provider consolidation does not collapse those boundaries.
 
-## 8. Status and Scope Guard
+## 8. FVS-1 executable verification contract
+
+The [FVS-1 Governed Documentation Production Loop Contract](spg-fvs-1-implementation-contract.md) promotes a bounded subset of Runtime verification from general future strategy to an admitted, slice-specific executable obligation:
+
+- mandatory scenarios T01–T18;
+- executable paths for all 12 first-wave critical Runtime invariants;
+- deterministic Test Executor under the same Executor Contract;
+- real PostgreSQL/Git/filesystem/worktree semantics where those behaviors are claimed;
+- at least one controlled real Codex documentation dogfood run.
+
+This is **ADMITTED / NOT YET IMPLEMENTED / NOT YET PASSED**. It does not promote the broader benchmark, scoring, routing, pricing, or Capability Performance Profile directions. F3-D is CLOSED, but S1-A implements only project-foundation smoke tests; T01–T18 and Runtime invariant verification remain for later authorized slices.
+
+## 9. Status and Scope Guard
 
 Confirmed principles include capability-oriented evaluation, equivalent-outcome comparison, evidence- and policy-bounded autonomy, trusted production economics, and transparent value-based selection/pricing. They preserve the linked A/B invariants and governance boundaries; they are design principles, not claims of measured provider performance or implemented capabilities.
 
-Capability Performance Profiles, adaptive decomposition, routing, policy feedback, strategy selection, and a capability marketplace remain **Future Capabilities / Architecture Directions**. Performance dimensions and Trusted Change Efficiency remain **candidate metrics**. All verification requirements and benchmark cases, including the incident-derived candidate, remain future work. Test fixtures, executable assertions, fault injectors, model thresholds, infrastructure mechanisms, and scoring implementation remain unselected and unimplemented. No actual prices, commercial tiers, or vendor rankings are defined.
+Capability Performance Profiles, adaptive decomposition, routing, policy feedback, strategy selection, and a capability marketplace remain **Future Capabilities / Architecture Directions**. Performance dimensions and Trusted Change Efficiency remain **candidate metrics**. Except for the bounded FVS-1 obligations linked above, broader verification requirements and benchmark cases remain future work. No FVS-1 test is implemented or executed by this documentation admission. Model thresholds, scoring implementation, prices, commercial tiers, and vendor rankings remain undefined.
 
-Architecture Baseline remains **v0.1** and SPG Lite MVP scope is unchanged. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The incident-derived regression remains a future benchmark candidate and is not claimed as implemented; no tests or specific slice are authorized here.
+Architecture Baseline remains **v0.1** and SPG Lite MVP scope is unchanged. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The incident-derived regression class is now represented by FVS-1 T03 as a mandatory future executable path, but no test or PASS result exists yet.

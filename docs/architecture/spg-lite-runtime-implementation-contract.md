@@ -13,6 +13,7 @@ It refines, without replacing:
 - [B. Reconciliation & Recovery](spg-reconciliation-recovery.md);
 - [C. Completion & Trust](spg-completion-trust.md);
 - [D. Side-effect Governance](spg-side-effect-governance.md).
+- [FVS-1 Governed Documentation Production Loop Contract](spg-fvs-1-implementation-contract.md) subsequently supplies the controlled slice-specific physical and executable contract without replacing this Runtime-level contract.
 
 The statements in this document are classified as:
 
@@ -22,7 +23,7 @@ The statements in this document are classified as:
 | Confirmed MVP Runtime Semantic | An approved Runtime meaning or invariant; not necessarily a dedicated physical entity |
 | Implementation Guidance | A permitted direction that keeps the first implementation small without selecting a final physical design |
 | Deferred Capability | Explicitly outside the first controlled implementation unless separately approved |
-| Physical Implementation Choice — NOT YET FROZEN | Language, framework, database, ORM, schema, API, topology, and similar choices still requiring repository-grounded selection |
+| Physical Implementation Choice — scoped | Platform/general choices remain unfrozen; an admitted controlled slice may select bounded technology without creating a platform-wide mandate |
 
 No production code, schema, API, test, CI, infrastructure, or specific implementation slice is created or authorized by this contract-admission task.
 
@@ -60,9 +61,9 @@ each slice is verified before expansion
 
 > Ready for implementation does not mean ready for uncontrolled bulk generation.
 
-This document does not authorize the first implementation slice. The exact next governed step is recorded in the final section.
+This Runtime-level document did not itself authorize the first implementation slice. F3-D subsequently closed, and the explicit S1-A task authorizes only the Runtime Project Foundation.
 
-## 3. Greenfield implementation reality
+## 3. Implementation reality evolution
 
 The repository Reality Check established:
 
@@ -78,20 +79,20 @@ Current implementation reality remains:
 
 | Area | Reality |
 | --- | --- |
-| SPG Runtime code | NOT IMPLEMENTED |
-| Runtime language/framework | NOT SELECTED |
-| Database | NOT SELECTED |
-| ORM | NOT SELECTED |
-| Migration framework | NOT SELECTED |
-| API/CLI | NOT IMPLEMENTED |
+| SPG Runtime code | S1-A project foundation IMPLEMENTED; Runtime lifecycle NOT IMPLEMENTED |
+| Runtime language/framework | Python 3.13.15 local validation; Modular Monolith foundation IMPLEMENTED; not a platform-wide mandate |
+| Database | PostgreSQL dependency/direction declared; no connection or schema |
+| ORM | SQLAlchemy 2.x dependency declared; no models/repositories |
+| Migration framework | Alembic dependency declared; no migration environment or revisions |
+| API/CLI | CLI-first foundation IMPLEMENTED; no HTTP/Web API |
 | Executor Adapter | NOT IMPLEMENTED |
 | Context Assembly | NOT IMPLEMENTED |
 | Verification Provider | NOT IMPLEMENTED |
-| Tests | NOT IMPLEMENTED |
+| Tests | S1-A smoke foundation IMPLEMENTED; 5 tests PASS |
 | CI | NOT IMPLEMENTED |
 | Deployment | NOT IMPLEMENTED |
 
-This is **Greenfield Implementation Reality**, not a failure and not permission to invent implementation that does not exist.
+This is **S1-A Foundation Reality**. It proves project startup only and is not permission to invent the unimplemented Runtime lifecycle.
 
 ## 4. I1 — Minimal Runtime Contract and domain spine
 
@@ -310,7 +311,7 @@ Execution generation
 Local transactions
 ```
 
-This is architecture guidance. Database, ORM, migration framework, physical schema, and API remain **NOT SELECTED / NOT FROZEN**.
+This remains Runtime-level architecture guidance. The later [FVS-1 Contract](spg-fvs-1-implementation-contract.md) selects PostgreSQL, SQLAlchemy 2.x, Alembic, and CLI-first for that controlled slice only. Physical schema and API remain unfrozen, and the selection is not a platform-wide mandate.
 
 ### Optimistic concurrency
 
@@ -364,6 +365,8 @@ SPG consumes Capability Contracts rather than Provider identities. External/plug
 - Repository / Artifact Infrastructure Adapter.
 
 Production Planner remains a core SPG capability.
+
+The [Runtime Profile, Provider Placement, and Containerized Deployment](runtime-profile-provider-deployment.md) clarification binds these logical capabilities to configured providers, models, adapters, and deployment placements without changing their contracts or Runtime semantics. Provider/model identity is configuration, not domain logic.
 
 ### Decision / Production Intent boundary
 
@@ -477,6 +480,12 @@ Capability Contracts permit long-running/asynchronous Provider execution and pre
 
 Executor, Verification Provider, Context Provider, or External Effect Adapter failure must become Attempt state, Production Issue, recovery/retry semantics, or blocking state rather than uncontrolled Runtime-process collapse.
 
+### FVS Runtime Profile and packaging clarification
+
+The first FVS must preserve a provider-neutral Capability Contract, an Executor adapter boundary, and a Runtime/Profile configuration boundary. It may use one real provider path; multiple providers and simultaneous Global/Mainland profiles are not prerequisites.
+
+Initial validation is local-first. Container-ready packaging, with Docker and Docker Compose as the preferred FVS/local deployment direction, is an infrastructure concern and does not redefine Production Run, PWU, Attempt, Completion, Governance, Commit, or Trusted Baseline semantics. No Dockerfile, Compose file, Provider Registry, adapter, provider integration, region selection, or deployment artifact is authorized by this documentation clarification.
+
 ## 21. End-to-End MVP production loop
 
 ```text
@@ -580,6 +589,9 @@ The following remain deferred and are not prerequisites for the first controlled
 - Compensation Engine and Effect Group Engine;
 - full deployment platform and complex role-specific UI/workspaces;
 - advanced multi-model routing;
+- multiple real provider chains and automatic provider capability discovery;
+- Provider Registry, provider-management UI, and residency Policy Engine;
+- distributed/cross-region worker topology, Kubernetes, and autoscaling;
 - generalized Production Pattern / Effect Protocol engine.
 
 ## 26. Architecture Baseline and closure
@@ -613,8 +625,15 @@ Implementation Governance
     AUTHORIZED FOR CONTROLLED IMPLEMENTATION
 ```
 
-No specific implementation slice is authorized by this document.
+The later [FVS-1 Contract](spg-fvs-1-implementation-contract.md) admits the reviewed slice-specific design without changing this Contract's closure:
 
-The exact next governed step is:
+```text
+F1. Slice Goal & Governance Contract                   REVIEWED / ADMITTED
+F2. Minimal Technical Foundation                       REVIEWED / ADMITTED
+F3-A. Runtime Slice Boundary & Physical Spine          REVIEWED / ADMITTED
+F3-B. Repository Integration / Commit Semantics        REVIEWED / ADMITTED
+F3-C. Executable Test & Failure Contract               REVIEWED / ADMITTED
+F3-D. FVS Coding Authorization Closure                 CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION
+```
 
-> **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains.**
+S1-A Runtime Project Foundation is implemented with local validation PASS. The next governed step is Architecture Lead S1-A Reality Review; S1-B must not begin before that review and a stable Git checkpoint.

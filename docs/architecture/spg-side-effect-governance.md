@@ -447,6 +447,6 @@ This is architecture closure, not implementation or verification completion.
 
 The A/B/C/D refinement body is reviewed and documented. Runtime Architecture Refinement is **CLOSED** and architecture readiness for the next governed design stage is **PASS**.
 
-The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The current next governed step is **Architecture Lead Reality Review → reconcile the existing Pre-Implementation Repository Reality Check against the newly admitted Source of Truth → authorize the first controlled vertical implementation slice if no blocker remains**.
+The subsequently admitted [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS. The [FVS-1 Contract](spg-fvs-1-implementation-contract.md) records F3-D CLOSED, but S1-A implements no REPOSITORY_REF_ADVANCE, CAS, effect record, Git mutation, or side-effect behavior. Generic Side-effect infrastructure remains deferred.
 
 This D-closure record did not perform that later Contract stage or start Coding, schemas, APIs, tests, Side-effect infrastructure, or implementation.
