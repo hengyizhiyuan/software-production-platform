@@ -18,7 +18,7 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **Runtime Architecture Refinement — CLOSED**
 
-Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine and S2 Governed Artifact Production are CLOSED / PASS, including S2-A Context & Execution Preparation Foundation and S2-B Isolated Execution & Independent Artifact Observation. S3 is NEXT / NOT STARTED and is not authorized. Completion evaluation, Verification, Candidate lifecycle, Repository Integration, and Runtime Commit remain unimplemented.
+Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine and S2 Governed Artifact Production are CLOSED / PASS, including S2-A Context & Execution Preparation Foundation and S2-B Isolated Execution & Independent Artifact Observation. S3 Completion, Verification & Candidate Governance is IN PROGRESS. S3-A Completion Evaluation & Produced Semantics remains CLOSED / PASS. S3-B Verification Qualification & Satisfaction is IMPLEMENTED — LOCAL VALIDATION PASS and PENDING ARCHITECTURE LEAD REALITY REVIEW; the full suite is 132/132 PASS. S3-C remains BLOCKED BY S3-B / NOT STARTED. Candidate lifecycle, Human Authorization, Repository Integration, and Runtime Commit remain unimplemented.
 
 | Architecture workflow item | Status |
 |---|---|
@@ -68,9 +68,13 @@ Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSE
 | S2 — Governed Artifact Production | CLOSED / PASS |
 | S2-A — Context & Execution Preparation Foundation | CLOSED / PASS |
 | S2-B — Isolated Execution & Independent Artifact Observation | CLOSED / PASS |
-| S3 — Completion / Verification / Candidate Governance | NEXT / NOT STARTED |
+| S3 — Completion, Verification & Candidate Governance | IN PROGRESS |
+| S3-A — Completion Evaluation & Produced Semantics | CLOSED / PASS |
+| S3-B — Verification Qualification & Satisfaction | IMPLEMENTED — LOCAL VALIDATION PASS / PENDING ARCHITECTURE LEAD REALITY REVIEW |
+| S3-C — Candidate Sealing & Human Governance | BLOCKED BY S3-B / NOT STARTED |
+| S4 — Repository Integration & Runtime Commit | NOT STARTED |
 
-The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md#44-s2-b-implementation-reality) records the accepted S2-B Reality and S2 closure. The exact next governed step is **Architecture Lead confirms S2 SOT closure → define the bounded S3 contract for Completion evaluation, Verification/Qualification, Candidate formation, and Governance**. S3 remains unauthorized and not started.
+The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md#47-s3-b-implementation-reality) records the S3-B implementation Reality and preserves `PRODUCED != Verification PASS != applicable evidence != SATISFIED != Candidate`. Assurance / Verification owns evidence truth and verification result; SPG owns production-context admissibility and the versioned `PRODUCED → SATISFIED` decision. S3-B is not CLOSED by local evidence alone and this implementation does not authorize S3-C. The exact next governed step is **Architecture Lead S3-B Reality Review → if PASS, close S3-B and authorize S3-C Candidate Sealing & Human Governance**.
 
 The completed refinement order is **A. State Foundation → B. Reconciliation & Recovery → C. Completion & Trust → D. Side-effect Governance → Final Readiness Review**. Runtime Failure Discovery remains CLOSED and its 12-area scope remains frozen; reopen it only when implementation, dogfood, or Reality Check evidence requires it.
 

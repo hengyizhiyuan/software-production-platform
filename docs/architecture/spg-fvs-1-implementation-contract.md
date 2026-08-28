@@ -979,13 +979,16 @@ S2 — Governed Artifact Production
     S2-A — Context & Execution Preparation Foundation
     S2-B — Isolated Execution & Independent Artifact Observation
 
-S3 — Verification / Candidate / Governance
+S3 — Completion, Verification & Candidate Governance
+    S3-A — Completion Evaluation & Produced Semantics
+    S3-B — Verification Qualification & Satisfaction
+    S3-C — Candidate Sealing & Human Governance
 S4 — Repository Integration & Runtime Commit
 S5 — Failure / Recovery Hardening
 S6 — Real Codex Dogfood & FVS Closure
 ```
 
-S3 through S6 are boundary labels only; this admission does not redefine or authorize them. Current implementation Reality is recorded below.
+S3 is formally defined in Section 45. At contract admission it remained NEXT / NOT STARTED; the subsequently authorized S3-A implementation Reality is recorded in Section 46. S4 through S6 remain boundary labels only.
 
 ## 43. S2-A implementation reality
 
@@ -1053,8 +1056,575 @@ Observed Work Product References
 
 The closure preserves `Provider SUCCESS != Observed Work Product != PWU Produced != PWU Satisfied != Verification PASS != Trusted Baseline`. Execution Reality remains represented by append-oriented Attempt, Preparation Binding, Dispatch Fact, Provider Report, Repository Observation, and Work Product Reference facts without adding unauthorized `PREPARED`, `RUNNING`, or `FINISHED` Attempt states. Provider Report and independently observed repository Reality remain separate dimensions. No arbitrary-crash exactly-once execution is claimed; general cross-system reconciliation/recovery remains later work.
 
-The next bounded stage is the trust path from observed Work Product Reality through Completion evaluation, PWU Produced/Satisfaction semantics, Verification/Qualification, and Candidate/Governance. This closure records S3 only as **NEXT / NOT STARTED** and does not authorize or define its implementation.
+The next bounded stage is the trust path from observed Work Product Reality through Completion evaluation, PWU Produced/Satisfaction semantics, Verification/Qualification, and Candidate/Governance. Section 45 defines that S3 contract. S3 remains **NEXT / NOT STARTED** and is not authorized for implementation.
 
 The exact next governed step is:
 
-> Architecture Lead confirms S2 SOT closure → define the bounded S3 contract for Completion evaluation, Verification/Qualification, Candidate formation, and Governance.
+> Architecture Lead Reality Review of the admitted S3 contract → if PASS, authorize S3-A Completion Evaluation & Produced Semantics implementation.
+
+## 45. S3 Completion, Verification & Candidate Governance stage contract
+
+This section admits the documentation-level contract for the governed trust path after S2. It defines semantic boundaries and future implementation evidence only. It does not authorize S3-A, S3-B, or S3-C implementation and changes no production code, schema, migration, repository ref, Runtime state, or Trusted Baseline.
+
+```text
+S3 — Completion, Verification & Candidate Governance
+    NEXT / NOT STARTED
+
+S3-A — Completion Evaluation & Produced Semantics
+    NEXT / NOT STARTED
+
+S3-B — Verification Qualification & Satisfaction
+    BLOCKED BY S3-A / NOT STARTED
+
+S3-C — Candidate Sealing & Human Governance
+    BLOCKED BY S3-B / NOT STARTED
+```
+
+The admitted conceptual flow is:
+
+```text
+Observed Repository Reality
++ Work Product References
++ Completion Contract
+↓
+S3-A Completion Evaluation
+↓
+PWU Produced
+↓
+Exact Proposed Repository Snapshot
+(non-authoritative Git commit/tree)
+↓
+S3-B Verification
+↓
+Qualification
+↓
+PWU Satisfied
+↓
+S3-C Candidate Sealing
+↓
+Human Candidate Authorization
+↓
+S4 Repository Integration & Runtime Commit
+```
+
+The stage preserves this hard boundary:
+
+```text
+Human Candidate Authorization
+!=
+Repository Integration
+!=
+Runtime Commit
+```
+
+S3 must not advance an authoritative Git ref, integrate a proposed snapshot, or advance the Current Trusted Baseline.
+
+### 45.1 S3-A — Completion Evaluation & Produced Semantics
+
+S3-A answers:
+
+> Does the independently observed production output satisfy the PWU's production-output obligations?
+
+It does not answer whether the output is independently verified, qualified, satisfied, trusted, accepted, integrated, or committed.
+
+#### Exact Completion Evaluation basis
+
+Every Completion Evaluation must bind the exact:
+
+- PWU;
+- Plan Revision;
+- Source Trusted Baseline;
+- Completion Contract version and fingerprint;
+- Repository Observation identity and fingerprint;
+- Work Product References;
+- Attempt and execution-generation lineage.
+
+Mutable current workspace Reality is not an admissible evaluation subject without an exact accepted Repository Observation. A materially different Observation requires a new Completion Evaluation or equivalent governed reconciliation. Historical evaluation facts are immutable and must not be rewritten.
+
+#### Output-obligation evaluation
+
+S3-A evaluates the already-admitted production-output obligations where present, including:
+
+- `required_artifacts`;
+- `required_changes`;
+- `required_markers`;
+- `forbidden_changes`;
+- blocking output conditions.
+
+`verification_obligations` are not Completion Evaluation inputs for the `Produced` judgment. They remain part of the full PWU Completion Contract and are evaluated through S3-B before Satisfaction.
+
+#### Provider Report has no Completion authority
+
+```text
+Provider SUCCESS
+!=
+PWU Produced
+
+Provider FAILURE
+!=
+PWU Not Produced
+```
+
+Completion derives from the exact Completion Contract production-output obligations plus independently observed Reality, not provider narrative. The required benchmark semantics are:
+
+| Provider report / observed Reality | Completion judgment |
+|---|---|
+| `SUCCESS` + required artifact absent | NOT PRODUCED |
+| `SUCCESS` + only unrelated artifact changed | NOT PRODUCED |
+| `SUCCESS` + workspace unchanged | NOT PRODUCED |
+| `FAILURE` + exact required output obligations satisfied | Provider failure remains historical fact; it does not by itself block factual Produced judgment |
+
+The final case still requires independent Verification in S3-B.
+
+#### Produced semantics
+
+```text
+Observed Work Product
+!=
+PWU Produced
+```
+
+`PWU Produced` means that the exact independently observed output satisfies the Completion Contract's production-output obligations. It does not mean `Verified`, `Satisfied`, `Trusted`, `Accepted`, `Integrated`, or `Committed`.
+
+This contract reuses the existing admitted `PRODUCED != SATISFIED` lifecycle semantics. If its physical representation is not already sufficient, the exact representation remains a later S3-A implementation-review decision; this contract does not invent an incompatible state or schema.
+
+### 45.2 S3-B — Verification Qualification & Satisfaction
+
+S3-B answers:
+
+> Is the produced result independently verified against the exact subject and required verification obligations?
+
+SPG coordinates Verification requirements, evidence admissibility, and production-state eligibility. It does not become the permanent owner of generic Assurance truth. The capability boundary remains:
+
+```text
+SPG
+↓
+Verification / Assurance Capability Contract
+↓
+FVS Deterministic Verification Provider
+or future Guardian
+```
+
+SPG Core must not depend on Guardian internals. FVS-1 may use deterministic Verification; full Guardian integration is not required.
+
+#### Exact proposed repository snapshot
+
+Before Verification, the exact produced repository Reality is frozen as a non-authoritative proposed repository snapshot. For FVS-1, this may be an exact Git commit object plus Git tree identity derived from the independently observed Attempt workspace.
+
+```text
+Git Commit Object
+!=
+Repository Integration
+!=
+Runtime Commit
+```
+
+Creating this proposed commit/tree must not advance a target ref, merge, push, change an authoritative branch, or advance the Trusted Baseline. It exists only as an immutable Verification and Candidate subject.
+
+The proposed snapshot must correspond exactly to the Repository Observation accepted by S3-A. If workspace Reality changed after that Observation, Runtime must not create a new snapshot while reusing the old Completion Evaluation. It requires a new Observation followed by a new Completion Evaluation, or equivalent governed reconciliation.
+
+#### Verification basis and admissibility
+
+Every Verification Record must bind the exact:
+
+- PWU;
+- Completion Evaluation;
+- proposed repository commit/tree;
+- Source Trusted Baseline;
+- Plan Revision;
+- verification obligation;
+- verification provider.
+
+A PASS without an exact subject and basis is not admissible.
+
+```text
+Verification Result
+!=
+Verification Applicability / Freshness
+```
+
+A historically valid PASS must not automatically apply after the subject, proposed snapshot, Plan Revision, Source Baseline, obligation, or other relevant Verification basis changes. Historical Verification facts remain preserved even when no longer applicable.
+
+#### Qualification
+
+For S3-B, SPG production qualification is the governed admissibility determination that:
+
+- required Verification obligations exist;
+- all required admissible Verification Evidence is present;
+- Evidence binds the exact subject;
+- Evidence remains applicable and fresh;
+- no required Verification result blocks qualification.
+
+Production qualification is not a generic Trust Score. Guardian / Verification retains ownership of Evidence interpretation, Findings, assurance truth, assurance-level Qualification, Gate results, and assurance confidence or coverage semantics. SPG consumes those conclusions through the capability contract and determines whether the required exact-subject evidence is admissible and sufficient for the governed production-state transition.
+
+#### PWU Satisfaction
+
+```text
+PWU Produced
+!=
+PWU Satisfied
+```
+
+A PWU may become Satisfied only when its production-output obligations are Produced and all required Verification / Qualification obligations are satisfied, together with any other applicable Completion Contract conditions. Provider `SUCCESS` cannot directly create Satisfaction.
+
+### 45.3 S3-C — Candidate Sealing & Human Governance
+
+S3-C answers:
+
+> Can this satisfied production result be sealed as the exact candidate that Human Authority may authorize for later integration?
+
+#### Candidate eligibility
+
+For the intentionally narrow FVS-1 path, Candidate formation requires at minimum:
+
+- current Plan Revision;
+- exact Source Trusted Baseline;
+- required PWU or PWUs Satisfied;
+- exact Completion Evaluation;
+- exact applicable Verification / Qualification;
+- exact proposed repository snapshot;
+- no known blocking eligibility condition.
+
+Existing Plan Completion semantics remain authoritative where applicable. One PWU's Satisfaction must not be silently generalized into arbitrary future multi-PWU Plan completion. S3-C does not introduce a general policy engine.
+
+#### Sealed Candidate content and immutability
+
+A sealed Baseline Candidate binds the exact:
+
+- Candidate identity;
+- Source Trusted Baseline;
+- Production Run;
+- Plan Revision;
+- target repository identity;
+- target authoritative ref;
+- expected source repository revision;
+- proposed repository commit and tree;
+- PWU and Work Product lineage;
+- Completion Evaluation;
+- Verification / Qualification records;
+- creation timestamp;
+- Candidate fingerprint or equivalent immutable identity.
+
+Material Candidate contents must not silently mutate after sealing. Material change requires a new Candidate identity or revision and renewed applicable evaluation and Verification.
+
+```text
+Candidate SEALED
+!=
+Candidate Authorized
+!=
+Repository Integrated
+!=
+Runtime Committed
+!=
+Trusted Baseline
+```
+
+Candidate creation does not change the Current Trusted Baseline.
+
+#### Exact Human Candidate Authorization
+
+Human Candidate Authorization must bind at minimum:
+
+- authority identity;
+- exact Candidate identity and fingerprint;
+- authorized scope;
+- expected Source Baseline and repository source revision;
+- target repository and ref scope;
+- rationale or basis;
+- timestamp.
+
+Generic authorization such as `approve latest` is invalid. Authorization applies to one exact immutable Candidate and cannot silently carry forward to modified Candidate material.
+
+> Authority changes governance permission, not engineering Reality.
+
+Human Authorization cannot convert Verification `FAIL` to `PASS`, create a missing Artifact, or make stale Evidence fresh. Risk acceptance or exceptions, if later required, remain explicit and distinct; S3-C does not add broad exception machinery.
+
+Authorization does not execute integration. S3-C stops after recording exact Candidate Authorization and must not advance a Git ref, perform repository CAS, merge, push, perform Runtime Commit, or change the Trusted Baseline pointer. Those operations belong exclusively to S4.
+
+### 45.4 Relationship to S4
+
+```text
+S3 output:
+
+SEALED Candidate
++ exact Human Authorization
+
+↓
+
+S4 input:
+
+authorized exact Candidate
++ expected Source Baseline
++ expected source Git revision
+
+↓
+
+Repository Integration Effect
++ authoritative ref CAS
++ Runtime Commit
++ new Trusted Baseline
+```
+
+S3 defines no S4 execution behavior. Only later successful Runtime Commit may advance the Current Trusted Baseline.
+
+### 45.5 S3 invariants
+
+1. Executor Report does not determine Completion.
+2. Completion binds the exact Completion Contract production-output obligations and independent Observation.
+3. Completion Evaluation is immutable and history-preserving.
+4. A changed Observation prevents silent reuse of an old Completion Evaluation.
+5. Observed Work Product does not imply Produced.
+6. Produced does not imply Satisfied.
+7. Verification binds an exact immutable proposed repository subject.
+8. A proposed Git commit/tree is not Repository Integration.
+9. Verification PASS and applicability/freshness are distinct.
+10. Verification for a changed subject cannot be silently reused.
+11. SPG owns Verification requirements and admissibility use, not generic Assurance truth.
+12. Future Guardian remains independently replaceable and integrable.
+13. Satisfaction requires Produced plus required qualified Verification and applicable Completion Contract conditions.
+14. Candidate formation requires exact satisfied production lineage.
+15. A sealed Candidate is immutable; material change creates a new Candidate revision or identity.
+16. A Candidate is not the Trusted Baseline.
+17. Human Authorization binds an exact Candidate.
+18. Human Authority changes permission, not facts.
+19. Authorization does not perform Repository Integration.
+20. Trusted Baseline advancement remains exclusively later Runtime Commit behavior.
+21. Production Horizon `DOCUMENTATION` remains fully valid.
+22. No Code Artifact is universally required.
+23. Provider `FAILURE` does not erase independently satisfied production-output Reality.
+24. Provider `SUCCESS` cannot create Produced or Satisfied by itself.
+25. No Trust Score is required for FVS-1.
+
+### 45.6 Future implementation evidence direction
+
+Later separately authorized implementation must prove at minimum:
+
+- `SUCCESS` plus missing required Artifact produces `NOT PRODUCED`;
+- `SUCCESS` plus unrelated work produces `NOT PRODUCED`;
+- `SUCCESS` plus no change produces `NOT PRODUCED`;
+- `FAILURE` plus exact required output derives Completion from Reality rather than provider status;
+- Produced plus missing Verification remains `NOT SATISFIED`;
+- Verification PASS against an old snapshot is not applicable to a new snapshot;
+- changing sealed Candidate content requires a new Candidate;
+- authorization for Candidate C1 cannot authorize modified Candidate C2;
+- an Authorized Candidate does not advance the repository ref or Trusted Baseline.
+
+No tests are implemented by this contract-definition task.
+
+### 45.7 Explicit non-goals and authorization boundary
+
+This S3 contract does not authorize or implement:
+
+- authoritative repository ref advancement;
+- repository compare-and-swap;
+- Repository Integration Effect;
+- Runtime Commit;
+- Trusted Baseline advancement;
+- remote push or deployment;
+- a general recovery engine, Saga, or 2PC;
+- full Guardian implementation;
+- Evidence Graph or Trust Score;
+- general Policy DSL;
+- AI Planner, full ECF, or Provider Registry;
+- Web, API, or UI;
+- real Codex dogfood.
+
+Architecture Baseline remains **v0.1**. The required mainline state after this contract admission is:
+
+```text
+S1
+    CLOSED / PASS
+
+S2
+    CLOSED / PASS
+
+S3
+    NEXT / NOT STARTED
+
+S3-A
+    NEXT / NOT STARTED
+
+S3-B
+    BLOCKED BY S3-A / NOT STARTED
+
+S3-C
+    BLOCKED BY S3-B / NOT STARTED
+
+S4
+    NOT STARTED
+```
+
+No S3 implementation authorization is granted. The exact next governed step is:
+
+> Architecture Lead Reality Review of the admitted S3 contract → if PASS, authorize S3-A Completion Evaluation & Produced Semantics implementation.
+
+## 46. S3-A implementation reality
+
+S3-A Completion Evaluation & Produced Semantics is **CLOSED / PASS**. Architecture Lead Reality Review accepted the repository evidence with zero architecture blockers, zero implementation blockers, and no scope leakage. S3 remains **IN PROGRESS**. S3-B is now **NEXT / NOT STARTED** because the S3-A dependency is satisfied; S3-C remains **BLOCKED BY S3-B / NOT STARTED**. This closure admission does not authorize S3-B implementation.
+
+Alembic revision `20260828_04` adds exactly one S3-A production table: `completion_evaluations`. The table stores immutable exact-basis Completion facts with Run, PWU, Plan Revision, Source Baseline, Attempt/generation, Completion Contract fingerprint, Repository Observation identity/fingerprint, exact Work Product lineage and set fingerprint, deterministic basis fingerprint, `PRODUCED` / `NOT_PRODUCED` outcome, structured obligation results, and creation time. The unique basis fingerprint and deterministic evaluation identity provide same-basis idempotency. No Verification, Qualification, Candidate, Authorization, Production Issue, External Effect, Repository Integration, or proposed-snapshot table was added.
+
+The current PWU lifecycle now admits only the already-contracted `PRODUCED` condition in addition to `PROPOSED`. S3-A does not add `NOT_PRODUCED`, `VERIFYING`, `SATISFIED`, or `FAILED` states. A `NOT_PRODUCED` evaluation remains an append-only fact and leaves PWU condition unchanged. A current-generation `PRODUCED` evaluation atomically inserts the Completion Evaluation, advances the versioned PWU from `PROPOSED` to `PRODUCED` through optimistic concurrency, and appends Transition History in one PostgreSQL Unit of Work.
+
+Completion derives only from the typed Completion Contract plus independently observed Reality. S3-A deterministically evaluates required output paths, required changed paths, required markers, forbidden path scopes, and declared blocking output conditions. `verification_obligations` are deliberately excluded. Provider Report outcome is not an input to the Produced judgment, so false-success cases remain `NOT_PRODUCED`, while Provider `FAILURE` plus exact satisfied output obligations may become `PRODUCED` without rewriting the historical failure report.
+
+The accepted executable benchmark evidence is:
+
+```text
+Provider SUCCESS + missing required artifact → NOT_PRODUCED
+Provider SUCCESS + unrelated work only       → NOT_PRODUCED
+Provider SUCCESS + no required change        → NOT_PRODUCED
+Provider FAILURE + exact required production-output obligations satisfied → PRODUCED
+```
+
+These judgments derive from the Completion Contract plus independent Repository Reality, never from provider narrative.
+
+Before evaluation, Runtime re-observes the exact Attempt workspace with the S2-B Git observer and requires the resulting manifest/fingerprint to equal the bound Repository Observation. Content-dependent obligations additionally identify the bytes read through Git's path-aware blob identity, preserving Git clean-filter semantics and rejecting mutable workspace drift. A changed workspace cannot reuse an older Observation; the historical Observation and any prior Completion Evaluation remain unchanged.
+
+The implemented S3-A path stops at:
+
+```text
+Completion Contract
++ exact Repository Observation
++ exact Work Product lineage
++ current PWU / Plan / Baseline / Attempt generation
+↓
+immutable Completion Evaluation
+↓
+PRODUCED or NOT_PRODUCED
+↓
+PWU PRODUCED only when exact output obligations pass
+```
+
+It does not execute Verification, create Verification Records or Guardian Findings, determine Qualification or Satisfaction, create a proposed Git snapshot, form or seal a Candidate, record Candidate Authorization, integrate a repository ref, perform Runtime Commit, or advance the Current Trusted Baseline.
+
+```text
+Observed Work Product
+!=
+PWU PRODUCED
+!=
+PWU SATISFIED
+!=
+Verification PASS
+!=
+Candidate
+!=
+Trusted Baseline
+```
+
+S3-A closes only Completion Evaluation and Produced semantics. It introduces no Verification, Satisfaction, Qualification, Candidate, or Authorization semantics.
+
+S3A-01 through S3A-22 pass against PostgreSQL 17.6, ephemeral real Git repositories, real detached Attempt worktrees, the Deterministic Test Executor, and independent S2-B observation. The S3-A migration downgrade to `20260828_03` and re-upgrade to `20260828_04` pass. The S3-A module is **23/23 PASS**: 22 numbered scenarios plus migration validation. The pre-S3-A S1/S2 suite remains **81/81 PASS**, and the full suite is **104/104 PASS**.
+
+Architecture Baseline remains **v0.1**. The current mainline state is:
+
+```text
+S1
+    CLOSED / PASS
+
+S2
+    CLOSED / PASS
+
+S3
+    IN PROGRESS
+
+S3-A
+    CLOSED / PASS
+
+S3-B
+    NEXT / NOT STARTED
+
+S3-C
+    BLOCKED BY S3-B / NOT STARTED
+
+S4
+    NOT STARTED
+```
+
+The governed step at S3-A closure was:
+
+> Architecture Lead confirms S3-A SOT closure → authorize S3-B Verification Qualification & Satisfaction.
+
+That authorization was subsequently granted. The resulting S3-B implementation Reality is recorded below.
+
+## 47. S3-B implementation reality
+
+S3-B Verification Qualification & Satisfaction is **IMPLEMENTED — LOCAL VALIDATION PASS** and **PENDING ARCHITECTURE LEAD REALITY REVIEW**. It is not CLOSED. S3 remains **IN PROGRESS**. S3-C remains **BLOCKED BY S3-B / NOT STARTED** and is not authorized by this implementation.
+
+Alembic revision `20260828_05` adds exactly three S3-B production tables: `proposed_repository_snapshots`, `verification_records`, and `production_admissibility_records`. No Candidate, Human Authorization, Repository Integration Effect, Runtime Commit, Production Issue, External Effect, Trust Score, Guardian Finding, or Evidence Graph table was added.
+
+The Proposed Repository Snapshot is an immutable, non-authoritative Git commit/tree subject bound to the exact PWU, Plan Revision, Source Baseline, Attempt/generation, Completion Evaluation, Repository Observation, repository identity, and authoritative-ref revision. Runtime revalidates the accepted Observation before construction, builds the tree with a temporary Git index, verifies the commit delta against the exact observed change manifest, and proves the authoritative ref unchanged. Workspace drift rejects stale snapshot creation. Repeating the same exact basis returns the same durable snapshot; materially different Reality requires a new Observation, Completion Evaluation, and snapshot identity.
+
+Verification runs through a provider-neutral Verification Capability Contract. The FVS deterministic provider uses that same seam and returns only `PASS`, `FAIL`, or `UNKNOWN` with lightweight structured evidence bound to the exact snapshot commit/tree and verification obligation. Verification Records also bind the Completion Evaluation, Plan Revision, Source Baseline, provider identity/version, and deterministic basis fingerprint. Same-basis/provider execution is idempotent; a deliberately different provider version creates a new immutable historical record rather than rewriting prior evidence.
+
+Verification Result and applicability remain distinct. A historical `PASS` is preserved, while applicability is computed relationally against the exact current snapshot, Completion Evaluation, Plan Revision, Source Baseline, PWU, and obligation. A changed subject or basis makes old evidence non-applicable without changing its historical result. No arbitrary TTL is introduced.
+
+Assurance / Verification capability owns evidence truth, verification execution/result, evidence interpretation, and assurance-level qualification. SPG separately owns the required verification obligations, exact production-context evidence admissibility, and PWU Satisfaction decision. For every required obligation, a Verification Record must exist, bind the exact subject, remain applicable, and return `PASS`; `FAIL`, `UNKNOWN`, missing, stale, partial, or wrong-subject evidence blocks production admissibility. No synthesized Trust Score or risk-acceptance shortcut is used.
+
+When the complete required PASS set is admissible for the current production lineage, one PostgreSQL Unit of Work appends the production-admissibility fact, advances the versioned PWU from `PRODUCED` to `SATISFIED` through optimistic concurrency, and appends Transition History. Injected failure rolls the whole authoritative action back. Historical stale-generation evidence remains durable but cannot regain current Satisfaction authority.
+
+The implemented S3-B path stops at:
+
+```text
+PWU PRODUCED
++ exact Completion Evaluation
++ exact non-authoritative Proposed Repository Snapshot
++ required exact Verification Records
++ relational applicability / freshness
+↓
+SPG production admissibility
+↓
+PWU SATISFIED
+```
+
+It preserves:
+
+```text
+PRODUCED
+!=
+Verification PASS
+!=
+Applicable Verification
+!=
+PWU SATISFIED
+!=
+Candidate
+!=
+Authorized
+!=
+Integrated
+!=
+Trusted Baseline
+```
+
+S3B-01 through S3B-27 pass against PostgreSQL 17.6, real ephemeral Git repositories and worktrees, actual detached commit/tree objects, the existing Deterministic Test Executor, S3-A Completion Evaluation, and the Deterministic Verification Provider. Migration downgrade to `20260828_04` and re-upgrade to `20260828_05` pass. The S3-B module is **28/28 PASS**: 27 numbered scenarios plus migration validation. The pre-S3-B suite remains **104/104 PASS**, and the full suite is **132/132 PASS**.
+
+Architecture Baseline remains **v0.1**. The current mainline state is:
+
+```text
+S1
+    CLOSED / PASS
+
+S2
+    CLOSED / PASS
+
+S3
+    IN PROGRESS
+
+S3-A
+    CLOSED / PASS
+
+S3-B
+    IMPLEMENTED — LOCAL VALIDATION PASS
+    PENDING ARCHITECTURE LEAD REALITY REVIEW
+
+S3-C
+    BLOCKED BY S3-B / NOT STARTED
+
+S4
+    NOT STARTED
+```
+
+The exact next governed step is:
+
+> Architecture Lead S3-B Reality Review → if PASS, close S3-B and authorize S3-C Candidate Sealing & Human Governance.

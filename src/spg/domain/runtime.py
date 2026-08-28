@@ -23,6 +23,8 @@ class PlanCondition(StrEnum):
 
 class WorkUnitCondition(StrEnum):
     PROPOSED = "PROPOSED"
+    PRODUCED = "PRODUCED"
+    SATISFIED = "SATISFIED"
 
 
 class AttemptCondition(StrEnum):

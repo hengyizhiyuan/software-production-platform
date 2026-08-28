@@ -42,7 +42,7 @@ def test_postgresql_engine_composition_has_no_connection_side_effect() -> None:
         database.dispose()
 
 
-def test_production_metadata_contains_only_admitted_s1_through_s2b_tables() -> None:
+def test_production_metadata_contains_only_admitted_s1_through_s3b_tables() -> None:
     assert set(metadata.tables) == {
         "production_snapshots",
         "current_trusted_baseline_pointer",
@@ -58,12 +58,16 @@ def test_production_metadata_contains_only_admitted_s1_through_s2b_tables() -> N
         "provider_execution_reports",
         "repository_observations",
         "work_product_references",
+        "completion_evaluations",
+        "proposed_repository_snapshots",
+        "verification_records",
+        "production_admissibility_records",
     }
 
 
-def test_alembic_environment_has_s2b_migration_head() -> None:
+def test_alembic_environment_has_s3b_migration_head() -> None:
     project_root = Path(__file__).resolve().parents[1]
     config = Config(project_root / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260828_03"]
+    assert scripts.get_heads() == ["20260828_05"]

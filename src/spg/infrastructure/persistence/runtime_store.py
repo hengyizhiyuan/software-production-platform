@@ -7,6 +7,22 @@ from uuid import UUID
 from sqlalchemy import func, insert, select
 from sqlalchemy.orm import Session
 
+from spg.domain.completion import (
+    CompletionEvaluationOutcome,
+    CompletionEvaluationRecord,
+    CompletionObligationResult,
+    CompletionWorkProductLineage,
+)
+from spg.domain.verification import (
+    ProductionAdmissibilityObligation,
+    ProductionAdmissibilityOutcome,
+    ProductionAdmissibilityRecord,
+    ProposedRepositorySnapshotRecord,
+    VerificationEvidence,
+    VerificationProviderBinding,
+    VerificationRecord,
+    VerificationResultValue,
+)
 from spg.domain.runtime import (
     AttemptCondition,
     BaselinePointerRecord,
@@ -43,6 +59,7 @@ from spg.domain.execution import (
 from spg.infrastructure.persistence.concurrency import update_versioned_row
 from spg.infrastructure.persistence.runtime_schema import (
     attempt_preparations,
+    completion_evaluations,
     context_packages,
     current_trusted_baseline_pointer,
     execution_attempts,
@@ -56,6 +73,9 @@ from spg.infrastructure.persistence.runtime_schema import (
     provider_execution_reports,
     repository_observations,
     work_product_references,
+    proposed_repository_snapshots,
+    verification_records,
+    production_admissibility_records,
 )
 
 
@@ -109,6 +129,18 @@ class RuntimeStore:
     def insert_work_product_reference(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(work_product_references).values(**values))
 
+    def insert_completion_evaluation(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(completion_evaluations).values(**values))
+
+    def insert_proposed_snapshot(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(proposed_repository_snapshots).values(**values))
+
+    def insert_verification_record(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(verification_records).values(**values))
+
+    def insert_production_admissibility(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(production_admissibility_records).values(**values))
+
     def bind_run_to_plan(self, run_id: UUID, expected_version: int, plan_id: UUID) -> int:
         return update_versioned_row(
             self.session,
@@ -130,6 +162,38 @@ class RuntimeStore:
             identity={"id": work_unit_id},
             expected_version=expected_version,
             values={"current_execution_generation": generation},
+        )
+
+    def mark_work_unit_produced(
+        self,
+        work_unit_id: UUID,
+        expected_version: int,
+    ) -> int:
+        return update_versioned_row(
+            self.session,
+            production_work_units,
+            identity={
+                "id": work_unit_id,
+                "condition": WorkUnitCondition.PROPOSED.value,
+            },
+            expected_version=expected_version,
+            values={"condition": WorkUnitCondition.PRODUCED.value},
+        )
+
+    def mark_work_unit_satisfied(
+        self,
+        work_unit_id: UUID,
+        expected_version: int,
+    ) -> int:
+        return update_versioned_row(
+            self.session,
+            production_work_units,
+            identity={
+                "id": work_unit_id,
+                "condition": WorkUnitCondition.PRODUCED.value,
+            },
+            expected_version=expected_version,
+            values={"condition": WorkUnitCondition.SATISFIED.value},
         )
 
     def update_baseline_pointer(
@@ -327,12 +391,19 @@ class RuntimeStore:
         )
         if row is None:
             return None
-        values = dict(row)
-        values["changes"] = tuple(
-            ObservedArtifactChange.model_validate(item)
-            for item in values.pop("change_manifest")
+        return self._repository_observation_record(row)
+
+    def repository_observation_by_id(
+        self,
+        observation_id: UUID,
+    ) -> RepositoryObservationRecord | None:
+        row = self._one(
+            repository_observations,
+            repository_observations.c.id == observation_id,
         )
-        return RepositoryObservationRecord.model_validate(values)
+        if row is None:
+            return None
+        return self._repository_observation_record(row)
 
     def work_product_references(
         self,
@@ -351,6 +422,120 @@ class RuntimeStore:
             values["change_type"] = ArtifactChangeType(values["change_type"])
             records.append(WorkProductReferenceRecord.model_validate(values))
         return tuple(records)
+
+    def completion_evaluation_by_basis(
+        self,
+        basis_fingerprint: str,
+    ) -> CompletionEvaluationRecord | None:
+        row = self._one(
+            completion_evaluations,
+            completion_evaluations.c.basis_fingerprint == basis_fingerprint,
+        )
+        if row is None:
+            return None
+        return self._completion_evaluation_record(row)
+
+    def completion_evaluation(
+        self,
+        evaluation_id: UUID,
+    ) -> CompletionEvaluationRecord | None:
+        row = self._one(
+            completion_evaluations,
+            completion_evaluations.c.id == evaluation_id,
+        )
+        if row is None:
+            return None
+        return self._completion_evaluation_record(row)
+
+    def completion_evaluations_for_work_unit(
+        self,
+        work_unit_id: UUID,
+    ) -> tuple[CompletionEvaluationRecord, ...]:
+        rows = self.session.execute(
+            select(completion_evaluations)
+            .where(completion_evaluations.c.work_unit_id == work_unit_id)
+            .order_by(completion_evaluations.c.created_at, completion_evaluations.c.id)
+        ).mappings()
+        return tuple(self._completion_evaluation_record(row) for row in rows)
+
+    def proposed_snapshot_by_basis(
+        self,
+        basis_fingerprint: str,
+    ) -> ProposedRepositorySnapshotRecord | None:
+        row = self._one(
+            proposed_repository_snapshots,
+            proposed_repository_snapshots.c.basis_fingerprint == basis_fingerprint,
+        )
+        if row is None:
+            return None
+        return ProposedRepositorySnapshotRecord.model_validate(dict(row))
+
+    def proposed_snapshot(
+        self,
+        snapshot_id: UUID,
+    ) -> ProposedRepositorySnapshotRecord | None:
+        row = self._one(
+            proposed_repository_snapshots,
+            proposed_repository_snapshots.c.id == snapshot_id,
+        )
+        if row is None:
+            return None
+        return ProposedRepositorySnapshotRecord.model_validate(dict(row))
+
+    def verification_record_by_basis(
+        self,
+        basis_fingerprint: str,
+    ) -> VerificationRecord | None:
+        row = self._one(
+            verification_records,
+            verification_records.c.basis_fingerprint == basis_fingerprint,
+        )
+        if row is None:
+            return None
+        return self._verification_record(row)
+
+    def verification_record(self, record_id: UUID) -> VerificationRecord | None:
+        row = self._one(verification_records, verification_records.c.id == record_id)
+        if row is None:
+            return None
+        return self._verification_record(row)
+
+    def verification_records_for_snapshot(
+        self,
+        snapshot_id: UUID,
+    ) -> tuple[VerificationRecord, ...]:
+        rows = self.session.execute(
+            select(verification_records)
+            .where(verification_records.c.proposed_snapshot_id == snapshot_id)
+            .order_by(verification_records.c.created_at, verification_records.c.id)
+        ).mappings()
+        return tuple(self._verification_record(row) for row in rows)
+
+    def production_admissibility_by_basis(
+        self,
+        basis_fingerprint: str,
+    ) -> ProductionAdmissibilityRecord | None:
+        row = self._one(
+            production_admissibility_records,
+            production_admissibility_records.c.basis_fingerprint == basis_fingerprint,
+        )
+        if row is None:
+            return None
+        return self._production_admissibility_record(row)
+
+    def production_admissibility_for_snapshot(
+        self,
+        snapshot_id: UUID,
+    ) -> tuple[ProductionAdmissibilityRecord, ...]:
+        rows = self.session.execute(
+            select(production_admissibility_records)
+            .where(production_admissibility_records.c.proposed_snapshot_id == snapshot_id)
+            .order_by(
+                production_admissibility_records.c.created_at,
+                production_admissibility_records.c.id,
+            )
+        ).mappings()
+        return tuple(self._production_admissibility_record(row) for row in rows)
 
     @staticmethod
     def _work_unit_record(row: Mapping[str, Any]) -> WorkUnitRecord:
@@ -381,6 +566,58 @@ class RuntimeStore:
             source_revision=values.pop("source_revision"),
         )
         return ExecutionDispatchRecord.model_validate(values)
+
+    @staticmethod
+    def _repository_observation_record(
+        row: Mapping[str, Any],
+    ) -> RepositoryObservationRecord:
+        values = dict(row)
+        values["changes"] = tuple(
+            ObservedArtifactChange.model_validate(item)
+            for item in values.pop("change_manifest")
+        )
+        return RepositoryObservationRecord.model_validate(values)
+
+    @staticmethod
+    def _completion_evaluation_record(
+        row: Mapping[str, Any],
+    ) -> CompletionEvaluationRecord:
+        values = dict(row)
+        values["outcome"] = CompletionEvaluationOutcome(values["outcome"])
+        values["work_product_lineage"] = tuple(
+            CompletionWorkProductLineage.model_validate(item)
+            for item in values["work_product_lineage"]
+        )
+        values["obligation_results"] = tuple(
+            CompletionObligationResult.model_validate(item)
+            for item in values["obligation_results"]
+        )
+        return CompletionEvaluationRecord.model_validate(values)
+
+    @staticmethod
+    def _verification_record(row: Mapping[str, Any]) -> VerificationRecord:
+        values = dict(row)
+        values["provider"] = VerificationProviderBinding.model_validate(
+            values.pop("provider_binding")
+        )
+        values["result"] = VerificationResultValue(values["result"])
+        values["evidence"] = VerificationEvidence.model_validate(values["evidence"])
+        return VerificationRecord.model_validate(values)
+
+    @staticmethod
+    def _production_admissibility_record(
+        row: Mapping[str, Any],
+    ) -> ProductionAdmissibilityRecord:
+        values = dict(row)
+        values["outcome"] = ProductionAdmissibilityOutcome(values["outcome"])
+        values["verification_record_ids"] = tuple(
+            UUID(value) for value in values["verification_record_ids"]
+        )
+        values["obligation_results"] = tuple(
+            ProductionAdmissibilityObligation.model_validate(item)
+            for item in values["obligation_results"]
+        )
+        return ProductionAdmissibilityRecord.model_validate(values)
 
     def _one(self, table, condition) -> Mapping[str, Any] | None:
         return self.session.execute(select(table).where(condition)).mappings().one_or_none()

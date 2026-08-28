@@ -6,6 +6,8 @@ from spg.config import Settings
 from spg.application.runtime import RuntimeService
 from spg.application.preparation import PreparationService
 from spg.application.execution import ExecutionService
+from spg.application.completion import CompletionService
+from spg.application.verification import VerificationService
 from spg.infrastructure.persistence import Database
 
 
@@ -45,6 +47,16 @@ class Application:
         selected_database = database or self.persistence()
         preparation = PreparationService(selected_database)
         return ExecutionService(selected_database, preparation=preparation)
+
+    def completion(self, database: Database | None = None) -> CompletionService:
+        """Compose S3-A output evaluation without Verification or Candidate logic."""
+
+        return CompletionService(database or self.persistence())
+
+    def verification(self, database: Database | None = None) -> VerificationService:
+        """Compose S3-B without selecting Guardian or creating a Candidate."""
+
+        return VerificationService(database or self.persistence())
 
 
 def bootstrap(settings: Settings | None = None) -> Application:

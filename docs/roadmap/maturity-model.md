@@ -2,7 +2,7 @@
 
 ## Current Architecture Review State
 
-Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and Readiness](../architecture/spg-runtime-architecture-readiness.md) is PASS, and the [SPG Lite Runtime Implementation Contract](../architecture/spg-lite-runtime-implementation-contract.md) remains CLOSED. The [FVS-1 Implementation Contract](../architecture/spg-fvs-1-implementation-contract.md) is ADMITTED, F3-D is CLOSED, and FVS-1 is authorized for controlled implementation. S1-A Runtime Project Foundation, S1-B Persistent Runtime Foundation, and S1-C Bootstrap Baseline & Minimal Durable Runtime Spine are CLOSED / PASS.
+Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and Readiness](../architecture/spg-runtime-architecture-readiness.md) is PASS, and the [SPG Lite Runtime Implementation Contract](../architecture/spg-lite-runtime-implementation-contract.md) remains CLOSED. The [FVS-1 Implementation Contract](../architecture/spg-fvs-1-implementation-contract.md) is ADMITTED, F3-D is CLOSED, and FVS-1 is authorized for controlled implementation. S1 Runtime Foundation & Persistent Spine and S2 Governed Artifact Production are CLOSED / PASS. S3 is IN PROGRESS and S3-A remains CLOSED / PASS. S3-B is IMPLEMENTED — LOCAL VALIDATION PASS and pending Architecture Lead Reality Review with the full suite at 132/132 PASS. S3-C remains BLOCKED BY S3-B / NOT STARTED.
 
 | Review item | Status |
 |---|---|
@@ -52,9 +52,13 @@ Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and 
 | S2 — Governed Artifact Production | CLOSED / PASS |
 | S2-A — Context & Execution Preparation Foundation | CLOSED / PASS |
 | S2-B — Isolated Execution & Independent Artifact Observation | CLOSED / PASS |
-| S3 — Completion / Verification / Candidate Governance | NEXT / NOT STARTED |
+| S3 — Completion, Verification & Candidate Governance | IN PROGRESS |
+| S3-A — Completion Evaluation & Produced Semantics | CLOSED / PASS |
+| S3-B — Verification Qualification & Satisfaction | IMPLEMENTED — LOCAL VALIDATION PASS / PENDING ARCHITECTURE LEAD REALITY REVIEW |
+| S3-C — Candidate Sealing & Human Governance | BLOCKED BY S3-B / NOT STARTED |
+| S4 — Repository Integration & Runtime Commit | NOT STARTED |
 
-The exact next governed step is **Architecture Lead confirms S2 SOT closure → define the bounded S3 contract for Completion evaluation, Verification/Qualification, Candidate formation, and Governance**. S3 remains unauthorized and not started.
+S3-B preserves the exact non-authoritative proposed snapshot, provider-neutral Verification seam, relational applicability/freshness, SPG production admissibility, and atomic optimistic-concurrency-protected `PRODUCED → SATISFIED` transition. It introduces no Candidate, Authorization, Repository Integration, Runtime Commit, Trusted Baseline advancement, Trust Score, or Guardian ownership collapse. S3-B is not yet CLOSED and S3-C is not authorized. The exact next governed step is **Architecture Lead S3-B Reality Review → if PASS, close S3-B and authorize S3-C Candidate Sealing & Human Governance**.
 
 The refinement order A → B → C → D and Final Review is complete. All 12 discovery areas remain frozen. The closure confirms logical Runtime semantics, ownership boundaries, deferred-scope clarity, and SPG Lite feasibility without selecting physical mechanisms or expanding MVP.
 

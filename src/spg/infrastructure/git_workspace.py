@@ -31,6 +31,36 @@ class GitExactReality:
         )
         return blob, blob_identity
 
+    def identify_blob_content(
+        self,
+        repository_path: Path,
+        repository_relative_path: str,
+        content: bytes,
+    ) -> str:
+        """Apply Git's path-aware clean filters and return exact blob identity."""
+
+        repository = self._repository_root(repository_path)
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repository),
+                "hash-object",
+                f"--path={repository_relative_path}",
+                "--stdin",
+            ],
+            input=content,
+            check=False,
+            capture_output=True,
+        )
+        if result.returncode != 0:
+            message = (
+                result.stderr.decode(errors="replace").strip()
+                or "Git blob identification failed"
+            )
+            raise RepositoryRealityError(message)
+        return result.stdout.decode().strip()
+
     @classmethod
     def _repository_root(cls, repository_path: Path) -> Path:
         repository = repository_path.resolve()

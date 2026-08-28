@@ -495,6 +495,248 @@ work_product_references = Table(
     ),
 )
 
+completion_evaluations = Table(
+    "completion_evaluations",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "production_run_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_runs.id", name="fk_completion_evaluations_run"),
+        nullable=False,
+    ),
+    Column(
+        "work_unit_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_work_units.id",
+            name="fk_completion_evaluations_work_unit",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "plan_revisions.id",
+            name="fk_completion_evaluations_plan",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "source_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_snapshots.id",
+            name="fk_completion_evaluations_baseline",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "attempt_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "execution_attempts.id",
+            name="fk_completion_evaluations_attempt",
+        ),
+        nullable=False,
+    ),
+    Column("generation", Integer, nullable=False),
+    Column("completion_contract_fingerprint", String(64), nullable=False),
+    Column(
+        "repository_observation_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "repository_observations.id",
+            name="fk_completion_evaluations_observation",
+        ),
+        nullable=False,
+    ),
+    Column("repository_observation_fingerprint", String(64), nullable=False),
+    Column("work_product_lineage", JSONB, nullable=False),
+    Column("work_product_set_fingerprint", String(64), nullable=False),
+    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("outcome", String(32), nullable=False),
+    Column("obligation_results", JSONB, nullable=False),
+    Column(
+        "created_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+)
+
+proposed_repository_snapshots = Table(
+    "proposed_repository_snapshots",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "production_run_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_runs.id", name="fk_proposed_snapshots_run"),
+        nullable=False,
+    ),
+    Column(
+        "work_unit_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_work_units.id", name="fk_proposed_snapshots_work_unit"),
+        nullable=False,
+    ),
+    Column(
+        "plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey("plan_revisions.id", name="fk_proposed_snapshots_plan"),
+        nullable=False,
+    ),
+    Column(
+        "source_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_snapshots.id", name="fk_proposed_snapshots_baseline"),
+        nullable=False,
+    ),
+    Column(
+        "attempt_id",
+        Uuid(as_uuid=True),
+        ForeignKey("execution_attempts.id", name="fk_proposed_snapshots_attempt"),
+        nullable=False,
+    ),
+    Column("generation", Integer, nullable=False),
+    Column(
+        "completion_evaluation_id",
+        Uuid(as_uuid=True),
+        ForeignKey("completion_evaluations.id", name="fk_proposed_snapshots_completion"),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "repository_observation_id",
+        Uuid(as_uuid=True),
+        ForeignKey("repository_observations.id", name="fk_proposed_snapshots_observation"),
+        nullable=False,
+    ),
+    Column("repository_identity", String(255), nullable=False),
+    Column("repository_ref", String(255), nullable=False),
+    Column("authoritative_ref_revision", String(128), nullable=False),
+    Column("proposed_commit_identity", String(128), nullable=False),
+    Column("tree_identity", String(128), nullable=False),
+    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column(
+        "created_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+)
+
+verification_records = Table(
+    "verification_records",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "production_run_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_runs.id", name="fk_verification_records_run"),
+        nullable=False,
+    ),
+    Column(
+        "work_unit_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_work_units.id", name="fk_verification_records_work_unit"),
+        nullable=False,
+    ),
+    Column(
+        "plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey("plan_revisions.id", name="fk_verification_records_plan"),
+        nullable=False,
+    ),
+    Column(
+        "source_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_snapshots.id", name="fk_verification_records_baseline"),
+        nullable=False,
+    ),
+    Column(
+        "completion_evaluation_id",
+        Uuid(as_uuid=True),
+        ForeignKey("completion_evaluations.id", name="fk_verification_records_completion"),
+        nullable=False,
+    ),
+    Column(
+        "proposed_snapshot_id",
+        Uuid(as_uuid=True),
+        ForeignKey("proposed_repository_snapshots.id", name="fk_verification_records_snapshot"),
+        nullable=False,
+    ),
+    Column("proposed_commit_identity", String(128), nullable=False),
+    Column("tree_identity", String(128), nullable=False),
+    Column("obligation", Text, nullable=False),
+    Column("obligation_fingerprint", String(64), nullable=False),
+    Column("provider_binding", JSONB, nullable=False),
+    Column("result", String(32), nullable=False),
+    Column("evidence", JSONB, nullable=False),
+    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column(
+        "created_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+)
+
+production_admissibility_records = Table(
+    "production_admissibility_records",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "production_run_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_runs.id", name="fk_admissibility_records_run"),
+        nullable=False,
+    ),
+    Column(
+        "work_unit_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_work_units.id", name="fk_admissibility_records_work_unit"),
+        nullable=False,
+    ),
+    Column(
+        "plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey("plan_revisions.id", name="fk_admissibility_records_plan"),
+        nullable=False,
+    ),
+    Column(
+        "source_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_snapshots.id", name="fk_admissibility_records_baseline"),
+        nullable=False,
+    ),
+    Column(
+        "completion_evaluation_id",
+        Uuid(as_uuid=True),
+        ForeignKey("completion_evaluations.id", name="fk_admissibility_records_completion"),
+        nullable=False,
+    ),
+    Column(
+        "proposed_snapshot_id",
+        Uuid(as_uuid=True),
+        ForeignKey("proposed_repository_snapshots.id", name="fk_admissibility_records_snapshot"),
+        nullable=False,
+    ),
+    Column("required_obligations_fingerprint", String(64), nullable=False),
+    Column("verification_record_ids", JSONB, nullable=False),
+    Column("obligation_results", JSONB, nullable=False),
+    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("outcome", String(32), nullable=False),
+    Column(
+        "created_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+)
+
 
 runtime_tables = (
     production_snapshots,
@@ -511,4 +753,8 @@ runtime_tables = (
     provider_execution_reports,
     repository_observations,
     work_product_references,
+    completion_evaluations,
+    proposed_repository_snapshots,
+    verification_records,
+    production_admissibility_records,
 )
