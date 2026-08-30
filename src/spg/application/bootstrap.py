@@ -5,9 +5,16 @@ from dataclasses import dataclass
 from spg.config import Settings
 from spg.application.runtime import RuntimeService
 from spg.application.preparation import PreparationService
+from spg.application.materialization import ExecutionInputMaterializationService
 from spg.application.execution import ExecutionService
 from spg.application.completion import CompletionService
 from spg.application.verification import VerificationService
+from spg.application.governance import CandidateGovernanceService
+from spg.application.integration import RepositoryIntegrationService
+from spg.application.runtime_commit import RuntimeCommitService
+from spg.application.recovery import RecoveryAssessmentService
+from spg.application.reconciliation import RecoveryReconciliationService
+from spg.application.attempt_recovery import AttemptRecoveryService
 from spg.infrastructure.persistence import Database
 
 
@@ -48,6 +55,19 @@ class Application:
         preparation = PreparationService(selected_database)
         return ExecutionService(selected_database, preparation=preparation)
 
+    def execution_input_materialization(
+        self,
+        database: Database | None = None,
+    ) -> ExecutionInputMaterializationService:
+        """Compose exact Provider input materialization without selecting a Provider."""
+
+        selected_database = database or self.persistence()
+        preparation = PreparationService(selected_database)
+        return ExecutionInputMaterializationService(
+            selected_database,
+            preparation=preparation,
+        )
+
     def completion(self, database: Database | None = None) -> CompletionService:
         """Compose S3-A output evaluation without Verification or Candidate logic."""
 
@@ -57,6 +77,54 @@ class Application:
         """Compose S3-B without selecting Guardian or creating a Candidate."""
 
         return VerificationService(database or self.persistence())
+
+    def candidate_governance(
+        self,
+        database: Database | None = None,
+    ) -> CandidateGovernanceService:
+        """Compose S3-C without Repository Integration or Runtime Commit."""
+
+        return CandidateGovernanceService(database or self.persistence())
+
+    def repository_integration(
+        self,
+        database: Database | None = None,
+    ) -> RepositoryIntegrationService:
+        """Compose S4-A without Runtime Commit or Trusted Baseline advancement."""
+
+        return RepositoryIntegrationService(database or self.persistence())
+
+    def runtime_commit(
+        self,
+        database: Database | None = None,
+    ) -> RuntimeCommitService:
+        """Compose S4-B without repository mutation or S5 recovery."""
+
+        return RuntimeCommitService(database or self.persistence())
+
+    def recovery_assessment(
+        self,
+        database: Database | None = None,
+    ) -> RecoveryAssessmentService:
+        """Compose S5-A classification without executing recovery."""
+
+        return RecoveryAssessmentService(database or self.persistence())
+
+    def recovery_reconciliation(
+        self,
+        database: Database | None = None,
+    ) -> RecoveryReconciliationService:
+        """Compose S5-B without Git mutation or broad automatic recovery."""
+
+        return RecoveryReconciliationService(database or self.persistence())
+
+    def attempt_recovery(
+        self,
+        database: Database | None = None,
+    ) -> AttemptRecoveryService:
+        """Compose S5-C salvage/retry preparation without provider dispatch."""
+
+        return AttemptRecoveryService(database or self.persistence())
 
 
 def bootstrap(settings: Settings | None = None) -> Application:

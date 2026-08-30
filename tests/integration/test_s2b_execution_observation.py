@@ -32,6 +32,7 @@ from spg.infrastructure.persistence.runtime_schema import (
     execution_dispatches,
     provider_execution_reports,
     repository_observations,
+    runtime_commits,
     runtime_tables,
     work_product_references,
 )
@@ -638,8 +639,8 @@ def test_s2b_18_execution_has_no_completion_or_later_stage_path(
         "candidates",
         "production_issues",
         "repository_integrations",
-        "runtime_commits",
     } & set(metadata.tables)
+    assert _count(prepared_facts.database, runtime_commits) == 0
 
 
 def test_s2b_19_observation_idempotency_is_deterministic(

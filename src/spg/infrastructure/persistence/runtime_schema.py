@@ -297,6 +297,68 @@ context_packages = Table(
     ),
 )
 
+materialized_execution_inputs = Table(
+    "materialized_execution_inputs",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "attempt_id",
+        Uuid(as_uuid=True),
+        ForeignKey("execution_attempts.id", name="fk_materialized_inputs_attempt"),
+        nullable=False,
+        unique=True,
+    ),
+    Column("generation", Integer, nullable=False),
+    Column(
+        "production_run_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_runs.id", name="fk_materialized_inputs_run"),
+        nullable=False,
+    ),
+    Column(
+        "work_unit_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_work_units.id", name="fk_materialized_inputs_work_unit"),
+        nullable=False,
+    ),
+    Column(
+        "plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey("plan_revisions.id", name="fk_materialized_inputs_plan"),
+        nullable=False,
+    ),
+    Column(
+        "source_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_snapshots.id", name="fk_materialized_inputs_baseline"),
+        nullable=False,
+    ),
+    Column(
+        "context_package_id",
+        Uuid(as_uuid=True),
+        ForeignKey("context_packages.id", name="fk_materialized_inputs_context"),
+        nullable=False,
+    ),
+    Column("context_package_version", Integer, nullable=False),
+    Column("context_package_content_fingerprint", String(64), nullable=False),
+    Column("completion_contract_fingerprint", String(64), nullable=False),
+    Column("prepared_execution_request", JSONB, nullable=False),
+    Column("instruction_content", Text, nullable=False),
+    Column("context_projection", JSONB, nullable=False),
+    Column("input_fingerprint", String(64), nullable=False, unique=True),
+    Column(
+        "created_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    CheckConstraint("generation > 0", name="materialized_input_generation_positive"),
+    CheckConstraint(
+        "context_package_version > 0",
+        name="materialized_input_context_version_positive",
+    ),
+)
+
 attempt_preparations = Table(
     "attempt_preparations",
     metadata,
@@ -737,6 +799,411 @@ production_admissibility_records = Table(
     ),
 )
 
+baseline_candidates = Table(
+    "baseline_candidates",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("condition", String(32), nullable=False),
+    Column(
+        "production_run_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_runs.id", name="fk_baseline_candidates_run"),
+        nullable=False,
+    ),
+    Column(
+        "plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey("plan_revisions.id", name="fk_baseline_candidates_plan"),
+        nullable=False,
+    ),
+    Column(
+        "source_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_snapshots.id", name="fk_baseline_candidates_baseline"),
+        nullable=False,
+    ),
+    Column("repository_identity", String(255), nullable=False),
+    Column("target_authoritative_ref", String(512), nullable=False),
+    Column("expected_source_repository_revision", String(128), nullable=False),
+    Column(
+        "proposed_snapshot_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "proposed_repository_snapshots.id",
+            name="fk_baseline_candidates_proposed_snapshot",
+        ),
+        nullable=False,
+    ),
+    Column("proposed_commit_identity", String(128), nullable=False),
+    Column("proposed_tree_identity", String(128), nullable=False),
+    Column("satisfied_work_unit_ids", JSONB, nullable=False),
+    Column("completion_evaluation_ids", JSONB, nullable=False),
+    Column("work_product_reference_ids", JSONB, nullable=False),
+    Column("verification_record_ids", JSONB, nullable=False),
+    Column(
+        "production_admissibility_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_admissibility_records.id",
+            name="fk_baseline_candidates_admissibility",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "production_admissibility_basis_fingerprint",
+        String(64),
+        nullable=False,
+    ),
+    Column("fingerprint", String(64), nullable=False, unique=True),
+    Column(
+        "sealed_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    CheckConstraint("condition = 'SEALED'", name="baseline_candidate_is_sealed"),
+)
+
+human_authorizations = Table(
+    "human_authorizations",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("authority_identity", String(255), nullable=False),
+    Column(
+        "candidate_id",
+        Uuid(as_uuid=True),
+        ForeignKey("baseline_candidates.id", name="fk_human_authorizations_candidate"),
+        nullable=False,
+    ),
+    Column("candidate_fingerprint", String(64), nullable=False),
+    Column("authorization_scope", JSONB, nullable=False),
+    Column(
+        "source_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_snapshots.id", name="fk_human_authorizations_baseline"),
+        nullable=False,
+    ),
+    Column("repository_identity", String(255), nullable=False),
+    Column("target_authoritative_ref", String(512), nullable=False),
+    Column("expected_source_repository_revision", String(128), nullable=False),
+    Column("proposed_repository_revision", String(128), nullable=False),
+    Column("rationale", Text, nullable=True),
+    Column(
+        "governance_record_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "governance_records.id",
+            name="fk_human_authorizations_governance",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column(
+        "authorized_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+)
+
+repository_integration_effects = Table(
+    "repository_integration_effects",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("version", Integer, nullable=False),
+    Column("effect_type", String(64), nullable=False),
+    Column("state", String(32), nullable=False),
+    Column(
+        "candidate_id",
+        Uuid(as_uuid=True),
+        ForeignKey("baseline_candidates.id", name="fk_repository_effects_candidate"),
+        nullable=False,
+    ),
+    Column("candidate_fingerprint", String(64), nullable=False),
+    Column(
+        "human_authorization_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "human_authorizations.id",
+            name="fk_repository_effects_authorization",
+        ),
+        nullable=False,
+    ),
+    Column("repository_identity", String(255), nullable=False),
+    Column("target_authoritative_ref", String(512), nullable=False),
+    Column("expected_source_repository_revision", String(128), nullable=False),
+    Column("proposed_repository_revision", String(128), nullable=False),
+    Column("proposed_tree_identity", String(128), nullable=False),
+    Column("operation_fingerprint", String(64), nullable=False, unique=True),
+    Column(
+        "prepared_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    Column("observed_repository_revision", String(128), nullable=True),
+    Column("observed_at", DateTime(timezone=True), nullable=True),
+    Column("converged_at", DateTime(timezone=True), nullable=True),
+    CheckConstraint(
+        "effect_type = 'REPOSITORY_REF_ADVANCE'",
+        name="repository_effect_is_ref_advance",
+    ),
+    CheckConstraint(
+        "state IN ('PREPARED', 'CONVERGED')",
+        name="repository_effect_state_is_narrow",
+    ),
+    CheckConstraint(
+        "(state = 'PREPARED' AND converged_at IS NULL) OR "
+        "(state = 'CONVERGED' AND converged_at IS NOT NULL "
+        "AND observed_repository_revision = proposed_repository_revision)",
+        name="repository_effect_convergence_is_observed",
+    ),
+)
+
+runtime_commits = Table(
+    "runtime_commits",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "candidate_id",
+        Uuid(as_uuid=True),
+        ForeignKey("baseline_candidates.id", name="fk_runtime_commits_candidate"),
+        nullable=False,
+        unique=True,
+    ),
+    Column("candidate_fingerprint", String(64), nullable=False),
+    Column(
+        "human_authorization_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "human_authorizations.id",
+            name="fk_runtime_commits_authorization",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "repository_integration_effect_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "repository_integration_effects.id",
+            name="fk_runtime_commits_integration_effect",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "source_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_snapshots.id",
+            name="fk_runtime_commits_source_baseline",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "new_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_snapshots.id",
+            name="fk_runtime_commits_new_baseline",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "production_run_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_runs.id", name="fk_runtime_commits_run"),
+        nullable=False,
+    ),
+    Column(
+        "plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey("plan_revisions.id", name="fk_runtime_commits_plan"),
+        nullable=False,
+    ),
+    Column("repository_identity", String(255), nullable=False),
+    Column("target_authoritative_ref", String(512), nullable=False),
+    Column("expected_source_repository_revision", String(128), nullable=False),
+    Column("repository_revision", String(128), nullable=False),
+    Column("repository_tree_identity", String(128), nullable=False),
+    Column("satisfied_work_unit_ids", JSONB, nullable=False),
+    Column("completion_evaluation_ids", JSONB, nullable=False),
+    Column("verification_record_ids", JSONB, nullable=False),
+    Column(
+        "production_admissibility_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_admissibility_records.id",
+            name="fk_runtime_commits_admissibility",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "production_admissibility_basis_fingerprint",
+        String(64),
+        nullable=False,
+    ),
+    Column("commit_fingerprint", String(64), nullable=False, unique=True),
+    Column(
+        "committed_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+)
+
+recovery_assessments = Table(
+    "recovery_assessments",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("subject_type", String(64), nullable=False),
+    Column("subject_identity", String(255), nullable=False),
+    Column("governed_basis", JSONB, nullable=False),
+    Column("observed_facts", JSONB, nullable=False),
+    Column("differences", JSONB, nullable=False),
+    Column("classification", String(32), nullable=False),
+    Column("guidance", String(64), nullable=False),
+    Column("subject_is_current", SmallInteger, nullable=False),
+    Column("safely_recoverable", SmallInteger, nullable=False),
+    Column("requires_human_attention", SmallInteger, nullable=False),
+    Column("recovery_barrier", SmallInteger, nullable=False),
+    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column(
+        "assessed_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    CheckConstraint(
+        "subject_type IN ('ATTEMPT', 'REPOSITORY_INTEGRATION')",
+        name="recovery_assessment_subject_is_narrow",
+    ),
+    CheckConstraint(
+        "classification IN "
+        "('COHERENT', 'RECOVERABLE', 'UNKNOWN', 'DIVERGED', 'STALE', 'BLOCKED')",
+        name="recovery_assessment_classification_is_known",
+    ),
+    CheckConstraint(
+        "subject_is_current IN (0, 1) AND safely_recoverable IN (0, 1) "
+        "AND requires_human_attention IN (0, 1) "
+        "AND recovery_barrier IN (0, 1)",
+        name="recovery_assessment_flags_are_boolean",
+    ),
+)
+
+recovery_action_records = Table(
+    "recovery_action_records",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "recovery_assessment_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "recovery_assessments.id",
+            name="fk_recovery_actions_assessment",
+        ),
+        nullable=False,
+    ),
+    Column("assessment_basis_fingerprint", String(64), nullable=False),
+    Column("action_type", String(64), nullable=False),
+    Column("subject_type", String(64), nullable=False),
+    Column("subject_identity", String(255), nullable=False),
+    Column(
+        "integration_effect_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "repository_integration_effects.id",
+            name="fk_recovery_actions_effect",
+        ),
+        nullable=True,
+    ),
+    Column(
+        "candidate_id",
+        Uuid(as_uuid=True),
+        ForeignKey("baseline_candidates.id", name="fk_recovery_actions_candidate"),
+        nullable=True,
+    ),
+    Column(
+        "runtime_commit_id",
+        Uuid(as_uuid=True),
+        ForeignKey("runtime_commits.id", name="fk_recovery_actions_runtime_commit"),
+        nullable=True,
+    ),
+    Column(
+        "old_attempt_id",
+        Uuid(as_uuid=True),
+        ForeignKey("execution_attempts.id", name="fk_recovery_actions_old_attempt"),
+        nullable=True,
+    ),
+    Column(
+        "new_attempt_id",
+        Uuid(as_uuid=True),
+        ForeignKey("execution_attempts.id", name="fk_recovery_actions_new_attempt"),
+        nullable=True,
+    ),
+    Column("old_generation", Integer, nullable=True),
+    Column("new_generation", Integer, nullable=True),
+    Column("workspace_identity", String(255), nullable=True),
+    Column(
+        "repository_observation_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "repository_observations.id",
+            name="fk_recovery_actions_observation",
+        ),
+        nullable=True,
+    ),
+    Column(
+        "completion_evaluation_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "completion_evaluations.id",
+            name="fk_recovery_actions_completion",
+        ),
+        nullable=True,
+    ),
+    Column("action_basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("outcome", String(32), nullable=False),
+    Column("observed_repository_revision", String(128), nullable=True),
+    Column("observed_tree_identity", String(128), nullable=True),
+    Column(
+        "resolved_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    CheckConstraint(
+        "action_type IN ('RECORD_EXTERNAL_CONVERGENCE', 'RETRY_RUNTIME_COMMIT', "
+        "'REOBSERVE_ATTEMPT_WORK', 'RETRY_WITH_NEW_ATTEMPT', "
+        "'RESUME_EXISTING_ATTEMPT')",
+        name="recovery_action_type_is_narrow",
+    ),
+    CheckConstraint(
+        "subject_type IN ('REPOSITORY_INTEGRATION', 'ATTEMPT')",
+        name="recovery_action_subject_is_narrow",
+    ),
+    CheckConstraint(
+        "outcome IN ('APPLIED', 'NO_ACTION', 'SALVAGED', 'INCOMPLETE', "
+        "'RETRY_CREATED', 'UNSUPPORTED_DEFERRED')",
+        name="recovery_action_outcome_is_known",
+    ),
+    CheckConstraint(
+        "(subject_type = 'REPOSITORY_INTEGRATION' "
+        "AND integration_effect_id IS NOT NULL AND candidate_id IS NOT NULL "
+        "AND old_attempt_id IS NULL) OR "
+        "(subject_type = 'ATTEMPT' AND old_attempt_id IS NOT NULL "
+        "AND integration_effect_id IS NULL AND candidate_id IS NULL)",
+        name="recovery_action_subject_binding_is_exact",
+    ),
+    UniqueConstraint(
+        "recovery_assessment_id",
+        "action_type",
+        name="uq_recovery_action_assessment_type",
+    ),
+)
+
 
 runtime_tables = (
     production_snapshots,
@@ -748,6 +1215,7 @@ runtime_tables = (
     governance_records,
     transition_history,
     context_packages,
+    materialized_execution_inputs,
     attempt_preparations,
     execution_dispatches,
     provider_execution_reports,
@@ -757,4 +1225,10 @@ runtime_tables = (
     proposed_repository_snapshots,
     verification_records,
     production_admissibility_records,
+    baseline_candidates,
+    human_authorizations,
+    repository_integration_effects,
+    runtime_commits,
+    recovery_assessments,
+    recovery_action_records,
 )

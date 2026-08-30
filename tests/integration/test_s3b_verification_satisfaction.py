@@ -41,7 +41,9 @@ from spg.infrastructure.persistence import (
     update_versioned_row,
 )
 from spg.infrastructure.persistence.runtime_schema import (
+    baseline_candidates,
     current_trusted_baseline_pointer,
+    human_authorizations,
     production_admissibility_records,
     production_work_units,
     proposed_repository_snapshots,
@@ -612,12 +614,11 @@ def test_s3b_21_satisfaction_creates_no_candidate(
     _verify_pass(facts, snapshot)
     result = facts.verification.evaluate_admissibility(snapshot.id)
     assert result.work_unit.condition is WorkUnitCondition.SATISFIED
-    assert not {
-        "baseline_candidates",
-        "candidates",
-        "candidate_authorizations",
-        "human_authorizations",
-    } & set(inspect(postgres_database.engine).get_table_names())
+    assert _count(postgres_database, baseline_candidates) == 0
+    assert _count(postgres_database, human_authorizations) == 0
+    assert not {"candidates", "candidate_authorizations"} & set(
+        inspect(postgres_database.engine).get_table_names()
+    )
 
 
 def test_s3b_22_no_repository_integration_or_ref_movement(

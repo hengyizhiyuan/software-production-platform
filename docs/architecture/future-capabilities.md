@@ -356,6 +356,20 @@ Production Policy + Production Pattern + AI Adaptive Planning
 
 This is a Future Capability and Architecture Direction, Not Implemented in the MVP.
 
+## Managed Production and Human Attention
+
+**FUTURE PRODUCT / INTERACTION DIRECTION — NOT REQUIRED FOR CURRENT S4; NOT A DOGFOOD BLOCKER BY ITSELF; NOT AUTHORIZED FOR UI IMPLEMENTATION.** This direction should guide later productization only after sufficient real Dogfood evidence exists.
+
+Once a project has crossed the high-uncertainty architecture/design phase and has sufficiently explicit contracts, Production State, Context, Verification, recovery boundaries, and Authority policies, it may enter a governed managed-production mode. The Human Governor defines goals, architecture, constraints, Authority boundaries, risk tolerance, and quality requirements; SPG governs planning, PWU execution, observation, Verification, satisfaction, Candidate formation, bounded continuation, and recovery. Human involvement is then concentrated at Authority boundaries, high-risk decisions, architecture or goal changes, material ambiguity, unresolvable Verification conflict, and risk acceptance: **Human-at-Authority-Points, not Human-in-the-loop-everywhere.**
+
+Managed production is not unrestricted autonomy. Automatic continuation is permitted only while required contracts and Verification obligations remain satisfied, no blocking finding or Authority escalation exists, production lineage remains current, and risk stays within the delegated boundary. Otherwise production stops, preserves state, and requests Human Attention. A mature run may continue for hours, overnight, or across interruptions without continuous supervision, but quality must not be reduced merely to increase autonomy. A mature AI-native production system should remain coherent, recoverable, verified, trustworthy, and within delegated Authority while the Human Governor is temporarily absent or working elsewhere.
+
+The future primary interaction surface should optimize for **“What requires my authority or attention?”** rather than **“What are all the agents currently doing?”** Possible high-level interaction labels include `Human-Guided`, `Managed Production`, and `Attention Required`, but these names are illustrative product language only: they are not frozen architecture/domain states, runtime enums, or persistence states.
+
+Governed managed production should allow one Human Governor to supervise multiple concurrently producing projects: designing or refining one project, reviewing escalations and high-impact decisions for another, and starting queued work while other projects continue inside their delegated envelopes. This portfolio-level concurrency supports the intended M × N organizational model. The objective is not merely faster code generation; it is for projects to consume substantial AI production capacity without consuming proportional continuous human attention. No quantitative productivity claim is made.
+
+This operating model depends conceptually on durable Production State, explicit PWUs, immutable Attempts/history, independent Reality observation, Verification and Assurance, Candidate and Authority boundaries, interruption/recovery, context reconstruction, governed replanning, and escalation. It does not redesign or implement those capabilities here. Later UI and interaction work may use this direction to inform a portfolio dashboard, project attention status, escalation inbox, autonomy/delegation controls, production progress summaries, Authority request UX, interruption/recovery UX, and project queue management. **No UI design, component design, frontend implementation, terminology freeze, or implementation authorization is created by this memo.**
+
 ## Engineering Conflict Evolution
 
 AI-native conflict is broader than a Git Merge Conflict. Future conflict understanding may include:
@@ -385,5 +399,4 @@ Engineering Branching is a Future Capability and Architecture Direction, Not Imp
 - Evidence
 
 Its purpose is to support alternative exploration, parallel production, and controlled integration. Project State should not be conceptually bound to one chat window or one execution environment.
-
 

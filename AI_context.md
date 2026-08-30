@@ -18,7 +18,7 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **Runtime Architecture Refinement — CLOSED**
 
-Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine and S2 Governed Artifact Production are CLOSED / PASS, including S2-A Context & Execution Preparation Foundation and S2-B Isolated Execution & Independent Artifact Observation. S3 Completion, Verification & Candidate Governance is IN PROGRESS. S3-A Completion Evaluation & Produced Semantics remains CLOSED / PASS. S3-B Verification Qualification & Satisfaction is IMPLEMENTED — LOCAL VALIDATION PASS and PENDING ARCHITECTURE LEAD REALITY REVIEW; the full suite is 132/132 PASS. S3-C remains BLOCKED BY S3-B / NOT STARTED. Candidate lifecycle, Human Authorization, Repository Integration, and Runtime Commit remain unimplemented.
+Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine, S2 Governed Artifact Production, S3 Completion, Verification & Candidate Governance, S4 Repository Integration & Runtime Commit, and S5 Failure / Recovery Hardening are **CLOSED / PASS**. S6 Real Codex Dogfood & FVS Closure is **IN PROGRESS**. S6-B1 remains **CLOSED / PARTIAL**. S6-B2 Dedicated Executor & Real Provider Boundary, S6-B2-A, and S6-B2-B1 are **CLOSED / PASS** after final deterministic closure hardening. The S6-B2-B2 historical real probe remains **COMPLETE / PARTIAL** with authenticated Provider execution proven and `Provider SUCCESS + Production Reality NONE` preserved. S6-C is **NOT STARTED**.
 
 | Architecture workflow item | Status |
 |---|---|
@@ -68,13 +68,27 @@ Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSE
 | S2 — Governed Artifact Production | CLOSED / PASS |
 | S2-A — Context & Execution Preparation Foundation | CLOSED / PASS |
 | S2-B — Isolated Execution & Independent Artifact Observation | CLOSED / PASS |
-| S3 — Completion, Verification & Candidate Governance | IN PROGRESS |
+| S3 — Completion, Verification & Candidate Governance | CLOSED / PASS |
 | S3-A — Completion Evaluation & Produced Semantics | CLOSED / PASS |
-| S3-B — Verification Qualification & Satisfaction | IMPLEMENTED — LOCAL VALIDATION PASS / PENDING ARCHITECTURE LEAD REALITY REVIEW |
-| S3-C — Candidate Sealing & Human Governance | BLOCKED BY S3-B / NOT STARTED |
-| S4 — Repository Integration & Runtime Commit | NOT STARTED |
+| S3-B — Verification Qualification & Satisfaction | CLOSED / PASS |
+| S3-C — Candidate Sealing & Human Governance | CLOSED / PASS |
+| S4 — Repository Integration & Runtime Commit | CLOSED / PASS |
+| S4-A — Authorized Repository Integration | CLOSED / PASS |
+| S4-B — Runtime Commit | CLOSED / PASS |
+| S5 — Failure / Recovery Hardening | CLOSED / PASS |
+| S5-A — Recovery Classification & Reconciliation Foundation | CLOSED / PASS |
+| S5-B — Repository Integration & Runtime Commit Reconciliation | CLOSED / PASS |
+| S5-C — Execution Attempt & Workspace Recovery Hardening | CLOSED / PASS |
+| S6 — Real Codex Dogfood & FVS Closure | IN PROGRESS |
+| S6-B1 — Real Codex SDK Host Integration Spike | CLOSED / PARTIAL |
+| S6-B1-R — Provider Terminal & Identity Correlation Spike | PARTIAL — LIFECYCLE CAPABILITY PROVEN / DURABLE REAL EVIDENCE INCOMPLETE |
+| S6-B1-R2 — Durable Provider Evidence Capture Hardening | CLOSED / PASS |
+| S6-B2 — Dedicated Executor & Real Provider Boundary | CLOSED / PASS |
+| S6-B2-A — Dedicated Executor Boundary Deterministic Spike | CLOSED / PASS |
+| S6-B2-B1 — Codex Adapter Binding & Authentication Boundary Preflight | CLOSED / PASS |
+| S6-B2-B2 Historical Real Probe — Single Real Codex Through Dedicated Executor Boundary | COMPLETE / PARTIAL |
 
-The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md#47-s3-b-implementation-reality) records the S3-B implementation Reality and preserves `PRODUCED != Verification PASS != applicable evidence != SATISFIED != Candidate`. Assurance / Verification owns evidence truth and verification result; SPG owns production-context admissibility and the versioned `PRODUCED → SATISFIED` decision. S3-B is not CLOSED by local evidence alone and this implementation does not authorize S3-C. The exact next governed step is **Architecture Lead S3-B Reality Review → if PASS, close S3-B and authorize S3-C Candidate Sealing & Human Governance**.
+The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md#54-s6-b1-real-codex-sdk-host-integration-spike-reality) records the bounded S6-B1 Reality and its S6-B1-R/R2 follow-ups. Historical probes remain immutable. **No additional S6-B1 or S6-B2-B2 real Provider probe is authorized**. S6-B2 is **CLOSED / PASS** after deterministic closure hardening: provider neutrality is now asserted from the governed request structure, unauthorized Provider/credential fields are rejected by the closed transport model, B2CLOSE-01–08 pass, the complete B2 deterministic module passes 38/38 with its real test deselected, affected S6-B1/R/R2 tests pass 45/45 with their real test deselected, and the current-tree deterministic regression passes 428/428 with two real tests deselected. The historical B2-B2 probe remains **COMPLETE / PARTIAL** and still records the exact benchmark `Provider SUCCESS + Production Reality NONE`; it is not relabeled. S6-C is not started.
 
 The completed refinement order is **A. State Foundation → B. Reconciliation & Recovery → C. Completion & Trust → D. Side-effect Governance → Final Readiness Review**. Runtime Failure Discovery remains CLOSED and its 12-area scope remains frozen; reopen it only when implementation, dogfood, or Reality Check evidence requires it.
 

@@ -1516,7 +1516,7 @@ S3-A closes only Completion Evaluation and Produced semantics. It introduces no 
 
 S3A-01 through S3A-22 pass against PostgreSQL 17.6, ephemeral real Git repositories, real detached Attempt worktrees, the Deterministic Test Executor, and independent S2-B observation. The S3-A migration downgrade to `20260828_03` and re-upgrade to `20260828_04` pass. The S3-A module is **23/23 PASS**: 22 numbered scenarios plus migration validation. The pre-S3-A S1/S2 suite remains **81/81 PASS**, and the full suite is **104/104 PASS**.
 
-Architecture Baseline remains **v0.1**. The current mainline state is:
+Architecture Baseline remains **v0.1**. The mainline state at S3-A closure was:
 
 ```text
 S1
@@ -1549,7 +1549,7 @@ That authorization was subsequently granted. The resulting S3-B implementation R
 
 ## 47. S3-B implementation reality
 
-S3-B Verification Qualification & Satisfaction is **IMPLEMENTED — LOCAL VALIDATION PASS** and **PENDING ARCHITECTURE LEAD REALITY REVIEW**. It is not CLOSED. S3 remains **IN PROGRESS**. S3-C remains **BLOCKED BY S3-B / NOT STARTED** and is not authorized by this implementation.
+S3-B Verification Qualification & Satisfaction is **CLOSED / PASS**. Architecture Lead Reality Review accepted the implementation and local evidence with zero architecture blockers, zero implementation blockers, and no scope leakage. At S3-B closure, S3 remained **IN PROGRESS** and S3-C was **NEXT / NOT STARTED**. S3-C was subsequently authorized for controlled implementation; its resulting implementation Reality is recorded in Section 48.
 
 Alembic revision `20260828_05` adds exactly three S3-B production tables: `proposed_repository_snapshots`, `verification_records`, and `production_admissibility_records`. No Candidate, Human Authorization, Repository Integration Effect, Runtime Commit, Production Issue, External Effect, Trust Score, Guardian Finding, or Evidence Graph table was added.
 
@@ -1599,7 +1599,7 @@ Trusted Baseline
 
 S3B-01 through S3B-27 pass against PostgreSQL 17.6, real ephemeral Git repositories and worktrees, actual detached commit/tree objects, the existing Deterministic Test Executor, S3-A Completion Evaluation, and the Deterministic Verification Provider. Migration downgrade to `20260828_04` and re-upgrade to `20260828_05` pass. The S3-B module is **28/28 PASS**: 27 numbered scenarios plus migration validation. The pre-S3-B suite remains **104/104 PASS**, and the full suite is **132/132 PASS**.
 
-Architecture Baseline remains **v0.1**. The current mainline state is:
+Architecture Baseline remains **v0.1**. The mainline state at S3-B closure was:
 
 ```text
 S1
@@ -1615,16 +1615,882 @@ S3-A
     CLOSED / PASS
 
 S3-B
-    IMPLEMENTED — LOCAL VALIDATION PASS
-    PENDING ARCHITECTURE LEAD REALITY REVIEW
+    CLOSED / PASS
 
 S3-C
-    BLOCKED BY S3-B / NOT STARTED
+    NEXT / NOT STARTED
 
 S4
     NOT STARTED
 ```
 
+The exact governed step at S3-B closure was:
+
+> Architecture Lead review of S3-C implementation scope and explicit authorization of S3-C — Candidate Sealing & Human Governance.
+
+That authorization was subsequently granted. The resulting S3-C implementation Reality is recorded below.
+
+## 48. S3-C implementation reality
+
+S3-C Candidate Sealing & Human Governance is **CLOSED / PASS**. Architecture Lead Reality Review accepted the implementation and local validation evidence with zero architecture blockers, zero implementation blockers, and no scope leakage. Because S3-A, S3-B, and S3-C are all CLOSED / PASS, S3 Completion, Verification & Candidate Governance is also **CLOSED / PASS**. S4 Repository Integration & Runtime Commit is **NEXT / NOT STARTED** and remains unauthorized.
+
+Alembic revision `20260828_06` adds exactly two S3-C production tables: `baseline_candidates` and `human_authorizations`. Existing `governance_records` and `transition_history` are reused for exact Human permission and append-only lifecycle history. No Repository Integration, Runtime Commit, External Effect, Production Issue, Trust Score, Guardian Finding, Evidence Graph, authentication, RBAC, or workflow-engine table was added.
+
+A Baseline Candidate is created only from one exact current FVS-1 production basis: a `SATISFIED` PWU; its current Run, Plan Revision, Source Trusted Baseline, Attempt generation, Completion Evaluation, Work Product References, Proposed Repository Snapshot, exact applicable Verification `PASS` records, and `ADMISSIBLE` Production Admissibility record. Candidate sealing locks the Current Trusted Baseline pointer, Run, and versioned PWU within the PostgreSQL Unit of Work, rejects stale expected versions and generations, and revalidates all relational lineage before writing.
+
+The Candidate durably binds the repository identity, target authoritative ref, expected source revision, proposed commit/tree, satisfied PWU set, Completion Evaluation set, Work Product Reference set, exact selected Verification Record set, and Production Admissibility identity/basis. Its canonical SHA-256 fingerprint covers every authority-relevant identity and basis fingerprint. The Candidate ID is deterministically derived from that fingerprint. Repeating the same exact basis returns the same logical Candidate; any material basis change yields a different fingerprint and Candidate. The record is frozen and exposes no update-in-place application operation.
+
+Before a new Candidate is sealed, Runtime validates that the current authoritative repository ref still equals the Candidate's expected source revision and that the stored proposed commit/tree objects remain exact. Divergence rejects new sealing without reset, merge, rebase, cherry-pick, push, or ref movement. A previously sealed Candidate remains immutable historical fact, while later S4 must independently revalidate whether it is still actionable.
+
+Human Authorization requires an explicit Candidate ID, the exact 64-character Candidate fingerprint, an explicit authority identity, and a structured scope that exactly matches the Candidate's repository identity, target authoritative ref, expected source revision, and proposed repository revision. There is no `approve latest` or implicit-current lookup. The authorization record, exact Governance Record, and Transition History commit atomically. A deterministic basis fingerprint provides retry idempotency for the same authority/Candidate/fingerprint/scope, while a different authority or Candidate creates new append-only history.
+
+Human Authorization changes permission only. It cannot create a Candidate that failed eligibility, convert Verification `FAIL` or `UNKNOWN` to `PASS`, manufacture missing or fresh evidence, move a PWU from `PRODUCED` to `SATISFIED`, repair a diverged repository source, integrate a ref, advance the Current Trusted Baseline, or perform Runtime Commit. The PWU remains `SATISFIED`; Candidate and Authorization are separate governed records.
+
+The implemented S3-C path stops at:
+
+```text
+PWU SATISFIED
++ exact current production lineage
++ exact Proposed Repository Snapshot
++ exact applicable Verification / Production Admissibility
++ current repository-source guard
+↓
+immutable SEALED Baseline Candidate
+↓
+exact append-only Human Authorization
+```
+
+It preserves:
+
+```text
+SATISFIED
+!=
+SEALED Candidate
+!=
+Human Authorized
+!=
+Repository Integrated
+!=
+Runtime Committed
+!=
+Trusted Baseline
+```
+
+S3C-01 through S3C-32 pass against PostgreSQL 17.6, real ephemeral Git repositories and isolated worktrees, actual detached proposed commit/tree objects, the Deterministic Test Executor, S3-A Completion Evaluation, and S3-B Verification/Satisfaction. Migration downgrade to `20260828_05` and re-upgrade to `20260828_06` pass. The S3-C module is **33/33 PASS**: 32 numbered scenarios plus migration validation. The accepted pre-S3-C suite remains **132/132 PASS**, and the full suite is **165/165 PASS**. `git diff --check` passes. Architecture Lead Reality Review is **PASS**; architecture blockers are **0**, implementation blockers are **0**, and scope leakage is **NONE**.
+
+Architecture Baseline remains **v0.1**. The mainline state at S3 closure was:
+
+```text
+S1
+    CLOSED / PASS
+
+S2
+    CLOSED / PASS
+
+S3
+    CLOSED / PASS
+
+S3-A
+    CLOSED / PASS
+
+S3-B
+    CLOSED / PASS
+
+S3-C
+    CLOSED / PASS
+
+S4
+    NEXT / NOT STARTED
+```
+
+The exact governed step at S3 closure was:
+
+> Architecture Lead review of S4 — Repository Integration & Runtime Commit implementation scope and explicit S4 authorization.
+
+Architecture Lead subsequently split S4 into S4-A Authorized Repository Integration and S4-B Runtime Commit, and authorized only S4-A. The resulting implementation Reality is recorded below.
+
+## 49. S4-A implementation reality
+
+S4-A Authorized Repository Integration is **CLOSED / PASS**. Architecture Lead Reality Review accepted the implementation and local validation evidence with zero architecture blockers, zero implementation blockers, and no scope leakage. At S4-A closure, S4 remained **IN PROGRESS** and S4-B Runtime Commit was **NEXT / NOT STARTED**. S4-B was subsequently authorized for controlled implementation; its resulting implementation Reality is recorded in Section 50.
+
+Alembic revision `20260829_07` adds exactly one S4-A production table: `repository_integration_effects`. It represents only `REPOSITORY_REF_ADVANCE` with the narrow states `PREPARED` and `CONVERGED`. No Runtime Commit, Trusted Baseline Candidate admission, generalized External Effect platform, Saga, compensation, recovery engine, remote-push, deployment, Production Issue, Guardian, ECF, authentication, RBAC, or UI table was added.
+
+Repository Integration requires an exact `SEALED` Candidate and exact Human Authorization. Runtime revalidates Candidate fingerprint, Authorization Candidate/fingerprint and scope, repository identity, target authoritative ref, expected source revision, proposed commit/tree, Current Trusted Baseline relationship, current Run/Plan lineage, `SATISFIED` PWU set, exact Verification `PASS` records, and `ADMISSIBLE` Production Admissibility. Missing, wrong, stale, or mismatched authority or production basis rejects preparation.
+
+The stable operation fingerprint binds effect type, Candidate identity/fingerprint, Human Authorization identity, repository identity, target ref, expected source revision, and proposed revision. The effect ID is deterministically derived from that fingerprint, and the database unique constraint prevents unrelated duplicate logical operations. Same-basis retries resolve to the same durable effect.
+
+S4-A orders the effect as:
+
+```text
+validate exact Candidate + Authorization
+↓
+persist PREPARED effect + Transition History
+↓
+commit PostgreSQL Unit of Work
+↓
+Git authoritative-ref compare-and-swap
+↓
+independent authoritative-ref observation
+↓
+persist CONVERGED + Transition History
+```
+
+The Git adapter exposes only factual local operations: `read_ref`, `commit_exists`, `read_commit_tree`, and exact old-value `compare_and_swap_ref`. It uses the sealed Candidate's existing proposed commit and never reconstructs it. The mutation is equivalent to `git update-ref <target> <proposed> <expected-old>`; divergence blocks mutation without force update, reset, merge, rebase, cherry-pick, push, or overwrite.
+
+Git command success is not convergence evidence. Only a separate ref observation equal to the exact proposed revision permits `CONVERGED`. Wrong or diverged observations leave the effect `PREPARED` with observed repository reality. Candidate, Authorization, Verification, Production Admissibility, and PWU facts remain unchanged; PWU remains `SATISFIED`.
+
+S4-A preserves both non-atomic interruption windows. Failure before Git CAS leaves the ref unchanged and the durable effect `PREPARED`. Failure after Git CAS but before `CONVERGED` persistence can leave the authoritative ref at the proposed revision while the effect remains `PREPARED`. A same-operation retry does not blindly repeat CAS or claim exactly-once execution; the unresolved state remains available for later separately authorized S5 reconciliation. S4-A implements no general recovery algorithm.
+
+After successful S4-A:
+
+```text
+authoritative repository ref = exact proposed commit
+Repository Integration Effect = CONVERGED
+Current Trusted Baseline Pointer = unchanged
+Candidate = SEALED
+PWU = SATISFIED
+Runtime Commit = not executed
+```
+
+This preserves:
+
+```text
+Git Commit Object
+!=
+Repository Integration
+!=
+SPG Runtime Commit
+```
+
+S4A-01 through S4A-31 pass against PostgreSQL 17.6 and real ephemeral Git repositories, exact detached proposed commit/tree objects, real old-value guarded ref updates, independently observed refs, injected transaction/process interruption windows, and the completed S1–S3 production lineage. Migration downgrade to `20260828_06` and re-upgrade to `20260829_07` pass. The S4-A module is **32/32 PASS**: 31 numbered scenarios plus migration validation. The accepted pre-S4-A suite remains **165/165 PASS**, and the full suite is **197/197 PASS**. `git diff --check` passes. Architecture Lead Reality Review is **PASS**; architecture blockers are **0**, implementation blockers are **0**, and scope leakage is **NONE**.
+
+Architecture Baseline remains **v0.1**. The mainline state at S4-A closure was:
+
+```text
+S1
+    CLOSED / PASS
+
+S2
+    CLOSED / PASS
+
+S3
+    CLOSED / PASS
+
+S4
+    IN PROGRESS
+
+S4-A
+    CLOSED / PASS
+
+S4-B
+    NEXT / NOT STARTED
+```
+
+The exact governed step at S4-A closure was:
+
+> Architecture Lead review and explicit authorization of S4-B — Runtime Commit.
+
+That authorization was subsequently granted. The resulting S4-B implementation Reality is recorded below.
+
+## 50. S4-B implementation reality
+
+S4-B Runtime Commit is **CLOSED / PASS**. Architecture Lead Reality Review accepted the implementation and local validation evidence with zero architecture blockers, zero implementation blockers, and no scope leakage. Because S4-A and S4-B are both CLOSED / PASS, S4 Repository Integration & Runtime Commit is also **CLOSED / PASS**. S5 Failure / Recovery Hardening is **NEXT / NOT STARTED** and is not authorized.
+
+Alembic revision `20260829_08` adds exactly one S4-B production table: `runtime_commits`. Existing immutable `production_snapshots`, the versioned singleton `current_trusted_baseline_pointer`, and append-only `transition_history` are reused. The Runtime Commit record links one exact Candidate, Human Authorization, `CONVERGED` Repository Integration Effect, Source and new Trusted Baselines, Run/Plan, repository commit/tree, SATISFIED PWU set, Completion set, Verification set, and Production Admissibility basis. No Candidate or PWU lifecycle state is added.
+
+Runtime Commit revalidates the exact governed basis inside one PostgreSQL Unit of Work: `SEALED` Candidate and fingerprint; exact Human Authorization identity/fingerprint/scope; exact `CONVERGED REPOSITORY_REF_ADVANCE` operation; Current Trusted Baseline Pointer and Source Baseline; current Run/Plan and `SATISFIED` PWU lineage; exact `PRODUCED` Completion Evaluations and Work Product References; exact Verification `PASS` records; and exact `ADMISSIBLE` Production Admissibility. Validity remains relational rather than inferred from historical Candidate sealing.
+
+The same transaction independently reads the authoritative repository ref and requires the exact proposed revision, then revalidates that commit object's exact tree. A persisted S4-A `CONVERGED` state alone is insufficient. S4-B performs only `read_ref`, `commit_exists`, and `read_commit_tree`; it never executes Git CAS, ref update, merge, rebase, reset, cherry-pick, force, repository repair, or push.
+
+The locally atomic transition is:
+
+```text
+lock and revalidate Current Source Baseline Pointer
+↓
+independently observe exact repository ref / commit / tree
+↓
+create immutable next TRUSTED production Snapshot
+↓
+persist exact Runtime Commit linkage
+↓
+advance pointer with expected Source Baseline + expected version
+↓
+append Runtime Commit and pointer Transition History
+↓
+commit PostgreSQL Unit of Work
+```
+
+Any failure in that transaction rolls back the new Snapshot, Runtime Commit record, pointer advance, and history together. Repository Reality remains at the already-converged revision. Prior Trusted Baselines remain immutable historical production truth.
+
+A canonical commit fingerprint binds every authority-relevant identity and exact production basis; deterministic Runtime Commit and Trusted Baseline IDs plus database uniqueness provide same-basis retry recognition. An uncertain-response retry returns the same logical commit and does not create duplicate baselines. Pointer locking, expected version, and exact expected Source Baseline prevent a second Candidate derived from the same source from overwriting a baseline committed first. This is local PostgreSQL idempotency and concurrency protection, not a cross-system exactly-once claim.
+
+After successful S4-B:
+
+```text
+authoritative repository ref = Candidate proposed revision
+Repository Integration Effect = CONVERGED
+new Trusted Baseline = exact Candidate repository reality
+Current Trusted Baseline Pointer = new Trusted Baseline
+Candidate = SEALED
+PWU = SATISFIED
+```
+
+This preserves:
+
+```text
+Git Commit Object
+!=
+Repository Integration
+!=
+SPG Runtime Commit
+```
+
+S4B-01 through S4B-32 pass against PostgreSQL 17.6 and real ephemeral Git repositories, independently re-read authoritative refs and commit trees, exact S1–S4-A lineage, injected transaction rollback, idempotent retry, and stale-source concurrency scenarios. Migration downgrade to `20260829_07` and re-upgrade to `20260829_08` pass. The S4-B module is **33/33 PASS**: 32 numbered scenarios plus migration validation. The accepted pre-S4-B suite remains **197/197 PASS**, and the full suite is **230/230 PASS**. `git diff --check` passes. Architecture Lead Reality Review is **PASS**; architecture blockers are **0**, implementation blockers are **0**, and scope leakage is **NONE**.
+
+Architecture Baseline remains **v0.1**. The mainline state at S4 closure was:
+
+```text
+S1
+    CLOSED / PASS
+
+S2
+    CLOSED / PASS
+
+S3
+    CLOSED / PASS
+
+S4
+    CLOSED / PASS
+
+S4-A
+    CLOSED / PASS
+
+S4-B
+    CLOSED / PASS
+
+S5
+    NEXT / NOT STARTED
+```
+
+The exact governed step at S4 closure was:
+
+> Architecture Lead review of S5 — Failure / Recovery Hardening implementation scope and explicit S5 authorization.
+
+Architecture Lead subsequently authorized only S5-A Recovery Classification & Reconciliation Foundation. The resulting implementation Reality is recorded below.
+
+## 51. S5-A implementation reality
+
+S5-A Recovery Classification & Reconciliation Foundation is **CLOSED / PASS** after Architecture Lead Reality Review **PASS**. At S5-A closure, S5 remained **IN PROGRESS**, and no later recovery slice or S6 work was authorized or started. The subsequently authorized S5-B and S5-C results are recorded below.
+
+Alembic revision `20260829_09` adds exactly one S5-A production table: `recovery_assessments`. The governing order is **Classify Before Recover**: recover knowledge before execution. An assessment uses one of two narrow exact subjects: an Attempt identity plus expected PWU/generation, or a Repository Integration Effect identity plus expected operation fingerprint. Structured `governed_basis`, `observed_facts`, and `differences` retain only facts applicable to that subject rather than introducing a universal nullable incident record. Recovery Assessments are immutable and append-only. The canonical basis fingerprint and deterministic assessment ID make the same exact observed/governed basis idempotent; changed observed Reality creates a new immutable historical assessment. Transition History records each newly classified assessment.
+
+The admitted classification vocabulary is `COHERENT`, `RECOVERABLE`, `UNKNOWN`, `DIVERGED`, `STALE`, and `BLOCKED`. It preserves `Failure != Divergence`, Provider Report is not Production Truth, `Historical Fact != Current Authority`, and stale generation evidence cannot regain current authority. Every assessment also records whether the subject remains current, whether recovery appears safely possible, whether Human Attention is required, whether a Recovery Barrier applies, and one advisory lowest-sufficient guidance class such as `NO_ACTION`, `REOBSERVE`, `RESUME_EXISTING_ATTEMPT`, `RETRY_WITH_NEW_ATTEMPT`, `RECORD_EXTERNAL_CONVERGENCE`, `RETRY_RUNTIME_COMMIT`, `REPLAN_SUPERSEDE`, or `ESCALATE_DIVERGENCE`. Guidance is not execution authorization, and unrelated work that remains valid is preserved.
+
+Known S5-A classifications include:
+
+| Observed window | Classification / guidance |
+|---|---|
+| interrupted dispatched Attempt with missing outcome/observation | `UNKNOWN / REOBSERVE` |
+| Provider SUCCESS with no observed change | `BLOCKED / REOBSERVE` |
+| Provider FAILURE with observed Work Products | `RECOVERABLE / REOBSERVE` |
+| Provider UNKNOWN with observed changes | `UNKNOWN / REOBSERVE` |
+| stale Attempt generation | `STALE / REPLAN_SUPERSEDE` |
+| Effect PREPARED and ref at expected source | `RECOVERABLE / REOBSERVE` |
+| Effect PREPARED and ref at proposed commit/tree | `RECOVERABLE / RECORD_EXTERNAL_CONVERGENCE` |
+| Effect PREPARED and ref at unrelated third revision | `DIVERGED / ESCALATE_DIVERGENCE` |
+| Effect CONVERGED, ref proposed, Runtime Commit absent, pointer at source | `RECOVERABLE / RETRY_RUNTIME_COMMIT` |
+| Runtime Commit exists and pointer/ref match committed Reality | `COHERENT / NO_ACTION` |
+
+An unresolved assessment exposes the minimum Recovery Barrier guard: a caller cannot silently treat `UNKNOWN`, `DIVERGED`, `STALE`, `BLOCKED`, or other unresolved recovery state as coherent forward progress. The guard performs no recovery action. S5-A does not dispatch or resume a provider, create a retry Attempt, alter a workspace, update a Git ref, mark an Effect `CONVERGED`, execute Runtime Commit, advance the Trusted Baseline, replan, compensate, schedule jobs, or run a background worker. Original Attempt, Provider Report, Observation, Work Product, Candidate, Effect, Runtime Commit, Baseline, Plan, and PWU facts remain unchanged.
+
+Architecture Lead watch item: recovery classification must remain governed by expected obligations and Completion Contract semantics. Absence of Git changes is not a universal platform rule for abnormal production because valid non-code or non-repository PWUs may exist. This caution changes no S5-A implementation and creates no new authorization.
+
+S5A-01 through S5A-32 pass against PostgreSQL 17.6, real ephemeral Git repositories/worktrees, known S2/S4 interruption windows, Provider outcome/Reality mismatches, stale generations, independently observed refs/trees, existing Runtime Commit recognition, idempotent reassessment, and Recovery Barrier enforcement. Migration downgrade to `20260829_08` and re-upgrade to `20260829_09` pass. The S5-A module is **33/33 PASS**: 32 numbered scenarios plus migration validation. The accepted pre-S5-A suite remains **230/230 PASS**, and the full suite is **263/263 PASS**. `git diff --check` passes. Architecture Lead Reality Review is **PASS**. Architecture blockers are **0**, implementation blockers are **0**, and scope leakage is **NONE**.
+
+Architecture Baseline remains **v0.1**. The mainline state at S5-A closure was:
+
+```text
+S1
+    CLOSED / PASS
+
+S2
+    CLOSED / PASS
+
+S3
+    CLOSED / PASS
+
+S4
+    CLOSED / PASS
+
+S5
+    IN PROGRESS
+
+S5-A
+    CLOSED / PASS
+```
+
+The exact governed step at S5-A closure was:
+
+> Architecture Lead review of the next bounded S5 recovery slice.
+
+That review does not authorize or start the slice.
+
+## 52. S5-B implementation reality
+
+S5-B Repository Integration & Runtime Commit Reconciliation is **CLOSED / PASS** after Architecture Lead Recovery Reality Review **PASS**. At S5-B closure, S5 remained **IN PROGRESS**, S5-A remained **CLOSED / PASS**, and no S5-C, other later recovery slice, or S6 work was authorized or started. Architecture Lead subsequently authorized the bounded S5-C slice recorded in section 53.
+
+The original S5-B implementation Attempt remains **INTERRUPTED BY QUOTA / final outcome UNKNOWN**. It is not rewritten as success. Recovery inspection found the S5-B implementation intact, all six previously identified schema-baseline assertion updates present, no partial or corrupted edit, and no need for implementation repair. Lowest-sufficient recovery completed only the missing validation. The admitted history is therefore: Original Attempt **INTERRUPTED BY QUOTA**; Implementation Reality **COMPLETE**; Recovery Verification **PASS**; Architecture Lead Recovery Reality Review **PASS**. This is accepted dogfood evidence that Attempt outcome differs from implementation Reality, classification precedes recovery, Reality is recovered rather than history replayed, and recovery occurs at the lowest sufficient level.
+
+Alembic revision `20260829_10` adds exactly one narrow table: `recovery_action_records`. Each append-only record binds one exact Recovery Assessment ID and basis fingerprint, one admitted action, the exact Repository Integration Effect and Candidate, the independently observed repository revision/tree, the stable action-basis fingerprint, outcome, optional exact Runtime Commit, and timestamp. It is resolution evidence separate from the immutable historical Assessment; it is not an incident platform, workflow engine, Saga, scheduler, or worker.
+
+The application exposes only `record_external_convergence(...)` and `retry_runtime_commit_from_recovery(...)`, both requiring an explicit Assessment ID and exact 64-character assessment fingerprint. There is no recover-latest, fix-current, or project-wide recovery operation. Duplicate protection derives a stable action identity from the exact Assessment, action, integration/candidate lineage, and observed governed basis.
+
+External-convergence reconciliation accepts only `RECOVERABLE / RECORD_EXTERNAL_CONVERGENCE`. It first regenerates the current exact Recovery Assessment, then locks and revalidates the current Candidate, Human Authorization, Source Baseline, Run/Plan, SATISFIED PWU, Verification PASS, Production Admissibility, Effect, repository identity, and target ref. Read-only Git operations independently require the exact proposed ref, existing commit, and exact proposed tree. Only then does one PostgreSQL transaction update `PREPARED → CONVERGED`, append Effect and Recovery Action history, and persist the Recovery Action. A failed transaction leaves the Effect `PREPARED`; Git Reality is never changed.
+
+Runtime Commit reconciliation accepts `RECOVERABLE / RETRY_RUNTIME_COMMIT`, or recognizes an already coherent exact Runtime Commit as `NO_ACTION`. Before mutation it regenerates the current Assessment and rejects changed repository/runtime Reality. The operation constructs the ordinary exact S4-B request and calls the unchanged `RuntimeCommitService`, thereby retaining Candidate fingerprint, Human Authorization, CONVERGED Effect, Source Baseline locking/CAS, independently read repository ref/tree, Verification PASS, Production Admissibility, SATISFIED PWU, Plan/Run lineage, immutable Trusted Baseline, pointer advancement, rollback, concurrency, and idempotency rules. There is no weaker recovery-commit path. If the exact Runtime Commit already exists with coherent pointer and repository Reality, S4-B idempotency is recognized and a narrow `NO_ACTION` resolution is appended without duplicating a commit, baseline, or pointer advance.
+
+Stale and divergent Reality remains protected:
+
+| Current Reality | S5-B result |
+|---|---|
+| `PREPARED + expected source ref` | no Git CAS retry; remains unresolved / reobserve |
+| `PREPARED + exact proposed ref/tree` | may record local convergence only |
+| `PREPARED + unexpected third ref` | no convergence or Runtime Commit; remains diverged / escalated |
+| assessment basis changed | selected historical Assessment is non-actionable; reassessment required |
+| Source Trusted Baseline no longer current | Runtime Commit recovery blocked |
+| exact coherent Runtime Commit already exists | `NO_ACTION`; no duplicate durable state |
+
+Recovery never rewrites the originating Assessment to coherent, resolved, or successful. Its original Recovery Barrier and abnormal observation remain historical evidence. A future fresh Assessment may demonstrate `COHERENT / NO_ACTION`; only fresh coherence can permit normal continuation. This implements **History Is Appended, Not Rewritten**, **Classify Before Recover**, and lowest-sufficient recovery: local knowledge is repaired without replaying Git or the production chain.
+
+S5B-01 through S5B-39 cover exact Assessment selection/fingerprint, immutable history, stale-basis detection, action/guidance eligibility, exact Candidate/Authorization and repository Reality, atomic convergence recording, injected rollback, duplicate safety, expected/proposed/third-ref distinctions, unchanged S4-B eligibility/atomicity/idempotency, existing-commit recognition, stale Source Baseline rejection, unchanged Candidate/PWU/Authorization, and all explicit non-goals. Together with migration downgrade/re-upgrade validation, the S5-B module is **40/40 PASS**. The accepted pre-S5-B suite remains **263/263 PASS**, and the full regression is **303/303 PASS**. Migration downgrade from `20260829_10` to `20260829_09` and re-upgrade pass. `git diff --check` passes. Architecture Lead Recovery Reality Review is **PASS**. Architecture blockers are **0**, implementation blockers are **0**, and scope leakage is **NONE**.
+
+S5-B performs no Git update, CAS retry, merge, rebase, reset, cherry-pick, force update, push, repository repair, Attempt retry/resume, new Attempt generation, provider recovery, workspace mutation, replanning, Candidate regeneration, compensation, Saga, background reconciliation, S6, Codex integration, Guardian expansion, ECF expansion, or UI work.
+
+Architecture Baseline remains **v0.1**. The mainline state at S5-B closure was:
+
+```text
+S1
+    CLOSED / PASS
+
+S2
+    CLOSED / PASS
+
+S3
+    CLOSED / PASS
+
+S4
+    CLOSED / PASS
+
+S5
+    IN PROGRESS
+
+S5-A
+    CLOSED / PASS
+
+S5-B
+    CLOSED / PASS
+```
+
+The exact governed step at S5-B closure was:
+
+> Architecture Lead review of the remaining bounded S5 recovery scope.
+
+That was the governed state at S5-B closure. Architecture Lead subsequently authorized only S5-C; S6 remained unauthorized.
+
+## 53. S5-C implementation reality
+
+S5-C Execution Attempt & Workspace Recovery Hardening is **CLOSED / PASS** after Architecture Lead Reality Review **PASS**. S5-A and S5-B remain **CLOSED / PASS**. Because all three bounded recovery slices are closed, S5 Failure / Recovery Hardening is also **CLOSED / PASS**. S6 Real Codex Dogfood & FVS Closure is **NEXT / NOT STARTED** and is not authorized.
+
+Alembic revision `20260829_11` extends the existing narrow `recovery_action_records` representation rather than adding a Runtime domain table. An Attempt recovery action binds the exact Recovery Assessment ID and fingerprint, old Attempt and generation, optional new Retry Attempt and generation, workspace identity, optional normal Repository Observation and Completion Evaluation, action-basis fingerprint, outcome, and timestamp. The historical Recovery Assessment, original Attempt, Provider Report, and existing workspace evidence remain unchanged. Same exact action basis has deterministic identity, so an uncertain repeated request does not create duplicate retry authority.
+
+Every operation requires an explicitly selected ATTEMPT Recovery Assessment. That assessment is historical evidence, not permanent mutation authority. S5-C freshly reassesses the exact Attempt/PWU/generation and revalidates current Plan Revision, Current Trusted Baseline, PWU, Context Package, Source Baseline, and workspace existence before recovery mutation. Changed lineage, a stale generation, or workspace drift blocks mutation and requires a new exact assessment. A missing workspace is represented distinctly from an existing workspace with no relevant changes; no work is fabricated and the historical workspace is not recreated as original Reality.
+
+**Salvage precedes retry.** For an existing prepared and dispatched Attempt workspace, S5-C reuses S2-B independent Repository Observation and the normal S3-A Completion Evaluation path against the admitted Completion Contract. Provider `SUCCESS`, `FAILURE`, or `UNKNOWN` does not establish production truth. If observed work is sufficient, it continues as ordinary `Observation → Completion Evaluation → PRODUCED` evidence and no Retry Attempt is created. There is no recovery-specific `PRODUCED` state. Absence of Git changes is not a universal failure or retry condition; the exact Completion Contract governs non-code and verification-only work as well as repository-producing work.
+
+Only a current `RECOVERABLE / RETRY_WITH_NEW_ATTEMPT` assessment basis may create a Retry Attempt. The existing Runtime generation mechanism atomically locks and revalidates current authority, creates generation 2, advances only the PWU current-generation pointer, appends the exact Recovery Action and Transition History, and commits or rolls back those database facts together. Generation 1 remains immutable historical evidence and cannot regain authority or mutate generation 2 production state. S5-C then reuses S2-A Attempt preparation to provision a new clean isolated worktree bound to the exact Source Baseline, Plan, PWU, and new generation. It neither mutates nor blindly copies partial content from the old workspace.
+
+Filesystem preparation remains outside the PostgreSQL transaction. A committed Retry Attempt and action with incomplete workspace provisioning therefore remain truthful and representable; an exact repeated request may idempotently complete the existing S2-A preparation. Attempt creation alone does not imply execution readiness. S5-C claims no PostgreSQL/filesystem exactly-once behavior.
+
+`RESUME_EXISTING_ATTEMPT` is not silently converted to retry. S5-C records a governed unsupported/deferred result when generic provider Resume is unavailable. It performs no Executor dispatch, Provider reconnect/resume, Codex SDK/CLI call, automatic retry execution, partial workspace transplant, replanning, PWU supersession, Git mutation or reconciliation, Runtime Commit recovery, compensation, Saga, background recovery, Guardian/ECF expansion, UI work, or S6 work.
+
+S5C-01 through S5C-41 cover exact Assessment selection and fingerprint, immutable history, stale-authority rejection, independent workspace reobservation, Provider outcome/Reality distinctions, Completion-governed salvage, the non-universal zero-diff rule, exact retry eligibility, new-generation authority, stale-generation protection, clean isolated retry workspaces, missing/drifted workspace behavior, local transaction rollback, duplicate safety, filesystem interruption truthfulness, no dispatch/resume/replanning, Recovery Barrier history, real interruption inspect-before-replay, documentation horizon, and explicit S6 non-goals. Together with migration downgrade/re-upgrade validation, the S5-C module is **42/42 PASS**. The accepted pre-S5-C suite remains **303/303 PASS**, and the full suite is **345/345 PASS**. Migration downgrade from `20260829_11` to `20260829_10` and re-upgrade pass. `git diff --check` passes. Architecture blockers are **0**, implementation blockers are **0**, and scope leakage is **NONE**.
+
+Compilation is **PASS**, and Architecture Lead Reality Review is **PASS**.
+
+S5 now supplies the sufficient FVS-level generic recovery foundation:
+
+```text
+Observe Reality
+→ Classify
+→ Preserve still-valid work
+→ Reconcile at the lowest sufficient level
+→ Re-enter the normal governed production path
+```
+
+S5-A supplies Recovery Classification & Reconciliation Foundation; S5-B supplies Repository Integration & Runtime Commit Reconciliation; S5-C supplies Execution Attempt & Workspace Recovery Hardening. Together they preserve **Classify Before Recover**, **Failure != Divergence**, **Attempt outcome != implementation reality**, **Recover knowledge before execution**, **Recover at the lowest sufficient level**, **History Is Appended, Not Rewritten**, and **No Actor Owns Production Truth Alone**. The real quota-interruption evidence admitted under S5-B remains historical Recovery Reality and is not rewritten by S5 closure.
+
+Generic Provider Resume remains **NOT IMPLEMENTED**. Provider/session/thread-specific Resume is deferred until real Executor capability is observed during S6. This admitted boundary is not an S5 blocker and does not authorize S6.
+
+Architecture Baseline remains **v0.1**. The current mainline state is:
+
+```text
+S1
+    CLOSED / PASS
+
+S2
+    CLOSED / PASS
+
+S3
+    CLOSED / PASS
+
+S4
+    CLOSED / PASS
+
+S5
+    CLOSED / PASS
+
+S5-A
+    CLOSED / PASS
+
+S5-B
+    CLOSED / PASS
+
+S5-C
+    CLOSED / PASS
+
+S6
+    NEXT / NOT STARTED
+```
+
 The exact next governed step is:
 
-> Architecture Lead S3-B Reality Review → if PASS, close S3-B and authorize S3-C Candidate Sealing & Human Governance.
+> Architecture Lead S6 scope review: Real Codex Dogfood & FVS Closure.
+
+S6 is not authorized or started by this closure admission.
+
+## 54. S6-B1 Real Codex SDK Host Integration Spike reality
+
+S6-B1 is **IMPLEMENTED — REAL SDK SPIKE PARTIAL** and **PENDING ARCHITECTURE LEAD REALITY REVIEW**. S6 is **IN PROGRESS**. S1 through S5 remain **CLOSED / PASS**. This result does not close S6-B1, S6, dogfood, or FVS-1.
+
+The stable official Python package `openai-codex==0.147.0` and its pinned `openai-codex-cli-bin==0.147.0` runtime are exact project dependencies. A provider-neutral immutable Materialized Execution Input now durably binds the exact Attempt/generation, Run, PWU, Plan Revision, Source Baseline, Prepared Execution Request, Context Package identity/version/fingerprint, Completion Contract fingerprint, exact instruction, exact UTF-8 context projection, and canonical input fingerprint before dispatch. The Codex SDK Provider receives this complete input and has no database dependency.
+
+`CodexSdkExecutor` preserves the existing synchronous Executor Capability Contract. It derives `cwd` only from the exact Attempt workspace, revalidates the registered detached worktree and Source Baseline, rejects the authoritative repository as workspace, uses `Sandbox.workspace_write` with deny-all interactive approval, and maps only a terminal completed SDK result to Provider `SUCCESS`. Provider output remains an untrusted claim without Completion, Verification, Candidate, Repository Integration, Runtime Commit, or Trusted Baseline authority. Provider Resume remains deferred.
+
+The focused deterministic S6-B1 suite is **21/21 PASS**, comprising migration downgrade/re-upgrade plus S6B1-01 through S6B1-20. It covers exact input binding and stable fingerprint, workspace authority, conservative outcome mapping, public Provider identity mapping, independent observation disagreement, absence of downstream authority, no Provider database lookup, no Resume, no full-access sandbox, deterministic Executor regression, Documentation Horizon support, and no S6-C/FVS closure leakage.
+
+Exactly one real ChatGPT-authenticated Codex SDK execution was launched against an ephemeral governed repository and exact detached Attempt worktree. No API-key environment was present. Codex changed only `docs/codex_real_execution_probe.md` from the admitted BEFORE marker to the admitted AFTER marker. The authoritative repository ref and working tree remained unchanged. After 120 seconds the stable SDK had not returned a terminal `TurnResult`, so the outer test conservatively interrupted the execution and did not retry. Consequently no terminal Provider Result, thread/turn correlation, or normal persisted Repository Observation was claimed.
+
+A single post-failure diagnostic used the existing independent `GitWorkspaceObserver` without launching another Provider turn. It observed exactly one `MODIFIED` artifact with source blob `558faea8fb1d4500ad7dee71448c4a4f72c94c64`, observed blob `663dd481e013182bead5b8685de62c6b67ac9041`, and observation fingerprint `919193a22ea08df6c86947fc08ee55a648fd52664005d0de395701a0fbaf1f1c`. This diagnostic proves exact workspace mutation Reality but does not replace the missing governed Provider Result or persisted normal observation chain.
+
+Architecture Baseline remains **v0.1**. At R2 implementation completion, the state was:
+
+```text
+S1–S5
+    CLOSED / PASS
+
+S6
+    IN PROGRESS
+
+S6-B1
+    IMPLEMENTED — REAL SDK SPIKE PARTIAL
+    PENDING ARCHITECTURE LEAD REALITY REVIEW
+```
+
+The next governed step is:
+
+> Architecture Lead S6-B1 Reality Review and disposition of the stable SDK terminal-result limitation before any dedicated Executor boundary spike or additional real Provider execution.
+
+## 55. S6-B1-R Provider Terminal & Identity Correlation Spike reality
+
+S6-B1-R is **PARTIAL — PUBLIC LIFECYCLE MAPPING PASS / NEW REAL CORRELATION NOT EXECUTED**. S6-B1 remains **IMPLEMENTED — REAL SDK SPIKE PARTIAL / PENDING ARCHITECTURE LEAD REALITY REVIEW**; S6 remains **IN PROGRESS**. This spike does not close S6-B1 or authorize S6-B2, S6-C, Docker execution, Provider Resume, or FVS closure.
+
+For stable `openai-codex==0.147.0`, the supported synchronous public surface exposes `Thread.id`, `Thread.turn(...)`, immediate `TurnHandle.id`, `TurnHandle.run()`, `TurnHandle.stream()`, `TurnHandle.interrupt()`, terminal `TurnResult`, `TurnCompletedNotification`, and `ErrorNotification`. `TurnResult` carries exact turn ID and status. The public terminal statuses are `completed`, `failed`, `interrupted`, and `inProgress`. The SDK exposes no timeout parameter on `Thread.run`, `Thread.turn`, `TurnHandle.run`, or `TurnHandle.stream`.
+
+The prior probe used `Thread.run(...)`, which is a supported convenience call that waits for the complete terminal `TurnResult`. Repository Reality proves that the requested tool-side file mutation occurred before the outer 120-second boundary, while no `TurnResult` returned before interruption. The strongest evidence-backed classification is therefore: the public terminal lifecycle had not completed before the external timeout. The exact reason the Provider did not finalize after the mutation remains unknown; approval wait, runtime defect, or another internal cause is not claimed without evidence.
+
+`CodexSdkExecutor` now starts the turn through public `Thread.turn(...)`, records public thread and turn identity before waiting, and waits once for the public terminal result. An optional bounded wait requests public `interrupt()` after timeout and always maps the timed-out Provider fact to `UNKNOWN`, even if independent observation proves that work exists. A terminal `completed` result with matching handle/result identity maps to Provider `SUCCESS`; terminal `failed` maps to `FAILURE`; `interrupted`, `inProgress`, timeout, exception, missing identity, or identity mismatch maps to `UNKNOWN`. These are Provider facts only and grant no `PRODUCED`, Verification, Satisfaction, Candidate, Runtime Commit, or Trusted Baseline authority.
+
+TERM-01 through TERM-08 and the affected S6-B1 deterministic suite are **29/29 PASS**, with the gated real probe deselected. They cover terminal success, terminal failure, timeout, `UNKNOWN` plus independently observed work, exact dispatch/thread/turn correlation, truthful missing identity, absence of Completion authority, and absence of Resume semantics. No full regression was rerun, as required by the bounded spike contract; the previously accepted S6-B1 full regression remains historical evidence.
+
+Real Probe #2 subsequently launched exactly one authenticated Provider Turn under explicit bounded repository-context egress authority. Public `Thread.id` and `TurnHandle.id` were available, and a public terminal object returned before the 120-second timeout; the timeout/interrupt path was not invoked. The authoritative repository and exact isolated Attempt workspace both remained unchanged, with the target marker still `BEFORE`. Exact IDs, terminal status, and lifecycle timestamps were not retained because evidence printing followed downstream artifact assertions and fixture cleanup truncated the temporary Runtime facts. Provider Outcome therefore remains `UNKNOWN`; no `SUCCESS` or `FAILURE` is inferred.
+
+Architecture Baseline remains **v0.1**. Current state:
+
+```text
+S1–S5
+    CLOSED / PASS
+
+S6
+    IN PROGRESS
+
+S6-B1
+    IMPLEMENTED — REAL SDK SPIKE PARTIAL
+    PENDING ARCHITECTURE LEAD REALITY REVIEW
+
+S6-B1-R
+    PARTIAL — LIFECYCLE CAPABILITY PROVEN
+    DURABLE REAL EVIDENCE INCOMPLETE
+```
+
+The next governed step is:
+
+> Architecture Lead review of durable Provider evidence-capture hardening before any further real correlation authority.
+
+## 56. S6-B1-R2 Durable Provider Evidence Capture Hardening reality
+
+S6-B1-R2 is **IMPLEMENTED — DETERMINISTIC VALIDATION PASS** and **PENDING ARCHITECTURE LEAD REALITY REVIEW**. S6-B1-R and S6-B1 remain **PARTIAL**. This task launches no real Provider turn and does not close S6-B1 or authorize S6-B2, S6-C, Provider Resume, Docker, or FVS closure.
+
+The exact Probe #2 historical truth remains:
+
+```text
+Real Probe #2
+
+Provider Turn launched           = YES
+Thread identity available        = YES
+Turn identity available          = YES
+Public terminal object returned  = YES
+Timeout/interruption             = NO
+
+Exact Thread ID retained         = NO
+Exact Turn ID retained           = NO
+Exact terminal status retained   = NO
+
+Provider Outcome                 = UNKNOWN
+
+Observed Workspace Change        = NONE
+Expected marker                  = BEFORE
+
+Probe Result                     = PARTIAL
+```
+
+The loss boundary was test instrumentation, not Provider lifecycle capability or Provider Report durability. `ExecutionService` committed the Provider Report before independent Repository Observation, but the real-probe test emitted its evidence only after artifact assertions. The failed marker assertion triggered fixture teardown, which truncated the temporary Runtime records before their exact values were reported externally.
+
+R2 preserves the existing domain and persistence architecture. `CodexSdkExecutor` now includes public SDK `started_at`, `completed_at`, and `duration_ms` in terminal metadata, alongside dispatch ID, public thread/turn IDs, identity state, adapter start/finish timestamps, terminal status, mapped Provider outcome, timeout/interruption facts, and exception type where available. It fabricates no unavailable value.
+
+The real-probe instrumentation now exports a standalone `S6B1_PROVIDER_EVIDENCE` JSON record immediately after the durable Provider Report is available and before any workspace/artifact assertion. It separately exports `S6B1_PRODUCTION_EVIDENCE` from independent observation. If observation raises after Provider Report commit, the exception path reloads and exports the durable Provider Report before re-raising. Cleanup remains after capture and is not evidence storage.
+
+This ordering is now explicit:
+
+```text
+Observe Provider Fact
+→ commit Provider Report
+→ export Provider Evidence
+→ independently observe/export Production Reality
+→ artifact assertions/adjudication
+→ cleanup
+```
+
+EVID-01 through EVID-08 prove thread identity, turn identity, terminal status, lifecycle timestamps, Provider outcome independence, observation-failure preservation, absence of invented artifact reality, and capture-before-cleanup ordering. Together with the affected S6-B1 and TERM tests, the focused deterministic suite is **37/37 PASS**, with the real probe explicitly deselected. Compilation/import is **PASS** and `git diff --check` is **PASS**. No full regression was run.
+
+Architecture Baseline remains **v0.1**. Current state:
+
+```text
+S1–S5
+    CLOSED / PASS
+
+S6
+    IN PROGRESS
+
+S6-B1
+    PARTIAL
+    PENDING ARCHITECTURE LEAD REALITY REVIEW
+
+S6-B1-R
+    PARTIAL
+
+S6-B1-R2
+    IMPLEMENTED — DETERMINISTIC VALIDATION PASS
+    PENDING ARCHITECTURE LEAD REALITY REVIEW
+```
+
+The next governed step is:
+
+> Architecture Lead review → decide whether one final explicitly authorized correlation probe is justified.
+
+## 57. S6-B1 final closure hardening and current-tree validation
+
+S6-B1-R2 is **CLOSED / PASS**. S6-B1 is **CLOSED / PARTIAL** by Architecture Lead decision. S6 remains **IN PROGRESS**; this closure does not authorize S6-B2, S6-C, Provider Resume, Docker, or FVS closure.
+
+`CLOSED / PARTIAL` means the bounded host-local real Codex SDK integration experiment is complete. It proved stable SDK integration, authenticated real Provider execution, isolated Attempt workspace execution, public Thread/Turn lifecycle identity, bounded timeout/interruption, conservative Provider Outcome mapping, durable Provider evidence capture, independent Production observation, and Provider Reality / Production Reality separation. It did not prove reliable real end-to-end production execution in one fully correlated Turn, consistently terminal Provider execution within the bounded window, or reliable expected workspace mutation on subsequent real probes. This is a known Provider integration/reliability limitation, not an implementation failure.
+
+The historical Final Probe remains immutable:
+
+```text
+Provider turns launched          = 1
+Retries                          = 0
+
+Dispatch ID                      = 87e79294-36dc-49ed-8f5c-58c059b85f95
+Workspace identity               = attempt-worktree:06c599cd-5f36-4758-b3b2-b686fd3e8d59
+Thread ID                        = 01a05064-6f34-7063-b056-a9ceeb8747d3
+Turn ID                          = 01a05064-703d-7eb0-940b-4d843535a8da
+
+Terminal within timeout         = NO
+Interrupt requested             = YES
+Post-timeout status             = interrupted
+Provider Outcome                = UNKNOWN
+
+Observed Workspace Change       = NONE
+Observed Work                   = NONE
+Expected marker remained        = BEFORE
+Probe Result                    = PARTIAL
+```
+
+Final deterministic hardening adds no schema or migration. Evidence export now includes the already-durable Materialized Execution Input ID and fingerprint alongside exact dispatch, workspace, thread, and turn identity. The real-probe contract no longer requires the preferred `marker == AFTER` outcome: `NONE` and `MODIFIED` remain independently observable Production Reality, while unexpected workspace paths or any authoritative repository mutation remain failures.
+
+CLOSE-01 through CLOSE-08 cover exact input ID/fingerprint export, `UNKNOWN + NONE`, `SUCCESS + NONE`, `UNKNOWN + MODIFIED`, absence of a preferred-mutation requirement, unexpected workspace paths, and authoritative repository mutation. The focused S6-B1/R/R2 closure suite is **45/45 PASS**, with the real Provider test deselected. Compilation/import is **PASS** against `openai-codex==0.147.0`. The current-tree serial deterministic suite collected 391 tests and completed **390/390 PASS**, with zero failures, zero skips, and one real Provider test deselected, in **921.61 seconds (00:15:21)**. Alembic is at `20260829_12 (head)`; no downgrade/re-upgrade was necessary. `git diff --check` is **PASS**.
+
+Current state:
+
+```text
+S1–S5
+    CLOSED / PASS
+
+S6
+    IN PROGRESS
+
+S6-B1
+    CLOSED / PARTIAL
+
+S6-B1-R
+    PARTIAL — HISTORICAL
+
+S6-B1-R2
+    CLOSED / PASS
+```
+
+No additional S6-B1 real Provider probe is authorized. Any future real Codex execution must belong to a separately admitted governed task, not an extension of S6-B1.
+
+## 58. S6-B2-A Dedicated Executor Boundary deterministic spike reality
+
+S6-B2-A is **CLOSED / PASS** after Architecture Lead decision. S6 remains **IN PROGRESS**. S6-B1 stays **CLOSED / PARTIAL** and is not reopened. This result does not close S6-B2, start S6-B2-B or S6-C, or prove dedicated real Codex execution.
+
+The physical spike uses the smallest admitted separation: a provider-neutral SPG client performs a single JSON request/response exchange with a dedicated local Python process. The transport projection is infrastructure rather than a new domain contract. It carries exact Attempt/generation, dispatch ID, Materialized Execution Input ID/fingerprint, canonical workspace identity, executor-local path mapping, and exact materialized Provider input. It deliberately excludes Provider/test configuration, the authoritative repository path, SPG database configuration, Provider credentials, Completion authority, and transport-specific state from durable domain models. The deterministic fixture Provider is selected and configured only in the Executor process environment.
+
+Logical ownership remains unchanged. SPG validates and persists dispatch authority, owns Materialized Execution Input and production state, and independently observes the exact Attempt workspace through `GitWorkspaceObserver`. The dedicated Executor owns only invocation mechanics and deterministic workspace operations. Its Provider result remains an untrusted claim and cannot create PRODUCED, Verification, Satisfaction, Candidate, Runtime Commit, or Trusted Baseline authority.
+
+Canonical `Attempt Workspace Identity` is mapped by infrastructure to an Executor-local writable path. Local-process execution currently maps the host Attempt workspace directly; deterministic symlink/path-escape coverage proves operations cannot escape into the authoritative repository, and translated mount paths do not replace the canonical domain path or identity. The child process runs with the exact workspace as its current directory and a minimal environment that excludes inherited SPG database configuration and credentials. The current transport exposes no credential channel; any future Provider credential must be provisioned independently in the dedicated Executor environment and must never enter the request or SPG persistence.
+
+Transport unavailability, timeout, process error, malformed response, and exact-correlation mismatch map conservatively to Provider Outcome `UNKNOWN` with distinct transport metadata and no fabricated Provider result. Normal responses must echo exact request fingerprint, Attempt/generation, dispatch, Materialized Input, and workspace identity before SPG accepts their Provider fact. Provider outcome and Production Reality remain independent: `SUCCESS + MODIFIED`, `SUCCESS + NONE`, `FAILURE + NONE`, `UNKNOWN + MODIFIED`, and `UNKNOWN + NONE` are representable, while Work Product References derive only from SPG's independent observation.
+
+B2A-01 through B2A-15 are **15/15 PASS** in **34.18 seconds**. B2A-01 is the dedicated boundary smoke: governed dispatch crossed the real local process, the deterministic Provider modified only the exact Attempt workspace, and SPG independently observed the change. Compilation/import and `git diff --check` are **PASS**. No schema or migration changed. No full regression was run because no shared Runtime semantic changed, as required by the bounded authorization.
+
+Current state:
+
+```text
+S6
+    IN PROGRESS
+
+S6-B1
+    CLOSED / PARTIAL
+
+S6-B1-R2
+    CLOSED / PASS
+
+S6-B2-A
+    CLOSED / PASS
+```
+
+The next governed step is:
+
+> Architecture Lead S6-B2-A review → determine whether an S6-B2-B real authentication/workspace boundary probe is justified.
+
+## 59. S6-B2-B1 Codex Adapter Binding and Authentication Boundary preflight reality
+
+The S6-B2-B1 implementation result was **IMPLEMENTED — DETERMINISTIC/PREFLIGHT VALIDATION PASS / PENDING ARCHITECTURE LEAD REVIEW**. Architecture Lead subsequently admitted S6-B2-B1 as **CLOSED / PASS** before authorizing S6-B2-B2. S6-B2-A remains **CLOSED / PASS**, S6-B1 remains **CLOSED / PARTIAL**, and S6 remains **IN PROGRESS**. The B1 task launched zero real Provider Turns and did not itself close S6-B2 or start S6-B2-B2/S6-C.
+
+The existing provider-neutral transport remains unchanged in ownership. SPG sends exact Attempt/generation, dispatch ID, Materialized Execution Input ID/fingerprint, Prepared Execution Request lineage, canonical workspace identity, infrastructure-translated workspace path, request fingerprint, and materialized Provider input. The payload contains no Provider binding selection, credential field, authoritative repository path, SPG database configuration, or deterministic Provider outcome. Child-side infrastructure selects `codex-sdk-preflight` from its own environment and reconstructs the exact adapter binding with a non-authoritative repository sentinel.
+
+The child reuses the existing `CodexSdkExecutor` and its dispatch validation/evidence metadata. A new local `preflight()` seam validates exact Materialized Input, dispatch, Attempt/generation, and translated Git workspace binding without constructing `Codex`, invoking `thread_start`, calling `Thread.turn()`/`run()`, or executing a model. No Codex lifecycle mapping is duplicated in transport. Stable `openai-codex==0.147.0` import and adapter construction are proven. Because constructing the SDK runtime itself starts its client, this bounded preflight deliberately stops before that operation.
+
+At the B1 preflight stage, authentication responsibility belonged to the dedicated Executor infrastructure but authentication readiness was intentionally not proven. No authentication file was read, no secret was inspected or copied, and no credential value entered transport, domain objects, persistence, Provider Reports, fixtures, or logs. The child environment policy admitted only the classes HOME location, executable/Python search paths, locale, temporary-directory location, and UTF-8 process configuration. It excluded inherited `SPG_DATABASE_URL` and unrelated credential variables. This was host-process filtering, not an OS-level credential isolation claim.
+
+```text
+PROVEN
+    stable SDK import
+    existing CodexSdkExecutor child-side selection/construction
+    exact request/input/workspace correlation
+    narrow child environment filtering
+    zero Codex runtime construction / zero Provider Turn
+
+NOT PROVEN
+    authenticated Codex runtime readiness
+    real Provider execution through Dedicated Executor
+    OS-level credential isolation
+
+AUTH_READINESS
+    REQUIRES REAL B2-B2 PROBE
+```
+
+Binding failures remain infrastructure facts with Provider Outcome `UNKNOWN`: `SDK_UNAVAILABLE`, `ADAPTER_INITIALIZATION_FAILED`, `MISSING_RUNTIME_PREREQUISITE`, `UNSUPPORTED_PROVIDER_BINDING`, transport failure, malformed response, and correlation mismatch cannot become Provider SUCCESS/FAILURE or Produced.
+
+Final B2B1-01 through B2B1-15 are **15/15 PASS** in **70.39 seconds**. Final affected B2A-01 through B2A-15 are **15/15 PASS** in **62.30 seconds**. Affected S6-B1/R/R2 deterministic tests are **45/45 PASS**, with the real Codex test explicitly deselected, in **140.69 seconds**. Compilation/import against `openai-codex==0.147.0` and `git diff --check` are **PASS**. No full regression ran because no shared Runtime/domain semantic changed. No schema, migration, Docker, authentication, Completion, Verification, Candidate, or Trusted Baseline change occurred.
+
+The state immediately after B1 implementation, before Architecture Lead admission, was:
+
+```text
+S6
+    IN PROGRESS
+
+S6-B1
+    CLOSED / PARTIAL
+
+S6-B2-A
+    CLOSED / PASS
+
+S6-B2-B1
+    IMPLEMENTED — DETERMINISTIC/PREFLIGHT VALIDATION PASS
+    PENDING ARCHITECTURE LEAD REVIEW
+```
+
+The next governed step is:
+
+> Architecture Lead S6-B2-B1 review → determine whether exactly one S6-B2-B2 real Codex Turn through the Dedicated Executor boundary is justified.
+
+## 60. S6-B2-B2 single real Codex through Dedicated Executor boundary reality
+
+S6-B2-B2 is **REAL PROBE COMPLETE / PARTIAL / PENDING ARCHITECTURE LEAD REVIEW**. S6-B2-B1 is **CLOSED / PASS**, S6-B2-A remains **CLOSED / PASS**, S6-B1 remains **CLOSED / PARTIAL**, and S6 remains **IN PROGRESS**. Exactly one real Provider Turn was launched and no retry occurred. S6-B2 is not closed and S6-C is not started.
+
+The real topology was proven end to end: SPG persisted one governed dispatch, `DedicatedExecutorClient` projected the exact Materialized Execution Input into provider-neutral JSON, a dedicated child process selected the Codex binding from its own environment, and the child reused the existing `CodexSdkExecutor` against the exact translated Attempt workspace. The request retained Attempt `8a3571d3-763c-4013-8682-8569a213fc98`, generation `1`, dispatch `e8d20081-685a-4a8a-813a-05ed0d1313d2`, Materialized Execution Input `fd59eadb-a5fa-572b-a16c-0c399dfb512a`, input fingerprint `cad6b3959ec66f93ad0fd4b2d69da5c33104b3b5c8845a31441d39d795fcc02a`, request fingerprint `a366aeee14bff0ee1913d7d3d2e29324cf08bf2beb554203a2145e573a8877da`, and canonical workspace identity `attempt-worktree:8a3571d3-763c-4013-8682-8569a213fc98`.
+
+Authenticated child-side Provider execution is **PROVEN** without inspecting or transmitting credential values. The child returned Thread `01a050c1-566e-7220-afb0-0ee59715973f` and Turn `01a050c1-579d-7a43-bfd3-5f98486b89de`; the public terminal result returned within the existing 120-second Provider wait as `completed`, the terminal Turn identity matched, no timeout or interrupt occurred, and the conservative mapped Provider Outcome was `SUCCESS`. The dedicated transport returned a correlated response with `provider_result_present = true` and status `COMPLETED`. This proves only the authenticated Provider fact, not Produced, Verification, Satisfaction, Candidate, Runtime Commit, or Trusted Baseline authority.
+
+SPG persisted Provider evidence before independently observing Production Reality. The authoritative fixture ref stayed exactly `95437027213eb02f48292e2c840efa7b8cfa6481`, its working-tree status stayed clean, the Attempt workspace stayed on the same HEAD, its status stayed clean, the admitted marker remained `S6-B2-A marker: BEFORE`, observed changed paths were empty, and Work Product References were empty. Therefore the truthful combination is:
+
+```text
+Provider Reality
+    SUCCESS
+
+Production Reality
+    NONE
+```
+
+The PARTIAL classification is limited to post-evidence harness validation. After both Provider and Production evidence were exported, the real probe test's broad `"codex" not in payload` assertion falsely matched `codex` in pytest's generated temporary directory name. It did not identify Provider selection in the transport schema or an authoritative-repository escape. Per authorization, no repair and no second Provider Turn occurred. Existing B2-A/B2-B1 deterministic coverage subsequently passed **30 tests** with the gated real test skipped; compilation, critical imports, and `git diff --check` passed. No full regression ran.
+
+Current state:
+
+```text
+S6
+    IN PROGRESS
+
+S6-B1
+    CLOSED / PARTIAL
+
+S6-B2-A
+    CLOSED / PASS
+
+S6-B2-B1
+    CLOSED / PASS
+
+S6-B2-B2
+    REAL PROBE COMPLETE / PARTIAL
+    PENDING ARCHITECTURE LEAD REVIEW
+
+S6-C
+    NOT STARTED
+```
+
+No additional S6-B2-B2 real Provider Turn is authorized. The next governed step is:
+
+> Architecture Lead S6-B2 final review.
+
+## 61. S6-B2 final deterministic closure hardening and admission
+
+S6-B2 Dedicated Executor & Real Provider Boundary is **CLOSED / PASS**. S6-B2-A and S6-B2-B1 remain **CLOSED / PASS**. The S6-B2-B2 historical real probe remains **COMPLETE / PARTIAL** exactly as observed; closing the aggregate capability does not relabel or rewrite that experiment. S6 remains **IN PROGRESS** and S6-C remains **NOT STARTED**.
+
+The historical false positive came from testing the full serialized payload as undifferentiated text. The assertion searched every admitted string value for `codex`, so pytest's generated temporary-directory name was mistaken for a Provider-specific transport field after Provider and Production evidence had already been captured. It was not evidence of Provider leakage.
+
+Closure hardening replaces that check with structural validation of the actual SPG-to-Executor request contract. The serialized payload must contain exactly the fields declared by frozen `DedicatedExecutorRequest`; its nested `ExecutorBinding` must contain exactly its provider-neutral binding-ref/capability/profile fields; both structures must exclude Provider binding, SDK/model/runtime configuration, Thread/Turn handles, Provider lifecycle objects, credentials, API keys, tokens, and authentication-file fields. Pydantic `extra = forbid` rejects every tested unauthorized Provider-specific or credential-like field. Admitted string values are not semantically reinterpreted, so filesystem paths, fixture names, repository identities, and documentation text may contain `codex` without false leakage classification. Provider binding selection remains child-side infrastructure configuration and is absent from the governed JSON request.
+
+B2CLOSE-01 through B2CLOSE-08 are **8/8 PASS**. They prove structural Provider neutrality, safe `codex`-named paths and fixtures, rejection of actual unauthorized Provider and credential fields, child-only binding selection, representable `SUCCESS + NONE`, and absence of Produced/Completion authority. Existing safe combinations remain representable, and no preferred `marker == AFTER` rule was introduced.
+
+Focused deterministic validation is **PASS**:
+
+```text
+S6-B2 complete deterministic module
+    38/38 PASS
+    1 real Provider test deselected
+
+Affected S6-B1/R/R2 integration module
+    45/45 PASS
+    1 real Provider test deselected
+
+Real Provider Turns during closure
+    0
+```
+
+The single serial current-tree deterministic regression collected **430** tests: **428/428 selected tests PASS**, **0 failed**, **0 skipped**, and **2 real Provider tests deselected**. The repository's configured `-q` plus the command's explicit `-q` suppressed pytest's internal duration line; the suite was not rerun merely to recover that presentation-only datum. Migration repository head and database current revision are both `20260829_12 (head)`. Compilation, critical imports, and `git diff --check` are **PASS**. No schema or migration changed.
+
+Historical S6-B2-B2 evidence remains immutable:
+
+```text
+Provider Turns launched
+    1
+
+Retries
+    0
+
+Authenticated child-side execution
+    PROVEN
+
+Thread
+    01a050c1-566e-7220-afb0-0ee59715973f
+
+Turn
+    01a050c1-579d-7a43-bfd3-5f98486b89de
+
+Terminal
+    completed / no timeout / no interrupt
+
+Provider Reality
+    SUCCESS
+
+Production Reality
+    NONE
+
+Observed Work
+    NONE
+
+Marker
+    BEFORE
+
+Authoritative repository
+    unchanged
+
+Historical probe classification
+    COMPLETE / PARTIAL
+```
+
+This real governance benchmark proves `Provider SUCCESS != PRODUCED`. It is neither normalized into a failed Provider call nor promoted into a successful production result.
+
+S6-B2 closure proves the real physical dedicated process boundary, provider-neutral SPG transport, exact governed correlation, infrastructure-owned workspace translation, authoritative repository isolation, child-side Provider binding, credential-free SPG contracts/transport/persistence, authenticated real Codex execution from the Executor process, public Thread/Turn lifecycle correlation, transport-failure versus Provider-outcome separation, independent SPG Production Observation, and Provider/Production Reality independence.
+
+Known limitations remain explicit: OS-level credential isolation, container isolation, Provider reliability, expected Production Work from Provider SUCCESS, and reliable end-to-end governed production completion are not proven.
+
+Current state:
+
+```text
+S6
+    IN PROGRESS
+
+S6-B1
+    CLOSED / PARTIAL
+
+S6-B2
+    CLOSED / PASS
+
+S6-B2-A
+    CLOSED / PASS
+
+S6-B2-B1
+    CLOSED / PASS
+
+S6-B2-B2 Historical Real Probe
+    COMPLETE / PARTIAL
+
+S6-C
+    NOT STARTED
+```
+
+The next governed step is:
+
+> Architecture Lead S6-B2 closure review → determine exact S6-C Real Governed Dogfood Loop scope.

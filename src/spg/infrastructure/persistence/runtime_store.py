@@ -23,6 +23,27 @@ from spg.domain.verification import (
     VerificationRecord,
     VerificationResultValue,
 )
+from spg.domain.governance import (
+    BaselineCandidateRecord,
+    CandidateAuthorizationScope,
+    CandidateCondition,
+    HumanAuthorizationRecord,
+)
+from spg.domain.integration import (
+    RepositoryEffectState,
+    RepositoryEffectType,
+    RepositoryIntegrationEffectRecord,
+)
+from spg.domain.runtime_commit import RuntimeCommitRecord
+from spg.domain.recovery import (
+    RecoveryActionOutcome,
+    RecoveryActionRecord,
+    RecoveryActionType,
+    RecoveryAssessmentRecord,
+    RecoveryClassification,
+    RecoveryGuidance,
+    RecoverySubjectType,
+)
 from spg.domain.runtime import (
     AttemptCondition,
     BaselinePointerRecord,
@@ -45,7 +66,12 @@ from spg.domain.preparation import (
     ContextPackageManifest,
     ContextPackageRecord,
     ExecutorBinding,
+    PreparedExecutionRequest,
     WorkspaceBinding,
+)
+from spg.domain.materialization import (
+    MaterializedContextArtifact,
+    MaterializedExecutionInputRecord,
 )
 from spg.domain.execution import (
     ArtifactChangeType,
@@ -61,6 +87,7 @@ from spg.infrastructure.persistence.runtime_schema import (
     attempt_preparations,
     completion_evaluations,
     context_packages,
+    materialized_execution_inputs,
     current_trusted_baseline_pointer,
     execution_attempts,
     governance_records,
@@ -76,6 +103,12 @@ from spg.infrastructure.persistence.runtime_schema import (
     proposed_repository_snapshots,
     verification_records,
     production_admissibility_records,
+    baseline_candidates,
+    human_authorizations,
+    repository_integration_effects,
+    runtime_commits,
+    recovery_assessments,
+    recovery_action_records,
 )
 
 
@@ -114,6 +147,9 @@ class RuntimeStore:
     def insert_context_package(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(context_packages).values(**values))
 
+    def insert_materialized_execution_input(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(materialized_execution_inputs).values(**values))
+
     def insert_attempt_preparation(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(attempt_preparations).values(**values))
 
@@ -140,6 +176,68 @@ class RuntimeStore:
 
     def insert_production_admissibility(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(production_admissibility_records).values(**values))
+
+    def insert_baseline_candidate(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(baseline_candidates).values(**values))
+
+    def insert_human_authorization(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(human_authorizations).values(**values))
+
+    def insert_repository_integration_effect(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(repository_integration_effects).values(**values))
+
+    def insert_runtime_commit(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(runtime_commits).values(**values))
+
+    def insert_recovery_assessment(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(recovery_assessments).values(**values))
+
+    def insert_recovery_action(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(recovery_action_records).values(**values))
+
+    def record_repository_effect_observation(
+        self,
+        effect_id: UUID,
+        expected_version: int,
+        observed_revision: str,
+        observed_at,
+    ) -> int:
+        return update_versioned_row(
+            self.session,
+            repository_integration_effects,
+            identity={
+                "id": effect_id,
+                "state": RepositoryEffectState.PREPARED.value,
+            },
+            expected_version=expected_version,
+            values={
+                "observed_repository_revision": observed_revision,
+                "observed_at": observed_at,
+            },
+        )
+
+    def mark_repository_effect_converged(
+        self,
+        effect_id: UUID,
+        expected_version: int,
+        observed_revision: str,
+        observed_at,
+    ) -> int:
+        return update_versioned_row(
+            self.session,
+            repository_integration_effects,
+            identity={
+                "id": effect_id,
+                "state": RepositoryEffectState.PREPARED.value,
+            },
+            expected_version=expected_version,
+            values={
+                "state": RepositoryEffectState.CONVERGED.value,
+                "observed_repository_revision": observed_revision,
+                "observed_at": observed_at,
+                "converged_at": observed_at,
+            },
+        )
 
     def bind_run_to_plan(self, run_id: UUID, expected_version: int, plan_id: UUID) -> int:
         return update_versioned_row(
@@ -200,23 +298,30 @@ class RuntimeStore:
         self,
         expected_version: int,
         snapshot_id: UUID,
+        *,
+        expected_snapshot_id: UUID | None = None,
     ) -> int:
-        """Provide the version-aware pointer primitive without advancing a baseline."""
+        """Advance by version and, when supplied, exact expected Source Baseline."""
+
+        identity: dict[str, Any] = {"singleton_id": 1}
+        if expected_snapshot_id is not None:
+            identity["snapshot_id"] = expected_snapshot_id
 
         return update_versioned_row(
             self.session,
             current_trusted_baseline_pointer,
-            identity={"singleton_id": 1},
+            identity=identity,
             expected_version=expected_version,
             values={"snapshot_id": snapshot_id, "updated_at": func.now()},
         )
 
-    def current_pointer(self) -> BaselinePointerRecord | None:
-        row = self.session.execute(
-            select(current_trusted_baseline_pointer).where(
-                current_trusted_baseline_pointer.c.singleton_id == 1
-            )
-        ).mappings().one_or_none()
+    def current_pointer(self, *, for_update: bool = False) -> BaselinePointerRecord | None:
+        statement = select(current_trusted_baseline_pointer).where(
+            current_trusted_baseline_pointer.c.singleton_id == 1
+        )
+        if for_update:
+            statement = statement.with_for_update()
+        row = self.session.execute(statement).mappings().one_or_none()
         if row is None:
             return None
         values = dict(row)
@@ -239,8 +344,16 @@ class RuntimeStore:
         ).mappings()
         return [GovernanceRecord.model_validate(dict(row)) for row in rows]
 
-    def run(self, run_id: UUID) -> ProductionRunRecord | None:
-        row = self._one(production_runs, production_runs.c.id == run_id)
+    def run(
+        self,
+        run_id: UUID,
+        *,
+        for_update: bool = False,
+    ) -> ProductionRunRecord | None:
+        statement = select(production_runs).where(production_runs.c.id == run_id)
+        if for_update:
+            statement = statement.with_for_update()
+        row = self.session.execute(statement).mappings().one_or_none()
         if row is None or row["current_plan_revision_id"] is None:
             return None
         values = dict(row)
@@ -318,6 +431,30 @@ class RuntimeStore:
         if row is None:
             return None
         return self._context_package_record(row)
+
+    def materialized_execution_input(
+        self,
+        input_id: UUID,
+    ) -> MaterializedExecutionInputRecord | None:
+        row = self._one(
+            materialized_execution_inputs,
+            materialized_execution_inputs.c.id == input_id,
+        )
+        if row is None:
+            return None
+        return self._materialized_execution_input_record(row)
+
+    def materialized_execution_input_for_attempt(
+        self,
+        attempt_id: UUID,
+    ) -> MaterializedExecutionInputRecord | None:
+        row = self._one(
+            materialized_execution_inputs,
+            materialized_execution_inputs.c.attempt_id == attempt_id,
+        )
+        if row is None:
+            return None
+        return self._materialized_execution_input_record(row)
 
     def attempt_preparation(
         self,
@@ -537,6 +674,202 @@ class RuntimeStore:
         ).mappings()
         return tuple(self._production_admissibility_record(row) for row in rows)
 
+    def production_admissibility(
+        self,
+        record_id: UUID,
+    ) -> ProductionAdmissibilityRecord | None:
+        row = self._one(
+            production_admissibility_records,
+            production_admissibility_records.c.id == record_id,
+        )
+        if row is None:
+            return None
+        return self._production_admissibility_record(row)
+
+    def baseline_candidate(self, candidate_id: UUID) -> BaselineCandidateRecord | None:
+        row = self._one(baseline_candidates, baseline_candidates.c.id == candidate_id)
+        if row is None:
+            return None
+        return self._baseline_candidate_record(row)
+
+    def baseline_candidate_by_fingerprint(
+        self,
+        fingerprint: str,
+    ) -> BaselineCandidateRecord | None:
+        row = self._one(
+            baseline_candidates,
+            baseline_candidates.c.fingerprint == fingerprint,
+        )
+        if row is None:
+            return None
+        return self._baseline_candidate_record(row)
+
+    def human_authorization(
+        self,
+        authorization_id: UUID,
+    ) -> HumanAuthorizationRecord | None:
+        row = self._one(
+            human_authorizations,
+            human_authorizations.c.id == authorization_id,
+        )
+        if row is None:
+            return None
+        return self._human_authorization_record(row)
+
+    def human_authorization_by_basis(
+        self,
+        basis_fingerprint: str,
+    ) -> HumanAuthorizationRecord | None:
+        row = self._one(
+            human_authorizations,
+            human_authorizations.c.basis_fingerprint == basis_fingerprint,
+        )
+        if row is None:
+            return None
+        return self._human_authorization_record(row)
+
+    def human_authorizations_for_candidate(
+        self,
+        candidate_id: UUID,
+    ) -> tuple[HumanAuthorizationRecord, ...]:
+        rows = self.session.execute(
+            select(human_authorizations)
+            .where(human_authorizations.c.candidate_id == candidate_id)
+            .order_by(
+                human_authorizations.c.authorized_at,
+                human_authorizations.c.id,
+            )
+        ).mappings()
+        return tuple(self._human_authorization_record(row) for row in rows)
+
+    def repository_integration_effect(
+        self,
+        effect_id: UUID,
+        *,
+        for_update: bool = False,
+    ) -> RepositoryIntegrationEffectRecord | None:
+        statement = select(repository_integration_effects).where(
+            repository_integration_effects.c.id == effect_id
+        )
+        if for_update:
+            statement = statement.with_for_update()
+        row = self.session.execute(statement).mappings().one_or_none()
+        if row is None:
+            return None
+        return self._repository_integration_effect_record(row)
+
+    def repository_integration_effect_by_operation(
+        self,
+        operation_fingerprint: str,
+    ) -> RepositoryIntegrationEffectRecord | None:
+        row = self._one(
+            repository_integration_effects,
+            repository_integration_effects.c.operation_fingerprint
+            == operation_fingerprint,
+        )
+        if row is None:
+            return None
+        return self._repository_integration_effect_record(row)
+
+    def runtime_commit(self, commit_id: UUID) -> RuntimeCommitRecord | None:
+        row = self._one(runtime_commits, runtime_commits.c.id == commit_id)
+        if row is None:
+            return None
+        return self._runtime_commit_record(row)
+
+    def runtime_commit_by_fingerprint(
+        self,
+        commit_fingerprint: str,
+    ) -> RuntimeCommitRecord | None:
+        row = self._one(
+            runtime_commits,
+            runtime_commits.c.commit_fingerprint == commit_fingerprint,
+        )
+        if row is None:
+            return None
+        return self._runtime_commit_record(row)
+
+    def runtime_commit_for_candidate(
+        self,
+        candidate_id: UUID,
+    ) -> RuntimeCommitRecord | None:
+        row = self._one(
+            runtime_commits,
+            runtime_commits.c.candidate_id == candidate_id,
+        )
+        if row is None:
+            return None
+        return self._runtime_commit_record(row)
+
+    def recovery_assessment(
+        self,
+        assessment_id: UUID,
+    ) -> RecoveryAssessmentRecord | None:
+        row = self._one(
+            recovery_assessments,
+            recovery_assessments.c.id == assessment_id,
+        )
+        if row is None:
+            return None
+        return self._recovery_assessment_record(row)
+
+    def recovery_assessment_by_basis(
+        self,
+        basis_fingerprint: str,
+    ) -> RecoveryAssessmentRecord | None:
+        row = self._one(
+            recovery_assessments,
+            recovery_assessments.c.basis_fingerprint == basis_fingerprint,
+        )
+        if row is None:
+            return None
+        return self._recovery_assessment_record(row)
+
+    def recovery_assessments_for_subject(
+        self,
+        subject_type: RecoverySubjectType,
+        subject_identity: str,
+    ) -> tuple[RecoveryAssessmentRecord, ...]:
+        rows = self.session.execute(
+            select(recovery_assessments)
+            .where(
+                recovery_assessments.c.subject_type == subject_type.value,
+                recovery_assessments.c.subject_identity == subject_identity,
+            )
+            .order_by(
+                recovery_assessments.c.assessed_at,
+                recovery_assessments.c.id,
+            )
+        ).mappings()
+        return tuple(self._recovery_assessment_record(row) for row in rows)
+
+    def recovery_action(
+        self,
+        action_id: UUID,
+    ) -> RecoveryActionRecord | None:
+        row = self._one(
+            recovery_action_records,
+            recovery_action_records.c.id == action_id,
+        )
+        if row is None:
+            return None
+        return self._recovery_action_record(row)
+
+    def recovery_action_for_assessment(
+        self,
+        assessment_id: UUID,
+        action_type: RecoveryActionType,
+    ) -> RecoveryActionRecord | None:
+        row = self.session.execute(
+            select(recovery_action_records).where(
+                recovery_action_records.c.recovery_assessment_id == assessment_id,
+                recovery_action_records.c.action_type == action_type.value,
+            )
+        ).mappings().one_or_none()
+        if row is None:
+            return None
+        return self._recovery_action_record(row)
+
     @staticmethod
     def _work_unit_record(row: Mapping[str, Any]) -> WorkUnitRecord:
         values = dict(row)
@@ -545,6 +878,20 @@ class RuntimeStore:
         )
         values["condition"] = WorkUnitCondition(values["condition"])
         return WorkUnitRecord.model_validate(values)
+
+    @staticmethod
+    def _materialized_execution_input_record(
+        row: Mapping[str, Any],
+    ) -> MaterializedExecutionInputRecord:
+        values = dict(row)
+        values["prepared_execution_request"] = PreparedExecutionRequest.model_validate(
+            values["prepared_execution_request"]
+        )
+        values["context_projection"] = tuple(
+            MaterializedContextArtifact.model_validate(item)
+            for item in values["context_projection"]
+        )
+        return MaterializedExecutionInputRecord.model_validate(values)
 
     @staticmethod
     def _context_package_record(row: Mapping[str, Any]) -> ContextPackageRecord:
@@ -618,6 +965,75 @@ class RuntimeStore:
             for item in values["obligation_results"]
         )
         return ProductionAdmissibilityRecord.model_validate(values)
+
+    @staticmethod
+    def _baseline_candidate_record(row: Mapping[str, Any]) -> BaselineCandidateRecord:
+        values = dict(row)
+        values["condition"] = CandidateCondition(values["condition"])
+        for field in (
+            "satisfied_work_unit_ids",
+            "completion_evaluation_ids",
+            "work_product_reference_ids",
+            "verification_record_ids",
+        ):
+            values[field] = tuple(UUID(value) for value in values[field])
+        return BaselineCandidateRecord.model_validate(values)
+
+    @staticmethod
+    def _human_authorization_record(row: Mapping[str, Any]) -> HumanAuthorizationRecord:
+        values = dict(row)
+        values["scope"] = CandidateAuthorizationScope.model_validate(
+            values.pop("authorization_scope")
+        )
+        return HumanAuthorizationRecord.model_validate(values)
+
+    @staticmethod
+    def _repository_integration_effect_record(
+        row: Mapping[str, Any],
+    ) -> RepositoryIntegrationEffectRecord:
+        values = dict(row)
+        values["effect_type"] = RepositoryEffectType(values["effect_type"])
+        values["state"] = RepositoryEffectState(values["state"])
+        return RepositoryIntegrationEffectRecord.model_validate(values)
+
+    @staticmethod
+    def _runtime_commit_record(row: Mapping[str, Any]) -> RuntimeCommitRecord:
+        values = dict(row)
+        for field in (
+            "satisfied_work_unit_ids",
+            "completion_evaluation_ids",
+            "verification_record_ids",
+        ):
+            values[field] = tuple(UUID(value) for value in values[field])
+        return RuntimeCommitRecord.model_validate(values)
+
+    @staticmethod
+    def _recovery_assessment_record(
+        row: Mapping[str, Any],
+    ) -> RecoveryAssessmentRecord:
+        values = dict(row)
+        values["subject_type"] = RecoverySubjectType(values["subject_type"])
+        values["classification"] = RecoveryClassification(
+            values["classification"]
+        )
+        values["guidance"] = RecoveryGuidance(values["guidance"])
+        values["differences"] = tuple(values["differences"])
+        for field in (
+            "subject_is_current",
+            "safely_recoverable",
+            "requires_human_attention",
+            "recovery_barrier",
+        ):
+            values[field] = bool(values[field])
+        return RecoveryAssessmentRecord.model_validate(values)
+
+    @staticmethod
+    def _recovery_action_record(row: Mapping[str, Any]) -> RecoveryActionRecord:
+        values = dict(row)
+        values["action_type"] = RecoveryActionType(values["action_type"])
+        values["subject_type"] = RecoverySubjectType(values["subject_type"])
+        values["outcome"] = RecoveryActionOutcome(values["outcome"])
+        return RecoveryActionRecord.model_validate(values)
 
     def _one(self, table, condition) -> Mapping[str, Any] | None:
         return self.session.execute(select(table).where(condition)).mappings().one_or_none()

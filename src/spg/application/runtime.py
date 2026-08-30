@@ -320,6 +320,7 @@ class RuntimeService:
         *,
         retry_of: UUID | None,
         reason: str,
+        commit: bool = True,
     ) -> ExecutionAttemptRecord:
         run = store.run(work_unit.production_run_id)
         plan = store.plan_revision(work_unit.plan_revision_id)
@@ -370,7 +371,8 @@ class RuntimeService:
         attempt = store.attempt(attempt_id)
         if attempt is None:
             raise RuntimeInvariantViolation("Attempt was not constructed")
-        unit_of_work.commit()
+        if commit:
+            unit_of_work.commit()
         return attempt
 
     @staticmethod
