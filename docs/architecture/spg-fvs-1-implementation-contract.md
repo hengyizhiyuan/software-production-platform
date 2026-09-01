@@ -2348,7 +2348,7 @@ The next governed step is:
 
 ## 60. S6-B2-B2 single real Codex through Dedicated Executor boundary reality
 
-S6-B2-B2 is **REAL PROBE COMPLETE / PARTIAL / PENDING ARCHITECTURE LEAD REVIEW**. S6-B2-B1 is **CLOSED / PASS**, S6-B2-A remains **CLOSED / PASS**, S6-B1 remains **CLOSED / PARTIAL**, and S6 remains **IN PROGRESS**. Exactly one real Provider Turn was launched and no retry occurred. S6-B2 is not closed and S6-C is not started.
+S6-B2-B2 is **REAL PROBE COMPLETE / PARTIAL / PENDING ARCHITECTURE LEAD REVIEW**. S6-B2-B1 is **CLOSED / PASS**, S6-B2-A remains **CLOSED / PASS**, S6-B1 remains **CLOSED / PARTIAL**, and S6 remains **IN PROGRESS**. Exactly one real Provider Turn was launched and no retry occurred. S6-B2 is not closed and S6-C1 is CLOSED / PASS; S6-C remains in progress and S6-C2 is not authorized.
 
 The real topology was proven end to end: SPG persisted one governed dispatch, `DedicatedExecutorClient` projected the exact Materialized Execution Input into provider-neutral JSON, a dedicated child process selected the Codex binding from its own environment, and the child reused the existing `CodexSdkExecutor` against the exact translated Attempt workspace. The request retained Attempt `8a3571d3-763c-4013-8682-8569a213fc98`, generation `1`, dispatch `e8d20081-685a-4a8a-813a-05ed0d1313d2`, Materialized Execution Input `fd59eadb-a5fa-572b-a16c-0c399dfb512a`, input fingerprint `cad6b3959ec66f93ad0fd4b2d69da5c33104b3b5c8845a31441d39d795fcc02a`, request fingerprint `a366aeee14bff0ee1913d7d3d2e29324cf08bf2beb554203a2145e573a8877da`, and canonical workspace identity `attempt-worktree:8a3571d3-763c-4013-8682-8569a213fc98`.
 
@@ -2494,3 +2494,142 @@ S6-C
 The next governed step is:
 
 > Architecture Lead S6-B2 closure review → determine exact S6-C Real Governed Dogfood Loop scope.
+
+## 62. S6-C1 Real Governed Dogfood Requirement and Contract Admission
+
+S6-C1 is **CLOSED / PASS** as a contract-admission step. It admits one real, bounded, independently verifiable documentation change as the first S6-C dogfood target. It does not execute the change, create an Attempt, launch a Codex Provider Turn, create production output, or authorize S6-C2.
+
+### 62.1 Selected target and Production Intent
+
+The repository contains authoritative Runtime, Executor, Completion, Verification, and Recovery contracts, but no single operational/governance artifact consolidating the real Executor boundary, Provider lifecycle versus independently observed Production Reality, `UNKNOWN` handling, retry rules, and operator handling for a governed dogfood run. The admitted target is not a duplicate and is not a synthetic marker task.
+
+```text
+Target artifact: docs/operations/spg-governed-dogfood-operator-guide.md
+Production Intent ID: PI-S6C-DOGFOOD-001
+Title: First real governed documentation dogfood operator guide
+Production Horizon: one documentation artifact in this repository
+```
+
+Purpose: provide a bounded operational projection of admitted S6-B1/B2 and S2-S5 rules for the first real S6-C loop.
+
+In scope: Executor boundary; Provider lifecycle versus Production Reality; Completion and Verification prerequisites; UNKNOWN, divergence, salvage-before-retry and new-Attempt retry; Human authority points; operator escalation; links to authoritative contracts.
+
+Non-goals: no new Runtime, Provider, Guardian, ECF, UI, API, Docker, schema, migration, recovery architecture, Provider Resume, blind replay, or Continuous Production Orchestration.
+
+### 62.2 One PWU
+
+```text
+PWU ID: PWU-S6C-DOGFOOD-001
+Category: Documentation / Engineering Governance Artifact
+Source Trusted Baseline: HEAD 273e901b3ef6514b0c35159736cb7f7aa17cc38e
+Plan Revision: S6C-DOGFOOD-PLAN-R1
+Allowed workspace scope: docs/operations/spg-governed-dogfood-operator-guide.md only
+Execution objective: produce the one target artifact from the admitted Context Package
+```
+
+Exactly one PWU is admitted; no second PWU is silently introduced.
+
+### 62.3 Completion and Verification Contract
+
+The artifact is `PRODUCED` only when independent observation establishes the exact path and verifies semantic anchors for Executor boundary, Provider/Production Reality separation, UNKNOWN and recovery handling, Completion/Verification, Human Authority, and escalation; all introduced Markdown links resolve; the document states `Provider SUCCESS != Production Reality`, `UNKNOWN != FAILURE`, salvage precedes retry, retry uses a new Attempt, and S6-C1 does not authorize S6-C2; and no unapproved path changes.
+
+It is `NOT_PRODUCED` if absent, incomplete, contradictory, unreferenced, or accompanied by out-of-scope changes. Provider SUCCESS, self-report, word count, or file existence alone is insufficient.
+
+Minimum deterministic Verification: exact target existence; required semantic-anchor checks; introduced-link resolution; allowed-scope and forbidden-path checks; consistency checks against S6-B1/B2 and S2-S5; and `git diff --check`. Full regression, Guardian, migration, and Docker validation are not required because the target is documentation-only. Verification Evidence must bind the exact observed target and PWU basis before Satisfaction.
+
+### 62.4 Context Package and recovery policy
+
+The approved Context Package Lite is limited to the relevant `AI_context.md` projection; this contract; `spg-lite-runtime-implementation-contract.md`; Runtime readiness/findings; Completion/Trust; Reconciliation/Recovery; exact target context; and the Intent, PWU, Completion Contract, constraints, and source baseline. It must use the existing Context Package identity/version/content-fingerprint mechanism. Raw conversation and the entire repository are not execution context.
+
+Existing S5 semantics apply: preserve Provider lifecycle separately from Production Reality; classify before recover; salvage before retry; use a new Attempt for retry; never blind replay or Provider Resume. SUCCESS/NONE remains a mismatch; UNKNOWN/MODIFIED is classified before salvage; UNKNOWN/NONE remains unresolved; FAILURE/MODIFIED preserves both facts; unexpected paths or workspace divergence block and require a governed assessment. S6-C1 performs no recovery action.
+
+### 62.5 Human authority and intended handoff
+
+Human Governor / Architecture Lead separately admits the Production Intent and the PWU/Completion/Verification Contract. Candidate authorization and Repository Integration authorization are later explicit authority points and are not granted here. Human authority cannot manufacture Verification, Production Reality, Produced/Satisfied state, Candidate eligibility, or Trusted Baseline.
+
+```text
+Admitted Intent → Plan / PWU → Prepared Execution → Attempt → Dedicated Executor
+→ Real Codex → Provider Report → Independent Observation → Completion Evaluation
+→ Verification → Satisfaction → Candidate → Human Authorization
+→ Repository Integration → Runtime Commit → Trusted Baseline
+```
+
+S6-C2 is real governed execution and observation; S6-C3 is Completion/Verification/Satisfaction; S6-C4 is Candidate, Authorization, Integration, Runtime Commit, and Trusted Baseline closure. None is executed or authorized by S6-C1.
+
+### 62.6 SOT status
+
+```text
+S6-C1: CLOSED / PASS
+S6-C: IN PROGRESS
+Dogfood Production Intent: ADMITTED
+Dogfood PWU Contract: ADMITTED
+Execution: NOT STARTED
+Production Output: NOT PRODUCED
+PWU Satisfaction: NOT ESTABLISHED
+```
+
+Next step: Architecture Lead S6-C1 review → authorize S6-C2 real governed execution only if the admitted contract is sound.
+## 63. S6-C1/S6-C2 Baseline-Binding Semantic Calibration
+
+The S6-C1 admission is calibrated to separate two exact bases that must not be conflated:
+
+```text
+Production Source Baseline
+    exact clean repository revision from which the Attempt workspace is created
+
+Governance Contract Snapshot
+    exact admitted Intent / Plan / PWU / Completion / Verification / Recovery /
+    Authority contract revision governing that Attempt
+
+Context Package
+    governed composition of Engineering Context projected from the Production
+    Source Baseline and Governance Execution Contract projected from the exact
+    admitted Governance Contract Snapshot
+```
+
+Engineering Context is projected from the exact Production Source Baseline. Governance Execution Contract is projected from the exact admitted Governance Contract Snapshot. Raw conversation, dynamic dirty-working-tree facts, and an entire-repository dump remain prohibited. Existing Context Package identity, version, and content-fingerprint mechanisms are sufficient; no new schema or migration is required.
+
+### 63.1 Same-ref integration consistency
+
+S6-C1 governance/SOT changes must be finalized in a clean repository checkpoint before S6-C2 execution. The resulting exact clean checkpoint revision is observed only after it exists; it is not predicted inside the commit that creates it. The intended FVS sequence is:
+
+```text
+admit/finalize S6-C1 governance contract
+→ create clean repository checkpoint
+→ observe exact resulting commit X
+→ bind Runtime Production Source Baseline = X
+→ create Attempt workspace from X
+→ produce dogfood artifact
+→ proposed production commit based on X
+→ later S4 integration expects authoritative ref X
+```
+
+This preserves exact source-ref CAS semantics. The current S6-C2 authorization naming `273e901...` is therefore stale while S6-C1 governance edits remain uncommitted and must not be used to create Runtime objects.
+
+### 63.2 Historical S6-C2 preflight block
+
+The prior S6-C2 start was a governance preflight block, not a Provider or production Attempt failure:
+
+```text
+Human authorized execution
+→ Contract / Baseline coherence check failed before Runtime creation
+→ Provider Turns: 0
+→ Production side effects: 0
+```
+
+Human Authorization is not permission to execute against incoherent Reality. No Run, PWU, Attempt, Context Package, MaterializedExecutionInput, Provider Report, or Production Observation was created by that blocked preflight.
+
+### 63.3 Calibrated status
+
+```text
+S6-C1
+    CLOSED / PASS — baseline-binding semantic calibration recorded
+
+S6-C2
+    PRE-EXECUTION BLOCKED — NO ATTEMPT CREATED
+
+S6-C
+    IN PROGRESS
+```
+
+The next governed step is Architecture Lead review, authorization of a bounded S6-C1 checkpoint commit, observation of the resulting exact clean revision, binding that revision as the S6-C2 Production Source Baseline, and only then reauthorization of S6-C2. This record does not create the checkpoint commit or execute S6-C2.
