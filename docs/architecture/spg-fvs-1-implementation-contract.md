@@ -2695,3 +2695,41 @@ The historical production-source revision 27c2220291d1727be38a124efac7afff0bcaed
         IN PROGRESS
 
 The next governed step is Architecture Lead review of the resulting exact clean repair checkpoint revision, admission of that revision as the new S6-C2 Production Source Baseline, and only then S6-C2 Authorization 3.
+
+## 65. S6-C2-DB1 local Dogfood Runtime database isolation
+
+S6-C2 Authorization #3 remains immutable pre-execution evidence. Repository, Contract, and execution-host readiness passed, but Production Runtime database isolation failed with `PRODUCTION_RUNTIME_DATABASE_NOT_CONFIGURED`. No Run, Plan, PWU, Attempt, Context Package, Materialized Execution Input, Provider Thread, Provider Turn, production artifact, or other production side effect was created. This is not a Provider, Attempt, PWU, or Runtime recovery failure.
+
+The admitted local FVS topology is one existing PostgreSQL service and volume with two logically distinct databases:
+
+```text
+spg_runtime
+    local real Dogfood Runtime state
+
+spg_test
+    pytest and deterministic test state
+```
+
+The application already accepts the Runtime URL through `SPG_DATABASE_URL`; PostgreSQL fixtures require `SPG_TEST_DATABASE_URL` and do not fall back to Runtime configuration. `spg_runtime` was provisioned non-destructively in the existing service and migrated once from an uninitialized state to repository head `20260829_12`. `spg_test` remained a distinct database at the same migration revision. This proves logical database separation only, not separate containers, roles, servers, or physical isolation.
+
+After migration, all Runtime and governance fact tables in `spg_runtime` contain zero rows: Run, Plan Revision, PWU, Context Package, Materialized Execution Input, Attempt, Preparation, Dispatch, Provider Report, Observation, Work Product Reference, Completion, Verification, Candidate, Human Authorization, Integration Effect, Runtime Commit, Recovery Assessment, Recovery Action, transition history, snapshots, governance records, and the Current Trusted Baseline Pointer are empty. `PI-S6C-DOGFOOD-001` is absent from both databases. No Trusted Baseline was bootstrapped and no new execution authorization was created.
+
+```text
+S6-C2 Authorization #3
+    PRE-EXECUTION BLOCKED
+    PRODUCTION_RUNTIME_DATABASE_NOT_CONFIGURED
+    no Runtime objects
+    no Provider Turn
+
+S6-C2-DB1
+    CLOSED / PASS
+
+S6-C2
+    PRE-EXECUTION BLOCKED
+    NOT STARTED
+
+S6-C
+    IN PROGRESS
+```
+
+This change does not create a new Production Source Baseline or authorize S6-C2. The remaining pre-execution requirement is a clean database-isolation checkpoint, observation and admission of its exact revision as the Production Source Baseline, and only then S6-C2 Authorization #4.

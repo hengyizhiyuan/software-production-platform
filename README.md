@@ -20,11 +20,23 @@ Run the CLI:
     uv run spg --help
     uv run spg status
 
-Start the development/test PostgreSQL service and configure the explicit database URLs:
+Start the local PostgreSQL service. The FVS topology uses two logical databases
+in this one service: `spg_runtime` for real local Dogfood Runtime state and
+`spg_test` for pytest state.
 
     docker compose up -d postgres
-    export SPG_DATABASE_URL=postgresql+psycopg://spg:spg-local-dev@127.0.0.1:54329/spg_test?sslmode=disable&connect_timeout=5
-    export SPG_TEST_DATABASE_URL="$SPG_DATABASE_URL"
+
+Provision `spg_runtime` idempotently by inspecting first and creating it only
+when the inspection returns no row:
+
+    docker compose exec -T postgres psql -U spg -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'spg_runtime'"
+    # Run only when the preceding command returns no row:
+    docker compose exec -T postgres createdb -U spg spg_runtime
+
+Configure Runtime and tests with distinct explicit URLs:
+
+    export SPG_DATABASE_URL=postgresql+psycopg://spg:spg-local-dev@127.0.0.1:54329/spg_runtime?sslmode=disable&connect_timeout=5
+    export SPG_TEST_DATABASE_URL=postgresql+psycopg://spg:spg-local-dev@127.0.0.1:54329/spg_test?sslmode=disable&connect_timeout=5
 
 Check non-destructive PostgreSQL connectivity and Alembic configuration:
 
@@ -49,4 +61,9 @@ Stop PostgreSQL when it is no longer needed:
 
     docker compose down
 
-The Compose credentials are local development values only. Alembic revision `20260827_01` owns the eight S1-C Runtime tables, `20260828_02` adds the two S2-A preparation tables, and `20260828_03` adds the four S2-B dispatch/report/observation/reference tables.
+The Compose credentials are local development values only. Logical database
+separation prevents pytest fixture cleanup from targeting local Dogfood Runtime
+state; it is not physical database isolation. Alembic revision `20260827_01`
+owns the eight S1-C Runtime tables, `20260828_02` adds the two S2-A preparation
+tables, and `20260828_03` adds the four S2-B
+dispatch/report/observation/reference tables.
