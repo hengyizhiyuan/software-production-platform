@@ -87,6 +87,11 @@ Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSE
 | S6-B2-A — Dedicated Executor Boundary Deterministic Spike | CLOSED / PASS |
 | S6-B2-B1 — Codex Adapter Binding & Authentication Boundary Preflight | CLOSED / PASS |
 | S6-B2-B2 Historical Real Probe — Single Real Codex Through Dedicated Executor Boundary | COMPLETE / PARTIAL |
+| S6-C — Real Governed Dogfood Loop | IN PROGRESS |
+| S6-C1 — Real Governed Dogfood Requirement & Contract Admission | CLOSED / PASS |
+| S6-C2-HR1R — Bounded Environment Sync Recovery | CLOSED / PASS |
+| S6-C2-HR1 — Windows Execution-Host Repair | CLOSED / PASS |
+| S6-C2 — First Real Governed Dogfood Execution & Observation | PRE-EXECUTION BLOCKED / NOT STARTED |
 
 The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md#54-s6-b1-real-codex-sdk-host-integration-spike-reality) records the bounded S6-B1 Reality and its S6-B1-R/R2 follow-ups. Historical probes remain immutable. **No additional S6-B1 or S6-B2-B2 real Provider probe is authorized**. S6-B2 is **CLOSED / PASS** after deterministic closure hardening: provider neutrality is now asserted from the governed request structure, unauthorized Provider/credential fields are rejected by the closed transport model, B2CLOSE-01–08 pass, the complete B2 deterministic module passes 38/38 with its real test deselected, affected S6-B1/R/R2 tests pass 45/45 with their real test deselected, and the current-tree deterministic regression passes 428/428 with two real tests deselected. The historical B2-B2 probe remains **COMPLETE / PARTIAL** and still records the exact benchmark `Provider SUCCESS + Production Reality NONE`; it is not relabeled. S6-C1 is CLOSED / PASS; S6-C remains in progress and S6-C2 is not authorized.
 
@@ -95,6 +100,10 @@ The completed refinement order is **A. State Foundation → B. Reconciliation & 
 S6-C1 admits one bounded documentation dogfood Production Intent and one PWU contract. Baseline-binding calibration now requires a clean checkpoint before S6-C2; the target artifact is not yet produced, no Attempt or Provider Turn has been created, and S6-C2 is pre-execution blocked. Runtime Failure Discovery remains CLOSED and its 12-area scope remains frozen; reopen it only when implementation, dogfood, or Reality Check evidence requires it.
 
 The [Runtime Findings Review](docs/architecture/spg-runtime-findings-review.md) preserves the frozen discovery scope. [State Foundation](docs/architecture/spg-state-foundation.md), [Reconciliation & Recovery](docs/architecture/spg-reconciliation-recovery.md), [Completion & Trust](docs/architecture/spg-completion-trust.md), and [Side-effect Governance](docs/architecture/spg-side-effect-governance.md) preserve the closed A/B/C/D semantics and their respective 20-invariant sets. The broader [Runtime Verification and Benchmark Strategy](docs/architecture/spg-runtime-verification-benchmarks.md) remains future work; FVS-1 now admits only its bounded T01–T18 and 12/12 executable obligations, which are not yet implemented or passed. Architecture readiness means enough semantics are stable for the next governed iteration, not that all future architecture or implementation is complete.
+
+### S6-C2-HR1 Windows Execution-Host Repair Closure
+
+S6-C2-HR1R and S6-C2-HR1 are CLOSED / PASS. The first environment sync failure remains historical evidence; the lock-preserving recovery sync, Windows state-root behavior, credential filtering, authentication readiness, Dedicated Executor no-Turn preflight, HOST 18/18, and affected B2-A/B2-B1 30/30 regression all pass. Full Regression Attempt 1 was interrupted by execution-host resource contention and host restart; no failure was observed before interruption, but its final result is UNKNOWN / NOT RETAINED. The bounded diagnostic measured the Windows localhost IPv6-first fallback at approximately 5.1 seconds per connection against the IPv4-only local Docker binding, compared with approximately 28 milliseconds through 127.0.0.1 with SSL disabled. Replacement Full Regression Attempt 2 collected 448 tests: 446/446 selected tests PASS, 0 failed, 0 skipped, and 2 real Provider tests deselected in 5078.33 seconds (1:24:38). Execution-host deterministic closure evidence is complete. Real Provider Threads and Turns remain zero. S6-C2 is still PRE-EXECUTION BLOCKED / NOT STARTED, and S6-C remains IN PROGRESS.
 
 ## Program-level Architecture Source of Truth
 

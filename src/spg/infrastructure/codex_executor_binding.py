@@ -24,10 +24,13 @@ from spg.infrastructure.executor_boundary import (
 
 CODEX_BINDING = "codex-sdk-preflight"
 CODEX_REAL_BINDING = "codex-sdk-real"
-AUTH_READINESS = "REQUIRES_REAL_B2_B2_PROBE"
+AUTH_READINESS_AVAILABLE = "AVAILABLE"
+AUTH_READINESS_HUMAN_LOGIN_REQUIRED = "HUMAN LOGIN REQUIRED"
+AUTH_READINESS_REQUIRES_EXECUTION_TIME_PROOF = "REQUIRES EXECUTION-TIME PROOF"
+AUTH_READINESS = AUTH_READINESS_REQUIRES_EXECUTION_TIME_PROOF
 REAL_PROVIDER_TIMEOUT_SECONDS = 120.0
 HIDDEN_REPOSITORY_PATH = Path("/__spg_authoritative_repository_not_exposed__")
-REQUIRED_RUNTIME_PREREQUISITES = ("HOME", "PATH")
+REQUIRED_RUNTIME_PREREQUISITES = ("CODEX_HOME", "PATH")
 
 
 @dataclass(frozen=True)
@@ -58,6 +61,7 @@ def preflight_codex_binding(
 ) -> DedicatedExecutorPreflightResponse:
     """Bind and validate the existing adapter while guaranteeing zero Turns."""
 
+    authentication_readiness = classify_codex_authentication_readiness(environment)
     missing = tuple(
         prerequisite
         for prerequisite in REQUIRED_RUNTIME_PREREQUISITES
@@ -67,6 +71,7 @@ def preflight_codex_binding(
         return _response(
             request,
             status="MISSING_RUNTIME_PREREQUISITE",
+            authentication_readiness=authentication_readiness,
             metadata={"missing_runtime_prerequisites": list(missing)},
         )
 
@@ -77,6 +82,7 @@ def preflight_codex_binding(
         return _response(
             request,
             status="SDK_UNAVAILABLE",
+            authentication_readiness=authentication_readiness,
             metadata={"failure_type": type(error).__name__},
         )
 
@@ -88,6 +94,7 @@ def preflight_codex_binding(
             return _response(
                 request,
                 status="SDK_UNAVAILABLE",
+                authentication_readiness=authentication_readiness,
                 sdk_version=sdk_version,
                 metadata={"failure_type": type(error).__name__},
             )
@@ -104,6 +111,7 @@ def preflight_codex_binding(
         return _response(
             request,
             status="ADAPTER_INITIALIZATION_FAILED",
+            authentication_readiness=authentication_readiness,
             sdk_version=sdk_version,
             metadata={"failure_type": type(error).__name__},
         )
@@ -111,6 +119,7 @@ def preflight_codex_binding(
     return _response(
         request,
         status="READY_FOR_REAL_PROBE_AUTH_UNPROVEN",
+        authentication_readiness=authentication_readiness,
         sdk_version=sdk_version,
         adapter_identity=(
             "spg.providers.codex_sdk_executor.CodexSdkExecutor"
@@ -129,8 +138,28 @@ def preflight_codex_binding(
                 "SPG_DATABASE_URL" in environment
             ),
             "authentication_secret_inspected": False,
+            "authentication_state_check": "STATE_MARKER_EXISTENCE_ONLY",
         },
     )
+
+
+def classify_codex_authentication_readiness(
+    environment: Mapping[str, str],
+) -> str:
+    """Classify state availability without reading or exposing credential contents."""
+
+    codex_home = environment.get("CODEX_HOME")
+    if not codex_home:
+        return AUTH_READINESS_HUMAN_LOGIN_REQUIRED
+    state_root = Path(codex_home)
+    try:
+        if not state_root.is_dir():
+            return AUTH_READINESS_HUMAN_LOGIN_REQUIRED
+        if (state_root / "auth.json").is_file():
+            return AUTH_READINESS_AVAILABLE
+    except OSError:
+        return AUTH_READINESS_REQUIRES_EXECUTION_TIME_PROOF
+    return AUTH_READINESS_REQUIRES_EXECUTION_TIME_PROOF
 
 
 def execute_codex_binding(
@@ -273,6 +302,7 @@ def _response(
     *,
     status: str,
     binding_identity: str = CODEX_BINDING,
+    authentication_readiness: str = AUTH_READINESS,
     sdk_version: str | None = None,
     adapter_identity: str | None = None,
     metadata: dict[str, object] | None = None,
@@ -289,7 +319,7 @@ def _response(
         workspace_identity=request.workspace_identity,
         binding_identity=binding_identity,
         binding_status=status,
-        authentication_readiness=AUTH_READINESS,
+        authentication_readiness=authentication_readiness,
         provider_turn_started=False,
         sdk_version=sdk_version,
         adapter_identity=adapter_identity,

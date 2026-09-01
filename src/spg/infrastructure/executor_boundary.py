@@ -1,11 +1,11 @@
 """Provider-neutral transport for a dedicated local Executor process."""
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime
 from hashlib import sha256
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import subprocess
 import sys
 from typing import Any, Protocol
@@ -565,16 +565,117 @@ def _correlation_metadata(request: DedicatedExecutorRequest) -> dict[str, object
     }
 
 
-def _minimal_executor_environment() -> dict[str, str]:
+def build_executor_child_environment(
+    source_environment: Mapping[str, str] | None = None,
+    *,
+    platform_name: str | None = None,
+) -> dict[str, str]:
+    """Project a narrow, cross-platform environment for the Executor child."""
+
+    source = os.environ if source_environment is None else source_environment
+    is_windows = (platform_name or os.name).casefold() in {"nt", "win32", "windows"}
     allowed = (
-        "HOME",
-        "LANG",
-        "LC_ALL",
-        "PATH",
-        "PYTHONPATH",
-        "SYSTEMROOT",
-        "TMPDIR",
+        (
+            "USERPROFILE",
+            "SYSTEMROOT",
+            "PATH",
+            "PYTHONPATH",
+            "TEMP",
+            "TMP",
+            "APPDATA",
+            "LOCALAPPDATA",
+            "LANG",
+            "LC_ALL",
+        )
+        if is_windows
+        else (
+            "HOME",
+            "PATH",
+            "PYTHONPATH",
+            "TMPDIR",
+            "LANG",
+            "LC_ALL",
+        )
     )
-    environment = {name: os.environ[name] for name in allowed if name in os.environ}
+    environment: dict[str, str] = {}
+    for name in allowed:
+        value = _environment_value(source, name, case_insensitive=is_windows)
+        if value:
+            environment[name] = value
+
+    codex_home = _resolve_codex_home(source, is_windows=is_windows)
+    if codex_home is not None:
+        environment["CODEX_HOME"] = codex_home
     environment["PYTHONIOENCODING"] = "utf-8"
     return environment
+
+
+def _minimal_executor_environment() -> dict[str, str]:
+    return build_executor_child_environment()
+
+
+def _resolve_codex_home(
+    source: Mapping[str, str],
+    *,
+    is_windows: bool,
+) -> str | None:
+    explicit = _environment_value(
+        source,
+        "CODEX_HOME",
+        case_insensitive=is_windows,
+    )
+    if explicit:
+        return _require_absolute_state_root(
+            explicit,
+            variable_name="CODEX_HOME",
+            is_windows=is_windows,
+        )
+
+    native_home_name = "USERPROFILE" if is_windows else "HOME"
+    native_home = _environment_value(
+        source,
+        native_home_name,
+        case_insensitive=is_windows,
+    )
+    if not native_home:
+        return None
+    native_root = _require_absolute_state_root(
+        native_home,
+        variable_name=native_home_name,
+        is_windows=is_windows,
+    )
+    if is_windows:
+        return str(PureWindowsPath(native_root) / ".codex")
+    return str(PurePosixPath(native_root) / ".codex")
+
+
+def _require_absolute_state_root(
+    value: str,
+    *,
+    variable_name: str,
+    is_windows: bool,
+) -> str:
+    path = PureWindowsPath(value) if is_windows else PurePosixPath(value)
+    if not path.is_absolute():
+        raise RuntimeInvariantViolation(
+            f"{variable_name} must identify an absolute Executor state root"
+        )
+    return str(path)
+
+
+def _environment_value(
+    source: Mapping[str, str],
+    name: str,
+    *,
+    case_insensitive: bool,
+) -> str | None:
+    if not case_insensitive:
+        return source.get(name)
+    exact = source.get(name)
+    if exact is not None:
+        return exact
+    expected = name.casefold()
+    for candidate, value in source.items():
+        if candidate.casefold() == expected:
+            return value
+    return None

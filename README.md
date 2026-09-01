@@ -10,6 +10,11 @@ The supported local workflow uses uv:
 
     uv sync --extra test
 
+For a Dedicated Executor host using the Codex Provider, select the
+Provider-specific profile explicitly in addition to the test profile:
+
+    uv sync --locked --extra test --extra codex-executor
+
 Run the CLI:
 
     uv run spg --help
@@ -18,7 +23,7 @@ Run the CLI:
 Start the development/test PostgreSQL service and configure the explicit database URLs:
 
     docker compose up -d postgres
-    export SPG_DATABASE_URL=postgresql+psycopg://spg:spg-local-dev@localhost:54329/spg_test
+    export SPG_DATABASE_URL=postgresql+psycopg://spg:spg-local-dev@127.0.0.1:54329/spg_test?sslmode=disable&connect_timeout=5
     export SPG_TEST_DATABASE_URL="$SPG_DATABASE_URL"
 
 Check non-destructive PostgreSQL connectivity and Alembic configuration:

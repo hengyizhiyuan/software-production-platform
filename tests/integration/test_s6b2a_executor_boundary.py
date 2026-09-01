@@ -349,6 +349,22 @@ def _git(repository: Path, *arguments: str) -> str:
     ).stdout.strip()
 
 
+def _create_directory_alias(alias: Path, target: Path) -> None:
+    """Create a directory alias without requiring Windows symlink privilege."""
+
+    if os.name == "nt":
+        result = subprocess.run(
+            ["cmd.exe", "/d", "/c", "mklink", "/J", str(alias), str(target)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            raise RuntimeError("Windows directory junction creation failed")
+        return
+    alias.symlink_to(target, target_is_directory=True)
+
+
 def _truncate_runtime(database: Database) -> None:
     table_names = ", ".join(f'"{name}"' for name in RUNTIME_TABLE_NAMES)
     with database.engine.begin() as connection:
@@ -402,7 +418,10 @@ def test_b2a_03_workspace_identity_survives_path_translation(
     tmp_path: Path,
 ) -> None:
     translated = tmp_path / "executor-mounted-workspace"
-    translated.symlink_to(s6b2a_facts.prepared.execution_request.workspace.workspace_path)
+    _create_directory_alias(
+        translated,
+        s6b2a_facts.prepared.execution_request.workspace.workspace_path,
+    )
 
     def mapper(workspace):
         return ExecutorWorkspacePathMapping(
@@ -427,12 +446,12 @@ def test_b2a_04_authoritative_repository_is_not_a_writable_executor_target(
     authoritative = s6b2a_facts.repository / "AI_context.md"
     before = authoritative.read_text(encoding="utf-8")
     escape = s6b2a_facts.prepared.execution_request.workspace.workspace_path / "escape"
-    escape.symlink_to(authoritative)
+    _create_directory_alias(escape, s6b2a_facts.repository)
     result = _client(
         s6b2a_facts,
         ProviderReportedOutcome.SUCCESS,
         mutate=True,
-        path="escape",
+        path="escape/AI_context.md",
     ).dispatch(_request(s6b2a_facts))
     assert result.outcome is ProviderReportedOutcome.UNKNOWN
     assert result.metadata["executor_transport_status"] == "PROCESS_ERROR"
@@ -599,7 +618,7 @@ def test_b2a_13_path_translation_never_replaces_canonical_domain_path(
 ) -> None:
     canonical = s6b2a_facts.prepared.execution_request.workspace
     translated = tmp_path / "container-workspace"
-    translated.symlink_to(canonical.workspace_path)
+    _create_directory_alias(translated, canonical.workspace_path)
 
     def mapper(workspace):
         return ExecutorWorkspacePathMapping(
@@ -725,7 +744,7 @@ def test_b2b1_05_workspace_translation_is_infrastructure_only(
 ) -> None:
     canonical = s6b2a_facts.prepared.execution_request.workspace
     translated = tmp_path / "codex-executor-workspace"
-    translated.symlink_to(canonical.workspace_path)
+    _create_directory_alias(translated, canonical.workspace_path)
 
     def mapper(workspace):
         return ExecutorWorkspacePathMapping(
@@ -824,7 +843,7 @@ def test_b2b1_11_sdk_unavailable_maps_conservatively(
 
     response = preflight_codex_binding(
         boundary_request,
-        environment={"HOME": "/fixture", "PATH": "/usr/bin"},
+        environment={"CODEX_HOME": "/fixture/.codex", "PATH": "/usr/bin"},
         sdk_version_resolver=unavailable,
     )
     assert response.binding_status == "SDK_UNAVAILABLE"
@@ -843,7 +862,7 @@ def test_b2b1_12_binding_failures_are_conservative_and_distinct(
 
     initialization = preflight_codex_binding(
         boundary_request,
-        environment={"HOME": "/fixture", "PATH": "/usr/bin"},
+        environment={"CODEX_HOME": "/fixture/.codex", "PATH": "/usr/bin"},
         sdk_version_resolver=lambda: "0.147.0",
         adapter_factory=initialization_failure,
     )
@@ -884,7 +903,7 @@ def test_b2b1_13_preflight_never_constructs_codex_or_starts_turn(
 
     response = preflight_codex_binding(
         boundary_request,
-        environment={"HOME": "/fixture", "PATH": "/usr/bin"},
+        environment={"CODEX_HOME": "/fixture/.codex", "PATH": "/usr/bin"},
         sdk_version_resolver=lambda: "0.147.0",
         adapter_factory=adapter_factory,
     )
@@ -920,7 +939,7 @@ def test_b2b1_15_independent_spg_observation_remains_unchanged(
         expected_authoritative_ref_revision=expected_ref,
     )
     assert reality.changes == ()
-    assert AUTH_READINESS == "REQUIRES_REAL_B2_B2_PROBE"
+    assert AUTH_READINESS == "REQUIRES EXECUTION-TIME PROOF"
 
 
 def _persisted_provider_report(database: Database, attempt_id):
@@ -1120,8 +1139,9 @@ def test_b2close_02_codex_named_filesystem_path_is_not_provider_leakage(
     tmp_path: Path,
 ) -> None:
     translated = tmp_path / "codex-named-executor-workspace"
-    translated.symlink_to(
-        s6b2a_facts.prepared.execution_request.workspace.workspace_path
+    _create_directory_alias(
+        translated,
+        s6b2a_facts.prepared.execution_request.workspace.workspace_path,
     )
 
     def mapper(workspace):

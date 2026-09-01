@@ -421,7 +421,6 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "alembic" },
-    { name = "openai-codex" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -429,6 +428,10 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+codex-executor = [
+    { name = "openai-codex" },
+    { name = "openai-codex-cli-bin" },
+]
 test = [
     { name = "pytest" },
 ]
@@ -436,14 +439,15 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1,<2" },
-    { name = "openai-codex", specifier = "==0.147.0" },
+    { name = "openai-codex", marker = "extra == 'codex-executor'", specifier = "==0.147.0" },
+    { name = "openai-codex-cli-bin", marker = "extra == 'codex-executor'", specifier = "==0.147.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3,<4" },
     { name = "pydantic", specifier = ">=2,<3" },
     { name = "pydantic-settings", specifier = ">=2,<3" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8,<10" },
     { name = "sqlalchemy", specifier = ">=2,<3" },
 ]
-provides-extras = ["test"]
+provides-extras = ["codex-executor", "test"]
 
 [[package]]
 name = "sqlalchemy"

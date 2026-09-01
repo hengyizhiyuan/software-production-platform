@@ -2633,3 +2633,65 @@ S6-C
 ```
 
 The next governed step is Architecture Lead review, authorization of a bounded S6-C1 checkpoint commit, observation of the resulting exact clean revision, binding that revision as the S6-C2 Production Source Baseline, and only then reauthorization of S6-C2. This record does not create the checkpoint commit or execute S6-C2.
+
+## 64. S6-C2-HR1 Windows execution-host repair closure
+
+S6-C2-HR1R and S6-C2-HR1 are CLOSED / PASS. This closure repairs and validates only the reproducible Windows Dedicated Executor host. It does not execute or authorize S6-C2, create production Runtime objects, launch a real Provider, produce the dogfood artifact, bind a new Production Source Baseline, or close S6-C.
+
+The initial HR1 environment sync Attempt remains immutable failed historical evidence:
+
+    Initial HR1 sync Attempt
+        FAILED — Windows OS error 32 while removing a temporary uv-trampoline executable
+
+    Post-failure environment Reality
+        openai-codex 0.147.0 present
+        openai-codex-cli-bin 0.147.0 present
+        spg-runtime 0.1.0 present
+
+HR1R confirmed no stale project-owned installer, pytest, or virtual-environment child process and then performed the one authorized lock-preserving retry. The exact test plus codex-executor profile sync passed without changing pyproject.toml or uv.lock. The provider-specific codex-executor profile keeps exact openai-codex 0.147.0 and openai-codex-cli-bin 0.147.0 dependencies outside SPG Core.
+
+Executor infrastructure resolves Codex state through explicit CODEX_HOME, native Windows USERPROFILE plus .codex, or POSIX HOME plus .codex. It does not persist or globally manufacture HOME. The Dedicated Executor child receives only a narrow cross-platform runtime allowlist; Windows lookup is case-insensitive, and SPG database configuration, Provider API keys, unrelated credentials, tokens, and application secrets are excluded. CODEX_HOME remains Executor infrastructure configuration and is absent from provider-neutral SPG domain, transport, and persistence contracts.
+
+The actual Dedicated Executor child-process no-Turn preflight selected CodexSdkExecutor, imported stable SDK/runtime lifecycle surfaces, preserved exact Materialized Execution Input and canonical workspace identity, and confirmed no SPG database configuration in the child. Authentication readiness is AVAILABLE based only on safe state-marker existence; no authentication contents were read, printed, copied, modified, or persisted. Provider Threads created: 0. Provider Turns created: 0.
+
+HOST-01 through HOST-17 plus exact installed-distribution validation pass 18/18. That evidence is reused for final closure because no relevant Executor environment or binding implementation changed afterward. The deferred focused regression initially exposed Windows host test portability rather than a Runtime semantic defect: B2-A-03 could not create a directory symbolic link without OS privilege, with WinError 1314. The narrow test-only correction uses a Windows directory junction for the same directory-alias, canonical-identity, and path-escape semantics while POSIX retains directory symlinks. Production code and assertions remain unchanged.
+
+After that correction, the final affected regression passes:
+
+    S6-B2-A
+        15/15 PASS
+
+    S6-B2-B1
+        15/15 PASS
+
+    Total
+        30/30 PASS
+
+    Real Provider Threads
+        0
+
+    Real Provider Turns
+        0
+
+Compilation/import, uv lock validation, and git diff validation pass. PostgreSQL remains healthy at Alembic 20260829_12; post-test cleanup leaves zero PI-S6C-DOGFOOD-001 Runs and zero Current Trusted Baseline Pointer rows, and docs/operations/spg-governed-dogfood-operator-guide.md remains absent.
+
+Full Regression Attempt 1 remains immutable interrupted historical evidence. Execution-host resource contention and a host restart ended that run after partial progress with no observed failure; its final outcome is UNKNOWN / NOT RETAINED, and it created no checkpoint. The bounded follow-up diagnostic measured the Windows localhost IPv6-first fallback at approximately 5.1 seconds per connection against the IPv4-only local Docker PostgreSQL binding. The equivalent process-local 127.0.0.1 endpoint with SSL disabled measured approximately 28 milliseconds median connection latency.
+
+Replacement Full Regression Attempt 2 used the process-scoped IPv4 test endpoint, remained serial, excluded real Codex tests, and reached terminal PASS. It collected 448 tests: 446/446 selected tests PASS, 0 failed, 0 skipped, and 2 real Provider tests deselected in 5078.33 seconds (1:24:38). Real Provider Threads created: 0. Real Provider Turns created: 0. Post-regression cleanup leaves no active test transaction, waiting lock, test fixture table, dogfood Run, Current Trusted Baseline Pointer, or target production artifact. Execution-host deterministic closure evidence is complete.
+
+The historical production-source revision 27c2220291d1727be38a124efac7afff0bcaed33 remains evidence only and must not be reused for S6-C2 after these code/configuration changes. This task does not predict or bind a replacement SHA.
+
+    S6-C2-HR1R
+        CLOSED / PASS
+
+    S6-C2-HR1
+        CLOSED / PASS
+
+    S6-C2
+        PRE-EXECUTION BLOCKED
+        NOT STARTED
+
+    S6-C
+        IN PROGRESS
+
+The next governed step is Architecture Lead review of the resulting exact clean repair checkpoint revision, admission of that revision as the new S6-C2 Production Source Baseline, and only then S6-C2 Authorization 3.
