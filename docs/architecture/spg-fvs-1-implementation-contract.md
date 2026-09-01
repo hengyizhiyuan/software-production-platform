@@ -2733,3 +2733,76 @@ S6-C
 ```
 
 This change does not create a new Production Source Baseline or authorize S6-C2. The remaining pre-execution requirement is a clean database-isolation checkpoint, observation and admission of its exact revision as the Production Source Baseline, and only then S6-C2 Authorization #4.
+
+## 66. S6-C2-R1 recovery assessment and R2 explicit UTF-8 transport repair
+
+S6-C2 Authorization #4 created immutable Attempt generation 1 at Production Source Baseline `bed7b2f1eb3a1e0036d14bda1b8ef1f4ffc72066`. Its Dispatch reached Dedicated Executor infrastructure, but locale-dependent parent encoding (`cp936`) conflicted with the child UTF-8 stdin/stdout contract. Parsing failed at byte offset 2984 before Provider binding. No Provider Thread or Turn was created, Provider Outcome remains UNKNOWN, Production Reality remains NONE, and the PWU remains PROPOSED.
+
+S6-C2-R1 is CLOSED / PASS. Recovery Assessment `18e1a39b-3133-591f-9364-50a5766fc8d2`, basis fingerprint `696e9c963172e7fde5c935e72b13e1391c5defe6ec61792223b8a5eb67e575dd`, classifies the exact generation-1 Attempt as `UNKNOWN` with `REOBSERVE` guidance. Current authority is true, safe recoverability is false, Human Attention is required, and the Recovery Barrier remains active. The assessment and its audit transition remain immutable; no Recovery Action exists.
+
+S6-C2-R2 defines the Dedicated Executor wire as UTF-8 with strict error handling. The parent serializes the provider-neutral request to explicit UTF-8 bytes and strictly decodes child stdout and stderr bytes. Correctness no longer depends on host locale, Windows ACP, global Python UTF-8 mode, or parent `PYTHONUTF8`. `PYTHONIOENCODING=utf-8` remains a narrow child-stream setting. Malformed child bytes are rejected and map to `MALFORMED_RESPONSE` with Provider Outcome UNKNOWN; lossy replacement or ignored data is prohibited.
+
+Focused deterministic evidence:
+
+```text
+UTF8 transport tests
+    14/14 PASS
+
+Affected S6-B2-A
+    15/15 PASS
+
+Affected S6-B2-B1
+    15/15 PASS
+
+Windows HOST
+    18/18 PASS
+
+Real Provider Threads / Turns
+    0 / 0
+```
+
+The UTF-8 evidence model contains 15 obligations. UTF8-01 through UTF8-14 are represented by 14 executable pytest functions. UTF8-15 is the operational pre/post `spg_runtime` immutable-snapshot assertion; it intentionally remains outside pytest so deterministic tests cannot consume or clean production Runtime state.
+
+The single serial full current-tree deterministic regression completed with terminal PASS:
+
+```text
+Collected
+    462
+
+Selected / Passed
+    460 / 460
+
+Failed / Skipped / Deselected
+    0 / 0 / 2
+
+Runtime
+    5440.85 seconds (1:30:40)
+
+Production Runtime pre/post snapshot
+    IDENTICAL
+
+Real Provider Threads / Turns
+    0 / 0
+```
+
+The repair changes only Dedicated Executor transport infrastructure, focused tests, and this minimum SOT. It does not change domain contracts, child environment allow-list, persistence, schema, migrations, Codex SDK version, or any historical Runtime fact. It does not create generation 2, resolve the Recovery Barrier, bind a new Production Source Baseline, create a Recovery Action, or authorize execution.
+
+```text
+S6-C2-R1
+    CLOSED / PASS
+
+S6-C2-R2
+    CLOSED / PASS
+
+S6-C2 Authorization #4 / Attempt generation 1
+    HISTORICAL EXECUTOR TRANSPORT FAILURE
+    Provider Turn 0
+    Provider Outcome UNKNOWN
+    Production Reality NONE
+
+S6-C2
+    IN PROGRESS
+    RECOVERY BARRIER ACTIVE
+```
+
+The resulting clean repository checkpoint is eligible only as an `S6-C2 PLATFORM-REPAIR CHECKPOINT` and remains `PENDING PRODUCTION-LINEAGE RECOVERY REVIEW`. It is not an admitted Production Source Baseline. The next governed step is Architecture Lead production-lineage recovery review, followed by separate authority to bind an exact clean revision and decide whether Attempt generation 2 may be created. No checkpoint identity is written or predicted here.

@@ -28,6 +28,8 @@ from spg.providers.deterministic_executor import (
 
 
 BOUNDARY_PROTOCOL = "spg-dedicated-executor-v1"
+EXECUTOR_WIRE_ENCODING = "utf-8"
+EXECUTOR_WIRE_ERRORS = "strict"
 
 
 class ExecutorWorkspacePathMapping(BaseModel):
@@ -163,10 +165,19 @@ class SubprocessExecutorTransport:
         elif self.provider_binding is not None:
             environment["SPG_EXECUTOR_PROVIDER_BINDING"] = self.provider_binding
         try:
+            wire_request = request.model_dump_json().encode(
+                EXECUTOR_WIRE_ENCODING,
+                EXECUTOR_WIRE_ERRORS,
+            )
+        except UnicodeError as error:
+            raise ExecutorTransportError(
+                "PROCESS_ERROR",
+                "dedicated Executor request is not valid UTF-8",
+            ) from error
+        try:
             result = subprocess.run(
                 self.command,
-                input=request.model_dump_json(),
-                text=True,
+                input=wire_request,
                 capture_output=True,
                 check=False,
                 timeout=self.timeout_seconds,
@@ -183,10 +194,24 @@ class SubprocessExecutorTransport:
                 "UNAVAILABLE",
                 "dedicated Executor process is unavailable",
             ) from error
+        try:
+            stdout = result.stdout.decode(
+                EXECUTOR_WIRE_ENCODING,
+                EXECUTOR_WIRE_ERRORS,
+            )
+            stderr = result.stderr.decode(
+                EXECUTOR_WIRE_ENCODING,
+                EXECUTOR_WIRE_ERRORS,
+            )
+        except UnicodeError as error:
+            raise ExecutorTransportError(
+                "MALFORMED_RESPONSE",
+                "dedicated Executor transport contained invalid UTF-8",
+            ) from error
         if result.returncode != 0:
-            message = result.stderr.strip() or "dedicated Executor process failed"
+            message = stderr.strip() or "dedicated Executor process failed"
             raise ExecutorTransportError("PROCESS_ERROR", message)
-        return result.stdout
+        return stdout
 
 
 WorkspacePathMapper = Callable[[WorkspaceBinding], ExecutorWorkspacePathMapping]
