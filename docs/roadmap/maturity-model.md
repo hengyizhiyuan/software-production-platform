@@ -2,7 +2,9 @@
 
 ## Current Architecture Review State
 
-Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and Readiness](../architecture/spg-runtime-architecture-readiness.md) is PASS, and the [SPG Lite Runtime Implementation Contract](../architecture/spg-lite-runtime-implementation-contract.md) remains CLOSED. The [FVS-1 Implementation Contract](../architecture/spg-fvs-1-implementation-contract.md) is ADMITTED, F3-D is CLOSED, and FVS-1 is authorized for controlled implementation. S1 through S5 remain **CLOSED / PASS**. S6 is **IN PROGRESS**. S6-C2 Authorization #4 created one immutable generation-1 Attempt whose Executor transport failed before Provider binding; Provider Outcome remains UNKNOWN, Production Reality remains NONE, and the PWU remains PROPOSED. S6-C2-R1, S6-C2-R2, S6-C2-R3, S6-C2-R4-A, and S6-C2-R4-B are **CLOSED / PASS**. The Windows S6-C2-R4-C full-regression Attempt is **INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED**; full-system regression is **DEFERRED TO THE LINUX SERVER PROMOTION GATE**. S6-C2-R4 and S6-C2 remain **IN PROGRESS / RECOVERY BARRIER ACTIVE**.
+Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and Readiness](../architecture/spg-runtime-architecture-readiness.md) is PASS, and the [SPG Lite Runtime Implementation Contract](../architecture/spg-lite-runtime-implementation-contract.md) remains CLOSED. The [FVS-1 Implementation Contract](../architecture/spg-fvs-1-implementation-contract.md) is ADMITTED, F3-D is CLOSED, and FVS-1 is authorized for controlled implementation. S1 through S5 remain **CLOSED / PASS**. S6-C2 Authorization #4 created one immutable generation-1 Attempt whose Executor transport failed before Provider binding; Provider Outcome remains UNKNOWN, Production Reality remains NONE, and the PWU remains PROPOSED. S6-C2-R1, S6-C2-R2, S6-C2-R3, S6-C2-R4-A, and S6-C2-R4-B are **CLOSED / PASS**. The Windows S6-C2-R4-C full-regression Attempt remains **INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED**. Complete R4 qualification/execution is **DEFERRED_BY_MVP**, with the historical Recovery Barrier preserved.
+
+[MVP Scope Calibration and Phase-2 Hardening Backlog](mvp-scope-calibration.md) is the current delivery-priority authority. The sequence is usable local Docker MVP with a functional Web UI, followed by Linux deployment and promotion validation, followed by systematic self-dogfood.
 
 | Review item | Status |
 |---|---|
@@ -39,6 +41,7 @@ Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and 
 | Coding Readiness | PASS |
 | Implementation Governance | AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
 | FVS-1 Implementation Contract | ADMITTED |
+| MVP-SCOPE-1 — Architecture Scope Calibration & Phase-2 Hardening Backlog | ADMITTED — CURRENT DEVELOPMENT PRIORITY |
 | F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
 | F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
 | F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
@@ -79,20 +82,37 @@ Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and 
 | S6-C2-R1 — Attempt Recovery Assessment & Encoding Diagnosis | CLOSED / PASS |
 | S6-C2-R2 — Explicit UTF-8 Dedicated Executor Transport Repair | CLOSED / PASS |
 | S6-C2-R3 — Production-Lineage Recovery Reality Check | CLOSED / PASS |
-| S6-C2-R4 — Verified Maintenance Baseline & Production-Lineage Recovery | IN PROGRESS |
+| S6-C2-R4 — Verified Maintenance Baseline & Production-Lineage Recovery | DEFERRED_BY_MVP after R4-B |
 | S6-C2-R4-A — Recovery Contract Admission | CLOSED / PASS |
 | S6-C2-R4-B — Controlled Implementation & Focused Validation | CLOSED / PASS |
-| S6-C2-R4-C — Windows Full Deterministic Regression Attempt | INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED; CHECKPOINT NOT CREATED |
-| Linux Dogfood Promotion Gate — Full Deterministic Regression | DEFERRED / NOT STARTED |
-| S6-C2 — First Real Governed Dogfood Execution & Observation | IN PROGRESS / RECOVERY BARRIER ACTIVE |
+| S6-C2-R4-C — Windows Full Deterministic Regression Attempt | INTERRUPTED HISTORICAL ATTEMPT; DEFERRED_BY_MVP |
+| S6-C2-R4-D — Real Maintenance Recovery Execution | DEFERRED_BY_MVP / NOT EXECUTED |
+| Linux MVP Deployment & Promotion Gate | AFTER LOCAL USABLE MVP / NOT STARTED |
+| S6-C2 — First Real Governed Dogfood Execution & Observation | HISTORICAL RECOVERY BARRIER PRESERVED; DEFERRED_BY_MVP |
 
 S6-C2-HR1R, S6-C2-HR1, and S6-C2-DB1 remain CLOSED / PASS historical prerequisites. Authorization #4 subsequently created the first governed dogfood Attempt and exposed a Windows parent/child encoding mismatch before Provider binding. R1 persisted the admitted `UNKNOWN / REOBSERVE` Recovery Assessment with an active barrier. R2 replaces locale-dependent text transport with an explicit UTF-8/strict bytes wire for request, response, and diagnostic streams. Its 15 evidence obligations comprise 14 executable UTF8 pytest functions plus one external production Runtime immutability assertion. Synthetic R2 tests pass 14/14, affected B2-A/B2-B1 pass 30/30, and HOST tests pass 18/18. The serial full regression collected 462 tests, selected and passed 460, failed 0, skipped 0, and deselected two real Provider tests in 5440.85 seconds; the production Runtime snapshot remained identical. Provider Threads and Turns remain zero; the target artifact remains absent.
 
 S5 is CLOSED / PASS and its generic recovery model remains unchanged. S6-B1 is CLOSED / PARTIAL and no additional S6-B1 probe is authorized. The historical B2-B2 probe remains COMPLETE / PARTIAL with `Provider SUCCESS + Production Reality NONE`. S6-C2-R3 confirmed that retrying the old Source Baseline cannot lawfully integrate and classified the gap as `NARROW PRODUCTION-LINEAGE RECOVERY CAPABILITY REQUIRED`.
 
-S6-C2-R4-A admits the Verified Maintenance Baseline & Production-Lineage Recovery contract. R4-B is CLOSED / PASS after Architecture Lead Reality Review and implements its generic typed capability, one immutable maintenance admission/resolution representation, read-only Git qualification, exact evidence and Authority fingerprints, Baseline pointer CAS, old-lineage `SUPERSEDED` terminal states, new Run/Plan/PWU admission, atomic rollback, idempotency, and concurrency. MR-01 through MR-34 focused evidence passes 23/23; unique affected regression cases pass 175/175; persistence foundation passes 6/6. The production Runtime remains byte/fact identical at Alembic `20260829_12`, with no real recovery or Provider execution. The Windows R4-C regression was interrupted at the last observed 59% progress with no known failure but no terminal result; no checkpoint was created. Full-system regression is deferred to the Linux server promotion gate.
+S6-C2-R4-A admits the Verified Maintenance Baseline & Production-Lineage Recovery contract. R4-B is CLOSED / PASS after Architecture Lead Reality Review and implements its generic typed capability, one immutable maintenance admission/resolution representation, read-only Git qualification, exact evidence and Authority fingerprints, Baseline pointer CAS, old-lineage `SUPERSEDED` terminal states, new Run/Plan/PWU admission, atomic rollback, idempotency, and concurrency. MR-01 through MR-34 focused evidence passes 23/23; unique affected regression cases pass 175/175; persistence foundation passes 6/6. The production Runtime remains byte/fact identical at Alembic `20260829_12`, with no real recovery or Provider execution. The Windows R4-C regression was interrupted at the last observed 59% progress with no known failure but no terminal result; no checkpoint was created. Complete R4 qualification, R4-D, and real maintenance recovery are DEFERRED_BY_MVP.
 
-The Windows spg_runtime at Alembic 20260829_12 is archived as historical Dogfood evidence and is not the active Runtime to be continued or migrated to Linux. Backup C:\Users\yuchunbo\Documents\SPG-backups\spg_runtime_windows_bootstrap_20260902T061522Z.dump has SHA-256 64ebae40cbea8589f3b1c988422329d4f52e9b5200729ca67c19f31c1a0045b0 and passed restore-list validation. The Linux development server is the next authoritative Dogfood Execution Host. The future Linux deployment candidate is not a Trusted Baseline. Real maintenance recovery remains unexecuted, the old lineage is not superseded, no new lineage exists, and the historical Recovery Barrier remains active.
+The Windows spg_runtime at Alembic 20260829_12 is archived as historical Dogfood evidence and is not the active Runtime to be continued or migrated to Linux. Backup C:\Users\yuchunbo\Documents\SPG-backups\spg_runtime_windows_bootstrap_20260902T061522Z.dump has SHA-256 64ebae40cbea8589f3b1c988422329d4f52e9b5200729ca67c19f31c1a0045b0 and passed restore-list validation. The next target is a usable local Docker MVP. Linux is the later deployment and promotion target for that completed MVP, not a reason to postpone the product surface. Real maintenance recovery remains unexecuted, the old lineage is not superseded, no new lineage exists, and the historical Recovery Barrier remains active.
+
+## Immediate MVP Delivery Sequence
+
+The detailed A/B/C classification, guardrails, verification levels, and Phase-2 triggers are authoritative in [MVP Scope Calibration and Phase-2 Hardening Backlog](mvp-scope-calibration.md). The shortest governed delivery path is:
+
+1. single-project governed task application flow;
+2. minimal HTTP API;
+3. functional Web UI;
+4. local Docker product integration;
+5. one real local end-to-end task;
+6. MVP closure and promotion validation;
+7. Linux deployment and promotion validation;
+8. systematic self-dogfood;
+9. evidence-triggered Phase-2 hardening.
+
+The Stage 0–3 model below remains the long-term maturity model; it does not override this immediate delivery order.
 
 The refinement order A → B → C → D and Final Review is complete. All 12 discovery areas remain frozen. The closure confirms logical Runtime semantics, ownership boundaries, deferred-scope clarity, and SPG Lite feasibility without selecting physical mechanisms or expanding MVP.
 
@@ -119,7 +139,7 @@ A lightweight Decision Intelligence Provider may be used to exercise the contrac
 
 One real provider path is sufficient for the first FVS. Dual Global/Mainland providers, provider-management UI, cross-region topology, residency policy automation, and Kubernetes are not Stage 1 prerequisites.
 
-For FVS-1 specifically, S1-A implements the Python Modular Monolith package foundation, CLI-first startup, Pydantic Settings, dependency declarations, and pytest smoke tests. S1-B adds real PostgreSQL connectivity, SQLAlchemy engine/session and explicit Unit of Work infrastructure, optimistic version-aware updates, an empty Alembic environment, and real PostgreSQL integration evidence without adding Runtime domain tables. Git worktree integration and Codex CLI Executor Adapter remain unimplemented.
+For FVS-1, the original S1-A/S1-B foundation established the Python Modular Monolith, CLI-first startup, typed settings, PostgreSQL, SQLAlchemy, Alembic, and tests. Subsequent S1-C through S5 slices implemented the bounded Runtime, execution/observation, Completion/Verification, Candidate governance, Repository Integration, Runtime Commit, and recovery foundations. The CLI remains a development/operator surface; a functional Web UI is mandatory for the usable MVP product.
 
 ## Stage 2 — Mature Capability Provider Integration
 

@@ -3119,4 +3119,44 @@ The complete frozen validation subject remained byte-identical before and after 
 
 The Windows spg_runtime remains at Alembic 20260829_12 and is archived as **WINDOWS BOOTSTRAP DOGFOOD EVIDENCE — NOT AN ACTIVE SERVER RUNTIME TO BE CONTINUED**. Backup C:\Users\yuchunbo\Documents\SPG-backups\spg_runtime_windows_bootstrap_20260902T061522Z.dump has SHA-256 64ebae40cbea8589f3b1c988422329d4f52e9b5200729ca67c19f31c1a0045b0 and passed restore-list validation. The archive preserves Authorization #1–#4 history, Attempt generation 1, Dispatch, Provider Report UNKNOWN, Observation NONE, Recovery Assessment, and the active historical Recovery Barrier. It is not migrated as the active Linux Runtime.
 
-The Linux development server is the next authoritative Dogfood Execution Host. The current repository checkpoint may be classified only as a **LINUX DOGFOOD DEPLOYMENT CANDIDATE — NOT YET A TRUSTED BASELINE**. Full-system regression is deferred to the Linux server promotion gate. Real maintenance recovery remains unexecuted; the old lineage is not superseded, no new lineage exists, and the Recovery Barrier historical fact is not rewritten.
+At the time of the Section 69 replan, the Linux development server was selected as the next authoritative Dogfood Execution Host and the repository checkpoint could be classified only as a **LINUX DOGFOOD DEPLOYMENT CANDIDATE — NOT YET A TRUSTED BASELINE**. No Linux promotion occurred. Section 70 supersedes that immediate priority while preserving this historical decision. Real maintenance recovery remains unexecuted; the old lineage is not superseded, no new lineage exists, and the Recovery Barrier historical fact is not rewritten.
+
+## 70. MVP-SCOPE-1 architecture scope calibration
+
+The earlier Linux Dogfood replan is preserved as historical context but no longer defines the immediate development priority. [MVP Scope Calibration and Phase-2 Hardening Backlog](../roadmap/mvp-scope-calibration.md) is the current roadmap authority under Architecture Baseline `v0.1`.
+
+The accepted calibration is:
+
+```text
+S6-C2-R4-A
+    CLOSED / PASS
+
+S6-C2-R4-B
+    IMPLEMENTED
+    FOCUSED / AFFECTED VALIDATION PASS
+    ARCHITECTURE LEAD REVIEW PASS
+
+Full-system R4 regression
+S6-C2-R4-C
+S6-C2-R4-D
+Real maintenance-lineage recovery
+    DEFERRED_BY_MVP
+```
+
+No historical Attempt, Provider Report, Production Observation, Recovery Assessment, Recovery Barrier, or archived Windows Runtime fact is relabeled or mutated. R4-B remains available as a stronger implemented guardrail; Phase-2 continuation is triggered by real MVP evidence rather than architecture interest alone.
+
+The current delivery order is:
+
+```text
+usable local Docker MVP
+    with functional Web UI
+    and real governed task flow
+        ↓
+Linux deployment and promotion validation
+        ↓
+systematic self-dogfood
+        ↓
+evidence-triggered Phase-2 hardening
+```
+
+The CLI remains a development/operator surface, not the product UI. This calibration changes roadmap priority only. It does not implement a feature, authorize a Provider Turn, create or recover a Runtime lineage, create a deployment, or change the frozen FVS Runtime semantics.

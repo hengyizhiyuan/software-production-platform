@@ -75,7 +75,7 @@ src/
     exists but is empty / placeholder
 ```
 
-Current implementation reality remains:
+The historical S1-B implementation reality was:
 
 | Area | Reality |
 | --- | --- |
@@ -92,7 +92,7 @@ Current implementation reality remains:
 | CI | NOT IMPLEMENTED |
 | Deployment | NOT IMPLEMENTED |
 
-This is **S1-B Persistent Runtime Foundation CLOSED / PASS Reality**. It proves local persistence mechanics only and is not permission to invent the unimplemented Runtime lifecycle.
+This is the immutable **S1-B Persistent Runtime Foundation CLOSED / PASS Reality** at that checkpoint. It proves what S1-B established; it is not the repository's current implementation inventory. Subsequent S1-C through S5 slices implemented the bounded Runtime, governed execution/observation, Completion/Verification, Candidate governance, Repository Integration, Runtime Commit, and recovery foundations. Current product gaps and delivery priority are governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](../roadmap/mvp-scope-calibration.md).
 
 ## 4. I1 — Minimal Runtime Contract and domain spine
 
@@ -636,4 +636,4 @@ F3-C. Executable Test & Failure Contract               REVIEWED / ADMITTED
 F3-D. FVS Coding Authorization Closure                 CLOSED — FVS-1 AUTHORIZED FOR CONTROLLED IMPLEMENTATION
 ```
 
-S1-A Runtime Project Foundation, S1-B Persistent Runtime Foundation, and S1-C Bootstrap Baseline & Minimal Durable Runtime Spine are CLOSED / PASS. The FVS-1 Contract records S2, S2-A, and S2-B CLOSED / PASS. S3 is NEXT / NOT STARTED and is not authorized.
+S1-A Runtime Project Foundation, S1-B Persistent Runtime Foundation, and S1-C Bootstrap Baseline & Minimal Durable Runtime Spine are CLOSED / PASS. The FVS-1 Contract records S2 through S5 CLOSED / PASS. R4-B is implemented and reviewed with focused/affected validation PASS; complete R4 qualification and execution are DEFERRED_BY_MVP. Current usable-product scope and delivery order are governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](../roadmap/mvp-scope-calibration.md).

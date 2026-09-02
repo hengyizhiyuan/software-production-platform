@@ -18,7 +18,11 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **Runtime Architecture Refinement — CLOSED**
 
-Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine, S2 Governed Artifact Production, S3 Completion, Verification & Candidate Governance, S4 Repository Integration & Runtime Commit, and S5 Failure / Recovery Hardening are **CLOSED / PASS**. S6 Real Codex Dogfood & FVS Closure is **IN PROGRESS**. S6-B1 remains **CLOSED / PARTIAL**. S6-B2 Dedicated Executor & Real Provider Boundary, S6-B2-A, and S6-B2-B1 are **CLOSED / PASS**. The S6-B2-B2 historical real probe remains **COMPLETE / PARTIAL** with `Provider SUCCESS + Production Reality NONE` preserved. S6-C1 and S6-C2-DB1 remain **CLOSED / PASS**. Authorization #4 created Attempt generation 1, whose Executor transport failed before any Provider Thread or Turn; Provider Outcome remains UNKNOWN and Production Reality remains NONE. S6-C2-R1, S6-C2-R2, S6-C2-R3, S6-C2-R4-A, and S6-C2-R4-B are **CLOSED / PASS**. The Windows S6-C2-R4-C full-regression Attempt is **INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED**; full-system regression is **DEFERRED TO THE LINUX SERVER PROMOTION GATE**. S6-C2-R4, S6-C2, and S6-C remain **IN PROGRESS**, with the Recovery Barrier active.
+**MVP-SCOPE-1 — ADMITTED / CURRENT DEVELOPMENT PRIORITY**
+
+Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine, S2 Governed Artifact Production, S3 Completion, Verification & Candidate Governance, S4 Repository Integration & Runtime Commit, and S5 Failure / Recovery Hardening are **CLOSED / PASS**. S6 Real Codex Dogfood & FVS Closure is **IN PROGRESS**. S6-B1 remains **CLOSED / PARTIAL**. S6-B2 Dedicated Executor & Real Provider Boundary, S6-B2-A, and S6-B2-B1 are **CLOSED / PASS**. The S6-B2-B2 historical real probe remains **COMPLETE / PARTIAL** with `Provider SUCCESS + Production Reality NONE` preserved. S6-C1 and S6-C2-DB1 remain **CLOSED / PASS**. Authorization #4 created Attempt generation 1, whose Executor transport failed before any Provider Thread or Turn; Provider Outcome remains UNKNOWN and Production Reality remains NONE. S6-C2-R1, S6-C2-R2, S6-C2-R3, S6-C2-R4-A, and S6-C2-R4-B are **CLOSED / PASS**. The Windows S6-C2-R4-C full-regression Attempt remains **INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED**. Full-system R4 regression, R4-C, R4-D, and real maintenance-lineage recovery are **DEFERRED_BY_MVP**; they are not current MVP blockers. S6-C remains historically IN PROGRESS, with its Recovery Barrier preserved rather than advanced.
+
+The current delivery priority is governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): complete a usable local Docker MVP with a functional Web UI, then deploy and promotion-validate that completed MVP on Linux, and only then begin systematic self-dogfood. ChatGPT + Codex remains the development workflow; a CLI-only Runtime is not the MVP product.
 
 | Architecture workflow item | Status |
 |---|---|
@@ -55,6 +59,7 @@ Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSE
 | Coding Readiness | PASS |
 | Implementation Governance | AUTHORIZED FOR CONTROLLED IMPLEMENTATION |
 | FVS-1 Implementation Contract | ADMITTED |
+| MVP-SCOPE-1 — Architecture Scope Calibration & Phase-2 Hardening Backlog | ADMITTED — CURRENT DEVELOPMENT PRIORITY |
 | F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
 | F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
 | F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
@@ -95,14 +100,15 @@ Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSE
 | S6-C2-R1 — Attempt Recovery Assessment & Encoding Diagnosis | CLOSED / PASS |
 | S6-C2-R2 — Explicit UTF-8 Dedicated Executor Transport Repair | CLOSED / PASS |
 | S6-C2-R3 — Production-Lineage Recovery Reality Check | CLOSED / PASS |
-| S6-C2-R4 — Verified Maintenance Baseline & Production-Lineage Recovery | IN PROGRESS |
+| S6-C2-R4 — Verified Maintenance Baseline & Production-Lineage Recovery | DEFERRED_BY_MVP after R4-B |
 | S6-C2-R4-A — Recovery Contract Admission | CLOSED / PASS |
 | S6-C2-R4-B — Controlled Implementation & Focused Validation | CLOSED / PASS |
-| S6-C2-R4-C — Windows Full Deterministic Regression Attempt | INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED; CHECKPOINT NOT CREATED |
-| Linux Dogfood Promotion Gate — Full Deterministic Regression | DEFERRED / NOT STARTED |
-| S6-C2 — First Real Governed Dogfood Execution & Observation | IN PROGRESS / RECOVERY BARRIER ACTIVE |
+| S6-C2-R4-C — Windows Full Deterministic Regression Attempt | INTERRUPTED HISTORICAL ATTEMPT; DEFERRED_BY_MVP |
+| S6-C2-R4-D — Real Maintenance Recovery Execution | DEFERRED_BY_MVP / NOT EXECUTED |
+| Linux MVP Deployment & Promotion Gate | AFTER LOCAL USABLE MVP / NOT STARTED |
+| S6-C2 — First Real Governed Dogfood Execution & Observation | HISTORICAL RECOVERY BARRIER PRESERVED; DEFERRED_BY_MVP |
 
-The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md#54-s6-b1-real-codex-sdk-host-integration-spike-reality) records the bounded S6-B1 Reality and its S6-B1-R/R2 follow-ups. Historical probes remain immutable. **No additional S6-B1 or S6-B2-B2 real Provider probe is authorized**. S6-B2 and S6-C2-R4-B are **CLOSED / PASS** after deterministic closure hardening and Architecture Lead Reality Review. The historical B2-B2 probe remains **COMPLETE / PARTIAL** and still records the exact benchmark `Provider SUCCESS + Production Reality NONE`; it is not relabeled. S6-C2 is IN PROGRESS under an active Recovery Barrier. The Windows R4-C regression was interrupted at the last observed 59% progress with no known failure, but no terminal pytest result was retained and no checkpoint was created. Full-system regression is deferred to the Linux server promotion gate. No real Runtime recovery, dispatch, or Provider Turn is authorized or executed.
+The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md#54-s6-b1-real-codex-sdk-host-integration-spike-reality) records the bounded S6-B1 Reality and its S6-B1-R/R2 follow-ups. Historical probes remain immutable. **No additional S6-B1 or S6-B2-B2 real Provider probe is authorized**. S6-B2 and S6-C2-R4-B are **CLOSED / PASS** after deterministic closure hardening and Architecture Lead Reality Review. The historical B2-B2 probe remains **COMPLETE / PARTIAL** and still records the exact benchmark `Provider SUCCESS + Production Reality NONE`; it is not relabeled. The historical S6-C2 Recovery Barrier remains preserved. The Windows R4-C regression was interrupted at the last observed 59% progress with no known failure, but no terminal pytest result was retained and no checkpoint was created. Complete R4 qualification and execution are DEFERRED_BY_MVP. No real Runtime recovery, dispatch, or Provider Turn is authorized or executed.
 
 The completed refinement order is **A. State Foundation → B. Reconciliation & Recovery → C. Completion & Trust → D. Side-effect Governance → Final Readiness Review**.
 
@@ -140,9 +146,9 @@ S6-C2-R4-B is **CLOSED / PASS** after Architecture Lead Reality Review. [Section
 
 Focused R4-B evidence passes 23/23; unique affected persistence, Runtime spine, S4-B, S5, and directly adjusted inventory cases pass 175/175; persistence foundation passes 6/6. Compile/import, migration downgrade/re-upgrade on `spg_test`, `uv lock --check`, and `git diff --check` pass. The pre/post `spg_runtime` whole-database fingerprint is identical, its schema remains `20260829_12`, and no real Baseline, pointer, lineage, Recovery Action, Attempt generation 2, Provider Thread, or Provider Turn was created.
 
-### Windows Bootstrap Runtime Archive and Linux Dogfood Replan
+### Windows Bootstrap Runtime Archive and MVP Delivery Replan
 
-The Windows R4-C full-regression Attempt was intentionally abandoned after interruption. Its log retained progress through 59% with no known failure, but no terminal pytest result; it is **INTERRUPTED / FINAL RESULT UNKNOWN / NOT RETAINED**, and no R4-C checkpoint was created. Full-system regression is deferred to the Linux server promotion gate, and the Linux development server is the next authoritative Dogfood Execution Host.
+The Windows R4-C full-regression Attempt was intentionally abandoned after interruption. Its log retained progress through 59% with no known failure, but no terminal pytest result; it is **INTERRUPTED / FINAL RESULT UNKNOWN / NOT RETAINED**, and no R4-C checkpoint was created. Complete R4 qualification, R4-D, and real maintenance recovery are DEFERRED_BY_MVP. The next delivery target is the usable local Docker MVP; the Linux development server becomes the deployment and promotion target only after that product exists.
 
 The unchanged spg_runtime at Alembic 20260829_12 is archived as **WINDOWS BOOTSTRAP DOGFOOD EVIDENCE — NOT AN ACTIVE SERVER RUNTIME TO BE CONTINUED**. Backup C:\Users\yuchunbo\Documents\SPG-backups\spg_runtime_windows_bootstrap_20260902T061522Z.dump has SHA-256 64ebae40cbea8589f3b1c988422329d4f52e9b5200729ca67c19f31c1a0045b0 and passed restore-list validation. It is not migrated into the future Linux Runtime. Real maintenance recovery remains unexecuted, the old lineage is not superseded, no new lineage exists, and the historical Recovery Barrier remains active.
 
@@ -156,6 +162,7 @@ The current system-level architecture baseline is:
 - [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md)
 - [Runtime Profile, Provider Placement, and Containerized Deployment](docs/architecture/runtime-profile-provider-deployment.md)
 - [SPG FVS-1 — Governed Documentation Production Loop Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md)
+- [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 

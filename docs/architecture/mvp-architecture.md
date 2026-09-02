@@ -230,11 +230,15 @@ Containerized packaging with Docker and Docker Compose is the preferred FVS/loca
 
 The [FVS-1 Governed Documentation Production Loop Contract](spg-fvs-1-implementation-contract.md) is ADMITTED under Baseline v0.1. It selects the bounded FVS technical foundation and records the real documentation-production loop, narrow Repository Integration protocol, and T01–T18 executable obligations.
 
-F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1 Runtime Foundation & Persistent Spine, S2 Governed Artifact Production, and their S1-A/S1-B/S1-C/S2-A/S2-B slices are CLOSED / PASS. S3 is NEXT / NOT STARTED and is not authorized.
+F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1 through S5 are CLOSED / PASS. R4-A is CLOSED / PASS, and R4-B is implemented with focused/affected validation and Architecture Lead review PASS. Complete R4 qualification, R4-C, R4-D, and real maintenance recovery are DEFERRED_BY_MVP. Historical Attempts and Recovery facts remain unchanged.
 
 ## MVP Scope Boundary
 
-The MVP does not include full CI/CD, automated deployment, production monitoring, full Guardian or ECF implementations, model routing, benchmarking, intelligent branching or merge, complete SaaS multi-tenancy, Provider Marketplace, provider-management UI, residency Policy Engine, or multi-region orchestration.
+The usable MVP is a local Docker product with a functional Web UI, real requirement intake, governed execution, Human Attention/Authority actions, and observable results. It includes the narrow application workflow and HTTP surface required by that UI. The CLI remains a development/operator interface and is not the complete MVP product.
+
+The MVP does not include full CI/CD, automated deployment, production monitoring, full Guardian or ECF implementations, model routing, benchmarking, intelligent branching or merge, complete SaaS multi-tenancy, Provider Marketplace, provider-management UI, residency Policy Engine, or multi-region orchestration. Complete R4 maintenance-lineage recovery closure is also DEFERRED_BY_MVP.
+
+The detailed current classification and roadmap are governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](../roadmap/mvp-scope-calibration.md).
 
 The [Runtime Architecture Final Closure and Readiness](spg-runtime-architecture-readiness.md) is PASS. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) records Implementation Contract / Runtime MVP Design CLOSED and Coding Readiness PASS. Controlled slices are permitted only after explicit Architecture Lead authorization; this admission does not authorize one, expand MVP, promote deferred capabilities, or select physical implementation.
 
@@ -303,7 +307,7 @@ No YiJue adapter, concrete API, or YiJue implementation is defined here.
 
 ## MVP Capability Boundary
 
-The MVP supports the basic Production Planner production loop, Project State, Iteration, VS, Work Item, Artifact recording, Executor invocation, Human Console, basic Production Reality View, and Capability Boundary.
+The MVP supports the basic Production Planner production loop, Project/Repository representation, real requirement intake, Iteration, VS, Work Item, Artifact recording, Executor invocation, basic Completion/Verification, Human Attention/Authority, Production Reality and outcome views, a minimal application/API layer, a functional Web UI, and local Docker product integration.
 
 The MVP does not implement:
 

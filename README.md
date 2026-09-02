@@ -2,7 +2,9 @@
 
 This repository contains the controlled implementation of the Software Production Governor Runtime.
 
-The current implementation includes the FVS-1 project and persistence foundations, the S1-C minimum durable Runtime spine, and the closed S2 governed artifact-production path: S2-A Context Package / Attempt preparation plus S2-B governed dispatch, provider-report, independent observation, and Work Product References. S3 Completion evaluation, Verification/Qualification, Candidate governance, Repository Integration, and Runtime Candidate Commit are not implemented or started.
+The current implementation includes the FVS-1 project and persistence foundations plus the S1–S5 governed Runtime path: Context Package and Attempt preparation, isolated dispatch, Provider Report, independent Production Observation, Completion and Verification, Candidate governance, authorized Repository Integration, Runtime Commit, and recovery foundations. R4-B verified maintenance-lineage recovery is implemented and has focused/affected validation plus Architecture Lead review PASS; complete R4 qualification and real maintenance recovery are deferred from the MVP critical path.
+
+The repository is currently CLI-first. It does not yet provide a cohesive HTTP/Web API, a functional Web UI, or an application/API/UI Docker product; the current Compose file provides PostgreSQL only. The current delivery priority is defined by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): finish a usable local Docker MVP with a real Web UI before Linux deployment and systematic self-dogfood.
 
 ## Local setup
 
