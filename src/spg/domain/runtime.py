@@ -15,16 +15,19 @@ class SnapshotCondition(StrEnum):
 
 class RunCondition(StrEnum):
     OPEN = "OPEN"
+    SUPERSEDED = "SUPERSEDED"
 
 
 class PlanCondition(StrEnum):
     ACTIVE = "ACTIVE"
+    SUPERSEDED = "SUPERSEDED"
 
 
 class WorkUnitCondition(StrEnum):
     PROPOSED = "PROPOSED"
     PRODUCED = "PRODUCED"
     SATISFIED = "SATISFIED"
+    SUPERSEDED = "SUPERSEDED"
 
 
 class AttemptCondition(StrEnum):
@@ -185,6 +188,7 @@ class PlanRevisionRecord(BaseModel):
     revision_number: int
     source_baseline_id: UUID
     condition: PlanCondition
+    version: int
     created_at: datetime
 
 

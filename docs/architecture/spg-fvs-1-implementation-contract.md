@@ -2806,3 +2806,317 @@ S6-C2
 ```
 
 The resulting clean repository checkpoint is eligible only as an `S6-C2 PLATFORM-REPAIR CHECKPOINT` and remains `PENDING PRODUCTION-LINEAGE RECOVERY REVIEW`. It is not an admitted Production Source Baseline. The next governed step is Architecture Lead production-lineage recovery review, followed by separate authority to bind an exact clean revision and decide whether Attempt generation 2 may be created. No checkpoint identity is written or predicted here.
+
+## 67. S6-C2-R3 closure and R4-A Verified Maintenance Baseline and Production-Lineage Recovery contract
+
+S6-C2-R3 is **CLOSED / PASS**. Its repository-grounded and Runtime-grounded Reality Check determined that existing capabilities are insufficient to continue the active self-hosted dogfood lineage lawfully and classified the gap as **NARROW PRODUCTION-LINEAGE RECOVERY CAPABILITY REQUIRED**. Execution compatibility remains distinct from Repository Integration eligibility: a newer SPG implementation can technically execute against an older target-project commit, but a Candidate based on that old Source Baseline cannot pass current exact-baseline and authoritative-ref CAS rules after the ref has advanced.
+
+At R4-A contract admission, S6-C2-R4 was **DEFINED / NOT STARTED**. S6-C2-R4-A is **CLOSED / PASS** as contract admission only. R4-A did not implement or execute recovery and did not itself authorize R4-B. The current post-implementation state is recorded in Section 68.
+
+### 67.1 Capability boundary
+
+The bounded capability is **Verified Maintenance Baseline & Production-Lineage Recovery**. It applies only when an independently verified platform repair has advanced the same authoritative self-hosted repository beyond the Source Baseline bound to an exact blocked production lineage.
+
+Conceptually, one governed recovery operation binds:
+
+```text
+exact blocked old production lineage
++ immutable Recovery Assessment
++ exact Current Trusted Baseline and pointer version
++ exact final verified maintenance checkpoint
++ exact Human / Architecture Authority
++ exact deterministic verification evidence
+        ↓
+new immutable maintenance Trusted Baseline
++ Current Trusted Baseline Pointer advancement
++ old-lineage supersession
++ append-only Recovery resolution
++ new authoritative Run / Plan / PWU lineage
+```
+
+The operation must not expose unsafe generic mutations such as `adopt_latest_baseline()`, `reset_current_run()`, or `rebind_current_pwu()`. It must not redispatch generation 1, mutate any old lineage binding, silently rebase the old PWU, fabricate the ordinary Candidate path, reset `spg_runtime`, or rewrite the historical Recovery Assessment.
+
+The current verified UTF-8 repair checkpoint is historical input evidence only. The eventual maintenance target is an exact clean checkpoint qualified only after complete R4-B implementation and Linux promotion-gate full-regression acceptance. Its SHA is bound only by a separately authorized Runtime recovery step. This contract does not hardcode, predict, or self-reference that future identity.
+
+### 67.2 Verified maintenance qualification
+
+A maintenance checkpoint is eligible only when the recovery request binds all of the following exact, current facts:
+
+- Current Trusted Baseline identity and repository revision;
+- Current Trusted Baseline Pointer version;
+- target repository identity and authoritative ref;
+- exact target maintenance commit and tree identity;
+- proof that the target commit is a linear descendant of the old Trusted Baseline;
+- independent observation that the authoritative ref currently equals the exact target commit;
+- approved maintenance purpose and approved changed-path / repair scope;
+- immutable deterministic verification evidence and its canonical fingerprint;
+- exact Human / Architecture Authority.
+
+Qualification must reject `latest HEAD`, `latest commit`, administrator narrative alone, raw conversation, and Provider success as authority or evidence substitutes.
+
+### 67.3 Maintenance verification evidence
+
+The minimum immutable evidence contract supports exact audit of:
+
+- verification command or suite identity;
+- collected, selected, passed, failed, skipped where reported, and deselected counts;
+- focused repair evidence;
+- migration, compile/import, lock, and diff evidence where applicable;
+- exact changed-path scope;
+- evidence timestamp;
+- canonical evidence fingerprint.
+
+The eventual evidence must validate the complete recovery-capability implementation and final clean checkpoint, not merely the earlier UTF-8 transport repair. This FVS path does not require Guardian and does not create a general metrics platform.
+
+### 67.4 Human authority contract
+
+The exact Human / Architecture Authority binds:
+
+- old Trusted Baseline;
+- final maintenance commit and tree;
+- authoritative repository and ref;
+- maintenance purpose;
+- verification evidence fingerprint;
+- old blocked Run / Plan / PWU / Attempt lineage;
+- exact Recovery Assessment;
+- new-lineage objective;
+- authorization scope and timestamp.
+
+Human Authority changes permission only. It cannot manufacture Provider `SUCCESS`, Production Work, Completion, Verification `PASS`, ordinary Candidate eligibility, or repository convergence. Candidate-specific Human Authorization semantics must not be reused. A later implementation may use or narrowly extend generic Governance authority semantics, subject to Reality Review.
+
+### 67.5 Baseline admission and Git boundary
+
+Successful admission creates a new immutable Trusted Baseline with provenance equivalent to `MAINTENANCE / RECOVERY ADMISSION`. The old Trusted Baseline remains immutable. The Current Trusted Baseline Pointer advances only through exact expected-source identity and version CAS.
+
+The admission must not claim provenance from an ordinary Candidate, Provider execution, Repository Integration Effect, or Runtime Commit. Missing ordinary production records must not be fabricated retroactively.
+
+Git is read-only external Reality for this operation. The capability may read the authoritative ref, confirm commit existence, read commit and tree identities, confirm linear-descendant ancestry, and inspect the exact diff/path scope. It must not update a ref, merge, rebase, reset, cherry-pick, force-update, push, or repair the repository.
+
+### 67.6 Old production-lineage supersession
+
+The old Run, Plan, PWU, Attempt generation 1, Dispatch, Provider Report, Observation, and Recovery Assessment remain historically intact. The old Attempt is never rewritten.
+
+The contract requires explicit material state and audit semantics by which the old production lineage loses current authority. Preferred logical transitions are:
+
+```text
+Run:  OPEN     → SUPERSEDED
+Plan: ACTIVE   → SUPERSEDED
+PWU:  PROPOSED → SUPERSEDED
+```
+
+R4-B Reality Review may determine that a separate immutable supersession record is safer than one or more condition transitions. Regardless of physical representation, the old lineage must not remain apparently current after authority is handed to the new lineage, and historical executable meaning must not be mutated.
+
+### 67.7 Recovery Assessment and barrier resolution
+
+Recovery Assessment `18e1a39b-3133-591f-9364-50a5766fc8d2` remains immutable with `recovery_barrier = true`. It must not be changed to resolved, false, or coherent.
+
+Barrier handling requires a new append-only Recovery Action / Resolution fact binding:
+
+- exact Recovery Assessment and basis fingerprint;
+- old Run / Plan / PWU / Attempt lineage;
+- maintenance baseline admission;
+- supersession decision;
+- new Run / Plan / PWU lineage;
+- exact Human Authority;
+- result and timestamp.
+
+The current production projection may regard the old barrier as handled only when the exact successful supersession/resolution fact exists. Historical evidence remains unchanged.
+
+### 67.8 New production-lineage admission
+
+The recovery creates new internal Run, Plan Revision, and PWU identities. The same external Production Intent may be retained, but no old internal identity is reused. The new lineage binds both the new maintenance Trusted Baseline and the exact admitted dogfood Governance Contract Snapshot.
+
+The operator-guide objective and Completion / Verification Contract remain unchanged unless a separately admitted contract revision exists. The new PWU begins at `PROPOSED`. The maintenance recovery creates no Attempt and is not generation 2 of the old PWU.
+
+### 67.9 Atomicity, idempotency, and concurrency
+
+Where existing architecture permits, one local PostgreSQL UnitOfWork must atomically:
+
+```text
+verify old pointer identity and version
+→ persist maintenance admission
+→ create new immutable Trusted Baseline
+→ advance the Current Trusted Baseline Pointer
+→ supersede old Run / Plan / PWU authority
+→ persist Recovery resolution
+→ create new Run / Plan / PWU
+→ append Governance and Transition History
+```
+
+All local state commits or all rolls back. Git remains read-only external Reality; no distributed transaction is introduced.
+
+The complete recovery basis has one canonical fingerprint. An exact duplicate request returns the same logical result without duplicate Baselines, recovery records, supersession, or new lineage. A stale expected pointer identity/version is rejected. Competing maintenance recoveries cannot overwrite each other.
+
+### 67.10 Eligibility and outcome boundaries
+
+The narrow operation is eligible only while the exact old lineage has an active Recovery Barrier, a PWU that is neither `PRODUCED` nor `SATISFIED`, no Completion, Verification, Candidate, Integration Effect, Runtime Commit, or material Work Product requiring preservation, and the exact failed/blocked Attempt plus Recovery Assessment.
+
+If material production work exists, the operation stops. General in-flight work migration is future work.
+
+Successful maintenance recovery means only:
+
+```text
+new maintenance Trusted Baseline admitted
+old blocked lineage superseded
+new governed production lineage admitted
+```
+
+It does not mean that the operator guide is produced, the PWU is satisfied, the Provider recovered, the old Attempt succeeded, a new Attempt exists, or S6-C2 is complete.
+
+### 67.11 Required future executable evidence — MR-01 through MR-34
+
+| ID | Required executable obligation |
+|---|---|
+| MR-01 | Exact old Trusted Baseline is required. |
+| MR-02 | Exact Current Trusted Baseline Pointer identity and version CAS are required. |
+| MR-03 | Exact target repository, authoritative ref, commit, and tree are required. |
+| MR-04 | Target commit must be a linear descendant of the old Baseline. |
+| MR-05 | Authoritative ref must currently equal the exact target commit. |
+| MR-06 | Exact approved maintenance purpose and changed-path scope are required. |
+| MR-07 | Exact immutable deterministic verification evidence is required. |
+| MR-08 | Exact Human / Architecture Authority is required. |
+| MR-09 | Raw conversation cannot serve as authority. |
+| MR-10 | Ordinary Candidate records are not fabricated. |
+| MR-11 | Git is not mutated. |
+| MR-12 | A new Trusted Baseline is created with maintenance/recovery provenance. |
+| MR-13 | The old Trusted Baseline remains immutable. |
+| MR-14 | The pointer advances exactly once. |
+| MR-15 | The old Run loses current authority. |
+| MR-16 | The old Plan loses current authority. |
+| MR-17 | The old PWU loses current authority. |
+| MR-18 | The old Attempt, Dispatch, Report, and Observation remain immutable. |
+| MR-19 | The historical Recovery Assessment remains immutable. |
+| MR-20 | Append-only Recovery resolution binds old and new lineages. |
+| MR-21 | New internal Run, Plan, and PWU identities are created. |
+| MR-22 | The same external Production Intent may be retained. |
+| MR-23 | The new lineage binds the exact new Trusted Baseline. |
+| MR-24 | The new lineage binds the exact Governance Contract Snapshot. |
+| MR-25 | The new PWU starts at `PROPOSED`. |
+| MR-26 | No Attempt is created automatically. |
+| MR-27 | Atomic rollback leaves old authority unchanged. |
+| MR-28 | An exact duplicate request is idempotent. |
+| MR-29 | Concurrent or stale-pointer recovery is rejected. |
+| MR-30 | Existing material Work Product blocks narrow supersession. |
+| MR-31 | No Completion, Verification, or Candidate side effect is created. |
+| MR-32 | No Provider Thread or Turn is created. |
+| MR-33 | No destructive Runtime reset occurs. |
+| MR-34 | Existing S1–S6 deterministic regression remains valid. |
+
+These are future executable obligations. R4-A creates no tests and claims none of them as implemented or passed.
+
+### 67.12 Governed sequencing and admitted state
+
+```text
+S6-C2-R4-A
+    Contract Admission
+
+S6-C2-R4-B
+    Controlled implementation and focused validation
+    NO Runtime recovery execution
+
+S6-C2-R4-C
+    Windows full deterministic regression Attempt
+    INTERRUPTED / FINAL RESULT UNKNOWN
+
+Linux Dogfood Promotion Gate
+    Full deterministic regression
+    + promotion checkpoint
+    + exact SHA observation
+
+S6-C2-R4-D
+    Architecture Lead-authorized Runtime recovery execution
+    against the exact final checkpoint
+    NO Provider Turn
+
+Later
+    separately authorize the first Attempt under the new lineage
+```
+
+Maintenance recovery must never execute against an intermediate implementation checkpoint. R4-A does not freeze deeper implementation subdivision and does not authorize R4-B.
+
+```text
+S6-C2-R3
+    CLOSED / PASS
+
+S6-C2-R4
+    IN PROGRESS
+
+S6-C2-R4-A
+    CLOSED / PASS
+
+S6-C2-R4-B
+    CLOSED / PASS
+
+S6-C2-R4-C
+    WINDOWS ATTEMPT INTERRUPTED
+    FINAL RESULT UNKNOWN / NOT RETAINED
+    CHECKPOINT NOT CREATED
+
+S6-C2
+    IN PROGRESS
+    RECOVERY BARRIER ACTIVE
+```
+
+Architecture Baseline remains `v0.1`. R4-B implementation evidence is recorded below. The Windows R4-C full regression was interrupted without a retained terminal result; full-system regression is deferred to the Linux server promotion gate.
+
+## 68. S6-C2-R4-B Verified Maintenance Recovery implementation and focused validation
+
+S6-C2-R4-B implements the generic capability only. It does not execute the real S6-C2 maintenance recovery and does not migrate or mutate `spg_runtime`.
+
+### 68.1 Persistence placement and capability boundary
+
+One immutable `maintenance_recovery_admissions` record is the narrow maintenance admission and append-only Recovery resolution representation. It binds exact old/new Trusted Baselines, repository/ref/commit/tree, canonical verification evidence, Human / Architecture Authority, immutable Recovery Assessment, old and new Run/Plan/PWU identities, old Attempt, Governance Contract Snapshot, external Production Intent, operation fingerprint, outcome, and timestamp. It is not an ordinary Candidate, Repository Integration Effect, Runtime Commit, or Provider execution record.
+
+Run, Plan, and PWU gain only the exact `SUPERSEDED` terminal state required by this contract. Plan gains an optimistic version so all three old-lineage authority objects are revalidated by expected identity/version. The original Recovery Assessment and all Attempt/Dispatch/Report/Observation facts remain immutable. The generic Governance Record supplies the authority audit entry; evidence and Authority remain typed, canonical, fingerprinted content in the immutable admission.
+
+### 68.2 Domain, application, and Git contracts
+
+The provider-neutral contracts are `MaintenanceVerificationEvidence`, `MaintenanceRecoveryAuthority`, `VerifiedMaintenanceRecoveryRequest`, and `VerifiedMaintenanceRecoveryResult`, with a typed new-lineage admission input and immutable admission record. The only public authority-handoff operation is `recover_lineage_after_verified_maintenance(...)`; no partial public baseline-adoption, reset, supersession, or rebinding primitive is exposed.
+
+`GitMaintenanceObserver` is read-only. It requires a clean exact repository root, reads the authoritative ref, verifies commit and tree, proves old revision ancestry with `merge-base --is-ancestor`, and computes the exact changed paths. The operation observes the target before mutation and again before local commit. It contains no ref update, merge, rebase, reset, cherry-pick, force, push, or repository-repair path.
+
+### 68.3 Local atomicity, idempotency, and concurrency
+
+One PostgreSQL UnitOfWork locks and revalidates the exact baseline pointer and old Run/Plan/PWU, revalidates the exact Recovery Assessment and narrow zero-material-work eligibility, creates the maintenance Baseline, advances the pointer by expected-source/version CAS, supersedes the old lineage, creates the new Run/Plan/PWU, appends Governance/Transition facts, and persists the immutable admission/resolution. The new PWU starts `PROPOSED` with execution generation zero. No Attempt, Context Package, Materialized Execution Input, Completion, Verification, Candidate, Integration Effect, Runtime Commit, or Provider call is created.
+
+The complete typed basis has one canonical operation fingerprint and deterministic logical identities. Exact replay returns the same admission and lineage without duplicates. A different operation using a stale pointer or stale lineage/Assessment basis is rejected. Eleven injected material mutation boundaries prove complete transaction rollback; Git remains external read-only Reality and no distributed transaction is claimed.
+
+### 68.4 Executable evidence and migration Reality
+
+MR-01 through MR-34 map to named executable tests. The focused R4-B module collects and passes 23/23 cases, including eleven atomic rollback parameters. Unique affected PostgreSQL persistence, Runtime spine, S4-B pointer/Runtime Commit, S5 recovery, and directly adjusted schema-inventory cases pass 175/175. Persistence foundation and migration-head checks pass 6/6. Compile/import validation, `uv lock --check`, and `git diff --check` pass.
+
+Linear migration `20260902_13` adds only the immutable maintenance admission table and Plan optimistic version. Downgrade to `20260829_12` and re-upgrade pass on `spg_test`. The real `spg_runtime` remains at `20260829_12`; its pre/post whole-database fingerprint is identical, its Current Trusted Baseline Pointer and generation-1 history are unchanged, Recovery Action count remains zero, generation 2 remains absent, and the R4-B table is not present there.
+
+### 68.5 Resulting governed state
+
+```text
+S6-C2-R4
+    IN PROGRESS
+
+S6-C2-R4-A
+    CLOSED / PASS
+
+S6-C2-R4-B
+    CLOSED / PASS
+
+S6-C2-R4-C
+    WINDOWS ATTEMPT INTERRUPTED
+    FINAL RESULT UNKNOWN / NOT RETAINED
+    CHECKPOINT NOT CREATED
+
+S6-C2
+    IN PROGRESS
+    RECOVERY BARRIER ACTIVE
+```
+
+Architecture Baseline remains `v0.1`. R4-B is CLOSED / PASS after Architecture Lead Reality Review. No real maintenance Baseline was admitted, no real lineage was superseded or created, and no Attempt generation 2 or Provider Thread/Turn exists. The Windows R4-C full regression was interrupted without a retained terminal result; full-system regression is deferred to the Linux server promotion gate.
+
+## 69. Interrupted Windows R4-C regression and Linux Dogfood deployment replan
+
+The Windows workstation is retained as a bootstrap/development host and will no longer perform full deterministic promotion regression, Trusted Baseline promotion, or long-term SPG Dogfood Runtime operation. The interrupted R4-C regression log retained progress through 59% with no known failure, but no terminal pytest result was retained. The Attempt is **STALLED / INTERRUPTED**, its result is **UNKNOWN / NOT RETAINED**, and no checkpoint was created.
+
+The complete frozen validation subject remained byte-identical before and after interruption. Existing R4-B evidence remains admitted: focused tests 23/23 PASS, MR-01 through MR-34 mapped and PASS, affected regression 175/175 PASS, persistence foundation 6/6 PASS, migration 20260902_13 round-trip PASS on spg_test, compile/import PASS, uv lock validation PASS, and Git diff validation PASS. This is not a full-system regression PASS.
+
+The Windows spg_runtime remains at Alembic 20260829_12 and is archived as **WINDOWS BOOTSTRAP DOGFOOD EVIDENCE — NOT AN ACTIVE SERVER RUNTIME TO BE CONTINUED**. Backup C:\Users\yuchunbo\Documents\SPG-backups\spg_runtime_windows_bootstrap_20260902T061522Z.dump has SHA-256 64ebae40cbea8589f3b1c988422329d4f52e9b5200729ca67c19f31c1a0045b0 and passed restore-list validation. The archive preserves Authorization #1–#4 history, Attempt generation 1, Dispatch, Provider Report UNKNOWN, Observation NONE, Recovery Assessment, and the active historical Recovery Barrier. It is not migrated as the active Linux Runtime.
+
+The Linux development server is the next authoritative Dogfood Execution Host. The current repository checkpoint may be classified only as a **LINUX DOGFOOD DEPLOYMENT CANDIDATE — NOT YET A TRUSTED BASELINE**. Full-system regression is deferred to the Linux server promotion gate. Real maintenance recovery remains unexecuted; the old lineage is not superseded, no new lineage exists, and the Recovery Barrier historical fact is not rewritten.

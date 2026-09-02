@@ -42,7 +42,7 @@ def test_postgresql_engine_composition_has_no_connection_side_effect() -> None:
         database.dispose()
 
 
-def test_production_metadata_contains_only_admitted_s1_through_s6b1_tables() -> None:
+def test_production_metadata_contains_only_admitted_s1_through_s6c2_r4b_tables() -> None:
     assert set(metadata.tables) == {
         "production_snapshots",
         "current_trusted_baseline_pointer",
@@ -69,12 +69,13 @@ def test_production_metadata_contains_only_admitted_s1_through_s6b1_tables() -> 
         "runtime_commits",
         "recovery_assessments",
         "recovery_action_records",
+        "maintenance_recovery_admissions",
     }
 
 
-def test_alembic_environment_has_s6b1_migration_head() -> None:
+def test_alembic_environment_has_s6c2_r4b_migration_head() -> None:
     project_root = Path(__file__).resolve().parents[1]
     config = Config(project_root / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260829_12"]
+    assert scripts.get_heads() == ["20260902_13"]

@@ -687,7 +687,7 @@ def test_s4b_32_existing_full_regression(postgres_database, git_repository, tmp_
     facts = _build(postgres_database, git_repository, tmp_path)
     result = facts.service.commit_runtime_candidate(facts.request)
     assert "runtime_commits" in metadata.tables
-    assert len(runtime_tables) == 25
+    assert len(runtime_tables) == 26
     assert _count(postgres_database, current_trusted_baseline_pointer) == 1
     assert _count(postgres_database, production_admissibility_records) == 1
     assert _count(postgres_database, transition_history) > 0

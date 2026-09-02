@@ -114,6 +114,7 @@ plan_revisions = Table(
         nullable=False,
     ),
     Column("condition", String(32), nullable=False),
+    Column("version", Integer, nullable=False),
     Column(
         "created_at",
         DateTime(timezone=True),
@@ -1205,6 +1206,147 @@ recovery_action_records = Table(
 )
 
 
+maintenance_recovery_admissions = Table(
+    "maintenance_recovery_admissions",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("operation_fingerprint", String(64), nullable=False, unique=True),
+    Column(
+        "old_trusted_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_snapshots.id",
+            name="fk_maintenance_recovery_old_baseline",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "new_trusted_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_snapshots.id",
+            name="fk_maintenance_recovery_new_baseline",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column("expected_pointer_version", Integer, nullable=False),
+    Column("repository_identity", String(255), nullable=False),
+    Column("authoritative_ref", String(512), nullable=False),
+    Column("target_commit", String(128), nullable=False),
+    Column("target_tree", String(128), nullable=False),
+    Column("maintenance_purpose", Text, nullable=False),
+    Column("approved_changed_paths", JSONB, nullable=False),
+    Column("verification_evidence", JSONB, nullable=False),
+    Column("maintenance_evidence_fingerprint", String(64), nullable=False),
+    Column("authority", JSONB, nullable=False),
+    Column("maintenance_authority_fingerprint", String(64), nullable=False),
+    Column(
+        "governance_record_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "governance_records.id",
+            name="fk_maintenance_recovery_governance",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "recovery_assessment_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "recovery_assessments.id",
+            name="fk_maintenance_recovery_assessment",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column("recovery_assessment_fingerprint", String(64), nullable=False),
+    Column(
+        "old_run_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_runs.id", name="fk_maintenance_recovery_old_run"),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "old_plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "plan_revisions.id",
+            name="fk_maintenance_recovery_old_plan",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "old_work_unit_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_work_units.id",
+            name="fk_maintenance_recovery_old_work_unit",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "old_attempt_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "execution_attempts.id",
+            name="fk_maintenance_recovery_old_attempt",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "new_run_id",
+        Uuid(as_uuid=True),
+        ForeignKey("production_runs.id", name="fk_maintenance_recovery_new_run"),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "new_plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "plan_revisions.id",
+            name="fk_maintenance_recovery_new_plan",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "new_work_unit_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_work_units.id",
+            name="fk_maintenance_recovery_new_work_unit",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column("governance_contract_snapshot_identity", String(255), nullable=False),
+    Column("governance_contract_snapshot_fingerprint", String(64), nullable=False),
+    Column("external_intent_ref", String(255), nullable=False),
+    Column("outcome", String(32), nullable=False),
+    Column(
+        "admitted_at",
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    CheckConstraint(
+        "expected_pointer_version >= 0",
+        name="maintenance_recovery_pointer_version_nonnegative",
+    ),
+    CheckConstraint(
+        "outcome = 'APPLIED'",
+        name="maintenance_recovery_outcome_is_applied",
+    ),
+)
+
+
 runtime_tables = (
     production_snapshots,
     current_trusted_baseline_pointer,
@@ -1231,4 +1373,5 @@ runtime_tables = (
     runtime_commits,
     recovery_assessments,
     recovery_action_records,
+    maintenance_recovery_admissions,
 )

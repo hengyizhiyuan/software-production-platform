@@ -171,6 +171,7 @@ class RuntimeService:
                     "revision_number": 1,
                     "source_baseline_id": baseline.id,
                     "condition": PlanCondition.ACTIVE.value,
+                    "version": 0,
                     "created_at": timestamp,
                 }
             )

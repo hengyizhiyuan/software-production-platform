@@ -227,7 +227,12 @@ def test_s5c_13_no_special_recovery_produced_state(postgres_database, git_reposi
     _, _, service, request = _case(postgres_database, git_repository, tmp_path, changes=True)
     result = service.recover_attempt_work(request)
     assert result.action.outcome is RecoveryActionOutcome.SALVAGED
-    assert set(WorkUnitCondition) == {WorkUnitCondition.PROPOSED, WorkUnitCondition.PRODUCED, WorkUnitCondition.SATISFIED}
+    assert set(WorkUnitCondition) == {
+        WorkUnitCondition.PROPOSED,
+        WorkUnitCondition.PRODUCED,
+        WorkUnitCondition.SATISFIED,
+        WorkUnitCondition.SUPERSEDED,
+    }
 
 
 def test_s5c_14_zero_git_diff_is_not_universal_retry_condition(postgres_database, git_repository, tmp_path) -> None:
@@ -476,5 +481,5 @@ def test_s5c_41_existing_full_regression(postgres_database, git_repository, tmp_
     facts, assessment, service, _ = _case(postgres_database, git_repository, tmp_path)
     result = service.retry_attempt_from_recovery(_retry_request(facts, assessment, tmp_path))
     assert result.retry_attempt.generation == 2
-    assert len(runtime_tables) == 25
+    assert len(runtime_tables) == 26
     assert "recovery_action_records" in metadata.tables

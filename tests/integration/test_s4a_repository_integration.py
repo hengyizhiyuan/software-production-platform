@@ -682,7 +682,7 @@ def test_s4a_31_existing_full_regression_contracts(postgres_database, git_reposi
     facts = _build(postgres_database, git_repository, tmp_path)
     result = facts.integration.integrate_repository_candidate(facts.request)
     assert "repository_integration_effects" in metadata.tables
-    assert len(runtime_tables) == 25
+    assert len(runtime_tables) == 26
     assert _count(postgres_database, current_trusted_baseline_pointer) == 1
     assert result.effect.state is RepositoryEffectState.CONVERGED
     assert "v0.1" in (

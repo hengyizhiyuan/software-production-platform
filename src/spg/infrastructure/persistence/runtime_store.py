@@ -35,6 +35,12 @@ from spg.domain.integration import (
     RepositoryIntegrationEffectRecord,
 )
 from spg.domain.runtime_commit import RuntimeCommitRecord
+from spg.domain.maintenance_recovery import (
+    MaintenanceAdmissionOutcome,
+    MaintenanceRecoveryAdmissionRecord,
+    MaintenanceRecoveryAuthority,
+    MaintenanceVerificationEvidence,
+)
 from spg.domain.recovery import (
     RecoveryActionOutcome,
     RecoveryActionRecord,
@@ -109,6 +115,7 @@ from spg.infrastructure.persistence.runtime_schema import (
     runtime_commits,
     recovery_assessments,
     recovery_action_records,
+    maintenance_recovery_admissions,
 )
 
 
@@ -195,6 +202,12 @@ class RuntimeStore:
     def insert_recovery_action(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(recovery_action_records).values(**values))
 
+    def insert_maintenance_recovery_admission(
+        self,
+        values: Mapping[str, Any],
+    ) -> None:
+        self.session.execute(insert(maintenance_recovery_admissions).values(**values))
+
     def record_repository_effect_observation(
         self,
         effect_id: UUID,
@@ -246,6 +259,33 @@ class RuntimeStore:
             identity={"id": run_id},
             expected_version=expected_version,
             values={"current_plan_revision_id": plan_id},
+        )
+
+    def supersede_run(self, run_id: UUID, expected_version: int) -> int:
+        return update_versioned_row(
+            self.session,
+            production_runs,
+            identity={"id": run_id, "condition": RunCondition.OPEN.value},
+            expected_version=expected_version,
+            values={"condition": RunCondition.SUPERSEDED.value},
+        )
+
+    def supersede_plan_revision(self, plan_id: UUID, expected_version: int) -> int:
+        return update_versioned_row(
+            self.session,
+            plan_revisions,
+            identity={"id": plan_id, "condition": PlanCondition.ACTIVE.value},
+            expected_version=expected_version,
+            values={"condition": PlanCondition.SUPERSEDED.value},
+        )
+
+    def supersede_work_unit(self, work_unit_id: UUID, expected_version: int) -> int:
+        return update_versioned_row(
+            self.session,
+            production_work_units,
+            identity={"id": work_unit_id, "condition": WorkUnitCondition.PROPOSED.value},
+            expected_version=expected_version,
+            values={"condition": WorkUnitCondition.SUPERSEDED.value},
         )
 
     def advance_work_unit_generation(
@@ -363,8 +403,16 @@ class RuntimeStore:
         values["condition"] = RunCondition(values["condition"])
         return ProductionRunRecord.model_validate(values)
 
-    def plan_revision(self, plan_id: UUID) -> PlanRevisionRecord | None:
-        row = self._one(plan_revisions, plan_revisions.c.id == plan_id)
+    def plan_revision(
+        self,
+        plan_id: UUID,
+        *,
+        for_update: bool = False,
+    ) -> PlanRevisionRecord | None:
+        statement = select(plan_revisions).where(plan_revisions.c.id == plan_id)
+        if for_update:
+            statement = statement.with_for_update()
+        row = self.session.execute(statement).mappings().one_or_none()
         if row is None:
             return None
         values = dict(row)
@@ -870,6 +918,90 @@ class RuntimeStore:
             return None
         return self._recovery_action_record(row)
 
+    def maintenance_recovery_admission(
+        self,
+        admission_id: UUID,
+    ) -> MaintenanceRecoveryAdmissionRecord | None:
+        row = self._one(
+            maintenance_recovery_admissions,
+            maintenance_recovery_admissions.c.id == admission_id,
+        )
+        if row is None:
+            return None
+        return self._maintenance_recovery_admission_record(row)
+
+    def maintenance_recovery_admission_by_fingerprint(
+        self,
+        operation_fingerprint: str,
+    ) -> MaintenanceRecoveryAdmissionRecord | None:
+        row = self._one(
+            maintenance_recovery_admissions,
+            maintenance_recovery_admissions.c.operation_fingerprint
+            == operation_fingerprint,
+        )
+        if row is None:
+            return None
+        return self._maintenance_recovery_admission_record(row)
+
+    def maintenance_recovery_disqualifying_counts(
+        self,
+        *,
+        run_id: UUID,
+        work_unit_id: UUID,
+        attempt_id: UUID,
+        recovery_assessment_id: UUID,
+    ) -> dict[str, int]:
+        candidate_ids = select(baseline_candidates.c.id).where(
+            baseline_candidates.c.production_run_id == run_id
+        )
+        return {
+            "work_products": self._count_where(
+                work_product_references,
+                work_product_references.c.attempt_id == attempt_id,
+            ),
+            "completion_evaluations": self._count_where(
+                completion_evaluations,
+                completion_evaluations.c.work_unit_id == work_unit_id,
+            ),
+            "verification_records": self._count_where(
+                verification_records,
+                verification_records.c.work_unit_id == work_unit_id,
+            ),
+            "candidates": self._count_where(
+                baseline_candidates,
+                baseline_candidates.c.production_run_id == run_id,
+            ),
+            "integration_effects": self._count_where(
+                repository_integration_effects,
+                repository_integration_effects.c.candidate_id.in_(candidate_ids),
+            ),
+            "runtime_commits": self._count_where(
+                runtime_commits,
+                runtime_commits.c.production_run_id == run_id,
+            ),
+            "recovery_actions": self._count_where(
+                recovery_action_records,
+                recovery_action_records.c.recovery_assessment_id
+                == recovery_assessment_id,
+            ),
+            "attempts": self._count_where(
+                execution_attempts,
+                execution_attempts.c.work_unit_id == work_unit_id,
+            ),
+        }
+
+    def maintenance_recovery_for_new_run(
+        self,
+        run_id: UUID,
+    ) -> MaintenanceRecoveryAdmissionRecord | None:
+        row = self._one(
+            maintenance_recovery_admissions,
+            maintenance_recovery_admissions.c.new_run_id == run_id,
+        )
+        if row is None:
+            return None
+        return self._maintenance_recovery_admission_record(row)
+
     @staticmethod
     def _work_unit_record(row: Mapping[str, Any]) -> WorkUnitRecord:
         values = dict(row)
@@ -1034,6 +1166,29 @@ class RuntimeStore:
         values["subject_type"] = RecoverySubjectType(values["subject_type"])
         values["outcome"] = RecoveryActionOutcome(values["outcome"])
         return RecoveryActionRecord.model_validate(values)
+
+    @staticmethod
+    def _maintenance_recovery_admission_record(
+        row: Mapping[str, Any],
+    ) -> MaintenanceRecoveryAdmissionRecord:
+        values = dict(row)
+        values["approved_changed_paths"] = tuple(values["approved_changed_paths"])
+        values["verification_evidence"] = MaintenanceVerificationEvidence.model_validate(
+            values["verification_evidence"]
+        )
+        values["authority"] = MaintenanceRecoveryAuthority.model_validate(
+            values["authority"]
+        )
+        values["outcome"] = MaintenanceAdmissionOutcome(values["outcome"])
+        return MaintenanceRecoveryAdmissionRecord.model_validate(values)
+
+    def _count_where(self, table, criterion) -> int:
+        return int(
+            self.session.scalar(
+                select(func.count()).select_from(table).where(criterion)
+            )
+            or 0
+        )
 
     def _one(self, table, condition) -> Mapping[str, Any] | None:
         return self.session.execute(select(table).where(condition)).mappings().one_or_none()

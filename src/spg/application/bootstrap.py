@@ -15,6 +15,7 @@ from spg.application.runtime_commit import RuntimeCommitService
 from spg.application.recovery import RecoveryAssessmentService
 from spg.application.reconciliation import RecoveryReconciliationService
 from spg.application.attempt_recovery import AttemptRecoveryService
+from spg.application.maintenance_recovery import VerifiedMaintenanceRecoveryService
 from spg.infrastructure.persistence import Database
 
 
@@ -125,6 +126,14 @@ class Application:
         """Compose S5-C salvage/retry preparation without provider dispatch."""
 
         return AttemptRecoveryService(database or self.persistence())
+
+    def verified_maintenance_recovery(
+        self,
+        database: Database | None = None,
+    ) -> VerifiedMaintenanceRecoveryService:
+        """Compose exact R4-B recovery without executing production or mutating Git."""
+
+        return VerifiedMaintenanceRecoveryService(database or self.persistence())
 
 
 def bootstrap(settings: Settings | None = None) -> Application:

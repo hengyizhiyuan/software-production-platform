@@ -635,7 +635,7 @@ def test_s3c_32_existing_regression_contracts_remain(postgres_database, git_repo
     candidate = _seal(facts)
     authorization = _authorize(facts, candidate)
     assert {"baseline_candidates", "human_authorizations"} <= set(metadata.tables)
-    assert len(runtime_tables) == 25
+    assert len(runtime_tables) == 26
     assert _count(postgres_database, current_trusted_baseline_pointer) == 1
     assert _count(postgres_database, baseline_candidates) == 1
     assert _count(postgres_database, human_authorizations) == 1

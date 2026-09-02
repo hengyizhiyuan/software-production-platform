@@ -688,7 +688,7 @@ def test_s5a_32_existing_full_regression(postgres_database, git_repository, tmp_
     facts = _build_attempt(postgres_database, git_repository, tmp_path)
     assessment = facts.recovery.assess_recovery(_attempt_request(facts))
     assert "recovery_assessments" in metadata.tables
-    assert len(runtime_tables) == 25
+    assert len(runtime_tables) == 26
     assert _count(postgres_database, current_trusted_baseline_pointer) == 1
     assert assessment.classification is RecoveryClassification.COHERENT
     assert "v0.1" in (
