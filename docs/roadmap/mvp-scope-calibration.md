@@ -18,7 +18,7 @@ The MVP is usable when a user can:
 
 1. Run the product locally in the intended Docker development environment.
 2. Open a functional Web UI.
-3. Select or open the current project and repository.
+3. View all Works or select an optional Goal navigation context.
 4. Submit a real software-development requirement.
 5. Observe the admitted Production Intent, Run, PWU, Attempt, and governed status.
 6. Respond to required Human Attention and Authority actions.
@@ -38,14 +38,14 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Executor boundary | Provider-neutral Executor contract, Dedicated Executor boundary, Codex binding, workspace isolation, and deterministic evidence exist | MVP CORE; product integration/debugging remains |
 | Execution and observation | Dispatch, Provider Report, independent repository observation, and Work Product lineage are implemented | MVP CORE / GUARDRAIL |
 | Completion and Verification | Basic Completion Evaluation, Verification, and production-admissibility semantics are implemented | MVP CORE |
-| Human Authority | Candidate authorization and governance records exist | MVP CORE; Human Attention query/action experience remains |
+| Human Authority | Candidate authorization, governance records, and product-facing Attention query/action delegation exist | MVP CORE; HTTP/UI experience remains |
 | Repository result handling | Candidate, authorized integration, and Runtime Commit semantics are implemented | MVP CORE / GUARDRAIL |
 | Recovery | S5 recovery foundations are implemented; R4-B maintenance-lineage recovery capability is implemented and focused/affected validation passed | Stronger existing guarantee; complete R4 closure is deferred |
-| API / product application facade | CLI-first only; no HTTP/Web API and no cohesive product workflow facade | NOT STARTED / MVP GAP |
-| Web UI | No frontend or functional Human Control Center | NOT STARTED / MVP GAP |
-| Project model | Repository identity exists through Baseline/Run contracts; no user-facing Project aggregate or selection experience | PARTIAL / MVP GAP |
+| API / product application facade | Goal-centric governed Work Python application flow and minimal Goal/Work FastAPI surface are closed with focused validation pass | MVP CORE / CLOSED / PASS |
+| Web UI | Same-origin FastAPI-served Goal / Work Control Room implements intake, refinement/admission, one-step advance, Attention, and truthful Work Result views | MVP CORE / IMPLEMENTED; focused validation pass; Architecture Lead review pending |
+| Goal / Work / Engineering Scope product model | Work is the user-facing organization unit; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / IMPLEMENTED |
 | Production Planner | Architecture and contracts exist; no complete product-facing Planner workflow | PARTIAL / MVP GAP |
-| Production state view | Authoritative facts exist; no product query projection/API/UI | PARTIAL / MVP GAP |
+| Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | PARTIAL / HTTP API AND UI GAP |
 | Docker integration | PostgreSQL Compose service exists; application, API, UI, and host-side Executor integration are not composed as one development product | PARTIAL / MVP GAP |
 | Local persistent Runtime database | Logical spg_runtime / spg_test separation exists | MVP CORE / GUARDRAIL |
 | Linux deployment | Candidate checkpoint exists; server bootstrap and promotion validation have not started | POST-LOCAL-MVP |
@@ -57,7 +57,7 @@ Only capabilities needed for the product definition are MVP CORE.
 
 | Capability | Narrow MVP Boundary |
 |---|---|
-| Project / Repository representation | One current project or a very small project list; exact repository identity, path/ref, and Baseline |
+| Goal / Work / Engineering Resource representation | Optional Goal aggregation; Work as the primary product object; explicit Engineering Scope binding to the configured repository identity, path/ref, and Baseline |
 | Requirement intake | Admit one real task/requirement through the product interface |
 | Production Intent / PWU formation | Create one governed Production Intent, one Run, and one-PWU-first plan; explicit Human confirmation is allowed |
 | Context Package Lite | Assemble only admitted Source of Truth, exact Baseline, requirement, constraints, and necessary repository context |
@@ -74,7 +74,7 @@ Only capabilities needed for the product definition are MVP CORE.
 | Local Docker integration | API/UI/Runtime database operate as one documented local development product; host-side Executor is temporarily acceptable |
 | Local persistent Runtime database | Durable local state with strict Runtime/Test database separation |
 
-Allowed MVP simplifications are single-project, one active Run, serial execution, one-PWU-first workflow, static Provider profile, basic Verification, simple Planner logic, and manual Human intervention for uncommon recovery. These are delivery choices, not permanent architecture constraints.
+Allowed MVP simplifications are one Engineering Resource per Work, one active Run, serial execution, one-PWU-first workflow, static Provider profile, basic Verification, simple Planner logic, and manual Human intervention for uncommon recovery. These are delivery choices, not permanent architecture constraints.
 
 ## 5. B. MVP GUARDRAILS
 
@@ -180,16 +180,18 @@ Windows full regression is not required to close every intermediate development 
 
 ## 10. MVP Web UI Boundary
 
-The functional Web UI must support:
+The functional Web UI supports:
 
-- select/open the current project;
-- enter a development requirement/task;
-- view the resulting Production Intent, Run, PWU, and Attempt;
-- view current production state and blocking reason;
-- view Human Attention items;
-- approve or reject required Authority actions;
-- view execution, observation, Completion, and Verification outcomes;
-- continue with another task.
+- view all Works or select an optional Goal context;
+- enter a natural-language Work with optional Goal and tags;
+- view the Work draft, Engineering Scope summary, product state, and blocking reason;
+- refine, approve, reject, or request refinement through governed API actions;
+- advance exactly one bounded production action per explicit interaction;
+- view and resolve API-provided Human Attention actions;
+- view truthful artifact, Verification, trusted-result, and remaining-risk projections;
+- continue with another independent Work.
+
+Work remains the primary user-facing product object. The UI does not introduce a Project aggregate root, Project selector, Chat Thread authority, browser-side production state machine, or automatic run-until-done behavior.
 
 A conversational interaction style is acceptable and preferred where it keeps the workflow simple.
 
@@ -197,10 +199,10 @@ The MVP does not require visual polish, complex dashboards, drag-and-drop workfl
 
 ## 11. Reordered MVP Roadmap
 
-1. **MVP Scope Calibration** — this document.
-2. **Single-project governed task application flow** — connect requirement intake, Project/repository identity, Production Intent/PWU formation, existing Runtime operations, status projection, and Human Attention/Authority actions.
-3. **Minimal HTTP API** — expose only the application commands and queries needed by the product.
-4. **Functional Web UI** — implement the required end-to-end user experience.
+1. **MVP Scope Calibration** — CLOSED / PASS; this document.
+2. **Goal-centric governed Work application flow** — CLOSED / PASS; connects requirement intake, Engineering Scope/resource identity, Production Intent/PWU formation, existing Runtime operations, status projection, and Human Attention/Authority actions.
+3. **Minimal HTTP API** — CLOSED / PASS; exposes only the application commands and queries needed by the product.
+4. **Functional Web UI** — implemented with focused validation pass; Architecture Lead Reality Review pending.
 5. **Local Docker integration** — compose API/UI/Runtime DB; integrate the temporary host-side Executor cleanly.
 6. **Real local end-to-end MVP task** — submit, govern, execute, observe, verify, authorize, and obtain a repository result.
 7. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.

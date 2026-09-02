@@ -4,7 +4,7 @@ This repository contains the controlled implementation of the Software Productio
 
 The current implementation includes the FVS-1 project and persistence foundations plus the S1–S5 governed Runtime path: Context Package and Attempt preparation, isolated dispatch, Provider Report, independent Production Observation, Completion and Verification, Candidate governance, authorized Repository Integration, Runtime Commit, and recovery foundations. R4-B verified maintenance-lineage recovery is implemented and has focused/affected validation plus Architecture Lead review PASS; complete R4 qualification and real maintenance recovery are deferred from the MVP critical path.
 
-The repository is currently CLI-first. It does not yet provide a cohesive HTTP/Web API, a functional Web UI, or an application/API/UI Docker product; the current Compose file provides PostgreSQL only. The current delivery priority is defined by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): finish a usable local Docker MVP with a real Web UI before Linux deployment and systematic self-dogfood.
+The repository now includes the Goal / Work application flow, its minimal HTTP API, and a functional same-origin Web UI. The application/API/UI Docker product is not yet integrated; the current Compose file still provides PostgreSQL only. The current delivery priority is defined by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): integrate the validated UI into a usable local Docker MVP before Linux deployment and systematic self-dogfood.
 
 ## Local setup
 
@@ -45,6 +45,14 @@ Check non-destructive PostgreSQL connectivity and Alembic configuration:
     uv run spg db check
     uv run alembic upgrade head
     uv run alembic current
+
+Start the local HTTP application and open `http://127.0.0.1:8000/app`:
+
+    uv run uvicorn spg.api.http:create_http_application --factory --host 127.0.0.1 --port 8000
+
+The Web UI is served from the same application origin as `/api/*`; it has no
+frontend build step, npm dependency, external CDN, or browser-side production
+authority.
 
 The governed Runtime commands are explicit:
 

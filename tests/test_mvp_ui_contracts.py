@@ -1,0 +1,99 @@
+"""Focused product and packaging contracts for the MVP control-room UI."""
+
+from importlib.resources import files
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+
+from spg.api import create_http_application
+
+
+WEB_ROOT = Path(str(files("spg.web")))
+
+
+class _StaticOnlyDatabase:
+    def check(self) -> None:
+        return None
+
+
+class _StaticOnlyWorkService:
+    database = _StaticOnlyDatabase()
+
+
+def _client() -> TestClient:
+    return TestClient(
+        create_http_application(
+            application=object(),  # Static routes do not require Runtime composition.
+            database=_StaticOnlyDatabase(),
+            work_service=_StaticOnlyWorkService(),
+        )
+    )
+
+
+def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
+    with _client() as client:
+        root = client.get("/", follow_redirects=False)
+        assert root.status_code == 307
+        assert root.headers["location"] == "/app"
+
+        page = client.get("/app")
+        assert page.status_code == 200
+        assert page.headers["content-type"].startswith("text/html")
+        assert 'id="work-form"' in page.text
+
+        for asset_name, content_marker in (
+            ("styles.css", ".control-room"),
+            ("state.js", "SPGViewModel"),
+            ("app.js", "startControlRoom"),
+        ):
+            packaged = WEB_ROOT / asset_name
+            assert packaged.is_file()
+            response = client.get(f"/assets/{asset_name}")
+            assert response.status_code == 200
+            assert content_marker in response.text
+
+
+def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+    combined = f"{html}\n{javascript}".lower()
+
+    assert "what do you want to get done?" in combined
+    assert "goal" in combined
+    assert "works" in combined
+    assert "human authority" in combined
+    assert "attention required" in combined
+    assert "work result" in combined
+    assert "no artifacts observed" in combined
+    assert "no verification evidence available" in combined
+    assert "project selector" not in combined
+    assert "chat thread" not in combined
+
+    for route in (
+        "/api/goals",
+        "/api/works",
+        "/refine",
+        "/advance",
+        "/api/attention",
+        "/result",
+    ):
+        assert route in javascript
+
+    for governed_endpoint in ("APPROVE: \"approve\"", "REJECT: \"reject\"", "REQUEST_REFINEMENT: \"request-refinement\""):
+        assert governed_endpoint in javascript
+
+    assert "attention.available_actions.forEach" in javascript
+    assert "setInterval" not in javascript
+    assert "setTimeout" not in javascript
+    assert "innerHTML" not in javascript
+    assert "SPG_DATABASE_URL" not in javascript
+    assert "OPENAI_API_KEY" not in javascript
+
+
+def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    assert "https://" not in html
+    assert "http://" not in html
+    assert 'src="/assets/state.js"' in html
+    assert 'src="/assets/app.js"' in html
+    assert 'href="/assets/styles.css"' in html

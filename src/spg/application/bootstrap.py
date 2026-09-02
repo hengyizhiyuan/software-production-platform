@@ -1,6 +1,7 @@
 """Explicit application composition for the S1-A foundation."""
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from spg.config import Settings
 from spg.application.runtime import RuntimeService
@@ -16,6 +17,10 @@ from spg.application.recovery import RecoveryAssessmentService
 from spg.application.reconciliation import RecoveryReconciliationService
 from spg.application.attempt_recovery import AttemptRecoveryService
 from spg.application.maintenance_recovery import VerifiedMaintenanceRecoveryService
+from spg.application.work import WorkApplicationService
+from spg.domain.executor import ExecutorCapabilityContract
+from spg.domain.preparation import ExecutorBinding
+from spg.domain.verifier import VerificationCapabilityContract
 from spg.infrastructure.persistence import Database
 
 
@@ -134,6 +139,29 @@ class Application:
         """Compose exact R4-B recovery without executing production or mutating Git."""
 
         return VerifiedMaintenanceRecoveryService(database or self.persistence())
+
+    def work(
+        self,
+        database: Database | None = None,
+        *,
+        workspace_root: Path | None = None,
+        executor: ExecutorCapabilityContract | None = None,
+        verifier: VerificationCapabilityContract | None = None,
+        executor_binding: ExecutorBinding | None = None,
+    ) -> WorkApplicationService:
+        """Compose the goal-centric MVP product flow over governed Runtime services."""
+
+        options = {
+            "workspace_root": workspace_root,
+            "executor": executor,
+            "verifier": verifier,
+        }
+        if executor_binding is not None:
+            options["executor_binding"] = executor_binding
+        return WorkApplicationService(
+            database or self.persistence(),
+            **options,
+        )
 
 
 def bootstrap(settings: Settings | None = None) -> Application:

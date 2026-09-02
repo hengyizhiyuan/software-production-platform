@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; form-action 'self'; base-uri 'self'"
+    >
+    <meta
+      name="description"
+      content="TNGA Software Production Control Room for governed Goal and Work operations."
+    >
+    <title>TNGA · Software Production</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+    <script src="/assets/state.js" defer></script>
+    <script src="/assets/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#work-surface">Skip to selected Work</a>
+
+    <header class="topbar">
+      <div class="brand-lockup" aria-label="TNGA Software Production">
+        <span class="brand-mark" aria-hidden="true">T</span>
+        <div>
+          <p class="eyebrow">TNGA</p>
+          <h1>Software Production</h1>
+        </div>
+      </div>
+      <button id="health-control" class="health-chip" type="button" aria-label="Refresh service health">
+        <span id="health-dot" class="health-dot health-unknown" aria-hidden="true"></span>
+        <span id="health-label">Checking</span>
+      </button>
+    </header>
+
+    <main class="control-room">
+      <aside class="navigator" aria-label="Goal and Work navigation">
+        <section class="nav-section goal-section" aria-labelledby="goals-heading">
+          <div class="section-heading-row">
+            <div>
+              <p class="eyebrow">Navigation horizon</p>
+              <h2 id="goals-heading">Goals</h2>
+            </div>
+            <button id="show-goal-form" class="icon-button" type="button" aria-label="Create Goal">+</button>
+          </div>
+
+          <form id="goal-form" class="inline-form" hidden>
+            <label for="goal-title">Goal title</label>
+            <div class="inline-form-row">
+              <input id="goal-title" name="title" maxlength="255" placeholder="MVP" required>
+              <button class="primary-button compact" type="submit">Create</button>
+            </div>
+          </form>
+
+          <nav id="goal-list" class="goal-list" aria-label="Goals"></nav>
+        </section>
+
+        <section class="nav-section work-section" aria-labelledby="works-heading">
+          <div class="section-heading-row">
+            <div>
+              <p class="eyebrow">Things to get done</p>
+              <h2 id="works-heading">Works</h2>
+            </div>
+            <button id="refresh-control" class="text-button" type="button">Refresh</button>
+          </div>
+
+          <label class="filter-label" for="status-filter">Status</label>
+          <select id="status-filter" class="status-filter">
+            <option value="">All statuses</option>
+            <option value="DRAFT">Draft</option>
+            <option value="NEEDS_REFINEMENT">Needs refinement</option>
+            <option value="AWAITING_APPROVAL">Awaiting approval</option>
+            <option value="READY">Ready</option>
+            <option value="RUNNING">Running</option>
+            <option value="NEEDS_ATTENTION">Needs your attention</option>
+            <option value="BLOCKED">Blocked</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+
+          <div id="work-list" class="work-list" aria-live="polite"></div>
+          <p id="work-list-empty" class="empty-copy" hidden>No Works in this view yet.</p>
+        </section>
+      </aside>
+
+      <section id="work-surface" class="work-surface" aria-label="Selected Work">
+        <div id="loading-state" class="surface-state">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Loading the production view…</p>
+        </div>
+
+        <div id="global-error" class="surface-state error-state" hidden>
+          <p class="eyebrow">Connection issue</p>
+          <h2>We could not load the production view.</h2>
+          <p id="global-error-message">The service may be temporarily unavailable.</p>
+          <button id="retry-control" class="secondary-button" type="button">Try again</button>
+        </div>
+
+        <div id="no-selection" class="surface-state" hidden>
+          <div class="empty-symbol" aria-hidden="true">W</div>
+          <p class="eyebrow">No Work selected</p>
+          <h2>Choose a Work or describe what you want to get done.</h2>
+          <p>Engineering resources and governed execution stay behind the Work.</p>
+        </div>
+
+        <article id="selected-work" class="selected-work" hidden>
+          <header class="work-header">
+            <div class="work-heading-copy">
+              <p class="eyebrow">Selected Work</p>
+              <h2 id="work-title">Untitled Work</h2>
+              <div class="status-row">
+                <span id="work-status" class="status-badge">Draft</span>
+                <span id="attention-marker" class="attention-marker" hidden>Needs your attention</span>
+              </div>
+            </div>
+            <button id="work-refresh-control" class="secondary-button compact" type="button">Refresh</button>
+          </header>
+
+          <section class="conversation-card request-card" aria-labelledby="request-heading">
+            <p class="speaker-label" id="request-heading">You requested</p>
+            <p id="work-request" class="request-text"></p>
+          </section>
+
+          <section class="interpretation-panel" aria-labelledby="interpretation-heading">
+            <div class="panel-title-row">
+              <div>
+                <p class="eyebrow">Governed interpretation</p>
+                <h3 id="interpretation-heading">Production draft</h3>
+              </div>
+              <span id="current-step" class="step-label"></span>
+            </div>
+
+            <dl class="detail-grid">
+              <div>
+                <dt>Desired outcome</dt>
+                <dd id="desired-outcome">Not defined yet</dd>
+              </div>
+              <div>
+                <dt>Engineering scope</dt>
+                <dd id="scope-summary">Not bound yet</dd>
+              </div>
+              <div>
+                <dt>Most recent event</dt>
+                <dd id="recent-event">No production event yet</dd>
+              </div>
+              <div>
+                <dt>What happens next</dt>
+                <dd id="next-action">Refine this Work</dd>
+              </div>
+            </dl>
+
+            <div class="metadata-row">
+              <div>
+                <p class="field-label">Constraints</p>
+                <div id="constraint-list" class="chip-list"></div>
+              </div>
+              <div>
+                <p class="field-label">Tags</p>
+                <div id="tag-list" class="chip-list"></div>
+              </div>
+            </div>
+
+            <details id="technical-details" class="technical-details">
+              <summary>Engineering resource details</summary>
+              <div id="resource-list" class="resource-list"></div>
+            </details>
+          </section>
+
+          <section class="operator-panel" aria-labelledby="actions-heading">
+            <div class="operator-identity">
+              <label for="authority-identity">Human authority</label>
+              <input id="authority-identity" value="human:local-operator" autocomplete="off">
+            </div>
+            <div>
+              <p class="eyebrow" id="actions-heading">Available now</p>
+              <div id="work-actions" class="action-row"></div>
+            </div>
+          </section>
+
+          <section id="attention-section" class="attention-section" aria-labelledby="attention-heading" hidden>
+            <div class="panel-title-row">
+              <div>
+                <p class="eyebrow">Human governance</p>
+                <h3 id="attention-heading">Attention required</h3>
+              </div>
+            </div>
+            <div id="attention-list" class="attention-list"></div>
+          </section>
+
+          <section class="result-panel" aria-labelledby="result-heading">
+            <div class="panel-title-row">
+              <div>
+                <p class="eyebrow">Observed outcome</p>
+                <h3 id="result-heading">Work result</h3>
+              </div>
+              <span id="trusted-result" class="trust-label">Not trusted yet</span>
+            </div>
+            <dl class="result-grid">
+              <div>
+                <dt>Artifacts</dt>
+                <dd id="artifact-summary">No artifacts observed.</dd>
+              </div>
+              <div>
+                <dt>Verification</dt>
+                <dd id="verification-summary">No verification evidence available.</dd>
+              </div>
+              <div>
+                <dt>Repository state</dt>
+                <dd id="repository-state">No repository result yet.</dd>
+              </div>
+              <div>
+                <dt>Remaining blocker or risk</dt>
+                <dd id="remaining-risk">This Work has not completed.</dd>
+              </div>
+            </dl>
+          </section>
+        </article>
+      </section>
+
+      <section class="composer" aria-labelledby="composer-heading">
+        <form id="work-form" class="composer-form">
+          <div class="composer-main">
+            <label id="composer-heading" for="work-requirement">What do you want to get done?</label>
+            <textarea
+              id="work-requirement"
+              name="requirement"
+              rows="3"
+              placeholder="Describe the outcome, boundaries, and anything that must remain true…"
+              required
+            ></textarea>
+          </div>
+          <div class="composer-options">
+            <div>
+              <label for="composer-goal">Goal · optional</label>
+              <select id="composer-goal"><option value="">No Goal</option></select>
+            </div>
+            <div>
+              <label for="work-tags">Tags · comma separated</label>
+              <input id="work-tags" placeholder="mvp, docs">
+            </div>
+            <button id="submit-work" class="primary-button" type="submit">Create Work</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <div id="live-region" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="notice" class="notice" role="alert" hidden>
+      <span id="notice-message"></span>
+      <button id="dismiss-notice" type="button" aria-label="Dismiss message">×</button>
+    </div>
+  </body>
+</html>
