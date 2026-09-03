@@ -1,0 +1,27 @@
+services:
+  postgres:
+    volumes:
+      - type: volume
+        source: spg-e2e-postgres-data
+        target: /var/lib/postgresql/data
+
+  app:
+    build:
+      target: codex-executor
+    environment:
+      CODEX_HOME: /home/spg/.codex
+      SPG_EXECUTOR_ADAPTER: codex-sdk
+      SPG_EXECUTOR_TIMEOUT_SECONDS: "600"
+      SPG_RUNTIME_PROFILE: local-docker-codex-e2e
+      SPG_VERIFICATION_ADAPTER: mvp-e2e-markdown
+    volumes:
+      - type: bind
+        source: ${SPG_CODEX_HOME_HOST:?Set SPG_CODEX_HOME_HOST to the existing host Codex state directory}
+        target: /home/spg/.codex
+      - type: volume
+        source: spg-e2e-runtime-data
+        target: /var/lib/spg
+
+volumes:
+  spg-e2e-postgres-data:
+  spg-e2e-runtime-data:

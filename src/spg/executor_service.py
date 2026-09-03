@@ -5,6 +5,7 @@ import sys
 
 from spg.infrastructure.executor_boundary import (
     DedicatedExecutorRequest,
+    MAX_PROVIDER_TIMEOUT_SECONDS,
     execute_deterministic_request,
 )
 from spg.infrastructure.codex_executor_binding import (
@@ -29,7 +30,11 @@ def main() -> int:
         elif binding == CODEX_BINDING:
             response = preflight_codex_binding(request, environment=os.environ)
         elif binding == CODEX_REAL_BINDING:
-            response = execute_codex_binding(request, environment=os.environ)
+            response = execute_codex_binding(
+                request,
+                environment=os.environ,
+                timeout_seconds=_provider_timeout_seconds(),
+            )
         else:
             response = unsupported_provider_binding(request, binding or "missing")
     except Exception as error:
@@ -37,6 +42,16 @@ def main() -> int:
         return 2
     print(response.model_dump_json(), flush=True)
     return 0
+
+
+def _provider_timeout_seconds() -> float:
+    raw = os.environ.get("SPG_EXECUTOR_PROVIDER_TIMEOUT_SECONDS")
+    if raw is None:
+        return 120.0
+    value = float(raw)
+    if not 0 < value <= MAX_PROVIDER_TIMEOUT_SECONDS:
+        raise ValueError("Executor Provider timeout must be within (0, 600]")
+    return value
 
 
 if __name__ == "__main__":

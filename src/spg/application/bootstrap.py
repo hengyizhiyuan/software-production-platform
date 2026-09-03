@@ -151,15 +151,43 @@ class Application:
     ) -> WorkApplicationService:
         """Compose the goal-centric MVP product flow over governed Runtime services."""
 
+        selected_database = database or self.persistence()
+        selected_executor = executor
+        selected_verifier = verifier
+        selected_binding = executor_binding
+        if selected_executor is None and self.settings.executor_adapter == "codex-sdk":
+            from spg.infrastructure.configured_executor import (
+                GovernedDedicatedExecutor,
+            )
+
+            selected_executor = GovernedDedicatedExecutor(
+                selected_database,
+                provider_timeout_seconds=self.settings.executor_timeout_seconds,
+            )
+            selected_binding = ExecutorBinding(
+                binding_ref="binding:codex-sdk-dedicated-process",
+                capability_identity="capability:executor",
+                profile_identity="profile:local-docker-codex-e2e",
+            )
+        if (
+            selected_verifier is None
+            and self.settings.verification_adapter == "mvp-e2e-markdown"
+        ):
+            from spg.providers.repository_markdown_verifier import (
+                MvpE2eMarkdownVerifier,
+            )
+
+            selected_verifier = MvpE2eMarkdownVerifier(selected_database)
+
         options = {
-            "workspace_root": workspace_root,
-            "executor": executor,
-            "verifier": verifier,
+            "workspace_root": workspace_root or self.settings.workspace_root,
+            "executor": selected_executor,
+            "verifier": selected_verifier,
         }
-        if executor_binding is not None:
-            options["executor_binding"] = executor_binding
+        if selected_binding is not None:
+            options["executor_binding"] = selected_binding
         return WorkApplicationService(
-            database or self.persistence(),
+            selected_database,
             **options,
         )
 

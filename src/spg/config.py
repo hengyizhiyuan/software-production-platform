@@ -25,3 +25,5 @@ class Settings(BaseSettings):
         description="PostgreSQL URL supplied through SPG_DATABASE_URL",
     )
     executor_adapter: str = "unconfigured"
+    executor_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
+    verification_adapter: str = "unconfigured"

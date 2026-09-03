@@ -30,6 +30,7 @@ from spg.providers.deterministic_executor import (
 BOUNDARY_PROTOCOL = "spg-dedicated-executor-v1"
 EXECUTOR_WIRE_ENCODING = "utf-8"
 EXECUTOR_WIRE_ERRORS = "strict"
+MAX_PROVIDER_TIMEOUT_SECONDS = 600.0
 
 
 class ExecutorWorkspacePathMapping(BaseModel):
@@ -140,6 +141,7 @@ class SubprocessExecutorTransport:
         timeout_seconds: float = 30.0,
         deterministic_specification: DeterministicExecutionSpecification | None = None,
         provider_binding: str | None = None,
+        provider_timeout_seconds: float | None = None,
     ) -> None:
         if timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive")
@@ -147,6 +149,11 @@ class SubprocessExecutorTransport:
         self.timeout_seconds = timeout_seconds
         self.deterministic_specification = deterministic_specification
         self.provider_binding = provider_binding
+        if provider_timeout_seconds is not None and not (
+            0 < provider_timeout_seconds <= MAX_PROVIDER_TIMEOUT_SECONDS
+        ):
+            raise ValueError("provider_timeout_seconds must be within (0, 600]")
+        self.provider_timeout_seconds = provider_timeout_seconds
         if deterministic_specification is not None and provider_binding not in {
             None,
             "deterministic-fixture",
@@ -164,6 +171,10 @@ class SubprocessExecutorTransport:
             )
         elif self.provider_binding is not None:
             environment["SPG_EXECUTOR_PROVIDER_BINDING"] = self.provider_binding
+        if self.provider_timeout_seconds is not None:
+            environment["SPG_EXECUTOR_PROVIDER_TIMEOUT_SECONDS"] = str(
+                self.provider_timeout_seconds
+            )
         try:
             wire_request = request.model_dump_json().encode(
                 EXECUTOR_WIRE_ENCODING,

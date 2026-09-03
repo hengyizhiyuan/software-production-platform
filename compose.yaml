@@ -15,5 +15,42 @@ services:
     volumes:
       - spg-postgres-data:/var/lib/postgresql/data
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPG_APPLICATION_NAME: SPG Local Product
+      SPG_DATABASE_URL: postgresql+psycopg://spg:spg-local-dev@postgres:5432/spg_dev?sslmode=disable&connect_timeout=5
+      SPG_REPOSITORY_PATH: /var/lib/spg/repository
+      SPG_RUNTIME_PROFILE: local-docker-mvp
+      SPG_WORKSPACE_ROOT: /var/lib/spg/workspaces
+    init: true
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"
+      interval: 3s
+      timeout: 4s
+      retries: 20
+      start_period: 10s
+    volumes:
+      - type: bind
+        source: ./.git
+        target: /source/.git
+        read_only: true
+      - type: volume
+        source: spg-runtime-data
+        target: /var/lib/spg
+
 volumes:
   spg-postgres-data:
+  spg-runtime-data:

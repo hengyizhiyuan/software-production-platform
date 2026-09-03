@@ -42,12 +42,13 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Repository result handling | Candidate, authorized integration, and Runtime Commit semantics are implemented | MVP CORE / GUARDRAIL |
 | Recovery | S5 recovery foundations are implemented; R4-B maintenance-lineage recovery capability is implemented and focused/affected validation passed | Stronger existing guarantee; complete R4 closure is deferred |
 | API / product application facade | Goal-centric governed Work Python application flow and minimal Goal/Work FastAPI surface are closed with focused validation pass | MVP CORE / CLOSED / PASS |
-| Web UI | Same-origin FastAPI-served Goal / Work Control Room implements intake, refinement/admission, one-step advance, Attention, and truthful Work Result views | MVP CORE / IMPLEMENTED; focused validation pass; Architecture Lead review pending |
+| Web UI | Same-origin FastAPI-served Goal / Work Control Room implements intake, refinement/admission, one-step advance, Attention, and truthful Work Result views | MVP CORE / CLOSED / PASS |
 | Goal / Work / Engineering Scope product model | Work is the user-facing organization unit; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / IMPLEMENTED |
 | Production Planner | Architecture and contracts exist; no complete product-facing Planner workflow | PARTIAL / MVP GAP |
-| Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | PARTIAL / HTTP API AND UI GAP |
-| Docker integration | PostgreSQL Compose service exists; application, API, UI, and host-side Executor integration are not composed as one development product | PARTIAL / MVP GAP |
-| Local persistent Runtime database | Logical spg_runtime / spg_test separation exists | MVP CORE / GUARDRAIL |
+| Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | MVP CORE / IMPLEMENTED; real Provider loop remains separate |
+| Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
+| Real local governed Codex E2E | Optional locked Codex image profile, Dedicated Executor composition, and targeted Markdown Verification are implemented; no live result is claimed in Git | MVP CORE / IMPLEMENTED; REAL EXECUTION PENDING |
+| Local persistent Runtime database | Logical spg_dev / spg_test / historical spg_runtime separation exists; the product composition uses only spg_dev | MVP CORE / GUARDRAIL |
 | Linux deployment | Candidate checkpoint exists; server bootstrap and promotion validation have not started | POST-LOCAL-MVP |
 | Full Guardian / ECF | Extension boundaries and Context Assembly Lite exist; full systems are not integrated | DEFERRED_BY_MVP |
 
@@ -202,9 +203,9 @@ The MVP does not require visual polish, complex dashboards, drag-and-drop workfl
 1. **MVP Scope Calibration** — CLOSED / PASS; this document.
 2. **Goal-centric governed Work application flow** — CLOSED / PASS; connects requirement intake, Engineering Scope/resource identity, Production Intent/PWU formation, existing Runtime operations, status projection, and Human Attention/Authority actions.
 3. **Minimal HTTP API** — CLOSED / PASS; exposes only the application commands and queries needed by the product.
-4. **Functional Web UI** — implemented with focused validation pass; Architecture Lead Reality Review pending.
-5. **Local Docker integration** — compose API/UI/Runtime DB; integrate the temporary host-side Executor cleanly.
-6. **Real local end-to-end MVP task** — submit, govern, execute, observe, verify, authorize, and obtain a repository result.
+4. **Functional Web UI** — CLOSED / PASS.
+5. **Local Docker integration** — CLOSED / PASS. PostgreSQL, migration, API, and UI are composed without requiring a Provider credential.
+6. **Real local end-to-end MVP task** — E2E enablement is implemented and real execution remains pending. The bounded slice stops at Candidate Human Attention; authorization and integration require later explicit authority.
 7. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
 8. **Linux server deployment** — bootstrap from an exact accepted candidate.
 9. **Linux promotion validation** — run the server promotion gate and operational checks.
@@ -212,6 +213,8 @@ The MVP does not require visual polish, complex dashboards, drag-and-drop workfl
 11. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
+
+MVP-DOCKER-1 Attempt #1 is preserved as **BLOCKED — HOST_DOCKER_UNAVAILABLE / IMPLEMENTATION NOT STARTED / FILE CHANGES 0**. Attempt #2 started after Human confirmation that Docker Desktop / Linux Engine was available and does not rewrite that historical blocker.
 
 ## 12. MVP Scope Firewall
 

@@ -24,13 +24,19 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-API-1 — CLOSED / PASS**
 
-**MVP-UI-1 — IMPLEMENTED — FOCUSED VALIDATION PASS / PENDING ARCHITECTURE LEAD REVIEW**
+**MVP-UI-1 — CLOSED / PASS**
+
+**MVP-DOCKER-1 — CLOSED / PASS**
+
+**MVP-E2E-1A — IMPLEMENTED / REAL EXECUTION PENDING**
 
 **MVP — IN PROGRESS**
 
 Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine, S2 Governed Artifact Production, S3 Completion, Verification & Candidate Governance, S4 Repository Integration & Runtime Commit, and S5 Failure / Recovery Hardening are **CLOSED / PASS**. S6 Real Codex Dogfood & FVS Closure is **IN PROGRESS**. S6-B1 remains **CLOSED / PARTIAL**. S6-B2 Dedicated Executor & Real Provider Boundary, S6-B2-A, and S6-B2-B1 are **CLOSED / PASS**. The S6-B2-B2 historical real probe remains **COMPLETE / PARTIAL** with `Provider SUCCESS + Production Reality NONE` preserved. S6-C1 and S6-C2-DB1 remain **CLOSED / PASS**. Authorization #4 created Attempt generation 1, whose Executor transport failed before any Provider Thread or Turn; Provider Outcome remains UNKNOWN and Production Reality remains NONE. S6-C2-R1, S6-C2-R2, S6-C2-R3, S6-C2-R4-A, and S6-C2-R4-B are **CLOSED / PASS**. The Windows S6-C2-R4-C full-regression Attempt remains **INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED**. Full-system R4 regression, R4-C, R4-D, and real maintenance-lineage recovery are **DEFERRED_BY_MVP**; they are not current MVP blockers. S6-C remains historically IN PROGRESS, with its Recovery Barrier preserved rather than advanced.
 
-The current delivery priority is governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): complete a usable local Docker MVP with a functional Web UI, then deploy and promotion-validate that completed MVP on Linux, and only then begin systematic self-dogfood. ChatGPT + Codex remains the development workflow; a CLI-only Runtime is not the MVP product.
+MVP-DOCKER-1 Attempt #1 remains historical evidence: **BLOCKED — HOST_DOCKER_UNAVAILABLE**, implementation not started, file changes 0. Attempt #2 began only after Human confirmation that Docker Desktop / Linux Engine was available.
+
+The current delivery priority is governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): review the implemented local Docker MVP, then validate one real local governed Codex production loop before Linux deployment and systematic self-dogfood. ChatGPT + Codex remains the development workflow; a CLI-only Runtime is not the MVP product.
 
 For the MVP product model, **Work is the user-facing organization unit**. Engineering Resources are bound to Work through an explicit Engineering Scope, while Goal remains an optional weak aggregation. MVP execution uses exactly one Engineering Resource and one-PWU-first planning as bounded delivery policies, without encoding either restriction as a permanent architecture limit.
 
@@ -72,7 +78,9 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-SCOPE-1 — Architecture Scope Calibration & Phase-2 Hardening Backlog | CLOSED / PASS |
 | MVP-APP-1 — Goal-Centric Governed Work Application Flow | CLOSED / PASS |
 | MVP-API-1 — Minimal Goal / Work Product HTTP API | CLOSED / PASS |
-| MVP-UI-1 — Functional Goal / Work Control Room Web UI | IMPLEMENTED — FOCUSED VALIDATION PASS / PENDING ARCHITECTURE LEAD REVIEW |
+| MVP-UI-1 — Functional Goal / Work Control Room Web UI | CLOSED / PASS |
+| MVP-DOCKER-1 — Local Integrated Product Runtime | CLOSED / PASS |
+| MVP-E2E-1A — Real Local Governed Codex Execution to Human Candidate Attention | IMPLEMENTED / REAL EXECUTION PENDING |
 | F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
 | F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
 | F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
