@@ -20,6 +20,8 @@ The Human submitted a documentation Work asking Watt to place a formal Productio
 | Completion | `PRODUCED`; required artifact and required change both `PASS` |
 | Verification | `FAIL` |
 | Work projection | `BLOCKED / VERIFICATION`; `trusted_result=false` |
+| Automatic orchestration | `REAL DOGFOOD PASS` |
+| Manual Advance | `0` |
 | Later governance | no Candidate, Authorization, Integration Effect, or Runtime Commit |
 
 The produced Markdown was substantive and relevant to the requested topic. It covered Human-in-the-loop versus Human-as-the-loop, bounded automatic progression, Human Attention, current MVP boundaries, future evolution, architecture invariants, and product acceptance. The failure is not evidence that the Executor failed to produce an artifact.
@@ -87,6 +89,8 @@ The successful orchestration behavior is itself evidence: Watt automatically rea
 > Artifact placement, execution authorization, Completion, and Verification must bind the same admitted artifact target and semantic expectation.
 
 The narrowest follow-up capability is a repository-aware Artifact Placement Contract during refinement/planning. It should make the proposed path Human-visible before Work Draft Approval and propagate the same admitted target through PWU, Materialized Execution Input, authorized changed paths, Completion, and a target-independent verifier. This is a product improvement finding, not an implementation authorization.
+
+Production automation amplifies the quality of the admitted Production Contract. A fast autonomous production line with a weak task contract only produces incorrectly governed output faster. This lesson does not reinterpret the original Work as successful: its production outcome remains blocked at Verification.
 
 ## Preservation Boundary
 

@@ -346,16 +346,36 @@ class CompletionService:
         for raw_path in contract.required_changes:
             path = _repository_path(raw_path)
             changed = path in changes
+            expected_change_type = None
+            if (
+                contract.artifact_contract is not None
+                and contract.artifact_contract.artifact_path == path
+            ):
+                expected_change_type = (
+                    ArtifactChangeType.ADDED
+                    if contract.artifact_contract.operation.value == "CREATE"
+                    else ArtifactChangeType.MODIFIED
+                )
+            matches_operation = (
+                changed
+                and (
+                    expected_change_type is None
+                    or changes[path].change_type is expected_change_type
+                )
+            )
             results.append(
                 _obligation(
                     CompletionObligationType.REQUIRED_CHANGE,
                     path,
-                    "path appears in the exact observed change manifest",
+                    (
+                        "path appears with the admitted change operation in the exact "
+                        "observed change manifest"
+                    ),
                     changes[path].change_type.value if changed else "UNCHANGED",
-                    changed,
-                    "required change was independently observed"
-                    if changed
-                    else "required change was not independently observed",
+                    matches_operation,
+                    "required change and operation were independently observed"
+                    if matches_operation
+                    else "required change or admitted operation was not observed",
                 )
             )
 

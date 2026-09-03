@@ -2,11 +2,11 @@
 
 from datetime import datetime
 from enum import StrEnum
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class SnapshotCondition(StrEnum):
@@ -38,6 +38,39 @@ class ProductionHorizon(StrEnum):
     DOCUMENTATION = "DOCUMENTATION"
 
 
+class ArtifactOperation(StrEnum):
+    CREATE = "CREATE"
+    UPDATE = "UPDATE"
+
+
+class ArtifactContract(BaseModel):
+    """Exact Human-admitted artifact authority for one initial PWU."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    engineering_resource_id: UUID
+    repository_identity: str = Field(min_length=1)
+    source_baseline_id: UUID
+    source_revision: str = Field(min_length=1)
+    artifact_path: str = Field(min_length=1)
+    operation: ArtifactOperation
+    constraints: tuple[str, ...] = ()
+    expected_outcome: str = Field(min_length=1)
+    verification_obligation: str = Field(min_length=1)
+
+    @field_validator("artifact_path")
+    @classmethod
+    def require_safe_repository_path(cls, value: str) -> str:
+        if "\\" in value:
+            raise ValueError("artifact path must use POSIX separators")
+        path = PurePosixPath(value)
+        if path.is_absolute() or ".." in path.parts or value in {"", "."}:
+            raise ValueError("artifact path must be repository-relative")
+        if ".git" in path.parts:
+            raise ValueError("artifact path cannot address Git internals")
+        return str(path)
+
+
 class CompletionContract(BaseModel):
     """Durable obligations established before any execution attempt."""
 
@@ -49,6 +82,7 @@ class CompletionContract(BaseModel):
     forbidden_changes: tuple[str, ...] = ()
     verification_obligations: tuple[str, ...] = ()
     blocking_conditions: tuple[str, ...] = ()
+    artifact_contract: ArtifactContract | None = None
 
     @model_validator(mode="after")
     def require_at_least_one_obligation(self) -> "CompletionContract":
@@ -60,6 +94,7 @@ class CompletionContract(BaseModel):
                 self.forbidden_changes,
                 self.verification_obligations,
                 self.blocking_conditions,
+                self.artifact_contract,
             )
         ):
             raise ValueError("Completion Contract must declare at least one obligation")

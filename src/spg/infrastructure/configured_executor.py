@@ -71,9 +71,21 @@ def render_governed_instruction(
 
     outputs = "\n".join(f"- {item}" for item in completion_contract.required_outputs)
     changes = "\n".join(f"- {item}" for item in completion_contract.required_changes)
+    artifact = completion_contract.artifact_contract
+    artifact_authority = ""
+    if artifact is not None:
+        constraints = "\n".join(f"- {item}" for item in artifact.constraints)
+        artifact_authority = (
+            "Artifact Target:\n"
+            f"- Path: {artifact.artifact_path}\n"
+            f"- Operation: {artifact.operation.value}\n"
+            f"- Desired outcome: {artifact.expected_outcome}\n"
+            f"- Constraints:\n{constraints or '- None beyond the admitted contract.'}\n\n"
+        )
     return (
         "Complete exactly the admitted software-production objective below.\n\n"
         f"Objective:\n{objective.strip()}\n\n"
+        f"{artifact_authority}"
         f"Authorized output paths:\n{outputs}\n\n"
         f"Authorized changed paths:\n{changes}\n\n"
         "Do not modify any other repository path. Work only inside the supplied "

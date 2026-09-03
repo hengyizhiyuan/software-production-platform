@@ -45,6 +45,11 @@
     workRequest: document.getElementById("work-request"),
     desiredOutcome: document.getElementById("desired-outcome"),
     scopeSummary: document.getElementById("scope-summary"),
+    artifactOperation: document.getElementById("artifact-operation"),
+    artifactRationale: document.getElementById("artifact-rationale"),
+    artifactTargetPanel: document.getElementById("artifact-target-panel"),
+    artifactTargetPath: document.getElementById("artifact-target-path"),
+    saveArtifactTarget: document.getElementById("save-artifact-target"),
     recentEvent: document.getElementById("recent-event"),
     nextAction: document.getElementById("next-action"),
     currentStep: document.getElementById("current-step"),
@@ -364,6 +369,19 @@
     elements.scopeSummary.textContent = work.engineering_scope
       ? work.engineering_scope.summary
       : "Not bound yet";
+    const target = work.artifact_target;
+    elements.artifactOperation.textContent = target
+      ? `${target.operation} · ${target.confidence} confidence`
+      : "Not proposed yet";
+    elements.artifactRationale.textContent = target
+      ? target.placement_rationale
+      : "No placement proposal yet";
+    elements.artifactTargetPath.value = target ? target.path : "";
+    elements.artifactTargetPanel.hidden = ![
+      "DRAFT",
+      "NEEDS_REFINEMENT",
+      "AWAITING_APPROVAL",
+    ].includes(work.status);
     elements.recentEvent.textContent = work.most_recent_meaningful_event || "No production event yet";
     elements.nextAction.textContent = work.what_happens_next || "No next action reported";
     elements.currentStep.textContent = work.current_production_step || "WORK_INTAKE";
@@ -411,6 +429,32 @@
       state.selectedWork = response;
       announce(`${viewModel.workTitle(response)} is now ${viewModel.statusLabel(response.status)}.`);
       await refreshAfterMutation();
+    } catch (error) {
+      showNotice(error);
+    } finally {
+      setBusy(false);
+      renderSelectedWork();
+    }
+  }
+
+  async function updateArtifactTarget() {
+    if (state.busy || !state.selectedWorkId) {
+      return;
+    }
+    const path = elements.artifactTargetPath.value.trim();
+    if (!path) {
+      showNotice(new ApiError(422, "INVALID_REQUEST", "Artifact Target is required."));
+      return;
+    }
+    hideNotice();
+    setBusy(true);
+    try {
+      state.selectedWork = await apiRequest(
+        `/api/works/${state.selectedWorkId}/refine`,
+        { method: "POST", body: { expected_artifact_path: path } },
+      );
+      await refreshAfterMutation();
+      announce(`Artifact Target updated to ${path}.`);
     } catch (error) {
       showNotice(error);
     } finally {
@@ -667,6 +711,7 @@
     "click",
     () => performWorkAction("ADVANCE"),
   );
+  elements.saveArtifactTarget.addEventListener("click", updateArtifactTarget);
   elements.retryControl.addEventListener("click", reloadWorkspace);
   elements.healthControl.addEventListener("click", loadHealth);
   elements.dismissNotice.addEventListener("click", hideNotice);

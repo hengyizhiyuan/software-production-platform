@@ -3,7 +3,9 @@
 from datetime import UTC, datetime
 from hashlib import sha256
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+import re
+import subprocess
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.completion import CompletionService
@@ -27,6 +29,9 @@ from spg.domain.preparation import (
     ExecutorBinding,
 )
 from spg.domain.product import (
+    ArtifactTargetConfidence,
+    ArtifactTargetOperation,
+    ArtifactTargetProposal,
     AttentionAction,
     AttentionItem,
     AttentionKind,
@@ -50,6 +55,8 @@ from spg.domain.product import (
     WorkStatus,
 )
 from spg.domain.runtime import (
+    ArtifactContract,
+    ArtifactOperation,
     CompletionContract,
     InitialRunRequest,
     ProductionHorizon,
@@ -208,6 +215,11 @@ class WorkApplicationService:
                     "scope_summary": None,
                     "production_objective": None,
                     "expected_artifact_path": None,
+                    "artifact_operation": None,
+                    "artifact_placement_rationale": None,
+                    "artifact_target_confidence": None,
+                    "artifact_source_baseline_id": None,
+                    "artifact_source_revision": None,
                     "verification_expectation": None,
                     "created_at": timestamp,
                     "updated_at": timestamp,
@@ -228,6 +240,7 @@ class WorkApplicationService:
             if work.condition not in {
                 WorkCondition.DRAFT,
                 WorkCondition.NEEDS_REFINEMENT,
+                WorkCondition.AWAITING_APPROVAL,
             }:
                 raise ProductInvariantViolation("Only a draft Work may be refined")
             resource = store.default_resource()
@@ -242,15 +255,30 @@ class WorkApplicationService:
                 or f"Change {resource.repository_identity} at {resource.authoritative_ref}"
             )
             objective = request.production_objective or desired_outcome
-            expected_artifact_path = (
-                request.expected_artifact_path
-                or f"docs/work-{work.id.hex[:12]}.md"
+            baseline = self.runtime.current_baseline()
+            if baseline.repository_identity != resource.repository_identity:
+                raise ProductInvariantViolation(
+                    "Engineering Resource does not match current governed Baseline"
+                )
+            proposal = self._artifact_target_proposal(
+                raw=work.raw_user_requirement,
+                explicit_path=request.expected_artifact_path,
+                resource=resource,
+                baseline_id=baseline.id,
+                source_revision=baseline.repository_revision,
             )
             verification = (
                 request.verification_expectation
                 or "Verify the requested outcome against independent repository Reality"
             )
-            needs_refinement = self._is_too_broad(work.raw_user_requirement)
+            constraints = self._merge_constraints(
+                work.constraints,
+                request.constraints,
+                self._extract_constraints(work.raw_user_requirement),
+            )
+            needs_refinement = (
+                self._is_too_broad(work.raw_user_requirement) or proposal is None
+            )
             condition = (
                 WorkCondition.NEEDS_REFINEMENT
                 if needs_refinement
@@ -290,11 +318,28 @@ class WorkApplicationService:
                 {
                     "refined_title": title,
                     "desired_outcome": desired_outcome,
-                    "constraints": list(request.constraints),
+                    "constraints": list(constraints),
                     "condition": condition.value,
                     "scope_summary": scope_summary,
                     "production_objective": objective,
-                    "expected_artifact_path": expected_artifact_path,
+                    "expected_artifact_path": (
+                        None if proposal is None else proposal.path
+                    ),
+                    "artifact_operation": (
+                        None if proposal is None else proposal.operation.value
+                    ),
+                    "artifact_placement_rationale": (
+                        None if proposal is None else proposal.placement_rationale
+                    ),
+                    "artifact_target_confidence": (
+                        None if proposal is None else proposal.confidence.value
+                    ),
+                    "artifact_source_baseline_id": (
+                        None if proposal is None else proposal.source_baseline_id
+                    ),
+                    "artifact_source_revision": (
+                        None if proposal is None else proposal.source_revision
+                    ),
                     "verification_expectation": verification,
                     "updated_at": timestamp,
                 },
@@ -353,6 +398,7 @@ class WorkApplicationService:
             resource = store.resource(active[0].resource_id)
             if resource is None:
                 raise ProductInvariantViolation("Scope Resource is missing")
+            artifact = self._required_artifact_target(work)
 
         baseline = self.runtime.current_baseline()
         if (
@@ -362,21 +408,40 @@ class WorkApplicationService:
             raise ProductInvariantViolation(
                 "Engineering Resource does not match current governed Baseline"
             )
+        if (
+            artifact.source_baseline_id != baseline.id
+            or artifact.source_revision != baseline.repository_revision
+        ):
+            raise ProductInvariantViolation(
+                "Artifact Target Proposal is stale against the current Source Baseline"
+            )
+        verification_obligation = (
+            work.verification_expectation
+            or "Verify the admitted artifact against independent repository Reality"
+        )
+        artifact_contract = ArtifactContract(
+            engineering_resource_id=resource.id,
+            repository_identity=resource.repository_identity,
+            source_baseline_id=baseline.id,
+            source_revision=baseline.repository_revision,
+            artifact_path=artifact.path,
+            operation=ArtifactOperation(artifact.operation.value),
+            constraints=work.constraints,
+            expected_outcome=work.desired_outcome or work.raw_user_requirement.strip(),
+            verification_obligation=verification_obligation,
+        )
+        objective = self._artifact_objective(artifact_contract)
         spine = self.runtime.create_initial_runtime_spine(
             InitialRunRequest(
                 intent_ref=f"work:{work.id}",
                 goal=work.desired_outcome or work.refined_title or "Governed Work",
                 production_horizon=ProductionHorizon.DOCUMENTATION,
-                initial_work_unit_objective=(
-                    work.production_objective or work.desired_outcome or "Produce Work"
-                ),
+                initial_work_unit_objective=objective,
                 completion_contract=CompletionContract(
-                    required_outputs=(work.expected_artifact_path or "docs/work-output.md",),
-                    required_changes=(work.expected_artifact_path or "docs/work-output.md",),
-                    verification_obligations=(
-                        work.verification_expectation
-                        or "Verify independent repository Reality",
-                    ),
+                    required_outputs=(artifact.path,),
+                    required_changes=(artifact.path,),
+                    verification_obligations=(verification_obligation,),
+                    artifact_contract=artifact_contract,
                 ),
             )
         )
@@ -855,6 +920,7 @@ class WorkApplicationService:
             title=work.refined_title,
             desired_outcome=work.desired_outcome,
             constraints=work.constraints,
+            artifact_target=self._artifact_target(work),
             tags=work.tags,
             engineering_scope=scope,
             status=status,
@@ -1072,6 +1138,221 @@ class WorkApplicationService:
             "rewrite the whole",
         )
         return len(normalized) > 600 or any(item in normalized for item in broad_markers)
+
+    @staticmethod
+    def _artifact_target(work: WorkRecord) -> ArtifactTargetProposal | None:
+        values = (
+            work.expected_artifact_path,
+            work.artifact_operation,
+            work.artifact_placement_rationale,
+            work.artifact_target_confidence,
+            work.artifact_source_baseline_id,
+            work.artifact_source_revision,
+        )
+        if any(item is None for item in values):
+            return None
+        return ArtifactTargetProposal(
+            path=work.expected_artifact_path or "",
+            operation=work.artifact_operation or ArtifactTargetOperation.CREATE,
+            placement_rationale=work.artifact_placement_rationale or "",
+            confidence=(
+                work.artifact_target_confidence or ArtifactTargetConfidence.LOW
+            ),
+            source_baseline_id=work.artifact_source_baseline_id,
+            source_revision=work.artifact_source_revision or "",
+        )
+
+    @classmethod
+    def _required_artifact_target(cls, work: WorkRecord) -> ArtifactTargetProposal:
+        target = cls._artifact_target(work)
+        if target is None:
+            raise ProductInvariantViolation(
+                "Work requires an exact Human-visible Artifact Target before approval"
+            )
+        return target
+
+    @classmethod
+    def _artifact_target_proposal(
+        cls,
+        *,
+        raw: str,
+        explicit_path: str | None,
+        resource: EngineeringResourceRecord,
+        baseline_id: UUID,
+        source_revision: str,
+    ) -> ArtifactTargetProposal | None:
+        repository = Path(resource.location_ref).resolve()
+        paths = cls._baseline_paths(repository, source_revision)
+        path: str | None = None
+        rationale: str | None = None
+        confidence = ArtifactTargetConfidence.LOW
+        if explicit_path is not None:
+            path = cls._validate_artifact_path(explicit_path)
+            rationale = "Human-selected repository-relative documentation target."
+            confidence = ArtifactTargetConfidence.HIGH
+        else:
+            match = re.search(
+                r"(?<![\w.-])((?:docs/)[A-Za-z0-9_./-]+\.md)(?![\w.-])",
+                raw,
+                flags=re.IGNORECASE,
+            )
+            if match:
+                path = cls._validate_artifact_path(match.group(1))
+                rationale = "The requirement names this exact documentation path."
+                confidence = ArtifactTargetConfidence.HIGH
+            else:
+                normalized = " ".join(raw.casefold().split())
+                if "production orchestration lite" in normalized:
+                    path = "docs/architecture/production-orchestration-lite.md"
+                    rationale = (
+                        "Architecture terminology and the baseline documentation tree "
+                        "place this product/architecture document under docs/architecture/."
+                    )
+                    confidence = ArtifactTargetConfidence.HIGH
+                else:
+                    folder = cls._documentation_folder(normalized, paths)
+                    slug = cls._document_slug(raw)
+                    if folder is not None and slug:
+                        path = f"{folder}/{slug}.md"
+                        rationale = (
+                            f"The exact Source Baseline contains {folder}/ and the "
+                            "requirement category maps to that documentation area."
+                        )
+                        confidence = ArtifactTargetConfidence.MEDIUM
+        if path is None:
+            return None
+        operation = (
+            ArtifactTargetOperation.UPDATE
+            if path in paths
+            else ArtifactTargetOperation.CREATE
+        )
+        return ArtifactTargetProposal(
+            path=path,
+            operation=operation,
+            placement_rationale=rationale or "Repository-aware documentation placement.",
+            confidence=confidence,
+            source_baseline_id=baseline_id,
+            source_revision=source_revision,
+        )
+
+    @staticmethod
+    def _baseline_paths(repository: Path, source_revision: str) -> frozenset[str]:
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repository),
+                "ls-tree",
+                "-r",
+                "--name-only",
+                source_revision,
+                "--",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            raise ProductInvariantViolation(
+                "Exact Source Baseline repository structure is unavailable"
+            )
+        return frozenset(result.stdout.splitlines())
+
+    @staticmethod
+    def _documentation_folder(normalized: str, paths: frozenset[str]) -> str | None:
+        directories = {
+            str(PurePosixPath(path).parent)
+            for path in paths
+            if path.startswith("docs/")
+        }
+        categories = (
+            ("docs/roadmap", ("roadmap", "migration plan", "delivery plan")),
+            ("docs/evidence", ("evidence", "finding", "benchmark", "test report")),
+            (
+                "docs/architecture",
+                ("architecture", "principle", "production orchestration", "product"),
+            ),
+        )
+        for folder, markers in categories:
+            if folder in directories and any(marker in normalized for marker in markers):
+                return folder
+        if "docs" in directories and any(
+            marker in normalized
+            for marker in ("document", "documentation", "markdown", "work result", "product result")
+        ):
+            return "docs"
+        return None
+
+    @staticmethod
+    def _document_slug(raw: str) -> str | None:
+        first = next((line.strip() for line in raw.splitlines() if line.strip()), "")
+        words = re.findall(r"[a-z0-9]+", first.casefold())
+        ignored = {
+            "a", "an", "the", "create", "add", "write", "produce", "update",
+            "document", "documentation", "markdown", "governed", "admitted",
+        }
+        selected = [word for word in words if word not in ignored][:8]
+        return "-".join(selected) or None
+
+    @staticmethod
+    def _validate_artifact_path(raw_path: str) -> str:
+        value = raw_path.strip()
+        if "\\" in value:
+            raise ProductInvariantViolation("Artifact Target must use POSIX separators")
+        path = PurePosixPath(value)
+        if path.is_absolute() or ".." in path.parts or value in {"", "."}:
+            raise ProductInvariantViolation(
+                "Artifact Target must be a safe repository-relative path"
+            )
+        if any(part.startswith(".") for part in path.parts):
+            raise ProductInvariantViolation(
+                "Artifact Target cannot address hidden or Git-internal paths"
+            )
+        if not value.startswith("docs/") or path.suffix.casefold() != ".md":
+            raise ProductInvariantViolation(
+                "MVP documentation Artifact Target must be a Markdown path under docs/"
+            )
+        return str(path)
+
+    @staticmethod
+    def _extract_constraints(raw: str) -> tuple[str, ...]:
+        normalized = " ".join(raw.casefold().split())
+        constraints: list[str] = []
+        if "do not expand" in normalized and any(
+            marker in normalized for marker in ("invent", "introduce", "new capabilities")
+        ):
+            constraints.append(
+                "Do not expand or invent capabilities beyond the already accepted design."
+            )
+        marker = re.compile(
+            r"\b(do not|must not|only|must|keep|without|do not expand|do not introduce)\b",
+            flags=re.IGNORECASE,
+        )
+        for fragment in re.split(r"[\n.;]+", raw):
+            candidate = " ".join(fragment.split()).strip(" -:")
+            if candidate and marker.search(candidate):
+                constraints.append(candidate)
+        return tuple(dict.fromkeys(constraints))
+
+    @staticmethod
+    def _merge_constraints(*groups: tuple[str, ...]) -> tuple[str, ...]:
+        return tuple(
+            dict.fromkeys(
+                item.strip()
+                for group in groups
+                for item in group
+                if item.strip()
+            )
+        )
+
+    @staticmethod
+    def _artifact_objective(contract: ArtifactContract) -> str:
+        constraint_text = "\n".join(f"- {item}" for item in contract.constraints)
+        return (
+            f"{contract.operation.value} the exact artifact {contract.artifact_path}.\n"
+            f"Intended outcome: {contract.expected_outcome}\n"
+            f"Constraints:\n{constraint_text or '- None beyond the admitted contract.'}"
+        )
 
     @staticmethod
     def _fingerprint(value: object) -> str:

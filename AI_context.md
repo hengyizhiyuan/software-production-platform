@@ -40,6 +40,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-E2E-1H — CLOSED / PASS**
 
+**MVP-INTAKE-2A — CLOSED / PASS**
+
 **FIRST COMPLETE WATT GOVERNED SOFTWARE PRODUCTION LOOP — PROVEN**
 
 **MVP-E2E-1I — IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW**
@@ -116,6 +118,7 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-E2E-1I — Post-Integration Checkout Synchronization & Restart Readiness | CLOSED / PASS |
 | MVP-E2E Proof — Two Complete Governed Watt Production Loops | CLOSED / PASS |
 | MVP-ORCH-1 — Production Orchestration Lite | CLOSED / PASS |
+| MVP-INTAKE-2A — Governed Artifact Target Contract | CLOSED / PASS |
 | F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
 | F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
 | F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
@@ -238,8 +241,9 @@ recovery, distributed scheduling/Worker Fleet, message brokers, and
 policy/risk-driven automatic Candidate integration are DEFERRED_BY_MVP.
 
 ORCH Dogfood #1 is preserved as **BLOCKED / VERIFICATION FAIL** historical
-evidence. Automatic orchestration reached the truthful Verification boundary
-without manual Advance: Provider Outcome was `SUCCESS`, independent Observation
+evidence. Automatic orchestration itself is **REAL DOGFOOD PASS** and required
+**0 manual Advance** actions: it reached the truthful Verification boundary.
+Provider Outcome was `SUCCESS`, independent Observation
 found exactly one admitted artifact, and Completion was `PRODUCED`, but the
 MVP E2E verifier remained bound to its historical fixed target rather than the
 Work's admitted artifact path. The primary finding is a
@@ -247,6 +251,9 @@ Work's admitted artifact path. The primary finding is a
 product-scope gaps; it is not an Executor failure. The Work remains unchanged
 with no retry, Candidate, Authorization, Integration, or Runtime Commit. See
 [ORCH Dogfood #1 Failure Finding](docs/evidence/dogfood/orch-dogfood-1-verification-contract-mismatch.md).
+The admitted lesson is that production automation amplifies the quality of the
+admitted Production Contract: a fast autonomous production line with a weak
+task contract only produces incorrectly governed output faster.
 
 ## Program-level Architecture Source of Truth
 

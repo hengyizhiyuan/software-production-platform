@@ -33,6 +33,28 @@ class WorkStatus(StrEnum):
     COMPLETED = "COMPLETED"
 
 
+class ArtifactTargetConfidence(StrEnum):
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
+
+class ArtifactTargetOperation(StrEnum):
+    CREATE = "CREATE"
+    UPDATE = "UPDATE"
+
+
+class ArtifactTargetProposal(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    path: str
+    operation: ArtifactTargetOperation
+    placement_rationale: str
+    confidence: ArtifactTargetConfidence
+    source_baseline_id: UUID
+    source_revision: str
+
+
 class EngineeringResourceKind(StrEnum):
     REPOSITORY = "REPOSITORY"
 
@@ -132,6 +154,11 @@ class WorkRecord(BaseModel):
     scope_summary: str | None
     production_objective: str | None
     expected_artifact_path: str | None
+    artifact_operation: ArtifactTargetOperation | None = None
+    artifact_placement_rationale: str | None = None
+    artifact_target_confidence: ArtifactTargetConfidence | None = None
+    artifact_source_baseline_id: UUID | None = None
+    artifact_source_revision: str | None = None
     verification_expectation: str | None
     created_at: datetime
     updated_at: datetime
@@ -170,6 +197,7 @@ class WorkProjection(BaseModel):
     title: str | None
     desired_outcome: str | None
     constraints: tuple[str, ...]
+    artifact_target: ArtifactTargetProposal | None = None
     tags: tuple[str, ...]
     engineering_scope: EngineeringScopeRecord | None
     status: WorkStatus

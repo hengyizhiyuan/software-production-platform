@@ -1,9 +1,10 @@
-"""Narrow read-only Verification Provider for the admitted MVP E2E artifact."""
+"""Contract-driven read-only Verification Provider for governed Markdown artifacts."""
 
 from dataclasses import dataclass
 from pathlib import Path
 import subprocess
 
+from spg.domain.runtime import ArtifactContract, ArtifactOperation
 from spg.domain.verification import (
     VerificationCapabilityRequest,
     VerificationCapabilityResult,
@@ -15,26 +16,12 @@ from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 
 
-TARGET_PATH = "docs/mvp-e2e/first-real-governed-work.md"
-REQUIRED_HEADINGS = (
-    "# First Real Governed MVP Work",
-    "## Purpose",
-    "## Guardrails",
-    "## Evidence Boundary",
-)
-REQUIRED_STATEMENTS = (
-    "Provider completion is not Production Truth",
-    "Production Reality is determined independently",
-    "Human Authority is required before trusted repository integration",
-)
-
-
 @dataclass(frozen=True, slots=True)
-class MarkdownVerificationFacts:
+class ArtifactVerificationFacts:
     exact_path_only: bool
-    headings_present: bool
-    statements_present: bool
+    operation_matches: bool
     readable_non_empty: bool
+    required_markers_present: bool
     diff_valid: bool
 
     @property
@@ -42,22 +29,22 @@ class MarkdownVerificationFacts:
         return all(
             (
                 self.exact_path_only,
-                self.headings_present,
-                self.statements_present,
+                self.operation_matches,
                 self.readable_non_empty,
+                self.required_markers_present,
                 self.diff_valid,
             )
         )
 
 
-class MvpE2eMarkdownVerifier:
-    """Verify one immutable proposed commit without changing repository authority."""
+class RepositoryArtifactVerifier:
+    """Resolve the target only from the exact PWU Completion Contract."""
 
     def __init__(self, database: Database) -> None:
         self.database = database
         self._binding = VerificationProviderBinding(
-            provider_identity="provider:mvp-e2e-markdown",
-            provider_version="v1",
+            provider_identity="provider:repository-artifact-contract",
+            provider_version="v2",
         )
 
     @property
@@ -68,6 +55,7 @@ class MvpE2eMarkdownVerifier:
         self,
         request: VerificationCapabilityRequest,
     ) -> VerificationCapabilityResult:
+        target_path: str | None = None
         try:
             with self.database.unit_of_work() as unit_of_work:
                 store = RuntimeStore(unit_of_work.session)
@@ -76,17 +64,31 @@ class MvpE2eMarkdownVerifier:
                     raise RuntimeError("proposed snapshot unavailable")
                 source = store.snapshot(request.source_baseline_id)
                 dispatch = store.execution_dispatch_for_attempt(proposed.attempt_id)
-            if source is None or dispatch is None:
+                work_unit = store.work_unit(proposed.work_unit_id)
+            if source is None or dispatch is None or work_unit is None:
                 raise RuntimeError("verification repository lineage unavailable")
             if (
                 proposed.proposed_commit_identity != request.proposed_commit_identity
                 or proposed.tree_identity != request.tree_identity
             ):
                 raise RuntimeError("verification subject identity mismatch")
-            facts = evaluate_mvp_e2e_markdown(
+            artifact = work_unit.completion_contract.artifact_contract
+            if artifact is None:
+                raise RuntimeError("PWU has no admitted Artifact Contract")
+            if (
+                artifact.source_baseline_id != source.id
+                or artifact.source_revision != source.repository_revision
+                or artifact.repository_identity != source.repository_identity
+                or artifact.verification_obligation != request.obligation
+            ):
+                raise RuntimeError("Artifact Contract lineage is incoherent")
+            target_path = artifact.artifact_path
+            facts = evaluate_repository_artifact(
                 dispatch.workspace.repository_path,
                 source.repository_revision,
                 request.proposed_commit_identity,
+                artifact,
+                required_markers=work_unit.completion_contract.required_markers,
             )
             result = (
                 VerificationResultValue.PASS
@@ -94,19 +96,20 @@ class MvpE2eMarkdownVerifier:
                 else VerificationResultValue.FAIL
             )
             metadata = {
-                "mode": "targeted-read-only-git",
-                "target_path": TARGET_PATH,
+                "mode": "contract-driven-read-only-git",
+                "target_path": target_path,
+                "operation": artifact.operation.value,
                 "exact_path_only": facts.exact_path_only,
-                "headings_present": facts.headings_present,
-                "statements_present": facts.statements_present,
+                "operation_matches": facts.operation_matches,
                 "readable_non_empty": facts.readable_non_empty,
+                "required_markers_present": facts.required_markers_present,
                 "diff_valid": facts.diff_valid,
             }
         except Exception as error:
             result = VerificationResultValue.UNKNOWN
             metadata = {
-                "mode": "targeted-read-only-git",
-                "target_path": TARGET_PATH,
+                "mode": "contract-driven-read-only-git",
+                "target_path": target_path,
                 "failure_type": type(error).__name__,
             }
         return VerificationCapabilityResult(
@@ -115,31 +118,45 @@ class MvpE2eMarkdownVerifier:
                 obligation=request.obligation,
                 subject_commit_identity=request.proposed_commit_identity,
                 subject_tree_identity=request.tree_identity,
-                expected="exact admitted Markdown artifact and no other change",
+                expected="exact Human-admitted artifact contract",
                 observed=result.value,
                 metadata=metadata,
             ),
         )
 
 
-def evaluate_mvp_e2e_markdown(
+# Configuration compatibility: the adapter name remains stable while behavior is generic.
+MvpE2eMarkdownVerifier = RepositoryArtifactVerifier
+
+
+def evaluate_repository_artifact(
     repository: Path,
     source_revision: str,
     proposed_commit: str,
-) -> MarkdownVerificationFacts:
-    """Evaluate the exact immutable Git subject without checking out or mutating it."""
+    artifact: ArtifactContract,
+    *,
+    required_markers: tuple[str, ...] = (),
+) -> ArtifactVerificationFacts:
+    """Evaluate the contract-selected path on one immutable Git subject."""
 
-    changed = _git(
+    changed_rows = _git(
         repository,
         "diff-tree",
         "--no-commit-id",
-        "--name-only",
+        "--name-status",
         "-r",
         "--no-renames",
         source_revision,
         proposed_commit,
         "--",
     ).splitlines()
+    expected_status = "A" if artifact.operation is ArtifactOperation.CREATE else "M"
+    expected_row = f"{expected_status}\t{artifact.artifact_path}"
+    exact_path_only = (
+        len(changed_rows) == 1
+        and changed_rows[0].split("\t")[-1] == artifact.artifact_path
+    )
+    operation_matches = changed_rows == [expected_row]
     diff_check = subprocess.run(
         [
             "git",
@@ -155,7 +172,13 @@ def evaluate_mvp_e2e_markdown(
         capture_output=True,
     )
     raw = subprocess.run(
-        ["git", "-C", str(repository), "show", f"{proposed_commit}:{TARGET_PATH}"],
+        [
+            "git",
+            "-C",
+            str(repository),
+            "show",
+            f"{proposed_commit}:{artifact.artifact_path}",
+        ],
         check=False,
         capture_output=True,
     )
@@ -167,15 +190,14 @@ def evaluate_mvp_e2e_markdown(
             readable = bool(content.strip())
         except UnicodeDecodeError:
             readable = False
-    lines = {line.strip() for line in content.splitlines()}
     normalized = " ".join(content.split()).casefold()
-    return MarkdownVerificationFacts(
-        exact_path_only=changed == [TARGET_PATH],
-        headings_present=all(item in lines for item in REQUIRED_HEADINGS),
-        statements_present=all(
-            item.casefold() in normalized for item in REQUIRED_STATEMENTS
-        ),
+    return ArtifactVerificationFacts(
+        exact_path_only=exact_path_only,
+        operation_matches=operation_matches,
         readable_non_empty=readable,
+        required_markers_present=all(
+            marker.casefold() in normalized for marker in required_markers
+        ),
         diff_valid=diff_check.returncode == 0,
     )
 

@@ -8,6 +8,8 @@ from sqlalchemy import delete, insert, select, update
 from sqlalchemy.orm import Session
 
 from spg.domain.product import (
+    ArtifactTargetConfidence,
+    ArtifactTargetOperation,
     EngineeringContextReference,
     EngineeringResourceKind,
     EngineeringResourceRecord,
@@ -390,6 +392,19 @@ class ProductStore:
             scope_summary=row["scope_summary"],
             production_objective=row["production_objective"],
             expected_artifact_path=row["expected_artifact_path"],
+            artifact_operation=(
+                None
+                if row["artifact_operation"] is None
+                else ArtifactTargetOperation(row["artifact_operation"])
+            ),
+            artifact_placement_rationale=row["artifact_placement_rationale"],
+            artifact_target_confidence=(
+                None
+                if row["artifact_target_confidence"] is None
+                else ArtifactTargetConfidence(row["artifact_target_confidence"])
+            ),
+            artifact_source_baseline_id=row["artifact_source_baseline_id"],
+            artifact_source_revision=row["artifact_source_revision"],
             verification_expectation=row["verification_expectation"],
             created_at=row["created_at"],
             updated_at=row["updated_at"],

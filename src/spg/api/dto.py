@@ -75,6 +75,15 @@ class EngineeringScopeResponse(ApiDto):
         )
 
 
+class ArtifactTargetResponse(ApiDto):
+    path: str
+    operation: str
+    placement_rationale: str
+    confidence: str
+    source_baseline_id: UUID
+    source_revision: str
+
+
 class WorkResponse(ApiDto):
     work_id: UUID
     goal_id: UUID | None
@@ -82,6 +91,7 @@ class WorkResponse(ApiDto):
     title: str | None
     desired_outcome: str | None
     constraints: tuple[str, ...]
+    artifact_target: ArtifactTargetResponse | None
     tags: tuple[str, ...]
     engineering_scope: EngineeringScopeResponse | None
     status: WorkStatus
@@ -100,6 +110,18 @@ class WorkResponse(ApiDto):
             title=work.title,
             desired_outcome=work.desired_outcome,
             constraints=work.constraints,
+            artifact_target=(
+                None
+                if work.artifact_target is None
+                else ArtifactTargetResponse(
+                    path=work.artifact_target.path,
+                    operation=work.artifact_target.operation.value,
+                    placement_rationale=work.artifact_target.placement_rationale,
+                    confidence=work.artifact_target.confidence.value,
+                    source_baseline_id=work.artifact_target.source_baseline_id,
+                    source_revision=work.artifact_target.source_revision,
+                )
+            ),
             tags=work.tags,
             engineering_scope=(
                 None

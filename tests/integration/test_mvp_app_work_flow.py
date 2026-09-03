@@ -11,6 +11,7 @@ import pytest
 from sqlalchemy import func, inspect, select
 
 from spg.application.runtime import RuntimeService
+from spg.application.materialization import ExecutionInputMaterializationService
 from spg.application.work import WorkApplicationService
 from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.preparation import ContextSemanticRole
@@ -23,6 +24,7 @@ from spg.domain.product import (
     ProductInvariantViolation,
     ResourceBindingCondition,
     WorkCondition,
+    WorkRefinementRequest,
     WorkStatus,
 )
 from spg.domain.runtime import BootstrapRequest
@@ -30,6 +32,7 @@ from spg.domain.verification import VerificationResultValue
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_schema import product_works
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.runtime_schema import (
     completion_evaluations,
     execution_attempts,
@@ -46,6 +49,8 @@ from spg.providers.deterministic_executor import (
     DeterministicTestExecutor,
 )
 from spg.providers.deterministic_verifier import DeterministicVerificationProvider
+from spg.infrastructure.configured_executor import render_governed_instruction
+from spg.providers.repository_markdown_verifier import RepositoryArtifactVerifier
 
 
 pytestmark = pytest.mark.postgresql
@@ -94,9 +99,14 @@ def git_repository(tmp_path: Path) -> Path:
     _git(repository, "config", "user.name", "SPG Test")
     _git(repository, "config", "user.email", "spg-test@example.invalid")
     (repository / "docs").mkdir()
+    (repository / "docs" / "architecture").mkdir()
     (repository / "AI_context.md").write_text("baseline context\n", encoding="utf-8")
     (repository / "docs" / "contract.md").write_text(
         "governed execution contract\n",
+        encoding="utf-8",
+    )
+    (repository / "docs" / "architecture" / "architecture-principles.md").write_text(
+        "accepted architecture principles\n",
         encoding="utf-8",
     )
     _git(repository, "add", ".")
@@ -160,6 +170,115 @@ def _draft(
         tags=tags,
     )
     return facts.service.refine_work(submitted.work_id)
+
+
+INTAKE_SAME_INTENT = """Create a formal Production Orchestration Lite product/architecture document
+in an appropriate location in the existing documentation system.
+Cover Human-in-the-loop != Human-as-the-loop, automatic progression boundaries,
+Human Attention responsibility, MVP vs future evolution, and reuse accepted design.
+Do not expand or invent new capabilities beyond the already accepted design."""
+
+
+def test_intake_same_intent_target_propagates_from_approval_through_verification(
+    app_facts: AppFacts,
+) -> None:
+    submitted = app_facts.service.submit_work(INTAKE_SAME_INTENT)
+    draft = app_facts.service.refine_work(submitted.work_id)
+    assert draft.artifact_target is not None
+    target = "docs/architecture/production-orchestration-lite.md"
+    assert draft.artifact_target.path == target
+    assert draft.artifact_target.operation.value == "CREATE"
+    assert draft.constraints
+    assert "docs/work-" not in draft.artifact_target.path
+
+    approved = app_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="architecture-lead:intake-test",
+    )
+    assert approved.status is WorkStatus.READY
+    binding = _runtime_binding(app_facts, draft.work_id)
+    assert binding is not None
+    with app_facts.database.unit_of_work() as unit_of_work:
+        work_unit = RuntimeStore(unit_of_work.session).work_unit(binding.work_unit_id)
+    assert work_unit is not None
+    contract = work_unit.completion_contract
+    assert contract.artifact_contract is not None
+    assert contract.artifact_contract.artifact_path == target
+    assert contract.required_outputs == (target,)
+    assert contract.required_changes == (target,)
+    assert target in work_unit.objective
+    assert all(item in contract.artifact_contract.constraints for item in draft.constraints)
+
+    app_facts.service.advance_work(draft.work_id)
+    app_facts.service.advance_work(draft.work_id)
+    with app_facts.database.unit_of_work() as unit_of_work:
+        summary = ProductStore(unit_of_work.session).runtime_summary(binding)
+    assert summary.attempt_id is not None
+    instruction = render_governed_instruction(work_unit.objective, contract)
+    materialized = ExecutionInputMaterializationService(app_facts.database).materialize(
+        summary.attempt_id,
+        instruction,
+    )
+    assert target in materialized.instruction_content
+    assert "Operation: CREATE" in materialized.instruction_content
+
+    executor = DeterministicTestExecutor(
+        DeterministicExecutionSpecification(
+            operations=(
+                DeterministicFileOperation(
+                    operation=DeterministicFileOperationType.CREATE,
+                    repository_relative_path=target,
+                    content="# Production Orchestration Lite\n\nGoverned result.\n",
+                ),
+            ),
+            reported_outcome=ProviderReportedOutcome.SUCCESS,
+        )
+    )
+    service = WorkApplicationService(
+        app_facts.database,
+        workspace_root=app_facts.workspace_root,
+        executor=executor,
+        verifier=RepositoryArtifactVerifier(app_facts.database),
+    )
+    for _ in range(10):
+        result = service.advance_work(draft.work_id)
+        if result.status in {WorkStatus.NEEDS_ATTENTION, WorkStatus.BLOCKED}:
+            break
+    assert result.status is WorkStatus.NEEDS_ATTENTION
+    with app_facts.database.unit_of_work() as unit_of_work:
+        final = ProductStore(unit_of_work.session).runtime_summary(binding)
+    assert final.artifact_paths == (target,)
+    assert final.verification_obligations == contract.verification_obligations
+    assert final.verification_results == (VerificationResultValue.PASS.value,)
+
+
+def test_intake_human_override_replaces_proposal_before_approval(
+    app_facts: AppFacts,
+) -> None:
+    submitted = app_facts.service.submit_work(INTAKE_SAME_INTENT)
+    proposed = app_facts.service.refine_work(submitted.work_id)
+    assert proposed.artifact_target is not None
+    target_a = proposed.artifact_target.path
+    target_b = "docs/architecture/human-approved-orchestration.md"
+
+    overridden = app_facts.service.refine_work(
+        submitted.work_id,
+        WorkRefinementRequest(expected_artifact_path=target_b),
+    )
+    assert overridden.artifact_target is not None
+    assert overridden.artifact_target.path == target_b
+    app_facts.service.approve_work(
+        submitted.work_id,
+        authority_identity="architecture-lead:override-test",
+    )
+    binding = _runtime_binding(app_facts, submitted.work_id)
+    assert binding is not None
+    with app_facts.database.unit_of_work() as unit_of_work:
+        work_unit = RuntimeStore(unit_of_work.session).work_unit(binding.work_unit_id)
+    assert work_unit is not None
+    serialized = work_unit.model_dump_json()
+    assert target_b in serialized
+    assert target_a not in serialized
 
 
 def _work_record(facts: AppFacts, work_id):

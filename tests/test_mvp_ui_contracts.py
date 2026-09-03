@@ -73,6 +73,10 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "human authority" in combined
     assert "attention required" in combined
     assert "work result" in combined
+    assert "artifact target" in combined
+    assert "artifact operation" in combined
+    assert "placement rationale" in combined
+    assert "expected_artifact_path" in javascript
     assert "no artifacts observed" in combined
     assert "no verification evidence available" in combined
     assert "project selector" not in combined

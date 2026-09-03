@@ -1,22 +1,27 @@
 from pathlib import Path
 import subprocess
+from uuid import uuid4
 
 import pytest
 
 from spg.config import Settings
-from spg.domain.runtime import CompletionContract
+from spg.domain.runtime import (
+    ArtifactContract,
+    ArtifactOperation,
+    CompletionContract,
+)
 from spg.infrastructure.configured_executor import render_governed_instruction
 from spg.infrastructure.executor_boundary import (
     SubprocessExecutorTransport,
     build_executor_child_environment,
 )
 from spg.providers.repository_markdown_verifier import (
-    TARGET_PATH,
-    evaluate_mvp_e2e_markdown,
+    evaluate_repository_artifact,
 )
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+TARGET_PATH = "docs/mvp-e2e/first-real-governed-work.md"
 VALID_CONTENT = """# First Real Governed MVP Work
 
 ## Purpose
@@ -113,14 +118,17 @@ def test_e2e_04_provider_timeout_is_explicit_and_bounded() -> None:
 
 
 def test_e2e_05_instruction_contains_only_governed_scope() -> None:
+    artifact = _artifact_contract()
     contract = CompletionContract(
         required_outputs=(TARGET_PATH,),
         required_changes=(TARGET_PATH,),
         verification_obligations=("Verify the exact E2E Markdown artifact",),
+        artifact_contract=artifact,
     )
     instruction = render_governed_instruction("Create the admitted document", contract)
     assert "Create the admitted document" in instruction
-    assert instruction.count(TARGET_PATH) == 2
+    assert instruction.count(TARGET_PATH) >= 3
+    assert "Operation: CREATE" in instruction
     assert "Do not modify any other repository path" in instruction
     assert "Do not commit, push, or change a Git ref" in instruction
 
@@ -136,7 +144,12 @@ def test_e2e_06_targeted_markdown_verification_passes_exact_subject(
     _git(repository, "commit", "-m", "candidate")
     proposed = _git(repository, "rev-parse", "HEAD")
 
-    facts = evaluate_mvp_e2e_markdown(repository, source, proposed)
+    facts = evaluate_repository_artifact(
+        repository,
+        source,
+        proposed,
+        _artifact_contract(source_revision=source),
+    )
     assert facts.passed
 
 
@@ -152,7 +165,12 @@ def test_e2e_07_targeted_markdown_verification_rejects_scope_drift(
     _git(repository, "commit", "-m", "invalid candidate")
     proposed = _git(repository, "rev-parse", "HEAD")
 
-    facts = evaluate_mvp_e2e_markdown(repository, source, proposed)
+    facts = evaluate_repository_artifact(
+        repository,
+        source,
+        proposed,
+        _artifact_contract(source_revision=source),
+    )
     assert not facts.passed
     assert not facts.exact_path_only
 
@@ -167,6 +185,19 @@ def _repository(tmp_path: Path) -> tuple[Path, str]:
     _git(repository, "add", "AI_context.md")
     _git(repository, "commit", "-m", "baseline")
     return repository, _git(repository, "rev-parse", "HEAD")
+
+
+def _artifact_contract(*, source_revision: str = "baseline") -> ArtifactContract:
+    return ArtifactContract(
+        engineering_resource_id=uuid4(),
+        repository_identity="test://mvp-e2e",
+        source_baseline_id=uuid4(),
+        source_revision=source_revision,
+        artifact_path=TARGET_PATH,
+        operation=ArtifactOperation.CREATE,
+        expected_outcome="Create the historical governed E2E document",
+        verification_obligation="Verify the exact E2E Markdown artifact",
+    )
 
 
 def _git(repository: Path, *arguments: str) -> str:

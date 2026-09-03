@@ -175,7 +175,10 @@ def _submit_and_refine(
     submitted = client.post("/api/works", json=payload)
     assert submitted.status_code == 201
     work_id = submitted.json()["work_id"]
-    refined = client.post(f"/api/works/{work_id}/refine", json={})
+    refined = client.post(
+        f"/api/works/{work_id}/refine",
+        json={"expected_artifact_path": f"docs/api-work-{work_id}.md"},
+    )
     assert refined.status_code == 200
     return refined.json()
 
@@ -338,7 +341,11 @@ def test_api_07_08_09_refinement_and_governed_admission(
 
     refined = api_facts.client.post(
         f"/api/works/{submitted['work_id']}/refine",
-        json={"title": "Governed API Work", "constraints": ["bounded"]},
+        json={
+            "title": "Governed API Work",
+            "constraints": ["bounded"],
+            "expected_artifact_path": "docs/governed-api-work.md",
+        },
     )
     assert refined.status_code == 200
     assert refined.json()["status"] == "AWAITING_APPROVAL"
@@ -615,7 +622,10 @@ def test_ui_functional_public_http_smoke_without_provider(api_facts: ApiFacts) -
     )
     assert first.status_code == 201
     first_id = first.json()["work_id"]
-    refined = client.post(f"/api/works/{first_id}/refine", json={})
+    refined = client.post(
+        f"/api/works/{first_id}/refine",
+        json={"expected_artifact_path": "docs/ui-smoke-work.md"},
+    )
     assert refined.status_code == 200
     assert refined.json()["status"] == "AWAITING_APPROVAL"
     attention = client.get("/api/attention", params={"work_id": first_id})
