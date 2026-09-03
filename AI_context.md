@@ -237,6 +237,17 @@ Provider Resume, Attempt recovery, or manufactured Human Authority. Durable
 recovery, distributed scheduling/Worker Fleet, message brokers, and
 policy/risk-driven automatic Candidate integration are DEFERRED_BY_MVP.
 
+ORCH Dogfood #1 is preserved as **BLOCKED / VERIFICATION FAIL** historical
+evidence. Automatic orchestration reached the truthful Verification boundary
+without manual Advance: Provider Outcome was `SUCCESS`, independent Observation
+found exactly one admitted artifact, and Completion was `PRODUCED`, but the
+MVP E2E verifier remained bound to its historical fixed target rather than the
+Work's admitted artifact path. The primary finding is a
+`VERIFICATION_CONTRACT_GAP`, with contributing refinement, planning, and MVP
+product-scope gaps; it is not an Executor failure. The Work remains unchanged
+with no retry, Candidate, Authorization, Integration, or Runtime Commit. See
+[ORCH Dogfood #1 Failure Finding](docs/evidence/dogfood/orch-dogfood-1-verification-contract-mismatch.md).
+
 ## Program-level Architecture Source of Truth
 
 The current system-level architecture baseline is:
