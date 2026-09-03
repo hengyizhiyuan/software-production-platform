@@ -20,12 +20,21 @@ class _StaticOnlyWorkService:
     database = _StaticOnlyDatabase()
 
 
+class _StaticOnlyOrchestrator:
+    def resume_safely_eligible_works(self) -> tuple[()]:
+        return ()
+
+    def shutdown(self) -> None:
+        return None
+
+
 def _client() -> TestClient:
     return TestClient(
         create_http_application(
             application=object(),  # Static routes do not require Runtime composition.
             database=_StaticOnlyDatabase(),
             work_service=_StaticOnlyWorkService(),
+            orchestrator=_StaticOnlyOrchestrator(),
         )
     )
 
@@ -84,7 +93,14 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
 
     assert "attention.available_actions.forEach" in javascript
     assert "setInterval" not in javascript
-    assert "setTimeout" not in javascript
+    assert "POLL_INTERVAL_MS = 2000" in javascript
+    assert "scheduleObservationPolling" in javascript
+    assert "globalThis.setTimeout" in javascript
+    assert javascript.count("/advance") == 1
+    polling = javascript[javascript.index("function scheduleObservationPolling") :]
+    assert 'method: "POST"' not in polling.split(
+        "async function refreshAfterMutation"
+    )[0]
     assert "innerHTML" not in javascript
     assert "SPG_DATABASE_URL" not in javascript
     assert "OPENAI_API_KEY" not in javascript

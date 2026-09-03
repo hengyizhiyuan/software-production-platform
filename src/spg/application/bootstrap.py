@@ -17,6 +17,7 @@ from spg.application.recovery import RecoveryAssessmentService
 from spg.application.reconciliation import RecoveryReconciliationService
 from spg.application.attempt_recovery import AttemptRecoveryService
 from spg.application.maintenance_recovery import VerifiedMaintenanceRecoveryService
+from spg.application.orchestration import ProductionOrchestrator
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
 from spg.domain.preparation import ExecutorBinding
@@ -190,6 +191,19 @@ class Application:
         return WorkApplicationService(
             selected_database,
             **options,
+        )
+
+    def production_orchestrator(
+        self,
+        work_service: WorkApplicationService,
+    ) -> ProductionOrchestrator:
+        """Compose the bounded in-process MVP production driver."""
+
+        return ProductionOrchestrator(
+            work_service,
+            max_automatic_transitions=(
+                self.settings.orchestration_max_automatic_transitions
+            ),
         )
 
 

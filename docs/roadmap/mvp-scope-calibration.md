@@ -187,12 +187,21 @@ The functional Web UI supports:
 - enter a natural-language Work with optional Goal and tags;
 - view the Work draft, Engineering Scope summary, product state, and blocking reason;
 - refine, approve, reject, or request refinement through governed API actions;
-- advance exactly one bounded production action per explicit interaction;
+- automatically progress legal non-Human production transitions after approval;
 - view and resolve API-provided Human Attention actions;
 - view truthful artifact, Verification, trusted-result, and remaining-risk projections;
 - continue with another independent Work.
 
-Work remains the primary user-facing product object. The UI does not introduce a Project aggregate root, Project selector, Chat Thread authority, browser-side production state machine, or automatic run-until-done behavior.
+Work remains the primary user-facing product object. UI polling observes
+server-side progress and never causes production transitions. The UI does not
+introduce a Project aggregate root, Project selector, Chat Thread authority, or
+browser-side production state machine. Manual single-step Advance remains a
+non-primary technical/operator fallback.
+
+The MVP server uses one bounded in-process Production Orchestrator. Human Work
+Draft Approval and exact Candidate Authorization remain mandatory. Distributed
+scheduling, Worker Fleet, durable recovery, Provider retry/Resume, and
+policy/risk-driven automatic Candidate integration are DEFERRED_BY_MVP.
 
 A conversational interaction style is acceptable and preferred where it keeps the workflow simple.
 
@@ -206,11 +215,12 @@ The MVP does not require visual polish, complex dashboards, drag-and-drop workfl
 4. **Functional Web UI** — CLOSED / PASS.
 5. **Local Docker integration** — CLOSED / PASS. PostgreSQL, migration, API, and UI are composed without requiring a Provider credential.
 6. **Real local end-to-end MVP task** — MVP-E2E-1A remains BLOCKED / RECOVERABLE historical evidence, and MVP-E2E-1B container-native state and blocked-Reality projection are CLOSED / PASS. MVP-E2E-1D remains immutable historical evidence with Provider Outcome SUCCESS but independently observed Production Reality NONE; the terminal Provider evidence records `bwrap: No permissions to create a new namespace`. MVP-E2E-1E is CLOSED / PASS: the E2E-only Dedicated Executor uses the locked public Codex `full-access` policy inside the Docker isolation boundary, and Completion Contracts that require production output project terminal NONE Reality as BLOCKED without rewriting Provider evidence. MVP-E2E-1F is REAL EXECUTION PENDING under separate authority for exactly one fresh governed Turn; no real E2E production success is claimed before independent Production Observation and targeted Verification.
-7. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
-8. **Linux server deployment** — bootstrap from an exact accepted candidate.
-9. **Linux promotion validation** — run the server promotion gate and operational checks.
-10. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
-11. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
+7. **Production Orchestration Lite** — CLOSED / PASS; server-side bounded automatic progression stops at Human Attention, BLOCKED, or COMPLETED.
+8. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
+9. **Linux server deployment** — bootstrap from an exact accepted candidate.
+10. **Linux promotion validation** — run the server promotion gate and operational checks.
+11. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
+12. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
 

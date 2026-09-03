@@ -472,6 +472,36 @@ class WorkApplicationService:
             work = self._required_work(store, work_id)
             return self._projection(store, work)
 
+    def orchestration_reality_fingerprint(self, work_id: UUID) -> str:
+        """Fingerprint persisted facts used only to detect actual step progress."""
+
+        with self.database.unit_of_work() as unit_of_work:
+            product = ProductStore(unit_of_work.session)
+            runtime = RuntimeStore(unit_of_work.session)
+            work = self._required_work(product, work_id)
+            binding = product.runtime_binding(work_id)
+            if binding is None:
+                facts = RuntimeFactSummary()
+            else:
+                facts = product.runtime_summary(binding)
+                preparation = (
+                    None
+                    if facts.attempt_id is None
+                    else runtime.attempt_preparation(facts.attempt_id)
+                )
+                preparation_identity = (
+                    None if preparation is None else str(preparation.attempt_id)
+                )
+            if binding is None:
+                preparation_identity = None
+        return self._fingerprint(
+            {
+                "work_condition": work.condition.value,
+                "runtime_facts": facts.model_dump(mode="json"),
+                "attempt_preparation_identity": preparation_identity,
+            }
+        )
+
     def list_works(self, goal_id: UUID | None = None) -> tuple[WorkProjection, ...]:
         with self.database.unit_of_work() as unit_of_work:
             store = ProductStore(unit_of_work.session)

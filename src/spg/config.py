@@ -31,3 +31,4 @@ class Settings(BaseSettings):
         "workspace-write"
     )
     verification_adapter: str = "unconfigured"
+    orchestration_max_automatic_transitions: int = Field(default=12, ge=1, le=50)

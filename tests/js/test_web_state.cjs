@@ -25,8 +25,8 @@ test("UI-07 maps every admitted Work status to clear product language", () => {
     DRAFT: "Draft",
     NEEDS_REFINEMENT: "Needs refinement",
     AWAITING_APPROVAL: "Awaiting approval",
-    READY: "Ready",
-    RUNNING: "Running",
+    READY: "Watt is preparing",
+    RUNNING: "Watt is working",
     NEEDS_ATTENTION: "Needs your attention",
     BLOCKED: "Blocked",
     COMPLETED: "Completed",
@@ -41,8 +41,8 @@ test("UI-09 through UI-11 expose only bounded status actions", () => {
     "REQUEST_REFINEMENT",
     "REJECT",
   ]);
-  assert.deepEqual(Array.from(viewModel.workActions("READY")), ["ADVANCE"]);
-  assert.deepEqual(Array.from(viewModel.workActions("RUNNING")), ["ADVANCE"]);
+  assert.deepEqual(Array.from(viewModel.workActions("READY")), []);
+  assert.deepEqual(Array.from(viewModel.workActions("RUNNING")), []);
   assert.deepEqual(Array.from(viewModel.workActions("NEEDS_ATTENTION")), []);
   assert.deepEqual(Array.from(viewModel.workActions("BLOCKED")), []);
   assert.deepEqual(Array.from(viewModel.workActions("COMPLETED")), []);
@@ -71,11 +71,33 @@ test("UI-14 through UI-16 do not invent result evidence", () => {
   );
 });
 
-test("UI-08 through UI-13 use safe DOM rendering and one explicit advance call", () => {
+test("UI-08 through UI-13 use safe DOM rendering and observational polling", () => {
   assert.doesNotMatch(appSource, /innerHTML|insertAdjacentHTML|document\.write/);
-  assert.doesNotMatch(appSource, /setInterval|setTimeout|runUntilDone/);
+  assert.doesNotMatch(appSource, /setInterval|runUntilDone/);
   assert.match(appSource, /node\.textContent = String\(text\)/);
   assert.match(appSource, /attention\.available_actions\.forEach/);
   assert.equal((appSource.match(/\$\{workPath\}\/advance/g) || []).length, 1);
+  assert.match(appSource, /POLL_INTERVAL_MS = 2000/);
+  assert.match(appSource, /scheduleObservationPolling/);
   assert.doesNotMatch(appSource, /SPG_DATABASE_URL|OPENAI_API_KEY|api[_-]?key/i);
+});
+
+test("ORCH-20 polling observes only and stops at Human or terminal states", () => {
+  assert.equal(viewModel.shouldPoll("READY"), true);
+  assert.equal(viewModel.shouldPoll("RUNNING"), true);
+  for (const status of [
+    "DRAFT",
+    "NEEDS_REFINEMENT",
+    "AWAITING_APPROVAL",
+    "NEEDS_ATTENTION",
+    "BLOCKED",
+    "COMPLETED",
+  ]) {
+    assert.equal(viewModel.shouldPoll(status), false);
+  }
+  const polling = appSource.slice(
+    appSource.indexOf("function scheduleObservationPolling"),
+    appSource.indexOf("async function refreshAfterMutation"),
+  );
+  assert.doesNotMatch(polling, /method:\s*"POST"|\/advance/);
 });

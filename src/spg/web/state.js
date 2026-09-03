@@ -5,8 +5,8 @@
     DRAFT: "Draft",
     NEEDS_REFINEMENT: "Needs refinement",
     AWAITING_APPROVAL: "Awaiting approval",
-    READY: "Ready",
-    RUNNING: "Running",
+    READY: "Watt is preparing",
+    RUNNING: "Watt is working",
     NEEDS_ATTENTION: "Needs your attention",
     BLOCKED: "Blocked",
     COMPLETED: "Completed",
@@ -38,10 +38,11 @@
     if (status === "AWAITING_APPROVAL") {
       return ["APPROVE", "REQUEST_REFINEMENT", "REJECT"];
     }
-    if (status === "READY" || status === "RUNNING") {
-      return ["ADVANCE"];
-    }
     return [];
+  }
+
+  function shouldPoll(status) {
+    return status === "READY" || status === "RUNNING";
   }
 
   function splitTags(value) {
@@ -88,6 +89,7 @@
     statusLabel,
     statusTone,
     workActions,
+    shouldPoll,
     splitTags,
     conciseRequirement,
     workTitle,

@@ -6,6 +6,7 @@
     return;
   }
 
+  const POLL_INTERVAL_MS = 2000;
   const state = {
     goals: [],
     works: [],
@@ -16,6 +17,7 @@
     result: null,
     statusFilter: "",
     busy: false,
+    pollTimer: null,
   };
 
   const elements = {
@@ -50,6 +52,7 @@
     tagList: document.getElementById("tag-list"),
     technicalDetails: document.getElementById("technical-details"),
     resourceList: document.getElementById("resource-list"),
+    manualAdvanceControl: document.getElementById("manual-advance-control"),
     authorityIdentity: document.getElementById("authority-identity"),
     workActions: document.getElementById("work-actions"),
     attentionSection: document.getElementById("attention-section"),
@@ -275,7 +278,7 @@
     elements.workActions.replaceChildren();
     viewModel.workActions(work.status).forEach((action) => {
       const classes = ["action-button"];
-      if (action === "APPROVE" || action === "ADVANCE") {
+      if (action === "APPROVE") {
         classes.push("emphasis");
       }
       if (action === "REJECT") {
@@ -292,6 +295,7 @@
         createElement("span", "empty-copy", "No direct action is available in this state."),
       );
     }
+    elements.manualAdvanceControl.hidden = !viewModel.shouldPoll(work.status);
   }
 
   function renderAttention() {
@@ -369,6 +373,7 @@
     renderWorkActions(work);
     renderAttention();
     renderResult();
+    scheduleObservationPolling();
   }
 
   function authorityIdentity() {
@@ -485,6 +490,31 @@
     state.attention = attention;
     state.result = result;
     renderSelectedWork();
+  }
+
+  function scheduleObservationPolling() {
+    if (state.pollTimer !== null) {
+      globalThis.clearTimeout(state.pollTimer);
+      state.pollTimer = null;
+    }
+    if (!state.selectedWork || !viewModel.shouldPoll(state.selectedWork.status)) {
+      return;
+    }
+    state.pollTimer = globalThis.setTimeout(async () => {
+      state.pollTimer = null;
+      if (state.busy) {
+        scheduleObservationPolling();
+        return;
+      }
+      try {
+        await loadCollections();
+        await refreshSelected();
+      } catch (error) {
+        showNotice(error);
+      } finally {
+        scheduleObservationPolling();
+      }
+    }, POLL_INTERVAL_MS);
   }
 
   async function refreshAfterMutation() {
@@ -633,6 +663,10 @@
       setBusy(false);
     }
   });
+  elements.manualAdvanceControl.addEventListener(
+    "click",
+    () => performWorkAction("ADVANCE"),
+  );
   elements.retryControl.addEventListener("click", reloadWorkspace);
   elements.healthControl.addEventListener("click", loadHealth);
   elements.dismissNotice.addEventListener("click", hideNotice);

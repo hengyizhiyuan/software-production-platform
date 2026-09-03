@@ -1,5 +1,6 @@
 """FastAPI boundary for the minimal Goal / Work MVP product surface."""
 
+from contextlib import asynccontextmanager
 from importlib.resources import files
 from pathlib import Path
 from typing import Annotated
@@ -26,6 +27,7 @@ from spg.api.dto import (
     WorkSubmitRequest,
 )
 from spg.application.bootstrap import Application, bootstrap
+from spg.application.orchestration import ProductionOrchestrator
 from spg.application.work import WorkApplicationService
 from spg.domain.product import (
     AttentionResolutionRequest,
@@ -65,6 +67,7 @@ def create_http_application(
     *,
     database: Database | None = None,
     work_service: WorkApplicationService | None = None,
+    orchestrator: ProductionOrchestrator | None = None,
 ) -> FastAPI:
     """Compose one ASGI application over the existing application bootstrap path."""
 
@@ -76,15 +79,29 @@ def create_http_application(
     else:
         selected_database = selected_database or work_service.database
 
+    selected_orchestrator = orchestrator or container.production_orchestrator(
+        work_service
+    )
+
+    @asynccontextmanager
+    async def lifespan(_application: FastAPI):
+        selected_orchestrator.resume_safely_eligible_works()
+        try:
+            yield
+        finally:
+            selected_orchestrator.shutdown()
+
     api = FastAPI(
         title="SPG Product API",
         version="0.1.0",
         docs_url="/docs",
         redoc_url=None,
+        lifespan=lifespan,
     )
     api.state.application = container
     api.state.database = selected_database
     api.state.work_service = work_service
+    api.state.production_orchestrator = selected_orchestrator
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
@@ -206,13 +223,13 @@ def create_http_application(
                 "NEEDS_REFINEMENT",
                 "Work requires refinement before Human admission",
             )
-        return WorkResponse.from_projection(
-            work_service.approve_work(
-                work_id,
-                authority_identity=request.authority_identity,
-                rationale=request.rationale,
-            )
+        projection = work_service.approve_work(
+            work_id,
+            authority_identity=request.authority_identity,
+            rationale=request.rationale,
         )
+        selected_orchestrator.schedule(work_id)
+        return WorkResponse.from_projection(projection)
 
     @api.post("/api/works/{work_id}/reject", response_model=WorkResponse)
     def reject_work(work_id: UUID, request: HumanDecisionRequest) -> WorkResponse:
@@ -262,9 +279,10 @@ def create_http_application(
             authority_identity=request.authority_identity,
             rationale=request.rationale,
         )
-        return WorkResponse.from_projection(
-            work_service.resolve_attention(attention_id, resolution)
-        )
+        projection = work_service.resolve_attention(attention_id, resolution)
+        if projection.status in {WorkStatus.READY, WorkStatus.RUNNING}:
+            selected_orchestrator.schedule(projection.work_id)
+        return WorkResponse.from_projection(projection)
 
     @api.get("/api/works/{work_id}/result", response_model=WorkResultResponse)
     def get_work_result(work_id: UUID) -> WorkResultResponse:

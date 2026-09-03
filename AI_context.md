@@ -113,7 +113,9 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-E2E-1G — Fresh E2E Runtime & First Real Watt Production Artifact | CLOSED / PASS |
 | MVP-E2E-1H — Human-Authorized Repository Integration & Trusted Baseline Commit | CLOSED / PASS |
 | First Complete Watt Governed Software Production Loop | PROVEN |
-| MVP-E2E-1I — Post-Integration Checkout Synchronization & Restart Readiness | IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW |
+| MVP-E2E-1I — Post-Integration Checkout Synchronization & Restart Readiness | CLOSED / PASS |
+| MVP-E2E Proof — Two Complete Governed Watt Production Loops | CLOSED / PASS |
+| MVP-ORCH-1 — Production Orchestration Lite | CLOSED / PASS |
 | F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
 | F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
 | F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
@@ -205,6 +207,35 @@ Focused R4-B evidence passes 23/23; unique affected persistence, Runtime spine, 
 The Windows R4-C full-regression Attempt was intentionally abandoned after interruption. Its log retained progress through 59% with no known failure, but no terminal pytest result; it is **INTERRUPTED / FINAL RESULT UNKNOWN / NOT RETAINED**, and no R4-C checkpoint was created. Complete R4 qualification, R4-D, and real maintenance recovery are DEFERRED_BY_MVP. The next delivery target is the usable local Docker MVP; the Linux development server becomes the deployment and promotion target only after that product exists.
 
 The unchanged spg_runtime at Alembic 20260829_12 is archived as **WINDOWS BOOTSTRAP DOGFOOD EVIDENCE — NOT AN ACTIVE SERVER RUNTIME TO BE CONTINUED**. Backup C:\Users\yuchunbo\Documents\SPG-backups\spg_runtime_windows_bootstrap_20260902T061522Z.dump has SHA-256 64ebae40cbea8589f3b1c988422329d4f52e9b5200729ca67c19f31c1a0045b0 and passed restore-list validation. It is not migrated into the future Linux Runtime. Real maintenance recovery remains unexecuted, the old lineage is not superseded, no new lineage exists, and the historical Recovery Barrier remains active.
+
+### MVP-ORCH-1 Production Orchestration Lite
+
+MVP-ORCH-1 is **CLOSED / PASS** after Architecture Lead Reality Review. It
+introduces a bounded, in-process application driver over the
+existing authoritative Work and governed Runtime transitions. After Human Work
+Draft Approval, Watt automatically executes one currently legal non-Human
+transition at a time, re-reading Runtime Reality after every committed step.
+It stops at Human Attention, BLOCKED Reality, COMPLETED, ambiguity, unchanged
+Reality, infrastructure failure, application shutdown, or the configured
+finite transition bound. A process-local per-Work guard prevents obvious
+duplicate scheduling; it does not create a second production state machine or
+distributed authority.
+
+Human Work Draft Approval and exact Candidate Authorization remain mandatory
+for MVP. Candidate authorization is not inferred or automated. After the Human
+authorizes an exact sealed Candidate, the same bounded driver may continue
+Repository Integration, Runtime Commit, Trusted Baseline advancement, and Work
+completion through the existing services. Human Attention is requested only
+when Watt lacks lawful autonomous authority or cannot safely determine the next
+production action. Human-in-the-loop does not mean Human-as-the-loop.
+
+The implementation is single-process and uses ephemeral daemon scheduling.
+Startup may reschedule only Works whose current projection permits ordinary
+READY/RUNNING deterministic progression. Existing dispatch facts prevent
+automatic Provider redispatch, so restart does not imply Provider retry,
+Provider Resume, Attempt recovery, or manufactured Human Authority. Durable
+recovery, distributed scheduling/Worker Fleet, message brokers, and
+policy/risk-driven automatic Candidate integration are DEFERRED_BY_MVP.
 
 ## Program-level Architecture Source of Truth
 

@@ -53,6 +53,19 @@ class ApiFacts:
     client: TestClient
 
 
+class _ManualOnlyOrchestrator:
+    """Keep pre-ORCH API cases explicitly on the admitted fallback path."""
+
+    def resume_safely_eligible_works(self) -> tuple[()]:
+        return ()
+
+    def schedule(self, _work_id: UUID) -> bool:
+        return False
+
+    def shutdown(self) -> None:
+        return None
+
+
 def _migration_config(database: Database) -> Config:
     os.environ["SPG_DATABASE_URL"] = database.engine.url.render_as_string(
         hide_password=False
@@ -130,7 +143,11 @@ def api_facts(
         ),
     )
     client = TestClient(
-        create_http_application(database=postgres_database, work_service=service),
+        create_http_application(
+            database=postgres_database,
+            work_service=service,
+            orchestrator=_ManualOnlyOrchestrator(),
+        ),
         raise_server_exceptions=False,
     )
     with client:
@@ -208,7 +225,11 @@ def _service_with_deterministic_capabilities(
 
 def _client_for_service(facts: ApiFacts, service: WorkApplicationService) -> TestClient:
     return TestClient(
-        create_http_application(database=facts.database, work_service=service),
+        create_http_application(
+            database=facts.database,
+            work_service=service,
+            orchestrator=_ManualOnlyOrchestrator(),
+        ),
         raise_server_exceptions=False,
     )
 
@@ -454,6 +475,82 @@ def test_api_13_14_16_deterministic_http_flow_attention_and_result(
         serialized = result.text.lower()
         assert "database_url" not in serialized
         assert "api_key" not in serialized
+    assert executor.dispatch_count == 1
+
+
+def test_orch_01_02_05_08_through_15_deterministic_automatic_flow(
+    api_facts: ApiFacts,
+) -> None:
+    goal = api_facts.client.post("/api/goals", json={"title": "MVP ORCH"}).json()
+    work = _submit_and_refine(api_facts.client, goal_id=goal["goal_id"])
+    work_id = UUID(work["work_id"])
+    service, executor = _service_with_deterministic_capabilities(
+        api_facts,
+        work_id,
+        produce_change=True,
+    )
+    application = create_http_application(
+        database=api_facts.database,
+        work_service=service,
+    )
+    manual_advance_calls = 0
+
+    @application.middleware("http")
+    async def count_manual_advance(request, call_next):
+        nonlocal manual_advance_calls
+        if request.url.path == f"/api/works/{work_id}/advance":
+            manual_advance_calls += 1
+        return await call_next(request)
+
+    with TestClient(application, raise_server_exceptions=False) as client:
+        approved = client.post(
+            f"/api/works/{work_id}/approve",
+            json={"authority_identity": "human:orch"},
+        )
+        assert approved.status_code == 200
+        # The Human request returns the persisted admission snapshot; Provider
+        # duration belongs to the in-process orchestration thread.
+        assert approved.json()["status"] == "READY"
+
+        orchestrator = application.state.production_orchestrator
+        assert orchestrator.wait_until_idle(work_id, 60)
+        candidate_work = client.get(f"/api/works/{work_id}").json()
+        assert candidate_work["status"] == "NEEDS_ATTENTION"
+        attention = client.get(
+            "/api/attention",
+            params={"work_id": str(work_id)},
+        ).json()
+        assert len(attention) == 1
+        assert attention[0]["kind"] == "CANDIDATE_AUTHORIZATION"
+        assert attention[0]["available_actions"] == ["AUTHORIZE"]
+        with api_facts.database.unit_of_work() as unit_of_work:
+            store = ProductStore(unit_of_work.session)
+            binding = store.runtime_binding(work_id)
+            assert binding is not None
+            before_authority = store.runtime_summary(binding)
+        assert before_authority.candidate_id is not None
+        assert before_authority.authorization_id is None
+
+        authorized = client.post(
+            f"/api/attention/{attention[0]['attention_id']}/resolve",
+            json={
+                "action": "AUTHORIZE",
+                "authority_identity": "human:orch",
+                "rationale": "authorize the exact sealed Candidate",
+            },
+        )
+        assert authorized.status_code == 200
+        assert authorized.json()["status"] == "RUNNING"
+        assert orchestrator.wait_until_idle(work_id, 60)
+
+        completed = client.get(f"/api/works/{work_id}").json()
+        result = client.get(f"/api/works/{work_id}/result").json()
+        assert completed["status"] == "COMPLETED"
+        assert result["trusted_result"] is True
+        assert result["produced_artifacts"]
+        assert result["verification_summary"]
+
+    assert manual_advance_calls == 0
     assert executor.dispatch_count == 1
 
 
