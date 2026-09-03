@@ -45,8 +45,10 @@ def test_e2e_01_optional_image_profile_preserves_default_runtime() -> None:
     assert "target: runtime" in base
     assert "CODEX_HOME" not in base
     assert "SPG_EXECUTOR_ADAPTER" not in base
+    assert "SPG_EXECUTOR_SANDBOX_MODE" not in base
     assert "target: codex-executor" in override
     assert "SPG_EXECUTOR_ADAPTER: codex-sdk" in override
+    assert "SPG_EXECUTOR_SANDBOX_MODE: full-access" in override
     assert "SPG_VERIFICATION_ADAPTER: mvp-e2e-markdown" in override
     assert "SPG_CODEX_AUTH_FILE_HOST" in override
     assert "spg-e2e-codex-state" in override
@@ -61,14 +63,19 @@ def test_e2e_02_typed_configuration_is_bounded() -> None:
     assert defaults.executor_adapter == "unconfigured"
     assert defaults.verification_adapter == "unconfigured"
     assert defaults.executor_timeout_seconds == 120.0
+    assert defaults.executor_sandbox_mode == "workspace-write"
     configured = Settings(
         executor_adapter="codex-sdk",
         verification_adapter="mvp-e2e-markdown",
         executor_timeout_seconds=600,
+        executor_sandbox_mode="full-access",
     )
     assert configured.executor_timeout_seconds == 600
+    assert configured.executor_sandbox_mode == "full-access"
     with pytest.raises(ValueError):
         Settings(executor_timeout_seconds=601)
+    with pytest.raises(ValueError):
+        Settings(executor_sandbox_mode="unsupported")
 
 
 def test_e2e_03_child_environment_keeps_credentials_out_of_transport() -> None:
@@ -95,10 +102,14 @@ def test_e2e_04_provider_timeout_is_explicit_and_bounded() -> None:
         provider_binding="codex-sdk-real",
         timeout_seconds=630,
         provider_timeout_seconds=600,
+        provider_sandbox_mode="full-access",
     )
     assert transport.provider_timeout_seconds == 600
+    assert transport.provider_sandbox_mode == "full-access"
     with pytest.raises(ValueError):
         SubprocessExecutorTransport(provider_timeout_seconds=601)
+    with pytest.raises(ValueError):
+        SubprocessExecutorTransport(provider_sandbox_mode="unsupported")
 
 
 def test_e2e_05_instruction_contains_only_governed_scope() -> None:

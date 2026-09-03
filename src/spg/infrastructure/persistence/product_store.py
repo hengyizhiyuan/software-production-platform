@@ -22,6 +22,7 @@ from spg.domain.product import (
     WorkRecord,
     WorkRuntimeBindingRecord,
 )
+from spg.domain.runtime import CompletionContract
 from spg.infrastructure.persistence.product_schema import (
     engineering_resource_bindings,
     engineering_resources,
@@ -37,6 +38,7 @@ from spg.infrastructure.persistence.runtime_schema import (
     execution_dispatches,
     human_authorizations,
     production_admissibility_records,
+    production_work_units,
     provider_execution_reports,
     proposed_repository_snapshots,
     repository_integration_effects,
@@ -183,6 +185,16 @@ class ProductStore:
         )
 
     def runtime_summary(self, binding: WorkRuntimeBindingRecord) -> RuntimeFactSummary:
+        raw_completion_contract = self.session.execute(
+            select(production_work_units.c.completion_contract).where(
+                production_work_units.c.id == binding.work_unit_id
+            )
+        ).scalar_one_or_none()
+        completion_contract = (
+            None
+            if raw_completion_contract is None
+            else CompletionContract.model_validate(raw_completion_contract)
+        )
         attempt = self.session.execute(
             select(execution_attempts)
             .where(execution_attempts.c.work_unit_id == binding.work_unit_id)
@@ -320,6 +332,11 @@ class ProductStore:
             integration_state=None if effect is None else effect["state"],
             runtime_commit_id=None if runtime_commit is None else runtime_commit["id"],
             artifact_paths=artifacts,
+            completion_requires_production_result=(
+                False
+                if completion_contract is None
+                else completion_contract.requires_observed_production_result
+            ),
             latest_event=event,
             extra={
                 "proposed_commit_identity": (

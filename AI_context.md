@@ -32,6 +32,12 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-E2E-1B — CLOSED / PASS**
 
+**MVP-E2E-1D — BLOCKED — PROVIDER SUCCESS / PRODUCTION REALITY NONE — HISTORICAL ATTEMPT PRESERVED**
+
+**MVP-E2E-1E — CLOSED / PASS**
+
+**MVP-E2E-1F — REAL EXECUTION PENDING**
+
 **MVP — IN PROGRESS**
 
 Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine, S2 Governed Artifact Production, S3 Completion, Verification & Candidate Governance, S4 Repository Integration & Runtime Commit, and S5 Failure / Recovery Hardening are **CLOSED / PASS**. S6 Real Codex Dogfood & FVS Closure is **IN PROGRESS**. S6-B1 remains **CLOSED / PARTIAL**. S6-B2 Dedicated Executor & Real Provider Boundary, S6-B2-A, and S6-B2-B1 are **CLOSED / PASS**. The S6-B2-B2 historical real probe remains **COMPLETE / PARTIAL** with `Provider SUCCESS + Production Reality NONE` preserved. S6-C1 and S6-C2-DB1 remain **CLOSED / PASS**. Authorization #4 created Attempt generation 1, whose Executor transport failed before any Provider Thread or Turn; Provider Outcome remains UNKNOWN and Production Reality remains NONE. S6-C2-R1, S6-C2-R2, S6-C2-R3, S6-C2-R4-A, and S6-C2-R4-B are **CLOSED / PASS**. The Windows S6-C2-R4-C full-regression Attempt remains **INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED**. Full-system R4 regression, R4-C, R4-D, and real maintenance-lineage recovery are **DEFERRED_BY_MVP**; they are not current MVP blockers. S6-C remains historically IN PROGRESS, with its Recovery Barrier preserved rather than advanced.
@@ -41,6 +47,12 @@ MVP-DOCKER-1 Attempt #1 remains historical evidence: **BLOCKED — HOST_DOCKER_U
 MVP-E2E-1A Attempt generation 1 remains immutable historical evidence: Attempt `b8992eb6-893d-40eb-a8a2-7c3fb008d4c0`, Dispatch `b433b2b3-230e-422d-a754-6990b289cf12`, Provider Outcome **UNKNOWN**, Provider Thread / Turn **0 / 0**, and independently observed Production Reality **NONE**. No Completion, Candidate, Integration, or Runtime Commit exists. The Codex process stopped before Thread creation because its SQLite state runtime could not initialize under the Windows bind-mounted `/home/spg/.codex`.
 
 MVP-E2E-1B is CLOSED / PASS. It separates the exact authorized authentication cache from mutable runtime state. The E2E `CODEX_HOME` now uses a dedicated Linux-native Docker named volume; the exact authentication file is exposed read-only at the Executor infrastructure boundary. The no-Turn child preflight initialized the locked Codex 0.147.0 app-server and SQLite state with authentication **AVAILABLE**, a writable state root, and Provider Thread / Turn **0 / 0**. The historical Work now projects **BLOCKED / EXECUTION_STOPPED** with informational Architecture/Operator Attention and no retry, resume, or Completion-evaluation action. Real governed execution remains unproven.
+
+MVP-E2E-1D remains immutable historical evidence: Attempt `72e89694-77d1-49d4-82ca-557f8433383f`, Dispatch `43f4a1b6-ebb7-452c-8b99-e8de7019be7c`, Provider Report `4a3599e6-324e-4385-855a-0916bee09d31`, and Repository Observation `b12558c9-af32-43f8-a64c-42659bd78c1b`. The real Provider Thread and Turn completed with Provider Outcome **SUCCESS**, but the independently observed Production Reality was **NONE**: the change manifest was empty, the required artifact was absent, and no Completion, Candidate, Integration, or Runtime Commit exists. Provider terminal evidence recorded the exact execution blocker `bwrap: No permissions to create a new namespace`. Provider success is not Production Truth.
+
+MVP-E2E-1E is **CLOSED / PASS**. The E2E-only Dedicated Executor selects the locked Codex SDK's public `full-access` sandbox policy to avoid unsupported nested namespace isolation inside the already-isolated Docker boundary; the default non-E2E policy remains `workspace-write`. Docker isolation, the exact Attempt workspace, authoritative-repository separation, credential filtering, governed scope, and independent Production Reality observation remain mandatory. A zero-Turn child preflight proved public-SDK policy acceptance, writable isolated workspace, authentication readiness, and Provider Thread / Turn **0 / 0**. For a Completion Contract that requires production output or change, terminal Provider evidence plus Production Reality **NONE** now projects **BLOCKED / EXECUTION_STOPPED** without changing Provider Outcome or inventing Completion or recovery authority.
+
+MVP-E2E-1F is **REAL EXECUTION PENDING**. Its admitted path requires a fresh Goal/Work lineage, exactly one real Codex Provider Turn through the governed Dedicated Executor, independent Production Observation, targeted Verification, and a stop at Candidate Human Attention without Candidate authorization or repository integration.
 
 The current delivery priority is governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): review the implemented local Docker MVP, then validate one real local governed Codex production loop before Linux deployment and systematic self-dogfood. ChatGPT + Codex remains the development workflow; a CLI-only Runtime is not the MVP product.
 
@@ -88,6 +100,9 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-DOCKER-1 — Local Integrated Product Runtime | CLOSED / PASS |
 | MVP-E2E-1A — Real Local Governed Codex Execution to Human Candidate Attention | BLOCKED / RECOVERABLE — HISTORICAL ATTEMPT PRESERVED |
 | MVP-E2E-1B — Container-Native Codex State Repair & Blocked-Reality Projection | CLOSED / PASS |
+| MVP-E2E-1D — Fresh Work Real Governed Codex Production Attempt | BLOCKED — PROVIDER SUCCESS / PRODUCTION REALITY NONE — HISTORICAL ATTEMPT PRESERVED |
+| MVP-E2E-1E — Container Codex Sandbox Compatibility & Terminal-NONE Projection | CLOSED / PASS |
+| MVP-E2E-1F — First Real Watt Governed Production Artifact | REAL EXECUTION PENDING |
 | F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
 | F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
 | F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |

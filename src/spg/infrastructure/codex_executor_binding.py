@@ -34,6 +34,9 @@ AUTH_READINESS = AUTH_READINESS_REQUIRES_EXECUTION_TIME_PROOF
 REAL_PROVIDER_TIMEOUT_SECONDS = 120.0
 HIDDEN_REPOSITORY_PATH = Path("/__spg_authoritative_repository_not_exposed__")
 REQUIRED_RUNTIME_PREREQUISITES = ("CODEX_HOME", "PATH")
+CODEX_SANDBOX_VARIABLE = "SPG_EXECUTOR_PROVIDER_SANDBOX_MODE"
+DEFAULT_CODEX_SANDBOX = "workspace-write"
+SUPPORTED_CODEX_SANDBOXES = frozenset({"workspace-write", "full-access"})
 
 
 @dataclass(frozen=True)
@@ -104,12 +107,25 @@ def preflight_codex_binding(
             )
         selected_adapter_factory = CodexSdkExecutor
 
+    try:
+        sandbox = _selected_codex_sandbox(environment)
+    except ValueError:
+        return _response(
+            request,
+            status="UNSUPPORTED_SANDBOX_POLICY",
+            authentication_readiness=authentication_readiness,
+            sdk_version=sdk_version,
+            metadata={"selected_sandbox_policy": environment.get(CODEX_SANDBOX_VARIABLE)},
+        )
+
     dispatch, materialized = _translated_binding(request)
     try:
-        adapter = selected_adapter_factory(
-            materialized,
-            workspace_validator=_validate_translated_workspace,
-        )
+        adapter_options: dict[str, object] = {
+            "workspace_validator": _validate_translated_workspace,
+        }
+        if CODEX_SANDBOX_VARIABLE in environment:
+            adapter_options["sandbox"] = sandbox
+        adapter = selected_adapter_factory(materialized, **adapter_options)
         adapter_metadata = adapter.preflight(dispatch)
     except Exception as error:
         return _response(
@@ -143,6 +159,8 @@ def preflight_codex_binding(
             ),
             "authentication_secret_inspected": False,
             "authentication_state_check": "STATE_MARKER_EXISTENCE_ONLY",
+            "selected_sandbox_policy": sandbox.value,
+            "sandbox_policy_validation": "PUBLIC_SDK_ENUM_ACCEPTED_NO_TURN",
         },
     )
 
@@ -313,11 +331,14 @@ def execute_codex_binding(
 
     dispatch, materialized = _translated_binding(request)
     try:
-        adapter = selected_adapter_factory(
-            materialized,
-            timeout_seconds=timeout_seconds,
-            workspace_validator=_validate_translated_workspace,
-        )
+        sandbox = _selected_codex_sandbox(environment)
+        adapter_options: dict[str, object] = {
+            "timeout_seconds": timeout_seconds,
+            "workspace_validator": _validate_translated_workspace,
+        }
+        if CODEX_SANDBOX_VARIABLE in environment:
+            adapter_options["sandbox"] = sandbox
+        adapter = selected_adapter_factory(materialized, **adapter_options)
         result = adapter.dispatch(dispatch)
     except Exception as error:
         result = ExecutorDispatchResult(
@@ -334,6 +355,17 @@ def execute_codex_binding(
             summary="Codex adapter initialization or dispatch failed",
         )
     return _execution_response(request, result, environment=environment)
+
+
+def _selected_codex_sandbox(environment: Mapping[str, str]):
+    """Resolve only supported public SDK sandbox policies."""
+
+    from openai_codex import Sandbox
+
+    selected = environment.get(CODEX_SANDBOX_VARIABLE, DEFAULT_CODEX_SANDBOX)
+    if selected not in SUPPORTED_CODEX_SANDBOXES:
+        raise ValueError("unsupported Codex sandbox policy")
+    return Sandbox(selected)
 
 
 def unsupported_provider_binding(

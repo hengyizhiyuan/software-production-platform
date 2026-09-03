@@ -30,6 +30,7 @@ def test_state_01_02_03_12_compose_separates_default_and_e2e_state() -> None:
     assert "SPG_CODEX_HOME_HOST" not in override
     assert "SPG_CODEX_AUTH_FILE_HOST" in override
     assert "SPG_CODEX_AUTH_SOURCE: /run/secrets/spg-codex-auth" in override
+    assert "SPG_EXECUTOR_SANDBOX_MODE: full-access" in override
 
 
 def test_state_04_auth_input_is_linked_without_content_copy_or_output(

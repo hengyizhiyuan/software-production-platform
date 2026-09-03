@@ -142,6 +142,7 @@ class SubprocessExecutorTransport:
         deterministic_specification: DeterministicExecutionSpecification | None = None,
         provider_binding: str | None = None,
         provider_timeout_seconds: float | None = None,
+        provider_sandbox_mode: str | None = None,
     ) -> None:
         if timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive")
@@ -154,6 +155,9 @@ class SubprocessExecutorTransport:
         ):
             raise ValueError("provider_timeout_seconds must be within (0, 600]")
         self.provider_timeout_seconds = provider_timeout_seconds
+        if provider_sandbox_mode not in {None, "workspace-write", "full-access"}:
+            raise ValueError("unsupported Executor Provider sandbox mode")
+        self.provider_sandbox_mode = provider_sandbox_mode
         if deterministic_specification is not None and provider_binding not in {
             None,
             "deterministic-fixture",
@@ -174,6 +178,10 @@ class SubprocessExecutorTransport:
         if self.provider_timeout_seconds is not None:
             environment["SPG_EXECUTOR_PROVIDER_TIMEOUT_SECONDS"] = str(
                 self.provider_timeout_seconds
+            )
+        if self.provider_sandbox_mode is not None:
+            environment["SPG_EXECUTOR_PROVIDER_SANDBOX_MODE"] = (
+                self.provider_sandbox_mode
             )
         try:
             wire_request = request.model_dump_json().encode(

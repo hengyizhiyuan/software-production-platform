@@ -24,6 +24,7 @@ from spg.domain.verification import VerificationResultValue
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_schema import (
+    completion_evaluations,
     execution_attempts,
     execution_dispatches,
     provider_execution_reports,
@@ -388,14 +389,15 @@ def test_api_10_11_12_15_19_bounded_advance_and_truthful_observation(
             assert connection.scalar(select(func.count()).select_from(execution_attempts)) == 1
             assert connection.scalar(select(func.count()).select_from(execution_dispatches)) == 0
         client.post(f"/api/works/{work['work_id']}/advance")
-        observed = client.post(f"/api/works/{work['work_id']}/advance")
-        assert observed.json()["status"] == "RUNNING"
-        with api_facts.database.engine.connect() as connection:
-            assert connection.scalar(select(func.count()).select_from(provider_execution_reports)) == 1
-            assert connection.scalar(select(func.count()).select_from(repository_observations)) == 1
         blocked = client.post(f"/api/works/{work['work_id']}/advance")
         assert blocked.json()["status"] == "BLOCKED"
         assert blocked.json()["status"] != "COMPLETED"
+        with api_facts.database.engine.connect() as connection:
+            assert connection.scalar(select(func.count()).select_from(provider_execution_reports)) == 1
+            assert connection.scalar(select(func.count()).select_from(repository_observations)) == 1
+            assert connection.scalar(select(func.count()).select_from(completion_evaluations)) == 0
+        repeated = client.post(f"/api/works/{work['work_id']}/advance")
+        assert repeated.json()["status"] == "BLOCKED"
     assert executor.dispatch_count == 1
 
 

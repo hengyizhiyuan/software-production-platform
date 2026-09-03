@@ -65,6 +65,16 @@ class CompletionContract(BaseModel):
             raise ValueError("Completion Contract must declare at least one obligation")
         return self
 
+    @property
+    def requires_observed_production_result(self) -> bool:
+        """Whether NONE Reality cannot satisfy the production obligations."""
+
+        return bool(
+            self.required_outputs
+            or self.required_changes
+            or self.required_markers
+        )
+
 
 class BootstrapRequest(BaseModel):
     """Explicit governed input for initial Trusted Baseline admission."""

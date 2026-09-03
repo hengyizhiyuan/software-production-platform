@@ -163,6 +163,7 @@ class Application:
             selected_executor = GovernedDedicatedExecutor(
                 selected_database,
                 provider_timeout_seconds=self.settings.executor_timeout_seconds,
+                provider_sandbox_mode=self.settings.executor_sandbox_mode,
             )
             selected_binding = ExecutorBinding(
                 binding_ref="binding:codex-sdk-dedicated-process",

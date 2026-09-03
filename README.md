@@ -53,11 +53,24 @@ Separate persistent E2E database/runtime volumes remain in use. Credentials are
 not copied into the image or transported through SPG product/domain contracts.
 This local topology does not claim OS/container-level credential isolation.
 
+The E2E profile explicitly selects the Codex SDK public `full-access` sandbox
+policy because the Dedicated Executor already runs inside the isolated Docker
+boundary and nested Linux namespace creation is unavailable there. This only
+disables Codex's nested command sandbox for that E2E profile: the non-root
+container, exact Attempt worktree, separate authoritative repository,
+credential filtering, authorized-path contract, and independent Production
+Observation remain mandatory. The default product and SDK configuration remain
+`workspace-write`. Production-grade sandbox hardening remains
+`DEFERRED_BY_MVP`; the E2E setting is not a production security claim.
+
 The first real MVP-E2E-1A Attempt remains blocked historical evidence:
 Provider Outcome is `UNKNOWN`, Production Reality is `NONE`, and no Provider
-Thread or Turn was created. The product projects that stopped lineage as
-`BLOCKED` with informational Architecture/Operator Attention; it does not
-offer retry, resume, or Completion evaluation authority.
+Thread or Turn was created. MVP-E2E-1D created one real Thread and Turn whose
+Provider Outcome was `SUCCESS`, while independent Production Reality remained
+`NONE` because nested `bwrap` sandbox initialization failed. Both lineages are
+projected `BLOCKED` when their Completion Contract requires a production
+result. Provider Outcome remains a separate immutable fact; no retry, resume,
+or Completion evaluation authority is inferred.
 
 ## Host-side development
 

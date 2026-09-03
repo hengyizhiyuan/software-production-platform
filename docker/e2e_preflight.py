@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 import json
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -53,6 +54,14 @@ def main() -> int:
         _run(repository, "commit", "-m", "preflight baseline")
         revision = _run(repository, "rev-parse", "HEAD")
         _run(repository, "worktree", "add", "--detach", str(workspace), revision)
+        writable_marker = workspace / ".spg-workspace-write-preflight"
+        writable_marker.write_text("writable\n", encoding="utf-8")
+        writable_marker.unlink()
+        workspace_writable = True
+        authoritative_repository_isolated = (
+            workspace.resolve() != repository.resolve()
+            and _run(repository, "status", "--porcelain") == ""
+        )
 
         attempt_id = uuid4()
         run_id = uuid4()
@@ -114,6 +123,9 @@ def main() -> int:
             materialized,
             transport=SubprocessExecutorTransport(
                 provider_binding=CODEX_STATE_RUNTIME_BINDING,
+                provider_sandbox_mode=os.environ.get(
+                    "SPG_EXECUTOR_SANDBOX_MODE"
+                ),
                 timeout_seconds=60,
             ),
         ).preflight_provider_binding(
@@ -145,6 +157,16 @@ def main() -> int:
             "provider_turns_started": response.metadata.get(
                 "provider_turns_started"
             ),
+            "selected_sandbox_policy": response.metadata.get(
+                "selected_sandbox_policy"
+            ),
+            "sandbox_policy_validation": response.metadata.get(
+                "sandbox_policy_validation"
+            ),
+            "attempt_workspace_writable": workspace_writable,
+            "authoritative_repository_isolated": (
+                authoritative_repository_isolated
+            ),
         }
         print(json.dumps(safe, sort_keys=True))
         return 0 if (
@@ -156,6 +178,9 @@ def main() -> int:
             == "APP_SERVER_INITIALIZED"
             and response.metadata.get("provider_threads_started") == 0
             and response.metadata.get("provider_turns_started") == 0
+            and response.metadata.get("selected_sandbox_policy") == "full-access"
+            and workspace_writable
+            and authoritative_repository_isolated
         ) else 1
 
 

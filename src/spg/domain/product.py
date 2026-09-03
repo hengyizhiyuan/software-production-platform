@@ -260,6 +260,7 @@ class RuntimeFactSummary(BaseModel):
     integration_state: str | None = None
     runtime_commit_id: UUID | None = None
     artifact_paths: tuple[str, ...] = ()
+    completion_requires_production_result: bool = False
     latest_event: str | None = None
     extra: dict[str, Any] = Field(default_factory=dict)
 

@@ -118,6 +118,7 @@ def test_stopped_unknown_none_reality_is_blocked_before_completion() -> None:
             dispatch_id=uuid4(),
             provider_outcome="UNKNOWN",
             observation_id=uuid4(),
+            completion_requires_production_result=True,
         ),
     )
     assert status is WorkStatus.BLOCKED
@@ -128,6 +129,47 @@ def test_stopped_unknown_none_reality_is_blocked_before_completion() -> None:
         "Architecture/Operator review required."
     )
     assert "Evaluate Completion" not in next_action
+
+
+def test_terminal_success_none_required_result_is_blocked_without_rewriting_provider() -> None:
+    facts = RuntimeFactSummary(
+        attempt_id=uuid4(),
+        dispatch_id=uuid4(),
+        provider_outcome="SUCCESS",
+        observation_id=uuid4(),
+        completion_requires_production_result=True,
+    )
+
+    status, step, event, next_action = _projection_service()._projection_state(
+        _work(),
+        facts,
+    )
+
+    assert status is WorkStatus.BLOCKED
+    assert step == "EXECUTION_STOPPED"
+    assert event == "REQUIRED_PRODUCTION_RESULT_ABSENT"
+    assert next_action == (
+        "Execution completed without the required production result. "
+        "Architecture/Operator review required."
+    )
+    assert facts.provider_outcome == "SUCCESS"
+
+
+def test_terminal_success_none_remains_representable_when_contract_allows_none() -> None:
+    status, step, _, next_action = _projection_service()._projection_state(
+        _work(),
+        RuntimeFactSummary(
+            attempt_id=uuid4(),
+            dispatch_id=uuid4(),
+            provider_outcome="SUCCESS",
+            observation_id=uuid4(),
+            completion_requires_production_result=False,
+        ),
+    )
+
+    assert status is WorkStatus.RUNNING
+    assert step == "PRODUCTION_OBSERVATION"
+    assert next_action == "Evaluate Completion"
 
 
 def test_broad_request_uses_needs_refinement_policy() -> None:

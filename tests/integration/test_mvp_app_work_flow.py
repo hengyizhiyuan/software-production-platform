@@ -8,7 +8,7 @@ from uuid import uuid4
 from alembic import command
 from alembic.config import Config
 import pytest
-from sqlalchemy import inspect, select
+from sqlalchemy import func, inspect, select
 
 from spg.application.runtime import RuntimeService
 from spg.application.work import WorkApplicationService
@@ -31,6 +31,7 @@ from spg.infrastructure.persistence import Database, product_tables, runtime_tab
 from spg.infrastructure.persistence.product_schema import product_works
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_schema import (
+    completion_evaluations,
     execution_attempts,
     governance_records,
     production_runs,
@@ -418,11 +419,11 @@ def test_work_14_15_18_24_provider_report_is_not_completion(
     )
     service.advance_work(draft.work_id)
     service.advance_work(draft.work_id)
-    observed = service.advance_work(draft.work_id)
-    assert observed.status is WorkStatus.RUNNING
     blocked = service.advance_work(draft.work_id)
     assert blocked.status is WorkStatus.BLOCKED
     assert blocked.status is not WorkStatus.COMPLETED
+    repeated = service.advance_work(draft.work_id)
+    assert repeated.status is WorkStatus.BLOCKED
     with app_facts.database.engine.connect() as connection:
         report = connection.execute(
             select(provider_execution_reports.c.outcome)
@@ -430,8 +431,12 @@ def test_work_14_15_18_24_provider_report_is_not_completion(
         observation = connection.execute(
             select(repository_observations.c.id)
         ).scalar_one()
+        completion_count = connection.scalar(
+            select(func.count()).select_from(completion_evaluations)
+        )
     assert report == ProviderReportedOutcome.SUCCESS.value
     assert observation is not None
+    assert completion_count == 0
     assert executor.dispatch_count == 1
 
 

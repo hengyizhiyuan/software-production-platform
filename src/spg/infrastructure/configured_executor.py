@@ -20,11 +20,13 @@ class GovernedDedicatedExecutor:
         database: Database,
         *,
         provider_timeout_seconds: float,
+        provider_sandbox_mode: str = "workspace-write",
     ) -> None:
         if not 0 < provider_timeout_seconds <= 600:
             raise ValueError("provider_timeout_seconds must be within (0, 600]")
         self.database = database
         self.provider_timeout_seconds = provider_timeout_seconds
+        self.provider_sandbox_mode = provider_sandbox_mode
         self.materialization = ExecutionInputMaterializationService(database)
 
     def dispatch(self, request: ExecutorDispatchRequest) -> ExecutorDispatchResult:
@@ -53,6 +55,7 @@ class GovernedDedicatedExecutor:
             timeout_seconds=self.provider_timeout_seconds + 30,
             provider_binding=CODEX_REAL_BINDING,
             provider_timeout_seconds=self.provider_timeout_seconds,
+            provider_sandbox_mode=self.provider_sandbox_mode,
         )
         return DedicatedExecutorClient(
             materialized,

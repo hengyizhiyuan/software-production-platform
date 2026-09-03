@@ -1,6 +1,7 @@
 """Typed environment-based configuration for the SPG foundation."""
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -26,4 +27,7 @@ class Settings(BaseSettings):
     )
     executor_adapter: str = "unconfigured"
     executor_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
+    executor_sandbox_mode: Literal["workspace-write", "full-access"] = (
+        "workspace-write"
+    )
     verification_adapter: str = "unconfigured"

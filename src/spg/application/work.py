@@ -559,6 +559,11 @@ class WorkApplicationService:
         if summary.observation_id is None:
             return self.get_work(work_id)
         if summary.completion_id is None:
+            if (
+                work_unit.completion_contract.requires_observed_production_result
+                and not summary.artifact_paths
+            ):
+                return self.get_work(work_id)
             self.completion.evaluate_observation(summary.observation_id)
             return self.get_work(work_id)
         if summary.completion_outcome != "PRODUCED":
@@ -862,12 +867,28 @@ class WorkApplicationService:
             and facts.observation_id is not None
             and not facts.artifact_paths
             and facts.completion_id is None
+            and facts.completion_requires_production_result
         ):
             return (
                 WorkStatus.BLOCKED,
                 "EXECUTION_STOPPED",
                 "PROVIDER_OUTCOME_UNKNOWN_PRODUCTION_NONE",
                 "Execution stopped before Provider completion. Architecture/Operator review required.",
+            )
+        if (
+            facts.dispatch_id is not None
+            and facts.provider_outcome is not None
+            and facts.observation_id is not None
+            and not facts.artifact_paths
+            and facts.completion_id is None
+            and facts.completion_requires_production_result
+        ):
+            return (
+                WorkStatus.BLOCKED,
+                "EXECUTION_STOPPED",
+                "REQUIRED_PRODUCTION_RESULT_ABSENT",
+                "Execution completed without the required production result. "
+                "Architecture/Operator review required.",
             )
         if facts.completion_outcome == "NOT_PRODUCED":
             return WorkStatus.BLOCKED, "COMPLETION", "OUTPUT_NOT_PRODUCED", "Review Completion failures"

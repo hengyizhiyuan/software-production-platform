@@ -57,6 +57,7 @@ class CodexSdkExecutor:
         codex_factory: CodexFactory | None = None,
         model: str | None = None,
         timeout_seconds: float | None = None,
+        sandbox: Sandbox = Sandbox.workspace_write,
         workspace_validator: WorkspaceValidator | None = None,
     ) -> None:
         if timeout_seconds is not None and timeout_seconds <= 0:
@@ -65,6 +66,7 @@ class CodexSdkExecutor:
         self.codex_factory = codex_factory or Codex
         self.model = model
         self.timeout_seconds = timeout_seconds
+        self.sandbox = sandbox
         self.workspace_validator = workspace_validator or _validate_host_workspace
 
     def preflight(self, request: ExecutorDispatchRequest) -> dict[str, Any]:
@@ -92,7 +94,7 @@ class CodexSdkExecutor:
                     cwd=str(workspace),
                     ephemeral=True,
                     model=self.model,
-                    sandbox=Sandbox.workspace_write,
+                    sandbox=self.sandbox,
                 )
                 thread_id = str(thread.id)
                 provider_reference = f"codex-sdk:thread:{thread_id}"
@@ -101,7 +103,7 @@ class CodexSdkExecutor:
                     approval_mode=ApprovalMode.deny_all,
                     cwd=str(workspace),
                     model=self.model,
-                    sandbox=Sandbox.workspace_write,
+                    sandbox=self.sandbox,
                 )
                 turn_id = str(turn.id)
                 provider_reference = f"codex-sdk:thread:{thread_id}:turn:{turn_id}"
@@ -228,7 +230,7 @@ class CodexSdkExecutor:
             "sdk_version": version("openai-codex"),
             "runtime_version": version("openai-codex-cli-bin"),
             "model": self.model or "sdk-default",
-            "sandbox": Sandbox.workspace_write.value,
+            "sandbox": self.sandbox.value,
             "approval_mode": ApprovalMode.deny_all.value,
             "dispatch_id": str(request.dispatch_id),
             "input_id": str(self.materialized_input.id),
