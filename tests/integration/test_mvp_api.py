@@ -368,6 +368,42 @@ def test_api_07_08_09_refinement_and_governed_admission(
     assert binding is not None
 
 
+def test_intake_multilingual_constraint_persists_and_projects(
+    api_facts: ApiFacts,
+) -> None:
+    requirement = (
+        "把我们刚刚确立的 Production Orchestration Lite 设计原则整理成一份正式的"
+        "产品/架构说明文档，放到现有文档体系中合适的位置。"
+        "重点说明 Human-in-the-loop 不等于 Human-as-the-loop、Watt 的自动推进边界、"
+        "Human Attention 的职责，以及 MVP 当前方案和未来演进方向的区别。"
+        "尽量复用现有已经确定的设计，不要发散新的能力。"
+    )
+    expected = ["尽量复用现有已经确定的设计，不要发散新的能力"]
+    submitted = api_facts.client.post(
+        "/api/works",
+        json={"requirement": requirement},
+    )
+    assert submitted.status_code == 201
+    work_id = submitted.json()["work_id"]
+
+    refined = api_facts.client.post(
+        f"/api/works/{work_id}/refine",
+        json={},
+    )
+    assert refined.status_code == 200
+    assert refined.json()["status"] == "AWAITING_APPROVAL"
+    assert refined.json()["constraints"] == expected
+
+    with api_facts.database.unit_of_work() as unit_of_work:
+        persisted = ProductStore(unit_of_work.session).work(UUID(work_id))
+    assert persisted is not None
+    assert persisted.constraints == tuple(expected)
+
+    projected = api_facts.client.get(f"/api/works/{work_id}")
+    assert projected.status_code == 200
+    assert projected.json()["constraints"] == expected
+
+
 def test_needs_refinement_reject_and_request_refinement_routes(
     api_facts: ApiFacts,
 ) -> None:

@@ -1328,9 +1328,33 @@ class WorkApplicationService:
             r"\b(do not|must not|only|must|keep|without|do not expand|do not introduce)\b",
             flags=re.IGNORECASE,
         )
-        for fragment in re.split(r"[\n.;]+", raw):
-            candidate = " ".join(fragment.split()).strip(" -:")
-            if candidate and marker.search(candidate):
+        chinese_markers = (
+            "不要",
+            "不得",
+            "不应",
+            "禁止",
+            "必须",
+            "只能",
+            "仅限",
+        )
+        fragments = tuple(
+            " ".join(fragment.split()).strip(" -:")
+            for fragment in re.split(r"[\n.;。；]+", raw)
+        )
+        has_explicit_chinese_instruction = any(
+            any(chinese_marker in fragment for chinese_marker in chinese_markers)
+            for fragment in fragments
+        )
+        for candidate in fragments:
+            chinese_instruction = any(
+                chinese_marker in candidate for chinese_marker in chinese_markers
+            )
+            bounded_reuse = (
+                "尽量复用" in candidate and has_explicit_chinese_instruction
+            )
+            if candidate and (
+                marker.search(candidate) or chinese_instruction or bounded_reuse
+            ):
                 constraints.append(candidate)
         return tuple(dict.fromkeys(constraints))
 

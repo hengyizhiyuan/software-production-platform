@@ -42,6 +42,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-INTAKE-2A — CLOSED / PASS**
 
+**MVP-INTAKE-2B — CLOSED / PASS**
+
 **FIRST COMPLETE WATT GOVERNED SOFTWARE PRODUCTION LOOP — PROVEN**
 
 **MVP-E2E-1I — IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW**
@@ -119,6 +121,7 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-E2E Proof — Two Complete Governed Watt Production Loops | CLOSED / PASS |
 | MVP-ORCH-1 — Production Orchestration Lite | CLOSED / PASS |
 | MVP-INTAKE-2A — Governed Artifact Target Contract | CLOSED / PASS |
+| MVP-INTAKE-2B — Bounded Chinese Work Constraints | CLOSED / PASS |
 | F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
 | F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
 | F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
@@ -254,6 +257,16 @@ with no retry, Candidate, Authorization, Integration, or Runtime Commit. See
 The admitted lesson is that production automation amplifies the quality of the
 admitted Production Contract: a fast autonomous production line with a weak
 task contract only produces incorrectly governed output faster.
+
+ORCH Dogfood #2 Draft preserves a second pre-production finding without
+approval or execution: repository-aware Artifact placement is **PASS**, while
+Constraint extraction is **FAIL** for the explicit Chinese instruction
+`尽量复用现有已经确定的设计，不要发散新的能力。`. The root cause is unsupported
+Chinese explicit constraint phrasing, classified as `EXTRACTION_RULE_GAP` and
+`TEST_COVERAGE_GAP`. Dogfood #2 is not successful and remains unexecuted.
+MVP-INTAKE-2B is **CLOSED / PASS** after focused validation and Architecture
+Lead Reality Review; this closure does not reinterpret or modify the preserved
+pre-fix Draft.
 
 ## Program-level Architecture Source of Truth
 

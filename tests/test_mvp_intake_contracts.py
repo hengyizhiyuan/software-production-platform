@@ -27,6 +27,17 @@ boundary, Human Attention responsibility, MVP vs future evolution, and reuse
 the accepted design. Do not expand or invent new capabilities beyond the
 already accepted design."""
 
+CHINESE_DOGFOOD_CONSTRAINT = (
+    "尽量复用现有已经确定的设计，不要发散新的能力"
+)
+CHINESE_DOGFOOD_INTENT = (
+    "把我们刚刚确立的 Production Orchestration Lite 设计原则整理成一份正式的"
+    "产品/架构说明文档，放到现有文档体系中合适的位置。"
+    "重点说明 Human-in-the-loop 不等于 Human-as-the-loop、Watt 的自动推进边界、"
+    "Human Attention 的职责，以及 MVP 当前方案和未来演进方向的区别。"
+    "尽量复用现有已经确定的设计，不要发散新的能力。"
+)
+
 
 def test_intake_01_02_03_06_07_08_repository_aware_proposal(
     tmp_path: Path,
@@ -69,6 +80,54 @@ def test_intake_01_02_03_06_07_08_repository_aware_proposal(
     )
     assert update is not None
     assert update.operation is ArtifactTargetOperation.UPDATE
+
+
+def test_intake_multilingual_extracts_exact_dogfood_constraint() -> None:
+    assert WorkApplicationService._extract_constraints(
+        f"{CHINESE_DOGFOOD_CONSTRAINT}。"
+    ) == (CHINESE_DOGFOOD_CONSTRAINT,)
+    assert WorkApplicationService._extract_constraints(CHINESE_DOGFOOD_INTENT) == (
+        CHINESE_DOGFOOD_CONSTRAINT,
+    )
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    (
+        "不要发散新的能力",
+        "不得修改已确认的边界",
+        "不应引入新的运行时依赖",
+        "禁止修改历史事实",
+        "必须保持精确基线绑定",
+        "只能变更已批准的文档路径",
+        "仅限当前 MVP 范围",
+    ),
+)
+def test_intake_multilingual_supports_bounded_chinese_markers(phrase: str) -> None:
+    assert WorkApplicationService._extract_constraints(f"{phrase}。") == (phrase,)
+
+
+def test_intake_multilingual_splits_chinese_punctuation_and_bounds_reuse(
+) -> None:
+    assert WorkApplicationService._extract_constraints(
+        "尽量复用现有设计。必须保持现有产品边界；不要新增能力。"
+    ) == (
+        "尽量复用现有设计",
+        "必须保持现有产品边界",
+        "不要新增能力",
+    )
+
+
+@pytest.mark.parametrize(
+    "prose",
+    (
+        "系统复用现有设计并描述未来能力。",
+        "这里介绍当前行为和未来方向。",
+        "团队尽量复用现有设计。",
+    ),
+)
+def test_intake_multilingual_rejects_descriptive_chinese_prose(prose: str) -> None:
+    assert WorkApplicationService._extract_constraints(prose) == ()
 
 
 def test_intake_04_05_16_human_override_is_safe_and_replaces_authority(
