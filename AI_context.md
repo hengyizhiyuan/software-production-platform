@@ -44,6 +44,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-INTAKE-2B — CLOSED / PASS**
 
+**MVP-INTAKE-DOGFOOD-3 — CLOSED / PASS**
+
 **FIRST COMPLETE WATT GOVERNED SOFTWARE PRODUCTION LOOP — PROVEN**
 
 **MVP-E2E-1I — IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW**
@@ -122,6 +124,7 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-ORCH-1 — Production Orchestration Lite | CLOSED / PASS |
 | MVP-INTAKE-2A — Governed Artifact Target Contract | CLOSED / PASS |
 | MVP-INTAKE-2B — Bounded Chinese Work Constraints | CLOSED / PASS |
+| MVP-INTAKE-DOGFOOD-3 — Same-Intent Trusted Completion | CLOSED / PASS |
 | F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
 | F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
 | F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
@@ -267,6 +270,19 @@ Chinese explicit constraint phrasing, classified as `EXTRACTION_RULE_GAP` and
 MVP-INTAKE-2B is **CLOSED / PASS** after focused validation and Architecture
 Lead Reality Review; this closure does not reinterpret or modify the preserved
 pre-fix Draft.
+
+ORCH Dogfood #3 is **CLOSED / PASS**. The same Human Intent used in Dogfood #1
+and #2 reached `COMPLETED` with Chinese constraint extraction, automatic
+orchestration, Verification `PASS`, exact Human Candidate Authorization,
+Repository Integration, Runtime Commit, Trusted Baseline advancement, and
+`trusted_result=true`; it required **0 manual Advance** actions. The three-step
+evidence sequence is: Dogfood #1 exposed Verification Contract and refinement
+findings; Dogfood #2 proved Artifact placement and exposed the Chinese
+constraint-extraction gap before execution; Dogfood #3 reached same-intent
+trusted completion. A separate `EXECUTION_PROGRESS_OBSERVABILITY_GAP` records
+that long-running healthy execution lacks sufficiently clear stage, progress,
+elapsed-time, and still-working feedback. Its interaction design and
+implementation are deferred. See [Dogfood #3 Trusted Completion Evidence](docs/evidence/dogfood/intake-dogfood-3-trusted-completion.md).
 
 ## Program-level Architecture Source of Truth
 
