@@ -11,3 +11,7 @@ Provider completion is not Production Truth. Human Authority is required before 
 ## Evidence Boundary
 
 Production Reality is determined independently from Provider completion and self-reported results.
+
+## Continuous Production
+
+This change is a second independent Watt Work starting from the Trusted Baseline created by the first governed production loop. Successful prior production becomes engineering input for subsequent Work.
