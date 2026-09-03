@@ -47,7 +47,7 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Production Planner | Architecture and contracts exist; no complete product-facing Planner workflow | PARTIAL / MVP GAP |
 | Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | MVP CORE / IMPLEMENTED; real Provider loop remains separate |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
-| Real local governed Codex E2E | Optional locked Codex image profile, Dedicated Executor composition, and targeted Markdown Verification are implemented; no live result is claimed in Git | MVP CORE / IMPLEMENTED; REAL EXECUTION PENDING |
+| Real local governed Codex E2E | The first real Attempt is preserved as BLOCKED / RECOVERABLE with UNKNOWN Provider Outcome, NONE Production Reality, and 0 / 0 Thread/Turn; container-native Codex state and truthful blocked projection are CLOSED / PASS | MVP CORE / BLOCKED HISTORY PRESERVED; E2E-1B CLOSED / PASS |
 | Local persistent Runtime database | Logical spg_dev / spg_test / historical spg_runtime separation exists; the product composition uses only spg_dev | MVP CORE / GUARDRAIL |
 | Linux deployment | Candidate checkpoint exists; server bootstrap and promotion validation have not started | POST-LOCAL-MVP |
 | Full Guardian / ECF | Extension boundaries and Context Assembly Lite exist; full systems are not integrated | DEFERRED_BY_MVP |
@@ -205,7 +205,7 @@ The MVP does not require visual polish, complex dashboards, drag-and-drop workfl
 3. **Minimal HTTP API** — CLOSED / PASS; exposes only the application commands and queries needed by the product.
 4. **Functional Web UI** — CLOSED / PASS.
 5. **Local Docker integration** — CLOSED / PASS. PostgreSQL, migration, API, and UI are composed without requiring a Provider credential.
-6. **Real local end-to-end MVP task** — E2E enablement is implemented and real execution remains pending. The bounded slice stops at Candidate Human Attention; authorization and integration require later explicit authority.
+6. **Real local end-to-end MVP task** — MVP-E2E-1A remains BLOCKED / RECOVERABLE historical evidence. MVP-E2E-1B container-native state and blocked-Reality projection are CLOSED / PASS. A new governed Attempt requires separate authority and lawful recovery admission; no real E2E success is claimed.
 7. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
 8. **Linux server deployment** — bootstrap from an exact accepted candidate.
 9. **Linux promotion validation** — run the server promotion gate and operational checks.

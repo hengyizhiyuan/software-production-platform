@@ -110,6 +110,26 @@ def test_unknown_or_not_produced_reality_is_blocked_not_completed() -> None:
     assert status is WorkStatus.BLOCKED
 
 
+def test_stopped_unknown_none_reality_is_blocked_before_completion() -> None:
+    status, step, event, next_action = _projection_service()._projection_state(
+        _work(),
+        RuntimeFactSummary(
+            attempt_id=uuid4(),
+            dispatch_id=uuid4(),
+            provider_outcome="UNKNOWN",
+            observation_id=uuid4(),
+        ),
+    )
+    assert status is WorkStatus.BLOCKED
+    assert step == "EXECUTION_STOPPED"
+    assert event == "PROVIDER_OUTCOME_UNKNOWN_PRODUCTION_NONE"
+    assert next_action == (
+        "Execution stopped before Provider completion. "
+        "Architecture/Operator review required."
+    )
+    assert "Evaluate Completion" not in next_action
+
+
 def test_broad_request_uses_needs_refinement_policy() -> None:
     assert WorkApplicationService._is_too_broad(
         "Rewrite the whole entire platform and all systems"

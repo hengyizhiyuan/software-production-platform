@@ -20,7 +20,7 @@ from spg.domain.preparation import (
     PreparedExecutionRequest,
     WorkspaceBinding,
 )
-from spg.infrastructure.codex_executor_binding import CODEX_BINDING
+from spg.infrastructure.codex_executor_binding import CODEX_STATE_RUNTIME_BINDING
 from spg.infrastructure.executor_boundary import (
     DedicatedExecutorClient,
     SubprocessExecutorTransport,
@@ -113,7 +113,7 @@ def main() -> int:
         response = DedicatedExecutorClient(
             materialized,
             transport=SubprocessExecutorTransport(
-                provider_binding=CODEX_BINDING,
+                provider_binding=CODEX_STATE_RUNTIME_BINDING,
                 timeout_seconds=60,
             ),
         ).preflight_provider_binding(
@@ -132,12 +132,30 @@ def main() -> int:
             "authentication_secret_inspected": response.metadata.get(
                 "authentication_secret_inspected"
             ),
+            "codex_home_writable": response.metadata.get("codex_home_writable"),
+            "state_runtime_initialization": response.metadata.get(
+                "state_runtime_initialization"
+            ),
+            "sqlite_state_artifact_present": response.metadata.get(
+                "sqlite_state_artifact_present"
+            ),
+            "provider_threads_started": response.metadata.get(
+                "provider_threads_started"
+            ),
+            "provider_turns_started": response.metadata.get(
+                "provider_turns_started"
+            ),
         }
         print(json.dumps(safe, sort_keys=True))
         return 0 if (
-            response.binding_status == "READY_FOR_REAL_PROBE_AUTH_UNPROVEN"
+            response.binding_status == "READY_FOR_THREAD_CREATION"
             and response.authentication_readiness == "AVAILABLE"
             and response.provider_turn_started is False
+            and response.metadata.get("codex_home_writable") is True
+            and response.metadata.get("state_runtime_initialization")
+            == "APP_SERVER_INITIALIZED"
+            and response.metadata.get("provider_threads_started") == 0
+            and response.metadata.get("provider_turns_started") == 0
         ) else 1
 
 

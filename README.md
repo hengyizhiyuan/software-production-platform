@@ -37,18 +37,27 @@ value and must not be reused outside this local environment.
 No Codex credential is required for startup. Without an explicitly configured
 Executor, Provider-required Work remains truthfully blocked or needs attention.
 
-For the explicitly governed local Codex E2E only, set `SPG_CODEX_HOME_HOST` in
-the ignored `.env` file to the absolute existing Codex state directory, then use
-the optional override:
+For the explicitly governed local Codex E2E only, set
+`SPG_CODEX_AUTH_FILE_HOST` in the ignored `.env` file to the absolute existing
+`auth.json` cache file, then use the optional override:
 
     docker compose -f compose.yaml -f compose.e2e.yaml up -d --build
     docker compose -f compose.yaml -f compose.e2e.yaml exec -T app python /app/docker/e2e_preflight.py
 
-The override installs the locked `codex-executor` dependency extra and mounts
-the existing state at the Executor infrastructure boundary. It uses separate
-persistent E2E database/runtime volumes. Credentials are not copied into the
-image or transported through SPG product/domain contracts. This local topology
-does not claim OS/container-level credential isolation.
+The override installs the locked `codex-executor` dependency extra. A dedicated
+Docker named volume provides the Linux-native mutable `CODEX_HOME`; only the
+exact authorized authentication cache is exposed as a read-only Compose secret
+and linked into that state root. The preflight starts and initializes the Codex
+app-server and its SQLite state without creating a Provider Thread or Turn.
+Separate persistent E2E database/runtime volumes remain in use. Credentials are
+not copied into the image or transported through SPG product/domain contracts.
+This local topology does not claim OS/container-level credential isolation.
+
+The first real MVP-E2E-1A Attempt remains blocked historical evidence:
+Provider Outcome is `UNKNOWN`, Production Reality is `NONE`, and no Provider
+Thread or Turn was created. The product projects that stopped lineage as
+`BLOCKED` with informational Architecture/Operator Attention; it does not
+offer retry, resume, or Completion evaluation authority.
 
 ## Host-side development
 

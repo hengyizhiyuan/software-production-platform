@@ -48,7 +48,10 @@ def test_e2e_01_optional_image_profile_preserves_default_runtime() -> None:
     assert "target: codex-executor" in override
     assert "SPG_EXECUTOR_ADAPTER: codex-sdk" in override
     assert "SPG_VERIFICATION_ADAPTER: mvp-e2e-markdown" in override
-    assert "SPG_CODEX_HOME_HOST" in override
+    assert "SPG_CODEX_AUTH_FILE_HOST" in override
+    assert "spg-e2e-codex-state" in override
+    assert "target: /home/spg/.codex" in override
+    assert "source: ${SPG_CODEX_HOME_HOST" not in override
     assert "spg-e2e-postgres-data" in override
     assert "spg-e2e-runtime-data" in override
 

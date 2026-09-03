@@ -856,6 +856,19 @@ class WorkApplicationService:
             return WorkStatus.BLOCKED, "WORK_REJECTED", "WORK_REJECTED", "No execution is authorized"
         if facts.runtime_commit_id is not None:
             return WorkStatus.COMPLETED, "RUNTIME_COMMIT", "TRUSTED_BASELINE_ADVANCED", "Work is complete"
+        if (
+            facts.dispatch_id is not None
+            and facts.provider_outcome == "UNKNOWN"
+            and facts.observation_id is not None
+            and not facts.artifact_paths
+            and facts.completion_id is None
+        ):
+            return (
+                WorkStatus.BLOCKED,
+                "EXECUTION_STOPPED",
+                "PROVIDER_OUTCOME_UNKNOWN_PRODUCTION_NONE",
+                "Execution stopped before Provider completion. Architecture/Operator review required.",
+            )
         if facts.completion_outcome == "NOT_PRODUCED":
             return WorkStatus.BLOCKED, "COMPLETION", "OUTPUT_NOT_PRODUCED", "Review Completion failures"
         if (

@@ -11,8 +11,10 @@ from spg.infrastructure.executor_boundary import (
 from spg.infrastructure.codex_executor_binding import (
     CODEX_BINDING,
     CODEX_REAL_BINDING,
+    CODEX_STATE_RUNTIME_BINDING,
     execute_codex_binding,
     preflight_codex_binding,
+    preflight_codex_state_runtime,
     unsupported_provider_binding,
 )
 from spg.providers.deterministic_executor import DeterministicExecutionSpecification
@@ -29,6 +31,11 @@ def main() -> int:
             response = execute_deterministic_request(request, specification)
         elif binding == CODEX_BINDING:
             response = preflight_codex_binding(request, environment=os.environ)
+        elif binding == CODEX_STATE_RUNTIME_BINDING:
+            response = preflight_codex_state_runtime(
+                request,
+                environment=os.environ,
+            )
         elif binding == CODEX_REAL_BINDING:
             response = execute_codex_binding(
                 request,

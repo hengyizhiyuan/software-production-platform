@@ -435,6 +435,44 @@ def test_work_14_15_18_24_provider_report_is_not_completion(
     assert executor.dispatch_count == 1
 
 
+def test_stopped_unknown_none_reality_projects_governed_attention(
+    app_facts: AppFacts,
+) -> None:
+    draft = _draft(app_facts)
+    app_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="human:test",
+    )
+    executor = DeterministicTestExecutor(
+        DeterministicExecutionSpecification(
+            operations=(),
+            reported_outcome=ProviderReportedOutcome.UNKNOWN,
+            summary="provider stopped before completion",
+        )
+    )
+    service = WorkApplicationService(
+        app_facts.database,
+        workspace_root=app_facts.workspace_root,
+        executor=executor,
+    )
+
+    service.advance_work(draft.work_id)
+    service.advance_work(draft.work_id)
+    stopped = service.advance_work(draft.work_id)
+
+    assert stopped.status is WorkStatus.BLOCKED
+    assert stopped.current_production_step == "EXECUTION_STOPPED"
+    assert stopped.human_attention_required is True
+    assert "Evaluate Completion" not in stopped.what_happens_next
+    attention = service.list_attention(work_id=draft.work_id)
+    assert len(attention) == 1
+    assert attention[0].kind is AttentionKind.PRODUCTION_BLOCKED
+    assert attention[0].available_actions == ()
+    assert attention[0].recommended_action is None
+    assert service.get_work_result(draft.work_id).trusted_result is False
+    assert executor.dispatch_count == 1
+
+
 def test_work_16_attention_and_work_17_authority_delegation(
     app_facts: AppFacts,
 ) -> None:

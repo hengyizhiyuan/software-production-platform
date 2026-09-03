@@ -1,11 +1,13 @@
 """Child-side Codex adapter binding for preflight and governed execution."""
 
 from collections.abc import Callable, Mapping
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from importlib.metadata import version
 from pathlib import Path
 import subprocess
+import tempfile
 from typing import Any
 
 from spg.domain.execution import (
@@ -23,6 +25,7 @@ from spg.infrastructure.executor_boundary import (
 
 
 CODEX_BINDING = "codex-sdk-preflight"
+CODEX_STATE_RUNTIME_BINDING = "codex-sdk-state-runtime-preflight"
 CODEX_REAL_BINDING = "codex-sdk-real"
 AUTH_READINESS_AVAILABLE = "AVAILABLE"
 AUTH_READINESS_HUMAN_LOGIN_REQUIRED = "HUMAN LOGIN REQUIRED"
@@ -50,6 +53,7 @@ class TransportMaterializedExecutionInput:
 
 SdkVersionResolver = Callable[[], str]
 AdapterFactory = Callable[..., Any]
+StateRuntimeFactory = Callable[[Mapping[str, str], Path], AbstractContextManager[Any]]
 
 
 def preflight_codex_binding(
@@ -160,6 +164,111 @@ def classify_codex_authentication_readiness(
     except OSError:
         return AUTH_READINESS_REQUIRES_EXECUTION_TIME_PROOF
     return AUTH_READINESS_REQUIRES_EXECUTION_TIME_PROOF
+
+
+def preflight_codex_state_runtime(
+    request: DedicatedExecutorRequest,
+    *,
+    environment: Mapping[str, str],
+    sdk_version_resolver: SdkVersionResolver | None = None,
+    adapter_factory: AdapterFactory | None = None,
+    state_runtime_factory: StateRuntimeFactory | None = None,
+) -> DedicatedExecutorPreflightResponse:
+    """Initialize the public Codex app-server without creating a Thread or Turn."""
+
+    binding = preflight_codex_binding(
+        request,
+        environment=environment,
+        sdk_version_resolver=sdk_version_resolver,
+        adapter_factory=adapter_factory,
+    ).model_copy(update={"binding_identity": CODEX_STATE_RUNTIME_BINDING})
+    if binding.binding_status != "READY_FOR_REAL_PROBE_AUTH_UNPROVEN":
+        return binding
+    if binding.authentication_readiness != AUTH_READINESS_AVAILABLE:
+        return binding.model_copy(update={"binding_status": "AUTHENTICATION_UNAVAILABLE"})
+
+    state_root = Path(environment["CODEX_HOME"])
+    try:
+        _prove_state_root_writable(state_root)
+    except OSError as error:
+        return binding.model_copy(
+            update={
+                "binding_status": "CODEX_STATE_ROOT_UNWRITABLE",
+                "metadata": {
+                    **binding.metadata,
+                    "codex_home_writable": False,
+                    "failure_type": type(error).__name__,
+                },
+            }
+        )
+
+    sqlite_before = _sqlite_state_artifact_count(state_root)
+    factory = state_runtime_factory or _default_state_runtime_factory
+    try:
+        with factory(environment, request.executor_workspace_path):
+            pass
+    except Exception as error:
+        return binding.model_copy(
+            update={
+                "binding_status": "STATE_RUNTIME_INITIALIZATION_FAILED",
+                "metadata": {
+                    **binding.metadata,
+                    "codex_home_writable": True,
+                    "state_runtime_initialization": "FAILED",
+                    "failure_type": type(error).__name__,
+                    "provider_threads_started": 0,
+                    "provider_turns_started": 0,
+                },
+            }
+        )
+
+    sqlite_after = _sqlite_state_artifact_count(state_root)
+    return binding.model_copy(
+        update={
+            "binding_status": "READY_FOR_THREAD_CREATION",
+            "metadata": {
+                **binding.metadata,
+                "codex_home_writable": True,
+                "state_runtime_initialization": "APP_SERVER_INITIALIZED",
+                "sqlite_state_artifact_present": sqlite_after > 0,
+                "sqlite_state_artifact_created": sqlite_after > sqlite_before,
+                "provider_threads_started": 0,
+                "provider_turns_started": 0,
+            },
+        }
+    )
+
+
+def _prove_state_root_writable(state_root: Path) -> None:
+    state_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        dir=state_root,
+        prefix=".spg-state-preflight-",
+        delete=False,
+    ) as marker:
+        marker_path = Path(marker.name)
+    marker_path.unlink()
+
+
+def _sqlite_state_artifact_count(state_root: Path) -> int:
+    try:
+        return sum(1 for path in state_root.rglob("*.sqlite*") if path.is_file())
+    except OSError:
+        return 0
+
+
+def _default_state_runtime_factory(
+    environment: Mapping[str, str],
+    workspace: Path,
+) -> AbstractContextManager[Any]:
+    from openai_codex import Codex, CodexConfig
+
+    return Codex(
+        CodexConfig(
+            cwd=str(workspace),
+            env=dict(environment),
+        )
+    )
 
 
 def execute_codex_binding(
