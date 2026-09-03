@@ -849,6 +849,18 @@ class RuntimeStore:
             return None
         return self._runtime_commit_record(row)
 
+    def runtime_commit_for_new_baseline(
+        self,
+        new_baseline_id: UUID,
+    ) -> RuntimeCommitRecord | None:
+        row = self._one(
+            runtime_commits,
+            runtime_commits.c.new_baseline_id == new_baseline_id,
+        )
+        if row is None:
+            return None
+        return self._runtime_commit_record(row)
+
     def recovery_assessment(
         self,
         assessment_id: UUID,

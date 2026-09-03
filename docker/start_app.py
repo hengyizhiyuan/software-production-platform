@@ -12,10 +12,14 @@ from psycopg import sql
 from sqlalchemy.engine import make_url
 
 from spg.application import bootstrap
+from spg.domain.integration import RepositoryEffectState
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import EngineeringContextReference
-from spg.domain.runtime import BootstrapRequest, RuntimeNotBootstrapped
+from spg.domain.runtime import BootstrapRequest, RuntimeNotBootstrapped, SnapshotCondition
+from spg.infrastructure.git_checkout import GitTrustedCheckoutSynchronizer
+from spg.infrastructure.git_integration import GitRepositoryIntegrationAdapter
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
 
 
 PRODUCT_DATABASE = "spg_dev"
@@ -107,7 +111,7 @@ def migrate_product_database() -> None:
 
 
 def prepare_repository_snapshot() -> Path:
-    """Materialize committed host Git reality without mounting its worktree."""
+    """Locate or clone committed host Git reality without interpreting Runtime state."""
 
     if not (SOURCE_REPOSITORY / ".git").is_dir():
         raise RuntimeError("read-only local Git metadata mount is required")
@@ -129,9 +133,122 @@ def prepare_repository_snapshot() -> Path:
             str(SOURCE_REPOSITORY),
             str(RUNTIME_REPOSITORY),
         )
-    if _run("git", "status", "--porcelain", cwd=RUNTIME_REPOSITORY):
-        raise RuntimeError("local Docker repository snapshot must remain clean")
     return RUNTIME_REPOSITORY
+
+
+def synchronize_repository_checkout(repository: Path) -> None:
+    """Safely materialize an already-committed Trusted Baseline checkout."""
+
+    application = bootstrap()
+    database = application.persistence()
+    git = GitRepositoryIntegrationAdapter()
+    synchronizer = GitTrustedCheckoutSynchronizer()
+    try:
+        with database.unit_of_work() as unit_of_work:
+            store = RuntimeStore(unit_of_work.session)
+            pointer = store.current_pointer()
+            if pointer is None:
+                current_ref = _current_repository_ref(repository)
+                current_revision = git.read_ref(repository, current_ref)
+                current_tree = git.read_commit_tree(repository, current_revision)
+                result = synchronizer.synchronize(
+                    repository_path=repository,
+                    authoritative_ref=current_ref,
+                    source_revision=current_revision,
+                    trusted_revision=current_revision,
+                    trusted_tree_identity=current_tree,
+                )
+            else:
+                baseline = store.snapshot(pointer.snapshot_id)
+                if baseline is None or baseline.condition is not SnapshotCondition.TRUSTED:
+                    raise RuntimeError(
+                        "REPOSITORY_CHECKOUT_DIVERGENCE: current Baseline is unavailable"
+                    )
+                if baseline.repository_identity != REPOSITORY_IDENTITY:
+                    raise RuntimeError(
+                        "REPOSITORY_CHECKOUT_DIVERGENCE: Baseline repository identity differs"
+                    )
+                resource = ProductStore(unit_of_work.session).default_resource()
+                if resource is None and pointer.version != 0:
+                    raise RuntimeError(
+                        "REPOSITORY_CHECKOUT_DIVERGENCE: default Engineering Resource is unavailable"
+                    )
+                if resource is not None and (
+                    resource.repository_identity != REPOSITORY_IDENTITY
+                    or resource.location_ref != str(repository)
+                    or resource.authoritative_ref != baseline.repository_ref
+                ):
+                    raise RuntimeError(
+                        "REPOSITORY_CHECKOUT_DIVERGENCE: Engineering Resource identity differs"
+                    )
+
+                runtime_commit = store.runtime_commit_for_new_baseline(baseline.id)
+                if runtime_commit is None:
+                    if pointer.version != 0 or baseline.source_baseline_id is not None:
+                        raise RuntimeError(
+                            "REPOSITORY_CHECKOUT_DIVERGENCE: current Baseline has no Runtime Commit"
+                        )
+                    trusted_tree = git.read_commit_tree(
+                        repository,
+                        baseline.repository_revision,
+                    )
+                    result = synchronizer.synchronize(
+                        repository_path=repository,
+                        authoritative_ref=baseline.repository_ref,
+                        source_revision=baseline.repository_revision,
+                        trusted_revision=baseline.repository_revision,
+                        trusted_tree_identity=trusted_tree,
+                    )
+                else:
+                    source = store.snapshot(runtime_commit.source_baseline_id)
+                    effect = store.repository_integration_effect(
+                        runtime_commit.repository_integration_effect_id
+                    )
+                    if (
+                        source is None
+                        or source.condition is not SnapshotCondition.TRUSTED
+                        or baseline.source_baseline_id != source.id
+                        or source.repository_identity != REPOSITORY_IDENTITY
+                        or source.repository_ref != baseline.repository_ref
+                        or source.repository_revision
+                        != runtime_commit.expected_source_repository_revision
+                        or runtime_commit.new_baseline_id != baseline.id
+                        or runtime_commit.repository_identity != REPOSITORY_IDENTITY
+                        or runtime_commit.target_authoritative_ref
+                        != baseline.repository_ref
+                        or runtime_commit.repository_revision
+                        != baseline.repository_revision
+                        or effect is None
+                        or effect.state is not RepositoryEffectState.CONVERGED
+                        or effect.id
+                        != runtime_commit.repository_integration_effect_id
+                        or effect.repository_identity != REPOSITORY_IDENTITY
+                        or effect.target_authoritative_ref
+                        != baseline.repository_ref
+                        or effect.expected_source_repository_revision
+                        != source.repository_revision
+                        or effect.proposed_repository_revision
+                        != baseline.repository_revision
+                        or effect.proposed_tree_identity
+                        != runtime_commit.repository_tree_identity
+                        or effect.observed_repository_revision
+                        != baseline.repository_revision
+                    ):
+                        raise RuntimeError(
+                            "REPOSITORY_CHECKOUT_DIVERGENCE: Runtime integration lineage differs"
+                        )
+                    result = synchronizer.synchronize(
+                        repository_path=repository,
+                        authoritative_ref=baseline.repository_ref,
+                        source_revision=source.repository_revision,
+                        trusted_revision=baseline.repository_revision,
+                        trusted_tree_identity=runtime_commit.repository_tree_identity,
+                    )
+    finally:
+        database.dispose()
+
+    outcome = "synchronized" if result.synchronized else "already current"
+    print(f"repository checkout {outcome} at Trusted Baseline", flush=True)
 
 
 def _current_repository_ref(repository: Path) -> str:
@@ -217,6 +334,7 @@ def main() -> None:
     ensure_local_databases()
     migrate_product_database()
     repository = prepare_repository_snapshot()
+    synchronize_repository_checkout(repository)
     ensure_local_product_foundation(repository)
     os.execvp(
         "uvicorn",

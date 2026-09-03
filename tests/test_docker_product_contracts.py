@@ -28,6 +28,11 @@ def test_docker_03_04_startup_is_migration_first_and_idempotent() -> None:
     assert "default_resource()" in startup
     assert 'SOURCE_REPOSITORY / ".git"' in startup
     assert '"safe.directory"' in startup
+    assert "synchronize_repository_checkout(repository)" in startup
+    assert startup.index("synchronize_repository_checkout(repository)") < startup.index(
+        "ensure_local_product_foundation(repository)"
+    )
+    assert "REPOSITORY_CHECKOUT_DIVERGENCE" in startup
 
 
 def test_docker_13_14_18_19_20_configuration_preserves_boundaries() -> None:

@@ -36,7 +36,13 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-E2E-1E — CLOSED / PASS**
 
-**MVP-E2E-1F — REAL EXECUTION PENDING**
+**MVP-E2E-1G — CLOSED / PASS**
+
+**MVP-E2E-1H — CLOSED / PASS**
+
+**FIRST COMPLETE WATT GOVERNED SOFTWARE PRODUCTION LOOP — PROVEN**
+
+**MVP-E2E-1I — IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW**
 
 **MVP — IN PROGRESS**
 
@@ -52,7 +58,9 @@ MVP-E2E-1D remains immutable historical evidence: Attempt `72e89694-77d1-49d4-82
 
 MVP-E2E-1E is **CLOSED / PASS**. The E2E-only Dedicated Executor selects the locked Codex SDK's public `full-access` sandbox policy to avoid unsupported nested namespace isolation inside the already-isolated Docker boundary; the default non-E2E policy remains `workspace-write`. Docker isolation, the exact Attempt workspace, authoritative-repository separation, credential filtering, governed scope, and independent Production Reality observation remain mandatory. A zero-Turn child preflight proved public-SDK policy acceptance, writable isolated workspace, authentication readiness, and Provider Thread / Turn **0 / 0**. For a Completion Contract that requires production output or change, terminal Provider evidence plus Production Reality **NONE** now projects **BLOCKED / EXECUTION_STOPPED** without changing Provider Outcome or inventing Completion or recovery authority.
 
-MVP-E2E-1F is **REAL EXECUTION PENDING**. Its admitted path requires a fresh Goal/Work lineage, exactly one real Codex Provider Turn through the governed Dedicated Executor, independent Production Observation, targeted Verification, and a stop at Candidate Human Attention without Candidate authorization or repository integration.
+MVP-E2E-1G and MVP-E2E-1H are **CLOSED / PASS**. The first complete Watt governed software production loop is **PROVEN**: Human Intent progressed through Work, PWU, one real Codex execution, independent Observation, Completion, Verification, Candidate, Human Authorization, Repository Integration, Runtime Commit, Trusted Baseline advancement, and completed Work projection.
+
+MVP-E2E-1I is **IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW**. After the CONVERGED Repository Integration, startup now materializes the Watt-owned authoritative checkout only when the Current Trusted Baseline, Runtime Commit, Integration Effect, repository identity, authoritative ref/tree, and exact source-Baseline index all agree and no independent local changes exist. Unexpected changes stop with `REPOSITORY_CHECKOUT_DIVERGENCE`. The current `watt-e2e2` app restarted successfully and remained restart-idempotent, the checkout stayed clean at the unchanged Trusted Baseline, completed Work and `trusted_result=true` remained queryable, and no Provider or Runtime production history was added or rewritten.
 
 The current delivery priority is governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): review the implemented local Docker MVP, then validate one real local governed Codex production loop before Linux deployment and systematic self-dogfood. ChatGPT + Codex remains the development workflow; a CLI-only Runtime is not the MVP product.
 
@@ -102,7 +110,10 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-E2E-1B — Container-Native Codex State Repair & Blocked-Reality Projection | CLOSED / PASS |
 | MVP-E2E-1D — Fresh Work Real Governed Codex Production Attempt | BLOCKED — PROVIDER SUCCESS / PRODUCTION REALITY NONE — HISTORICAL ATTEMPT PRESERVED |
 | MVP-E2E-1E — Container Codex Sandbox Compatibility & Terminal-NONE Projection | CLOSED / PASS |
-| MVP-E2E-1F — First Real Watt Governed Production Artifact | REAL EXECUTION PENDING |
+| MVP-E2E-1G — Fresh E2E Runtime & First Real Watt Production Artifact | CLOSED / PASS |
+| MVP-E2E-1H — Human-Authorized Repository Integration & Trusted Baseline Commit | CLOSED / PASS |
+| First Complete Watt Governed Software Production Loop | PROVEN |
+| MVP-E2E-1I — Post-Integration Checkout Synchronization & Restart Readiness | IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW |
 | F1. Slice Goal & Governance Contract | REVIEWED / ADMITTED |
 | F2. Minimal Technical Foundation | REVIEWED / ADMITTED |
 | F3-A. Runtime Slice Boundary & Physical Spine | REVIEWED / ADMITTED |
