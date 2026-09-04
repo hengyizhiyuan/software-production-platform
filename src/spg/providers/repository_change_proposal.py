@@ -78,7 +78,6 @@ class RepositoryAwareChangeProposalProvider:
             tuple(target for target in targets if target.disposition is ProposalTargetDisposition.REQUIRED),
             request.explicit_allowed_areas,
             request.requested_verification,
-            unresolved,
         )
         if not any(
             target.disposition is ProposalTargetDisposition.REQUIRED for target in targets
@@ -277,7 +276,6 @@ class RepositoryAwareChangeProposalProvider:
         targets: tuple[RepositoryChangeProposalTarget, ...],
         allowed_areas: tuple[str, ...],
         requested: tuple[CodeVerificationObligation, ...],
-        unresolved: list[str],
     ) -> tuple[CodeVerificationObligation, ...]:
         obligations = [
             CodeVerificationObligation(kind=CodeVerificationKind.PATH_SCOPE),
@@ -309,13 +307,16 @@ class RepositoryAwareChangeProposalProvider:
                             target=path,
                         )
                     )
-            if any(
-                path.startswith("tests/") and Path(path).suffix.casefold() in {".js", ".cjs", ".mjs"}
-                for path in paths
-            ):
-                unresolved.append(
-                    "FRONTEND_VERIFICATION_CONTRACT_GAP: current typed verifier cannot execute the discovered Node test target."
-                )
+                if (
+                    path.startswith("tests/")
+                    and Path(path).suffix.casefold() in {".js", ".cjs", ".mjs"}
+                ):
+                    obligations.append(
+                        CodeVerificationObligation(
+                            kind=CodeVerificationKind.NODE_TEST_TARGET,
+                            target=path,
+                        )
+                    )
         return tuple({item.identity: item for item in obligations}.values())
 
     @staticmethod

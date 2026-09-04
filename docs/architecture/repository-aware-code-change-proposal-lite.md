@@ -6,8 +6,8 @@
 
 The Architecture Lead Reality Review passed. The
 `REPOSITORY_AWARE_CHANGE_PROPOSAL_GAP` is closed. The separately confirmed
-`FRONTEND_VERIFICATION_CONTRACT_GAP` remains open and is not fixed by this
-checkpoint.
+`FRONTEND_VERIFICATION_CONTRACT_GAP` was not fixed by that checkpoint and is
+subsequently resolved by MVP-VERIFY-NODE-1 focused evidence.
 
 This slice adds bounded repository understanding before Code Work admission. It
 does not change the authority of the Human, Production Planner, Executor,
@@ -81,18 +81,13 @@ changed by this result.
 
 ## Frontend Verification Reality
 
-Classification: **B — FRONTEND_VERIFICATION_CONTRACT_GAP**.
+Historical classification: **B — FRONTEND_VERIFICATION_CONTRACT_GAP**.
 
-The repository has a targeted Node test at `tests/js/test_web_state.cjs`, but
-the current MVP-CODE-1 typed set contains only `PATH_SCOPE`, `GIT_DIFF_CHECK`,
-`PYTHON_COMPILE`, `PYTEST_TARGET`, and `IMPORT_CHECK`. It therefore cannot
-truthfully represent execution of that Node test. Refinement proposes the two
-supported structural checks and surfaces the unresolved gap. It does not invent
-a Python check, weaken Verification, or grant arbitrary-shell authority.
-
-The narrow follow-up for Architecture Lead review is one typed, path-bounded
-Node test obligation within the existing contract-driven verifier model. That
-follow-up is not implemented or authorized by this slice.
+MVP-REFINE-CODE-1 originally preserved this truthful gap because its typed set
+could not represent the repository's targeted Node test. MVP-VERIFY-NODE-1 now
+resolves the gap with `NODE_TEST_TARGET` inside the existing contract-driven
+verifier. See [Typed Node Test Verification Lite](typed-node-test-verification-lite.md).
+No Python substitute or arbitrary-shell authority is introduced.
 
 ## Focused Evidence
 

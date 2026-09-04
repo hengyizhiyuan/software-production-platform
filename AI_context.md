@@ -54,6 +54,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
 
+**MVP-VERIFY-NODE-1 — CLOSED / PASS**
+
 **MVP CORE CAPABILITY SET — FUNCTIONALLY COMPLETE**
 
 **FIRST COMPLETE WATT GOVERNED SOFTWARE PRODUCTION LOOP — PROVEN**
@@ -136,6 +138,7 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
+| MVP-VERIFY-NODE-1 — Typed Node Test Verification Lite | CLOSED / PASS |
 | MVP-INTAKE-2A — Governed Artifact Target Contract | CLOSED / PASS |
 | MVP-INTAKE-2B — Bounded Chinese Work Constraints | CLOSED / PASS |
 | MVP-INTAKE-DOGFOOD-3 — Same-Intent Trusted Completion | CLOSED / PASS |
@@ -348,11 +351,26 @@ is Human-visible but is not Production Authority. The existing
 Engineering Resource identity. Ambiguity remains `NEEDS_REFINEMENT`; no
 repository-wide fallback is permitted. The first Code Self-dogfood Work remains
 unchanged historical pre-execution evidence with zero Runs, Attempts, or
-Provider Reports. Frontend verification is classified as
-`FRONTEND_VERIFICATION_CONTRACT_GAP`: the current typed verifier cannot express
-the repository's targeted Node test, and this slice does not invent a Python or
-arbitrary-shell substitute. See [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
+Provider Reports. The historical `FRONTEND_VERIFICATION_CONTRACT_GAP` is now
+resolved by MVP-VERIFY-NODE-1 focused evidence through one typed, path-bounded
+`NODE_TEST_TARGET`; no Python substitute or arbitrary-shell authority is
+introduced. See [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
 and [Code Dogfood #1 Finding](docs/evidence/dogfood/code-dogfood-1-repository-aware-change-proposal-gap.md).
+
+### MVP-VERIFY-NODE-1 Typed Node Verification Boundary
+
+MVP-VERIFY-NODE-1 is **CLOSED / PASS** after Architecture Lead Reality Review.
+The Human-admitted Code Change Contract may
+contain `NODE_TEST_TARGET:<safe repository-relative JavaScript test>`. The
+existing Contract-driven Repository Verifier maps that type only to fixed
+`node --test <validated-target>` execution against the exact proposed commit,
+and records bounded target/result/exit/fingerprint/duration evidence. Unsafe,
+non-test, or out-of-scope paths are rejected before execution. Node FAIL keeps
+Completion and Verification separate, blocks Candidate formation, and leaves
+`trusted_result=false`. Python and Documentation verification paths remain
+unchanged. The local Watt Docker runtime definition supplies only the Node
+runtime; no generic shell or JavaScript workflow engine is added. See
+[Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md).
 
 ## Program-level Architecture Source of Truth
 
@@ -367,6 +385,7 @@ The current system-level architecture baseline is:
 - [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md)
 - [Bounded Single-PWU Code Work](docs/architecture/bounded-single-pwu-code-work.md)
 - [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
+- [Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 

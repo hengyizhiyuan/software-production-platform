@@ -51,6 +51,12 @@ distinct from Production Authority; only Human admission forms the exact
 `CodeChangeContract`. The implementation is documented in
 [Repository-Aware Code Change Proposal Lite](../../architecture/repository-aware-code-change-proposal-lite.md).
 
+The separately exposed `FRONTEND_VERIFICATION_CONTRACT_GAP` is resolved by the
+focused evidence for
+[Typed Node Test Verification Lite](../../architecture/typed-node-test-verification-lite.md).
+This changes future contract capability only; it does not mutate or rerun the
+historical Work.
+
 The same natural-language requirement must later be submitted in a fresh Watt
 Runtime. This record neither proves that future Work will complete nor
 authorizes implementation of Composer state persistence in the development

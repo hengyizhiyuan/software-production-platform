@@ -113,12 +113,34 @@ def git_repository(tmp_path: Path) -> Path:
     )
     (repository / "src").mkdir()
     (repository / "tests").mkdir()
+    (repository / "src" / "spg" / "web").mkdir(parents=True)
+    (repository / "tests" / "js").mkdir(parents=True)
     (repository / "src" / "spg_example.py").write_text(
         'def value() -> str:\n    return "old"\n',
         encoding="utf-8",
     )
     (repository / "tests" / "test_spg_example.py").write_text(
         'from spg_example import value\n\n\ndef test_value() -> None:\n    assert value() == "old"\n',
+        encoding="utf-8",
+    )
+    (repository / "src" / "spg" / "web" / "app.js").write_text(
+        'const composer = { expanded: true };\n',
+        encoding="utf-8",
+    )
+    (repository / "src" / "spg" / "web" / "index.html").write_text(
+        '<button id="composer">Composer</button>\n',
+        encoding="utf-8",
+    )
+    (repository / "tests" / "js" / "test_web_state.cjs").write_text(
+        """const fs = require("node:fs");
+const path = require("node:path");
+const test = require("node:test");
+const assert = require("node:assert/strict");
+test("composer exists", () => {
+  const source = fs.readFileSync(path.join(__dirname, "../../src/spg/web/app.js"), "utf8");
+  assert.match(source, /composer/);
+});
+""",
         encoding="utf-8",
     )
     _git(repository, "add", ".")
@@ -679,6 +701,121 @@ def test_code_13_15_17_19_20_targeted_pytest_failure_prevents_candidate(
     assert summary.candidate_id is None
     assert service.get_work_result(draft.work_id).trusted_result is False
     assert executor.dispatch_count == 1
+
+
+NODE_DOGFOOD_INTENT = (
+    "让底部 Work Composer 的展开/收缩状态在页面刷新后保持用户上一次选择。"
+    "只修改实现这个行为所需的前端文件和相关测试，"
+    "不要改动其他功能，也不要进行 UI 重构。"
+)
+
+
+def _node_test_source(expected: str) -> str:
+    return f"""const fs = require("node:fs");
+const path = require("node:path");
+const test = require("node:test");
+const assert = require("node:assert/strict");
+test("composer state", () => {{
+  const source = fs.readFileSync(path.join(__dirname, "../../src/spg/web/app.js"), "utf8");
+  assert.match(source, /{expected}/);
+}});
+"""
+
+
+@pytest.mark.parametrize(
+    ("expected_in_test", "verification_result", "candidate_expected"),
+    (
+        ("localStorage", VerificationResultValue.PASS, True),
+        ("sessionStorage", VerificationResultValue.FAIL, False),
+    ),
+)
+def test_node_07_08_09_10_12_node_result_aggregates_without_changing_completion(
+    app_facts: AppFacts,
+    expected_in_test: str,
+    verification_result: VerificationResultValue,
+    candidate_expected: bool,
+) -> None:
+    submitted = app_facts.service.submit_work(NODE_DOGFOOD_INTENT)
+    draft = app_facts.service.refine_work(submitted.work_id)
+    assert draft.status is WorkStatus.AWAITING_APPROVAL
+    assert draft.change_proposal is not None
+    assert tuple(target.path for target in draft.change_proposal.required_targets) == (
+        "src/spg/web/app.js",
+        "tests/js/test_web_state.cjs",
+    )
+    assert tuple(
+        item.identity for item in draft.change_proposal.verification_obligations
+    ) == (
+        "PATH_SCOPE",
+        "GIT_DIFF_CHECK",
+        "NODE_TEST_TARGET:tests/js/test_web_state.cjs",
+    )
+    approved = app_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="human:node-contract",
+    )
+    assert approved.change_contract is not None
+
+    service, executor = _code_executor_service(
+        app_facts,
+        (
+            DeterministicFileOperation(
+                operation=DeterministicFileOperationType.MODIFY,
+                repository_relative_path="src/spg/web/app.js",
+                content="const composerState = globalThis.localStorage;\n",
+            ),
+            DeterministicFileOperation(
+                operation=DeterministicFileOperationType.MODIFY,
+                repository_relative_path="tests/js/test_web_state.cjs",
+                content=_node_test_source(expected_in_test),
+            ),
+        ),
+    )
+    projection, attention = _advance_until_governed_stop(service, draft.work_id)
+    binding = _runtime_binding(app_facts, draft.work_id)
+    assert binding is not None
+    with app_facts.database.unit_of_work() as unit_of_work:
+        store = RuntimeStore(unit_of_work.session)
+        summary = ProductStore(unit_of_work.session).runtime_summary(binding)
+        assert summary.proposed_snapshot_id is not None
+        records = store.verification_records_for_snapshot(summary.proposed_snapshot_id)
+
+    results = dict(
+        zip(summary.verification_obligations, summary.verification_results, strict=True)
+    )
+    assert summary.completion_outcome == "PRODUCED"
+    assert results["PATH_SCOPE"] == VerificationResultValue.PASS.value
+    assert results["GIT_DIFF_CHECK"] == VerificationResultValue.PASS.value
+    assert (
+        results["NODE_TEST_TARGET:tests/js/test_web_state.cjs"]
+        == verification_result.value
+    )
+    node_record = next(
+        record
+        for record in records
+        if record.obligation == "NODE_TEST_TARGET:tests/js/test_web_state.cjs"
+    )
+    assert node_record.evidence.metadata["target"] == "tests/js/test_web_state.cjs"
+    assert node_record.evidence.metadata["exit_code"] == (
+        0 if verification_result is VerificationResultValue.PASS else 1
+    )
+    assert len(node_record.evidence.metadata["output_fingerprint"]) == 64
+    assert executor.dispatch_count == 1
+
+    if candidate_expected:
+        assert projection.status is WorkStatus.NEEDS_ATTENTION
+        assert len(attention) == 1
+        assert attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION
+        assert summary.candidate_id is not None
+    else:
+        assert projection.status is WorkStatus.BLOCKED
+        assert attention
+        assert all(
+            item.kind is not AttentionKind.CANDIDATE_AUTHORIZATION
+            for item in attention
+        )
+        assert summary.candidate_id is None
+        assert service.get_work_result(draft.work_id).trusted_result is False
 
 
 def test_refcode_03_04_15_16_17_human_edits_proposal_then_admits_contract(

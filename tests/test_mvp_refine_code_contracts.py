@@ -231,7 +231,7 @@ def test_refcode_10_11_ambiguous_work_has_no_repository_wide_fallback(
     assert not {"src/**", "tests/**", "**/*"} & set(proposal.allowed_areas)
 
 
-def test_refcode_20_frontend_verification_gap_is_truthful(
+def test_node_11_12_frontend_proposal_uses_typed_node_target(
     proposal_repository: tuple[Path, str],
 ) -> None:
     repository, revision = proposal_repository
@@ -242,12 +242,12 @@ def test_refcode_20_frontend_verification_gap_is_truthful(
     assert tuple(item.kind for item in proposal.verification_obligations) == (
         CodeVerificationKind.PATH_SCOPE,
         CodeVerificationKind.GIT_DIFF_CHECK,
+        CodeVerificationKind.NODE_TEST_TARGET,
     )
-    assert any(
-        "FRONTEND_VERIFICATION_CONTRACT_GAP" in question
-        for question in proposal.unresolved_scope_questions
+    assert proposal.verification_obligations[-1].target == (
+        "tests/js/test_web_state.cjs"
     )
-    assert "NODE_TEST" not in CodeVerificationKind.__members__
+    assert not proposal.unresolved_scope_questions
 
 
 class _WrongBaselineProvider:

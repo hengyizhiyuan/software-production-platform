@@ -1662,6 +1662,17 @@ class WorkApplicationService:
                         target=path,
                     )
                 )
+            if path.startswith("tests/") and Path(path).suffix.casefold() in {
+                ".js",
+                ".cjs",
+                ".mjs",
+            }:
+                obligations.append(
+                    CodeVerificationObligation(
+                        kind=CodeVerificationKind.NODE_TEST_TARGET,
+                        target=path,
+                    )
+                )
             module = cls._python_module_for_path(path)
             if module is not None:
                 obligations.append(

@@ -91,6 +91,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert 'id="code-allowed-areas"' in html
     assert 'id="code-forbidden-areas"' in html
     assert 'id="code-verification-obligations"' in html
+    assert "NODE_TEST_TARGET:tests/js/test_web_state.cjs" in html
     assert "code_exact_targets" in javascript
     assert "code_allowed_areas" in javascript
     assert "typedVerificationObligations" in javascript

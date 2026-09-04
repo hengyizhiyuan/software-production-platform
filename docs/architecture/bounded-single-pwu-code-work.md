@@ -59,7 +59,9 @@ contract:
 - `PYTHON_COMPILE` compiles changed admitted Python files;
 - `PYTEST_TARGET:<repository path>` runs only the validated admitted target;
 - `IMPORT_CHECK:<module>` imports only a module mapped to the admitted source
-  boundary.
+  boundary;
+- `NODE_TEST_TARGET:<repository path>` runs one admitted JavaScript test through
+  the fixed `node --test <target>` mapping.
 
 No arbitrary shell command becomes Production Authority. Commands use fixed
 argument vectors, a narrow environment, and an exact temporary materialization

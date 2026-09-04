@@ -30,6 +30,7 @@ class CodeVerificationKind(StrEnum):
     PYTHON_COMPILE = "PYTHON_COMPILE"
     PYTEST_TARGET = "PYTEST_TARGET"
     IMPORT_CHECK = "IMPORT_CHECK"
+    NODE_TEST_TARGET = "NODE_TEST_TARGET"
 
 
 class CodeChangeTarget(BaseModel):
@@ -52,10 +53,23 @@ class CodeVerificationObligation(BaseModel):
 
     @model_validator(mode="after")
     def require_typed_target(self) -> "CodeVerificationObligation":
-        if self.kind is CodeVerificationKind.PYTEST_TARGET:
+        if self.kind in {
+            CodeVerificationKind.PYTEST_TARGET,
+            CodeVerificationKind.NODE_TEST_TARGET,
+        }:
             if self.target is None:
-                raise ValueError("PYTEST_TARGET requires a repository-relative target")
+                raise ValueError(
+                    f"{self.kind.value} requires a repository-relative target"
+                )
             object.__setattr__(self, "target", safe_repository_path(self.target))
+            if self.kind is CodeVerificationKind.NODE_TEST_TARGET and (
+                not self.target.startswith("tests/")
+                or PurePosixPath(self.target).suffix.casefold()
+                not in {".js", ".cjs", ".mjs"}
+            ):
+                raise ValueError(
+                    "NODE_TEST_TARGET requires a JavaScript test below tests/"
+                )
         elif self.kind is CodeVerificationKind.IMPORT_CHECK:
             if self.target is None or not re.fullmatch(
                 r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*", self.target
@@ -130,11 +144,17 @@ class CodeChangeContract(BaseModel):
             raise ValueError("Code Change Contract requires PATH_SCOPE and GIT_DIFF_CHECK")
         for obligation in self.verification_obligations:
             if (
-                obligation.kind is CodeVerificationKind.PYTEST_TARGET
+                obligation.kind
+                in {
+                    CodeVerificationKind.PYTEST_TARGET,
+                    CodeVerificationKind.NODE_TEST_TARGET,
+                }
                 and obligation.target is not None
                 and not self.allows_path(obligation.target)
             ):
-                raise ValueError("PYTEST_TARGET must be inside the admitted change boundary")
+                raise ValueError(
+                    f"{obligation.kind.value} must be inside the admitted change boundary"
+                )
             if obligation.kind is CodeVerificationKind.IMPORT_CHECK:
                 candidates = python_module_paths(obligation.target or "")
                 if not any(self.allows_path(path) for path in candidates):

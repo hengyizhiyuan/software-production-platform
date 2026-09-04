@@ -1,4 +1,4 @@
-"""Contract-driven Verification Lite for bounded Python code Work."""
+"""Contract-driven Verification Lite for bounded code Work."""
 
 from contextlib import contextmanager
 from hashlib import sha256
@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+from time import perf_counter
 from typing import Iterator
 
 from spg.domain.change import (
@@ -194,6 +195,19 @@ class RepositoryCodeVerifier:
                     timeout=self.timeout_seconds,
                 )
                 return _value(completed.returncode == 0), _process_metadata(base, completed)
+            if obligation.kind is CodeVerificationKind.NODE_TEST_TARGET:
+                assert obligation.target is not None
+                started = perf_counter()
+                completed = _run(
+                    ["node", "--test", obligation.target],
+                    cwd=snapshot,
+                    env=_verification_environment(snapshot),
+                    timeout=self.timeout_seconds,
+                )
+                return _value(completed.returncode == 0), {
+                    **_process_metadata(base, completed),
+                    "duration_ms": round((perf_counter() - started) * 1000),
+                }
             if obligation.kind is CodeVerificationKind.IMPORT_CHECK:
                 assert obligation.target is not None
                 if not any(
@@ -334,6 +348,8 @@ def _process_metadata(
         **base,
         "exit_code": completed.returncode,
         "output_fingerprint": sha256(output).hexdigest(),
+        "stdout_bytes": len(completed.stdout or b""),
+        "stderr_bytes": len(completed.stderr or b""),
     }
 
 
