@@ -20,6 +20,7 @@ from spg.domain.product import (
 )
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
+from spg.domain.runtime_activation import RuntimeActivationProjection
 
 
 class ApiDto(BaseModel):
@@ -441,6 +442,23 @@ class AttentionResponse(ApiDto):
         )
 
 
+class RuntimeActivationResponse(ApiDto):
+    state: str
+    active_application_revision: str | None
+    active_repository_tree_identity: str | None
+    active_source_package_fingerprint: str | None
+    active_static_asset_fingerprint: str | None
+    current_trusted_baseline_revision: str | None
+    current_trusted_baseline_tree_identity: str | None
+    activation_mode: str | None
+    reason: str
+    image_rebuild_paths: tuple[str, ...]
+
+    @classmethod
+    def from_projection(cls, projection: RuntimeActivationProjection) -> Self:
+        return cls(**projection.model_dump(mode="json"))
+
+
 class WorkResultResponse(ApiDto):
     work_id: UUID
     status: WorkStatus
@@ -451,10 +469,18 @@ class WorkResultResponse(ApiDto):
     trusted_result: bool
     remaining_blocker_or_risk: str | None
     human_attention_required: bool
+    runtime_activation: RuntimeActivationResponse
 
     @classmethod
-    def from_projection(cls, result: WorkResultProjection) -> Self:
-        return cls(**result.model_dump())
+    def from_projection(
+        cls,
+        result: WorkResultProjection,
+        activation: RuntimeActivationProjection,
+    ) -> Self:
+        return cls(
+            **result.model_dump(),
+            runtime_activation=RuntimeActivationResponse.from_projection(activation),
+        )
 
 
 class HealthResponse(ApiDto):

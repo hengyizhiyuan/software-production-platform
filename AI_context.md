@@ -139,6 +139,7 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
 | MVP-VERIFY-NODE-1 — Typed Node Test Verification Lite | CLOSED / PASS |
+| MVP-RUNTIME-ACTIVATE-1 — Trusted Baseline / Active Runtime Convergence Lite | CLOSED / PASS |
 | MVP-INTAKE-2A — Governed Artifact Target Contract | CLOSED / PASS |
 | MVP-INTAKE-2B — Bounded Chinese Work Constraints | CLOSED / PASS |
 | MVP-INTAKE-DOGFOOD-3 — Same-Intent Trusted Completion | CLOSED / PASS |
@@ -372,6 +373,27 @@ unchanged. The local Watt Docker runtime definition supplies only the Node
 runtime; no generic shell or JavaScript workflow engine is added. See
 [Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md).
 
+### MVP-RUNTIME-ACTIVATE-1 Trusted Baseline / Active Runtime Boundary
+
+MVP-RUNTIME-ACTIVATE-1 is **CLOSED / PASS** after Architecture Lead Reality
+Review. Trusted Baseline, Active Runtime Revision,
+and Human Product Acceptance are distinct facts. A local Docker App restart now
+safely materializes the exact Current Trusted Baseline checkout, refuses dirty
+Reality, classifies image/dependency/migration/bootstrap changes as
+`IMAGE_REBUILD_REQUIRED`, and starts one internally consistent Python/static
+source revision with observable fingerprints. Code Dogfood #2 B1
+`84be41abb4e48875107c28d9483f3c8e0e316b68` was activated and its HTTP-served
+Composer asset matched the trusted Git blob; historical Runtime facts remained
+unchanged. The Human Governor then repeatedly exercised collapsed and expanded
+Composer states across page refresh; all four successive expected states
+matched observed states. Code Dogfood #2 is therefore **COMPLETED / TRUSTED
+RESULT / ACTIVE_AT_TRUSTED_BASELINE / HUMAN PRODUCT ACCEPTANCE PASS**, and the
+first trusted Watt code self-dogfood loop is **PROVEN**.
+`VERIFICATION_RUNTIME_COVERAGE_GAP` remains **OPEN / NON-BLOCKING /
+DEFERRED**. See
+[Trusted Baseline / Active Runtime Convergence Lite](docs/architecture/trusted-baseline-active-runtime-convergence-lite.md)
+and [Code Dogfood #2 Runtime Divergence](docs/evidence/dogfood/code-dogfood-2-trusted-baseline-active-runtime-divergence.md).
+
 ## Program-level Architecture Source of Truth
 
 The current system-level architecture baseline is:
@@ -386,6 +408,7 @@ The current system-level architecture baseline is:
 - [Bounded Single-PWU Code Work](docs/architecture/bounded-single-pwu-code-work.md)
 - [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
 - [Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md)
+- [Trusted Baseline / Active Runtime Convergence Lite](docs/architecture/trusted-baseline-active-runtime-convergence-lite.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -418,6 +441,7 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Production Work Unit Generalization
 - Ownership Before Integration
 - Generated Does Not Equal Trusted
+- Trusted Baseline Does Not Imply Active Runtime
 - Contract Before Implementation
 - Source of Truth over Conversation History
 - Conversation-to-Contract — raw conversation is never authoritative execution input

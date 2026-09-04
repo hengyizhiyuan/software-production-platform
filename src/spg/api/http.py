@@ -21,6 +21,7 @@ from spg.api.dto import (
     GoalSummaryResponse,
     HealthResponse,
     HumanDecisionRequest,
+    RuntimeActivationResponse,
     WorkRefineRequest,
     WorkResponse,
     WorkResultResponse,
@@ -28,6 +29,7 @@ from spg.api.dto import (
 )
 from spg.application.bootstrap import Application, bootstrap
 from spg.application.orchestration import ProductionOrchestrator
+from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.domain.product import (
     AttentionResolutionRequest,
@@ -68,6 +70,7 @@ def create_http_application(
     database: Database | None = None,
     work_service: WorkApplicationService | None = None,
     orchestrator: ProductionOrchestrator | None = None,
+    runtime_activation: RuntimeActivationService | None = None,
 ) -> FastAPI:
     """Compose one ASGI application over the existing application bootstrap path."""
 
@@ -81,6 +84,9 @@ def create_http_application(
 
     selected_orchestrator = orchestrator or container.production_orchestrator(
         work_service
+    )
+    selected_runtime_activation = runtime_activation or container.runtime_activation(
+        selected_database
     )
 
     @asynccontextmanager
@@ -155,6 +161,15 @@ def create_http_application(
             service="available",
             database="available",
             application_initialized=True,
+        )
+
+    @api.get(
+        "/api/runtime-activation",
+        response_model=RuntimeActivationResponse,
+    )
+    def get_runtime_activation() -> RuntimeActivationResponse:
+        return RuntimeActivationResponse.from_projection(
+            selected_runtime_activation.project()
         )
 
     @api.get("/", include_in_schema=False)
@@ -287,7 +302,8 @@ def create_http_application(
     @api.get("/api/works/{work_id}/result", response_model=WorkResultResponse)
     def get_work_result(work_id: UUID) -> WorkResultResponse:
         return WorkResultResponse.from_projection(
-            work_service.get_work_result(work_id)
+            work_service.get_work_result(work_id),
+            selected_runtime_activation.project(),
         )
 
     return api

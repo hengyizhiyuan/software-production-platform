@@ -47,6 +47,7 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI | MVP CORE / CLOSED / PASS |
 | Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | MVP CORE / IMPLEMENTED; real Provider loop remains separate |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
+| Trusted Baseline / Active Runtime convergence | Local Docker startup safely synchronizes the exact Trusted checkout, activates Python and static assets from one revision, and exposes explicit activation state/fingerprints | MVP GUARDRAIL / CLOSED / PASS |
 | Real local governed Codex E2E | The first real Attempt is preserved as BLOCKED / RECOVERABLE with UNKNOWN Provider Outcome, NONE Production Reality, and 0 / 0 Thread/Turn; container-native Codex state and truthful blocked projection are CLOSED / PASS | MVP CORE / BLOCKED HISTORY PRESERVED; E2E-1B CLOSED / PASS |
 | Local persistent Runtime database | Logical spg_dev / spg_test / historical spg_runtime separation exists; the product composition uses only spg_dev | MVP CORE / GUARDRAIL |
 | Linux deployment | Candidate checkpoint exists; server bootstrap and promotion validation have not started | POST-LOCAL-MVP |
@@ -74,6 +75,7 @@ Only capabilities needed for the product definition are MVP CORE.
 | Functional Web UI | Requirement intake, state view, attention/authority actions, outcome view, and next-task continuation |
 | Local Docker integration | API/UI/Runtime database operate as one documented local development product; host-side Executor is temporarily acceptable |
 | Local persistent Runtime database | Durable local state with strict Runtime/Test database separation |
+| Runtime Activation Lite | Distinguish repository trust from the active process; support an explicit safe local restart for source-only changes and require image rebuild for image/dependency boundaries |
 
 Allowed MVP simplifications are one Engineering Resource per Work, one active Run, serial execution, one-PWU-first workflow, static Provider profile, basic Verification, simple Planner logic, and manual Human intervention for uncommon recovery. These are delivery choices, not permanent architecture constraints.
 
@@ -208,6 +210,12 @@ A conversational interaction style is acceptable and preferred where it keeps th
 
 The MVP does not require visual polish, complex dashboards, drag-and-drop workflow editing, agent animation, advanced analytics, or multi-user collaboration.
 
+Trusted repository completion must not be presented as active product behavior
+until Runtime activation evidence converges. Human Product Acceptance remains a
+separate fact. Browser/runtime-served acceptance automation is not added by
+Runtime Activation Lite; the current `VERIFICATION_RUNTIME_COVERAGE_GAP` remains
+an evidence-backed follow-up rather than hidden success.
+
 ## 11. Reordered MVP Roadmap
 
 1. **MVP Scope Calibration** — CLOSED / PASS; this document.
@@ -219,11 +227,12 @@ The MVP does not require visual polish, complex dashboards, drag-and-drop workfl
 7. **Production Orchestration Lite** — CLOSED / PASS; server-side bounded automatic progression stops at Human Attention, BLOCKED, or COMPLETED.
 8. **Single-PWU Production Planner Intelligence Lite** — CLOSED / PASS; multi-PWU production remains deferred.
 9. **Bounded Single-PWU Code Work** — CLOSED / PASS; adds Human-visible bounded change authority and typed contract-driven code Verification without changing the one-PWU model.
-10. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
-11. **Linux server deployment** — bootstrap from an exact accepted candidate.
-12. **Linux promotion validation** — run the server promotion gate and operational checks.
-13. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
-14. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
+10. **Trusted Baseline / Active Runtime Convergence Lite** — CLOSED / PASS; Architecture Lead Reality Review and Human Composer acceptance passed. The first trusted Watt code self-dogfood loop is proven.
+11. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
+12. **Linux server deployment** — bootstrap from an exact accepted candidate.
+13. **Linux promotion validation** — run the server promotion gate and operational checks.
+14. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
+15. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
 

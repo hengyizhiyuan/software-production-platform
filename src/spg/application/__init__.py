@@ -13,6 +13,7 @@ from spg.application.runtime_commit import RuntimeCommitService
 from spg.application.recovery import RecoveryAssessmentService
 from spg.application.reconciliation import RecoveryReconciliationService
 from spg.application.attempt_recovery import AttemptRecoveryService
+from spg.application.runtime_activation import RuntimeActivationService
 
 __all__ = [
     "Application",
@@ -26,6 +27,7 @@ __all__ = [
     "RecoveryAssessmentService",
     "RecoveryReconciliationService",
     "RuntimeService",
+    "RuntimeActivationService",
     "RuntimeCommitService",
     "VerificationService",
     "bootstrap",

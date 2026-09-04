@@ -23,7 +23,7 @@ def test_docker_03_04_startup_is_migration_first_and_idempotent() -> None:
     assert 'REQUIRED_LOCAL_DATABASES = ("spg_dev", "spg_test")' in startup
     assert "SELECT 1 FROM pg_database" in startup
     assert '"upgrade", "head"' in startup
-    assert startup.index("migrate_product_database()") < startup.index("os.execvp(")
+    assert startup.index("migrate_product_database()") < startup.index("os.execvpe(")
     assert "RuntimeNotBootstrapped" in startup
     assert "default_resource()" in startup
     assert 'SOURCE_REPOSITORY / ".git"' in startup
@@ -32,6 +32,10 @@ def test_docker_03_04_startup_is_migration_first_and_idempotent() -> None:
     assert startup.index("synchronize_repository_checkout(repository)") < startup.index(
         "ensure_local_product_foundation(repository)"
     )
+    assert startup.index("synchronize_repository_checkout(repository)") < startup.index(
+        "prepare_local_runtime_activation(repository)"
+    )
+    assert "SPG_ACTIVE_RUNTIME_STATIC_ASSET_FINGERPRINT" in startup
     assert "REPOSITORY_CHECKOUT_DIVERGENCE" in startup
 
 

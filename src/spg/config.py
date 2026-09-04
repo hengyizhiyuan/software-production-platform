@@ -32,3 +32,8 @@ class Settings(BaseSettings):
     )
     verification_adapter: str = "unconfigured"
     orchestration_max_automatic_transitions: int = Field(default=12, ge=1, le=50)
+    active_runtime_revision: str | None = None
+    active_runtime_tree_identity: str | None = None
+    active_runtime_package_fingerprint: str | None = None
+    active_runtime_static_asset_fingerprint: str | None = None
+    active_runtime_source_root: Path | None = None

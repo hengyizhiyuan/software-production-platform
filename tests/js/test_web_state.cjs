@@ -101,3 +101,27 @@ test("ORCH-20 polling observes only and stops at Human or terminal states", () =
   );
   assert.doesNotMatch(polling, /method:\s*"POST"|\/advance/);
 });
+
+test("Work Composer preserves the user's expanded state across reloads", () => {
+  assert.match(
+    appSource,
+    /const COMPOSER_EXPANDED_STORAGE_KEY = "spg\.workComposer\.expanded"/,
+  );
+  assert.match(
+    appSource,
+    /localStorage\.getItem\(COMPOSER_EXPANDED_STORAGE_KEY\)/,
+  );
+  assert.match(
+    appSource,
+    /if \(stored === "true" \|\| stored === "false"\) \{\s*setComposerExpanded\(stored === "true"\)/,
+  );
+  assert.match(
+    appSource,
+    /setComposerExpanded\(nextExpanded\);\s*try \{\s*localStorage\.setItem\(COMPOSER_EXPANDED_STORAGE_KEY, String\(nextExpanded\)\)/,
+  );
+  assert.match(
+    appSource,
+    /restoreComposerExpanded\(\);\s*reloadWorkspace\(\)/,
+  );
+  assert.equal((appSource.match(/catch \(_error\)/g) || []).length, 2);
+});

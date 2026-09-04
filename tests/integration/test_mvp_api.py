@@ -712,6 +712,14 @@ def test_work_result_before_execution_does_not_invent_evidence(
     assert result.json()["verification_summary"] == []
     assert result.json()["repository_state"] is None
     assert result.json()["trusted_result"] is False
+    activation = result.json()["runtime_activation"]
+    assert activation["state"] == "ACTIVATION_BLOCKED"
+    assert activation["active_application_revision"] is None
+    assert activation["current_trusted_baseline_revision"] == _git(
+        api_facts.repository,
+        "rev-parse",
+        "HEAD",
+    )
 
 
 def test_ui_functional_public_http_smoke_without_provider(api_facts: ApiFacts) -> None:

@@ -18,6 +18,7 @@ from spg.application.reconciliation import RecoveryReconciliationService
 from spg.application.attempt_recovery import AttemptRecoveryService
 from spg.application.maintenance_recovery import VerifiedMaintenanceRecoveryService
 from spg.application.orchestration import ProductionOrchestrator
+from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
 from spg.domain.preparation import ExecutorBinding
@@ -217,6 +218,14 @@ class Application:
                 self.settings.orchestration_max_automatic_transitions
             ),
         )
+
+    def runtime_activation(
+        self,
+        database: Database | None = None,
+    ) -> RuntimeActivationService:
+        """Compose the read-only local Runtime activation projection."""
+
+        return RuntimeActivationService(database or self.persistence(), self.settings)
 
 
 def bootstrap(settings: Settings | None = None) -> Application:

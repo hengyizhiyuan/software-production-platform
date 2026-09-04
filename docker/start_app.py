@@ -20,6 +20,11 @@ from spg.infrastructure.git_checkout import GitTrustedCheckoutSynchronizer
 from spg.infrastructure.git_integration import GitRepositoryIntegrationAdapter
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.infrastructure.runtime_activation import (
+    GitLocalRuntimeActivation,
+    RuntimeActivationError,
+)
+from spg.domain.runtime_activation import ActiveRuntimeEvidence
 
 
 PRODUCT_DATABASE = "spg_dev"
@@ -29,6 +34,8 @@ RUNTIME_REPOSITORY = Path("/var/lib/spg/repository")
 REPOSITORY_IDENTITY = "local://software-production-platform"
 LOCAL_AUTHORITY = "local-docker-bootstrap"
 CODEX_AUTH_SOURCE_VARIABLE = "SPG_CODEX_AUTH_SOURCE"
+ACTIVATION_EVIDENCE_FILE = Path("/var/lib/spg/runtime-activation.json")
+PREVIOUS_ACTIVE_REVISION_VARIABLE = "SPG_PREVIOUS_ACTIVE_RUNTIME_REVISION"
 
 
 def _run(*arguments: str, cwd: Path | None = None) -> str:
@@ -329,6 +336,100 @@ def ensure_local_product_foundation(repository: Path) -> None:
     print("local product foundation ready", flush=True)
 
 
+def prepare_local_runtime_activation(repository: Path) -> ActiveRuntimeEvidence:
+    """Bind one whole application process to the exact Current Trusted Baseline."""
+
+    application = bootstrap()
+    database = application.persistence()
+    try:
+        with database.unit_of_work() as unit_of_work:
+            store = RuntimeStore(unit_of_work.session)
+            pointer = store.current_pointer()
+            if pointer is None:
+                raise RuntimeActivationError(
+                    "RUNTIME_ACTIVATION_BLOCKED: Current Trusted Baseline is unavailable"
+                )
+            baseline = store.snapshot(pointer.snapshot_id)
+            if baseline is None or baseline.condition is not SnapshotCondition.TRUSTED:
+                raise RuntimeActivationError(
+                    "RUNTIME_ACTIVATION_BLOCKED: Current Trusted Baseline is invalid"
+                )
+        trusted_tree = _run(
+            "git",
+            "rev-parse",
+            f"{baseline.repository_revision}^{{tree}}",
+            cwd=repository,
+        )
+        previous = _previous_active_revision(
+            pointer_version=pointer.version,
+            trusted_revision=baseline.repository_revision,
+        )
+        evidence = GitLocalRuntimeActivation().prepare(
+            repository_path=repository,
+            trusted_revision=baseline.repository_revision,
+            trusted_tree_identity=trusted_tree,
+            previous_active_revision=previous,
+        )
+        _write_activation_evidence(evidence)
+        return evidence
+    finally:
+        database.dispose()
+
+
+def _previous_active_revision(*, pointer_version: int, trusted_revision: str) -> str:
+    override = os.environ.get(PREVIOUS_ACTIVE_REVISION_VARIABLE)
+    if override:
+        return override
+    if ACTIVATION_EVIDENCE_FILE.is_file() and not ACTIVATION_EVIDENCE_FILE.is_symlink():
+        try:
+            return ActiveRuntimeEvidence.model_validate_json(
+                ACTIVATION_EVIDENCE_FILE.read_text(encoding="utf-8")
+            ).active_application_revision
+        except (OSError, ValueError) as error:
+            raise RuntimeActivationError(
+                "RUNTIME_ACTIVATION_BLOCKED: active Runtime evidence is invalid"
+            ) from error
+    if pointer_version == 0:
+        return trusted_revision
+    raise RuntimeActivationError(
+        "RUNTIME_ACTIVATION_BLOCKED: previous active revision evidence is required"
+    )
+
+
+def _write_activation_evidence(evidence: ActiveRuntimeEvidence) -> None:
+    if ACTIVATION_EVIDENCE_FILE.is_symlink():
+        raise RuntimeActivationError(
+            "RUNTIME_ACTIVATION_BLOCKED: activation evidence path is a symlink"
+        )
+    ACTIVATION_EVIDENCE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    temporary = ACTIVATION_EVIDENCE_FILE.with_suffix(".json.tmp")
+    temporary.write_text(evidence.model_dump_json(), encoding="utf-8")
+    temporary.replace(ACTIVATION_EVIDENCE_FILE)
+
+
+def _activated_environment(evidence: ActiveRuntimeEvidence) -> dict[str, str]:
+    environment = dict(os.environ)
+    existing_python_path = environment.get("PYTHONPATH")
+    environment["PYTHONPATH"] = (
+        evidence.active_source_root
+        if not existing_python_path
+        else f"{evidence.active_source_root}{os.pathsep}{existing_python_path}"
+    )
+    environment["SPG_ACTIVE_RUNTIME_REVISION"] = evidence.active_application_revision
+    environment["SPG_ACTIVE_RUNTIME_TREE_IDENTITY"] = (
+        evidence.active_repository_tree_identity
+    )
+    environment["SPG_ACTIVE_RUNTIME_PACKAGE_FINGERPRINT"] = (
+        evidence.active_source_package_fingerprint
+    )
+    environment["SPG_ACTIVE_RUNTIME_STATIC_ASSET_FINGERPRINT"] = (
+        evidence.active_static_asset_fingerprint
+    )
+    environment["SPG_ACTIVE_RUNTIME_SOURCE_ROOT"] = evidence.active_source_root
+    environment.pop(PREVIOUS_ACTIVE_REVISION_VARIABLE, None)
+    return environment
+
+
 def main() -> None:
     prepare_optional_codex_state()
     ensure_local_databases()
@@ -336,9 +437,17 @@ def main() -> None:
     repository = prepare_repository_snapshot()
     synchronize_repository_checkout(repository)
     ensure_local_product_foundation(repository)
-    os.execvp(
-        "uvicorn",
+    activation = prepare_local_runtime_activation(repository)
+    print(
+        "runtime activation prepared at Current Trusted Baseline "
+        f"{activation.active_application_revision}",
+        flush=True,
+    )
+    os.execvpe(
+        sys.executable,
         (
+            sys.executable,
+            "-m",
             "uvicorn",
             "spg.api.http:create_http_application",
             "--factory",
@@ -347,6 +456,7 @@ def main() -> None:
             "--port",
             "8000",
         ),
+        _activated_environment(activation),
     )
 
 

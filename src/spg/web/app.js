@@ -7,6 +7,7 @@
   }
 
   const POLL_INTERVAL_MS = 2000;
+  const COMPOSER_EXPANDED_STORAGE_KEY = "spg.workComposer.expanded";
   const state = {
     goals: [],
     works: [],
@@ -287,6 +288,25 @@
     });
   }
 
+  function setComposerExpanded(expanded) {
+    elements.workForm.hidden = !expanded;
+    elements.composerToggle.setAttribute("aria-expanded", String(expanded));
+    elements.composerToggle.textContent = expanded
+      ? "Collapse composer"
+      : "Expand composer";
+  }
+
+  function restoreComposerExpanded() {
+    try {
+      const stored = localStorage.getItem(COMPOSER_EXPANDED_STORAGE_KEY);
+      if (stored === "true" || stored === "false") {
+        setComposerExpanded(stored === "true");
+      }
+    } catch (_error) {
+      // Keep the markup default when browser storage is unavailable.
+    }
+  }
+
   function renderProductionPlan(work) {
     const plan = work.production_plan;
     elements.productionPlanPanel.hidden = !plan;
@@ -435,14 +455,25 @@
       elements.remainingRisk.textContent = "This Work has not completed.";
       return;
     }
+    const activation = result.runtime_activation;
+    const activeAtTrusted = activation
+      && activation.state === "ACTIVE_AT_TRUSTED_BASELINE";
     elements.trustedResult.textContent = result.trusted_result
-      ? "Trusted result"
+      ? activeAtTrusted
+        ? "Trusted result · Active at trusted baseline"
+        : "Trusted repository result · Runtime activation required"
       : "Not trusted yet";
     elements.trustedResult.classList.toggle("trusted", result.trusted_result);
     elements.artifactSummary.textContent = viewModel.artifactSummary(result);
     elements.verificationSummary.textContent = viewModel.verificationSummary(result);
-    elements.repositoryState.textContent = result.repository_state || "No repository result yet.";
-    elements.remainingRisk.textContent = result.remaining_blocker_or_risk || "No remaining blocker reported.";
+    elements.repositoryState.textContent = activation
+      ? (result.repository_state || "No repository result yet.") + " · " + activation.state
+      : result.repository_state || "No repository result yet.";
+    elements.remainingRisk.textContent = (
+      activation && activation.state !== "ACTIVE_AT_TRUSTED_BASELINE"
+        ? activation.reason
+        : result.remaining_blocker_or_risk
+    ) || "No remaining blocker reported.";
   }
 
   function renderSelectedWork() {
@@ -836,11 +867,13 @@
   elements.workForm.addEventListener("submit", createWork);
   elements.composerToggle.addEventListener("click", () => {
     const expanded = elements.composerToggle.getAttribute("aria-expanded") === "true";
-    elements.workForm.hidden = expanded;
-    elements.composerToggle.setAttribute("aria-expanded", String(!expanded));
-    elements.composerToggle.textContent = expanded
-      ? "Expand composer"
-      : "Collapse composer";
+    const nextExpanded = !expanded;
+    setComposerExpanded(nextExpanded);
+    try {
+      localStorage.setItem(COMPOSER_EXPANDED_STORAGE_KEY, String(nextExpanded));
+    } catch (_error) {
+      // The in-page toggle still works when browser storage is unavailable.
+    }
   });
   elements.statusFilter.addEventListener("change", () => {
     state.statusFilter = elements.statusFilter.value;
@@ -871,5 +904,6 @@
   elements.healthControl.addEventListener("click", loadHealth);
   elements.dismissNotice.addEventListener("click", hideNotice);
 
+  restoreComposerExpanded();
   reloadWorkspace();
 })();

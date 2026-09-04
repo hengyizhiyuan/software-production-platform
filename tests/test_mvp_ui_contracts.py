@@ -6,6 +6,10 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from spg.api import create_http_application
+from spg.domain.runtime_activation import (
+    RuntimeActivationProjection,
+    RuntimeActivationState,
+)
 
 
 WEB_ROOT = Path(str(files("spg.web")))
@@ -28,6 +32,16 @@ class _StaticOnlyOrchestrator:
         return None
 
 
+class _StaticRuntimeActivation:
+    def project(self) -> RuntimeActivationProjection:
+        return RuntimeActivationProjection(
+            state=RuntimeActivationState.ACTIVE_AT_TRUSTED_BASELINE,
+            active_application_revision="test-revision",
+            current_trusted_baseline_revision="test-revision",
+            reason="Static route test Runtime is converged.",
+        )
+
+
 def _client() -> TestClient:
     return TestClient(
         create_http_application(
@@ -35,6 +49,7 @@ def _client() -> TestClient:
             database=_StaticOnlyDatabase(),
             work_service=_StaticOnlyWorkService(),
             orchestrator=_StaticOnlyOrchestrator(),
+            runtime_activation=_StaticRuntimeActivation(),
         )
     )
 
@@ -60,6 +75,10 @@ def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
             response = client.get(f"/assets/{asset_name}")
             assert response.status_code == 200
             assert content_marker in response.text
+
+        activation = client.get("/api/runtime-activation")
+        assert activation.status_code == 200
+        assert activation.json()["state"] == "ACTIVE_AT_TRUSTED_BASELINE"
 
 
 def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
@@ -137,7 +156,7 @@ def test_planb_composer_has_explicit_bounded_collapse_control() -> None:
     assert 'id="composer-toggle"' in html
     assert 'aria-controls="work-form"' in html
     assert 'aria-expanded="true"' in html
-    assert "elements.workForm.hidden = expanded" in javascript
+    assert "elements.workForm.hidden = !expanded" in javascript
     assert '"Expand composer"' in javascript
     assert '"Collapse composer"' in javascript
 
