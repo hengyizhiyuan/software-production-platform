@@ -46,6 +46,17 @@ ECF
 
 These systems collaborate while preserving Ownership Separation, Source of Truth Separation, and Lifecycle Independence.
 
+## Interpretation Externalization and Multimodal Alignment
+
+**FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET
+DESIGNED FOR IMPLEMENTATION.** Watt may eventually externalize its reconstructed
+interpretation of a Motive through the lowest-cost representation rich enough
+to expose material misunderstanding, allowing Human calibration before costly
+production. This is an alignment/refinement capability, not merely a visual
+presentation feature, and no Alignment Artifact entity, selection algorithm,
+UI, API, schema, or production gate is authorized here. See
+[Interpretation Externalization and Multimodal Alignment](interpretation-externalization-and-multimodal-alignment.md).
+
 ## Production Planner Boundary
 
 Production Planner is responsible for:

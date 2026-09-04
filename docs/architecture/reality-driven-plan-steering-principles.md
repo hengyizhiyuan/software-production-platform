@@ -255,6 +255,17 @@ Steering does not duplicate SPG execution, observation, Verification, Commit,
 Executor, or Runtime orchestration semantics, and it is not another Executor or
 Orchestrator.
 
+## Relationship to Interpretation Externalization
+
+[Interpretation Externalization and Multimodal Alignment](interpretation-externalization-and-multimodal-alignment.md)
+is a related but distinct future capability. It asks whether Watt's
+reconstructed understanding of the Motive is materially aligned with the
+Human's mental model; Plan Steering asks what should happen next from admitted
+objective and Reality. Future Plan Steering may selectively request an
+Alignment Artifact when semantic risk is material, but this record defines no
+trigger, representation-selection algorithm, mandatory gate, or implementation
+authorization.
+
 ## Fresh-session Reconstruction Requirement
 
 A user may close the current AI session and later start a new session, change

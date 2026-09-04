@@ -2,7 +2,7 @@
 
 ## Status and Scope
 
-**Architecture Decision: RECORDED / ADMITTED**
+**Architecture Decision: CLOSED / PASS**
 
 This record calibrates product language and conceptual boundaries. It does not
 rename current domain types, database tables, identifiers, API routes, Runtime
@@ -138,6 +138,12 @@ optional hardening.
 Its higher-order product thesis and normative continuity, reconstructability,
 equivalence, provenance, and anti-drift requirements are recorded in
 [Reality-driven Plan Steering — Foundational Principles](reality-driven-plan-steering-principles.md).
+
+A distinct future alignment capability is recorded in
+[Interpretation Externalization and Multimodal Alignment](interpretation-externalization-and-multimodal-alignment.md).
+It may help a Human calibrate the system's reconstructed Motive before costly
+production, but it is not a mandatory Work gate, current MVP scope, or
+implementation authorization.
 
 No implementation contract, data model, API, orchestration change, or Feature
 ID is created by this documentation decision.

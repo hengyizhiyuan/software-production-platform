@@ -145,8 +145,9 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-ORCH-1 — Production Orchestration Lite | CLOSED / PASS |
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
-| Motive / Work / Plan Concept Calibration | RECORDED / ADMITTED |
+| Motive / Work / Plan Concept Calibration | CLOSED / PASS |
 | Reality-driven Plan Steering | FOUNDATIONAL PRINCIPLES RECORDED / ADMITTED — MATERIAL MVP CORE PRODUCT CAPABILITY — NOT YET IMPLEMENTED |
+| Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
 | MVP-VERIFY-NODE-1 — Typed Node Test Verification Lite | CLOSED / PASS |
@@ -370,6 +371,18 @@ for one Single-PWU production-step plan and does not satisfy long-lived Plan
 Steering. See
 [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md).
 
+### Interpretation Externalization / Multimodal Alignment
+
+Textual confirmation does not prove equivalence between the Human's mental
+model and Watt's reconstructed interpretation. The future capability
+**Interpretation Externalization** would make Watt's interpretation of a
+Motive concrete enough for Human calibration, using the lowest-cost
+representation rich enough to expose material misunderstanding. It is a future
+alignment/refinement capability, not merely visualization, and remains **NOT
+CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION**. It adds no MVP
+blocker, mandatory Work gate, domain entity, schema, API, UI, or implementation
+authorization. See [Interpretation Externalization and Multimodal Alignment](docs/architecture/interpretation-externalization-and-multimodal-alignment.md).
+
 ### MVP-CODE-1 Bounded Code Work Boundary
 
 MVP-CODE-1 is **CLOSED / PASS** after Architecture Lead Reality Review.
@@ -458,6 +471,7 @@ The current system-level architecture baseline is:
 - [Trusted Baseline / Active Runtime Convergence Lite](docs/architecture/trusted-baseline-active-runtime-convergence-lite.md)
 - [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md)
 - [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md)
+- [Interpretation Externalization and Multimodal Alignment](docs/architecture/interpretation-externalization-and-multimodal-alignment.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -495,6 +509,8 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Models Reason over the Plan; Models Do Not Own the Plan
 - Plan Must Be Reconstructable from Governed Reality
 - Roadmap Guides Production; Reality Governs Roadmap
+- Alignment Is Calibration of the Interpreted Model, Not Confirmation of Words
+- Use the Lowest-cost Representation Rich Enough to Expose Material Misunderstanding
 - Ownership Before Integration
 - Generated Does Not Equal Trusted
 - Trusted Baseline Does Not Imply Active Runtime
