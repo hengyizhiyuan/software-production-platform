@@ -138,6 +138,9 @@ optional hardening.
 Its higher-order product thesis and normative continuity, reconstructability,
 equivalence, provenance, and anti-drift requirements are recorded in
 [Reality-driven Plan Steering — Foundational Principles](reality-driven-plan-steering-principles.md).
+Its bounded admitted MVP behavior is recorded in the
+[Reality-driven Plan Steering MVP Behavioral Contract](reality-driven-plan-steering-mvp-contract.md).
+Implementation remains not yet started.
 
 A distinct future alignment capability is recorded in
 [Interpretation Externalization and Multimodal Alignment](interpretation-externalization-and-multimodal-alignment.md).

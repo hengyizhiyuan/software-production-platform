@@ -45,7 +45,7 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Web UI | Same-origin FastAPI-served Goal / Work Control Room implements intake, refinement/admission, one-step advance, Attention, and truthful Work Result views | MVP CORE / CLOSED / PASS |
 | Motive / Work / Engineering Scope product model | Motive is the product-facing concept; Work is the current internal governed representation; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / CONCEPT CALIBRATION CLOSED / PASS; IMPLEMENTATION REMAINS WORK-NAMED |
 | Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI; it is a narrow production-step plan, not full lifecycle steering | MVP CORE / PLAN-1B CLOSED / PASS |
-| Reality-driven Plan Steering | Foundational principles are recorded/admitted; long-lived Motive/Work guidance must preserve material direction across model/session/environment changes and derive revisions from governed Reality | MVP CORE GAP / NOT YET IMPLEMENTED |
+| [Reality-driven Plan Steering](../architecture/reality-driven-plan-steering-mvp-contract.md) | Foundational principles and the MVP behavioral contract are defined/admitted; long-lived Motive/Work guidance defaults to auto-continue, preserves material direction, and grounds Next Steps and revisions in governed Reality | MATERIAL MVP CORE PRODUCT CAPABILITY / IMPLEMENTATION NOT YET STARTED |
 | [Interpretation Externalization / Multimodal Alignment](../architecture/interpretation-externalization-and-multimodal-alignment.md) | Externalize Watt's reconstructed Motive interpretation at the lowest sufficient representation cost so material semantic mismatch can be calibrated | FUTURE CORE DIFFERENTIATION CAPABILITY / NOT CURRENT MVP SCOPE / NOT YET DESIGNED FOR IMPLEMENTATION |
 | Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | MVP CORE / IMPLEMENTED; real Provider loop remains separate |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
@@ -233,7 +233,7 @@ an evidence-backed follow-up rather than hidden success.
 8. **Single-PWU Production Planner Intelligence Lite** — CLOSED / PASS; multi-PWU production remains deferred.
 9. **Bounded Single-PWU Code Work** — CLOSED / PASS; adds Human-visible bounded change authority and typed contract-driven code Verification without changing the one-PWU model.
 10. **Trusted Baseline / Active Runtime Convergence Lite** — CLOSED / PASS; Architecture Lead Reality Review and Human Composer acceptance passed. The first trusted Watt code self-dogfood loop is proven.
-11. **Reality-driven Plan Steering** — foundational principles RECORDED / ADMITTED; capability NOT YET IMPLEMENTED. Define its bounded Plan Frame, reconstruction, divergence, next-step, revision, Human Attention, and SPG invocation contracts before implementation.
+11. **Reality-driven Plan Steering** — foundational principles and MVP behavioral contract DEFINED / ADMITTED; implementation NOT YET STARTED. Any implementation slice requires separate admission and must preserve the bounded Plan Frame, Next-Step/Outcome, Human Attention, revision, reconstruction, and SPG invocation contracts.
 12. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
 13. **Linux server deployment** — bootstrap from an exact accepted candidate.
 14. **Linux promotion validation** — run the server promotion gate and operational checks.
@@ -262,9 +262,9 @@ Robustness, recovery, scale, optimization, and security work does not enter the 
 
 ## 13. Next Slice Selection Boundary
 
-Architecture Lead selects each concrete slice separately. The next design step
-should define the bounded Reality-driven Plan Steering contract: objective and
-Reality inputs, next-step classifications, Human-decision boundaries, Plan
-revision/evidence semantics, and invocation of SPG for admitted production.
-This calibration does not authorize its implementation and does not introduce
-Project Governor, Initiative, multi-PWU execution, or Phase-2 automation.
+Architecture Lead selects each concrete slice separately. The bounded
+Reality-driven Plan Steering MVP behavioral contract is now DEFINED / ADMITTED.
+Any next implementation-contract or implementation-slice work requires
+separate Architecture Lead admission. This calibration does not authorize
+implementation and does not introduce Project Governor, Initiative, multi-PWU
+execution, or Phase-2 automation.

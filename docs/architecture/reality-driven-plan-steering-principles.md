@@ -12,6 +12,10 @@ It defines product intent and normative architecture requirements. It does not
 implement Plan Steering, prescribe a database schema, or change production
 code, API, Runtime, Executor, migration, or authority behavior.
 
+The admitted bounded MVP behavior is defined in the
+[Reality-driven Plan Steering MVP Behavioral Contract](reality-driven-plan-steering-mvp-contract.md).
+The contract does not authorize implementation or reopen PLAN-1B, ORCH, or SPG.
+
 ## Strategic Product Position
 
 Reality-driven Plan Steering is not merely an AI task-list generator or a
@@ -308,6 +312,7 @@ similar principles.
 Reality-driven Plan Steering
     MATERIAL MVP CORE PRODUCT CAPABILITY
     NOT YET IMPLEMENTED
+    MVP BEHAVIORAL CONTRACT DEFINED / ADMITTED
 
 MVP-PLAN-1B
     CLOSED / PASS

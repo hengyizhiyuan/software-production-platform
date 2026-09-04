@@ -57,6 +57,15 @@ presentation feature, and no Alignment Artifact entity, selection algorithm,
 UI, API, schema, or production gate is authorized here. See
 [Interpretation Externalization and Multimodal Alignment](interpretation-externalization-and-multimodal-alignment.md).
 
+## Future Plan Steering Human-Attention Extensions
+
+The admitted
+[Reality-driven Plan Steering MVP Behavioral Contract](reality-driven-plan-steering-mvp-contract.md)
+reserves two future iterations without adding them to the current MVP Attention
+boundary: Milestone / Alignment Acceptance and Resource / Capability Boundary
+Crossing. Neither is an MVP blocker or implementation authorization, and no
+policy, threshold, persistence, UX, or Authority design is frozen.
+
 ## Production Planner Boundary
 
 Production Planner is responsible for:
@@ -410,4 +419,3 @@ Engineering Branching is a Future Capability and Architecture Direction, Not Imp
 - Evidence
 
 Its purpose is to support alternative exploration, parallel production, and controlled integration. Project State should not be conceptually bound to one chat window or one execution environment.
-

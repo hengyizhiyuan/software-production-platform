@@ -250,6 +250,8 @@ Future Plan Steering may request Interpretation Externalization when Motive
 interpretation is uncertain, a major Plan revision changes expected product
 shape, new Reality invalidates an important assumption, Human acceptance
 reveals a semantic mismatch, or a high-cost production phase is about to begin.
+The two explicitly deferred Human-Attention extensions are registered in the
+[Reality-driven Plan Steering MVP Behavioral Contract](reality-driven-plan-steering-mvp-contract.md).
 No such integration is implemented or authorized here.
 
 ## Real Watt Alignment Evidence
