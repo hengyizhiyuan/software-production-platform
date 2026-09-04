@@ -49,7 +49,9 @@ A conceptual Plan may span a long-lived Work and repeatedly choose the next
 appropriate refinement, design, Human-decision, or governed-production step
 from current Reality. The current PLAN-1B single-PWU proposal implements only a
 narrow subset. Reality-driven Plan Steering remains a material core capability
-that is not yet implemented. The detailed boundary is recorded in
+and is now in progress through the provider-neutral persisted Steering Truth
+Spine; Steering reasoning and automatic progression are not yet implemented.
+The detailed boundary is recorded in
 [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
 
 The MVP uses **Single Intelligence Mode**:

@@ -146,7 +146,7 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | Motive / Work / Plan Concept Calibration | CLOSED / PASS |
-| Reality-driven Plan Steering | FOUNDATIONAL PRINCIPLES + MVP BEHAVIORAL CONTRACT DEFINED / ADMITTED — MATERIAL MVP CORE PRODUCT CAPABILITY — IMPLEMENTATION NOT YET STARTED |
+| Reality-driven Plan Steering | IN PROGRESS — MVP-PLAN-STEER-1C STEERING TRUTH SPINE CLOSED / PASS |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -343,8 +343,11 @@ what should happen next given the objective and current Reality; SPG answers
 how an admitted engineering-production step is executed, observed, verified,
 and committed truthfully.
 
-**Reality-driven Plan Steering is NOT YET IMPLEMENTED.** It is a material
-remaining core product capability, not Phase-2 hardening. Advanced autonomous
+**Reality-driven Plan Steering is IN PROGRESS.** MVP-PLAN-STEER-1C implements
+the provider-neutral persisted Steering Truth Spine and reconstruction query;
+Steering reasoning, automatic long-lived execution, SPG bridging, and extended
+Human Attention remain unimplemented. It is a material remaining core product
+capability, not Phase-2 hardening. Advanced autonomous
 replanning, multi-PWU orchestration, optimization, and unattended continuous
 production remain separable deferred capabilities. See
 [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md).
@@ -366,8 +369,9 @@ provider, session, host, or environment changes. Identical wording is not
 required, but material divergence without changed Reality must be detectable
 and explainable. New model output alone is not New Reality.
 
-The capability remains **NOT YET IMPLEMENTED**. PLAN-1B remains CLOSED / PASS
-for one Single-PWU production-step plan and does not satisfy long-lived Plan
+The capability is **IN PROGRESS** through the separately admitted
+MVP-PLAN-STEER-1C Steering Truth Spine. PLAN-1B remains CLOSED / PASS for one
+Single-PWU production-step plan and remains distinct from long-lived Plan
 Steering. See
 [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md).
 
@@ -380,8 +384,9 @@ is satisfied. Next Steps are typed as `REFINE`, `HUMAN_DECISION`, `DESIGN`,
 `PRODUCE`, `VERIFY_ACCEPT`, or `COMPLETE` and require Reality-grounded
 rationale. Plan owns progression state and rationale while referenced governed
 Reality retains its existing Truth ownership. Step transition, progressive
-elaboration, and material Plan revision remain distinct. Implementation is
-**NOT YET STARTED** and requires separate admission. See
+elaboration, and material Plan revision remain distinct. The persisted Truth
+Spine is **CLOSED / PASS**; reasoning and automatic progression require
+separate admission. See
 [Reality-driven Plan Steering MVP Behavioral Contract](docs/architecture/reality-driven-plan-steering-mvp-contract.md).
 
 ### Interpretation Externalization / Multimodal Alignment

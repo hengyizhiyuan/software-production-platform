@@ -17,6 +17,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
 from spg.infrastructure.persistence.metadata import metadata
+from spg.infrastructure.persistence.steering_schema import steering_tables
 
 
 product_goals = Table(
@@ -178,7 +179,6 @@ work_runtime_bindings = Table(
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 
-
 product_tables = (
     product_goals,
     engineering_resources,
@@ -186,4 +186,5 @@ product_tables = (
     engineering_scopes,
     engineering_resource_bindings,
     work_runtime_bindings,
+    *steering_tables,
 )

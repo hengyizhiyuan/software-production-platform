@@ -4,13 +4,16 @@
 
 **Foundational Architecture / Product Principles: RECORDED / ADMITTED**
 
-**Reality-driven Plan Steering: MATERIAL MVP CORE PRODUCT CAPABILITY — NOT YET IMPLEMENTED**
+**Reality-driven Plan Steering: MATERIAL MVP CORE PRODUCT CAPABILITY — IN PROGRESS**
+
+**MVP-PLAN-STEER-1C Steering Truth Spine: CLOSED / PASS**
 
 This record builds on the
 [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
-It defines product intent and normative architecture requirements. It does not
-implement Plan Steering, prescribe a database schema, or change production
-code, API, Runtime, Executor, migration, or authority behavior.
+It defines product intent and normative architecture requirements. The
+separately admitted 1C Slice implements only the persisted Steering Truth Spine;
+it does not implement Steering reasoning, automatic progression, SPG bridging,
+or additional production authority.
 
 The admitted bounded MVP behavior is defined in the
 [Reality-driven Plan Steering MVP Behavioral Contract](reality-driven-plan-steering-mvp-contract.md).

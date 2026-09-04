@@ -554,11 +554,28 @@ anti-drift behavior without adding layers that merely relay information.
 
 ## Current Capability Status
 
+MVP-PLAN-STEER-1C persists a provider-neutral Steering Plan, immutable admitted
+revisions, stable ordered Steps, admitted Steering Decisions, typed external
+Reality references, and append-only transition/elaboration/revision history.
+The single authoritative current-Step representation is Step state, protected
+by a database invariant allowing at most one `CURRENT` Step per revision.
+
+For 1C, the decision basis fingerprint is canonical SHA-256 over the persisted
+Work identity and update time, requirement/outcome/objective/constraints, the
+active Steering revision identity and number, the exact current Step identity
+and governed fields, and sorted typed Reality references. Decision prose and
+reasoning-provider identity are deliberately excluded: they are decision output
+and diagnostic metadata, not the governed basis.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
-    IMPLEMENTATION = NOT YET STARTED
+    IMPLEMENTATION = IN PROGRESS
     MATERIAL MVP CORE PRODUCT CAPABILITY
+
+MVP-PLAN-STEER-1C
+    STEERING TRUTH SPINE = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
 
 MVP-PLAN-1B
     CLOSED / PASS

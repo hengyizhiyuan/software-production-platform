@@ -18,6 +18,7 @@ from spg.application.reconciliation import RecoveryReconciliationService
 from spg.application.attempt_recovery import AttemptRecoveryService
 from spg.application.maintenance_recovery import VerifiedMaintenanceRecoveryService
 from spg.application.orchestration import ProductionOrchestrator
+from spg.application.steering import SteeringApplicationService
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
@@ -218,6 +219,14 @@ class Application:
                 self.settings.orchestration_max_automatic_transitions
             ),
         )
+
+    def steering(
+        self,
+        database: Database | None = None,
+    ) -> SteeringApplicationService:
+        """Compose persisted Steering truth without a reasoning provider or driver."""
+
+        return SteeringApplicationService(database or self.persistence())
 
     def runtime_activation(
         self,
