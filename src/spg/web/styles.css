@@ -679,6 +679,33 @@ dd {
   border-top: 1px solid var(--line);
 }
 
+.production-plan {
+  margin-top: 20px;
+  padding: 18px;
+  background: #f3f6f5;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.production-plan h3 {
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.plan-objective {
+  line-height: 1.5;
+}
+
+.plan-steps {
+  margin: 0 0 16px;
+  padding-left: 24px;
+  line-height: 1.6;
+}
+
+.plan-details {
+  margin-top: 0;
+}
+
 .technical-details summary {
   color: var(--teal);
   font-size: 13px;
@@ -775,6 +802,19 @@ dd {
   border: 1px solid var(--line-strong);
   border-radius: 18px;
   box-shadow: 0 20px 48px rgb(25 48 59 / 16%);
+}
+
+.composer-toggle-row {
+  width: min(100%, 980px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 auto 6px;
+  padding: 0 4px;
+}
+
+.composer-toggle-row .field-label {
+  margin: 0;
 }
 
 .composer-main label {

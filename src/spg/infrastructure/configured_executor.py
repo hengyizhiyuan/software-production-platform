@@ -72,6 +72,23 @@ def render_governed_instruction(
     outputs = "\n".join(f"- {item}" for item in completion_contract.required_outputs)
     changes = "\n".join(f"- {item}" for item in completion_contract.required_changes)
     artifact = completion_contract.artifact_contract
+    plan = completion_contract.production_plan
+    plan_section = ""
+    if plan is not None:
+        steps = "\n".join(
+            f"{step.position}. {step.instruction}" for step in plan.ordered_steps
+        )
+        plan_constraints = "\n".join(
+            f"- {item}" for item in plan.inherited_constraints
+        )
+        plan_section = (
+            f"Desired outcome:\n{plan.desired_outcome}\n\n"
+            f"Admitted Production Plan objective:\n{plan.objective}\n\n"
+            f"Ordered Plan steps:\n{steps}\n\n"
+            "Inherited constraints:\n"
+            f"{plan_constraints or '- None beyond the admitted contract.'}\n\n"
+            f"Verification approach:\n{plan.verification_approach}\n\n"
+        )
     artifact_authority = ""
     if artifact is not None:
         constraints = "\n".join(f"- {item}" for item in artifact.constraints)
@@ -85,6 +102,7 @@ def render_governed_instruction(
     return (
         "Complete exactly the admitted software-production objective below.\n\n"
         f"Objective:\n{objective.strip()}\n\n"
+        f"{plan_section}"
         f"{artifact_authority}"
         f"Authorized output paths:\n{outputs}\n\n"
         f"Authorized changed paths:\n{changes}\n\n"

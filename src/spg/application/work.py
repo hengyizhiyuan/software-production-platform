@@ -12,6 +12,7 @@ from spg.application.completion import CompletionService
 from spg.application.execution import ExecutionService
 from spg.application.governance import CandidateGovernanceService
 from spg.application.integration import RepositoryIntegrationService
+from spg.application.planning import ProductionPlanningService
 from spg.application.preparation import PreparationService
 from spg.application.runtime import RuntimeService
 from spg.application.runtime_commit import RuntimeCommitService
@@ -27,6 +28,14 @@ from spg.domain.preparation import (
     ContextArtifactSelection,
     ContextPackageRequest,
     ExecutorBinding,
+)
+from spg.domain.planning import (
+    OnePwuFitClassification,
+    PlannedArtifactOperation,
+    ProductionPlanArtifactTarget,
+    ProductionPlanProposal,
+    ProductionPlanner,
+    ProductionPlanningRequest,
 )
 from spg.domain.product import (
     ArtifactTargetConfidence,
@@ -70,6 +79,7 @@ from spg.domain.verifier import VerificationCapabilityContract
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.providers.rule_based_planner import RuleBasedProductionPlanner
 
 
 WORK_ACTOR = "spg-product:work-application"
@@ -90,12 +100,16 @@ class WorkApplicationService:
         workspace_root: Path | None = None,
         executor: ExecutorCapabilityContract | None = None,
         verifier: VerificationCapabilityContract | None = None,
+        planner: ProductionPlanner | None = None,
         executor_binding: ExecutorBinding = DEFAULT_BINDING,
     ) -> None:
         self.database = database
         self.workspace_root = (workspace_root or Path(".spg/workspaces")).resolve()
         self.executor = executor
         self.verifier = verifier
+        self.planning = ProductionPlanningService(
+            planner or RuleBasedProductionPlanner()
+        )
         self.executor_binding = executor_binding
         self.runtime = RuntimeService(database)
         self.preparation = PreparationService(database)
@@ -221,6 +235,7 @@ class WorkApplicationService:
                     "artifact_source_baseline_id": None,
                     "artifact_source_revision": None,
                     "verification_expectation": None,
+                    "production_plan_proposal": None,
                     "created_at": timestamp,
                     "updated_at": timestamp,
                 }
@@ -276,13 +291,52 @@ class WorkApplicationService:
                 request.constraints,
                 self._extract_constraints(work.raw_user_requirement),
             )
-            needs_refinement = (
-                self._is_too_broad(work.raw_user_requirement) or proposal is None
+            refinement_reasons: list[str] = []
+            if self._is_too_broad(work.raw_user_requirement):
+                refinement_reasons.append(
+                    "The admitted Work is too broad for a trustworthy single-PWU plan."
+                )
+            if proposal is None:
+                refinement_reasons.append(
+                    "An exact authorized artifact target is required before production."
+                )
+            plan = self.planning.propose(
+                ProductionPlanningRequest(
+                    work_id=work.id,
+                    admitted_requirement=work.raw_user_requirement,
+                    desired_outcome=desired_outcome,
+                    production_objective=objective,
+                    artifact_targets=(
+                        ()
+                        if proposal is None
+                        else (
+                            ProductionPlanArtifactTarget(
+                                path=proposal.path,
+                                operation=PlannedArtifactOperation(
+                                    proposal.operation.value
+                                ),
+                            ),
+                        )
+                    ),
+                    constraints=constraints,
+                    verification_expectation=verification,
+                    engineering_scope_summary=scope_summary,
+                    engineering_resource_id=resource.id,
+                    repository_identity=resource.repository_identity,
+                    source_baseline_id=baseline.id,
+                    source_revision=baseline.repository_revision,
+                    context_references=tuple(
+                        item.repository_relative_path
+                        for item in resource.context_references
+                    ),
+                    refinement_reasons=tuple(refinement_reasons),
+                )
             )
             condition = (
-                WorkCondition.NEEDS_REFINEMENT
-                if needs_refinement
-                else WorkCondition.AWAITING_APPROVAL
+                WorkCondition.AWAITING_APPROVAL
+                if plan.fit_classification
+                is OnePwuFitClassification.ONE_PWU_FIT
+                else WorkCondition.NEEDS_REFINEMENT
             )
             scope_id = uuid4()
             timestamp = datetime.now(UTC)
@@ -341,6 +395,7 @@ class WorkApplicationService:
                         None if proposal is None else proposal.source_revision
                     ),
                     "verification_expectation": verification,
+                    "production_plan_proposal": plan.model_dump(mode="json"),
                     "updated_at": timestamp,
                 },
             )
@@ -399,6 +454,7 @@ class WorkApplicationService:
             if resource is None:
                 raise ProductInvariantViolation("Scope Resource is missing")
             artifact = self._required_artifact_target(work)
+            plan = self._required_production_plan(work)
 
         baseline = self.runtime.current_baseline()
         if (
@@ -414,6 +470,31 @@ class WorkApplicationService:
         ):
             raise ProductInvariantViolation(
                 "Artifact Target Proposal is stale against the current Source Baseline"
+            )
+        if plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT:
+            raise ProductInvariantViolation(
+                "Work Production Plan is not fit for the single-PWU MVP"
+            )
+        expected_plan_target = ProductionPlanArtifactTarget(
+            path=artifact.path,
+            operation=PlannedArtifactOperation(artifact.operation.value),
+        )
+        if (
+            plan.desired_outcome
+            != (work.desired_outcome or work.raw_user_requirement.strip())
+            or plan.objective
+            != (work.production_objective or work.desired_outcome or "")
+            or plan.artifact_targets != (expected_plan_target,)
+            or plan.inherited_constraints != work.constraints
+            or plan.verification_approach
+            != (work.verification_expectation or "")
+            or plan.engineering_resource_id != resource.id
+            or plan.repository_identity != resource.repository_identity
+            or plan.source_baseline_id != baseline.id
+            or plan.source_revision != baseline.repository_revision
+        ):
+            raise ProductInvariantViolation(
+                "Production Plan no longer matches the admitted Work authority envelope"
             )
         verification_obligation = (
             work.verification_expectation
@@ -442,6 +523,7 @@ class WorkApplicationService:
                     required_changes=(artifact.path,),
                     verification_obligations=(verification_obligation,),
                     artifact_contract=artifact_contract,
+                    production_plan=plan,
                 ),
             )
         )
@@ -470,6 +552,11 @@ class WorkApplicationService:
                         "resource_id": str(resource.id),
                         "production_run_id": str(spine.run.id),
                         "work_unit_id": str(spine.work_unit.id),
+                        "production_plan_proposal_id": str(plan.proposal_id),
+                        "production_plan_fingerprint": self._fingerprint(
+                            plan.model_dump(mode="json")
+                        ),
+                        "production_plan_fit": plan.fit_classification.value,
                     },
                     "rationale": rationale,
                     "created_at": timestamp,
@@ -739,6 +826,31 @@ class WorkApplicationService:
         )
         items: list[AttentionItem] = []
         for projection in projections:
+            if projection.status is WorkStatus.NEEDS_REFINEMENT:
+                questions = (
+                    ()
+                    if projection.production_plan is None
+                    else projection.production_plan.unresolved_questions
+                )
+                items.append(
+                    AttentionItem(
+                        id=uuid5(
+                            NAMESPACE_URL,
+                            f"spg:work-refinement-attention:{projection.work_id}",
+                        ),
+                        work_id=projection.work_id,
+                        kind=AttentionKind.WORK_REFINEMENT_REQUIRED,
+                        decision="Refine this Work before production admission.",
+                        reason=(
+                            " ".join(questions)
+                            or "The current Work cannot form a trustworthy single-PWU plan."
+                        ),
+                        available_actions=(),
+                        recommended_action=None,
+                        governed_subject_ref=f"work:{projection.work_id}",
+                    )
+                )
+                continue
             if projection.status is WorkStatus.AWAITING_APPROVAL:
                 items.append(
                     AttentionItem(
@@ -921,6 +1033,7 @@ class WorkApplicationService:
             desired_outcome=work.desired_outcome,
             constraints=work.constraints,
             artifact_target=self._artifact_target(work),
+            production_plan=work.production_plan,
             tags=work.tags,
             engineering_scope=scope,
             status=status,
@@ -928,7 +1041,12 @@ class WorkApplicationService:
             most_recent_meaningful_event=summary.latest_event or event,
             what_happens_next=next_action,
             human_attention_required=status
-            in {WorkStatus.AWAITING_APPROVAL, WorkStatus.NEEDS_ATTENTION, WorkStatus.BLOCKED},
+            in {
+                WorkStatus.NEEDS_REFINEMENT,
+                WorkStatus.AWAITING_APPROVAL,
+                WorkStatus.NEEDS_ATTENTION,
+                WorkStatus.BLOCKED,
+            },
             result_summary=result_summary,
         )
 
@@ -940,10 +1058,21 @@ class WorkApplicationService:
         if work.condition is WorkCondition.DRAFT:
             return WorkStatus.DRAFT, "WORK_INTAKE", "WORK_SUBMITTED", "Refine Work draft"
         if work.condition is WorkCondition.NEEDS_REFINEMENT:
+            if (
+                work.production_plan is not None
+                and work.production_plan.fit_classification
+                is OnePwuFitClassification.MULTI_PWU_REQUIRED
+            ):
+                return (
+                    WorkStatus.NEEDS_REFINEMENT,
+                    "PRODUCTION_PLANNING",
+                    "MULTI_PWU_REQUIRED",
+                    "Narrow the Work to one governed PWU; multi-PWU production is deferred",
+                )
             return (
                 WorkStatus.NEEDS_REFINEMENT,
-                "WORK_REFINEMENT",
-                "REFINEMENT_REQUIRED",
+                "PRODUCTION_PLANNING",
+                "PLAN_REFINEMENT_REQUIRED",
                 "Narrow or clarify the Work",
             )
         if work.condition is WorkCondition.AWAITING_APPROVAL:
@@ -1170,6 +1299,14 @@ class WorkApplicationService:
                 "Work requires an exact Human-visible Artifact Target before approval"
             )
         return target
+
+    @staticmethod
+    def _required_production_plan(work: WorkRecord) -> ProductionPlanProposal:
+        if work.production_plan is None:
+            raise ProductInvariantViolation(
+                "Work requires a Human-visible Production Plan before approval"
+            )
+        return work.production_plan
 
     @classmethod
     def _artifact_target_proposal(

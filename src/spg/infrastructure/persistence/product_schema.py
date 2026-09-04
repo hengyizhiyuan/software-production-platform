@@ -76,6 +76,7 @@ product_works = Table(
     Column("artifact_source_baseline_id", Uuid(as_uuid=True), nullable=True),
     Column("artifact_source_revision", String(64), nullable=True),
     Column("verification_expectation", Text, nullable=True),
+    Column("production_plan_proposal", JSONB, nullable=True),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )

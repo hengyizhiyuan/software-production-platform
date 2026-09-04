@@ -25,6 +25,7 @@ from spg.domain.product import (
     WorkRuntimeBindingRecord,
 )
 from spg.domain.runtime import CompletionContract
+from spg.domain.planning import ProductionPlanProposal
 from spg.infrastructure.persistence.product_schema import (
     engineering_resource_bindings,
     engineering_resources,
@@ -406,6 +407,13 @@ class ProductStore:
             artifact_source_baseline_id=row["artifact_source_baseline_id"],
             artifact_source_revision=row["artifact_source_revision"],
             verification_expectation=row["verification_expectation"],
+            production_plan=(
+                None
+                if row["production_plan_proposal"] is None
+                else ProductionPlanProposal.model_validate(
+                    row["production_plan_proposal"]
+                )
+            ),
             created_at=row["created_at"],
             updated_at=row["updated_at"],
         )

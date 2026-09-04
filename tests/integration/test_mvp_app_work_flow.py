@@ -38,6 +38,7 @@ from spg.infrastructure.persistence.runtime_schema import (
     execution_attempts,
     governance_records,
     production_runs,
+    plan_revisions,
     production_work_units,
     provider_execution_reports,
     repository_observations,
@@ -185,6 +186,8 @@ def test_intake_same_intent_target_propagates_from_approval_through_verification
     submitted = app_facts.service.submit_work(INTAKE_SAME_INTENT)
     draft = app_facts.service.refine_work(submitted.work_id)
     assert draft.artifact_target is not None
+    assert draft.production_plan is not None
+    assert draft.production_plan.fit_classification.value == "ONE_PWU_FIT"
     target = "docs/architecture/production-orchestration-lite.md"
     assert draft.artifact_target.path == target
     assert draft.artifact_target.operation.value == "CREATE"
@@ -203,6 +206,7 @@ def test_intake_same_intent_target_propagates_from_approval_through_verification
     assert work_unit is not None
     contract = work_unit.completion_contract
     assert contract.artifact_contract is not None
+    assert contract.production_plan == draft.production_plan
     assert contract.artifact_contract.artifact_path == target
     assert contract.required_outputs == (target,)
     assert contract.required_changes == (target,)
@@ -221,6 +225,11 @@ def test_intake_same_intent_target_propagates_from_approval_through_verification
     )
     assert target in materialized.instruction_content
     assert "Operation: CREATE" in materialized.instruction_content
+    assert "Ordered Plan steps:" in materialized.instruction_content
+    assert all(
+        step.instruction in materialized.instruction_content
+        for step in draft.production_plan.ordered_steps
+    )
 
     executor = DeterministicTestExecutor(
         DeterministicExecutionSpecification(
@@ -250,6 +259,66 @@ def test_intake_same_intent_target_propagates_from_approval_through_verification
     assert final.artifact_paths == (target,)
     assert final.verification_obligations == contract.verification_obligations
     assert final.verification_results == (VerificationResultValue.PASS.value,)
+
+
+def test_plan_approval_creates_exactly_one_plan_revision_and_one_pwu(
+    app_facts: AppFacts,
+) -> None:
+    draft = _draft(
+        app_facts,
+        requirement="Add an API endpoint, affected tests, and documentation at docs/api-plan.md",
+    )
+    assert draft.production_plan is not None
+    assert len(draft.production_plan.ordered_steps) >= 4
+
+    app_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="architecture-lead:plan-1b",
+    )
+    binding = _runtime_binding(app_facts, draft.work_id)
+    assert binding is not None
+    with app_facts.database.unit_of_work() as unit_of_work:
+        plan_count = unit_of_work.session.scalar(
+            select(func.count()).select_from(plan_revisions)
+        )
+        work_unit_count = unit_of_work.session.scalar(
+            select(func.count()).select_from(production_work_units)
+        )
+        work_unit = RuntimeStore(unit_of_work.session).work_unit(binding.work_unit_id)
+
+    assert plan_count == 1
+    assert work_unit_count == 1
+    assert work_unit is not None
+    assert work_unit.completion_contract.production_plan == draft.production_plan
+
+
+@pytest.mark.parametrize(
+    ("requirement", "expected_fit"),
+    (
+        ("Rewrite the whole entire platform and all systems", "NEEDS_REFINEMENT"),
+        (
+            "Use independently governed sequential production with a successor baseline",
+            "MULTI_PWU_REQUIRED",
+        ),
+    ),
+)
+def test_non_single_pwu_fit_creates_no_executable_runtime(
+    app_facts: AppFacts,
+    requirement: str,
+    expected_fit: str,
+) -> None:
+    draft = _draft(app_facts, requirement=requirement)
+
+    assert draft.status is WorkStatus.NEEDS_REFINEMENT
+    assert draft.production_plan is not None
+    assert draft.production_plan.fit_classification.value == expected_fit
+    assert draft.human_attention_required
+    assert _runtime_binding(app_facts, draft.work_id) is None
+    with pytest.raises(ProductInvariantViolation):
+        app_facts.service.approve_work(
+            draft.work_id,
+            authority_identity="architecture-lead:plan-1b",
+        )
 
 
 def test_intake_human_override_replaces_proposal_before_approval(

@@ -76,6 +76,10 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "artifact target" in combined
     assert "artifact operation" in combined
     assert "placement rationale" in combined
+    assert "production plan" in combined
+    assert "single-pwu approach" in combined
+    assert 'id="plan-steps"' in html
+    assert "plan.fit_classification" in javascript
     assert "expected_artifact_path" in javascript
     assert "no artifacts observed" in combined
     assert "no verification evidence available" in combined
@@ -108,6 +112,18 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "innerHTML" not in javascript
     assert "SPG_DATABASE_URL" not in javascript
     assert "OPENAI_API_KEY" not in javascript
+
+
+def test_planb_composer_has_explicit_bounded_collapse_control() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+
+    assert 'id="composer-toggle"' in html
+    assert 'aria-controls="work-form"' in html
+    assert 'aria-expanded="true"' in html
+    assert "elements.workForm.hidden = expanded" in javascript
+    assert '"Expand composer"' in javascript
+    assert '"Collapse composer"' in javascript
 
 
 def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None:

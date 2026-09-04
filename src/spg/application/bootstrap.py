@@ -21,6 +21,7 @@ from spg.application.orchestration import ProductionOrchestrator
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
 from spg.domain.preparation import ExecutorBinding
+from spg.domain.planning import ProductionPlanner
 from spg.domain.verifier import VerificationCapabilityContract
 from spg.infrastructure.persistence import Database
 
@@ -148,6 +149,7 @@ class Application:
         workspace_root: Path | None = None,
         executor: ExecutorCapabilityContract | None = None,
         verifier: VerificationCapabilityContract | None = None,
+        planner: ProductionPlanner | None = None,
         executor_binding: ExecutorBinding | None = None,
     ) -> WorkApplicationService:
         """Compose the goal-centric MVP product flow over governed Runtime services."""
@@ -185,6 +187,7 @@ class Application:
             "workspace_root": workspace_root or self.settings.workspace_root,
             "executor": selected_executor,
             "verifier": selected_verifier,
+            "planner": planner,
         }
         if selected_binding is not None:
             options["executor_binding"] = selected_binding

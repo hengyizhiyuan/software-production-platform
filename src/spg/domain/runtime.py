@@ -8,6 +8,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from spg.domain.planning import ProductionPlanProposal
+
 
 class SnapshotCondition(StrEnum):
     TRUSTED = "TRUSTED"
@@ -83,6 +85,7 @@ class CompletionContract(BaseModel):
     verification_obligations: tuple[str, ...] = ()
     blocking_conditions: tuple[str, ...] = ()
     artifact_contract: ArtifactContract | None = None
+    production_plan: ProductionPlanProposal | None = None
 
     @model_validator(mode="after")
     def require_at_least_one_obligation(self) -> "CompletionContract":

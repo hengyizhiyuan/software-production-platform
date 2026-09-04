@@ -352,6 +352,15 @@ def test_api_07_08_09_refinement_and_governed_admission(
     assert refined.json()["raw_user_requirement"] == "Admit this Work"
     assert refined.json()["constraints"] == ["bounded"]
     assert len(refined.json()["engineering_scope"]["resources"]) == 1
+    plan = refined.json()["production_plan"]
+    assert plan["fit_classification"] == "ONE_PWU_FIT"
+    assert plan["objective"] == refined.json()["desired_outcome"]
+    assert [step["position"] for step in plan["ordered_steps"]] == list(
+        range(1, len(plan["ordered_steps"]) + 1)
+    )
+    assert plan["artifact_targets"] == ["CREATE docs/governed-api-work.md"]
+    assert plan["inherited_constraints"] == ["bounded"]
+    assert plan["verification_approach"]
     approved = api_facts.client.post(
         f"/api/works/{submitted['work_id']}/approve",
         json={

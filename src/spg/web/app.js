@@ -50,6 +50,12 @@
     artifactTargetPanel: document.getElementById("artifact-target-panel"),
     artifactTargetPath: document.getElementById("artifact-target-path"),
     saveArtifactTarget: document.getElementById("save-artifact-target"),
+    productionPlanPanel: document.getElementById("production-plan-panel"),
+    planFit: document.getElementById("plan-fit"),
+    planObjective: document.getElementById("plan-objective"),
+    planSteps: document.getElementById("plan-steps"),
+    planVerification: document.getElementById("plan-verification"),
+    planUnresolved: document.getElementById("plan-unresolved"),
     recentEvent: document.getElementById("recent-event"),
     nextAction: document.getElementById("next-action"),
     currentStep: document.getElementById("current-step"),
@@ -68,6 +74,7 @@
     repositoryState: document.getElementById("repository-state"),
     remainingRisk: document.getElementById("remaining-risk"),
     workForm: document.getElementById("work-form"),
+    composerToggle: document.getElementById("composer-toggle"),
     workRequirement: document.getElementById("work-requirement"),
     composerGoal: document.getElementById("composer-goal"),
     workTags: document.getElementById("work-tags"),
@@ -267,6 +274,24 @@
     });
   }
 
+  function renderProductionPlan(work) {
+    const plan = work.production_plan;
+    elements.productionPlanPanel.hidden = !plan;
+    elements.planSteps.replaceChildren();
+    if (!plan) {
+      return;
+    }
+    elements.planFit.textContent = plan.fit_classification;
+    elements.planObjective.textContent = plan.objective;
+    plan.ordered_steps.forEach((step) => {
+      elements.planSteps.append(createElement("li", "", step.instruction));
+    });
+    elements.planVerification.textContent = plan.verification_approach;
+    elements.planUnresolved.textContent = plan.unresolved_questions.length
+      ? plan.unresolved_questions.join(" · ")
+      : "None";
+  }
+
   function actionLabel(action) {
     const labels = {
       REFINE: "Refine Draft",
@@ -387,6 +412,7 @@
     elements.currentStep.textContent = work.current_production_step || "WORK_INTAKE";
     renderChips(elements.constraintList, work.constraints, "No explicit constraints");
     renderChips(elements.tagList, work.tags, "No tags");
+    renderProductionPlan(work);
     renderResources(work);
     renderWorkActions(work);
     renderAttention();
@@ -688,6 +714,14 @@
   });
   elements.goalForm.addEventListener("submit", createGoal);
   elements.workForm.addEventListener("submit", createWork);
+  elements.composerToggle.addEventListener("click", () => {
+    const expanded = elements.composerToggle.getAttribute("aria-expanded") === "true";
+    elements.workForm.hidden = expanded;
+    elements.composerToggle.setAttribute("aria-expanded", String(!expanded));
+    elements.composerToggle.textContent = expanded
+      ? "Expand composer"
+      : "Collapse composer";
+  });
   elements.statusFilter.addEventListener("change", () => {
     state.statusFilter = elements.statusFilter.value;
     renderWorkList();

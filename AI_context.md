@@ -46,6 +46,10 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-INTAKE-DOGFOOD-3 — CLOSED / PASS**
 
+**MVP-PLAN-1A — NOT IMPLEMENTED — PLAN_AUTHORITY_BOUNDARY_FINDING CONFIRMED**
+
+**MVP-PLAN-1B — CLOSED / PASS**
+
 **FIRST COMPLETE WATT GOVERNED SOFTWARE PRODUCTION LOOP — PROVEN**
 
 **MVP-E2E-1I — IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW**
@@ -122,6 +126,8 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-E2E-1I — Post-Integration Checkout Synchronization & Restart Readiness | CLOSED / PASS |
 | MVP-E2E Proof — Two Complete Governed Watt Production Loops | CLOSED / PASS |
 | MVP-ORCH-1 — Production Orchestration Lite | CLOSED / PASS |
+| MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
+| MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | MVP-INTAKE-2A — Governed Artifact Target Contract | CLOSED / PASS |
 | MVP-INTAKE-2B — Bounded Chinese Work Constraints | CLOSED / PASS |
 | MVP-INTAKE-DOGFOOD-3 — Same-Intent Trusted Completion | CLOSED / PASS |
@@ -283,6 +289,27 @@ trusted completion. A separate `EXECUTION_PROGRESS_OBSERVABILITY_GAP` records
 that long-running healthy execution lacks sufficiently clear stage, progress,
 elapsed-time, and still-working feedback. Its interaction design and
 implementation are deferred. See [Dogfood #3 Trusted Completion Evidence](docs/evidence/dogfood/intake-dogfood-3-trusted-completion.md).
+
+### MVP-PLAN-1A / MVP-PLAN-1B Production Planning Boundary
+
+MVP-PLAN-1A is **NOT IMPLEMENTED**. Its pre-implementation review confirmed
+the `PLAN_AUTHORITY_BOUNDARY_FINDING`: Candidate Authorization is exact per
+PWU, Runtime Commit advances the Trusted Baseline, and a pending successor PWU
+cannot silently rebind from B0 to B1. Multi-PWU sequential production and its
+successor activation/authority semantics are therefore `DEFERRED_BY_MVP`; the
+finding does not invalidate the current one-PWU production model.
+
+MVP-PLAN-1B is **CLOSED / PASS** after Architecture Lead Reality Review. A
+provider-neutral Production Planner now turns governed
+Work and repository facts into a durable structured plan with ordered logical
+steps, exact target and Baseline identity, inherited constraints, verification
+approach, assumptions, unresolved questions, and one-PWU fit classification.
+Only `ONE_PWU_FIT` may enter the existing Human Work Draft Approval and create
+one Plan Revision plus one PWU. `NEEDS_REFINEMENT` and
+`MULTI_PWU_REQUIRED` create no executable Runtime. The approved Plan is carried
+by the PWU Completion Contract and rendered into Materialized Execution Input;
+ORCH-1 and all downstream authority transitions remain unchanged. See
+[Single-PWU Production Planner Intelligence Lite](docs/architecture/single-pwu-production-planner-lite.md).
 
 ## Program-level Architecture Source of Truth
 

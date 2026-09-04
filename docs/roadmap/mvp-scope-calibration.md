@@ -44,7 +44,7 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | API / product application facade | Goal-centric governed Work Python application flow and minimal Goal/Work FastAPI surface are closed with focused validation pass | MVP CORE / CLOSED / PASS |
 | Web UI | Same-origin FastAPI-served Goal / Work Control Room implements intake, refinement/admission, one-step advance, Attention, and truthful Work Result views | MVP CORE / CLOSED / PASS |
 | Goal / Work / Engineering Scope product model | Work is the user-facing organization unit; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / IMPLEMENTED |
-| Production Planner | Architecture and contracts exist; no complete product-facing Planner workflow | PARTIAL / MVP GAP |
+| Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI | MVP CORE / CLOSED / PASS |
 | Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | MVP CORE / IMPLEMENTED; real Provider loop remains separate |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
 | Real local governed Codex E2E | The first real Attempt is preserved as BLOCKED / RECOVERABLE with UNKNOWN Provider Outcome, NONE Production Reality, and 0 / 0 Thread/Turn; container-native Codex state and truthful blocked projection are CLOSED / PASS | MVP CORE / BLOCKED HISTORY PRESERVED; E2E-1B CLOSED / PASS |
@@ -111,6 +111,7 @@ DEFERRED_BY_MVP means preserved and intentionally removed from the immediate cri
 | Token / quota / capacity governance | Not implemented | Not required for first usable product | Operator monitors limits manually | Usage may later attach to Provider/Attempt evidence | Material cost, quota, or starvation incidents |
 | Full Continuous Managed Production | Architecture direction only | MVP is user-initiated and Human-governed | No unattended continuous production | Production loop and state contracts remain durable | Stable self-dogfood demonstrates bounded autonomy need |
 | Advanced autonomous replanning / supersession | Semantics partly exist; automated intelligence is not complete | One-PWU-first and Human redirection are enough | Complex replans are manual | Plan revisions, supersession, and Authority boundaries remain | Frequent multi-step divergence or replanning |
+| Multi-PWU sequential production | PLAN-1A not implemented; Authority review confirmed exact per-PWU Candidate authority and successor Baseline rebinding gap | Structured single-PWU planning closes the current product need | Work requiring independently governed production units must be narrowed or deferred | Fit classification preserves `MULTI_PWU_REQUIRED`; no successor authority is fabricated | Repeated real Work cannot safely fit one PWU and architecture is separately admitted |
 | Multi-project concurrent production | Not implemented | Single/limited project is enough | No portfolio concurrency | Project/repository identity remains explicit | More than one active project is operationally required |
 | Executor fleet / remote workers | Not implemented | One host-side Executor is acceptable | No failover or workload distribution | Executor contract remains remote-capable and provider-neutral | Throughput or isolation requires multiple workers |
 | Full Guardian integration | Basic Verification and extension point exist | Basic Verification satisfies MVP | Human accepts reduced assurance depth | Assurance contract and ownership remain independent | Regulated/high-risk work or insufficient verification |
@@ -216,11 +217,12 @@ The MVP does not require visual polish, complex dashboards, drag-and-drop workfl
 5. **Local Docker integration** — CLOSED / PASS. PostgreSQL, migration, API, and UI are composed without requiring a Provider credential.
 6. **Real local end-to-end MVP task** — MVP-E2E-1A remains BLOCKED / RECOVERABLE historical evidence, and MVP-E2E-1B container-native state and blocked-Reality projection are CLOSED / PASS. MVP-E2E-1D remains immutable historical evidence with Provider Outcome SUCCESS but independently observed Production Reality NONE; the terminal Provider evidence records `bwrap: No permissions to create a new namespace`. MVP-E2E-1E is CLOSED / PASS: the E2E-only Dedicated Executor uses the locked public Codex `full-access` policy inside the Docker isolation boundary, and Completion Contracts that require production output project terminal NONE Reality as BLOCKED without rewriting Provider evidence. MVP-E2E-1F is REAL EXECUTION PENDING under separate authority for exactly one fresh governed Turn; no real E2E production success is claimed before independent Production Observation and targeted Verification.
 7. **Production Orchestration Lite** — CLOSED / PASS; server-side bounded automatic progression stops at Human Attention, BLOCKED, or COMPLETED.
-8. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
-9. **Linux server deployment** — bootstrap from an exact accepted candidate.
-10. **Linux promotion validation** — run the server promotion gate and operational checks.
-11. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
-12. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
+8. **Single-PWU Production Planner Intelligence Lite** — CLOSED / PASS; multi-PWU production remains deferred.
+9. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
+10. **Linux server deployment** — bootstrap from an exact accepted candidate.
+11. **Linux promotion validation** — run the server promotion gate and operational checks.
+12. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
+13. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
 

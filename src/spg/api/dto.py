@@ -17,6 +17,7 @@ from spg.domain.product import (
     WorkResultProjection,
     WorkStatus,
 )
+from spg.domain.planning import ProductionPlanProposal
 
 
 class ApiDto(BaseModel):
@@ -84,6 +85,56 @@ class ArtifactTargetResponse(ApiDto):
     source_revision: str
 
 
+class ProductionPlanStepResponse(ApiDto):
+    position: int
+    instruction: str
+
+
+class ProductionPlanResponse(ApiDto):
+    proposal_id: UUID
+    objective: str
+    desired_outcome: str
+    ordered_steps: tuple[ProductionPlanStepResponse, ...]
+    artifact_targets: tuple[str, ...]
+    inherited_constraints: tuple[str, ...]
+    verification_approach: str
+    assumptions: tuple[str, ...]
+    unresolved_questions: tuple[str, ...]
+    fit_classification: str
+    engineering_resource_id: UUID
+    repository_identity: str
+    source_baseline_id: UUID
+    source_revision: str
+
+    @classmethod
+    def from_proposal(cls, plan: ProductionPlanProposal) -> Self:
+        return cls(
+            proposal_id=plan.proposal_id,
+            objective=plan.objective,
+            desired_outcome=plan.desired_outcome,
+            ordered_steps=tuple(
+                ProductionPlanStepResponse(
+                    position=step.position,
+                    instruction=step.instruction,
+                )
+                for step in plan.ordered_steps
+            ),
+            artifact_targets=tuple(
+                f"{target.operation.value} {target.path}"
+                for target in plan.artifact_targets
+            ),
+            inherited_constraints=plan.inherited_constraints,
+            verification_approach=plan.verification_approach,
+            assumptions=plan.assumptions,
+            unresolved_questions=plan.unresolved_questions,
+            fit_classification=plan.fit_classification.value,
+            engineering_resource_id=plan.engineering_resource_id,
+            repository_identity=plan.repository_identity,
+            source_baseline_id=plan.source_baseline_id,
+            source_revision=plan.source_revision,
+        )
+
+
 class WorkResponse(ApiDto):
     work_id: UUID
     goal_id: UUID | None
@@ -92,6 +143,7 @@ class WorkResponse(ApiDto):
     desired_outcome: str | None
     constraints: tuple[str, ...]
     artifact_target: ArtifactTargetResponse | None
+    production_plan: ProductionPlanResponse | None
     tags: tuple[str, ...]
     engineering_scope: EngineeringScopeResponse | None
     status: WorkStatus
@@ -121,6 +173,11 @@ class WorkResponse(ApiDto):
                     source_baseline_id=work.artifact_target.source_baseline_id,
                     source_revision=work.artifact_target.source_revision,
                 )
+            ),
+            production_plan=(
+                None
+                if work.production_plan is None
+                else ProductionPlanResponse.from_proposal(work.production_plan)
             ),
             tags=work.tags,
             engineering_scope=(

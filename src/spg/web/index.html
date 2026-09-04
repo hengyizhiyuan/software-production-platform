@@ -156,6 +156,28 @@
               </div>
             </dl>
 
+            <section id="production-plan-panel" class="production-plan" hidden>
+              <div class="panel-title-row">
+                <div>
+                  <p class="eyebrow">Production Plan</p>
+                  <h3>Single-PWU approach</h3>
+                </div>
+                <span id="plan-fit" class="step-label"></span>
+              </div>
+              <p id="plan-objective" class="plan-objective"></p>
+              <ol id="plan-steps" class="plan-steps"></ol>
+              <dl class="detail-grid plan-details">
+                <div>
+                  <dt>Verification approach</dt>
+                  <dd id="plan-verification"></dd>
+                </div>
+                <div>
+                  <dt>Unresolved questions</dt>
+                  <dd id="plan-unresolved"></dd>
+                </div>
+              </dl>
+            </section>
+
             <div id="artifact-target-panel" class="operator-identity" hidden>
               <label for="artifact-target-path">Artifact Target</label>
               <input id="artifact-target-path" autocomplete="off" placeholder="docs/architecture/example.md">
@@ -244,6 +266,16 @@
       </section>
 
       <section class="composer" aria-labelledby="composer-heading">
+        <div class="composer-toggle-row">
+          <span class="field-label">New governed Work</span>
+          <button
+            id="composer-toggle"
+            class="text-button"
+            type="button"
+            aria-expanded="true"
+            aria-controls="work-form"
+          >Collapse composer</button>
+        </div>
         <form id="work-form" class="composer-form">
           <div class="composer-main">
             <label id="composer-heading" for="work-requirement">What do you want to get done?</label>

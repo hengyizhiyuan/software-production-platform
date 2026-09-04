@@ -8,6 +8,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from spg.domain.preparation import ContextSemanticRole
+from spg.domain.planning import ProductionPlanProposal
 
 
 class GoalCondition(StrEnum):
@@ -71,6 +72,7 @@ class ResourceBindingCondition(StrEnum):
 
 class AttentionKind(StrEnum):
     WORK_DRAFT_APPROVAL = "WORK_DRAFT_APPROVAL"
+    WORK_REFINEMENT_REQUIRED = "WORK_REFINEMENT_REQUIRED"
     CANDIDATE_AUTHORIZATION = "CANDIDATE_AUTHORIZATION"
     PRODUCTION_BLOCKED = "PRODUCTION_BLOCKED"
 
@@ -160,6 +162,7 @@ class WorkRecord(BaseModel):
     artifact_source_baseline_id: UUID | None = None
     artifact_source_revision: str | None = None
     verification_expectation: str | None
+    production_plan: ProductionPlanProposal | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -198,6 +201,7 @@ class WorkProjection(BaseModel):
     desired_outcome: str | None
     constraints: tuple[str, ...]
     artifact_target: ArtifactTargetProposal | None = None
+    production_plan: ProductionPlanProposal | None = None
     tags: tuple[str, ...]
     engineering_scope: EngineeringScopeRecord | None
     status: WorkStatus
