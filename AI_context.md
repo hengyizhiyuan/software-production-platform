@@ -82,7 +82,16 @@ MVP-E2E-1I is **CLOSED / PASS**. After the CONVERGED Repository Integration, sta
 
 The current delivery priority is governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): review the implemented local Docker MVP, then validate one real local governed Codex production loop before Linux deployment and systematic self-dogfood. ChatGPT + Codex remains the development workflow; a CLI-only Runtime is not the MVP product.
 
-For the MVP product model, **Work is the user-facing organization unit**. Engineering Resources are bound to Work through an explicit Engineering Scope, while Goal remains an optional weak aggregation. MVP execution uses exactly one Engineering Resource and one-PWU-first planning as bounded delivery policies, without encoding either restriction as a permanent architecture limit.
+For product-facing language, **Motive is the thing the user genuinely wants to
+make happen**. The current implementation preserves **Work** as its internal
+governed representation; no domain, schema, `work_id`, API route, Runtime
+binding, or test rename is implied. A Work may be broad/long-lived or
+narrow/short-lived and may yield code, documentation, architecture, tests,
+evidence, analysis, Runtime/product state, or multiple related trusted
+artifacts. **PWU, not Work, is the bounded production-unit concept.** Goal
+remains an optional weak aggregation. MVP execution uses exactly one
+Engineering Resource and one-PWU-first planning as bounded delivery policies,
+without encoding either restriction as a permanent architecture limit.
 
 | Architecture workflow item | Status |
 |---|---|
@@ -136,6 +145,8 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-ORCH-1 — Production Orchestration Lite | CLOSED / PASS |
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
+| Motive / Work / Plan Concept Calibration | RECORDED / ADMITTED |
+| Reality-driven Plan Steering | NOT YET IMPLEMENTED — MATERIAL CORE PRODUCT CAPABILITY |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
 | MVP-VERIFY-NODE-1 — Typed Node Test Verification Lite | CLOSED / PASS |
@@ -323,6 +334,20 @@ by the PWU Completion Contract and rendered into Materialized Execution Input;
 ORCH-1 and all downstream authority transitions remain unchanged. See
 [Single-PWU Production Planner Intelligence Lite](docs/architecture/single-pwu-production-planner-lite.md).
 
+PLAN-1B is a narrow implementation of one admitted production-step plan, not
+the complete conceptual Plan. A long-lived Plan may span refinement, design,
+Human decision, governed production, Reality observation, and repeated
+reassessment until the Motive/Work outcome is achieved. The broader Plan asks
+what should happen next given the objective and current Reality; SPG answers
+how an admitted engineering-production step is executed, observed, verified,
+and committed truthfully.
+
+**Reality-driven Plan Steering is NOT YET IMPLEMENTED.** It is a material
+remaining core product capability, not Phase-2 hardening. Advanced autonomous
+replanning, multi-PWU orchestration, optimization, and unattended continuous
+production remain separable deferred capabilities. See
+[Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md).
+
 ### MVP-CODE-1 Bounded Code Work Boundary
 
 MVP-CODE-1 is **CLOSED / PASS** after Architecture Lead Reality Review.
@@ -409,6 +434,7 @@ The current system-level architecture baseline is:
 - [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
 - [Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md)
 - [Trusted Baseline / Active Runtime Convergence Lite](docs/architecture/trusted-baseline-active-runtime-convergence-lite.md)
+- [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -439,6 +465,9 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Capability Contract Before Capability Implementation
 - Dependency Direction Follows Capability Ownership
 - Production Work Unit Generalization
+- Motive Is Product Intent; Work Is the Current Governed Representation
+- PWU, Not Work, Is the Bounded Production Unit
+- Reality-driven Plan Steering
 - Ownership Before Integration
 - Generated Does Not Equal Trusted
 - Trusted Baseline Does Not Imply Active Runtime

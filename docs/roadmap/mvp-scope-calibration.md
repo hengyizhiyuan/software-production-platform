@@ -43,8 +43,9 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Recovery | S5 recovery foundations are implemented; R4-B maintenance-lineage recovery capability is implemented and focused/affected validation passed | Stronger existing guarantee; complete R4 closure is deferred |
 | API / product application facade | Goal-centric governed Work Python application flow and minimal Goal/Work FastAPI surface are closed with focused validation pass | MVP CORE / CLOSED / PASS |
 | Web UI | Same-origin FastAPI-served Goal / Work Control Room implements intake, refinement/admission, one-step advance, Attention, and truthful Work Result views | MVP CORE / CLOSED / PASS |
-| Goal / Work / Engineering Scope product model | Work is the user-facing organization unit; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / IMPLEMENTED |
-| Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI | MVP CORE / CLOSED / PASS |
+| Motive / Work / Engineering Scope product model | Motive is the product-facing concept; Work is the current internal governed representation; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / CONCEPT CALIBRATED; IMPLEMENTATION REMAINS WORK-NAMED |
+| Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI; it is a narrow production-step plan, not full lifecycle steering | MVP CORE / PLAN-1B CLOSED / PASS |
+| Reality-driven Plan Steering | Long-lived Motive/Work guidance from current Reality through next-step selection, Human decisions, governed production, and Plan reassessment | MVP CORE GAP / NOT YET IMPLEMENTED |
 | Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | MVP CORE / IMPLEMENTED; real Provider loop remains separate |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
 | Trusted Baseline / Active Runtime convergence | Local Docker startup safely synchronizes the exact Trusted checkout, activates Python and static assets from one revision, and exposes explicit activation state/fingerprints | MVP GUARDRAIL / CLOSED / PASS |
@@ -59,11 +60,12 @@ Only capabilities needed for the product definition are MVP CORE.
 
 | Capability | Narrow MVP Boundary |
 |---|---|
-| Goal / Work / Engineering Resource representation | Optional Goal aggregation; Work as the primary product object; explicit Engineering Scope binding to the configured repository identity, path/ref, and Baseline |
+| Motive / Work / Engineering Resource representation | Motive as product-facing language; Work as the current internal governed representation; optional Goal aggregation; explicit Engineering Scope binding to repository identity, path/ref, and Baseline |
 | Requirement intake | Admit one real task/requirement through the product interface |
 | Production Intent / PWU formation | Create one governed Production Intent, one Run, and one-PWU-first plan; explicit Human confirmation is allowed |
 | Context Package Lite | Assemble only admitted Source of Truth, exact Baseline, requirement, constraints, and necessary repository context |
-| Production Planner Lite | Simple AI or deterministic/rule-assisted formation of a plan/PWU; no advanced autonomous replanning |
+| Production Planner Lite | Current narrow AI or deterministic/rule-assisted formation of one admitted production-step plan/PWU; it does not define the full conceptual Plan |
+| Reality-driven Plan Steering | Guide a long-lived Motive/Work from objective and current Reality to the next appropriate governed step, request Human decisions when needed, and reassess the Plan as Reality changes |
 | Codex Executor integration | One static Provider profile and one reliable real execution path |
 | Run / Attempt execution | Serial execution with one active Run and one current Attempt generation |
 | Production State progression | Expose the current governed state and blocking reason |
@@ -77,7 +79,7 @@ Only capabilities needed for the product definition are MVP CORE.
 | Local persistent Runtime database | Durable local state with strict Runtime/Test database separation |
 | Runtime Activation Lite | Distinguish repository trust from the active process; support an explicit safe local restart for source-only changes and require image rebuild for image/dependency boundaries |
 
-Allowed MVP simplifications are one Engineering Resource per Work, one active Run, serial execution, one-PWU-first workflow, static Provider profile, basic Verification, simple Planner logic, and manual Human intervention for uncommon recovery. These are delivery choices, not permanent architecture constraints.
+Allowed MVP simplifications are one Engineering Resource per Work, one active Run, serial execution, one-PWU-first workflow, static Provider profile, basic Verification, simple Planner logic, and manual Human intervention for uncommon recovery. These are delivery choices, not permanent architecture constraints. In particular, one-PWU-first constrains current execution; it does not make Work inherently atomic or short-lived.
 
 ## 5. B. MVP GUARDRAILS
 
@@ -112,8 +114,8 @@ DEFERRED_BY_MVP means preserved and intentionally removed from the immediate cri
 | Automatic model / capability routing | Not implemented; static binding exists | One Provider path is enough | Manual Provider selection and no optimization | Capability contracts and Runtime Profile remain provider-neutral | Multiple proven Providers require governed selection |
 | Token / quota / capacity governance | Not implemented | Not required for first usable product | Operator monitors limits manually | Usage may later attach to Provider/Attempt evidence | Material cost, quota, or starvation incidents |
 | Full Continuous Managed Production | Architecture direction only | MVP is user-initiated and Human-governed | No unattended continuous production | Production loop and state contracts remain durable | Stable self-dogfood demonstrates bounded autonomy need |
-| Advanced autonomous replanning / supersession | Semantics partly exist; automated intelligence is not complete | One-PWU-first and Human redirection are enough | Complex replans are manual | Plan revisions, supersession, and Authority boundaries remain | Frequent multi-step divergence or replanning |
-| Multi-PWU sequential production | PLAN-1A not implemented; Authority review confirmed exact per-PWU Candidate authority and successor Baseline rebinding gap | Structured single-PWU planning closes the current product need | Work requiring independently governed production units must be narrowed or deferred | Fit classification preserves `MULTI_PWU_REQUIRED`; no successor authority is fabricated | Repeated real Work cannot safely fit one PWU and architecture is separately admitted |
+| Advanced autonomous replanning / supersession | Advanced automation is not implemented; this is separate from the core Reality-driven Plan Steering gap | Core steering must be designed first; optimization and autonomous supersession are not required initially | Complex autonomous replans remain Human-governed | Plan revisions, supersession, and Authority boundaries remain | Core steering is proven and repeated Reality requires advanced automation |
+| Multi-PWU sequential production | PLAN-1A not implemented; Authority review confirmed exact per-PWU Candidate authority and successor Baseline rebinding gap | Structured single-PWU planning closes the current execution need | Independently governed production steps must be narrowed or deferred; the encompassing Work need not be redefined as atomic | Fit classification preserves `MULTI_PWU_REQUIRED`; no successor authority is fabricated | Repeated real Work cannot safely progress through independently governed PWUs and architecture is separately admitted |
 | Multi-project concurrent production | Not implemented | Single/limited project is enough | No portfolio concurrency | Project/repository identity remains explicit | More than one active project is operationally required |
 | Executor fleet / remote workers | Not implemented | One host-side Executor is acceptable | No failover or workload distribution | Executor contract remains remote-capable and provider-neutral | Throughput or isolation requires multiple workers |
 | Full Guardian integration | Basic Verification and extension point exist | Basic Verification satisfies MVP | Human accepts reduced assurance depth | Assurance contract and ownership remain independent | Regulated/high-risk work or insufficient verification |
@@ -195,8 +197,10 @@ The functional Web UI supports:
 - view truthful artifact, Verification, trusted-result, and remaining-risk projections;
 - continue with another independent Work.
 
-Work remains the primary user-facing product object. UI polling observes
-server-side progress and never causes production transitions. The UI does not
+Motive is the product-facing concept; the current UI/API still uses the
+internal name Work. This documentation calibration does not rename routes,
+identifiers, domain types, or screens. UI polling observes server-side progress
+and never causes production transitions. The UI does not
 introduce a Project aggregate root, Project selector, Chat Thread authority, or
 browser-side production state machine. Manual single-step Advance remains a
 non-primary technical/operator fallback.
@@ -228,11 +232,12 @@ an evidence-backed follow-up rather than hidden success.
 8. **Single-PWU Production Planner Intelligence Lite** — CLOSED / PASS; multi-PWU production remains deferred.
 9. **Bounded Single-PWU Code Work** — CLOSED / PASS; adds Human-visible bounded change authority and typed contract-driven code Verification without changing the one-PWU model.
 10. **Trusted Baseline / Active Runtime Convergence Lite** — CLOSED / PASS; Architecture Lead Reality Review and Human Composer acceptance passed. The first trusted Watt code self-dogfood loop is proven.
-11. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
-12. **Linux server deployment** — bootstrap from an exact accepted candidate.
-13. **Linux promotion validation** — run the server promotion gate and operational checks.
-14. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
-15. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
+11. **Reality-driven Plan Steering** — NOT YET IMPLEMENTED; remaining material MVP core capability. Define and admit its bounded design before implementation.
+12. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
+13. **Linux server deployment** — bootstrap from an exact accepted candidate.
+14. **Linux promotion validation** — run the server promotion gate and operational checks.
+15. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
+16. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
 
@@ -256,4 +261,9 @@ Robustness, recovery, scale, optimization, and security work does not enter the 
 
 ## 13. Next Slice Selection Boundary
 
-Architecture Lead selects each concrete slice separately. The first eligible implementation slice should create the narrow application-level workflow for one project and one governed task. It should reuse existing Runtime services rather than introduce UI, deployment, advanced Planner intelligence, or Phase-2 hardening in the same slice.
+Architecture Lead selects each concrete slice separately. The next design step
+should define the bounded Reality-driven Plan Steering contract: objective and
+Reality inputs, next-step classifications, Human-decision boundaries, Plan
+revision/evidence semantics, and invocation of SPG for admitted production.
+This calibration does not authorize its implementation and does not introduce
+Project Governor, Initiative, multi-PWU execution, or Phase-2 automation.

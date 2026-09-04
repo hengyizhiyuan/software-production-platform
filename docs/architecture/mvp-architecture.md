@@ -36,6 +36,22 @@ The MVP validates whether:
 
 ## Production Planner: MVP Intelligence Mode
 
+### Motive / Work / Plan Product Boundary
+
+Motive is the product-facing expression of what the user genuinely wants to
+make happen. Work remains the current internal governed representation; no
+implementation rename is implied. Work is not inherently an atomic coding
+task—PWU is the bounded production unit. Goal remains an optional weak
+aggregation, and Project remains a user/domain-world concept rather than a new
+mandatory parent object.
+
+A conceptual Plan may span a long-lived Work and repeatedly choose the next
+appropriate refinement, design, Human-decision, or governed-production step
+from current Reality. The current PLAN-1B single-PWU proposal implements only a
+narrow subset. Reality-driven Plan Steering remains a material core capability
+that is not yet implemented. The detailed boundary is recorded in
+[Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
+
 The MVP uses **Single Intelligence Mode**:
 
 ```text

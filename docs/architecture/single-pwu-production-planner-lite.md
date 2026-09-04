@@ -10,6 +10,19 @@ This slice adds planning intelligence to the existing one Work → one Plan
 Revision → one governed PWU model. It does not authorize multi-PWU production,
 change Candidate authority, or introduce another execution state machine.
 
+## Concept Calibration
+
+PLAN-1B is the narrow current implementation of planning for one admitted
+production step. It does not define Plan as permanently equivalent to a short
+execution checklist, nor Work as an atomic task. A Work may be broad and
+long-lived; PWU is the bounded production-unit concept. The conceptual Plan may
+guide a Motive/Work through current Reality, next-step selection, refinement,
+design, Human decisions, governed production, and reassessment over time.
+
+That broader **Reality-driven Plan Steering** capability is not yet
+implemented. PLAN-1B remains CLOSED / PASS and is not reopened. See
+[Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
+
 ## Production Plan Proposal
 
 Production Planner Lite transforms governed Work facts into a durable,
