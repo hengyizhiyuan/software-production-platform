@@ -135,5 +135,9 @@ supersession automation, and unattended continuous production may remain
 separately deferred; their deferral does not classify the core steering gap as
 optional hardening.
 
+Its higher-order product thesis and normative continuity, reconstructability,
+equivalence, provenance, and anti-drift requirements are recorded in
+[Reality-driven Plan Steering — Foundational Principles](reality-driven-plan-steering-principles.md).
+
 No implementation contract, data model, API, orchestration change, or Feature
 ID is created by this documentation decision.

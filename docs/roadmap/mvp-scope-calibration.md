@@ -45,7 +45,7 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Web UI | Same-origin FastAPI-served Goal / Work Control Room implements intake, refinement/admission, one-step advance, Attention, and truthful Work Result views | MVP CORE / CLOSED / PASS |
 | Motive / Work / Engineering Scope product model | Motive is the product-facing concept; Work is the current internal governed representation; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / CONCEPT CALIBRATED; IMPLEMENTATION REMAINS WORK-NAMED |
 | Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI; it is a narrow production-step plan, not full lifecycle steering | MVP CORE / PLAN-1B CLOSED / PASS |
-| Reality-driven Plan Steering | Long-lived Motive/Work guidance from current Reality through next-step selection, Human decisions, governed production, and Plan reassessment | MVP CORE GAP / NOT YET IMPLEMENTED |
+| Reality-driven Plan Steering | Foundational principles are recorded/admitted; long-lived Motive/Work guidance must preserve material direction across model/session/environment changes and derive revisions from governed Reality | MVP CORE GAP / NOT YET IMPLEMENTED |
 | Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | MVP CORE / IMPLEMENTED; real Provider loop remains separate |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
 | Trusted Baseline / Active Runtime convergence | Local Docker startup safely synchronizes the exact Trusted checkout, activates Python and static assets from one revision, and exposes explicit activation state/fingerprints | MVP GUARDRAIL / CLOSED / PASS |
@@ -65,7 +65,7 @@ Only capabilities needed for the product definition are MVP CORE.
 | Production Intent / PWU formation | Create one governed Production Intent, one Run, and one-PWU-first plan; explicit Human confirmation is allowed |
 | Context Package Lite | Assemble only admitted Source of Truth, exact Baseline, requirement, constraints, and necessary repository context |
 | Production Planner Lite | Current narrow AI or deterministic/rule-assisted formation of one admitted production-step plan/PWU; it does not define the full conceptual Plan |
-| Reality-driven Plan Steering | Guide a long-lived Motive/Work from objective and current Reality to the next appropriate governed step, request Human decisions when needed, and reassess the Plan as Reality changes |
+| Reality-driven Plan Steering | Reconstruct and preserve a long-lived Plan from governed Reality, select the next appropriate step, request Human decisions when needed, and create traceable revisions only when Reality justifies change |
 | Codex Executor integration | One static Provider profile and one reliable real execution path |
 | Run / Attempt execution | Serial execution with one active Run and one current Attempt generation |
 | Production State progression | Expose the current governed state and blocking reason |
@@ -232,7 +232,7 @@ an evidence-backed follow-up rather than hidden success.
 8. **Single-PWU Production Planner Intelligence Lite** — CLOSED / PASS; multi-PWU production remains deferred.
 9. **Bounded Single-PWU Code Work** — CLOSED / PASS; adds Human-visible bounded change authority and typed contract-driven code Verification without changing the one-PWU model.
 10. **Trusted Baseline / Active Runtime Convergence Lite** — CLOSED / PASS; Architecture Lead Reality Review and Human Composer acceptance passed. The first trusted Watt code self-dogfood loop is proven.
-11. **Reality-driven Plan Steering** — NOT YET IMPLEMENTED; remaining material MVP core capability. Define and admit its bounded design before implementation.
+11. **Reality-driven Plan Steering** — foundational principles RECORDED / ADMITTED; capability NOT YET IMPLEMENTED. Define its bounded Plan Frame, reconstruction, divergence, next-step, revision, Human Attention, and SPG invocation contracts before implementation.
 12. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
 13. **Linux server deployment** — bootstrap from an exact accepted candidate.
 14. **Linux promotion validation** — run the server promotion gate and operational checks.

@@ -183,6 +183,35 @@ Intent → Planning → Execution → Verification → Reality Feedback
 
 Plans may change, but changes must be evidence-based, traceable, explainable, and governed. Dynamic adjustment is not arbitrary adjustment. The production record must preserve Decision Record, Change Reason, Impact Context, and New Baseline.
 
+## Reality-driven Plan Steering Foundational Principles
+
+Reality-driven Plan Steering is intended as a primary Watt product
+differentiator, not merely a task-list generator. Its normative foundations
+are:
+
+- **Facts constrain the Plan.** Governed Reality, not transient model memory,
+  constrains material planning direction.
+- **Models reason over the Plan; models do not own the Plan.** Model, provider,
+  session, host, or environment replacement does not by itself authorize a
+  material Plan change.
+- **Plan must be reconstructable from governed Reality.** Direction, current
+  step, rationale, decisions, Findings, and revision causes must survive loss of
+  the originating conversation.
+- **Roadmap guides production; Reality governs roadmap.** Preserve the admitted
+  Plan by default and revise it only when traceable governed Reality justifies
+  change.
+
+Materially equivalent governed facts, objectives, constraints, and decisions
+should yield materially equivalent Plans without requiring deterministic LLM
+wording or micro-ordering. Material divergence must be detectable and
+explainable. New model output alone is not New Reality.
+
+The complete product thesis, anti-drift requirements, Plan Revision provenance,
+fresh-session reconstruction requirement, Human/SPG boundaries, and reserved
+design questions are authoritative in
+[Reality-driven Plan Steering — Foundational Principles](reality-driven-plan-steering-principles.md).
+The capability remains a material MVP core gap and is not yet implemented.
+
 ## Progress Reflects Reality, Not Commitment
 
 Progress primarily supports state understanding, risk identification, decision support, and production governance. It is not required to increase linearly. Feature adjustment, design refactoring, task decomposition changes, or a decrease in completion may represent a return from an incorrect path toward a more correct target state.

@@ -146,7 +146,7 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | Motive / Work / Plan Concept Calibration | RECORDED / ADMITTED |
-| Reality-driven Plan Steering | NOT YET IMPLEMENTED — MATERIAL CORE PRODUCT CAPABILITY |
+| Reality-driven Plan Steering | FOUNDATIONAL PRINCIPLES RECORDED / ADMITTED — MATERIAL MVP CORE PRODUCT CAPABILITY — NOT YET IMPLEMENTED |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
 | MVP-VERIFY-NODE-1 — Typed Node Test Verification Lite | CLOSED / PASS |
@@ -348,6 +348,28 @@ replanning, multi-PWU orchestration, optimization, and unattended continuous
 production remain separable deferred capabilities. See
 [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md).
 
+### Reality-driven Plan Steering Foundational Principles
+
+Reality-driven Plan Steering is intended to become a primary Watt product
+differentiator: preserve long-running development direction, reconstruct why
+the current Plan exists, select the next appropriate move from governed
+engineering Reality, and resist drift away from Motive and admitted decisions.
+This is strategic product intent, not a market-leadership claim.
+
+The admitted normative principles are **Facts constrain the Plan**, **Models
+reason over the Plan; models do not own the Plan**, **Plan must be
+reconstructable from governed Reality**, and **Roadmap guides production;
+Reality governs roadmap**. Same governed facts, objective, constraints, and
+accepted decisions should produce materially equivalent Plans across model,
+provider, session, host, or environment changes. Identical wording is not
+required, but material divergence without changed Reality must be detectable
+and explainable. New model output alone is not New Reality.
+
+The capability remains **NOT YET IMPLEMENTED**. PLAN-1B remains CLOSED / PASS
+for one Single-PWU production-step plan and does not satisfy long-lived Plan
+Steering. See
+[Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md).
+
 ### MVP-CODE-1 Bounded Code Work Boundary
 
 MVP-CODE-1 is **CLOSED / PASS** after Architecture Lead Reality Review.
@@ -435,6 +457,7 @@ The current system-level architecture baseline is:
 - [Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md)
 - [Trusted Baseline / Active Runtime Convergence Lite](docs/architecture/trusted-baseline-active-runtime-convergence-lite.md)
 - [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md)
+- [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -468,6 +491,10 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Motive Is Product Intent; Work Is the Current Governed Representation
 - PWU, Not Work, Is the Bounded Production Unit
 - Reality-driven Plan Steering
+- Facts Constrain the Plan
+- Models Reason over the Plan; Models Do Not Own the Plan
+- Plan Must Be Reconstructable from Governed Reality
+- Roadmap Guides Production; Reality Governs Roadmap
 - Ownership Before Integration
 - Generated Does Not Equal Trusted
 - Trusted Baseline Does Not Imply Active Runtime
