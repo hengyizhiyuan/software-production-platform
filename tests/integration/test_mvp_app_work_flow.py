@@ -52,6 +52,7 @@ from spg.providers.deterministic_executor import (
 from spg.providers.deterministic_verifier import DeterministicVerificationProvider
 from spg.infrastructure.configured_executor import render_governed_instruction
 from spg.providers.repository_markdown_verifier import RepositoryArtifactVerifier
+from spg.providers.contract_verifier import ContractDrivenRepositoryVerifier
 
 
 pytestmark = pytest.mark.postgresql
@@ -108,6 +109,16 @@ def git_repository(tmp_path: Path) -> Path:
     )
     (repository / "docs" / "architecture" / "architecture-principles.md").write_text(
         "accepted architecture principles\n",
+        encoding="utf-8",
+    )
+    (repository / "src").mkdir()
+    (repository / "tests").mkdir()
+    (repository / "src" / "spg_example.py").write_text(
+        'def value() -> str:\n    return "old"\n',
+        encoding="utf-8",
+    )
+    (repository / "tests" / "test_spg_example.py").write_text(
+        'from spg_example import value\n\n\ndef test_value() -> None:\n    assert value() == "old"\n',
         encoding="utf-8",
     )
     _git(repository, "add", ".")
@@ -269,7 +280,9 @@ def test_plan_approval_creates_exactly_one_plan_revision_and_one_pwu(
         requirement="Add an API endpoint, affected tests, and documentation at docs/api-plan.md",
     )
     assert draft.production_plan is not None
-    assert len(draft.production_plan.ordered_steps) >= 4
+    # Only the exact documentation target is admitted here. The Planner must not
+    # invent source/test steps from descriptive prose without a Code Contract.
+    assert len(draft.production_plan.ordered_steps) >= 3
 
     app_facts.service.approve_work(
         draft.work_id,
@@ -402,6 +415,258 @@ def _advance_to_candidate_attention(facts: AppFacts, work_id):
         if attention and attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION:
             return service, executor, projection, attention[0]
     raise AssertionError("candidate Attention was not reached")
+
+
+def _code_executor_service(
+    facts: AppFacts,
+    operations: tuple[DeterministicFileOperation, ...],
+) -> tuple[WorkApplicationService, DeterministicTestExecutor]:
+    executor = DeterministicTestExecutor(
+        DeterministicExecutionSpecification(
+            operations=operations,
+            reported_outcome=ProviderReportedOutcome.SUCCESS,
+            summary="deterministic bounded code execution",
+        )
+    )
+    return (
+        WorkApplicationService(
+            facts.database,
+            workspace_root=facts.workspace_root,
+            executor=executor,
+            verifier=ContractDrivenRepositoryVerifier(facts.database),
+        ),
+        executor,
+    )
+
+
+def _advance_until_governed_stop(
+    service: WorkApplicationService,
+    work_id,
+):
+    projection = service.get_work(work_id)
+    for _ in range(20):
+        projection = service.advance_work(work_id)
+        attention = service.list_attention(work_id=work_id)
+        if projection.status is WorkStatus.BLOCKED or (
+            attention and attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION
+        ):
+            return projection, attention
+    raise AssertionError("code Work did not reach a governed stop")
+
+
+def test_code_01_02_07_08_09_10_11_13_15_17_18_20_21_happy_path(
+    app_facts: AppFacts,
+) -> None:
+    submitted = app_facts.service.submit_work(
+        "Modify Python source code behavior and its unit test"
+    )
+    unresolved = app_facts.service.refine_work(submitted.work_id)
+    assert unresolved.target_kind.value == "CODE_WORK"
+    assert unresolved.status is WorkStatus.NEEDS_REFINEMENT
+    assert unresolved.artifact_target is None
+    assert unresolved.change_contract is None
+
+    draft = app_facts.service.refine_work(
+        submitted.work_id,
+        WorkRefinementRequest(
+            code_exact_targets=(
+                "src/spg_example.py",
+                "tests/test_spg_example.py",
+            )
+        ),
+    )
+    assert draft.status is WorkStatus.AWAITING_APPROVAL
+    assert draft.change_contract is not None
+    assert draft.artifact_target is None
+    assert draft.production_plan is not None
+    assert draft.production_plan.change_contract == draft.change_contract
+    assert draft.change_contract.verification_identities == (
+        "PATH_SCOPE",
+        "GIT_DIFF_CHECK",
+        "PYTHON_COMPILE",
+        "IMPORT_CHECK:spg_example",
+        "PYTEST_TARGET:tests/test_spg_example.py",
+    )
+
+    app_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="human:code-contract",
+    )
+    binding = _runtime_binding(app_facts, draft.work_id)
+    assert binding is not None
+    with app_facts.database.unit_of_work() as unit_of_work:
+        work_unit = RuntimeStore(unit_of_work.session).work_unit(binding.work_unit_id)
+        plan_count = unit_of_work.session.scalar(
+            select(func.count()).select_from(plan_revisions)
+        )
+        work_unit_count = unit_of_work.session.scalar(
+            select(func.count()).select_from(production_work_units)
+        )
+    assert work_unit is not None
+    assert plan_count == work_unit_count == 1
+    assert work_unit.completion_contract.change_contract == draft.change_contract
+    instruction = render_governed_instruction(
+        work_unit.objective,
+        work_unit.completion_contract,
+    )
+    assert "src/spg_example.py" in instruction
+    assert "tests/test_spg_example.py" in instruction
+    assert "Never widen the Change Contract yourself" in instruction
+
+    service, executor = _code_executor_service(
+        app_facts,
+        (
+            DeterministicFileOperation(
+                operation=DeterministicFileOperationType.MODIFY,
+                repository_relative_path="src/spg_example.py",
+                content='def value() -> str:\n    return "new"\n',
+            ),
+            DeterministicFileOperation(
+                operation=DeterministicFileOperationType.MODIFY,
+                repository_relative_path="tests/test_spg_example.py",
+                content=(
+                    "from spg_example import value\n\n\n"
+                    "def test_value() -> None:\n    assert value() == \"new\"\n"
+                ),
+            ),
+        ),
+    )
+    projection, attention = _advance_until_governed_stop(service, draft.work_id)
+    assert projection.status is WorkStatus.NEEDS_ATTENTION
+    assert len(attention) == 1
+    assert attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION
+    with app_facts.database.unit_of_work() as unit_of_work:
+        summary = ProductStore(unit_of_work.session).runtime_summary(binding)
+    assert summary.artifact_paths == (
+        "src/spg_example.py",
+        "tests/test_spg_example.py",
+    )
+    assert summary.completion_outcome == "PRODUCED"
+    assert set(summary.verification_results) == {VerificationResultValue.PASS.value}
+    assert summary.candidate_id is not None
+    assert executor.dispatch_count == 1
+
+    service.resolve_attention(
+        attention[0].id,
+        AttentionResolutionRequest(
+            action=AttentionAction.AUTHORIZE,
+            authority_identity="human:code-candidate",
+            rationale="authorize exact bounded code Candidate",
+        ),
+    )
+    for _ in range(4):
+        projection = service.advance_work(draft.work_id)
+        if projection.status is WorkStatus.COMPLETED:
+            break
+    assert projection.status is WorkStatus.COMPLETED
+    assert service.get_work_result(draft.work_id).trusted_result is True
+    with app_facts.database.unit_of_work() as unit_of_work:
+        completed_summary = ProductStore(unit_of_work.session).runtime_summary(binding)
+    assert completed_summary.authorization_id is not None
+    assert completed_summary.integration_state == "CONVERGED"
+    assert completed_summary.runtime_commit_id is not None
+    assert 'return "new"' in _git(
+        app_facts.repository,
+        "show",
+        "refs/heads/main:src/spg_example.py",
+    )
+
+
+def test_code_12_13_14_19_20_unauthorized_path_fails_without_candidate(
+    app_facts: AppFacts,
+) -> None:
+    submitted = app_facts.service.submit_work(
+        "Modify only src/spg_example.py to return a new value"
+    )
+    draft = app_facts.service.refine_work(submitted.work_id)
+    assert draft.change_contract is not None
+    app_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="human:code-contract",
+    )
+    service, executor = _code_executor_service(
+        app_facts,
+        (
+            DeterministicFileOperation(
+                operation=DeterministicFileOperationType.MODIFY,
+                repository_relative_path="src/spg_example.py",
+                content='def value() -> str:\n    return "new"\n',
+            ),
+            DeterministicFileOperation(
+                operation=DeterministicFileOperationType.CREATE,
+                repository_relative_path="README.md",
+                content="unauthorized\n",
+            ),
+        ),
+    )
+    projection, _ = _advance_until_governed_stop(service, draft.work_id)
+    binding = _runtime_binding(app_facts, draft.work_id)
+    assert binding is not None
+    with app_facts.database.unit_of_work() as unit_of_work:
+        summary = ProductStore(unit_of_work.session).runtime_summary(binding)
+    assert projection.status is WorkStatus.BLOCKED
+    assert summary.completion_outcome == "PRODUCED"
+    assert summary.artifact_paths == ("README.md", "src/spg_example.py")
+    results = dict(
+        zip(summary.verification_obligations, summary.verification_results, strict=True)
+    )
+    assert results["PATH_SCOPE"] == VerificationResultValue.FAIL.value
+    assert summary.candidate_id is None
+    assert service.get_work_result(draft.work_id).trusted_result is False
+    assert executor.dispatch_count == 1
+
+
+def test_code_13_15_17_19_20_targeted_pytest_failure_prevents_candidate(
+    app_facts: AppFacts,
+) -> None:
+    submitted = app_facts.service.submit_work(
+        "Modify src/spg_example.py and tests/test_spg_example.py"
+    )
+    draft = app_facts.service.refine_work(submitted.work_id)
+    assert draft.change_contract is not None
+    app_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="human:code-contract",
+    )
+    service, executor = _code_executor_service(
+        app_facts,
+        (
+            DeterministicFileOperation(
+                operation=DeterministicFileOperationType.MODIFY,
+                repository_relative_path="src/spg_example.py",
+                content='def value() -> str:\n    return "bad"\n',
+            ),
+            DeterministicFileOperation(
+                operation=DeterministicFileOperationType.MODIFY,
+                repository_relative_path="tests/test_spg_example.py",
+                content=(
+                    "from spg_example import value\n\n\n"
+                    "def test_value() -> None:\n    assert value() == \"expected\"\n"
+                ),
+            ),
+        ),
+    )
+    projection, _ = _advance_until_governed_stop(service, draft.work_id)
+    binding = _runtime_binding(app_facts, draft.work_id)
+    assert binding is not None
+    with app_facts.database.unit_of_work() as unit_of_work:
+        summary = ProductStore(unit_of_work.session).runtime_summary(binding)
+    assert projection.status is WorkStatus.BLOCKED
+    assert summary.completion_outcome == "PRODUCED"
+    results = dict(
+        zip(summary.verification_obligations, summary.verification_results, strict=True)
+    )
+    assert results["PATH_SCOPE"] == VerificationResultValue.PASS.value
+    assert results["GIT_DIFF_CHECK"] == VerificationResultValue.PASS.value
+    assert results["PYTHON_COMPILE"] == VerificationResultValue.PASS.value
+    assert results["IMPORT_CHECK:spg_example"] == VerificationResultValue.PASS.value
+    assert (
+        results["PYTEST_TARGET:tests/test_spg_example.py"]
+        == VerificationResultValue.FAIL.value
+    )
+    assert summary.candidate_id is None
+    assert service.get_work_result(draft.work_id).trusted_result is False
+    assert executor.dispatch_count == 1
 
 
 def test_mvp_app_migration_downgrade_and_reupgrade(

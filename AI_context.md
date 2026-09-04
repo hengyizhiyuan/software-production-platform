@@ -50,9 +50,13 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-PLAN-1B — CLOSED / PASS**
 
+**MVP-CODE-1 — CLOSED / PASS**
+
+**MVP CORE CAPABILITY SET — FUNCTIONALLY COMPLETE**
+
 **FIRST COMPLETE WATT GOVERNED SOFTWARE PRODUCTION LOOP — PROVEN**
 
-**MVP-E2E-1I — IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW**
+**MVP-E2E-1I — CLOSED / PASS**
 
 **MVP — IN PROGRESS**
 
@@ -70,7 +74,7 @@ MVP-E2E-1E is **CLOSED / PASS**. The E2E-only Dedicated Executor selects the loc
 
 MVP-E2E-1G and MVP-E2E-1H are **CLOSED / PASS**. The first complete Watt governed software production loop is **PROVEN**: Human Intent progressed through Work, PWU, one real Codex execution, independent Observation, Completion, Verification, Candidate, Human Authorization, Repository Integration, Runtime Commit, Trusted Baseline advancement, and completed Work projection.
 
-MVP-E2E-1I is **IMPLEMENTED — RESTART READINESS PASS / PENDING ARCHITECTURE LEAD REVIEW**. After the CONVERGED Repository Integration, startup now materializes the Watt-owned authoritative checkout only when the Current Trusted Baseline, Runtime Commit, Integration Effect, repository identity, authoritative ref/tree, and exact source-Baseline index all agree and no independent local changes exist. Unexpected changes stop with `REPOSITORY_CHECKOUT_DIVERGENCE`. The current `watt-e2e2` app restarted successfully and remained restart-idempotent, the checkout stayed clean at the unchanged Trusted Baseline, completed Work and `trusted_result=true` remained queryable, and no Provider or Runtime production history was added or rewritten.
+MVP-E2E-1I is **CLOSED / PASS**. After the CONVERGED Repository Integration, startup now materializes the Watt-owned authoritative checkout only when the Current Trusted Baseline, Runtime Commit, Integration Effect, repository identity, authoritative ref/tree, and exact source-Baseline index all agree and no independent local changes exist. Unexpected changes stop with `REPOSITORY_CHECKOUT_DIVERGENCE`. The current `watt-e2e2` app restarted successfully and remained restart-idempotent, the checkout stayed clean at the unchanged Trusted Baseline, completed Work and `trusted_result=true` remained queryable, and no Provider or Runtime production history was added or rewritten.
 
 The current delivery priority is governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): review the implemented local Docker MVP, then validate one real local governed Codex production loop before Linux deployment and systematic self-dogfood. ChatGPT + Codex remains the development workflow; a CLI-only Runtime is not the MVP product.
 
@@ -128,6 +132,7 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-ORCH-1 — Production Orchestration Lite | CLOSED / PASS |
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
+| MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-INTAKE-2A — Governed Artifact Target Contract | CLOSED / PASS |
 | MVP-INTAKE-2B — Bounded Chinese Work Constraints | CLOSED / PASS |
 | MVP-INTAKE-DOGFOOD-3 — Same-Intent Trusted Completion | CLOSED / PASS |
@@ -311,6 +316,21 @@ by the PWU Completion Contract and rendered into Materialized Execution Input;
 ORCH-1 and all downstream authority transitions remain unchanged. See
 [Single-PWU Production Planner Intelligence Lite](docs/architecture/single-pwu-production-planner-lite.md).
 
+### MVP-CODE-1 Bounded Code Work Boundary
+
+MVP-CODE-1 is **CLOSED / PASS** after Architecture Lead Reality Review.
+Ordinary explicitly bounded source-code/test Work now
+forms a Human-visible Code Change Contract against the exact Engineering
+Resource and Source Baseline. Exact files and/or bounded repository areas,
+forbidden scopes, inherited constraints, and typed Verification obligations
+are admitted with the existing Work Draft decision and propagated through the
+sole PWU and Materialized Execution Input. Independent Observation remains
+Production Truth. Unauthorized paths or failed targeted tests produce
+Verification `FAIL` and no Candidate even when Completion is `PRODUCED`.
+Documentation Work retains its existing Artifact Contract path. No Multi-PWU,
+general AI planning, arbitrary-shell CI, ECF, Guardian, Provider-routing, or
+Recovery scope is added. See [Bounded Single-PWU Code Work](docs/architecture/bounded-single-pwu-code-work.md).
+
 ## Program-level Architecture Source of Truth
 
 The current system-level architecture baseline is:
@@ -322,6 +342,7 @@ The current system-level architecture baseline is:
 - [Runtime Profile, Provider Placement, and Containerized Deployment](docs/architecture/runtime-profile-provider-deployment.md)
 - [SPG FVS-1 — Governed Documentation Production Loop Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md)
 - [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md)
+- [Bounded Single-PWU Code Work](docs/architecture/bounded-single-pwu-code-work.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 

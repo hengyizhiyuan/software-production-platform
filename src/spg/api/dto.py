@@ -6,6 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from spg.domain.change import CodeChangeContract, CodeVerificationObligation
 from spg.domain.product import (
     AttentionAction,
     AttentionItem,
@@ -90,12 +91,70 @@ class ProductionPlanStepResponse(ApiDto):
     instruction: str
 
 
+class CodeChangeTargetResponse(ApiDto):
+    path: str
+    operation: str
+
+
+class CodeVerificationResponse(ApiDto):
+    kind: str
+    target: str | None
+    identity: str
+
+
+class CodeChangeContractResponse(ApiDto):
+    target_kind: str
+    target_shape: str
+    engineering_resource_id: UUID
+    repository_identity: str
+    source_baseline_id: UUID
+    source_revision: str
+    desired_outcome: str
+    constraints: tuple[str, ...]
+    exact_targets: tuple[CodeChangeTargetResponse, ...]
+    allowed_areas: tuple[str, ...]
+    forbidden_areas: tuple[str, ...]
+    verification_obligations: tuple[CodeVerificationResponse, ...]
+
+    @classmethod
+    def from_contract(cls, contract: CodeChangeContract) -> Self:
+        return cls(
+            target_kind=contract.target_kind.value,
+            target_shape=contract.target_shape.value,
+            engineering_resource_id=contract.engineering_resource_id,
+            repository_identity=contract.repository_identity,
+            source_baseline_id=contract.source_baseline_id,
+            source_revision=contract.source_revision,
+            desired_outcome=contract.desired_outcome,
+            constraints=contract.constraints,
+            exact_targets=tuple(
+                CodeChangeTargetResponse(
+                    path=target.path,
+                    operation=target.operation.value,
+                )
+                for target in contract.exact_targets
+            ),
+            allowed_areas=contract.allowed_areas,
+            forbidden_areas=contract.forbidden_areas,
+            verification_obligations=tuple(
+                CodeVerificationResponse(
+                    kind=item.kind.value,
+                    target=item.target,
+                    identity=item.identity,
+                )
+                for item in contract.verification_obligations
+            ),
+        )
+
+
 class ProductionPlanResponse(ApiDto):
     proposal_id: UUID
+    target_kind: str
     objective: str
     desired_outcome: str
     ordered_steps: tuple[ProductionPlanStepResponse, ...]
     artifact_targets: tuple[str, ...]
+    change_contract: CodeChangeContractResponse | None
     inherited_constraints: tuple[str, ...]
     verification_approach: str
     assumptions: tuple[str, ...]
@@ -110,6 +169,7 @@ class ProductionPlanResponse(ApiDto):
     def from_proposal(cls, plan: ProductionPlanProposal) -> Self:
         return cls(
             proposal_id=plan.proposal_id,
+            target_kind=plan.target_kind.value,
             objective=plan.objective,
             desired_outcome=plan.desired_outcome,
             ordered_steps=tuple(
@@ -122,6 +182,11 @@ class ProductionPlanResponse(ApiDto):
             artifact_targets=tuple(
                 f"{target.operation.value} {target.path}"
                 for target in plan.artifact_targets
+            ),
+            change_contract=(
+                None
+                if plan.change_contract is None
+                else CodeChangeContractResponse.from_contract(plan.change_contract)
             ),
             inherited_constraints=plan.inherited_constraints,
             verification_approach=plan.verification_approach,
@@ -142,7 +207,9 @@ class WorkResponse(ApiDto):
     title: str | None
     desired_outcome: str | None
     constraints: tuple[str, ...]
+    target_kind: str
     artifact_target: ArtifactTargetResponse | None
+    change_contract: CodeChangeContractResponse | None
     production_plan: ProductionPlanResponse | None
     tags: tuple[str, ...]
     engineering_scope: EngineeringScopeResponse | None
@@ -162,6 +229,7 @@ class WorkResponse(ApiDto):
             title=work.title,
             desired_outcome=work.desired_outcome,
             constraints=work.constraints,
+            target_kind=work.target_kind.value,
             artifact_target=(
                 None
                 if work.artifact_target is None
@@ -173,6 +241,11 @@ class WorkResponse(ApiDto):
                     source_baseline_id=work.artifact_target.source_baseline_id,
                     source_revision=work.artifact_target.source_revision,
                 )
+            ),
+            change_contract=(
+                None
+                if work.change_contract is None
+                else CodeChangeContractResponse.from_contract(work.change_contract)
             ),
             production_plan=(
                 None
@@ -232,6 +305,10 @@ class WorkRefineRequest(ApiDto):
     production_objective: str | None = None
     expected_artifact_path: str | None = None
     verification_expectation: str | None = None
+    code_exact_targets: tuple[str, ...] | None = None
+    code_allowed_areas: tuple[str, ...] | None = None
+    code_forbidden_areas: tuple[str, ...] | None = None
+    code_verification_obligations: tuple[CodeVerificationObligation, ...] | None = None
 
 
 class HumanDecisionRequest(ApiDto):

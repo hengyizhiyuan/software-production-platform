@@ -215,14 +215,15 @@ The MVP does not require visual polish, complex dashboards, drag-and-drop workfl
 3. **Minimal HTTP API** — CLOSED / PASS; exposes only the application commands and queries needed by the product.
 4. **Functional Web UI** — CLOSED / PASS.
 5. **Local Docker integration** — CLOSED / PASS. PostgreSQL, migration, API, and UI are composed without requiring a Provider credential.
-6. **Real local end-to-end MVP task** — MVP-E2E-1A remains BLOCKED / RECOVERABLE historical evidence, and MVP-E2E-1B container-native state and blocked-Reality projection are CLOSED / PASS. MVP-E2E-1D remains immutable historical evidence with Provider Outcome SUCCESS but independently observed Production Reality NONE; the terminal Provider evidence records `bwrap: No permissions to create a new namespace`. MVP-E2E-1E is CLOSED / PASS: the E2E-only Dedicated Executor uses the locked public Codex `full-access` policy inside the Docker isolation boundary, and Completion Contracts that require production output project terminal NONE Reality as BLOCKED without rewriting Provider evidence. MVP-E2E-1F is REAL EXECUTION PENDING under separate authority for exactly one fresh governed Turn; no real E2E production success is claimed before independent Production Observation and targeted Verification.
+6. **Real local end-to-end MVP task** — CLOSED / PASS for the admitted MVP proof. MVP-E2E-1A and MVP-E2E-1D remain immutable blocked historical evidence. MVP-E2E-1B and MVP-E2E-1E closed the container state and sandbox blockers. MVP-E2E-1G/1H proved the first complete governed Watt production loop; MVP-E2E-1I proved restart readiness; a second Work proved continuous production from the prior Trusted Baseline. Later Intake Dogfood reached same-intent trusted completion, while ORCH Dogfood #1 truthfully exposed a Verification Contract mismatch rather than manufacturing success.
 7. **Production Orchestration Lite** — CLOSED / PASS; server-side bounded automatic progression stops at Human Attention, BLOCKED, or COMPLETED.
 8. **Single-PWU Production Planner Intelligence Lite** — CLOSED / PASS; multi-PWU production remains deferred.
-9. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
-10. **Linux server deployment** — bootstrap from an exact accepted candidate.
-11. **Linux promotion validation** — run the server promotion gate and operational checks.
-12. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
-13. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
+9. **Bounded Single-PWU Code Work** — CLOSED / PASS; adds Human-visible bounded change authority and typed contract-driven code Verification without changing the one-PWU model.
+10. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
+11. **Linux server deployment** — bootstrap from an exact accepted candidate.
+12. **Linux promotion validation** — run the server promotion gate and operational checks.
+13. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
+14. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
 

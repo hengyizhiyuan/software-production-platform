@@ -175,6 +175,15 @@ class Application:
             )
         if (
             selected_verifier is None
+            and self.settings.verification_adapter == "contract-driven-repository"
+        ):
+            from spg.providers.contract_verifier import (
+                ContractDrivenRepositoryVerifier,
+            )
+
+            selected_verifier = ContractDrivenRepositoryVerifier(selected_database)
+        elif (
+            selected_verifier is None
             and self.settings.verification_adapter == "mvp-e2e-markdown"
         ):
             from spg.providers.repository_markdown_verifier import (

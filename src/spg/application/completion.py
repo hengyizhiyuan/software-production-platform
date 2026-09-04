@@ -8,6 +8,7 @@ from pathlib import Path, PurePosixPath
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.preparation import completion_contract_fingerprint
+from spg.domain.change import ChangeOperation, path_matches_scope
 from spg.domain.completion import (
     CompletionEvaluationOutcome,
     CompletionEvaluationRecord,
@@ -356,6 +357,21 @@ class CompletionService:
                     if contract.artifact_contract.operation.value == "CREATE"
                     else ArtifactChangeType.MODIFIED
                 )
+            elif contract.change_contract is not None:
+                admitted = next(
+                    (
+                        target
+                        for target in contract.change_contract.exact_targets
+                        if target.path == path
+                    ),
+                    None,
+                )
+                if admitted is not None:
+                    expected_change_type = (
+                        ArtifactChangeType.ADDED
+                        if admitted.operation is ChangeOperation.CREATE
+                        else ArtifactChangeType.MODIFIED
+                    )
             matches_operation = (
                 changed
                 and (
@@ -379,6 +395,26 @@ class CompletionService:
                 )
             )
 
+        if contract.change_contract is not None:
+            areas = contract.change_contract.allowed_areas
+            if areas and not contract.change_contract.exact_targets:
+                matches = tuple(
+                    path
+                    for path in changes
+                    if any(path_matches_scope(path, area) for area in areas)
+                )
+                results.append(
+                    _obligation(
+                        CompletionObligationType.REQUIRED_CHANGE_SCOPE,
+                        " | ".join(areas),
+                        "at least one change exists inside the admitted bounded area",
+                        ", ".join(matches) if matches else "UNCHANGED",
+                        bool(matches),
+                        "required bounded-area change was independently observed"
+                        if matches
+                        else "no change was observed inside the required bounded area",
+                    )
+                )
         marker_paths = tuple(
             dict.fromkeys(
                 [

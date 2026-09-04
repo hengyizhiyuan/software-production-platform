@@ -50,6 +50,13 @@
     artifactTargetPanel: document.getElementById("artifact-target-panel"),
     artifactTargetPath: document.getElementById("artifact-target-path"),
     saveArtifactTarget: document.getElementById("save-artifact-target"),
+    codeChangeContractPanel: document.getElementById("code-change-contract-panel"),
+    codeTargetShape: document.getElementById("code-target-shape"),
+    codeExactTargets: document.getElementById("code-exact-targets"),
+    codeAllowedAreas: document.getElementById("code-allowed-areas"),
+    codeForbiddenAreas: document.getElementById("code-forbidden-areas"),
+    codeVerificationObligations: document.getElementById("code-verification-obligations"),
+    saveCodeChangeContract: document.getElementById("save-code-change-contract"),
     productionPlanPanel: document.getElementById("production-plan-panel"),
     planFit: document.getElementById("plan-fit"),
     planObjective: document.getElementById("plan-objective"),
@@ -292,6 +299,22 @@
       : "None";
   }
 
+  function renderCodeChangeContract(work) {
+    const editable = ["DRAFT", "NEEDS_REFINEMENT", "AWAITING_APPROVAL"].includes(work.status);
+    const isCodeWork = work.target_kind === "CODE_WORK";
+    const contract = work.change_contract;
+    elements.codeChangeContractPanel.hidden = !isCodeWork || !editable;
+    elements.codeTargetShape.textContent = contract ? contract.target_shape : "UNRESOLVED";
+    elements.codeExactTargets.value = contract
+      ? contract.exact_targets.map((target) => target.path).join("\n")
+      : "";
+    elements.codeAllowedAreas.value = contract ? contract.allowed_areas.join("\n") : "";
+    elements.codeForbiddenAreas.value = contract ? contract.forbidden_areas.join("\n") : "";
+    elements.codeVerificationObligations.value = contract
+      ? contract.verification_obligations.map((item) => item.identity).join("\n")
+      : "PATH_SCOPE\nGIT_DIFF_CHECK";
+  }
+
   function actionLabel(action) {
     const labels = {
       REFINE: "Refine Draft",
@@ -395,14 +418,19 @@
       ? work.engineering_scope.summary
       : "Not bound yet";
     const target = work.artifact_target;
-    elements.artifactOperation.textContent = target
+    const codeContract = work.change_contract;
+    elements.artifactOperation.textContent = codeContract
+      ? `${codeContract.target_kind} · ${codeContract.target_shape}`
+      : target
       ? `${target.operation} · ${target.confidence} confidence`
       : "Not proposed yet";
-    elements.artifactRationale.textContent = target
+    elements.artifactRationale.textContent = codeContract
+      ? "Exact files and bounded areas shown in the admitted Change Contract."
+      : target
       ? target.placement_rationale
       : "No placement proposal yet";
     elements.artifactTargetPath.value = target ? target.path : "";
-    elements.artifactTargetPanel.hidden = ![
+    elements.artifactTargetPanel.hidden = work.target_kind === "CODE_WORK" || ![
       "DRAFT",
       "NEEDS_REFINEMENT",
       "AWAITING_APPROVAL",
@@ -413,6 +441,7 @@
     renderChips(elements.constraintList, work.constraints, "No explicit constraints");
     renderChips(elements.tagList, work.tags, "No tags");
     renderProductionPlan(work);
+    renderCodeChangeContract(work);
     renderResources(work);
     renderWorkActions(work);
     renderAttention();
@@ -481,6 +510,52 @@
       );
       await refreshAfterMutation();
       announce(`Artifact Target updated to ${path}.`);
+    } catch (error) {
+      showNotice(error);
+    } finally {
+      setBusy(false);
+      renderSelectedWork();
+    }
+  }
+
+  function nonEmptyLines(value) {
+    return value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+  }
+
+  function typedVerificationObligations(value) {
+    return nonEmptyLines(value).map((identity) => {
+      const separator = identity.indexOf(":");
+      return separator < 0
+        ? { kind: identity, target: null }
+        : { kind: identity.slice(0, separator), target: identity.slice(separator + 1) };
+    });
+  }
+
+  async function updateCodeChangeContract() {
+    if (state.busy || !state.selectedWorkId) {
+      return;
+    }
+    const body = {
+      code_exact_targets: nonEmptyLines(elements.codeExactTargets.value),
+      code_allowed_areas: nonEmptyLines(elements.codeAllowedAreas.value),
+      code_forbidden_areas: nonEmptyLines(elements.codeForbiddenAreas.value),
+      code_verification_obligations: typedVerificationObligations(
+        elements.codeVerificationObligations.value,
+      ),
+    };
+    if (!body.code_exact_targets.length && !body.code_allowed_areas.length) {
+      showNotice(new ApiError(422, "INVALID_REQUEST", "At least one exact target or bounded area is required."));
+      return;
+    }
+    hideNotice();
+    setBusy(true);
+    try {
+      state.selectedWork = await apiRequest(
+        `/api/works/${state.selectedWorkId}/refine`,
+        { method: "POST", body },
+      );
+      await refreshAfterMutation();
+      announce("Code Change Contract updated.");
     } catch (error) {
       showNotice(error);
     } finally {
@@ -746,6 +821,7 @@
     () => performWorkAction("ADVANCE"),
   );
   elements.saveArtifactTarget.addEventListener("click", updateArtifactTarget);
+  elements.saveCodeChangeContract.addEventListener("click", updateCodeChangeContract);
   elements.retryControl.addEventListener("click", reloadWorkspace);
   elements.healthControl.addEventListener("click", loadHealth);
   elements.dismissNotice.addEventListener("click", hideNotice);

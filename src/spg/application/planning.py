@@ -27,6 +27,7 @@ class ProductionPlanningService:
                 NAMESPACE_URL,
                 f"spg:planning-authority-refinement:{request.work_id}:{'|'.join(violations)}",
             ),
+            target_kind=request.target_kind,
             objective=request.production_objective,
             desired_outcome=request.desired_outcome,
             ordered_steps=(
@@ -36,6 +37,7 @@ class ProductionPlanningService:
                 ),
             ),
             artifact_targets=request.artifact_targets,
+            change_contract=request.change_contract,
             inherited_constraints=request.constraints,
             verification_approach=request.verification_expectation,
             assumptions=(),
@@ -57,8 +59,12 @@ class ProductionPlanningService:
             violations.append("Planner changed the admitted production objective.")
         if proposal.desired_outcome != request.desired_outcome:
             violations.append("Planner changed the admitted desired outcome.")
+        if proposal.target_kind is not request.target_kind:
+            violations.append("Planner changed the admitted target kind.")
         if proposal.artifact_targets != request.artifact_targets:
             violations.append("Planner introduced or changed an unauthorized artifact target.")
+        if proposal.change_contract != request.change_contract:
+            violations.append("Planner introduced or widened an unauthorized code change boundary.")
         if proposal.inherited_constraints != request.constraints:
             violations.append("Planner changed the admitted Work constraints.")
         if proposal.verification_approach != request.verification_expectation:

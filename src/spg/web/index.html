@@ -184,6 +184,35 @@
               <button id="save-artifact-target" class="secondary-button compact" type="button">Update target</button>
             </div>
 
+            <section id="code-change-contract-panel" class="change-contract-panel" hidden>
+              <div class="panel-title-row">
+                <div>
+                  <p class="eyebrow">Code Change Contract</p>
+                  <h3>Human-visible change authority</h3>
+                </div>
+                <span id="code-target-shape" class="step-label">UNRESOLVED</span>
+              </div>
+              <p class="empty-copy">
+                Only these exact files or bounded repository areas may change.
+                One item per line; bounded areas must end with <code>/**</code>.
+              </p>
+              <div class="change-contract-grid">
+                <label for="code-exact-targets">Exact target files
+                  <textarea id="code-exact-targets" rows="3" placeholder="src/spg/example.py&#10;tests/test_example.py"></textarea>
+                </label>
+                <label for="code-allowed-areas">Bounded allowed areas
+                  <textarea id="code-allowed-areas" rows="3" placeholder="src/spg/api/**&#10;tests/integration/**"></textarea>
+                </label>
+                <label for="code-forbidden-areas">Forbidden paths / areas
+                  <textarea id="code-forbidden-areas" rows="3" placeholder=".github/**"></textarea>
+                </label>
+                <label for="code-verification-obligations">Typed verification obligations
+                  <textarea id="code-verification-obligations" rows="4" placeholder="PATH_SCOPE&#10;GIT_DIFF_CHECK&#10;PYTHON_COMPILE&#10;PYTEST_TARGET:tests/test_example.py"></textarea>
+                </label>
+              </div>
+              <button id="save-code-change-contract" class="secondary-button compact" type="button">Update Change Contract</button>
+            </section>
+
             <div class="metadata-row">
               <div>
                 <p class="field-label">Constraints</p>

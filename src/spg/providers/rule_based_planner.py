@@ -1,5 +1,7 @@
 """Narrow deterministic Production Planner Lite provider."""
 
+import json
+
 from uuid import NAMESPACE_URL, uuid5
 
 from spg.domain.planning import (
@@ -46,11 +48,19 @@ class RuleBasedProductionPlanner:
                 request.production_objective,
                 fit.value,
                 *(target.path for target in request.artifact_targets),
+                json.dumps(
+                    None
+                    if request.change_contract is None
+                    else request.change_contract.model_dump(mode="json"),
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
                 *instructions,
             )
         )
         return ProductionPlanProposal(
             proposal_id=uuid5(NAMESPACE_URL, f"spg:production-plan:{identity}"),
+            target_kind=request.target_kind,
             objective=request.production_objective,
             desired_outcome=request.desired_outcome,
             ordered_steps=tuple(
@@ -58,6 +68,7 @@ class RuleBasedProductionPlanner:
                 for index, instruction in enumerate(instructions, start=1)
             ),
             artifact_targets=request.artifact_targets,
+            change_contract=request.change_contract,
             inherited_constraints=request.constraints,
             verification_approach=request.verification_expectation,
             assumptions=(
@@ -87,5 +98,14 @@ class RuleBasedProductionPlanner:
             steps.append(
                 f"{action.capitalize()} the exact authorized artifact {target.path}."
             )
+        if request.change_contract is not None:
+            if request.change_contract.exact_targets:
+                paths = ", ".join(
+                    target.path for target in request.change_contract.exact_targets
+                )
+                steps.append(f"Modify only the admitted exact code targets: {paths}.")
+            if request.change_contract.allowed_areas:
+                areas = ", ".join(request.change_contract.allowed_areas)
+                steps.append(f"Keep all other code changes inside: {areas}.")
         steps.append("Run the admitted targeted verification and report the resulting evidence.")
         return tuple(dict.fromkeys(steps))

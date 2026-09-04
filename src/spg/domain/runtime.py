@@ -8,6 +8,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from spg.domain.change import CodeChangeContract
 from spg.domain.planning import ProductionPlanProposal
 
 
@@ -38,6 +39,7 @@ class AttemptCondition(StrEnum):
 
 class ProductionHorizon(StrEnum):
     DOCUMENTATION = "DOCUMENTATION"
+    CODE = "CODE"
 
 
 class ArtifactOperation(StrEnum):
@@ -85,6 +87,7 @@ class CompletionContract(BaseModel):
     verification_obligations: tuple[str, ...] = ()
     blocking_conditions: tuple[str, ...] = ()
     artifact_contract: ArtifactContract | None = None
+    change_contract: CodeChangeContract | None = None
     production_plan: ProductionPlanProposal | None = None
 
     @model_validator(mode="after")
@@ -98,6 +101,7 @@ class CompletionContract(BaseModel):
                 self.verification_obligations,
                 self.blocking_conditions,
                 self.artifact_contract,
+                self.change_contract,
             )
         ):
             raise ValueError("Completion Contract must declare at least one obligation")
@@ -111,6 +115,7 @@ class CompletionContract(BaseModel):
             self.required_outputs
             or self.required_changes
             or self.required_markers
+            or self.change_contract is not None
         )
 
 

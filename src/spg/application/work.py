@@ -17,6 +17,15 @@ from spg.application.preparation import PreparationService
 from spg.application.runtime import RuntimeService
 from spg.application.runtime_commit import RuntimeCommitService
 from spg.application.verification import VerificationService
+from spg.domain.change import (
+    ChangeOperation,
+    ChangeTargetShape,
+    CodeChangeContract,
+    CodeChangeTarget,
+    CodeVerificationKind,
+    CodeVerificationObligation,
+    ProductionTargetKind,
+)
 from spg.domain.executor import ExecutorCapabilityContract
 from spg.domain.governance import (
     CandidateAuthorizationScope,
@@ -275,34 +284,71 @@ class WorkApplicationService:
                 raise ProductInvariantViolation(
                     "Engineering Resource does not match current governed Baseline"
                 )
-            proposal = self._artifact_target_proposal(
-                raw=work.raw_user_requirement,
-                explicit_path=request.expected_artifact_path,
-                resource=resource,
-                baseline_id=baseline.id,
-                source_revision=baseline.repository_revision,
-            )
-            verification = (
-                request.verification_expectation
-                or "Verify the requested outcome against independent repository Reality"
-            )
             constraints = self._merge_constraints(
                 work.constraints,
                 request.constraints,
                 self._extract_constraints(work.raw_user_requirement),
+            )
+            code_work = self._is_code_work(work.raw_user_requirement, request)
+            existing_change_contract = (
+                None
+                if work.production_plan is None
+                else work.production_plan.change_contract
+            )
+            change_contract = (
+                self._code_change_contract_proposal(
+                    raw=work.raw_user_requirement,
+                    request=request,
+                    existing=existing_change_contract,
+                    resource=resource,
+                    baseline_id=baseline.id,
+                    source_revision=baseline.repository_revision,
+                    desired_outcome=desired_outcome,
+                    constraints=constraints,
+                )
+                if code_work
+                else None
+            )
+            proposal = (
+                None
+                if code_work
+                else self._artifact_target_proposal(
+                    raw=work.raw_user_requirement,
+                    explicit_path=request.expected_artifact_path,
+                    resource=resource,
+                    baseline_id=baseline.id,
+                    source_revision=baseline.repository_revision,
+                )
+            )
+            verification = (
+                request.verification_expectation
+                or (
+                    self._code_verification_summary(change_contract)
+                    if change_contract is not None
+                    else "Verify the requested outcome against independent repository Reality"
+                )
             )
             refinement_reasons: list[str] = []
             if self._is_too_broad(work.raw_user_requirement):
                 refinement_reasons.append(
                     "The admitted Work is too broad for a trustworthy single-PWU plan."
                 )
-            if proposal is None:
+            if code_work and change_contract is None:
+                refinement_reasons.append(
+                    "A safely bounded exact target set or repository area is required for code production."
+                )
+            elif not code_work and proposal is None:
                 refinement_reasons.append(
                     "An exact authorized artifact target is required before production."
                 )
             plan = self.planning.propose(
                 ProductionPlanningRequest(
                     work_id=work.id,
+                    target_kind=(
+                        ProductionTargetKind.CODE_WORK
+                        if code_work
+                        else ProductionTargetKind.DOCUMENTATION_WORK
+                    ),
                     admitted_requirement=work.raw_user_requirement,
                     desired_outcome=desired_outcome,
                     production_objective=objective,
@@ -318,6 +364,7 @@ class WorkApplicationService:
                             ),
                         )
                     ),
+                    change_contract=change_contract,
                     constraints=constraints,
                     verification_expectation=verification,
                     engineering_scope_summary=scope_summary,
@@ -453,8 +500,9 @@ class WorkApplicationService:
             resource = store.resource(active[0].resource_id)
             if resource is None:
                 raise ProductInvariantViolation("Scope Resource is missing")
-            artifact = self._required_artifact_target(work)
             plan = self._required_production_plan(work)
+            artifact = self._artifact_target(work)
+            change_contract = plan.change_contract
 
         baseline = self.runtime.current_baseline()
         if (
@@ -464,27 +512,54 @@ class WorkApplicationService:
             raise ProductInvariantViolation(
                 "Engineering Resource does not match current governed Baseline"
             )
-        if (
-            artifact.source_baseline_id != baseline.id
-            or artifact.source_revision != baseline.repository_revision
-        ):
-            raise ProductInvariantViolation(
-                "Artifact Target Proposal is stale against the current Source Baseline"
-            )
         if plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT:
             raise ProductInvariantViolation(
                 "Work Production Plan is not fit for the single-PWU MVP"
             )
-        expected_plan_target = ProductionPlanArtifactTarget(
-            path=artifact.path,
-            operation=PlannedArtifactOperation(artifact.operation.value),
-        )
+        if (artifact is None) == (change_contract is None):
+            raise ProductInvariantViolation(
+                "Work must contain exactly one documentation or code production contract"
+            )
+        expected_plan_targets = ()
+        if artifact is not None:
+            if (
+                artifact.source_baseline_id != baseline.id
+                or artifact.source_revision != baseline.repository_revision
+            ):
+                raise ProductInvariantViolation(
+                    "Artifact Target Proposal is stale against the current Source Baseline"
+                )
+            expected_plan_targets = (
+                ProductionPlanArtifactTarget(
+                    path=artifact.path,
+                    operation=PlannedArtifactOperation(artifact.operation.value),
+                ),
+            )
+        if change_contract is not None and (
+            change_contract.engineering_resource_id != resource.id
+            or change_contract.repository_identity != resource.repository_identity
+            or change_contract.source_baseline_id != baseline.id
+            or change_contract.source_revision != baseline.repository_revision
+            or change_contract.desired_outcome
+            != (work.desired_outcome or work.raw_user_requirement.strip())
+            or change_contract.constraints != work.constraints
+        ):
+            raise ProductInvariantViolation(
+                "Code Change Contract no longer matches the admitted Work authority envelope"
+            )
         if (
             plan.desired_outcome
             != (work.desired_outcome or work.raw_user_requirement.strip())
             or plan.objective
             != (work.production_objective or work.desired_outcome or "")
-            or plan.artifact_targets != (expected_plan_target,)
+            or plan.target_kind
+            is not (
+                ProductionTargetKind.CODE_WORK
+                if change_contract is not None
+                else ProductionTargetKind.DOCUMENTATION_WORK
+            )
+            or plan.artifact_targets != expected_plan_targets
+            or plan.change_contract != change_contract
             or plan.inherited_constraints != work.constraints
             or plan.verification_approach
             != (work.verification_expectation or "")
@@ -496,35 +571,50 @@ class WorkApplicationService:
             raise ProductInvariantViolation(
                 "Production Plan no longer matches the admitted Work authority envelope"
             )
-        verification_obligation = (
-            work.verification_expectation
-            or "Verify the admitted artifact against independent repository Reality"
-        )
-        artifact_contract = ArtifactContract(
-            engineering_resource_id=resource.id,
-            repository_identity=resource.repository_identity,
-            source_baseline_id=baseline.id,
-            source_revision=baseline.repository_revision,
-            artifact_path=artifact.path,
-            operation=ArtifactOperation(artifact.operation.value),
-            constraints=work.constraints,
-            expected_outcome=work.desired_outcome or work.raw_user_requirement.strip(),
-            verification_obligation=verification_obligation,
-        )
-        objective = self._artifact_objective(artifact_contract)
+        if artifact is not None:
+            verification_obligation = (
+                work.verification_expectation
+                or "Verify the admitted artifact against independent repository Reality"
+            )
+            artifact_contract = ArtifactContract(
+                engineering_resource_id=resource.id,
+                repository_identity=resource.repository_identity,
+                source_baseline_id=baseline.id,
+                source_revision=baseline.repository_revision,
+                artifact_path=artifact.path,
+                operation=ArtifactOperation(artifact.operation.value),
+                constraints=work.constraints,
+                expected_outcome=work.desired_outcome or work.raw_user_requirement.strip(),
+                verification_obligation=verification_obligation,
+            )
+            objective = self._artifact_objective(artifact_contract)
+            horizon = ProductionHorizon.DOCUMENTATION
+            completion_contract = CompletionContract(
+                required_outputs=(artifact.path,),
+                required_changes=(artifact.path,),
+                verification_obligations=(verification_obligation,),
+                artifact_contract=artifact_contract,
+                production_plan=plan,
+            )
+        else:
+            assert change_contract is not None
+            objective = self._code_change_objective(change_contract)
+            horizon = ProductionHorizon.CODE
+            exact_paths = tuple(target.path for target in change_contract.exact_targets)
+            completion_contract = CompletionContract(
+                required_outputs=exact_paths,
+                required_changes=exact_paths,
+                verification_obligations=change_contract.verification_identities,
+                change_contract=change_contract,
+                production_plan=plan,
+            )
         spine = self.runtime.create_initial_runtime_spine(
             InitialRunRequest(
                 intent_ref=f"work:{work.id}",
                 goal=work.desired_outcome or work.refined_title or "Governed Work",
-                production_horizon=ProductionHorizon.DOCUMENTATION,
+                production_horizon=horizon,
                 initial_work_unit_objective=objective,
-                completion_contract=CompletionContract(
-                    required_outputs=(artifact.path,),
-                    required_changes=(artifact.path,),
-                    verification_obligations=(verification_obligation,),
-                    artifact_contract=artifact_contract,
-                    production_plan=plan,
-                ),
+                completion_contract=completion_contract,
             )
         )
         timestamp = datetime.now(UTC)
@@ -1032,7 +1122,17 @@ class WorkApplicationService:
             title=work.refined_title,
             desired_outcome=work.desired_outcome,
             constraints=work.constraints,
+            target_kind=(
+                ProductionTargetKind.DOCUMENTATION_WORK
+                if work.production_plan is None
+                else work.production_plan.target_kind
+            ),
             artifact_target=self._artifact_target(work),
+            change_contract=(
+                None
+                if work.production_plan is None
+                else work.production_plan.change_contract
+            ),
             production_plan=work.production_plan,
             tags=work.tags,
             engineering_scope=scope,
@@ -1254,6 +1354,237 @@ class WorkApplicationService:
     def _default_title(raw: str) -> str:
         first = next((line.strip() for line in raw.splitlines() if line.strip()), "")
         return first[:120] or "Untitled Work"
+
+    @classmethod
+    def _is_code_work(
+        cls,
+        raw: str,
+        request: WorkRefinementRequest,
+    ) -> bool:
+        if any(
+            value is not None
+            for value in (
+                request.code_exact_targets,
+                request.code_allowed_areas,
+                request.code_forbidden_areas,
+                request.code_verification_obligations,
+            )
+        ):
+            return True
+        paths = cls._explicit_repository_paths(raw)
+        if any(
+            path.startswith(("src/", "tests/")) or path.endswith(".py")
+            for path in paths
+        ) or cls._explicit_repository_areas(raw):
+            return True
+        normalized = " ".join(raw.casefold().split())
+        markers = (
+            "source code",
+            "python code",
+            "code change",
+            "modify code",
+            "update code",
+            "fix the bug",
+            "unit test",
+            "代码",
+            "源文件",
+            "修复 bug",
+            "单元测试",
+        )
+        return any(marker in normalized for marker in markers)
+
+    @classmethod
+    def _code_change_contract_proposal(
+        cls,
+        *,
+        raw: str,
+        request: WorkRefinementRequest,
+        existing: CodeChangeContract | None,
+        resource: EngineeringResourceRecord,
+        baseline_id: UUID,
+        source_revision: str,
+        desired_outcome: str,
+        constraints: tuple[str, ...],
+    ) -> CodeChangeContract | None:
+        baseline_paths = cls._baseline_paths(Path(resource.location_ref).resolve(), source_revision)
+        exact_paths = (
+            request.code_exact_targets
+            if request.code_exact_targets is not None
+            else tuple(target.path for target in existing.exact_targets)
+            if existing is not None
+            else cls._explicit_repository_paths(raw)
+        )
+        allowed_areas = (
+            request.code_allowed_areas
+            if request.code_allowed_areas is not None
+            else existing.allowed_areas
+            if existing is not None
+            else cls._explicit_repository_areas(raw)
+        )
+        forbidden_areas = (
+            request.code_forbidden_areas
+            if request.code_forbidden_areas is not None
+            else existing.forbidden_areas
+            if existing is not None
+            else ()
+        )
+        if not exact_paths and not allowed_areas:
+            return None
+        try:
+            targets = tuple(
+                CodeChangeTarget(
+                    path=path,
+                    operation=(
+                        ChangeOperation.UPDATE
+                        if path in baseline_paths
+                        else ChangeOperation.CREATE
+                    ),
+                )
+                for path in dict.fromkeys(exact_paths)
+            )
+            shape = (
+                ChangeTargetShape.EXACT_AND_BOUNDED
+                if targets and allowed_areas
+                else ChangeTargetShape.EXACT_TARGET_SET
+                if targets
+                else ChangeTargetShape.BOUNDED_REPOSITORY_AREAS
+            )
+            obligations = (
+                request.code_verification_obligations
+                if request.code_verification_obligations is not None
+                else existing.verification_obligations
+                if existing is not None
+                else cls._default_code_verification_obligations(
+                    tuple(target.path for target in targets),
+                    allowed_areas,
+                )
+            )
+            mandatory = (
+                CodeVerificationObligation(kind=CodeVerificationKind.PATH_SCOPE),
+                CodeVerificationObligation(kind=CodeVerificationKind.GIT_DIFF_CHECK),
+            )
+            obligation_map = {
+                item.identity: item for item in (*mandatory, *obligations)
+            }
+            return CodeChangeContract(
+                target_shape=shape,
+                engineering_resource_id=resource.id,
+                repository_identity=resource.repository_identity,
+                source_baseline_id=baseline_id,
+                source_revision=source_revision,
+                desired_outcome=desired_outcome,
+                constraints=constraints,
+                exact_targets=targets,
+                allowed_areas=allowed_areas,
+                forbidden_areas=forbidden_areas,
+                verification_obligations=tuple(obligation_map.values()),
+            )
+        except ValueError as error:
+            raise ProductInvariantViolation(f"Invalid Code Change Contract: {error}") from error
+
+    @staticmethod
+    def _explicit_repository_areas(raw: str) -> tuple[str, ...]:
+        matches = re.findall(
+            r"(?<![\w./*-])([A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*/\*\*)(?![\w/*-])",
+            raw,
+        )
+        return tuple(dict.fromkeys(matches))
+
+    @staticmethod
+    def _explicit_repository_paths(raw: str) -> tuple[str, ...]:
+        nested = re.findall(
+            r"(?<![\w./-])((?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+)(?![\w./*-])",
+            raw,
+        )
+        roots = re.findall(
+            r"(?<![\w./-])([A-Za-z0-9_-]+\.(?:py|toml|json|ya?ml))(?![\w./-])",
+            raw,
+            flags=re.IGNORECASE,
+        )
+        return tuple(
+            dict.fromkeys(
+                path.rstrip(".,:;。；")
+                for path in (*nested, *roots)
+                if "*" not in path
+                and not (
+                    path.startswith("docs/") and path.casefold().endswith(".md")
+                )
+            )
+        )
+
+    @classmethod
+    def _default_code_verification_obligations(
+        cls,
+        exact_paths: tuple[str, ...],
+        allowed_areas: tuple[str, ...],
+    ) -> tuple[CodeVerificationObligation, ...]:
+        obligations: list[CodeVerificationObligation] = [
+            CodeVerificationObligation(kind=CodeVerificationKind.PATH_SCOPE),
+            CodeVerificationObligation(kind=CodeVerificationKind.GIT_DIFF_CHECK),
+        ]
+        if any(path.endswith(".py") for path in exact_paths) or any(
+            area.startswith(("src/", "tests/")) for area in allowed_areas
+        ):
+            obligations.append(
+                CodeVerificationObligation(kind=CodeVerificationKind.PYTHON_COMPILE)
+            )
+        for path in exact_paths:
+            if path.startswith("tests/") and path.endswith(".py"):
+                obligations.append(
+                    CodeVerificationObligation(
+                        kind=CodeVerificationKind.PYTEST_TARGET,
+                        target=path,
+                    )
+                )
+            module = cls._python_module_for_path(path)
+            if module is not None:
+                obligations.append(
+                    CodeVerificationObligation(
+                        kind=CodeVerificationKind.IMPORT_CHECK,
+                        target=module,
+                    )
+                )
+        for area in allowed_areas:
+            prefix = area[:-3].rstrip("/")
+            if prefix.startswith("tests/"):
+                obligations.append(
+                    CodeVerificationObligation(
+                        kind=CodeVerificationKind.PYTEST_TARGET,
+                        target=prefix,
+                    )
+                )
+        return tuple({item.identity: item for item in obligations}.values())
+
+    @staticmethod
+    def _python_module_for_path(path: str) -> str | None:
+        if not path.startswith("src/") or not path.endswith(".py"):
+            return None
+        stem = path[4:-3].replace("/", ".")
+        if stem.endswith(".__init__"):
+            stem = stem[: -len(".__init__")]
+        return stem or None
+
+    @staticmethod
+    def _code_verification_summary(contract: CodeChangeContract | None) -> str:
+        if contract is None:
+            return "Define a bounded Code Change Contract before Verification"
+        return "Run admitted typed checks: " + ", ".join(
+            contract.verification_identities
+        )
+
+    @staticmethod
+    def _code_change_objective(contract: CodeChangeContract) -> str:
+        exact = "\n".join(
+            f"- {target.operation.value} {target.path}"
+            for target in contract.exact_targets
+        )
+        areas = "\n".join(f"- {area}" for area in contract.allowed_areas)
+        return (
+            f"Produce the admitted code change.\n"
+            f"Desired outcome: {contract.desired_outcome}\n"
+            f"Exact targets:\n{exact or '- None.'}\n"
+            f"Bounded areas:\n{areas or '- None.'}"
+        )
 
     @staticmethod
     def _is_too_broad(raw: str) -> bool:

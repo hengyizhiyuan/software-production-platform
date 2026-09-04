@@ -377,6 +377,62 @@ def test_api_07_08_09_refinement_and_governed_admission(
     assert binding is not None
 
 
+def test_code_draft_contract_is_visible_adjustable_and_admitted_over_http(
+    api_facts: ApiFacts,
+) -> None:
+    submitted = api_facts.client.post(
+        "/api/works",
+        json={"requirement": "Modify Python source code and its unit test"},
+    ).json()
+    unresolved = api_facts.client.post(
+        f"/api/works/{submitted['work_id']}/refine",
+        json={},
+    )
+    assert unresolved.status_code == 200
+    assert unresolved.json()["target_kind"] == "CODE_WORK"
+    assert unresolved.json()["status"] == "NEEDS_REFINEMENT"
+    assert unresolved.json()["artifact_target"] is None
+    assert unresolved.json()["change_contract"] is None
+
+    refined = api_facts.client.post(
+        f"/api/works/{submitted['work_id']}/refine",
+        json={
+            "code_exact_targets": [
+                "src/spg/example.py",
+                "tests/test_example.py",
+            ],
+            "code_forbidden_areas": [".github/**"],
+            "code_verification_obligations": [
+                {"kind": "PATH_SCOPE"},
+                {"kind": "GIT_DIFF_CHECK"},
+                {"kind": "PYTHON_COMPILE"},
+                {"kind": "PYTEST_TARGET", "target": "tests/test_example.py"},
+                {"kind": "IMPORT_CHECK", "target": "spg.example"},
+            ],
+        },
+    )
+    assert refined.status_code == 200
+    payload = refined.json()
+    assert payload["status"] == "AWAITING_APPROVAL"
+    assert payload["target_kind"] == "CODE_WORK"
+    assert payload["artifact_target"] is None
+    assert payload["production_plan"]["target_kind"] == "CODE_WORK"
+    assert payload["change_contract"]["target_shape"] == "EXACT_TARGET_SET"
+    assert [item["path"] for item in payload["change_contract"]["exact_targets"]] == [
+        "src/spg/example.py",
+        "tests/test_example.py",
+    ]
+    assert payload["change_contract"]["forbidden_areas"] == [".github/**"]
+
+    approved = api_facts.client.post(
+        f"/api/works/{submitted['work_id']}/approve",
+        json={"authority_identity": "human:code-api"},
+    )
+    assert approved.status_code == 200
+    assert approved.json()["status"] == "READY"
+    assert approved.json()["change_contract"] == payload["change_contract"]
+
+
 def test_intake_multilingual_constraint_persists_and_projects(
     api_facts: ApiFacts,
 ) -> None:

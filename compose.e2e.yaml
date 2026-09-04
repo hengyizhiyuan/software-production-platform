@@ -15,7 +15,7 @@ services:
       SPG_EXECUTOR_TIMEOUT_SECONDS: "600"
       SPG_EXECUTOR_SANDBOX_MODE: full-access
       SPG_RUNTIME_PROFILE: local-docker-codex-e2e
-      SPG_VERIFICATION_ADAPTER: mvp-e2e-markdown
+      SPG_VERIFICATION_ADAPTER: contract-driven-repository
     secrets:
       - source: spg-codex-auth
         target: spg-codex-auth

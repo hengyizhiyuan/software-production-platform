@@ -7,6 +7,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from spg.domain.change import (
+    CodeChangeContract,
+    CodeVerificationObligation,
+    ProductionTargetKind,
+)
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.planning import ProductionPlanProposal
 
@@ -200,7 +205,9 @@ class WorkProjection(BaseModel):
     title: str | None
     desired_outcome: str | None
     constraints: tuple[str, ...]
+    target_kind: ProductionTargetKind = ProductionTargetKind.DOCUMENTATION_WORK
     artifact_target: ArtifactTargetProposal | None = None
+    change_contract: CodeChangeContract | None = None
     production_plan: ProductionPlanProposal | None = None
     tags: tuple[str, ...]
     engineering_scope: EngineeringScopeRecord | None
@@ -259,6 +266,10 @@ class WorkRefinementRequest(BaseModel):
     production_objective: str | None = None
     expected_artifact_path: str | None = None
     verification_expectation: str | None = None
+    code_exact_targets: tuple[str, ...] | None = None
+    code_allowed_areas: tuple[str, ...] | None = None
+    code_forbidden_areas: tuple[str, ...] | None = None
+    code_verification_obligations: tuple[CodeVerificationObligation, ...] | None = None
 
 
 class AttentionResolutionRequest(BaseModel):

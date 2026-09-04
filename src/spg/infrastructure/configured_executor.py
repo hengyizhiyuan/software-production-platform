@@ -72,6 +72,7 @@ def render_governed_instruction(
     outputs = "\n".join(f"- {item}" for item in completion_contract.required_outputs)
     changes = "\n".join(f"- {item}" for item in completion_contract.required_changes)
     artifact = completion_contract.artifact_contract
+    change_contract = completion_contract.change_contract
     plan = completion_contract.production_plan
     plan_section = ""
     if plan is not None:
@@ -99,13 +100,44 @@ def render_governed_instruction(
             f"- Desired outcome: {artifact.expected_outcome}\n"
             f"- Constraints:\n{constraints or '- None beyond the admitted contract.'}\n\n"
         )
+    change_authority = ""
+    if change_contract is not None:
+        exact_targets = "\n".join(
+            f"- {target.operation.value} {target.path}"
+            for target in change_contract.exact_targets
+        )
+        allowed_areas = "\n".join(
+            f"- {area}" for area in change_contract.allowed_areas
+        )
+        forbidden_areas = "\n".join(
+            f"- {area}" for area in change_contract.forbidden_areas
+        )
+        verifications = "\n".join(
+            f"- {item.identity}" for item in change_contract.verification_obligations
+        )
+        constraints = "\n".join(
+            f"- {item}" for item in change_contract.constraints
+        )
+        change_authority = (
+            "Code Change Contract:\n"
+            f"- Target shape: {change_contract.target_shape.value}\n"
+            f"- Desired outcome: {change_contract.desired_outcome}\n"
+            f"Exact targets:\n{exact_targets or '- None.'}\n"
+            f"Bounded allowed areas:\n{allowed_areas or '- None.'}\n"
+            f"Forbidden paths/areas:\n{forbidden_areas or '- None beyond the admitted boundary.'}\n"
+            f"Constraints:\n{constraints or '- None beyond the admitted contract.'}\n"
+            f"Required Verification:\n{verifications}\n\n"
+        )
     return (
         "Complete exactly the admitted software-production objective below.\n\n"
         f"Objective:\n{objective.strip()}\n\n"
         f"{plan_section}"
         f"{artifact_authority}"
+        f"{change_authority}"
         f"Authorized output paths:\n{outputs}\n\n"
         f"Authorized changed paths:\n{changes}\n\n"
-        "Do not modify any other repository path. Work only inside the supplied "
+        "Do not modify any other repository path outside the exact targets or "
+        "bounded areas admitted above. Never widen the Change Contract yourself. "
+        "Work only inside the supplied "
         "Attempt workspace. Do not commit, push, or change a Git ref."
     )
