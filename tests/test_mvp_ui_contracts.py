@@ -82,6 +82,11 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "plan.fit_classification" in javascript
     assert "expected_artifact_path" in javascript
     assert "code change contract" in combined
+    assert "code change proposal" in combined
+    assert "not production authority" in combined
+    assert "proposal confidence" in combined
+    assert "conditional targets" in combined
+    assert "unresolved questions" in combined
     assert 'id="code-exact-targets"' in html
     assert 'id="code-allowed-areas"' in html
     assert 'id="code-forbidden-areas"' in html
@@ -89,6 +94,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "code_exact_targets" in javascript
     assert "code_allowed_areas" in javascript
     assert "typedVerificationObligations" in javascript
+    assert "work.change_proposal" in javascript
     assert 'work.target_kind === "CODE_WORK"' in javascript
     assert "no artifacts observed" in combined
     assert "no verification evidence available" in combined

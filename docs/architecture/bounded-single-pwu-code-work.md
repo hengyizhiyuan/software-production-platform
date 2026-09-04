@@ -13,11 +13,14 @@ Integration, Runtime Commit, Trusted Baseline, and ORCH-1 models.
 ## Code Work and Change Authority
 
 Refinement now classifies the production target as `DOCUMENTATION_WORK` or
-`CODE_WORK`. Documentation Work retains its Artifact Contract. Code Work uses
-a Human-visible `CodeChangeContract` containing the Engineering Resource,
-exact Source Baseline, Desired Outcome, inherited constraints, exact target
-files and/or bounded repository areas, known create/update operations,
-forbidden scopes, and typed Verification obligations.
+`CODE_WORK`. Documentation Work retains its Artifact Contract. Explicitly
+bounded Code Work may form a Human-visible Change Proposal containing the
+Engineering Resource, exact Source Baseline, Desired Outcome, inherited
+constraints, exact target files and/or bounded repository areas, known
+create/update operations, forbidden scopes, and typed Verification obligations.
+Only the existing Human `ADMIT_WORK_DRAFT` decision converts that proposal into
+the authoritative `CodeChangeContract`. See
+[Repository-Aware Code Change Proposal Lite](repository-aware-code-change-proposal-lite.md).
 
 Supported authority shapes are `EXACT_TARGET_SET`,
 `BOUNDED_REPOSITORY_AREAS`, and `EXACT_AND_BOUNDED`. Paths must be safe,
@@ -26,10 +29,11 @@ internals, wildcard exact targets, and implicit repository-root authority are
 rejected. An unresolved code intent remains `NEEDS_REFINEMENT`; it never falls
 back to `docs/*.md` or `**/*`.
 
-The Human may adjust this exact contract in the existing Work Draft before
-`ADMIT_WORK_DRAFT`. That existing decision admits Work, Plan, and Change
-Contract together; no second approval gate is introduced. Planner output must
-preserve the contract exactly and cannot widen its own authority.
+The Human may adjust the proposal in the existing Work Draft before
+`ADMIT_WORK_DRAFT`. That existing decision admits Work, Plan, and the resulting
+Change Contract together; no second approval gate is introduced. Planner
+output must preserve the proposal and final contract exactly and cannot widen
+its own authority.
 
 ## PWU, Execution, and Observation
 

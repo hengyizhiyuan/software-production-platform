@@ -52,6 +52,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-CODE-1 — CLOSED / PASS**
 
+**MVP-REFINE-CODE-1 — CLOSED / PASS**
+
 **MVP CORE CAPABILITY SET — FUNCTIONALLY COMPLETE**
 
 **FIRST COMPLETE WATT GOVERNED SOFTWARE PRODUCTION LOOP — PROVEN**
@@ -133,6 +135,7 @@ For the MVP product model, **Work is the user-facing organization unit**. Engine
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
+| MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
 | MVP-INTAKE-2A — Governed Artifact Target Contract | CLOSED / PASS |
 | MVP-INTAKE-2B — Bounded Chinese Work Constraints | CLOSED / PASS |
 | MVP-INTAKE-DOGFOOD-3 — Same-Intent Trusted Completion | CLOSED / PASS |
@@ -331,6 +334,26 @@ Documentation Work retains its existing Artifact Contract path. No Multi-PWU,
 general AI planning, arbitrary-shell CI, ECF, Guardian, Provider-routing, or
 Recovery scope is added. See [Bounded Single-PWU Code Work](docs/architecture/bounded-single-pwu-code-work.md).
 
+### MVP-REFINE-CODE-1 Repository-Aware Change Proposal Boundary
+
+MVP-REFINE-CODE-1 is **CLOSED / PASS** after Architecture Lead Reality Review.
+During Code Work refinement, a
+provider-neutral capability may inspect the exact current Source Baseline using
+read-only Git object operations and propose required or conditional paths,
+bounded/forbidden areas, concise evidence, confidence, supported typed
+Verification obligations, provenance, and unresolved questions. The Proposal
+is Human-visible but is not Production Authority. The existing
+`ADMIT_WORK_DRAFT` decision alone creates the authoritative
+`CodeChangeContract`, records Proposal provenance, and rejects stale Baseline or
+Engineering Resource identity. Ambiguity remains `NEEDS_REFINEMENT`; no
+repository-wide fallback is permitted. The first Code Self-dogfood Work remains
+unchanged historical pre-execution evidence with zero Runs, Attempts, or
+Provider Reports. Frontend verification is classified as
+`FRONTEND_VERIFICATION_CONTRACT_GAP`: the current typed verifier cannot express
+the repository's targeted Node test, and this slice does not invent a Python or
+arbitrary-shell substitute. See [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
+and [Code Dogfood #1 Finding](docs/evidence/dogfood/code-dogfood-1-repository-aware-change-proposal-gap.md).
+
 ## Program-level Architecture Source of Truth
 
 The current system-level architecture baseline is:
@@ -343,6 +366,7 @@ The current system-level architecture baseline is:
 - [SPG FVS-1 — Governed Documentation Production Loop Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md)
 - [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md)
 - [Bounded Single-PWU Code Work](docs/architecture/bounded-single-pwu-code-work.md)
+- [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 

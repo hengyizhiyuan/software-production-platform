@@ -17,6 +17,7 @@ from spg.application.preparation import PreparationService
 from spg.application.runtime import RuntimeService
 from spg.application.runtime_commit import RuntimeCommitService
 from spg.application.verification import VerificationService
+from spg.application.refinement import RepositoryChangeProposalService
 from spg.domain.change import (
     ChangeOperation,
     ChangeTargetShape,
@@ -45,6 +46,11 @@ from spg.domain.planning import (
     ProductionPlanProposal,
     ProductionPlanner,
     ProductionPlanningRequest,
+)
+from spg.domain.refinement import (
+    RepositoryChangeProposal,
+    RepositoryChangeProposalProvider,
+    RepositoryChangeProposalRequest,
 )
 from spg.domain.product import (
     ArtifactTargetConfidence,
@@ -89,6 +95,9 @@ from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.providers.rule_based_planner import RuleBasedProductionPlanner
+from spg.providers.repository_change_proposal import (
+    RepositoryAwareChangeProposalProvider,
+)
 
 
 WORK_ACTOR = "spg-product:work-application"
@@ -110,6 +119,7 @@ class WorkApplicationService:
         executor: ExecutorCapabilityContract | None = None,
         verifier: VerificationCapabilityContract | None = None,
         planner: ProductionPlanner | None = None,
+        change_proposal_provider: RepositoryChangeProposalProvider | None = None,
         executor_binding: ExecutorBinding = DEFAULT_BINDING,
     ) -> None:
         self.database = database
@@ -118,6 +128,9 @@ class WorkApplicationService:
         self.verifier = verifier
         self.planning = ProductionPlanningService(
             planner or RuleBasedProductionPlanner()
+        )
+        self.change_proposals = RepositoryChangeProposalService(
+            change_proposal_provider or RepositoryAwareChangeProposalProvider()
         )
         self.executor_binding = executor_binding
         self.runtime = RuntimeService(database)
@@ -244,6 +257,7 @@ class WorkApplicationService:
                     "artifact_source_baseline_id": None,
                     "artifact_source_revision": None,
                     "verification_expectation": None,
+                    "code_change_proposal": None,
                     "production_plan_proposal": None,
                     "created_at": timestamp,
                     "updated_at": timestamp,
@@ -290,18 +304,16 @@ class WorkApplicationService:
                 self._extract_constraints(work.raw_user_requirement),
             )
             code_work = self._is_code_work(work.raw_user_requirement, request)
-            existing_change_contract = (
-                None
-                if work.production_plan is None
-                else work.production_plan.change_contract
-            )
-            change_contract = (
-                self._code_change_contract_proposal(
+            existing_proposal = work.code_change_proposal
+            change_proposal = (
+                self._repository_change_proposal(
+                    work_id=work.id,
                     raw=work.raw_user_requirement,
                     request=request,
-                    existing=existing_change_contract,
+                    existing=existing_proposal,
                     resource=resource,
                     baseline_id=baseline.id,
+                    source_ref=baseline.repository_ref,
                     source_revision=baseline.repository_revision,
                     desired_outcome=desired_outcome,
                     constraints=constraints,
@@ -323,8 +335,8 @@ class WorkApplicationService:
             verification = (
                 request.verification_expectation
                 or (
-                    self._code_verification_summary(change_contract)
-                    if change_contract is not None
+                    self._proposal_verification_summary(change_proposal)
+                    if change_proposal is not None
                     else "Verify the requested outcome against independent repository Reality"
                 )
             )
@@ -333,9 +345,19 @@ class WorkApplicationService:
                 refinement_reasons.append(
                     "The admitted Work is too broad for a trustworthy single-PWU plan."
                 )
-            if code_work and change_contract is None:
+            if code_work and (
+                change_proposal is None
+                or (
+                    not change_proposal.required_targets
+                    and not change_proposal.allowed_areas
+                )
+            ):
                 refinement_reasons.append(
                     "A safely bounded exact target set or repository area is required for code production."
+                )
+            if code_work and change_proposal is not None:
+                refinement_reasons.extend(
+                    change_proposal.unresolved_scope_questions
                 )
             elif not code_work and proposal is None:
                 refinement_reasons.append(
@@ -364,7 +386,8 @@ class WorkApplicationService:
                             ),
                         )
                     ),
-                    change_contract=change_contract,
+                    change_proposal=change_proposal,
+                    change_contract=None,
                     constraints=constraints,
                     verification_expectation=verification,
                     engineering_scope_summary=scope_summary,
@@ -442,6 +465,11 @@ class WorkApplicationService:
                         None if proposal is None else proposal.source_revision
                     ),
                     "verification_expectation": verification,
+                    "code_change_proposal": (
+                        None
+                        if change_proposal is None
+                        else change_proposal.model_dump(mode="json")
+                    ),
                     "production_plan_proposal": plan.model_dump(mode="json"),
                     "updated_at": timestamp,
                 },
@@ -502,6 +530,7 @@ class WorkApplicationService:
                 raise ProductInvariantViolation("Scope Resource is missing")
             plan = self._required_production_plan(work)
             artifact = self._artifact_target(work)
+            change_proposal = work.code_change_proposal
             change_contract = plan.change_contract
 
         baseline = self.runtime.current_baseline()
@@ -516,9 +545,15 @@ class WorkApplicationService:
             raise ProductInvariantViolation(
                 "Work Production Plan is not fit for the single-PWU MVP"
             )
-        if (artifact is None) == (change_contract is None):
+        if sum(
+            (
+                artifact is not None,
+                change_proposal is not None,
+                change_contract is not None,
+            )
+        ) != 1:
             raise ProductInvariantViolation(
-                "Work must contain exactly one documentation or code production contract"
+                "Work must contain exactly one documentation target, Code Proposal, or legacy Code Contract"
             )
         expected_plan_targets = ()
         if artifact is not None:
@@ -535,6 +570,54 @@ class WorkApplicationService:
                     operation=PlannedArtifactOperation(artifact.operation.value),
                 ),
             )
+        if change_proposal is not None:
+            if (
+                plan.change_proposal != change_proposal
+                or change_proposal.engineering_resource_id != resource.id
+                or change_proposal.repository_identity != resource.repository_identity
+                or change_proposal.source_baseline_id != baseline.id
+                or change_proposal.source_ref != baseline.repository_ref
+                or change_proposal.source_revision != baseline.repository_revision
+            ):
+                raise ProductInvariantViolation(
+                    "Code Change Proposal is stale against the current Source Baseline"
+                )
+            change_contract = self._admit_change_contract(
+                change_proposal,
+                desired_outcome=(
+                    work.desired_outcome or work.raw_user_requirement.strip()
+                ),
+                constraints=work.constraints,
+            )
+            plan = self.planning.propose(
+                ProductionPlanningRequest(
+                    work_id=work.id,
+                    target_kind=ProductionTargetKind.CODE_WORK,
+                    admitted_requirement=work.raw_user_requirement,
+                    desired_outcome=(
+                        work.desired_outcome or work.raw_user_requirement.strip()
+                    ),
+                    production_objective=(
+                        work.production_objective or work.desired_outcome or ""
+                    ),
+                    change_contract=change_contract,
+                    constraints=work.constraints,
+                    verification_expectation=work.verification_expectation or "",
+                    engineering_scope_summary=scope.summary,
+                    engineering_resource_id=resource.id,
+                    repository_identity=resource.repository_identity,
+                    source_baseline_id=baseline.id,
+                    source_revision=baseline.repository_revision,
+                    context_references=tuple(
+                        item.repository_relative_path
+                        for item in resource.context_references
+                    ),
+                )
+            )
+            if plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT:
+                raise ProductInvariantViolation(
+                    "Admitted Code Change Contract did not produce a one-PWU Plan"
+                )
         if change_contract is not None and (
             change_contract.engineering_resource_id != resource.id
             or change_contract.repository_identity != resource.repository_identity
@@ -647,6 +730,16 @@ class WorkApplicationService:
                             plan.model_dump(mode="json")
                         ),
                         "production_plan_fit": plan.fit_classification.value,
+                        "source_change_proposal_id": (
+                            None
+                            if change_proposal is None
+                            else str(change_proposal.proposal_id)
+                        ),
+                        "source_change_proposal_fingerprint": (
+                            None
+                            if change_proposal is None
+                            else change_proposal.proposal_fingerprint
+                        ),
                     },
                     "rationale": rationale,
                     "created_at": timestamp,
@@ -672,7 +765,11 @@ class WorkApplicationService:
             )
             product.update_work(
                 current.id,
-                {"condition": WorkCondition.READY.value, "updated_at": timestamp},
+                {
+                    "condition": WorkCondition.READY.value,
+                    "production_plan_proposal": plan.model_dump(mode="json"),
+                    "updated_at": timestamp,
+                },
             )
             unit_of_work.commit()
         return self.get_work(work_id)
@@ -1128,6 +1225,7 @@ class WorkApplicationService:
                 else work.production_plan.target_kind
             ),
             artifact_target=self._artifact_target(work),
+            change_proposal=work.code_change_proposal,
             change_contract=(
                 None
                 if work.production_plan is None
@@ -1384,42 +1482,48 @@ class WorkApplicationService:
             "code change",
             "modify code",
             "update code",
+            "frontend",
+            "javascript",
             "fix the bug",
             "unit test",
             "代码",
+            "前端",
             "源文件",
             "修复 bug",
             "单元测试",
         )
         return any(marker in normalized for marker in markers)
 
-    @classmethod
-    def _code_change_contract_proposal(
-        cls,
+    def _repository_change_proposal(
+        self,
         *,
+        work_id: UUID,
         raw: str,
         request: WorkRefinementRequest,
-        existing: CodeChangeContract | None,
+        existing: RepositoryChangeProposal | None,
         resource: EngineeringResourceRecord,
         baseline_id: UUID,
+        source_ref: str,
         source_revision: str,
         desired_outcome: str,
         constraints: tuple[str, ...],
-    ) -> CodeChangeContract | None:
-        baseline_paths = cls._baseline_paths(Path(resource.location_ref).resolve(), source_revision)
+    ) -> RepositoryChangeProposal:
         exact_paths = (
             request.code_exact_targets
             if request.code_exact_targets is not None
-            else tuple(target.path for target in existing.exact_targets)
-            if existing is not None
-            else cls._explicit_repository_paths(raw)
+            else self._explicit_repository_paths(raw)
+            or (
+                tuple(target.path for target in existing.required_targets)
+                if existing is not None
+                else ()
+            )
         )
         allowed_areas = (
             request.code_allowed_areas
             if request.code_allowed_areas is not None
             else existing.allowed_areas
             if existing is not None
-            else cls._explicit_repository_areas(raw)
+            else self._explicit_repository_areas(raw)
         )
         forbidden_areas = (
             request.code_forbidden_areas
@@ -1428,59 +1532,81 @@ class WorkApplicationService:
             if existing is not None
             else ()
         )
-        if not exact_paths and not allowed_areas:
-            return None
+        existing_targets = (
+            tuple(target.path for target in existing.required_targets)
+            if existing is not None
+            else ()
+        )
+        scope_unchanged = (
+            existing is not None
+            and tuple(exact_paths) == existing_targets
+            and tuple(allowed_areas) == existing.allowed_areas
+        )
+        requested_verification = (
+            request.code_verification_obligations
+            if request.code_verification_obligations is not None
+            else existing.verification_obligations
+            if scope_unchanged
+            else ()
+        )
         try:
-            targets = tuple(
-                CodeChangeTarget(
-                    path=path,
-                    operation=(
-                        ChangeOperation.UPDATE
-                        if path in baseline_paths
-                        else ChangeOperation.CREATE
-                    ),
+            return self.change_proposals.propose(
+                RepositoryChangeProposalRequest(
+                    work_id=work_id,
+                    refined_code_intent=desired_outcome,
+                    constraints=constraints,
+                    engineering_resource_id=resource.id,
+                    repository_identity=resource.repository_identity,
+                    repository_location=resource.location_ref,
+                    source_baseline_id=baseline_id,
+                    source_ref=source_ref,
+                    source_revision=source_revision,
+                    explicit_targets=tuple(exact_paths),
+                    explicit_allowed_areas=tuple(allowed_areas),
+                    explicit_forbidden_areas=tuple(forbidden_areas),
+                    requested_verification=requested_verification,
                 )
-                for path in dict.fromkeys(exact_paths)
-            )
-            shape = (
-                ChangeTargetShape.EXACT_AND_BOUNDED
-                if targets and allowed_areas
-                else ChangeTargetShape.EXACT_TARGET_SET
-                if targets
-                else ChangeTargetShape.BOUNDED_REPOSITORY_AREAS
-            )
-            obligations = (
-                request.code_verification_obligations
-                if request.code_verification_obligations is not None
-                else existing.verification_obligations
-                if existing is not None
-                else cls._default_code_verification_obligations(
-                    tuple(target.path for target in targets),
-                    allowed_areas,
-                )
-            )
-            mandatory = (
-                CodeVerificationObligation(kind=CodeVerificationKind.PATH_SCOPE),
-                CodeVerificationObligation(kind=CodeVerificationKind.GIT_DIFF_CHECK),
-            )
-            obligation_map = {
-                item.identity: item for item in (*mandatory, *obligations)
-            }
-            return CodeChangeContract(
-                target_shape=shape,
-                engineering_resource_id=resource.id,
-                repository_identity=resource.repository_identity,
-                source_baseline_id=baseline_id,
-                source_revision=source_revision,
-                desired_outcome=desired_outcome,
-                constraints=constraints,
-                exact_targets=targets,
-                allowed_areas=allowed_areas,
-                forbidden_areas=forbidden_areas,
-                verification_obligations=tuple(obligation_map.values()),
             )
         except ValueError as error:
-            raise ProductInvariantViolation(f"Invalid Code Change Contract: {error}") from error
+            raise ProductInvariantViolation(f"Invalid Code Change Proposal: {error}") from error
+
+    @staticmethod
+    def _admit_change_contract(
+        proposal: RepositoryChangeProposal,
+        *,
+        desired_outcome: str,
+        constraints: tuple[str, ...],
+    ) -> CodeChangeContract:
+        if proposal.unresolved_scope_questions:
+            raise ProductInvariantViolation(
+                "Change Proposal still requires refinement before Human admission"
+            )
+        targets = tuple(
+            CodeChangeTarget(path=target.path, operation=target.operation)
+            for target in proposal.required_targets
+        )
+        shape = (
+            ChangeTargetShape.EXACT_AND_BOUNDED
+            if targets and proposal.allowed_areas
+            else ChangeTargetShape.EXACT_TARGET_SET
+            if targets
+            else ChangeTargetShape.BOUNDED_REPOSITORY_AREAS
+        )
+        return CodeChangeContract(
+            target_shape=shape,
+            engineering_resource_id=proposal.engineering_resource_id,
+            repository_identity=proposal.repository_identity,
+            source_baseline_id=proposal.source_baseline_id,
+            source_revision=proposal.source_revision,
+            desired_outcome=desired_outcome,
+            constraints=constraints,
+            exact_targets=targets,
+            allowed_areas=proposal.allowed_areas,
+            forbidden_areas=proposal.forbidden_areas,
+            verification_obligations=proposal.verification_obligations,
+            source_proposal_id=proposal.proposal_id,
+            source_proposal_fingerprint=proposal.proposal_fingerprint,
+        )
 
     @staticmethod
     def _explicit_repository_areas(raw: str) -> tuple[str, ...]:
@@ -1570,6 +1696,16 @@ class WorkApplicationService:
             return "Define a bounded Code Change Contract before Verification"
         return "Run admitted typed checks: " + ", ".join(
             contract.verification_identities
+        )
+
+    @staticmethod
+    def _proposal_verification_summary(
+        proposal: RepositoryChangeProposal | None,
+    ) -> str:
+        if proposal is None:
+            return "Define a bounded Code Change Proposal before Verification"
+        return "Proposed typed checks: " + ", ".join(
+            item.identity for item in proposal.verification_obligations
         )
 
     @staticmethod

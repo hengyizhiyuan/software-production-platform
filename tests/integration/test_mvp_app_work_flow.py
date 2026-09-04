@@ -464,6 +464,7 @@ def test_code_01_02_07_08_09_10_11_13_15_17_18_20_21_happy_path(
     assert unresolved.target_kind.value == "CODE_WORK"
     assert unresolved.status is WorkStatus.NEEDS_REFINEMENT
     assert unresolved.artifact_target is None
+    assert unresolved.change_proposal is not None
     assert unresolved.change_contract is None
 
     draft = app_facts.service.refine_work(
@@ -476,11 +477,14 @@ def test_code_01_02_07_08_09_10_11_13_15_17_18_20_21_happy_path(
         ),
     )
     assert draft.status is WorkStatus.AWAITING_APPROVAL
-    assert draft.change_contract is not None
+    assert draft.change_proposal is not None
+    assert draft.change_contract is None
     assert draft.artifact_target is None
     assert draft.production_plan is not None
-    assert draft.production_plan.change_contract == draft.change_contract
-    assert draft.change_contract.verification_identities == (
+    assert draft.production_plan.change_proposal == draft.change_proposal
+    assert tuple(
+        item.identity for item in draft.change_proposal.verification_obligations
+    ) == (
         "PATH_SCOPE",
         "GIT_DIFF_CHECK",
         "PYTHON_COMPILE",
@@ -488,9 +492,15 @@ def test_code_01_02_07_08_09_10_11_13_15_17_18_20_21_happy_path(
         "PYTEST_TARGET:tests/test_spg_example.py",
     )
 
-    app_facts.service.approve_work(
+    approved = app_facts.service.approve_work(
         draft.work_id,
         authority_identity="human:code-contract",
+    )
+    assert approved.change_contract is not None
+    assert approved.change_contract.source_proposal_id == draft.change_proposal.proposal_id
+    assert (
+        approved.change_contract.source_proposal_fingerprint
+        == draft.change_proposal.proposal_fingerprint
     )
     binding = _runtime_binding(app_facts, draft.work_id)
     assert binding is not None
@@ -504,7 +514,7 @@ def test_code_01_02_07_08_09_10_11_13_15_17_18_20_21_happy_path(
         )
     assert work_unit is not None
     assert plan_count == work_unit_count == 1
-    assert work_unit.completion_contract.change_contract == draft.change_contract
+    assert work_unit.completion_contract.change_contract == approved.change_contract
     instruction = render_governed_instruction(
         work_unit.objective,
         work_unit.completion_contract,
@@ -579,7 +589,8 @@ def test_code_12_13_14_19_20_unauthorized_path_fails_without_candidate(
         "Modify only src/spg_example.py to return a new value"
     )
     draft = app_facts.service.refine_work(submitted.work_id)
-    assert draft.change_contract is not None
+    assert draft.change_proposal is not None
+    assert draft.change_contract is None
     app_facts.service.approve_work(
         draft.work_id,
         authority_identity="human:code-contract",
@@ -623,7 +634,8 @@ def test_code_13_15_17_19_20_targeted_pytest_failure_prevents_candidate(
         "Modify src/spg_example.py and tests/test_spg_example.py"
     )
     draft = app_facts.service.refine_work(submitted.work_id)
-    assert draft.change_contract is not None
+    assert draft.change_proposal is not None
+    assert draft.change_contract is None
     app_facts.service.approve_work(
         draft.work_id,
         authority_identity="human:code-contract",
@@ -667,6 +679,81 @@ def test_code_13_15_17_19_20_targeted_pytest_failure_prevents_candidate(
     assert summary.candidate_id is None
     assert service.get_work_result(draft.work_id).trusted_result is False
     assert executor.dispatch_count == 1
+
+
+def test_refcode_03_04_15_16_17_human_edits_proposal_then_admits_contract(
+    app_facts: AppFacts,
+) -> None:
+    submitted = app_facts.service.submit_work(
+        "Modify Python source code behavior and its unit test"
+    )
+    first = app_facts.service.refine_work(
+        submitted.work_id,
+        WorkRefinementRequest(code_exact_targets=("src/spg_example.py",)),
+    )
+    assert first.change_proposal is not None
+    assert first.change_contract is None
+    assert _runtime_binding(app_facts, first.work_id) is None
+
+    edited = app_facts.service.refine_work(
+        first.work_id,
+        WorkRefinementRequest(
+            code_exact_targets=(
+                "src/spg_example.py",
+                "tests/test_spg_example.py",
+            )
+        ),
+    )
+    assert edited.change_proposal is not None
+    assert tuple(target.path for target in edited.change_proposal.required_targets) == (
+        "src/spg_example.py",
+        "tests/test_spg_example.py",
+    )
+    assert edited.change_contract is None
+    assert _runtime_binding(app_facts, edited.work_id) is None
+
+    approved = app_facts.service.approve_work(
+        edited.work_id,
+        authority_identity="human:proposal-admission",
+    )
+    assert approved.change_contract is not None
+    assert approved.change_contract.source_proposal_id == edited.change_proposal.proposal_id
+    assert (
+        approved.change_contract.source_proposal_fingerprint
+        == edited.change_proposal.proposal_fingerprint
+    )
+    assert _runtime_binding(app_facts, edited.work_id) is not None
+
+
+def test_refcode_14_stale_proposal_cannot_be_admitted(
+    app_facts: AppFacts,
+) -> None:
+    submitted = app_facts.service.submit_work(
+        "Modify src/spg_example.py"
+    )
+    draft = app_facts.service.refine_work(submitted.work_id)
+    assert draft.change_proposal is not None
+    assert draft.production_plan is not None
+    stale = draft.change_proposal.model_copy(update={"source_revision": "f" * 40})
+    stale_plan = draft.production_plan.model_copy(
+        update={"change_proposal": stale}
+    )
+    with app_facts.database.unit_of_work() as unit_of_work:
+        ProductStore(unit_of_work.session).update_work(
+            draft.work_id,
+            {
+                "code_change_proposal": stale.model_dump(mode="json"),
+                "production_plan_proposal": stale_plan.model_dump(mode="json"),
+            },
+        )
+        unit_of_work.commit()
+
+    with pytest.raises(ProductInvariantViolation, match="stale"):
+        app_facts.service.approve_work(
+            draft.work_id,
+            authority_identity="human:stale-proposal",
+        )
+    assert _runtime_binding(app_facts, draft.work_id) is None
 
 
 def test_mvp_app_migration_downgrade_and_reupgrade(

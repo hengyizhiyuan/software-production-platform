@@ -87,6 +87,8 @@ class CodeChangeContract(BaseModel):
     allowed_areas: tuple[str, ...] = ()
     forbidden_areas: tuple[str, ...] = ()
     verification_obligations: tuple[CodeVerificationObligation, ...] = ()
+    source_proposal_id: UUID | None = None
+    source_proposal_fingerprint: str | None = None
 
     @field_validator("allowed_areas")
     @classmethod
@@ -137,6 +139,10 @@ class CodeChangeContract(BaseModel):
                 candidates = python_module_paths(obligation.target or "")
                 if not any(self.allows_path(path) for path in candidates):
                     raise ValueError("IMPORT_CHECK module must map inside the admitted change boundary")
+        if (self.source_proposal_id is None) != (
+            self.source_proposal_fingerprint is None
+        ):
+            raise ValueError("Change Contract Proposal provenance must be complete")
         return self
 
     def allows_path(self, path: str) -> bool:

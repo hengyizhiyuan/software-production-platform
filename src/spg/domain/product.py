@@ -14,6 +14,7 @@ from spg.domain.change import (
 )
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.planning import ProductionPlanProposal
+from spg.domain.refinement import RepositoryChangeProposal
 
 
 class GoalCondition(StrEnum):
@@ -167,6 +168,7 @@ class WorkRecord(BaseModel):
     artifact_source_baseline_id: UUID | None = None
     artifact_source_revision: str | None = None
     verification_expectation: str | None
+    code_change_proposal: RepositoryChangeProposal | None = None
     production_plan: ProductionPlanProposal | None = None
     created_at: datetime
     updated_at: datetime
@@ -207,6 +209,7 @@ class WorkProjection(BaseModel):
     constraints: tuple[str, ...]
     target_kind: ProductionTargetKind = ProductionTargetKind.DOCUMENTATION_WORK
     artifact_target: ArtifactTargetProposal | None = None
+    change_proposal: RepositoryChangeProposal | None = None
     change_contract: CodeChangeContract | None = None
     production_plan: ProductionPlanProposal | None = None
     tags: tuple[str, ...]

@@ -50,6 +50,13 @@ class RuleBasedProductionPlanner:
                 *(target.path for target in request.artifact_targets),
                 json.dumps(
                     None
+                    if request.change_proposal is None
+                    else request.change_proposal.model_dump(mode="json"),
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+                json.dumps(
+                    None
                     if request.change_contract is None
                     else request.change_contract.model_dump(mode="json"),
                     sort_keys=True,
@@ -68,6 +75,7 @@ class RuleBasedProductionPlanner:
                 for index, instruction in enumerate(instructions, start=1)
             ),
             artifact_targets=request.artifact_targets,
+            change_proposal=request.change_proposal,
             change_contract=request.change_contract,
             inherited_constraints=request.constraints,
             verification_approach=request.verification_expectation,
@@ -98,6 +106,15 @@ class RuleBasedProductionPlanner:
             steps.append(
                 f"{action.capitalize()} the exact authorized artifact {target.path}."
             )
+        if request.change_proposal is not None:
+            required = ", ".join(
+                target.path for target in request.change_proposal.required_targets
+            )
+            if required:
+                steps.append(f"Prepare the Human-proposed code targets: {required}.")
+            if request.change_proposal.allowed_areas:
+                areas = ", ".join(request.change_proposal.allowed_areas)
+                steps.append(f"Keep any Human-admitted code changes inside: {areas}.")
         if request.change_contract is not None:
             if request.change_contract.exact_targets:
                 paths = ", ".join(

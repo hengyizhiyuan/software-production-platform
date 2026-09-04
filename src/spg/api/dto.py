@@ -19,6 +19,7 @@ from spg.domain.product import (
     WorkStatus,
 )
 from spg.domain.planning import ProductionPlanProposal
+from spg.domain.refinement import RepositoryChangeProposal
 
 
 class ApiDto(BaseModel):
@@ -96,6 +97,21 @@ class CodeChangeTargetResponse(ApiDto):
     operation: str
 
 
+class ChangeProposalTargetResponse(ApiDto):
+    path: str
+    operation: str
+    disposition: str
+    rationale: str
+    evidence: str
+    confidence: str
+
+
+class ChangeProposalProvenanceResponse(ApiDto):
+    provider_identity: str
+    provider_version: str
+    inspection_method: str
+
+
 class CodeVerificationResponse(ApiDto):
     kind: str
     target: str | None
@@ -115,6 +131,8 @@ class CodeChangeContractResponse(ApiDto):
     allowed_areas: tuple[str, ...]
     forbidden_areas: tuple[str, ...]
     verification_obligations: tuple[CodeVerificationResponse, ...]
+    source_proposal_id: UUID | None
+    source_proposal_fingerprint: str | None
 
     @classmethod
     def from_contract(cls, contract: CodeChangeContract) -> Self:
@@ -144,6 +162,67 @@ class CodeChangeContractResponse(ApiDto):
                 )
                 for item in contract.verification_obligations
             ),
+            source_proposal_id=contract.source_proposal_id,
+            source_proposal_fingerprint=contract.source_proposal_fingerprint,
+        )
+
+
+class RepositoryChangeProposalResponse(ApiDto):
+    proposal_id: UUID
+    target_kind: str
+    engineering_resource_id: UUID
+    repository_identity: str
+    source_baseline_id: UUID
+    source_ref: str
+    source_revision: str
+    proposed_targets: tuple[ChangeProposalTargetResponse, ...]
+    allowed_areas: tuple[str, ...]
+    forbidden_areas: tuple[str, ...]
+    rationale: str
+    confidence: str
+    verification_obligations: tuple[CodeVerificationResponse, ...]
+    provenance: ChangeProposalProvenanceResponse
+    unresolved_scope_questions: tuple[str, ...]
+    proposal_fingerprint: str
+
+    @classmethod
+    def from_proposal(cls, proposal: RepositoryChangeProposal) -> Self:
+        return cls(
+            proposal_id=proposal.proposal_id,
+            target_kind=proposal.target_kind.value,
+            engineering_resource_id=proposal.engineering_resource_id,
+            repository_identity=proposal.repository_identity,
+            source_baseline_id=proposal.source_baseline_id,
+            source_ref=proposal.source_ref,
+            source_revision=proposal.source_revision,
+            proposed_targets=tuple(
+                ChangeProposalTargetResponse(
+                    path=target.path,
+                    operation=target.operation.value,
+                    disposition=target.disposition.value,
+                    rationale=target.rationale,
+                    evidence=target.evidence,
+                    confidence=target.confidence.value,
+                )
+                for target in proposal.proposed_targets
+            ),
+            allowed_areas=proposal.allowed_areas,
+            forbidden_areas=proposal.forbidden_areas,
+            rationale=proposal.rationale,
+            confidence=proposal.confidence.value,
+            verification_obligations=tuple(
+                CodeVerificationResponse(
+                    kind=item.kind.value,
+                    target=item.target,
+                    identity=item.identity,
+                )
+                for item in proposal.verification_obligations
+            ),
+            provenance=ChangeProposalProvenanceResponse(
+                **proposal.provenance.model_dump()
+            ),
+            unresolved_scope_questions=proposal.unresolved_scope_questions,
+            proposal_fingerprint=proposal.proposal_fingerprint,
         )
 
 
@@ -154,6 +233,7 @@ class ProductionPlanResponse(ApiDto):
     desired_outcome: str
     ordered_steps: tuple[ProductionPlanStepResponse, ...]
     artifact_targets: tuple[str, ...]
+    change_proposal: RepositoryChangeProposalResponse | None
     change_contract: CodeChangeContractResponse | None
     inherited_constraints: tuple[str, ...]
     verification_approach: str
@@ -183,6 +263,13 @@ class ProductionPlanResponse(ApiDto):
                 f"{target.operation.value} {target.path}"
                 for target in plan.artifact_targets
             ),
+            change_proposal=(
+                None
+                if plan.change_proposal is None
+                else RepositoryChangeProposalResponse.from_proposal(
+                    plan.change_proposal
+                )
+            ),
             change_contract=(
                 None
                 if plan.change_contract is None
@@ -209,6 +296,7 @@ class WorkResponse(ApiDto):
     constraints: tuple[str, ...]
     target_kind: str
     artifact_target: ArtifactTargetResponse | None
+    change_proposal: RepositoryChangeProposalResponse | None
     change_contract: CodeChangeContractResponse | None
     production_plan: ProductionPlanResponse | None
     tags: tuple[str, ...]
@@ -240,6 +328,13 @@ class WorkResponse(ApiDto):
                     confidence=work.artifact_target.confidence.value,
                     source_baseline_id=work.artifact_target.source_baseline_id,
                     source_revision=work.artifact_target.source_revision,
+                )
+            ),
+            change_proposal=(
+                None
+                if work.change_proposal is None
+                else RepositoryChangeProposalResponse.from_proposal(
+                    work.change_proposal
                 )
             ),
             change_contract=(

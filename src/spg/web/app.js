@@ -51,7 +51,13 @@
     artifactTargetPath: document.getElementById("artifact-target-path"),
     saveArtifactTarget: document.getElementById("save-artifact-target"),
     codeChangeContractPanel: document.getElementById("code-change-contract-panel"),
+    codeAuthorityKind: document.getElementById("code-authority-kind"),
     codeTargetShape: document.getElementById("code-target-shape"),
+    codeProposalConfidence: document.getElementById("code-proposal-confidence"),
+    codeProposalRationale: document.getElementById("code-proposal-rationale"),
+    codeProposalSource: document.getElementById("code-proposal-source"),
+    codeConditionalTargets: document.getElementById("code-conditional-targets"),
+    codeProposalUnresolved: document.getElementById("code-proposal-unresolved"),
     codeExactTargets: document.getElementById("code-exact-targets"),
     codeAllowedAreas: document.getElementById("code-allowed-areas"),
     codeForbiddenAreas: document.getElementById("code-forbidden-areas"),
@@ -315,6 +321,44 @@
       : "PATH_SCOPE\nGIT_DIFF_CHECK";
   }
 
+  function renderRepositoryChangeProposal(work) {
+    const proposal = work.change_proposal;
+    const contract = work.change_contract;
+    const newline = String.fromCharCode(10);
+    elements.codeAuthorityKind.textContent = contract
+      ? "Admitted Code Change Contract"
+      : "Code Change Proposal · Not Production Authority";
+    if (!proposal || contract) {
+      elements.codeProposalConfidence.textContent = contract ? "HUMAN ADMITTED" : "UNRESOLVED";
+      elements.codeProposalRationale.textContent = "No proposal evidence.";
+      elements.codeProposalSource.textContent = "UNRESOLVED";
+      elements.codeConditionalTargets.textContent = "None";
+      elements.codeProposalUnresolved.textContent = "None";
+      return;
+    }
+    elements.codeTargetShape.textContent = "PROPOSAL";
+    elements.codeExactTargets.value = proposal.proposed_targets
+      .filter((target) => target.disposition === "REQUIRED")
+      .map((target) => target.path)
+      .join(newline);
+    elements.codeAllowedAreas.value = proposal.allowed_areas.join(newline);
+    elements.codeForbiddenAreas.value = proposal.forbidden_areas.join(newline);
+    elements.codeVerificationObligations.value = proposal.verification_obligations
+      .map((item) => item.identity)
+      .join(newline);
+    elements.codeProposalConfidence.textContent = proposal.confidence;
+    elements.codeProposalRationale.textContent = proposal.rationale;
+    elements.codeProposalSource.textContent =
+      proposal.source_revision.slice(0, 12) + " · " + proposal.provenance.provider_identity;
+    elements.codeConditionalTargets.textContent =
+      proposal.proposed_targets
+        .filter((target) => target.disposition === "CONDITIONAL")
+        .map((target) => target.path + " — " + target.rationale)
+        .join(" · ") || "None";
+    elements.codeProposalUnresolved.textContent =
+      proposal.unresolved_scope_questions.join(" · ") || "None";
+  }
+
   function actionLabel(action) {
     const labels = {
       REFINE: "Refine Draft",
@@ -442,6 +486,7 @@
     renderChips(elements.tagList, work.tags, "No tags");
     renderProductionPlan(work);
     renderCodeChangeContract(work);
+    renderRepositoryChangeProposal(work);
     renderResources(work);
     renderWorkActions(work);
     renderAttention();
@@ -555,7 +600,7 @@
         { method: "POST", body },
       );
       await refreshAfterMutation();
-      announce("Code Change Contract updated.");
+      announce("Code Change Proposal updated for Human review.");
     } catch (error) {
       showNotice(error);
     } finally {

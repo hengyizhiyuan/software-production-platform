@@ -392,6 +392,7 @@ def test_code_draft_contract_is_visible_adjustable_and_admitted_over_http(
     assert unresolved.json()["target_kind"] == "CODE_WORK"
     assert unresolved.json()["status"] == "NEEDS_REFINEMENT"
     assert unresolved.json()["artifact_target"] is None
+    assert unresolved.json()["change_proposal"] is not None
     assert unresolved.json()["change_contract"] is None
 
     refined = api_facts.client.post(
@@ -417,12 +418,16 @@ def test_code_draft_contract_is_visible_adjustable_and_admitted_over_http(
     assert payload["target_kind"] == "CODE_WORK"
     assert payload["artifact_target"] is None
     assert payload["production_plan"]["target_kind"] == "CODE_WORK"
-    assert payload["change_contract"]["target_shape"] == "EXACT_TARGET_SET"
-    assert [item["path"] for item in payload["change_contract"]["exact_targets"]] == [
+    assert payload["change_contract"] is None
+    assert payload["change_proposal"]["target_kind"] == "CODE_WORK"
+    assert [item["path"] for item in payload["change_proposal"]["proposed_targets"]] == [
         "src/spg/example.py",
         "tests/test_example.py",
     ]
-    assert payload["change_contract"]["forbidden_areas"] == [".github/**"]
+    assert payload["change_proposal"]["forbidden_areas"] == [".github/**"]
+    assert payload["change_proposal"]["provenance"]["provider_identity"].startswith(
+        "provider:repository-aware-change-proposal"
+    )
 
     approved = api_facts.client.post(
         f"/api/works/{submitted['work_id']}/approve",
@@ -430,7 +435,13 @@ def test_code_draft_contract_is_visible_adjustable_and_admitted_over_http(
     )
     assert approved.status_code == 200
     assert approved.json()["status"] == "READY"
-    assert approved.json()["change_contract"] == payload["change_contract"]
+    admitted = approved.json()["change_contract"]
+    assert admitted["target_shape"] == "EXACT_TARGET_SET"
+    assert admitted["source_proposal_id"] == payload["change_proposal"]["proposal_id"]
+    assert (
+        admitted["source_proposal_fingerprint"]
+        == payload["change_proposal"]["proposal_fingerprint"]
+    )
 
 
 def test_intake_multilingual_constraint_persists_and_projects(

@@ -187,15 +187,22 @@
             <section id="code-change-contract-panel" class="change-contract-panel" hidden>
               <div class="panel-title-row">
                 <div>
-                  <p class="eyebrow">Code Change Contract</p>
-                  <h3>Human-visible change authority</h3>
+                  <p id="code-authority-kind" class="eyebrow">Code Change Proposal</p>
+                  <h3>Repository-aware scope for Human admission</h3>
                 </div>
                 <span id="code-target-shape" class="step-label">UNRESOLVED</span>
               </div>
               <p class="empty-copy">
-                Only these exact files or bounded repository areas may change.
-                One item per line; bounded areas must end with <code>/**</code>.
+                This proposal is not Production Authority. Edit it as needed;
+                only ADMIT_WORK_DRAFT creates the authoritative Change Contract.
               </p>
+              <dl class="technical-grid">
+                <div><dt>Proposal confidence</dt><dd id="code-proposal-confidence">UNRESOLVED</dd></div>
+                <div><dt>Inspection rationale</dt><dd id="code-proposal-rationale">No proposal evidence.</dd></div>
+                <div><dt>Source Baseline</dt><dd id="code-proposal-source">UNRESOLVED</dd></div>
+                <div><dt>Conditional targets</dt><dd id="code-conditional-targets">None</dd></div>
+                <div><dt>Unresolved questions</dt><dd id="code-proposal-unresolved">None</dd></div>
+              </dl>
               <div class="change-contract-grid">
                 <label for="code-exact-targets">Exact target files
                   <textarea id="code-exact-targets" rows="3" placeholder="src/spg/example.py&#10;tests/test_example.py"></textarea>
@@ -210,7 +217,7 @@
                   <textarea id="code-verification-obligations" rows="4" placeholder="PATH_SCOPE&#10;GIT_DIFF_CHECK&#10;PYTHON_COMPILE&#10;PYTEST_TARGET:tests/test_example.py"></textarea>
                 </label>
               </div>
-              <button id="save-code-change-contract" class="secondary-button compact" type="button">Update Change Contract</button>
+              <button id="save-code-change-contract" class="secondary-button compact" type="button">Update Change Proposal</button>
             </section>
 
             <div class="metadata-row">

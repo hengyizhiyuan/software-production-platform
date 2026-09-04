@@ -37,6 +37,7 @@ class ProductionPlanningService:
                 ),
             ),
             artifact_targets=request.artifact_targets,
+            change_proposal=request.change_proposal,
             change_contract=request.change_contract,
             inherited_constraints=request.constraints,
             verification_approach=request.verification_expectation,
@@ -63,6 +64,8 @@ class ProductionPlanningService:
             violations.append("Planner changed the admitted target kind.")
         if proposal.artifact_targets != request.artifact_targets:
             violations.append("Planner introduced or changed an unauthorized artifact target.")
+        if proposal.change_proposal != request.change_proposal:
+            violations.append("Planner introduced or widened an unauthorized Change Proposal.")
         if proposal.change_contract != request.change_contract:
             violations.append("Planner introduced or widened an unauthorized code change boundary.")
         if proposal.inherited_constraints != request.constraints:
