@@ -39,6 +39,7 @@ class OrchestrationStopReason(StrEnum):
     TRANSITION_LIMIT_REACHED = "TRANSITION_LIMIT_REACHED"
     APPLICATION_STOPPING = "APPLICATION_STOPPING"
     INFRASTRUCTURE_ERROR = "INFRASTRUCTURE_ERROR"
+    PRODUCTION_CYCLE_TRUSTED = "PRODUCTION_CYCLE_TRUSTED"
 
 
 @dataclass(frozen=True, slots=True)
@@ -115,6 +116,13 @@ class ProductionOrchestrator:
                     OrchestrationStopReason.APPLICATION_STOPPING,
                 )
             before = self.work_service.get_work(work_id)
+            if self._trusted_steering_cycle(before):
+                return OrchestrationOutcome(
+                    work_id,
+                    transitions,
+                    before.status,
+                    OrchestrationStopReason.PRODUCTION_CYCLE_TRUSTED,
+                )
             if before.status in _STOP_STATUSES:
                 return OrchestrationOutcome(
                     work_id,
@@ -131,6 +139,13 @@ class ProductionOrchestrator:
             self.work_service.advance_work(work_id)
             transitions += 1
             after = self.work_service.get_work(work_id)
+            if self._trusted_steering_cycle(after):
+                return OrchestrationOutcome(
+                    work_id,
+                    transitions,
+                    after.status,
+                    OrchestrationStopReason.PRODUCTION_CYCLE_TRUSTED,
+                )
             if after.status in _STOP_STATUSES:
                 return OrchestrationOutcome(
                     work_id,
@@ -217,6 +232,14 @@ class ProductionOrchestrator:
         if callable(reality_fingerprint):
             return reality_fingerprint(work_id)
         return projection.model_dump_json(exclude_none=False)
+
+    @staticmethod
+    def _trusted_steering_cycle(projection: WorkProjection) -> bool:
+        return bool(
+            projection.steering_enabled
+            and projection.current_production_run_id is not None
+            and projection.current_production_cycle_trusted
+        )
 
     @staticmethod
     def _no_safe_progress(

@@ -2,10 +2,12 @@
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     Column,
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     String,
     Table,
     Text,
@@ -129,11 +131,29 @@ engineering_resource_bindings = Table(
 work_runtime_bindings = Table(
     "work_runtime_bindings",
     metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
     Column(
         "work_id",
         Uuid(as_uuid=True),
         ForeignKey("product_works.id", name="fk_work_runtime_bindings_work"),
-        primary_key=True,
+        nullable=False,
+    ),
+    Column("cycle_number", Integer, nullable=False),
+    Column(
+        "steering_step_id",
+        Uuid(as_uuid=True),
+        ForeignKey("steering_steps.id", name="fk_work_runtime_bindings_steering_step"),
+        nullable=True,
+        unique=True,
+    ),
+    Column(
+        "steering_decision_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "steering_decisions.id",
+            name="fk_work_runtime_bindings_steering_decision",
+        ),
+        nullable=True,
     ),
     Column(
         "engineering_scope_id",
@@ -176,7 +196,17 @@ work_runtime_bindings = Table(
         unique=True,
     ),
     Column("admitted_by", String(255), nullable=False),
+    Column("condition", String(32), nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    UniqueConstraint(
+        "work_id",
+        "cycle_number",
+        name="uq_work_runtime_bindings_work_cycle",
+    ),
+    CheckConstraint(
+        "condition IN ('ADMITTED', 'TRUSTED')",
+        name="ck_work_runtime_bindings_condition_known",
+    ),
 )
 
 product_tables = (

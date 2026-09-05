@@ -17,6 +17,7 @@ from spg.domain.product import (
     EngineeringScopeRecord,
     GoalCondition,
     GoalRecord,
+    ProductionCycleBindingCondition,
     ResourceBindingCondition,
     ResourceBindingRecord,
     RuntimeFactSummary,
@@ -173,11 +174,83 @@ class ProductStore:
         self.session.execute(insert(work_runtime_bindings).values(**values))
 
     def runtime_binding(self, work_id: UUID) -> WorkRuntimeBindingRecord | None:
-        row = self._one(work_runtime_bindings, work_runtime_bindings.c.work_id == work_id)
+        row = self.session.execute(
+            select(work_runtime_bindings)
+            .where(work_runtime_bindings.c.work_id == work_id)
+            .order_by(
+                work_runtime_bindings.c.cycle_number.desc(),
+                work_runtime_bindings.c.created_at.desc(),
+            )
+            .limit(1)
+        ).mappings().first()
         if row is None:
             return None
+        return self._runtime_binding(row)
+
+    def runtime_bindings(self, work_id: UUID) -> tuple[WorkRuntimeBindingRecord, ...]:
+        rows = self.session.execute(
+            select(work_runtime_bindings)
+            .where(work_runtime_bindings.c.work_id == work_id)
+            .order_by(
+                work_runtime_bindings.c.cycle_number,
+                work_runtime_bindings.c.created_at,
+            )
+        ).mappings()
+        return tuple(self._runtime_binding(row) for row in rows)
+
+    def runtime_binding_for_step(
+        self,
+        steering_step_id: UUID,
+    ) -> WorkRuntimeBindingRecord | None:
+        row = self._one(
+            work_runtime_bindings,
+            work_runtime_bindings.c.steering_step_id == steering_step_id,
+        )
+        return None if row is None else self._runtime_binding(row)
+
+    def associate_runtime_binding(
+        self,
+        binding_id: UUID,
+        *,
+        steering_step_id: UUID,
+        steering_decision_id: UUID,
+    ) -> None:
+        result = self.session.execute(
+            update(work_runtime_bindings)
+            .where(
+                (work_runtime_bindings.c.id == binding_id)
+                & work_runtime_bindings.c.steering_step_id.is_(None)
+            )
+            .values(
+                steering_step_id=steering_step_id,
+                steering_decision_id=steering_decision_id,
+            )
+        )
+        if result.rowcount != 1:
+            raise LookupError(f"Unassociated production cycle not found: {binding_id}")
+
+    def set_runtime_binding_condition(
+        self,
+        binding_id: UUID,
+        condition: ProductionCycleBindingCondition,
+    ) -> None:
+        result = self.session.execute(
+            update(work_runtime_bindings)
+            .where(work_runtime_bindings.c.id == binding_id)
+            .values(condition=condition.value)
+        )
+        if result.rowcount != 1:
+            raise LookupError(f"Production cycle not found: {binding_id}")
+
+    @staticmethod
+    def _runtime_binding(row: Mapping[str, Any]) -> WorkRuntimeBindingRecord:
         return WorkRuntimeBindingRecord(
+            id=row["id"],
             work_id=row["work_id"],
+            cycle_number=row["cycle_number"],
+            steering_step_id=row["steering_step_id"],
+            steering_decision_id=row["steering_decision_id"],
+            condition=ProductionCycleBindingCondition(row["condition"]),
             engineering_scope_id=row["engineering_scope_id"],
             resource_id=row["resource_id"],
             production_run_id=row["production_run_id"],

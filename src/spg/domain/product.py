@@ -5,7 +5,7 @@ from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from spg.domain.change import (
     CodeChangeContract,
@@ -14,6 +14,7 @@ from spg.domain.change import (
 )
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.planning import ProductionPlanProposal
+from spg.domain.planning import ProductionPlanArtifactTarget
 from spg.domain.refinement import RepositoryChangeProposal
 from spg.domain.steering import RealityReference, SteeringAttentionReason
 
@@ -75,6 +76,11 @@ class EngineeringScopeCondition(StrEnum):
 class ResourceBindingCondition(StrEnum):
     PROPOSED = "PROPOSED"
     ACTIVE = "ACTIVE"
+
+
+class ProductionCycleBindingCondition(StrEnum):
+    ADMITTED = "ADMITTED"
+    TRUSTED = "TRUSTED"
 
 
 class AttentionKind(StrEnum):
@@ -187,7 +193,14 @@ class WorkRecord(BaseModel):
 class WorkRuntimeBindingRecord(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    id: UUID
     work_id: UUID
+    cycle_number: int = Field(ge=1)
+    steering_step_id: UUID | None = None
+    steering_decision_id: UUID | None = None
+    condition: ProductionCycleBindingCondition = (
+        ProductionCycleBindingCondition.ADMITTED
+    )
     engineering_scope_id: UUID
     resource_id: UUID
     production_run_id: UUID
@@ -196,6 +209,43 @@ class WorkRuntimeBindingRecord(BaseModel):
     governance_record_id: UUID
     admitted_by: str
     created_at: datetime
+
+
+class SteeringProductionRequest(BaseModel):
+    """Exact bounded production request proposed for one current PRODUCE Step."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    work_id: UUID
+    steering_step_id: UUID
+    steering_decision_id: UUID
+    production_objective: str = Field(min_length=1)
+    target_kind: ProductionTargetKind
+    engineering_scope_id: UUID
+    engineering_resource_id: UUID
+    repository_identity: str = Field(min_length=1)
+    source_baseline_id: UUID
+    source_revision: str = Field(min_length=1)
+    artifact_targets: tuple[ProductionPlanArtifactTarget, ...] = ()
+    change_contract: CodeChangeContract | None = None
+    constraints: tuple[str, ...] = ()
+    verification_expectation: str = Field(min_length=1)
+
+
+class SteeringProductionAdmission(BaseModel):
+    """Authority-safe outcome; Attention never contains a partial Runtime lineage."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    request: SteeringProductionRequest
+    binding: WorkRuntimeBindingRecord | None = None
+    attention_decision_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def require_one_outcome(self) -> "SteeringProductionAdmission":
+        if (self.binding is None) == (self.attention_decision_id is None):
+            raise ValueError("Production admission must yield one cycle or one Attention")
+        return self
 
 
 class WorkProjection(BaseModel):
@@ -222,6 +272,14 @@ class WorkProjection(BaseModel):
     what_happens_next: str
     human_attention_required: bool
     result_summary: str | None
+    steering_enabled: bool = False
+    current_steering_step_id: UUID | None = None
+    current_steering_step_type: str | None = None
+    current_production_cycle_number: int | None = None
+    current_production_run_id: UUID | None = None
+    current_production_cycle_trusted: bool = False
+    latest_trusted_runtime_commit_id: UUID | None = None
+    work_complete: bool = False
 
 
 class GoalProjection(BaseModel):

@@ -7,7 +7,7 @@ from hashlib import sha256
 import json
 from uuid import UUID, uuid4
 
-from spg.domain.product import WorkCondition
+from spg.domain.product import ProductionCycleBindingCondition, WorkCondition
 from spg.domain.steering import (
     AdmitSteeringDecisionRequest,
     CreateSteeringPlanRequest,
@@ -33,6 +33,7 @@ from spg.domain.steering import (
 )
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 
 
@@ -208,6 +209,8 @@ class SteeringApplicationService:
     ) -> SteeringPlanReconstruction:
         timestamp = datetime.now(UTC)
         with self.database.unit_of_work() as unit_of_work:
+            product = ProductStore(unit_of_work.session)
+            runtime = RuntimeStore(unit_of_work.session)
             store = SteeringStore(unit_of_work.session)
             revision = self._required_active_revision(
                 store, request.steering_plan_revision_id
@@ -237,17 +240,56 @@ class SteeringApplicationService:
                 raise SteeringRecordNotFound(
                     f"Steering Decision not found: {request.steering_decision_id}"
                 )
+            allowed_outcome = (
+                SteeringOutcome.COMPLETE
+                if next_step.type is SteeringStepType.COMPLETE
+                else SteeringOutcome.AUTO_CONTINUE
+            )
             if (
                 decision.steering_plan_revision_id != revision.id
                 or decision.current_step_id != current.id
                 or decision.next_step_type is not next_step.type
                 or decision.objective != next_step.objective
                 or decision.completion_condition != next_step.completion_condition
-                or decision.steering_outcome is not SteeringOutcome.AUTO_CONTINUE
+                or decision.steering_outcome is not allowed_outcome
             ):
                 raise SteeringInvariantViolation(
                     "Steering Decision does not admit the requested Step transition"
                 )
+            if current.type is SteeringStepType.PRODUCE:
+                binding = product.runtime_binding_for_step(current.id)
+                if binding is None:
+                    raise SteeringInvariantViolation(
+                        "PRODUCE Step has no associated SPG production cycle"
+                    )
+                required_refs = self._trusted_production_refs(
+                    product,
+                    runtime,
+                    binding,
+                )
+                if not set(required_refs) <= set(decision.reality_refs):
+                    raise SteeringInvariantViolation(
+                        "PRODUCE Step close Decision lacks exact trusted production Reality"
+                    )
+                product.set_runtime_binding_condition(
+                    binding.id,
+                    ProductionCycleBindingCondition.TRUSTED,
+                )
+            elif next_step.type is SteeringStepType.COMPLETE:
+                binding = product.runtime_binding(revision.work_id)
+                if binding is None:
+                    raise SteeringInvariantViolation(
+                        "COMPLETE transition has no trusted SPG production cycle"
+                    )
+                required_refs = self._trusted_production_refs(
+                    product,
+                    runtime,
+                    binding,
+                )
+                if not set(required_refs) <= set(decision.reality_refs):
+                    raise SteeringInvariantViolation(
+                        "COMPLETE transition lacks exact trusted production Reality"
+                    )
             store.set_step_state(current.id, SteeringStepState.CLOSED)
             store.set_step_state(next_step.id, SteeringStepState.CURRENT)
             store.insert_history(
@@ -270,6 +312,77 @@ class SteeringApplicationService:
             work_id = revision.work_id
             unit_of_work.commit()
         return self.reconstruct(work_id)
+
+    @staticmethod
+    def _trusted_production_refs(product, runtime, binding):
+        summary = product.runtime_summary(binding)
+        required_values = (
+            summary.completion_id,
+            summary.candidate_id,
+            summary.authorization_id,
+            summary.integration_effect_id,
+            summary.runtime_commit_id,
+        )
+        if (
+            any(value is None for value in required_values)
+            or summary.completion_outcome != "PRODUCED"
+            or not summary.verification_results
+            or any(result != "PASS" for result in summary.verification_results)
+            or summary.integration_state != "CONVERGED"
+        ):
+            raise SteeringInvariantViolation(
+                "PRODUCE Step cannot close without trusted SPG evidence"
+            )
+        commit = runtime.runtime_commit(summary.runtime_commit_id)
+        pointer = runtime.current_pointer()
+        if (
+            commit is None
+            or pointer is None
+            or commit.production_run_id != binding.production_run_id
+            or commit.plan_revision_id != binding.plan_revision_id
+            or binding.work_unit_id not in commit.satisfied_work_unit_ids
+            or pointer.snapshot_id != commit.new_baseline_id
+        ):
+            raise SteeringInvariantViolation(
+                "Runtime Commit is not the exact current trusted production result"
+            )
+        verification = runtime.verification_records_for_snapshot(
+            summary.proposed_snapshot_id
+        )
+        refs = [
+            RealityReference(
+                kind=RealityReferenceKind.COMPLETION,
+                identity=summary.completion_id,
+            ),
+            *(
+                RealityReference(
+                    kind=RealityReferenceKind.VERIFICATION,
+                    identity=item.id,
+                )
+                for item in verification
+            ),
+            RealityReference(
+                kind=RealityReferenceKind.CANDIDATE,
+                identity=summary.candidate_id,
+            ),
+            RealityReference(
+                kind=RealityReferenceKind.AUTHORIZATION,
+                identity=summary.authorization_id,
+            ),
+            RealityReference(
+                kind=RealityReferenceKind.INTEGRATION_EFFECT,
+                identity=summary.integration_effect_id,
+            ),
+            RealityReference(
+                kind=RealityReferenceKind.RUNTIME_COMMIT,
+                identity=summary.runtime_commit_id,
+            ),
+            RealityReference(
+                kind=RealityReferenceKind.TRUSTED_BASELINE,
+                identity=commit.new_baseline_id,
+            ),
+        ]
+        return tuple(refs)
 
     def elaborate_step(
         self,

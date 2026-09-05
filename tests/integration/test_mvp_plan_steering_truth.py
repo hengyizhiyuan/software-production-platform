@@ -18,10 +18,17 @@ from spg.application.steering_decision import (
     PlanFrameAssembler,
     SteeringDecisionApplicationService,
 )
+from spg.application.steering_production import SteeringProductionService
+from spg.application.orchestration import (
+    OrchestrationStopReason,
+    ProductionOrchestrator,
+)
 from spg.application.work import WorkApplicationService
 from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import (
+    AttentionAction,
+    AttentionResolutionRequest,
     AttentionKind,
     EngineeringContextReference,
     WorkRefinementRequest,
@@ -53,6 +60,13 @@ from spg.domain.steering import (
 )
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.steering_store import SteeringStore
+from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.runtime_schema import (
+    production_runs,
+    production_work_units,
+)
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from sqlalchemy import func, select
 from spg.providers.deterministic_executor import (
     DeterministicExecutionSpecification,
     DeterministicFileOperation,
@@ -767,6 +781,333 @@ def test_steering_decision_migration_downgrade_and_reupgrade(
     assert "authority_assessment" in upgraded
 
 
+def _transition_to_next_step(database: Database, work_id):
+    decision_service = SteeringDecisionApplicationService(
+        database,
+        DeterministicPlanSteeringCapability(),
+    )
+    frame, candidate = decision_service.evaluate(work_id)
+    decision = decision_service.admit(work_id, candidate)
+    next_step = frame.reconstruction.next_step
+    assert next_step is not None
+    return SteeringApplicationService(database).transition_step(
+        TransitionSteeringStepRequest(
+            steering_plan_revision_id=frame.reconstruction.active_revision.revision.id,
+            current_step_id=frame.reconstruction.current_step.id,
+            next_step_id=next_step.id,
+            steering_decision_id=decision.id,
+        )
+    )
+
+
+def _trusted_cycle(
+    database: Database,
+    works: WorkApplicationService,
+    work_id,
+) -> None:
+    orchestrator = ProductionOrchestrator(works)
+    first = orchestrator.orchestrate(work_id)
+    assert first.work_status is WorkStatus.NEEDS_ATTENTION
+    attention = works.list_attention(work_id=work_id)
+    assert len(attention) == 1
+    assert attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION
+    works.resolve_attention(
+        attention[0].id,
+        AttentionResolutionRequest(
+            action=AttentionAction.AUTHORIZE,
+            authority_identity="human:exact-cycle-candidate",
+        ),
+    )
+    second = orchestrator.orchestrate(work_id)
+    assert second.stop_reason is OrchestrationStopReason.PRODUCTION_CYCLE_TRUSTED
+    with database.unit_of_work() as unit_of_work:
+        binding = WorkApplicationService._runtime_binding_for_current_context(
+            ProductStore(unit_of_work.session), work_id
+        )
+        assert binding is not None
+        assert ProductStore(unit_of_work.session).runtime_summary(
+            binding
+        ).runtime_commit_id is not None
+
+
+def test_steer_spg_01_through_16_two_independent_cycles_and_completion(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    original_works, work, baseline_zero = admitted_work
+    created = _create_steering_plan(
+        postgres_database,
+        work.work_id,
+        steps=(
+            SteeringStepSpec(
+                type=SteeringStepType.DESIGN,
+                objective="Establish the bounded design",
+                completion_condition="The bounded design is governed",
+                state=SteeringStepState.CURRENT,
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.PRODUCE,
+                objective="Produce bounded result A",
+                completion_condition="Production result A is trusted",
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.PRODUCE,
+                objective="Produce bounded result B",
+                completion_condition="Production result B is trusted",
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.COMPLETE,
+                objective="Recognize the long-lived outcome",
+                completion_condition="Both bounded results are trusted",
+            ),
+        ),
+    )
+    first_produce = _transition_to_next_step(
+        postgres_database, work.work_id
+    ).current_step
+    assert first_produce is not None
+    bridge = SteeringProductionService(postgres_database)
+    request_a = bridge.materialize_request(work.work_id)
+    cycle_a = bridge.admit_cycle(request_a).binding
+    assert cycle_a is not None
+    assert cycle_a.cycle_number == 1
+    assert cycle_a.steering_step_id == first_produce.id
+
+    works_a = WorkApplicationService(
+        postgres_database,
+        workspace_root=original_works.workspace_root,
+        executor=DeterministicTestExecutor(
+            DeterministicExecutionSpecification(
+                operations=(
+                    DeterministicFileOperation(
+                        operation=DeterministicFileOperationType.CREATE,
+                        repository_relative_path="docs/steering-result.md",
+                        content="# Cycle A\n",
+                    ),
+                ),
+                reported_outcome=ProviderReportedOutcome.SUCCESS,
+                summary="deterministic cycle A",
+            )
+        ),
+        verifier=DeterministicVerificationProvider(
+            {"Verify the admitted artifact": VerificationResultValue.PASS}
+        ),
+    )
+    _trusted_cycle(postgres_database, works_a, work.work_id)
+    baseline_one = RuntimeService(postgres_database).current_baseline()
+    assert baseline_one.id != baseline_zero.id
+    assert works_a.get_work(work.work_id).status is not WorkStatus.COMPLETED
+
+    second_produce = _transition_to_next_step(
+        postgres_database, work.work_id
+    ).current_step
+    assert second_produce is not None
+    request_b = bridge.materialize_request(work.work_id)
+    assert request_b.artifact_targets[0].operation.value == "UPDATE"
+    cycle_b = bridge.admit_cycle(request_b).binding
+    assert cycle_b is not None
+    assert cycle_b.cycle_number == 2
+    assert cycle_b.production_run_id != cycle_a.production_run_id
+    assert cycle_b.plan_revision_id != cycle_a.plan_revision_id
+    assert cycle_b.work_unit_id != cycle_a.work_unit_id
+    with postgres_database.unit_of_work() as unit_of_work:
+        runtime = RuntimeStore(unit_of_work.session)
+        assert runtime.run(cycle_a.production_run_id).source_baseline_id == baseline_zero.id
+        assert runtime.run(cycle_b.production_run_id).source_baseline_id == baseline_one.id
+
+    works_b = WorkApplicationService(
+        postgres_database,
+        workspace_root=original_works.workspace_root,
+        executor=DeterministicTestExecutor(
+            DeterministicExecutionSpecification(
+                operations=(
+                    DeterministicFileOperation(
+                        operation=DeterministicFileOperationType.MODIFY,
+                        repository_relative_path="docs/steering-result.md",
+                        content="# Cycle B\n",
+                    ),
+                ),
+                reported_outcome=ProviderReportedOutcome.SUCCESS,
+                summary="deterministic cycle B",
+            )
+        ),
+        verifier=DeterministicVerificationProvider(
+            {"Verify the admitted artifact": VerificationResultValue.PASS}
+        ),
+    )
+    _trusted_cycle(postgres_database, works_b, work.work_id)
+    baseline_two = RuntimeService(postgres_database).current_baseline()
+    assert baseline_two.id not in {baseline_zero.id, baseline_one.id}
+    before_complete = works_b.get_work(work.work_id)
+    assert before_complete.status is not WorkStatus.COMPLETED
+    assert before_complete.current_production_cycle_number == 2
+    completed = _transition_to_next_step(postgres_database, work.work_id)
+    assert completed.current_step is not None
+    assert completed.current_step.type is SteeringStepType.COMPLETE
+    projected = works_b.get_work(work.work_id)
+    assert projected.status is WorkStatus.COMPLETED
+    assert projected.work_complete is True
+    assert projected.steering_enabled is True
+    assert projected.latest_trusted_runtime_commit_id is not None
+    with postgres_database.unit_of_work() as unit_of_work:
+        bindings = ProductStore(unit_of_work.session).runtime_bindings(work.work_id)
+        assert len(bindings) == 2
+        assert all(
+            unit_of_work.session.scalar(
+                select(func.count())
+                .select_from(production_work_units)
+                .where(
+                    production_work_units.c.production_run_id
+                    == binding.production_run_id
+                )
+            )
+            == 1
+            for binding in bindings
+        )
+
+
+def test_steer_spg_authority_expansion_stops_before_runtime_creation(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    _works, work, _baseline = admitted_work
+    _create_steering_plan(postgres_database, work.work_id)
+    _transition_to_next_step(postgres_database, work.work_id)
+    bridge = SteeringProductionService(postgres_database)
+    request = bridge.materialize_request(work.work_id)
+    with postgres_database.unit_of_work() as unit_of_work:
+        before = unit_of_work.session.scalar(select(func.count()).select_from(production_runs))
+    expanded = request.model_copy(
+        update={
+            "artifact_targets": (
+                request.artifact_targets[0].model_copy(
+                    update={"path": "docs/outside-authority.md"}
+                ),
+            )
+        }
+    )
+    stopped = bridge.admit_cycle(expanded)
+    assert stopped.binding is None
+    assert stopped.attention_decision_id is not None
+    with postgres_database.unit_of_work() as unit_of_work:
+        after = unit_of_work.session.scalar(select(func.count()).select_from(production_runs))
+        assert after == before
+        assert ProductStore(unit_of_work.session).runtime_binding_for_step(
+            request.steering_step_id
+        ) is None
+    attention = _works.list_attention(work_id=work.work_id)
+    assert attention[0].steering_reason is SteeringAttentionReason.SCOPE_OR_AUTHORITY_EXPANSION
+
+
+def test_steer_spg_failed_second_cycle_stays_open_without_retry(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    original_works, work, _baseline_zero = admitted_work
+    _create_steering_plan(
+        postgres_database,
+        work.work_id,
+        steps=(
+            SteeringStepSpec(
+                type=SteeringStepType.DESIGN,
+                objective="Govern the bounded direction",
+                completion_condition="Direction governed",
+                state=SteeringStepState.CURRENT,
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.PRODUCE,
+                objective="Produce trusted result A",
+                completion_condition="Result A trusted",
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.PRODUCE,
+                objective="Produce result B",
+                completion_condition="Result B trusted",
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.COMPLETE,
+                objective="Complete the long-lived Work",
+                completion_condition="All results trusted",
+            ),
+        ),
+    )
+    _transition_to_next_step(postgres_database, work.work_id)
+    bridge = SteeringProductionService(postgres_database)
+    assert bridge.admit_cycle(bridge.materialize_request(work.work_id)).binding
+    passing = WorkApplicationService(
+        postgres_database,
+        workspace_root=original_works.workspace_root,
+        executor=DeterministicTestExecutor(
+            DeterministicExecutionSpecification(
+                operations=(
+                    DeterministicFileOperation(
+                        operation=DeterministicFileOperationType.CREATE,
+                        repository_relative_path="docs/steering-result.md",
+                        content="# Trusted A\n",
+                    ),
+                ),
+                reported_outcome=ProviderReportedOutcome.SUCCESS,
+                summary="cycle A passes",
+            )
+        ),
+        verifier=DeterministicVerificationProvider(
+            {"Verify the admitted artifact": VerificationResultValue.PASS}
+        ),
+    )
+    _trusted_cycle(postgres_database, passing, work.work_id)
+    baseline_one = RuntimeService(postgres_database).current_baseline()
+    second = _transition_to_next_step(postgres_database, work.work_id).current_step
+    assert second is not None
+    binding = bridge.admit_cycle(bridge.materialize_request(work.work_id)).binding
+    assert binding is not None
+
+    executor = DeterministicTestExecutor(
+        DeterministicExecutionSpecification(
+            operations=(
+                DeterministicFileOperation(
+                    operation=DeterministicFileOperationType.MODIFY,
+                    repository_relative_path="docs/steering-result.md",
+                    content="# Untrusted B\n",
+                ),
+            ),
+            reported_outcome=ProviderReportedOutcome.SUCCESS,
+            summary="cycle B verification fails",
+        )
+    )
+    failing = WorkApplicationService(
+        postgres_database,
+        workspace_root=original_works.workspace_root,
+        executor=executor,
+        verifier=DeterministicVerificationProvider(
+            {"Verify the admitted artifact": VerificationResultValue.FAIL}
+        ),
+    )
+    orchestrator = ProductionOrchestrator(failing)
+    stopped = orchestrator.orchestrate(work.work_id)
+    assert stopped.work_status is WorkStatus.BLOCKED
+    assert RuntimeService(postgres_database).current_baseline().id == baseline_one.id
+    assert executor.dispatch_count == 1
+    with postgres_database.unit_of_work() as unit_of_work:
+        summary = ProductStore(unit_of_work.session).runtime_summary(binding)
+    assert summary.completion_outcome == "PRODUCED"
+    assert summary.verification_results == (VerificationResultValue.FAIL.value,)
+    assert summary.candidate_id is None
+    assert summary.runtime_commit_id is None
+    reconstruction = SteeringApplicationService(postgres_database).reconstruct(
+        work.work_id
+    )
+    assert reconstruction.current_step is not None
+    assert reconstruction.current_step.id == second.id
+    assert reconstruction.current_step.state is SteeringStepState.CURRENT
+    frame = PlanFrameAssembler(postgres_database).assemble(work.work_id)
+    assert {
+        blocker.kind for blocker in frame.open_blocking_reality
+    } == {PlanFrameBlockerKind.VERIFICATION_NOT_PASSING}
+    again = orchestrator.orchestrate(work.work_id)
+    assert again.transitions_executed == 0
+    assert executor.dispatch_count == 1
+
+
 def test_steering_migration_downgrade_and_reupgrade(
     postgres_database: Database,
 ) -> None:
@@ -781,6 +1122,33 @@ def test_steering_migration_downgrade_and_reupgrade(
     command.upgrade(config, "head")
     assert STEERING_TABLE_NAMES <= set(inspect(postgres_database.engine).get_table_names())
 
+
+def test_steering_production_cycle_migration_preserves_legacy_binding(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    _works, work, _baseline = admitted_work
+    with postgres_database.unit_of_work() as unit_of_work:
+        before = ProductStore(unit_of_work.session).runtime_binding(work.work_id)
+    assert before is not None
+    config = _migration_config(postgres_database)
+    command.downgrade(config, "20260905_19")
+    columns = {
+        item["name"]
+        for item in inspect(postgres_database.engine).get_columns(
+            "work_runtime_bindings"
+        )
+    }
+    assert "cycle_number" not in columns
+    command.upgrade(config, "head")
+    with postgres_database.unit_of_work() as unit_of_work:
+        after = ProductStore(unit_of_work.session).runtime_binding(work.work_id)
+    assert after is not None
+    assert after.cycle_number == 1
+    assert after.steering_step_id is None
+    assert after.production_run_id == before.production_run_id
+    assert after.plan_revision_id == before.plan_revision_id
+    assert after.work_unit_id == before.work_unit_id
 
 def _truncate(database: Database) -> None:
     names = ", ".join(f'"{name}"' for name in ALL_TABLE_NAMES)

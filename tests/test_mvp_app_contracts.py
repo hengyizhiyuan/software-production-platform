@@ -95,6 +95,35 @@ def test_provider_success_without_observation_is_not_completed() -> None:
     assert status is not WorkStatus.COMPLETED
 
 
+def test_runtime_commit_completion_separates_steering_from_legacy_work() -> None:
+    trusted_cycle = RuntimeFactSummary(
+        completion_id=uuid4(),
+        completion_outcome="PRODUCED",
+        verification_results=("PASS",),
+        integration_effect_id=uuid4(),
+        integration_state="CONVERGED",
+        runtime_commit_id=uuid4(),
+    )
+    legacy, _, _, _ = _projection_service()._projection_state(
+        _work(),
+        trusted_cycle,
+    )
+    steering_active, _, _, _ = _projection_service()._projection_state(
+        _work(),
+        trusted_cycle,
+        steering_enabled=True,
+    )
+    steering_complete, _, _, _ = _projection_service()._projection_state(
+        _work(),
+        trusted_cycle,
+        steering_enabled=True,
+        steering_complete=True,
+    )
+    assert legacy is WorkStatus.COMPLETED
+    assert steering_active is WorkStatus.RUNNING
+    assert steering_complete is WorkStatus.COMPLETED
+
+
 def test_unknown_or_not_produced_reality_is_blocked_not_completed() -> None:
     status, _, _, _ = _projection_service()._projection_state(
         _work(),

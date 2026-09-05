@@ -146,7 +146,7 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | Motive / Work / Plan Concept Calibration | CLOSED / PASS |
-| Reality-driven Plan Steering | IN PROGRESS — MVP-PLAN-STEER-1C AND MVP-PLAN-STEER-1D CLOSED / PASS; AUTOMATIC PROGRESSION AND SPG BRIDGING REMAIN PENDING |
+| Reality-driven Plan Steering | IN PROGRESS — MVP-PLAN-STEER-1C/1D/1E CLOSED / PASS; AUTOMATIC LONG-LIVED PROGRESSION REMAINS PENDING |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -347,8 +347,12 @@ and committed truthfully.
 the provider-neutral persisted Steering Truth Spine and reconstruction query.
 MVP-PLAN-STEER-1D adds authoritative Plan Frame assembly, provider-neutral
 Next-Step evaluation/admission, stale-basis and authority guards, and the five
-bounded MVP Steering Human Attention reasons. Automatic long-lived execution,
-SPG bridging, and extended Human Attention remain unimplemented. It is a
+bounded MVP Steering Human Attention reasons. MVP-PLAN-STEER-1E adds the
+authority-checked PRODUCE-Step bridge to independent one-PWU SPG cycles,
+per-cycle current-baseline binding, trusted Step-close evidence, and separates
+Steering Work completion from a single Runtime Commit. Automatic long-lived
+Steering evaluation/driver behavior and extended Human Attention remain
+unimplemented. It is a
 material remaining core product
 capability, not Phase-2 hardening. Advanced autonomous
 replanning, multi-PWU orchestration, optimization, and unattended continuous
@@ -373,7 +377,8 @@ required, but material divergence without changed Reality must be detectable
 and explainable. New model output alone is not New Reality.
 
 The capability is **IN PROGRESS** through the closed MVP-PLAN-STEER-1C Truth
-Spine and the closed MVP-PLAN-STEER-1D decision layer. PLAN-1B
+Spine, the closed MVP-PLAN-STEER-1D decision layer, and the closed
+MVP-PLAN-STEER-1E production bridge. PLAN-1B
 remains CLOSED / PASS for one Single-PWU production-step plan and remains
 distinct from long-lived Plan Steering. See
 [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md).

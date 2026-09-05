@@ -69,6 +69,7 @@ from spg.domain.product import (
     GoalRecord,
     ProductInvariantViolation,
     ProductRecordNotFound,
+    ProductionCycleBindingCondition,
     ResourceBindingCondition,
     RuntimeFactSummary,
     WorkCondition,
@@ -91,7 +92,7 @@ from spg.domain.verification import (
     VerificationResultValue,
 )
 from spg.domain.verifier import VerificationCapabilityContract
-from spg.domain.steering import SteeringOutcome
+from spg.domain.steering import RealityReferenceKind, SteeringOutcome
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
@@ -749,7 +750,11 @@ class WorkApplicationService:
             )
             product.insert_runtime_binding(
                 {
+                    "id": uuid4(),
                     "work_id": current.id,
+                    "cycle_number": 1,
+                    "steering_step_id": None,
+                    "steering_decision_id": None,
                     "engineering_scope_id": scope.id,
                     "resource_id": resource.id,
                     "production_run_id": spine.run.id,
@@ -757,6 +762,7 @@ class WorkApplicationService:
                     "work_unit_id": spine.work_unit.id,
                     "governance_record_id": governance_id,
                     "admitted_by": authority_identity,
+                    "condition": ProductionCycleBindingCondition.ADMITTED.value,
                     "created_at": timestamp,
                 }
             )
@@ -820,7 +826,7 @@ class WorkApplicationService:
             product = ProductStore(unit_of_work.session)
             runtime = RuntimeStore(unit_of_work.session)
             work = self._required_work(product, work_id)
-            binding = product.runtime_binding(work_id)
+            binding = self._runtime_binding_for_current_context(product, work_id)
             if binding is None:
                 facts = RuntimeFactSummary()
             else:
@@ -875,7 +881,7 @@ class WorkApplicationService:
             product = ProductStore(unit_of_work.session)
             runtime_store = RuntimeStore(unit_of_work.session)
             work = self._required_work(product, work_id)
-            binding = product.runtime_binding(work_id)
+            binding = self._runtime_binding_for_current_context(product, work_id)
             if binding is None:
                 return self._projection(product, work)
             resource = product.resource(binding.resource_id)
@@ -1102,7 +1108,9 @@ class WorkApplicationService:
                 continue
             with self.database.unit_of_work() as unit_of_work:
                 store = ProductStore(unit_of_work.session)
-                binding = store.runtime_binding(projection.work_id)
+                binding = self._runtime_binding_for_current_context(
+                    store, projection.work_id
+                )
                 summary = (
                     RuntimeFactSummary()
                     if binding is None
@@ -1175,7 +1183,9 @@ class WorkApplicationService:
         if attention.kind is AttentionKind.CANDIDATE_AUTHORIZATION:
             with self.database.unit_of_work() as unit_of_work:
                 product = ProductStore(unit_of_work.session)
-                binding = product.runtime_binding(attention.work_id)
+                binding = self._runtime_binding_for_current_context(
+                    product, attention.work_id
+                )
                 if binding is None:
                     raise ProductInvariantViolation("Attention has no Runtime lineage")
                 summary = product.runtime_summary(binding)
@@ -1243,11 +1253,81 @@ class WorkApplicationService:
         work: WorkRecord,
     ) -> WorkProjection:
         scope = store.scope_for_work(work.id)
-        binding = store.runtime_binding(work.id)
+        steering = SteeringStore(store.session)
+        steering_plan = steering.plan_for_work(work.id)
+        current_steering_step = None
+        latest_steering_decision = None
+        if steering_plan is not None:
+            revision = steering.active_revision(steering_plan.id)
+            if revision is not None:
+                current_steering_step = next(
+                    (
+                        item
+                        for item in steering.steps(revision.id)
+                        if item.state.value == "CURRENT"
+                    ),
+                    None,
+                )
+            latest_steering_decision = steering.latest_decision_for_plan(
+                steering_plan.id
+            )
+        current_cycle_binding = self._runtime_binding_for_current_context(
+            store, work.id
+        )
+        latest_binding = store.runtime_binding(work.id)
+        binding = current_cycle_binding
+        if (
+            current_steering_step is not None
+            and current_steering_step.type.value == "COMPLETE"
+        ):
+            binding = latest_binding
         summary = RuntimeFactSummary() if binding is None else store.runtime_summary(binding)
-        status, step, event, next_action = self._projection_state(work, summary)
+        latest_summary = (
+            RuntimeFactSummary()
+            if latest_binding is None
+            else store.runtime_summary(latest_binding)
+        )
+        steering_complete = bool(
+            steering_plan is not None
+            and latest_steering_decision is not None
+            and latest_steering_decision.steering_outcome is SteeringOutcome.COMPLETE
+            and latest_summary.runtime_commit_id is not None
+            and latest_summary.completion_outcome == "PRODUCED"
+            and latest_summary.verification_results
+            and all(item == "PASS" for item in latest_summary.verification_results)
+            and latest_summary.integration_state == "CONVERGED"
+            and any(
+                item.kind is RealityReferenceKind.RUNTIME_COMMIT
+                and item.identity == latest_summary.runtime_commit_id
+                for item in latest_steering_decision.reality_refs
+            )
+        )
+        status, step, event, next_action = self._projection_state(
+            work,
+            summary,
+            steering_enabled=steering_plan is not None,
+            steering_complete=steering_complete,
+            steering_attention=bool(
+                latest_steering_decision is not None
+                and latest_steering_decision.steering_outcome
+                is SteeringOutcome.HUMAN_ATTENTION
+            ),
+        )
+        if current_steering_step is not None:
+            step = current_steering_step.type.value
+        bindings = store.runtime_bindings(work.id)
+        latest_trusted_commit_id = next(
+            (
+                facts.runtime_commit_id
+                for facts in (
+                    store.runtime_summary(item) for item in reversed(bindings)
+                )
+                if facts.runtime_commit_id is not None
+            ),
+            None,
+        )
         result_summary = None
-        if summary.runtime_commit_id is not None:
+        if latest_trusted_commit_id is not None:
             result_summary = "Trusted Runtime Commit recorded"
         elif summary.artifact_paths:
             result_summary = (
@@ -1287,12 +1367,41 @@ class WorkApplicationService:
                 WorkStatus.BLOCKED,
             },
             result_summary=result_summary,
+            steering_enabled=steering_plan is not None,
+            current_steering_step_id=(
+                None if current_steering_step is None else current_steering_step.id
+            ),
+            current_steering_step_type=(
+                None
+                if current_steering_step is None
+                else current_steering_step.type.value
+            ),
+            current_production_cycle_number=(
+                None
+                if current_cycle_binding is None
+                else current_cycle_binding.cycle_number
+            ),
+            current_production_run_id=(
+                None
+                if current_cycle_binding is None
+                else current_cycle_binding.production_run_id
+            ),
+            current_production_cycle_trusted=bool(
+                current_cycle_binding is not None
+                and summary.runtime_commit_id is not None
+            ),
+            latest_trusted_runtime_commit_id=latest_trusted_commit_id,
+            work_complete=status is WorkStatus.COMPLETED,
         )
 
     def _projection_state(
         self,
         work: WorkRecord,
         facts: RuntimeFactSummary,
+        *,
+        steering_enabled: bool = False,
+        steering_complete: bool = False,
+        steering_attention: bool = False,
     ) -> tuple[WorkStatus, str, str, str]:
         if work.condition is WorkCondition.DRAFT:
             return WorkStatus.DRAFT, "WORK_INTAKE", "WORK_SUBMITTED", "Refine Work draft"
@@ -1323,6 +1432,22 @@ class WorkApplicationService:
             )
         if work.condition is WorkCondition.REJECTED:
             return WorkStatus.BLOCKED, "WORK_REJECTED", "WORK_REJECTED", "No execution is authorized"
+        if steering_complete:
+            return WorkStatus.COMPLETED, "STEERING_COMPLETE", "STEERING_COMPLETE", "Work is complete"
+        if steering_attention:
+            return (
+                WorkStatus.NEEDS_ATTENTION,
+                "STEERING_ATTENTION",
+                "STEERING_HUMAN_ATTENTION",
+                "Human must resolve the material Steering decision",
+            )
+        if facts.runtime_commit_id is not None and steering_enabled:
+            return (
+                WorkStatus.RUNNING,
+                "STEERING_REASSESSMENT",
+                "PRODUCTION_CYCLE_TRUSTED",
+                "Reassess governed Reality and admit the next Steering direction",
+            )
         if facts.runtime_commit_id is not None:
             return WorkStatus.COMPLETED, "RUNTIME_COMMIT", "TRUSTED_BASELINE_ADVANCED", "Work is complete"
         if (
@@ -1481,6 +1606,30 @@ class WorkApplicationService:
         if work is None:
             raise ProductRecordNotFound(f"Work not found: {work_id}")
         return work
+
+    @staticmethod
+    def _runtime_binding_for_current_context(
+        store: ProductStore,
+        work_id: UUID,
+    ):
+        steering = SteeringStore(store.session)
+        plan = steering.plan_for_work(work_id)
+        if plan is None:
+            return store.runtime_binding(work_id)
+        revision = steering.active_revision(plan.id)
+        if revision is None:
+            return None
+        current = next(
+            (
+                step
+                for step in steering.steps(revision.id)
+                if step.state.value == "CURRENT"
+            ),
+            None,
+        )
+        if current is None or current.type.value != "PRODUCE":
+            return None
+        return store.runtime_binding_for_step(current.id)
 
     @staticmethod
     def _require_mvp_scope(bindings) -> None:

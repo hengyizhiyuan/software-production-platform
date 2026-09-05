@@ -578,6 +578,25 @@ Five typed MVP Steering Attention reasons and their bounded decision context are
 projected without overloading Candidate Authorization. No decision is executed
 automatically in this Slice.
 
+MVP-PLAN-STEER-1E connects an admitted current `PRODUCE` Step to one existing
+governed SPG production cycle. A long-lived Work may own multiple cycle
+bindings, but each binding remains an independent Run with one runtime Plan
+Revision and one PWU. Each later cycle binds the Current Trusted Baseline at
+its own admission; this is not successor-PWU rebasing. The bridge validates the
+materialized request against the persisted Work objective, exact Engineering
+Scope and Resource, constraints, target/change boundary, forbidden areas, and
+Verification boundary before creating a Run. A mismatch records typed
+`SCOPE_OR_AUTHORITY_EXPANSION` Human Attention and creates no Runtime lineage.
+
+For Steering-enabled Work, a Runtime Commit proves only that the associated
+production cycle is trusted. Closing a `PRODUCE` Step additionally requires
+referenced Completion `PRODUCED`, Verification `PASS`, exact Candidate and
+Authorization, converged Integration, Runtime Commit, and the advanced Trusted
+Baseline. Work-level `COMPLETED` is projected only from an admitted `COMPLETE`
+Steering Decision with matching trusted evidence. Legacy Works without a
+Steering Plan retain Runtime Commit → Work `COMPLETED` compatibility. Automatic
+post-cycle Steering evaluation remains outside 1E.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
@@ -590,6 +609,11 @@ MVP-PLAN-STEER-1C
 
 MVP-PLAN-STEER-1D
     PLAN FRAME / STEERING DECISION / HUMAN ATTENTION LITE
+        = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
+
+MVP-PLAN-STEER-1E
+    PRODUCE STEP → SPG BRIDGE / LONG-LIVED WORK COMPLETION SEPARATION
         = CLOSED / PASS
     ARCHITECTURE LEAD REALITY REVIEW = PASS
 

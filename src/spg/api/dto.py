@@ -309,6 +309,14 @@ class WorkResponse(ApiDto):
     what_happens_next: str
     human_attention_required: bool
     result_summary: str | None
+    steering_enabled: bool = False
+    current_steering_step_id: UUID | None = None
+    current_steering_step_type: str | None = None
+    current_production_cycle_number: int | None = None
+    current_production_run_id: UUID | None = None
+    current_production_cycle_trusted: bool = False
+    latest_trusted_runtime_commit_id: UUID | None = None
+    work_complete: bool = False
 
     @classmethod
     def from_projection(cls, work: WorkProjection) -> Self:
@@ -361,6 +369,16 @@ class WorkResponse(ApiDto):
             what_happens_next=work.what_happens_next,
             human_attention_required=work.human_attention_required,
             result_summary=work.result_summary,
+            steering_enabled=work.steering_enabled,
+            current_steering_step_id=work.current_steering_step_id,
+            current_steering_step_type=work.current_steering_step_type,
+            current_production_cycle_number=work.current_production_cycle_number,
+            current_production_run_id=work.current_production_run_id,
+            current_production_cycle_trusted=work.current_production_cycle_trusted,
+            latest_trusted_runtime_commit_id=(
+                work.latest_trusted_runtime_commit_id
+            ),
+            work_complete=work.work_complete,
         )
 
 

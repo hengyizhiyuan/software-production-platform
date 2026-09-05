@@ -10,6 +10,8 @@
 
 **MVP-PLAN-STEER-1D Plan Frame, Steering Decision & Human Attention Lite: CLOSED / PASS**
 
+**MVP-PLAN-STEER-1E PRODUCE Step → SPG Bridge: CLOSED / PASS**
+
 This record builds on the
 [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
 It defines product intent and normative architecture requirements. The
