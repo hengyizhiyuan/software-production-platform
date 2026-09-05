@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from contextlib import AbstractContextManager
+from copy import deepcopy
 import json
 from typing import Any
 
@@ -25,6 +26,28 @@ from spg.providers.codex_sdk_executor import _enum_value, _wait_for_terminal
 
 
 CodexFactory = Callable[[], AbstractContextManager[Any]]
+
+
+def _provider_strict_output_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    """Adapt typed JSON Schema to the Provider's strict pure-``$ref`` dialect."""
+
+    normalized = deepcopy(schema)
+
+    def normalize(value: object) -> None:
+        if isinstance(value, dict):
+            if "$ref" in value:
+                reference = value["$ref"]
+                value.clear()
+                value["$ref"] = reference
+                return
+            for nested in value.values():
+                normalize(nested)
+        elif isinstance(value, list):
+            for nested in value:
+                normalize(nested)
+
+    normalize(normalized)
+    return normalized
 
 
 class _SemanticProviderProductionProposal(SemanticProductionProposal):
@@ -149,7 +172,9 @@ class CodexSdkSemanticStepCapability:
     def output_schema() -> dict[str, Any]:
         """Return the exact typed payload contract supplied to Provider generation."""
 
-        return _SemanticProviderPayload.model_json_schema()
+        return _provider_strict_output_schema(
+            _SemanticProviderPayload.model_json_schema()
+        )
 
     @staticmethod
     def _parse_payload(raw: str) -> _SemanticProviderPayload:

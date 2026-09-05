@@ -600,6 +600,9 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
         "CODE_WORK",
     ]
     assert schema["$defs"]["_SemanticProviderProductionProposal"]["properties"][
+        "target_kind"
+    ] == {"$ref": "#/$defs/ProductionTargetKind"}
+    assert schema["$defs"]["_SemanticProviderProductionProposal"]["properties"][
         "artifact_targets"
     ]["items"] == {"$ref": "#/$defs/ProductionPlanArtifactTarget"}
     assert schema["$defs"]["_SemanticProviderProductionProposal"]["properties"][
@@ -623,6 +626,106 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
         "codex-sdk:thread:thread-semantic-test:turn:turn-semantic-test"
     )
     assert _runtime_counts(postgres_database) == (0, 0, 0)
+
+
+@pytest.mark.real_codex
+def test_semantic_provider_real_end_to_end_governed_design_result(
+    postgres_database: Database,
+    product,
+) -> None:
+    if os.environ.get("SPG_RUN_REAL_SEMANTIC_CODEX") != "1":
+        pytest.skip("set SPG_RUN_REAL_SEMANTIC_CODEX=1 for the authorized probe")
+
+    works, repository = product
+    admitted, plan = _admitted_plan(works)
+    assert admitted.production_plan is None
+    assert plan.current_step is not None
+    assert plan.current_step.type is SteeringStepType.DESIGN
+    assert _runtime_counts(postgres_database) == (0, 0, 0)
+
+    class RecordingRealCapability:
+        def __init__(self) -> None:
+            self.delegate = CodexSdkSemanticStepCapability(timeout_seconds=600)
+            self.input: SemanticStepInput | None = None
+            self.candidate: SemanticStepResultCandidate | None = None
+
+        def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+            self.input = input
+            self.candidate = self.delegate.execute(input)
+            return self.candidate
+
+    capability = RecordingRealCapability()
+    service = SemanticStepApplicationService(
+        postgres_database,
+        capability,
+    )
+    result = service.execute(admitted.work_id)
+
+    candidate = capability.candidate
+    semantic_input = capability.input
+    assert candidate is not None
+    assert semantic_input is not None
+    assert candidate.completion_claimed is True
+    assert candidate.authority_assessment is (
+        SteeringAuthorityAssessment.WITHIN_AUTHORITY
+    )
+    assert not candidate.unresolved_questions
+    assert result.step_id == plan.current_step.id
+    assert result.result_kind is SemanticResultKind.DESIGN_DIRECTION
+    assert result.completion_satisfied is True
+    assert result.decisions
+    assert result.evidence_refs
+    assert result.reasoning_provider_identity.startswith("codex-sdk:thread:")
+    reconstruction = SteeringApplicationService(postgres_database).reconstruct(
+        admitted.work_id
+    )
+    assert reconstruction.current_step is not None
+    assert reconstruction.current_step.type is SteeringStepType.DESIGN
+    assert reconstruction.current_step.state.value == "CURRENT"
+    assert tuple(item.id for item in reconstruction.semantic_results) == (result.id,)
+    assert _runtime_counts(postgres_database) == (0, 0, 0)
+    assert _git(repository, "status", "--porcelain") == ""
+    print(
+        "REAL_SEMANTIC_EVIDENCE="
+        + json.dumps(
+            {
+                "work_id": str(admitted.work_id),
+                "step_id": str(plan.current_step.id),
+                "source_revision": semantic_input.source_revision,
+                "source_tree": semantic_input.source_tree,
+                "basis_fingerprint": candidate.basis_fingerprint,
+                "result_id": str(result.id),
+                "result_kind": result.result_kind.value,
+                "bounded_summary": result.bounded_summary,
+                "decisions": list(result.decisions),
+                "evidence_refs": [
+                    item.model_dump(mode="json") for item in result.evidence_refs
+                ],
+                "authority_assessment": result.authority_assessment.value,
+                "human_attention_recommendation": (
+                    result.human_attention_recommendation
+                ),
+                "proposed_production": (
+                    None
+                    if result.proposed_production is None
+                    else result.proposed_production.model_dump(mode="json")
+                ),
+                "completion_satisfied": result.completion_satisfied,
+                "provider_identity": result.reasoning_provider_identity,
+                "current_step_after_admission": (
+                    reconstruction.current_step.type.value
+                ),
+                "runtime_counts": {
+                    "runs": 0,
+                    "pwus": 0,
+                    "runtime_commits": 0,
+                },
+                "repository_clean": True,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+    )
 
 
 def test_sem_03_real_adapter_rejects_unstructured_provider_prose() -> None:

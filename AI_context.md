@@ -60,6 +60,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-PLAN-STEER-1K — CLOSED / PASS**
 
+**MVP-PLAN-STEER-1L — CLOSED / PASS**
+
 **MVP-CODE-1 — CLOSED / PASS**
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
@@ -464,6 +466,45 @@ values, then deterministically converts it into the unchanged domain proposal.
 1K is **CLOSED / PASS** after focused validation and Architecture Lead Reality
 Review. See [Long-lived Motive Dogfood #5 Provider Schema Requiredness
 Finding](docs/evidence/dogfood/long-lived-motive-dogfood-5-semantic-provider-schema-requiredness-gap.md).
+
+Long-lived Motive Dogfood #6 proved the 1K required-key correction with the
+real Provider, then exposed the next response-format boundary: the generated
+`target_kind` node combined `$ref` with a `description` sibling, which the
+Provider rejected before content generation. The preserved Runtime has one
+failed ephemeral semantic Thread/Turn, zero Semantic Step Results and zero
+production facts, with `DESIGN` still current and the Driver truthfully
+`STOPPED / BLOCKED`. This confirms
+`SEMANTIC_PROVIDER_SCHEMA_REF_SIBLING_GAP`; the exact
+`SEMANTIC_PROVIDER_SCHEMA_REQUIREDNESS_GAP` is resolved by real Provider
+evidence. The preserved failure remains historical evidence; it was not retried
+or rewritten.
+MVP-PLAN-STEER-1L recursively normalizes only the Provider-facing schema so
+every `$ref` node is pure while the typed wire/domain and application Authority
+contracts remain unchanged. See [Long-lived Motive Dogfood #6 Provider `$ref`
+Schema Finding](docs/evidence/dogfood/long-lived-motive-dogfood-6-semantic-provider-ref-sibling-gap.md).
+
+A bounded fresh integration closure then used the same target-free Motive
+semantics and two independent disposable PostgreSQL/repository states. The real
+Provider accepted the normalized strict schema and returned structured DESIGN
+content in both executions. Wire validation, deterministic domain conversion,
+candidate creation, fail-closed application admission, governed
+`SemanticStepResult` persistence, and reconstruction all passed. The final
+fresh proof kept `DESIGN` current as a governed completion-evidence boundary,
+kept the repository clean, and created zero Run/PWU/Runtime Commit facts.
+`SEMANTIC_PROVIDER_SCHEMA_REF_SIBLING_GAP` and its parent
+`SEMANTIC_STRUCTURED_OUTPUT_GAP` are therefore resolved by real Provider
+evidence. MVP-PLAN-STEER-1L is **CLOSED / PASS** after Architecture Lead Reality
+Review.
+Human Dogfood is no longer the iterative Provider-compatibility oracle; real
+Provider validation belongs inside the bounded Executor self-refine loop. See
+[Semantic Provider Integration Self-refine Closure](docs/evidence/dogfood/semantic-provider-integration-self-refine-closure.md).
+
+The closure also preserves a new architecture finding for later calibration:
+`SPG_EXECUTION_GRANULARITY_CALIBRATION_REQUIRED`. The working hypothesis is to
+govern the execution envelope, not every Executor move. This checkpoint does
+not redesign SPG or implement that calibration. The separate
+`SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains **CONFIRMED / PARTIALLY MITIGATED
+/ OPEN**. Core Closure is not declared.
 
 ### Reality-driven Plan Steering MVP Behavioral Contract
 

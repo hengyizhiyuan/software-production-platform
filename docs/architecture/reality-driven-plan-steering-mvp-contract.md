@@ -672,6 +672,36 @@ repository-path, authority, completion, and production-admission validation.
 1K is **CLOSED / PASS** after focused validation and Architecture Lead Reality
 Review; real Provider Dogfood continues.
 
+Long-lived Motive Dogfood #6 proved the recursive required-key correction with
+the real Provider, then failed at the next strict response-format rule because
+the generated `target_kind` schema combined `$ref` with a `description`
+sibling. MVP-PLAN-STEER-1L keeps the typed Pydantic wire model authoritative and
+applies one recursive structural adaptation to the schema supplied to the SDK:
+every `$ref` node is emitted as pure `$ref`. Domain descriptions, enums, target
+types, path constraints, null/empty semantics, wire-to-domain conversion, and
+all application Authority checks remain unchanged. 1L is **IMPLEMENTED —
+FOCUSED VALIDATION PASS — PENDING ARCHITECTURE LEAD REALITY REVIEW**; the parent
+structured-output gap requires fresh real Provider evidence before closure.
+
+The bounded integration closure supplied that evidence using two independent
+disposable states and real Provider Turns. The Provider accepted the normalized
+strict schema and returned valid structured DESIGN content; wire validation,
+domain conversion, candidate creation, application admission, governed result
+persistence, and reconstruction all passed. No Run, PWU, Runtime Commit, or
+repository mutation existed before `PRODUCE`. This resolves
+`SEMANTIC_PROVIDER_SCHEMA_REF_SIBLING_GAP` and the parent
+`SEMANTIC_STRUCTURED_OUTPUT_GAP` by real Provider evidence. MVP-PLAN-STEER-1L is
+**CLOSED / PASS** after Architecture Lead Reality Review. Human Dogfood is no
+longer the iterative compatibility oracle:
+fresh real Provider validation is part of bounded Executor self-refine for this
+integration boundary.
+
+The closure preserves `SPG_EXECUTION_GRANULARITY_CALIBRATION_REQUIRED` for
+later architecture calibration, with the working hypothesis: govern the
+execution envelope, not every Executor move. No SPG redesign or granularity
+change is admitted by 1L. `SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains
+**CONFIRMED / PARTIALLY MITIGATED / OPEN**, and Core Closure is not declared.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
@@ -720,6 +750,11 @@ MVP-PLAN-STEER-1J
 
 MVP-PLAN-STEER-1K
     STRICT SEMANTIC PROVIDER WIRE SCHEMA COMPATIBILITY
+        = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
+
+MVP-PLAN-STEER-1L
+    STRICT PROVIDER PURE-$ref SCHEMA COMPATIBILITY
         = CLOSED / PASS
     ARCHITECTURE LEAD REALITY REVIEW = PASS
 

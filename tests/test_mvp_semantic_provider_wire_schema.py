@@ -7,7 +7,10 @@ import pytest
 from spg.domain.change import ProductionTargetKind
 from spg.domain.planning import PlannedArtifactOperation
 from spg.domain.steering import SemanticProductionProposal, SteeringInvariantViolation
-from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
+from spg.providers.codex_semantic import (
+    CodexSdkSemanticStepCapability,
+    _provider_strict_output_schema,
+)
 
 
 def _payload(proposed_production: object = None) -> dict[str, object]:
@@ -34,6 +37,16 @@ def _object_schemas(value: object, path: str = "$") -> Iterator[tuple[str, dict]
             yield from _object_schemas(nested, f"{path}[{index}]")
 
 
+def _schema_nodes(value: object, path: str = "$") -> Iterator[tuple[str, dict]]:
+    if isinstance(value, dict):
+        yield path, value
+        for key, nested in value.items():
+            yield from _schema_nodes(nested, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, nested in enumerate(value):
+            yield from _schema_nodes(nested, f"{path}[{index}]")
+
+
 def _proposal_schema(schema: dict[str, Any]) -> dict[str, Any]:
     return schema["$defs"]["_SemanticProviderProductionProposal"]
 
@@ -49,6 +62,13 @@ def test_sem_wire_01_03_04_05_08_09_10_15_schema_is_recursively_strict() -> None
         ), path
         assert object_schema.get("additionalProperties") is False, path
 
+    ref_schemas = tuple(
+        (path, node) for path, node in _schema_nodes(schema) if "$ref" in node
+    )
+    assert ref_schemas
+    for path, ref_schema in ref_schemas:
+        assert set(ref_schema) == {"$ref"}, path
+
     assert set(schema["properties"]) == set(schema["required"])
     proposal = _proposal_schema(schema)
     assert set(proposal["properties"]) == set(proposal["required"])
@@ -63,6 +83,36 @@ def test_sem_wire_01_03_04_05_08_09_10_15_schema_is_recursively_strict() -> None
     assert proposal["properties"]["allowed_areas"]["items"]["pattern"] == (
         r"^.+/\*\*$"
     )
+
+
+def test_sem_ref_01_02_03_04_16_dogfood_6_ref_sibling_is_normalized() -> None:
+    observed_dogfood_schema = {
+        "properties": {
+            "target_kind": {
+                "$ref": "#/$defs/ProductionTargetKind",
+                "description": (
+                    "Existing Watt production target kind; "
+                    "no provider-defined aliases."
+                ),
+            }
+        }
+    }
+
+    normalized = _provider_strict_output_schema(observed_dogfood_schema)
+
+    assert observed_dogfood_schema["properties"]["target_kind"] == {
+        "$ref": "#/$defs/ProductionTargetKind",
+        "description": (
+            "Existing Watt production target kind; no provider-defined aliases."
+        ),
+    }
+    assert normalized["properties"]["target_kind"] == {
+        "$ref": "#/$defs/ProductionTargetKind"
+    }
+    proposal = _proposal_schema(CodexSdkSemanticStepCapability.output_schema())
+    assert proposal["properties"]["target_kind"] == {
+        "$ref": "#/$defs/ProductionTargetKind"
+    }
 
 
 def test_sem_wire_02_domain_defaults_remain_unchanged() -> None:
