@@ -19,11 +19,17 @@ from spg.application.attempt_recovery import AttemptRecoveryService
 from spg.application.maintenance_recovery import VerifiedMaintenanceRecoveryService
 from spg.application.orchestration import ProductionOrchestrator
 from spg.application.steering import SteeringApplicationService
+from spg.application.steering_decision import (
+    DeterministicPlanSteeringCapability,
+    PlanFrameAssembler,
+    SteeringDecisionApplicationService,
+)
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
 from spg.domain.preparation import ExecutorBinding
 from spg.domain.planning import ProductionPlanner
+from spg.domain.steering import PlanSteeringCapability
 from spg.domain.verifier import VerificationCapabilityContract
 from spg.infrastructure.persistence import Database
 
@@ -227,6 +233,27 @@ class Application:
         """Compose persisted Steering truth without a reasoning provider or driver."""
 
         return SteeringApplicationService(database or self.persistence())
+
+    def steering_plan_frames(
+        self,
+        database: Database | None = None,
+    ) -> PlanFrameAssembler:
+        """Compose provider-free authoritative Plan Frame assembly."""
+
+        return PlanFrameAssembler(database or self.persistence())
+
+    def steering_decisions(
+        self,
+        database: Database | None = None,
+        *,
+        capability: PlanSteeringCapability | None = None,
+    ) -> SteeringDecisionApplicationService:
+        """Compose decision-only Steering without a progression driver."""
+
+        return SteeringDecisionApplicationService(
+            database or self.persistence(),
+            capability or DeterministicPlanSteeringCapability(),
+        )
 
     def runtime_activation(
         self,

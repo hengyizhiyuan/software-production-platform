@@ -173,6 +173,13 @@ steering_decisions = Table(
     Column("steering_outcome", String(32), nullable=False),
     Column("basis_fingerprint", String(64), nullable=False, unique=True),
     Column("reasoning_provider_identity", String(255), nullable=True),
+    Column("attention_reason", String(64), nullable=True),
+    Column("recommendation", Text, nullable=True),
+    Column("alternatives", JSONB, nullable=False, server_default=text("'[]'::jsonb")),
+    Column("trade_offs", JSONB, nullable=False, server_default=text("'[]'::jsonb")),
+    Column("expected_impact", Text, nullable=True),
+    Column("authority_assessment", String(32), nullable=True),
+    Column("proposed_engineering_scope_fingerprint", String(64), nullable=True),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     CheckConstraint(
         "next_step_type IN ('REFINE', 'HUMAN_DECISION', 'DESIGN', 'PRODUCE', "
@@ -192,6 +199,20 @@ steering_decisions = Table(
         "(steering_outcome = 'COMPLETE' AND next_step_type = 'COMPLETE') OR "
         "(steering_outcome <> 'COMPLETE' AND next_step_type <> 'COMPLETE')",
         name="ck_steering_decisions_complete_outcome_consistent",
+    ),
+    CheckConstraint(
+        "attention_reason IS NULL OR attention_reason IN "
+        "('MOTIVE_OR_OUTCOME_AMBIGUITY', "
+        "'MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION', "
+        "'SCOPE_OR_AUTHORITY_EXPANSION', "
+        "'MATERIAL_RISK_OR_COST_DECISION', "
+        "'PRODUCT_ACCEPTANCE_REQUIRED')",
+        name="ck_steering_decisions_attention_reason_known",
+    ),
+    CheckConstraint(
+        "authority_assessment IS NULL OR authority_assessment IN "
+        "('WITHIN_AUTHORITY', 'UNCERTAIN', 'EXPANDS_AUTHORITY')",
+        name="ck_steering_decisions_authority_assessment_known",
     ),
 )
 

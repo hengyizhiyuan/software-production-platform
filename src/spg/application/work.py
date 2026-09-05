@@ -91,9 +91,11 @@ from spg.domain.verification import (
     VerificationResultValue,
 )
 from spg.domain.verifier import VerificationCapabilityContract
+from spg.domain.steering import SteeringOutcome
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.providers.rule_based_planner import RuleBasedProductionPlanner
 from spg.providers.repository_change_proposal import (
     RepositoryAwareChangeProposalProvider,
@@ -1056,6 +1058,45 @@ class WorkApplicationService:
                         ),
                         recommended_action=AttentionAction.APPROVE,
                         governed_subject_ref=f"work:{projection.work_id}",
+                    )
+                )
+                continue
+            with self.database.unit_of_work() as unit_of_work:
+                steering = SteeringStore(unit_of_work.session)
+                plan = steering.plan_for_work(projection.work_id)
+                decision = (
+                    None
+                    if plan is None
+                    else steering.latest_decision_for_plan(plan.id)
+                )
+            if (
+                decision is not None
+                and decision.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
+                and decision.attention_reason is not None
+            ):
+                items.append(
+                    AttentionItem(
+                        id=uuid5(
+                            NAMESPACE_URL,
+                            f"spg:steering-attention:{decision.id}",
+                        ),
+                        work_id=projection.work_id,
+                        kind=AttentionKind.STEERING_DECISION_REQUIRED,
+                        decision=decision.objective,
+                        reason=decision.reason,
+                        available_actions=(),
+                        recommended_action=None,
+                        governed_subject_ref=f"steering-decision:{decision.id}",
+                        steering_reason=decision.attention_reason,
+                        recommendation=decision.recommendation,
+                        alternatives=decision.alternatives,
+                        trade_offs=decision.trade_offs,
+                        expected_impact=decision.expected_impact,
+                        reality_refs=decision.reality_refs,
+                        steering_plan_revision_id=(
+                            decision.steering_plan_revision_id
+                        ),
+                        steering_step_id=decision.current_step_id,
                     )
                 )
                 continue

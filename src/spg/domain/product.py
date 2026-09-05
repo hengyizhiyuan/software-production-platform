@@ -15,6 +15,7 @@ from spg.domain.change import (
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
+from spg.domain.steering import RealityReference, SteeringAttentionReason
 
 
 class GoalCondition(StrEnum):
@@ -81,6 +82,7 @@ class AttentionKind(StrEnum):
     WORK_REFINEMENT_REQUIRED = "WORK_REFINEMENT_REQUIRED"
     CANDIDATE_AUTHORIZATION = "CANDIDATE_AUTHORIZATION"
     PRODUCTION_BLOCKED = "PRODUCTION_BLOCKED"
+    STEERING_DECISION_REQUIRED = "STEERING_DECISION_REQUIRED"
 
 
 class AttentionAction(StrEnum):
@@ -243,6 +245,14 @@ class AttentionItem(BaseModel):
     available_actions: tuple[AttentionAction, ...]
     recommended_action: AttentionAction | None
     governed_subject_ref: str
+    steering_reason: SteeringAttentionReason | None = None
+    recommendation: str | None = None
+    alternatives: tuple[str, ...] = ()
+    trade_offs: tuple[str, ...] = ()
+    expected_impact: str | None = None
+    reality_refs: tuple[RealityReference, ...] = ()
+    steering_plan_revision_id: UUID | None = None
+    steering_step_id: UUID | None = None
 
 
 class WorkResultProjection(BaseModel):

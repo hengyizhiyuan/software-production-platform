@@ -1,6 +1,10 @@
 """Persistence adapter for long-lived Steering Plan truth."""
 
 from collections.abc import Mapping
+from datetime import date, datetime
+from enum import Enum
+from hashlib import sha256
+import json
 from typing import Any
 from uuid import UUID
 
@@ -10,6 +14,9 @@ from sqlalchemy.orm import Session
 from spg.domain.steering import (
     RealityReference,
     RealityReferenceKind,
+    ResolvedRealityReference,
+    SteeringAttentionReason,
+    SteeringAuthorityAssessment,
     SteeringDecisionRecord,
     SteeringHistoryEventRecord,
     SteeringHistoryEventType,
@@ -217,6 +224,29 @@ class SteeringStore:
             is not None
         )
 
+    def resolve_reality_reference(
+        self,
+        reference: RealityReference,
+    ) -> ResolvedRealityReference | None:
+        """Resolve an external fact without copying its payload into Steering truth."""
+
+        table = _REALITY_TABLES[reference.kind]
+        row = self.session.execute(
+            select(table).where(table.c.id == reference.identity)
+        ).mappings().one_or_none()
+        if row is None:
+            return None
+        canonical = json.dumps(
+            self._canonical_value(dict(row)),
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        return ResolvedRealityReference(
+            reference=reference,
+            material_fingerprint=sha256(canonical.encode("utf-8")).hexdigest(),
+        )
+
     @staticmethod
     def _references(raw: list[dict[str, Any]]) -> tuple[RealityReference, ...]:
         return tuple(RealityReference.model_validate(item) for item in raw)
@@ -270,6 +300,23 @@ class SteeringStore:
             steering_outcome=SteeringOutcome(row["steering_outcome"]),
             basis_fingerprint=row["basis_fingerprint"],
             reasoning_provider_identity=row["reasoning_provider_identity"],
+            attention_reason=(
+                None
+                if row["attention_reason"] is None
+                else SteeringAttentionReason(row["attention_reason"])
+            ),
+            recommendation=row["recommendation"],
+            alternatives=tuple(row["alternatives"]),
+            trade_offs=tuple(row["trade_offs"]),
+            expected_impact=row["expected_impact"],
+            authority_assessment=(
+                None
+                if row["authority_assessment"] is None
+                else SteeringAuthorityAssessment(row["authority_assessment"])
+            ),
+            proposed_engineering_scope_fingerprint=row[
+                "proposed_engineering_scope_fingerprint"
+            ],
             created_at=row["created_at"],
         )
 
@@ -293,3 +340,22 @@ class SteeringStore:
 
     def _one(self, table, condition) -> Mapping[str, Any] | None:
         return self.session.execute(select(table).where(condition)).mappings().first()
+
+    @classmethod
+    def _canonical_value(cls, value: Any) -> Any:
+        if isinstance(value, Mapping):
+            return {
+                str(key): cls._canonical_value(item)
+                for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+            }
+        if isinstance(value, (list, tuple)):
+            return [cls._canonical_value(item) for item in value]
+        if isinstance(value, (datetime, date)):
+            return value.isoformat()
+        if isinstance(value, UUID):
+            return str(value)
+        if isinstance(value, Enum):
+            return value.value
+        if isinstance(value, bytes):
+            return value.hex()
+        return value

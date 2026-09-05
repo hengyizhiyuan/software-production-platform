@@ -16,6 +16,7 @@ from spg.domain.steering import (
     RealityReferenceKind,
     ReviseSteeringPlanRequest,
     SteeringDecisionRecord,
+    SteeringDecisionBasis,
     SteeringHistoryEventType,
     SteeringInvariantViolation,
     SteeringOutcome,
@@ -96,6 +97,18 @@ class SteeringApplicationService:
         current_step_id: UUID,
         reality_refs: tuple[RealityReference, ...],
     ) -> str:
+        return self.decision_basis(
+            steering_plan_revision_id,
+            current_step_id,
+            reality_refs,
+        ).fingerprint
+
+    def decision_basis(
+        self,
+        steering_plan_revision_id: UUID,
+        current_step_id: UUID,
+        reality_refs: tuple[RealityReference, ...],
+    ) -> SteeringDecisionBasis:
         with self.database.unit_of_work() as unit_of_work:
             product = ProductStore(unit_of_work.session)
             store = SteeringStore(unit_of_work.session)
@@ -109,7 +122,8 @@ class SteeringApplicationService:
             work = product.work(revision.work_id)
             if work is None:
                 raise SteeringRecordNotFound(f"Work not found: {revision.work_id}")
-            return self._basis_fingerprint(work, revision, step, refs)
+            scope = product.scope_for_work(work.id)
+            return self._basis(work, scope, revision, step, store, refs)
 
     def admit_decision(
         self,
@@ -130,7 +144,15 @@ class SteeringApplicationService:
             work = product.work(revision.work_id)
             if work is None:
                 raise SteeringRecordNotFound(f"Work not found: {revision.work_id}")
-            fingerprint = self._basis_fingerprint(work, revision, step, refs)
+            scope = product.scope_for_work(work.id)
+            fingerprint = self._basis(
+                work,
+                scope,
+                revision,
+                step,
+                store,
+                refs,
+            ).fingerprint
             if fingerprint != request.expected_basis_fingerprint:
                 raise SteeringInvariantViolation(
                     "Steering Decision basis is stale or does not match governed Reality"
@@ -154,6 +176,23 @@ class SteeringApplicationService:
                     "steering_outcome": request.steering_outcome.value,
                     "basis_fingerprint": fingerprint,
                     "reasoning_provider_identity": request.reasoning_provider_identity,
+                    "attention_reason": (
+                        None
+                        if request.attention_reason is None
+                        else request.attention_reason.value
+                    ),
+                    "recommendation": request.recommendation,
+                    "alternatives": list(request.alternatives),
+                    "trade_offs": list(request.trade_offs),
+                    "expected_impact": request.expected_impact,
+                    "authority_assessment": (
+                        None
+                        if request.authority_assessment is None
+                        else request.authority_assessment.value
+                    ),
+                    "proposed_engineering_scope_fingerprint": (
+                        request.proposed_engineering_scope_fingerprint
+                    ),
                     "created_at": timestamp,
                 }
             )
@@ -580,8 +619,18 @@ class SteeringApplicationService:
         return tuple(identities)
 
     @staticmethod
-    def _basis_fingerprint(work, revision, step, refs) -> str:
-        """Hash governed identities/facts; exclude decision prose and provider output."""
+    def _basis(work, scope, revision, step, store, refs) -> SteeringDecisionBasis:
+        """Canonicalize governed facts; exclude decision prose and provider output."""
+
+        resolved = []
+        for reference in refs:
+            fact = store.resolve_reality_reference(reference)
+            if fact is None:
+                raise SteeringInvariantViolation(
+                    "Steering Reality reference does not exist: "
+                    f"{reference.kind.value}:{reference.identity}"
+                )
+            resolved.append(fact)
 
         payload = {
             "work": {
@@ -592,6 +641,22 @@ class SteeringApplicationService:
                 "production_objective": work.production_objective,
                 "constraints": list(work.constraints),
             },
+            "engineering_scope": (
+                None
+                if scope is None
+                else {
+                    "id": str(scope.id),
+                    "fingerprint": scope.fingerprint,
+                    "condition": scope.condition.value,
+                    "bindings": [
+                        {
+                            "resource_id": str(binding.resource_id),
+                            "condition": binding.condition.value,
+                        }
+                        for binding in scope.bindings
+                    ],
+                }
+            ),
             "steering_plan_revision": {
                 "id": str(revision.id),
                 "revision_number": revision.revision_number,
@@ -605,8 +670,12 @@ class SteeringApplicationService:
                 "state": step.state.value,
             },
             "reality_refs": [
-                {"kind": item.kind.value, "identity": str(item.identity)}
-                for item in refs
+                {
+                    "kind": item.reference.kind.value,
+                    "identity": str(item.reference.identity),
+                    "material_fingerprint": item.material_fingerprint,
+                }
+                for item in resolved
             ],
         }
         canonical = json.dumps(
@@ -615,4 +684,8 @@ class SteeringApplicationService:
             sort_keys=True,
             separators=(",", ":"),
         )
-        return sha256(canonical.encode("utf-8")).hexdigest()
+        return SteeringDecisionBasis(
+            canonical_representation=canonical,
+            fingerprint=sha256(canonical.encode("utf-8")).hexdigest(),
+            resolved_reality=tuple(resolved),
+        )

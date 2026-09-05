@@ -21,6 +21,7 @@ from spg.domain.product import (
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
 from spg.domain.runtime_activation import RuntimeActivationProjection
+from spg.domain.steering import RealityReference, SteeringAttentionReason
 
 
 class ApiDto(BaseModel):
@@ -427,6 +428,14 @@ class AttentionResponse(ApiDto):
     available_actions: tuple[AttentionAction, ...]
     recommended_action: AttentionAction | None
     governed_subject_ref: str
+    steering_reason: SteeringAttentionReason | None = None
+    recommendation: str | None = None
+    alternatives: tuple[str, ...] = ()
+    trade_offs: tuple[str, ...] = ()
+    expected_impact: str | None = None
+    reality_refs: tuple[RealityReference, ...] = ()
+    steering_plan_revision_id: UUID | None = None
+    steering_step_id: UUID | None = None
 
     @classmethod
     def from_projection(cls, attention: AttentionItem) -> Self:
@@ -439,6 +448,14 @@ class AttentionResponse(ApiDto):
             available_actions=attention.available_actions,
             recommended_action=attention.recommended_action,
             governed_subject_ref=attention.governed_subject_ref,
+            steering_reason=attention.steering_reason,
+            recommendation=attention.recommendation,
+            alternatives=attention.alternatives,
+            trade_offs=attention.trade_offs,
+            expected_impact=attention.expected_impact,
+            reality_refs=attention.reality_refs,
+            steering_plan_revision_id=attention.steering_plan_revision_id,
+            steering_step_id=attention.steering_step_id,
         )
 
 

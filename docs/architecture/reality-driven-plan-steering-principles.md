@@ -8,16 +8,21 @@
 
 **MVP-PLAN-STEER-1C Steering Truth Spine: CLOSED / PASS**
 
+**MVP-PLAN-STEER-1D Plan Frame, Steering Decision & Human Attention Lite: CLOSED / PASS**
+
 This record builds on the
 [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
 It defines product intent and normative architecture requirements. The
-separately admitted 1C Slice implements only the persisted Steering Truth Spine;
-it does not implement Steering reasoning, automatic progression, SPG bridging,
-or additional production authority.
+1C implements the persisted Steering Truth Spine. The closed 1D Slice
+assembles governed Plan Frames and admits provider-neutral Steering
+decisions, including bounded Human Attention semantics; neither Slice
+implements automatic progression, SPG bridging, or additional production
+authority.
 
 The admitted bounded MVP behavior is defined in the
 [Reality-driven Plan Steering MVP Behavioral Contract](reality-driven-plan-steering-mvp-contract.md).
-The contract does not authorize implementation or reopen PLAN-1B, ORCH, or SPG.
+The contract does not authorize further implementation or reopen PLAN-1B,
+ORCH, or SPG.
 
 ## Strategic Product Position
 

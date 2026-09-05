@@ -567,6 +567,17 @@ and governed fields, and sorted typed Reality references. Decision prose and
 reasoning-provider identity are deliberately excluded: they are decision output
 and diagnostic metadata, not the governed basis.
 
+MVP-PLAN-STEER-1D assembles an ephemeral Plan Frame from persisted Work,
+Engineering Scope, active Steering truth, governance decisions, current Trusted
+Baseline, and relevant Runtime/Completion/Verification Reality. A replaceable
+provider-neutral capability returns an advisory `NextStepCandidate`; the
+application recomputes the current basis and admits it only when lineage,
+Reality references, authority, scope, and completion evidence remain valid.
+The existing Steering Decision remains the persisted decision Source of Truth.
+Five typed MVP Steering Attention reasons and their bounded decision context are
+projected without overloading Candidate Authorization. No decision is executed
+automatically in this Slice.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
@@ -575,6 +586,11 @@ Reality-driven Plan Steering
 
 MVP-PLAN-STEER-1C
     STEERING TRUTH SPINE = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
+
+MVP-PLAN-STEER-1D
+    PLAN FRAME / STEERING DECISION / HUMAN ATTENTION LITE
+        = CLOSED / PASS
     ARCHITECTURE LEAD REALITY REVIEW = PASS
 
 MVP-PLAN-1B
