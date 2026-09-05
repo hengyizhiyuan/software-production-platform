@@ -22,6 +22,7 @@ from spg.api.dto import (
     HealthResponse,
     HumanDecisionRequest,
     RuntimeActivationResponse,
+    SteeringPlanResponse,
     WorkRefineRequest,
     WorkResponse,
     WorkResultResponse,
@@ -29,6 +30,7 @@ from spg.api.dto import (
 )
 from spg.application.bootstrap import Application, bootstrap
 from spg.application.orchestration import ProductionOrchestrator
+from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.domain.product import (
@@ -38,6 +40,7 @@ from spg.domain.product import (
     WorkRefinementRequest,
     WorkStatus,
 )
+from spg.domain.steering import SteeringRecordNotFound
 from spg.infrastructure.persistence import Database, DatabaseConfigurationError
 
 
@@ -70,6 +73,7 @@ def create_http_application(
     database: Database | None = None,
     work_service: WorkApplicationService | None = None,
     orchestrator: ProductionOrchestrator | None = None,
+    steering_driver: PlanSteeringDriver | None = None,
     runtime_activation: RuntimeActivationService | None = None,
 ) -> FastAPI:
     """Compose one ASGI application over the existing application bootstrap path."""
@@ -85,16 +89,23 @@ def create_http_application(
     selected_orchestrator = orchestrator or container.production_orchestrator(
         work_service
     )
+    selected_steering_driver = steering_driver or container.plan_steering_driver(
+        selected_database,
+        work_service,
+        selected_orchestrator,
+    )
     selected_runtime_activation = runtime_activation or container.runtime_activation(
         selected_database
     )
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
+        selected_steering_driver.resume_safely_eligible_works()
         selected_orchestrator.resume_safely_eligible_works()
         try:
             yield
         finally:
+            selected_steering_driver.shutdown()
             selected_orchestrator.shutdown()
 
     api = FastAPI(
@@ -108,13 +119,15 @@ def create_http_application(
     api.state.database = selected_database
     api.state.work_service = work_service
     api.state.production_orchestrator = selected_orchestrator
+    api.state.plan_steering_driver = selected_steering_driver
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
     @api.exception_handler(ProductRecordNotFound)
+    @api.exception_handler(SteeringRecordNotFound)
     async def not_found_handler(
         _request: Request,
-        error: ProductRecordNotFound,
+        error: ProductRecordNotFound | SteeringRecordNotFound,
     ) -> JSONResponse:
         return _error(404, "NOT_FOUND", str(error))
 
@@ -221,6 +234,15 @@ def create_http_application(
     @api.get("/api/works/{work_id}", response_model=WorkResponse)
     def get_work(work_id: UUID) -> WorkResponse:
         return WorkResponse.from_projection(work_service.get_work(work_id))
+
+    @api.get(
+        "/api/works/{work_id}/steering",
+        response_model=SteeringPlanResponse,
+    )
+    def get_steering_plan(work_id: UUID) -> SteeringPlanResponse:
+        return SteeringPlanResponse.from_projection(
+            selected_steering_driver.project(work_id)
+        )
 
     @api.post("/api/works/{work_id}/refine", response_model=WorkResponse)
     def refine_work(work_id: UUID, request: WorkRefineRequest) -> WorkResponse:

@@ -32,6 +32,14 @@ class _StaticOnlyOrchestrator:
         return None
 
 
+class _StaticOnlySteeringDriver:
+    def resume_safely_eligible_works(self) -> tuple[()]:
+        return ()
+
+    def shutdown(self) -> None:
+        return None
+
+
 class _StaticRuntimeActivation:
     def project(self) -> RuntimeActivationProjection:
         return RuntimeActivationProjection(
@@ -49,6 +57,7 @@ def _client() -> TestClient:
             database=_StaticOnlyDatabase(),
             work_service=_StaticOnlyWorkService(),
             orchestrator=_StaticOnlyOrchestrator(),
+            steering_driver=_StaticOnlySteeringDriver(),
             runtime_activation=_StaticRuntimeActivation(),
         )
     )

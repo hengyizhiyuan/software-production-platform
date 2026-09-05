@@ -5,13 +5,14 @@
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
-    IMPLEMENTATION = NOT YET STARTED
+    IMPLEMENTED FOR MVP BEHAVIOR
+    LONG-LIVED REAL DOGFOOD / CORE CLOSURE REVIEW PENDING
     MATERIAL MVP CORE PRODUCT CAPABILITY
 ```
 
-This is a documentation and Source-of-Truth contract. It does not implement
-Plan Steering, define a final persistence schema, or change production code,
-API, database, migrations, tests, PLAN-1B, ORCH, or SPG behavior.
+This contract remains the behavioral Source of Truth. MVP-PLAN-STEER-1C
+through 1F implement its bounded MVP behavior without defining a final general
+planning schema or reopening PLAN-1B and SPG authority semantics.
 
 It specializes the admitted
 [Reality-driven Plan Steering — Foundational Principles](reality-driven-plan-steering-principles.md)
@@ -594,13 +595,25 @@ referenced Completion `PRODUCED`, Verification `PASS`, exact Candidate and
 Authorization, converged Integration, Runtime Commit, and the advanced Trusted
 Baseline. Work-level `COMPLETED` is projected only from an admitted `COMPLETE`
 Steering Decision with matching trusted evidence. Legacy Works without a
-Steering Plan retain Runtime Commit → Work `COMPLETED` compatibility. Automatic
-post-cycle Steering evaluation remains outside 1E.
+Steering Plan retain Runtime Commit → Work `COMPLETED` compatibility.
+
+MVP-PLAN-STEER-1F adds a bounded process-local driver over those persisted
+facts. Each iteration reloads Work, active Plan revision, current Step,
+decisions, Runtime evidence, and Trusted Baseline; it performs no more than one
+semantic Steering action and then compares authoritative fingerprints. PRODUCE
+delegates to ORCH and stops while a production cycle is active. ORCH terminal
+outcomes re-enable Steering assessment. Typed Human, completion, production,
+blocked, no-progress, transition-bound, and shutdown stops prevent hidden
+spinning. Startup eligibility is reconstructed from persistence, and a
+read-only Plan projection exposes current/next Steps, rationale, automatic
+state, associated production cycle, Attention, and last stop without copying
+SPG Attempt/Dispatch detail into Plan truth.
 
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
-    IMPLEMENTATION = IN PROGRESS
+    IMPLEMENTED FOR MVP BEHAVIOR
+    LONG-LIVED REAL DOGFOOD / CORE CLOSURE REVIEW PENDING
     MATERIAL MVP CORE PRODUCT CAPABILITY
 
 MVP-PLAN-STEER-1C
@@ -614,6 +627,11 @@ MVP-PLAN-STEER-1D
 
 MVP-PLAN-STEER-1E
     PRODUCE STEP → SPG BRIDGE / LONG-LIVED WORK COMPLETION SEPARATION
+        = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
+
+MVP-PLAN-STEER-1F
+    BOUNDED AUTO-CONTINUE / RESTART / PLAN OBSERVABILITY
         = CLOSED / PASS
     ARCHITECTURE LEAD REALITY REVIEW = PASS
 

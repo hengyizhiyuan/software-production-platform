@@ -21,7 +21,13 @@ from spg.domain.product import (
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
 from spg.domain.runtime_activation import RuntimeActivationProjection
-from spg.domain.steering import RealityReference, SteeringAttentionReason
+from spg.domain.steering import (
+    RealityReference,
+    SteeringAttentionReason,
+    SteeringDecisionRecord,
+    SteeringPlanProjection,
+    SteeringStepRecord,
+)
 
 
 class ApiDto(BaseModel):
@@ -379,6 +385,126 @@ class WorkResponse(ApiDto):
                 work.latest_trusted_runtime_commit_id
             ),
             work_complete=work.work_complete,
+        )
+
+
+class SteeringStepResponse(ApiDto):
+    step_id: UUID
+    type: str
+    objective: str
+    completion_condition: str
+    position: int
+    state: str
+
+    @classmethod
+    def from_record(cls, step: SteeringStepRecord) -> Self:
+        return cls(
+            step_id=step.id,
+            type=step.type.value,
+            objective=step.objective,
+            completion_condition=step.completion_condition,
+            position=step.position,
+            state=step.state.value,
+        )
+
+
+class SteeringDecisionResponse(ApiDto):
+    decision_id: UUID
+    next_step_type: str
+    objective: str
+    reason: str
+    outcome: str
+    human_required: bool
+    attention_reason: str | None
+    reality_refs: tuple[RealityReference, ...]
+
+    @classmethod
+    def from_record(cls, decision: SteeringDecisionRecord) -> Self:
+        return cls(
+            decision_id=decision.id,
+            next_step_type=decision.next_step_type.value,
+            objective=decision.objective,
+            reason=decision.reason,
+            outcome=decision.steering_outcome.value,
+            human_required=decision.human_required,
+            attention_reason=(
+                None
+                if decision.attention_reason is None
+                else decision.attention_reason.value
+            ),
+            reality_refs=decision.reality_refs,
+        )
+
+
+class SteeringPlanResponse(ApiDto):
+    work_id: UUID
+    work_objective: str
+    steering_enabled: bool
+    steering_plan_id: UUID
+    active_revision_id: UUID
+    active_revision_number: int
+    completed_steps: tuple[SteeringStepResponse, ...]
+    current_step: SteeringStepResponse | None
+    known_next_steps: tuple[SteeringStepResponse, ...]
+    latest_decision: SteeringDecisionResponse | None
+    selection_rationale: str | None
+    steering_outcome: str | None
+    automatic_progression_state: str
+    current_production_cycle_number: int | None
+    current_production_run_id: UUID | None
+    current_production_cycle_trusted: bool
+    human_attention_required: bool
+    last_stop_reason: str | None
+
+    @classmethod
+    def from_projection(cls, projection: SteeringPlanProjection) -> Self:
+        return cls(
+            work_id=projection.work_id,
+            work_objective=projection.work_objective,
+            steering_enabled=projection.steering_enabled,
+            steering_plan_id=projection.steering_plan_id,
+            active_revision_id=projection.active_revision_id,
+            active_revision_number=projection.active_revision_number,
+            completed_steps=tuple(
+                SteeringStepResponse.from_record(step)
+                for step in projection.completed_steps
+            ),
+            current_step=(
+                None
+                if projection.current_step is None
+                else SteeringStepResponse.from_record(projection.current_step)
+            ),
+            known_next_steps=tuple(
+                SteeringStepResponse.from_record(step)
+                for step in projection.known_next_steps
+            ),
+            latest_decision=(
+                None
+                if projection.latest_decision is None
+                else SteeringDecisionResponse.from_record(projection.latest_decision)
+            ),
+            selection_rationale=projection.selection_rationale,
+            steering_outcome=(
+                None
+                if projection.steering_outcome is None
+                else projection.steering_outcome.value
+            ),
+            automatic_progression_state=(
+                projection.automatic_progression_state.value
+            ),
+            current_production_cycle_number=(
+                projection.current_production_cycle_number
+            ),
+            current_production_run_id=projection.current_production_run_id,
+            current_production_cycle_trusted=(
+                projection.current_production_cycle_trusted
+            ),
+            human_attention_required=projection.human_attention_required,
+            last_stop_reason=(
+                None
+                if projection.last_stop_reason is None
+                else projection.last_stop_reason.value
+            ),
         )
 
 

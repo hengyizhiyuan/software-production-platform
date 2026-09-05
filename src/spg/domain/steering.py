@@ -39,6 +39,30 @@ class SteeringOutcome(StrEnum):
     COMPLETE = "COMPLETE"
 
 
+class SteeringDriverStopReason(StrEnum):
+    HUMAN_ATTENTION = "HUMAN_ATTENTION"
+    COMPLETE = "COMPLETE"
+    PRODUCTION_RUNNING = "PRODUCTION_RUNNING"
+    BLOCKED = "BLOCKED"
+    NO_PROGRESS = "NO_PROGRESS"
+    TRANSITION_BOUND = "TRANSITION_BOUND"
+    SHUTDOWN = "SHUTDOWN"
+
+
+class SteeringActionType(StrEnum):
+    STEP_TRANSITION = "STEP_TRANSITION"
+    PRODUCTION_CYCLE_ADMISSION = "PRODUCTION_CYCLE_ADMISSION"
+    PRODUCTION_SCHEDULE = "PRODUCTION_SCHEDULE"
+    HUMAN_ATTENTION = "HUMAN_ATTENTION"
+    COMPLETE = "COMPLETE"
+
+
+class SteeringAutomaticProgressionState(StrEnum):
+    ACTIVE = "ACTIVE"
+    WAITING_PRODUCTION = "WAITING_PRODUCTION"
+    STOPPED = "STOPPED"
+
+
 class SteeringHistoryEventType(StrEnum):
     STEP_TRANSITION = "STEP_TRANSITION"
     STEP_ELABORATION = "STEP_ELABORATION"
@@ -364,6 +388,53 @@ class SteeringPlanReconstruction(BaseModel):
     latest_decision: SteeringDecisionRecord | None
     history: tuple[SteeringHistoryEventRecord, ...]
     has_material_revision: bool
+
+
+class SteeringIterationResult(BaseModel):
+    """Ephemeral driver result; authoritative progression remains persisted elsewhere."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    work_id: UUID
+    action: SteeringActionType | None
+    progressed: bool
+    before_fingerprint: str = Field(min_length=64, max_length=64)
+    after_fingerprint: str = Field(min_length=64, max_length=64)
+    stop_reason: SteeringDriverStopReason | None = None
+
+
+class SteeringActivationResult(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    work_id: UUID
+    iterations_executed: int = Field(ge=0)
+    stop_reason: SteeringDriverStopReason
+    last_action: SteeringActionType | None = None
+
+
+class SteeringPlanProjection(BaseModel):
+    """Read-only Plan-level view composed from persisted truth and driver activity."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    work_id: UUID
+    work_objective: str
+    steering_enabled: bool
+    steering_plan_id: UUID
+    active_revision_id: UUID
+    active_revision_number: int
+    completed_steps: tuple[SteeringStepRecord, ...]
+    current_step: SteeringStepRecord | None
+    known_next_steps: tuple[SteeringStepRecord, ...]
+    latest_decision: SteeringDecisionRecord | None
+    selection_rationale: str | None
+    steering_outcome: SteeringOutcome | None
+    automatic_progression_state: SteeringAutomaticProgressionState
+    current_production_cycle_number: int | None
+    current_production_run_id: UUID | None
+    current_production_cycle_trusted: bool
+    human_attention_required: bool
+    last_stop_reason: SteeringDriverStopReason | None
 
 
 class SteeringDecisionBasis(BaseModel):

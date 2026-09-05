@@ -146,7 +146,7 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | Motive / Work / Plan Concept Calibration | CLOSED / PASS |
-| Reality-driven Plan Steering | IN PROGRESS — MVP-PLAN-STEER-1C/1D/1E CLOSED / PASS; AUTOMATIC LONG-LIVED PROGRESSION REMAINS PENDING |
+| Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F CLOSED / PASS; LONG-LIVED REAL DOGFOOD / CORE CLOSURE REVIEW PENDING |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -350,11 +350,12 @@ Next-Step evaluation/admission, stale-basis and authority guards, and the five
 bounded MVP Steering Human Attention reasons. MVP-PLAN-STEER-1E adds the
 authority-checked PRODUCE-Step bridge to independent one-PWU SPG cycles,
 per-cycle current-baseline binding, trusted Step-close evidence, and separates
-Steering Work completion from a single Runtime Commit. Automatic long-lived
-Steering evaluation/driver behavior and extended Human Attention remain
-unimplemented. It is a
-material remaining core product
-capability, not Phase-2 hardening. Advanced autonomous
+Steering Work completion from a single Runtime Commit. MVP-PLAN-STEER-1F adds
+the bounded process-local auto-continue driver, typed stops, restart
+reconstruction, ORCH outcome wakeups, and Plan-level API observability without
+owning new progression truth. The capability is **implemented for MVP
+behavior**, with 1F **CLOSED / PASS** after Architecture Lead Reality Review;
+long-lived real Dogfood/core closure remains pending. Advanced autonomous
 replanning, multi-PWU orchestration, optimization, and unattended continuous
 production remain separable deferred capabilities. See
 [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md).
@@ -376,9 +377,11 @@ provider, session, host, or environment changes. Identical wording is not
 required, but material divergence without changed Reality must be detectable
 and explainable. New model output alone is not New Reality.
 
-The capability is **IN PROGRESS** through the closed MVP-PLAN-STEER-1C Truth
-Spine, the closed MVP-PLAN-STEER-1D decision layer, and the closed
-MVP-PLAN-STEER-1E production bridge. PLAN-1B
+The capability is **IMPLEMENTED FOR MVP BEHAVIOR** through the closed
+MVP-PLAN-STEER-1C Truth Spine, the closed MVP-PLAN-STEER-1D decision layer, the
+closed MVP-PLAN-STEER-1E production bridge, and MVP-PLAN-STEER-1F bounded
+automatic progression, now **CLOSED / PASS** after Architecture Lead Reality
+Review. Long-lived real Dogfood/core closure remains pending. PLAN-1B
 remains CLOSED / PASS for one Single-PWU production-step plan and remains
 distinct from long-lived Plan Steering. See
 [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md).
@@ -394,8 +397,9 @@ rationale. Plan owns progression state and rationale while referenced governed
 Reality retains its existing Truth ownership. Step transition, progressive
 elaboration, and material Plan revision remain distinct. The persisted Truth
 Spine is **CLOSED / PASS**. The 1D Plan Frame, decision admission, and bounded
-Steering Attention layer is **CLOSED / PASS**; automatic progression requires
-separate admission. See
+Steering Attention layer is **CLOSED / PASS**. The 1F bounded auto-continue
+driver is also **CLOSED / PASS** after Architecture Lead Reality Review;
+long-lived real Dogfood/core closure remains pending. See
 [Reality-driven Plan Steering MVP Behavioral Contract](docs/architecture/reality-driven-plan-steering-mvp-contract.md).
 
 ### Interpretation Externalization / Multimodal Alignment

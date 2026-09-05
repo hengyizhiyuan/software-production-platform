@@ -7,6 +7,7 @@ from enum import StrEnum
 import logging
 from threading import Condition, Event, RLock, Thread
 from time import monotonic
+from typing import Callable
 from uuid import UUID
 
 from spg.application.work import WorkApplicationService
@@ -68,6 +69,7 @@ class ProductionOrchestrator:
         self._active_work_ids: set[UUID] = set()
         self._threads: dict[UUID, Thread] = {}
         self._last_outcomes: dict[UUID, OrchestrationOutcome] = {}
+        self._outcome_listeners: list[Callable[[OrchestrationOutcome], None]] = []
         self._stopping = Event()
 
     def schedule(self, work_id: UUID) -> bool:
@@ -99,9 +101,23 @@ class ProductionOrchestrator:
 
         scheduled: list[UUID] = []
         for work in self.work_service.list_works():
-            if work.status in _AUTOMATIC_STATUSES and self.schedule(work.work_id):
+            if (
+                not work.steering_enabled
+                and work.status in _AUTOMATIC_STATUSES
+                and self.schedule(work.work_id)
+            ):
                 scheduled.append(work.work_id)
         return tuple(scheduled)
+
+    def add_outcome_listener(
+        self,
+        listener: Callable[[OrchestrationOutcome], None],
+    ) -> None:
+        """Register an ephemeral wakeup listener; no progression truth is copied."""
+
+        with self._condition:
+            if listener not in self._outcome_listeners:
+                self._outcome_listeners.append(listener)
 
     def orchestrate(self, work_id: UUID) -> OrchestrationOutcome:
         """Drive fresh Reality through one legal transition at a time."""
@@ -221,7 +237,15 @@ class ProductionOrchestrator:
                 self._last_outcomes[work_id] = outcome
                 self._threads.pop(work_id, None)
                 self._active_work_ids.discard(work_id)
+                listeners = tuple(self._outcome_listeners)
                 self._condition.notify_all()
+            for listener in listeners:
+                try:
+                    listener(outcome)
+                except Exception:
+                    LOGGER.exception(
+                        "Production outcome listener failed Work=%s", work_id
+                    )
 
     def _fingerprint(self, work_id: UUID, projection: WorkProjection) -> str:
         reality_fingerprint = getattr(

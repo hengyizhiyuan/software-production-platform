@@ -1070,10 +1070,9 @@ class WorkApplicationService:
             with self.database.unit_of_work() as unit_of_work:
                 steering = SteeringStore(unit_of_work.session)
                 plan = steering.plan_for_work(projection.work_id)
+                revision = None if plan is None else steering.active_revision(plan.id)
                 decision = (
-                    None
-                    if plan is None
-                    else steering.latest_decision_for_plan(plan.id)
+                    None if revision is None else steering.latest_decision(revision.id)
                 )
             if (
                 decision is not None
@@ -1268,9 +1267,7 @@ class WorkApplicationService:
                     ),
                     None,
                 )
-            latest_steering_decision = steering.latest_decision_for_plan(
-                steering_plan.id
-            )
+                latest_steering_decision = steering.latest_decision(revision.id)
         current_cycle_binding = self._runtime_binding_for_current_context(
             store, work.id
         )

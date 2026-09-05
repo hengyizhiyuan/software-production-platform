@@ -3,11 +3,13 @@ from datetime import UTC, datetime
 import os
 from pathlib import Path
 import subprocess
+from time import monotonic, sleep
 from uuid import uuid4
 
 from alembic import command
 from alembic.config import Config
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError
 
@@ -19,11 +21,13 @@ from spg.application.steering_decision import (
     SteeringDecisionApplicationService,
 )
 from spg.application.steering_production import SteeringProductionService
+from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.orchestration import (
     OrchestrationStopReason,
     ProductionOrchestrator,
 )
 from spg.application.work import WorkApplicationService
+from spg.api import create_http_application
 from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import (
@@ -48,6 +52,7 @@ from spg.domain.steering import (
     ReviseSteeringPlanRequest,
     StaleSteeringCandidate,
     SteeringAttentionReason,
+    SteeringDriverStopReason,
     SteeringAuthorityAssessment,
     SteeringHistoryEventType,
     SteeringInvariantViolation,
@@ -830,6 +835,37 @@ def _trusted_cycle(
         ).runtime_commit_id is not None
 
 
+def _wait_for(assertion, *, timeout: float = 30.0) -> None:
+    deadline = monotonic() + timeout
+    last_error = None
+    while monotonic() < deadline:
+        try:
+            assertion()
+            return
+        except AssertionError as error:
+            last_error = error
+            sleep(0.02)
+    if last_error is not None:
+        raise last_error
+    raise AssertionError("Timed out waiting for deterministic Steering Reality")
+
+
+def _authorize_current_candidate(
+    works: WorkApplicationService,
+    work_id,
+) -> None:
+    attention = works.list_attention(work_id=work_id)
+    assert len(attention) == 1
+    assert attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION
+    works.resolve_attention(
+        attention[0].id,
+        AttentionResolutionRequest(
+            action=AttentionAction.AUTHORIZE,
+            authority_identity="human:steering-driver-candidate",
+        ),
+    )
+
+
 def test_steer_spg_01_through_16_two_independent_cycles_and_completion(
     postgres_database: Database,
     admitted_work,
@@ -1106,6 +1142,458 @@ def test_steer_spg_failed_second_cycle_stays_open_without_retry(
     again = orchestrator.orchestrate(work.work_id)
     assert again.transitions_executed == 0
     assert executor.dispatch_count == 1
+    driver = PlanSteeringDriver(
+        postgres_database,
+        failing,
+        orchestrator,
+    )
+    driver_outcome = driver.activate(work.work_id)
+    assert driver_outcome.stop_reason is SteeringDriverStopReason.BLOCKED
+    assert driver_outcome.iterations_executed == 0
+    assert failing.get_work(work.work_id).status is WorkStatus.BLOCKED
+    assert executor.dispatch_count == 1
+
+
+def test_steer_loop_auto_continues_two_cycles_across_restart_and_projects_api(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    original_works, work, baseline_zero = admitted_work
+    _create_steering_plan(
+        postgres_database,
+        work.work_id,
+        steps=(
+            SteeringStepSpec(
+                type=SteeringStepType.DESIGN,
+                objective="Govern the deterministic design Reality",
+                completion_condition="The admitted design direction is recorded",
+                state=SteeringStepState.CURRENT,
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.PRODUCE,
+                objective="Produce trusted result A",
+                completion_condition="Production result A is trusted",
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.PRODUCE,
+                objective="Produce trusted result B",
+                completion_condition="Production result B is trusted",
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.VERIFY_ACCEPT,
+                objective="Accept the persisted verification evidence",
+                completion_condition="Required persisted evidence is accepted",
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.COMPLETE,
+                objective="Close the long-lived Work",
+                completion_condition="Both production cycles are trusted",
+            ),
+        ),
+    )
+    executor_a = DeterministicTestExecutor(
+        DeterministicExecutionSpecification(
+            operations=(
+                DeterministicFileOperation(
+                    operation=DeterministicFileOperationType.CREATE,
+                    repository_relative_path="docs/steering-result.md",
+                    content="# Trusted cycle A\n",
+                ),
+            ),
+            reported_outcome=ProviderReportedOutcome.SUCCESS,
+            summary="deterministic cycle A",
+        )
+    )
+    works_a = WorkApplicationService(
+        postgres_database,
+        workspace_root=original_works.workspace_root,
+        executor=executor_a,
+        verifier=DeterministicVerificationProvider(
+            {"Verify the admitted artifact": VerificationResultValue.PASS}
+        ),
+    )
+    orchestrator_a = ProductionOrchestrator(works_a)
+    driver_a = PlanSteeringDriver(
+        postgres_database,
+        works_a,
+        orchestrator_a,
+        capability=_WordingCapability(
+            reason="Session A follows persisted governed Reality",
+            provider="fake:steering-session-a",
+        ),
+    )
+    try:
+        started = driver_a.activate(work.work_id)
+        assert started.stop_reason is SteeringDriverStopReason.PRODUCTION_RUNNING
+        assert started.iterations_executed == 2
+
+        def cycle_a_waiting_for_human() -> None:
+            projection = works_a.get_work(work.work_id)
+            assert projection.status is WorkStatus.NEEDS_ATTENTION
+            assert projection.current_production_cycle_number == 1
+            assert not orchestrator_a.is_active(work.work_id)
+            assert not driver_a.is_active(work.work_id)
+
+        _wait_for(cycle_a_waiting_for_human)
+        assert executor_a.dispatch_count == 1
+        driver_a.shutdown()
+        _authorize_current_candidate(works_a, work.work_id)
+        assert orchestrator_a.schedule(work.work_id)
+
+        def cycle_a_trusted() -> None:
+            projection = works_a.get_work(work.work_id)
+            assert projection.current_production_cycle_trusted is True
+            assert not orchestrator_a.is_active(work.work_id)
+
+        _wait_for(cycle_a_trusted)
+        baseline_one = RuntimeService(postgres_database).current_baseline()
+        assert baseline_one.id != baseline_zero.id
+    finally:
+        driver_a.shutdown()
+        orchestrator_a.shutdown()
+
+    executor_b = DeterministicTestExecutor(
+        DeterministicExecutionSpecification(
+            operations=(
+                DeterministicFileOperation(
+                    operation=DeterministicFileOperationType.MODIFY,
+                    repository_relative_path="docs/steering-result.md",
+                    content="# Trusted cycle B\n",
+                ),
+            ),
+            reported_outcome=ProviderReportedOutcome.SUCCESS,
+            summary="deterministic cycle B after restart",
+        )
+    )
+    works_b = WorkApplicationService(
+        postgres_database,
+        workspace_root=original_works.workspace_root,
+        executor=executor_b,
+        verifier=DeterministicVerificationProvider(
+            {"Verify the admitted artifact": VerificationResultValue.PASS}
+        ),
+    )
+    orchestrator_b = ProductionOrchestrator(works_b)
+    driver_b = PlanSteeringDriver(
+        postgres_database,
+        works_b,
+        orchestrator_b,
+        capability=_WordingCapability(
+            reason="Session B independently reconstructs the same material direction",
+            provider="fake:steering-session-b",
+        ),
+    )
+    try:
+        assert driver_b.resume_safely_eligible_works() == (work.work_id,)
+
+        def cycle_b_waiting_for_human() -> None:
+            projection = works_b.get_work(work.work_id)
+            reconstruction = SteeringApplicationService(
+                postgres_database
+            ).reconstruct(work.work_id)
+            assert projection.status is WorkStatus.NEEDS_ATTENTION
+            assert projection.current_production_cycle_number == 2
+            assert reconstruction.current_step is not None
+            assert reconstruction.current_step.objective == "Produce trusted result B"
+            assert not orchestrator_b.is_active(work.work_id)
+            assert not driver_b.is_active(work.work_id)
+
+        _wait_for(cycle_b_waiting_for_human)
+        assert executor_b.dispatch_count == 1
+        waiting_projection = driver_b.project(work.work_id)
+        assert waiting_projection.current_step is not None
+        assert waiting_projection.current_step.objective == "Produce trusted result B"
+        assert waiting_projection.current_production_cycle_number == 2
+        assert waiting_projection.human_attention_required is True
+        assert (
+            waiting_projection.last_stop_reason
+            is SteeringDriverStopReason.HUMAN_ATTENTION
+        )
+        assert waiting_projection.latest_decision is not None
+        assert waiting_projection.selection_rationale == (
+            "Session B independently reconstructs the same material direction"
+        )
+        with postgres_database.unit_of_work() as unit_of_work:
+            bindings = ProductStore(unit_of_work.session).runtime_bindings(work.work_id)
+            assert len(bindings) == 2
+            run_a = RuntimeStore(unit_of_work.session).run(bindings[0].production_run_id)
+            run_b = RuntimeStore(unit_of_work.session).run(bindings[1].production_run_id)
+            assert run_a is not None and run_b is not None
+            assert run_a.source_baseline_id == baseline_zero.id
+            assert run_b.source_baseline_id == baseline_one.id
+
+        _authorize_current_candidate(works_b, work.work_id)
+        assert orchestrator_b.schedule(work.work_id)
+
+        def long_lived_work_completed() -> None:
+            projection = works_b.get_work(work.work_id)
+            assert projection.status is WorkStatus.COMPLETED
+            assert projection.work_complete is True
+            assert not orchestrator_b.is_active(work.work_id)
+            assert not driver_b.is_active(work.work_id)
+
+        _wait_for(long_lived_work_completed)
+        baseline_two = RuntimeService(postgres_database).current_baseline()
+        assert baseline_two.id not in {baseline_zero.id, baseline_one.id}
+        reconstruction = SteeringApplicationService(postgres_database).reconstruct(
+            work.work_id
+        )
+        assert [step.type for step in reconstruction.completed_steps] == [
+            SteeringStepType.DESIGN,
+            SteeringStepType.PRODUCE,
+            SteeringStepType.PRODUCE,
+            SteeringStepType.VERIFY_ACCEPT,
+        ]
+        assert reconstruction.current_step is not None
+        assert reconstruction.current_step.type is SteeringStepType.COMPLETE
+        projection = driver_b.project(work.work_id)
+        assert projection.current_step.type is SteeringStepType.COMPLETE
+        assert projection.known_next_steps == ()
+        assert projection.last_stop_reason is SteeringDriverStopReason.COMPLETE
+        assert projection.current_production_cycle_number is None
+        assert projection.current_production_cycle_trusted is False
+        assert projection.human_attention_required is False
+
+        api = create_http_application(
+            database=postgres_database,
+            work_service=works_b,
+            orchestrator=orchestrator_b,
+            steering_driver=driver_b,
+        )
+        response = TestClient(api).get(f"/api/works/{work.work_id}/steering")
+        assert response.status_code == 200
+        body = response.json()
+        assert body["work_objective"] == "Establish the first bounded artifact"
+        assert body["steering_enabled"] is True
+        assert body["active_revision_number"] == 1
+        assert body["current_step"]["type"] == "COMPLETE"
+        assert body["known_next_steps"] == []
+        assert body["latest_decision"]["outcome"] == "COMPLETE"
+        assert body["selection_rationale"]
+        assert body["automatic_progression_state"] == "STOPPED"
+        assert body["last_stop_reason"] == "COMPLETE"
+        assert "attempt" not in body
+        assert "dispatch" not in body
+    finally:
+        driver_b.shutdown()
+        orchestrator_b.shutdown()
+
+
+def test_steer_loop_human_attention_stops_then_plan_revision_reenables(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    works, work, _baseline = admitted_work
+    created = _create_steering_plan(
+        postgres_database,
+        work.work_id,
+        steps=(
+            SteeringStepSpec(
+                type=SteeringStepType.DESIGN,
+                objective="Close the bounded design",
+                completion_condition="Design direction is governed",
+                state=SteeringStepState.CURRENT,
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.HUMAN_DECISION,
+                objective="Choose the material architecture direction",
+                completion_condition="Human Authority records the direction",
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.PRODUCE,
+                objective="Produce only after the governed decision",
+                completion_condition="The production result is trusted",
+            ),
+        ),
+    )
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(postgres_database, works, orchestrator)
+    try:
+        stopped = driver.activate(work.work_id)
+        assert stopped.stop_reason is SteeringDriverStopReason.HUMAN_ATTENTION
+        assert stopped.iterations_executed == 2
+        reconstruction = SteeringApplicationService(postgres_database).reconstruct(
+            work.work_id
+        )
+        assert reconstruction.current_step is not None
+        assert reconstruction.current_step.type is SteeringStepType.HUMAN_DECISION
+        assert reconstruction.next_step is not None
+        assert reconstruction.next_step.type is SteeringStepType.PRODUCE
+        assert works.get_work(work.work_id).status is WorkStatus.NEEDS_ATTENTION
+        assert driver.resume_safely_eligible_works() == ()
+        with postgres_database.unit_of_work() as unit_of_work:
+            bindings = ProductStore(unit_of_work.session).runtime_bindings(work.work_id)
+            assert len(bindings) == 1
+            assert bindings[0].steering_step_id is None
+        assert orchestrator.last_outcome(work.work_id) is None
+
+        work_ref = RealityReference(
+            kind=RealityReferenceKind.WORK,
+            identity=work.work_id,
+        )
+        revised = SteeringApplicationService(postgres_database).revise_plan(
+            ReviseSteeringPlanRequest(
+                steering_plan_id=created.steering_plan_id,
+                superseded_revision_id=created.active_revision.revision.id,
+                rationale="Human Authority resolved the material direction",
+                reality_refs=(work_ref,),
+                steps=(
+                    SteeringStepSpec(
+                        type=SteeringStepType.DESIGN,
+                        objective="Record the selected bounded direction",
+                        completion_condition="The Human decision is incorporated",
+                        state=SteeringStepState.CURRENT,
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.PRODUCE,
+                        objective="Produce the selected bounded direction",
+                        completion_condition="The production result is trusted",
+                    ),
+                ),
+            )
+        )
+        assert works.get_work(work.work_id).status is WorkStatus.READY
+        restarted = PlanSteeringDriver(postgres_database, works, orchestrator)
+        resumed = restarted.iterate(work.work_id)
+        assert resumed.progressed is True
+        assert resumed.stop_reason is None
+        current = SteeringApplicationService(postgres_database).reconstruct(
+            work.work_id
+        ).current_step
+        assert current is not None and current.type is SteeringStepType.PRODUCE
+        assert revised.active_revision.revision.revision_number == 2
+        restarted.shutdown()
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
+
+
+def test_steer_loop_verify_accept_without_evidence_requests_product_acceptance(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    works, work, _baseline = admitted_work
+    _create_steering_plan(
+        postgres_database,
+        work.work_id,
+        steps=(
+            SteeringStepSpec(
+                type=SteeringStepType.VERIFY_ACCEPT,
+                objective="Accept the long-lived product outcome",
+                completion_condition="Persisted evidence proves product acceptance",
+                state=SteeringStepState.CURRENT,
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.COMPLETE,
+                objective="Close the long-lived Work",
+                completion_condition="The long-lived outcome is accepted",
+            ),
+        ),
+    )
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(postgres_database, works, orchestrator)
+    try:
+        outcome = driver.activate(work.work_id)
+        assert outcome.stop_reason is SteeringDriverStopReason.HUMAN_ATTENTION
+        reconstruction = SteeringApplicationService(postgres_database).reconstruct(
+            work.work_id
+        )
+        assert reconstruction.current_step is not None
+        assert reconstruction.current_step.type is SteeringStepType.VERIFY_ACCEPT
+        assert reconstruction.latest_decision is not None
+        assert (
+            reconstruction.latest_decision.attention_reason
+            is SteeringAttentionReason.PRODUCT_ACCEPTANCE_REQUIRED
+        )
+        assert works.get_work(work.work_id).status is WorkStatus.NEEDS_ATTENTION
+        assert orchestrator.last_outcome(work.work_id) is None
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
+
+
+def test_steer_loop_no_progress_and_transition_bound_are_typed(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    works, work, _baseline = admitted_work
+    _create_steering_plan(
+        postgres_database,
+        work.work_id,
+        steps=(
+            SteeringStepSpec(
+                type=SteeringStepType.DESIGN,
+                objective="Known but not current",
+                completion_condition="A current Step must be admitted",
+            ),
+        ),
+    )
+    orchestrator = ProductionOrchestrator(works)
+    no_progress_driver = PlanSteeringDriver(postgres_database, works, orchestrator)
+    try:
+        assert no_progress_driver.resume_safely_eligible_works() == ()
+        result = no_progress_driver.iterate(work.work_id)
+        assert result.stop_reason is SteeringDriverStopReason.NO_PROGRESS
+        assert result.progressed is False
+        assert result.before_fingerprint == result.after_fingerprint
+        no_progress_driver.shutdown()
+        shutdown = no_progress_driver.activate(work.work_id)
+        assert shutdown.stop_reason is SteeringDriverStopReason.SHUTDOWN
+        assert shutdown.iterations_executed == 0
+    finally:
+        no_progress_driver.shutdown()
+        orchestrator.shutdown()
+
+    revised = SteeringApplicationService(postgres_database).revise_plan(
+        ReviseSteeringPlanRequest(
+            steering_plan_id=SteeringApplicationService(
+                postgres_database
+            ).reconstruct(work.work_id).steering_plan_id,
+            superseded_revision_id=SteeringApplicationService(
+                postgres_database
+            ).reconstruct(work.work_id).active_revision.revision.id,
+            rationale="Admit a bounded executable direction",
+            reality_refs=(
+                RealityReference(
+                    kind=RealityReferenceKind.WORK,
+                    identity=work.work_id,
+                ),
+            ),
+            steps=(
+                SteeringStepSpec(
+                    type=SteeringStepType.DESIGN,
+                    objective="One bounded design action",
+                    completion_condition="Design action is governed",
+                    state=SteeringStepState.CURRENT,
+                ),
+                SteeringStepSpec(
+                    type=SteeringStepType.PRODUCE,
+                    objective="Later production must not run in this activation",
+                    completion_condition="Production is trusted",
+                ),
+            ),
+        )
+    )
+    bounded_orchestrator = ProductionOrchestrator(works)
+    bounded = PlanSteeringDriver(
+        postgres_database,
+        works,
+        bounded_orchestrator,
+        max_automatic_transitions=1,
+    )
+    try:
+        outcome = bounded.activate(work.work_id)
+        assert outcome.stop_reason is SteeringDriverStopReason.TRANSITION_BOUND
+        assert outcome.iterations_executed == 1
+        assert bounded_orchestrator.last_outcome(work.work_id) is None
+        current = SteeringApplicationService(postgres_database).reconstruct(
+            work.work_id
+        ).current_step
+        assert current is not None and current.type is SteeringStepType.PRODUCE
+        assert revised.active_revision.revision.revision_number == 2
+    finally:
+        bounded.shutdown()
+        bounded_orchestrator.shutdown()
 
 
 def test_steering_migration_downgrade_and_reupgrade(

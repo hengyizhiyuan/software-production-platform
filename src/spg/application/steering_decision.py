@@ -299,6 +299,21 @@ class DeterministicPlanSteeringCapability:
                 authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
             )
 
+        if current.type is SteeringStepType.VERIFY_ACCEPT:
+            return self._attention(
+                plan_frame,
+                refs,
+                reason=SteeringAttentionReason.PRODUCT_ACCEPTANCE_REQUIRED,
+                objective="Decide whether the governed product evidence is accepted",
+                rationale=(
+                    "Persisted production evidence does not yet prove the admitted "
+                    "long-lived completion condition"
+                ),
+                recommendation="Review the governed result against the Work outcome",
+                impact="Acceptance determines whether Watt may form a COMPLETE decision",
+                authority=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+            )
+
         if current.type is SteeringStepType.HUMAN_DECISION:
             return self._attention(
                 plan_frame,

@@ -4,13 +4,15 @@
 
 **Foundational Architecture / Product Principles: RECORDED / ADMITTED**
 
-**Reality-driven Plan Steering: MATERIAL MVP CORE PRODUCT CAPABILITY — IN PROGRESS**
+**Reality-driven Plan Steering: IMPLEMENTED FOR MVP BEHAVIOR — CORE CLOSURE REVIEW PENDING**
 
 **MVP-PLAN-STEER-1C Steering Truth Spine: CLOSED / PASS**
 
 **MVP-PLAN-STEER-1D Plan Frame, Steering Decision & Human Attention Lite: CLOSED / PASS**
 
 **MVP-PLAN-STEER-1E PRODUCE Step → SPG Bridge: CLOSED / PASS**
+
+**MVP-PLAN-STEER-1F Bounded Auto-Continue & Observability: CLOSED / PASS**
 
 This record builds on the
 [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
@@ -23,8 +25,7 @@ authority.
 
 The admitted bounded MVP behavior is defined in the
 [Reality-driven Plan Steering MVP Behavioral Contract](reality-driven-plan-steering-mvp-contract.md).
-The contract does not authorize further implementation or reopen PLAN-1B,
-ORCH, or SPG.
+The contract does not reopen PLAN-1B, ORCH, or SPG authority semantics.
 
 ## Strategic Product Position
 
@@ -316,21 +317,25 @@ development drift are intended to form durable system-level differentiation.
 This remains strategic intent, not a claim that other systems cannot implement
 similar principles.
 
-## Current Capability Gap
+## Current Capability State
 
 ```text
 Reality-driven Plan Steering
     MATERIAL MVP CORE PRODUCT CAPABILITY
-    NOT YET IMPLEMENTED
+    IMPLEMENTED FOR MVP BEHAVIOR
     MVP BEHAVIORAL CONTRACT DEFINED / ADMITTED
+    LONG-LIVED REAL DOGFOOD / CORE CLOSURE REVIEW PENDING
 
 MVP-PLAN-1B
     CLOSED / PASS
     Single-PWU Production Planner Lite only
 ```
 
-PLAN-1B does not satisfy long-lived Plan Steering. This record adds no
-implementation authorization.
+PLAN-1B alone does not satisfy long-lived Plan Steering. The bounded 1F driver
+now reconstructs persisted Reality, takes one semantic action per iteration,
+delegates production cycles to ORCH, stops on typed boundaries, and exposes a
+Plan-level projection. Advanced replanning and future Attention categories
+remain outside this MVP behavior.
 
 ## Reserved Next-stage Design Questions
 

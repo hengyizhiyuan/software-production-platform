@@ -24,6 +24,7 @@ from spg.application.steering_decision import (
     PlanFrameAssembler,
     SteeringDecisionApplicationService,
 )
+from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
@@ -253,6 +254,23 @@ class Application:
         return SteeringDecisionApplicationService(
             database or self.persistence(),
             capability or DeterministicPlanSteeringCapability(),
+        )
+
+    def plan_steering_driver(
+        self,
+        database: Database,
+        work_service: WorkApplicationService,
+        production_orchestrator: ProductionOrchestrator,
+        *,
+        capability: PlanSteeringCapability | None = None,
+    ) -> PlanSteeringDriver:
+        """Compose bounded Steering progression over existing governed seams."""
+
+        return PlanSteeringDriver(
+            database,
+            work_service,
+            production_orchestrator,
+            capability=capability,
         )
 
     def runtime_activation(
