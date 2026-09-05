@@ -11,6 +11,14 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from spg.domain.change import (
+    ProductionTargetKind,
+    safe_repository_area,
+    safe_repository_path,
+    safe_repository_scope,
+)
+from spg.domain.planning import ProductionPlanArtifactTarget
+
 
 class SteeringPlanRevisionCondition(StrEnum):
     ACTIVE = "ACTIVE"
@@ -50,6 +58,7 @@ class SteeringDriverStopReason(StrEnum):
 
 
 class SteeringActionType(StrEnum):
+    SEMANTIC_RESULT_ADMISSION = "SEMANTIC_RESULT_ADMISSION"
     STEP_TRANSITION = "STEP_TRANSITION"
     PRODUCTION_CYCLE_ADMISSION = "PRODUCTION_CYCLE_ADMISSION"
     PRODUCTION_SCHEDULE = "PRODUCTION_SCHEDULE"
@@ -81,6 +90,7 @@ class RealityReferenceKind(StrEnum):
     INTEGRATION_EFFECT = "INTEGRATION_EFFECT"
     RUNTIME_COMMIT = "RUNTIME_COMMIT"
     RECOVERY_ASSESSMENT = "RECOVERY_ASSESSMENT"
+    SEMANTIC_RESULT = "SEMANTIC_RESULT"
 
 
 class SteeringAttentionReason(StrEnum):
@@ -97,6 +107,11 @@ class SteeringAuthorityAssessment(StrEnum):
     WITHIN_AUTHORITY = "WITHIN_AUTHORITY"
     UNCERTAIN = "UNCERTAIN"
     EXPANDS_AUTHORITY = "EXPANDS_AUTHORITY"
+
+
+class SemanticResultKind(StrEnum):
+    DESIGN_DIRECTION = "DESIGN_DIRECTION"
+    WORK_REFINEMENT = "WORK_REFINEMENT"
 
 
 class PlanFrameBlockerKind(StrEnum):
@@ -129,6 +144,210 @@ class PlanFrameBlocker(BaseModel):
     kind: PlanFrameBlockerKind
     reason: str = Field(min_length=1)
     reality_refs: tuple[RealityReference, ...] = Field(min_length=1)
+
+
+class SemanticContextMaterial(BaseModel):
+    """Bounded exact-baseline repository material admitted for semantic reasoning."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    repository_relative_path: str = Field(min_length=1)
+    content: str
+    content_fingerprint: str = Field(min_length=64, max_length=64)
+
+
+class SemanticGovernanceDecision(BaseModel):
+    """Minimum Human/governance fact projected into a semantic input."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: UUID
+    decision_type: str = Field(min_length=1)
+    authority_identity: str = Field(min_length=1)
+    scope: dict[str, object]
+    rationale: str | None = None
+
+
+class SemanticProductionProposal(BaseModel):
+    """Advisory bounded production proposal; never production authority itself."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    target_kind: ProductionTargetKind
+    objective: str = Field(min_length=1)
+    artifact_targets: tuple[ProductionPlanArtifactTarget, ...] = ()
+    code_targets: tuple[str, ...] = ()
+    allowed_areas: tuple[str, ...] = ()
+    forbidden_areas: tuple[str, ...] = ()
+    verification_expectation: str = Field(min_length=1)
+
+    @field_validator("code_targets")
+    @classmethod
+    def normalize_code_targets(cls, values: tuple[str, ...]) -> tuple[str, ...]:
+        return tuple(dict.fromkeys(safe_repository_path(value) for value in values))
+
+    @field_validator("allowed_areas")
+    @classmethod
+    def normalize_allowed_areas(cls, values: tuple[str, ...]) -> tuple[str, ...]:
+        return tuple(dict.fromkeys(safe_repository_area(value) for value in values))
+
+    @field_validator("forbidden_areas")
+    @classmethod
+    def normalize_forbidden_areas(cls, values: tuple[str, ...]) -> tuple[str, ...]:
+        return tuple(dict.fromkeys(safe_repository_scope(value) for value in values))
+
+    @model_validator(mode="after")
+    def require_one_bounded_target_form(self) -> Self:
+        if self.target_kind is ProductionTargetKind.DOCUMENTATION_WORK:
+            if len(self.artifact_targets) != 1 or any(
+                (self.code_targets, self.allowed_areas, self.forbidden_areas)
+            ):
+                raise ValueError(
+                    "documentation semantic production requires one artifact target"
+                )
+        elif self.artifact_targets or not (self.code_targets or self.allowed_areas):
+            raise ValueError(
+                "code semantic production requires exact targets or bounded areas"
+            )
+        if set(self.code_targets) & set(self.forbidden_areas):
+            raise ValueError("semantic production target conflicts with a forbidden path")
+        return self
+
+
+class SemanticStepInput(BaseModel):
+    """Reconstructable governed input for one current semantic Steering Step."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    work_id: UUID
+    desired_outcome: str = Field(min_length=1)
+    constraints: tuple[str, ...]
+    steering_plan_revision_id: UUID
+    step: "SteeringStepRecord"
+    basis_fingerprint: str = Field(min_length=64, max_length=64)
+    engineering_resource_id: UUID
+    engineering_scope_id: UUID
+    engineering_scope_summary: str = Field(min_length=1)
+    engineering_scope_fingerprint: str = Field(min_length=64, max_length=64)
+    repository_identity: str = Field(min_length=1)
+    repository_location: str = Field(min_length=1)
+    repository_ref: str = Field(min_length=1)
+    source_baseline_id: UUID
+    source_revision: str = Field(min_length=1)
+    source_tree: str = Field(min_length=1)
+    reality_refs: tuple[RealityReference, ...] = Field(min_length=1)
+    governance_decisions: tuple[SemanticGovernanceDecision, ...]
+    repository_tree_paths: tuple[str, ...]
+    context_materials: tuple[SemanticContextMaterial, ...]
+
+    @model_validator(mode="after")
+    def require_semantic_step(self) -> Self:
+        if self.step.type not in {SteeringStepType.DESIGN, SteeringStepType.REFINE}:
+            raise ValueError("Semantic Step input supports only DESIGN and REFINE")
+        if self.step.steering_plan_revision_id != self.steering_plan_revision_id:
+            raise ValueError("Semantic Step input revision and Step do not match")
+        return self
+
+
+class SemanticStepResultCandidate(BaseModel):
+    """Advisory provider output bound to one exact semantic input."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    work_id: UUID
+    steering_plan_revision_id: UUID
+    step_id: UUID
+    step_type: SteeringStepType
+    basis_fingerprint: str = Field(min_length=64, max_length=64)
+    result_kind: SemanticResultKind
+    bounded_summary: str = Field(min_length=20)
+    decisions: tuple[str, ...] = Field(min_length=1)
+    derived_constraints: tuple[str, ...] = ()
+    evidence_refs: tuple[RealityReference, ...] = Field(min_length=1)
+    unresolved_questions: tuple[str, ...] = ()
+    authority_assessment: SteeringAuthorityAssessment
+    human_attention_recommendation: str | None = None
+    proposed_production: SemanticProductionProposal | None = None
+    reasoning_provider_identity: str | None = None
+    completion_claimed: bool
+
+    @model_validator(mode="after")
+    def require_coherent_semantic_result(self) -> Self:
+        expected_kind = (
+            SemanticResultKind.DESIGN_DIRECTION
+            if self.step_type is SteeringStepType.DESIGN
+            else SemanticResultKind.WORK_REFINEMENT
+            if self.step_type is SteeringStepType.REFINE
+            else None
+        )
+        if expected_kind is None or self.result_kind is not expected_kind:
+            raise ValueError("semantic result kind must match DESIGN or REFINE")
+        if self.step_type is SteeringStepType.REFINE and self.proposed_production:
+            raise ValueError("REFINE cannot directly propose production")
+        attention_required = bool(
+            self.unresolved_questions
+            or self.authority_assessment is not SteeringAuthorityAssessment.WITHIN_AUTHORITY
+        )
+        if attention_required != bool(self.human_attention_recommendation):
+            raise ValueError(
+                "semantic uncertainty or authority expansion requires Human Attention"
+            )
+        if self.completion_claimed and attention_required:
+            raise ValueError("an unresolved semantic result cannot claim completion")
+        return self
+
+    @property
+    def material_direction_fingerprint(self) -> str:
+        payload = {
+            "step_type": self.step_type.value,
+            "result_kind": self.result_kind.value,
+            "decisions": [" ".join(item.casefold().split()) for item in self.decisions],
+            "derived_constraints": [
+                " ".join(item.casefold().split()) for item in self.derived_constraints
+            ],
+            "authority_assessment": self.authority_assessment.value,
+            "proposed_production": (
+                None
+                if self.proposed_production is None
+                else self.proposed_production.model_dump(mode="json")
+            ),
+            "completion_claimed": self.completion_claimed,
+        }
+        canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+        return sha256(canonical.encode("utf-8")).hexdigest()
+
+
+class SemanticStepResultRecord(BaseModel):
+    """Immutable governed Reality admitted from a validated semantic candidate."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: UUID
+    work_id: UUID
+    steering_plan_revision_id: UUID
+    step_id: UUID
+    step_type: SteeringStepType
+    basis_fingerprint: str = Field(min_length=64, max_length=64)
+    result_kind: SemanticResultKind
+    bounded_summary: str
+    decisions: tuple[str, ...]
+    derived_constraints: tuple[str, ...]
+    evidence_refs: tuple[RealityReference, ...]
+    unresolved_questions: tuple[str, ...]
+    authority_assessment: SteeringAuthorityAssessment
+    human_attention_recommendation: str | None
+    proposed_production: SemanticProductionProposal | None
+    reasoning_provider_identity: str | None
+    completion_satisfied: bool
+    material_direction_fingerprint: str = Field(min_length=64, max_length=64)
+    created_at: datetime
+
+
+class SemanticStepCapability(Protocol):
+    """Replaceable semantic reasoning seam; output remains advisory."""
+
+    def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+        ...
 
 
 class SteeringStepSpec(BaseModel):
@@ -387,6 +606,7 @@ class SteeringPlanReconstruction(BaseModel):
     next_step: SteeringStepRecord | None
     latest_decision: SteeringDecisionRecord | None
     history: tuple[SteeringHistoryEventRecord, ...]
+    semantic_results: tuple[SemanticStepResultRecord, ...] = ()
     has_material_revision: bool
 
 
@@ -578,6 +798,10 @@ class SteeringInvariantViolation(SteeringDomainError):
 
 class StaleSteeringCandidate(SteeringInvariantViolation):
     """A candidate no longer matches the exact current governed basis."""
+
+
+class StaleSemanticStepCandidate(SteeringInvariantViolation):
+    """A semantic candidate no longer matches the current governed input."""
 
 
 class SteeringRecordNotFound(SteeringDomainError):

@@ -75,6 +75,15 @@ class PlanFrameAssembler:
                 references.extend(reconstruction.latest_decision.reality_refs)
             if reconstruction.history:
                 references.extend(reconstruction.history[-1].reality_refs)
+            references.extend(
+                RealityReference(
+                    kind=RealityReferenceKind.SEMANTIC_RESULT,
+                    identity=result.id,
+                )
+                for result in reconstruction.semantic_results
+                if result.steering_plan_revision_id
+                == reconstruction.active_revision.revision.id
+            )
 
             governance_refs = tuple(
                 RealityReference(

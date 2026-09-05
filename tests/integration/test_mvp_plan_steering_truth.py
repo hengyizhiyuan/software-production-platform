@@ -14,6 +14,7 @@ from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError
 
 from spg.application.runtime import RuntimeService
+from spg.application.semantic_steps import SemanticStepApplicationService
 from spg.application.steering import SteeringApplicationService
 from spg.application.steering_decision import (
     DeterministicPlanSteeringCapability,
@@ -50,7 +51,11 @@ from spg.domain.steering import (
     RealityReference,
     RealityReferenceKind,
     ReviseSteeringPlanRequest,
+    SemanticResultKind,
+    SemanticStepInput,
+    SemanticStepResultCandidate,
     StaleSteeringCandidate,
+    SteeringActionType,
     SteeringAttentionReason,
     SteeringDriverStopReason,
     SteeringAuthorityAssessment,
@@ -91,6 +96,7 @@ STEERING_TABLE_NAMES = {
     "steering_steps",
     "steering_decisions",
     "steering_history_events",
+    "semantic_step_results",
 }
 
 
@@ -242,7 +248,17 @@ def test_steer_truth_03_through_14_and_reconstruction(
         SteeringStepType.COMPLETE,
     ]
 
-    decision_refs = (baseline_ref, work_ref)
+    semantic_result = _record_semantic_result(postgres_database, work.work_id)
+    decision_refs = tuple(
+        item.reference
+        for item in PlanFrameAssembler(postgres_database)
+        .assemble(work.work_id)
+        .basis.resolved_reality
+    )
+    assert RealityReference(
+        kind=RealityReferenceKind.SEMANTIC_RESULT,
+        identity=semantic_result.id,
+    ) in decision_refs
     fingerprint = service.decision_basis_fingerprint(
         revision_id,
         design.id,
@@ -520,6 +536,38 @@ class _WordingCapability:
         )
 
 
+class _TestSemanticCapability:
+    def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+        return SemanticStepResultCandidate(
+            work_id=input.work_id,
+            steering_plan_revision_id=input.steering_plan_revision_id,
+            step_id=input.step.id,
+            step_type=input.step.type,
+            basis_fingerprint=input.basis_fingerprint,
+            result_kind=(
+                SemanticResultKind.DESIGN_DIRECTION
+                if input.step.type is SteeringStepType.DESIGN
+                else SemanticResultKind.WORK_REFINEMENT
+            ),
+            bounded_summary=(
+                "The deterministic test records a bounded governed semantic direction."
+            ),
+            decisions=("Retain the already admitted bounded test direction.",),
+            derived_constraints=input.constraints,
+            evidence_refs=input.reality_refs,
+            authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+            reasoning_provider_identity="fake:semantic-step",
+            completion_claimed=True,
+        )
+
+
+def _record_semantic_result(database: Database, work_id):
+    return SemanticStepApplicationService(
+        database,
+        _TestSemanticCapability(),
+    ).execute(work_id)
+
+
 def test_steer_dec_01_through_09_plan_frame_candidate_and_admission(
     postgres_database: Database,
     admitted_work,
@@ -787,6 +835,17 @@ def test_steering_decision_migration_downgrade_and_reupgrade(
 
 
 def _transition_to_next_step(database: Database, work_id):
+    reconstruction = SteeringApplicationService(database).reconstruct(work_id)
+    if (
+        reconstruction.current_step is not None
+        and reconstruction.current_step.type
+        in {SteeringStepType.DESIGN, SteeringStepType.REFINE}
+        and not any(
+            result.step_id == reconstruction.current_step.id
+            for result in reconstruction.semantic_results
+        )
+    ):
+        _record_semantic_result(database, work_id)
     decision_service = SteeringDecisionApplicationService(
         database,
         DeterministicPlanSteeringCapability(),
@@ -1221,11 +1280,12 @@ def test_steer_loop_auto_continues_two_cycles_across_restart_and_projects_api(
             reason="Session A follows persisted governed Reality",
             provider="fake:steering-session-a",
         ),
+        semantic_capability=_TestSemanticCapability(),
     )
     try:
         started = driver_a.activate(work.work_id)
         assert started.stop_reason is SteeringDriverStopReason.PRODUCTION_RUNNING
-        assert started.iterations_executed == 2
+        assert started.iterations_executed == 3
 
         def cycle_a_waiting_for_human() -> None:
             projection = works_a.get_work(work.work_id)
@@ -1407,11 +1467,16 @@ def test_steer_loop_human_attention_stops_then_plan_revision_reenables(
         ),
     )
     orchestrator = ProductionOrchestrator(works)
-    driver = PlanSteeringDriver(postgres_database, works, orchestrator)
+    driver = PlanSteeringDriver(
+        postgres_database,
+        works,
+        orchestrator,
+        semantic_capability=_TestSemanticCapability(),
+    )
     try:
         stopped = driver.activate(work.work_id)
         assert stopped.stop_reason is SteeringDriverStopReason.HUMAN_ATTENTION
-        assert stopped.iterations_executed == 2
+        assert stopped.iterations_executed == 3
         reconstruction = SteeringApplicationService(postgres_database).reconstruct(
             work.work_id
         )
@@ -1453,9 +1518,16 @@ def test_steer_loop_human_attention_stops_then_plan_revision_reenables(
             )
         )
         assert works.get_work(work.work_id).status is WorkStatus.READY
-        restarted = PlanSteeringDriver(postgres_database, works, orchestrator)
+        restarted = PlanSteeringDriver(
+            postgres_database,
+            works,
+            orchestrator,
+            semantic_capability=_TestSemanticCapability(),
+        )
+        semantic = restarted.iterate(work.work_id)
+        assert semantic.action is SteeringActionType.SEMANTIC_RESULT_ADMISSION
         resumed = restarted.iterate(work.work_id)
-        assert resumed.progressed is True
+        assert resumed.action is SteeringActionType.STEP_TRANSITION
         assert resumed.stop_reason is None
         current = SteeringApplicationService(postgres_database).reconstruct(
             work.work_id
@@ -1579,6 +1651,7 @@ def test_steer_loop_no_progress_and_transition_bound_are_typed(
         postgres_database,
         works,
         bounded_orchestrator,
+        semantic_capability=_TestSemanticCapability(),
         max_automatic_transitions=1,
     )
     try:
@@ -1589,7 +1662,8 @@ def test_steer_loop_no_progress_and_transition_bound_are_typed(
         current = SteeringApplicationService(postgres_database).reconstruct(
             work.work_id
         ).current_step
-        assert current is not None and current.type is SteeringStepType.PRODUCE
+        assert current is not None and current.type is SteeringStepType.DESIGN
+        assert outcome.last_action is SteeringActionType.SEMANTIC_RESULT_ADMISSION
         assert revised.active_revision.revision.revision_number == 2
     finally:
         bounded.shutdown()

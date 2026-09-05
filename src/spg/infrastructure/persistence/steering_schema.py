@@ -217,6 +217,66 @@ steering_decisions = Table(
 )
 
 
+semantic_step_results = Table(
+    "semantic_step_results",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "work_id",
+        Uuid(as_uuid=True),
+        ForeignKey("product_works.id", name="fk_semantic_step_results_work"),
+        nullable=False,
+    ),
+    Column(
+        "steering_plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "steering_plan_revisions.id",
+            name="fk_semantic_step_results_revision",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "step_id",
+        Uuid(as_uuid=True),
+        ForeignKey("steering_steps.id", name="fk_semantic_step_results_step"),
+        nullable=False,
+    ),
+    Column("step_type", String(32), nullable=False),
+    Column("basis_fingerprint", String(64), nullable=False),
+    Column("result_kind", String(32), nullable=False),
+    Column("bounded_summary", Text, nullable=False),
+    Column("decisions", JSONB, nullable=False),
+    Column("derived_constraints", JSONB, nullable=False),
+    Column("evidence_refs", JSONB, nullable=False),
+    Column("unresolved_questions", JSONB, nullable=False),
+    Column("authority_assessment", String(32), nullable=False),
+    Column("human_attention_recommendation", Text, nullable=True),
+    Column("proposed_production", JSONB, nullable=True),
+    Column("reasoning_provider_identity", String(255), nullable=True),
+    Column("completion_satisfied", Boolean, nullable=False),
+    Column("material_direction_fingerprint", String(64), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    UniqueConstraint(
+        "step_id",
+        "basis_fingerprint",
+        name="uq_semantic_step_results_step_basis",
+    ),
+    CheckConstraint(
+        "step_type IN ('DESIGN', 'REFINE')",
+        name="ck_semantic_step_results_step_type_known",
+    ),
+    CheckConstraint(
+        "result_kind IN ('DESIGN_DIRECTION', 'WORK_REFINEMENT')",
+        name="ck_semantic_step_results_result_kind_known",
+    ),
+    CheckConstraint(
+        "authority_assessment IN ('WITHIN_AUTHORITY', 'UNCERTAIN', 'EXPANDS_AUTHORITY')",
+        name="ck_semantic_step_results_authority_assessment_known",
+    ),
+)
+
+
 steering_history_events = Table(
     "steering_history_events",
     metadata,
@@ -292,5 +352,6 @@ steering_tables = (
     steering_plan_revisions,
     steering_steps,
     steering_decisions,
+    semantic_step_results,
     steering_history_events,
 )

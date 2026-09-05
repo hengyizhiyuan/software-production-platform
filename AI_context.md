@@ -54,6 +54,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-PLAN-STEER-1H — CLOSED / PASS**
 
+**MVP-PLAN-STEER-1I — CLOSED / PASS**
+
 **MVP-CODE-1 — CLOSED / PASS**
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
@@ -150,7 +152,7 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | Motive / Work / Plan Concept Calibration | CLOSED / PASS |
-| Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F/1G CLOSED / PASS; REAL LONG-LIVED DOGFOOD CONTINUES |
+| Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F/1G/1H/1I CLOSED / PASS; REAL PROVIDER DOGFOOD CONTINUES |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -413,6 +415,20 @@ eligibility is evaluated. Long-lived Motive Dogfood #2 remains preserved as
 **PASSED WORK ADMISSION / FAILED AT POST-ADMISSION STEERING ACTIVATION —
 STEERING_BOOTSTRAP_TRIGGER_GAP CONFIRMED** pre-fix evidence. See [Long-lived
 Motive Dogfood #2 Post-admission Activation Finding](docs/evidence/dogfood/long-lived-motive-dogfood-2-post-admission-activation-gap.md).
+
+Long-lived Motive Dogfood #3 preserved the next exact pre-fix boundary:
+**Work Admission PASS / Steering Activation PASS / FAILED AT SEMANTIC DESIGN
+EXECUTION — SEMANTIC_STEP_EXECUTION_GAP CONFIRMED**. Its `DESIGN` Step had
+closed as a control-flow label, leaving `PRODUCE` current without a governed
+Production Plan; no Provider Turn occurred. MVP-PLAN-STEER-1I implements
+provider-neutral `DESIGN` and `REFINE` execution, validates advisory output
+against the exact persisted Step basis and authority, persists immutable
+Semantic Step Results, and prevents semantic Step closure without that exact
+completion evidence. `DESIGN` may propose a production contract, but Runtime
+creation remains deferred to the existing authority-checked PLAN-1B/SPG
+boundary. 1I is **CLOSED / PASS** after focused validation and Architecture Lead
+Reality Review; real Provider Dogfood and Core Closure remain pending.
+See [Long-lived Motive Dogfood #3 Semantic Design Execution Finding](docs/evidence/dogfood/long-lived-motive-dogfood-3-semantic-design-execution-gap.md).
 
 ### Reality-driven Plan Steering MVP Behavioral Contract
 

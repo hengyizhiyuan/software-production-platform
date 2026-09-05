@@ -15,6 +15,7 @@ from spg.application.orchestration import (
     ProductionOrchestrator,
 )
 from spg.application.steering import SteeringApplicationService
+from spg.application.semantic_steps import SemanticStepApplicationService
 from spg.application.steering_decision import (
     DeterministicPlanSteeringCapability,
     PlanFrameAssembler,
@@ -28,10 +29,15 @@ from spg.domain.product import (
     WorkStatus,
 )
 from spg.domain.steering import (
+    NextStepCandidate,
     PlanFrame,
     PlanSteeringCapability,
+    SemanticStepCapability,
+    SemanticStepResultRecord,
     SteeringActionType,
     SteeringActivationResult,
+    SteeringAttentionReason,
+    SteeringAuthorityAssessment,
     SteeringAutomaticProgressionState,
     SteeringDecisionRecord,
     SteeringDriverStopReason,
@@ -61,6 +67,7 @@ class PlanSteeringDriver:
         production_orchestrator: ProductionOrchestrator,
         *,
         capability: PlanSteeringCapability | None = None,
+        semantic_capability: SemanticStepCapability | None = None,
         max_automatic_transitions: int = DEFAULT_MAX_STEERING_TRANSITIONS,
     ) -> None:
         if max_automatic_transitions < 1:
@@ -76,6 +83,10 @@ class PlanSteeringDriver:
             capability or DeterministicPlanSteeringCapability(),
         )
         self.production = SteeringProductionService(database)
+        self.semantic = SemanticStepApplicationService(
+            database,
+            semantic_capability,
+        )
         self._condition = Condition(RLock())
         self._active_work_ids: set[UUID] = set()
         self._pending_work_ids: set[UUID] = set()
@@ -125,6 +136,8 @@ class PlanSteeringDriver:
 
         if current.type is SteeringStepType.PRODUCE:
             return self._produce_iteration(frame, before)
+        if current.type in {SteeringStepType.DESIGN, SteeringStepType.REFINE}:
+            return self._semantic_iteration(frame, before)
         return self._decision_iteration(frame, before)
 
     def activate(self, work_id: UUID) -> SteeringActivationResult:
@@ -452,6 +465,105 @@ class PlanSteeringDriver:
                 stop=SteeringDriverStopReason.COMPLETE,
             )
         return self._transition_iteration(frame, before, decision=decision)
+
+    def _semantic_iteration(
+        self,
+        frame: PlanFrame,
+        before: str,
+    ) -> SteeringIterationResult:
+        current = frame.reconstruction.current_step
+        assert current is not None
+        result = self.semantic.result_for_step(current.id)
+        if result is None:
+            if self.semantic.capability is None:
+                return self._result(
+                    frame.work_id,
+                    before,
+                    action=None,
+                    stop=SteeringDriverStopReason.NO_PROGRESS,
+                )
+            result = self.semantic.execute(frame.work_id)
+            if result.human_attention_recommendation is not None:
+                self._admit_semantic_attention(frame.work_id, result)
+                return self._result(
+                    frame.work_id,
+                    before,
+                    action=SteeringActionType.HUMAN_ATTENTION,
+                    stop=SteeringDriverStopReason.HUMAN_ATTENTION,
+                )
+            return self._result(
+                frame.work_id,
+                before,
+                action=SteeringActionType.SEMANTIC_RESULT_ADMISSION,
+                stop=None,
+            )
+        if result.human_attention_recommendation is not None:
+            latest = frame.reconstruction.latest_decision
+            if not (
+                latest is not None
+                and latest.current_step_id == current.id
+                and latest.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
+                and latest.basis_fingerprint == frame.basis.fingerprint
+            ):
+                self._admit_semantic_attention(frame.work_id, result)
+            return self._result(
+                frame.work_id,
+                before,
+                action=SteeringActionType.HUMAN_ATTENTION,
+                stop=SteeringDriverStopReason.HUMAN_ATTENTION,
+            )
+        if not result.completion_satisfied:
+            return self._result(
+                frame.work_id,
+                before,
+                action=None,
+                stop=SteeringDriverStopReason.NO_PROGRESS,
+            )
+        fresh = self.frames.assemble(frame.work_id)
+        return self._decision_iteration(fresh, before)
+
+    def _admit_semantic_attention(
+        self,
+        work_id: UUID,
+        result: SemanticStepResultRecord,
+    ) -> SteeringDecisionRecord:
+        fresh = self.frames.assemble(work_id)
+        current = fresh.reconstruction.current_step
+        assert current is not None
+        refs = tuple(item.reference for item in fresh.basis.resolved_reality)
+        reason = (
+            SteeringAttentionReason.SCOPE_OR_AUTHORITY_EXPANSION
+            if result.authority_assessment
+            is SteeringAuthorityAssessment.EXPANDS_AUTHORITY
+            else SteeringAttentionReason.MOTIVE_OR_OUTCOME_AMBIGUITY
+            if current.type is SteeringStepType.REFINE
+            else SteeringAttentionReason.MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION
+        )
+        return self.decisions.admit(
+            work_id,
+            NextStepCandidate(
+                type=SteeringStepType.HUMAN_DECISION,
+                objective="Resolve the material semantic Steering question",
+                reason=result.bounded_summary,
+                reality_refs=refs,
+                human_required=True,
+                completion_condition=(
+                    "Human Authority resolves the semantic question before continuation"
+                ),
+                proposed_outcome=SteeringOutcome.HUMAN_ATTENTION,
+                basis_fingerprint=fresh.basis.fingerprint,
+                authority_assessment=result.authority_assessment,
+                proposed_engineering_scope_fingerprint=(
+                    fresh.engineering_scope_fingerprint
+                ),
+                attention_reason=reason,
+                recommendation=result.human_attention_recommendation,
+                expected_impact=(
+                    "No semantic Step transition or SPG production occurs before resolution"
+                ),
+                reasoning_provider_identity=result.reasoning_provider_identity,
+            ),
+        )
 
     def _transition_iteration(
         self,

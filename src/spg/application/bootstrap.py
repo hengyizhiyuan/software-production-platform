@@ -35,7 +35,7 @@ from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
 from spg.domain.preparation import ExecutorBinding
 from spg.domain.planning import ProductionPlanner
-from spg.domain.steering import PlanSteeringCapability
+from spg.domain.steering import PlanSteeringCapability, SemanticStepCapability
 from spg.domain.verifier import VerificationCapabilityContract
 from spg.infrastructure.persistence import Database
 
@@ -268,14 +268,24 @@ class Application:
         production_orchestrator: ProductionOrchestrator,
         *,
         capability: PlanSteeringCapability | None = None,
+        semantic_capability: SemanticStepCapability | None = None,
     ) -> PlanSteeringDriver:
         """Compose bounded Steering progression over existing governed seams."""
+
+        selected_semantic = semantic_capability
+        if selected_semantic is None and self.settings.executor_adapter == "codex-sdk":
+            from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
+
+            selected_semantic = CodexSdkSemanticStepCapability(
+                timeout_seconds=self.settings.executor_timeout_seconds,
+            )
 
         return PlanSteeringDriver(
             database,
             work_service,
             production_orchestrator,
             capability=capability,
+            semantic_capability=selected_semantic,
         )
 
     def steering_bootstrap(

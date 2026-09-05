@@ -15,6 +15,9 @@ from spg.domain.steering import (
     RealityReference,
     RealityReferenceKind,
     ResolvedRealityReference,
+    SemanticProductionProposal,
+    SemanticResultKind,
+    SemanticStepResultRecord,
     SteeringAttentionReason,
     SteeringAuthorityAssessment,
     SteeringDecisionRecord,
@@ -42,6 +45,7 @@ from spg.infrastructure.persistence.runtime_schema import (
     verification_records,
 )
 from spg.infrastructure.persistence.steering_schema import (
+    semantic_step_results,
     steering_decisions,
     steering_history_events,
     steering_plan_revisions,
@@ -62,6 +66,7 @@ _REALITY_TABLES = {
     RealityReferenceKind.INTEGRATION_EFFECT: repository_integration_effects,
     RealityReferenceKind.RUNTIME_COMMIT: runtime_commits,
     RealityReferenceKind.RECOVERY_ASSESSMENT: recovery_assessments,
+    RealityReferenceKind.SEMANTIC_RESULT: semantic_step_results,
 }
 
 
@@ -82,6 +87,9 @@ class SteeringStore:
 
     def insert_decision(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(steering_decisions).values(**values))
+
+    def insert_semantic_result(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(semantic_step_results).values(**values))
 
     def insert_history(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(steering_history_events).values(**values))
@@ -160,6 +168,47 @@ class SteeringStore:
             .limit(1)
         ).mappings().first()
         return None if row is None else self._decision(row)
+
+    def semantic_result(self, result_id: UUID) -> SemanticStepResultRecord | None:
+        row = self._one(
+            semantic_step_results,
+            semantic_step_results.c.id == result_id,
+        )
+        return None if row is None else self._semantic_result(row)
+
+    def latest_semantic_result_for_step(
+        self,
+        step_id: UUID,
+    ) -> SemanticStepResultRecord | None:
+        row = self.session.execute(
+            select(semantic_step_results)
+            .where(semantic_step_results.c.step_id == step_id)
+            .order_by(
+                semantic_step_results.c.created_at.desc(),
+                semantic_step_results.c.id.desc(),
+            )
+            .limit(1)
+        ).mappings().first()
+        return None if row is None else self._semantic_result(row)
+
+    def semantic_results_for_plan(
+        self,
+        plan_id: UUID,
+    ) -> tuple[SemanticStepResultRecord, ...]:
+        rows = self.session.execute(
+            select(semantic_step_results)
+            .join(
+                steering_plan_revisions,
+                steering_plan_revisions.c.id
+                == semantic_step_results.c.steering_plan_revision_id,
+            )
+            .where(steering_plan_revisions.c.steering_plan_id == plan_id)
+            .order_by(
+                semantic_step_results.c.created_at,
+                semantic_step_results.c.id,
+            )
+        ).mappings()
+        return tuple(self._semantic_result(row) for row in rows)
 
     def history(self, plan_id: UUID) -> tuple[SteeringHistoryEventRecord, ...]:
         rows = self.session.execute(
@@ -316,6 +365,42 @@ class SteeringStore:
             ),
             proposed_engineering_scope_fingerprint=row[
                 "proposed_engineering_scope_fingerprint"
+            ],
+            created_at=row["created_at"],
+        )
+
+    @classmethod
+    def _semantic_result(cls, row: Mapping[str, Any]) -> SemanticStepResultRecord:
+        return SemanticStepResultRecord(
+            id=row["id"],
+            work_id=row["work_id"],
+            steering_plan_revision_id=row["steering_plan_revision_id"],
+            step_id=row["step_id"],
+            step_type=SteeringStepType(row["step_type"]),
+            basis_fingerprint=row["basis_fingerprint"],
+            result_kind=SemanticResultKind(row["result_kind"]),
+            bounded_summary=row["bounded_summary"],
+            decisions=tuple(row["decisions"]),
+            derived_constraints=tuple(row["derived_constraints"]),
+            evidence_refs=cls._references(row["evidence_refs"]),
+            unresolved_questions=tuple(row["unresolved_questions"]),
+            authority_assessment=SteeringAuthorityAssessment(
+                row["authority_assessment"]
+            ),
+            human_attention_recommendation=row[
+                "human_attention_recommendation"
+            ],
+            proposed_production=(
+                None
+                if row["proposed_production"] is None
+                else SemanticProductionProposal.model_validate(
+                    row["proposed_production"]
+                )
+            ),
+            reasoning_provider_identity=row["reasoning_provider_identity"],
+            completion_satisfied=row["completion_satisfied"],
+            material_direction_fingerprint=row[
+                "material_direction_fingerprint"
             ],
             created_at=row["created_at"],
         )

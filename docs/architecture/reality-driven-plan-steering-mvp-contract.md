@@ -631,6 +631,21 @@ not drive progression. MVP-PLAN-STEER-1H is **CLOSED / PASS** after focused
 validation and Architecture Lead Reality Review; real long-lived Dogfood
 continues.
 
+MVP-PLAN-STEER-1I makes `DESIGN` and `REFINE` executable governed semantic
+Steps rather than control-flow labels. A provider-neutral capability receives
+a reconstructable input bound to the active Plan revision, exact current Step,
+Plan Frame basis, admitted Work/Scope/Resource, Trusted Baseline, governance
+references, and bounded repository context. Its typed output remains advisory
+until application validation admits an immutable Semantic Step Result. A
+semantic Step cannot close without a completion-satisfied result referenced by
+the exact Steering Decision. `DESIGN` may produce a bounded Production Plan
+proposal, but it does not mutate the repository, authorize production, or
+create Run/PWU; actual production still crosses the existing authority,
+PLAN-1B `ONE_PWU_FIT`, and SPG admission boundary. Authority uncertainty or
+expansion stops at governed Human Attention. 1I is **CLOSED / PASS** after
+focused validation and Architecture Lead Reality Review; real Provider
+Dogfood continues.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
@@ -664,6 +679,11 @@ MVP-PLAN-STEER-1G
 
 MVP-PLAN-STEER-1H
     POST-ADMISSION STEERING ACTIVATION
+        = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
+
+MVP-PLAN-STEER-1I
+    GOVERNED SEMANTIC DESIGN / REFINE EXECUTION LITE
         = CLOSED / PASS
     ARCHITECTURE LEAD REALITY REVIEW = PASS
 

@@ -256,7 +256,26 @@ class SteeringApplicationService:
                 raise SteeringInvariantViolation(
                     "Steering Decision does not admit the requested Step transition"
                 )
-            if current.type is SteeringStepType.PRODUCE:
+            if current.type in {SteeringStepType.DESIGN, SteeringStepType.REFINE}:
+                semantic_result = store.latest_semantic_result_for_step(current.id)
+                semantic_ref = (
+                    None
+                    if semantic_result is None
+                    else RealityReference(
+                        kind=RealityReferenceKind.SEMANTIC_RESULT,
+                        identity=semantic_result.id,
+                    )
+                )
+                if (
+                    semantic_result is None
+                    or semantic_result.steering_plan_revision_id != revision.id
+                    or not semantic_result.completion_satisfied
+                    or semantic_ref not in decision.reality_refs
+                ):
+                    raise SteeringInvariantViolation(
+                        "Semantic Step cannot close without exact governed result evidence"
+                    )
+            elif current.type is SteeringStepType.PRODUCE:
                 binding = product.runtime_binding_for_step(current.id)
                 if binding is None:
                     raise SteeringInvariantViolation(
@@ -583,6 +602,7 @@ class SteeringApplicationService:
                 next_step=next_step,
                 latest_decision=store.latest_decision_for_plan(plan.id),
                 history=store.history(plan.id),
+                semantic_results=store.semantic_results_for_plan(plan.id),
                 has_material_revision=len(revisions) > 1,
             )
 
