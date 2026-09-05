@@ -18,6 +18,7 @@ from spg.application.reconciliation import RecoveryReconciliationService
 from spg.application.attempt_recovery import AttemptRecoveryService
 from spg.application.maintenance_recovery import VerifiedMaintenanceRecoveryService
 from spg.application.orchestration import ProductionOrchestrator
+from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.steering import SteeringApplicationService
 from spg.application.steering_decision import (
     DeterministicPlanSteeringCapability,
@@ -288,6 +289,22 @@ class Application:
         return SteeringBootstrapService(
             database or self.persistence(),
             capability=capability,
+        )
+
+    @staticmethod
+    def work_post_admission(
+        work_service: WorkApplicationService,
+        steering_bootstrap: SteeringBootstrapService,
+        steering_driver: PlanSteeringDriver,
+        production_orchestrator: ProductionOrchestrator,
+    ) -> WorkPostAdmissionService:
+        """Compose the shared mode-aware post-admission lifecycle seam."""
+
+        return WorkPostAdmissionService(
+            work_service,
+            steering_bootstrap,
+            steering_driver,
+            production_orchestrator,
         )
 
     def runtime_activation(

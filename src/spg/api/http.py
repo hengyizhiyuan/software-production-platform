@@ -30,16 +30,17 @@ from spg.api.dto import (
 )
 from spg.application.bootstrap import Application, bootstrap
 from spg.application.orchestration import ProductionOrchestrator
+from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.domain.product import (
+    AttentionAction,
     AttentionResolutionRequest,
     ProductInvariantViolation,
     ProductRecordNotFound,
     WorkRefinementRequest,
-    WorkMode,
     WorkStatus,
 )
 from spg.domain.steering import SteeringRecordNotFound
@@ -103,9 +104,16 @@ def create_http_application(
     selected_steering_bootstrap = steering_bootstrap or SteeringBootstrapService(
         selected_database
     )
+    selected_post_admission = WorkPostAdmissionService(
+        work_service,
+        selected_steering_bootstrap,
+        selected_steering_driver,
+        selected_orchestrator,
+    )
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
+        selected_post_admission.bootstrap_incomplete_ready_long_lived()
         selected_steering_driver.resume_safely_eligible_works()
         selected_orchestrator.resume_safely_eligible_works()
         try:
@@ -127,6 +135,7 @@ def create_http_application(
     api.state.production_orchestrator = selected_orchestrator
     api.state.plan_steering_driver = selected_steering_driver
     api.state.steering_bootstrap = selected_steering_bootstrap
+    api.state.work_post_admission = selected_post_admission
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
@@ -273,12 +282,9 @@ def create_http_application(
             authority_identity=request.authority_identity,
             rationale=request.rationale,
         )
-        if projection.mode is WorkMode.LONG_LIVED_STEERING:
-            selected_steering_bootstrap.bootstrap(work_id)
-            projection = work_service.get_work(work_id)
-        else:
-            selected_orchestrator.schedule(work_id)
-        return WorkResponse.from_projection(projection)
+        return WorkResponse.from_projection(
+            selected_post_admission.activate(projection.work_id)
+        )
 
     @api.post("/api/works/{work_id}/reject", response_model=WorkResponse)
     def reject_work(work_id: UUID, request: HumanDecisionRequest) -> WorkResponse:
@@ -329,7 +335,9 @@ def create_http_application(
             rationale=request.rationale,
         )
         projection = work_service.resolve_attention(attention_id, resolution)
-        if projection.status in {WorkStatus.READY, WorkStatus.RUNNING}:
+        if request.action is AttentionAction.APPROVE:
+            projection = selected_post_admission.activate(projection.work_id)
+        elif projection.status in {WorkStatus.READY, WorkStatus.RUNNING}:
             selected_orchestrator.schedule(projection.work_id)
         return WorkResponse.from_projection(projection)
 

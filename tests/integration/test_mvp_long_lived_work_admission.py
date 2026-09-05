@@ -12,32 +12,48 @@ import pytest
 from sqlalchemy import func, select
 
 from spg.api import create_http_application
+from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.runtime import RuntimeService
 from spg.application.steering_bootstrap import SteeringBootstrapService
+from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.steering_production import SteeringProductionService
 from spg.application.work import WorkApplicationService
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import (
     AttentionKind,
     EngineeringContextReference,
+    ProductInvariantViolation,
     WorkMode,
     WorkRefinementRequest,
     WorkStatus,
 )
 from spg.domain.runtime import BootstrapRequest
 from spg.domain.steering import SteeringOutcome, SteeringStepType
-from spg.infrastructure.persistence import Database, product_tables, runtime_tables
+from spg.infrastructure.persistence import (
+    Database,
+    product_tables,
+    runtime_tables,
+    steering_tables,
+)
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_schema import (
     production_runs,
     production_work_units,
     provider_execution_reports,
 )
+from spg.infrastructure.persistence.steering_schema import (
+    steering_decisions,
+    steering_plan_revisions,
+    steering_plans,
+    steering_steps,
+)
 
 
 pytestmark = pytest.mark.postgresql
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-ALL_TABLE_NAMES = {table.name for table in (*product_tables, *runtime_tables)}
+ALL_TABLE_NAMES = {
+    table.name for table in (*product_tables, *runtime_tables, *steering_tables)
+}
 
 DOGFOOD_MOTIVE = """我希望改善 Watt 在任务执行过程中的状态可观测性。
 现在任务自动执行时，我很难判断系统正在做什么、做到哪一步、
@@ -54,15 +70,23 @@ class AdmissionFacts:
     service: WorkApplicationService
 
 
-class _ManualOrchestrator:
+class _RecordingOrchestrator:
+    def __init__(self) -> None:
+        self.scheduled_work_ids: list[UUID] = []
+        self._active_work_ids: set[UUID] = set()
+
     def resume_safely_eligible_works(self) -> tuple[()]:
         return ()
 
-    def schedule(self, _work_id: UUID) -> bool:
-        return False
+    def schedule(self, work_id: UUID) -> bool:
+        if work_id in self._active_work_ids:
+            return False
+        self._active_work_ids.add(work_id)
+        self.scheduled_work_ids.append(work_id)
+        return True
 
-    def is_active(self, _work_id: UUID) -> bool:
-        return False
+    def is_active(self, work_id: UUID) -> bool:
+        return work_id in self._active_work_ids
 
     def last_outcome(self, _work_id: UUID):
         return None
@@ -71,7 +95,49 @@ class _ManualOrchestrator:
         return None
 
     def shutdown(self) -> None:
-        return None
+        self._active_work_ids.clear()
+
+
+class _RecordingSteeringDriver(PlanSteeringDriver):
+    def __init__(
+        self,
+        database: Database,
+        work_service: WorkApplicationService,
+        production_orchestrator: _RecordingOrchestrator,
+    ) -> None:
+        super().__init__(database, work_service, production_orchestrator)
+        self.scheduled_work_ids: list[UUID] = []
+
+    def schedule(self, work_id: UUID) -> bool:
+        with self._condition:
+            if work_id in self._active_work_ids:
+                return False
+            self._active_work_ids.add(work_id)
+            self.scheduled_work_ids.append(work_id)
+        return True
+
+    def shutdown(self, timeout: float = 2.0) -> None:
+        del timeout
+        with self._condition:
+            self._active_work_ids.clear()
+            self._pending_work_ids.clear()
+
+
+class _FailingSteeringBootstrap:
+    def bootstrap(self, _work_id: UUID):
+        raise ProductInvariantViolation("deterministic Steering bootstrap failure")
+
+
+class _UnavailableSteeringDriver:
+    def __init__(self) -> None:
+        self.scheduled_work_ids: list[UUID] = []
+
+    def schedule(self, work_id: UUID) -> bool:
+        self.scheduled_work_ids.append(work_id)
+        return False
+
+    def is_active(self, _work_id: UUID) -> bool:
+        return False
 
 
 def _migration_config(database: Database) -> Config:
@@ -160,6 +226,25 @@ def _counts(database: Database) -> tuple[int, int, int]:
             ).scalar_one(),
             connection.execute(
                 select(func.count()).select_from(provider_execution_reports)
+            ).scalar_one(),
+        )
+
+
+def _steering_counts(database: Database) -> tuple[int, int, int, int, int]:
+    with database.engine.connect() as connection:
+        return (
+            connection.execute(select(func.count()).select_from(steering_plans)).scalar_one(),
+            connection.execute(
+                select(func.count()).select_from(steering_plan_revisions)
+            ).scalar_one(),
+            connection.execute(select(func.count()).select_from(steering_steps)).scalar_one(),
+            connection.execute(
+                select(func.count())
+                .select_from(steering_steps)
+                .where(steering_steps.c.state == "CURRENT")
+            ).scalar_one(),
+            connection.execute(
+                select(func.count()).select_from(steering_decisions)
             ).scalar_one(),
         )
 
@@ -341,10 +426,17 @@ def test_steer_admit_11_13_legacy_path_still_precreates_one_cycle(
 def test_steer_admit_16_real_http_approval_bootstraps_plan(
     admission_facts: AdmissionFacts,
 ) -> None:
+    orchestrator = _RecordingOrchestrator()
+    driver = _RecordingSteeringDriver(
+        admission_facts.database,
+        admission_facts.service,
+        orchestrator,
+    )
     application = create_http_application(
         database=admission_facts.database,
         work_service=admission_facts.service,
-        orchestrator=_ManualOrchestrator(),
+        orchestrator=orchestrator,
+        steering_driver=driver,
     )
     with TestClient(application, raise_server_exceptions=False) as client:
         submitted = client.post(
@@ -367,6 +459,242 @@ def test_steer_admit_16_real_http_approval_bootstraps_plan(
         assert steering.status_code == 200
         assert steering.json()["current_step"]["type"] == "DESIGN"
         assert _counts(admission_facts.database) == (0, 0, 0)
+
+
+@pytest.mark.parametrize("approval_path", ("dedicated", "attention"))
+def test_steer_act_01_02_03_04_06_09_10_16_all_admission_paths_auto_activate(
+    admission_facts: AdmissionFacts,
+    approval_path: str,
+) -> None:
+    orchestrator = _RecordingOrchestrator()
+    driver = _RecordingSteeringDriver(
+        admission_facts.database,
+        admission_facts.service,
+        orchestrator,
+    )
+    application = create_http_application(
+        database=admission_facts.database,
+        work_service=admission_facts.service,
+        orchestrator=orchestrator,
+        steering_driver=driver,
+    )
+
+    with TestClient(application, raise_server_exceptions=False) as client:
+        submitted = client.post(
+            "/api/works",
+            json={"requirement": DOGFOOD_MOTIVE, "mode": "LONG_LIVED_STEERING"},
+        )
+        assert submitted.status_code == 201
+        work_id = submitted.json()["work_id"]
+        refined = client.post(f"/api/works/{work_id}/refine", json={})
+        assert refined.status_code == 200
+        assert refined.json()["status"] == "AWAITING_APPROVAL"
+
+        if approval_path == "dedicated":
+            approved = client.post(
+                f"/api/works/{work_id}/approve",
+                json={"authority_identity": "human:steer-act"},
+            )
+        else:
+            attention = client.get(
+                "/api/attention", params={"work_id": work_id}
+            ).json()
+            approval = next(
+                item for item in attention if item["kind"] == "WORK_DRAFT_APPROVAL"
+            )
+            approved = client.post(
+                f"/api/attention/{approval['attention_id']}/resolve",
+                json={
+                    "action": "APPROVE",
+                    "authority_identity": "human:steer-act",
+                },
+            )
+
+        assert approved.status_code == 200
+        projection = admission_facts.service.get_work(UUID(work_id))
+        assert projection.mode is WorkMode.LONG_LIVED_STEERING
+        assert projection.status is WorkStatus.READY
+        assert projection.engineering_scope is not None
+        assert projection.engineering_scope.condition.value == "ADMITTED"
+        assert projection.steering_enabled is True
+        assert projection.current_steering_step_type == "DESIGN"
+        assert driver.scheduled_work_ids == [UUID(work_id)]
+        assert orchestrator.scheduled_work_ids == []
+        assert _steering_counts(admission_facts.database) == (1, 1, 4, 1, 0)
+        assert _counts(admission_facts.database) == (0, 0, 0)
+        with admission_facts.database.unit_of_work() as unit_of_work:
+            assert ProductStore(unit_of_work.session).runtime_binding(UUID(work_id)) is None
+
+        steering = client.get(f"/api/works/{work_id}/steering")
+        assert steering.status_code == 200
+        assert steering.json()["active_revision_number"] == 1
+        assert steering.json()["current_step"]["type"] == "DESIGN"
+        observed = (_steering_counts(admission_facts.database), len(driver.scheduled_work_ids))
+        for _ in range(3):
+            assert client.get(f"/api/works/{work_id}").status_code == 200
+            assert client.get(
+                "/api/attention", params={"work_id": work_id}
+            ).status_code == 200
+            assert client.get(f"/api/works/{work_id}/steering").status_code == 200
+        assert (
+            _steering_counts(admission_facts.database),
+            len(driver.scheduled_work_ids),
+        ) == observed
+
+
+def test_steer_act_07_08_14_repeated_activation_is_idempotent_and_single_active(
+    admission_facts: AdmissionFacts,
+) -> None:
+    draft = _long_lived_draft(admission_facts)
+    admission_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="human:idempotency",
+    )
+    orchestrator = _RecordingOrchestrator()
+    driver = _RecordingSteeringDriver(
+        admission_facts.database,
+        admission_facts.service,
+        orchestrator,
+    )
+    coordinator = WorkPostAdmissionService(
+        admission_facts.service,
+        SteeringBootstrapService(admission_facts.database),
+        driver,
+        orchestrator,
+    )
+
+    first = coordinator.activate(draft.work_id)
+    first_counts = _steering_counts(admission_facts.database)
+    second = coordinator.activate(draft.work_id)
+
+    assert first.steering_enabled is True
+    assert second.steering_enabled is True
+    assert first_counts == (1, 1, 4, 1, 0)
+    assert _steering_counts(admission_facts.database) == first_counts
+    assert driver.scheduled_work_ids == [draft.work_id]
+    assert orchestrator.scheduled_work_ids == []
+    assert _counts(admission_facts.database) == (0, 0, 0)
+
+
+def test_steer_act_11_12_startup_repairs_interrupted_admission_once(
+    admission_facts: AdmissionFacts,
+) -> None:
+    draft = _long_lived_draft(admission_facts)
+    pending = admission_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="human:interrupted-admission",
+    )
+    assert pending.status is WorkStatus.READY
+    assert pending.steering_enabled is False
+    assert _steering_counts(admission_facts.database) == (0, 0, 0, 0, 0)
+
+    first_orchestrator = _RecordingOrchestrator()
+    first_driver = _RecordingSteeringDriver(
+        admission_facts.database,
+        admission_facts.service,
+        first_orchestrator,
+    )
+    first_application = create_http_application(
+        database=admission_facts.database,
+        work_service=admission_facts.service,
+        orchestrator=first_orchestrator,
+        steering_driver=first_driver,
+    )
+    with TestClient(first_application):
+        assert first_driver.scheduled_work_ids == [draft.work_id]
+        assert first_orchestrator.scheduled_work_ids == []
+        assert _steering_counts(admission_facts.database) == (1, 1, 4, 1, 0)
+        assert _counts(admission_facts.database) == (0, 0, 0)
+
+    second_orchestrator = _RecordingOrchestrator()
+    second_driver = _RecordingSteeringDriver(
+        admission_facts.database,
+        admission_facts.service,
+        second_orchestrator,
+    )
+    second_application = create_http_application(
+        database=admission_facts.database,
+        work_service=admission_facts.service,
+        orchestrator=second_orchestrator,
+        steering_driver=second_driver,
+    )
+    with TestClient(second_application):
+        assert second_driver.scheduled_work_ids == [draft.work_id]
+        assert second_orchestrator.scheduled_work_ids == []
+        assert _steering_counts(admission_facts.database) == (1, 1, 4, 1, 0)
+        assert _counts(admission_facts.database) == (0, 0, 0)
+
+
+def test_steer_act_13_activation_failures_never_fall_through_to_orch(
+    admission_facts: AdmissionFacts,
+) -> None:
+    draft = _long_lived_draft(admission_facts)
+    admission_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="human:failure-safety",
+    )
+    orchestrator = _RecordingOrchestrator()
+    driver = _UnavailableSteeringDriver()
+    failing_bootstrap = WorkPostAdmissionService(
+        admission_facts.service,
+        _FailingSteeringBootstrap(),  # type: ignore[arg-type]
+        driver,  # type: ignore[arg-type]
+        orchestrator,  # type: ignore[arg-type]
+    )
+
+    with pytest.raises(ProductInvariantViolation, match="bootstrap failure"):
+        failing_bootstrap.activate(draft.work_id)
+    assert orchestrator.scheduled_work_ids == []
+    assert _steering_counts(admission_facts.database) == (0, 0, 0, 0, 0)
+    assert _counts(admission_facts.database) == (0, 0, 0)
+
+    unavailable_driver = WorkPostAdmissionService(
+        admission_facts.service,
+        SteeringBootstrapService(admission_facts.database),
+        driver,  # type: ignore[arg-type]
+        orchestrator,  # type: ignore[arg-type]
+    )
+    with pytest.raises(ProductInvariantViolation, match="scheduling is unavailable"):
+        unavailable_driver.activate(draft.work_id)
+    assert _steering_counts(admission_facts.database) == (1, 1, 4, 1, 0)
+    assert orchestrator.scheduled_work_ids == []
+    assert _counts(admission_facts.database) == (0, 0, 0)
+
+
+def test_steer_act_05_15_immediate_production_still_uses_orch(
+    admission_facts: AdmissionFacts,
+) -> None:
+    orchestrator = _RecordingOrchestrator()
+    driver = _RecordingSteeringDriver(
+        admission_facts.database,
+        admission_facts.service,
+        orchestrator,
+    )
+    application = create_http_application(
+        database=admission_facts.database,
+        work_service=admission_facts.service,
+        orchestrator=orchestrator,
+        steering_driver=driver,
+    )
+    with TestClient(application, raise_server_exceptions=False) as client:
+        submitted = client.post(
+            "/api/works",
+            json={"requirement": "Produce docs/immediate-result.md"},
+        )
+        work_id = submitted.json()["work_id"]
+        assert client.post(f"/api/works/{work_id}/refine", json={}).status_code == 200
+        approved = client.post(
+            f"/api/works/{work_id}/approve",
+            json={"authority_identity": "human:immediate"},
+        )
+
+        assert approved.status_code == 200
+        assert approved.json()["mode"] == "IMMEDIATE_PRODUCTION"
+        assert approved.json()["steering_enabled"] is False
+        assert orchestrator.scheduled_work_ids == [UUID(work_id)]
+        assert driver.scheduled_work_ids == []
+        assert _steering_counts(admission_facts.database) == (0, 0, 0, 0, 0)
+        assert _counts(admission_facts.database) == (1, 1, 0)
 
 
 def test_steer_admit_13_migration_preserves_historical_work_as_immediate(

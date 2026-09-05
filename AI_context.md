@@ -52,6 +52,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-PLAN-STEER-1G — CLOSED / PASS**
 
+**MVP-PLAN-STEER-1H — CLOSED / PASS**
+
 **MVP-CODE-1 — CLOSED / PASS**
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
@@ -399,6 +401,18 @@ preserved as **FAILED AT ADMISSION — WORK_PRODUCTION_ADMISSION_COUPLING
 CONFIRMED** historical evidence; the coupling and contributing admission gaps
 are resolved by 1G, and real long-lived Dogfood continues. See [Long-lived Motive
 Dogfood #1 Admission Finding](docs/evidence/dogfood/long-lived-motive-dogfood-1-admission-coupling.md).
+
+MVP-PLAN-STEER-1H is **CLOSED / PASS** after focused validation and Architecture
+Lead Reality Review. All successful Work-admission entry points
+now converge on one mode-aware post-admission service: immediate-production
+Work schedules the existing Production Orchestrator, while long-lived Work
+idempotently bootstraps Steering truth and schedules the Plan Steering Driver.
+Startup repairs the exact durable interruption window `READY +
+LONG_LIVED_STEERING + no SteeringPlan` before normal Steering restart
+eligibility is evaluated. Long-lived Motive Dogfood #2 remains preserved as
+**PASSED WORK ADMISSION / FAILED AT POST-ADMISSION STEERING ACTIVATION —
+STEERING_BOOTSTRAP_TRIGGER_GAP CONFIRMED** pre-fix evidence. See [Long-lived
+Motive Dogfood #2 Post-admission Activation Finding](docs/evidence/dogfood/long-lived-motive-dogfood-2-post-admission-activation-gap.md).
 
 ### Reality-driven Plan Steering MVP Behavioral Contract
 

@@ -23,6 +23,9 @@ class _StaticOnlyDatabase:
 class _StaticOnlyWorkService:
     database = _StaticOnlyDatabase()
 
+    def list_works(self) -> tuple[()]:
+        return ()
+
 
 class _StaticOnlyOrchestrator:
     def resume_safely_eligible_works(self) -> tuple[()]:

@@ -619,6 +619,18 @@ exact production boundary is already admitted—`PRODUCE`. PLAN-1B and Run/PWU
 creation remain mandatory at the exact `PRODUCE` boundary. Authority expansion
 still records `SCOPE_OR_AUTHORITY_EXPANSION` and stops before Runtime creation.
 
+MVP-PLAN-STEER-1H converges the dedicated Work approval endpoint and Work Draft
+Attention resolution on one post-admission application service. The service
+reads the admitted Work mode from persisted Reality, sends immediate-production
+Work to the existing Production Orchestrator, and idempotently bootstraps then
+schedules the Plan Steering Driver for long-lived Work. Startup repairs only
+the truthful incomplete state `READY + LONG_LIVED_STEERING + no SteeringPlan`
+before applying the existing driver restart-eligibility rules. Bootstrap or
+driver-scheduling failure never falls through to production, and UI reads do
+not drive progression. MVP-PLAN-STEER-1H is **CLOSED / PASS** after focused
+validation and Architecture Lead Reality Review; real long-lived Dogfood
+continues.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
@@ -647,6 +659,11 @@ MVP-PLAN-STEER-1F
 
 MVP-PLAN-STEER-1G
     LONG-LIVED WORK ADMISSION / STEERING BOOTSTRAP
+        = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
+
+MVP-PLAN-STEER-1H
+    POST-ADMISSION STEERING ACTIVATION
         = CLOSED / PASS
     ARCHITECTURE LEAD REALITY REVIEW = PASS
 
