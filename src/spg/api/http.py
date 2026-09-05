@@ -41,6 +41,7 @@ from spg.domain.product import (
     ProductInvariantViolation,
     ProductRecordNotFound,
     WorkRefinementRequest,
+    WorkProjection,
     WorkStatus,
 )
 from spg.domain.steering import SteeringRecordNotFound
@@ -139,6 +140,36 @@ def create_http_application(
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
+    def work_response(projection: WorkProjection) -> WorkResponse:
+        response = WorkResponse.from_projection(projection)
+        if not projection.steering_enabled:
+            return response
+        try:
+            steering = selected_steering_driver.project(projection.work_id)
+        except SteeringRecordNotFound:
+            return response
+        state = steering.automatic_progression_state.value
+        stop_reason = (
+            None
+            if steering.last_stop_reason is None
+            else steering.last_stop_reason.value
+        )
+        updates: dict[str, str | None] = {
+            "automatic_progression_state": state,
+            "last_stop_reason": stop_reason,
+        }
+        if state == "STOPPED" and stop_reason == "BLOCKED":
+            updates.update(
+                {
+                    "most_recent_meaningful_event": "STEERING_STOPPED_BLOCKED",
+                    "what_happens_next": (
+                        "Automatic Steering stopped on a governed invariant; "
+                        "inspect the recorded Runtime evidence"
+                    ),
+                }
+            )
+        return response.model_copy(update=updates)
+
     @api.exception_handler(ProductRecordNotFound)
     @api.exception_handler(SteeringRecordNotFound)
     async def not_found_handler(
@@ -227,7 +258,7 @@ def create_http_application(
 
     @api.post("/api/works", response_model=WorkResponse, status_code=201)
     def submit_work(request: WorkSubmitRequest) -> WorkResponse:
-        return WorkResponse.from_projection(
+        return work_response(
             work_service.submit_work(
                 request.requirement,
                 goal_id=request.goal_id,
@@ -246,11 +277,11 @@ def create_http_application(
             projections = tuple(
                 work for work in projections if work.status is status_filter
             )
-        return [WorkResponse.from_projection(work) for work in projections]
+        return [work_response(work) for work in projections]
 
     @api.get("/api/works/{work_id}", response_model=WorkResponse)
     def get_work(work_id: UUID) -> WorkResponse:
-        return WorkResponse.from_projection(work_service.get_work(work_id))
+        return work_response(work_service.get_work(work_id))
 
     @api.get(
         "/api/works/{work_id}/steering",
@@ -264,7 +295,7 @@ def create_http_application(
     @api.post("/api/works/{work_id}/refine", response_model=WorkResponse)
     def refine_work(work_id: UUID, request: WorkRefineRequest) -> WorkResponse:
         refinement = WorkRefinementRequest(**request.model_dump())
-        return WorkResponse.from_projection(
+        return work_response(
             work_service.refine_work(work_id, refinement)
         )
 
@@ -282,13 +313,13 @@ def create_http_application(
             authority_identity=request.authority_identity,
             rationale=request.rationale,
         )
-        return WorkResponse.from_projection(
+        return work_response(
             selected_post_admission.activate(projection.work_id)
         )
 
     @api.post("/api/works/{work_id}/reject", response_model=WorkResponse)
     def reject_work(work_id: UUID, request: HumanDecisionRequest) -> WorkResponse:
-        return WorkResponse.from_projection(
+        return work_response(
             work_service.reject_work_draft(
                 work_id,
                 authority_identity=request.authority_identity,
@@ -303,7 +334,7 @@ def create_http_application(
         work_id: UUID,
         request: HumanDecisionRequest,
     ) -> WorkResponse:
-        return WorkResponse.from_projection(
+        return work_response(
             work_service.request_work_refinement(
                 work_id,
                 authority_identity=request.authority_identity,
@@ -312,7 +343,7 @@ def create_http_application(
 
     @api.post("/api/works/{work_id}/advance", response_model=WorkResponse)
     def advance_work(work_id: UUID) -> WorkResponse:
-        return WorkResponse.from_projection(work_service.advance_work(work_id))
+        return work_response(work_service.advance_work(work_id))
 
     @api.get("/api/attention", response_model=list[AttentionResponse])
     def list_attention(work_id: UUID | None = None) -> list[AttentionResponse]:
@@ -339,7 +370,7 @@ def create_http_application(
             projection = selected_post_admission.activate(projection.work_id)
         elif projection.status in {WorkStatus.READY, WorkStatus.RUNNING}:
             selected_orchestrator.schedule(projection.work_id)
-        return WorkResponse.from_projection(projection)
+        return work_response(projection)
 
     @api.get("/api/works/{work_id}/result", response_model=WorkResultResponse)
     def get_work_result(work_id: UUID) -> WorkResultResponse:

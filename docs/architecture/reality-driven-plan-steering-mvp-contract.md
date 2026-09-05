@@ -646,6 +646,20 @@ expansion stops at governed Human Attention. 1I is **CLOSED / PASS** after
 focused validation and Architecture Lead Reality Review; real Provider
 Dogfood continues.
 
+MVP-PLAN-STEER-1J constrains real semantic Provider generation with the JSON
+schema derived from the same typed payload model used by strict application
+parsing. The schema exposes only current Watt target vocabulary and typed
+artifact shapes, while bounded allowed areas retain repository-relative `/**`
+syntax. JSON/Pydantic parsing, fresh-basis reconstruction, evidence, scope,
+authority, completion, and result-admission checks remain fail closed. A
+Provider schema match remains advisory rather than Authority. When the bounded
+Driver stops on a governed invariant, the Work API now reuses its existing
+`STOPPED / BLOCKED` projection instead of implying semantic execution is still
+active. The structured-output gap is resolved in implementation and focused
+validation; the broader execution-observability gap is only partially mitigated
+and remains open. 1J is **CLOSED / PASS** after Architecture Lead Reality
+Review; real Provider Dogfood continues.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
@@ -684,6 +698,11 @@ MVP-PLAN-STEER-1H
 
 MVP-PLAN-STEER-1I
     GOVERNED SEMANTIC DESIGN / REFINE EXECUTION LITE
+        = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
+
+MVP-PLAN-STEER-1J
+    SCHEMA-CONSTRAINED SEMANTIC PROVIDER OUTPUT
         = CLOSED / PASS
     ARCHITECTURE LEAD REALITY REVIEW = PASS
 

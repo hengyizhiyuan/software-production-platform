@@ -68,6 +68,7 @@ class CodexSdkSemanticStepCapability:
                 approval_mode=ApprovalMode.deny_all,
                 cwd=input.repository_location,
                 model=self.model,
+                output_schema=self.output_schema(),
                 sandbox=Sandbox.read_only,
             )
             terminal = _wait_for_terminal(turn, self.timeout_seconds)
@@ -110,6 +111,12 @@ class CodexSdkSemanticStepCapability:
         )
 
     @staticmethod
+    def output_schema() -> dict[str, Any]:
+        """Return the exact typed payload contract supplied to Provider generation."""
+
+        return _SemanticProviderPayload.model_json_schema()
+
+    @staticmethod
     def _parse_payload(raw: str) -> _SemanticProviderPayload:
         value = raw.strip()
         if value.startswith("```"):
@@ -145,6 +152,15 @@ class CodexSdkSemanticStepCapability:
             "(null, or a typed object with target_kind, objective, artifact_targets, "
             "code_targets, allowed_areas, forbidden_areas, verification_expectation); "
             "completion_claimed (boolean). For REFINE, proposed_production must be null. "
+            "For proposed production, target_kind must be exactly DOCUMENTATION_WORK or "
+            "CODE_WORK. DOCUMENTATION_WORK uses exactly one artifact_targets object with "
+            "repository-relative path and CREATE or UPDATE operation; CODE_WORK leaves "
+            "artifact_targets empty and uses exact repository-relative code_targets and/or "
+            "allowed_areas. Every allowed_areas value must be a repository-relative area "
+            "ending with /**; natural-language area descriptions are invalid. DESIGN may "
+            "propose production but never authorizes it. If an exact target or bounded area "
+            "is not supported by the supplied Reality, record the uncertainty instead of "
+            "fabricating a path. "
             "If uncertainty or authority expansion exists, provide a Human recommendation "
             "and do not claim completion. Do not treat your prose as authority.\n\n"
             "Governed SemanticStepInput:\n"

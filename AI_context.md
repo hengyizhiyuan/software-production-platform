@@ -56,6 +56,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-PLAN-STEER-1I — CLOSED / PASS**
 
+**MVP-PLAN-STEER-1J — CLOSED / PASS**
+
 **MVP-CODE-1 — CLOSED / PASS**
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
@@ -152,7 +154,7 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | Motive / Work / Plan Concept Calibration | CLOSED / PASS |
-| Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F/1G/1H/1I CLOSED / PASS; REAL PROVIDER DOGFOOD CONTINUES |
+| Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F/1G/1H/1I/1J CLOSED / PASS; REAL PROVIDER DOGFOOD CONTINUES |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -429,6 +431,22 @@ creation remains deferred to the existing authority-checked PLAN-1B/SPG
 boundary. 1I is **CLOSED / PASS** after focused validation and Architecture Lead
 Reality Review; real Provider Dogfood and Core Closure remain pending.
 See [Long-lived Motive Dogfood #3 Semantic Design Execution Finding](docs/evidence/dogfood/long-lived-motive-dogfood-3-semantic-design-execution-gap.md).
+
+Long-lived Motive Dogfood #4 proved **Work Admission PASS / Steering Activation
+PASS / Real Semantic Provider PASS**, then failed at strict structured semantic
+output admission. Its one ephemeral Provider Thread/Turn completed and returned
+JSON, but the payload used an unadmitted target-kind alias, string artifact
+targets, and natural-language allowed areas. No Semantic Step Result or
+production facts were created, and `DESIGN` remains current. This confirms
+`SEMANTIC_STRUCTURED_OUTPUT_GAP`; the UI's continued active-looking Work text
+also confirms the non-primary `SEMANTIC_EXECUTION_OBSERVABILITY_GAP`.
+MVP-PLAN-STEER-1J binds generation to the existing typed payload JSON schema,
+retains every fail-closed application check, and projects a stopped/blocked
+Driver truthfully through the Work API. The primary structured-output gap is
+resolved in implementation and focused validation; the observability gap is
+partially mitigated and remains open. 1J is **CLOSED / PASS** after Architecture
+Lead Reality Review. See [Long-lived
+Motive Dogfood #4 Structured Semantic Output Finding](docs/evidence/dogfood/long-lived-motive-dogfood-4-semantic-structured-output-gap.md).
 
 ### Reality-driven Plan Steering MVP Behavioral Contract
 

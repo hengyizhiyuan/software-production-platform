@@ -6,10 +6,17 @@ from datetime import datetime
 from enum import StrEnum
 from hashlib import sha256
 import json
-from typing import Protocol, Self
+from typing import Annotated, Protocol, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 from spg.domain.change import (
     ProductionTargetKind,
@@ -168,17 +175,39 @@ class SemanticGovernanceDecision(BaseModel):
     rationale: str | None = None
 
 
+SemanticBoundedRepositoryArea = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, pattern=r"^.+/\*\*$"),
+]
+
+
 class SemanticProductionProposal(BaseModel):
     """Advisory bounded production proposal; never production authority itself."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    target_kind: ProductionTargetKind
+    target_kind: ProductionTargetKind = Field(
+        description="Existing Watt production target kind; no provider-defined aliases.",
+    )
     objective: str = Field(min_length=1)
-    artifact_targets: tuple[ProductionPlanArtifactTarget, ...] = ()
-    code_targets: tuple[str, ...] = ()
-    allowed_areas: tuple[str, ...] = ()
-    forbidden_areas: tuple[str, ...] = ()
+    artifact_targets: tuple[ProductionPlanArtifactTarget, ...] = Field(
+        default=(),
+        description=(
+            "Typed documentation artifact targets; CODE_WORK must leave this empty."
+        ),
+    )
+    code_targets: tuple[str, ...] = Field(
+        default=(),
+        description="Exact repository-relative code paths without wildcards.",
+    )
+    allowed_areas: tuple[SemanticBoundedRepositoryArea, ...] = Field(
+        default=(),
+        description="Repository-relative bounded areas ending with /**.",
+    )
+    forbidden_areas: tuple[str, ...] = Field(
+        default=(),
+        description="Repository-relative exact paths or bounded areas ending with /**.",
+    )
     verification_expectation: str = Field(min_length=1)
 
     @field_validator("code_targets")

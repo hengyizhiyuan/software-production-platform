@@ -325,6 +325,8 @@ class WorkResponse(ApiDto):
     current_production_cycle_trusted: bool = False
     latest_trusted_runtime_commit_id: UUID | None = None
     work_complete: bool = False
+    automatic_progression_state: str | None = None
+    last_stop_reason: str | None = None
 
     @classmethod
     def from_projection(cls, work: WorkProjection) -> Self:

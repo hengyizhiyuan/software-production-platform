@@ -7,6 +7,7 @@ import subprocess
 
 from alembic import command
 from alembic.config import Config
+from fastapi.testclient import TestClient
 import pytest
 from sqlalchemy import func, inspect, select, text
 
@@ -23,6 +24,7 @@ from spg.application.steering_decision import (
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.steering_production import SteeringProductionService
 from spg.application.work import WorkApplicationService
+from spg.api.http import create_http_application
 from spg.domain.change import ProductionTargetKind
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import (
@@ -589,8 +591,38 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
     assert fake.thread_kwargs["approval_mode"].value == "deny_all"
     assert fake.thread_kwargs["sandbox"].value == "read-only"
     assert fake.turn_kwargs["sandbox"].value == "read-only"
+    assert fake.turn_kwargs["output_schema"] == (
+        CodexSdkSemanticStepCapability.output_schema()
+    )
+    schema = fake.turn_kwargs["output_schema"]
+    assert schema["$defs"]["ProductionTargetKind"]["enum"] == [
+        "DOCUMENTATION_WORK",
+        "CODE_WORK",
+    ]
+    assert schema["$defs"]["SemanticProductionProposal"]["properties"][
+        "artifact_targets"
+    ]["items"] == {"$ref": "#/$defs/ProductionPlanArtifactTarget"}
+    assert schema["$defs"]["SemanticProductionProposal"]["properties"][
+        "allowed_areas"
+    ]["items"]["pattern"] == r"^.+/\*\*$"
     assert "Return JSON only" in fake.instruction
+    assert "target_kind must be exactly DOCUMENTATION_WORK or CODE_WORK" in (
+        fake.instruction
+    )
+    assert "ending with /**" in fake.instruction
     assert str(semantic_input.repository_location) not in fake.instruction
+
+    admitted_result = SemanticStepApplicationService(
+        postgres_database,
+        None,
+    ).admit(semantic_input, candidate)
+    assert admitted_result.step_id == semantic_input.step.id
+    assert admitted_result.basis_fingerprint == semantic_input.basis_fingerprint
+    assert admitted_result.completion_satisfied is True
+    assert admitted_result.reasoning_provider_identity == (
+        "codex-sdk:thread:thread-semantic-test:turn:turn-semantic-test"
+    )
+    assert _runtime_counts(postgres_database) == (0, 0, 0)
 
 
 def test_sem_03_real_adapter_rejects_unstructured_provider_prose() -> None:
@@ -601,6 +633,132 @@ def test_sem_03_real_adapter_rejects_unstructured_provider_prose() -> None:
         CodexSdkSemanticStepCapability._parse_payload(
             "A free-form design answer is not governed application Reality."
         )
+
+
+def test_sem_schema_03_04_05_06_15_dogfood_4_malformed_shapes_remain_rejected(
+) -> None:
+    common = {
+        "bounded_summary": "Bounded design proposal from current Reality.",
+        "decisions": ["Reuse the existing Work and Steering projections."],
+        "derived_constraints": [],
+        "unresolved_questions": [],
+        "authority_assessment": "WITHIN_AUTHORITY",
+        "human_attention_recommendation": None,
+        "completion_claimed": True,
+    }
+    invalid_proposals = (
+        {
+            "target_kind": "BOUNDED_CODE_CHANGE",
+            "objective": "Expose bounded execution progress",
+            "artifact_targets": [],
+            "code_targets": ["src/spg/web/app.js"],
+            "allowed_areas": [],
+            "forbidden_areas": [],
+            "verification_expectation": "Focused API and UI tests",
+        },
+        {
+            "target_kind": "DOCUMENTATION_WORK",
+            "objective": "Document bounded execution progress",
+            "artifact_targets": ["path-a", "path-b"],
+            "code_targets": [],
+            "allowed_areas": [],
+            "forbidden_areas": [],
+            "verification_expectation": "Artifact path verification",
+        },
+        {
+            "target_kind": "CODE_WORK",
+            "objective": "Expose bounded execution progress",
+            "artifact_targets": [],
+            "code_targets": [],
+            "allowed_areas": ["frontend files related to observability"],
+            "forbidden_areas": [],
+            "verification_expectation": "Focused API and UI tests",
+        },
+    )
+
+    for proposed_production in invalid_proposals:
+        with pytest.raises(
+            SteeringInvariantViolation,
+            match="invalid structured result",
+        ):
+            CodexSdkSemanticStepCapability._parse_payload(
+                json.dumps(common | {"proposed_production": proposed_production})
+            )
+
+    schema = CodexSdkSemanticStepCapability.output_schema()
+    proposal = schema["$defs"]["SemanticProductionProposal"]["properties"]
+    assert "BOUNDED_CODE_CHANGE" not in schema["$defs"][
+        "ProductionTargetKind"
+    ]["enum"]
+    assert proposal["artifact_targets"]["items"]["$ref"] == (
+        "#/$defs/ProductionPlanArtifactTarget"
+    )
+    assert proposal["allowed_areas"]["items"]["pattern"] == r"^.+/\*\*$"
+
+
+def test_sem_schema_12_13_blocked_driver_is_truthful_in_work_api(
+    postgres_database: Database,
+    product,
+) -> None:
+    works, _repository = product
+    admitted, plan = _admitted_plan(works)
+    assert plan.current_step is not None
+    invalid = {
+        "bounded_summary": "Malformed Dogfood #4 provider result.",
+        "decisions": ["Attempt a bounded change."],
+        "derived_constraints": list(admitted.constraints),
+        "unresolved_questions": [],
+        "authority_assessment": "WITHIN_AUTHORITY",
+        "human_attention_recommendation": None,
+        "proposed_production": {
+            "target_kind": "BOUNDED_CODE_CHANGE",
+            "objective": "Expose progress",
+            "artifact_targets": [],
+            "code_targets": ["src/spg/web/app.js"],
+            "allowed_areas": [],
+            "forbidden_areas": [],
+            "verification_expectation": "Focused tests",
+        },
+        "completion_claimed": True,
+    }
+    fake = _FakeSemanticCodex(json.dumps(invalid))
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(
+        postgres_database,
+        works,
+        orchestrator,
+        semantic_capability=CodexSdkSemanticStepCapability(
+            codex_factory=lambda: fake,
+        ),
+    )
+    try:
+        assert driver.schedule(admitted.work_id) is True
+        assert driver.wait_until_idle(admitted.work_id, 5)
+        outcome = driver.last_outcome(admitted.work_id)
+        assert outcome is not None
+        assert outcome.stop_reason is SteeringDriverStopReason.BLOCKED
+        assert not SteeringApplicationService(postgres_database).reconstruct(
+            admitted.work_id
+        ).semantic_results
+        assert _runtime_counts(postgres_database) == (0, 0, 0)
+
+        api = create_http_application(
+            database=postgres_database,
+            work_service=works,
+            orchestrator=orchestrator,
+            steering_driver=driver,
+        )
+        response = TestClient(api).get(f"/api/works/{admitted.work_id}")
+        assert response.status_code == 200
+        body = response.json()
+        assert body["current_steering_step_type"] == "DESIGN"
+        assert body["automatic_progression_state"] == "STOPPED"
+        assert body["last_stop_reason"] == "BLOCKED"
+        assert body["most_recent_meaningful_event"] == "STEERING_STOPPED_BLOCKED"
+        assert "stopped on a governed invariant" in body["what_happens_next"]
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
 
 
 def test_semantic_result_migration_downgrade_and_reupgrade(
