@@ -58,6 +58,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-PLAN-STEER-1J — CLOSED / PASS**
 
+**MVP-PLAN-STEER-1K — CLOSED / PASS**
+
 **MVP-CODE-1 — CLOSED / PASS**
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
@@ -447,6 +449,21 @@ resolved in implementation and focused validation; the observability gap is
 partially mitigated and remains open. 1J is **CLOSED / PASS** after Architecture
 Lead Reality Review. See [Long-lived
 Motive Dogfood #4 Structured Semantic Output Finding](docs/evidence/dogfood/long-lived-motive-dogfood-4-semantic-structured-output-gap.md).
+
+Long-lived Motive Dogfood #5 passed Work admission, Steering activation, and
+semantic input assembly, then failed before content generation because the
+Provider rejected the response-format schema: every object property must be
+listed in `required`, beginning with the omitted `artifact_targets` key. The
+preserved Runtime has one failed ephemeral semantic Thread/Turn, zero Semantic
+Step Results and zero production facts, with `DESIGN` still current and the
+Driver truthfully `STOPPED / BLOCKED`. This confirms
+`SEMANTIC_PROVIDER_SCHEMA_REQUIREDNESS_GAP`; the parent
+`SEMANTIC_STRUCTURED_OUTPUT_GAP` remains open in real Dogfood. MVP-PLAN-STEER-1K
+adds a strict typed Provider wire shape with required-null and required-empty
+values, then deterministically converts it into the unchanged domain proposal.
+1K is **CLOSED / PASS** after focused validation and Architecture Lead Reality
+Review. See [Long-lived Motive Dogfood #5 Provider Schema Requiredness
+Finding](docs/evidence/dogfood/long-lived-motive-dogfood-5-semantic-provider-schema-requiredness-gap.md).
 
 ### Reality-driven Plan Steering MVP Behavioral Contract
 

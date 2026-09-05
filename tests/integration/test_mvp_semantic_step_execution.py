@@ -599,10 +599,10 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
         "DOCUMENTATION_WORK",
         "CODE_WORK",
     ]
-    assert schema["$defs"]["SemanticProductionProposal"]["properties"][
+    assert schema["$defs"]["_SemanticProviderProductionProposal"]["properties"][
         "artifact_targets"
     ]["items"] == {"$ref": "#/$defs/ProductionPlanArtifactTarget"}
-    assert schema["$defs"]["SemanticProductionProposal"]["properties"][
+    assert schema["$defs"]["_SemanticProviderProductionProposal"]["properties"][
         "allowed_areas"
     ]["items"]["pattern"] == r"^.+/\*\*$"
     assert "Return JSON only" in fake.instruction
@@ -686,7 +686,7 @@ def test_sem_schema_03_04_05_06_15_dogfood_4_malformed_shapes_remain_rejected(
             )
 
     schema = CodexSdkSemanticStepCapability.output_schema()
-    proposal = schema["$defs"]["SemanticProductionProposal"]["properties"]
+    proposal = schema["$defs"]["_SemanticProviderProductionProposal"]["properties"]
     assert "BOUNDED_CODE_CHANGE" not in schema["$defs"][
         "ProductionTargetKind"
     ]["enum"]

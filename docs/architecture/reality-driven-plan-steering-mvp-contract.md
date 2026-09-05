@@ -660,6 +660,18 @@ validation; the broader execution-observability gap is only partially mitigated
 and remains open. 1J is **CLOSED / PASS** after Architecture Lead Reality
 Review; real Provider Dogfood continues.
 
+Long-lived Motive Dogfood #5 proved that Provider schema supply alone was
+insufficient: strict response-format admission requires every property at every
+object level to appear in `required`. The generated schema omitted default
+collections and nullable fields, so the Provider rejected it before content
+generation. MVP-PLAN-STEER-1K separates the strict typed Provider wire shape
+from unchanged domain defaults. Wire collections are required and may be empty;
+wire optional values are required keys and may be null. Conversion into the
+existing domain proposal is deterministic and retains enum, typed-target,
+repository-path, authority, completion, and production-admission validation.
+1K is **CLOSED / PASS** after focused validation and Architecture Lead Reality
+Review; real Provider Dogfood continues.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
@@ -703,6 +715,11 @@ MVP-PLAN-STEER-1I
 
 MVP-PLAN-STEER-1J
     SCHEMA-CONSTRAINED SEMANTIC PROVIDER OUTPUT
+        = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
+
+MVP-PLAN-STEER-1K
+    STRICT SEMANTIC PROVIDER WIRE SCHEMA COMPATIBILITY
         = CLOSED / PASS
     ARCHITECTURE LEAD REALITY REVIEW = PASS
 

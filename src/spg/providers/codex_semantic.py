@@ -8,9 +8,11 @@ import json
 from typing import Any
 
 from openai_codex import ApprovalMode, Codex, Sandbox
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
+from spg.domain.planning import ProductionPlanArtifactTarget
 from spg.domain.steering import (
+    SemanticBoundedRepositoryArea,
     SemanticProductionProposal,
     SemanticResultKind,
     SemanticStepInput,
@@ -25,17 +27,50 @@ from spg.providers.codex_sdk_executor import _enum_value, _wait_for_terminal
 CodexFactory = Callable[[], AbstractContextManager[Any]]
 
 
+class _SemanticProviderProductionProposal(SemanticProductionProposal):
+    """Strict Provider wire shape over unchanged domain proposal semantics."""
+
+    artifact_targets: tuple[ProductionPlanArtifactTarget, ...] = Field(
+        description=(
+            "Typed documentation artifact targets; CODE_WORK must leave this empty."
+        ),
+    )
+    code_targets: tuple[str, ...] = Field(
+        description="Exact repository-relative code paths without wildcards.",
+    )
+    allowed_areas: tuple[SemanticBoundedRepositoryArea, ...] = Field(
+        description="Repository-relative bounded areas ending with /**.",
+    )
+    forbidden_areas: tuple[str, ...] = Field(
+        description=(
+            "Repository-relative exact paths or bounded areas ending with /**."
+        ),
+    )
+
+    def to_domain(self) -> SemanticProductionProposal:
+        """Discard wire-only requiredness without changing semantic values."""
+
+        return SemanticProductionProposal.model_validate(self.model_dump())
+
+
 class _SemanticProviderPayload(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     bounded_summary: str
     decisions: tuple[str, ...]
-    derived_constraints: tuple[str, ...] = ()
-    unresolved_questions: tuple[str, ...] = ()
+    derived_constraints: tuple[str, ...]
+    unresolved_questions: tuple[str, ...]
     authority_assessment: SteeringAuthorityAssessment
-    human_attention_recommendation: str | None = None
-    proposed_production: SemanticProductionProposal | None = None
+    human_attention_recommendation: str | None
+    proposed_production: _SemanticProviderProductionProposal | None
     completion_claimed: bool
+
+    def domain_production_proposal(self) -> SemanticProductionProposal | None:
+        """Convert the strict wire proposal into the existing domain contract."""
+
+        if self.proposed_production is None:
+            return None
+        return self.proposed_production.to_domain()
 
 
 class CodexSdkSemanticStepCapability:
@@ -103,7 +138,7 @@ class CodexSdkSemanticStepCapability:
             human_attention_recommendation=(
                 payload.human_attention_recommendation
             ),
-            proposed_production=payload.proposed_production,
+            proposed_production=payload.domain_production_proposal(),
             reasoning_provider_identity=(
                 f"codex-sdk:thread:{thread.id}:turn:{turn.id}"
             ),

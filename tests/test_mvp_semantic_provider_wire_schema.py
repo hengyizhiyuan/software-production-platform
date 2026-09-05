@@ -1,0 +1,241 @@
+import json
+from collections.abc import Iterator
+from typing import Any
+
+import pytest
+
+from spg.domain.change import ProductionTargetKind
+from spg.domain.planning import PlannedArtifactOperation
+from spg.domain.steering import SemanticProductionProposal, SteeringInvariantViolation
+from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
+
+
+def _payload(proposed_production: object = None) -> dict[str, object]:
+    return {
+        "bounded_summary": "A bounded semantic direction grounded in current Reality.",
+        "decisions": ["Reuse the existing governed Work and Steering seams."],
+        "derived_constraints": [],
+        "unresolved_questions": [],
+        "authority_assessment": "WITHIN_AUTHORITY",
+        "human_attention_recommendation": None,
+        "proposed_production": proposed_production,
+        "completion_claimed": True,
+    }
+
+
+def _object_schemas(value: object, path: str = "$") -> Iterator[tuple[str, dict]]:
+    if isinstance(value, dict):
+        if "properties" in value:
+            yield path, value
+        for key, nested in value.items():
+            yield from _object_schemas(nested, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, nested in enumerate(value):
+            yield from _object_schemas(nested, f"{path}[{index}]")
+
+
+def _proposal_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    return schema["$defs"]["_SemanticProviderProductionProposal"]
+
+
+def test_sem_wire_01_03_04_05_08_09_10_15_schema_is_recursively_strict() -> None:
+    schema = CodexSdkSemanticStepCapability.output_schema()
+
+    object_schemas = tuple(_object_schemas(schema))
+    assert object_schemas
+    for path, object_schema in object_schemas:
+        assert set(object_schema["properties"]) == set(
+            object_schema.get("required", [])
+        ), path
+        assert object_schema.get("additionalProperties") is False, path
+
+    assert set(schema["properties"]) == set(schema["required"])
+    proposal = _proposal_schema(schema)
+    assert set(proposal["properties"]) == set(proposal["required"])
+    assert "artifact_targets" in proposal["required"]
+    assert schema["$defs"]["ProductionTargetKind"]["enum"] == [
+        "DOCUMENTATION_WORK",
+        "CODE_WORK",
+    ]
+    assert proposal["properties"]["artifact_targets"]["items"] == {
+        "$ref": "#/$defs/ProductionPlanArtifactTarget"
+    }
+    assert proposal["properties"]["allowed_areas"]["items"]["pattern"] == (
+        r"^.+/\*\*$"
+    )
+
+
+def test_sem_wire_02_domain_defaults_remain_unchanged() -> None:
+    proposal = SemanticProductionProposal(
+        target_kind=ProductionTargetKind.CODE_WORK,
+        objective="Improve bounded progress observability",
+        code_targets=("src/spg/web/app.js",),
+        verification_expectation="Focused API and UI tests",
+    )
+
+    assert proposal.artifact_targets == ()
+    assert proposal.allowed_areas == ()
+    assert proposal.forbidden_areas == ()
+
+
+def test_sem_wire_03_04_06_no_production_round_trip_uses_explicit_values() -> None:
+    wire = CodexSdkSemanticStepCapability._parse_payload(json.dumps(_payload()))
+
+    assert wire.derived_constraints == ()
+    assert wire.unresolved_questions == ()
+    assert wire.human_attention_recommendation is None
+    assert wire.proposed_production is None
+    assert wire.domain_production_proposal() is None
+
+
+def test_sem_wire_04_06_code_work_round_trip_preserves_typed_values() -> None:
+    wire = CodexSdkSemanticStepCapability._parse_payload(
+        json.dumps(
+            _payload(
+                {
+                    "target_kind": "CODE_WORK",
+                    "objective": "Improve bounded progress observability",
+                    "artifact_targets": [],
+                    "code_targets": ["src/spg/web/app.js"],
+                    "allowed_areas": ["src/spg/web/**"],
+                    "forbidden_areas": [],
+                    "verification_expectation": "Focused API and UI tests",
+                }
+            )
+        )
+    )
+
+    proposal = wire.domain_production_proposal()
+    assert type(proposal) is SemanticProductionProposal
+    assert proposal.target_kind is ProductionTargetKind.CODE_WORK
+    assert proposal.artifact_targets == ()
+    assert proposal.code_targets == ("src/spg/web/app.js",)
+    assert proposal.allowed_areas == ("src/spg/web/**",)
+    assert proposal.forbidden_areas == ()
+
+
+def test_sem_wire_04_06_documentation_round_trip_preserves_typed_values() -> None:
+    wire = CodexSdkSemanticStepCapability._parse_payload(
+        json.dumps(
+            _payload(
+                {
+                    "target_kind": "DOCUMENTATION_WORK",
+                    "objective": "Record bounded progress observability",
+                    "artifact_targets": [
+                        {
+                            "path": "docs/architecture/progress-observability.md",
+                            "operation": "CREATE",
+                        }
+                    ],
+                    "code_targets": [],
+                    "allowed_areas": [],
+                    "forbidden_areas": [],
+                    "verification_expectation": "Artifact path verification",
+                }
+            )
+        )
+    )
+
+    proposal = wire.domain_production_proposal()
+    assert type(proposal) is SemanticProductionProposal
+    assert proposal.target_kind is ProductionTargetKind.DOCUMENTATION_WORK
+    assert proposal.artifact_targets[0].path == (
+        "docs/architecture/progress-observability.md"
+    )
+    assert proposal.artifact_targets[0].operation is PlannedArtifactOperation.CREATE
+    assert proposal.code_targets == ()
+    assert proposal.allowed_areas == ()
+    assert proposal.forbidden_areas == ()
+
+
+@pytest.mark.parametrize(
+    "proposal",
+    (
+        {
+            "target_kind": "BOUNDED_CODE_CHANGE",
+            "objective": "Invalid alias",
+            "artifact_targets": [],
+            "code_targets": ["src/spg/web/app.js"],
+            "allowed_areas": [],
+            "forbidden_areas": [],
+            "verification_expectation": "Focused tests",
+        },
+        {
+            "target_kind": "DOCUMENTATION_WORK",
+            "objective": "Invalid artifact shape",
+            "artifact_targets": ["docs/not-a-typed-target.md"],
+            "code_targets": [],
+            "allowed_areas": [],
+            "forbidden_areas": [],
+            "verification_expectation": "Focused tests",
+        },
+        {
+            "target_kind": "CODE_WORK",
+            "objective": "Invalid natural-language area",
+            "artifact_targets": [],
+            "code_targets": [],
+            "allowed_areas": ["frontend files related to observability"],
+            "forbidden_areas": [],
+            "verification_expectation": "Focused tests",
+        },
+        {
+            "target_kind": "CODE_WORK",
+            "objective": "Invalid repository escape",
+            "artifact_targets": [],
+            "code_targets": ["../outside.py"],
+            "allowed_areas": [],
+            "forbidden_areas": [],
+            "verification_expectation": "Focused tests",
+        },
+    ),
+)
+def test_sem_wire_07_malformed_semantic_values_remain_rejected(
+    proposal: dict[str, object],
+) -> None:
+    with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
+        CodexSdkSemanticStepCapability._parse_payload(
+            json.dumps(_payload(proposal))
+        )
+
+
+@pytest.mark.parametrize(
+    "missing_key",
+    (
+        "derived_constraints",
+        "unresolved_questions",
+        "human_attention_recommendation",
+        "proposed_production",
+    ),
+)
+def test_sem_wire_03_04_absent_wire_keys_are_not_defaulted(
+    missing_key: str,
+) -> None:
+    payload = _payload()
+    payload.pop(missing_key)
+
+    with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
+        CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))
+
+
+@pytest.mark.parametrize(
+    "missing_key",
+    ("artifact_targets", "code_targets", "allowed_areas", "forbidden_areas"),
+)
+def test_sem_wire_04_15_absent_proposal_collections_are_not_defaulted(
+    missing_key: str,
+) -> None:
+    proposal = {
+        "target_kind": "CODE_WORK",
+        "objective": "Improve bounded progress observability",
+        "artifact_targets": [],
+        "code_targets": ["src/spg/web/app.js"],
+        "allowed_areas": ["src/spg/web/**"],
+        "forbidden_areas": [],
+        "verification_expectation": "Focused API and UI tests",
+    }
+    proposal.pop(missing_key)
+
+    with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
+        CodexSdkSemanticStepCapability._parse_payload(
+            json.dumps(_payload(proposal))
+        )
