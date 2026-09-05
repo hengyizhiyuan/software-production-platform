@@ -73,6 +73,7 @@ from spg.domain.product import (
     ResourceBindingCondition,
     RuntimeFactSummary,
     WorkCondition,
+    WorkMode,
     WorkProjection,
     WorkRecord,
     WorkRefinementRequest,
@@ -229,6 +230,7 @@ class WorkApplicationService:
         *,
         goal_id: UUID | None = None,
         tags: tuple[str, ...] = (),
+        mode: WorkMode = WorkMode.IMMEDIATE_PRODUCTION,
     ) -> WorkProjection:
         if not raw_user_requirement.strip():
             raise ProductInvariantViolation("Work requirement is required")
@@ -245,6 +247,7 @@ class WorkApplicationService:
                 {
                     "id": work_id,
                     "goal_id": goal_id,
+                    "work_mode": mode.value,
                     "raw_user_requirement": raw_user_requirement,
                     "refined_title": None,
                     "desired_outcome": None,
@@ -306,8 +309,15 @@ class WorkApplicationService:
                 request.constraints,
                 self._extract_constraints(work.raw_user_requirement),
             )
+            long_lived = work.mode is WorkMode.LONG_LIVED_STEERING
             code_work = self._is_code_work(work.raw_user_requirement, request)
             existing_proposal = work.code_change_proposal
+            explicit_code_boundary = bool(
+                request.code_exact_targets
+                or request.code_allowed_areas
+                or self._explicit_repository_paths(work.raw_user_requirement)
+                or self._explicit_repository_areas(work.raw_user_requirement)
+            )
             change_proposal = (
                 self._repository_change_proposal(
                     work_id=work.id,
@@ -321,12 +331,20 @@ class WorkApplicationService:
                     desired_outcome=desired_outcome,
                     constraints=constraints,
                 )
-                if code_work
+                if code_work and (not long_lived or explicit_code_boundary)
                 else None
+            )
+            explicit_documentation_target = bool(
+                request.expected_artifact_path
+                or re.search(
+                    r"(?<![\w.-])(?:docs/)[A-Za-z0-9_./-]+\.md(?![\w.-])",
+                    work.raw_user_requirement,
+                    flags=re.IGNORECASE,
+                )
             )
             proposal = (
                 None
-                if code_work
+                if code_work or (long_lived and not explicit_documentation_target)
                 else self._artifact_target_proposal(
                     raw=work.raw_user_requirement,
                     explicit_path=request.expected_artifact_path,
@@ -343,11 +361,14 @@ class WorkApplicationService:
                     else "Verify the requested outcome against independent repository Reality"
                 )
             )
-            refinement_reasons: list[str] = []
+            envelope_refinement_reasons: list[str] = []
             if self._is_too_broad(work.raw_user_requirement):
-                refinement_reasons.append(
-                    "The admitted Work is too broad for a trustworthy single-PWU plan."
+                envelope_refinement_reasons.append(
+                    "The long-lived Work authority envelope is too broad to admit safely."
+                    if long_lived
+                    else "The admitted Work is too broad for a trustworthy single-PWU plan."
                 )
+            production_refinement_reasons = list(envelope_refinement_reasons)
             if code_work and (
                 change_proposal is None
                 or (
@@ -355,60 +376,68 @@ class WorkApplicationService:
                     and not change_proposal.allowed_areas
                 )
             ):
-                refinement_reasons.append(
+                production_refinement_reasons.append(
                     "A safely bounded exact target set or repository area is required for code production."
                 )
             if code_work and change_proposal is not None:
-                refinement_reasons.extend(
+                production_refinement_reasons.extend(
                     change_proposal.unresolved_scope_questions
                 )
             elif not code_work and proposal is None:
-                refinement_reasons.append(
+                production_refinement_reasons.append(
                     "An exact authorized artifact target is required before production."
                 )
-            plan = self.planning.propose(
-                ProductionPlanningRequest(
-                    work_id=work.id,
-                    target_kind=(
-                        ProductionTargetKind.CODE_WORK
-                        if code_work
-                        else ProductionTargetKind.DOCUMENTATION_WORK
-                    ),
-                    admitted_requirement=work.raw_user_requirement,
-                    desired_outcome=desired_outcome,
-                    production_objective=objective,
-                    artifact_targets=(
-                        ()
-                        if proposal is None
-                        else (
-                            ProductionPlanArtifactTarget(
-                                path=proposal.path,
-                                operation=PlannedArtifactOperation(
-                                    proposal.operation.value
-                                ),
+            production_request = ProductionPlanningRequest(
+                work_id=work.id,
+                target_kind=(
+                    ProductionTargetKind.CODE_WORK
+                    if code_work
+                    else ProductionTargetKind.DOCUMENTATION_WORK
+                ),
+                admitted_requirement=work.raw_user_requirement,
+                desired_outcome=desired_outcome,
+                production_objective=objective,
+                artifact_targets=(
+                    ()
+                    if proposal is None
+                    else (
+                        ProductionPlanArtifactTarget(
+                            path=proposal.path,
+                            operation=PlannedArtifactOperation(
+                                proposal.operation.value
                             ),
-                        )
-                    ),
-                    change_proposal=change_proposal,
-                    change_contract=None,
-                    constraints=constraints,
-                    verification_expectation=verification,
-                    engineering_scope_summary=scope_summary,
-                    engineering_resource_id=resource.id,
-                    repository_identity=resource.repository_identity,
-                    source_baseline_id=baseline.id,
-                    source_revision=baseline.repository_revision,
-                    context_references=tuple(
-                        item.repository_relative_path
-                        for item in resource.context_references
-                    ),
-                    refinement_reasons=tuple(refinement_reasons),
-                )
+                        ),
+                    )
+                ),
+                change_proposal=change_proposal,
+                change_contract=None,
+                constraints=constraints,
+                verification_expectation=verification,
+                engineering_scope_summary=scope_summary,
+                engineering_resource_id=resource.id,
+                repository_identity=resource.repository_identity,
+                source_baseline_id=baseline.id,
+                source_revision=baseline.repository_revision,
+                context_references=tuple(
+                    item.repository_relative_path
+                    for item in resource.context_references
+                ),
+                refinement_reasons=tuple(production_refinement_reasons),
+            )
+            concrete_production_boundary = bool(proposal or change_proposal)
+            plan = (
+                self.planning.propose(production_request)
+                if not long_lived or concrete_production_boundary
+                else None
             )
             condition = (
-                WorkCondition.AWAITING_APPROVAL
-                if plan.fit_classification
-                is OnePwuFitClassification.ONE_PWU_FIT
+                WorkCondition.NEEDS_REFINEMENT
+                if long_lived and envelope_refinement_reasons
+                else WorkCondition.AWAITING_APPROVAL
+                if long_lived
+                else WorkCondition.AWAITING_APPROVAL
+                if plan is not None
+                and plan.fit_classification is OnePwuFitClassification.ONE_PWU_FIT
                 else WorkCondition.NEEDS_REFINEMENT
             )
             scope_id = uuid4()
@@ -473,7 +502,9 @@ class WorkApplicationService:
                         if change_proposal is None
                         else change_proposal.model_dump(mode="json")
                     ),
-                    "production_plan_proposal": plan.model_dump(mode="json"),
+                    "production_plan_proposal": (
+                        None if plan is None else plan.model_dump(mode="json")
+                    ),
                     "updated_at": timestamp,
                 },
             )
@@ -509,6 +540,12 @@ class WorkApplicationService:
     ) -> WorkProjection:
         if not authority_identity.strip():
             raise ProductInvariantViolation("Human authority identity is required")
+        if self.get_work(work_id).mode is WorkMode.LONG_LIVED_STEERING:
+            return self._approve_long_lived_work(
+                work_id,
+                authority_identity=authority_identity,
+                rationale=rationale,
+            )
         with self.database.unit_of_work() as unit_of_work:
             store = ProductStore(unit_of_work.session)
             work = self._required_work(store, work_id)
@@ -783,6 +820,169 @@ class WorkApplicationService:
         return self.get_work(work_id)
 
     approve_work_draft = approve_work
+
+    def _approve_long_lived_work(
+        self,
+        work_id: UUID,
+        *,
+        authority_identity: str,
+        rationale: str | None,
+    ) -> WorkProjection:
+        """Admit a Work authority envelope without admitting production."""
+
+        with self.database.unit_of_work() as unit_of_work:
+            product = ProductStore(unit_of_work.session)
+            work = self._required_work(product, work_id)
+            if work.mode is not WorkMode.LONG_LIVED_STEERING:
+                raise ProductInvariantViolation("Work is not a long-lived Steering Work")
+            if work.condition is WorkCondition.READY:
+                return self._projection(product, work)
+            if work.condition is not WorkCondition.AWAITING_APPROVAL:
+                raise ProductInvariantViolation(
+                    "Long-lived Work must await Human approval before Steering admission"
+                )
+            if not (work.desired_outcome or "").strip():
+                raise ProductInvariantViolation(
+                    "Long-lived Work requires a governed desired outcome"
+                )
+            scope = product.scope_for_work(work_id)
+            if scope is None:
+                raise ProductInvariantViolation("Work has no Engineering Scope")
+            proposed = tuple(
+                item
+                for item in scope.bindings
+                if item.condition is ResourceBindingCondition.PROPOSED
+            )
+            self._require_mvp_scope(proposed)
+            resource = product.resource(proposed[0].resource_id)
+            if resource is None:
+                raise ProductInvariantViolation("Scope Resource is missing")
+            artifact = self._artifact_target(work)
+            change_proposal = work.code_change_proposal
+            plan = work.production_plan
+
+        baseline = self.runtime.current_baseline()
+        if (
+            baseline.repository_identity != resource.repository_identity
+            or baseline.repository_ref != resource.authoritative_ref
+        ):
+            raise ProductInvariantViolation(
+                "Engineering Resource does not match current governed Baseline"
+            )
+        if artifact is not None and (
+            artifact.source_baseline_id != baseline.id
+            or artifact.source_revision != baseline.repository_revision
+        ):
+            raise ProductInvariantViolation(
+                "Artifact Target Proposal is stale against the current Source Baseline"
+            )
+        if change_proposal is not None and (
+            change_proposal.engineering_resource_id != resource.id
+            or change_proposal.repository_identity != resource.repository_identity
+            or change_proposal.source_baseline_id != baseline.id
+            or change_proposal.source_ref != baseline.repository_ref
+            or change_proposal.source_revision != baseline.repository_revision
+        ):
+            raise ProductInvariantViolation(
+                "Code Change Proposal is stale against the current Source Baseline"
+            )
+        if artifact is not None and change_proposal is not None:
+            raise ProductInvariantViolation(
+                "Long-lived Work cannot mix production target proposal forms"
+            )
+        if plan is not None:
+            expected_targets = (
+                ()
+                if artifact is None
+                else (
+                    ProductionPlanArtifactTarget(
+                        path=artifact.path,
+                        operation=PlannedArtifactOperation(artifact.operation.value),
+                    ),
+                )
+            )
+            expected_kind = (
+                ProductionTargetKind.CODE_WORK
+                if change_proposal is not None
+                else ProductionTargetKind.DOCUMENTATION_WORK
+            )
+            if (
+                plan.desired_outcome != work.desired_outcome
+                or plan.objective != work.production_objective
+                or plan.target_kind is not expected_kind
+                or plan.artifact_targets != expected_targets
+                or plan.change_proposal != change_proposal
+                or plan.change_contract is not None
+                or plan.inherited_constraints != work.constraints
+                or plan.engineering_resource_id != resource.id
+                or plan.repository_identity != resource.repository_identity
+                or plan.source_baseline_id != baseline.id
+                or plan.source_revision != baseline.repository_revision
+            ):
+                raise ProductInvariantViolation(
+                    "Production proposal exceeds the long-lived Work authority envelope"
+                )
+
+        timestamp = datetime.now(UTC)
+        governance_id = uuid5(
+            NAMESPACE_URL,
+            f"spg:long-lived-work-admission:{work_id}:{scope.fingerprint}:{authority_identity}",
+        )
+        with self.database.unit_of_work() as unit_of_work:
+            product = ProductStore(unit_of_work.session)
+            runtime = RuntimeStore(unit_of_work.session)
+            current = self._required_work(product, work_id)
+            if current.condition is WorkCondition.READY:
+                unit_of_work.rollback()
+                return self.get_work(work_id)
+            if current.condition is not WorkCondition.AWAITING_APPROVAL:
+                raise ProductInvariantViolation(
+                    "Long-lived Work admission Reality changed before approval"
+                )
+            runtime.insert_governance(
+                {
+                    "id": governance_id,
+                    "decision_type": "ADMIT_LONG_LIVED_WORK",
+                    "authority_identity": authority_identity,
+                    "subject_type": "PRODUCT_WORK",
+                    "subject_identity": str(work_id),
+                    "scope": {
+                        "work_mode": current.mode.value,
+                        "engineering_scope_id": str(scope.id),
+                        "scope_fingerprint": scope.fingerprint,
+                        "resource_id": str(resource.id),
+                        "repository_identity": resource.repository_identity,
+                        "repository_ref": resource.authoritative_ref,
+                        "source_baseline_id": str(baseline.id),
+                        "source_revision": baseline.repository_revision,
+                        "desired_outcome": current.desired_outcome,
+                        "constraints": list(current.constraints),
+                        "artifact_target": (
+                            None
+                            if artifact is None
+                            else artifact.model_dump(mode="json")
+                        ),
+                        "source_change_proposal_fingerprint": (
+                            None
+                            if change_proposal is None
+                            else change_proposal.proposal_fingerprint
+                        ),
+                    },
+                    "rationale": rationale,
+                    "created_at": timestamp,
+                }
+            )
+            product.set_scope_condition(
+                scope.id,
+                EngineeringScopeCondition.ADMITTED,
+                updated_at=timestamp,
+            )
+            product.update_work(
+                work_id,
+                {"condition": WorkCondition.READY.value, "updated_at": timestamp},
+            )
+            unit_of_work.commit()
+        return self.get_work(work_id)
 
     def reject_work_draft(
         self,
@@ -1333,6 +1533,7 @@ class WorkApplicationService:
         return WorkProjection(
             work_id=work.id,
             goal_id=work.goal_id,
+            mode=work.mode,
             raw_user_requirement=work.raw_user_requirement,
             title=work.refined_title,
             desired_outcome=work.desired_outcome,
@@ -1447,6 +1648,24 @@ class WorkApplicationService:
             )
         if facts.runtime_commit_id is not None:
             return WorkStatus.COMPLETED, "RUNTIME_COMMIT", "TRUSTED_BASELINE_ADVANCED", "Work is complete"
+        if (
+            work.mode is WorkMode.LONG_LIVED_STEERING
+            and not steering_enabled
+            and facts.attempt_id is None
+        ):
+            return (
+                WorkStatus.READY,
+                "STEERING_READY",
+                "STEERING_BOOTSTRAP_PENDING",
+                "Create the initial governed Steering Plan",
+            )
+        if steering_enabled and facts.attempt_id is None:
+            return (
+                WorkStatus.READY,
+                "STEERING_ACTIVE",
+                "STEERING_PLAN_ACTIVE",
+                "Steering evaluates the current governed Plan Step",
+            )
         if (
             facts.dispatch_id is not None
             and facts.provider_outcome == "UNKNOWN"

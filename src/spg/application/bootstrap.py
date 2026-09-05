@@ -25,6 +25,10 @@ from spg.application.steering_decision import (
     SteeringDecisionApplicationService,
 )
 from spg.application.steering_driver import PlanSteeringDriver
+from spg.application.steering_bootstrap import (
+    InitialSteeringPlanFormationCapability,
+    SteeringBootstrapService,
+)
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
@@ -270,6 +274,19 @@ class Application:
             database,
             work_service,
             production_orchestrator,
+            capability=capability,
+        )
+
+    def steering_bootstrap(
+        self,
+        database: Database | None = None,
+        *,
+        capability: InitialSteeringPlanFormationCapability | None = None,
+    ) -> SteeringBootstrapService:
+        """Compose initial long-lived Plan formation without production admission."""
+
+        return SteeringBootstrapService(
+            database or self.persistence(),
             capability=capability,
         )
 

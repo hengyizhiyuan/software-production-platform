@@ -103,6 +103,10 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "work result" in combined
     assert "artifact target" in combined
     assert "artifact operation" in combined
+    assert 'id="work-mode"' in html
+    assert 'value="LONG_LIVED_STEERING" selected' in html
+    assert 'value="IMMEDIATE_PRODUCTION"' in html
+    assert "mode: elements.workMode.value" in javascript
     assert "placement rationale" in combined
     assert "production plan" in combined
     assert "single-pwu approach" in combined

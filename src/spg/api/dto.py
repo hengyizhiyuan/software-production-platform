@@ -15,6 +15,7 @@ from spg.domain.product import (
     GoalProjection,
     GoalRecord,
     WorkProjection,
+    WorkMode,
     WorkResultProjection,
     WorkStatus,
 )
@@ -298,6 +299,7 @@ class ProductionPlanResponse(ApiDto):
 class WorkResponse(ApiDto):
     work_id: UUID
     goal_id: UUID | None
+    mode: WorkMode
     raw_user_requirement: str
     title: str | None
     desired_outcome: str | None
@@ -329,6 +331,7 @@ class WorkResponse(ApiDto):
         return cls(
             work_id=work.work_id,
             goal_id=work.goal_id,
+            mode=work.mode,
             raw_user_requirement=work.raw_user_requirement,
             title=work.title,
             desired_outcome=work.desired_outcome,
@@ -536,6 +539,7 @@ class WorkSubmitRequest(ApiDto):
     requirement: str = Field(min_length=1)
     goal_id: UUID | None = None
     tags: tuple[str, ...] = ()
+    mode: WorkMode = WorkMode.IMMEDIATE_PRODUCTION
 
 
 class WorkRefineRequest(ApiDto):

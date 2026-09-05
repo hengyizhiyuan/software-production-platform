@@ -31,6 +31,13 @@ class WorkCondition(StrEnum):
     REJECTED = "REJECTED"
 
 
+class WorkMode(StrEnum):
+    """Select admission lifecycle without changing Work identity."""
+
+    IMMEDIATE_PRODUCTION = "IMMEDIATE_PRODUCTION"
+    LONG_LIVED_STEERING = "LONG_LIVED_STEERING"
+
+
 class WorkStatus(StrEnum):
     DRAFT = "DRAFT"
     NEEDS_REFINEMENT = "NEEDS_REFINEMENT"
@@ -160,6 +167,7 @@ class WorkRecord(BaseModel):
 
     id: UUID
     goal_id: UUID | None
+    mode: WorkMode = WorkMode.IMMEDIATE_PRODUCTION
     raw_user_requirement: str
     refined_title: str | None
     desired_outcome: str | None
@@ -218,7 +226,7 @@ class SteeringProductionRequest(BaseModel):
 
     work_id: UUID
     steering_step_id: UUID
-    steering_decision_id: UUID
+    steering_decision_id: UUID | None = None
     production_objective: str = Field(min_length=1)
     target_kind: ProductionTargetKind
     engineering_scope_id: UUID
@@ -255,6 +263,7 @@ class WorkProjection(BaseModel):
 
     work_id: UUID
     goal_id: UUID | None
+    mode: WorkMode = WorkMode.IMMEDIATE_PRODUCTION
     raw_user_requirement: str
     title: str | None
     desired_outcome: str | None

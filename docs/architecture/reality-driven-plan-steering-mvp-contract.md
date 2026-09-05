@@ -562,7 +562,7 @@ The single authoritative current-Step representation is Step state, protected
 by a database invariant allowing at most one `CURRENT` Step per revision.
 
 For 1C, the decision basis fingerprint is canonical SHA-256 over the persisted
-Work identity and update time, requirement/outcome/objective/constraints, the
+Work identity, admission mode, and update time, requirement/outcome/objective/constraints, the
 active Steering revision identity and number, the exact current Step identity
 and governed fields, and sorted typed Reality references. Decision prose and
 reasoning-provider identity are deliberately excluded: they are decision output
@@ -609,6 +609,16 @@ read-only Plan projection exposes current/next Steps, rationale, automatic
 state, associated production cycle, Attention, and last stop without copying
 SPG Attempt/Dispatch detail into Plan truth.
 
+MVP-PLAN-STEER-1G separates long-lived Work admission from exact production
+admission. The explicit Work mode preserves legacy immediate-production Works
+while allowing a Human to admit a long-lived objective, constraints, exact
+Engineering Resource, and bounded Scope without an Artifact/Change Contract or
+Runtime lineage. That admission creates an initial provider-neutral Steering
+Plan whose first Step may be `REFINE`, `DESIGN`, `HUMAN_DECISION`, or—when an
+exact production boundary is already admitted—`PRODUCE`. PLAN-1B and Run/PWU
+creation remain mandatory at the exact `PRODUCE` boundary. Authority expansion
+still records `SCOPE_OR_AUTHORITY_EXPANSION` and stops before Runtime creation.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
@@ -632,6 +642,11 @@ MVP-PLAN-STEER-1E
 
 MVP-PLAN-STEER-1F
     BOUNDED AUTO-CONTINUE / RESTART / PLAN OBSERVABILITY
+        = CLOSED / PASS
+    ARCHITECTURE LEAD REALITY REVIEW = PASS
+
+MVP-PLAN-STEER-1G
+    LONG-LIVED WORK ADMISSION / STEERING BOOTSTRAP
         = CLOSED / PASS
     ARCHITECTURE LEAD REALITY REVIEW = PASS
 

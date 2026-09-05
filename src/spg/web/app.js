@@ -90,6 +90,7 @@
     workForm: document.getElementById("work-form"),
     composerToggle: document.getElementById("composer-toggle"),
     workRequirement: document.getElementById("work-requirement"),
+    workMode: document.getElementById("work-mode"),
     composerGoal: document.getElementById("composer-goal"),
     workTags: document.getElementById("work-tags"),
     submitWork: document.getElementById("submit-work"),
@@ -829,6 +830,7 @@
     try {
       const body = {
         requirement,
+        mode: elements.workMode.value,
         goal_id: elements.composerGoal.value || null,
         tags: viewModel.splitTags(elements.workTags.value),
       };

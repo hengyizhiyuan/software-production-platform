@@ -50,6 +50,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-PLAN-1B — CLOSED / PASS**
 
+**MVP-PLAN-STEER-1G — CLOSED / PASS**
+
 **MVP-CODE-1 — CLOSED / PASS**
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
@@ -146,7 +148,7 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | Motive / Work / Plan Concept Calibration | CLOSED / PASS |
-| Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F CLOSED / PASS; LONG-LIVED REAL DOGFOOD / CORE CLOSURE REVIEW PENDING |
+| Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F/1G CLOSED / PASS; REAL LONG-LIVED DOGFOOD CONTINUES |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -385,6 +387,18 @@ Review. Long-lived real Dogfood/core closure remains pending. PLAN-1B
 remains CLOSED / PASS for one Single-PWU production-step plan and remains
 distinct from long-lived Plan Steering. See
 [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md).
+
+MVP-PLAN-STEER-1G is **CLOSED / PASS** after focused validation and Architecture
+Lead Reality Review. Long-lived Work admission now governs the
+Motive/outcome, constraints, exact Engineering Resource and bounded Scope
+without requiring or creating a production cycle. Human admission creates the
+initial provider-neutral Steering Plan while Run/PWU creation and PLAN-1B
+`ONE_PWU_FIT` remain deferred to an exact `PRODUCE` Step. Legacy immediate
+production admission remains compatible. Long-lived Motive Dogfood #1 remains
+preserved as **FAILED AT ADMISSION — WORK_PRODUCTION_ADMISSION_COUPLING
+CONFIRMED** historical evidence; the coupling and contributing admission gaps
+are resolved by 1G, and real long-lived Dogfood continues. See [Long-lived Motive
+Dogfood #1 Admission Finding](docs/evidence/dogfood/long-lived-motive-dogfood-1-admission-coupling.md).
 
 ### Reality-driven Plan Steering MVP Behavioral Contract
 

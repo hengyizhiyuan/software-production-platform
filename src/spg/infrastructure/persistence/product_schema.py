@@ -64,6 +64,7 @@ product_works = Table(
         ForeignKey("product_goals.id", name="fk_product_works_goal"),
         nullable=True,
     ),
+    Column("work_mode", String(32), nullable=False),
     Column("raw_user_requirement", Text, nullable=False),
     Column("refined_title", String(255), nullable=True),
     Column("desired_outcome", Text, nullable=True),
@@ -83,6 +84,10 @@ product_works = Table(
     Column("production_plan_proposal", JSONB, nullable=True),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    CheckConstraint(
+        "work_mode IN ('IMMEDIATE_PRODUCTION', 'LONG_LIVED_STEERING')",
+        name="ck_product_works_work_mode_known",
+    ),
 )
 
 engineering_scopes = Table(

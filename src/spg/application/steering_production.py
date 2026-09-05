@@ -85,10 +85,16 @@ class SteeringProductionService:
             ),
             None,
         )
-        if inbound is None or inbound.steering_decision_id is None:
+        if (
+            (inbound is None or inbound.steering_decision_id is None)
+            and step.position != 1
+        ):
             raise SteeringInvariantViolation(
                 "Current PRODUCE Step has no admitted Steering Decision provenance"
             )
+        steering_decision_id = (
+            None if inbound is None else inbound.steering_decision_id
+        )
 
         baseline = self.runtime.current_baseline()
         with self.database.unit_of_work() as unit_of_work:
@@ -139,6 +145,14 @@ class SteeringProductionService:
                 )
             else:
                 admitted_contract = plan.change_contract
+                if admitted_contract is None and plan.change_proposal is not None:
+                    admitted_contract = WorkApplicationService._admit_change_contract(
+                        plan.change_proposal,
+                        desired_outcome=(
+                            work.desired_outcome or work.raw_user_requirement
+                        ),
+                        constraints=work.constraints,
+                    )
                 if admitted_contract is None:
                     raise ProductInvariantViolation(
                         "Code Work has no Human-admitted Change Contract"
@@ -169,7 +183,7 @@ class SteeringProductionService:
             return SteeringProductionRequest(
                 work_id=work.id,
                 steering_step_id=step.id,
-                steering_decision_id=inbound.steering_decision_id,
+                steering_decision_id=steering_decision_id,
                 production_objective=step.objective,
                 target_kind=plan.target_kind,
                 engineering_scope_id=scope.id,
@@ -265,7 +279,11 @@ class SteeringProductionService:
                     "subject_identity": str(request.steering_step_id),
                     "scope": {
                         "work_id": str(request.work_id),
-                        "steering_decision_id": str(request.steering_decision_id),
+                        "steering_decision_id": (
+                            None
+                            if request.steering_decision_id is None
+                            else str(request.steering_decision_id)
+                        ),
                         "production_run_id": str(spine.run.id),
                         "plan_revision_id": str(spine.plan_revision.id),
                         "work_unit_id": str(spine.work_unit.id),

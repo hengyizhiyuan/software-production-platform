@@ -31,6 +31,7 @@ from spg.api.dto import (
 from spg.application.bootstrap import Application, bootstrap
 from spg.application.orchestration import ProductionOrchestrator
 from spg.application.steering_driver import PlanSteeringDriver
+from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.domain.product import (
@@ -38,6 +39,7 @@ from spg.domain.product import (
     ProductInvariantViolation,
     ProductRecordNotFound,
     WorkRefinementRequest,
+    WorkMode,
     WorkStatus,
 )
 from spg.domain.steering import SteeringRecordNotFound
@@ -74,6 +76,7 @@ def create_http_application(
     work_service: WorkApplicationService | None = None,
     orchestrator: ProductionOrchestrator | None = None,
     steering_driver: PlanSteeringDriver | None = None,
+    steering_bootstrap: SteeringBootstrapService | None = None,
     runtime_activation: RuntimeActivationService | None = None,
 ) -> FastAPI:
     """Compose one ASGI application over the existing application bootstrap path."""
@@ -95,6 +98,9 @@ def create_http_application(
         selected_orchestrator,
     )
     selected_runtime_activation = runtime_activation or container.runtime_activation(
+        selected_database
+    )
+    selected_steering_bootstrap = steering_bootstrap or SteeringBootstrapService(
         selected_database
     )
 
@@ -120,6 +126,7 @@ def create_http_application(
     api.state.work_service = work_service
     api.state.production_orchestrator = selected_orchestrator
     api.state.plan_steering_driver = selected_steering_driver
+    api.state.steering_bootstrap = selected_steering_bootstrap
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
@@ -216,6 +223,7 @@ def create_http_application(
                 request.requirement,
                 goal_id=request.goal_id,
                 tags=request.tags,
+                mode=request.mode,
             )
         )
 
@@ -265,7 +273,11 @@ def create_http_application(
             authority_identity=request.authority_identity,
             rationale=request.rationale,
         )
-        selected_orchestrator.schedule(work_id)
+        if projection.mode is WorkMode.LONG_LIVED_STEERING:
+            selected_steering_bootstrap.bootstrap(work_id)
+            projection = work_service.get_work(work_id)
+        else:
+            selected_orchestrator.schedule(work_id)
         return WorkResponse.from_projection(projection)
 
     @api.post("/api/works/{work_id}/reject", response_model=WorkResponse)

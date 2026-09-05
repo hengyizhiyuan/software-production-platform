@@ -748,6 +748,7 @@ class SteeringApplicationService:
         payload = {
             "work": {
                 "id": str(work.id),
+                "mode": work.mode.value,
                 "updated_at": work.updated_at.isoformat(),
                 "raw_user_requirement": work.raw_user_requirement,
                 "desired_outcome": work.desired_outcome,

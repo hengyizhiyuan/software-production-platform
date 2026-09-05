@@ -22,6 +22,7 @@ from spg.domain.product import (
     ResourceBindingRecord,
     RuntimeFactSummary,
     WorkCondition,
+    WorkMode,
     WorkRecord,
     WorkRuntimeBindingRecord,
 )
@@ -213,7 +214,7 @@ class ProductStore:
         binding_id: UUID,
         *,
         steering_step_id: UUID,
-        steering_decision_id: UUID,
+        steering_decision_id: UUID | None,
     ) -> None:
         result = self.session.execute(
             update(work_runtime_bindings)
@@ -457,6 +458,7 @@ class ProductStore:
         return WorkRecord(
             id=row["id"],
             goal_id=row["goal_id"],
+            mode=WorkMode(row["work_mode"]),
             raw_user_requirement=row["raw_user_requirement"],
             refined_title=row["refined_title"],
             desired_outcome=row["desired_outcome"],
