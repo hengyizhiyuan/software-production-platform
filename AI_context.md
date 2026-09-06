@@ -62,6 +62,10 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-PLAN-STEER-1L — CLOSED / PASS**
 
+**MVP-SPG-GRANULARITY-1A — BEHAVIORAL CONTRACT DEFINED / ADMITTED — ARCHITECTURE LEAD REALITY REVIEW PASS**
+
+**MVP-SPG-GRANULARITY-1B — CLOSED / PASS — FRESH REAL MULTI-TURN EXECUTOR PROOF PASS**
+
 **MVP-CODE-1 — CLOSED / PASS**
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
@@ -159,6 +163,8 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | Motive / Work / Plan Concept Calibration | CLOSED / PASS |
 | Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F/1G/1H/1I/1J CLOSED / PASS; REAL PROVIDER DOGFOOD CONTINUES |
+| MVP-SPG-GRANULARITY-1A — Executor Autonomy Envelope / Attempt Granularity | BEHAVIORAL CONTRACT DEFINED / ADMITTED — ARCHITECTURE LEAD REALITY REVIEW PASS |
+| MVP-SPG-GRANULARITY-1B — Bounded Multi-turn Executor Attempt | CLOSED / PASS — FRESH REAL MULTI-TURN EXECUTOR PROOF PASS |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -499,12 +505,42 @@ Human Dogfood is no longer the iterative Provider-compatibility oracle; real
 Provider validation belongs inside the bounded Executor self-refine loop. See
 [Semantic Provider Integration Self-refine Closure](docs/evidence/dogfood/semantic-provider-integration-self-refine-closure.md).
 
-The closure also preserves a new architecture finding for later calibration:
-`SPG_EXECUTION_GRANULARITY_CALIBRATION_REQUIRED`. The working hypothesis is to
-govern the execution envelope, not every Executor move. This checkpoint does
-not redesign SPG or implement that calibration. The separate
+The closure also preserves the architecture finding
+`SPG_EXECUTION_GRANULARITY_CALIBRATION_REQUIRED`. MVP-SPG-GRANULARITY-1A
+confirms calibration decision **B — BOUNDED GRANULARITY CALIBRATION REQUIRED**
+and admits the [Executor Autonomy Envelope / Attempt Granularity MVP
+Contract](docs/architecture/executor-autonomy-envelope-attempt-granularity-mvp-contract.md).
+A PWU is not a Provider Turn; bounded Executor self-refine may remain inside
+one continuous Attempt only while its objective, generation, Workspace,
+Source Basis, Authority, Completion Contract, execution budget, and STOP
+conditions remain valid. One outer Dispatch and aggregate Provider Report
+remain the preferred MVP boundary, while independent Observation, Completion,
+Verification, Candidate governance, and Runtime Commit remain external. At the
+1A contract checkpoint the implementation had not started and SPG was not
+redesigned. The separate
 `SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains **CONFIRMED / PARTIALLY MITIGATED
 / OPEN**. Core Closure is not declared.
+
+MVP-SPG-GRANULARITY-1B implements the admitted bounded calibration behind the
+existing Executor capability: one PWU and Attempt retain one outer Dispatch and
+aggregate Provider Report while one Codex Thread may perform bounded internal
+Turns. Continuation reuses the exact materialized envelope and stops on a
+finite Turn/time budget, repeated no-progress, explicit boundary crossing, or
+lost execution continuity. The Executor now receives generic required markers,
+forbidden changes, blocking conditions, Verification obligations, Resource,
+Repository/Baseline, sandbox, budget, and STOP policy; PLAN-1B ordered steps are
+rendered as non-authoritative strategy hints. Independent Observation,
+Completion, Verification, Candidate governance, ORCH, Steering, integration,
+and Runtime Commit remain unchanged. 1B is **CLOSED / PASS** after Architecture
+Lead Final Evidence Review and a fresh real two-Turn Executor proof. That proof retained
+one PWU, Attempt, outer Dispatch, and aggregate Provider Report; preserved the
+Source Basis and authoritative repository; and admitted independent Completion
+and Verification only after `RESULT_READY`. See [MVP-SPG-GRANULARITY-1B Focused
+Evidence](docs/evidence/mvp-spg-granularity-1b-focused-validation.md) and [Fresh
+Real Multi-turn Executor Proof](docs/evidence/mvp-spg-granularity-1b-real-provider-proof.md).
+`SPG_EXECUTION_GRANULARITY_CALIBRATION_REQUIRED` is resolved by that real
+evidence. The separate observability gap remains open and Core Closure is not
+declared.
 
 ### Reality-driven Plan Steering MVP Behavioral Contract
 

@@ -14,4 +14,5 @@ def test_settings_load_from_environment(monkeypatch) -> None:
     assert settings.database_url is None
     assert settings.executor_adapter == "unconfigured"
     assert settings.executor_timeout_seconds == 120.0
+    assert settings.executor_max_internal_turns == 3
     assert settings.verification_adapter == "unconfigured"

@@ -295,6 +295,7 @@ def execute_codex_binding(
     environment: Mapping[str, str],
     adapter_factory: AdapterFactory | None = None,
     timeout_seconds: float = REAL_PROVIDER_TIMEOUT_SECONDS,
+    max_internal_turns: int = 3,
 ) -> DedicatedExecutorResponse:
     """Run one exact materialized input through the existing Codex adapter."""
 
@@ -324,7 +325,8 @@ def execute_codex_binding(
         )
 
     selected_adapter_factory = adapter_factory
-    if selected_adapter_factory is None:
+    using_default_adapter = selected_adapter_factory is None
+    if using_default_adapter:
         from spg.providers.codex_sdk_executor import CodexSdkExecutor
 
         selected_adapter_factory = CodexSdkExecutor
@@ -336,6 +338,8 @@ def execute_codex_binding(
             "timeout_seconds": timeout_seconds,
             "workspace_validator": _validate_translated_workspace,
         }
+        if using_default_adapter:
+            adapter_options["max_internal_turns"] = max_internal_turns
         if CODEX_SANDBOX_VARIABLE in environment:
             adapter_options["sandbox"] = sandbox
         adapter = selected_adapter_factory(materialized, **adapter_options)
@@ -476,6 +480,7 @@ def _execution_response(
 ) -> DedicatedExecutorResponse:
     metadata = {
         **result.metadata,
+        "terminal_executor_outcome": result.return_control.value,
         "executor_boundary": "DEDICATED_LOCAL_PROCESS",
         "provider_binding_selected_in_child": True,
         "child_provider_binding": CODEX_REAL_BINDING,

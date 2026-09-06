@@ -19,6 +19,16 @@ class ProviderReportedOutcome(StrEnum):
     UNKNOWN = "UNKNOWN"
 
 
+class ExecutorReturnControl(StrEnum):
+    """Executor claim explaining why one bounded execution grant returned."""
+
+    RESULT_READY = "RESULT_READY"
+    UNABLE_TO_COMPLETE = "UNABLE_TO_COMPLETE"
+    BOUNDARY_CROSSING_REQUIRED = "BOUNDARY_CROSSING_REQUIRED"
+    BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
+    EXECUTION_CONTINUITY_LOST = "EXECUTION_CONTINUITY_LOST"
+
+
 class ArtifactChangeType(StrEnum):
     ADDED = "ADDED"
     MODIFIED = "MODIFIED"
@@ -45,11 +55,21 @@ class ExecutorDispatchResult(BaseModel):
     finished_at: datetime
     metadata: dict[str, Any] = Field(default_factory=dict)
     summary: str | None = None
+    return_control: ExecutorReturnControl | None = None
 
     @model_validator(mode="after")
     def require_monotonic_timestamps(self) -> "ExecutorDispatchResult":
         if self.finished_at < self.started_at:
             raise ValueError("provider finished_at cannot precede started_at")
+        if self.return_control is None:
+            default = (
+                ExecutorReturnControl.RESULT_READY
+                if self.outcome is ProviderReportedOutcome.SUCCESS
+                else ExecutorReturnControl.UNABLE_TO_COMPLETE
+                if self.outcome is ProviderReportedOutcome.FAILURE
+                else ExecutorReturnControl.EXECUTION_CONTINUITY_LOST
+            )
+            object.__setattr__(self, "return_control", default)
         return self
 
 

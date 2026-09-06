@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     )
     executor_adapter: str = "unconfigured"
     executor_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
+    executor_max_internal_turns: int = Field(default=3, ge=1)
     executor_sandbox_mode: Literal["workspace-write", "full-access"] = (
         "workspace-write"
     )

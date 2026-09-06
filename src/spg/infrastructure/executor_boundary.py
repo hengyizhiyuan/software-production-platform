@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from spg.domain.execution import (
     ExecutorDispatchRequest,
     ExecutorDispatchResult,
+    ExecutorReturnControl,
     ProviderReportedOutcome,
 )
 from spg.domain.materialization import MaterializedExecutionInputRecord
@@ -142,6 +143,7 @@ class SubprocessExecutorTransport:
         deterministic_specification: DeterministicExecutionSpecification | None = None,
         provider_binding: str | None = None,
         provider_timeout_seconds: float | None = None,
+        provider_max_internal_turns: int | None = None,
         provider_sandbox_mode: str | None = None,
     ) -> None:
         if timeout_seconds <= 0:
@@ -155,6 +157,9 @@ class SubprocessExecutorTransport:
         ):
             raise ValueError("provider_timeout_seconds must be within (0, 600]")
         self.provider_timeout_seconds = provider_timeout_seconds
+        if provider_max_internal_turns is not None and provider_max_internal_turns < 1:
+            raise ValueError("provider_max_internal_turns must be positive")
+        self.provider_max_internal_turns = provider_max_internal_turns
         if provider_sandbox_mode not in {None, "workspace-write", "full-access"}:
             raise ValueError("unsupported Executor Provider sandbox mode")
         self.provider_sandbox_mode = provider_sandbox_mode
@@ -178,6 +183,10 @@ class SubprocessExecutorTransport:
         if self.provider_timeout_seconds is not None:
             environment["SPG_EXECUTOR_PROVIDER_TIMEOUT_SECONDS"] = str(
                 self.provider_timeout_seconds
+            )
+        if self.provider_max_internal_turns is not None:
+            environment["SPG_EXECUTOR_MAX_INTERNAL_TURNS"] = str(
+                self.provider_max_internal_turns
             )
         if self.provider_sandbox_mode is not None:
             environment["SPG_EXECUTOR_PROVIDER_SANDBOX_MODE"] = (
@@ -304,6 +313,7 @@ class DedicatedExecutorClient:
             finished_at=response.finished_at,
             metadata=metadata,
             summary=response.summary,
+            return_control=_return_control(response.metadata),
         )
 
     def preflight_provider_binding(
@@ -607,6 +617,16 @@ def _correlation_metadata(request: DedicatedExecutorRequest) -> dict[str, object
         "workspace_identity": request.workspace_identity,
         "executor_workspace_path": str(request.executor_workspace_path),
     }
+
+
+def _return_control(metadata: Mapping[str, Any]) -> ExecutorReturnControl | None:
+    value = metadata.get("terminal_executor_outcome")
+    if not isinstance(value, str):
+        return None
+    try:
+        return ExecutorReturnControl(value)
+    except ValueError:
+        return None
 
 
 def build_executor_child_environment(

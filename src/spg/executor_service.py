@@ -41,6 +41,7 @@ def main() -> int:
                 request,
                 environment=os.environ,
                 timeout_seconds=_provider_timeout_seconds(),
+                max_internal_turns=_max_internal_turns(),
             )
         else:
             response = unsupported_provider_binding(request, binding or "missing")
@@ -58,6 +59,16 @@ def _provider_timeout_seconds() -> float:
     value = float(raw)
     if not 0 < value <= MAX_PROVIDER_TIMEOUT_SECONDS:
         raise ValueError("Executor Provider timeout must be within (0, 600]")
+    return value
+
+
+def _max_internal_turns() -> int:
+    raw = os.environ.get("SPG_EXECUTOR_MAX_INTERNAL_TURNS")
+    if raw is None:
+        return 3
+    value = int(raw)
+    if value < 1:
+        raise ValueError("Executor maximum internal Turns must be positive")
     return value
 
 

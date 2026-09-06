@@ -180,6 +180,7 @@ class Application:
             selected_executor = GovernedDedicatedExecutor(
                 selected_database,
                 provider_timeout_seconds=self.settings.executor_timeout_seconds,
+                max_internal_turns=self.settings.executor_max_internal_turns,
                 provider_sandbox_mode=self.settings.executor_sandbox_mode,
             )
             selected_binding = ExecutorBinding(

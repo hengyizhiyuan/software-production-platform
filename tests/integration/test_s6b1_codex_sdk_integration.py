@@ -16,10 +16,12 @@ from openai_codex import ApprovalMode, Codex, Sandbox
 import pytest
 from sqlalchemy import func, inspect, select
 
+from spg.application.completion import CompletionService
 from spg.application.execution import ExecutionService
 from spg.application.materialization import ExecutionInputMaterializationService
 from spg.application.preparation import PreparationService
 from spg.application.runtime import RuntimeService
+from spg.application.verification import VerificationService
 from spg.domain.execution import ArtifactChangeType, ProviderReportedOutcome
 from spg.domain.preparation import (
     ContextArtifactSelection,
@@ -34,13 +36,18 @@ from spg.domain.runtime import (
     ProductionHorizon,
     RuntimeInvariantViolation,
 )
+from spg.domain.verification import VerificationResultValue
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.runtime_schema import (
     baseline_candidates,
     completion_evaluations,
+    execution_attempts,
+    execution_dispatches,
     materialized_execution_inputs,
+    production_work_units,
     production_admissibility_records,
+    provider_execution_reports,
     runtime_tables,
     runtime_commits,
     verification_records,
@@ -50,6 +57,7 @@ from spg.providers.deterministic_executor import (
     DeterministicExecutionSpecification,
     DeterministicTestExecutor,
 )
+from spg.providers.deterministic_verifier import DeterministicVerificationProvider
 
 
 pytestmark = pytest.mark.postgresql
@@ -61,8 +69,13 @@ AFTER_CONTENT = "S6-B1 marker: AFTER\n"
 INSTRUCTION = (
     "Change exactly the specified marker in "
     "docs/codex_real_execution_probe.md from 'S6-B1 marker: BEFORE' to "
-    "'S6-B1 marker: AFTER'. Do not modify any other file. Do not commit. "
-    "Do not push. Stop after making the requested file change."
+    "'S6-B1 marker: AFTER'. This proof contract requires at least two bounded "
+    "internal Provider Turns inside this same Attempt. During the first Turn, "
+    "inspect the repository and make only the requested edit, then return "
+    "CONTINUE without claiming RESULT_READY. During the next Turn, re-read the "
+    "exact diff and run git diff --check; diagnose and repair any in-scope issue, "
+    "then return RESULT_READY only after revalidation passes. Do not modify any "
+    "other file. Do not commit. Do not push."
 )
 
 
@@ -239,7 +252,7 @@ def s6b1_facts(postgres_database: Database, tmp_path: Path) -> S6B1Facts:
             initial_work_unit_objective=f"Modify only {TARGET_PATH}",
             completion_contract=CompletionContract(
                 required_outputs=(TARGET_PATH,),
-                required_changes=("replace BEFORE marker with AFTER marker",),
+                required_changes=(TARGET_PATH,),
                 forbidden_changes=("any other repository path",),
                 verification_obligations=("independent repository observation",),
             ),
@@ -346,6 +359,13 @@ def _provider_evidence(report) -> dict[str, object]:
         "interrupt_requested": metadata.get("interrupt_requested", False),
         "post_timeout_status": metadata.get("post_timeout_status"),
         "exception_type": metadata.get("exception_type"),
+        "internal_turn_count": metadata.get("internal_turn_count"),
+        "self_refine_occurred": metadata.get("self_refine_occurred"),
+        "terminal_executor_outcome": metadata.get("terminal_executor_outcome"),
+        "executor_stop_reason": metadata.get("executor_stop_reason"),
+        "internal_activity_summaries": metadata.get(
+            "internal_activity_summaries"
+        ),
     }
 
 
@@ -552,6 +572,9 @@ def test_s6b1_10_provider_identity_binds_exact_dispatch(
     assert result.provider_report.metadata["input_fingerprint"] == (
         s6b1_facts.materialized_input.input_fingerprint
     )
+    assert result.provider_report.metadata["terminal_executor_outcome"] == (
+        "RESULT_READY"
+    )
 
 
 def test_s6b1_11_observation_does_not_trust_provider_response(
@@ -683,6 +706,124 @@ def test_s6b1_20_no_s6c_or_fvs_closure_leakage(
     assert _count(s6b1_facts.database, completion_evaluations) == 0
     assert _count(s6b1_facts.database, baseline_candidates) == 0
     assert _count(s6b1_facts.database, runtime_commits) == 0
+
+
+def test_gran_01_05_multi_turn_attempt_persists_one_outer_dispatch_and_report(
+    s6b1_facts: S6B1Facts,
+) -> None:
+    responses = (
+        json.dumps(
+            {
+                "action": "CONTINUE",
+                "activity_summary": "diagnosed the bounded compatibility issue",
+            }
+        ),
+        json.dumps(
+            {
+                "action": "CONTINUE",
+                "activity_summary": "applied the bounded compatibility correction",
+            }
+        ),
+        json.dumps(
+            {
+                "action": "RESULT_READY",
+                "activity_summary": "revalidated the candidate result",
+            }
+        ),
+    )
+
+    class MultiTurnHandle:
+        def __init__(self, owner, index: int) -> None:
+            self.owner = owner
+            self.index = index
+            self.id = f"turn-gran-{index + 1}"
+
+        def run(self):
+            if self.index == 1:
+                workspace = Path(self.owner.turn_calls[self.index][1]["cwd"])
+                (workspace / TARGET_PATH).write_text(AFTER_CONTENT, encoding="utf-8")
+            return SimpleNamespace(
+                id=self.id,
+                status=FakeStatus("completed"),
+                error=None,
+                started_at=1_800_000_000 + self.index,
+                completed_at=1_800_000_001 + self.index,
+                duration_ms=1_000,
+                final_response=responses[self.index],
+            )
+
+        def interrupt(self):
+            return SimpleNamespace()
+
+    class MultiTurnThread:
+        id = "thread-granularity-integration"
+
+        def __init__(self, owner) -> None:
+            self.owner = owner
+
+        def turn(self, content: str, **kwargs):
+            index = len(self.owner.turn_calls)
+            self.owner.turn_calls.append((content, kwargs))
+            return MultiTurnHandle(self.owner, index)
+
+    class MultiTurnCodex:
+        def __init__(self) -> None:
+            self.thread_start_count = 0
+            self.turn_calls: list[tuple[str, dict[str, object]]] = []
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return None
+
+        def thread_start(self, **_kwargs):
+            self.thread_start_count += 1
+            return MultiTurnThread(self)
+
+    fake = MultiTurnCodex()
+    result = s6b1_facts.execution.dispatch_and_observe(
+        s6b1_facts.attempt.id,
+        CodexSdkExecutor(
+            s6b1_facts.materialized_input,
+            codex_factory=lambda: fake,
+            max_internal_turns=3,
+        ),
+    )
+
+    assert fake.thread_start_count == 1
+    assert len(fake.turn_calls) == 3
+    assert _count(s6b1_facts.database, production_work_units) == 1
+    assert _count(s6b1_facts.database, execution_attempts) == 1
+    assert _count(s6b1_facts.database, execution_dispatches) == 1
+    assert _count(s6b1_facts.database, provider_execution_reports) == 1
+    assert result.provider_report.metadata["internal_turn_count"] == 3
+    assert result.provider_report.metadata["self_refine_occurred"] is True
+    assert result.provider_report.metadata["terminal_executor_outcome"] == (
+        "RESULT_READY"
+    )
+    assert [item.artifact_path for item in result.work_products] == [TARGET_PATH]
+    assert _count(s6b1_facts.database, completion_evaluations) == 0
+    assert _count(s6b1_facts.database, verification_records) == 0
+
+    completion = CompletionService(
+        s6b1_facts.database,
+        observer=s6b1_facts.execution.observer,
+    ).evaluate_observation(result.observation.id)
+    verification = VerificationService(s6b1_facts.database)
+    proposed = verification.create_proposed_snapshot(completion.evaluation.id)
+    obligation = "independent repository observation"
+    verified = verification.verify_obligation(
+        proposed.id,
+        obligation,
+        DeterministicVerificationProvider(
+            {obligation: VerificationResultValue.PASS}
+        ),
+    )
+
+    assert verified.result is VerificationResultValue.PASS
+    assert _count(s6b1_facts.database, completion_evaluations) == 1
+    assert _count(s6b1_facts.database, verification_records) == 1
 
 
 def test_term_01_public_terminal_success_maps_success(
@@ -1123,7 +1264,8 @@ def test_s6b1_real_codex_sdk_probe(s6b1_facts: S6B1Facts) -> None:
             s6b1_facts.attempt.id,
             CodexSdkExecutor(
                 s6b1_facts.materialized_input,
-                timeout_seconds=120,
+                timeout_seconds=600,
+                max_internal_turns=3,
             ),
         )
     except Exception as error:
@@ -1186,11 +1328,18 @@ def test_s6b1_real_codex_sdk_probe(s6b1_facts: S6B1Facts) -> None:
     }
     _emit_probe_evidence("S6B1_PRODUCTION_EVIDENCE", production_evidence)
 
-    assert result.provider_report.outcome in {
-        ProviderReportedOutcome.SUCCESS,
-        ProviderReportedOutcome.FAILURE,
-        ProviderReportedOutcome.UNKNOWN,
-    }
+    assert result.provider_report.outcome is ProviderReportedOutcome.SUCCESS
+    assert result.provider_report.metadata["internal_turn_count"] >= 2
+    assert result.provider_report.metadata["self_refine_occurred"] is True
+    assert result.provider_report.metadata["terminal_executor_outcome"] == (
+        "RESULT_READY"
+    )
+    assert _count(s6b1_facts.database, production_work_units) == 1
+    assert _count(s6b1_facts.database, execution_attempts) == 1
+    assert _count(s6b1_facts.database, execution_dispatches) == 1
+    assert _count(s6b1_facts.database, provider_execution_reports) == 1
+    assert _count(s6b1_facts.database, completion_evaluations) == 0
+    assert _count(s6b1_facts.database, verification_records) == 0
     _assert_probe_correlation(result, s6b1_facts.materialized_input)
     _assert_safe_production_observation(
         result,
@@ -1206,7 +1355,35 @@ def test_s6b1_real_codex_sdk_probe(s6b1_facts: S6B1Facts) -> None:
             "--",
             TARGET_PATH,
         )
+
+    completion = CompletionService(
+        s6b1_facts.database,
+        observer=s6b1_facts.execution.observer,
+    ).evaluate_observation(result.observation.id)
+    verification = VerificationService(s6b1_facts.database)
+    proposed = verification.create_proposed_snapshot(completion.evaluation.id)
+    obligation = "independent repository observation"
+    verified = verification.verify_obligation(
+        proposed.id,
+        obligation,
+        DeterministicVerificationProvider(
+            {obligation: VerificationResultValue.PASS}
+        ),
+    )
+    _emit_probe_evidence(
+        "S6B1_INDEPENDENT_VERIFICATION_EVIDENCE",
+        {
+            "completion_evaluation_id": str(completion.evaluation.id),
+            "completion_outcome": completion.evaluation.outcome.value,
+            "verification_record_id": str(verified.id),
+            "verification_result": verified.result.value,
+            "provider_report_is_verification": False,
+        },
+    )
+    assert verified.result is VerificationResultValue.PASS
+    assert _count(s6b1_facts.database, completion_evaluations) == 1
+    assert _count(s6b1_facts.database, verification_records) == 1
     assert s6b1_facts.runtime.inspect_run(
         s6b1_facts.spine.run.id
-    ).work_unit.condition.value == "PROPOSED"
+    ).work_unit.condition.value == "PRODUCED"
     assert s6b1_facts.runtime.current_baseline().id == s6b1_facts.baseline.id

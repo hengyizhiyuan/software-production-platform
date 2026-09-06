@@ -2,6 +2,7 @@
 
 from spg.application.materialization import ExecutionInputMaterializationService
 from spg.domain.execution import ExecutorDispatchRequest, ExecutorDispatchResult
+from spg.domain.preparation import PreparedExecutionRequest
 from spg.domain.runtime import CompletionContract, RuntimeInvariantViolation
 from spg.infrastructure.codex_executor_binding import CODEX_REAL_BINDING
 from spg.infrastructure.executor_boundary import (
@@ -20,22 +21,28 @@ class GovernedDedicatedExecutor:
         database: Database,
         *,
         provider_timeout_seconds: float,
+        max_internal_turns: int = 3,
         provider_sandbox_mode: str = "workspace-write",
     ) -> None:
         if not 0 < provider_timeout_seconds <= 600:
             raise ValueError("provider_timeout_seconds must be within (0, 600]")
         self.database = database
         self.provider_timeout_seconds = provider_timeout_seconds
+        if max_internal_turns < 1:
+            raise ValueError("max_internal_turns must be positive")
+        self.max_internal_turns = max_internal_turns
         self.provider_sandbox_mode = provider_sandbox_mode
         self.materialization = ExecutionInputMaterializationService(database)
 
     def dispatch(self, request: ExecutorDispatchRequest) -> ExecutorDispatchResult:
         with self.database.unit_of_work() as unit_of_work:
-            work_unit = RuntimeStore(unit_of_work.session).work_unit(
-                request.execution.work_unit_id
-            )
+            store = RuntimeStore(unit_of_work.session)
+            work_unit = store.work_unit(request.execution.work_unit_id)
+            snapshot = store.snapshot(request.execution.source_baseline_id)
         if work_unit is None:
             raise RuntimeInvariantViolation("Executor PWU is unavailable")
+        if snapshot is None:
+            raise RuntimeInvariantViolation("Executor Source Baseline is unavailable")
         if (
             work_unit.id != request.execution.work_unit_id
             or work_unit.production_run_id != request.execution.production_run_id
@@ -49,12 +56,18 @@ class GovernedDedicatedExecutor:
             render_governed_instruction(
                 work_unit.objective,
                 work_unit.completion_contract,
+                execution=request.execution,
+                repository_ref=snapshot.repository_ref,
+                sandbox_policy=self.provider_sandbox_mode,
+                max_internal_turns=self.max_internal_turns,
+                time_budget_seconds=self.provider_timeout_seconds,
             ),
         )
         transport = SubprocessExecutorTransport(
             timeout_seconds=self.provider_timeout_seconds + 30,
             provider_binding=CODEX_REAL_BINDING,
             provider_timeout_seconds=self.provider_timeout_seconds,
+            provider_max_internal_turns=self.max_internal_turns,
             provider_sandbox_mode=self.provider_sandbox_mode,
         )
         return DedicatedExecutorClient(
@@ -66,6 +79,12 @@ class GovernedDedicatedExecutor:
 def render_governed_instruction(
     objective: str,
     completion_contract: CompletionContract,
+    *,
+    execution: PreparedExecutionRequest | None = None,
+    repository_ref: str | None = None,
+    sandbox_policy: str | None = None,
+    max_internal_turns: int = 1,
+    time_budget_seconds: float | None = None,
 ) -> str:
     """Render only approved Runtime facts into the Provider instruction."""
 
@@ -85,11 +104,65 @@ def render_governed_instruction(
         plan_section = (
             f"Desired outcome:\n{plan.desired_outcome}\n\n"
             f"Admitted Production Plan objective:\n{plan.objective}\n\n"
-            f"Ordered Plan steps:\n{steps}\n\n"
+            "Ordered Plan steps:\n"
+            "Non-authoritative strategy hints; Executor owns HOW.\n"
+            f"{steps}\n\n"
             "Inherited constraints:\n"
             f"{plan_constraints or '- None beyond the admitted contract.'}\n\n"
             f"Verification approach:\n{plan.verification_approach}\n\n"
         )
+    markers = "\n".join(f"- {item}" for item in completion_contract.required_markers)
+    forbidden_changes = "\n".join(
+        f"- {item}" for item in completion_contract.forbidden_changes
+    )
+    blocking_conditions = "\n".join(
+        f"- {item}" for item in completion_contract.blocking_conditions
+    )
+    generic_verifications = "\n".join(
+        f"- {item}" for item in completion_contract.verification_obligations
+    )
+    authority = (
+        completion_contract.change_contract
+        or completion_contract.artifact_contract
+        or completion_contract.production_plan
+    )
+    governed_basis = ""
+    if authority is not None:
+        governed_basis = (
+            "Governed Resource / Source Basis:\n"
+            f"- Engineering Resource: {authority.engineering_resource_id}\n"
+            f"- Repository identity: {authority.repository_identity}\n"
+            f"- Repository ref: {repository_ref or 'not separately projected'}\n"
+            f"- Source Baseline: {authority.source_baseline_id}\n"
+            f"- Source revision: {authority.source_revision}\n"
+        )
+        if execution is not None:
+            governed_basis += (
+                f"- PWU: {execution.work_unit_id}\n"
+                f"- Attempt: {execution.attempt_id}\n"
+                f"- Generation: {execution.generation}\n"
+                f"- Workspace: {execution.workspace.workspace_identity}\n"
+            )
+        governed_basis += "\n"
+    execution_policy = (
+        "Bounded Executor policy:\n"
+        f"- Sandbox: {sandbox_policy or 'admitted by the Executor binding'}\n"
+        f"- Maximum internal Provider Turns: {max_internal_turns}\n"
+        f"- Total Provider time budget seconds: "
+        f"{time_budget_seconds if time_budget_seconds is not None else 'binding-defined'}\n"
+        "- Before every continuation, the PWU, Attempt, generation, Workspace, "
+        "Source Basis, Authority, Completion Contract, and remaining budget must "
+        "still be valid.\n"
+        "- Stop and return BOUNDARY_CROSSING_REQUIRED before widening Scope, "
+        "changing Resource/repository, entering a forbidden area, changing the "
+        "Completion Contract, or making a Human-owned decision.\n"
+        "- Stop on budget exhaustion or lost execution continuity. Never rebase, "
+        "commit, push, or change a Git ref.\n\n"
+        "At the end of each internal Provider Turn, return the supplied structured "
+        "control claim. Use CONTINUE only when another bounded diagnose, repair, or "
+        "validation Turn is necessary. Use RESULT_READY only when the best candidate "
+        "is ready for independent SPG observation and Verification.\n\n"
+    )
     artifact_authority = ""
     if artifact is not None:
         constraints = "\n".join(f"- {item}" for item in artifact.constraints)
@@ -131,13 +204,21 @@ def render_governed_instruction(
     return (
         "Complete exactly the admitted software-production objective below.\n\n"
         f"Objective:\n{objective.strip()}\n\n"
+        f"{governed_basis}"
         f"{plan_section}"
         f"{artifact_authority}"
         f"{change_authority}"
         f"Authorized output paths:\n{outputs}\n\n"
         f"Authorized changed paths:\n{changes}\n\n"
+        f"Required markers:\n{markers or '- None.'}\n\n"
+        f"Forbidden changes:\n{forbidden_changes or '- None beyond the admitted target/scope contracts.'}\n\n"
+        f"Blocking conditions:\n{blocking_conditions or '- None.'}\n\n"
+        f"Verification obligations:\n{generic_verifications or '- None beyond the admitted target/change contracts.'}\n\n"
+        f"{execution_policy}"
         "Do not modify any other repository path outside the exact targets or "
         "bounded areas admitted above. Never widen the Change Contract yourself. "
         "Work only inside the supplied "
-        "Attempt workspace. Do not commit, push, or change a Git ref."
+        "Attempt workspace. Do not commit, push, or change a Git ref. Internal "
+        "tests are advisory; only SPG independent "
+        "Verification can establish trusted satisfaction."
     )

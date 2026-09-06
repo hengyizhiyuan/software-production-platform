@@ -236,6 +236,10 @@ class ExecutionService:
     ) -> ProviderExecutionReportRecord:
         timestamp = datetime.now(UTC)
         report_id = uuid4()
+        metadata = {
+            **provider_result.metadata,
+            "terminal_executor_outcome": provider_result.return_control.value,
+        }
         with self.database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
             if store.provider_execution_report(dispatch.id) is not None:
@@ -251,7 +255,7 @@ class ExecutionService:
                     "outcome": provider_result.outcome.value,
                     "started_at": provider_result.started_at,
                     "finished_at": provider_result.finished_at,
-                    "metadata": provider_result.metadata,
+                    "metadata": metadata,
                     "summary": provider_result.summary,
                     "recorded_at": timestamp,
                 }

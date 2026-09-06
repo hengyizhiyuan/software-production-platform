@@ -371,7 +371,10 @@ def test_s2b_06_observation_is_independent_from_provider_prose(
             )
         ),
     )
-    assert result.provider_report.metadata == {"operation_count": 1}
+    assert result.provider_report.metadata == {
+        "operation_count": 1,
+        "terminal_executor_outcome": "RESULT_READY",
+    }
     assert [change.repository_relative_path for change in result.observation.changes] == [
         "docs/existing.md"
     ]
