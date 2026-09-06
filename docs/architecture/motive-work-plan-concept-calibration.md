@@ -57,6 +57,23 @@ within one PWU, the current Runtime may require refinement, Human-managed
 sequencing, or deferral of independently governed steps. It must not redefine
 the Work itself as inherently atomic.
 
+## Work Interaction and Governed Evolution
+
+A Work is not the boundary of Human interaction. Conversation may begin before
+Work exists and continue after admission or current completion. First utterance
+does not automatically create Work. New Human context, correction, constraints,
+requests, preferences, feedback, and questions are interpreted against current
+governed Reality before any change is admitted.
+
+The authoritative Work representation must evolve through versioned,
+reconstructable Reality rather than latest-message overwrite. A compact Shared
+Understanding distinguishes what was communicated, what Watt interpreted, and
+what was admitted. The detailed semantic contract is
+[Work Interaction & Closed-loop Refinement](work-interaction-closed-loop-refinement.md).
+
+Existing implementation does not yet provide this capability. WIC-1 is
+**DEFINED / ADMITTED** and ready for bounded MVP implementation planning.
+
 ## Plan Role
 
 Plan is not only a short execution checklist. Conceptually, it can guide a
@@ -152,3 +169,12 @@ implementation authorization.
 
 No implementation contract, data model, API, orchestration change, or Feature
 ID is created by this documentation decision.
+
+## Product Closure Boundary
+
+The historical `WATT MVP CORE — CLOSED / PASS` evidence remains truthful for
+the Governed Production + Reality-driven Plan Steering Core. The approved
+[Product North Star](watt-product-north-star.md) identifies continuing Work
+Interaction and Closed-loop Refinement as an additional Product-shape
+essential. Therefore Watt Product MVP is **NOT CLOSED** while WIC implementation
+remains not started.

@@ -4,7 +4,7 @@
 
 Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and Readiness](../architecture/spg-runtime-architecture-readiness.md) is PASS, and the [SPG Lite Runtime Implementation Contract](../architecture/spg-lite-runtime-implementation-contract.md) remains CLOSED. The [FVS-1 Implementation Contract](../architecture/spg-fvs-1-implementation-contract.md) is ADMITTED, F3-D is CLOSED, and FVS-1 is authorized for controlled implementation. S1 through S5 remain **CLOSED / PASS**. S6-C2 Authorization #4 created one immutable generation-1 Attempt whose Executor transport failed before Provider binding; Provider Outcome remains UNKNOWN, Production Reality remains NONE, and the PWU remains PROPOSED. S6-C2-R1, S6-C2-R2, S6-C2-R3, S6-C2-R4-A, and S6-C2-R4-B are **CLOSED / PASS**. The Windows S6-C2-R4-C full-regression Attempt remains **INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED**. Complete R4 qualification/execution is **DEFERRED_BY_MVP**, with the historical Recovery Barrier preserved.
 
-[MVP Scope Calibration and Phase-2 Hardening Backlog](mvp-scope-calibration.md) is the current delivery-priority authority. Watt MVP Core and Reality-driven Plan Steering MVP are **CLOSED / PASS** after Dogfood #9 machine-loop proof and Dogfood #10 Human-operated acceptance. Post-Core Product Experience, deployment readiness, and Linux promotion remain later separately admitted work.
+[MVP Scope Calibration and Phase-2 Hardening Backlog](mvp-scope-calibration.md) is the current delivery-priority authority. The governed production and Reality-driven Plan Steering core is **CLOSED / PASS** after Dogfood #9 machine-loop proof and Dogfood #10 Human-operated acceptance. [WIC-1 Work Interaction Closed-loop Refinement](../architecture/work-interaction-closed-loop-refinement.md) is **DEFINED / ADMITTED**, but its implementation has not started; therefore the Watt Product MVP is **NOT CLOSED**. Deployment readiness and Linux promotion remain later separately admitted work.
 
 | Review item | Status |
 |---|---|
@@ -92,7 +92,9 @@ Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and 
 | Reality-driven Plan Steering MVP | CLOSED / PASS — 1C THROUGH 1L |
 | Long-lived Motive Dogfood #9 | PASS — COMPLETE MACHINE-SIDE PRODUCTION LOOP |
 | Long-lived Motive Dogfood #10 | PASS — HUMAN-OPERATED END-TO-END ACCEPTANCE |
-| Watt MVP Core | CLOSED / PASS — EXPLICIT NON-BLOCKING DEFERRALS PRESERVED |
+| Governed Production + Plan Steering Core | CLOSED / PASS — HISTORICAL MVP CORE CLOSURE SCOPE |
+| WIC-1 Work Interaction Architecture | DEFINED / ADMITTED — IMPLEMENTATION NOT STARTED |
+| Watt Product MVP | NOT CLOSED — WORK INTERACTION CORE REMAINS TO BE IMPLEMENTED |
 
 S6-C2-HR1R, S6-C2-HR1, and S6-C2-DB1 remain CLOSED / PASS historical prerequisites. Authorization #4 subsequently created the first governed dogfood Attempt and exposed a Windows parent/child encoding mismatch before Provider binding. R1 persisted the admitted `UNKNOWN / REOBSERVE` Recovery Assessment with an active barrier. R2 replaces locale-dependent text transport with an explicit UTF-8/strict bytes wire for request, response, and diagnostic streams. Its 15 evidence obligations comprise 14 executable UTF8 pytest functions plus one external production Runtime immutability assertion. Synthetic R2 tests pass 14/14, affected B2-A/B2-B1 pass 30/30, and HOST tests pass 18/18. The serial full regression collected 462 tests, selected and passed 460, failed 0, skipped 0, and deselected two real Provider tests in 5440.85 seconds; the production Runtime snapshot remained identical. Provider Threads and Turns remain zero; the target artifact remains absent.
 
@@ -111,10 +113,11 @@ The detailed A/B/C classification, guardrails, verification levels, and Phase-2 
 3. functional Web UI;
 4. local Docker product integration;
 5. one real local end-to-end task;
-6. MVP closure and promotion validation;
-7. Linux deployment and promotion validation;
-8. systematic self-dogfood;
-9. evidence-triggered Phase-2 hardening.
+6. governed Work Interaction Core implementation and Human validation;
+7. Watt Product MVP closure reassessment and promotion validation;
+8. Linux deployment and promotion validation;
+9. systematic self-dogfood;
+10. evidence-triggered Phase-2 hardening.
 
 The Stage 0–3 model below remains the long-term maturity model; it does not override this immediate delivery order.
 

@@ -563,6 +563,12 @@ This baseline governs program-level system boundaries. Detailed documents remain
 - [Runtime Findings Review](spg-runtime-findings-review.md) preserves the discovery scope and current agenda.
 - [Runtime Verification and Benchmark Strategy](spg-runtime-verification-benchmarks.md) records future invariant verification, fault injection, provider-independent benchmarks, and the real incident-derived regression candidate, not current implementation scope.
 - [MVP Architecture](mvp-architecture.md) defines the current MVP boundary.
+- [工律 / Watt Product North Star](watt-product-north-star.md) governs the
+  Human-calibrated Product shape under these system boundaries.
+- [Work Interaction & Closed-loop Refinement](work-interaction-closed-loop-refinement.md)
+  defines provider-neutral continuing Interaction, governed Work evolution,
+  feedback admission, and the existing Plan/SPG handoff without changing plane
+  ownership or Runtime truth.
 - [Guardian Integration](../assurance/guardian-integration.md) and [ECF Integration](../context/ecf-integration.md) define integration boundaries without redesigning those systems.
 - Product-specific documents retain product internals and implementation decisions.
 

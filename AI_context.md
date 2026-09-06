@@ -4,9 +4,14 @@
 
 - **Project:** AI-Native Software Production Platform
 - **Repository:** `software-production-platform`
-- **Internal Program:** TNGA Program
+- **Chinese Product Brand:** 工律
+- **Internal Development Codename:** Watt
+- **Formal English Product Brand:** UNDECIDED / DEFERRED
+- **Previous Internal Codename:** TNGA
 
-TNGA is an internal strategic research and development program code. It is not the repository name, package name, or external product name.
+The internal codename migration from TNGA to Watt is Human-approved and became
+due when MVP Core closed. Repository-wide migration is a separate bounded task;
+historical TNGA references remain truthful and are not rewritten opportunistically.
 
 ## Project Purpose
 
@@ -79,6 +84,14 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 **MVP-VERIFY-NODE-1 — CLOSED / PASS**
 
 **WATT MVP CORE — CLOSED / PASS**
+
+**GOVERNED PRODUCTION + REALITY-DRIVEN PLAN STEERING CORE — CLOSED / PASS**
+
+**WIC-1 WORK INTERACTION ARCHITECTURE CONTRACT — DEFINED / ADMITTED**
+
+**WORK INTERACTION & CLOSED-LOOP REFINEMENT CORE — ARCHITECTURE DEFINED / IMPLEMENTATION NOT STARTED**
+
+**WATT PRODUCT MVP — NOT CLOSED**
 
 **REALITY-DRIVEN PLAN STEERING MVP — CLOSED / PASS**
 
@@ -180,7 +193,9 @@ without encoding either restriction as a permanent architecture limit.
 | Long-lived Motive Dogfood #8 — Bounded Self-refine | HISTORICAL FAILURE PRESERVED / FRESH REAL PASS TO CANDIDATE AUTHORIZATION |
 | Long-lived Motive Dogfood #9 — Complete production loop | PASS — exact Human Authorization, Integration, Runtime Commit, VERIFY_ACCEPT, and COMPLETE |
 | Long-lived Motive Dogfood #10 — Human-operated acceptance | PASS — normal UI operation, exact Trusted Baseline activation, and bounded Human functional acceptance |
-| Watt MVP Core | CLOSED / PASS — explicit non-blocking deferrals preserved |
+| Historical Watt MVP Core | CLOSED / PASS — proved Governed Production + Reality-driven Plan Steering Core; explicit non-blocking deferrals preserved |
+| Work Interaction & Closed-loop Refinement Core | ARCHITECTURE DEFINED / IMPLEMENTATION NOT STARTED — WIC-1 READY FOR BOUNDED MVP IMPLEMENTATION PLANNING |
+| Watt Product MVP | NOT CLOSED |
 | DCP-1 — Duration & Capacity Semantic Foundation | CLOSED / PASS |
 | DCP-2 — Production Measurement v0 | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable measurement and planning-time TaskShapeSnapshot; no decision influence |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
@@ -631,6 +646,25 @@ post-completion execution-history visibility. See [Dogfood #10 Human
 Acceptance](docs/evidence/dogfood/long-lived-motive-dogfood-10-human-acceptance.md)
 and [Watt MVP Core Closure](docs/evidence/mvp-core-closure.md).
 
+### Product North Star and Work Interaction Core
+
+The Human-calibrated [工律 / Watt Product North Star](docs/architecture/watt-product-north-star.md)
+is authoritative for Product shape. Continuing natural-language interaction
+before and during a long-lived Work, visible Shared Understanding, governed
+interpretation/impact assessment, versioned Work Reality evolution, feedback
+admission, and Product-level completion/continuation semantics are
+Product-shape essentials.
+
+[WIC-1 Work Interaction & Closed-loop Refinement](docs/architecture/work-interaction-closed-loop-refinement.md)
+defines them as one cohesive capability chain: Human Input → Interpretation →
+Impact Assessment → governed Work Evolution → existing Plan reassessment →
+production/feedback → continuing Interaction. WIC-1 is **DEFINED / ADMITTED**
+and **READY FOR BOUNDED MVP IMPLEMENTATION PLANNING**; implementation has not
+started. The existing Governed Production + Reality-driven Plan Steering Core
+remains **CLOSED / PASS**, while **Watt Product MVP remains NOT CLOSED**. No
+first utterance becomes Work automatically, raw conversation is not truth, and
+new input cannot mutate an active Production Contract.
+
 ### Reality-driven Plan Steering MVP Behavioral Contract
 
 The admitted MVP contract defines a stepwise and reconstructable steering loop
@@ -756,6 +790,8 @@ The current system-level architecture baseline is:
 - [Duration & Capacity Semantic Foundation](docs/architecture/duration-capacity-semantic-foundation.md)
 - [Production Measurement v0](docs/architecture/production-measurement-v0.md)
 - [Interpretation Externalization and Multimodal Alignment](docs/architecture/interpretation-externalization-and-multimodal-alignment.md)
+- [工律 / Watt Product North Star](docs/architecture/watt-product-north-star.md)
+- [Work Interaction & Closed-loop Refinement Architecture Contract](docs/architecture/work-interaction-closed-loop-refinement.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -803,6 +839,10 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Contract Before Implementation
 - Source of Truth over Conversation History
 - Conversation-to-Contract — raw conversation is never authoritative execution input
+- First Utterance Does Not Automatically Create Work
+- Continuing Human–Watt Interaction Is Product Shape
+- Shared Understanding Distinguishes Candidate from Governed Reality
+- Production Cycle Completion Does Not End the Work Relationship Automatically
 - Controlled Autonomy
 - AI Capability Evolution Independence
 

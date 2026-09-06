@@ -56,6 +56,15 @@ activation, and Human-operated acceptance are implemented and proven.
 The detailed boundary is recorded in
 [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
 
+The approved [Product North Star](watt-product-north-star.md) additionally
+requires continuing natural-language Human–Watt interaction before and during
+Work, compact Shared Understanding, governed impact assessment, versioned Work
+Reality evolution, and feedback admission into existing Plan reassessment.
+[WIC-1](work-interaction-closed-loop-refinement.md) defines this Product-shape
+Core and is ready for bounded implementation planning; implementation has not
+started. The proved Governed Production + Reality-driven Plan Steering Core
+remains closed, while Watt Product MVP remains **NOT CLOSED**.
+
 The MVP uses **Single Intelligence Mode**:
 
 ```text
@@ -254,7 +263,14 @@ F1/F2/F3-A/F3-B/F3-C are REVIEWED / ADMITTED and F3-D is CLOSED. S1 through S5 a
 
 ## MVP Scope Boundary
 
-The usable MVP is a local Docker product with a functional Web UI, real requirement intake, governed execution, Human Attention/Authority actions, and observable results. It includes the narrow application workflow and HTTP surface required by that UI. The CLI remains a development/operator interface and is not the complete MVP product.
+The usable Product MVP is a local Docker product with a functional Web UI,
+continuing natural-language Motive/Work interaction, governed Shared
+Understanding and Work evolution, real requirement admission, governed
+execution, Human Attention/Authority actions, feedback-driven Plan
+reassessment, and observable results. The current application already proves
+the production/Steering path but not WIC; Watt Product MVP therefore remains
+open. The CLI remains a development/operator interface and is not the complete
+MVP product.
 
 The MVP does not include full CI/CD, automated deployment, production monitoring, full Guardian or ECF implementations, model routing, benchmarking, intelligent branching or merge, complete SaaS multi-tenancy, Provider Marketplace, provider-management UI, residency Policy Engine, or multi-region orchestration. Complete R4 maintenance-lineage recovery closure is also DEFERRED_BY_MVP.
 
@@ -327,7 +343,13 @@ No YiJue adapter, concrete API, or YiJue implementation is defined here.
 
 ## MVP Capability Boundary
 
-The MVP supports the basic Production Planner production loop, Project/Repository representation, real requirement intake, Iteration, VS, Work Item, Artifact recording, Executor invocation, basic Completion/Verification, Human Attention/Authority, Production Reality and outcome views, a minimal application/API layer, a functional Web UI, and local Docker product integration.
+The MVP target supports the basic Production Planner production loop,
+Project/Repository representation, continuing Motive/Work interaction,
+governed Work evolution and feedback admission, Iteration, VS, Work Item,
+Artifact recording, Executor invocation, basic Completion/Verification, Human
+Attention/Authority, Production Reality and outcome views, a minimal
+application/API layer, a functional Web UI, and local Docker product
+integration. WIC remains architecture-defined and not yet implemented.
 
 The MVP does not implement:
 

@@ -6,11 +6,11 @@ This document is the authoritative MVP delivery calibration under Architecture B
 
 It changes roadmap priority, not the confirmed Runtime semantics or ownership boundaries. Existing R4-A and R4-B implementation remains intact. No product feature, Provider execution, production migration, Runtime mutation, or deployment is introduced by this document.
 
-The post-Core priority is:
+The current Product-MVP priority is:
 
-> Preserve the closed MVP Core, calibrate duration/capacity architecture,
-> improve the necessary Product Experience, establish deployment readiness,
-> and then deploy and promote on Linux through separately admitted work.
+> Preserve the closed Governed Production + Reality-driven Plan Steering Core,
+> implement the admitted Work Interaction & Closed-loop Refinement Core, then
+> reassess Product-MVP closure before Product Experience and deployment work.
 
 The MVP development workflow remains Human Governor + ChatGPT Architecture Lead + Codex repo-grounded Executor.
 
@@ -21,12 +21,15 @@ The MVP is usable when a user can:
 1. Run the product locally in the intended Docker development environment.
 2. Open a functional Web UI.
 3. View all Works or select an optional Goal navigation context.
-4. Submit a real software-development requirement.
-5. Observe the admitted Production Intent, Run, PWU, Attempt, and governed status.
-6. Respond to required Human Attention and Authority actions.
-7. Observe execution, independent production observation, Completion, and Verification outcomes.
-8. Obtain the resulting repository development outcome.
-9. Continue with another task.
+4. Begin a natural-language Interaction without automatically creating Work.
+5. Progressively refine an incomplete Motive and calibrate Watt's Shared Understanding.
+6. Admit a sufficiently clear governed Work through the applicable Human boundary.
+7. Continue natural-language interaction inside the active Work and govern material changes.
+8. Observe the admitted Production Intent, Run, PWU, Attempt, and governed status.
+9. Respond to required Human Attention and Authority actions.
+10. Observe execution, independent production observation, Completion, and Verification outcomes.
+11. Admit relevant Human/Runtime/Verification feedback into Work and Plan reassessment.
+12. Obtain the resulting repository outcome and continue the same Work or transition truthfully to a new Work.
 
 The UI may be visually simple. It must be functional, not a static demonstration. A CLI-only system is not the MVP product.
 
@@ -48,6 +51,7 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Motive / Work / Engineering Scope product model | Motive is the product-facing concept; Work is the current internal governed representation; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / CONCEPT CALIBRATION CLOSED / PASS; IMPLEMENTATION REMAINS WORK-NAMED |
 | Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI; it is a narrow production-step plan, not full lifecycle steering | MVP CORE / PLAN-1B CLOSED / PASS |
 | [Reality-driven Plan Steering](../architecture/reality-driven-plan-steering-mvp-contract.md) | 1C through 1L are CLOSED / PASS. Dogfood #9 proves the complete machine-side long-lived loop; Dogfood #10 proves Human-operated acceptance and exact Runtime activation. The remaining observability gap is explicit and non-blocking. | MATERIAL MVP CORE PRODUCT CAPABILITY / MVP CLOSED / PASS |
+| [Work Interaction & Closed-loop Refinement](../architecture/work-interaction-closed-loop-refinement.md) | Pre-Work multi-turn Motive formation, Shared Understanding, in-Work interaction, impact assessment, versioned Work Reality evolution, feedback admission, and continuation/new-Work semantics | PRODUCT-SHAPE ESSENTIAL / ARCHITECTURE DEFINED / IMPLEMENTATION NOT STARTED |
 | [Interpretation Externalization / Multimodal Alignment](../architecture/interpretation-externalization-and-multimodal-alignment.md) | Externalize Watt's reconstructed Motive interpretation at the lowest sufficient representation cost so material semantic mismatch can be calibrated | FUTURE CORE DIFFERENTIATION CAPABILITY / NOT CURRENT MVP SCOPE / NOT YET DESIGNED FOR IMPLEMENTATION |
 | Production state view | Work, Goal, Attention, Steering, progress, and Work Result projections derive from authoritative Runtime facts | MVP CORE / CLOSED / PASS; real Provider loop and Human acceptance proven |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
@@ -69,6 +73,7 @@ Only capabilities needed for the product definition are MVP CORE.
 | Context Package Lite | Assemble only admitted Source of Truth, exact Baseline, requirement, constraints, and necessary repository context |
 | Production Planner Lite | Current narrow AI or deterministic/rule-assisted formation of one admitted production-step plan/PWU; it does not define the full conceptual Plan |
 | Reality-driven Plan Steering | Reconstruct and preserve a long-lived Plan from governed Reality, select the next appropriate step, request Human decisions when needed, and create traceable revisions only when Reality justifies change |
+| Work Interaction & Closed-loop Refinement | Support continuing natural-language interaction before and during Work; distinguish candidate interpretation from governed truth; admit versioned Work changes; connect feedback to existing Plan reassessment without mutating active production contracts |
 | Codex Executor integration | One static Provider profile and one reliable real execution path |
 | Run / Attempt execution | Serial execution with one active Run and one current Attempt generation |
 | Production State progression | Expose the current governed state and blocking reason |
@@ -239,15 +244,18 @@ an evidence-backed follow-up rather than hidden success.
 9. **Bounded Single-PWU Code Work** — CLOSED / PASS; adds Human-visible bounded change authority and typed contract-driven code Verification without changing the one-PWU model.
 10. **Trusted Baseline / Active Runtime Convergence Lite** — CLOSED / PASS; Architecture Lead Reality Review and Human Composer acceptance passed. The first trusted Watt code self-dogfood loop is proven.
 11. **Reality-driven Plan Steering** — MVP CLOSED / PASS. Slices 1C through 1L close the reconstructable truth spine, governed decisions and semantic execution, automatic progression, exact SPG production bridge, strict real-Provider contract, and long-lived completion semantics. Dogfood #9 proves the machine-side production loop through Runtime Commit and COMPLETE; Dogfood #10 proves Human-operated acceptance and exact activation. Extended Human Attention and Product Experience remain separately gated.
-12. **Watt MVP Core Closure** — CLOSED / PASS with explicit non-blocking deferrals; see [closure evidence](../evidence/mvp-core-closure.md).
-13. **Duration/capacity semantic foundation** — DCP-1 CLOSED / PASS and DCP-2
+12. **Historical Watt MVP Core Closure** — CLOSED / PASS for the proved Governed Production + Reality-driven Plan Steering Core; see [closure evidence](../evidence/mvp-core-closure.md). This does not close Watt Product MVP.
+13. **Product North Star / WIC-1 Architecture** — CLOSED / PASS for architecture definition. Work Interaction & Closed-loop Refinement implementation has not started.
+14. **Work Interaction & Closed-loop Refinement MVP implementation** — NEXT / REQUIRES SEPARATE BOUNDED IMPLEMENTATION PLAN.
+15. **Duration/capacity semantic foundation** — DCP-1 CLOSED / PASS and DCP-2
     Production Measurement v0 IMPLEMENTED / FOCUSED VALIDATION PASS; estimation,
     queue, scheduling, and runtime capacity behavior require separate admission
     and do not reopen Core.
-14. **Necessary UI / Product Experience work** — improve observability and history within an admitted post-Core boundary.
-15. **Deployment readiness and promotion validation** — risk-based gates for the accepted checkpoint.
-16. **Linux server deployment and promotion** — bootstrap and validate from an exact accepted candidate.
-17. **Phase-2 hardening and systematic post-Core dogfood** — activate from evidence and triggers, not architectural interest alone.
+16. **Watt Product MVP closure reassessment** — only after WIC implementation and real product evidence.
+17. **Necessary UI / Product Experience work** — improve observability and history within an admitted boundary.
+18. **Deployment readiness and promotion validation** — risk-based gates for the accepted checkpoint.
+19. **Linux server deployment and promotion** — bootstrap and validate from an exact accepted candidate.
+20. **Phase-2 hardening and systematic post-Core dogfood** — activate from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
 
@@ -271,10 +279,9 @@ Robustness, recovery, scale, optimization, and security work does not enter the 
 
 ## 13. Next Slice Selection Boundary
 
-Architecture Lead selects each concrete slice separately. The bounded
-Reality-driven Plan Steering MVP behavioral contract and Watt MVP Core are now
-**CLOSED / PASS**.
-Any next implementation-contract or implementation-slice work requires
-separate Architecture Lead admission. This calibration does not authorize
-implementation and does not introduce Project Governor, Initiative, multi-PWU
-execution, or Phase-2 automation.
+Architecture Lead selects each concrete slice separately. Governed Production
+and Reality-driven Plan Steering Core remains **CLOSED / PASS**. WIC-1 is
+**DEFINED / ADMITTED** and ready for bounded MVP implementation planning, but
+no implementation Slice is authorized by this architecture checkpoint. Watt
+Product MVP remains **NOT CLOSED**. This calibration introduces no Project
+Governor, Initiative, Multi-PWU execution, or Phase-2 automation.
