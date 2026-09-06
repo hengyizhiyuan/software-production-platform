@@ -127,6 +127,16 @@ Larger PWUs and longer autonomous runs are potential economic benefits only wher
 
 Adaptive PWU decomposition, automatic routing, and the benchmark feedback loop remain future work. The [SPG Lite Runtime Implementation Contract](spg-lite-runtime-implementation-contract.md) is CLOSED with Coding Readiness PASS without promoting these capabilities. A controlled slice still requires explicit Architecture Lead authorization.
 
+The [Duration & Capacity Semantic
+Foundation](duration-capacity-semantic-foundation.md) defines the admitted
+post-Core vocabulary for measurement-first duration evidence, planning versus
+operational estimates, sizing advisory, and future capacity policy. It preserves
+the rule that Planner/Estimator advises, SPG governs the production envelope,
+Executor owns HOW, Verification establishes trust, and a future
+Capacity/Scheduling capability may decide when scarce execution capacity is
+granted. No queue, scheduler, prediction, or automatic decomposition is
+implemented by that foundation.
+
 ## Engineering Conflict Evolution
 
 Future conflict understanding may include:

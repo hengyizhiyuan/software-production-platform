@@ -1179,6 +1179,17 @@ A **Capability Performance Profile** is a future benchmark- and production-histo
 
 **Task Decomposition Is Also Resource Allocation:** capability and reliability may influence safe PWU granularity. Wider autonomy requires capability-specific evidence and policy permission, not a model's brand or price. These are design principles; profiles, adaptive allocation, and routing remain future capabilities, not MVP implementations.
 
+The post-Core [Duration & Capacity Semantic
+Foundation](duration-capacity-semantic-foundation.md) further distinguishes
+stable Governed Production Truth from dynamically recalculable operational
+plans. Production Measurement records observed Reality; Estimation advises;
+SPG continues to govern PWU and Authority; a future Capacity/Scheduling
+capability may govern scarce capacity grants. Preferred execution horizon is a
+soft planning signal, never an Executor timeout or decomposition authority.
+Natural cohesion, independent verifiability, and governed scope remain stronger
+than duration preference. DCP-1 defines these semantics only; it implements no
+runtime capacity behavior.
+
 This feedback preserves **Replaceable Intelligence, Durable Governance**. Provider performance cannot redefine Production Contracts, State semantics, Authority, Guardian's trust model, or governance invariants. Evidence informs choices without transferring authoritative state-transition responsibility to the provider.
 
 ## Production Capability Graph

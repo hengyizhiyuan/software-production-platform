@@ -181,6 +181,7 @@ without encoding either restriction as a permanent architecture limit.
 | Long-lived Motive Dogfood #9 — Complete production loop | PASS — exact Human Authorization, Integration, Runtime Commit, VERIFY_ACCEPT, and COMPLETE |
 | Long-lived Motive Dogfood #10 — Human-operated acceptance | PASS — normal UI operation, exact Trusted Baseline activation, and bounded Human functional acceptance |
 | Watt MVP Core | CLOSED / PASS — explicit non-blocking deferrals preserved |
+| DCP-1 — Duration & Capacity Semantic Foundation | DEFINED / ADMITTED — architecture/SOT only; runtime implementation NOT STARTED |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -598,8 +599,14 @@ Authorization, Integration Effect, or Runtime Commit. See [Long-lived Motive
 Dogfood #8 Bounded Self-refine Closure](docs/evidence/dogfood/long-lived-motive-dogfood-8-self-refine-closure.md).
 `SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains **CONFIRMED / PARTIALLY MITIGATED
 / OPEN**.
-Duration-aware PWU sizing / capacity-aware decomposition remains a deferred
-design calibration topic and is not part of this closure checkpoint.
+Duration-aware PWU sizing / capacity-aware production planning is now governed
+by the post-Core [Duration & Capacity Semantic
+Foundation](docs/architecture/duration-capacity-semantic-foundation.md). DCP-1
+defines measurement-first semantics, TaskShapeSnapshot, uncertainty-aware
+DurationEstimate, SizingAdvisory, CapacityPolicy, and the boundary between
+stable Governed Production Truth and dynamically recalculable operational
+planning. Runtime implementation, prediction, decomposition, queueing, and
+scheduling remain not started and require separate admission.
 
 Long-lived Motive Dogfood #9 proves the complete machine-side long-lived
 production loop: real governed DESIGN, PRODUCE, PLAN-1B, SPG, bounded Executor,
@@ -741,6 +748,7 @@ The current system-level architecture baseline is:
 - [Long-lived Motive Dogfood #9 — Complete Production Loop](docs/evidence/dogfood/long-lived-motive-dogfood-9-production-loop-closure.md)
 - [Long-lived Motive Dogfood #10 — Human-operated Acceptance](docs/evidence/dogfood/long-lived-motive-dogfood-10-human-acceptance.md)
 - [Watt MVP Core Closure](docs/evidence/mvp-core-closure.md)
+- [Duration & Capacity Semantic Foundation](docs/architecture/duration-capacity-semantic-foundation.md)
 - [Interpretation Externalization and Multimodal Alignment](docs/architecture/interpretation-externalization-and-multimodal-alignment.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
@@ -775,6 +783,8 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Motive Is Product Intent; Work Is the Current Governed Representation
 - PWU, Not Work, Is the Bounded Production Unit
 - Reality-driven Plan Steering
+- Duration/Capacity Measurement Before Optimization
+- Operational Plans May Recalculate; Governed Production Truth Does Not Drift
 - Facts Constrain the Plan
 - Models Reason over the Plan; Models Do Not Own the Plan
 - Plan Must Be Reconstructable from Governed Reality

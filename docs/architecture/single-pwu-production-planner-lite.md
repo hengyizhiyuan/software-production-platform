@@ -19,9 +19,11 @@ long-lived; PWU is the bounded production-unit concept. The conceptual Plan may
 guide a Motive/Work through current Reality, next-step selection, refinement,
 design, Human decisions, governed production, and reassessment over time.
 
-That broader **Reality-driven Plan Steering** capability is not yet
-implemented. PLAN-1B remains CLOSED / PASS and is not reopened. See
-[Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
+That broader **Reality-driven Plan Steering** capability is now implemented for
+the closed MVP behavior. PLAN-1B remains CLOSED / PASS and is not reopened. See
+[Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md)
+and the [Reality-driven Plan Steering MVP Behavioral
+Contract](reality-driven-plan-steering-mvp-contract.md).
 
 ## Production Plan Proposal
 
@@ -51,9 +53,16 @@ The fit classification is one of:
 - `NEEDS_REFINEMENT`: ambiguity or an authority mismatch blocks admission;
 - `MULTI_PWU_REQUIRED`: independently governed sequencing exceeds the MVP.
 
-Only `ONE_PWU_FIT` may reach Human Work Draft Approval and Runtime admission.
-The other classifications create no Run, Plan Revision, PWU, Attempt, or
-Provider authority and remain visible as refinement-required Human Attention.
+For legacy `IMMEDIATE_PRODUCTION` Work, only `ONE_PWU_FIT` may reach Human Work
+Draft Approval and Runtime admission. For `LONG_LIVED_STEERING` Work, Human
+admission governs the Work envelope without creating Run/PWU Reality; PLAN-1B
+and `ONE_PWU_FIT` remain mandatory when a later exact `PRODUCE` Step seeks
+production admission. The other classifications create no production Run,
+Plan Revision, PWU, Attempt, or Provider authority.
+
+Future duration-aware sizing may advise this boundary, but does not change its
+Authority. See [Duration & Capacity Semantic
+Foundation](duration-capacity-semantic-foundation.md).
 
 Planner intelligence is not Production Authority. A proposal must exactly
 preserve the admitted desired outcome, objective, Engineering Resource,
