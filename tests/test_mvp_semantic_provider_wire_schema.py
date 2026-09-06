@@ -18,11 +18,14 @@ def _payload(proposed_production: object = None) -> dict[str, object]:
         "bounded_summary": "A bounded semantic direction grounded in current Reality.",
         "decisions": ["Reuse the existing governed Work and Steering seams."],
         "derived_constraints": [],
-        "unresolved_questions": [],
-        "authority_assessment": "WITHIN_AUTHORITY",
-        "human_attention_recommendation": None,
         "proposed_production": proposed_production,
-        "completion_claimed": True,
+        "disposition": {
+            "state": "RESOLVED",
+            "authority_assessment": "WITHIN_AUTHORITY",
+            "unresolved_questions": [],
+            "human_attention_recommendation": None,
+            "completion_claimed": True,
+        },
     }
 
 
@@ -70,6 +73,14 @@ def test_sem_wire_01_03_04_05_08_09_10_15_schema_is_recursively_strict() -> None
         assert set(ref_schema) == {"$ref"}, path
 
     assert set(schema["properties"]) == set(schema["required"])
+    assert "anyOf" not in schema
+    disposition = schema["properties"]["disposition"]
+    assert len(disposition["anyOf"]) == 3
+    assert all(set(branch) == {"$ref"} for branch in disposition["anyOf"])
+    resolved = schema["$defs"]["_SemanticProviderResolvedDisposition"]
+    resolved_questions = resolved["properties"]["unresolved_questions"]
+    assert resolved_questions["items"] == {"type": "string"}
+    assert resolved_questions["maxItems"] == 0
     proposal = _proposal_schema(schema)
     assert set(proposal["properties"]) == set(proposal["required"])
     assert "artifact_targets" in proposal["required"]
@@ -136,6 +147,42 @@ def test_sem_wire_03_04_06_no_production_round_trip_uses_explicit_values() -> No
     assert wire.human_attention_recommendation is None
     assert wire.proposed_production is None
     assert wire.domain_production_proposal() is None
+
+
+@pytest.mark.parametrize(
+    "disposition",
+    (
+        {
+            "state": "RESOLVED",
+            "authority_assessment": "UNCERTAIN",
+            "unresolved_questions": ["Which exact bounded path is supported?"],
+            "human_attention_recommendation": None,
+            "completion_claimed": True,
+        },
+        {
+            "state": "UNRESOLVED",
+            "authority_assessment": "WITHIN_AUTHORITY",
+            "unresolved_questions": [],
+            "human_attention_recommendation": "Choose a bounded direction.",
+            "completion_claimed": False,
+        },
+        {
+            "state": "AUTHORITY_EXPANSION",
+            "authority_assessment": "EXPANDS_AUTHORITY",
+            "unresolved_questions": [],
+            "human_attention_recommendation": "",
+            "completion_claimed": False,
+        },
+    ),
+)
+def test_sem_wire_dogfood_7_cross_field_incoherence_is_not_representable(
+    disposition: dict[str, object],
+) -> None:
+    payload = _payload()
+    payload["disposition"] = disposition
+
+    with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
+        CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))
 
 
 def test_sem_wire_04_06_code_work_round_trip_preserves_typed_values() -> None:
@@ -252,9 +299,8 @@ def test_sem_wire_07_malformed_semantic_values_remain_rejected(
     "missing_key",
     (
         "derived_constraints",
-        "unresolved_questions",
-        "human_attention_recommendation",
         "proposed_production",
+        "disposition",
     ),
 )
 def test_sem_wire_03_04_absent_wire_keys_are_not_defaulted(

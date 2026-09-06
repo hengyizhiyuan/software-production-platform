@@ -569,11 +569,14 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
                 ),
                 "decisions": ["Reuse the current Work and Steering projections."],
                 "derived_constraints": list(semantic_input.constraints),
-                "unresolved_questions": [],
-                "authority_assessment": "WITHIN_AUTHORITY",
-                "human_attention_recommendation": None,
                 "proposed_production": None,
-                "completion_claimed": True,
+                "disposition": {
+                    "state": "RESOLVED",
+                    "authority_assessment": "WITHIN_AUTHORITY",
+                    "unresolved_questions": [],
+                    "human_attention_recommendation": None,
+                    "completion_claimed": True,
+                },
             }
         )
     )
@@ -626,6 +629,83 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
         "codex-sdk:thread:thread-semantic-test:turn:turn-semantic-test"
     )
     assert _runtime_counts(postgres_database) == (0, 0, 0)
+
+
+def test_dogfood_7_coherent_wire_result_closes_design_and_admits_produce(
+    postgres_database: Database,
+    product,
+) -> None:
+    works, repository = product
+    admitted, plan = _admitted_plan(works)
+    assert plan.current_step is not None
+    assert plan.current_step.type is SteeringStepType.DESIGN
+    fake = _FakeSemanticCodex(
+        json.dumps(
+            {
+                "bounded_summary": (
+                    "Expose bounded execution progress through the existing web path."
+                ),
+                "decisions": [
+                    "Reuse the current Work projection and existing application UI."
+                ],
+                "derived_constraints": list(admitted.constraints),
+                "proposed_production": {
+                    "target_kind": "CODE_WORK",
+                    "objective": "Expose bounded execution progress observability",
+                    "artifact_targets": [],
+                    "code_targets": ["src/spg/web/app.js"],
+                    "allowed_areas": [],
+                    "forbidden_areas": [],
+                    "verification_expectation": "PATH_SCOPE and GIT_DIFF_CHECK",
+                },
+                "disposition": {
+                    "state": "RESOLVED",
+                    "authority_assessment": "WITHIN_AUTHORITY",
+                    "unresolved_questions": [],
+                    "human_attention_recommendation": None,
+                    "completion_claimed": True,
+                },
+            }
+        )
+    )
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(
+        postgres_database,
+        works,
+        orchestrator,
+        semantic_capability=CodexSdkSemanticStepCapability(
+            codex_factory=lambda: fake,
+        ),
+    )
+    try:
+        admitted_result = driver.iterate(admitted.work_id)
+        assert admitted_result.action is SteeringActionType.SEMANTIC_RESULT_ADMISSION
+        reconstructed = SteeringApplicationService(postgres_database).reconstruct(
+            admitted.work_id
+        )
+        assert len(reconstructed.semantic_results) == 1
+        assert reconstructed.semantic_results[0].completion_satisfied is True
+        assert _runtime_counts(postgres_database) == (0, 0, 0)
+        assert _git(repository, "status", "--porcelain") == ""
+
+        transitioned = driver.iterate(admitted.work_id)
+        assert transitioned.action is SteeringActionType.STEP_TRANSITION
+        reconstructed = SteeringApplicationService(postgres_database).reconstruct(
+            admitted.work_id
+        )
+        assert reconstructed.current_step is not None
+        assert reconstructed.current_step.type is SteeringStepType.PRODUCE
+        assert _runtime_counts(postgres_database) == (0, 0, 0)
+
+        production = SteeringProductionService(postgres_database)
+        production_request = production.materialize_request(admitted.work_id)
+        production_admission = production.admit_cycle(production_request)
+        assert production_admission.binding is not None
+        assert _runtime_counts(postgres_database) == (1, 1, 0)
+        assert _git(repository, "status", "--porcelain") == ""
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
 
 
 @pytest.mark.real_codex
@@ -685,6 +765,32 @@ def test_semantic_provider_real_end_to_end_governed_design_result(
     assert tuple(item.id for item in reconstruction.semantic_results) == (result.id,)
     assert _runtime_counts(postgres_database) == (0, 0, 0)
     assert _git(repository, "status", "--porcelain") == ""
+
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(postgres_database, works, orchestrator)
+    try:
+        transitioned = driver.iterate(admitted.work_id)
+        assert transitioned.action is SteeringActionType.STEP_TRANSITION
+        reconstruction = SteeringApplicationService(postgres_database).reconstruct(
+            admitted.work_id
+        )
+        assert reconstruction.current_step is not None
+        assert reconstruction.current_step.type is SteeringStepType.PRODUCE
+        assert reconstruction.latest_decision is not None
+        assert reconstruction.latest_decision.steering_outcome is (
+            SteeringOutcome.AUTO_CONTINUE
+        )
+        assert _runtime_counts(postgres_database) == (0, 0, 0)
+
+        production = SteeringProductionService(postgres_database)
+        production_request = production.materialize_request(admitted.work_id)
+        production_admission = production.admit_cycle(production_request)
+        assert production_admission.binding is not None
+        assert _runtime_counts(postgres_database) == (1, 1, 0)
+        assert _git(repository, "status", "--porcelain") == ""
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
     print(
         "REAL_SEMANTIC_EVIDENCE="
         + json.dumps(
@@ -712,12 +818,12 @@ def test_semantic_provider_real_end_to_end_governed_design_result(
                 ),
                 "completion_satisfied": result.completion_satisfied,
                 "provider_identity": result.reasoning_provider_identity,
-                "current_step_after_admission": (
+                "current_step_after_transition": (
                     reconstruction.current_step.type.value
                 ),
                 "runtime_counts": {
-                    "runs": 0,
-                    "pwus": 0,
+                    "runs": 1,
+                    "pwus": 1,
                     "runtime_commits": 0,
                 },
                 "repository_clean": True,
@@ -744,10 +850,13 @@ def test_sem_schema_03_04_05_06_15_dogfood_4_malformed_shapes_remain_rejected(
         "bounded_summary": "Bounded design proposal from current Reality.",
         "decisions": ["Reuse the existing Work and Steering projections."],
         "derived_constraints": [],
-        "unresolved_questions": [],
-        "authority_assessment": "WITHIN_AUTHORITY",
-        "human_attention_recommendation": None,
-        "completion_claimed": True,
+        "disposition": {
+            "state": "RESOLVED",
+            "authority_assessment": "WITHIN_AUTHORITY",
+            "unresolved_questions": [],
+            "human_attention_recommendation": None,
+            "completion_claimed": True,
+        },
     }
     invalid_proposals = (
         {
@@ -810,9 +919,6 @@ def test_sem_schema_12_13_blocked_driver_is_truthful_in_work_api(
         "bounded_summary": "Malformed Dogfood #4 provider result.",
         "decisions": ["Attempt a bounded change."],
         "derived_constraints": list(admitted.constraints),
-        "unresolved_questions": [],
-        "authority_assessment": "WITHIN_AUTHORITY",
-        "human_attention_recommendation": None,
         "proposed_production": {
             "target_kind": "BOUNDED_CODE_CHANGE",
             "objective": "Expose progress",
@@ -822,7 +928,13 @@ def test_sem_schema_12_13_blocked_driver_is_truthful_in_work_api(
             "forbidden_areas": [],
             "verification_expectation": "Focused tests",
         },
-        "completion_claimed": True,
+        "disposition": {
+            "state": "RESOLVED",
+            "authority_assessment": "WITHIN_AUTHORITY",
+            "unresolved_questions": [],
+            "human_attention_recommendation": None,
+            "completion_claimed": True,
+        },
     }
     fake = _FakeSemanticCodex(json.dumps(invalid))
     orchestrator = ProductionOrchestrator(works)

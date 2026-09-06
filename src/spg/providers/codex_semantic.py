@@ -6,7 +6,7 @@ from collections.abc import Callable
 from contextlib import AbstractContextManager
 from copy import deepcopy
 import json
-from typing import Any
+from typing import Any, Literal
 
 from openai_codex import ApprovalMode, Codex, Sandbox
 from pydantic import BaseModel, ConfigDict, Field
@@ -76,17 +76,78 @@ class _SemanticProviderProductionProposal(SemanticProductionProposal):
         return SemanticProductionProposal.model_validate(self.model_dump())
 
 
+class _SemanticProviderResolvedDisposition(BaseModel):
+    """Wire shape for a semantic result with no governed attention boundary."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    state: Literal["RESOLVED"]
+    authority_assessment: Literal[SteeringAuthorityAssessment.WITHIN_AUTHORITY]
+    unresolved_questions: tuple[str, ...] = Field(max_length=0)
+    human_attention_recommendation: None
+    completion_claimed: bool
+
+
+class _SemanticProviderUnresolvedDisposition(BaseModel):
+    """Wire shape for an explicit unresolved semantic question."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    state: Literal["UNRESOLVED"]
+    authority_assessment: Literal[
+        SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+        SteeringAuthorityAssessment.UNCERTAIN,
+    ]
+    unresolved_questions: tuple[str, ...] = Field(min_length=1)
+    human_attention_recommendation: str = Field(min_length=1)
+    completion_claimed: Literal[False]
+
+
+class _SemanticProviderAuthorityExpansionDisposition(BaseModel):
+    """Wire shape for a proposed direction outside admitted Work authority."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    state: Literal["AUTHORITY_EXPANSION"]
+    authority_assessment: Literal[
+        SteeringAuthorityAssessment.EXPANDS_AUTHORITY
+    ]
+    unresolved_questions: tuple[str, ...]
+    human_attention_recommendation: str = Field(min_length=1)
+    completion_claimed: Literal[False]
+
+
+_SemanticProviderDisposition = (
+    _SemanticProviderResolvedDisposition
+    | _SemanticProviderUnresolvedDisposition
+    | _SemanticProviderAuthorityExpansionDisposition
+)
+
+
 class _SemanticProviderPayload(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     bounded_summary: str
     decisions: tuple[str, ...]
     derived_constraints: tuple[str, ...]
-    unresolved_questions: tuple[str, ...]
-    authority_assessment: SteeringAuthorityAssessment
-    human_attention_recommendation: str | None
     proposed_production: _SemanticProviderProductionProposal | None
-    completion_claimed: bool
+    disposition: _SemanticProviderDisposition
+
+    @property
+    def unresolved_questions(self) -> tuple[str, ...]:
+        return self.disposition.unresolved_questions
+
+    @property
+    def authority_assessment(self) -> SteeringAuthorityAssessment:
+        return self.disposition.authority_assessment
+
+    @property
+    def human_attention_recommendation(self) -> str | None:
+        return self.disposition.human_attention_recommendation
+
+    @property
+    def completion_claimed(self) -> bool:
+        return self.disposition.completion_claimed
 
     def domain_production_proposal(self) -> SemanticProductionProposal | None:
         """Convert the strict wire proposal into the existing domain contract."""
@@ -206,12 +267,18 @@ class CodexSdkSemanticStepCapability:
             "repository tree, and bounded context. Return JSON only, with exactly these "
             "fields: bounded_summary (string); decisions (non-empty string array); "
             "derived_constraints (array containing only already admitted constraints); "
-            "unresolved_questions (string array); authority_assessment "
-            "(WITHIN_AUTHORITY, UNCERTAIN, or EXPANDS_AUTHORITY); "
-            "human_attention_recommendation (string or null); proposed_production "
+            "proposed_production "
             "(null, or a typed object with target_kind, objective, artifact_targets, "
             "code_targets, allowed_areas, forbidden_areas, verification_expectation); "
-            "completion_claimed (boolean). For REFINE, proposed_production must be null. "
+            "disposition (exactly one schema-selected object). disposition RESOLVED "
+            "requires authority_assessment WITHIN_AUTHORITY, unresolved_questions [], "
+            "human_attention_recommendation null, and a boolean completion_claimed. "
+            "disposition UNRESOLVED requires authority_assessment WITHIN_AUTHORITY or "
+            "UNCERTAIN, at least one unresolved question, a non-empty Human "
+            "recommendation, and completion_claimed false. disposition "
+            "AUTHORITY_EXPANSION requires authority_assessment EXPANDS_AUTHORITY, a "
+            "non-empty Human recommendation, and completion_claimed false. For REFINE, "
+            "proposed_production must be null. "
             "For proposed production, target_kind must be exactly DOCUMENTATION_WORK or "
             "CODE_WORK. DOCUMENTATION_WORK uses exactly one artifact_targets object with "
             "repository-relative path and CREATE or UPDATE operation; CODE_WORK leaves "
@@ -221,8 +288,9 @@ class CodexSdkSemanticStepCapability:
             "propose production but never authorizes it. If an exact target or bounded area "
             "is not supported by the supplied Reality, record the uncertainty instead of "
             "fabricating a path. "
-            "If uncertainty or authority expansion exists, provide a Human recommendation "
-            "and do not claim completion. Do not treat your prose as authority.\n\n"
+            "Select UNRESOLVED or AUTHORITY_EXPANSION whenever uncertainty or authority "
+            "expansion exists; never encode an incoherent cross-field combination. Do not "
+            "treat your prose as authority.\n\n"
             "Governed SemanticStepInput:\n"
             + json.dumps(governed, ensure_ascii=False, sort_keys=True)
         )

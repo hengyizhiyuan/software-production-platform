@@ -542,6 +542,25 @@ Real Multi-turn Executor Proof](docs/evidence/mvp-spg-granularity-1b-real-provid
 evidence. The separate observability gap remains open and Core Closure is not
 declared.
 
+Long-lived Motive Dogfood #7 preserved the next exact semantic boundary. Its
+real Provider Thread/Turn completed and passed the strict Provider wire schema,
+but `SemanticStepResultCandidate` rejected an incoherent combination of
+authority assessment, unresolved questions, Human Attention recommendation,
+and completion claim. The Runtime remains immutable at `READY / DESIGN /
+STEERING_STOPPED_BLOCKED`, with zero Semantic Step Results and zero production
+facts. The bounded correction models those correlated values as three
+Provider-wire dispositions: `RESOLVED`, `UNRESOLVED`, and
+`AUTHORITY_EXPANSION`; domain and application admission rules remain unchanged.
+A fresh disposable real-Provider proof using the same target-free Motive
+semantics then passed schema admission, semantic generation, wire/domain
+validation, governed result persistence, lawful `DESIGN → PRODUCE` transition,
+Authority validation, PLAN-1B, and SPG production admission. It created one Run
+and one PWU only after PRODUCE admission, did not execute the Executor, left the
+repository clean, and created no Runtime Commit. See [Long-lived Motive Dogfood
+#7 Semantic Wire Coherence Finding](docs/evidence/dogfood/long-lived-motive-dogfood-7-semantic-wire-coherence-gap.md).
+`SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains **CONFIRMED / PARTIALLY MITIGATED
+/ OPEN**; Core Closure is not declared by this correction.
+
 ### Reality-driven Plan Steering MVP Behavioral Contract
 
 The admitted MVP contract defines a stepwise and reconstructable steering loop
