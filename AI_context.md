@@ -68,21 +68,31 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **LONG-LIVED MOTIVE DOGFOOD #8 — HISTORICAL FAILURE PRESERVED / FRESH SELF-REFINE PASS TO CANDIDATE AUTHORIZATION**
 
+**LONG-LIVED MOTIVE DOGFOOD #9 — COMPLETE MACHINE-SIDE LONG-LIVED PRODUCTION LOOP / PASS**
+
+**LONG-LIVED MOTIVE DOGFOOD #10 — HUMAN-OPERATED END-TO-END ACCEPTANCE / PASS**
+
 **MVP-CODE-1 — CLOSED / PASS**
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
 
 **MVP-VERIFY-NODE-1 — CLOSED / PASS**
 
-**MVP CORE CAPABILITY SET — FUNCTIONALLY COMPLETE**
+**WATT MVP CORE — CLOSED / PASS**
+
+**REALITY-DRIVEN PLAN STEERING MVP — CLOSED / PASS**
+
+**LONG-LIVED GOVERNED PRODUCTION LOOP — IMPLEMENTED AND PROVEN**
+
+**HUMAN-OPERATED END-TO-END ACCEPTANCE — PASS**
 
 **FIRST COMPLETE WATT GOVERNED SOFTWARE PRODUCTION LOOP — PROVEN**
 
 **MVP-E2E-1I — CLOSED / PASS**
 
-**MVP — IN PROGRESS**
+**POST-CORE PRODUCT EXPERIENCE AND DEPLOYMENT — IN PROGRESS**
 
-Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine, S2 Governed Artifact Production, S3 Completion, Verification & Candidate Governance, S4 Repository Integration & Runtime Commit, and S5 Failure / Recovery Hardening are **CLOSED / PASS**. S6 Real Codex Dogfood & FVS Closure is **IN PROGRESS**. S6-B1 remains **CLOSED / PARTIAL**. S6-B2 Dedicated Executor & Real Provider Boundary, S6-B2-A, and S6-B2-B1 are **CLOSED / PASS**. The S6-B2-B2 historical real probe remains **COMPLETE / PARTIAL** with `Provider SUCCESS + Production Reality NONE` preserved. S6-C1 and S6-C2-DB1 remain **CLOSED / PASS**. Authorization #4 created Attempt generation 1, whose Executor transport failed before any Provider Thread or Turn; Provider Outcome remains UNKNOWN and Production Reality remains NONE. S6-C2-R1, S6-C2-R2, S6-C2-R3, S6-C2-R4-A, and S6-C2-R4-B are **CLOSED / PASS**. The Windows S6-C2-R4-C full-regression Attempt remains **INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED**. Full-system R4 regression, R4-C, R4-D, and real maintenance-lineage recovery are **DEFERRED_BY_MVP**; they are not current MVP blockers. S6-C remains historically IN PROGRESS, with its Recovery Barrier preserved rather than advanced.
+Architecture Baseline remains **v0.1**. Runtime Architecture Refinement is CLOSED and Runtime Architecture Readiness is PASS. [SPG Lite Runtime Implementation Contract](docs/architecture/spg-lite-runtime-implementation-contract.md) records I1/I2/I3 CLOSED, I4 PASSED, and Coding Readiness PASS. The [FVS-1 Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md) is ADMITTED; F3-D is CLOSED and FVS-1 is **AUTHORIZED FOR CONTROLLED IMPLEMENTATION**. S1 Runtime Foundation & Persistent Spine, S2 Governed Artifact Production, S3 Completion, Verification & Candidate Governance, S4 Repository Integration & Runtime Commit, S5 Failure / Recovery Hardening, and S6 Real Codex Dogfood & FVS Closure are **CLOSED / PASS**. S6-B1 remains **CLOSED / PARTIAL**. S6-B2 Dedicated Executor & Real Provider Boundary, S6-B2-A, and S6-B2-B1 are **CLOSED / PASS**. The S6-B2-B2 historical real probe remains **COMPLETE / PARTIAL** with `Provider SUCCESS + Production Reality NONE` preserved. S6-C1 and S6-C2-DB1 remain **CLOSED / PASS**. Authorization #4 created Attempt generation 1, whose Executor transport failed before any Provider Thread or Turn; Provider Outcome remains UNKNOWN and Production Reality remains NONE. S6-C2-R1, S6-C2-R2, S6-C2-R3, S6-C2-R4-A, and S6-C2-R4-B are **CLOSED / PASS**. The Windows S6-C2-R4-C full-regression Attempt remains **INTERRUPTED — FINAL RESULT UNKNOWN / NOT RETAINED**. Full-system R4 regression, R4-C, R4-D, and real maintenance-lineage recovery are **DEFERRED_BY_MVP**; they are not current MVP blockers. The historical Recovery Barrier remains preserved rather than advanced.
 
 MVP-DOCKER-1 Attempt #1 remains historical evidence: **BLOCKED — HOST_DOCKER_UNAVAILABLE**, implementation not started, file changes 0. Attempt #2 began only after Human confirmation that Docker Desktop / Linux Engine was available.
 
@@ -164,10 +174,13 @@ without encoding either restriction as a permanent architecture limit.
 | MVP-PLAN-1A — Sequential Production Plan Foundation | NOT IMPLEMENTED — AUTHORITY BOUNDARY CONFIRMED / MULTI-PWU DEFERRED_BY_MVP |
 | MVP-PLAN-1B — Single-PWU Production Planner Intelligence Lite | CLOSED / PASS |
 | Motive / Work / Plan Concept Calibration | CLOSED / PASS |
-| Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F/1G/1H/1I/1J CLOSED / PASS; REAL PROVIDER DOGFOOD CONTINUES |
+| Reality-driven Plan Steering | MVP CLOSED / PASS — MVP-PLAN-STEER-1C through 1L CLOSED / PASS; real Provider, production, integration, completion, activation, and Human acceptance proven |
 | MVP-SPG-GRANULARITY-1A — Executor Autonomy Envelope / Attempt Granularity | BEHAVIORAL CONTRACT DEFINED / ADMITTED — ARCHITECTURE LEAD REALITY REVIEW PASS |
 | MVP-SPG-GRANULARITY-1B — Bounded Multi-turn Executor Attempt | CLOSED / PASS — FRESH REAL MULTI-TURN EXECUTOR PROOF PASS |
 | Long-lived Motive Dogfood #8 — Bounded Self-refine | HISTORICAL FAILURE PRESERVED / FRESH REAL PASS TO CANDIDATE AUTHORIZATION |
+| Long-lived Motive Dogfood #9 — Complete production loop | PASS — exact Human Authorization, Integration, Runtime Commit, VERIFY_ACCEPT, and COMPLETE |
+| Long-lived Motive Dogfood #10 — Human-operated acceptance | PASS — normal UI operation, exact Trusted Baseline activation, and bounded Human functional acceptance |
+| Watt MVP Core | CLOSED / PASS — explicit non-blocking deferrals preserved |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -200,7 +213,7 @@ without encoding either restriction as a permanent architecture limit.
 | S5-A — Recovery Classification & Reconciliation Foundation | CLOSED / PASS |
 | S5-B — Repository Integration & Runtime Commit Reconciliation | CLOSED / PASS |
 | S5-C — Execution Attempt & Workspace Recovery Hardening | CLOSED / PASS |
-| S6 — Real Codex Dogfood & FVS Closure | IN PROGRESS |
+| S6 — Real Codex Dogfood & FVS Closure | CLOSED / PASS — HISTORICAL DEFERRED R4 BARRIER PRESERVED |
 | S6-B1 — Real Codex SDK Host Integration Spike | CLOSED / PARTIAL |
 | S6-B1-R — Provider Terminal & Identity Correlation Spike | PARTIAL — LIFECYCLE CAPABILITY PROVEN / DURABLE REAL EVIDENCE INCOMPLETE |
 | S6-B1-R2 — Durable Provider Evidence Capture Hardening | CLOSED / PASS |
@@ -208,7 +221,7 @@ without encoding either restriction as a permanent architecture limit.
 | S6-B2-A — Dedicated Executor Boundary Deterministic Spike | CLOSED / PASS |
 | S6-B2-B1 — Codex Adapter Binding & Authentication Boundary Preflight | CLOSED / PASS |
 | S6-B2-B2 Historical Real Probe — Single Real Codex Through Dedicated Executor Boundary | COMPLETE / PARTIAL |
-| S6-C — Real Governed Dogfood Loop | IN PROGRESS |
+| S6-C — Real Governed Dogfood Loop | CLOSED / PASS — DOGFOOD #9/#10 |
 | S6-C1 — Real Governed Dogfood Requirement & Contract Admission | CLOSED / PASS |
 | S6-C2-HR1R — Bounded Environment Sync Recovery | CLOSED / PASS |
 | S6-C2-HR1 — Windows Execution-Host Repair | CLOSED / PASS |
@@ -364,7 +377,7 @@ what should happen next given the objective and current Reality; SPG answers
 how an admitted engineering-production step is executed, observed, verified,
 and committed truthfully.
 
-**Reality-driven Plan Steering is IN PROGRESS.** MVP-PLAN-STEER-1C implements
+**Reality-driven Plan Steering MVP is CLOSED / PASS.** MVP-PLAN-STEER-1C implements
 the provider-neutral persisted Steering Truth Spine and reconstruction query.
 MVP-PLAN-STEER-1D adds authoritative Plan Frame assembly, provider-neutral
 Next-Step evaluation/admission, stale-basis and authority guards, and the five
@@ -374,9 +387,10 @@ per-cycle current-baseline binding, trusted Step-close evidence, and separates
 Steering Work completion from a single Runtime Commit. MVP-PLAN-STEER-1F adds
 the bounded process-local auto-continue driver, typed stops, restart
 reconstruction, ORCH outcome wakeups, and Plan-level API observability without
-owning new progression truth. The capability is **implemented for MVP
-behavior**, with 1F **CLOSED / PASS** after Architecture Lead Reality Review;
-long-lived real Dogfood/core closure remains pending. Advanced autonomous
+owning new progression truth. Slices 1G through 1L close long-lived admission,
+automatic activation, governed semantic execution, and strict real-Provider
+compatibility. Dogfood #9/#10 prove the complete production loop and
+Human-operated acceptance. Advanced autonomous
 replanning, multi-PWU orchestration, optimization, and unattended continuous
 production remain separable deferred capabilities. See
 [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md).
@@ -398,11 +412,12 @@ provider, session, host, or environment changes. Identical wording is not
 required, but material divergence without changed Reality must be detectable
 and explainable. New model output alone is not New Reality.
 
-The capability is **IMPLEMENTED FOR MVP BEHAVIOR** through the closed
+The capability is **MVP CLOSED / PASS** through the closed
 MVP-PLAN-STEER-1C Truth Spine, the closed MVP-PLAN-STEER-1D decision layer, the
 closed MVP-PLAN-STEER-1E production bridge, and MVP-PLAN-STEER-1F bounded
-automatic progression, now **CLOSED / PASS** after Architecture Lead Reality
-Review. Long-lived real Dogfood/core closure remains pending. PLAN-1B
+automatic progression, and the closed 1G through 1L admission/semantic Provider
+Slices. Dogfood #9/#10 close real long-lived execution and Human acceptance.
+PLAN-1B
 remains CLOSED / PASS for one Single-PWU production-step plan and remains
 distinct from long-lived Plan Steering. See
 [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md).
@@ -442,7 +457,8 @@ Semantic Step Results, and prevents semantic Step closure without that exact
 completion evidence. `DESIGN` may propose a production contract, but Runtime
 creation remains deferred to the existing authority-checked PLAN-1B/SPG
 boundary. 1I is **CLOSED / PASS** after focused validation and Architecture Lead
-Reality Review; real Provider Dogfood and Core Closure remain pending.
+Reality Review. At that checkpoint real Provider Dogfood and Core Closure were
+still pending; subsequent 1J–1L and Dogfood #9/#10 evidence closes them.
 See [Long-lived Motive Dogfood #3 Semantic Design Execution Finding](docs/evidence/dogfood/long-lived-motive-dogfood-3-semantic-design-execution-gap.md).
 
 Long-lived Motive Dogfood #4 proved **Work Admission PASS / Steering Activation
@@ -521,8 +537,8 @@ remain the preferred MVP boundary, while independent Observation, Completion,
 Verification, Candidate governance, and Runtime Commit remain external. At the
 1A contract checkpoint the implementation had not started and SPG was not
 redesigned. The separate
-`SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains **CONFIRMED / PARTIALLY MITIGATED
-/ OPEN**. Core Closure is not declared.
+At the 1A contract checkpoint, `SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remained
+**CONFIRMED / PARTIALLY MITIGATED / OPEN**, and Core Closure was not declared.
 
 MVP-SPG-GRANULARITY-1B implements the admitted bounded calibration behind the
 existing Executor capability: one PWU and Attempt retain one outer Dispatch and
@@ -542,8 +558,8 @@ and Verification only after `RESULT_READY`. See [MVP-SPG-GRANULARITY-1B Focused
 Evidence](docs/evidence/mvp-spg-granularity-1b-focused-validation.md) and [Fresh
 Real Multi-turn Executor Proof](docs/evidence/mvp-spg-granularity-1b-real-provider-proof.md).
 `SPG_EXECUTION_GRANULARITY_CALIBRATION_REQUIRED` is resolved by that real
-evidence. The separate observability gap remains open and Core Closure is not
-declared.
+evidence. That checkpoint did not itself declare Core Closure; the separate
+observability gap remains a non-blocking post-Core Product Experience item.
 
 Long-lived Motive Dogfood #7 preserved the next exact semantic boundary. Its
 real Provider Thread/Turn completed and passed the strict Provider wire schema,
@@ -561,8 +577,9 @@ Authority validation, PLAN-1B, and SPG production admission. It created one Run
 and one PWU only after PRODUCE admission, did not execute the Executor, left the
 repository clean, and created no Runtime Commit. See [Long-lived Motive Dogfood
 #7 Semantic Wire Coherence Finding](docs/evidence/dogfood/long-lived-motive-dogfood-7-semantic-wire-coherence-gap.md).
-`SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains **CONFIRMED / PARTIALLY MITIGATED
-/ OPEN**; Core Closure is not declared by this correction.
+At the Dogfood #7 correction checkpoint,
+`SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remained **CONFIRMED / PARTIALLY
+MITIGATED / OPEN** and Core Closure was not declared by that correction.
 
 Long-lived Motive Dogfood #8 preserved a cross-contract production-scope
 failure: the strict semantic wire admitted root-wide `tests/**`, while the
@@ -584,6 +601,24 @@ Dogfood #8 Bounded Self-refine Closure](docs/evidence/dogfood/long-lived-motive-
 Duration-aware PWU sizing / capacity-aware decomposition remains a deferred
 design calibration topic and is not part of this closure checkpoint.
 
+Long-lived Motive Dogfood #9 proves the complete machine-side long-lived
+production loop: real governed DESIGN, PRODUCE, PLAN-1B, SPG, bounded Executor,
+independent Completion/Verification, sealed Candidate, exact Human Candidate
+Authorization, Integration Effect, Runtime Commit, `VERIFY_ACCEPT`, and
+`COMPLETE`. The exact trusted commit is
+`fc1aa7b31bd5c57b133931530d3fcffbf9c4d805`. See [Dogfood #9 Production Loop
+Closure](docs/evidence/dogfood/long-lived-motive-dogfood-9-production-loop-closure.md).
+
+Long-lived Motive Dogfood #10 proves Human-operated end-to-end acceptance via
+the normal product UI and exact active-Runtime convergence at commit
+`44744223cb5fffa03460e55aac8721d0e77466f6`, tree
+`eda786bd2bd289d43f118aa02be3e2c876090eae`. The Human accepted the bounded
+development-stage observability experience. `SEMANTIC_EXECUTION_OBSERVABILITY_GAP`
+remains **CONFIRMED / PARTIALLY MITIGATED / NON-BLOCKING**, specifically for
+post-completion execution-history visibility. See [Dogfood #10 Human
+Acceptance](docs/evidence/dogfood/long-lived-motive-dogfood-10-human-acceptance.md)
+and [Watt MVP Core Closure](docs/evidence/mvp-core-closure.md).
+
 ### Reality-driven Plan Steering MVP Behavioral Contract
 
 The admitted MVP contract defines a stepwise and reconstructable steering loop
@@ -595,9 +630,11 @@ rationale. Plan owns progression state and rationale while referenced governed
 Reality retains its existing Truth ownership. Step transition, progressive
 elaboration, and material Plan revision remain distinct. The persisted Truth
 Spine is **CLOSED / PASS**. The 1D Plan Frame, decision admission, and bounded
-Steering Attention layer is **CLOSED / PASS**. The 1F bounded auto-continue
-driver is also **CLOSED / PASS** after Architecture Lead Reality Review;
-long-lived real Dogfood/core closure remains pending. See
+Steering Attention layer is **CLOSED / PASS**. Slices 1E through 1L close the
+production bridge, bounded auto-continue loop, long-lived admission, governed
+semantic execution, and strict Provider contract. Dogfood #9/#10 close the
+real long-lived loop and Human acceptance; Reality-driven Plan Steering MVP is
+**CLOSED / PASS**. See
 [Reality-driven Plan Steering MVP Behavioral Contract](docs/architecture/reality-driven-plan-steering-mvp-contract.md).
 
 ### Interpretation Externalization / Multimodal Alignment
@@ -701,6 +738,9 @@ The current system-level architecture baseline is:
 - [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md)
 - [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md)
 - [Reality-driven Plan Steering MVP Behavioral Contract](docs/architecture/reality-driven-plan-steering-mvp-contract.md)
+- [Long-lived Motive Dogfood #9 — Complete Production Loop](docs/evidence/dogfood/long-lived-motive-dogfood-9-production-loop-closure.md)
+- [Long-lived Motive Dogfood #10 — Human-operated Acceptance](docs/evidence/dogfood/long-lived-motive-dogfood-10-human-acceptance.md)
+- [Watt MVP Core Closure](docs/evidence/mvp-core-closure.md)
 - [Interpretation Externalization and Multimodal Alignment](docs/architecture/interpretation-externalization-and-multimodal-alignment.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.

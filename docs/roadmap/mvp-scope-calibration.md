@@ -6,9 +6,11 @@ This document is the authoritative MVP delivery calibration under Architecture B
 
 It changes roadmap priority, not the confirmed Runtime semantics or ownership boundaries. Existing R4-A and R4-B implementation remains intact. No product feature, Provider execution, production migration, Runtime mutation, or deployment is introduced by this document.
 
-The immediate priority is:
+The post-Core priority is:
 
-> Complete a usable SPG / TNGA MVP with a functional Web UI, integrate and debug it in the local Docker development environment, deploy the completed MVP to a stable Linux development server, and only then begin systematic self-dogfooding.
+> Preserve the closed MVP Core, calibrate duration/capacity architecture,
+> improve the necessary Product Experience, establish deployment readiness,
+> and then deploy and promote on Linux through separately admitted work.
 
 The MVP development workflow remains Human Governor + ChatGPT Architecture Lead + Codex repo-grounded Executor.
 
@@ -45,9 +47,9 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Web UI | Same-origin FastAPI-served Goal / Work Control Room implements intake, refinement/admission, one-step advance, Attention, and truthful Work Result views | MVP CORE / CLOSED / PASS |
 | Motive / Work / Engineering Scope product model | Motive is the product-facing concept; Work is the current internal governed representation; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / CONCEPT CALIBRATION CLOSED / PASS; IMPLEMENTATION REMAINS WORK-NAMED |
 | Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI; it is a narrow production-step plan, not full lifecycle steering | MVP CORE / PLAN-1B CLOSED / PASS |
-| [Reality-driven Plan Steering](../architecture/reality-driven-plan-steering-mvp-contract.md) | 1C/1D/1E/1F/1G/1H/1I/1J are CLOSED / PASS. 1J adds schema-constrained semantic Provider output and a partial stopped/blocked observability mitigation. Real Provider Dogfood continues; the broader observability gap and core closure remain pending. | MATERIAL MVP CORE PRODUCT CAPABILITY / IMPLEMENTED FOR MVP BEHAVIOR |
+| [Reality-driven Plan Steering](../architecture/reality-driven-plan-steering-mvp-contract.md) | 1C through 1L are CLOSED / PASS. Dogfood #9 proves the complete machine-side long-lived loop; Dogfood #10 proves Human-operated acceptance and exact Runtime activation. The remaining observability gap is explicit and non-blocking. | MATERIAL MVP CORE PRODUCT CAPABILITY / MVP CLOSED / PASS |
 | [Interpretation Externalization / Multimodal Alignment](../architecture/interpretation-externalization-and-multimodal-alignment.md) | Externalize Watt's reconstructed Motive interpretation at the lowest sufficient representation cost so material semantic mismatch can be calibrated | FUTURE CORE DIFFERENTIATION CAPABILITY / NOT CURRENT MVP SCOPE / NOT YET DESIGNED FOR IMPLEMENTATION |
-| Production state view | Work, Goal, Attention, and Work Result projections derive from authoritative Runtime facts | MVP CORE / IMPLEMENTED; real Provider loop remains separate |
+| Production state view | Work, Goal, Attention, Steering, progress, and Work Result projections derive from authoritative Runtime facts | MVP CORE / CLOSED / PASS; real Provider loop and Human acceptance proven |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
 | Trusted Baseline / Active Runtime convergence | Local Docker startup safely synchronizes the exact Trusted checkout, activates Python and static assets from one revision, and exposes explicit activation state/fingerprints | MVP GUARDRAIL / CLOSED / PASS |
 | Real local governed Codex E2E | The first real Attempt is preserved as BLOCKED / RECOVERABLE with UNKNOWN Provider Outcome, NONE Production Reality, and 0 / 0 Thread/Turn; container-native Codex state and truthful blocked projection are CLOSED / PASS | MVP CORE / BLOCKED HISTORY PRESERVED; E2E-1B CLOSED / PASS |
@@ -111,12 +113,15 @@ DEFERRED_BY_MVP means preserved and intentionally removed from the immediate cri
 | Real R4-D maintenance recovery execution | Not executed | Historical Windows lineage is archived rather than continued | Old Runtime remains blocked historical evidence | No lineage mutation; later explicit Authority can bind a qualified target | Linux promotion PASS and specific recovery value |
 | Cross-host active Runtime handoff | Not implemented | New Linux MVP Runtime can start cleanly | Historical Windows Runtime is not continued on Linux | Runtime identity and export/import boundaries remain separable | Need to continue active work across hosts |
 | Execution supervision, heartbeat, and stall handling | Recovery/observation semantics exist; no complete supervisor | Serial MVP can use Human monitoring | Stalls require manual inspection and intervention | Attempt identity, state, fencing, observation, and issue boundaries remain | Repeated unattended long-running executions |
+| Semantic execution and post-completion history observability | Current-stage and stopped/blocked projection is implemented; durable post-completion execution history remains limited | Human accepted the bounded development-stage experience | Completed Work history is less legible than live progress | Persisted Steering and production facts remain authoritative | Product Experience work is separately admitted |
+| Verification Runtime coverage | Source-level Verification, Runtime activation, and Human acceptance are distinct; browser-served coverage is incomplete | Dogfood #10 supplied bounded Human acceptance | Some served-Runtime behavior remains outside automated Verification | Activation fingerprints and acceptance evidence remain separate | Release/promotion coverage requires it |
 | Host capacity leasing / heavy-job scheduler | Not implemented | One active Run and serial execution are sufficient | Human coordinates heavy jobs | Capability/Attempt identity does not assume one scheduler | Concurrent heavy workloads appear |
 | Automatic model / capability routing | Not implemented; static binding exists | One Provider path is enough | Manual Provider selection and no optimization | Capability contracts and Runtime Profile remain provider-neutral | Multiple proven Providers require governed selection |
 | Token / quota / capacity governance | Not implemented | Not required for first usable product | Operator monitors limits manually | Usage may later attach to Provider/Attempt evidence | Material cost, quota, or starvation incidents |
 | Full Continuous Managed Production | Architecture direction only | MVP is user-initiated and Human-governed | No unattended continuous production | Production loop and state contracts remain durable | Stable self-dogfood demonstrates bounded autonomy need |
-| Advanced autonomous replanning / supersession | Advanced automation is not implemented; this is separate from the core Reality-driven Plan Steering gap | Core steering must be designed first; optimization and autonomous supersession are not required initially | Complex autonomous replans remain Human-governed | Plan revisions, supersession, and Authority boundaries remain | Core steering is proven and repeated Reality requires advanced automation |
+| Advanced autonomous replanning / supersession | Advanced automation is not implemented; bounded Reality-driven Plan Steering MVP is closed | Optimization and autonomous supersession are not required for the closed Core | Complex autonomous replans remain Human-governed | Plan revisions, supersession, and Authority boundaries remain | Repeated Reality requires advanced automation and a separate contract is admitted |
 | Multi-PWU sequential production | PLAN-1A not implemented; Authority review confirmed exact per-PWU Candidate authority and successor Baseline rebinding gap | Structured single-PWU planning closes the current execution need | Independently governed production steps must be narrowed or deferred; the encompassing Work need not be redefined as atomic | Fit classification preserves `MULTI_PWU_REQUIRED`; no successor authority is fabricated | Repeated real Work cannot safely progress through independently governed PWUs and architecture is separately admitted |
+| Duration-aware PWU sizing / capacity-aware decomposition | Working architecture topic only | Current bounded PWU/Attempt loop is proven | Human and Planner use present fit judgment | Historical duration and capacity policy may inform a future envelope without weakening Authority | Separately admitted architecture calibration |
 | Multi-project concurrent production | Not implemented | Single/limited project is enough | No portfolio concurrency | Project/repository identity remains explicit | More than one active project is operationally required |
 | Executor fleet / remote workers | Not implemented | One host-side Executor is acceptable | No failover or workload distribution | Executor contract remains remote-capable and provider-neutral | Throughput or isolation requires multiple workers |
 | Full Guardian integration | Basic Verification and extension point exist | Basic Verification satisfies MVP | Human accepts reduced assurance depth | Assurance contract and ownership remain independent | Regulated/high-risk work or insufficient verification |
@@ -182,7 +187,7 @@ Windows full regression is not required to close every intermediate development 
 - **Windows workstation:** temporary development host only.
 - **Windows-specific hardening:** an MVP blocker only when it affects Docker-integrated MVP use.
 - **Linux development server:** deployment target after local MVP completion.
-- **Systematic TNGA self-dogfood:** begins only after the usable MVP is deployed and promotion-validated on the stable Linux server.
+- **Self-dogfood:** Dogfood #9/#10 already prove machine and Human-operated Core loops; systematic post-Core use remains governed separately from Linux promotion.
 - **Provider placement:** a host-side Executor is temporarily acceptable if the product boundary stays clean and the Docker-integrated MVP is reliable. Complete containerization of every Provider component is not required.
 
 ## 10. MVP Web UI Boundary
@@ -233,12 +238,13 @@ an evidence-backed follow-up rather than hidden success.
 8. **Single-PWU Production Planner Intelligence Lite** — CLOSED / PASS; multi-PWU production remains deferred.
 9. **Bounded Single-PWU Code Work** — CLOSED / PASS; adds Human-visible bounded change authority and typed contract-driven code Verification without changing the one-PWU model.
 10. **Trusted Baseline / Active Runtime Convergence Lite** — CLOSED / PASS; Architecture Lead Reality Review and Human Composer acceptance passed. The first trusted Watt code self-dogfood loop is proven.
-11. **Reality-driven Plan Steering** — IMPLEMENTED FOR MVP BEHAVIOR. 1C provides the closed persisted Steering Truth Spine; 1D implements Plan Frame assembly, provider-neutral decision admission, and bounded MVP Steering Attention; 1E is CLOSED / PASS for the authority-checked PRODUCE-Step bridge, independent one-PWU production cycles, trusted production Step closure, and Steering Work-completion separation. 1F is CLOSED / PASS after Architecture Lead Reality Review and adds bounded automatic progression, ORCH outcome reassessment, restart reconstruction, typed stops, and Plan-level observability. 1G is CLOSED / PASS and separates long-lived Work-envelope admission from exact `PRODUCE` admission without changing legacy immediate-production behavior. 1H is CLOSED / PASS and converges Work approval entry points on automatic, restart-safe Steering bootstrap/driver scheduling. 1I is CLOSED / PASS and adds provider-neutral governed semantic DESIGN/REFINE execution. 1J is CLOSED / PASS and binds real semantic generation to the existing typed payload schema while retaining fail-closed admission; its stopped/blocked projection only partially mitigates the broader observability gap. Real Provider Dogfood continues; extended Human Attention remains separately gated.
-12. **MVP closure and promotion validation** — risk-based affected evidence plus full deterministic regression at the justified release gate.
-13. **Linux server deployment** — bootstrap from an exact accepted candidate.
-14. **Linux promotion validation** — run the server promotion gate and operational checks.
-15. **Begin systematic self-dogfood** — only after a usable promoted MVP exists.
-16. **Phase-2 hardening** — activate deferred items from evidence and triggers, not architectural interest alone.
+11. **Reality-driven Plan Steering** — MVP CLOSED / PASS. Slices 1C through 1L close the reconstructable truth spine, governed decisions and semantic execution, automatic progression, exact SPG production bridge, strict real-Provider contract, and long-lived completion semantics. Dogfood #9 proves the machine-side production loop through Runtime Commit and COMPLETE; Dogfood #10 proves Human-operated acceptance and exact activation. Extended Human Attention and Product Experience remain separately gated.
+12. **Watt MVP Core Closure** — CLOSED / PASS with explicit non-blocking deferrals; see [closure evidence](../evidence/mvp-core-closure.md).
+13. **Duration/capacity architecture calibration** — separately admit if selected; do not reopen Core.
+14. **Necessary UI / Product Experience work** — improve observability and history within an admitted post-Core boundary.
+15. **Deployment readiness and promotion validation** — risk-based gates for the accepted checkpoint.
+16. **Linux server deployment and promotion** — bootstrap and validate from an exact accepted candidate.
+17. **Phase-2 hardening and systematic post-Core dogfood** — activate from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
 
@@ -263,7 +269,8 @@ Robustness, recovery, scale, optimization, and security work does not enter the 
 ## 13. Next Slice Selection Boundary
 
 Architecture Lead selects each concrete slice separately. The bounded
-Reality-driven Plan Steering MVP behavioral contract is now DEFINED / ADMITTED.
+Reality-driven Plan Steering MVP behavioral contract and Watt MVP Core are now
+**CLOSED / PASS**.
 Any next implementation-contract or implementation-slice work requires
 separate Architecture Lead admission. This calibration does not authorize
 implementation and does not introduce Project Governor, Initiative, multi-PWU

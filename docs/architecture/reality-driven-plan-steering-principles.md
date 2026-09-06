@@ -4,7 +4,7 @@
 
 **Foundational Architecture / Product Principles: RECORDED / ADMITTED**
 
-**Reality-driven Plan Steering: IMPLEMENTED FOR MVP BEHAVIOR — CORE CLOSURE REVIEW PENDING**
+**Reality-driven Plan Steering: MVP CLOSED / PASS**
 
 **MVP-PLAN-STEER-1C Steering Truth Spine: CLOSED / PASS**
 
@@ -14,14 +14,17 @@
 
 **MVP-PLAN-STEER-1F Bounded Auto-Continue & Observability: CLOSED / PASS**
 
+**MVP-PLAN-STEER-1G through 1L: CLOSED / PASS**
+
 This record builds on the
 [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
 It defines product intent and normative architecture requirements. The
 1C implements the persisted Steering Truth Spine. The closed 1D Slice
 assembles governed Plan Frames and admits provider-neutral Steering
-decisions, including bounded Human Attention semantics; neither Slice
-implements automatic progression, SPG bridging, or additional production
-authority.
+decisions, including bounded Human Attention semantics. Later closed Slices
+1E through 1L add the bounded automatic loop, exact production bridge,
+long-lived admission, governed semantic execution, and strict Provider wire
+compatibility without adding production authority.
 
 The admitted bounded MVP behavior is defined in the
 [Reality-driven Plan Steering MVP Behavioral Contract](reality-driven-plan-steering-mvp-contract.md).
@@ -322,20 +325,20 @@ similar principles.
 ```text
 Reality-driven Plan Steering
     MATERIAL MVP CORE PRODUCT CAPABILITY
-    IMPLEMENTED FOR MVP BEHAVIOR
+    MVP CLOSED / PASS
     MVP BEHAVIORAL CONTRACT DEFINED / ADMITTED
-    LONG-LIVED REAL DOGFOOD / CORE CLOSURE REVIEW PENDING
+    REAL LONG-LIVED DOGFOOD AND HUMAN ACCEPTANCE PASS
 
 MVP-PLAN-1B
     CLOSED / PASS
     Single-PWU Production Planner Lite only
 ```
 
-PLAN-1B alone does not satisfy long-lived Plan Steering. The bounded 1F driver
-now reconstructs persisted Reality, takes one semantic action per iteration,
-delegates production cycles to ORCH, stops on typed boundaries, and exposes a
-Plan-level projection. Advanced replanning and future Attention categories
-remain outside this MVP behavior.
+PLAN-1B alone does not satisfy long-lived Plan Steering. The closed bounded
+implementation reconstructs persisted Reality, executes governed semantic
+Steps, delegates exact production cycles to ORCH/SPG, stops on typed
+boundaries, and exposes a Plan-level projection. Advanced replanning and future
+Attention categories remain outside this MVP behavior.
 
 ## Reserved Next-stage Design Questions
 

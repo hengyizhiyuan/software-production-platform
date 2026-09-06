@@ -117,9 +117,9 @@ world. It is not promoted to a new first-class production object, aggregate
 root, or mandatory parent above Work. No Project or Initiative domain entity is
 introduced.
 
-## Remaining Core Capability: Reality-driven Plan Steering
+## Closed Core Capability: Reality-driven Plan Steering
 
-**Status: NOT YET IMPLEMENTED — MATERIAL CORE PRODUCT CAPABILITY**
+**Status: MVP CLOSED / PASS — MATERIAL CORE PRODUCT CAPABILITY**
 
 Reality-driven Plan Steering means AI continuously guides a long-lived Work by:
 
@@ -129,18 +129,20 @@ Reality-driven Plan Steering means AI continuously guides a long-lived Work by:
 - revising the Plan as new Reality appears;
 - preserving the Motive, authority boundaries, evidence, and outcome direction.
 
-This is not Phase-2 hardening. It is a remaining core product capability.
+This was not Phase-2 hardening. It is now a closed MVP Core capability, proven
+through real long-lived Provider, production, Human Authority, integration,
+Runtime Commit, activation, and Human-operated acceptance evidence.
 Advanced autonomous replanning, multi-PWU orchestration, optimization,
 supersession automation, and unattended continuous production may remain
-separately deferred; their deferral does not classify the core steering gap as
-optional hardening.
+separately deferred without reopening the closed MVP boundary.
 
 Its higher-order product thesis and normative continuity, reconstructability,
 equivalence, provenance, and anti-drift requirements are recorded in
 [Reality-driven Plan Steering — Foundational Principles](reality-driven-plan-steering-principles.md).
 Its bounded admitted MVP behavior is recorded in the
 [Reality-driven Plan Steering MVP Behavioral Contract](reality-driven-plan-steering-mvp-contract.md).
-Implementation remains not yet started.
+The bounded MVP implementation and closure evidence are recorded in the linked
+contract and [Watt MVP Core Closure](../evidence/mvp-core-closure.md).
 
 A distinct future alignment capability is recorded in
 [Interpretation Externalization and Multimodal Alignment](interpretation-externalization-and-multimodal-alignment.md).

@@ -32,8 +32,10 @@ unit. Internal technical iteration belongs inside one continuous Attempt while
 the admitted envelope remains valid. Independent Verification remains external.
 
 1A defines the behavioral contract; 1B implements its bounded Slice behind the
-existing Executor capability. Fresh real Provider evidence now closes the
-calibration Finding without declaring MVP Core Closure. See [Fresh Real
+existing Executor capability. Fresh real Provider evidence closed the
+calibration Finding; that checkpoint did not itself declare MVP Core Closure.
+Subsequent Dogfood #9/#10 evidence closes the Core without changing this
+contract. See [Fresh Real
 Multi-turn Executor Proof](../evidence/mvp-spg-granularity-1b-real-provider-proof.md).
 
 ## 2. PWU Semantics
@@ -470,9 +472,9 @@ MVP-SPG-GRANULARITY-1B
     FRESH REAL MULTI-TURN EXECUTOR PROOF PASS
 ```
 
-MVP Core Closure is not declared. No existing historical Dogfood, Runtime,
-Attempt, Provider evidence, or trusted Baseline is reclassified by this
-contract.
+This contract did not itself declare MVP Core Closure. The later
+[Watt MVP Core Closure](../evidence/mvp-core-closure.md) does not reclassify any
+historical Dogfood, Runtime, Attempt, Provider evidence, or Trusted Baseline.
 
 ## 18. Risks / STOP Conditions
 

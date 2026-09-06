@@ -5,13 +5,13 @@
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
-    IMPLEMENTED FOR MVP BEHAVIOR
-    LONG-LIVED REAL DOGFOOD / CORE CLOSURE REVIEW PENDING
+    MVP CLOSED / PASS
+    REAL LONG-LIVED DOGFOOD / HUMAN ACCEPTANCE PASS
     MATERIAL MVP CORE PRODUCT CAPABILITY
 ```
 
 This contract remains the behavioral Source of Truth. MVP-PLAN-STEER-1C
-through 1F implement its bounded MVP behavior without defining a final general
+through 1L implement its bounded MVP behavior without defining a final general
 planning schema or reopening PLAN-1B and SPG authority semantics.
 
 It specializes the admitted
@@ -700,13 +700,15 @@ The closure preserves `SPG_EXECUTION_GRANULARITY_CALIBRATION_REQUIRED` for
 later architecture calibration, with the working hypothesis: govern the
 execution envelope, not every Executor move. No SPG redesign or granularity
 change is admitted by 1L. `SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains
-**CONFIRMED / PARTIALLY MITIGATED / OPEN**, and Core Closure is not declared.
+**CONFIRMED / PARTIALLY MITIGATED / NON-BLOCKING**. Subsequent Dogfood #9 and
+#10 evidence closes the MVP Core while preserving this post-Core Product
+Experience deferral. See [Watt MVP Core Closure](../evidence/mvp-core-closure.md).
 
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED
-    IMPLEMENTED FOR MVP BEHAVIOR
-    LONG-LIVED REAL DOGFOOD / CORE CLOSURE REVIEW PENDING
+    MVP CLOSED / PASS
+    REAL LONG-LIVED DOGFOOD / HUMAN ACCEPTANCE PASS
     MATERIAL MVP CORE PRODUCT CAPABILITY
 
 MVP-PLAN-STEER-1C

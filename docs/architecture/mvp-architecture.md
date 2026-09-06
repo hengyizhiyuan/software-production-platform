@@ -49,9 +49,10 @@ A conceptual Plan may span a long-lived Work and repeatedly choose the next
 appropriate refinement, design, Human-decision, or governed-production step
 from current Reality. The current PLAN-1B single-PWU proposal implements only a
 narrow subset. Reality-driven Plan Steering remains a material core capability
-and is now in progress through the provider-neutral persisted Steering Truth
-Spine plus Plan Frame and Steering decision admission; automatic progression
-and SPG bridging are not yet implemented.
+and is **MVP CLOSED / PASS**: persisted Steering truth, governed semantic
+DESIGN/REFINE, automatic progression, the authority-checked SPG bridge,
+independent Verification, exact Human Candidate Authorization, Runtime Commit,
+activation, and Human-operated acceptance are implemented and proven.
 The detailed boundary is recorded in
 [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md).
 
