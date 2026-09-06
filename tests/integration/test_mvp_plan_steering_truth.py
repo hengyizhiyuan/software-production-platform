@@ -1213,6 +1213,77 @@ def test_steer_spg_failed_second_cycle_stays_open_without_retry(
     assert executor.dispatch_count == 1
 
 
+def test_steering_reactivates_bounded_orch_without_human_continue(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    original_works, work, _baseline = admitted_work
+    _create_steering_plan(
+        postgres_database,
+        work.work_id,
+        steps=(
+            SteeringStepSpec(
+                type=SteeringStepType.PRODUCE,
+                objective="Produce the admitted bounded capability",
+                completion_condition="The bounded production result is trusted",
+                state=SteeringStepState.CURRENT,
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.VERIFY_ACCEPT,
+                objective="Accept the persisted verification evidence",
+                completion_condition="Required persisted evidence is accepted",
+            ),
+            SteeringStepSpec(
+                type=SteeringStepType.COMPLETE,
+                objective="Close the long-lived Work",
+                completion_condition="The Work outcome is satisfied",
+            ),
+        ),
+    )
+    executor = DeterministicTestExecutor(
+        DeterministicExecutionSpecification(
+            operations=(
+                DeterministicFileOperation(
+                    operation=DeterministicFileOperationType.CREATE,
+                    repository_relative_path="docs/steering-result.md",
+                    content="# Bounded activation result\n",
+                ),
+            ),
+            reported_outcome=ProviderReportedOutcome.SUCCESS,
+            summary="one production attempt across bounded ORCH activations",
+        )
+    )
+    works = WorkApplicationService(
+        postgres_database,
+        workspace_root=original_works.workspace_root,
+        executor=executor,
+        verifier=DeterministicVerificationProvider(
+            {"Verify the admitted artifact": VerificationResultValue.PASS}
+        ),
+    )
+    orchestrator = ProductionOrchestrator(
+        works,
+        max_automatic_transitions=1,
+    )
+    driver = PlanSteeringDriver(postgres_database, works, orchestrator)
+    try:
+        started = driver.activate(work.work_id)
+        assert started.stop_reason is SteeringDriverStopReason.PRODUCTION_RUNNING
+
+        def waiting_at_candidate_authority() -> None:
+            projection = works.get_work(work.work_id)
+            assert projection.status is WorkStatus.NEEDS_ATTENTION
+            assert len(works.list_attention(work_id=work.work_id)) == 1
+            assert not orchestrator.is_active(work.work_id)
+            assert not driver.is_active(work.work_id)
+
+        _wait_for(waiting_at_candidate_authority, timeout=90)
+        assert executor.dispatch_count == 1
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
+
+
 def test_steer_loop_auto_continues_two_cycles_across_restart_and_projects_api(
     postgres_database: Database,
     admitted_work,
@@ -1358,7 +1429,7 @@ def test_steer_loop_auto_continues_two_cycles_across_restart_and_projects_api(
             assert not orchestrator_b.is_active(work.work_id)
             assert not driver_b.is_active(work.work_id)
 
-        _wait_for(cycle_b_waiting_for_human)
+        _wait_for(cycle_b_waiting_for_human, timeout=90)
         assert executor_b.dispatch_count == 1
         waiting_projection = driver_b.project(work.work_id)
         assert waiting_projection.current_step is not None

@@ -92,7 +92,7 @@ def test_sem_wire_01_03_04_05_08_09_10_15_schema_is_recursively_strict() -> None
         "$ref": "#/$defs/ProductionPlanArtifactTarget"
     }
     assert proposal["properties"]["allowed_areas"]["items"]["pattern"] == (
-        r"^.+/\*\*$"
+        r"^[^/]+/[^/]+(?:/[^/]+)*/\*\*$"
     )
 
 
@@ -277,6 +277,15 @@ def test_sem_wire_04_06_documentation_round_trip_preserves_typed_values() -> Non
         },
         {
             "target_kind": "CODE_WORK",
+            "objective": "Invalid broad source and test roots",
+            "artifact_targets": [],
+            "code_targets": [],
+            "allowed_areas": ["src/**", "tests/**"],
+            "forbidden_areas": [],
+            "verification_expectation": "Focused tests",
+        },
+        {
+            "target_kind": "CODE_WORK",
             "objective": "Invalid repository escape",
             "artifact_targets": [],
             "code_targets": ["../outside.py"],
@@ -311,6 +320,37 @@ def test_sem_wire_03_04_absent_wire_keys_are_not_defaulted(
 
     with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
         CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))
+
+
+def test_dogfood_8_broad_fallback_is_rejected_before_candidate_admission() -> None:
+    proposal = {
+        "target_kind": "CODE_WORK",
+        "objective": "Improve execution progress observability",
+        "artifact_targets": [],
+        "code_targets": [],
+        "allowed_areas": (
+            "src/spg/api/**",
+            "src/spg/web/**",
+            "tests/js/**",
+            "tests/**",
+        ),
+        "forbidden_areas": [],
+        "verification_expectation": "Focused API and UI tests",
+    }
+
+    with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
+        CodexSdkSemanticStepCapability._parse_payload(
+            json.dumps(_payload(proposal))
+        )
+
+    proposal["allowed_areas"] = ["src/spg/web/**", "tests/js/**"]
+    parsed = CodexSdkSemanticStepCapability._parse_payload(
+        json.dumps(_payload(proposal))
+    )
+    assert parsed.domain_production_proposal().allowed_areas == (
+        "src/spg/web/**",
+        "tests/js/**",
+    )
 
 
 @pytest.mark.parametrize(

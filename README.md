@@ -44,7 +44,8 @@ For the explicitly governed local Codex E2E only, set
     docker compose -f compose.yaml -f compose.e2e.yaml up -d --build
     docker compose -f compose.yaml -f compose.e2e.yaml exec -T app python /app/docker/e2e_preflight.py
 
-The override installs the locked `codex-executor` dependency extra. A dedicated
+The override installs the locked `codex-executor` and `test` dependency extras;
+the latter is required by independent typed `PYTEST_TARGET` Verification. A dedicated
 Docker named volume provides the Linux-native mutable `CODEX_HOME`; only the
 exact authorized authentication cache is exposed as a read-only Compose secret
 and linked into that state root. The preflight starts and initializes the Codex

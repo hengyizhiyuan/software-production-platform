@@ -285,6 +285,10 @@ def test_sem_01_03_04_05_06_08_09_10_12_14_15_real_product_path(
         assert capability.inputs[0].context_materials[0].repository_relative_path == (
             "AI_context.md"
         )
+        instruction = CodexSdkSemanticStepCapability._instruction(capability.inputs[0])
+        assert "Do not invoke shell, filesystem, or repository tools" in instruction
+        assert "repository_tree_paths and context_materials" in instruction
+        assert "missing full contents alone is not a Human decision" in instruction
         assert _runtime_counts(postgres_database) == (0, 0, 0)
         assert _git(repository, "status", "--porcelain") == ""
 
@@ -610,7 +614,7 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
     ]["items"] == {"$ref": "#/$defs/ProductionPlanArtifactTarget"}
     assert schema["$defs"]["_SemanticProviderProductionProposal"]["properties"][
         "allowed_areas"
-    ]["items"]["pattern"] == r"^.+/\*\*$"
+    ]["items"]["pattern"] == r"^[^/]+/[^/]+(?:/[^/]+)*/\*\*$"
     assert "Return JSON only" in fake.instruction
     assert "target_kind must be exactly DOCUMENTATION_WORK or CODE_WORK" in (
         fake.instruction
@@ -886,6 +890,15 @@ def test_sem_schema_03_04_05_06_15_dogfood_4_malformed_shapes_remain_rejected(
             "forbidden_areas": [],
             "verification_expectation": "Focused API and UI tests",
         },
+        {
+            "target_kind": "CODE_WORK",
+            "objective": "Expose bounded execution progress",
+            "artifact_targets": [],
+            "code_targets": [],
+            "allowed_areas": ["src/**", "tests/**"],
+            "forbidden_areas": [],
+            "verification_expectation": "Focused API and UI tests",
+        },
     )
 
     for proposed_production in invalid_proposals:
@@ -905,7 +918,9 @@ def test_sem_schema_03_04_05_06_15_dogfood_4_malformed_shapes_remain_rejected(
     assert proposal["artifact_targets"]["items"]["$ref"] == (
         "#/$defs/ProductionPlanArtifactTarget"
     )
-    assert proposal["allowed_areas"]["items"]["pattern"] == r"^.+/\*\*$"
+    assert proposal["allowed_areas"]["items"]["pattern"] == (
+        r"^[^/]+/[^/]+(?:/[^/]+)*/\*\*$"
+    )
 
 
 def test_sem_schema_12_13_blocked_driver_is_truthful_in_work_api(

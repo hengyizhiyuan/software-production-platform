@@ -416,7 +416,6 @@ class PlanSteeringDriver:
         last = self.production_orchestrator.last_outcome(frame.work_id)
         if last is not None and last.stop_reason in {
             OrchestrationStopReason.NO_SAFE_PROGRESS,
-            OrchestrationStopReason.TRANSITION_LIMIT_REACHED,
             OrchestrationStopReason.INFRASTRUCTURE_ERROR,
         }:
             return self._result(
@@ -425,6 +424,10 @@ class PlanSteeringDriver:
                 action=None,
                 stop=SteeringDriverStopReason.NO_PROGRESS,
             )
+        # A transition bound ends one finite ORCH activation; it is not itself
+        # a governed production failure. Steering may schedule another bounded
+        # activation from freshly reconstructed Reality so a long but finite
+        # verification contract does not require a technical Human Continue.
         scheduled = self.production_orchestrator.schedule(frame.work_id)
         if not scheduled and not self.production_orchestrator.is_active(
             frame.work_id

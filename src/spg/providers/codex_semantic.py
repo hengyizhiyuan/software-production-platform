@@ -62,7 +62,10 @@ class _SemanticProviderProductionProposal(SemanticProductionProposal):
         description="Exact repository-relative code paths without wildcards.",
     )
     allowed_areas: tuple[SemanticBoundedRepositoryArea, ...] = Field(
-        description="Repository-relative bounded areas ending with /**.",
+        description=(
+            "Repository-relative bounded subdirectories ending with /**; "
+            "root-wide areas such as src/** or tests/** are invalid."
+        ),
     )
     forbidden_areas: tuple[str, ...] = Field(
         description=(
@@ -263,7 +266,15 @@ class CodexSdkSemanticStepCapability:
         return (
             "Execute exactly one governed semantic Steering Step. This is read-only "
             "reasoning: do not modify files, create production authority, commit, or "
-            "push. Ground the result in the supplied Work, authority, exact baseline, "
+            "push. Do not invoke shell, filesystem, or repository tools in this Turn. "
+            "Repository access is bounded to the supplied repository_tree_paths and "
+            "context_materials, which are authoritative for the exact baseline. A path "
+            "inventory that identifies existing implementation and test seams may "
+            "support exact production targets even when full source contents are not "
+            "included; missing full contents alone is not a Human decision. Never "
+            "fabricate a path absent from that inventory, and select an unresolved "
+            "disposition when the bounded supplied Reality still leaves material "
+            "uncertainty. Ground the result in the supplied Work, authority, exact baseline, "
             "repository tree, and bounded context. Return JSON only, with exactly these "
             "fields: bounded_summary (string); decisions (non-empty string array); "
             "derived_constraints (array containing only already admitted constraints); "
@@ -283,8 +294,12 @@ class CodexSdkSemanticStepCapability:
             "CODE_WORK. DOCUMENTATION_WORK uses exactly one artifact_targets object with "
             "repository-relative path and CREATE or UPDATE operation; CODE_WORK leaves "
             "artifact_targets empty and uses exact repository-relative code_targets and/or "
-            "allowed_areas. Every allowed_areas value must be a repository-relative area "
-            "ending with /**; natural-language area descriptions are invalid. DESIGN may "
+            "allowed_areas. Every allowed_areas value must be a repository-relative "
+            "subdirectory ending with /** and with at least two path segments before it; "
+            "root-wide fallback "
+            "areas such as src/** and tests/** and natural-language area descriptions are "
+            "invalid. Use exact code_targets, narrower nested areas, or an unresolved "
+            "disposition instead. DESIGN may "
             "propose production but never authorizes it. If an exact target or bounded area "
             "is not supported by the supplied Reality, record the uncertainty instead of "
             "fabricating a path. "

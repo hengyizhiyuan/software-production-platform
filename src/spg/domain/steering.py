@@ -177,7 +177,10 @@ class SemanticGovernanceDecision(BaseModel):
 
 SemanticBoundedRepositoryArea = Annotated[
     str,
-    StringConstraints(strip_whitespace=True, pattern=r"^.+/\*\*$"),
+    StringConstraints(
+        strip_whitespace=True,
+        pattern=r"^[^/]+/[^/]+(?:/[^/]+)*/\*\*$",
+    ),
 ]
 
 
@@ -202,7 +205,10 @@ class SemanticProductionProposal(BaseModel):
     )
     allowed_areas: tuple[SemanticBoundedRepositoryArea, ...] = Field(
         default=(),
-        description="Repository-relative bounded areas ending with /**.",
+        description=(
+            "Repository-relative bounded subdirectories ending with /**; "
+            "root-wide areas such as src/** or tests/** are invalid."
+        ),
     )
     forbidden_areas: tuple[str, ...] = Field(
         default=(),

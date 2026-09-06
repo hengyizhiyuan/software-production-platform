@@ -66,6 +66,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **MVP-SPG-GRANULARITY-1B — CLOSED / PASS — FRESH REAL MULTI-TURN EXECUTOR PROOF PASS**
 
+**LONG-LIVED MOTIVE DOGFOOD #8 — HISTORICAL FAILURE PRESERVED / FRESH SELF-REFINE PASS TO CANDIDATE AUTHORIZATION**
+
 **MVP-CODE-1 — CLOSED / PASS**
 
 **MVP-REFINE-CODE-1 — CLOSED / PASS**
@@ -165,6 +167,7 @@ without encoding either restriction as a permanent architecture limit.
 | Reality-driven Plan Steering | IMPLEMENTED FOR MVP BEHAVIOR — MVP-PLAN-STEER-1C/1D/1E/1F/1G/1H/1I/1J CLOSED / PASS; REAL PROVIDER DOGFOOD CONTINUES |
 | MVP-SPG-GRANULARITY-1A — Executor Autonomy Envelope / Attempt Granularity | BEHAVIORAL CONTRACT DEFINED / ADMITTED — ARCHITECTURE LEAD REALITY REVIEW PASS |
 | MVP-SPG-GRANULARITY-1B — Bounded Multi-turn Executor Attempt | CLOSED / PASS — FRESH REAL MULTI-TURN EXECUTOR PROOF PASS |
+| Long-lived Motive Dogfood #8 — Bounded Self-refine | HISTORICAL FAILURE PRESERVED / FRESH REAL PASS TO CANDIDATE AUTHORIZATION |
 | Interpretation Externalization / Multimodal Alignment | FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET DESIGNED FOR IMPLEMENTATION |
 | MVP-CODE-1 — Bounded Single-PWU Code Work Closure | CLOSED / PASS |
 | MVP-REFINE-CODE-1 — Repository-Aware Code Change Proposal Lite | CLOSED / PASS |
@@ -560,6 +563,26 @@ repository clean, and created no Runtime Commit. See [Long-lived Motive Dogfood
 #7 Semantic Wire Coherence Finding](docs/evidence/dogfood/long-lived-motive-dogfood-7-semantic-wire-coherence-gap.md).
 `SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains **CONFIRMED / PARTIALLY MITIGATED
 / OPEN**; Core Closure is not declared by this correction.
+
+Long-lived Motive Dogfood #8 preserved a cross-contract production-scope
+failure: the strict semantic wire admitted root-wide `tests/**`, while the
+repository-aware Change Proposal correctly rejected that fallback before any
+governed Semantic Step Result or production fact existed. Bounded self-refine
+then corrected Provider wire/domain scope coherence, installed the locked test
+extra in the deployed Executor/verifier image, kept semantic execution on its
+persisted bounded context without container-incompatible repository tooling,
+and allowed Steering to continue a finite production chain across multiple
+bounded ORCH activations. A final fresh real run used the same Motive and
+reached governed DESIGN completion, PRODUCE, PLAN-1B `ONE_PWU_FIT`, one
+PWU/Attempt/Dispatch/aggregate Provider Report, independent Completion
+`PRODUCED`, eight independent Verification PASS records, and one sealed
+Candidate. It stopped correctly before Candidate Authorization, with zero
+Authorization, Integration Effect, or Runtime Commit. See [Long-lived Motive
+Dogfood #8 Bounded Self-refine Closure](docs/evidence/dogfood/long-lived-motive-dogfood-8-self-refine-closure.md).
+`SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains **CONFIRMED / PARTIALLY MITIGATED
+/ OPEN**.
+Duration-aware PWU sizing / capacity-aware decomposition remains a deferred
+design calibration topic and is not part of this closure checkpoint.
 
 ### Reality-driven Plan Steering MVP Behavioral Contract
 

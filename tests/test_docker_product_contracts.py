@@ -63,4 +63,8 @@ def test_docker_07_08_image_contains_server_migrations_and_packaged_ui() -> None
     assert "uv sync --locked" in dockerfile
     assert "COPY migrations ./migrations" in dockerfile
     assert 'CMD ["python", "/app/docker/start_app.py"]' in dockerfile
+    assert (
+        "uv sync --locked --no-dev --no-editable "
+        "--extra codex-executor --extra test"
+    ) in dockerfile
     assert '"spg.web" = ["*.html", "*.css", "*.js"]' in project

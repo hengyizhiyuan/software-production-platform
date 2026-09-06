@@ -40,7 +40,7 @@ CMD ["python", "/app/docker/start_app.py"]
 FROM runtime-base AS codex-executor
 
 USER root
-RUN uv sync --locked --no-dev --no-editable --extra codex-executor
+RUN uv sync --locked --no-dev --no-editable --extra codex-executor --extra test
 USER spg
 
 FROM runtime-base AS runtime
