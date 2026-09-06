@@ -111,6 +111,16 @@
                 <span id="work-status" class="status-badge">Draft</span>
                 <span id="attention-marker" class="attention-marker" hidden>Needs your attention</span>
               </div>
+              <section id="execution-progress" class="execution-progress" aria-live="polite" hidden>
+                <div class="execution-progress-heading">
+                  <span class="activity-pulse" aria-hidden="true"></span>
+                  <strong id="execution-phase">Production</strong>
+                  <span id="execution-elapsed">0s elapsed</span>
+                </div>
+                <p id="execution-activity">Observing current production reality</p>
+                <p id="execution-count" class="execution-progress-meta">Progress total unknown</p>
+                <p id="execution-blocked" class="execution-blocked" hidden></p>
+              </section>
             </div>
             <button id="work-refresh-control" class="secondary-button compact" type="button">Refresh</button>
           </header>

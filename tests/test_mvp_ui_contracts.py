@@ -96,6 +96,7 @@ def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
 def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
     javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+    state_javascript = (WEB_ROOT / "state.js").read_text(encoding="utf-8")
     combined = f"{html}\n{javascript}".lower()
 
     assert "what do you want to get done?" in combined
@@ -134,6 +135,10 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert 'work.target_kind === "CODE_WORK"' in javascript
     assert "no artifacts observed" in combined
     assert "no verification evidence available" in combined
+    assert 'id="execution-progress"' in html
+    assert 'aria-live="polite"' in html
+    assert "transitions completed · total unknown" in state_javascript
+    assert "progress.percentComplete" not in javascript
     assert "project selector" not in combined
     assert "chat thread" not in combined
 

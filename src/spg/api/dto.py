@@ -296,6 +296,19 @@ class ProductionPlanResponse(ApiDto):
         )
 
 
+class ExecutionProgressResponse(ApiDto):
+    phase: str
+    activity: str
+    transitions_completed: int
+    transitions_total: int | None
+    percent_complete: int | None = None
+    started_at: datetime | None
+    updated_at: datetime
+    elapsed_seconds: float
+    still_working: bool
+    blocked_reason: str | None = None
+
+
 class WorkResponse(ApiDto):
     work_id: UUID
     goal_id: UUID | None
@@ -327,6 +340,7 @@ class WorkResponse(ApiDto):
     work_complete: bool = False
     automatic_progression_state: str | None = None
     last_stop_reason: str | None = None
+    execution_progress: ExecutionProgressResponse | None = None
 
     @classmethod
     def from_projection(cls, work: WorkProjection) -> Self:

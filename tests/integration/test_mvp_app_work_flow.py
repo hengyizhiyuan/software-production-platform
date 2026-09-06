@@ -12,6 +12,7 @@ from sqlalchemy import func, inspect, select
 
 from spg.application.runtime import RuntimeService
 from spg.application.materialization import ExecutionInputMaterializationService
+from spg.application.orchestration import OrchestrationProgress
 from spg.application.work import WorkApplicationService
 from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.preparation import ContextSemanticRole
@@ -59,6 +60,25 @@ pytestmark = pytest.mark.postgresql
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PRODUCT_TABLE_NAMES = {table.name for table in product_tables}
 ALL_TABLE_NAMES = {table.name for table in (*product_tables, *runtime_tables)}
+
+
+def test_orchestration_progress_is_observational_and_allows_unknown_total() -> None:
+    from datetime import UTC, datetime
+
+    now = datetime.now(UTC)
+    progress = OrchestrationProgress(
+        phase="EXECUTION",
+        activity="Waiting for Provider terminal evidence",
+        transitions_completed=3,
+        transitions_total=None,
+        started_at=now,
+        updated_at=now,
+        elapsed_seconds=12.0,
+        still_working=True,
+    )
+    assert progress.transitions_total is None
+    assert progress.still_working is True
+    assert progress.blocked_reason is None
 
 
 @dataclass(frozen=True)

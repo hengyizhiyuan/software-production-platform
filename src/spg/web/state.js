@@ -45,6 +45,26 @@
     return status === "READY" || status === "RUNNING";
   }
 
+  function executionProgress(work) {
+    const progress = work && work.execution_progress;
+    if (!progress) {
+      return null;
+    }
+    const knownTotal = Number.isInteger(progress.transitions_total)
+      && progress.transitions_total > 0;
+    return {
+      phase: progress.phase || "Production",
+      activity: progress.activity || "Observing current production reality",
+      progressText: knownTotal
+        ? `${progress.transitions_completed} of ${progress.transitions_total} steps`
+        : `${progress.transitions_completed} transitions completed · total unknown`,
+      percentComplete: knownTotal ? progress.percent_complete : null,
+      elapsedText: `${Math.max(0, Math.floor(progress.elapsed_seconds || 0))}s elapsed`,
+      stillWorking: progress.still_working === true,
+      blockedReason: progress.blocked_reason || null,
+    };
+  }
+
   function splitTags(value) {
     const unique = new Set(
       String(value || "")
@@ -90,6 +110,7 @@
     statusTone,
     workActions,
     shouldPoll,
+    executionProgress,
     splitTags,
     conciseRequirement,
     workTitle,

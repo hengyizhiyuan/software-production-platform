@@ -16,6 +16,7 @@ from spg.api.dto import (
     AttentionResolveRequest,
     AttentionResponse,
     ErrorResponse,
+    ExecutionProgressResponse,
     GoalCreateRequest,
     GoalResponse,
     GoalSummaryResponse,
@@ -142,6 +143,24 @@ def create_http_application(
 
     def work_response(projection: WorkProjection) -> WorkResponse:
         response = WorkResponse.from_projection(projection)
+        progress_reader = getattr(selected_orchestrator, "progress", None)
+        if callable(progress_reader):
+            progress = progress_reader(projection.work_id)
+            if progress is not None:
+                response = response.model_copy(update={
+                    "execution_progress": ExecutionProgressResponse(
+                        phase=progress.phase,
+                        activity=progress.activity,
+                        transitions_completed=progress.transitions_completed,
+                        transitions_total=progress.transitions_total,
+                        percent_complete=None,
+                        started_at=progress.started_at,
+                        updated_at=progress.updated_at,
+                        elapsed_seconds=progress.elapsed_seconds,
+                        still_working=progress.still_working,
+                        blocked_reason=progress.blocked_reason,
+                    )
+                })
         if not projection.steering_enabled:
             return response
         try:

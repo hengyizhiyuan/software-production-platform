@@ -42,6 +42,12 @@
     selectedWork: document.getElementById("selected-work"),
     workTitle: document.getElementById("work-title"),
     workStatus: document.getElementById("work-status"),
+    executionProgress: document.getElementById("execution-progress"),
+    executionPhase: document.getElementById("execution-phase"),
+    executionActivity: document.getElementById("execution-activity"),
+    executionCount: document.getElementById("execution-count"),
+    executionElapsed: document.getElementById("execution-elapsed"),
+    executionBlocked: document.getElementById("execution-blocked"),
     attentionMarker: document.getElementById("attention-marker"),
     workRequest: document.getElementById("work-request"),
     desiredOutcome: document.getElementById("desired-outcome"),
@@ -487,6 +493,18 @@
     elements.workTitle.textContent = viewModel.workTitle(work);
     elements.workStatus.textContent = viewModel.statusLabel(work.status);
     elements.workStatus.className = `status-badge ${viewModel.statusTone(work.status)}`;
+    const progress = viewModel.executionProgress(work);
+    elements.executionProgress.hidden = !progress;
+    if (progress) {
+      elements.executionProgress.classList.toggle("is-active", progress.stillWorking);
+      elements.executionProgress.classList.toggle("is-blocked", Boolean(progress.blockedReason));
+      elements.executionPhase.textContent = progress.phase;
+      elements.executionActivity.textContent = progress.activity;
+      elements.executionCount.textContent = progress.progressText;
+      elements.executionElapsed.textContent = progress.elapsedText;
+      elements.executionBlocked.hidden = !progress.blockedReason;
+      elements.executionBlocked.textContent = progress.blockedReason || "";
+    }
     elements.attentionMarker.hidden = !work.human_attention_required;
     elements.workRequest.textContent = work.raw_user_requirement || "No request text available.";
     elements.desiredOutcome.textContent = work.desired_outcome || "Not defined yet";

@@ -635,6 +635,12 @@ def test_orch_01_02_05_08_through_15_deterministic_automatic_flow(
         assert orchestrator.wait_until_idle(work_id, 60)
         candidate_work = client.get(f"/api/works/{work_id}").json()
         assert candidate_work["status"] == "NEEDS_ATTENTION"
+        progress = candidate_work["execution_progress"]
+        assert progress["still_working"] is False
+        assert progress["transitions_completed"] > 0
+        assert progress["transitions_total"] is None
+        assert progress["percent_complete"] is None
+        assert progress["phase"] == "NEEDS_ATTENTION"
         attention = client.get(
             "/api/attention",
             params={"work_id": str(work_id)},
@@ -665,6 +671,8 @@ def test_orch_01_02_05_08_through_15_deterministic_automatic_flow(
         completed = client.get(f"/api/works/{work_id}").json()
         result = client.get(f"/api/works/{work_id}/result").json()
         assert completed["status"] == "COMPLETED"
+        assert completed["execution_progress"]["phase"] == "COMPLETED"
+        assert completed["execution_progress"]["still_working"] is False
         assert result["trusted_result"] is True
         assert result["produced_artifacts"]
         assert result["verification_summary"]

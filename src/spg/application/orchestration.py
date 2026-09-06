@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from enum import StrEnum
 import logging
 from threading import Condition, Event, RLock, Thread
@@ -52,6 +53,21 @@ class OrchestrationOutcome:
     operator_message: str | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class OrchestrationProgress:
+    """Ephemeral operational telemetry, never production authority."""
+
+    phase: str
+    activity: str
+    transitions_completed: int
+    transitions_total: int | None
+    started_at: datetime | None
+    updated_at: datetime
+    elapsed_seconds: float
+    still_working: bool
+    blocked_reason: str | None = None
+
+
 class ProductionOrchestrator:
     """A process-local driver over authoritative Work and Runtime Reality."""
 
@@ -69,6 +85,7 @@ class ProductionOrchestrator:
         self._active_work_ids: set[UUID] = set()
         self._threads: dict[UUID, Thread] = {}
         self._last_outcomes: dict[UUID, OrchestrationOutcome] = {}
+        self._progress: dict[UUID, OrchestrationProgress] = {}
         self._outcome_listeners: list[Callable[[OrchestrationOutcome], None]] = []
         self._stopping = Event()
 
@@ -79,6 +96,11 @@ class ProductionOrchestrator:
             if self._stopping.is_set() or work_id in self._active_work_ids:
                 return False
             self._last_outcomes.pop(work_id, None)
+            now = datetime.now(UTC)
+            self._progress[work_id] = OrchestrationProgress(
+                "SCHEDULED", "Waiting for the automatic production driver", 0,
+                None, now, now, 0.0, True,
+            )
             self._active_work_ids.add(work_id)
             thread = Thread(
                 target=self._run_scheduled,
@@ -132,6 +154,10 @@ class ProductionOrchestrator:
                     OrchestrationStopReason.APPLICATION_STOPPING,
                 )
             before = self.work_service.get_work(work_id)
+            self._record_progress(
+                work_id, before.current_production_step,
+                before.what_happens_next, transitions,
+            )
             if self._trusted_steering_cycle(before):
                 return OrchestrationOutcome(
                     work_id,
@@ -155,6 +181,10 @@ class ProductionOrchestrator:
             self.work_service.advance_work(work_id)
             transitions += 1
             after = self.work_service.get_work(work_id)
+            self._record_progress(
+                work_id, after.current_production_step,
+                after.most_recent_meaningful_event, transitions,
+            )
             if self._trusted_steering_cycle(after):
                 return OrchestrationOutcome(
                     work_id,
@@ -193,6 +223,20 @@ class ProductionOrchestrator:
     def last_outcome(self, work_id: UUID) -> OrchestrationOutcome | None:
         with self._condition:
             return self._last_outcomes.get(work_id)
+
+    def progress(self, work_id: UUID) -> OrchestrationProgress | None:
+        """Return the latest process-local observation without advancing Work."""
+
+        with self._condition:
+            current = self._progress.get(work_id)
+            if current is None or not current.still_working or current.started_at is None:
+                return current
+            return OrchestrationProgress(
+                current.phase, current.activity, current.transitions_completed,
+                current.transitions_total, current.started_at, current.updated_at,
+                max(current.elapsed_seconds, (datetime.now(UTC) - current.started_at).total_seconds()),
+                True, current.blocked_reason,
+            )
 
     def wait_until_idle(self, work_id: UUID, timeout: float) -> bool:
         """Wait only for bounded observation; never advance production."""
@@ -234,6 +278,26 @@ class ProductionOrchestrator:
             )
         finally:
             with self._condition:
+                prior = self._progress.get(work_id)
+                now = datetime.now(UTC)
+                blocked = outcome.operator_message if outcome.stop_reason in {
+                    OrchestrationStopReason.NO_SAFE_PROGRESS,
+                    OrchestrationStopReason.TRANSITION_LIMIT_REACHED,
+                    OrchestrationStopReason.INFRASTRUCTURE_ERROR,
+                } else None
+                if blocked is None and outcome.work_status is WorkStatus.BLOCKED:
+                    blocked = (
+                        "Work reached a governed blocked state; inspect the most "
+                        "recent production event and Runtime evidence."
+                    )
+                self._progress[work_id] = OrchestrationProgress(
+                    outcome.work_status.value if outcome.work_status else "STOPPED",
+                    outcome.operator_message or outcome.stop_reason.value,
+                    outcome.transitions_executed, None,
+                    None if prior is None else prior.started_at, now,
+                    0.0 if prior is None or prior.started_at is None else (now - prior.started_at).total_seconds(),
+                    False, blocked,
+                )
                 self._last_outcomes[work_id] = outcome
                 self._threads.pop(work_id, None)
                 self._active_work_ids.discard(work_id)
@@ -246,6 +310,18 @@ class ProductionOrchestrator:
                     LOGGER.exception(
                         "Production outcome listener failed Work=%s", work_id
                     )
+
+    def _record_progress(
+        self, work_id: UUID, phase: str, activity: str, transitions: int,
+    ) -> None:
+        now = datetime.now(UTC)
+        with self._condition:
+            prior = self._progress.get(work_id)
+            started = now if prior is None or prior.started_at is None else prior.started_at
+            self._progress[work_id] = OrchestrationProgress(
+                phase, activity, transitions, None, started, now,
+                (now - started).total_seconds(), True,
+            )
 
     def _fingerprint(self, work_id: UUID, projection: WorkProjection) -> str:
         reality_fingerprint = getattr(

@@ -102,6 +102,26 @@ test("ORCH-20 polling observes only and stops at Human or terminal states", () =
   assert.doesNotMatch(polling, /method:\s*"POST"|\/advance/);
 });
 
+test("execution progress shows activity without inventing a percentage", () => {
+  const unknown = viewModel.executionProgress({ execution_progress: {
+    phase: "EXECUTION", activity: "Waiting for Provider evidence",
+    transitions_completed: 2, transitions_total: null,
+    percent_complete: null, elapsed_seconds: 9.8, still_working: true,
+  }});
+  assert.equal(unknown.progressText, "2 transitions completed · total unknown");
+  assert.equal(unknown.percentComplete, null);
+  assert.equal(unknown.elapsedText, "9s elapsed");
+  assert.equal(unknown.stillWorking, true);
+
+  const stopped = viewModel.executionProgress({ execution_progress: {
+    phase: "BLOCKED", activity: "Stopped", transitions_completed: 1,
+    transitions_total: null, elapsed_seconds: 3, still_working: false,
+    blocked_reason: "Verification failed",
+  }});
+  assert.equal(stopped.blockedReason, "Verification failed");
+  assert.equal(stopped.stillWorking, false);
+});
+
 test("Work Composer preserves the user's expanded state across reloads", () => {
   assert.match(
     appSource,
