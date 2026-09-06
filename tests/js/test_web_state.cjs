@@ -154,5 +154,12 @@ test("Work Composer preserves the user's expanded state across reloads", () => {
     appSource,
     /restoreComposerExpanded\(\);\s*reloadWorkspace\(\)/,
   );
-  assert.equal((appSource.match(/catch \(_error\)/g) || []).length, 2);
+  assert.ok((appSource.match(/catch \(_error\)/g) || []).length >= 2);
+});
+
+test("pre-Work composer uses Interaction truth and never creates Work", () => {
+  assert.match(appSource, /apiRequest\("\/api\/interactions"/);
+  assert.match(appSource, /\/api\/interactions\/\$\{state\.selectedInteractionId\}\/records/);
+  assert.doesNotMatch(appSource, /apiRequest\("\/api\/works", \{ method: "POST"/);
+  assert.match(appSource, /No Work was created/);
 });

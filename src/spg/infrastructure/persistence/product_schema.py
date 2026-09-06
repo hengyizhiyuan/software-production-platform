@@ -82,6 +82,26 @@ product_works = Table(
     Column("verification_expectation", Text, nullable=True),
     Column("code_change_proposal", JSONB, nullable=True),
     Column("production_plan_proposal", JSONB, nullable=True),
+    Column(
+        "current_work_reality_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "work_reality_revisions.id",
+            name="fk_product_works_current_reality_revision",
+            use_alter=True,
+        ),
+        nullable=True,
+    ),
+    Column(
+        "current_engineering_scope_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "engineering_scopes.id",
+            name="fk_product_works_current_engineering_scope",
+            use_alter=True,
+        ),
+        nullable=True,
+    ),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     CheckConstraint(
@@ -99,13 +119,18 @@ engineering_scopes = Table(
         Uuid(as_uuid=True),
         ForeignKey("product_works.id", name="fk_engineering_scopes_work"),
         nullable=False,
-        unique=True,
     ),
     Column("summary", Text, nullable=False),
     Column("fingerprint", String(64), nullable=False, unique=True),
     Column("condition", String(32), nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)
+
+Index(
+    "ix_engineering_scopes_work_created",
+    engineering_scopes.c.work_id,
+    engineering_scopes.c.created_at,
 )
 
 engineering_resource_bindings = Table(
@@ -133,6 +158,138 @@ engineering_resource_bindings = Table(
     ),
 )
 
+product_interactions = Table(
+    "product_interactions",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("condition", String(32), nullable=False),
+    Column(
+        "current_work_id",
+        Uuid(as_uuid=True),
+        ForeignKey("product_works.id", name="fk_product_interactions_current_work"),
+        nullable=True,
+    ),
+    Column("created_by", String(255), nullable=False),
+    Column("updated_by", String(255), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    CheckConstraint(
+        "condition IN ('OPEN', 'ARCHIVED')",
+        name="ck_product_interactions_condition_known",
+    ),
+)
+
+interaction_records = Table(
+    "interaction_records",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "interaction_id",
+        Uuid(as_uuid=True),
+        ForeignKey("product_interactions.id", name="fk_interaction_records_interaction"),
+        nullable=False,
+    ),
+    Column("sequence", Integer, nullable=False),
+    Column("actor", String(32), nullable=False),
+    Column("source", String(255), nullable=False),
+    Column("content", Text, nullable=False),
+    Column("content_fingerprint", String(64), nullable=False),
+    Column(
+        "work_focus_id",
+        Uuid(as_uuid=True),
+        ForeignKey("product_works.id", name="fk_interaction_records_work_focus"),
+        nullable=True,
+    ),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    UniqueConstraint(
+        "interaction_id",
+        "sequence",
+        name="uq_interaction_records_interaction_sequence",
+    ),
+    CheckConstraint(
+        "actor IN ('HUMAN', 'WATT')",
+        name="ck_interaction_records_actor_known",
+    ),
+)
+
+interaction_assessments = Table(
+    "interaction_assessments",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "interaction_id",
+        Uuid(as_uuid=True),
+        ForeignKey("product_interactions.id", name="fk_interaction_assessments_interaction"),
+        nullable=False,
+    ),
+    Column("basis_fingerprint", String(64), nullable=False),
+    Column("basis_last_sequence", Integer, nullable=False),
+    Column("interpreted_motive", Text, nullable=True),
+    Column("desired_outcome", Text, nullable=True),
+    Column("candidate_context", JSONB, nullable=False),
+    Column("candidate_constraints", JSONB, nullable=False),
+    Column("current_requests", JSONB, nullable=False),
+    Column("unresolved_material_questions", JSONB, nullable=False),
+    Column("meanings", JSONB, nullable=False),
+    Column("natural_response", Text, nullable=False),
+    Column("readiness", JSONB, nullable=False),
+    Column("provider_identity", String(255), nullable=False),
+    Column("model_identity", String(255), nullable=True),
+    Column("schema_version", String(32), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    UniqueConstraint(
+        "interaction_id",
+        "basis_fingerprint",
+        name="uq_interaction_assessments_interaction_basis",
+    ),
+)
+
+work_reality_revisions = Table(
+    "work_reality_revisions",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "work_id",
+        Uuid(as_uuid=True),
+        ForeignKey("product_works.id", name="fk_work_reality_revisions_work"),
+        nullable=False,
+    ),
+    Column("revision_number", Integer, nullable=False),
+    Column(
+        "previous_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey("work_reality_revisions.id", name="fk_work_reality_revisions_previous"),
+        nullable=True,
+    ),
+    Column("basis_fingerprint", String(64), nullable=False),
+    Column("motive", Text, nullable=False),
+    Column("desired_outcome", Text, nullable=False),
+    Column("context_facts", JSONB, nullable=False),
+    Column("constraints", JSONB, nullable=False),
+    Column("requests", JSONB, nullable=False),
+    Column(
+        "engineering_scope_id",
+        Uuid(as_uuid=True),
+        ForeignKey("engineering_scopes.id", name="fk_work_reality_revisions_scope"),
+        nullable=True,
+    ),
+    Column("supporting_references", JSONB, nullable=False),
+    Column("change_set", JSONB, nullable=False),
+    Column("rationale", Text, nullable=False),
+    Column("admitted_by", String(255), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    UniqueConstraint(
+        "work_id",
+        "revision_number",
+        name="uq_work_reality_revisions_work_number",
+    ),
+    UniqueConstraint(
+        "work_id",
+        "basis_fingerprint",
+        name="uq_work_reality_revisions_work_basis",
+    ),
+)
+
 work_runtime_bindings = Table(
     "work_runtime_bindings",
     metadata,
@@ -157,6 +314,15 @@ work_runtime_bindings = Table(
         ForeignKey(
             "steering_decisions.id",
             name="fk_work_runtime_bindings_steering_decision",
+        ),
+        nullable=True,
+    ),
+    Column(
+        "work_reality_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "work_reality_revisions.id",
+            name="fk_work_runtime_bindings_reality_revision",
         ),
         nullable=True,
     ),
@@ -220,6 +386,10 @@ product_tables = (
     product_works,
     engineering_scopes,
     engineering_resource_bindings,
+    product_interactions,
+    interaction_records,
+    interaction_assessments,
+    work_reality_revisions,
     work_runtime_bindings,
     *steering_tables,
 )

@@ -152,7 +152,22 @@ class ProductStore:
         )
 
     def scope_for_work(self, work_id: UUID) -> EngineeringScopeRecord | None:
-        row = self._one(engineering_scopes, engineering_scopes.c.work_id == work_id)
+        current_scope_id = self.session.execute(
+            select(product_works.c.current_engineering_scope_id).where(
+                product_works.c.id == work_id
+            )
+        ).scalar_one_or_none()
+        statement = select(engineering_scopes).where(
+            engineering_scopes.c.work_id == work_id
+        )
+        if current_scope_id is not None:
+            statement = statement.where(engineering_scopes.c.id == current_scope_id)
+        row = self.session.execute(
+            statement.order_by(
+                engineering_scopes.c.created_at.desc(),
+                engineering_scopes.c.id.desc(),
+            ).limit(1)
+        ).mappings().first()
         if row is None:
             return None
         bindings = self.session.execute(
@@ -262,6 +277,7 @@ class ProductStore:
             steering_step_id=row["steering_step_id"],
             steering_decision_id=row["steering_decision_id"],
             condition=ProductionCycleBindingCondition(row["condition"]),
+            work_reality_revision_id=row["work_reality_revision_id"],
             engineering_scope_id=row["engineering_scope_id"],
             resource_id=row["resource_id"],
             production_run_id=row["production_run_id"],
@@ -462,9 +478,17 @@ class ProductStore:
         )
 
     def _work(self, row: Mapping[str, Any]) -> WorkRecord:
-        scope = self.session.execute(
-            select(engineering_scopes.c.id).where(engineering_scopes.c.work_id == row["id"])
-        ).scalar_one_or_none()
+        scope = row["current_engineering_scope_id"]
+        if scope is None:
+            scope = self.session.execute(
+                select(engineering_scopes.c.id)
+                .where(engineering_scopes.c.work_id == row["id"])
+                .order_by(
+                    engineering_scopes.c.created_at.desc(),
+                    engineering_scopes.c.id.desc(),
+                )
+                .limit(1)
+            ).scalar_one_or_none()
         return WorkRecord(
             id=row["id"],
             goal_id=row["goal_id"],
@@ -507,6 +531,9 @@ class ProductStore:
                     row["production_plan_proposal"]
                 )
             ),
+            current_work_reality_revision_id=row[
+                "current_work_reality_revision_id"
+            ],
             created_at=row["created_at"],
             updated_at=row["updated_at"],
         )

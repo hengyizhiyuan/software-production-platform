@@ -89,7 +89,9 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **WIC-1 WORK INTERACTION ARCHITECTURE CONTRACT — DEFINED / ADMITTED**
 
-**WORK INTERACTION & CLOSED-LOOP REFINEMENT CORE — ARCHITECTURE DEFINED / IMPLEMENTATION NOT STARTED**
+**WIC SLICE 1 — INTERACTION TRUTH SPINE & PRE-WORK UNDERSTANDING — IMPLEMENTED / PASS**
+
+**WORK INTERACTION & CLOSED-LOOP REFINEMENT CORE — IN PROGRESS**
 
 **WATT PRODUCT MVP — NOT CLOSED**
 
@@ -194,7 +196,8 @@ without encoding either restriction as a permanent architecture limit.
 | Long-lived Motive Dogfood #9 — Complete production loop | PASS — exact Human Authorization, Integration, Runtime Commit, VERIFY_ACCEPT, and COMPLETE |
 | Long-lived Motive Dogfood #10 — Human-operated acceptance | PASS — normal UI operation, exact Trusted Baseline activation, and bounded Human functional acceptance |
 | Historical Watt MVP Core | CLOSED / PASS — proved Governed Production + Reality-driven Plan Steering Core; explicit non-blocking deferrals preserved |
-| Work Interaction & Closed-loop Refinement Core | ARCHITECTURE DEFINED / IMPLEMENTATION NOT STARTED — WIC-1 READY FOR BOUNDED MVP IMPLEMENTATION PLANNING |
+| WIC Slice 1 — Interaction Truth Spine & Pre-Work Understanding | IMPLEMENTED / PASS — real multi-turn Provider proof reached NOT_READY → READY with zero Work/production facts |
+| Work Interaction & Closed-loop Refinement Core | IN PROGRESS — Slice 1 closed; governed Work admission and later active-Work slices not started |
 | Watt Product MVP | NOT CLOSED |
 | DCP-1 — Duration & Capacity Semantic Foundation | CLOSED / PASS |
 | DCP-2 — Production Measurement v0 | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable measurement and planning-time TaskShapeSnapshot; no decision influence |
@@ -658,9 +661,11 @@ Product-shape essentials.
 [WIC-1 Work Interaction & Closed-loop Refinement](docs/architecture/work-interaction-closed-loop-refinement.md)
 defines them as one cohesive capability chain: Human Input → Interpretation →
 Impact Assessment → governed Work Evolution → existing Plan reassessment →
-production/feedback → continuing Interaction. WIC-1 is **DEFINED / ADMITTED**
-and **READY FOR BOUNDED MVP IMPLEMENTATION PLANNING**; implementation has not
-started. The existing Governed Production + Reality-driven Plan Steering Core
+production/feedback → continuing Interaction. WIC-1 is **DEFINED / ADMITTED**;
+Slice 1 is **IMPLEMENTED / PASS**, proving durable pre-Work multi-turn
+interpretation, Shared Understanding, readiness progression, restart recovery,
+and zero Work before admission. The remaining WIC Core is **IN PROGRESS** and
+Slice 2 has not started. The existing Governed Production + Reality-driven Plan Steering Core
 remains **CLOSED / PASS**, while **Watt Product MVP remains NOT CLOSED**. No
 first utterance becomes Work automatically, raw conversation is not truth, and
 new input cannot mutate an active Production Contract.

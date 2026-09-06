@@ -8,9 +8,13 @@
 
   const POLL_INTERVAL_MS = 2000;
   const COMPOSER_EXPANDED_STORAGE_KEY = "spg.workComposer.expanded";
+  const INTERACTION_STORAGE_KEY = "spg.currentInteraction.id";
   const state = {
     goals: [],
     works: [],
+    interactions: [],
+    selectedInteractionId: "",
+    sharedUnderstanding: null,
     selectedGoalId: "",
     selectedWorkId: "",
     selectedWork: null,
@@ -39,6 +43,18 @@
     globalError: document.getElementById("global-error"),
     globalErrorMessage: document.getElementById("global-error-message"),
     noSelection: document.getElementById("no-selection"),
+    interactionHistory: document.getElementById("interaction-history"),
+    newInteractionControl: document.getElementById("new-interaction-control"),
+    interactionReadiness: document.getElementById("interaction-readiness"),
+    wattResponse: document.getElementById("watt-response"),
+    interpretedMotive: document.getElementById("interpreted-motive"),
+    interpretedOutcome: document.getElementById("interpreted-outcome"),
+    interpretedContext: document.getElementById("interpreted-context"),
+    interpretedRequests: document.getElementById("interpreted-requests"),
+    interpretedConstraints: document.getElementById("interpreted-constraints"),
+    interpretedQuestions: document.getElementById("interpreted-questions"),
+    governedUnderstanding: document.getElementById("governed-understanding"),
+    readinessAffordance: document.getElementById("readiness-affordance"),
     selectedWork: document.getElementById("selected-work"),
     workTitle: document.getElementById("work-title"),
     workStatus: document.getElementById("work-status"),
@@ -98,9 +114,6 @@
     workForm: document.getElementById("work-form"),
     composerToggle: document.getElementById("composer-toggle"),
     workRequirement: document.getElementById("work-requirement"),
-    workMode: document.getElementById("work-mode"),
-    composerGoal: document.getElementById("composer-goal"),
-    workTags: document.getElementById("work-tags"),
     submitWork: document.getElementById("submit-work"),
     liveRegion: document.getElementById("live-region"),
     notice: document.getElementById("notice"),
@@ -224,22 +237,6 @@
     });
   }
 
-  function renderGoalOptions() {
-    const selected = elements.composerGoal.value || state.selectedGoalId;
-    elements.composerGoal.replaceChildren();
-    const noGoal = createElement("option", "", "No Goal");
-    noGoal.value = "";
-    elements.composerGoal.append(noGoal);
-    state.goals.forEach((goal) => {
-      const option = createElement("option", "", goal.title);
-      option.value = goal.goal_id;
-      elements.composerGoal.append(option);
-    });
-    elements.composerGoal.value = state.goals.some((goal) => goal.goal_id === selected)
-      ? selected
-      : "";
-  }
-
   function renderWorkList() {
     elements.workList.replaceChildren();
     const works = filteredWorks();
@@ -268,6 +265,61 @@
       button.addEventListener("click", () => selectWork(work.work_id));
       elements.workList.append(button);
     });
+  }
+
+  function joined(values, emptyLabel) {
+    return Array.isArray(values) && values.length ? values.join(" · ") : emptyLabel;
+  }
+
+  function renderInteraction() {
+    const projection = state.sharedUnderstanding;
+    elements.interactionHistory.replaceChildren();
+    if (!projection) {
+      elements.interactionHistory.append(
+        createElement("p", "empty-copy", "No messages yet."),
+      );
+      elements.interactionReadiness.textContent = "NOT_READY";
+      elements.interactionReadiness.className = "status-badge status-draft";
+      elements.wattResponse.textContent = "Start anywhere. Watt will ask only for material clarification.";
+      elements.interpretedMotive.textContent = "Not established yet";
+      elements.interpretedOutcome.textContent = "Not established yet";
+      elements.interpretedContext.textContent = "None yet";
+      elements.interpretedRequests.textContent = "None yet";
+      elements.interpretedConstraints.textContent = "None yet";
+      elements.interpretedQuestions.textContent = "Tell Watt what you want to explore.";
+      elements.governedUnderstanding.textContent = "None — no Work exists";
+      elements.readinessAffordance.textContent = "Not ready to form Work.";
+      return;
+    }
+    projection.records.forEach((record) => {
+      const message = createElement("article", `interaction-message actor-${record.actor.toLowerCase()}`);
+      message.append(createElement("p", "speaker-label", record.actor === "HUMAN" ? "You" : "Watt"));
+      message.append(createElement("p", "", record.content));
+      elements.interactionHistory.append(message);
+    });
+    const assessment = projection.latest_assessment;
+    const readiness = projection.readiness;
+    const status = readiness ? readiness.status : "NOT_READY";
+    elements.interactionReadiness.textContent = status;
+    elements.interactionReadiness.className = `status-badge ${status === "READY" ? "status-completed" : "status-draft"}`;
+    elements.wattResponse.textContent = assessment
+      ? assessment.natural_response
+      : "Watt has not completed an assessment for the latest message yet.";
+    elements.interpretedMotive.textContent = projection.interpreted_motive || "Not established yet";
+    elements.interpretedOutcome.textContent = projection.desired_outcome || "Not established yet";
+    elements.interpretedContext.textContent = joined(projection.candidate_context, "None yet");
+    elements.interpretedRequests.textContent = joined(projection.current_requests, "None yet");
+    elements.interpretedConstraints.textContent = joined(projection.candidate_constraints, "None yet");
+    elements.interpretedQuestions.textContent = joined(
+      projection.unresolved_material_questions,
+      status === "READY" ? "None" : "Assessment pending",
+    );
+    elements.governedUnderstanding.textContent = projection.governed_work_id
+      ? `Focused Work ${projection.governed_work_id}`
+      : "None — no Work exists";
+    elements.readinessAffordance.textContent = status === "READY"
+      ? "Ready to form Work — admission is intentionally deferred to WIC Slice 2."
+      : "Not ready to form Work.";
   }
 
   function renderChips(container, values, emptyLabel) {
@@ -707,15 +759,33 @@
   }
 
   async function loadCollections() {
-    const [goals, works] = await Promise.all([
+    const [goals, works, interactions] = await Promise.all([
       apiRequest("/api/goals"),
       apiRequest("/api/works"),
+      apiRequest("/api/interactions"),
     ]);
     state.goals = goals;
     state.works = works;
+    state.interactions = interactions;
+    if (!state.selectedInteractionId && interactions.length) {
+      let stored = "";
+      try {
+        stored = localStorage.getItem(INTERACTION_STORAGE_KEY) || "";
+      } catch (_error) {
+        stored = "";
+      }
+      const selected = interactions.find((item) => item.interaction_id === stored)
+        || interactions[0];
+      state.selectedInteractionId = selected.interaction_id;
+      state.sharedUnderstanding = selected;
+    } else if (state.selectedInteractionId) {
+      state.sharedUnderstanding = interactions.find(
+        (item) => item.interaction_id === state.selectedInteractionId,
+      ) || null;
+    }
     renderGoalList();
-    renderGoalOptions();
     renderWorkList();
+    renderInteraction();
   }
 
   async function refreshSelected() {
@@ -786,7 +856,6 @@
 
   function selectGoal(goalId) {
     state.selectedGoalId = goalId;
-    elements.composerGoal.value = goalId;
     renderGoalList();
     renderWorkList();
   }
@@ -801,11 +870,9 @@
       await Promise.all([loadHealth(), loadCollections()]);
       if (state.selectedWorkId) {
         await refreshSelected();
-      } else if (filteredWorks().length > 0) {
-        state.selectedWorkId = filteredWorks()[0].work_id;
-        await refreshSelected();
       } else {
         setSurface("empty");
+        renderInteraction();
       }
     } catch (error) {
       elements.globalErrorMessage.textContent = error instanceof ApiError
@@ -834,7 +901,6 @@
       elements.goalTitle.value = "";
       elements.goalForm.hidden = true;
       await loadCollections();
-      elements.composerGoal.value = goal.goal_id;
       announce(`Goal ${goal.title} created.`);
     } catch (error) {
       showNotice(error);
@@ -843,44 +909,64 @@
     }
   }
 
-  async function createWork(event) {
+  async function continueInteraction(event) {
     event.preventDefault();
     if (state.busy) {
       return;
     }
-    const requirement = elements.workRequirement.value;
+    const content = elements.workRequirement.value.trim();
+    if (!content) {
+      return;
+    }
     setBusy(true);
     hideNotice();
     try {
-      const body = {
-        requirement,
-        mode: elements.workMode.value,
-        goal_id: elements.composerGoal.value || null,
-        tags: viewModel.splitTags(elements.workTags.value),
-      };
-      let work = await apiRequest("/api/works", { method: "POST", body });
-      state.selectedWorkId = work.work_id;
-      state.statusFilter = "";
-      elements.statusFilter.value = "";
-      elements.workRequirement.value = "";
-      elements.workTags.value = "";
-      try {
-        work = await apiRequest(`/api/works/${work.work_id}/refine`, {
+      if (!state.selectedInteractionId) {
+        const created = await apiRequest("/api/interactions", {
           method: "POST",
-          body: {},
+          body: { human_identity: "human:local-operator" },
         });
-      } catch (refinementError) {
-        showNotice(refinementError);
+        state.selectedInteractionId = created.interaction_id;
+        try {
+          localStorage.setItem(INTERACTION_STORAGE_KEY, state.selectedInteractionId);
+        } catch (_error) {
+          // Interaction remains durable server-side when browser storage is unavailable.
+        }
       }
-      state.selectedWork = work;
-      await refreshAfterMutation();
-      announce(`${viewModel.workTitle(work)} created as a governed Work.`);
+      state.sharedUnderstanding = await apiRequest(
+        `/api/interactions/${state.selectedInteractionId}/records`,
+        {
+          method: "POST",
+          body: { content, human_identity: "human:local-operator" },
+        },
+      );
+      elements.workRequirement.value = "";
+      state.selectedWorkId = "";
+      state.selectedWork = null;
+      await loadCollections();
+      setSurface("empty");
+      renderInteraction();
+      announce("Shared Understanding updated. No Work was created.");
     } catch (error) {
       showNotice(error);
     } finally {
       setBusy(false);
-      renderSelectedWork();
+      renderInteraction();
     }
+  }
+
+  function beginNewInteraction() {
+    state.selectedInteractionId = "";
+    state.sharedUnderstanding = null;
+    state.selectedWorkId = "";
+    try {
+      localStorage.removeItem(INTERACTION_STORAGE_KEY);
+    } catch (_error) {
+      // A fresh interaction will still be created on the next message.
+    }
+    setSurface("empty");
+    renderInteraction();
+    elements.workRequirement.focus();
   }
 
   elements.showGoalForm.addEventListener("click", () => {
@@ -890,7 +976,8 @@
     }
   });
   elements.goalForm.addEventListener("submit", createGoal);
-  elements.workForm.addEventListener("submit", createWork);
+  elements.workForm.addEventListener("submit", continueInteraction);
+  elements.newInteractionControl.addEventListener("click", beginNewInteraction);
   elements.composerToggle.addEventListener("click", () => {
     const expanded = elements.composerToggle.getAttribute("aria-expanded") === "true";
     const nextExpanded = !expanded;

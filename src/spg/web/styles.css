@@ -222,6 +222,55 @@ h3 {
   background: var(--surface-strong);
 }
 
+.interaction-surface {
+  width: min(920px, 100%);
+  margin-top: 22px;
+  padding: 20px;
+  text-align: left;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.interaction-history {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.interaction-message {
+  max-width: 82%;
+  padding: 12px 14px;
+  background: var(--teal-soft);
+  border-radius: 4px 14px 14px;
+}
+
+.interaction-message p:last-child,
+.interaction-response {
+  margin-bottom: 0;
+  white-space: pre-wrap;
+}
+
+.shared-understanding {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.interaction-response {
+  margin: 14px 0;
+  padding: 12px 14px;
+  color: var(--navy);
+  background: #f4fbf9;
+  border-left: 3px solid var(--teal);
+  border-radius: 6px;
+}
+
+.interaction-composer-options {
+  align-items: center;
+}
+
 .execution-progress-heading {
   display: flex;
   align-items: center;

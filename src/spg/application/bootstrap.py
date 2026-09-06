@@ -12,6 +12,10 @@ from spg.application.completion import CompletionService
 from spg.application.verification import VerificationService
 from spg.application.governance import CandidateGovernanceService
 from spg.application.integration import RepositoryIntegrationService
+from spg.application.interaction import (
+    UnavailableWorkInteractionCapability,
+    WorkInteractionService,
+)
 from spg.application.runtime_commit import RuntimeCommitService
 from spg.application.recovery import RecoveryAssessmentService
 from spg.application.reconciliation import RecoveryReconciliationService
@@ -219,6 +223,25 @@ class Application:
             selected_database,
             **options,
         )
+
+    def interaction(
+        self,
+        database: Database | None = None,
+    ) -> WorkInteractionService:
+        """Compose pre-Work interpretation without composing Work or production."""
+
+        selected_database = database or self.persistence()
+        capability = UnavailableWorkInteractionCapability()
+        if self.settings.executor_adapter == "codex-sdk":
+            from spg.providers.codex_interaction import (
+                CodexSdkWorkInteractionCapability,
+            )
+
+            capability = CodexSdkWorkInteractionCapability(
+                repository_location=str(self.settings.repository_path),
+                timeout_seconds=self.settings.executor_timeout_seconds,
+            )
+        return WorkInteractionService(selected_database, capability=capability)
 
     def production_orchestrator(
         self,

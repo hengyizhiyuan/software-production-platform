@@ -51,7 +51,7 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Motive / Work / Engineering Scope product model | Motive is the product-facing concept; Work is the current internal governed representation; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / CONCEPT CALIBRATION CLOSED / PASS; IMPLEMENTATION REMAINS WORK-NAMED |
 | Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI; it is a narrow production-step plan, not full lifecycle steering | MVP CORE / PLAN-1B CLOSED / PASS |
 | [Reality-driven Plan Steering](../architecture/reality-driven-plan-steering-mvp-contract.md) | 1C through 1L are CLOSED / PASS. Dogfood #9 proves the complete machine-side long-lived loop; Dogfood #10 proves Human-operated acceptance and exact Runtime activation. The remaining observability gap is explicit and non-blocking. | MATERIAL MVP CORE PRODUCT CAPABILITY / MVP CLOSED / PASS |
-| [Work Interaction & Closed-loop Refinement](../architecture/work-interaction-closed-loop-refinement.md) | Pre-Work multi-turn Motive formation, Shared Understanding, in-Work interaction, impact assessment, versioned Work Reality evolution, feedback admission, and continuation/new-Work semantics | PRODUCT-SHAPE ESSENTIAL / ARCHITECTURE DEFINED / IMPLEMENTATION NOT STARTED |
+| [Work Interaction & Closed-loop Refinement](../architecture/work-interaction-closed-loop-refinement.md) | Slice 1 implements durable pre-Work Interaction, basis-bound interpretation, profile readiness, Shared Understanding, and zero-Work-before-admission; Work admission and active-Work evolution remain later slices | PRODUCT-SHAPE ESSENTIAL / SLICE 1 IMPLEMENTED / PASS / CORE IN PROGRESS |
 | [Interpretation Externalization / Multimodal Alignment](../architecture/interpretation-externalization-and-multimodal-alignment.md) | Externalize Watt's reconstructed Motive interpretation at the lowest sufficient representation cost so material semantic mismatch can be calibrated | FUTURE CORE DIFFERENTIATION CAPABILITY / NOT CURRENT MVP SCOPE / NOT YET DESIGNED FOR IMPLEMENTATION |
 | Production state view | Work, Goal, Attention, Steering, progress, and Work Result projections derive from authoritative Runtime facts | MVP CORE / CLOSED / PASS; real Provider loop and Human acceptance proven |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
@@ -245,8 +245,8 @@ an evidence-backed follow-up rather than hidden success.
 10. **Trusted Baseline / Active Runtime Convergence Lite** — CLOSED / PASS; Architecture Lead Reality Review and Human Composer acceptance passed. The first trusted Watt code self-dogfood loop is proven.
 11. **Reality-driven Plan Steering** — MVP CLOSED / PASS. Slices 1C through 1L close the reconstructable truth spine, governed decisions and semantic execution, automatic progression, exact SPG production bridge, strict real-Provider contract, and long-lived completion semantics. Dogfood #9 proves the machine-side production loop through Runtime Commit and COMPLETE; Dogfood #10 proves Human-operated acceptance and exact activation. Extended Human Attention and Product Experience remain separately gated.
 12. **Historical Watt MVP Core Closure** — CLOSED / PASS for the proved Governed Production + Reality-driven Plan Steering Core; see [closure evidence](../evidence/mvp-core-closure.md). This does not close Watt Product MVP.
-13. **Product North Star / WIC-1 Architecture** — CLOSED / PASS for architecture definition. Work Interaction & Closed-loop Refinement implementation has not started.
-14. **Work Interaction & Closed-loop Refinement MVP implementation** — NEXT / REQUIRES SEPARATE BOUNDED IMPLEMENTATION PLAN.
+13. **Product North Star / WIC-1 Architecture** — CLOSED / PASS for architecture definition.
+14. **WIC Slice 1 — Interaction Truth Spine & Pre-Work Understanding** — IMPLEMENTED / PASS. Multi-turn real Provider evidence advances `NOT_READY -> READY` while Work and production facts remain zero. Work Interaction & Closed-loop Refinement Core remains IN PROGRESS; Slice 2 is not started.
 15. **Duration/capacity semantic foundation** — DCP-1 CLOSED / PASS and DCP-2
     Production Measurement v0 IMPLEMENTED / FOCUSED VALIDATION PASS; estimation,
     queue, scheduling, and runtime capacity behavior require separate admission
@@ -280,8 +280,8 @@ Robustness, recovery, scale, optimization, and security work does not enter the 
 ## 13. Next Slice Selection Boundary
 
 Architecture Lead selects each concrete slice separately. Governed Production
-and Reality-driven Plan Steering Core remains **CLOSED / PASS**. WIC-1 is
-**DEFINED / ADMITTED** and ready for bounded MVP implementation planning, but
-no implementation Slice is authorized by this architecture checkpoint. Watt
+and Reality-driven Plan Steering Core remains **CLOSED / PASS**. WIC Slice 1 is
+**IMPLEMENTED / PASS**; later WIC admission/evolution slices require separate
+authorization and are not started by this checkpoint. Watt
 Product MVP remains **NOT CLOSED**. This calibration introduces no Project
 Governor, Initiative, Multi-PWU execution, or Phase-2 automation.

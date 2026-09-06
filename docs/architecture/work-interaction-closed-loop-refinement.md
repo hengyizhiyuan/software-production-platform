@@ -7,17 +7,18 @@ WIC-1 Architecture Contract
     DEFINED / ADMITTED
 
 Work Interaction & Closed-loop Refinement Core
-    ARCHITECTURE DEFINED / IMPLEMENTATION NOT STARTED
+    IN PROGRESS
 
-Implementation readiness
-    READY FOR BOUNDED MVP IMPLEMENTATION PLANNING
+WIC Slice 1 — Interaction Truth Spine & Pre-Work Understanding
+    IMPLEMENTED / PASS
 ```
 
 This contract specializes the approved
 [工律 / Watt Product North Star](watt-product-north-star.md). It defines one
 cohesive capability pillar spanning pre-Work formation and interaction during a
-long-lived Work. It creates no schema, migration, API, UI, Provider call, or
-Runtime behavior.
+long-lived Work. The architecture checkpoint itself created no Runtime behavior;
+the admitted Slice 1 now implements the additive pre-Work truth spine,
+interpretation/readiness capability, API, and minimum UI without Work admission.
 
 The closed Governed Production and Reality-driven Plan Steering Core remains
 authoritative. WIC does not reopen or weaken Work/Production admission

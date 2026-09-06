@@ -97,9 +97,41 @@
 
         <div id="no-selection" class="surface-state" hidden>
           <div class="empty-symbol" aria-hidden="true">W</div>
-          <p class="eyebrow">No Work selected</p>
-          <h2>Choose a Work or describe what you want to get done.</h2>
-          <p>Engineering resources and governed execution stay behind the Work.</p>
+          <p class="eyebrow">Pre-Work Interaction</p>
+          <h2>Tell Watt what is on your mind.</h2>
+          <p>Explore or clarify naturally. No governed Work exists until a later Human admission.</p>
+
+          <section id="interaction-surface" class="interaction-surface" aria-labelledby="interaction-heading">
+            <div class="panel-title-row">
+              <div>
+                <p class="eyebrow">Human said</p>
+                <h3 id="interaction-heading">Interaction</h3>
+              </div>
+              <button id="new-interaction-control" class="text-button" type="button">New interaction</button>
+            </div>
+            <div id="interaction-history" class="interaction-history" aria-live="polite"></div>
+
+            <section id="shared-understanding" class="shared-understanding" aria-labelledby="understanding-heading">
+              <div class="panel-title-row">
+                <div>
+                  <p class="eyebrow">Watt interpreted · Candidate only</p>
+                  <h3 id="understanding-heading">Shared Understanding</h3>
+                </div>
+                <span id="interaction-readiness" class="status-badge status-draft">NOT_READY</span>
+              </div>
+              <p id="watt-response" class="interaction-response">Start anywhere. Watt will ask only for material clarification.</p>
+              <dl class="detail-grid">
+                <div><dt>Interpreted Motive</dt><dd id="interpreted-motive">Not established yet</dd></div>
+                <div><dt>Desired outcome</dt><dd id="interpreted-outcome">Not established yet</dd></div>
+                <div><dt>Context / facts</dt><dd id="interpreted-context">None yet</dd></div>
+                <div><dt>Current requests</dt><dd id="interpreted-requests">None yet</dd></div>
+                <div><dt>Candidate constraints</dt><dd id="interpreted-constraints">None yet</dd></div>
+                <div><dt>Unresolved material questions</dt><dd id="interpreted-questions">Tell Watt what you want to explore.</dd></div>
+                <div><dt>Governed / admitted</dt><dd id="governed-understanding">None — no Work exists</dd></div>
+              </dl>
+              <p id="readiness-affordance" class="empty-copy">Not ready to form Work.</p>
+            </section>
+          </section>
         </div>
 
         <article id="selected-work" class="selected-work" hidden>
@@ -315,7 +347,7 @@
 
       <section class="composer" aria-labelledby="composer-heading">
         <div class="composer-toggle-row">
-          <span class="field-label">New governed Work</span>
+          <span class="field-label">Continuing Interaction</span>
           <button
             id="composer-toggle"
             class="text-button"
@@ -326,32 +358,18 @@
         </div>
         <form id="work-form" class="composer-form">
           <div class="composer-main">
-            <label id="composer-heading" for="work-requirement">What do you want to get done?</label>
+            <label id="composer-heading" for="work-requirement">What would you like Watt to understand?</label>
             <textarea
               id="work-requirement"
               name="requirement"
               rows="3"
-              placeholder="Describe the outcome, boundaries, and anything that must remain true…"
+              placeholder="Share an idea, context, question, outcome, or constraint…"
               required
             ></textarea>
           </div>
-          <div class="composer-options">
-            <div>
-              <label for="work-mode">Work mode</label>
-              <select id="work-mode">
-                <option value="LONG_LIVED_STEERING" selected>Long-lived · Steering</option>
-                <option value="IMMEDIATE_PRODUCTION">Immediate production</option>
-              </select>
-            </div>
-            <div>
-              <label for="composer-goal">Goal · optional</label>
-              <select id="composer-goal"><option value="">No Goal</option></select>
-            </div>
-            <div>
-              <label for="work-tags">Tags · comma separated</label>
-              <input id="work-tags" placeholder="mvp, docs">
-            </div>
-            <button id="submit-work" class="primary-button" type="submit">Create Work</button>
+          <div class="composer-options interaction-composer-options">
+            <p class="empty-copy">Your message becomes Interaction truth, not Work truth.</p>
+            <button id="submit-work" class="primary-button" type="submit">Send</button>
           </div>
         </form>
       </section>

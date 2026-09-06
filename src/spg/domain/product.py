@@ -186,6 +186,7 @@ class WorkRecord(BaseModel):
     verification_expectation: str | None
     code_change_proposal: RepositoryChangeProposal | None = None
     production_plan: ProductionPlanProposal | None = None
+    current_work_reality_revision_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -209,6 +210,7 @@ class WorkRuntimeBindingRecord(BaseModel):
     condition: ProductionCycleBindingCondition = (
         ProductionCycleBindingCondition.ADMITTED
     )
+    work_reality_revision_id: UUID | None = None
     engineering_scope_id: UUID
     resource_id: UUID
     production_run_id: UUID

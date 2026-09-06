@@ -7,6 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from spg.domain.change import CodeChangeContract, CodeVerificationObligation
+from spg.domain.interaction import SharedUnderstanding
 from spg.domain.product import (
     AttentionAction,
     AttentionItem,
@@ -38,6 +39,170 @@ class ApiDto(BaseModel):
 class GoalCreateRequest(ApiDto):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = None
+
+
+class InteractionCreateRequest(ApiDto):
+    human_identity: str = Field(default="human:local-operator", min_length=1, max_length=255)
+
+
+class InteractionMessageRequest(ApiDto):
+    content: str = Field(min_length=1)
+    human_identity: str = Field(default="human:local-operator", min_length=1, max_length=255)
+
+
+class InteractionRecordResponse(ApiDto):
+    record_id: UUID
+    sequence: int
+    actor: str
+    source: str
+    content: str
+    work_focus_id: UUID | None
+    created_at: datetime
+
+
+class InteractionMeaningResponse(ApiDto):
+    kind: str
+    statement: str
+    source_record_ids: tuple[UUID, ...]
+    confidence: float
+    rationale: str
+    clarification_required: bool
+
+
+class InteractionReadinessResponse(ApiDto):
+    status: str
+    profile: str
+    profile_version: str
+    satisfied_requirements: tuple[str, ...]
+    missing_information: tuple[str, ...]
+    unresolved_material_questions: tuple[str, ...]
+    reasons: tuple[str, ...]
+    basis_fingerprint: str
+
+
+class InteractionAssessmentResponse(ApiDto):
+    assessment_id: UUID
+    basis_fingerprint: str
+    basis_last_sequence: int
+    interpreted_motive: str | None
+    desired_outcome: str | None
+    candidate_context: tuple[str, ...]
+    candidate_constraints: tuple[str, ...]
+    current_requests: tuple[str, ...]
+    unresolved_material_questions: tuple[str, ...]
+    meanings: tuple[InteractionMeaningResponse, ...]
+    natural_response: str
+    readiness: InteractionReadinessResponse
+    provider_identity: str
+    model_identity: str | None
+    schema_version: str
+    created_at: datetime
+
+
+class SharedUnderstandingResponse(ApiDto):
+    interaction_id: UUID
+    condition: str
+    current_work_id: UUID | None
+    created_at: datetime
+    updated_at: datetime
+    records: tuple[InteractionRecordResponse, ...]
+    human_said: tuple[str, ...]
+    latest_assessment: InteractionAssessmentResponse | None
+    interpreted_motive: str | None
+    desired_outcome: str | None
+    candidate_context: tuple[str, ...]
+    candidate_constraints: tuple[str, ...]
+    current_requests: tuple[str, ...]
+    unresolved_material_questions: tuple[str, ...]
+    readiness: InteractionReadinessResponse | None
+    governed_work_id: UUID | None
+
+    @classmethod
+    def from_projection(cls, projection: SharedUnderstanding) -> Self:
+        assessment = projection.latest_assessment
+        readiness = projection.readiness
+        return cls(
+            interaction_id=projection.interaction.id,
+            condition=projection.interaction.condition.value,
+            current_work_id=projection.interaction.current_work_id,
+            created_at=projection.interaction.created_at,
+            updated_at=projection.interaction.updated_at,
+            records=tuple(
+                InteractionRecordResponse(
+                    record_id=item.id,
+                    sequence=item.sequence,
+                    actor=item.actor.value,
+                    source=item.source,
+                    content=item.content,
+                    work_focus_id=item.work_focus_id,
+                    created_at=item.created_at,
+                )
+                for item in projection.records
+            ),
+            human_said=projection.human_said,
+            latest_assessment=(
+                None
+                if assessment is None
+                else InteractionAssessmentResponse(
+                    assessment_id=assessment.id,
+                    basis_fingerprint=assessment.basis_fingerprint,
+                    basis_last_sequence=assessment.basis_last_sequence,
+                    interpreted_motive=assessment.interpreted_motive,
+                    desired_outcome=assessment.desired_outcome,
+                    candidate_context=assessment.candidate_context,
+                    candidate_constraints=assessment.candidate_constraints,
+                    current_requests=assessment.current_requests,
+                    unresolved_material_questions=assessment.unresolved_material_questions,
+                    meanings=tuple(
+                        InteractionMeaningResponse(
+                            kind=item.kind.value,
+                            statement=item.statement,
+                            source_record_ids=item.source_record_ids,
+                            confidence=item.confidence,
+                            rationale=item.rationale,
+                            clarification_required=item.clarification_required,
+                        )
+                        for item in assessment.meanings
+                    ),
+                    natural_response=assessment.natural_response,
+                    readiness=InteractionReadinessResponse(
+                        status=assessment.readiness.status.value,
+                        profile=assessment.readiness.profile,
+                        profile_version=assessment.readiness.profile_version,
+                        satisfied_requirements=assessment.readiness.satisfied_requirements,
+                        missing_information=assessment.readiness.missing_information,
+                        unresolved_material_questions=assessment.readiness.unresolved_material_questions,
+                        reasons=assessment.readiness.reasons,
+                        basis_fingerprint=assessment.readiness.basis_fingerprint,
+                    ),
+                    provider_identity=assessment.provider_identity,
+                    model_identity=assessment.model_identity,
+                    schema_version=assessment.schema_version,
+                    created_at=assessment.created_at,
+                )
+            ),
+            interpreted_motive=projection.interpreted_motive,
+            desired_outcome=projection.desired_outcome,
+            candidate_context=projection.candidate_context,
+            candidate_constraints=projection.candidate_constraints,
+            current_requests=projection.current_requests,
+            unresolved_material_questions=projection.unresolved_material_questions,
+            readiness=(
+                None
+                if readiness is None
+                else InteractionReadinessResponse(
+                    status=readiness.status.value,
+                    profile=readiness.profile,
+                    profile_version=readiness.profile_version,
+                    satisfied_requirements=readiness.satisfied_requirements,
+                    missing_information=readiness.missing_information,
+                    unresolved_material_questions=readiness.unresolved_material_questions,
+                    reasons=readiness.reasons,
+                    basis_fingerprint=readiness.basis_fingerprint,
+                )
+            ),
+            governed_work_id=projection.governed_work_id,
+        )
 
 
 class GoalResponse(ApiDto):

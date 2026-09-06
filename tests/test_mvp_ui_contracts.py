@@ -99,7 +99,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     state_javascript = (WEB_ROOT / "state.js").read_text(encoding="utf-8")
     combined = f"{html}\n{javascript}".lower()
 
-    assert "what do you want to get done?" in combined
+    assert "what would you like watt to understand?" in combined
     assert "goal" in combined
     assert "works" in combined
     assert "human authority" in combined
@@ -107,10 +107,12 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "work result" in combined
     assert "artifact target" in combined
     assert "artifact operation" in combined
-    assert 'id="work-mode"' in html
-    assert 'value="LONG_LIVED_STEERING" selected' in html
-    assert 'value="IMMEDIATE_PRODUCTION"' in html
-    assert "mode: elements.workMode.value" in javascript
+    assert 'id="interaction-history"' in html
+    assert 'id="shared-understanding"' in html
+    assert 'id="interaction-readiness"' in html
+    assert "ready to form work" in combined
+    assert 'id="work-mode"' not in html
+    assert 'id="work-tags"' not in html
     assert "placement rationale" in combined
     assert "production plan" in combined
     assert "single-pwu approach" in combined
@@ -145,6 +147,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "chat thread" not in combined
 
     for route in (
+        "/api/interactions",
         "/api/goals",
         "/api/works",
         "/refine",
@@ -170,6 +173,8 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "innerHTML" not in javascript
     assert "SPG_DATABASE_URL" not in javascript
     assert "OPENAI_API_KEY" not in javascript
+    assert 'apiRequest("/api/works", { method: "POST"' not in javascript
+    assert "No Work was created" in javascript
 
 
 def test_planb_composer_has_explicit_bounded_collapse_control() -> None:

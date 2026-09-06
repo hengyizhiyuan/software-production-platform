@@ -70,18 +70,28 @@ def test_production_metadata_contains_runtime_and_mvp_app_product_tables() -> No
         "recovery_assessments",
         "recovery_action_records",
         "maintenance_recovery_admissions",
+        "steering_plans",
+        "steering_plan_revisions",
+        "steering_steps",
+        "steering_decisions",
+        "steering_history_events",
+        "semantic_step_results",
         "product_goals",
         "engineering_resources",
         "product_works",
         "engineering_scopes",
         "engineering_resource_bindings",
+        "product_interactions",
+        "interaction_records",
+        "interaction_assessments",
+        "work_reality_revisions",
         "work_runtime_bindings",
     }
 
 
-def test_alembic_environment_has_repository_change_proposal_head() -> None:
+def test_alembic_environment_has_wic_interaction_truth_spine_head() -> None:
     project_root = Path(__file__).resolve().parents[1]
     config = Config(project_root / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260904_17"]
+    assert scripts.get_heads() == ["20260907_23"]

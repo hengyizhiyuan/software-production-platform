@@ -22,6 +22,9 @@ from spg.api.dto import (
     GoalSummaryResponse,
     HealthResponse,
     HumanDecisionRequest,
+    InteractionCreateRequest,
+    InteractionMessageRequest,
+    SharedUnderstandingResponse,
     RuntimeActivationResponse,
     SteeringPlanResponse,
     WorkRefineRequest,
@@ -31,6 +34,7 @@ from spg.api.dto import (
 )
 from spg.application.bootstrap import Application, bootstrap
 from spg.application.orchestration import ProductionOrchestrator
+from spg.application.interaction import WorkInteractionService
 from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.steering_bootstrap import SteeringBootstrapService
@@ -44,6 +48,10 @@ from spg.domain.product import (
     WorkRefinementRequest,
     WorkProjection,
     WorkStatus,
+)
+from spg.domain.interaction import (
+    InteractionInvariantViolation,
+    InteractionRecordNotFound,
 )
 from spg.domain.steering import SteeringRecordNotFound
 from spg.infrastructure.persistence import Database, DatabaseConfigurationError
@@ -81,6 +89,7 @@ def create_http_application(
     steering_driver: PlanSteeringDriver | None = None,
     steering_bootstrap: SteeringBootstrapService | None = None,
     runtime_activation: RuntimeActivationService | None = None,
+    interaction_service: WorkInteractionService | None = None,
 ) -> FastAPI:
     """Compose one ASGI application over the existing application bootstrap path."""
 
@@ -112,6 +121,9 @@ def create_http_application(
         selected_steering_driver,
         selected_orchestrator,
     )
+    selected_interaction = interaction_service
+    if selected_interaction is None and hasattr(container, "interaction"):
+        selected_interaction = container.interaction(selected_database)
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
@@ -138,6 +150,7 @@ def create_http_application(
     api.state.plan_steering_driver = selected_steering_driver
     api.state.steering_bootstrap = selected_steering_bootstrap
     api.state.work_post_admission = selected_post_admission
+    api.state.interaction_service = selected_interaction
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
@@ -201,9 +214,10 @@ def create_http_application(
 
     @api.exception_handler(ProductRecordNotFound)
     @api.exception_handler(SteeringRecordNotFound)
+    @api.exception_handler(InteractionRecordNotFound)
     async def not_found_handler(
         _request: Request,
-        error: ProductRecordNotFound | SteeringRecordNotFound,
+        error: ProductRecordNotFound | SteeringRecordNotFound | InteractionRecordNotFound,
     ) -> JSONResponse:
         return _error(404, "NOT_FOUND", str(error))
 
@@ -213,6 +227,13 @@ def create_http_application(
         error: ProductInvariantViolation,
     ) -> JSONResponse:
         return _error(409, _invariant_code(error), str(error))
+
+    @api.exception_handler(InteractionInvariantViolation)
+    async def interaction_invariant_handler(
+        _request: Request,
+        error: InteractionInvariantViolation,
+    ) -> JSONResponse:
+        return _error(409, "INTERACTION_INVARIANT", str(error))
 
     @api.exception_handler(ProductHttpError)
     async def product_http_handler(
@@ -268,6 +289,74 @@ def create_http_application(
     @api.get("/app", include_in_schema=False)
     def product_ui() -> FileResponse:
         return FileResponse(web_root / "index.html", media_type="text/html")
+
+    def required_interaction_service() -> WorkInteractionService:
+        if selected_interaction is None:
+            raise ProductHttpError(
+                503,
+                "INTERACTION_UNAVAILABLE",
+                "Work Interaction capability is unavailable",
+            )
+        return selected_interaction
+
+    @api.post(
+        "/api/interactions",
+        response_model=SharedUnderstandingResponse,
+        status_code=201,
+    )
+    def create_interaction(
+        request: InteractionCreateRequest,
+    ) -> SharedUnderstandingResponse:
+        service = required_interaction_service()
+        interaction = service.create_interaction(human_identity=request.human_identity)
+        return SharedUnderstandingResponse.from_projection(
+            service.get_shared_understanding(interaction.id)
+        )
+
+    @api.get(
+        "/api/interactions",
+        response_model=list[SharedUnderstandingResponse],
+    )
+    def list_interactions() -> list[SharedUnderstandingResponse]:
+        return [
+            SharedUnderstandingResponse.from_projection(item)
+            for item in required_interaction_service().list_interactions()
+        ]
+
+    @api.get(
+        "/api/interactions/{interaction_id}",
+        response_model=SharedUnderstandingResponse,
+    )
+    def get_interaction(interaction_id: UUID) -> SharedUnderstandingResponse:
+        return SharedUnderstandingResponse.from_projection(
+            required_interaction_service().get_shared_understanding(interaction_id)
+        )
+
+    @api.get(
+        "/api/interactions/{interaction_id}/shared-understanding",
+        response_model=SharedUnderstandingResponse,
+    )
+    def get_shared_understanding(interaction_id: UUID) -> SharedUnderstandingResponse:
+        return SharedUnderstandingResponse.from_projection(
+            required_interaction_service().get_shared_understanding(interaction_id)
+        )
+
+    @api.post(
+        "/api/interactions/{interaction_id}/records",
+        response_model=SharedUnderstandingResponse,
+        status_code=201,
+    )
+    def append_interaction_record(
+        interaction_id: UUID,
+        request: InteractionMessageRequest,
+    ) -> SharedUnderstandingResponse:
+        return SharedUnderstandingResponse.from_projection(
+            required_interaction_service().append_and_assess(
+                interaction_id,
+                request.content,
+                human_identity=request.human_identity,
+            )
+        )
 
     @api.post("/api/goals", response_model=GoalResponse, status_code=201)
     def create_goal(request: GoalCreateRequest) -> GoalResponse:
