@@ -100,6 +100,7 @@
           <p class="eyebrow">Pre-Work Interaction</p>
           <h2>Tell Watt what is on your mind.</h2>
           <p>Explore or clarify naturally. No governed Work exists until a later Human admission.</p>
+        </div>
 
           <section id="interaction-surface" class="interaction-surface" aria-labelledby="interaction-heading">
             <div class="panel-title-row">
@@ -127,12 +128,20 @@
                 <div><dt>Current requests</dt><dd id="interpreted-requests">None yet</dd></div>
                 <div><dt>Candidate constraints</dt><dd id="interpreted-constraints">None yet</dd></div>
                 <div><dt>Unresolved material questions</dt><dd id="interpreted-questions">Tell Watt what you want to explore.</dd></div>
+                <div><dt>Engineering resource</dt><dd id="interaction-resource">Not bound yet</dd></div>
+                <div><dt>Authority envelope</dt><dd id="interaction-scope">Not bound yet</dd></div>
                 <div><dt>Governed / admitted</dt><dd id="governed-understanding">None — no Work exists</dd></div>
               </dl>
               <p id="readiness-affordance" class="empty-copy">Not ready to form Work.</p>
+              <div id="interaction-admission" class="operator-panel compact-admission" hidden>
+                <div class="operator-identity">
+                  <label for="interaction-authority-identity">Human authority</label>
+                  <input id="interaction-authority-identity" value="human:local-operator" autocomplete="off">
+                </div>
+                <button id="admit-work-control" class="primary-button" type="button">Admit governed Work</button>
+              </div>
             </section>
           </section>
-        </div>
 
         <article id="selected-work" class="selected-work" hidden>
           <header class="work-header">

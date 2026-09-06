@@ -265,6 +265,11 @@ class SteeringProductionService:
         with self.database.unit_of_work() as unit_of_work:
             product = ProductStore(unit_of_work.session)
             runtime = RuntimeStore(unit_of_work.session)
+            current_work = product.work(request.work_id)
+            if current_work is None:
+                raise ProductInvariantViolation(
+                    "Work authority envelope disappeared before production admission"
+                )
             if product.runtime_binding_for_step(request.steering_step_id) is not None:
                 raise SteeringInvariantViolation(
                     "Steering PRODUCE Step already has an admitted production cycle"
@@ -300,6 +305,9 @@ class SteeringProductionService:
                     "cycle_number": cycle_number,
                     "steering_step_id": request.steering_step_id,
                     "steering_decision_id": request.steering_decision_id,
+                    "work_reality_revision_id": (
+                        current_work.current_work_reality_revision_id
+                    ),
                     "engineering_scope_id": request.engineering_scope_id,
                     "resource_id": request.engineering_resource_id,
                     "production_run_id": spine.run.id,

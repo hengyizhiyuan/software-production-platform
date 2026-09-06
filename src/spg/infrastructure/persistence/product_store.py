@@ -27,6 +27,7 @@ from spg.domain.product import (
     WorkRuntimeBindingRecord,
 )
 from spg.domain.runtime import CompletionContract
+from spg.domain.interaction import WorkRealityRevision
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
 from spg.infrastructure.persistence.product_schema import (
@@ -35,6 +36,7 @@ from spg.infrastructure.persistence.product_schema import (
     engineering_scopes,
     product_goals,
     product_works,
+    work_reality_revisions,
     work_runtime_bindings,
 )
 from spg.infrastructure.persistence.runtime_schema import (
@@ -122,6 +124,11 @@ class ProductStore:
         ).scalar_one_or_none()
         if existing is not None:
             self.session.execute(
+                update(product_works)
+                .where(product_works.c.id == scope_values["work_id"])
+                .values(current_engineering_scope_id=None)
+            )
+            self.session.execute(
                 delete(engineering_resource_bindings).where(
                     engineering_resource_bindings.c.engineering_scope_id == existing
                 )
@@ -132,6 +139,43 @@ class ProductStore:
         self.session.execute(insert(engineering_scopes).values(**scope_values))
         for values in binding_values:
             self.session.execute(insert(engineering_resource_bindings).values(**values))
+        self.session.execute(
+            update(product_works)
+            .where(product_works.c.id == scope_values["work_id"])
+            .values(current_engineering_scope_id=scope_values["id"])
+        )
+
+    def insert_scope(
+        self,
+        *,
+        scope_values: Mapping[str, Any],
+        binding_values: tuple[Mapping[str, Any], ...],
+    ) -> None:
+        self.session.execute(insert(engineering_scopes).values(**scope_values))
+        for values in binding_values:
+            self.session.execute(insert(engineering_resource_bindings).values(**values))
+
+    def insert_work_reality_revision(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(work_reality_revisions).values(**values))
+
+    def work_reality_revision(
+        self, revision_id: UUID
+    ) -> WorkRealityRevision | None:
+        row = self._one(
+            work_reality_revisions,
+            work_reality_revisions.c.id == revision_id,
+        )
+        return None if row is None else self._work_reality_revision(row)
+
+    def current_work_reality_revision(
+        self, work_id: UUID
+    ) -> WorkRealityRevision | None:
+        revision_id = self.session.execute(
+            select(product_works.c.current_work_reality_revision_id).where(
+                product_works.c.id == work_id
+            )
+        ).scalar_one_or_none()
+        return None if revision_id is None else self.work_reality_revision(revision_id)
 
     def set_scope_condition(
         self,
@@ -545,6 +589,38 @@ class ProductStore:
             engineering_scope_id=row["engineering_scope_id"],
             resource_id=row["resource_id"],
             condition=ResourceBindingCondition(row["condition"]),
+            created_at=row["created_at"],
+        )
+
+    @staticmethod
+    def _work_reality_revision(row: Mapping[str, Any]) -> WorkRealityRevision:
+        return WorkRealityRevision(
+            id=row["id"],
+            work_id=row["work_id"],
+            revision_number=row["revision_number"],
+            previous_revision_id=row["previous_revision_id"],
+            basis_fingerprint=row["basis_fingerprint"],
+            revision_fingerprint=row["revision_fingerprint"],
+            source_interaction_id=row["source_interaction_id"],
+            source_assessment_id=row["source_assessment_id"],
+            motive=row["motive"],
+            desired_outcome=row["desired_outcome"],
+            context_facts=tuple(row["context_facts"]),
+            constraints=tuple(row["constraints"]),
+            requests=tuple(row["requests"]),
+            engineering_scope_id=row["engineering_scope_id"],
+            engineering_resource_id=row["engineering_resource_id"],
+            scope_basis_fingerprint=row["scope_basis_fingerprint"],
+            repository_identity=row["repository_identity"],
+            repository_ref=row["repository_ref"],
+            source_baseline_id=row["source_baseline_id"],
+            source_revision=row["source_revision"],
+            governance_record_id=row["governance_record_id"],
+            supporting_references=tuple(row["supporting_references"]),
+            change_set=tuple(row["change_set"]),
+            rationale=row["rationale"],
+            admitted_by=row["admitted_by"],
+            schema_version=row["schema_version"],
             created_at=row["created_at"],
         )
 

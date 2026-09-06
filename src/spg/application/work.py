@@ -12,6 +12,7 @@ from spg.application.completion import CompletionService
 from spg.application.execution import ExecutionService
 from spg.application.governance import CandidateGovernanceService
 from spg.application.integration import RepositoryIntegrationService
+from spg.application.interaction import interaction_basis_fingerprint
 from spg.application.planning import ProductionPlanningService
 from spg.application.preparation import PreparationService
 from spg.application.runtime import RuntimeService
@@ -34,6 +35,12 @@ from spg.domain.governance import (
     HumanAuthorizationRequest,
 )
 from spg.domain.integration import RepositoryIntegrationRequest
+from spg.domain.interaction import (
+    InteractionCondition,
+    InteractionInvariantViolation,
+    InteractionRecordNotFound,
+    WorkAdmissionReadinessStatus,
+)
 from spg.domain.preparation import (
     ContextArtifactSelection,
     ContextPackageRequest,
@@ -96,6 +103,7 @@ from spg.domain.verifier import VerificationCapabilityContract
 from spg.domain.steering import RealityReferenceKind, SteeringOutcome
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.providers.rule_based_planner import RuleBasedProductionPlanner
@@ -110,6 +118,7 @@ DEFAULT_BINDING = ExecutorBinding(
     capability_identity="capability:executor",
     profile_identity="profile:local-mvp",
 )
+WORK_REALITY_SCHEMA_VERSION = "wic-work-reality-v1"
 
 
 class WorkApplicationService:
@@ -268,6 +277,320 @@ class WorkApplicationService:
                     "created_at": timestamp,
                     "updated_at": timestamp,
                 }
+            )
+            unit_of_work.commit()
+        return self.get_work(work_id)
+
+    def admit_interaction_work(
+        self,
+        interaction_id: UUID,
+        *,
+        assessment_id: UUID,
+        basis_fingerprint: str,
+        authority_identity: str,
+        rationale: str | None = None,
+    ) -> WorkProjection:
+        """Atomically admit one exact READY interpretation as long-lived Work."""
+
+        identity = authority_identity.strip()
+        if not identity:
+            raise ProductInvariantViolation("Human authority identity is required")
+        timestamp = datetime.now(UTC)
+        with self.database.unit_of_work() as unit_of_work:
+            interactions = InteractionStore(unit_of_work.session)
+            product = ProductStore(unit_of_work.session)
+            runtime = RuntimeStore(unit_of_work.session)
+            interaction = interactions.interaction(interaction_id, for_update=True)
+            if interaction is None:
+                raise InteractionRecordNotFound(
+                    f"Interaction not found: {interaction_id}"
+                )
+            if interaction.condition is not InteractionCondition.OPEN:
+                raise InteractionInvariantViolation(
+                    "Only an open Interaction can admit governed Work"
+                )
+            records = interactions.records(interaction_id)
+            if not records:
+                raise InteractionInvariantViolation(
+                    "Interaction has no Work admission basis"
+                )
+            assessment = interactions.assessment(assessment_id)
+            if assessment is None or assessment.interaction_id != interaction_id:
+                raise InteractionRecordNotFound(
+                    f"Interaction assessment not found: {assessment_id}"
+                )
+            work_id = uuid5(
+                NAMESPACE_URL,
+                f"spg:wic-work:{interaction_id}:{assessment.id}:{basis_fingerprint}",
+            )
+            if interaction.current_work_id is not None:
+                if interaction.current_work_id != work_id:
+                    raise InteractionInvariantViolation(
+                        "Interaction already focuses a different governed Work"
+                    )
+                revision = product.current_work_reality_revision(work_id)
+                if (
+                    revision is None
+                    or revision.source_assessment_id != assessment.id
+                    or revision.basis_fingerprint != basis_fingerprint
+                ):
+                    raise ProductInvariantViolation(
+                        "Interaction focus and governed Work revision diverged"
+                    )
+                unit_of_work.rollback()
+                return self.get_work(work_id)
+
+            current_basis = interaction_basis_fingerprint(interaction, records)
+            if current_basis != basis_fingerprint:
+                raise InteractionInvariantViolation(
+                    "READY assessment is stale against current Interaction Reality"
+                )
+            latest = interactions.latest_assessment(interaction_id)
+            if (
+                latest is None
+                or latest.id != assessment.id
+                or assessment.basis_fingerprint != current_basis
+                or assessment.basis_last_sequence != records[-1].sequence
+            ):
+                raise InteractionInvariantViolation(
+                    "Only the exact current assessment may admit governed Work"
+                )
+            if (
+                assessment.readiness.status
+                is not WorkAdmissionReadinessStatus.READY
+                or assessment.readiness.basis_fingerprint != current_basis
+                or assessment.readiness.profile != WorkMode.LONG_LIVED_STEERING.value
+            ):
+                raise InteractionInvariantViolation(
+                    "Interaction is not READY for long-lived Work admission"
+                )
+            motive = (assessment.interpreted_motive or "").strip()
+            desired_outcome = (assessment.desired_outcome or "").strip()
+            if not motive or not desired_outcome:
+                raise InteractionInvariantViolation(
+                    "READY assessment lacks a valid Motive or desired outcome"
+                )
+
+            resource = product.default_resource()
+            if resource is None:
+                raise ProductInvariantViolation(
+                    "A configured default Engineering Resource is required"
+                )
+            pointer = runtime.current_pointer(for_update=True)
+            if pointer is None:
+                raise ProductInvariantViolation(
+                    "A Current Trusted Baseline is required for Work admission"
+                )
+            baseline = runtime.snapshot(pointer.snapshot_id)
+            if baseline is None:
+                raise ProductInvariantViolation(
+                    "Current Trusted Baseline snapshot is missing"
+                )
+            if (
+                baseline.repository_identity != resource.repository_identity
+                or baseline.repository_ref != resource.authoritative_ref
+            ):
+                raise ProductInvariantViolation(
+                    "Engineering Resource does not match current governed Baseline"
+                )
+
+            scope_id = uuid5(NAMESPACE_URL, f"spg:wic-scope:{work_id}")
+            governance_id = uuid5(NAMESPACE_URL, f"spg:wic-governance:{work_id}")
+            revision_id = uuid5(NAMESPACE_URL, f"spg:wic-work-revision:1:{work_id}")
+            scope_summary = (
+                "Long-lived Work authority envelope for "
+                f"{resource.repository_identity} at {resource.authoritative_ref}"
+            )
+            scope_fingerprint = self._fingerprint(
+                {
+                    "work_id": str(work_id),
+                    "assessment_id": str(assessment.id),
+                    "basis_fingerprint": current_basis,
+                    "resource_id": str(resource.id),
+                    "repository_identity": resource.repository_identity,
+                    "repository_ref": resource.authoritative_ref,
+                    "source_baseline_id": str(baseline.id),
+                    "source_revision": baseline.repository_revision,
+                    "constraints": list(assessment.candidate_constraints),
+                }
+            )
+            admission_rationale = (
+                rationale.strip()
+                if rationale is not None and rationale.strip()
+                else "Human admitted the exact READY Shared Understanding as governed long-lived Work."
+            )
+            supporting_references = [
+                f"INTERACTION_RECORD:{record.id}"
+                for record in records
+                if record.sequence <= assessment.basis_last_sequence
+            ]
+            revision_payload = {
+                "work_id": str(work_id),
+                "revision_number": 1,
+                "previous_revision_id": None,
+                "basis_fingerprint": current_basis,
+                "source_interaction_id": str(interaction_id),
+                "source_assessment_id": str(assessment.id),
+                "motive": motive,
+                "desired_outcome": desired_outcome,
+                "context_facts": list(assessment.candidate_context),
+                "constraints": list(assessment.candidate_constraints),
+                "requests": list(assessment.current_requests),
+                "engineering_scope_id": str(scope_id),
+                "engineering_resource_id": str(resource.id),
+                "scope_basis_fingerprint": scope_fingerprint,
+                "repository_identity": resource.repository_identity,
+                "repository_ref": resource.authoritative_ref,
+                "source_baseline_id": str(baseline.id),
+                "source_revision": baseline.repository_revision,
+                "governance_record_id": str(governance_id),
+                "supporting_references": supporting_references,
+                "change_set": [],
+                "rationale": admission_rationale,
+                "admitted_by": identity,
+                "schema_version": WORK_REALITY_SCHEMA_VERSION,
+            }
+            revision_fingerprint = self._fingerprint(revision_payload)
+
+            existing = product.work(work_id)
+            if existing is None:
+                product.insert_work(
+                    {
+                        "id": work_id,
+                        "goal_id": None,
+                        "work_mode": WorkMode.LONG_LIVED_STEERING.value,
+                        "raw_user_requirement": motive,
+                        "refined_title": self._default_title(motive),
+                        "desired_outcome": desired_outcome,
+                        "constraints": list(assessment.candidate_constraints),
+                        "tags": [],
+                        "condition": WorkCondition.READY.value,
+                        "scope_summary": scope_summary,
+                        "production_objective": desired_outcome,
+                        "expected_artifact_path": None,
+                        "artifact_operation": None,
+                        "artifact_placement_rationale": None,
+                        "artifact_target_confidence": None,
+                        "artifact_source_baseline_id": None,
+                        "artifact_source_revision": None,
+                        "verification_expectation": (
+                            "Verify the requested outcome against independent repository Reality"
+                        ),
+                        "code_change_proposal": None,
+                        "production_plan_proposal": None,
+                        "current_work_reality_revision_id": None,
+                        "current_engineering_scope_id": None,
+                        "created_at": timestamp,
+                        "updated_at": timestamp,
+                    }
+                )
+                product.insert_scope(
+                    scope_values={
+                        "id": scope_id,
+                        "work_id": work_id,
+                        "summary": scope_summary,
+                        "fingerprint": scope_fingerprint,
+                        "condition": EngineeringScopeCondition.ADMITTED.value,
+                        "created_at": timestamp,
+                        "updated_at": timestamp,
+                    },
+                    binding_values=(
+                        {
+                            "id": uuid5(
+                                NAMESPACE_URL,
+                                f"spg:wic-scope-binding:{scope_id}:{resource.id}",
+                            ),
+                            "engineering_scope_id": scope_id,
+                            "resource_id": resource.id,
+                            "condition": ResourceBindingCondition.ACTIVE.value,
+                            "created_at": timestamp,
+                        },
+                    ),
+                )
+                runtime.insert_governance(
+                    {
+                        "id": governance_id,
+                        "decision_type": "ADMIT_LONG_LIVED_WORK",
+                        "authority_identity": identity,
+                        "subject_type": "PRODUCT_WORK",
+                        "subject_identity": str(work_id),
+                        "scope": {
+                            "work_mode": WorkMode.LONG_LIVED_STEERING.value,
+                            "source_interaction_id": str(interaction_id),
+                            "source_assessment_id": str(assessment.id),
+                            "assessment_basis_fingerprint": current_basis,
+                            "work_reality_revision_id": str(revision_id),
+                            "engineering_scope_id": str(scope_id),
+                            "scope_fingerprint": scope_fingerprint,
+                            "resource_id": str(resource.id),
+                            "repository_identity": resource.repository_identity,
+                            "repository_ref": resource.authoritative_ref,
+                            "source_baseline_id": str(baseline.id),
+                            "source_revision": baseline.repository_revision,
+                            "desired_outcome": desired_outcome,
+                            "constraints": list(assessment.candidate_constraints),
+                            "artifact_target": None,
+                            "source_change_proposal_fingerprint": None,
+                        },
+                        "rationale": admission_rationale,
+                        "created_at": timestamp,
+                    }
+                )
+                product.insert_work_reality_revision(
+                    {
+                        "id": revision_id,
+                        "work_id": work_id,
+                        "revision_number": 1,
+                        "previous_revision_id": None,
+                        "basis_fingerprint": current_basis,
+                        "revision_fingerprint": revision_fingerprint,
+                        "source_interaction_id": interaction_id,
+                        "source_assessment_id": assessment.id,
+                        "motive": motive,
+                        "desired_outcome": desired_outcome,
+                        "context_facts": list(assessment.candidate_context),
+                        "constraints": list(assessment.candidate_constraints),
+                        "requests": list(assessment.current_requests),
+                        "engineering_scope_id": scope_id,
+                        "engineering_resource_id": resource.id,
+                        "scope_basis_fingerprint": scope_fingerprint,
+                        "repository_identity": resource.repository_identity,
+                        "repository_ref": resource.authoritative_ref,
+                        "source_baseline_id": baseline.id,
+                        "source_revision": baseline.repository_revision,
+                        "governance_record_id": governance_id,
+                        "supporting_references": supporting_references,
+                        "change_set": [],
+                        "rationale": admission_rationale,
+                        "admitted_by": identity,
+                        "schema_version": WORK_REALITY_SCHEMA_VERSION,
+                        "created_at": timestamp,
+                    }
+                )
+                product.update_work(
+                    work_id,
+                    {
+                        "current_work_reality_revision_id": revision_id,
+                        "current_engineering_scope_id": scope_id,
+                        "updated_at": timestamp,
+                    },
+                )
+            else:
+                revision = product.current_work_reality_revision(work_id)
+                if (
+                    revision is None
+                    or revision.source_assessment_id != assessment.id
+                    or revision.revision_fingerprint != revision_fingerprint
+                ):
+                    raise ProductInvariantViolation(
+                        "Existing governed Work does not match exact admission basis"
+                    )
+
+            interactions.set_current_work(
+                interaction_id,
+                work_id=work_id,
+                updated_by=identity,
+                updated_at=timestamp,
             )
             unit_of_work.commit()
         return self.get_work(work_id)
@@ -792,6 +1115,9 @@ class WorkApplicationService:
                     "cycle_number": 1,
                     "steering_step_id": None,
                     "steering_decision_id": None,
+                    "work_reality_revision_id": (
+                        current.current_work_reality_revision_id
+                    ),
                     "engineering_scope_id": scope.id,
                     "resource_id": resource.id,
                     "production_run_id": spine.run.id,
@@ -1565,6 +1891,7 @@ class WorkApplicationService:
                 WorkStatus.BLOCKED,
             },
             result_summary=result_summary,
+            current_work_reality_revision_id=work.current_work_reality_revision_id,
             steering_enabled=steering_plan is not None,
             current_steering_step_id=(
                 None if current_steering_step is None else current_steering_step.id

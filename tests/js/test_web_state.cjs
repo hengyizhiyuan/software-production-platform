@@ -157,9 +157,14 @@ test("Work Composer preserves the user's expanded state across reloads", () => {
   assert.ok((appSource.match(/catch \(_error\)/g) || []).length >= 2);
 });
 
-test("pre-Work composer uses Interaction truth and never creates Work", () => {
+test("pre-Work composer keeps messaging separate from explicit governed admission", () => {
   assert.match(appSource, /apiRequest\("\/api\/interactions"/);
   assert.match(appSource, /\/api\/interactions\/\$\{state\.selectedInteractionId\}\/records/);
   assert.doesNotMatch(appSource, /apiRequest\("\/api\/works", \{ method: "POST"/);
   assert.match(appSource, /No Work was created/);
+  assert.match(appSource, /\/api\/interactions\/\$\{projection\.interaction_id\}\/admit-work/);
+  assert.match(appSource, /assessment_id: assessment\.assessment_id/);
+  assert.match(appSource, /basis_fingerprint: assessment\.basis_fingerprint/);
+  assert.match(appSource, /admitWorkControl\.addEventListener\("click", admitInteractionWork\)/);
+  assert.doesNotMatch(appSource, /countdown/i);
 });

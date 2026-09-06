@@ -31,7 +31,10 @@ from spg.domain.steering import (
     SteeringStepState,
     SteeringStepType,
 )
-from spg.infrastructure.persistence.product_schema import product_works
+from spg.infrastructure.persistence.product_schema import (
+    product_works,
+    work_reality_revisions,
+)
 from spg.infrastructure.persistence.runtime_schema import (
     baseline_candidates,
     completion_evaluations,
@@ -56,6 +59,7 @@ from spg.infrastructure.persistence.steering_schema import (
 
 _REALITY_TABLES = {
     RealityReferenceKind.WORK: product_works,
+    RealityReferenceKind.WORK_REALITY_REVISION: work_reality_revisions,
     RealityReferenceKind.GOVERNANCE_DECISION: governance_records,
     RealityReferenceKind.TRUSTED_BASELINE: production_snapshots,
     RealityReferenceKind.REPOSITORY_OBSERVATION: repository_observations,

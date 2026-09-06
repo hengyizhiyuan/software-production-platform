@@ -24,6 +24,7 @@ from spg.domain.interaction import (
 )
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.interaction_store import InteractionStore
+from spg.infrastructure.persistence.product_store import ProductStore
 
 
 ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v1"
@@ -316,18 +317,31 @@ class WorkInteractionService:
     def get_shared_understanding(self, interaction_id: UUID) -> SharedUnderstanding:
         with self.database.unit_of_work() as uow:
             store = InteractionStore(uow.session)
+            product = ProductStore(uow.session)
             interaction = store.interaction(interaction_id)
             if interaction is None:
                 raise InteractionRecordNotFound(f"Interaction not found: {interaction_id}")
             records = store.records(interaction_id)
             latest = store.latest_assessment(interaction_id)
+            resource = product.default_resource()
+            governed_revision = (
+                None
+                if interaction.current_work_id is None
+                else product.current_work_reality_revision(interaction.current_work_id)
+            )
         current_basis = (
             interaction_basis_fingerprint(interaction, records) if records else None
         )
         # A historical assessment remains evidence but is not projected as the
         # current understanding after a newer record arrives.
         if latest is not None and latest.basis_fingerprint != current_basis:
-            latest = None
+            admitted_assessment_is_still_the_latest_human_basis = bool(
+                governed_revision is not None
+                and governed_revision.source_assessment_id == latest.id
+                and latest.basis_last_sequence == records[-1].sequence
+            )
+            if not admitted_assessment_is_still_the_latest_human_basis:
+                latest = None
         return SharedUnderstanding(
             interaction=interaction,
             records=records,
@@ -344,7 +358,25 @@ class WorkInteractionService:
                 () if latest is None else latest.unresolved_material_questions
             ),
             readiness=None if latest is None else latest.readiness,
+            candidate_engineering_resource_id=(
+                None if resource is None else resource.id
+            ),
+            candidate_repository_identity=(
+                None if resource is None else resource.repository_identity
+            ),
+            candidate_repository_ref=(
+                None if resource is None else resource.authoritative_ref
+            ),
+            candidate_scope_summary=(
+                None
+                if resource is None
+                else (
+                    "Long-lived Work authority envelope for "
+                    f"{resource.repository_identity} at {resource.authoritative_ref}"
+                )
+            ),
             governed_work_id=interaction.current_work_id,
+            governed_revision=governed_revision,
         )
 
     def pending_assessment_interactions(self) -> tuple[UUID, ...]:

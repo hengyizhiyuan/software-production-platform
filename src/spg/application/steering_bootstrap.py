@@ -172,6 +172,18 @@ class SteeringBootstrapService:
             steps = self.capability.form(work)
 
         baseline = self.runtime.current_baseline()
+        work_reference = RealityReference(
+            kind=(
+                RealityReferenceKind.WORK_REALITY_REVISION
+                if work.current_work_reality_revision_id is not None
+                else RealityReferenceKind.WORK
+            ),
+            identity=(
+                work.current_work_reality_revision_id
+                if work.current_work_reality_revision_id is not None
+                else work.id
+            ),
+        )
         return self.steering.create_plan(
             CreateSteeringPlanRequest(
                 work_id=work_id,
@@ -180,6 +192,7 @@ class SteeringBootstrapService:
                     f"Human-admitted Work envelope by {self.capability.identity}"
                 ),
                 reality_refs=(
+                    work_reference,
                     RealityReference(
                         kind=RealityReferenceKind.TRUSTED_BASELINE,
                         identity=baseline.id,

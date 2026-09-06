@@ -393,6 +393,11 @@ h3 {
   font-size: 13px;
 }
 
+.compact-admission {
+  margin-top: 14px;
+  align-items: end;
+}
+
 .inline-form {
   margin: 16px 0;
   padding: 13px;

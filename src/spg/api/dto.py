@@ -50,6 +50,15 @@ class InteractionMessageRequest(ApiDto):
     human_identity: str = Field(default="human:local-operator", min_length=1, max_length=255)
 
 
+class InteractionWorkAdmissionRequest(ApiDto):
+    assessment_id: UUID
+    basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    authority_identity: str = Field(
+        default="human:local-operator", min_length=1, max_length=255
+    )
+    rationale: str | None = None
+
+
 class InteractionRecordResponse(ApiDto):
     record_id: UUID
     sequence: int
@@ -99,6 +108,36 @@ class InteractionAssessmentResponse(ApiDto):
     created_at: datetime
 
 
+class WorkRealityRevisionResponse(ApiDto):
+    revision_id: UUID
+    work_id: UUID
+    revision_number: int
+    previous_revision_id: UUID | None
+    basis_fingerprint: str
+    revision_fingerprint: str
+    source_interaction_id: UUID
+    source_assessment_id: UUID
+    motive: str
+    desired_outcome: str
+    context_facts: tuple[str, ...]
+    constraints: tuple[str, ...]
+    requests: tuple[str, ...]
+    engineering_scope_id: UUID
+    engineering_resource_id: UUID
+    scope_basis_fingerprint: str
+    repository_identity: str
+    repository_ref: str
+    source_baseline_id: UUID
+    source_revision: str
+    governance_record_id: UUID
+    supporting_references: tuple[str, ...]
+    change_set: tuple[str, ...]
+    rationale: str
+    admitted_by: str
+    schema_version: str
+    created_at: datetime
+
+
 class SharedUnderstandingResponse(ApiDto):
     interaction_id: UUID
     condition: str
@@ -115,7 +154,12 @@ class SharedUnderstandingResponse(ApiDto):
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
     readiness: InteractionReadinessResponse | None
+    candidate_engineering_resource_id: UUID | None
+    candidate_repository_identity: str | None
+    candidate_repository_ref: str | None
+    candidate_scope_summary: str | None
     governed_work_id: UUID | None
+    governed_revision: WorkRealityRevisionResponse | None
 
     @classmethod
     def from_projection(cls, projection: SharedUnderstanding) -> Self:
@@ -201,7 +245,46 @@ class SharedUnderstandingResponse(ApiDto):
                     basis_fingerprint=readiness.basis_fingerprint,
                 )
             ),
+            candidate_engineering_resource_id=(
+                projection.candidate_engineering_resource_id
+            ),
+            candidate_repository_identity=projection.candidate_repository_identity,
+            candidate_repository_ref=projection.candidate_repository_ref,
+            candidate_scope_summary=projection.candidate_scope_summary,
             governed_work_id=projection.governed_work_id,
+            governed_revision=(
+                None
+                if projection.governed_revision is None
+                else WorkRealityRevisionResponse(
+                    revision_id=projection.governed_revision.id,
+                    work_id=projection.governed_revision.work_id,
+                    revision_number=projection.governed_revision.revision_number,
+                    previous_revision_id=projection.governed_revision.previous_revision_id,
+                    basis_fingerprint=projection.governed_revision.basis_fingerprint,
+                    revision_fingerprint=projection.governed_revision.revision_fingerprint,
+                    source_interaction_id=projection.governed_revision.source_interaction_id,
+                    source_assessment_id=projection.governed_revision.source_assessment_id,
+                    motive=projection.governed_revision.motive,
+                    desired_outcome=projection.governed_revision.desired_outcome,
+                    context_facts=projection.governed_revision.context_facts,
+                    constraints=projection.governed_revision.constraints,
+                    requests=projection.governed_revision.requests,
+                    engineering_scope_id=projection.governed_revision.engineering_scope_id,
+                    engineering_resource_id=projection.governed_revision.engineering_resource_id,
+                    scope_basis_fingerprint=projection.governed_revision.scope_basis_fingerprint,
+                    repository_identity=projection.governed_revision.repository_identity,
+                    repository_ref=projection.governed_revision.repository_ref,
+                    source_baseline_id=projection.governed_revision.source_baseline_id,
+                    source_revision=projection.governed_revision.source_revision,
+                    governance_record_id=projection.governed_revision.governance_record_id,
+                    supporting_references=projection.governed_revision.supporting_references,
+                    change_set=projection.governed_revision.change_set,
+                    rationale=projection.governed_revision.rationale,
+                    admitted_by=projection.governed_revision.admitted_by,
+                    schema_version=projection.governed_revision.schema_version,
+                    created_at=projection.governed_revision.created_at,
+                )
+            ),
         )
 
 
@@ -495,6 +578,7 @@ class WorkResponse(ApiDto):
     what_happens_next: str
     human_attention_required: bool
     result_summary: str | None
+    current_work_reality_revision_id: UUID | None = None
     steering_enabled: bool = False
     current_steering_step_id: UUID | None = None
     current_steering_step_type: str | None = None
@@ -559,6 +643,9 @@ class WorkResponse(ApiDto):
             what_happens_next=work.what_happens_next,
             human_attention_required=work.human_attention_required,
             result_summary=work.result_summary,
+            current_work_reality_revision_id=(
+                work.current_work_reality_revision_id
+            ),
             steering_enabled=work.steering_enabled,
             current_steering_step_id=work.current_steering_step_id,
             current_steering_step_type=work.current_steering_step_type,

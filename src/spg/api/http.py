@@ -24,6 +24,7 @@ from spg.api.dto import (
     HumanDecisionRequest,
     InteractionCreateRequest,
     InteractionMessageRequest,
+    InteractionWorkAdmissionRequest,
     SharedUnderstandingResponse,
     RuntimeActivationResponse,
     SteeringPlanResponse,
@@ -356,6 +357,28 @@ def create_http_application(
                 request.content,
                 human_identity=request.human_identity,
             )
+        )
+
+    @api.post(
+        "/api/interactions/{interaction_id}/admit-work",
+        response_model=SharedUnderstandingResponse,
+        status_code=201,
+    )
+    def admit_interaction_work(
+        interaction_id: UUID,
+        request: InteractionWorkAdmissionRequest,
+    ) -> SharedUnderstandingResponse:
+        service = required_interaction_service()
+        work = work_service.admit_interaction_work(
+            interaction_id,
+            assessment_id=request.assessment_id,
+            basis_fingerprint=request.basis_fingerprint,
+            authority_identity=request.authority_identity,
+            rationale=request.rationale,
+        )
+        selected_post_admission.activate(work.work_id)
+        return SharedUnderstandingResponse.from_projection(
+            service.get_shared_understanding(interaction_id)
         )
 
     @api.post("/api/goals", response_model=GoalResponse, status_code=201)

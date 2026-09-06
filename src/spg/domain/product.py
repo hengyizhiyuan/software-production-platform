@@ -283,6 +283,7 @@ class WorkProjection(BaseModel):
     what_happens_next: str
     human_attention_required: bool
     result_summary: str | None
+    current_work_reality_revision_id: UUID | None = None
     steering_enabled: bool = False
     current_steering_step_id: UUID | None = None
     current_steering_step_type: str | None = None

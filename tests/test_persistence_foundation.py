@@ -89,9 +89,9 @@ def test_production_metadata_contains_runtime_and_mvp_app_product_tables() -> No
     }
 
 
-def test_alembic_environment_has_wic_interaction_truth_spine_head() -> None:
+def test_alembic_environment_has_wic_governed_admission_head() -> None:
     project_root = Path(__file__).resolve().parents[1]
     config = Config(project_root / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260907_23"]
+    assert scripts.get_heads() == ["20260907_24"]

@@ -53,8 +53,13 @@
     interpretedRequests: document.getElementById("interpreted-requests"),
     interpretedConstraints: document.getElementById("interpreted-constraints"),
     interpretedQuestions: document.getElementById("interpreted-questions"),
+    interactionResource: document.getElementById("interaction-resource"),
+    interactionScope: document.getElementById("interaction-scope"),
     governedUnderstanding: document.getElementById("governed-understanding"),
     readinessAffordance: document.getElementById("readiness-affordance"),
+    interactionAdmission: document.getElementById("interaction-admission"),
+    interactionAuthorityIdentity: document.getElementById("interaction-authority-identity"),
+    admitWorkControl: document.getElementById("admit-work-control"),
     selectedWork: document.getElementById("selected-work"),
     workTitle: document.getElementById("work-title"),
     workStatus: document.getElementById("work-status"),
@@ -287,8 +292,11 @@
       elements.interpretedRequests.textContent = "None yet";
       elements.interpretedConstraints.textContent = "None yet";
       elements.interpretedQuestions.textContent = "Tell Watt what you want to explore.";
+      elements.interactionResource.textContent = "Not bound yet";
+      elements.interactionScope.textContent = "Not bound yet";
       elements.governedUnderstanding.textContent = "None — no Work exists";
       elements.readinessAffordance.textContent = "Not ready to form Work.";
+      elements.interactionAdmission.hidden = true;
       return;
     }
     projection.records.forEach((record) => {
@@ -314,12 +322,28 @@
       projection.unresolved_material_questions,
       status === "READY" ? "None" : "Assessment pending",
     );
-    elements.governedUnderstanding.textContent = projection.governed_work_id
-      ? `Focused Work ${projection.governed_work_id}`
+    const governed = projection.governed_revision;
+    const repositoryIdentity = governed
+      ? governed.repository_identity
+      : projection.candidate_repository_identity;
+    const repositoryRef = governed
+      ? governed.repository_ref
+      : projection.candidate_repository_ref;
+    elements.interactionResource.textContent = repositoryIdentity
+      ? `${repositoryIdentity} · ${repositoryRef}`
+      : "Not bound yet";
+    elements.interactionScope.textContent = governed
+      ? `Admitted scope ${governed.engineering_scope_id} · basis ${governed.scope_basis_fingerprint}`
+      : projection.candidate_scope_summary || "Not bound yet";
+    elements.governedUnderstanding.textContent = governed
+      ? `Work ${governed.work_id} · Reality revision ${governed.revision_number} · Motive: ${governed.motive} · Outcome: ${governed.desired_outcome} · Constraints: ${joined(governed.constraints, "none")}`
       : "None — no Work exists";
-    elements.readinessAffordance.textContent = status === "READY"
-      ? "Ready to form Work — admission is intentionally deferred to WIC Slice 2."
-      : "Not ready to form Work.";
+    elements.readinessAffordance.textContent = governed
+      ? "Governed Work admitted. This Interaction remains open and focused on that Work."
+      : status === "READY"
+        ? "Ready to form Work. Review the candidate understanding, Resource, scope, and constraints before admitting."
+        : "Not ready to form Work.";
+    elements.interactionAdmission.hidden = status !== "READY" || Boolean(governed);
   }
 
   function renderChips(container, values, emptyLabel) {
@@ -941,17 +965,67 @@
         },
       );
       elements.workRequirement.value = "";
-      state.selectedWorkId = "";
-      state.selectedWork = null;
+      const focusedWorkId = state.sharedUnderstanding.governed_work_id || "";
+      state.selectedWorkId = focusedWorkId;
       await loadCollections();
-      setSurface("empty");
+      if (focusedWorkId) {
+        await refreshSelected();
+        setSurface("selected");
+      } else {
+        state.selectedWork = null;
+        setSurface("empty");
+      }
       renderInteraction();
-      announce("Shared Understanding updated. No Work was created.");
+      announce(
+        focusedWorkId
+          ? "Interaction updated while preserving governed Work focus."
+          : "Shared Understanding updated. No Work was created.",
+      );
     } catch (error) {
       showNotice(error);
     } finally {
       setBusy(false);
       renderInteraction();
+    }
+  }
+
+  async function admitInteractionWork() {
+    const projection = state.sharedUnderstanding;
+    const assessment = projection && projection.latest_assessment;
+    if (state.busy || !projection || !assessment || !projection.readiness) {
+      return;
+    }
+    const identity = elements.interactionAuthorityIdentity.value.trim();
+    if (!identity) {
+      showNotice(new ApiError(422, "INVALID_REQUEST", "Human authority identity is required."));
+      return;
+    }
+    hideNotice();
+    setBusy(true);
+    try {
+      state.sharedUnderstanding = await apiRequest(
+        `/api/interactions/${projection.interaction_id}/admit-work`,
+        {
+          method: "POST",
+          body: {
+            assessment_id: assessment.assessment_id,
+            basis_fingerprint: assessment.basis_fingerprint,
+            authority_identity: identity,
+          },
+        },
+      );
+      state.selectedWorkId = state.sharedUnderstanding.governed_work_id;
+      await loadCollections();
+      await refreshSelected();
+      setSurface("selected");
+      renderInteraction();
+      announce("Governed long-lived Work admitted. Automatic Steering activation started.");
+    } catch (error) {
+      showNotice(error);
+    } finally {
+      setBusy(false);
+      renderInteraction();
+      renderSelectedWork();
     }
   }
 
@@ -977,6 +1051,7 @@
   });
   elements.goalForm.addEventListener("submit", createGoal);
   elements.workForm.addEventListener("submit", continueInteraction);
+  elements.admitWorkControl.addEventListener("click", admitInteractionWork);
   elements.newInteractionControl.addEventListener("click", beginNewInteraction);
   elements.composerToggle.addEventListener("click", () => {
     const expanded = elements.composerToggle.getAttribute("aria-expanded") === "true";

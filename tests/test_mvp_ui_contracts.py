@@ -110,6 +110,11 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert 'id="interaction-history"' in html
     assert 'id="shared-understanding"' in html
     assert 'id="interaction-readiness"' in html
+    assert 'id="admit-work-control"' in html
+    assert 'id="interaction-authority-identity"' in html
+    assert 'id="interaction-resource"' in html
+    assert 'id="interaction-scope"' in html
+    assert "admit governed work" in combined
     assert "ready to form work" in combined
     assert 'id="work-mode"' not in html
     assert 'id="work-tags"' not in html
@@ -148,6 +153,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
 
     for route in (
         "/api/interactions",
+        "/admit-work",
         "/api/goals",
         "/api/works",
         "/refine",
@@ -175,6 +181,11 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "OPENAI_API_KEY" not in javascript
     assert 'apiRequest("/api/works", { method: "POST"' not in javascript
     assert "No Work was created" in javascript
+    assert "assessment_id: assessment.assessment_id" in javascript
+    assert "basis_fingerprint: assessment.basis_fingerprint" in javascript
+    assert 'elements.admitWorkControl.addEventListener("click", admitInteractionWork)' in javascript
+    assert "setTimeout" in javascript
+    assert "countdown" not in combined
 
 
 def test_planb_composer_has_explicit_bounded_collapse_control() -> None:

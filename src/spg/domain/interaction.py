@@ -146,6 +146,40 @@ class InteractionAssessment(BaseModel):
     created_at: datetime
 
 
+class WorkRealityRevision(BaseModel):
+    """Immutable governed Work truth admitted from one exact Interaction basis."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: UUID
+    work_id: UUID
+    revision_number: int = Field(ge=1)
+    previous_revision_id: UUID | None = None
+    basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    revision_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_interaction_id: UUID
+    source_assessment_id: UUID
+    motive: str = Field(min_length=1)
+    desired_outcome: str = Field(min_length=1)
+    context_facts: tuple[str, ...]
+    constraints: tuple[str, ...]
+    requests: tuple[str, ...]
+    engineering_scope_id: UUID
+    engineering_resource_id: UUID
+    scope_basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    repository_identity: str = Field(min_length=1)
+    repository_ref: str = Field(min_length=1)
+    source_baseline_id: UUID
+    source_revision: str = Field(min_length=1)
+    governance_record_id: UUID
+    supporting_references: tuple[str, ...]
+    change_set: tuple[str, ...]
+    rationale: str = Field(min_length=1)
+    admitted_by: str = Field(min_length=1)
+    schema_version: str = Field(min_length=1)
+    created_at: datetime
+
+
 class SharedUnderstanding(BaseModel):
     """Rebuildable projection; never a separately persisted source of truth."""
 
@@ -162,30 +196,12 @@ class SharedUnderstanding(BaseModel):
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
     readiness: WorkAdmissionReadiness | None
+    candidate_engineering_resource_id: UUID | None = None
+    candidate_repository_identity: str | None = None
+    candidate_repository_ref: str | None = None
+    candidate_scope_summary: str | None = None
     governed_work_id: UUID | None
-
-
-class WorkRealityRevision(BaseModel):
-    """Immutable governed Work truth contract reserved for later WIC admission."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    id: UUID
-    work_id: UUID
-    revision_number: int = Field(ge=1)
-    previous_revision_id: UUID | None = None
-    basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
-    motive: str = Field(min_length=1)
-    desired_outcome: str = Field(min_length=1)
-    context_facts: tuple[str, ...]
-    constraints: tuple[str, ...]
-    requests: tuple[str, ...]
-    engineering_scope_id: UUID | None = None
-    supporting_references: tuple[str, ...]
-    change_set: tuple[str, ...]
-    rationale: str = Field(min_length=1)
-    admitted_by: str = Field(min_length=1)
-    created_at: datetime
+    governed_revision: WorkRealityRevision | None = None
 
 
 class WorkInteractionCapability(Protocol):

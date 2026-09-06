@@ -11,6 +11,9 @@ Work Interaction & Closed-loop Refinement Core
 
 WIC Slice 1 — Interaction Truth Spine & Pre-Work Understanding
     IMPLEMENTED / PASS
+
+WIC Slice 2 — Governed Work Admission & Interaction Continuity
+    IMPLEMENTED / PASS
 ```
 
 This contract specializes the approved
@@ -19,6 +22,10 @@ cohesive capability pillar spanning pre-Work formation and interaction during a
 long-lived Work. The architecture checkpoint itself created no Runtime behavior;
 the admitted Slice 1 now implements the additive pre-Work truth spine,
 interpretation/readiness capability, API, and minimum UI without Work admission.
+Slice 2 adds explicit Human admission of the exact current `READY` assessment,
+immutable Work Reality revision #1, exact Resource/Scope/Baseline and governance
+provenance, existing long-lived Steering bootstrap, and continued focus in the
+same Interaction. It does not implement active Work revision #2+.
 
 The closed Governed Production and Reality-driven Plan Steering Core remains
 authoritative. WIC does not reopen or weaken Work/Production admission
@@ -461,4 +468,32 @@ WIC MVP ARCHITECTURE
     READY FOR IMPLEMENTATION PLANNING
 ```
 
-This status authorizes planning only. It does not authorize implementation.
+The architecture contract is admitted. Implemented Slice 1 and Slice 2 evidence
+does not authorize the remaining active-Work or feedback slices.
+
+## 14. Slice 2 implementation checkpoint
+
+`POST /api/interactions/{interaction_id}/admit-work` accepts only the exact
+assessment identity/basis plus explicit Human authority. The server revalidates
+the open Interaction, newest Human basis, `READY` profile, current Engineering
+Resource and Trusted Baseline. One transaction then creates the long-lived Work,
+admitted Engineering Scope, `ADMIT_LONG_LIVED_WORK` governance record, immutable
+Work Reality revision #1, compatibility-row pointers, and Interaction focus.
+
+The revision records exact source Interaction/Assessment, Resource, repository
+ref, Baseline revision, scope basis, rationale, schema version, and deterministic
+fingerprint. The initial Steering revision references this exact Work Reality
+revision. Existing `WorkPostAdmissionService` remains the activation seam.
+Admission creates no Run, PWU, Attempt, Dispatch, Provider production report,
+Candidate, Authorization, Integration Effect, or Runtime Commit.
+
+```text
+WIC Slice 2 — Governed Work Admission & Interaction Continuity
+    IMPLEMENTED / PASS
+
+Work Interaction & Closed-loop Refinement Core
+    IN PROGRESS
+
+Watt Product MVP
+    NOT CLOSED
+```

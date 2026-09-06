@@ -262,6 +262,25 @@ work_reality_revisions = Table(
         nullable=True,
     ),
     Column("basis_fingerprint", String(64), nullable=False),
+    Column("revision_fingerprint", String(64), nullable=False),
+    Column(
+        "source_interaction_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "product_interactions.id",
+            name="fk_work_reality_revisions_source_interaction",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "source_assessment_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "interaction_assessments.id",
+            name="fk_work_reality_revisions_source_assessment",
+        ),
+        nullable=False,
+    ),
     Column("motive", Text, nullable=False),
     Column("desired_outcome", Text, nullable=False),
     Column("context_facts", JSONB, nullable=False),
@@ -271,12 +290,44 @@ work_reality_revisions = Table(
         "engineering_scope_id",
         Uuid(as_uuid=True),
         ForeignKey("engineering_scopes.id", name="fk_work_reality_revisions_scope"),
-        nullable=True,
+        nullable=False,
+    ),
+    Column(
+        "engineering_resource_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "engineering_resources.id",
+            name="fk_work_reality_revisions_resource",
+        ),
+        nullable=False,
+    ),
+    Column("scope_basis_fingerprint", String(64), nullable=False),
+    Column("repository_identity", String(255), nullable=False),
+    Column("repository_ref", String(512), nullable=False),
+    Column(
+        "source_baseline_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "production_snapshots.id",
+            name="fk_work_reality_revisions_baseline",
+        ),
+        nullable=False,
+    ),
+    Column("source_revision", String(64), nullable=False),
+    Column(
+        "governance_record_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "governance_records.id",
+            name="fk_work_reality_revisions_governance",
+        ),
+        nullable=False,
     ),
     Column("supporting_references", JSONB, nullable=False),
     Column("change_set", JSONB, nullable=False),
     Column("rationale", Text, nullable=False),
     Column("admitted_by", String(255), nullable=False),
+    Column("schema_version", String(32), nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     UniqueConstraint(
         "work_id",
@@ -287,6 +338,18 @@ work_reality_revisions = Table(
         "work_id",
         "basis_fingerprint",
         name="uq_work_reality_revisions_work_basis",
+    ),
+    UniqueConstraint(
+        "revision_fingerprint",
+        name="uq_work_reality_revisions_fingerprint",
+    ),
+    UniqueConstraint(
+        "source_assessment_id",
+        name="uq_work_reality_revisions_source_assessment",
+    ),
+    UniqueConstraint(
+        "governance_record_id",
+        name="uq_work_reality_revisions_governance",
     ),
 )
 

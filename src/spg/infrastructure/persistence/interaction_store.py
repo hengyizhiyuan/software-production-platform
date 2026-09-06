@@ -14,6 +14,7 @@ from spg.domain.interaction import (
     InteractionActor,
     InteractionAssessment,
     InteractionCondition,
+    InteractionInvariantViolation,
     InteractionRecord,
     InterpretationMeaning,
     WorkAdmissionReadiness,
@@ -68,6 +69,34 @@ class InteractionStore:
             .values(updated_by=updated_by, updated_at=updated_at)
         )
 
+    def set_current_work(
+        self,
+        interaction_id: UUID,
+        *,
+        work_id: UUID,
+        updated_by: str,
+        updated_at,
+    ) -> None:
+        result = self.session.execute(
+            update(product_interactions)
+            .where(
+                (product_interactions.c.id == interaction_id)
+                & (
+                    product_interactions.c.current_work_id.is_(None)
+                    | (product_interactions.c.current_work_id == work_id)
+                )
+            )
+            .values(
+                current_work_id=work_id,
+                updated_by=updated_by,
+                updated_at=updated_at,
+            )
+        )
+        if result.rowcount != 1:
+            raise InteractionInvariantViolation(
+                "Interaction focus changed before governed Work admission"
+            )
+
     def records(self, interaction_id: UUID) -> tuple[InteractionRecord, ...]:
         rows = self.session.execute(
             select(interaction_records)
@@ -100,6 +129,14 @@ class InteractionStore:
                 interaction_assessments.c.id,
             )
             .limit(1)
+        ).mappings().first()
+        return None if row is None else self._assessment(row)
+
+    def assessment(self, assessment_id: UUID) -> InteractionAssessment | None:
+        row = self.session.execute(
+            select(interaction_assessments).where(
+                interaction_assessments.c.id == assessment_id
+            )
         ).mappings().first()
         return None if row is None else self._assessment(row)
 
