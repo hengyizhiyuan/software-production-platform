@@ -47,6 +47,8 @@
     executionActivity: document.getElementById("execution-activity"),
     executionCount: document.getElementById("execution-count"),
     executionElapsed: document.getElementById("execution-elapsed"),
+    executionSignal: document.getElementById("execution-signal"),
+    executionUpdated: document.getElementById("execution-updated"),
     executionBlocked: document.getElementById("execution-blocked"),
     attentionMarker: document.getElementById("attention-marker"),
     workRequest: document.getElementById("work-request"),
@@ -502,6 +504,10 @@
       elements.executionActivity.textContent = progress.activity;
       elements.executionCount.textContent = progress.progressText;
       elements.executionElapsed.textContent = progress.elapsedText;
+      elements.executionSignal.textContent = progress.activitySignal;
+      elements.executionUpdated.textContent = progress.updatedAt
+        ? `Last activity ${new Date(progress.updatedAt).toLocaleTimeString()}`
+        : "Last activity time unavailable";
       elements.executionBlocked.hidden = !progress.blockedReason;
       elements.executionBlocked.textContent = progress.blockedReason || "";
     }

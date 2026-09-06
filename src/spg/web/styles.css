@@ -234,6 +234,15 @@ h3 {
   font-size: 12px;
 }
 
+.execution-signal {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.execution-progress.is-active .execution-signal { color: var(--teal); }
+
 .execution-progress p { margin: 7px 0 0; }
 .execution-progress.is-blocked { border-left-color: var(--red); }
 .execution-blocked { color: var(--red); font-weight: 650; }

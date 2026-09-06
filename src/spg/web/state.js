@@ -50,17 +50,30 @@
     if (!progress) {
       return null;
     }
+    const completed = Number.isInteger(progress.transitions_completed)
+      ? Math.max(0, progress.transitions_completed)
+      : 0;
     const knownTotal = Number.isInteger(progress.transitions_total)
       && progress.transitions_total > 0;
+    const apiPercent = Number.isFinite(progress.percent_complete)
+      ? Math.max(0, Math.min(100, Math.round(progress.percent_complete)))
+      : null;
+    const percentComplete = knownTotal
+      ? (apiPercent === null
+        ? Math.min(100, Math.round((completed / progress.transitions_total) * 100))
+        : apiPercent)
+      : null;
     return {
       phase: progress.phase || "Production",
       activity: progress.activity || "Observing current production reality",
       progressText: knownTotal
-        ? `${progress.transitions_completed} of ${progress.transitions_total} steps`
-        : `${progress.transitions_completed} transitions completed · total unknown`,
-      percentComplete: knownTotal ? progress.percent_complete : null,
+        ? `${completed} of ${progress.transitions_total} transitions · ${percentComplete}%`
+        : `${completed} transitions completed · total unknown`,
+      percentComplete,
       elapsedText: `${Math.max(0, Math.floor(progress.elapsed_seconds || 0))}s elapsed`,
       stillWorking: progress.still_working === true,
+      activitySignal: progress.still_working === true ? "Still working" : "Not running",
+      updatedAt: progress.updated_at || null,
       blockedReason: progress.blocked_reason || null,
     };
   }

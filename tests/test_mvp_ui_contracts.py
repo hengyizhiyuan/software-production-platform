@@ -136,6 +136,8 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "no artifacts observed" in combined
     assert "no verification evidence available" in combined
     assert 'id="execution-progress"' in html
+    assert 'id="execution-signal"' in html
+    assert 'id="execution-updated"' in html
     assert 'aria-live="polite"' in html
     assert "transitions completed · total unknown" in state_javascript
     assert "progress.percentComplete" not in javascript

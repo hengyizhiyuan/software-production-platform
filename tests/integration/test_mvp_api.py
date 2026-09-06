@@ -641,6 +641,8 @@ def test_orch_01_02_05_08_through_15_deterministic_automatic_flow(
         assert progress["transitions_total"] is None
         assert progress["percent_complete"] is None
         assert progress["phase"] == "NEEDS_ATTENTION"
+        assert progress["updated_at"] is not None
+        assert progress["elapsed_seconds"] >= 0
         attention = client.get(
             "/api/attention",
             params={"work_id": str(work_id)},
@@ -673,6 +675,7 @@ def test_orch_01_02_05_08_through_15_deterministic_automatic_flow(
         assert completed["status"] == "COMPLETED"
         assert completed["execution_progress"]["phase"] == "COMPLETED"
         assert completed["execution_progress"]["still_working"] is False
+        assert completed["execution_progress"]["blocked_reason"] is None
         assert result["trusted_result"] is True
         assert result["produced_artifacts"]
         assert result["verification_summary"]

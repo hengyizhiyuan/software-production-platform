@@ -112,6 +112,7 @@ test("execution progress shows activity without inventing a percentage", () => {
   assert.equal(unknown.percentComplete, null);
   assert.equal(unknown.elapsedText, "9s elapsed");
   assert.equal(unknown.stillWorking, true);
+  assert.equal(unknown.activitySignal, "Still working");
 
   const stopped = viewModel.executionProgress({ execution_progress: {
     phase: "BLOCKED", activity: "Stopped", transitions_completed: 1,
@@ -120,6 +121,16 @@ test("execution progress shows activity without inventing a percentage", () => {
   }});
   assert.equal(stopped.blockedReason, "Verification failed");
   assert.equal(stopped.stillWorking, false);
+  assert.equal(stopped.activitySignal, "Not running");
+
+  const known = viewModel.executionProgress({ execution_progress: {
+    phase: "VERIFY", activity: "Running checks", transitions_completed: 1,
+    transitions_total: 4, percent_complete: 25, elapsed_seconds: 12,
+    still_working: true, updated_at: "2026-09-06T00:00:00Z",
+  }});
+  assert.equal(known.progressText, "1 of 4 transitions · 25%");
+  assert.equal(known.percentComplete, 25);
+  assert.equal(known.updatedAt, "2026-09-06T00:00:00Z");
 });
 
 test("Work Composer preserves the user's expanded state across reloads", () => {

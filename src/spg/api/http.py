@@ -147,13 +147,23 @@ def create_http_application(
         if callable(progress_reader):
             progress = progress_reader(projection.work_id)
             if progress is not None:
+                percent_complete = None
+                if progress.transitions_total is not None:
+                    percent_complete = min(
+                        100,
+                        round(
+                            100
+                            * progress.transitions_completed
+                            / progress.transitions_total
+                        ),
+                    )
                 response = response.model_copy(update={
                     "execution_progress": ExecutionProgressResponse(
                         phase=progress.phase,
                         activity=progress.activity,
                         transitions_completed=progress.transitions_completed,
                         transitions_total=progress.transitions_total,
-                        percent_complete=None,
+                        percent_complete=percent_complete,
                         started_at=progress.started_at,
                         updated_at=progress.updated_at,
                         elapsed_seconds=progress.elapsed_seconds,

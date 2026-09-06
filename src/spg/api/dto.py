@@ -299,12 +299,12 @@ class ProductionPlanResponse(ApiDto):
 class ExecutionProgressResponse(ApiDto):
     phase: str
     activity: str
-    transitions_completed: int
-    transitions_total: int | None
-    percent_complete: int | None = None
+    transitions_completed: int = Field(ge=0)
+    transitions_total: int | None = Field(default=None, ge=1)
+    percent_complete: int | None = Field(default=None, ge=0, le=100)
     started_at: datetime | None
     updated_at: datetime
-    elapsed_seconds: float
+    elapsed_seconds: float = Field(ge=0)
     still_working: bool
     blocked_reason: str | None = None
 
