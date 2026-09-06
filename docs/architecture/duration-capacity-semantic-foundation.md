@@ -2,15 +2,20 @@
 
 ## Status and Authority
 
-**DCP-1: SEMANTIC FOUNDATION DEFINED / ADMITTED**
+**DCP-1: CLOSED / PASS**
 
-**Runtime implementation: NOT STARTED**
+**DCP-2 Production Measurement v0: IMPLEMENTED / FOCUSED VALIDATION PASS**
 
 This document is the authoritative semantic foundation for future
 duration-aware PWU sizing and capacity-aware production planning. It records
 architecture vocabulary, responsibility boundaries, and evolution constraints.
 It does not authorize a queue, scheduler, worker pool, concurrency limiter,
 duration heuristic, prediction model, automatic decomposition, or migration.
+
+The first measurement-only implementation is defined by [Production
+Measurement v0](production-measurement-v0.md). DurationEstimate,
+SizingAdvisory runtime behavior, Queue, Scheduler, capacity admission, and
+Production Scheduling Experience remain not implemented.
 
 Watt MVP Core remains **CLOSED / PASS**. DCP-1 is post-Core architecture work
 and does not reopen or weaken any closed production-governance boundary.
@@ -425,3 +430,4 @@ admission for separately admitted design/implementation work.
 - [Completion and Trust Semantics](spg-completion-trust.md)
 - [Side-effect Governance](spg-side-effect-governance.md)
 - [Watt MVP Core Closure](../evidence/mvp-core-closure.md)
+- [Production Measurement v0](production-measurement-v0.md)

@@ -454,6 +454,22 @@ class RuntimeStore:
         values["condition"] = AttemptCondition(values["condition"])
         return ExecutionAttemptRecord.model_validate(values)
 
+    def attempts_for_work_unit(
+        self,
+        work_unit_id: UUID,
+    ) -> tuple[ExecutionAttemptRecord, ...]:
+        rows = self.session.execute(
+            select(execution_attempts)
+            .where(execution_attempts.c.work_unit_id == work_unit_id)
+            .order_by(execution_attempts.c.generation, execution_attempts.c.created_at)
+        ).mappings()
+        records: list[ExecutionAttemptRecord] = []
+        for row in rows:
+            values = dict(row)
+            values["condition"] = AttemptCondition(values["condition"])
+            records.append(ExecutionAttemptRecord.model_validate(values))
+        return tuple(records)
+
     def transitions(self) -> list[TransitionRecord]:
         rows = self.session.execute(
             select(transition_history).order_by(
@@ -696,6 +712,17 @@ class RuntimeStore:
         ).mappings()
         return tuple(self._verification_record(row) for row in rows)
 
+    def verification_records_for_work_unit(
+        self,
+        work_unit_id: UUID,
+    ) -> tuple[VerificationRecord, ...]:
+        rows = self.session.execute(
+            select(verification_records)
+            .where(verification_records.c.work_unit_id == work_unit_id)
+            .order_by(verification_records.c.created_at, verification_records.c.id)
+        ).mappings()
+        return tuple(self._verification_record(row) for row in rows)
+
     def production_admissibility_by_basis(
         self,
         basis_fingerprint: str,
@@ -751,6 +778,21 @@ class RuntimeStore:
         if row is None:
             return None
         return self._baseline_candidate_record(row)
+
+    def baseline_candidates_for_work_unit(
+        self,
+        work_unit_id: UUID,
+    ) -> tuple[BaselineCandidateRecord, ...]:
+        rows = self.session.execute(
+            select(baseline_candidates)
+            .where(
+                baseline_candidates.c.satisfied_work_unit_ids.contains(
+                    [str(work_unit_id)]
+                )
+            )
+            .order_by(baseline_candidates.c.sealed_at, baseline_candidates.c.id)
+        ).mappings()
+        return tuple(self._baseline_candidate_record(row) for row in rows)
 
     def human_authorization(
         self,
@@ -818,6 +860,20 @@ class RuntimeStore:
         if row is None:
             return None
         return self._repository_integration_effect_record(row)
+
+    def repository_integration_effects_for_candidate(
+        self,
+        candidate_id: UUID,
+    ) -> tuple[RepositoryIntegrationEffectRecord, ...]:
+        rows = self.session.execute(
+            select(repository_integration_effects)
+            .where(repository_integration_effects.c.candidate_id == candidate_id)
+            .order_by(
+                repository_integration_effects.c.prepared_at,
+                repository_integration_effects.c.id,
+            )
+        ).mappings()
+        return tuple(self._repository_integration_effect_record(row) for row in rows)
 
     def runtime_commit(self, commit_id: UUID) -> RuntimeCommitRecord | None:
         row = self._one(runtime_commits, runtime_commits.c.id == commit_id)

@@ -137,6 +137,11 @@ Capacity/Scheduling capability may decide when scarce execution capacity is
 granted. No queue, scheduler, prediction, or automatic decomposition is
 implemented by that foundation.
 
+[Production Measurement v0](production-measurement-v0.md) implements the first
+measurement-only step as deterministic projections over existing authoritative
+lifecycle facts and admitted PWU contracts. It does not add duration estimates,
+change one-PWU fit, or grant scheduling/production Authority.
+
 ## Engineering Conflict Evolution
 
 Future conflict understanding may include:

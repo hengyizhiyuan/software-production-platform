@@ -209,6 +209,16 @@ class ProductStore:
         )
         return None if row is None else self._runtime_binding(row)
 
+    def runtime_binding_for_work_unit(
+        self,
+        work_unit_id: UUID,
+    ) -> WorkRuntimeBindingRecord | None:
+        row = self._one(
+            work_runtime_bindings,
+            work_runtime_bindings.c.work_unit_id == work_unit_id,
+        )
+        return None if row is None else self._runtime_binding(row)
+
     def associate_runtime_binding(
         self,
         binding_id: UUID,
