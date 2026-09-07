@@ -4,7 +4,7 @@
 
 ~~~text
 Contract
-    DEFINED
+    FULFILLED
 
 Control Room Slice 1 - Production Control Foundation
     CLOSED / PASS
@@ -16,7 +16,10 @@ Control Room Slice 3 - Production Intelligence
     CLOSED / PASS
 
 Control Room Slice 4 - Human Product Acceptance
-    NOT STARTED
+    CLOSED / PASS WITH PRODUCT EXPERIENCE FINDINGS
+
+Human Product Acceptance
+    PASS
 ~~~
 
 This contract defines the bounded Human Product Acceptance activity for the
@@ -30,9 +33,11 @@ Watt Software Production Control Room. It is governed by:
 - [Control Room Slice 2 Contract](software-production-control-room-slice-2-implementation-contract.md);
 - [Control Room Slice 3 Contract](software-production-control-room-slice-3-implementation-contract.md).
 
-This document records acceptance obligations only. It does not execute Human
-acceptance, claim an acceptance result, authorize Provider or Dogfood
-activity, or authorize implementation of a future module.
+This document defines the acceptance obligations and records their final
+closure. The supporting Human acceptance observations are preserved in the
+[Slice 4 Human Product Acceptance Evidence](../evidence/control-room-slice-4-human-product-acceptance.md).
+Closure does not authorize Provider or Dogfood activity or implementation of a
+future module.
 
 ## 2. Slice identity and purpose
 
@@ -249,6 +254,13 @@ Use this classification for observations such as:
 These findings should remain product-experience findings unless evidence shows
 a missing authoritative Reality or capability boundary.
 
+The accepted
+[`PRE_AUTHORIZATION_WORK_PREVIEW_REQUIRED`](../product/work-formation-review-before-admission.md)
+finding records that a Human can review understanding alignment before Work
+Admission but cannot yet sufficiently preview the governed Work proposal being
+authorized. It is a future high-priority product improvement, not an implemented
+Slice 4 capability or a current WIC architecture change.
+
 ### 9.2 Architecture Gap
 
 Use this classification when evidence shows:
@@ -272,7 +284,8 @@ Control Room Slice 4 closes only when:
 - Human Product Acceptance and Architecture Lead Reality Review support
   closure.
 
-Creation of this contract does not satisfy these criteria.
+The accepted Human evidence satisfies these criteria with one non-blocking
+Product Experience Gap. Contract creation alone did not satisfy them.
 
 ## 11. Validation and execution boundary
 
@@ -287,3 +300,33 @@ capabilities, invoke a Provider, or run unrelated Dogfood.
 
 Any missing capability discovered during acceptance must be reported and
 classified. It must not be implemented under this contract.
+
+## 12. Closure Reality
+
+~~~text
+Control Room Slice 4
+    CLOSED / PASS WITH PRODUCT EXPERIENCE FINDINGS
+
+Human Product Acceptance
+    PASS
+~~~
+
+Human acceptance validated that:
+
+- Human expression, Watt interpretation, and governed Reality remain
+  distinguishable;
+- a new direction does not silently modify the current Work;
+- a new-Work recommendation appears when appropriate while the Human retains
+  decision authority;
+- the Production Objective, Production Status, Attention Center, Current
+  Direction, and Trust Summary together explain what is being produced, what
+  is happening, why the direction exists, and why the result is trusted.
+
+The acceptance Runtime was `ACTIVE_AT_TRUSTED_BASELINE`. No incorrect truth
+ownership, Authority model defect, Runtime risk, or architecture misalignment
+was identified.
+
+The accepted non-blocking finding is
+[`PRE_AUTHORIZATION_WORK_PREVIEW_REQUIRED`](../product/work-formation-review-before-admission.md).
+It remains a future high-priority Product Experience improvement and does not
+reopen Slice 4 or authorize a WIC or Control Room implementation change.
