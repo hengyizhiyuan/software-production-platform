@@ -266,6 +266,139 @@
     };
   }
 
+  function currentDirectionProjection(work, steering, attentionItems) {
+    const current = work
+      && steering
+      && sameIdentity(steering.work_id, work.work_id)
+      ? steering
+      : null;
+    if (!current) {
+      return {
+        available: false,
+        revision: "No active Steering Plan revision available.",
+        direction: "No admitted production direction available.",
+        currentStep: "No current Plan step available.",
+        nextStep: "No known next step available.",
+        rationale: "No admitted Plan rationale available.",
+        realityBasis: [],
+        condition: "Plan Steering Reality is not available for this Work.",
+      };
+    }
+
+    const currentStep = current.current_step;
+    const knownNext = Array.isArray(current.known_next_steps)
+      ? current.known_next_steps
+      : [];
+    const nextStep = knownNext[0] || null;
+    const decision = current.latest_decision;
+    const realityBasis = decision && Array.isArray(decision.reality_refs)
+      ? decision.reality_refs.map((reference) => (
+        `${reference.kind}: ${reference.identity}`
+      ))
+      : [];
+    const workAttention = Array.isArray(attentionItems)
+      ? attentionItems.find((item) => sameIdentity(item && item.work_id, work.work_id))
+      : null;
+
+    let condition = current.automatic_progression_state
+      ? `Automatic progression: ${current.automatic_progression_state}`
+      : "Automatic progression state is not reported.";
+    if (current.human_attention_required) {
+      condition = workAttention && workAttention.reason
+        ? `Human decision required: ${workAttention.reason}`
+        : "Human decision required by existing Plan Steering Reality.";
+    } else if (current.last_stop_reason) {
+      condition = `Steering stopped: ${current.last_stop_reason}`;
+    } else if (current.steering_outcome) {
+      condition = `Steering outcome: ${current.steering_outcome}`;
+    }
+
+    return {
+      available: true,
+      revision: `Plan revision ${current.active_revision_number}`,
+      direction: currentStep && currentStep.objective
+        ? currentStep.objective
+        : "No current Plan step objective is recorded.",
+      currentStep: currentStep
+        ? `${currentStep.type} - ${currentStep.state}`
+        : "No current Plan step available.",
+      nextStep: nextStep
+        ? `${nextStep.type}: ${nextStep.objective}`
+        : "No known next step available.",
+      rationale: current.selection_rationale
+        || (decision && decision.reason)
+        || "No admitted Plan rationale available.",
+      realityBasis,
+      condition,
+    };
+  }
+
+  function trustSummaryProjection(work, result) {
+    const activation = result && result.runtime_activation;
+    const status = result && result.status
+      ? result.status
+      : work && work.status;
+    const workComplete = Boolean(work && work.work_complete === true);
+    const productionCycleTrusted = Boolean(
+      work && work.current_production_cycle_trusted === true,
+    );
+    const trustedRepository = Boolean(result && result.trusted_result === true);
+    const activeAtTrusted = Boolean(
+      activation && activation.state === "ACTIVE_AT_TRUSTED_BASELINE",
+    );
+    const verification = result && Array.isArray(result.verification_summary)
+      ? result.verification_summary.filter((item) => String(item || "").trim())
+      : [];
+
+    let trustState = "Not trusted yet";
+    let trustBasis = "No trusted Work Result is available.";
+    if (trustedRepository && activeAtTrusted) {
+      trustState = "Trusted and active";
+      trustBasis = "Existing Runtime Reality reports a trusted result active at the Current Trusted Baseline.";
+    } else if (trustedRepository) {
+      trustState = "Trusted repository result; activation pending";
+      trustBasis = activation && activation.reason
+        ? activation.reason
+        : "A trusted repository result exists, but Active Runtime equivalence is not established.";
+    } else if (result) {
+      trustBasis = result.remaining_blocker_or_risk
+        || "No trusted Runtime Commit is recorded for this Work Result.";
+    }
+
+    const runtimeCommitIdentity = work && work.latest_trusted_runtime_commit_id;
+    const baselineRevision = activation && activation.current_trusted_baseline_revision;
+    const baselineTree = activation && activation.current_trusted_baseline_tree_identity;
+    const activeRevision = activation && activation.active_application_revision;
+
+    return {
+      trustedRepository,
+      activeAtTrusted,
+      state: trustState,
+      completion: productionCycleTrusted
+        ? "Current production cycle completion and trust recorded by existing Work Reality."
+        : workComplete
+          ? "Work completion recorded by existing Work Reality."
+        : status
+          ? `Not complete - Work status: ${status}`
+          : "Completion Reality is not available.",
+      verification: verification.length
+        ? verification.join(" | ")
+        : "No Verification evidence is available.",
+      runtimeCommit: runtimeCommitIdentity
+        ? `Runtime Commit ${runtimeCommitIdentity}`
+        : trustedRepository
+          ? "Trusted Runtime Commit recorded; identity is not exposed by this Work projection."
+          : "No trusted Runtime Commit recorded.",
+      trustedBaseline: baselineRevision
+        ? `Revision ${baselineRevision}${baselineTree ? ` - tree ${baselineTree}` : ""}`
+        : "Current Trusted Baseline is not available.",
+      activeRuntime: activation
+        ? `${activation.state}${activeRevision ? ` - revision ${activeRevision}` : ""}`
+        : "Active Runtime Reality is not available.",
+      basis: trustBasis,
+    };
+  }
+
   function splitTags(value) {
     const unique = new Set(
       String(value || "")
@@ -314,6 +447,8 @@
     executionProgress,
     controlRoomProjection,
     understandingAlignmentProjection,
+    currentDirectionProjection,
+    trustSummaryProjection,
     splitTags,
     conciseRequirement,
     workTitle,

@@ -375,6 +375,167 @@ test("Control Room Slice 2 remains explicit when no WIC Reality matches the Work
   assert.equal(projection.shared.understoodObjective, "No understood objective is available.");
 });
 
+test("Control Room Slice 3 projects current direction from exact Steering Reality", () => {
+  const projection = viewModel.currentDirectionProjection(
+    { work_id: "work-direction" },
+    {
+      work_id: "work-direction",
+      active_revision_number: 3,
+      current_step: {
+        type: "PRODUCE",
+        objective: "Implement the admitted projection",
+        state: "CURRENT",
+      },
+      known_next_steps: [{
+        type: "VERIFY_ACCEPT",
+        objective: "Verify the produced projection",
+        state: "KNOWN",
+      }],
+      latest_decision: {
+        reason: "The design step completed with governed evidence.",
+        reality_refs: [
+          { kind: "WORK", identity: "work-direction" },
+          { kind: "SEMANTIC_RESULT", identity: "result-1" },
+        ],
+      },
+      selection_rationale: "Current Reality admits the bounded production step.",
+      steering_outcome: "AUTO_CONTINUE",
+      automatic_progression_state: "RUNNING",
+      human_attention_required: false,
+      last_stop_reason: null,
+    },
+    [],
+  );
+
+  assert.equal(projection.available, true);
+  assert.equal(projection.revision, "Plan revision 3");
+  assert.equal(projection.direction, "Implement the admitted projection");
+  assert.equal(projection.currentStep, "PRODUCE - CURRENT");
+  assert.equal(projection.nextStep, "VERIFY_ACCEPT: Verify the produced projection");
+  assert.equal(projection.rationale, "Current Reality admits the bounded production step.");
+  assert.deepEqual(Array.from(projection.realityBasis), [
+    "WORK: work-direction",
+    "SEMANTIC_RESULT: result-1",
+  ]);
+  assert.equal(projection.condition, "Steering outcome: AUTO_CONTINUE");
+});
+
+test("Control Room Slice 3 preserves blockers and missing Plan Reality", () => {
+  const blocked = viewModel.currentDirectionProjection(
+    { work_id: "work-blocked" },
+    {
+      work_id: "work-blocked",
+      active_revision_number: 2,
+      current_step: { type: "HUMAN_DECISION", objective: "Choose direction", state: "CURRENT" },
+      known_next_steps: [],
+      latest_decision: null,
+      selection_rationale: null,
+      automatic_progression_state: "STOPPED",
+      steering_outcome: "HUMAN_ATTENTION",
+      human_attention_required: true,
+      last_stop_reason: "HUMAN_ATTENTION",
+    },
+    [{ work_id: "work-blocked", reason: "Architecture authority is required." }],
+  );
+  assert.equal(blocked.nextStep, "No known next step available.");
+  assert.equal(blocked.rationale, "No admitted Plan rationale available.");
+  assert.equal(
+    blocked.condition,
+    "Human decision required: Architecture authority is required.",
+  );
+
+  const missing = viewModel.currentDirectionProjection(
+    { work_id: "work-current" },
+    { work_id: "different-work" },
+    [],
+  );
+  assert.equal(missing.available, false);
+  assert.equal(missing.direction, "No admitted production direction available.");
+  assert.deepEqual(Array.from(missing.realityBasis), []);
+});
+
+test("Control Room Slice 3 explains a trusted result active at its baseline", () => {
+  const projection = viewModel.trustSummaryProjection(
+    {
+      status: "RUNNING",
+      work_complete: false,
+      current_production_cycle_trusted: true,
+      latest_trusted_runtime_commit_id: "runtime-commit-1",
+    },
+    {
+      status: "COMPLETED",
+      trusted_result: true,
+      verification_summary: ["PATH_SCOPE: PASS", "NODE_TEST_TARGET: PASS"],
+      runtime_activation: {
+        state: "ACTIVE_AT_TRUSTED_BASELINE",
+        active_application_revision: "revision-2",
+        current_trusted_baseline_revision: "revision-2",
+        current_trusted_baseline_tree_identity: "tree-2",
+        reason: "Active Runtime matches the Current Trusted Baseline.",
+      },
+    },
+  );
+
+  assert.equal(projection.state, "Trusted and active");
+  assert.equal(
+    projection.completion,
+    "Current production cycle completion and trust recorded by existing Work Reality.",
+  );
+  assert.equal(projection.verification, "PATH_SCOPE: PASS | NODE_TEST_TARGET: PASS");
+  assert.equal(projection.runtimeCommit, "Runtime Commit runtime-commit-1");
+  assert.equal(projection.trustedBaseline, "Revision revision-2 - tree tree-2");
+  assert.equal(projection.activeRuntime, "ACTIVE_AT_TRUSTED_BASELINE - revision revision-2");
+  assert.equal(projection.trustedRepository, true);
+  assert.equal(projection.activeAtTrusted, true);
+});
+
+test("Control Room Slice 3 does not hide trusted baseline and Active Runtime divergence", () => {
+  const projection = viewModel.trustSummaryProjection(
+    { status: "COMPLETED", work_complete: true },
+    {
+      status: "COMPLETED",
+      trusted_result: true,
+      verification_summary: ["NODE_TEST_TARGET: PASS"],
+      runtime_activation: {
+        state: "ACTIVATION_REQUIRED",
+        active_application_revision: "revision-1",
+        current_trusted_baseline_revision: "revision-2",
+        current_trusted_baseline_tree_identity: "tree-2",
+        reason: "Active Runtime is behind the Current Trusted Baseline.",
+      },
+    },
+  );
+
+  assert.equal(projection.state, "Trusted repository result; activation pending");
+  assert.equal(projection.activeAtTrusted, false);
+  assert.equal(projection.activeRuntime, "ACTIVATION_REQUIRED - revision revision-1");
+  assert.equal(
+    projection.basis,
+    "Active Runtime is behind the Current Trusted Baseline.",
+  );
+});
+
+test("Control Room Slice 3 keeps incomplete and unverified Reality explicit", () => {
+  const projection = viewModel.trustSummaryProjection(
+    { status: "RUNNING", work_complete: false },
+    {
+      status: "RUNNING",
+      trusted_result: false,
+      verification_summary: [],
+      remaining_blocker_or_risk: "Verification has not completed.",
+      runtime_activation: null,
+    },
+  );
+
+  assert.equal(projection.state, "Not trusted yet");
+  assert.equal(projection.completion, "Not complete - Work status: RUNNING");
+  assert.equal(projection.verification, "No Verification evidence is available.");
+  assert.equal(projection.runtimeCommit, "No trusted Runtime Commit recorded.");
+  assert.equal(projection.trustedBaseline, "Current Trusted Baseline is not available.");
+  assert.equal(projection.activeRuntime, "Active Runtime Reality is not available.");
+  assert.equal(projection.basis, "Verification has not completed.");
+});
+
 test("Work Composer preserves the user's expanded state across reloads", () => {
   assert.match(
     appSource,

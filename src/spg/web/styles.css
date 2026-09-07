@@ -846,6 +846,85 @@ textarea {
   border-radius: var(--radius-md);
 }
 
+.production-intelligence {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.intelligence-card {
+  min-width: 0;
+  padding: 22px;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.trust-summary-card {
+  border-top: 3px solid var(--teal);
+}
+
+.intelligence-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.intelligence-heading h3 {
+  margin-bottom: 14px;
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.intelligence-primary {
+  margin-bottom: 16px;
+  color: var(--navy);
+  font-size: 16px;
+  font-weight: 720;
+  line-height: 1.45;
+}
+
+.intelligence-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.intelligence-facts > div,
+.trust-chain > div {
+  min-width: 0;
+  padding: 12px;
+  background: #f3f6f5;
+  border-radius: var(--radius-md);
+}
+
+.intelligence-facts .wide-fact {
+  grid-column: 1 / -1;
+}
+
+.trust-chain {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+}
+
+.trust-chain > div {
+  border-left: 3px solid #b9d8d3;
+}
+
+.trust-basis {
+  margin: 14px 0 0;
+  padding-top: 14px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.5;
+  border-top: 1px solid var(--line);
+}
+
 .conversation-card,
 .interpretation-panel,
 .operator-panel,
@@ -1229,6 +1308,10 @@ dd {
   .alignment-flow {
     grid-template-columns: 1fr;
   }
+
+  .production-intelligence {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 620px) {
@@ -1248,6 +1331,7 @@ dd {
   .detail-grid,
   .result-grid,
   .alignment-detail-grid,
+  .intelligence-facts,
   .metadata-row,
   .operator-panel,
   .composer-options {

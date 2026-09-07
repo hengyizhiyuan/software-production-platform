@@ -20,6 +20,7 @@
     selectedWork: null,
     attention: [],
     result: null,
+    steering: null,
     statusFilter: "",
     busy: false,
     pollTimer: null,
@@ -116,6 +117,21 @@
     alignmentConfirmedConstraints: document.getElementById("alignment-confirmed-constraints"),
     alignmentRelevantFacts: document.getElementById("alignment-relevant-facts"),
     alignmentUnresolvedQuestions: document.getElementById("alignment-unresolved-questions"),
+    directionState: document.getElementById("direction-state"),
+    directionRevision: document.getElementById("direction-revision"),
+    directionObjective: document.getElementById("direction-objective"),
+    directionCurrentStep: document.getElementById("direction-current-step"),
+    directionNextStep: document.getElementById("direction-next-step"),
+    directionRationale: document.getElementById("direction-rationale"),
+    directionRealityBasis: document.getElementById("direction-reality-basis"),
+    directionCondition: document.getElementById("direction-condition"),
+    trustSummaryState: document.getElementById("trust-summary-state"),
+    trustCompletion: document.getElementById("trust-completion"),
+    trustVerification: document.getElementById("trust-verification"),
+    trustRuntimeCommit: document.getElementById("trust-runtime-commit"),
+    trustBaseline: document.getElementById("trust-baseline"),
+    trustActiveRuntime: document.getElementById("trust-active-runtime"),
+    trustBasis: document.getElementById("trust-basis"),
     workRequest: document.getElementById("work-request"),
     desiredOutcome: document.getElementById("desired-outcome"),
     scopeSummary: document.getElementById("scope-summary"),
@@ -671,6 +687,42 @@
     );
   }
 
+  function renderProductionIntelligence(work) {
+    const direction = viewModel.currentDirectionProjection(
+      work,
+      state.steering,
+      state.attention,
+    );
+    elements.directionState.textContent = direction.available
+      ? "Plan Reality available"
+      : "Plan Reality unavailable";
+    elements.directionState.className = direction.available
+      ? "status-badge status-ready"
+      : "status-badge status-draft";
+    elements.directionRevision.textContent = direction.revision;
+    elements.directionObjective.textContent = direction.direction;
+    elements.directionCurrentStep.textContent = direction.currentStep;
+    elements.directionNextStep.textContent = direction.nextStep;
+    elements.directionRationale.textContent = direction.rationale;
+    elements.directionRealityBasis.textContent = joined(
+      direction.realityBasis,
+      "No Reality references are available for the current direction.",
+    );
+    elements.directionCondition.textContent = direction.condition;
+
+    const trust = viewModel.trustSummaryProjection(work, state.result);
+    elements.trustSummaryState.textContent = trust.state;
+    elements.trustSummaryState.className = trust.trustedRepository
+      ? "trust-label trusted"
+      : "trust-label";
+    elements.trustCompletion.textContent = trust.completion;
+    elements.trustVerification.textContent = trust.verification;
+    elements.trustRuntimeCommit.textContent = trust.runtimeCommit;
+    elements.trustBaseline.textContent = trust.trustedBaseline;
+    elements.trustActiveRuntime.textContent = trust.activeRuntime;
+    elements.trustBasis.textContent = trust.basis;
+  }
+
   function renderResult() {
     const result = state.result;
     if (!result) {
@@ -732,6 +784,7 @@
     elements.attentionMarker.hidden = !work.human_attention_required;
     renderControlRoomFoundation(work);
     renderUnderstandingAlignment(work);
+    renderProductionIntelligence(work);
     elements.workRequest.textContent = work.raw_user_requirement || "No request text available.";
     elements.desiredOutcome.textContent = work.desired_outcome || "Not defined yet";
     elements.scopeSummary.textContent = work.engineering_scope
@@ -956,23 +1009,37 @@
     renderInteraction();
   }
 
+  async function loadSteeringProjection(workId) {
+    try {
+      return await apiRequest(`/api/works/${workId}/steering`);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
   async function refreshSelected() {
     if (!state.selectedWorkId) {
       state.selectedWork = null;
       state.attention = [];
       state.result = null;
+      state.steering = null;
       renderSelectedWork();
       return;
     }
     const workId = state.selectedWorkId;
-    const [work, attention, result] = await Promise.all([
+    const [work, attention, result, steering] = await Promise.all([
       apiRequest(`/api/works/${workId}`),
       apiRequest(`/api/attention?work_id=${encodeURIComponent(workId)}`),
       apiRequest(`/api/works/${workId}/result`),
+      loadSteeringProjection(workId),
     ]);
     state.selectedWork = work;
     state.attention = attention;
     state.result = result;
+    state.steering = steering;
     renderSelectedWork();
   }
 

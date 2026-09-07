@@ -305,6 +305,63 @@ def test_control_room_slice_2_preserves_wic_truth_layers_without_mutation() -> N
     assert "/advance" not in render_projection
 
 
+def test_control_room_slice_3_projects_plan_and_trust_reality_without_mutation() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+    state_javascript = (WEB_ROOT / "state.js").read_text(encoding="utf-8")
+
+    for element_id in (
+        "production-intelligence",
+        "current-direction-panel",
+        "direction-state",
+        "direction-revision",
+        "direction-objective",
+        "direction-current-step",
+        "direction-next-step",
+        "direction-rationale",
+        "direction-reality-basis",
+        "direction-condition",
+        "trust-summary-panel",
+        "trust-summary-state",
+        "trust-completion",
+        "trust-verification",
+        "trust-runtime-commit",
+        "trust-baseline",
+        "trust-active-runtime",
+        "trust-basis",
+    ):
+        assert f'id="{element_id}"' in html
+
+    assert "Why is the next step this?" in html
+    assert "Why should I trust the result?" in html
+    assert "currentDirectionProjection" in state_javascript
+    assert "trustSummaryProjection" in state_javascript
+    assert "selection_rationale" in state_javascript
+    assert "reality_refs" in state_javascript
+    assert "latest_trusted_runtime_commit_id" in state_javascript
+    assert "current_trusted_baseline_revision" in state_javascript
+    assert "active_application_revision" in state_javascript
+    assert "ACTIVE_AT_TRUSTED_BASELINE" in state_javascript
+
+    assert "loadSteeringProjection(workId)" in javascript
+    assert "`/api/works/${workId}/steering`" in javascript
+    assert "state.result" in javascript
+    assert "state.attention" in javascript
+
+    render_start = javascript.index("function renderProductionIntelligence")
+    render_end = javascript.index("function renderResult", render_start)
+    render_projection = javascript[render_start:render_end]
+    assert "apiRequest" not in render_projection
+    assert 'method: "POST"' not in render_projection
+    assert "/advance" not in render_projection
+
+    steering_load_start = javascript.index("async function loadSteeringProjection")
+    steering_load_end = javascript.index("async function refreshSelected", steering_load_start)
+    steering_load = javascript[steering_load_start:steering_load_end]
+    assert 'method: "POST"' not in steering_load
+    assert "/advance" not in steering_load
+
+
 def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None:
     html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
     assert "https://" not in html

@@ -285,6 +285,45 @@
             </dl>
           </section>
 
+          <section id="production-intelligence" class="production-intelligence" aria-label="Production direction and trust">
+            <section id="current-direction-panel" class="intelligence-card" aria-labelledby="current-direction-heading">
+              <header class="intelligence-heading">
+                <div>
+                  <p class="eyebrow">Current Direction</p>
+                  <h3 id="current-direction-heading">Why is the next step this?</h3>
+                </div>
+                <span id="direction-state" class="status-badge"></span>
+              </header>
+              <p id="direction-objective" class="intelligence-primary"></p>
+              <dl class="intelligence-facts">
+                <div><dt>Plan Revision</dt><dd id="direction-revision"></dd></div>
+                <div><dt>Current Step</dt><dd id="direction-current-step"></dd></div>
+                <div><dt>Known Next Step</dt><dd id="direction-next-step"></dd></div>
+                <div><dt>Direction Condition</dt><dd id="direction-condition"></dd></div>
+                <div class="wide-fact"><dt>Rationale</dt><dd id="direction-rationale"></dd></div>
+                <div class="wide-fact"><dt>Reality Basis</dt><dd id="direction-reality-basis"></dd></div>
+              </dl>
+            </section>
+
+            <section id="trust-summary-panel" class="intelligence-card trust-summary-card" aria-labelledby="trust-summary-heading">
+              <header class="intelligence-heading">
+                <div>
+                  <p class="eyebrow">Trust Summary</p>
+                  <h3 id="trust-summary-heading">Why should I trust the result?</h3>
+                </div>
+                <span id="trust-summary-state" class="trust-label"></span>
+              </header>
+              <dl class="trust-chain" aria-label="Completion, Verification, Runtime Commit, Trusted Baseline, and Active Runtime">
+                <div><dt>Completion</dt><dd id="trust-completion"></dd></div>
+                <div><dt>Verification</dt><dd id="trust-verification"></dd></div>
+                <div><dt>Runtime Commit</dt><dd id="trust-runtime-commit"></dd></div>
+                <div><dt>Trusted Baseline</dt><dd id="trust-baseline"></dd></div>
+                <div><dt>Active Runtime</dt><dd id="trust-active-runtime"></dd></div>
+              </dl>
+              <p id="trust-basis" class="trust-basis"></p>
+            </section>
+          </section>
+
           <section class="conversation-card request-card" aria-labelledby="request-heading">
             <p class="speaker-label" id="request-heading">You requested</p>
             <p id="work-request" class="request-text"></p>
