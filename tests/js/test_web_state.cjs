@@ -133,6 +133,248 @@ test("execution progress shows activity without inventing a percentage", () => {
   assert.equal(known.updatedAt, "2026-09-06T00:00:00Z");
 });
 
+test("Control Room Slice 1 projects only existing Work, WIC, Runtime, and Attention Reality", () => {
+  const work = {
+    work_id: "work-1",
+    title: "Ship the Control Room foundation",
+    desired_outcome: "Human can see objective, status, and attention.",
+    status: "RUNNING",
+    current_production_step: "EXECUTE",
+    human_attention_required: true,
+    execution_progress: {
+      phase: "EXECUTION",
+      activity: "Applying the admitted production step",
+      transitions_completed: 2,
+      transitions_total: null,
+      elapsed_seconds: 4,
+      still_working: false,
+      blocked_reason: "Human review is required",
+    },
+  };
+  const understandings = [{
+    current_work_id: "work-1",
+    governed_revision: {
+      work_id: "work-1",
+      motive: "Make production Reality understandable",
+    },
+    work_satisfaction_state: "IN_PROGRESS",
+  }];
+  const attention = [{
+    work_id: "work-1",
+    decision: "Review candidate",
+    reason: "Human review is required",
+    recommendation: "Authorize the admitted candidate",
+  }];
+
+  const projection = viewModel.controlRoomProjection(work, understandings, attention);
+
+  assert.equal(projection.objective.motive, "Make production Reality understandable");
+  assert.equal(projection.objective.currentWork, "Ship the Control Room foundation");
+  assert.equal(
+    projection.objective.desiredOutcome,
+    "Human can see objective, status, and attention.",
+  );
+  assert.equal(projection.objective.satisfaction, "IN_PROGRESS");
+  assert.equal(projection.status.workStatus, "Watt is working");
+  assert.equal(projection.status.lifecyclePhase, "EXECUTE");
+  assert.equal(projection.status.activity, "Applying the admitted production step");
+  assert.equal(projection.status.condition, "Human review is required");
+  assert.equal(projection.attention.required, true);
+  assert.equal(projection.attention.state, "1 Human attention requirement");
+  assert.equal(
+    projection.attention.summary,
+    "Review candidate: Human review is required",
+  );
+  assert.equal(
+    projection.attention.emergingDirection,
+    "Authorize the admitted candidate",
+  );
+});
+
+test("Control Room Slice 1 does not infer missing or cross-Work Reality", () => {
+  const projection = viewModel.controlRoomProjection(
+    {
+      work_id: "work-2",
+      raw_user_requirement: "A conversational statement is not governed Motive truth",
+      status: "DRAFT",
+      human_attention_required: false,
+    },
+    [{
+      current_work_id: "work-1",
+      governed_revision: { work_id: "work-1", motive: "Different Work" },
+      work_satisfaction_state: "CURRENTLY_SATISFIED",
+    }],
+    [{
+      work_id: "work-1",
+      decision: "Unrelated decision",
+      reason: "Different Work",
+    }],
+  );
+
+  assert.equal(projection.objective.motive, "Not available from governed Work Reality.");
+  assert.equal(projection.objective.satisfaction, "Not available for this Work.");
+  assert.equal(projection.status.lifecyclePhase, "Not reported by Work Reality.");
+  assert.equal(projection.status.activity, "No active production activity reported.");
+  assert.equal(projection.status.condition, "No blocking or waiting condition reported.");
+  assert.equal(projection.attention.required, false);
+  assert.equal(projection.attention.state, "No Human attention required");
+  assert.equal(
+    projection.attention.summary,
+    "No blockers, reviews, or transitions require Human action.",
+  );
+  assert.equal(projection.attention.emergingDirection, "No emerging direction reported.");
+});
+
+test("Control Room Slice 1 preserves completed satisfaction without creating attention", () => {
+  const projection = viewModel.controlRoomProjection(
+    {
+      work_id: "work-complete",
+      title: "Completed governed Work",
+      desired_outcome: "The admitted outcome is trusted.",
+      status: "COMPLETED",
+      current_production_step: "WORK_COMPLETED",
+      human_attention_required: false,
+    },
+    [{
+      current_work_id: "work-complete",
+      governed_work_id: "work-complete",
+      governed_revision: {
+        work_id: "work-complete",
+        motive: "Reach a trusted outcome",
+      },
+      work_satisfaction_state: "CURRENTLY_SATISFIED",
+    }],
+    [],
+  );
+
+  assert.equal(projection.status.workStatus, "Completed");
+  assert.equal(projection.objective.satisfaction, "CURRENTLY_SATISFIED");
+  assert.equal(projection.attention.required, false);
+  assert.equal(projection.status.activity, "No active production activity reported.");
+});
+
+test("Control Room Slice 2 keeps Human, interpreted, and governed WIC Reality distinct", () => {
+  const projection = viewModel.understandingAlignmentProjection(
+    { work_id: "work-aligned" },
+    [{
+      interaction_id: "interaction-1",
+      current_work_id: "work-aligned",
+      human_said: ["Make the current production direction visible."],
+      latest_assessment: { assessment_id: "assessment-1" },
+      latest_assessment_current: true,
+      interpreted_motive: "Improve production visibility",
+      desired_outcome: "Human can inspect understanding alignment.",
+      candidate_context: ["Candidate context"],
+      candidate_constraints: ["Candidate constraint"],
+      unresolved_material_questions: [],
+      readiness: { status: "READY" },
+      work_revision_admission_status: "NOT_APPLICABLE",
+      governed_revision: {
+        work_id: "work-aligned",
+        revision_number: 2,
+        motive: "Governed visibility motive",
+        desired_outcome: "Governed alignment outcome",
+        constraints: ["Confirmed constraint"],
+        context_facts: ["Confirmed repository fact"],
+      },
+    }],
+  );
+
+  assert.equal(projection.status.label, "Understood");
+  assert.equal(projection.status.tone, "status-completed");
+  assert.deepEqual(Array.from(projection.human.statements), [
+    "Make the current production direction visible.",
+  ]);
+  assert.equal(projection.interpreted.currency, "Current advisory interpretation");
+  assert.equal(projection.interpreted.motive, "Improve production visibility");
+  assert.equal(projection.governed.revision, "Work Reality revision 2");
+  assert.equal(projection.governed.motive, "Governed visibility motive");
+  assert.deepEqual(Array.from(projection.shared.confirmedConstraints), [
+    "Confirmed constraint",
+  ]);
+  assert.deepEqual(Array.from(projection.shared.relevantFacts), [
+    "Confirmed repository fact",
+  ]);
+  assert.deepEqual(Array.from(projection.shared.unresolvedQuestions), []);
+});
+
+test("Control Room Slice 2 projects pending Human authority without admitting Reality", () => {
+  const projection = viewModel.understandingAlignmentProjection(
+    { work_id: "work-pending" },
+    [{
+      current_work_id: "work-pending",
+      human_said: ["Please change the admitted Work direction."],
+      latest_assessment: { assessment_id: "assessment-pending" },
+      latest_assessment_current: true,
+      interpreted_motive: "Candidate changed direction",
+      desired_outcome: "Candidate changed outcome",
+      unresolved_material_questions: [],
+      readiness: { status: "READY" },
+      work_revision_admission_status: "PENDING_HUMAN",
+      governed_revision: null,
+    }],
+  );
+
+  assert.equal(projection.status.label, "Waiting for Human decision");
+  assert.equal(
+    projection.status.basis,
+    "Existing WIC Reality reports a pending Human decision.",
+  );
+  assert.equal(projection.interpreted.motive, "Candidate changed direction");
+  assert.equal(projection.governed.available, false);
+  assert.equal(projection.governed.motive, "Not governed.");
+  assert.deepEqual(Array.from(projection.shared.confirmedConstraints), []);
+});
+
+test("Control Room Slice 2 exposes stale and unresolved assessment conditions", () => {
+  const stale = viewModel.understandingAlignmentProjection(
+    { work_id: "work-stale" },
+    [{
+      current_work_id: "work-stale",
+      latest_assessment: { assessment_id: "assessment-stale" },
+      latest_assessment_current: false,
+      interpreted_motive: "Earlier interpretation",
+      unresolved_material_questions: [],
+      readiness: { status: "READY" },
+      work_revision_admission_status: "NOT_APPLICABLE",
+    }],
+  );
+  assert.equal(stale.status.label, "Needs clarification");
+  assert.equal(stale.interpreted.currency, "Stale advisory interpretation");
+  assert.equal(stale.status.basis, "The latest WIC assessment is no longer current.");
+
+  const unresolved = viewModel.understandingAlignmentProjection(
+    { work_id: "work-unresolved" },
+    [{
+      current_work_id: "work-unresolved",
+      latest_assessment: { assessment_id: "assessment-current" },
+      latest_assessment_current: true,
+      unresolved_material_questions: ["Which repository is authoritative?"],
+      readiness: { status: "NOT_READY" },
+      work_revision_admission_status: "NOT_APPLICABLE",
+    }],
+  );
+  assert.equal(unresolved.status.label, "Needs clarification");
+  assert.equal(unresolved.status.basis, "1 unresolved material question remains.");
+  assert.deepEqual(Array.from(unresolved.shared.unresolvedQuestions), [
+    "Which repository is authoritative?",
+  ]);
+});
+
+test("Control Room Slice 2 remains explicit when no WIC Reality matches the Work", () => {
+  const projection = viewModel.understandingAlignmentProjection(
+    { work_id: "work-without-interaction" },
+    [],
+  );
+
+  assert.equal(projection.available, false);
+  assert.equal(projection.status.label, "Needs clarification");
+  assert.deepEqual(Array.from(projection.human.statements), []);
+  assert.equal(projection.interpreted.currency, "No advisory interpretation");
+  assert.equal(projection.governed.revision, "No governed Work Reality revision");
+  assert.equal(projection.shared.understoodObjective, "No understood objective is available.");
+});
+
 test("Work Composer preserves the user's expanded state across reloads", () => {
   assert.match(
     appSource,

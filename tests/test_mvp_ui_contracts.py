@@ -226,6 +226,85 @@ def test_planb_composer_has_explicit_bounded_collapse_control() -> None:
     assert '"Collapse composer"' in javascript
 
 
+def test_control_room_slice_1_is_a_read_only_projection_over_existing_reality() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+    state_javascript = (WEB_ROOT / "state.js").read_text(encoding="utf-8")
+
+    for element_id in (
+        "control-room-foundation",
+        "control-objective-motive",
+        "control-objective-work",
+        "control-objective-outcome",
+        "control-objective-satisfaction",
+        "control-status-work",
+        "control-status-phase",
+        "control-status-activity",
+        "control-status-condition",
+        "control-attention-state",
+        "control-attention-summary",
+        "control-emerging-direction",
+    ):
+        assert f'id="{element_id}"' in html
+
+    assert "What are we producing?" in html
+    assert "What is happening now?" in html
+    assert "Does Watt need me?" in html
+    assert "controlRoomProjection" in state_javascript
+    assert "state.interactions" in javascript
+    assert "state.attention" in javascript
+    assert "work.execution_progress" in state_javascript
+    assert "Not available from governed Work Reality." in state_javascript
+
+    render_start = javascript.index("function renderControlRoomFoundation")
+    render_end = javascript.index("function renderResult", render_start)
+    render_projection = javascript[render_start:render_end]
+    assert "apiRequest" not in render_projection
+    assert 'method: "POST"' not in render_projection
+    assert "/advance" not in render_projection
+
+
+def test_control_room_slice_2_preserves_wic_truth_layers_without_mutation() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+    state_javascript = (WEB_ROOT / "state.js").read_text(encoding="utf-8")
+
+    for element_id in (
+        "understanding-alignment",
+        "alignment-status",
+        "alignment-status-basis",
+        "alignment-human-said",
+        "alignment-interpretation-currency",
+        "alignment-interpreted-motive",
+        "alignment-interpreted-outcome",
+        "alignment-governed-revision",
+        "alignment-governed-motive",
+        "alignment-governed-outcome",
+        "alignment-understood-objective",
+        "alignment-confirmed-constraints",
+        "alignment-relevant-facts",
+        "alignment-unresolved-questions",
+    ):
+        assert f'id="{element_id}"' in html
+
+    assert "Does Watt understand what I mean?" in html
+    assert "Human said" in html
+    assert "Watt interpreted" in html
+    assert "Governed Reality" in html
+    assert "understandingAlignmentProjection" in state_javascript
+    assert "latest_assessment_current" in state_javascript
+    assert "work_revision_admission_status" in state_javascript
+    assert "governed_revision" in state_javascript
+
+    render_start = javascript.index("function renderUnderstandingAlignment")
+    render_end = javascript.index("function renderResult", render_start)
+    render_projection = javascript[render_start:render_end]
+    assert "state.interactions" in render_projection
+    assert "apiRequest" not in render_projection
+    assert 'method: "POST"' not in render_projection
+    assert "/advance" not in render_projection
+
+
 def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None:
     html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
     assert "https://" not in html

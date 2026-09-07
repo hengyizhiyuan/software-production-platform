@@ -685,6 +685,167 @@ textarea {
   background: var(--amber-soft);
 }
 
+.control-room-foundation {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.control-room-card {
+  min-width: 0;
+  padding: 18px;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--teal);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.control-room-card.requires-attention {
+  border-color: #dfbf83;
+  border-top-color: var(--amber);
+  background: #fffdf7;
+}
+
+.control-room-card h3 {
+  margin-bottom: 16px;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.control-room-facts {
+  display: grid;
+  gap: 11px;
+  margin: 0;
+}
+
+.control-room-facts > div {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.control-room-facts > div:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.control-room-facts dd,
+.control-room-summary {
+  font-size: 13px;
+}
+
+.control-room-state {
+  margin-bottom: 8px;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.control-room-summary {
+  margin-bottom: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.compact-facts {
+  margin-top: 10px;
+}
+
+.understanding-alignment {
+  margin-bottom: 16px;
+  padding: 22px;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.alignment-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.alignment-heading h3 {
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+.alignment-status-basis {
+  margin-bottom: 18px;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.alignment-flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.alignment-stage {
+  min-width: 0;
+  padding: 15px;
+  background: #f3f6f5;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.alignment-stage.governed-stage {
+  background: #f4fbf9;
+  border-color: #b9d8d3;
+}
+
+.alignment-stage-label {
+  margin-bottom: 10px;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.alignment-currency {
+  margin-bottom: 12px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.alignment-human-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.alignment-human-list .empty-copy {
+  padding: 0;
+  list-style: none;
+}
+
+.alignment-stage-facts {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.alignment-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0 0;
+}
+
+.alignment-detail-grid > div {
+  min-width: 0;
+  padding: 13px;
+  background: #f7f9f8;
+  border-radius: var(--radius-md);
+}
+
 .conversation-card,
 .interpretation-panel,
 .operator-panel,
@@ -1060,6 +1221,14 @@ dd {
   .composer {
     padding: 12px 14px 16px;
   }
+
+  .control-room-foundation {
+    grid-template-columns: 1fr;
+  }
+
+  .alignment-flow {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 620px) {
@@ -1078,6 +1247,7 @@ dd {
   .work-list,
   .detail-grid,
   .result-grid,
+  .alignment-detail-grid,
   .metadata-row,
   .operator-panel,
   .composer-options {

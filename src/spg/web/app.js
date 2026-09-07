@@ -91,6 +91,31 @@
     executionUpdated: document.getElementById("execution-updated"),
     executionBlocked: document.getElementById("execution-blocked"),
     attentionMarker: document.getElementById("attention-marker"),
+    controlObjectiveMotive: document.getElementById("control-objective-motive"),
+    controlObjectiveWork: document.getElementById("control-objective-work"),
+    controlObjectiveOutcome: document.getElementById("control-objective-outcome"),
+    controlObjectiveSatisfaction: document.getElementById("control-objective-satisfaction"),
+    controlStatusWork: document.getElementById("control-status-work"),
+    controlStatusPhase: document.getElementById("control-status-phase"),
+    controlStatusActivity: document.getElementById("control-status-activity"),
+    controlStatusCondition: document.getElementById("control-status-condition"),
+    controlAttentionCard: document.getElementById("control-attention-card"),
+    controlAttentionState: document.getElementById("control-attention-state"),
+    controlAttentionSummary: document.getElementById("control-attention-summary"),
+    controlEmergingDirection: document.getElementById("control-emerging-direction"),
+    alignmentStatus: document.getElementById("alignment-status"),
+    alignmentStatusBasis: document.getElementById("alignment-status-basis"),
+    alignmentHumanSaid: document.getElementById("alignment-human-said"),
+    alignmentInterpretationCurrency: document.getElementById("alignment-interpretation-currency"),
+    alignmentInterpretedMotive: document.getElementById("alignment-interpreted-motive"),
+    alignmentInterpretedOutcome: document.getElementById("alignment-interpreted-outcome"),
+    alignmentGovernedRevision: document.getElementById("alignment-governed-revision"),
+    alignmentGovernedMotive: document.getElementById("alignment-governed-motive"),
+    alignmentGovernedOutcome: document.getElementById("alignment-governed-outcome"),
+    alignmentUnderstoodObjective: document.getElementById("alignment-understood-objective"),
+    alignmentConfirmedConstraints: document.getElementById("alignment-confirmed-constraints"),
+    alignmentRelevantFacts: document.getElementById("alignment-relevant-facts"),
+    alignmentUnresolvedQuestions: document.getElementById("alignment-unresolved-questions"),
     workRequest: document.getElementById("work-request"),
     desiredOutcome: document.getElementById("desired-outcome"),
     scopeSummary: document.getElementById("scope-summary"),
@@ -584,6 +609,68 @@
     });
   }
 
+  function renderControlRoomFoundation(work) {
+    const projection = viewModel.controlRoomProjection(
+      work,
+      state.interactions,
+      state.attention,
+    );
+    elements.controlObjectiveMotive.textContent = projection.objective.motive;
+    elements.controlObjectiveWork.textContent = projection.objective.currentWork;
+    elements.controlObjectiveOutcome.textContent = projection.objective.desiredOutcome;
+    elements.controlObjectiveSatisfaction.textContent = projection.objective.satisfaction;
+    elements.controlStatusWork.textContent = projection.status.workStatus;
+    elements.controlStatusPhase.textContent = projection.status.lifecyclePhase;
+    elements.controlStatusActivity.textContent = projection.status.activity;
+    elements.controlStatusCondition.textContent = projection.status.condition;
+    elements.controlAttentionCard.classList.toggle(
+      "requires-attention",
+      projection.attention.required,
+    );
+    elements.controlAttentionState.textContent = projection.attention.state;
+    elements.controlAttentionSummary.textContent = projection.attention.summary;
+    elements.controlEmergingDirection.textContent = projection.attention.emergingDirection;
+  }
+
+  function renderUnderstandingAlignment(work) {
+    const projection = viewModel.understandingAlignmentProjection(
+      work,
+      state.interactions,
+    );
+    elements.alignmentStatus.textContent = projection.status.label;
+    elements.alignmentStatus.className = `status-badge ${projection.status.tone}`;
+    elements.alignmentStatusBasis.textContent = projection.status.basis;
+    elements.alignmentHumanSaid.replaceChildren();
+    if (projection.human.statements.length) {
+      projection.human.statements.forEach((statement) => {
+        elements.alignmentHumanSaid.append(createElement("li", "", statement));
+      });
+    } else {
+      elements.alignmentHumanSaid.append(
+        createElement("li", "empty-copy", "No Human expression is available for this Work."),
+      );
+    }
+    elements.alignmentInterpretationCurrency.textContent = projection.interpreted.currency;
+    elements.alignmentInterpretedMotive.textContent = projection.interpreted.motive;
+    elements.alignmentInterpretedOutcome.textContent = projection.interpreted.desiredOutcome;
+    elements.alignmentGovernedRevision.textContent = projection.governed.revision;
+    elements.alignmentGovernedMotive.textContent = projection.governed.motive;
+    elements.alignmentGovernedOutcome.textContent = projection.governed.desiredOutcome;
+    elements.alignmentUnderstoodObjective.textContent = projection.shared.understoodObjective;
+    elements.alignmentConfirmedConstraints.textContent = joined(
+      projection.shared.confirmedConstraints,
+      "No confirmed constraints.",
+    );
+    elements.alignmentRelevantFacts.textContent = joined(
+      projection.shared.relevantFacts,
+      "No governed context facts.",
+    );
+    elements.alignmentUnresolvedQuestions.textContent = joined(
+      projection.shared.unresolvedQuestions,
+      "No unresolved material questions.",
+    );
+  }
+
   function renderResult() {
     const result = state.result;
     if (!result) {
@@ -643,6 +730,8 @@
       elements.executionBlocked.textContent = progress.blockedReason || "";
     }
     elements.attentionMarker.hidden = !work.human_attention_required;
+    renderControlRoomFoundation(work);
+    renderUnderstandingAlignment(work);
     elements.workRequest.textContent = work.raw_user_requirement || "No request text available.";
     elements.desiredOutcome.textContent = work.desired_outcome || "Not defined yet";
     elements.scopeSummary.textContent = work.engineering_scope

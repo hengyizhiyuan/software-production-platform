@@ -196,6 +196,95 @@
             <button id="work-refresh-control" class="secondary-button compact" type="button">Refresh</button>
           </header>
 
+          <section id="control-room-foundation" class="control-room-foundation" aria-label="Production control foundation">
+            <section class="control-room-card" aria-labelledby="control-objective-heading">
+              <p class="eyebrow">Production Objective</p>
+              <h3 id="control-objective-heading">What are we producing?</h3>
+              <dl class="control-room-facts">
+                <div><dt>Motive</dt><dd id="control-objective-motive"></dd></div>
+                <div><dt>Current Work</dt><dd id="control-objective-work"></dd></div>
+                <div><dt>Desired Outcome</dt><dd id="control-objective-outcome"></dd></div>
+                <div><dt>Satisfaction</dt><dd id="control-objective-satisfaction"></dd></div>
+              </dl>
+            </section>
+
+            <section class="control-room-card" aria-labelledby="control-status-heading">
+              <p class="eyebrow">Production Status</p>
+              <h3 id="control-status-heading">What is happening now?</h3>
+              <dl class="control-room-facts">
+                <div><dt>Work Status</dt><dd id="control-status-work"></dd></div>
+                <div><dt>Lifecycle Phase</dt><dd id="control-status-phase"></dd></div>
+                <div><dt>Production Activity</dt><dd id="control-status-activity"></dd></div>
+                <div><dt>Blocking / Waiting</dt><dd id="control-status-condition"></dd></div>
+              </dl>
+            </section>
+
+            <section id="control-attention-card" class="control-room-card" aria-labelledby="control-attention-heading">
+              <p class="eyebrow">Attention Center</p>
+              <h3 id="control-attention-heading">Does Watt need me?</h3>
+              <p id="control-attention-state" class="control-room-state"></p>
+              <p id="control-attention-summary" class="control-room-summary"></p>
+              <dl class="control-room-facts compact-facts">
+                <div><dt>Emerging Direction</dt><dd id="control-emerging-direction"></dd></div>
+              </dl>
+            </section>
+          </section>
+
+          <section id="understanding-alignment" class="understanding-alignment" aria-labelledby="understanding-alignment-heading">
+            <header class="alignment-heading">
+              <div>
+                <p class="eyebrow">Understanding Alignment</p>
+                <h3 id="understanding-alignment-heading">Does Watt understand what I mean?</h3>
+              </div>
+              <span id="alignment-status" class="status-badge"></span>
+            </header>
+            <p id="alignment-status-basis" class="alignment-status-basis"></p>
+
+            <div class="alignment-flow" aria-label="Human expression, Watt interpretation, and governed Reality">
+              <section class="alignment-stage">
+                <p class="alignment-stage-label">Human said</p>
+                <ul id="alignment-human-said" class="alignment-human-list"></ul>
+              </section>
+
+              <section class="alignment-stage">
+                <p class="alignment-stage-label">Watt interpreted</p>
+                <p id="alignment-interpretation-currency" class="alignment-currency"></p>
+                <dl class="alignment-stage-facts">
+                  <div><dt>Motive</dt><dd id="alignment-interpreted-motive"></dd></div>
+                  <div><dt>Desired Outcome</dt><dd id="alignment-interpreted-outcome"></dd></div>
+                </dl>
+              </section>
+
+              <section class="alignment-stage governed-stage">
+                <p class="alignment-stage-label">Governed Reality</p>
+                <p id="alignment-governed-revision" class="alignment-currency"></p>
+                <dl class="alignment-stage-facts">
+                  <div><dt>Motive</dt><dd id="alignment-governed-motive"></dd></div>
+                  <div><dt>Desired Outcome</dt><dd id="alignment-governed-outcome"></dd></div>
+                </dl>
+              </section>
+            </div>
+
+            <dl class="alignment-detail-grid">
+              <div>
+                <dt>Understood Objective</dt>
+                <dd id="alignment-understood-objective"></dd>
+              </div>
+              <div>
+                <dt>Confirmed Constraints</dt>
+                <dd id="alignment-confirmed-constraints"></dd>
+              </div>
+              <div>
+                <dt>Relevant Governed Facts</dt>
+                <dd id="alignment-relevant-facts"></dd>
+              </div>
+              <div>
+                <dt>Unresolved Questions</dt>
+                <dd id="alignment-unresolved-questions"></dd>
+              </div>
+            </dl>
+          </section>
+
           <section class="conversation-card request-card" aria-labelledby="request-heading">
             <p class="speaker-label" id="request-heading">You requested</p>
             <p id="work-request" class="request-text"></p>

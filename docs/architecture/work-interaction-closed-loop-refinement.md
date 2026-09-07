@@ -3,12 +3,6 @@
 ## 1. Status and scope
 
 ```text
-WIC-1 Architecture Contract
-    DEFINED / ADMITTED
-
-Work Interaction & Closed-loop Refinement Core
-    IN PROGRESS
-
 WIC Slice 1 — Interaction Truth Spine & Pre-Work Understanding
     IMPLEMENTED / PASS
 
@@ -20,6 +14,12 @@ WIC Slice 3 — Active Work Evolution, Focus Preservation, Feedback & Plan Reass
 
 WIC Slice 4 — Work Satisfaction, Continuation & New Work Transition
     IMPLEMENTED / PASS
+
+Work Interaction & Closed-loop Refinement Core
+    CLOSED / PASS
+
+WIC-1 Architecture Contract
+    DEFINED / ADMITTED
 ```
 
 This contract specializes the approved
@@ -504,7 +504,50 @@ WIC Slice 2 — Governed Work Admission & Interaction Continuity
     IMPLEMENTED / PASS
 
 Work Interaction & Closed-loop Refinement Core
-    IN PROGRESS
+    HISTORICAL CHECKPOINT — CLOSURE PENDING SLICES 3 AND 4
+
+Watt Product MVP
+    NOT CLOSED
+```
+
+## 15. Slice 3 implementation checkpoint
+
+Every new Human message remains one append-only `InteractionRecord`. The exact
+active Work revision, Engineering Scope, Steering Plan revision/current Step,
+active production binding, and selected source-domain Reality references form
+the interpretation basis. The bounded focus taxonomy is `ON_TOPIC`,
+`RELEVANT_EXPLORATION`, `SIDE_QUESTION`, `MATERIAL_BRANCH`, and
+`UNRELATED_NEW_DEMAND`; side questions and exploration preserve focus with
+`NO_GOVERNED_CHANGE`, while branches/unrelated demands remain outside the Work
+and project `NEW_WORK_RECOMMENDED`.
+
+Material candidate meaning remains non-authoritative until explicit Human
+approval. Approval appends Work Reality revision N+1 with exact predecessor,
+source records/assessment, governance, Baseline, Resource, Scope, supporting
+references, change set, rationale, and deterministic fingerprint. Constraint or
+scope change appends a new Scope instead of replacing history. Rejection and
+refinement request record governance without changing Work Truth. CAS, stale
+basis rejection, and exact-decision replay preserve concurrency and idempotency.
+
+The current Work revision is part of `PlanFrame` and Steering decision basis.
+Approval invokes the existing post-admission/Steering driver seam; WIC neither
+selects the next Step nor calls SPG directly. New production admission carries
+the exact current Work revision and rejects revision changes before admission.
+An already admitted production binding remains attached to its old revision,
+Scope, Run, Plan, PWU, and contracts; no message is injected into Attempt/MEI.
+When impact is `CURRENT_RESULT_MAY_BE_INSUFFICIENT`, the revision mismatch is a
+PlanFrame blocker until existing Steering/Human governance resolves the latest
+Work satisfaction question.
+
+Focused evidence is recorded in
+[WIC Slice 3 Focused Validation](../evidence/wic-slice-3-focused-validation.md).
+
+```text
+WIC Slice 3 — Active Work Evolution, Focus Preservation, Feedback & Plan Reassessment
+    IMPLEMENTED / PASS
+
+Work Interaction & Closed-loop Refinement Core
+    HISTORICAL CHECKPOINT — CLOSURE PENDING SLICE 4
 
 Watt Product MVP
     NOT CLOSED
@@ -553,40 +596,19 @@ Watt Product MVP
     NOT CLOSED
 ```
 
-## 15. Slice 3 implementation checkpoint
-
-Every new Human message remains one append-only `InteractionRecord`. The exact
-active Work revision, Engineering Scope, Steering Plan revision/current Step,
-active production binding, and selected source-domain Reality references form
-the interpretation basis. The bounded focus taxonomy is `ON_TOPIC`,
-`RELEVANT_EXPLORATION`, `SIDE_QUESTION`, `MATERIAL_BRANCH`, and
-`UNRELATED_NEW_DEMAND`; side questions and exploration preserve focus with
-`NO_GOVERNED_CHANGE`, while branches/unrelated demands remain outside the Work
-and project `NEW_WORK_RECOMMENDED`.
-
-Material candidate meaning remains non-authoritative until explicit Human
-approval. Approval appends Work Reality revision N+1 with exact predecessor,
-source records/assessment, governance, Baseline, Resource, Scope, supporting
-references, change set, rationale, and deterministic fingerprint. Constraint or
-scope change appends a new Scope instead of replacing history. Rejection and
-refinement request record governance without changing Work Truth. CAS, stale
-basis rejection, and exact-decision replay preserve concurrency and idempotency.
-
-The current Work revision is part of `PlanFrame` and Steering decision basis.
-Approval invokes the existing post-admission/Steering driver seam; WIC neither
-selects the next Step nor calls SPG directly. New production admission carries
-the exact current Work revision and rejects revision changes before admission.
-An already admitted production binding remains attached to its old revision,
-Scope, Run, Plan, PWU, and contracts; no message is injected into Attempt/MEI.
-When impact is `CURRENT_RESULT_MAY_BE_INSUFFICIENT`, the revision mismatch is a
-PlanFrame blocker until existing Steering/Human governance resolves the latest
-Work satisfaction question.
-
-Focused evidence is recorded in
-[WIC Slice 3 Focused Validation](../evidence/wic-slice-3-focused-validation.md).
+## 17. Current WIC Core closure status
 
 ```text
+WIC Slice 1 — Interaction Truth Spine & Pre-Work Understanding
+    IMPLEMENTED / PASS
+
+WIC Slice 2 — Governed Work Admission & Interaction Continuity
+    IMPLEMENTED / PASS
+
 WIC Slice 3 — Active Work Evolution, Focus Preservation, Feedback & Plan Reassessment
+    IMPLEMENTED / PASS
+
+WIC Slice 4 — Work Satisfaction, Continuation & New Work Transition
     IMPLEMENTED / PASS
 
 Work Interaction & Closed-loop Refinement Core
