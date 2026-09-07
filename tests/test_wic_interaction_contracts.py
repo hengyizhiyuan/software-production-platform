@@ -6,6 +6,8 @@ from pydantic import ValidationError
 from spg.domain.interaction import (
     WorkAdmissionReadiness,
     WorkAdmissionReadinessStatus,
+    WorkFocusClassification,
+    WorkImpactDisposition,
 )
 from spg.providers.codex_interaction import CodexSdkWorkInteractionCapability
 
@@ -55,3 +57,26 @@ def test_ready_readiness_cannot_hide_material_questions() -> None:
             reasons=("invalid",),
             basis_fingerprint="a" * 64,
         )
+
+
+def test_wic3_provider_contract_exposes_bounded_focus_and_impact_taxonomies() -> None:
+    schema = CodexSdkWorkInteractionCapability.output_schema()
+    encoded = str(schema)
+    assert {item.value for item in WorkFocusClassification} == {
+        "ON_TOPIC",
+        "RELEVANT_EXPLORATION",
+        "SIDE_QUESTION",
+        "MATERIAL_BRANCH",
+        "UNRELATED_NEW_DEMAND",
+    }
+    assert {item.value for item in WorkImpactDisposition} == {
+        "NO_GOVERNED_CHANGE",
+        "CURRENT_CYCLE_REMAINS_VALID",
+        "DEFER_TO_PRODUCTION_BOUNDARY",
+        "CURRENT_RESULT_MAY_BE_INSUFFICIENT",
+        "HUMAN_GOVERNANCE_REQUIRED",
+        "NEW_WORK_RECOMMENDED",
+    }
+    assert "focus_classification" in encoded
+    assert "impact_disposition" in encoded
+    assert "supporting_references" in encoded

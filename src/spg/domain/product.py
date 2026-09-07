@@ -96,6 +96,7 @@ class AttentionKind(StrEnum):
     CANDIDATE_AUTHORIZATION = "CANDIDATE_AUTHORIZATION"
     PRODUCTION_BLOCKED = "PRODUCTION_BLOCKED"
     STEERING_DECISION_REQUIRED = "STEERING_DECISION_REQUIRED"
+    WORK_REVISION_APPROVAL = "WORK_REVISION_APPROVAL"
 
 
 class AttentionAction(StrEnum):
@@ -227,6 +228,7 @@ class SteeringProductionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     work_id: UUID
+    work_reality_revision_id: UUID | None = None
     steering_step_id: UUID
     steering_decision_id: UUID | None = None
     production_objective: str = Field(min_length=1)
@@ -323,6 +325,9 @@ class AttentionItem(BaseModel):
     reality_refs: tuple[RealityReference, ...] = ()
     steering_plan_revision_id: UUID | None = None
     steering_step_id: UUID | None = None
+    interaction_id: UUID | None = None
+    interaction_assessment_id: UUID | None = None
+    expected_work_reality_revision_id: UUID | None = None
 
 
 class WorkResultProjection(BaseModel):

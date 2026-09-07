@@ -15,6 +15,8 @@ from spg.domain.interaction import (
     InteractionInterpretationInput,
     InterpretationMeaning,
     InteractionInvariantViolation,
+    WorkFocusClassification,
+    WorkImpactDisposition,
 )
 from spg.providers.codex_sdk_executor import _enum_value, _wait_for_terminal
 from spg.providers.codex_semantic import _provider_strict_output_schema
@@ -39,6 +41,9 @@ class _InteractionProviderPayload(BaseModel):
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
     meanings: tuple[_InteractionProviderMeaning, ...]
+    focus_classification: WorkFocusClassification | None
+    impact_disposition: WorkImpactDisposition | None
+    supporting_references: tuple[str, ...]
     natural_response: str
 
 
@@ -111,8 +116,8 @@ class CodexSdkWorkInteractionCapability:
     def _instruction(basis: InteractionInterpretationInput) -> str:
         payload = basis.model_dump(mode="json")
         return (
-            "Interpret one pre-Work Human–Watt interaction from the exact persisted "
-            "basis supplied below. This is advisory, read-only interpretation. Do not "
+            "Interpret one Human–Watt interaction from the exact persisted basis "
+            "supplied below. This is advisory, read-only interpretation. Do not "
             "create or imply Work admission, governance, production authority, a Plan, "
             "Run, PWU, repository change, or execution. Do not use tools or hidden "
             "conversation memory. Distinguish casual/exploratory/background input from "
@@ -120,7 +125,14 @@ class CodexSdkWorkInteractionCapability:
             "must retain unresolved_material_questions and must not fabricate motive or "
             "outcome. A sufficiently clear long-lived Motive needs a concrete desired "
             "outcome but does not need an exact production target. Preserve explicit "
-            "constraints and requests. Every meaning must use one allowed kind and cite "
+            "constraints and requests. When active_work_context exists, preserve its "
+            "Motive/outcome/context/constraints/requests unless the latest Human input "
+            "actually proposes a change. Classify how that input relates to current Work "
+            "focus and its production impact. Questions, bounded exploration, material "
+            "branches, and unrelated demands must not silently rewrite current Work. "
+            "Never inject the input into an active production cycle. supporting_references "
+            "may only repeat typed references present in Interaction records; do not copy "
+            "external findings. Every meaning must use one allowed kind and cite "
             "only source_record_ids present in the supplied basis. natural_response is "
             "concise Human-facing continuation or clarification; it is not authoritative. "
             "Return JSON only matching the supplied schema, including every key and [] "

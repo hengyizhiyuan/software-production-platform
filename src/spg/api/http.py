@@ -25,6 +25,7 @@ from spg.api.dto import (
     InteractionCreateRequest,
     InteractionMessageRequest,
     InteractionWorkAdmissionRequest,
+    InteractionWorkRevisionDecisionRequest,
     SharedUnderstandingResponse,
     RuntimeActivationResponse,
     SteeringPlanResponse,
@@ -356,6 +357,7 @@ def create_http_application(
                 interaction_id,
                 request.content,
                 human_identity=request.human_identity,
+                supporting_references=request.supporting_references,
             )
         )
 
@@ -377,6 +379,30 @@ def create_http_application(
             rationale=request.rationale,
         )
         selected_post_admission.activate(work.work_id)
+        return SharedUnderstandingResponse.from_projection(
+            service.get_shared_understanding(interaction_id)
+        )
+
+    @api.post(
+        "/api/interactions/{interaction_id}/work-revision-decisions",
+        response_model=SharedUnderstandingResponse,
+    )
+    def decide_interaction_work_revision(
+        interaction_id: UUID,
+        request: InteractionWorkRevisionDecisionRequest,
+    ) -> SharedUnderstandingResponse:
+        service = required_interaction_service()
+        work = work_service.decide_interaction_work_revision(
+            interaction_id,
+            assessment_id=request.assessment_id,
+            basis_fingerprint=request.basis_fingerprint,
+            expected_previous_revision_id=request.expected_previous_revision_id,
+            action=request.action,
+            authority_identity=request.authority_identity,
+            rationale=request.rationale,
+        )
+        if request.action is AttentionAction.APPROVE:
+            selected_post_admission.activate(work.work_id)
         return SharedUnderstandingResponse.from_projection(
             service.get_shared_understanding(interaction_id)
         )

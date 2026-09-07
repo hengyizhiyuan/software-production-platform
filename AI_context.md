@@ -198,7 +198,8 @@ without encoding either restriction as a permanent architecture limit.
 | Historical Watt MVP Core | CLOSED / PASS — proved Governed Production + Reality-driven Plan Steering Core; explicit non-blocking deferrals preserved |
 | WIC Slice 1 — Interaction Truth Spine & Pre-Work Understanding | IMPLEMENTED / PASS — real multi-turn Provider proof reached NOT_READY → READY with zero Work/production facts |
 | WIC Slice 2 — Governed Work Admission & Interaction Continuity | IMPLEMENTED / PASS — exact READY basis + Human Authority atomically create Work Reality revision #1, admitted scope/governance and same-Interaction focus; existing Steering bootstrap; zero production facts |
-| Work Interaction & Closed-loop Refinement Core | IN PROGRESS — Slices 1–2 closed; active Work evolution and feedback/completion-transition slices not started |
+| WIC Slice 3 — Active Work Evolution, Focus Preservation, Feedback & Plan Reassessment | IMPLEMENTED / PASS — bounded focus/impact assessment, Human-governed append-only revision N+1, exact Scope/Plan/production revision lineage, feedback references, active-cycle immutability, and existing Steering reassessment bridge |
+| Work Interaction & Closed-loop Refinement Core | IN PROGRESS — Slices 1–3 closed; Slice 4 completion/new-Work transition remains not implemented |
 | Watt Product MVP | NOT CLOSED |
 | DCP-1 — Duration & Capacity Semantic Foundation | CLOSED / PASS |
 | DCP-2 — Production Measurement v0 | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable measurement and planning-time TaskShapeSnapshot; no decision influence |
@@ -663,13 +664,17 @@ Product-shape essentials.
 defines them as one cohesive capability chain: Human Input → Interpretation →
 Impact Assessment → governed Work Evolution → existing Plan reassessment →
 production/feedback → continuing Interaction. WIC-1 is **DEFINED / ADMITTED**;
-Slices 1 and 2 are **IMPLEMENTED / PASS**. Slice 1 proves durable pre-Work multi-turn
+Slices 1–3 are **IMPLEMENTED / PASS**. Slice 1 proves durable pre-Work multi-turn
 interpretation, Shared Understanding, readiness progression, restart recovery,
 and zero Work before admission. Slice 2 proves explicit Human admission from the
 exact current `READY` basis into one immutable Work Reality revision #1, exact
 Resource/Scope/Baseline and governance provenance, same-Interaction continuity,
 and revision-bound existing Steering bootstrap with zero production admission
-side effects. The remaining WIC Core is **IN PROGRESS**. The existing Governed Production + Reality-driven Plan Steering Core
+side effects. Slice 3 proves focus preservation, governed append-only Work
+revision N+1, exact Scope/Plan/production binding, source-fact references,
+active-cycle historical immutability, and reassessment through existing Plan
+Steering. The remaining Slice 4 transition behavior keeps WIC Core **IN
+PROGRESS**. The existing Governed Production + Reality-driven Plan Steering Core
 remains **CLOSED / PASS**, while **Watt Product MVP remains NOT CLOSED**. No
 first utterance becomes Work automatically, raw conversation is not truth, and
 new input cannot mutate an active Production Contract.

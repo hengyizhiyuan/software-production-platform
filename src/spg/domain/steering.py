@@ -126,6 +126,7 @@ class PlanFrameBlockerKind(StrEnum):
     PRODUCTION_NOT_PRODUCED = "PRODUCTION_NOT_PRODUCED"
     VERIFICATION_NOT_PASSING = "VERIFICATION_NOT_PASSING"
     REPOSITORY_INTEGRATION_NOT_CONVERGED = "REPOSITORY_INTEGRATION_NOT_CONVERGED"
+    CURRENT_RESULT_MAY_BE_INSUFFICIENT = "CURRENT_RESULT_MAY_BE_INSUFFICIENT"
 
 
 class RealityReference(BaseModel):
@@ -709,6 +710,7 @@ class PlanFrame(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     work_id: UUID
+    work_reality_revision_id: UUID | None = None
     work_objective: str = Field(min_length=1)
     work_condition: str = Field(min_length=1)
     constraints: tuple[str, ...]

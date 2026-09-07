@@ -182,6 +182,7 @@ class SteeringProductionService:
 
             return SteeringProductionRequest(
                 work_id=work.id,
+                work_reality_revision_id=work.current_work_reality_revision_id,
                 steering_step_id=step.id,
                 steering_decision_id=steering_decision_id,
                 production_objective=step.objective,
@@ -230,6 +231,8 @@ class SteeringProductionService:
                 if (
                     run is not None
                     and run.source_baseline_id == request.source_baseline_id
+                    and adoptable.work_reality_revision_id
+                    == request.work_reality_revision_id
                     and adoptable.engineering_scope_id == request.engineering_scope_id
                     and adoptable.resource_id == request.engineering_resource_id
                 ):
@@ -247,33 +250,50 @@ class SteeringProductionService:
                     return SteeringProductionAdmission(request=request, binding=binding)
 
         plan, completion_contract, horizon, objective = self._production_contract(request)
-        spine = self.runtime.create_initial_runtime_spine(
-            InitialRunRequest(
-                intent_ref=f"work:{request.work_id}:steering-step:{request.steering_step_id}",
-                goal=request.production_objective,
-                production_horizon=horizon,
-                initial_work_unit_objective=objective,
-                completion_contract=completion_contract,
-            )
-        )
-        timestamp = datetime.now(UTC)
-        governance_id = uuid5(
-            NAMESPACE_URL,
-            f"spg:steering-production:{request.steering_step_id}:{spine.run.id}",
-        )
-        binding_id = uuid4()
         with self.database.unit_of_work() as unit_of_work:
             product = ProductStore(unit_of_work.session)
             runtime = RuntimeStore(unit_of_work.session)
-            current_work = product.work(request.work_id)
+            current_work = product.work(request.work_id, for_update=True)
             if current_work is None:
                 raise ProductInvariantViolation(
                     "Work authority envelope disappeared before production admission"
                 )
-            if product.runtime_binding_for_step(request.steering_step_id) is not None:
-                raise SteeringInvariantViolation(
-                    "Steering PRODUCE Step already has an admitted production cycle"
+            if (
+                current_work.current_work_reality_revision_id
+                != request.work_reality_revision_id
+            ):
+                raise ProductInvariantViolation(
+                    "Work Reality Revision changed before production admission"
                 )
+            existing = product.runtime_binding_for_step(request.steering_step_id)
+            if existing is not None:
+                unit_of_work.rollback()
+                return SteeringProductionAdmission(
+                    request=request,
+                    binding=existing,
+                )
+            # Hold the Work row while the existing Runtime service forms the spine.
+            # A concurrent Work revision admission uses the same durable lock, so
+            # either the old exact cycle is admitted first or the stale request
+            # fails before any new production facts are created.
+            spine = self.runtime.create_initial_runtime_spine(
+                InitialRunRequest(
+                    intent_ref=(
+                        f"work:{request.work_id}:steering-step:"
+                        f"{request.steering_step_id}"
+                    ),
+                    goal=request.production_objective,
+                    production_horizon=horizon,
+                    initial_work_unit_objective=objective,
+                    completion_contract=completion_contract,
+                )
+            )
+            timestamp = datetime.now(UTC)
+            governance_id = uuid5(
+                NAMESPACE_URL,
+                f"spg:steering-production:{request.steering_step_id}:{spine.run.id}",
+            )
+            binding_id = uuid4()
             cycle_number = len(product.runtime_bindings(request.work_id)) + 1
             runtime.insert_governance(
                 {
@@ -306,7 +326,7 @@ class SteeringProductionService:
                     "steering_step_id": request.steering_step_id,
                     "steering_decision_id": request.steering_decision_id,
                     "work_reality_revision_id": (
-                        current_work.current_work_reality_revision_id
+                        request.work_reality_revision_id
                     ),
                     "engineering_scope_id": request.engineering_scope_id,
                     "resource_id": request.engineering_resource_id,

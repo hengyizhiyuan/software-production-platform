@@ -55,6 +55,7 @@ class PlanFrameAssembler:
                     "Plan Frame requires the admitted READY Work Reality"
                 )
             scope = product.scope_for_work(work_id)
+            work_reality_revision = product.current_work_reality_revision(work_id)
             if (
                 scope is None
                 or work.engineering_scope_id != scope.id
@@ -71,6 +72,13 @@ class PlanFrameAssembler:
             references.append(
                 RealityReference(kind=RealityReferenceKind.WORK, identity=work.id)
             )
+            if work_reality_revision is not None:
+                references.append(
+                    RealityReference(
+                        kind=RealityReferenceKind.WORK_REALITY_REVISION,
+                        identity=work_reality_revision.id,
+                    )
+                )
             if reconstruction.latest_decision is not None:
                 references.extend(reconstruction.latest_decision.reality_refs)
             if reconstruction.history:
@@ -119,6 +127,7 @@ class PlanFrameAssembler:
             runtime_refs: list[RealityReference] = []
             blockers: list[PlanFrameBlocker] = []
             completion_evidence_sufficient = False
+            current_result_may_be_insufficient = False
             binding = product.runtime_binding(work_id)
             if binding is not None:
                 summary = product.runtime_summary(binding)
@@ -200,11 +209,38 @@ class PlanFrameAssembler:
                             reality_refs=(integration_ref,),
                         )
                     )
+                current_result_may_be_insufficient = bool(
+                    work_reality_revision is not None
+                    and binding.work_reality_revision_id
+                    != work_reality_revision.id
+                    and "impact:CURRENT_RESULT_MAY_BE_INSUFFICIENT"
+                    in work_reality_revision.change_set
+                )
+                if current_result_may_be_insufficient:
+                    blockers.append(
+                        PlanFrameBlocker(
+                            kind=(
+                                PlanFrameBlockerKind.CURRENT_RESULT_MAY_BE_INSUFFICIENT
+                            ),
+                            reason=(
+                                "The admitted production cycle remains historical truth "
+                                "for an older Work Reality revision; its result cannot "
+                                "satisfy the latest revision without governed reassessment"
+                            ),
+                            reality_refs=(
+                                RealityReference(
+                                    kind=RealityReferenceKind.WORK_REALITY_REVISION,
+                                    identity=work_reality_revision.id,
+                                ),
+                            ),
+                        )
+                    )
                 completion_evidence_sufficient = bool(
                     completion_ref
                     and summary.completion_outcome == "PRODUCED"
                     and verification_refs
                     and all(result == "PASS" for result in summary.verification_results)
+                    and not current_result_may_be_insufficient
                 )
             references.extend(runtime_refs)
 
@@ -216,6 +252,9 @@ class PlanFrameAssembler:
         )
         return PlanFrame(
             work_id=work.id,
+            work_reality_revision_id=(
+                None if work_reality_revision is None else work_reality_revision.id
+            ),
             work_objective=(
                 work.production_objective
                 or work.desired_outcome

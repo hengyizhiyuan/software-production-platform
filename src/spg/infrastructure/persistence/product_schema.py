@@ -194,6 +194,7 @@ interaction_records = Table(
     Column("source", String(255), nullable=False),
     Column("content", Text, nullable=False),
     Column("content_fingerprint", String(64), nullable=False),
+    Column("supporting_references", JSONB, nullable=False),
     Column(
         "work_focus_id",
         Uuid(as_uuid=True),
@@ -231,6 +232,48 @@ interaction_assessments = Table(
     Column("current_requests", JSONB, nullable=False),
     Column("unresolved_material_questions", JSONB, nullable=False),
     Column("meanings", JSONB, nullable=False),
+    Column("focus_classification", String(32), nullable=True),
+    Column("impact_disposition", String(48), nullable=True),
+    Column("candidate_change", JSONB, nullable=True),
+    Column(
+        "basis_work_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "work_reality_revisions.id",
+            name="fk_interaction_assessments_basis_work_revision",
+            use_alter=True,
+        ),
+        nullable=True,
+    ),
+    Column(
+        "basis_steering_plan_revision_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "steering_plan_revisions.id",
+            name="fk_interaction_assessments_basis_steering_revision",
+        ),
+        nullable=True,
+    ),
+    Column(
+        "basis_steering_step_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "steering_steps.id",
+            name="fk_interaction_assessments_basis_steering_step",
+        ),
+        nullable=True,
+    ),
+    Column(
+        "basis_active_runtime_binding_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "work_runtime_bindings.id",
+            name="fk_interaction_assessments_basis_runtime_binding",
+            use_alter=True,
+        ),
+        nullable=True,
+    ),
+    Column("supporting_references", JSONB, nullable=False),
     Column("natural_response", Text, nullable=False),
     Column("readiness", JSONB, nullable=False),
     Column("provider_identity", String(255), nullable=False),
@@ -241,6 +284,19 @@ interaction_assessments = Table(
         "interaction_id",
         "basis_fingerprint",
         name="uq_interaction_assessments_interaction_basis",
+    ),
+    CheckConstraint(
+        "focus_classification IS NULL OR focus_classification IN "
+        "('ON_TOPIC', 'RELEVANT_EXPLORATION', 'SIDE_QUESTION', "
+        "'MATERIAL_BRANCH', 'UNRELATED_NEW_DEMAND')",
+        name="ck_interaction_assessments_focus_known",
+    ),
+    CheckConstraint(
+        "impact_disposition IS NULL OR impact_disposition IN "
+        "('NO_GOVERNED_CHANGE', 'CURRENT_CYCLE_REMAINS_VALID', "
+        "'DEFER_TO_PRODUCTION_BOUNDARY', 'CURRENT_RESULT_MAY_BE_INSUFFICIENT', "
+        "'HUMAN_GOVERNANCE_REQUIRED', 'NEW_WORK_RECOMMENDED')",
+        name="ck_interaction_assessments_impact_known",
     ),
 )
 
@@ -281,6 +337,7 @@ work_reality_revisions = Table(
         ),
         nullable=False,
     ),
+    Column("source_record_ids", JSONB, nullable=False),
     Column("motive", Text, nullable=False),
     Column("desired_outcome", Text, nullable=False),
     Column("context_facts", JSONB, nullable=False),

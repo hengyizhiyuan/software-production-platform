@@ -34,6 +34,32 @@ class InterpretationMeaningKind(StrEnum):
     NEW_WORK_CANDIDATE = "NEW_WORK_CANDIDATE"
 
 
+class WorkFocusClassification(StrEnum):
+    ON_TOPIC = "ON_TOPIC"
+    RELEVANT_EXPLORATION = "RELEVANT_EXPLORATION"
+    SIDE_QUESTION = "SIDE_QUESTION"
+    MATERIAL_BRANCH = "MATERIAL_BRANCH"
+    UNRELATED_NEW_DEMAND = "UNRELATED_NEW_DEMAND"
+
+
+class WorkImpactDisposition(StrEnum):
+    NO_GOVERNED_CHANGE = "NO_GOVERNED_CHANGE"
+    CURRENT_CYCLE_REMAINS_VALID = "CURRENT_CYCLE_REMAINS_VALID"
+    DEFER_TO_PRODUCTION_BOUNDARY = "DEFER_TO_PRODUCTION_BOUNDARY"
+    CURRENT_RESULT_MAY_BE_INSUFFICIENT = "CURRENT_RESULT_MAY_BE_INSUFFICIENT"
+    HUMAN_GOVERNANCE_REQUIRED = "HUMAN_GOVERNANCE_REQUIRED"
+    NEW_WORK_RECOMMENDED = "NEW_WORK_RECOMMENDED"
+
+
+class WorkRevisionAdmissionStatus(StrEnum):
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    PENDING_HUMAN = "PENDING_HUMAN"
+    ADMITTED = "ADMITTED"
+    REJECTED = "REJECTED"
+    REFINEMENT_REQUESTED = "REFINEMENT_REQUESTED"
+    NEW_WORK_RECOMMENDED = "NEW_WORK_RECOMMENDED"
+
+
 class WorkAdmissionReadinessStatus(StrEnum):
     NOT_READY = "NOT_READY"
     READY = "READY"
@@ -51,6 +77,7 @@ class InteractionRecord(BaseModel):
     content: str = Field(min_length=1)
     content_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     work_focus_id: UUID | None = None
+    supporting_references: tuple[str, ...] = ()
     created_at: datetime
 
 
@@ -104,7 +131,39 @@ class InteractionInterpretationInput(BaseModel):
     interaction: Interaction
     records: tuple[InteractionRecord, ...] = Field(min_length=1)
     prior_assessment: "InteractionAssessment | None" = None
+    active_work_context: "ActiveWorkInterpretationContext | None" = None
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class ActiveWorkInterpretationContext(BaseModel):
+    """Exact governed Work/Plan/production basis supplied to interpretation."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    work_revision: "WorkRealityRevision"
+    engineering_scope_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    steering_plan_revision_id: UUID | None = None
+    steering_plan_revision_number: int | None = Field(default=None, ge=1)
+    current_steering_step_id: UUID | None = None
+    current_steering_step_type: str | None = None
+    active_production_binding_id: UUID | None = None
+    active_cycle_work_revision_id: UUID | None = None
+    active_cycle_number: int | None = Field(default=None, ge=1)
+    relevant_reality_references: tuple[str, ...] = ()
+
+
+class WorkEvolutionCandidateChange(BaseModel):
+    """Candidate materialized Work state; never governed truth by itself."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    changed_fields: tuple[str, ...]
+    motive: str
+    desired_outcome: str
+    context_facts: tuple[str, ...]
+    constraints: tuple[str, ...]
+    requests: tuple[str, ...]
+    scope_change_required: bool = False
 
 
 class InteractionAssessmentCandidate(BaseModel):
@@ -119,6 +178,9 @@ class InteractionAssessmentCandidate(BaseModel):
     current_requests: tuple[str, ...] = ()
     unresolved_material_questions: tuple[str, ...] = ()
     meanings: tuple[InterpretationMeaning, ...] = ()
+    focus_classification: WorkFocusClassification | None = None
+    impact_disposition: WorkImpactDisposition | None = None
+    supporting_references: tuple[str, ...] = ()
     natural_response: str = Field(min_length=1)
     provider_identity: str = Field(min_length=1, max_length=255)
     model_identity: str | None = Field(default=None, max_length=255)
@@ -138,6 +200,14 @@ class InteractionAssessment(BaseModel):
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
     meanings: tuple[InterpretationMeaning, ...]
+    focus_classification: WorkFocusClassification | None = None
+    impact_disposition: WorkImpactDisposition | None = None
+    candidate_change: WorkEvolutionCandidateChange | None = None
+    basis_work_revision_id: UUID | None = None
+    basis_steering_plan_revision_id: UUID | None = None
+    basis_steering_step_id: UUID | None = None
+    basis_active_runtime_binding_id: UUID | None = None
+    supporting_references: tuple[str, ...] = ()
     natural_response: str
     readiness: WorkAdmissionReadiness
     provider_identity: str
@@ -159,6 +229,7 @@ class WorkRealityRevision(BaseModel):
     revision_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     source_interaction_id: UUID
     source_assessment_id: UUID
+    source_record_ids: tuple[UUID, ...] = ()
     motive: str = Field(min_length=1)
     desired_outcome: str = Field(min_length=1)
     context_facts: tuple[str, ...]
@@ -188,6 +259,7 @@ class SharedUnderstanding(BaseModel):
     interaction: Interaction
     records: tuple[InteractionRecord, ...]
     latest_assessment: InteractionAssessment | None
+    latest_assessment_current: bool = True
     human_said: tuple[str, ...]
     interpreted_motive: str | None
     desired_outcome: str | None
@@ -202,6 +274,15 @@ class SharedUnderstanding(BaseModel):
     candidate_scope_summary: str | None = None
     governed_work_id: UUID | None
     governed_revision: WorkRealityRevision | None = None
+    current_work_focus: str | None = None
+    focus_classification: WorkFocusClassification | None = None
+    impact_disposition: WorkImpactDisposition | None = None
+    candidate_change: WorkEvolutionCandidateChange | None = None
+    work_revision_admission_status: WorkRevisionAdmissionStatus = (
+        WorkRevisionAdmissionStatus.NOT_APPLICABLE
+    )
+    active_cycle_work_revision_id: UUID | None = None
+    active_cycle_impact_disposition: WorkImpactDisposition | None = None
 
 
 class WorkInteractionCapability(Protocol):

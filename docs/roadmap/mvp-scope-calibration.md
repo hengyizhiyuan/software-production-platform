@@ -51,7 +51,7 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | Motive / Work / Engineering Scope product model | Motive is the product-facing concept; Work is the current internal governed representation; Goal is an optional weak aggregation; Engineering Resources bind through explicit Engineering Scope | MVP PRODUCT MODEL / CONCEPT CALIBRATION CLOSED / PASS; IMPLEMENTATION REMAINS WORK-NAMED |
 | Production Planner | Structured provider-neutral single-PWU Production Plan is durable, Human-visible before approval, and carried into the sole PWU/MEI; it is a narrow production-step plan, not full lifecycle steering | MVP CORE / PLAN-1B CLOSED / PASS |
 | [Reality-driven Plan Steering](../architecture/reality-driven-plan-steering-mvp-contract.md) | 1C through 1L are CLOSED / PASS. Dogfood #9 proves the complete machine-side long-lived loop; Dogfood #10 proves Human-operated acceptance and exact Runtime activation. The remaining observability gap is explicit and non-blocking. | MATERIAL MVP CORE PRODUCT CAPABILITY / MVP CLOSED / PASS |
-| [Work Interaction & Closed-loop Refinement](../architecture/work-interaction-closed-loop-refinement.md) | Slices 1–2 implement durable pre-Work Interaction, basis-bound interpretation/readiness, explicit Human Work admission, immutable Work Reality revision #1, same-Interaction focus, and existing Steering bootstrap; active-Work evolution remains later | PRODUCT-SHAPE ESSENTIAL / SLICES 1–2 IMPLEMENTED / PASS / CORE IN PROGRESS |
+| [Work Interaction & Closed-loop Refinement](../architecture/work-interaction-closed-loop-refinement.md) | Slices 1–3 implement pre-Work formation, explicit Human Work admission, bounded active-Work focus/impact assessment, append-only Work Reality revision N+1, exact Scope/Plan/production lineage, feedback references, active-cycle immutability, and existing Steering reassessment; Slice 4 transition behavior remains later | PRODUCT-SHAPE ESSENTIAL / SLICES 1–3 IMPLEMENTED / PASS / CORE IN PROGRESS |
 | [Interpretation Externalization / Multimodal Alignment](../architecture/interpretation-externalization-and-multimodal-alignment.md) | Externalize Watt's reconstructed Motive interpretation at the lowest sufficient representation cost so material semantic mismatch can be calibrated | FUTURE CORE DIFFERENTIATION CAPABILITY / NOT CURRENT MVP SCOPE / NOT YET DESIGNED FOR IMPLEMENTATION |
 | Production state view | Work, Goal, Attention, Steering, progress, and Work Result projections derive from authoritative Runtime facts | MVP CORE / CLOSED / PASS; real Provider loop and Human acceptance proven |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
@@ -248,12 +248,13 @@ an evidence-backed follow-up rather than hidden success.
 13. **Product North Star / WIC-1 Architecture** — CLOSED / PASS for architecture definition.
 14. **WIC Slice 1 — Interaction Truth Spine & Pre-Work Understanding** — IMPLEMENTED / PASS. Multi-turn real Provider evidence advances `NOT_READY -> READY` while Work and production facts remain zero.
 15. **WIC Slice 2 — Governed Work Admission & Interaction Continuity** — IMPLEMENTED / PASS. Exact current `READY` assessment plus explicit Human Authority creates one Work Reality revision #1, admitted scope/governance, same-Interaction focus, and existing long-lived Steering bootstrap with zero production facts. WIC Core remains IN PROGRESS.
-16. **Duration/capacity semantic foundation** — DCP-1 CLOSED / PASS and DCP-2
+16. **WIC Slice 3 — Active Work Evolution, Focus Preservation, Feedback & Plan Reassessment** — IMPLEMENTED / PASS. Active input is classified against exact governed Reality; only Human approval appends revision N+1; old production bindings remain immutable; the latest revision enters existing Plan Steering through `PlanFrame`. WIC Core remains IN PROGRESS pending Slice 4.
+17. **Duration/capacity semantic foundation** — DCP-1 CLOSED / PASS and DCP-2
     Production Measurement v0 IMPLEMENTED / FOCUSED VALIDATION PASS; estimation,
     queue, scheduling, and runtime capacity behavior require separate admission
     and do not reopen Core.
-17. **Watt Product MVP closure reassessment** — only after WIC implementation and real product evidence.
-18. **Necessary UI / Product Experience work** — improve observability and history within an admitted boundary.
+18. **Watt Product MVP closure reassessment** — only after WIC implementation and real product evidence.
+19. **Necessary UI / Product Experience work** — improve observability and history within an admitted boundary.
 19. **Deployment readiness and promotion validation** — risk-based gates for the accepted checkpoint.
 20. **Linux server deployment and promotion** — bootstrap and validate from an exact accepted candidate.
 21. **Phase-2 hardening and systematic post-Core dogfood** — activate from evidence and triggers, not architectural interest alone.

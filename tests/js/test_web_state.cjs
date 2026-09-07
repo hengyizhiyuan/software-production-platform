@@ -168,3 +168,11 @@ test("pre-Work composer keeps messaging separate from explicit governed admissio
   assert.match(appSource, /admitWorkControl\.addEventListener\("click", admitInteractionWork\)/);
   assert.doesNotMatch(appSource, /countdown/i);
 });
+
+test("active Work interaction keeps revision admission explicit and Human governed", () => {
+  assert.match(appSource, /work-revision-decisions/);
+  assert.match(appSource, /work_revision_admission_status === "PENDING_HUMAN"/);
+  assert.match(appSource, /approve-work-revision/);
+  assert.match(appSource, /reject-work-revision/);
+  assert.match(appSource, /refine-work-revision/);
+});

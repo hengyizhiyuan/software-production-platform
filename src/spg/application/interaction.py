@@ -8,6 +8,7 @@ import json
 from uuid import UUID, uuid4
 
 from spg.domain.interaction import (
+    ActiveWorkInterpretationContext,
     Interaction,
     InteractionActor,
     InteractionAssessment,
@@ -17,17 +18,25 @@ from spg.domain.interaction import (
     InteractionInvariantViolation,
     InteractionRecord,
     InteractionRecordNotFound,
+    InterpretationMeaningKind,
     SharedUnderstanding,
+    WorkEvolutionCandidateChange,
+    WorkFocusClassification,
+    WorkImpactDisposition,
+    WorkRevisionAdmissionStatus,
     WorkAdmissionReadiness,
     WorkAdmissionReadinessStatus,
     WorkInteractionCapability,
 )
+from spg.domain.product import ProductionCycleBindingCondition
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.infrastructure.persistence.steering_store import SteeringStore
 
 
-ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v1"
+ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v2"
 READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
 
@@ -35,6 +44,7 @@ READINESS_PROFILE_VERSION = "v0"
 def interaction_basis_fingerprint(
     interaction: Interaction,
     records: tuple[InteractionRecord, ...],
+    active_work_context: ActiveWorkInterpretationContext | None = None,
 ) -> str:
     payload = {
         "interaction_id": str(interaction.id),
@@ -51,9 +61,15 @@ def interaction_basis_fingerprint(
                 "work_focus_id": (
                     None if record.work_focus_id is None else str(record.work_focus_id)
                 ),
+                "supporting_references": list(record.supporting_references),
             }
             for record in records
         ],
+        "active_work_context": (
+            None
+            if active_work_context is None
+            else active_work_context.model_dump(mode="json")
+        ),
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(encoded).hexdigest()
@@ -69,6 +85,55 @@ class DeterministicWorkInteractionCapability:
     ) -> InteractionAssessmentCandidate:
         human = [record for record in basis.records if record.actor is InteractionActor.HUMAN]
         latest = human[-1]
+        active = basis.active_work_context
+        if active is not None:
+            value = latest.content.strip()
+            normalized_latest = value.casefold()
+            references = latest.supporting_references
+            if value.rstrip().endswith(("?", "？")):
+                focus = WorkFocusClassification.SIDE_QUESTION
+                impact = WorkImpactDisposition.NO_GOVERNED_CHANGE
+            elif any(
+                marker in normalized_latest
+                for marker in ("另一个需求", "另外一个需求", "unrelated", "new work")
+            ):
+                focus = WorkFocusClassification.UNRELATED_NEW_DEMAND
+                impact = WorkImpactDisposition.NEW_WORK_RECOMMENDED
+            elif any(
+                marker in normalized_latest
+                for marker in ("探索", "设想", "未来是否", "maybe", "what if")
+            ):
+                focus = WorkFocusClassification.RELEVANT_EXPLORATION
+                impact = WorkImpactDisposition.NO_GOVERNED_CHANGE
+            else:
+                focus = WorkFocusClassification.ON_TOPIC
+                impact = (
+                    WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT
+                    if active.active_production_binding_id is not None
+                    else WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED
+                )
+            revision = active.work_revision
+            contextual = (
+                revision.context_facts
+                if impact is WorkImpactDisposition.NO_GOVERNED_CHANGE
+                else (*revision.context_facts, value)
+            )
+            return InteractionAssessmentCandidate(
+                interpreted_motive=revision.motive,
+                desired_outcome=revision.desired_outcome,
+                candidate_context=contextual,
+                candidate_constraints=revision.constraints,
+                current_requests=revision.requests,
+                focus_classification=focus,
+                impact_disposition=impact,
+                supporting_references=references,
+                natural_response=(
+                    "I kept the current Work focus and recorded this without changing governed Work."
+                    if impact is WorkImpactDisposition.NO_GOVERNED_CHANGE
+                    else "I assessed this against the current Work. Human governance is required before any Work revision."
+                ),
+                provider_identity="watt-native:deterministic-v1",
+            )
         combined = "\n".join(record.content.strip() for record in human).strip()
         normalized = combined.lower().strip("。.!！?？ ")
         idle = normalized in self._IDLE or len(normalized) < 8
@@ -166,6 +231,7 @@ class WorkInteractionService:
         content: str,
         *,
         human_identity: str,
+        supporting_references: tuple[str, ...] = (),
     ) -> InteractionRecord:
         value = content.strip()
         identity = human_identity.strip()
@@ -174,6 +240,7 @@ class WorkInteractionService:
         now = datetime.now(UTC)
         record_id = uuid4()
         content_fingerprint = hashlib.sha256(value.encode()).hexdigest()
+        references = self._normalize_supporting_references(supporting_references)
         with self.database.unit_of_work() as uow:
             store = InteractionStore(uow.session)
             interaction = store.interaction(interaction_id, for_update=True)
@@ -192,6 +259,7 @@ class WorkInteractionService:
                     "content": value,
                     "content_fingerprint": content_fingerprint,
                     "work_focus_id": interaction.current_work_id,
+                    "supporting_references": list(references),
                     "created_at": now,
                 }
             )
@@ -209,6 +277,7 @@ class WorkInteractionService:
         content: str,
         *,
         human_identity: str,
+        supporting_references: tuple[str, ...] = (),
     ) -> SharedUnderstanding:
         # The Human record commits first. A failed Provider call therefore leaves an
         # honest, recoverable unassessed basis rather than losing communication.
@@ -216,6 +285,7 @@ class WorkInteractionService:
             interaction_id,
             content,
             human_identity=human_identity,
+            supporting_references=supporting_references,
         )
         self.assess_current(interaction_id)
         return self.get_shared_understanding(interaction_id)
@@ -251,7 +321,12 @@ class WorkInteractionService:
             records = store.records(interaction_id)
             if not records:
                 raise InteractionInvariantViolation("Interaction has no assessment basis")
-            current_basis = interaction_basis_fingerprint(interaction, records)
+            active_context = self._active_work_context(uow.session, interaction)
+            current_basis = interaction_basis_fingerprint(
+                interaction,
+                records,
+                active_context,
+            )
             if current_basis != basis_fingerprint:
                 raise InteractionInvariantViolation(
                     "Interaction assessment basis is stale and cannot become current"
@@ -268,6 +343,27 @@ class WorkInteractionService:
                 raise InteractionInvariantViolation(
                     "Interpretation meaning references a record outside its basis"
                 )
+            focus, impact, candidate_change = self._normalize_active_candidate(
+                candidate,
+                active_context,
+            )
+            record_references = self._normalize_supporting_references(
+                tuple(
+                    reference
+                    for record in records
+                    for reference in record.supporting_references
+                )
+            )
+            candidate_references = self._normalize_supporting_references(
+                candidate.supporting_references
+            )
+            if not set(candidate_references).issubset(record_references):
+                raise InteractionInvariantViolation(
+                    "Interpretation cannot invent supporting Reality references"
+                )
+            supporting_references = tuple(
+                dict.fromkeys((*record_references, *candidate_references))
+            )
             readiness = self._evaluate_readiness(candidate, current_basis)
             assessment_id = uuid4()
             store.insert_assessment(
@@ -287,6 +383,34 @@ class WorkInteractionService:
                     "meanings": [
                         meaning.model_dump(mode="json") for meaning in candidate.meanings
                     ],
+                    "focus_classification": None if focus is None else focus.value,
+                    "impact_disposition": None if impact is None else impact.value,
+                    "candidate_change": (
+                        None
+                        if candidate_change is None
+                        else candidate_change.model_dump(mode="json")
+                    ),
+                    "basis_work_revision_id": (
+                        None
+                        if active_context is None
+                        else active_context.work_revision.id
+                    ),
+                    "basis_steering_plan_revision_id": (
+                        None
+                        if active_context is None
+                        else active_context.steering_plan_revision_id
+                    ),
+                    "basis_steering_step_id": (
+                        None
+                        if active_context is None
+                        else active_context.current_steering_step_id
+                    ),
+                    "basis_active_runtime_binding_id": (
+                        None
+                        if active_context is None
+                        else active_context.active_production_binding_id
+                    ),
+                    "supporting_references": list(supporting_references),
                     "natural_response": candidate.natural_response,
                     "readiness": readiness.model_dump(mode="json"),
                     "provider_identity": candidate.provider_identity,
@@ -318,6 +442,7 @@ class WorkInteractionService:
         with self.database.unit_of_work() as uow:
             store = InteractionStore(uow.session)
             product = ProductStore(uow.session)
+            runtime = RuntimeStore(uow.session)
             interaction = store.interaction(interaction_id)
             if interaction is None:
                 raise InteractionRecordNotFound(f"Interaction not found: {interaction_id}")
@@ -329,23 +454,44 @@ class WorkInteractionService:
                 if interaction.current_work_id is None
                 else product.current_work_reality_revision(interaction.current_work_id)
             )
+            active_context = self._active_work_context(uow.session, interaction)
+            admitted_from_latest = (
+                None
+                if latest is None
+                else product.work_reality_revision_for_assessment(latest.id)
+            )
+            evolution_decisions = (
+                []
+                if latest is None
+                else runtime.governance_for_subject(
+                    f"interaction-assessment:{latest.id}"
+                )
+            )
         current_basis = (
-            interaction_basis_fingerprint(interaction, records) if records else None
+            interaction_basis_fingerprint(interaction, records, active_context)
+            if records
+            else None
         )
         # A historical assessment remains evidence but is not projected as the
         # current understanding after a newer record arrives.
-        if latest is not None and latest.basis_fingerprint != current_basis:
-            admitted_assessment_is_still_the_latest_human_basis = bool(
-                governed_revision is not None
-                and governed_revision.source_assessment_id == latest.id
-                and latest.basis_last_sequence == records[-1].sequence
-            )
-            if not admitted_assessment_is_still_the_latest_human_basis:
+        assessment_current = bool(
+            latest is not None and latest.basis_fingerprint == current_basis
+        )
+        if latest is not None and latest.basis_last_sequence != records[-1].sequence:
                 latest = None
+                assessment_current = False
+                admitted_from_latest = None
+                evolution_decisions = []
+        admission_status = self._revision_admission_status(
+            latest,
+            admitted_from_latest is not None,
+            tuple(record.decision_type for record in evolution_decisions),
+        )
         return SharedUnderstanding(
             interaction=interaction,
             records=records,
             latest_assessment=latest,
+            latest_assessment_current=assessment_current,
             human_said=tuple(
                 item.content for item in records if item.actor is InteractionActor.HUMAN
             ),
@@ -377,6 +523,31 @@ class WorkInteractionService:
             ),
             governed_work_id=interaction.current_work_id,
             governed_revision=governed_revision,
+            current_work_focus=(
+                None
+                if governed_revision is None
+                else (
+                    f"{governed_revision.motive} → {governed_revision.desired_outcome}"
+                )
+            ),
+            focus_classification=(
+                None if latest is None else latest.focus_classification
+            ),
+            impact_disposition=(
+                None if latest is None else latest.impact_disposition
+            ),
+            candidate_change=(None if latest is None else latest.candidate_change),
+            work_revision_admission_status=admission_status,
+            active_cycle_work_revision_id=(
+                None
+                if active_context is None
+                else active_context.active_cycle_work_revision_id
+            ),
+            active_cycle_impact_disposition=(
+                None
+                if latest is None or latest.basis_active_runtime_binding_id is None
+                else latest.impact_disposition
+            ),
         )
 
     def pending_assessment_interactions(self) -> tuple[UUID, ...]:
@@ -400,17 +571,228 @@ class WorkInteractionService:
                 raise InteractionRecordNotFound(f"Interaction not found: {interaction_id}")
             records = store.records(interaction_id)
             prior = store.latest_assessment(interaction_id)
+            active_context = self._active_work_context(uow.session, interaction)
         if not records:
             raise InteractionInvariantViolation("Interaction has no assessment basis")
-        fingerprint = interaction_basis_fingerprint(interaction, records)
+        fingerprint = interaction_basis_fingerprint(
+            interaction,
+            records,
+            active_context,
+        )
         if prior is not None and prior.basis_fingerprint == fingerprint:
             prior = None
         return InteractionInterpretationInput(
             interaction=interaction,
             records=records,
             prior_assessment=prior,
+            active_work_context=active_context,
             basis_fingerprint=fingerprint,
         )
+
+    @staticmethod
+    def _active_work_context(session, interaction: Interaction) -> ActiveWorkInterpretationContext | None:
+        if interaction.current_work_id is None:
+            return None
+        product = ProductStore(session)
+        runtime = RuntimeStore(session)
+        revision = product.current_work_reality_revision(interaction.current_work_id)
+        scope = product.scope_for_work(interaction.current_work_id)
+        if revision is None or scope is None:
+            raise InteractionInvariantViolation(
+                "Focused Work lacks exact Work Reality Revision or Engineering Scope"
+            )
+        steering = SteeringStore(session)
+        plan = steering.plan_for_work(interaction.current_work_id)
+        active_revision = None if plan is None else steering.active_revision(plan.id)
+        current_step = None
+        if active_revision is not None:
+            current_step = next(
+                (
+                    step
+                    for step in steering.steps(active_revision.id)
+                    if step.state.value == "CURRENT"
+                ),
+                None,
+            )
+        binding = product.runtime_binding(interaction.current_work_id)
+        active_binding = (
+            binding
+            if binding is not None
+            and binding.condition is ProductionCycleBindingCondition.ADMITTED
+            else None
+        )
+        references = [
+            f"WORK_REALITY_REVISION:{revision.id}",
+            f"ENGINEERING_SCOPE:{scope.id}",
+        ]
+        if active_revision is not None:
+            references.append(f"STEERING_PLAN_REVISION:{active_revision.id}")
+        if current_step is not None:
+            references.append(f"STEERING_STEP:{current_step.id}")
+        if active_binding is not None:
+            references.append(f"PRODUCTION_CYCLE:{active_binding.id}")
+            summary = product.runtime_summary(active_binding)
+            for kind, identity in (
+                ("COMPLETION", summary.completion_id),
+                ("RUNTIME_COMMIT", summary.runtime_commit_id),
+            ):
+                if identity is not None:
+                    references.append(f"{kind}:{identity}")
+            if summary.proposed_snapshot_id is not None:
+                references.extend(
+                    f"VERIFICATION:{record.id}"
+                    for record in runtime.verification_records_for_snapshot(
+                        summary.proposed_snapshot_id
+                    )
+                )
+        return ActiveWorkInterpretationContext(
+            work_revision=revision,
+            engineering_scope_fingerprint=scope.fingerprint,
+            steering_plan_revision_id=(
+                None if active_revision is None else active_revision.id
+            ),
+            steering_plan_revision_number=(
+                None if active_revision is None else active_revision.revision_number
+            ),
+            current_steering_step_id=(
+                None if current_step is None else current_step.id
+            ),
+            current_steering_step_type=(
+                None if current_step is None else current_step.type.value
+            ),
+            active_production_binding_id=(
+                None if active_binding is None else active_binding.id
+            ),
+            active_cycle_work_revision_id=(
+                None
+                if active_binding is None
+                else active_binding.work_reality_revision_id
+            ),
+            active_cycle_number=(
+                None if active_binding is None else active_binding.cycle_number
+            ),
+            relevant_reality_references=tuple(references),
+        )
+
+    @staticmethod
+    def _normalize_active_candidate(
+        candidate: InteractionAssessmentCandidate,
+        active: ActiveWorkInterpretationContext | None,
+    ) -> tuple[
+        WorkFocusClassification | None,
+        WorkImpactDisposition | None,
+        WorkEvolutionCandidateChange | None,
+    ]:
+        if active is None:
+            return None, None, None
+        focus = candidate.focus_classification or WorkFocusClassification.ON_TOPIC
+        if focus in {
+            WorkFocusClassification.MATERIAL_BRANCH,
+            WorkFocusClassification.UNRELATED_NEW_DEMAND,
+        }:
+            return focus, WorkImpactDisposition.NEW_WORK_RECOMMENDED, None
+        if focus in {
+            WorkFocusClassification.RELEVANT_EXPLORATION,
+            WorkFocusClassification.SIDE_QUESTION,
+        }:
+            return focus, WorkImpactDisposition.NO_GOVERNED_CHANGE, None
+
+        current = active.work_revision
+        motive = (candidate.interpreted_motive or current.motive).strip()
+        outcome = (candidate.desired_outcome or current.desired_outcome).strip()
+        context = candidate.candidate_context or current.context_facts
+        constraints = candidate.candidate_constraints or current.constraints
+        requests = candidate.current_requests or current.requests
+        values = {
+            "motive": motive,
+            "desired_outcome": outcome,
+            "context_facts": tuple(context),
+            "constraints": tuple(constraints),
+            "requests": tuple(requests),
+        }
+        changed = tuple(
+            name
+            for name, before in (
+                ("motive", current.motive),
+                ("desired_outcome", current.desired_outcome),
+                ("context_facts", current.context_facts),
+                ("constraints", current.constraints),
+                ("requests", current.requests),
+            )
+            if values[name] != before
+        )
+        if not changed:
+            return focus, WorkImpactDisposition.NO_GOVERNED_CHANGE, None
+        scope_change = "constraints" in changed or any(
+            meaning.kind is InterpretationMeaningKind.OBJECTIVE_OR_SCOPE_CHANGE
+            for meaning in candidate.meanings
+        )
+        impact = candidate.impact_disposition
+        if impact in {
+            None,
+            WorkImpactDisposition.NO_GOVERNED_CHANGE,
+            WorkImpactDisposition.NEW_WORK_RECOMMENDED,
+        }:
+            impact = (
+                WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT
+                if active.active_production_binding_id is not None
+                else WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED
+            )
+        return (
+            focus,
+            impact,
+            WorkEvolutionCandidateChange(
+                changed_fields=changed,
+                motive=motive,
+                desired_outcome=outcome,
+                context_facts=tuple(context),
+                constraints=tuple(constraints),
+                requests=tuple(requests),
+                scope_change_required=scope_change,
+            ),
+        )
+
+    @staticmethod
+    def _normalize_supporting_references(values: tuple[str, ...]) -> tuple[str, ...]:
+        allowed = {"VERIFICATION", "RUNTIME_FACT", "COMPLETION", "ENGINEERING_FINDING"}
+        normalized: list[str] = []
+        for raw in values:
+            value = raw.strip()
+            if not value:
+                continue
+            kind, separator, identity = value.partition(":")
+            if separator != ":" or kind not in allowed:
+                raise InteractionInvariantViolation(
+                    "Supporting Reality reference must use an allowed typed identity"
+                )
+            try:
+                UUID(identity)
+            except ValueError as error:
+                raise InteractionInvariantViolation(
+                    "Supporting Reality reference identity must be a UUID"
+                ) from error
+            normalized.append(f"{kind}:{identity}")
+        return tuple(dict.fromkeys(normalized))
+
+    @staticmethod
+    def _revision_admission_status(
+        assessment: InteractionAssessment | None,
+        admitted: bool,
+        decision_types: tuple[str, ...],
+    ) -> WorkRevisionAdmissionStatus:
+        if assessment is None or assessment.basis_work_revision_id is None:
+            return WorkRevisionAdmissionStatus.NOT_APPLICABLE
+        if admitted:
+            return WorkRevisionAdmissionStatus.ADMITTED
+        if assessment.impact_disposition is WorkImpactDisposition.NEW_WORK_RECOMMENDED:
+            return WorkRevisionAdmissionStatus.NEW_WORK_RECOMMENDED
+        if assessment.candidate_change is None:
+            return WorkRevisionAdmissionStatus.NOT_APPLICABLE
+        if "REJECT_WORK_REALITY_REVISION" in decision_types:
+            return WorkRevisionAdmissionStatus.REJECTED
+        if "REQUEST_WORK_REALITY_REFINEMENT" in decision_types:
+            return WorkRevisionAdmissionStatus.REFINEMENT_REQUESTED
+        return WorkRevisionAdmissionStatus.PENDING_HUMAN
 
     @staticmethod
     def _evaluate_readiness(

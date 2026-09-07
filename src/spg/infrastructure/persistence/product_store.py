@@ -98,8 +98,11 @@ class ProductStore:
         if result.rowcount != 1:
             raise LookupError(f"Work not found: {work_id}")
 
-    def work(self, work_id: UUID) -> WorkRecord | None:
-        row = self._one(product_works, product_works.c.id == work_id)
+    def work(self, work_id: UUID, *, for_update: bool = False) -> WorkRecord | None:
+        statement = select(product_works).where(product_works.c.id == work_id)
+        if for_update:
+            statement = statement.with_for_update()
+        row = self.session.execute(statement).mappings().first()
         return None if row is None else self._work(row)
 
     def list_works(self, goal_id: UUID | None = None) -> tuple[WorkRecord, ...]:
@@ -167,6 +170,25 @@ class ProductStore:
         )
         return None if row is None else self._work_reality_revision(row)
 
+    def work_reality_revision_for_assessment(
+        self, assessment_id: UUID
+    ) -> WorkRealityRevision | None:
+        row = self._one(
+            work_reality_revisions,
+            work_reality_revisions.c.source_assessment_id == assessment_id,
+        )
+        return None if row is None else self._work_reality_revision(row)
+
+    def work_reality_revisions(
+        self, work_id: UUID
+    ) -> tuple[WorkRealityRevision, ...]:
+        rows = self.session.execute(
+            select(work_reality_revisions)
+            .where(work_reality_revisions.c.work_id == work_id)
+            .order_by(work_reality_revisions.c.revision_number)
+        ).mappings()
+        return tuple(self._work_reality_revision(row) for row in rows)
+
     def current_work_reality_revision(
         self, work_id: UUID
     ) -> WorkRealityRevision | None:
@@ -218,6 +240,31 @@ class ProductStore:
             select(engineering_resource_bindings)
             .where(engineering_resource_bindings.c.engineering_scope_id == row["id"])
             .order_by(engineering_resource_bindings.c.created_at, engineering_resource_bindings.c.id)
+        ).mappings()
+        return EngineeringScopeRecord(
+            id=row["id"],
+            work_id=row["work_id"],
+            summary=row["summary"],
+            fingerprint=row["fingerprint"],
+            condition=EngineeringScopeCondition(row["condition"]),
+            bindings=tuple(self._binding(item) for item in bindings),
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )
+
+    def scope(self, scope_id: UUID) -> EngineeringScopeRecord | None:
+        row = self.session.execute(
+            select(engineering_scopes).where(engineering_scopes.c.id == scope_id)
+        ).mappings().first()
+        if row is None:
+            return None
+        bindings = self.session.execute(
+            select(engineering_resource_bindings)
+            .where(engineering_resource_bindings.c.engineering_scope_id == scope_id)
+            .order_by(
+                engineering_resource_bindings.c.created_at,
+                engineering_resource_bindings.c.id,
+            )
         ).mappings()
         return EngineeringScopeRecord(
             id=row["id"],
@@ -603,6 +650,7 @@ class ProductStore:
             revision_fingerprint=row["revision_fingerprint"],
             source_interaction_id=row["source_interaction_id"],
             source_assessment_id=row["source_assessment_id"],
+            source_record_ids=tuple(UUID(item) for item in row["source_record_ids"]),
             motive=row["motive"],
             desired_outcome=row["desired_outcome"],
             context_facts=tuple(row["context_facts"]),

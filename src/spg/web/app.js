@@ -56,10 +56,20 @@
     interactionResource: document.getElementById("interaction-resource"),
     interactionScope: document.getElementById("interaction-scope"),
     governedUnderstanding: document.getElementById("governed-understanding"),
+    currentWorkFocus: document.getElementById("current-work-focus"),
+    interactionFocusClassification: document.getElementById("interaction-focus-classification"),
+    interactionImpactDisposition: document.getElementById("interaction-impact-disposition"),
+    interactionCandidateChange: document.getElementById("interaction-candidate-change"),
+    workRevisionAdmissionStatus: document.getElementById("work-revision-admission-status"),
     readinessAffordance: document.getElementById("readiness-affordance"),
     interactionAdmission: document.getElementById("interaction-admission"),
     interactionAuthorityIdentity: document.getElementById("interaction-authority-identity"),
     admitWorkControl: document.getElementById("admit-work-control"),
+    workRevisionAdmission: document.getElementById("work-revision-admission"),
+    workRevisionAuthorityIdentity: document.getElementById("work-revision-authority-identity"),
+    approveWorkRevision: document.getElementById("approve-work-revision"),
+    rejectWorkRevision: document.getElementById("reject-work-revision"),
+    refineWorkRevision: document.getElementById("refine-work-revision"),
     selectedWork: document.getElementById("selected-work"),
     workTitle: document.getElementById("work-title"),
     workStatus: document.getElementById("work-status"),
@@ -295,8 +305,14 @@
       elements.interactionResource.textContent = "Not bound yet";
       elements.interactionScope.textContent = "Not bound yet";
       elements.governedUnderstanding.textContent = "None — no Work exists";
+      elements.currentWorkFocus.textContent = "No governed Work focus";
+      elements.interactionFocusClassification.textContent = "Not assessed";
+      elements.interactionImpactDisposition.textContent = "No governed impact";
+      elements.interactionCandidateChange.textContent = "None";
+      elements.workRevisionAdmissionStatus.textContent = "Not applicable";
       elements.readinessAffordance.textContent = "Not ready to form Work.";
       elements.interactionAdmission.hidden = true;
+      elements.workRevisionAdmission.hidden = true;
       return;
     }
     projection.records.forEach((record) => {
@@ -338,12 +354,23 @@
     elements.governedUnderstanding.textContent = governed
       ? `Work ${governed.work_id} · Reality revision ${governed.revision_number} · Motive: ${governed.motive} · Outcome: ${governed.desired_outcome} · Constraints: ${joined(governed.constraints, "none")}`
       : "None — no Work exists";
+    elements.currentWorkFocus.textContent = projection.current_work_focus || "No governed Work focus";
+    elements.interactionFocusClassification.textContent = projection.focus_classification || "Not assessed";
+    elements.interactionImpactDisposition.textContent = projection.impact_disposition || "No governed impact";
+    const candidate = projection.candidate_change;
+    elements.interactionCandidateChange.textContent = candidate
+      ? `${joined(candidate.changed_fields, "change")} · Outcome: ${candidate.desired_outcome}`
+      : "None";
+    elements.workRevisionAdmissionStatus.textContent = projection.work_revision_admission_status || "NOT_APPLICABLE";
     elements.readinessAffordance.textContent = governed
       ? "Governed Work admitted. This Interaction remains open and focused on that Work."
       : status === "READY"
         ? "Ready to form Work. Review the candidate understanding, Resource, scope, and constraints before admitting."
         : "Not ready to form Work.";
     elements.interactionAdmission.hidden = status !== "READY" || Boolean(governed);
+    elements.workRevisionAdmission.hidden = !(
+      governed && projection.work_revision_admission_status === "PENDING_HUMAN"
+    );
   }
 
   function renderChips(container, values, emptyLabel) {
@@ -1029,6 +1056,49 @@
     }
   }
 
+  async function decideWorkRevision(action) {
+    const projection = state.sharedUnderstanding;
+    const assessment = projection && projection.latest_assessment;
+    const governed = projection && projection.governed_revision;
+    if (state.busy || !projection || !assessment || !governed) {
+      return;
+    }
+    const identity = elements.workRevisionAuthorityIdentity.value.trim();
+    if (!identity) {
+      showNotice(new ApiError(422, "INVALID_REQUEST", "Human authority identity is required."));
+      return;
+    }
+    hideNotice();
+    setBusy(true);
+    try {
+      state.sharedUnderstanding = await apiRequest(
+        `/api/interactions/${projection.interaction_id}/work-revision-decisions`,
+        {
+          method: "POST",
+          body: {
+            assessment_id: assessment.assessment_id,
+            basis_fingerprint: assessment.basis_fingerprint,
+            expected_previous_revision_id: governed.revision_id,
+            action,
+            authority_identity: identity,
+          },
+        },
+      );
+      await loadCollections();
+      await refreshSelected();
+      renderInteraction();
+      announce(action === "APPROVE"
+        ? "Work Reality revision admitted. Existing Plan Steering reassessment scheduled."
+        : "Human decision recorded. Governed Work remains unchanged.");
+    } catch (error) {
+      showNotice(error);
+    } finally {
+      setBusy(false);
+      renderInteraction();
+      renderSelectedWork();
+    }
+  }
+
   function beginNewInteraction() {
     state.selectedInteractionId = "";
     state.sharedUnderstanding = null;
@@ -1052,6 +1122,9 @@
   elements.goalForm.addEventListener("submit", createGoal);
   elements.workForm.addEventListener("submit", continueInteraction);
   elements.admitWorkControl.addEventListener("click", admitInteractionWork);
+  elements.approveWorkRevision.addEventListener("click", () => decideWorkRevision("APPROVE"));
+  elements.rejectWorkRevision.addEventListener("click", () => decideWorkRevision("REJECT"));
+  elements.refineWorkRevision.addEventListener("click", () => decideWorkRevision("REQUEST_REFINEMENT"));
   elements.newInteractionControl.addEventListener("click", beginNewInteraction);
   elements.composerToggle.addEventListener("click", () => {
     const expanded = elements.composerToggle.getAttribute("aria-expanded") === "true";

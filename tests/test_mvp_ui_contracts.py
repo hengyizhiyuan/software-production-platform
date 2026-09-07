@@ -114,6 +114,16 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert 'id="interaction-authority-identity"' in html
     assert 'id="interaction-resource"' in html
     assert 'id="interaction-scope"' in html
+    assert 'id="current-work-focus"' in html
+    assert 'id="interaction-focus-classification"' in html
+    assert 'id="interaction-impact-disposition"' in html
+    assert 'id="interaction-candidate-change"' in html
+    assert 'id="work-revision-admission-status"' in html
+    assert 'id="work-revision-admission"' in html
+    assert 'id="work-revision-authority-identity"' in html
+    assert 'id="approve-work-revision"' in html
+    assert 'id="reject-work-revision"' in html
+    assert 'id="refine-work-revision"' in html
     assert "admit governed work" in combined
     assert "ready to form work" in combined
     assert 'id="work-mode"' not in html
@@ -154,6 +164,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     for route in (
         "/api/interactions",
         "/admit-work",
+        "/work-revision-decisions",
         "/api/goals",
         "/api/works",
         "/refine",
@@ -162,6 +173,8 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
         "/result",
     ):
         assert route in javascript
+    assert "PENDING_HUMAN" in javascript
+    assert "candidate_change" in javascript
 
     for governed_endpoint in ("APPROVE: \"approve\"", "REJECT: \"reject\"", "REQUEST_REFINEMENT: \"request-refinement\""):
         assert governed_endpoint in javascript

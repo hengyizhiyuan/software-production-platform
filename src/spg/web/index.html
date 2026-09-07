@@ -131,6 +131,11 @@
                 <div><dt>Engineering resource</dt><dd id="interaction-resource">Not bound yet</dd></div>
                 <div><dt>Authority envelope</dt><dd id="interaction-scope">Not bound yet</dd></div>
                 <div><dt>Governed / admitted</dt><dd id="governed-understanding">None — no Work exists</dd></div>
+                <div><dt>Current Work focus</dt><dd id="current-work-focus">No governed Work focus</dd></div>
+                <div><dt>Input relevance</dt><dd id="interaction-focus-classification">Not assessed</dd></div>
+                <div><dt>Governed impact</dt><dd id="interaction-impact-disposition">No governed impact</dd></div>
+                <div><dt>Candidate Work change</dt><dd id="interaction-candidate-change">None</dd></div>
+                <div><dt>Revision admission</dt><dd id="work-revision-admission-status">Not applicable</dd></div>
               </dl>
               <p id="readiness-affordance" class="empty-copy">Not ready to form Work.</p>
               <div id="interaction-admission" class="operator-panel compact-admission" hidden>
@@ -139,6 +144,15 @@
                   <input id="interaction-authority-identity" value="human:local-operator" autocomplete="off">
                 </div>
                 <button id="admit-work-control" class="primary-button" type="button">Admit governed Work</button>
+              </div>
+              <div id="work-revision-admission" class="operator-panel compact-admission" hidden>
+                <div class="operator-identity">
+                  <label for="work-revision-authority-identity">Human authority</label>
+                  <input id="work-revision-authority-identity" value="human:local-operator" autocomplete="off">
+                </div>
+                <button id="approve-work-revision" class="primary-button" type="button">Admit revision</button>
+                <button id="reject-work-revision" class="text-button" type="button">Reject</button>
+                <button id="refine-work-revision" class="text-button" type="button">Request refinement</button>
               </div>
             </section>
           </section>

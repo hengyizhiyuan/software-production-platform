@@ -17,6 +17,9 @@ from spg.domain.interaction import (
     InteractionInvariantViolation,
     InteractionRecord,
     InterpretationMeaning,
+    WorkEvolutionCandidateChange,
+    WorkFocusClassification,
+    WorkImpactDisposition,
     WorkAdmissionReadiness,
 )
 from spg.infrastructure.persistence.product_schema import (
@@ -50,6 +53,15 @@ class InteractionStore:
             )
         ).mappings()
         return tuple(self._interaction(row) for row in rows)
+
+    def interaction_for_work(self, work_id: UUID) -> Interaction | None:
+        row = self.session.execute(
+            select(product_interactions)
+            .where(product_interactions.c.current_work_id == work_id)
+            .order_by(product_interactions.c.updated_at.desc())
+            .limit(1)
+        ).mappings().first()
+        return None if row is None else self._interaction(row)
 
     def next_sequence(self, interaction_id: UUID) -> int:
         value = self.session.execute(
@@ -175,6 +187,7 @@ class InteractionStore:
             content=row["content"],
             content_fingerprint=row["content_fingerprint"],
             work_focus_id=row["work_focus_id"],
+            supporting_references=tuple(row["supporting_references"]),
             created_at=row["created_at"],
         )
 
@@ -194,6 +207,32 @@ class InteractionStore:
             meanings=tuple(
                 InterpretationMeaning.model_validate(item) for item in row["meanings"]
             ),
+            focus_classification=(
+                None
+                if row["focus_classification"] is None
+                else WorkFocusClassification(row["focus_classification"])
+            ),
+            impact_disposition=(
+                None
+                if row["impact_disposition"] is None
+                else WorkImpactDisposition(row["impact_disposition"])
+            ),
+            candidate_change=(
+                None
+                if row["candidate_change"] is None
+                else WorkEvolutionCandidateChange.model_validate(
+                    row["candidate_change"]
+                )
+            ),
+            basis_work_revision_id=row["basis_work_revision_id"],
+            basis_steering_plan_revision_id=row[
+                "basis_steering_plan_revision_id"
+            ],
+            basis_steering_step_id=row["basis_steering_step_id"],
+            basis_active_runtime_binding_id=row[
+                "basis_active_runtime_binding_id"
+            ],
+            supporting_references=tuple(row["supporting_references"]),
             natural_response=row["natural_response"],
             readiness=WorkAdmissionReadiness.model_validate(row["readiness"]),
             provider_identity=row["provider_identity"],

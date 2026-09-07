@@ -36,9 +36,12 @@ from spg.domain.governance import (
 )
 from spg.domain.integration import RepositoryIntegrationRequest
 from spg.domain.interaction import (
+    InteractionAssessment,
     InteractionCondition,
     InteractionInvariantViolation,
     InteractionRecordNotFound,
+    WorkFocusClassification,
+    WorkImpactDisposition,
     WorkAdmissionReadinessStatus,
 )
 from spg.domain.preparation import (
@@ -119,6 +122,7 @@ DEFAULT_BINDING = ExecutorBinding(
     profile_identity="profile:local-mvp",
 )
 WORK_REALITY_SCHEMA_VERSION = "wic-work-reality-v1"
+WORK_EVOLUTION_SCHEMA_VERSION = "wic-work-reality-v2"
 
 
 class WorkApplicationService:
@@ -431,6 +435,11 @@ class WorkApplicationService:
                 "basis_fingerprint": current_basis,
                 "source_interaction_id": str(interaction_id),
                 "source_assessment_id": str(assessment.id),
+                "source_record_ids": [
+                    str(record.id)
+                    for record in records
+                    if record.sequence <= assessment.basis_last_sequence
+                ],
                 "motive": motive,
                 "desired_outcome": desired_outcome,
                 "context_facts": list(assessment.candidate_context),
@@ -546,6 +555,11 @@ class WorkApplicationService:
                         "revision_fingerprint": revision_fingerprint,
                         "source_interaction_id": interaction_id,
                         "source_assessment_id": assessment.id,
+                        "source_record_ids": [
+                            str(record.id)
+                            for record in records
+                            if record.sequence <= assessment.basis_last_sequence
+                        ],
                         "motive": motive,
                         "desired_outcome": desired_outcome,
                         "context_facts": list(assessment.candidate_context),
@@ -594,6 +608,333 @@ class WorkApplicationService:
             )
             unit_of_work.commit()
         return self.get_work(work_id)
+
+    def decide_interaction_work_revision(
+        self,
+        interaction_id: UUID,
+        *,
+        assessment_id: UUID,
+        basis_fingerprint: str,
+        expected_previous_revision_id: UUID,
+        action: AttentionAction,
+        authority_identity: str,
+        rationale: str | None = None,
+    ) -> WorkProjection:
+        """Govern one exact active-Work interpretation without rewriting history."""
+
+        if action not in {
+            AttentionAction.APPROVE,
+            AttentionAction.REJECT,
+            AttentionAction.REQUEST_REFINEMENT,
+        }:
+            raise ProductInvariantViolation("Unsupported Work revision decision")
+        identity = authority_identity.strip()
+        if not identity:
+            raise ProductInvariantViolation("Human authority identity is required")
+        timestamp = datetime.now(UTC)
+        with self.database.unit_of_work() as unit_of_work:
+            interactions = InteractionStore(unit_of_work.session)
+            product = ProductStore(unit_of_work.session)
+            runtime = RuntimeStore(unit_of_work.session)
+            steering = SteeringStore(unit_of_work.session)
+            interaction = interactions.interaction(interaction_id, for_update=True)
+            if interaction is None or interaction.current_work_id is None:
+                raise InteractionInvariantViolation(
+                    "Active Work revision requires a focused Interaction"
+                )
+            work = product.work(interaction.current_work_id, for_update=True)
+            if work is None or work.mode is not WorkMode.LONG_LIVED_STEERING:
+                raise ProductInvariantViolation(
+                    "Work evolution requires an admitted long-lived Work"
+                )
+            records = interactions.records(interaction_id)
+            assessment = interactions.assessment(assessment_id)
+            latest = interactions.latest_assessment(interaction_id)
+            current_revision = product.current_work_reality_revision(work.id)
+            if assessment is None or assessment.interaction_id != interaction_id:
+                raise InteractionRecordNotFound(
+                    f"Interaction assessment not found: {assessment_id}"
+                )
+            if current_revision is None:
+                raise ProductInvariantViolation("Focused Work has no Reality revision")
+            decision_type = {
+                AttentionAction.APPROVE: "ADMIT_WORK_REALITY_REVISION",
+                AttentionAction.REJECT: "REJECT_WORK_REALITY_REVISION",
+                AttentionAction.REQUEST_REFINEMENT: "REQUEST_WORK_REALITY_REFINEMENT",
+            }[action]
+            subject = f"interaction-assessment:{assessment.id}"
+            prior_decisions = runtime.governance_for_subject(subject)
+            if prior_decisions:
+                if prior_decisions[-1].decision_type != decision_type:
+                    raise ProductInvariantViolation(
+                        "Work revision candidate already has a different Human decision"
+                    )
+                existing_revision = product.work_reality_revision_for_assessment(
+                    assessment.id
+                )
+                if action is AttentionAction.APPROVE and existing_revision is None:
+                    raise ProductInvariantViolation(
+                        "Approved Work revision decision has no admitted revision"
+                    )
+                unit_of_work.rollback()
+                return self.get_work(work.id)
+            if (
+                latest is None
+                or latest.id != assessment.id
+                or assessment.basis_fingerprint != basis_fingerprint
+                or assessment.basis_last_sequence != records[-1].sequence
+                or assessment.basis_work_revision_id != current_revision.id
+                or current_revision.id != expected_previous_revision_id
+            ):
+                raise InteractionInvariantViolation(
+                    "Work revision assessment is stale against current governed Reality"
+                )
+            plan = steering.plan_for_work(work.id)
+            active_plan = None if plan is None else steering.active_revision(plan.id)
+            current_step = None
+            if active_plan is not None:
+                current_step = next(
+                    (
+                        step
+                        for step in steering.steps(active_plan.id)
+                        if step.state.value == "CURRENT"
+                    ),
+                    None,
+                )
+            binding = product.runtime_binding(work.id)
+            active_binding = (
+                binding
+                if binding is not None
+                and binding.condition is ProductionCycleBindingCondition.ADMITTED
+                else None
+            )
+            if (
+                assessment.basis_steering_plan_revision_id
+                != (None if active_plan is None else active_plan.id)
+                or assessment.basis_steering_step_id
+                != (None if current_step is None else current_step.id)
+                or assessment.basis_active_runtime_binding_id
+                != (None if active_binding is None else active_binding.id)
+            ):
+                raise InteractionInvariantViolation(
+                    "Work revision assessment Plan or production basis is stale"
+                )
+            if assessment.focus_classification in {
+                WorkFocusClassification.MATERIAL_BRANCH,
+                WorkFocusClassification.UNRELATED_NEW_DEMAND,
+            } or assessment.impact_disposition is WorkImpactDisposition.NEW_WORK_RECOMMENDED:
+                raise ProductInvariantViolation(
+                    "A branch or unrelated demand cannot be merged into current Work"
+                )
+            if assessment.candidate_change is None:
+                raise ProductInvariantViolation(
+                    "Assessment contains no governed Work change candidate"
+                )
+
+            governance_id = uuid5(
+                NAMESPACE_URL,
+                f"spg:wic-work-revision-decision:{assessment.id}:{action.value}",
+            )
+            decision_rationale = (
+                rationale.strip()
+                if rationale is not None and rationale.strip()
+                else f"Human {action.value.casefold()} decision for proposed Work evolution."
+            )
+            runtime.insert_governance(
+                {
+                    "id": governance_id,
+                    "decision_type": decision_type,
+                    "authority_identity": identity,
+                    "subject_type": "WORK_REALITY_REVISION_CANDIDATE",
+                    "subject_identity": subject,
+                    "scope": {
+                        "work_id": str(work.id),
+                        "interaction_id": str(interaction.id),
+                        "assessment_id": str(assessment.id),
+                        "basis_fingerprint": assessment.basis_fingerprint,
+                        "previous_revision_id": str(current_revision.id),
+                        "changed_fields": list(
+                            assessment.candidate_change.changed_fields
+                        ),
+                        "focus_classification": (
+                            None
+                            if assessment.focus_classification is None
+                            else assessment.focus_classification.value
+                        ),
+                        "impact_disposition": (
+                            None
+                            if assessment.impact_disposition is None
+                            else assessment.impact_disposition.value
+                        ),
+                        "active_runtime_binding_id": (
+                            None if active_binding is None else str(active_binding.id)
+                        ),
+                    },
+                    "rationale": decision_rationale,
+                    "created_at": timestamp,
+                }
+            )
+            if action is not AttentionAction.APPROVE:
+                unit_of_work.commit()
+                return self.get_work(work.id)
+
+            candidate = assessment.candidate_change
+            current_scope = product.scope(current_revision.engineering_scope_id)
+            resource = product.resource(current_revision.engineering_resource_id)
+            pointer = runtime.current_pointer(for_update=True)
+            if current_scope is None or resource is None or pointer is None:
+                raise ProductInvariantViolation(
+                    "Current Work scope, Resource, or Trusted Baseline is missing"
+                )
+            baseline = runtime.snapshot(pointer.snapshot_id)
+            if baseline is None:
+                raise ProductInvariantViolation("Current Trusted Baseline is missing")
+            if (
+                baseline.repository_identity != resource.repository_identity
+                or baseline.repository_ref != resource.authoritative_ref
+            ):
+                raise ProductInvariantViolation(
+                    "Current Work Resource no longer matches Trusted Baseline"
+                )
+
+            revision_number = current_revision.revision_number + 1
+            revision_id = uuid5(
+                NAMESPACE_URL,
+                f"spg:wic-work-revision:{work.id}:{revision_number}:{assessment.id}",
+            )
+            scope = current_scope
+            if candidate.scope_change_required:
+                scope_id = uuid5(
+                    NAMESPACE_URL,
+                    f"spg:wic-scope:{work.id}:revision:{revision_number}:{assessment.id}",
+                )
+                scope_summary = (
+                    "Long-lived Work revision "
+                    f"{revision_number} authority envelope for "
+                    f"{resource.repository_identity} at {resource.authoritative_ref}"
+                )
+                scope_fingerprint = self._fingerprint(
+                    {
+                        "work_id": str(work.id),
+                        "revision_number": revision_number,
+                        "assessment_id": str(assessment.id),
+                        "previous_scope_id": str(current_scope.id),
+                        "resource_id": str(resource.id),
+                        "constraints": list(candidate.constraints),
+                    }
+                )
+                product.insert_scope(
+                    scope_values={
+                        "id": scope_id,
+                        "work_id": work.id,
+                        "summary": scope_summary,
+                        "fingerprint": scope_fingerprint,
+                        "condition": EngineeringScopeCondition.ADMITTED.value,
+                        "created_at": timestamp,
+                        "updated_at": timestamp,
+                    },
+                    binding_values=(
+                        {
+                            "id": uuid5(
+                                NAMESPACE_URL,
+                                f"spg:wic-scope-binding:{scope_id}:{resource.id}",
+                            ),
+                            "engineering_scope_id": scope_id,
+                            "resource_id": resource.id,
+                            "condition": ResourceBindingCondition.ACTIVE.value,
+                            "created_at": timestamp,
+                        },
+                    ),
+                )
+                scope = product.scope(scope_id)
+                assert scope is not None
+
+            source_record_ids = tuple(
+                record.id
+                for record in records
+                if record.sequence <= assessment.basis_last_sequence
+            )
+            supporting_references = tuple(
+                dict.fromkeys(
+                    (
+                        *(f"INTERACTION_RECORD:{record_id}" for record_id in source_record_ids),
+                        *assessment.supporting_references,
+                    )
+                )
+            )
+            revision_payload = {
+                "work_id": str(work.id),
+                "revision_number": revision_number,
+                "previous_revision_id": str(current_revision.id),
+                "basis_fingerprint": assessment.basis_fingerprint,
+                "source_interaction_id": str(interaction.id),
+                "source_assessment_id": str(assessment.id),
+                "source_record_ids": [str(item) for item in source_record_ids],
+                "motive": candidate.motive,
+                "desired_outcome": candidate.desired_outcome,
+                "context_facts": list(candidate.context_facts),
+                "constraints": list(candidate.constraints),
+                "requests": list(candidate.requests),
+                "engineering_scope_id": str(scope.id),
+                "engineering_resource_id": str(resource.id),
+                "scope_basis_fingerprint": scope.fingerprint,
+                "repository_identity": resource.repository_identity,
+                "repository_ref": resource.authoritative_ref,
+                "source_baseline_id": str(baseline.id),
+                "source_revision": baseline.repository_revision,
+                "governance_record_id": str(governance_id),
+                "supporting_references": list(supporting_references),
+                "change_set": [
+                    *candidate.changed_fields,
+                    f"impact:{assessment.impact_disposition.value}",
+                ],
+                "rationale": decision_rationale,
+                "admitted_by": identity,
+                "schema_version": WORK_EVOLUTION_SCHEMA_VERSION,
+            }
+            product.insert_work_reality_revision(
+                {
+                    **revision_payload,
+                    "id": revision_id,
+                    "work_id": work.id,
+                    "previous_revision_id": current_revision.id,
+                    "source_interaction_id": interaction.id,
+                    "source_assessment_id": assessment.id,
+                    "source_record_ids": [str(item) for item in source_record_ids],
+                    "engineering_scope_id": scope.id,
+                    "engineering_resource_id": resource.id,
+                    "source_baseline_id": baseline.id,
+                    "governance_record_id": governance_id,
+                    "revision_fingerprint": self._fingerprint(revision_payload),
+                    "created_at": timestamp,
+                }
+            )
+            compatibility_update = {
+                "raw_user_requirement": candidate.motive,
+                "desired_outcome": candidate.desired_outcome,
+                "constraints": list(candidate.constraints),
+                "production_objective": candidate.desired_outcome,
+                "scope_summary": scope.summary,
+                "current_work_reality_revision_id": revision_id,
+                "current_engineering_scope_id": scope.id,
+                "updated_at": timestamp,
+            }
+            if set(candidate.changed_fields) - {"context_facts"}:
+                compatibility_update.update(
+                    {
+                        "code_change_proposal": None,
+                        "production_plan_proposal": None,
+                        "expected_artifact_path": None,
+                        "artifact_operation": None,
+                        "artifact_placement_rationale": None,
+                        "artifact_target_confidence": None,
+                        "artifact_source_baseline_id": None,
+                        "artifact_source_revision": None,
+                    }
+                )
+            product.update_work(work.id, compatibility_update)
+            unit_of_work.commit()
+        return self.get_work(work.id)
 
     def refine_work(
         self,
@@ -1594,6 +1935,71 @@ class WorkApplicationService:
                 )
                 continue
             with self.database.unit_of_work() as unit_of_work:
+                interaction_store = InteractionStore(unit_of_work.session)
+                product_store = ProductStore(unit_of_work.session)
+                runtime_store = RuntimeStore(unit_of_work.session)
+                focused_interaction = interaction_store.interaction_for_work(
+                    projection.work_id
+                )
+                evolution_assessment = (
+                    None
+                    if focused_interaction is None
+                    else interaction_store.latest_assessment(focused_interaction.id)
+                )
+                admitted_evolution = (
+                    None
+                    if evolution_assessment is None
+                    else product_store.work_reality_revision_for_assessment(
+                        evolution_assessment.id
+                    )
+                )
+                evolution_decisions = (
+                    []
+                    if evolution_assessment is None
+                    else runtime_store.governance_for_subject(
+                        f"interaction-assessment:{evolution_assessment.id}"
+                    )
+                )
+            if (
+                focused_interaction is not None
+                and evolution_assessment is not None
+                and evolution_assessment.candidate_change is not None
+                and admitted_evolution is None
+                and not evolution_decisions
+                and evolution_assessment.basis_work_revision_id
+                == projection.current_work_reality_revision_id
+            ):
+                items.append(
+                    AttentionItem(
+                        id=uuid5(
+                            NAMESPACE_URL,
+                            f"spg:work-revision-attention:{evolution_assessment.id}",
+                        ),
+                        work_id=projection.work_id,
+                        kind=AttentionKind.WORK_REVISION_APPROVAL,
+                        decision="Admit this interpreted change as the next Work Reality revision?",
+                        reason=(
+                            "Latest Human input is candidate meaning, not Work Truth. "
+                            f"Impact: {evolution_assessment.impact_disposition.value}."
+                        ),
+                        available_actions=(
+                            AttentionAction.APPROVE,
+                            AttentionAction.REJECT,
+                            AttentionAction.REQUEST_REFINEMENT,
+                        ),
+                        recommended_action=None,
+                        governed_subject_ref=(
+                            f"interaction-assessment:{evolution_assessment.id}"
+                        ),
+                        interaction_id=focused_interaction.id,
+                        interaction_assessment_id=evolution_assessment.id,
+                        expected_work_reality_revision_id=(
+                            evolution_assessment.basis_work_revision_id
+                        ),
+                    )
+                )
+                continue
+            with self.database.unit_of_work() as unit_of_work:
                 steering = SteeringStore(unit_of_work.session)
                 plan = steering.plan_for_work(projection.work_id)
                 revision = None if plan is None else steering.active_revision(plan.id)
@@ -1703,6 +2109,35 @@ class WorkApplicationService:
             return self.request_work_refinement(
                 attention.work_id,
                 authority_identity=request.authority_identity,
+            )
+
+        if attention.kind is AttentionKind.WORK_REVISION_APPROVAL:
+            if (
+                attention.interaction_id is None
+                or attention.interaction_assessment_id is None
+                or attention.expected_work_reality_revision_id is None
+            ):
+                raise ProductInvariantViolation(
+                    "Work revision Attention lost its exact governed basis"
+                )
+            with self.database.unit_of_work() as unit_of_work:
+                assessment = InteractionStore(unit_of_work.session).assessment(
+                    attention.interaction_assessment_id
+                )
+            if assessment is None:
+                raise ProductInvariantViolation(
+                    "Work revision Attention lost its assessment"
+                )
+            return self.decide_interaction_work_revision(
+                attention.interaction_id,
+                assessment_id=assessment.id,
+                basis_fingerprint=assessment.basis_fingerprint,
+                expected_previous_revision_id=(
+                    attention.expected_work_reality_revision_id
+                ),
+                action=request.action,
+                authority_identity=request.authority_identity,
+                rationale=request.rationale,
             )
 
         if attention.kind is AttentionKind.CANDIDATE_AUTHORIZATION:

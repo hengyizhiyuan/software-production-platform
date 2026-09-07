@@ -774,6 +774,11 @@ class SteeringApplicationService:
                 "desired_outcome": work.desired_outcome,
                 "production_objective": work.production_objective,
                 "constraints": list(work.constraints),
+                "current_work_reality_revision_id": (
+                    None
+                    if work.current_work_reality_revision_id is None
+                    else str(work.current_work_reality_revision_id)
+                ),
             },
             "engineering_scope": (
                 None

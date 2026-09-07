@@ -48,11 +48,23 @@ class InteractionCreateRequest(ApiDto):
 class InteractionMessageRequest(ApiDto):
     content: str = Field(min_length=1)
     human_identity: str = Field(default="human:local-operator", min_length=1, max_length=255)
+    supporting_references: tuple[str, ...] = ()
 
 
 class InteractionWorkAdmissionRequest(ApiDto):
     assessment_id: UUID
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    authority_identity: str = Field(
+        default="human:local-operator", min_length=1, max_length=255
+    )
+    rationale: str | None = None
+
+
+class InteractionWorkRevisionDecisionRequest(ApiDto):
+    assessment_id: UUID
+    basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    expected_previous_revision_id: UUID
+    action: AttentionAction
     authority_identity: str = Field(
         default="human:local-operator", min_length=1, max_length=255
     )
@@ -66,6 +78,7 @@ class InteractionRecordResponse(ApiDto):
     source: str
     content: str
     work_focus_id: UUID | None
+    supporting_references: tuple[str, ...]
     created_at: datetime
 
 
@@ -100,6 +113,14 @@ class InteractionAssessmentResponse(ApiDto):
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
     meanings: tuple[InteractionMeaningResponse, ...]
+    focus_classification: str | None
+    impact_disposition: str | None
+    candidate_change: dict[str, object] | None
+    basis_work_revision_id: UUID | None
+    basis_steering_plan_revision_id: UUID | None
+    basis_steering_step_id: UUID | None
+    basis_active_runtime_binding_id: UUID | None
+    supporting_references: tuple[str, ...]
     natural_response: str
     readiness: InteractionReadinessResponse
     provider_identity: str
@@ -117,6 +138,7 @@ class WorkRealityRevisionResponse(ApiDto):
     revision_fingerprint: str
     source_interaction_id: UUID
     source_assessment_id: UUID
+    source_record_ids: tuple[UUID, ...]
     motive: str
     desired_outcome: str
     context_facts: tuple[str, ...]
@@ -147,6 +169,7 @@ class SharedUnderstandingResponse(ApiDto):
     records: tuple[InteractionRecordResponse, ...]
     human_said: tuple[str, ...]
     latest_assessment: InteractionAssessmentResponse | None
+    latest_assessment_current: bool
     interpreted_motive: str | None
     desired_outcome: str | None
     candidate_context: tuple[str, ...]
@@ -160,6 +183,13 @@ class SharedUnderstandingResponse(ApiDto):
     candidate_scope_summary: str | None
     governed_work_id: UUID | None
     governed_revision: WorkRealityRevisionResponse | None
+    current_work_focus: str | None
+    focus_classification: str | None
+    impact_disposition: str | None
+    candidate_change: dict[str, object] | None
+    work_revision_admission_status: str
+    active_cycle_work_revision_id: UUID | None
+    active_cycle_impact_disposition: str | None
 
     @classmethod
     def from_projection(cls, projection: SharedUnderstanding) -> Self:
@@ -179,6 +209,7 @@ class SharedUnderstandingResponse(ApiDto):
                     source=item.source,
                     content=item.content,
                     work_focus_id=item.work_focus_id,
+                    supporting_references=item.supporting_references,
                     created_at=item.created_at,
                 )
                 for item in projection.records
@@ -208,6 +239,30 @@ class SharedUnderstandingResponse(ApiDto):
                         )
                         for item in assessment.meanings
                     ),
+                    focus_classification=(
+                        None
+                        if assessment.focus_classification is None
+                        else assessment.focus_classification.value
+                    ),
+                    impact_disposition=(
+                        None
+                        if assessment.impact_disposition is None
+                        else assessment.impact_disposition.value
+                    ),
+                    candidate_change=(
+                        None
+                        if assessment.candidate_change is None
+                        else assessment.candidate_change.model_dump(mode="json")
+                    ),
+                    basis_work_revision_id=assessment.basis_work_revision_id,
+                    basis_steering_plan_revision_id=(
+                        assessment.basis_steering_plan_revision_id
+                    ),
+                    basis_steering_step_id=assessment.basis_steering_step_id,
+                    basis_active_runtime_binding_id=(
+                        assessment.basis_active_runtime_binding_id
+                    ),
+                    supporting_references=assessment.supporting_references,
                     natural_response=assessment.natural_response,
                     readiness=InteractionReadinessResponse(
                         status=assessment.readiness.status.value,
@@ -225,6 +280,7 @@ class SharedUnderstandingResponse(ApiDto):
                     created_at=assessment.created_at,
                 )
             ),
+            latest_assessment_current=projection.latest_assessment_current,
             interpreted_motive=projection.interpreted_motive,
             desired_outcome=projection.desired_outcome,
             candidate_context=projection.candidate_context,
@@ -264,6 +320,7 @@ class SharedUnderstandingResponse(ApiDto):
                     revision_fingerprint=projection.governed_revision.revision_fingerprint,
                     source_interaction_id=projection.governed_revision.source_interaction_id,
                     source_assessment_id=projection.governed_revision.source_assessment_id,
+                    source_record_ids=projection.governed_revision.source_record_ids,
                     motive=projection.governed_revision.motive,
                     desired_outcome=projection.governed_revision.desired_outcome,
                     context_facts=projection.governed_revision.context_facts,
@@ -284,6 +341,31 @@ class SharedUnderstandingResponse(ApiDto):
                     schema_version=projection.governed_revision.schema_version,
                     created_at=projection.governed_revision.created_at,
                 )
+            ),
+            current_work_focus=projection.current_work_focus,
+            focus_classification=(
+                None
+                if projection.focus_classification is None
+                else projection.focus_classification.value
+            ),
+            impact_disposition=(
+                None
+                if projection.impact_disposition is None
+                else projection.impact_disposition.value
+            ),
+            candidate_change=(
+                None
+                if projection.candidate_change is None
+                else projection.candidate_change.model_dump(mode="json")
+            ),
+            work_revision_admission_status=(
+                projection.work_revision_admission_status.value
+            ),
+            active_cycle_work_revision_id=projection.active_cycle_work_revision_id,
+            active_cycle_impact_disposition=(
+                None
+                if projection.active_cycle_impact_disposition is None
+                else projection.active_cycle_impact_disposition.value
             ),
         )
 
@@ -852,6 +934,9 @@ class AttentionResponse(ApiDto):
     reality_refs: tuple[RealityReference, ...] = ()
     steering_plan_revision_id: UUID | None = None
     steering_step_id: UUID | None = None
+    interaction_id: UUID | None = None
+    interaction_assessment_id: UUID | None = None
+    expected_work_reality_revision_id: UUID | None = None
 
     @classmethod
     def from_projection(cls, attention: AttentionItem) -> Self:
@@ -872,6 +957,11 @@ class AttentionResponse(ApiDto):
             reality_refs=attention.reality_refs,
             steering_plan_revision_id=attention.steering_plan_revision_id,
             steering_step_id=attention.steering_step_id,
+            interaction_id=attention.interaction_id,
+            interaction_assessment_id=attention.interaction_assessment_id,
+            expected_work_reality_revision_id=(
+                attention.expected_work_reality_revision_id
+            ),
         )
 
 
