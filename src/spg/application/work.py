@@ -42,6 +42,7 @@ from spg.domain.interaction import (
     InteractionRecordNotFound,
     WorkFocusClassification,
     WorkImpactDisposition,
+    WorkTransitionChoice,
     WorkAdmissionReadinessStatus,
 )
 from spg.domain.preparation import (
@@ -606,6 +607,16 @@ class WorkApplicationService:
                 updated_by=identity,
                 updated_at=timestamp,
             )
+            transition = interactions.latest_transition(interaction_id)
+            if (
+                transition is not None
+                and transition.choice is WorkTransitionChoice.START_NEW_WORK
+                and transition.target_work_id is None
+            ):
+                interactions.bind_transition_target(
+                    transition.id,
+                    target_work_id=work_id,
+                )
             unit_of_work.commit()
         return self.get_work(work_id)
 
@@ -701,7 +712,37 @@ class WorkApplicationService:
                     ),
                     None,
                 )
+            latest_plan_decision = (
+                None
+                if active_plan is None
+                else steering.latest_decision(active_plan.id)
+            )
             binding = product.runtime_binding(work.id)
+            binding_summary = (
+                None if binding is None else product.runtime_summary(binding)
+            )
+            was_currently_satisfied = bool(
+                current_step is not None
+                and current_step.type.value == "COMPLETE"
+                and latest_plan_decision is not None
+                and latest_plan_decision.steering_outcome is SteeringOutcome.COMPLETE
+                and binding is not None
+                and binding.work_reality_revision_id == current_revision.id
+                and binding_summary is not None
+                and binding_summary.runtime_commit_id is not None
+                and binding_summary.completion_outcome == "PRODUCED"
+                and binding_summary.verification_results
+                and all(
+                    result == "PASS"
+                    for result in binding_summary.verification_results
+                )
+                and binding_summary.integration_state == "CONVERGED"
+                and any(
+                    reference.kind is RealityReferenceKind.RUNTIME_COMMIT
+                    and reference.identity == binding_summary.runtime_commit_id
+                    for reference in latest_plan_decision.reality_refs
+                )
+            )
             active_binding = (
                 binding
                 if binding is not None
@@ -887,6 +928,11 @@ class WorkApplicationService:
                 "change_set": [
                     *candidate.changed_fields,
                     f"impact:{assessment.impact_disposition.value}",
+                    *(
+                        ("satisfaction:REOPENED",)
+                        if was_currently_satisfied
+                        else ()
+                    ),
                 ],
                 "rationale": decision_rationale,
                 "admitted_by": identity,
@@ -2254,6 +2300,9 @@ class WorkApplicationService:
             and latest_summary.verification_results
             and all(item == "PASS" for item in latest_summary.verification_results)
             and latest_summary.integration_state == "CONVERGED"
+            and latest_binding is not None
+            and latest_binding.work_reality_revision_id
+            == work.current_work_reality_revision_id
             and any(
                 item.kind is RealityReferenceKind.RUNTIME_COMMIT
                 and item.identity == latest_summary.runtime_commit_id

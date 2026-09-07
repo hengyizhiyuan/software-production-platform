@@ -17,6 +17,9 @@ WIC Slice 2 — Governed Work Admission & Interaction Continuity
 
 WIC Slice 3 — Active Work Evolution, Focus Preservation, Feedback & Plan Reassessment
     IMPLEMENTED / PASS
+
+WIC Slice 4 — Work Satisfaction, Continuation & New Work Transition
+    IMPLEMENTED / PASS
 ```
 
 This contract specializes the approved
@@ -31,8 +34,9 @@ provenance, existing long-lived Steering bootstrap, and continued focus in the
 same Interaction. Slice 3 adds bounded active-Work focus/impact assessment,
 Human-governed append-only Work Reality revision #2+, historical Scope lineage,
 exact Plan/production revision binding, source-fact references, and the existing
-Steering reassessment bridge. It does not implement Slice 4 completion/new-Work
-transition behavior.
+Steering reassessment bridge. Slice 4 adds reconstructable satisfaction and
+relationship projections, completed-Work continuation, and a Human-governed
+new-Work formation transition without creating Work or production Authority.
 
 The closed Governed Production and Reality-driven Plan Steering Core remains
 authoritative. WIC does not reopen or weaken Work/Production admission
@@ -475,8 +479,9 @@ WIC MVP ARCHITECTURE
     READY FOR IMPLEMENTATION PLANNING
 ```
 
-The architecture contract is admitted. Implemented Slices 1–3 evidence does not
-authorize Slice 4 completion/new-Work transition behavior.
+The architecture contract is admitted and all four bounded implementation
+slices are implemented with focused deterministic evidence. Final Human WIC
+Dogfood remains separate from this implementation checkpoint.
 
 ## 14. Slice 2 implementation checkpoint
 
@@ -500,6 +505,49 @@ WIC Slice 2 — Governed Work Admission & Interaction Continuity
 
 Work Interaction & Closed-loop Refinement Core
     IN PROGRESS
+
+Watt Product MVP
+    NOT CLOSED
+```
+
+## 16. Slice 4 implementation checkpoint
+
+Shared Understanding now projects satisfaction separately from the open
+Interaction relationship. `CURRENTLY_SATISFIED` is reconstructed only from the
+exact current Work revision, persisted Steering `COMPLETE`, trusted production
+binding, produced Completion, PASS Verification, CONVERGED integration, and its
+Runtime Commit evidence. Historical completion remains true when a later
+admitted revision reopens the same Work for further progression.
+
+Completed same-Motive input follows the existing Slice 3 path: candidate
+interpretation and impact assessment remain advisory, Human approval appends
+Work Reality revision N+1, the Work projects active again, and existing Plan
+Steering reassesses from the new exact revision. No previous Completion,
+Verification, Integration Effect, Runtime Commit, or Trusted Baseline fact is
+rewritten.
+
+`MATERIAL_BRANCH` or `UNRELATED_NEW_DEMAND` persists one reconstructable Work
+transition with source Interaction Record, source assessment, originating Work,
+reason, classification, impact, and Human choice. The Human may continue the
+current Work, start new Work formation, or dismiss. Starting formation only
+clears the Interaction's current focus; it does not create Work, Authority, or
+production facts. A later new Work still requires normal interpretation,
+readiness, and explicit Human admission, and its governance is independent.
+
+One Interaction may therefore preserve sequential Work focus history and
+transition provenance without assuming `one Interaction == one Work forever`.
+This is Workspace-first compatible but does not introduce Workspace hierarchy,
+Work navigation, Work graphs, or a project-management surface.
+
+Focused evidence is recorded in
+[WIC Slice 4 Focused Validation](../evidence/wic-slice-4-focused-validation.md).
+
+```text
+WIC Slice 4 — Work Satisfaction, Continuation & New Work Transition
+    IMPLEMENTED / PASS
+
+Work Interaction & Closed-loop Refinement Core
+    CLOSED / PASS
 
 Watt Product MVP
     NOT CLOSED
@@ -542,7 +590,7 @@ WIC Slice 3 — Active Work Evolution, Focus Preservation, Feedback & Plan Reass
     IMPLEMENTED / PASS
 
 Work Interaction & Closed-loop Refinement Core
-    IN PROGRESS
+    CLOSED / PASS
 
 Watt Product MVP
     NOT CLOSED

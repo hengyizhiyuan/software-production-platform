@@ -60,6 +60,23 @@ class WorkRevisionAdmissionStatus(StrEnum):
     NEW_WORK_RECOMMENDED = "NEW_WORK_RECOMMENDED"
 
 
+class WorkSatisfactionState(StrEnum):
+    """Current truth about whether the focused Work objective is satisfied."""
+
+    NO_FOCUSED_WORK = "NO_FOCUSED_WORK"
+    IN_PROGRESS = "IN_PROGRESS"
+    CURRENTLY_SATISFIED = "CURRENTLY_SATISFIED"
+
+
+class WorkTransitionChoice(StrEnum):
+    """Human-owned disposition of one persisted new-Work recommendation."""
+
+    PENDING_HUMAN = "PENDING_HUMAN"
+    CONTINUE_CURRENT_WORK = "CONTINUE_CURRENT_WORK"
+    START_NEW_WORK = "START_NEW_WORK"
+    DISMISSED = "DISMISSED"
+
+
 class WorkAdmissionReadinessStatus(StrEnum):
     NOT_READY = "NOT_READY"
     READY = "READY"
@@ -150,6 +167,7 @@ class ActiveWorkInterpretationContext(BaseModel):
     active_cycle_work_revision_id: UUID | None = None
     active_cycle_number: int | None = Field(default=None, ge=1)
     relevant_reality_references: tuple[str, ...] = ()
+    satisfaction_state: WorkSatisfactionState = WorkSatisfactionState.IN_PROGRESS
 
 
 class WorkEvolutionCandidateChange(BaseModel):
@@ -251,6 +269,27 @@ class WorkRealityRevision(BaseModel):
     created_at: datetime
 
 
+class WorkTransitionRecord(BaseModel):
+    """Append-preserving provenance for a suggested change of Work focus."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: UUID
+    interaction_id: UUID
+    source_record_id: UUID
+    source_assessment_id: UUID
+    originating_work_id: UUID
+    target_work_id: UUID | None = None
+    reason: str = Field(min_length=1)
+    focus_classification: WorkFocusClassification
+    impact_disposition: WorkImpactDisposition
+    choice: WorkTransitionChoice = WorkTransitionChoice.PENDING_HUMAN
+    decided_by: str | None = None
+    decision_rationale: str | None = None
+    decided_at: datetime | None = None
+    created_at: datetime
+
+
 class SharedUnderstanding(BaseModel):
     """Rebuildable projection; never a separately persisted source of truth."""
 
@@ -283,6 +322,13 @@ class SharedUnderstanding(BaseModel):
     )
     active_cycle_work_revision_id: UUID | None = None
     active_cycle_impact_disposition: WorkImpactDisposition | None = None
+    work_satisfaction_state: WorkSatisfactionState = (
+        WorkSatisfactionState.NO_FOCUSED_WORK
+    )
+    interaction_relationship_state: InteractionCondition = InteractionCondition.OPEN
+    work_focus_history: tuple[UUID, ...] = ()
+    latest_work_transition: WorkTransitionRecord | None = None
+    new_work_formation_pending: bool = False
 
 
 class WorkInteractionCapability(Protocol):

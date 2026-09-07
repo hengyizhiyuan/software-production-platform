@@ -61,6 +61,10 @@
     interactionImpactDisposition: document.getElementById("interaction-impact-disposition"),
     interactionCandidateChange: document.getElementById("interaction-candidate-change"),
     workRevisionAdmissionStatus: document.getElementById("work-revision-admission-status"),
+    workSatisfactionState: document.getElementById("work-satisfaction-state"),
+    interactionRelationshipState: document.getElementById("interaction-relationship-state"),
+    workFocusHistory: document.getElementById("work-focus-history"),
+    workTransitionSummary: document.getElementById("work-transition-summary"),
     readinessAffordance: document.getElementById("readiness-affordance"),
     interactionAdmission: document.getElementById("interaction-admission"),
     interactionAuthorityIdentity: document.getElementById("interaction-authority-identity"),
@@ -70,6 +74,11 @@
     approveWorkRevision: document.getElementById("approve-work-revision"),
     rejectWorkRevision: document.getElementById("reject-work-revision"),
     refineWorkRevision: document.getElementById("refine-work-revision"),
+    workTransitionDecision: document.getElementById("work-transition-decision"),
+    workTransitionAuthorityIdentity: document.getElementById("work-transition-authority-identity"),
+    continueCurrentWork: document.getElementById("continue-current-work"),
+    startNewWork: document.getElementById("start-new-work"),
+    dismissWorkTransition: document.getElementById("dismiss-work-transition"),
     selectedWork: document.getElementById("selected-work"),
     workTitle: document.getElementById("work-title"),
     workStatus: document.getElementById("work-status"),
@@ -310,9 +319,14 @@
       elements.interactionImpactDisposition.textContent = "No governed impact";
       elements.interactionCandidateChange.textContent = "None";
       elements.workRevisionAdmissionStatus.textContent = "Not applicable";
+      elements.workSatisfactionState.textContent = "NO_FOCUSED_WORK";
+      elements.interactionRelationshipState.textContent = "OPEN";
+      elements.workFocusHistory.textContent = "None";
+      elements.workTransitionSummary.textContent = "None";
       elements.readinessAffordance.textContent = "Not ready to form Work.";
       elements.interactionAdmission.hidden = true;
       elements.workRevisionAdmission.hidden = true;
+      elements.workTransitionDecision.hidden = true;
       return;
     }
     projection.records.forEach((record) => {
@@ -362,14 +376,28 @@
       ? `${joined(candidate.changed_fields, "change")} · Outcome: ${candidate.desired_outcome}`
       : "None";
     elements.workRevisionAdmissionStatus.textContent = projection.work_revision_admission_status || "NOT_APPLICABLE";
-    elements.readinessAffordance.textContent = governed
-      ? "Governed Work admitted. This Interaction remains open and focused on that Work."
+    elements.workSatisfactionState.textContent = projection.work_satisfaction_state || "NO_FOCUSED_WORK";
+    elements.interactionRelationshipState.textContent = projection.interaction_relationship_state || projection.condition;
+    elements.workFocusHistory.textContent = joined(projection.work_focus_history, "None");
+    const transition = projection.latest_work_transition;
+    elements.workTransitionSummary.textContent = transition
+      ? `${transition.focus_classification} · ${transition.choice} · ${transition.reason}`
+      : "None";
+    elements.readinessAffordance.textContent = projection.new_work_formation_pending
+      ? "New Work formation context is open. Continue the Interaction; no Work exists until Human admission."
+      : projection.work_satisfaction_state === "CURRENTLY_SATISFIED"
+        ? "This Work achieved its current objective. The Interaction remains open."
+      : governed
+        ? "Governed Work admitted. This Interaction remains open and focused on that Work."
       : status === "READY"
         ? "Ready to form Work. Review the candidate understanding, Resource, scope, and constraints before admitting."
         : "Not ready to form Work.";
     elements.interactionAdmission.hidden = status !== "READY" || Boolean(governed);
     elements.workRevisionAdmission.hidden = !(
       governed && projection.work_revision_admission_status === "PENDING_HUMAN"
+    );
+    elements.workTransitionDecision.hidden = !(
+      transition && transition.choice === "PENDING_HUMAN"
     );
   }
 
@@ -1099,6 +1127,54 @@
     }
   }
 
+  async function decideWorkTransition(choice) {
+    const projection = state.sharedUnderstanding;
+    const transition = projection && projection.latest_work_transition;
+    if (state.busy || !projection || !transition) {
+      return;
+    }
+    const identity = elements.workTransitionAuthorityIdentity.value.trim();
+    if (!identity) {
+      showNotice(new ApiError(422, "INVALID_REQUEST", "Human authority identity is required."));
+      return;
+    }
+    hideNotice();
+    setBusy(true);
+    try {
+      state.sharedUnderstanding = await apiRequest(
+        "/api/interactions/" + projection.interaction_id + "/work-transition-decisions",
+        {
+          method: "POST",
+          body: {
+            transition_id: transition.transition_id,
+            expected_originating_work_id: transition.originating_work_id,
+            choice,
+            authority_identity: identity,
+          },
+        },
+      );
+      state.selectedWorkId = state.sharedUnderstanding.governed_work_id || "";
+      await loadCollections();
+      if (state.selectedWorkId) {
+        await refreshSelected();
+        setSurface("selected");
+      } else {
+        state.selectedWork = null;
+        setSurface("empty");
+      }
+      renderInteraction();
+      announce(choice === "START_NEW_WORK"
+        ? "New Work formation context started. No Work or production authority was created."
+        : "Work transition choice recorded. Existing governed Work remains unchanged.");
+    } catch (error) {
+      showNotice(error);
+    } finally {
+      setBusy(false);
+      renderInteraction();
+      renderSelectedWork();
+    }
+  }
+
   function beginNewInteraction() {
     state.selectedInteractionId = "";
     state.sharedUnderstanding = null;
@@ -1125,6 +1201,9 @@
   elements.approveWorkRevision.addEventListener("click", () => decideWorkRevision("APPROVE"));
   elements.rejectWorkRevision.addEventListener("click", () => decideWorkRevision("REJECT"));
   elements.refineWorkRevision.addEventListener("click", () => decideWorkRevision("REQUEST_REFINEMENT"));
+  elements.continueCurrentWork.addEventListener("click", () => decideWorkTransition("CONTINUE_CURRENT_WORK"));
+  elements.startNewWork.addEventListener("click", () => decideWorkTransition("START_NEW_WORK"));
+  elements.dismissWorkTransition.addEventListener("click", () => decideWorkTransition("DISMISSED"));
   elements.newInteractionControl.addEventListener("click", beginNewInteraction);
   elements.composerToggle.addEventListener("click", () => {
     const expanded = elements.composerToggle.getAttribute("aria-expanded") === "true";

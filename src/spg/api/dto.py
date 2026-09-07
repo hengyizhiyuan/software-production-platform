@@ -7,7 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from spg.domain.change import CodeChangeContract, CodeVerificationObligation
-from spg.domain.interaction import SharedUnderstanding
+from spg.domain.interaction import SharedUnderstanding, WorkTransitionChoice
 from spg.domain.product import (
     AttentionAction,
     AttentionItem,
@@ -65,6 +65,16 @@ class InteractionWorkRevisionDecisionRequest(ApiDto):
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     expected_previous_revision_id: UUID
     action: AttentionAction
+    authority_identity: str = Field(
+        default="human:local-operator", min_length=1, max_length=255
+    )
+    rationale: str | None = None
+
+
+class InteractionWorkTransitionDecisionRequest(ApiDto):
+    transition_id: UUID
+    expected_originating_work_id: UUID
+    choice: WorkTransitionChoice
     authority_identity: str = Field(
         default="human:local-operator", min_length=1, max_length=255
     )
@@ -160,6 +170,22 @@ class WorkRealityRevisionResponse(ApiDto):
     created_at: datetime
 
 
+class InteractionWorkTransitionResponse(ApiDto):
+    transition_id: UUID
+    source_record_id: UUID
+    source_assessment_id: UUID
+    originating_work_id: UUID
+    target_work_id: UUID | None
+    reason: str
+    focus_classification: str
+    impact_disposition: str
+    choice: str
+    decided_by: str | None
+    decision_rationale: str | None
+    decided_at: datetime | None
+    created_at: datetime
+
+
 class SharedUnderstandingResponse(ApiDto):
     interaction_id: UUID
     condition: str
@@ -190,6 +216,11 @@ class SharedUnderstandingResponse(ApiDto):
     work_revision_admission_status: str
     active_cycle_work_revision_id: UUID | None
     active_cycle_impact_disposition: str | None
+    work_satisfaction_state: str
+    interaction_relationship_state: str
+    work_focus_history: tuple[UUID, ...]
+    latest_work_transition: InteractionWorkTransitionResponse | None
+    new_work_formation_pending: bool
 
     @classmethod
     def from_projection(cls, projection: SharedUnderstanding) -> Self:
@@ -367,6 +398,43 @@ class SharedUnderstandingResponse(ApiDto):
                 if projection.active_cycle_impact_disposition is None
                 else projection.active_cycle_impact_disposition.value
             ),
+            work_satisfaction_state=projection.work_satisfaction_state.value,
+            interaction_relationship_state=(
+                projection.interaction_relationship_state.value
+            ),
+            work_focus_history=projection.work_focus_history,
+            latest_work_transition=(
+                None
+                if projection.latest_work_transition is None
+                else InteractionWorkTransitionResponse(
+                    transition_id=projection.latest_work_transition.id,
+                    source_record_id=(
+                        projection.latest_work_transition.source_record_id
+                    ),
+                    source_assessment_id=(
+                        projection.latest_work_transition.source_assessment_id
+                    ),
+                    originating_work_id=(
+                        projection.latest_work_transition.originating_work_id
+                    ),
+                    target_work_id=projection.latest_work_transition.target_work_id,
+                    reason=projection.latest_work_transition.reason,
+                    focus_classification=(
+                        projection.latest_work_transition.focus_classification.value
+                    ),
+                    impact_disposition=(
+                        projection.latest_work_transition.impact_disposition.value
+                    ),
+                    choice=projection.latest_work_transition.choice.value,
+                    decided_by=projection.latest_work_transition.decided_by,
+                    decision_rationale=(
+                        projection.latest_work_transition.decision_rationale
+                    ),
+                    decided_at=projection.latest_work_transition.decided_at,
+                    created_at=projection.latest_work_transition.created_at,
+                )
+            ),
+            new_work_formation_pending=projection.new_work_formation_pending,
         )
 
 

@@ -136,6 +136,10 @@
                 <div><dt>Governed impact</dt><dd id="interaction-impact-disposition">No governed impact</dd></div>
                 <div><dt>Candidate Work change</dt><dd id="interaction-candidate-change">None</dd></div>
                 <div><dt>Revision admission</dt><dd id="work-revision-admission-status">Not applicable</dd></div>
+                <div><dt>Work satisfaction</dt><dd id="work-satisfaction-state">NO_FOCUSED_WORK</dd></div>
+                <div><dt>Interaction relationship</dt><dd id="interaction-relationship-state">OPEN</dd></div>
+                <div><dt>Work focus history</dt><dd id="work-focus-history">None</dd></div>
+                <div><dt>Work transition</dt><dd id="work-transition-summary">None</dd></div>
               </dl>
               <p id="readiness-affordance" class="empty-copy">Not ready to form Work.</p>
               <div id="interaction-admission" class="operator-panel compact-admission" hidden>
@@ -153,6 +157,16 @@
                 <button id="approve-work-revision" class="primary-button" type="button">Admit revision</button>
                 <button id="reject-work-revision" class="text-button" type="button">Reject</button>
                 <button id="refine-work-revision" class="text-button" type="button">Request refinement</button>
+              </div>
+              <div id="work-transition-decision" class="operator-panel compact-admission" hidden>
+                <div class="operator-identity">
+                  <label for="work-transition-authority-identity">Human authority</label>
+                  <input id="work-transition-authority-identity" value="human:local-operator" autocomplete="off">
+                </div>
+                <p class="empty-copy">This appears to be a new Work direction. No Work will be created by this choice.</p>
+                <button id="continue-current-work" class="secondary-button compact" type="button">Continue current Work</button>
+                <button id="start-new-work" class="primary-button compact" type="button">Start new Work formation</button>
+                <button id="dismiss-work-transition" class="text-button" type="button">Dismiss</button>
               </div>
             </section>
           </section>

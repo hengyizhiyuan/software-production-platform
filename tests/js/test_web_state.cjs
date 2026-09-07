@@ -169,6 +169,18 @@ test("pre-Work composer keeps messaging separate from explicit governed admissio
   assert.doesNotMatch(appSource, /countdown/i);
 });
 
+test("WIC Slice 4 exposes Human-governed Work transition controls only", () => {
+  assert.match(appSource, /work-transition-decisions/);
+  assert.match(appSource, /CONTINUE_CURRENT_WORK/);
+  assert.match(appSource, /START_NEW_WORK/);
+  assert.match(appSource, /DISMISSED/);
+  assert.match(appSource, /No Work or production authority was created/);
+  assert.doesNotMatch(
+    appSource,
+    /apiRequest\("\/api\/works",\s*\{\s*method:\s*"POST"/,
+  );
+});
+
 test("active Work interaction keeps revision admission explicit and Human governed", () => {
   assert.match(appSource, /work-revision-decisions/);
   assert.match(appSource, /work_revision_admission_status === "PENDING_HUMAN"/);

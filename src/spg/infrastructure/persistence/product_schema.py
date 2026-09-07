@@ -410,6 +410,86 @@ work_reality_revisions = Table(
     ),
 )
 
+interaction_work_transitions = Table(
+    "interaction_work_transitions",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "interaction_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "product_interactions.id",
+            name="fk_interaction_work_transitions_interaction",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "source_record_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "interaction_records.id",
+            name="fk_interaction_work_transitions_source_record",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "source_assessment_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "interaction_assessments.id",
+            name="fk_interaction_work_transitions_source_assessment",
+        ),
+        nullable=False,
+        unique=True,
+    ),
+    Column(
+        "originating_work_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "product_works.id",
+            name="fk_interaction_work_transitions_originating_work",
+        ),
+        nullable=False,
+    ),
+    Column(
+        "target_work_id",
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "product_works.id",
+            name="fk_interaction_work_transitions_target_work",
+        ),
+        nullable=True,
+        unique=True,
+    ),
+    Column("reason", Text, nullable=False),
+    Column("focus_classification", String(32), nullable=False),
+    Column("impact_disposition", String(48), nullable=False),
+    Column("choice", String(32), nullable=False),
+    Column("decided_by", String(255), nullable=True),
+    Column("decision_rationale", Text, nullable=True),
+    Column("decided_at", DateTime(timezone=True), nullable=True),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    CheckConstraint(
+        "focus_classification IN ('MATERIAL_BRANCH', 'UNRELATED_NEW_DEMAND')",
+        name="ck_interaction_work_transitions_focus_known",
+    ),
+    CheckConstraint(
+        "impact_disposition = 'NEW_WORK_RECOMMENDED'",
+        name="ck_interaction_work_transitions_impact_known",
+    ),
+    CheckConstraint(
+        "choice IN ('PENDING_HUMAN', 'CONTINUE_CURRENT_WORK', "
+        "'START_NEW_WORK', 'DISMISSED')",
+        name="ck_interaction_work_transitions_choice_known",
+    ),
+    CheckConstraint(
+        "(choice = 'PENDING_HUMAN' AND decided_by IS NULL AND decided_at IS NULL) "
+        "OR (choice <> 'PENDING_HUMAN' AND decided_by IS NOT NULL "
+        "AND decided_at IS NOT NULL)",
+        name="ck_interaction_work_transitions_decision_coherent",
+    ),
+)
+
 work_runtime_bindings = Table(
     "work_runtime_bindings",
     metadata,
@@ -510,6 +590,7 @@ product_tables = (
     interaction_records,
     interaction_assessments,
     work_reality_revisions,
+    interaction_work_transitions,
     work_runtime_bindings,
     *steering_tables,
 )

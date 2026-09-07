@@ -15,10 +15,19 @@ from sqlalchemy import func, inspect, select, text
 
 from spg.api import create_http_application
 from spg.application.interaction import WorkInteractionService
+from spg.application.orchestration import OrchestrationStopReason, ProductionOrchestrator
 from spg.application.runtime import RuntimeService
-from spg.application.steering_decision import PlanFrameAssembler
+from spg.application.steering import SteeringApplicationService
+from spg.application.steering_decision import (
+    DeterministicPlanSteeringCapability,
+    PlanFrameAssembler,
+    SteeringDecisionApplicationService,
+)
 from spg.application.steering_bootstrap import SteeringBootstrapService
+from spg.application.steering_production import SteeringProductionService
 from spg.application.work import WorkApplicationService
+from spg.domain.change import ProductionTargetKind
+from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.interaction import (
     InteractionAssessmentCandidate,
     InteractionInterpretationInput,
@@ -29,10 +38,23 @@ from spg.domain.interaction import (
     WorkFocusClassification,
     WorkImpactDisposition,
     WorkRevisionAdmissionStatus,
+    WorkSatisfactionState,
+    WorkTransitionChoice,
+)
+from spg.domain.planning import (
+    OnePwuFitClassification,
+    PlannedArtifactOperation,
+    ProductionPlanArtifactTarget,
+    ProductionPlanProposal,
+    ProductionPlanStep,
 )
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import (
     AttentionAction,
+    AttentionKind,
+    AttentionResolutionRequest,
+    ArtifactTargetConfidence,
+    ArtifactTargetOperation,
     EngineeringContextReference,
     ProductInvariantViolation,
     ProductionCycleBindingCondition,
@@ -46,12 +68,22 @@ from spg.domain.runtime import (
     ProductionHorizon,
 )
 from spg.domain.runtime_activation import RuntimeActivationProjection, RuntimeActivationState
-from spg.domain.steering import RealityReferenceKind, SteeringStepType
+from spg.domain.steering import (
+    AdmitSteeringDecisionRequest,
+    CreateSteeringPlanRequest,
+    RealityReferenceKind,
+    SteeringOutcome,
+    SteeringStepSpec,
+    SteeringStepState,
+    SteeringStepType,
+    TransitionSteeringStepRequest,
+)
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_schema import (
     engineering_resource_bindings,
     engineering_scopes,
     interaction_records,
+    interaction_work_transitions,
     product_interactions,
     product_works,
     work_runtime_bindings,
@@ -77,6 +109,14 @@ from spg.infrastructure.persistence.runtime_schema import (
 )
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_schema import steering_plans
+from spg.providers.deterministic_executor import (
+    DeterministicExecutionSpecification,
+    DeterministicFileOperation,
+    DeterministicFileOperationType,
+    DeterministicTestExecutor,
+)
+from spg.providers.deterministic_verifier import DeterministicVerificationProvider
+from spg.domain.verification import VerificationResultValue
 
 
 pytestmark = pytest.mark.postgresql
@@ -986,6 +1026,429 @@ def test_wic3_revision_api_triggers_existing_steering_driver_only_after_approval
         assert _count(postgres_database, production_runs) == 0
 
 
+def _transition_current_steering_step(database: Database, work_id: UUID):
+    decisions = SteeringDecisionApplicationService(
+        database,
+        DeterministicPlanSteeringCapability(),
+    )
+    frame, candidate = decisions.evaluate(work_id)
+    decision = decisions.admit(work_id, candidate)
+    current = frame.reconstruction.current_step
+    next_step = frame.reconstruction.next_step
+    assert current is not None
+    assert next_step is not None
+    return SteeringApplicationService(database).transition_step(
+        TransitionSteeringStepRequest(
+            steering_plan_revision_id=(
+                frame.reconstruction.active_revision.revision.id
+            ),
+            current_step_id=current.id,
+            next_step_id=next_step.id,
+            steering_decision_id=decision.id,
+        )
+    )
+
+
+def _complete_wic_work(
+    database: Database,
+    original_work_service: WorkApplicationService,
+    admitted,
+) -> WorkApplicationService:
+    scope = admitted.engineering_scope
+    assert scope is not None
+    baseline = RuntimeService(database).current_baseline()
+    artifact = ProductionPlanArtifactTarget(
+        path="docs/wic-slice-4-result.md",
+        operation=PlannedArtifactOperation.CREATE,
+    )
+    plan = ProductionPlanProposal(
+        proposal_id=uuid4(),
+        target_kind=ProductionTargetKind.DOCUMENTATION_WORK,
+        objective=admitted.desired_outcome or admitted.raw_user_requirement,
+        desired_outcome=admitted.desired_outcome or admitted.raw_user_requirement,
+        ordered_steps=(
+            ProductionPlanStep(position=1, instruction="Produce the exact artifact."),
+            ProductionPlanStep(position=2, instruction="Verify the exact artifact."),
+        ),
+        artifact_targets=(artifact,),
+        inherited_constraints=admitted.constraints,
+        verification_approach="Verify the admitted artifact",
+        fit_classification=OnePwuFitClassification.ONE_PWU_FIT,
+        engineering_resource_id=scope.bindings[0].resource_id,
+        repository_identity=baseline.repository_identity,
+        source_baseline_id=baseline.id,
+        source_revision=baseline.repository_revision,
+    )
+    with database.unit_of_work() as unit_of_work:
+        ProductStore(unit_of_work.session).update_work(
+            admitted.work_id,
+            {
+                "expected_artifact_path": artifact.path,
+                "artifact_operation": ArtifactTargetOperation.CREATE.value,
+                "artifact_placement_rationale": (
+                    "Deterministic Slice 4 completion fixture."
+                ),
+                "artifact_target_confidence": ArtifactTargetConfidence.HIGH.value,
+                "artifact_source_baseline_id": baseline.id,
+                "artifact_source_revision": baseline.repository_revision,
+                "verification_expectation": "Verify the admitted artifact",
+                "production_plan_proposal": plan.model_dump(mode="json"),
+                "updated_at": datetime.now(UTC),
+            },
+        )
+        unit_of_work.commit()
+
+    SteeringApplicationService(database).create_plan(
+        CreateSteeringPlanRequest(
+            work_id=admitted.work_id,
+            rationale="Exercise the exact Slice 4 completion lifecycle.",
+            steps=(
+                SteeringStepSpec(
+                    type=SteeringStepType.PRODUCE,
+                    objective="Produce the exact Slice 4 artifact",
+                    completion_condition="The artifact reaches trusted Runtime Commit",
+                    state=SteeringStepState.CURRENT,
+                ),
+                SteeringStepSpec(
+                    type=SteeringStepType.VERIFY_ACCEPT,
+                    objective="Accept the governed result",
+                    completion_condition="Persisted verification evidence passes",
+                ),
+                SteeringStepSpec(
+                    type=SteeringStepType.COMPLETE,
+                    objective="Recognize current Work satisfaction",
+                    completion_condition="The current Work objective is satisfied",
+                ),
+            ),
+        )
+    )
+    bridge = SteeringProductionService(database)
+    admission = bridge.admit_cycle(bridge.materialize_request(admitted.work_id))
+    assert admission.binding is not None
+
+    work_service = WorkApplicationService(
+        database,
+        workspace_root=original_work_service.workspace_root,
+        executor=DeterministicTestExecutor(
+            DeterministicExecutionSpecification(
+                operations=(
+                    DeterministicFileOperation(
+                        operation=DeterministicFileOperationType.CREATE,
+                        repository_relative_path=artifact.path,
+                        content="# WIC Slice 4 completed result\n",
+                    ),
+                ),
+                reported_outcome=ProviderReportedOutcome.SUCCESS,
+                summary="deterministic WIC Slice 4 completion",
+            )
+        ),
+        verifier=DeterministicVerificationProvider(
+            {"Verify the admitted artifact": VerificationResultValue.PASS}
+        ),
+    )
+    orchestrator = ProductionOrchestrator(work_service)
+    first = orchestrator.orchestrate(admitted.work_id)
+    assert first.work_status is WorkStatus.NEEDS_ATTENTION
+    attention = work_service.list_attention(work_id=admitted.work_id)
+    assert len(attention) == 1
+    assert attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION
+    work_service.resolve_attention(
+        attention[0].id,
+        AttentionResolutionRequest(
+            action=AttentionAction.AUTHORIZE,
+            authority_identity="human:wic-slice-4-test",
+        ),
+    )
+    second = orchestrator.orchestrate(admitted.work_id)
+    assert second.stop_reason is OrchestrationStopReason.PRODUCTION_CYCLE_TRUSTED
+    assert _transition_current_steering_step(
+        database, admitted.work_id
+    ).current_step.type is SteeringStepType.VERIFY_ACCEPT
+    completed = _transition_current_steering_step(database, admitted.work_id)
+    assert completed.current_step.type is SteeringStepType.COMPLETE
+    assert work_service.get_work(admitted.work_id).status is WorkStatus.COMPLETED
+    return work_service
+
+
+def test_wic4_completed_work_continuation_reopens_satisfaction_without_rewriting_completion(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    completed_work = _complete_wic_work(postgres_database, work, admitted)
+    completed_projection = completed_work.get_work(admitted.work_id)
+    trusted_commit_id = completed_projection.latest_trusted_runtime_commit_id
+    assert trusted_commit_id is not None
+
+    active = WorkInteractionService(
+        postgres_database,
+        capability=_ActiveCapability(
+            focus=WorkFocusClassification.ON_TOPIC,
+            impact=WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT,
+            context_fact="Elapsed time should be clearer in the same Work experience.",
+        ),
+    )
+    before = active.get_shared_understanding(ready.interaction.id)
+    assert before.work_satisfaction_state is WorkSatisfactionState.CURRENTLY_SATISFIED
+    assert before.interaction_relationship_state.value == "OPEN"
+
+    pending = active.append_and_assess(
+        ready.interaction.id,
+        "Can we also show elapsed time more clearly?",
+        human_identity="human:test",
+    )
+    assessment = pending.latest_assessment
+    old_revision = pending.governed_revision
+    assert assessment is not None
+    assert old_revision is not None
+    assert pending.work_revision_admission_status is WorkRevisionAdmissionStatus.PENDING_HUMAN
+    assert pending.work_satisfaction_state is WorkSatisfactionState.CURRENTLY_SATISFIED
+    production_counts = {
+        table.name: _count(postgres_database, table)
+        for table in PRODUCTION_TABLES
+    }
+
+    driver = _RecordingDriver()
+    client = TestClient(
+        create_http_application(
+            application=object(),
+            database=postgres_database,
+            work_service=completed_work,
+            orchestrator=_NoopOrchestrator(),
+            steering_driver=driver,
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=active,
+        ),
+        raise_server_exceptions=False,
+    )
+    with client:
+        response = client.post(
+            f"/api/interactions/{ready.interaction.id}/work-revision-decisions",
+            json={
+                "assessment_id": str(assessment.id),
+                "basis_fingerprint": assessment.basis_fingerprint,
+                "expected_previous_revision_id": str(old_revision.id),
+                "action": "APPROVE",
+                "authority_identity": "human:governor",
+            },
+        )
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["work_satisfaction_state"] == "IN_PROGRESS"
+    assert payload["interaction_relationship_state"] == "OPEN"
+    assert payload["governed_revision"]["revision_number"] == 2
+    assert "satisfaction:REOPENED" in payload["governed_revision"]["change_set"]
+    assert driver.scheduled == [admitted.work_id]
+
+    evolved = completed_work.get_work(admitted.work_id)
+    assert evolved.status is WorkStatus.RUNNING
+    assert evolved.work_complete is False
+    assert evolved.latest_trusted_runtime_commit_id == trusted_commit_id
+    with postgres_database.unit_of_work() as unit_of_work:
+        history = ProductStore(unit_of_work.session).work_reality_revisions(
+            admitted.work_id
+        )
+    assert len(history) == 2
+    assert history[0] == old_revision
+    assert history[1].previous_revision_id == old_revision.id
+    assert {
+        table.name: _count(postgres_database, table)
+        for table in PRODUCTION_TABLES
+    } == production_counts
+    frame = PlanFrameAssembler(postgres_database).assemble(admitted.work_id)
+    assert frame.work_reality_revision_id == history[1].id
+    assert frame.completion_evidence_sufficient is False
+    assert any(
+        blocker.kind.value == "CURRENT_RESULT_MAY_BE_INSUFFICIENT"
+        for blocker in frame.open_blocking_reality
+    )
+
+
+@pytest.mark.parametrize(
+    "choice",
+    (
+        WorkTransitionChoice.CONTINUE_CURRENT_WORK,
+        WorkTransitionChoice.DISMISSED,
+    ),
+)
+def test_wic4_non_switch_transition_choices_are_idempotent_and_preserve_work(
+    postgres_database: Database,
+    services,
+    choice: WorkTransitionChoice,
+) -> None:
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    old_revision_id = admitted.current_work_reality_revision_id
+    active = WorkInteractionService(
+        postgres_database,
+        capability=_ActiveCapability(
+            focus=WorkFocusClassification.UNRELATED_NEW_DEMAND,
+            impact=WorkImpactDisposition.NEW_WORK_RECOMMENDED,
+            motive="Build a materially unrelated mobile application.",
+        ),
+    )
+    pending = active.append_and_assess(
+        ready.interaction.id,
+        "This is unrelated: build a new mobile application.",
+        human_identity="human:test",
+    )
+    transition = pending.latest_work_transition
+    assert transition is not None
+    assert transition.choice is WorkTransitionChoice.PENDING_HUMAN
+    assert _count(postgres_database, product_works) == 1
+    assert _count(postgres_database, interaction_work_transitions) == 1
+
+    client = TestClient(
+        create_http_application(
+            application=object(),
+            database=postgres_database,
+            work_service=work,
+            orchestrator=_NoopOrchestrator(),
+            steering_driver=_RecordingDriver(),
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=active,
+        ),
+        raise_server_exceptions=False,
+    )
+    with client:
+        response = client.post(
+            f"/api/interactions/{ready.interaction.id}/work-transition-decisions",
+            json={
+                "transition_id": str(transition.id),
+                "expected_originating_work_id": str(admitted.work_id),
+                "choice": choice.value,
+                "authority_identity": "human:governor",
+            },
+        )
+    assert response.status_code == 200, response.text
+    assert response.json()["latest_work_transition"]["choice"] == choice.value
+    decided = active.get_shared_understanding(ready.interaction.id)
+    repeated = active.decide_work_transition(
+        ready.interaction.id,
+        transition_id=transition.id,
+        expected_originating_work_id=admitted.work_id,
+        choice=choice,
+        authority_identity="human:governor",
+    )
+    assert decided.governed_work_id == admitted.work_id
+    assert repeated.latest_work_transition == decided.latest_work_transition
+    assert decided.latest_work_transition.choice is choice
+    assert work.get_work(admitted.work_id).current_work_reality_revision_id == (
+        old_revision_id
+    )
+    assert _count(postgres_database, product_works) == 1
+    assert _count(postgres_database, work_reality_revisions) == 1
+    with pytest.raises(
+        InteractionInvariantViolation,
+        match="different Human choice",
+    ):
+        active.decide_work_transition(
+            ready.interaction.id,
+            transition_id=transition.id,
+            expected_originating_work_id=admitted.work_id,
+            choice=WorkTransitionChoice.START_NEW_WORK,
+            authority_identity="human:governor",
+        )
+
+
+def test_wic4_new_work_transition_survives_restart_and_forms_independent_work(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, interactions = services
+    ready = _ready(interactions)
+    old_work = _admit(work, ready)
+    old_revision = interactions.get_shared_understanding(
+        ready.interaction.id
+    ).governed_revision
+    assert old_revision is not None
+    active = WorkInteractionService(
+        postgres_database,
+        capability=_ActiveCapability(
+            focus=WorkFocusClassification.UNRELATED_NEW_DEMAND,
+            impact=WorkImpactDisposition.NEW_WORK_RECOMMENDED,
+            motive="Build an independent mobile application.",
+        ),
+    )
+    pending = active.append_and_assess(
+        ready.interaction.id,
+        "This is a new work: build an independent mobile application.",
+        human_identity="human:test",
+    )
+    transition = pending.latest_work_transition
+    assert transition is not None
+    assert transition.source_record_id == pending.records[-1].id
+    assert transition.source_assessment_id == pending.latest_assessment.id
+    assert transition.originating_work_id == old_work.work_id
+    assert transition.focus_classification is WorkFocusClassification.UNRELATED_NEW_DEMAND
+    assert transition.impact_disposition is WorkImpactDisposition.NEW_WORK_RECOMMENDED
+    assert transition.choice is WorkTransitionChoice.PENDING_HUMAN
+    assert _count(postgres_database, product_works) == 1
+    for table in PRODUCTION_TABLES:
+        assert _count(postgres_database, table) == 0, table.name
+
+    restarted = WorkInteractionService(
+        postgres_database,
+        capability=_ReadyCapability(),
+    )
+    restored = restarted.get_shared_understanding(ready.interaction.id)
+    assert restored.latest_work_transition == transition
+    switched = restarted.decide_work_transition(
+        ready.interaction.id,
+        transition_id=transition.id,
+        expected_originating_work_id=old_work.work_id,
+        choice=WorkTransitionChoice.START_NEW_WORK,
+        authority_identity="human:governor",
+        rationale="Begin independent Work formation without inherited authority.",
+    )
+    assert switched.governed_work_id is None
+    assert switched.governed_revision is None
+    assert switched.new_work_formation_pending is True
+    assert switched.work_satisfaction_state is WorkSatisfactionState.NO_FOCUSED_WORK
+    assert old_work.work_id in switched.work_focus_history
+    repeated = restarted.decide_work_transition(
+        ready.interaction.id,
+        transition_id=transition.id,
+        expected_originating_work_id=old_work.work_id,
+        choice=WorkTransitionChoice.START_NEW_WORK,
+        authority_identity="human:governor",
+    )
+    assert repeated.new_work_formation_pending is True
+    assert _count(postgres_database, product_works) == 1
+    assert _count(postgres_database, work_reality_revisions) == 1
+
+    candidate = restarted.append_and_assess(
+        ready.interaction.id,
+        "Please build the independent mobile experience with an observable outcome.",
+        human_identity="human:test",
+    )
+    assert candidate.governed_work_id is None
+    assert candidate.readiness.status is WorkAdmissionReadinessStatus.READY
+    new_work = work.admit_interaction_work(
+        ready.interaction.id,
+        assessment_id=candidate.latest_assessment.id,
+        basis_fingerprint=candidate.latest_assessment.basis_fingerprint,
+        authority_identity="human:governor",
+        rationale="Independently admit the new Work formation.",
+    )
+    assert new_work.work_id != old_work.work_id
+    final = restarted.get_shared_understanding(ready.interaction.id)
+    assert final.governed_work_id == new_work.work_id
+    assert final.latest_work_transition.target_work_id == new_work.work_id
+    assert final.new_work_formation_pending is False
+    assert final.work_focus_history == (old_work.work_id, new_work.work_id)
+    assert _count(postgres_database, product_works) == 2
+    assert _count(postgres_database, work_reality_revisions) == 2
+    assert final.governed_revision.governance_record_id != (
+        old_revision.governance_record_id
+    )
+    for table in PRODUCTION_TABLES:
+        assert _count(postgres_database, table) == 0, table.name
+
+
 def test_wic_admission_migration_downgrade_and_reupgrade(
     postgres_database: Database,
 ) -> None:
@@ -1061,6 +1524,37 @@ def test_wic3_migration_round_trip_is_additive_and_reversible(
         "basis_active_runtime_binding_id",
         "supporting_references",
     } <= assessment_columns
+
+
+def test_wic4_migration_round_trip_preserves_transition_provenance(
+    postgres_database: Database,
+) -> None:
+    config = _migration_config(postgres_database)
+    command.downgrade(config, "20260907_25")
+    assert "interaction_work_transitions" not in inspect(
+        postgres_database.engine
+    ).get_table_names()
+
+    command.upgrade(config, "head")
+    inspector = inspect(postgres_database.engine)
+    assert "interaction_work_transitions" in inspector.get_table_names()
+    assert {
+        "interaction_id",
+        "source_record_id",
+        "source_assessment_id",
+        "originating_work_id",
+        "target_work_id",
+        "reason",
+        "focus_classification",
+        "impact_disposition",
+        "choice",
+        "decided_by",
+        "decision_rationale",
+        "decided_at",
+    } <= {
+        item["name"]
+        for item in inspector.get_columns("interaction_work_transitions")
+    }
 
 
 def _git(repository: Path, *args: str) -> str:

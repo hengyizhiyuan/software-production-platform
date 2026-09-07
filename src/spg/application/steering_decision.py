@@ -213,8 +213,12 @@ class PlanFrameAssembler:
                     work_reality_revision is not None
                     and binding.work_reality_revision_id
                     != work_reality_revision.id
-                    and "impact:CURRENT_RESULT_MAY_BE_INSUFFICIENT"
-                    in work_reality_revision.change_set
+                    and (
+                        "impact:CURRENT_RESULT_MAY_BE_INSUFFICIENT"
+                        in work_reality_revision.change_set
+                        or "satisfaction:REOPENED"
+                        in work_reality_revision.change_set
+                    )
                 )
                 if current_result_may_be_insufficient:
                     blockers.append(

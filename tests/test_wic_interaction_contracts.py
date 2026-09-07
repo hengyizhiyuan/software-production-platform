@@ -8,6 +8,8 @@ from spg.domain.interaction import (
     WorkAdmissionReadinessStatus,
     WorkFocusClassification,
     WorkImpactDisposition,
+    WorkSatisfactionState,
+    WorkTransitionChoice,
 )
 from spg.providers.codex_interaction import CodexSdkWorkInteractionCapability
 
@@ -80,3 +82,17 @@ def test_wic3_provider_contract_exposes_bounded_focus_and_impact_taxonomies() ->
     assert "focus_classification" in encoded
     assert "impact_disposition" in encoded
     assert "supporting_references" in encoded
+
+
+def test_wic4_lifecycle_taxonomies_are_small_and_human_governed() -> None:
+    assert {item.value for item in WorkSatisfactionState} == {
+        "NO_FOCUSED_WORK",
+        "IN_PROGRESS",
+        "CURRENTLY_SATISFIED",
+    }
+    assert {item.value for item in WorkTransitionChoice} == {
+        "PENDING_HUMAN",
+        "CONTINUE_CURRENT_WORK",
+        "START_NEW_WORK",
+        "DISMISSED",
+    }

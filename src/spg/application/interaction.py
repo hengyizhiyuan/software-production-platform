@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 import hashlib
 import json
-from uuid import UUID, uuid4
+from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.domain.interaction import (
     ActiveWorkInterpretationContext,
@@ -24,11 +24,14 @@ from spg.domain.interaction import (
     WorkFocusClassification,
     WorkImpactDisposition,
     WorkRevisionAdmissionStatus,
+    WorkSatisfactionState,
+    WorkTransitionChoice,
     WorkAdmissionReadiness,
     WorkAdmissionReadinessStatus,
     WorkInteractionCapability,
 )
 from spg.domain.product import ProductionCycleBindingCondition
+from spg.domain.steering import RealityReferenceKind, SteeringOutcome, SteeringStepType
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.product_store import ProductStore
@@ -79,6 +82,15 @@ class DeterministicWorkInteractionCapability:
     """Conservative deterministic test capability; not the Watt product Provider."""
 
     _IDLE = {"hi", "hello", "hey", "你好", "在吗", "谢谢", "thanks"}
+    _CONTINUATION_MARKERS = (
+        "also",
+        "slightly",
+        "improve",
+        "再",
+        "也",
+        "稍微",
+        "继续",
+    )
 
     def interpret(
         self, basis: InteractionInterpretationInput
@@ -90,10 +102,7 @@ class DeterministicWorkInteractionCapability:
             value = latest.content.strip()
             normalized_latest = value.casefold()
             references = latest.supporting_references
-            if value.rstrip().endswith(("?", "？")):
-                focus = WorkFocusClassification.SIDE_QUESTION
-                impact = WorkImpactDisposition.NO_GOVERNED_CHANGE
-            elif any(
+            if any(
                 marker in normalized_latest
                 for marker in ("另一个需求", "另外一个需求", "unrelated", "new work")
             ):
@@ -105,11 +114,25 @@ class DeterministicWorkInteractionCapability:
             ):
                 focus = WorkFocusClassification.RELEVANT_EXPLORATION
                 impact = WorkImpactDisposition.NO_GOVERNED_CHANGE
+            elif value.rstrip().endswith(("?", "？")) and not (
+                active.satisfaction_state
+                is WorkSatisfactionState.CURRENTLY_SATISFIED
+                and any(
+                    marker in normalized_latest
+                    for marker in self._CONTINUATION_MARKERS
+                )
+            ):
+                focus = WorkFocusClassification.SIDE_QUESTION
+                impact = WorkImpactDisposition.NO_GOVERNED_CHANGE
             else:
                 focus = WorkFocusClassification.ON_TOPIC
                 impact = (
                     WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT
-                    if active.active_production_binding_id is not None
+                    if (
+                        active.active_production_binding_id is not None
+                        or active.satisfaction_state
+                        is WorkSatisfactionState.CURRENTLY_SATISFIED
+                    )
                     else WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED
                 )
             revision = active.work_revision
@@ -419,8 +442,115 @@ class WorkInteractionService:
                     "created_at": now,
                 }
             )
+            if (
+                active_context is not None
+                and impact is WorkImpactDisposition.NEW_WORK_RECOMMENDED
+            ):
+                source_record = next(
+                    record
+                    for record in reversed(records)
+                    if record.actor is InteractionActor.HUMAN
+                )
+                store.insert_work_transition(
+                    {
+                        "id": uuid5(
+                            NAMESPACE_URL,
+                            f"watt:wic-work-transition:{assessment_id}",
+                        ),
+                        "interaction_id": interaction.id,
+                        "source_record_id": source_record.id,
+                        "source_assessment_id": assessment_id,
+                        "originating_work_id": active_context.work_revision.work_id,
+                        "target_work_id": None,
+                        "reason": candidate.natural_response,
+                        "focus_classification": focus.value,
+                        "impact_disposition": impact.value,
+                        "choice": WorkTransitionChoice.PENDING_HUMAN.value,
+                        "decided_by": None,
+                        "decision_rationale": None,
+                        "decided_at": None,
+                        "created_at": now,
+                    }
+                )
             uow.commit()
         return self.get_assessment(assessment_id)
+
+    def decide_work_transition(
+        self,
+        interaction_id: UUID,
+        *,
+        transition_id: UUID,
+        expected_originating_work_id: UUID,
+        choice: WorkTransitionChoice,
+        authority_identity: str,
+        rationale: str | None = None,
+    ) -> SharedUnderstanding:
+        if choice is WorkTransitionChoice.PENDING_HUMAN:
+            raise InteractionInvariantViolation(
+                "Human transition decision cannot remain pending"
+            )
+        identity = authority_identity.strip()
+        if not identity:
+            raise InteractionInvariantViolation("Human authority identity is required")
+        now = datetime.now(UTC)
+        with self.database.unit_of_work() as uow:
+            store = InteractionStore(uow.session)
+            interaction = store.interaction(interaction_id, for_update=True)
+            transition = store.work_transition(transition_id, for_update=True)
+            if interaction is None:
+                raise InteractionRecordNotFound(
+                    f"Interaction not found: {interaction_id}"
+                )
+            if interaction.condition is not InteractionCondition.OPEN:
+                raise InteractionInvariantViolation(
+                    "Archived Interaction cannot change Work focus"
+                )
+            if (
+                transition is None
+                or transition.interaction_id != interaction_id
+                or transition.originating_work_id != expected_originating_work_id
+            ):
+                raise InteractionRecordNotFound(
+                    f"Work transition not found: {transition_id}"
+                )
+            if transition.choice is not WorkTransitionChoice.PENDING_HUMAN:
+                if transition.choice is choice:
+                    uow.rollback()
+                    return self.get_shared_understanding(interaction_id)
+                raise InteractionInvariantViolation(
+                    "Work transition already has a different Human choice"
+                )
+            if interaction.current_work_id != transition.originating_work_id:
+                raise InteractionInvariantViolation(
+                    "Work transition is stale against current Interaction focus"
+                )
+            decision_rationale = (
+                rationale.strip()
+                if rationale is not None and rationale.strip()
+                else f"Human selected {choice.value} for the Work transition."
+            )
+            if choice is WorkTransitionChoice.START_NEW_WORK:
+                store.clear_current_work(
+                    interaction_id,
+                    expected_work_id=transition.originating_work_id,
+                    updated_by=identity,
+                    updated_at=now,
+                )
+            else:
+                store.touch_interaction(
+                    interaction_id,
+                    updated_by=identity,
+                    updated_at=now,
+                )
+            store.decide_transition(
+                transition.id,
+                choice=choice,
+                decided_by=identity,
+                decision_rationale=decision_rationale,
+                decided_at=now,
+            )
+            uow.commit()
+        return self.get_shared_understanding(interaction_id)
 
     def get_assessment(self, assessment_id: UUID) -> InteractionAssessment:
         # Assessment ids are intentionally resolved through their owning Interaction;
@@ -467,6 +597,8 @@ class WorkInteractionService:
                     f"interaction-assessment:{latest.id}"
                 )
             )
+            transitions = store.transitions(interaction_id)
+            latest_transition = transitions[-1] if transitions else None
         current_basis = (
             interaction_basis_fingerprint(interaction, records, active_context)
             if records
@@ -486,6 +618,26 @@ class WorkInteractionService:
             latest,
             admitted_from_latest is not None,
             tuple(record.decision_type for record in evolution_decisions),
+        )
+        work_focus_history: list[UUID] = []
+        for work_id in (
+            *(record.work_focus_id for record in records),
+            *(
+                identity
+                for transition in transitions
+                for identity in (
+                    transition.originating_work_id,
+                    transition.target_work_id,
+                )
+            ),
+            interaction.current_work_id,
+        ):
+            if work_id is not None and work_id not in work_focus_history:
+                work_focus_history.append(work_id)
+        satisfaction_state = (
+            WorkSatisfactionState.NO_FOCUSED_WORK
+            if active_context is None
+            else active_context.satisfaction_state
         )
         return SharedUnderstanding(
             interaction=interaction,
@@ -547,6 +699,16 @@ class WorkInteractionService:
                 None
                 if latest is None or latest.basis_active_runtime_binding_id is None
                 else latest.impact_disposition
+            ),
+            work_satisfaction_state=satisfaction_state,
+            interaction_relationship_state=interaction.condition,
+            work_focus_history=tuple(work_focus_history),
+            latest_work_transition=latest_transition,
+            new_work_formation_pending=bool(
+                interaction.current_work_id is None
+                and latest_transition is not None
+                and latest_transition.choice is WorkTransitionChoice.START_NEW_WORK
+                and latest_transition.target_work_id is None
             ),
         )
 
@@ -621,6 +783,36 @@ class WorkInteractionService:
             and binding.condition is ProductionCycleBindingCondition.ADMITTED
             else None
         )
+        binding_summary = (
+            None if binding is None else product.runtime_summary(binding)
+        )
+        latest_decision = (
+            None
+            if active_revision is None
+            else steering.latest_decision(active_revision.id)
+        )
+        currently_satisfied = bool(
+            current_step is not None
+            and current_step.type is SteeringStepType.COMPLETE
+            and latest_decision is not None
+            and latest_decision.steering_outcome is SteeringOutcome.COMPLETE
+            and binding is not None
+            and binding.work_reality_revision_id == revision.id
+            and binding_summary is not None
+            and binding_summary.runtime_commit_id is not None
+            and binding_summary.completion_outcome == "PRODUCED"
+            and binding_summary.verification_results
+            and all(
+                result == "PASS"
+                for result in binding_summary.verification_results
+            )
+            and binding_summary.integration_state == "CONVERGED"
+            and any(
+                reference.kind is RealityReferenceKind.RUNTIME_COMMIT
+                and reference.identity == binding_summary.runtime_commit_id
+                for reference in latest_decision.reality_refs
+            )
+        )
         references = [
             f"WORK_REALITY_REVISION:{revision.id}",
             f"ENGINEERING_SCOPE:{scope.id}",
@@ -643,6 +835,21 @@ class WorkInteractionService:
                     f"VERIFICATION:{record.id}"
                     for record in runtime.verification_records_for_snapshot(
                         summary.proposed_snapshot_id
+                    )
+                )
+        elif binding is not None and binding_summary is not None:
+            references.append(f"PRODUCTION_CYCLE:{binding.id}")
+            for kind, identity in (
+                ("COMPLETION", binding_summary.completion_id),
+                ("RUNTIME_COMMIT", binding_summary.runtime_commit_id),
+            ):
+                if identity is not None:
+                    references.append(f"{kind}:{identity}")
+            if binding_summary.proposed_snapshot_id is not None:
+                references.extend(
+                    f"VERIFICATION:{record.id}"
+                    for record in runtime.verification_records_for_snapshot(
+                        binding_summary.proposed_snapshot_id
                     )
                 )
         return ActiveWorkInterpretationContext(
@@ -672,6 +879,11 @@ class WorkInteractionService:
                 None if active_binding is None else active_binding.cycle_number
             ),
             relevant_reality_references=tuple(references),
+            satisfaction_state=(
+                WorkSatisfactionState.CURRENTLY_SATISFIED
+                if currently_satisfied
+                else WorkSatisfactionState.IN_PROGRESS
+            ),
         )
 
     @staticmethod
@@ -735,7 +947,11 @@ class WorkInteractionService:
         }:
             impact = (
                 WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT
-                if active.active_production_binding_id is not None
+                if (
+                    active.active_production_binding_id is not None
+                    or active.satisfaction_state
+                    is WorkSatisfactionState.CURRENTLY_SATISFIED
+                )
                 else WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED
             )
         return (

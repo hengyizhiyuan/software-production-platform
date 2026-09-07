@@ -61,9 +61,10 @@ requires continuing natural-language Human–Watt interaction before and during
 Work, compact Shared Understanding, governed impact assessment, versioned Work
 Reality evolution, and feedback admission into existing Plan reassessment.
 [WIC-1](work-interaction-closed-loop-refinement.md) defines this Product-shape
-Core and is ready for bounded implementation planning; implementation has not
-started. The proved Governed Production + Reality-driven Plan Steering Core
-remains closed, while Watt Product MVP remains **NOT CLOSED**.
+Core. Its four bounded slices are **IMPLEMENTED / PASS**, including completed
+Work satisfaction, same-Motive continuation, and Human-governed transition to
+fresh Work formation. The WIC Core is **CLOSED / PASS**, while Watt Product MVP
+remains **NOT CLOSED** pending Human WIC Dogfood and closure reassessment.
 
 The MVP uses **Single Intelligence Mode**:
 
@@ -267,9 +268,10 @@ The usable Product MVP is a local Docker product with a functional Web UI,
 continuing natural-language Motive/Work interaction, governed Shared
 Understanding and Work evolution, real requirement admission, governed
 execution, Human Attention/Authority actions, feedback-driven Plan
-reassessment, and observable results. The current application already proves
-the production/Steering path but not WIC; Watt Product MVP therefore remains
-open. The CLI remains a development/operator interface and is not the complete
+reassessment, and observable results. The current application implements the
+bounded production/Steering and WIC Cores; Watt Product MVP remains open pending
+Human WIC Product evidence and closure reassessment. The CLI remains a
+development/operator interface and is not the complete
 MVP product.
 
 The MVP does not include full CI/CD, automated deployment, production monitoring, full Guardian or ECF implementations, model routing, benchmarking, intelligent branching or merge, complete SaaS multi-tenancy, Provider Marketplace, provider-management UI, residency Policy Engine, or multi-region orchestration. Complete R4 maintenance-lineage recovery closure is also DEFERRED_BY_MVP.
@@ -349,7 +351,8 @@ governed Work evolution and feedback admission, Iteration, VS, Work Item,
 Artifact recording, Executor invocation, basic Completion/Verification, Human
 Attention/Authority, Production Reality and outcome views, a minimal
 application/API layer, a functional Web UI, and local Docker product
-integration. WIC remains architecture-defined and not yet implemented.
+integration. The four bounded WIC slices are implemented and closed with
+focused deterministic evidence; Human WIC Dogfood remains separate.
 
 The MVP does not implement:
 

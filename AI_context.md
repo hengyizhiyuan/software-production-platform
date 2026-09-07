@@ -91,7 +91,13 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **WIC SLICE 1 — INTERACTION TRUTH SPINE & PRE-WORK UNDERSTANDING — IMPLEMENTED / PASS**
 
-**WORK INTERACTION & CLOSED-LOOP REFINEMENT CORE — IN PROGRESS**
+**WIC SLICE 2 — GOVERNED WORK ADMISSION & INTERACTION CONTINUITY — IMPLEMENTED / PASS**
+
+**WIC SLICE 3 — ACTIVE WORK EVOLUTION, FOCUS PRESERVATION, FEEDBACK & PLAN REASSESSMENT — IMPLEMENTED / PASS**
+
+**WIC SLICE 4 — WORK SATISFACTION, CONTINUATION & NEW WORK TRANSITION — IMPLEMENTED / PASS**
+
+**WORK INTERACTION & CLOSED-LOOP REFINEMENT CORE — CLOSED / PASS**
 
 **WATT PRODUCT MVP — NOT CLOSED**
 
@@ -199,7 +205,8 @@ without encoding either restriction as a permanent architecture limit.
 | WIC Slice 1 — Interaction Truth Spine & Pre-Work Understanding | IMPLEMENTED / PASS — real multi-turn Provider proof reached NOT_READY → READY with zero Work/production facts |
 | WIC Slice 2 — Governed Work Admission & Interaction Continuity | IMPLEMENTED / PASS — exact READY basis + Human Authority atomically create Work Reality revision #1, admitted scope/governance and same-Interaction focus; existing Steering bootstrap; zero production facts |
 | WIC Slice 3 — Active Work Evolution, Focus Preservation, Feedback & Plan Reassessment | IMPLEMENTED / PASS — bounded focus/impact assessment, Human-governed append-only revision N+1, exact Scope/Plan/production revision lineage, feedback references, active-cycle immutability, and existing Steering reassessment bridge |
-| Work Interaction & Closed-loop Refinement Core | IN PROGRESS — Slices 1–3 closed; Slice 4 completion/new-Work transition remains not implemented |
+| WIC Slice 4 — Work Satisfaction, Continuation & New Work Transition | IMPLEMENTED / PASS — exact satisfaction reconstruction, same-Motive continuation through existing revision/Steering, Human-governed new-Work formation transition, restart reconstruction, idempotency, and sequential Work focus provenance |
+| Work Interaction & Closed-loop Refinement Core | CLOSED / PASS — Slices 1–4 implemented with focused deterministic evidence; final Human WIC Dogfood remains separately governed |
 | Watt Product MVP | NOT CLOSED |
 | DCP-1 — Duration & Capacity Semantic Foundation | CLOSED / PASS |
 | DCP-2 — Production Measurement v0 | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable measurement and planning-time TaskShapeSnapshot; no decision influence |
@@ -664,7 +671,7 @@ Product-shape essentials.
 defines them as one cohesive capability chain: Human Input → Interpretation →
 Impact Assessment → governed Work Evolution → existing Plan reassessment →
 production/feedback → continuing Interaction. WIC-1 is **DEFINED / ADMITTED**;
-Slices 1–3 are **IMPLEMENTED / PASS**. Slice 1 proves durable pre-Work multi-turn
+Slices 1–4 are **IMPLEMENTED / PASS**. Slice 1 proves durable pre-Work multi-turn
 interpretation, Shared Understanding, readiness progression, restart recovery,
 and zero Work before admission. Slice 2 proves explicit Human admission from the
 exact current `READY` basis into one immutable Work Reality revision #1, exact
@@ -673,9 +680,13 @@ and revision-bound existing Steering bootstrap with zero production admission
 side effects. Slice 3 proves focus preservation, governed append-only Work
 revision N+1, exact Scope/Plan/production binding, source-fact references,
 active-cycle historical immutability, and reassessment through existing Plan
-Steering. The remaining Slice 4 transition behavior keeps WIC Core **IN
-PROGRESS**. The existing Governed Production + Reality-driven Plan Steering Core
-remains **CLOSED / PASS**, while **Watt Product MVP remains NOT CLOSED**. No
+Steering. Slice 4 proves exact current satisfaction reconstruction, same-Motive
+continuation without rewriting historical completion, and a persisted,
+Human-governed transition from satisfied Work to fresh Work formation without
+automatic Work creation or inherited Authority. WIC Core is therefore **CLOSED
+/ PASS**. The existing Governed Production + Reality-driven Plan Steering Core
+remains **CLOSED / PASS**, while **Watt Product MVP remains NOT CLOSED** pending
+separately governed Human WIC Dogfood and closure reassessment. No
 first utterance becomes Work automatically, raw conversation is not truth, and
 new input cannot mutate an active Production Contract.
 

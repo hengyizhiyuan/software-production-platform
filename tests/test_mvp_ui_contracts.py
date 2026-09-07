@@ -124,6 +124,14 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert 'id="approve-work-revision"' in html
     assert 'id="reject-work-revision"' in html
     assert 'id="refine-work-revision"' in html
+    assert 'id="work-satisfaction-state"' in html
+    assert 'id="interaction-relationship-state"' in html
+    assert 'id="work-focus-history"' in html
+    assert 'id="work-transition-summary"' in html
+    assert 'id="work-transition-decision"' in html
+    assert 'id="continue-current-work"' in html
+    assert 'id="start-new-work"' in html
+    assert 'id="dismiss-work-transition"' in html
     assert "admit governed work" in combined
     assert "ready to form work" in combined
     assert 'id="work-mode"' not in html
@@ -165,6 +173,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
         "/api/interactions",
         "/admit-work",
         "/work-revision-decisions",
+        "/work-transition-decisions",
         "/api/goals",
         "/api/works",
         "/refine",
@@ -175,6 +184,9 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
         assert route in javascript
     assert "PENDING_HUMAN" in javascript
     assert "candidate_change" in javascript
+    assert "new_work_formation_pending" in javascript
+    assert "CURRENTLY_SATISFIED" in javascript
+    assert "START_NEW_WORK" in javascript
 
     for governed_endpoint in ("APPROVE: \"approve\"", "REJECT: \"reject\"", "REQUEST_REFINEMENT: \"request-refinement\""):
         assert governed_endpoint in javascript
@@ -197,6 +209,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "assessment_id: assessment.assessment_id" in javascript
     assert "basis_fingerprint: assessment.basis_fingerprint" in javascript
     assert 'elements.admitWorkControl.addEventListener("click", admitInteractionWork)' in javascript
+    assert "No Work or production authority was created." in javascript
     assert "setTimeout" in javascript
     assert "countdown" not in combined
 
