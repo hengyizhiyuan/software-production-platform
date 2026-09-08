@@ -70,7 +70,7 @@ policy, threshold, persistence, UX, or Authority design is frozen.
 
 Production Planner is responsible for:
 
-- Project Intelligence
+- Work Intelligence
 - Production Intelligence
 - Iteration Management
 - Task Orchestration
@@ -173,9 +173,9 @@ Continuous Evolution
 
 ## Engineering Portfolio Intelligence
 
-Engineering Portfolio Intelligence is a future enterprise capability direction, not an MVP requirement. It may provide CTOs, technical leaders, and enterprise administrators with a unified view across multiple projects, including:
+Engineering Portfolio Intelligence is a future enterprise capability direction, not an MVP requirement. It may provide CTOs, technical leaders, and enterprise administrators with a unified view across multiple Works and external product engagements, including:
 
-- Overall project state
+- Overall Work and production state
 - Risk
 - AI execution status
 - Resource usage
@@ -418,4 +418,4 @@ Engineering Branching is a Future Capability and Architecture Direction, Not Imp
 - Code
 - Evidence
 
-Its purpose is to support alternative exploration, parallel production, and controlled integration. Project State should not be conceptually bound to one chat window or one execution environment.
+Its purpose is to support alternative exploration, parallel production, and controlled integration. Work and Production State should not be conceptually bound to one chat window or one execution environment.

@@ -29,7 +29,7 @@ Progress is not required to increase linearly. Feature adjustment, design refact
 
 The MVP provides a minimum viable software production state view across:
 
-- Project state
+- Work Reality
 - Capability / Module state
 - Vertical Slice state
 - Work Item state
@@ -47,7 +47,7 @@ The MVP does not implement:
 
 ## Long-term Direction
 
-Engineering Portfolio Intelligence is a future enterprise capability for CTOs, technical leaders, and enterprise administrators. It may support unified observation of project state, risk, AI execution, resource usage, Assurance status, and production health across multiple projects.
+Engineering Portfolio Intelligence is a future enterprise capability for CTOs, technical leaders, and enterprise administrators. It may support unified observation of Work and production state, risk, AI execution, resource usage, Assurance status, and production health across multiple Works and external product engagements. It does not require a Watt Project entity or Project lifecycle.
 
 This document records architecture direction only and does not expand the MVP implementation scope.
 

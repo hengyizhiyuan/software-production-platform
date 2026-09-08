@@ -20,11 +20,15 @@ The MVP does not implement ECF. It reserves a Context Provider abstraction for a
 Role Runtime → ECF Projection → Engineering Context
 ```
 
-## Consumer Project
+## External Consumer Product and Work
 
-Consumer Projects, for example 易决, use platform capabilities. They are not internal modules of the platform.
+External Consumer Products, for example 易决, use platform capabilities. They
+are not internal modules or first-class production entities of Watt. When Watt
+produces or evolves such a product, the governed production relationship is a
+Work with attributable Assets.
 
-Using SPG to produce a Consumer Project does not make that product's runtime or Decision Engine a dependency of SPG.
+Using SPG for that Work does not make the product's Runtime, repository, or
+Decision Engine a dependency of SPG.
 
 
 

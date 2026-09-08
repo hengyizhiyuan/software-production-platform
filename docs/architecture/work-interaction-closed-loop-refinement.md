@@ -151,7 +151,7 @@ Every profile can require or conditionally require:
 
 - sufficiently clear Motive and desired outcome;
 - relevant context and material constraints;
-- Engineering Resource and bounded scope when required;
+- Engineering Resource / Work Asset relationship and bounded scope when required;
 - applicable Human Authority;
 - resolution of questions that prevent lawful admission.
 
@@ -364,8 +364,8 @@ new revision before trusting a result against the latest Work Reality.
 
 | Capability | Owns | Must not own |
 | --- | --- | --- |
-| WIC | Interaction provenance, candidate interpretation, impact assessment, Work-change admission coordination, Work Reality revision semantics, Shared Understanding projection | Plan progression, production execution, source-domain evidence truth |
-| Work Truth | Current admitted Motive/outcome/context/constraints/requests/scope and revision lineage | Raw conversation as truth, production facts |
+| WIC | Interaction provenance, candidate interpretation, impact assessment, Work/Asset-relationship admission coordination, Work Reality revision semantics, Shared Understanding projection | Plan progression, production execution, source-domain evidence truth |
+| Work Truth | Current admitted Motive/outcome/context/constraints/requests/scope, relevant Asset relationships, and revision lineage | Raw conversation or attached Assets as automatic truth, production facts |
 | Plan Steering | Plan/Revision/Step progression, rationale, next action from governed Reality | Work-input interpretation, SPG execution |
 | SPG | Exact production admission, PWU/Attempt lifecycle, observation/Verification coordination, Candidate/Integration/Commit transitions | Conversation or Work interpretation |
 | Executor | Work inside one admitted Attempt envelope and provider evidence | Work/Plan truth, Verification or Authority |

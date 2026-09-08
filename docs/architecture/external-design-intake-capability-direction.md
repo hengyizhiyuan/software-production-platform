@@ -30,6 +30,18 @@ The capability must preserve the difference between what an external artifact
 says, what an AI interprets from it, and what the Human ultimately admits as
 Design Reality.
 
+In the Work-centric production model, this capability is **Work Asset Intake**,
+not Project import. Before Work admission, an external artifact remains
+Interaction provenance or candidate input. Once a Work exists, an admitted
+relationship makes it a Work Asset:
+
+```text
+External Design Artifact
+    -> attributable candidate input
+    -> Work admission / asset relationship admission
+    -> Work Asset used by Guided Design
+```
+
 ## 2. Core Principle
 
 External Design Intake is not:

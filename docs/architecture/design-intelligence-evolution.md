@@ -114,7 +114,7 @@ The platform does not directly embed or own Decision Intelligence. It uses a Cap
 
 ## Boundary Rules
 
-Production Planner is responsible for Project Intelligence, Production Intelligence, Iteration Management, and Task Orchestration.
+Production Planner is responsible for Work Intelligence, Production Intelligence, Iteration Management, and bounded PWU coordination.
 
 It does not own enterprise strategic decisions, product direction selection, major value judgments, or Decision Intelligence Capability.
 

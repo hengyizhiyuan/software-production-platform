@@ -401,7 +401,7 @@ These are architecture semantics, not Side-effect Gateway, deployment automation
 
 ## Planning Continuity Principle
 
-> AI-native production systems must maintain project intent, discussion context, and planned reasoning continuity despite local interaction interruptions.
+> AI-native production systems must maintain Work intent, discussion context, and planned reasoning continuity despite local interaction interruptions.
 
 The system should not lose the overall production objective, planned path, or reasoning continuity because of a local interaction interruption.
 
@@ -1202,7 +1202,7 @@ Future nodes may include:
 - Provider
 - Artifact
 - Evidence
-- Project
+- Work
 - Domain
 
 Future relationships may include:
@@ -1236,8 +1236,8 @@ Human / AI Provider
 
 This creates an M×N model:
 
-- One capability can serve multiple projects.
-- One project can dynamically compose multiple capabilities.
+- One capability can serve multiple Works.
+- One Work can dynamically compose multiple capabilities.
 
 Automatic organization formation is not implemented in the MVP.
 
@@ -1360,7 +1360,7 @@ Production Recipe is a Future Capability / Business Direction and is not impleme
 A future value flywheel may be:
 
 ```text
-More Projects
+More Governed Works
         ↓
 More Production Data
         ↓
@@ -1372,7 +1372,7 @@ Lower Trusted Production Cost
         ↓
 More Competitive Delivery
         ↓
-More Projects
+More Governed Works
 ```
 
 This is a Future Business Direction, not a statement of current capability.

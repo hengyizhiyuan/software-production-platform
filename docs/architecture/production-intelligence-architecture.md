@@ -2,7 +2,7 @@
 
 ## Production Planner: AI Native Software Production Governor
 
-Production Planner is an AI Role responsible for keeping the software production process continuously convergent. It maintains Production Intent and Project Intelligence, drives the Production Iteration Loop, maintains Engineering Coherence, and coordinates Capability Execution.
+Production Planner is an AI Role responsible for keeping the software production process continuously convergent. It maintains Production Intent and Work Intelligence, drives the Production Iteration Loop, maintains Engineering Coherence, and coordinates Capability Execution.
 
 It is not a Coding Agent, Project Management Tool, Super Agent, or Chatbot.
 
@@ -54,35 +54,31 @@ Production State must be explicit and must not depend on Chat History, one Agent
 
 It includes:
 
-- Project Intent
+- Work Intent and Work Reality
 - Current Baseline
 - Active Iteration
-- VS
-- Work Item
+- Steering Plan
+- Production Work Unit
 - Artifact
 - Evidence
 - Decision Record
 - Risk
 
-Production Planner consumes Project State and ECF / Context capabilities; it does not own the factual state.
+Production Planner consumes Work/Production Reality and ECF / Context capabilities; it does not own the factual state.
 
 ## Production Object Hierarchy
 
 ```text
-Project
-    ↓
-Production Objective
-    ↓
-Iteration
-    ↓
-Vertical Slice (VS)
-    ↓
-Work Item
-    ↓
-Execution Step
+Work
+    -> Work Reality
+    -> Assets
+    -> Steering Plan
+    -> Production Work Unit
+        -> Attempt
+            -> Executor Run
 ```
 
-VS is not the smallest execution unit. Work Item is closer to execution granularity. Artifacts and Evidence attach to Work Item and Iteration lifecycles.
+PWU is the bounded production unit. Artifacts and Evidence remain attributable to the Work, PWU, Attempt, and applicable source Reality.
 
 ## Workflow Philosophy
 
@@ -92,7 +88,7 @@ The long-term workflow uses:
 Production Policy + Production Pattern + AI Adaptive Planning
 ```
 
-Policy defines non-violable rules. Pattern preserves a verified production route. AI Adaptive Planning adjusts according to Project Context, Risk, and Current State.
+Policy defines non-violable rules. Pattern preserves a verified production route. AI Adaptive Planning adjusts according to Work Context, Risk, and Current State.
 
 This is a Future Capability and Architecture Direction, Not Implemented in the MVP.
 
@@ -160,7 +156,7 @@ The long-term concern is semantic engineering consistency beyond Git Merge Confl
 
 ## Scope Boundary
 
-MVP remains focused on the basic Production Planner loop, Project State, Iteration, VS, Work Item, Artifact recording, Executor invocation, Human Console, basic Production Reality View, and Capability Boundary.
+MVP remains focused on the basic Production Planner loop, Work/Production Reality, Steering, PWU, Artifact recording, Executor invocation, Human Console, basic Production Reality View, and Capability Boundary.
 
 YiJue integration, multi-user parallel development, Engineering Branching, complete Pattern Library, automatic Model Routing, complete Guardian, and complete ECF are Future Capabilities and Architecture Directions, Not Implemented in the MVP.
 

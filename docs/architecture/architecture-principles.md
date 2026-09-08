@@ -1,6 +1,7 @@
 # Long-term Architecture Principles
 
-This is a living architecture document. It records long-term directions and explicitly labeled Current Architecture Principles. The [closed State Foundation](spg-state-foundation.md) confirms logical governance semantics under Architecture Baseline v0.1, not implementation or physical-service design. No section expands the current MVP.
+This is a living architecture document. It records long-term directions and explicitly labeled Current Architecture Principles. The [closed State Foundation](spg-state-foundation.md) confirms logical governance semantics under Architecture Baseline v0.1, not implementation or physical-service design. The [Work-centric Production Model](work-centric-production-model.md) establishes Work, not Project, as the primary production entity and treats repositories and other resources as Work Assets. No section expands the current MVP.
+
 ## AI-Native Software Production System
 
 The platform is not an AI coding tool. It solves how humans and AI can continuously produce trustworthy software through a governed production loop.
@@ -75,7 +76,7 @@ The platform purchases a Production Capability contribution, not the model's ful
 
 The platform should preserve engineering understanding independently of model versions. It should not rely on a model to permanently store:
 
-- Project intent
+- Work intent
 - Design rationale
 - Historical decisions
 - Current baseline
@@ -86,7 +87,7 @@ These must exist as explicit, platform-managed artifacts.
 
 The platform should enable model replacement, executor replacement, model capability upgrades, and cost/performance trade-offs without losing:
 
-- Project understanding
+- Work understanding
 - Engineering continuity
 - Decision history
 - Production governance
@@ -97,10 +98,10 @@ Target Architecture describes long-term direction. Current MVP Implementation de
 
 These long-term principles are not MVP requirements. The current MVP remains focused on:
 
-- Project Workspace
+- Work Assets and Engineering Context
 - Context Management
 - Role-based AI collaboration
-- Task lifecycle
+- Work/PWU lifecycle
 - Executor integration
 - Artifact management
 
@@ -224,7 +225,7 @@ This requires attention to:
 
 - Coordination among AI roles
 - Organizational goals
-- Long-term project state
+- Long-term Work Reality
 - Explicit authority boundaries
 - Trustworthy production outcomes
 - Continuous feedback and evolution
@@ -618,7 +619,7 @@ Production Planner is an **AI Native Software Production Governor**: an AI Role 
 It is not a Coding Agent, Project Management Tool, Super Agent, or Chatbot. Its core responsibilities are:
 
 - Maintain Production Intent
-- Maintain Project Intelligence
+- Maintain Work and Production Intelligence
 - Drive the Production Iteration Loop
 - Maintain Engineering Coherence
 - Coordinate Capability Execution

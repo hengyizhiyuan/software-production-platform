@@ -104,8 +104,10 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 **GUIDED DESIGN FACILITATION LAYER — IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — PENDING ARCHITECTURE LEAD REALITY REVIEW**
 
 **HUMAN–WATT COLLABORATION EXPERIENCE V2 — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER V2 PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
+
 **HUMAN–WATT COLLABORATION EXPERIENCE V2.1 — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER V2.1 PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
 
+**WORK-CENTRIC PRODUCTION MODEL — ARCHITECTURE PRINCIPLE / ALIGNED**
 
 **WATT PRODUCT MVP — NOT CLOSED**
 
@@ -837,6 +839,7 @@ The current system-level architecture baseline is:
 - [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
 - [Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md)
 - [Trusted Baseline / Active Runtime Convergence Lite](docs/architecture/trusted-baseline-active-runtime-convergence-lite.md)
+- [Work-centric Production Model](docs/architecture/work-centric-production-model.md)
 - [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md)
 - [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md)
 - [Reality-driven Plan Steering MVP Behavioral Contract](docs/architecture/reality-driven-plan-steering-mvp-contract.md)
@@ -887,6 +890,8 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Dependency Direction Follows Capability Ownership
 - Production Work Unit Generalization
 - Motive Is Product Intent; Work Is the Current Governed Representation
+- Work Is the Primary Production Entity; Project Is Not a Watt Lifecycle
+- Assets Are Attributable Work Inputs, Not Work or Truth Owners
 - PWU, Not Work, Is the Bounded Production Unit
 - Reality-driven Plan Steering
 - Guided Design Structures Design Questions; Plan Steering Owns What Happens Next
@@ -920,7 +925,7 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 
 The future platform will form a system with the following capabilities:
 
-- Consumer Projects, for example 易决
+- External Consumer Products, for example 易决
 - Guardian — Engineering Assurance System
 - Engineering Context Fabric
 
@@ -929,9 +934,9 @@ This document describes their relationship only; it does not define their intern
 
 ## Origin and MVP Goal
 
-The current design originates from real ChatGPT + Codex collaboration practice. The MVP goal is not to copy that workflow into a new platform; it is to validate a minimum AI-native Software Production Loop for real projects.
+The current design originates from real ChatGPT + Codex collaboration practice. The MVP goal is not to copy that workflow into a new platform; it is to validate a minimum AI-native Software Production Loop for real Works and software-system engagements.
 
-The MVP prioritizes running the production loop, serving real projects, accumulating engineering data, and validating AI-driven research and development. The long-term direction may evolve toward an AI Software Production Operating System.
+The MVP prioritizes running the production loop, serving real Works, accumulating engineering data, and validating AI-driven research and development. The long-term direction may evolve toward an AI Software Production Operating System.
 
 
 ## Formal Platform Positioning

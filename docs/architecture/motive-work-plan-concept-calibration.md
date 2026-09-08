@@ -57,6 +57,30 @@ within one PWU, the current Runtime may require refinement, Human-managed
 sequencing, or deferral of independently governed steps. It must not redefine
 the Work itself as inherently atomic.
 
+## Work Assets
+
+Work is the primary production entity. Repositories, documents, design files,
+external systems, and Runtime environments are Assets associated with Work;
+they are not Project entities or mandatory containers above Work.
+
+```text
+Work
+    -> admitted Work Asset relationship
+    -> attributable Asset Reality
+    -> governed Work Reality / Plan / PWU use
+```
+
+An Asset does not become Work Truth merely because it is attached. Its source
+facts remain attributable, AI interpretation remains candidate meaning, and
+only governed admission changes Work Reality. Before Work exists, external
+materials remain Interaction provenance or candidate inputs rather than Work
+Assets.
+
+The current repository-oriented Engineering Resource and Scope binding is a
+narrow implementation foundation. A generalized Work Asset model is not yet
+implemented or authorized. The complete principle is defined in the
+[Work-centric Production Model](work-centric-production-model.md).
+
 ## Work Interaction and Governed Evolution
 
 A Work is not the boundary of Human interaction. Conversation may begin before
@@ -132,7 +156,9 @@ not made mandatory above Motive or Work.
 Project may describe an existing or new software system in the user's domain
 world. It is not promoted to a new first-class production object, aggregate
 root, or mandatory parent above Work. No Project or Initiative domain entity is
-introduced.
+introduced. Product operations should use New Work, Existing Work with Assets,
+and Work Asset Intake rather than New Project, Import Project, or Project
+Lifecycle.
 
 ## Closed Core Capability: Reality-driven Plan Steering
 

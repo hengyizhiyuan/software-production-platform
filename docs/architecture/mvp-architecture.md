@@ -25,12 +25,12 @@ The MVP design originates from real ChatGPT + Codex collaboration practice. That
 
 ### MVP Goal
 
-The MVP is not defined as moving ChatGPT + Codex into a new platform. Its goal is to build a minimum viable AI-native Software Production Loop in which AI can, based on project goals, perform planning, task decomposition, execution coordination, result verification, and iteration advancement.
+The MVP is not defined as moving ChatGPT + Codex into a new platform. Its goal is to build a minimum viable AI-native Software Production Loop in which AI can, from admitted Work intent and current Work Reality, perform planning, bounded production decomposition, execution coordination, result verification, and iteration advancement.
 
 The MVP validates whether:
 
 - AI can drive the engineering rhythm
-- AI can continuously understand project state
+- AI can continuously understand Work and production Reality
 - AI can adjust the next path based on execution results
 - Humans can move from executors to governors
 
@@ -42,8 +42,9 @@ Motive is the product-facing expression of what the user genuinely wants to
 make happen. Work remains the current internal governed representation; no
 implementation rename is implied. Work is not inherently an atomic coding
 task—PWU is the bounded production unit. Goal remains an optional weak
-aggregation, and Project remains a user/domain-world concept rather than a new
-mandatory parent object.
+aggregation. Project remains only a user/domain-world concept rather than a new
+mandatory parent object; repositories and other relevant resources are Assets
+attached to Work.
 
 A conceptual Plan may span a long-lived Work and repeatedly choose the next
 appropriate refinement, design, Human-decision, or governed-production step
@@ -86,28 +87,37 @@ Execution Loop
 ```
 
 This mode exists to quickly validate the AI-native software production loop. It does not define Production Planner as a permanently fixed super Agent.
-## Engineering Hierarchy
+## Work-centric Engineering Hierarchy
 
 ```text
-Project
-└── Capability / Feature
-    └── Vertical Slice (VS)
-        └── Task
-            └── Execution Unit
-                └── Executor Run
+Work
+├── Work Reality
+├── Assets
+├── Steering Plan
+└── Production Work Unit (PWU)
+    └── Attempt
+        └── Executor Run
 ```
+
+Vertical Slice and Task may remain planning/decomposition labels inside a Work.
+They are not mandatory domain parents and do not create a Project lifecycle.
 
 ### Vertical Slice (VS)
 
-A VS is a minimum independently verifiable value delivery unit. It is not the smallest execution unit and should contain enough scope to validate a complete capability.
+A VS is an optional minimum independently verifiable value-delivery label
+inside a Work. It is not Watt's primary production entity or smallest execution
+unit.
 
 ### Task
 
-A Task is a meaningful engineering decomposition unit inside a VS.
+A Task is an optional engineering decomposition label inside a Work/Plan.
 
-### Execution Unit
+### Production Work Unit (PWU)
 
-An Execution Unit is the smallest unit directly assigned to an Executor: a specific authorized execution action with clear input and expected output. Typical input includes a Task Contract, Context, and Workspace. Typical output includes a code change, execution result, logs, and verification information.
+PWU is the bounded production unit admitted to execution. It carries an exact
+objective, contract, context and Asset baseline, scope, expected output, and
+verification obligation. An Attempt dispatches that bounded unit to an
+Executor.
 
 ## Engineering Iteration
 
@@ -118,7 +128,7 @@ Reasoning → Generate Execution Instruction → Executor Run
     → Result Feedback → Evaluation → Continue or Correct
 ```
 
-An Iteration is one complete production cycle in which AI understands the goal, plans, executes, observes, reflects, and adjusts the path until it approaches a trusted target state. It is distinct from the VS lifecycle, Task lifecycle, and code lifecycle.
+An Iteration is one complete production cycle in which AI understands the Work objective, plans, executes, observes, reflects, and adjusts the path until it approaches a trusted target state. It is distinct from the Work lifecycle, PWU/Attempt lifecycle, and code lifecycle.
 
 ## MVP Core Components
 
@@ -132,7 +142,7 @@ Production Planner is the SPG capability responsible for transforming approved p
 
 It is responsible for:
 
-- Understanding project goals and long-term direction
+- Understanding Work intent and long-term direction
 - Maintaining the overall design intent
 - Understanding capability boundaries and architecture constraints
 - Tracking key design decisions
@@ -188,7 +198,7 @@ Execution Evidence → Impact Analysis → Plan Update
 Production Planner does not own Business Decision, Product Strategy, Value Judgment, whether a product should exist, or General Decision Intelligence.
 ### Context Layer
 
-Provides lightweight context management for project understanding, current baseline, important decisions, documentation references, and historical artifacts. It uses a Context Provider abstraction so roles do not remain permanently coupled to raw files. Future ECF integration is reserved but not implemented here.
+Provides lightweight context management for Work understanding, current baseline, important decisions, Work Asset references, and historical artifacts. It uses a Context Provider abstraction so roles do not remain permanently coupled to raw files. Future ECF integration is reserved but not implemented here.
 
 ### Workflow / Iteration Engine
 
@@ -201,7 +211,7 @@ Engineering State Management is AI-native software production state awareness an
 
 Its purpose is to keep the Human Governor and AI Production System aware of:
 
-- The project's current real state
+- The Work's current governed Reality
 - What is currently happening
 - Which capabilities are complete
 - Which Tasks are executing
@@ -210,7 +220,7 @@ Its purpose is to keep the Human Governor and AI Production System aware of:
 
 The MVP provides a minimum viable software production state view across:
 
-- Project state
+- Work Reality
 - Capability / Module state
 - Vertical Slice state
 - Work Item state
@@ -219,9 +229,9 @@ The MVP provides a minimum viable software production state view across:
 - Basic progress presentation
 
 This state view supports understanding and governance; it does not introduce AI delay prediction, automatic resource optimization, enterprise Portfolio management, complex portfolio analysis, or advanced production economics analysis.
-### Task / VS Management
+### Plan / PWU Projection
 
-Maintains VSs, Tasks, execution status, and associated artifacts. This is engineering production state management, not traditional project management.
+Maintains Work-linked planning decomposition, PWU status, execution status, and associated artifacts. This is engineering production state management, not traditional project management.
 
 ### Executor Framework
 
@@ -237,7 +247,7 @@ Provides a lightweight feedback loop—not full CI/CD—with build checks, basic
 
 ### Human Control Center
 
-Provides the Human Governor interface to observe project state, AI activities, and execution progress; approve, reject, redirect, or override; and configure models, executors, and policies. The human remains a governor rather than a manual operator.
+Provides the Human Governor interface to observe Work and production Reality, AI activities, and execution progress; approve, reject, redirect, or override; and configure models, executors, and policies. The human remains a governor rather than a manual operator.
 
 ## Reversible Production and Recovery
 
@@ -306,13 +316,13 @@ During the MVP, the Human Governor temporarily performs Feature Consistency Chec
 The MVP focus remains:
 
 - Production Planner
-- Project / Work Management
+- Work and Work Asset Management
 - Executor
 - Workspace
 - Verification Loop
 - Human Governance
 
-The ChatGPT + Codex collaboration pattern is the origin of the MVP, while the objective is to validate an AI-driven software production process for real projects.
+The ChatGPT + Codex collaboration pattern is the origin of the MVP, while the objective is to validate an AI-driven software production process for real Works.
 
 
 
@@ -353,7 +363,7 @@ No YiJue adapter, concrete API, or YiJue implementation is defined here.
 ## MVP Capability Boundary
 
 The MVP target supports the basic Production Planner production loop,
-Project/Repository representation, continuing Motive/Work interaction,
+Work and Repository Asset representation, continuing Motive/Work interaction,
 governed Work evolution and feedback admission, Iteration, VS, Work Item,
 Artifact recording, Executor invocation, basic Completion/Verification, Human
 Attention/Authority, Production Reality and outcome views, a minimal

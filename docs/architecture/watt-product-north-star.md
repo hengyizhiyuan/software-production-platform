@@ -137,6 +137,18 @@ evolving realization relationship around a Motive, not one production ticket.
 Goal remains an optional weak aggregation; Project/Initiative is not a required
 parent.
 
+Repositories, documents, design artifacts, external systems, and Runtime
+environments relate to production as **Work Assets**. They are attributable
+inputs or execution surfaces attached to Work, not Project containers, Work
+substitutes, or Truth owners. Their source Reality remains independently
+attributable; governed admission determines what affects Work Reality.
+
+```text
+Repository Asset -> Repository Reality Extraction -> Work Reality
+```
+
+See the [Work-centric Production Model](work-centric-production-model.md).
+
 ### PWU and production cycle
 
 PWU, not Work, is the bounded production unit. A production cycle is one exact,
@@ -168,6 +180,7 @@ admits any resulting Work change through governance, and lets Plan Steering
 reassess what happens next.
 
 Source basis: [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md),
+[Work-centric Production Model](work-centric-production-model.md),
 [Reality-driven Plan Steering Principles](reality-driven-plan-steering-principles.md),
 [Work Interaction & Closed-loop Refinement Contract](work-interaction-closed-loop-refinement.md),
 and the implemented [Guided Design Core](guided-design-core.md).
