@@ -219,6 +219,7 @@ change is introduced here.
 
 ## References
 
+- [Work-centric Production and Responsibility Principles](work-centric-production-and-responsibility-principles.md)
 - [Watt Product North Star](watt-product-north-star.md)
 - [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md)
 - [Work Interaction & Closed-loop Refinement](work-interaction-closed-loop-refinement.md)

@@ -58,6 +58,9 @@ perspective projects the same authoritative Reality while changing only:
 
 The Surface names below describe responsibility-centered perspectives. They do
 not introduce persisted user roles, permissions, or organizational identities.
+They are the current product-surface application of **One Reality, different
+responsibility projections**, as defined in the
+[Work-centric Production and Responsibility Principles](../architecture/work-centric-production-and-responsibility-principles.md).
 
 ## 4. Surface A — Production Operator View
 

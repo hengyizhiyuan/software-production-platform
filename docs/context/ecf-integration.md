@@ -11,6 +11,12 @@ In the future, Engineering Context Fabric may provide:
 
 The platform consumes Context capability from ECF.
 
+ECF owns **Need-to-know / Least Context**. It does not own IAM, credentials,
+asset permissions, or action authorization. Future capability/access
+provisioning owns **Need-to-act / Least Privilege** as a distinct seam, even
+when both responsibilities follow the same minimum-sufficient principle. See
+the [Work-centric Production and Responsibility Principles](../architecture/work-centric-production-and-responsibility-principles.md).
+
 Under the [Work-centric Production Model](../architecture/work-centric-production-model.md),
 ECF assembles context from attributable Work Assets. It does not create a
 Project container or turn an Asset into Work Truth:

@@ -842,6 +842,7 @@ The current system-level architecture baseline is:
 - [Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md)
 - [Trusted Baseline / Active Runtime Convergence Lite](docs/architecture/trusted-baseline-active-runtime-convergence-lite.md)
 - [Work-centric Production Model](docs/architecture/work-centric-production-model.md)
+- [Work-centric Production and Responsibility Principles](docs/architecture/work-centric-production-and-responsibility-principles.md)
 - [Motive / Work / Plan Concept Calibration](docs/architecture/motive-work-plan-concept-calibration.md)
 - [Reality-driven Plan Steering — Foundational Principles](docs/architecture/reality-driven-plan-steering-principles.md)
 - [Reality-driven Plan Steering MVP Behavioral Contract](docs/architecture/reality-driven-plan-steering-mvp-contract.md)
@@ -894,6 +895,10 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Motive Is Product Intent; Work Is the Current Governed Representation
 - Work Is the Primary Production Entity; Project Is Not a Watt Lifecycle
 - Assets Are Attributable Work Inputs, Not Work or Truth Owners
+- One Reality, Different Responsibility Projections
+- Minimum-Sufficient Information — Need-to-know / Least Context
+- Minimum-Sufficient Capability — Need-to-act / Least Privilege
+- Context Assembly and Action Authorization Have Distinct Ownership
 - PWU, Not Work, Is the Bounded Production Unit
 - Reality-driven Plan Steering
 - Guided Design Structures Design Questions; Plan Steering Owns What Happens Next

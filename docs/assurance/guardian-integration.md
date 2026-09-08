@@ -10,6 +10,12 @@ Guardian is platform-native, but platform-independent.
 
 The platform is responsible for Orchestration. Guardian is responsible for Assurance.
 
+Assurance validates observed results, Evidence, contract satisfaction,
+important boundary violations, and quality Findings. It does not micromanage
+each Executor move or replace the Executor's autonomy inside an admitted
+production envelope. See the
+[Work-centric Production and Responsibility Principles](../architecture/work-centric-production-and-responsibility-principles.md).
+
 Guardian is:
 
 - Not an AI Code Reviewer
@@ -25,5 +31,4 @@ Evidence for the governed Work/PWU; it does not own a Project lifecycle, Work,
 Plan, or attached Assets.
 
 This document does not design Guardian Core.
-
 

@@ -225,7 +225,10 @@ Runtime Reality into a reconstructable execution lineage.
 **Purpose:** provide **execution continuity without execution monolithicity**.
 PWUs should support bounded execution that can be paused, reconstructed,
 verified, recovered, and continued across replaceable Executors and models
-without losing the encompassing Work direction.
+without losing the encompassing Work direction. A PWU should carry enough
+objective, boundary, context, access, acceptance, and Evidence responsibility
+for an Executor to complete a meaningful production increment autonomously;
+it should not regress into micro-task or line-by-line orchestration.
 
 **Status:** future deepening beyond the current one-PWU-first MVP boundary.
 
@@ -255,6 +258,40 @@ questions, and completion expectations into reusable governed assets.
 **Status:** future methodology assetization. The current seed schemas are an
 implementation foundation, not yet an enterprise methodology library. See
 [Guided Design Core](../architecture/guided-design-core.md).
+
+### 5.6 Work Assets and Repository Reality
+
+**Purpose:** associate repositories, documents, issue/planning systems, design
+artifacts, Runtime environments, and other external systems with Work as
+attributable inputs or execution surfaces; extract source Reality without
+turning attachment into Work Truth or introducing a Project lifecycle.
+
+**Status:** future bounded Work Asset / Asset Intake and Repository Reality
+capability. Existing Engineering Resource and repository binding is only the
+narrow foundation. See the
+[Work-centric Production Model](../architecture/work-centric-production-model.md).
+
+### 5.7 Responsibility-aware Reality Projection
+
+**Purpose:** project one authoritative production Reality according to
+execution, lead, product/engineering-management, and program/organizational
+responsibility, using progressively more aggregated, exception-oriented, and
+decision-oriented views rather than more raw data.
+
+**Status:** future extension of the current Control Room perspectives. It does
+not authorize user-role persistence, team management, permissions, or an
+organization hierarchy.
+
+### 5.8 Minimum-sufficient Capability and Access Provisioning
+
+**Purpose:** derive the Assets and temporary/scoped capabilities needed by an
+admitted Work/PWU, provision least-privilege action access, and withdraw it when
+no longer required. This is distinct from ECF's least-context responsibility.
+
+**Status:** future architecture and implementation work; no IAM/RBAC
+replacement or capability marketplace is authorized. Sections 5.2–5.8 are
+governed together by the
+[Work-centric Production and Responsibility Principles](../architecture/work-centric-production-and-responsibility-principles.md).
 
 ## 6. Roadmap Maintenance Rules
 

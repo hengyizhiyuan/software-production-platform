@@ -147,7 +147,9 @@ attributable; governed admission determines what affects Work Reality.
 Repository Asset -> Repository Reality Extraction -> Work Reality
 ```
 
-See the [Work-centric Production Model](work-centric-production-model.md).
+See the [Work-centric Production Model](work-centric-production-model.md) and
+the cross-domain
+[Work-centric Production and Responsibility Principles](work-centric-production-and-responsibility-principles.md).
 
 ### PWU and production cycle
 
