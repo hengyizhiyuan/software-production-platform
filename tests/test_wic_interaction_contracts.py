@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
+from spg.application.interaction import WorkInteractionService
 from spg.domain.interaction import (
     WorkAdmissionReadiness,
     WorkAdmissionReadinessStatus,
@@ -199,8 +200,25 @@ def test_wic_provider_instruction_requires_progressive_context_aware_leadership(
     instruction = CodexSdkWorkInteractionCapability._instruction(basis)
 
     assert "progressive disclosure" in instruction
-    assert "do not enumerate the full Design Schema" in instruction
+    assert "Do not enumerate the full Design Schema" in instruction
     assert "recommend one next design action" in instruction
     assert "ask at most one highest-impact unresolved question" in instruction
     assert "never ask the Human to repeat it" in instruction
     assert "lead with a useful proposal" in instruction
+    assert "the first sentence must answer that exact question directly" in instruction
+    assert "two to five short paragraphs" in instruction
+    assert "never print the action label" in instruction
+    assert "Do not add headings such as Design approach" in instruction
+    assert "If the Human explicitly asks for detailed analysis" in instruction
+    assert "does not automatically generate or write a design-document" in instruction
+
+
+def test_wic_human_facing_response_does_not_append_internal_design_metadata() -> None:
+    response = "先确定主要使用者，因为这会影响后续边界。\n\n谁负责日常操作？"
+
+    rendered = WorkInteractionService._human_facing_response(response)
+
+    assert rendered == response
+    assert "设计方式：" not in rendered
+    assert "当前阶段：" not in rendered
+    assert "Facilitation strategy:" not in rendered

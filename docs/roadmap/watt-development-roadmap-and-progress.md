@@ -163,6 +163,10 @@ authorized by this roadmap.
 
 ### Priority 2 — Human–Watt Collaboration Experience Improvement
 
+Current Reality: response-quality refinement v2.2 is implemented with focused
+validation and four-scenario real `gpt-5.6-sol` proof. Human Product Acceptance
+remains pending.
+
 Focus:
 
 - stronger Design Facilitation behavior;

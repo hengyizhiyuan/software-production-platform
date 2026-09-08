@@ -8,6 +8,8 @@ Experience calibration v2: **IMPLEMENTED / FOCUSED VALIDATION PASS / REAL
 PROVIDER V2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
 Experience refinement v2.1: **IMPLEMENTED / FOCUSED VALIDATION PASS / REAL
 PROVIDER V2.1 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+Response quality refinement v2.2: **IMPLEMENTED / FOCUSED VALIDATION PASS /
+REAL PROVIDER V2.2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
 
 
 ## Purpose
@@ -92,7 +94,7 @@ The Provider receives the ordered design stages and is instructed to:
 - use facts the Human already supplied instead of asking for them again;
 - use progressive disclosure instead of enumerating the full methodology,
   agenda, or unresolved set;
-- briefly explain the design approach and current stage;
+- translate the current design position into natural collaboration language;
 - select and justify the highest-value current focus;
 - offer useful framing, alternatives, trade-offs, or decision order where the
   evidence supports them;
@@ -100,11 +102,29 @@ The Provider receives the ordered design stages and is instructed to:
 - ask at most one highest-impact unresolved question;
 - distinguish advisory facilitation from governed Reality and Authority.
 
-The final Human-facing message projects the selected approach, current stage,
-why that stage comes first, and one next design action from existing Guided
-Design definitions. It deliberately does not dump the complete stage path.
-This is behavior and presentation calibration; it does not create a new
-interpretation, Design, Plan, Work, or Authority owner.
+The default Human-facing message does not print schema identity/version,
+internal stage identifiers, facilitation enums, or rationale labels. It answers
+a direct question first, otherwise gives the minimum sufficient framing and one
+next action or key question. Explicit requests for the complete method or a
+detailed comparison may expand beyond the normal concise form. The persisted
+schema, stage, rationale, and progress remain available in the bounded detail
+projection. This is behavior and presentation calibration; it does not create
+a new interpretation, Design, Plan, Work, or Authority owner.
+
+## Response quality policy
+
+Normal collaboration follows `direct answer -> optional brief progression`
+for a clear Human question. Other turns use progressive disclosure: normally
+two to five short paragraphs, one primary recommendation/action, and at most
+one material question. Known Interaction facts are reused before asking for
+more information. The Provider chooses a conversational action internally but
+does not expose action labels or its reasoning structure.
+
+Concision is contextual. A Human request for detailed analysis, the complete
+design method, alternatives, or architecture receives the necessary detail.
+The application persists the Provider-authored Human-facing text without
+appending a second mechanical metadata report at Turn completion, preserving
+the existing stream-to-final-message identity.
 
 ## Persistence and restart
 
@@ -128,10 +148,12 @@ governed Authority.
 
 ## Control Room projection
 
-The existing Control Room projects the conversation, Turn status, selected
-schema, stage, current design focus, rationale, facilitation guidance, progress,
-and unresolved areas. These are projections over WIC and Guided Design Reality;
-the Control Room does not own or duplicate them.
+The existing Control Room projects the conversation and Turn status first.
+Selected schema, stage, current design focus, rationale, facilitation guidance,
+progress, and unresolved areas remain available under an explicit collaboration
+details disclosure instead of dominating normal conversation. These are
+projections over WIC and Guided Design Reality; the Control Room does not own or
+duplicate them.
 
 ## Non-goals and limitations
 

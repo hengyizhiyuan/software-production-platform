@@ -8,6 +8,8 @@ Experience calibration v2: **FOCUSED DETERMINISTIC VALIDATION PASS / REAL
 PROVIDER V2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING**
 Experience refinement v2.1: **FOCUSED VALIDATION PASS / REAL PROVIDER V2.1
 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING**
+Response quality refinement v2.2: **FOCUSED VALIDATION PASS / REAL PROVIDER
+V2.2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING**
 
 
 ## Scope
@@ -251,3 +253,50 @@ It remains outside Git and contains no credentials. The disposable proof
 database contains no Work, PWU, production Run, Runtime Commit, or Trusted
 Baseline mutation. This is real product-path evidence, not Human Product
 Acceptance; that judgment remains pending.
+
+## Response quality refinement v2.2 evidence
+
+Repository inspection identified two direct causes of the mechanical response:
+the Provider instruction asked ordinary replies to explain the selected design
+approach and current stage, and Turn completion then appended a second labeled
+`Design approach / Current stage / Why / Next action` block. The Control Room
+also displayed the complete internal collaboration projection by default.
+
+V2.2 separates Human-facing expression from internal design metadata. The
+Provider now applies direct-answer-first behavior, contextual concision, known
+fact reuse, one primary next action/question, and detail expansion only when
+requested. Turn completion persists the streamed natural response without
+appending metadata. Internal schema/stage/facilitation fields remain unchanged
+and are available through an explicit details disclosure.
+
+Focused results:
+
+- response policy, Guided Design, and UI contracts: **21 passed**;
+- browser state and one-message streaming lifecycle: **24 passed**;
+- PostgreSQL WIC persistence/restart/SSE: **9 passed**;
+- governed Work/WIC regression: **24 passed**;
+- real v2.2 Provider proof: **1 passed, 11 deselected**;
+- Work and production facts created by the proof: **0**.
+
+The explicitly authorized real proof used `gpt-5.6-sol`, four independent
+ephemeral Threads and four Turns. Every streamed response equaled its final
+persisted Watt message. Representative observed responses were:
+
+- new design goal: Watt proposed first bounding the users and core operational
+  problem, then asked one question; it used two short paragraphs and no
+  schema/stage labels;
+- known-context reuse: Watt reused individual developers, small studios,
+  technical public-account, Xiaohongshu, and livestream facts, proposed a
+  cross-channel content loop, and advanced to one scope choice without asking
+  for the audience again;
+- direct question: `目前，Work 前的引导式设计不会自动生成或写入设计文档，`
+  `因此暂时没有可提供的文档路径。` appeared first, followed only by the
+  brief governed production-proposal explanation;
+- explicit detail request: Watt expanded into the complete seven-part method,
+  including users/problem, outcomes/scenarios, boundaries, capabilities,
+  responsibility/information, architecture/risk, and staged verification.
+
+The full safe response artifact is
+`.spg/validation-evidence/human-watt-collaboration-v2.2-real-provider-20260908.json`.
+It remains outside Git. This proof validates Provider behavior and message
+lifecycle; Human Product Acceptance remains a separate pending judgment.

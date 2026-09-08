@@ -109,6 +109,8 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "artifact operation" in combined
     assert 'id="interaction-history"' in html
     assert 'id="shared-understanding"' in html
+    assert '<details class="collaboration-detail-disclosure">' in html
+    assert "Review collaboration details" in html
     assert 'id="interaction-readiness"' in html
     assert 'id="admit-work-control"' in html
     assert 'id="interaction-authority-identity"' in html

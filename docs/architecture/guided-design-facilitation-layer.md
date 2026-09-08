@@ -8,6 +8,9 @@ Human–Watt experience calibration v2: **IMPLEMENTED / FOCUSED VALIDATION PASS 
 REAL PROVIDER V2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
 Human–Watt experience refinement v2.1: **IMPLEMENTED / FOCUSED VALIDATION PASS /
 REAL PROVIDER V2.1 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+Human–Watt response quality refinement v2.2: **IMPLEMENTED / FOCUSED
+VALIDATION PASS / REAL PROVIDER V2.2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE
+PENDING.**
 
 
 ## Purpose
@@ -57,6 +60,12 @@ framing, direction, alternatives, trade-offs, or decision order when Reality
 supports them. It remains advisory and cannot admit Design Reality, create
 Work, or transfer Authority.
 
+The Human-facing response is an expression of this projection, not a dump of
+it. Direct questions are answered first. Schema/version, internal stage and
+facilitation labels remain in the detail projection by default, while normal
+conversation uses concise natural language. A Human may explicitly request the
+complete method or detailed reasoning and receive a longer explanation.
+
 ## Seed Design Schema Registry
 
 The registry is provider-neutral, versioned, configurable in application code,
@@ -102,9 +111,9 @@ Watt selects **General Product/System Design v0.1**, explains that the input is
 a new software product/system design problem, establishes the opening stage and
 focus, explains why that focus precedes downstream capability design, and
 presents active guidance rather than merely returning a list of questions.
-The persisted conversation response briefly identifies the selected approach,
-opening stage, why it comes first, and one next design action. It does not
-enumerate the complete stage path in the first response.
+The persisted conversation response naturally recommends the opening focus and
+one next design action without printing the schema, stage, or facilitation
+labels. It does not enumerate the complete stage path in the first response.
 
 ## Ownership and progression
 

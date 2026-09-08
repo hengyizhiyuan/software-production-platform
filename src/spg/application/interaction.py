@@ -522,23 +522,9 @@ class WorkInteractionService:
                             f"{interaction.selected_design_schema_version}",
                         )
                     )
-                    response_content = assessment.natural_response
-                    if (
-                        interaction is not None
-                        and interaction.current_work_id is None
-                        and interaction.selected_design_schema_identity is not None
-                    ):
-                        schema = design_schema_by_identity(
-                            interaction.selected_design_schema_identity,
-                            interaction.selected_design_schema_version,
-                        )
-                        response_content = self._design_facilitation_response(
-                            assessment.natural_response,
-                            schema=schema,
-                            selection_rationale=(
-                                interaction.design_schema_selection_rationale or ""
-                            ),
-                        )
+                    response_content = self._human_facing_response(
+                        assessment.natural_response
+                    )
                     self._reconcile_turn_response(turn_id, response_content)
                     store.insert_message(
                         {
@@ -626,28 +612,10 @@ class WorkInteractionService:
         )
 
     @staticmethod
-    def _design_facilitation_response(
-        natural_response: str,
-        *,
-        schema,
-        selection_rationale: str,
-    ) -> str:
-        focus = schema.issues[0]
-        if any("\u4e00" <= character <= "\u9fff" for character in natural_response):
-            return (
-                f"{natural_response.strip()}\n\n"
-                f"设计方式：{schema.title}。{selection_rationale}\n"
-                f"当前阶段：{focus.title}。\n"
-                f"为什么先处理：{focus.why_it_matters}\n"
-                f"下一个设计动作：{focus.objective}"
-            )
-        return (
-            f"{natural_response.strip()}\n\n"
-            f"Design approach: {schema.title}. {selection_rationale}\n"
-            f"Current stage: {focus.title}.\n"
-            f"Why this stage comes first: {focus.why_it_matters}\n"
-            f"Next design action: {focus.objective}"
-        )
+    def _human_facing_response(natural_response: str) -> str:
+        """Keep Provider-authored collaboration prose separate from metadata views."""
+
+        return natural_response.strip()
 
     def admit_candidate(
         self,

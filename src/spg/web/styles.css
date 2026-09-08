@@ -1040,6 +1040,23 @@ textarea {
   margin: 0;
 }
 
+.collaboration-detail-disclosure {
+  margin: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.collaboration-detail-disclosure summary {
+  padding: 13px 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.collaboration-detail-disclosure[open] .detail-grid {
+  margin-top: 4px;
+}
+
 .detail-grid > div,
 .result-grid > div {
   min-width: 0;

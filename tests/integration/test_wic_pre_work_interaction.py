@@ -342,9 +342,9 @@ def _preserve_real_provider_success_report(
             "设计路径：" in projection.conversation_messages[-1].content
             or "Design path:" in projection.conversation_messages[-1].content
         ),
-        "next_design_action_present": (
-            "下一个设计动作：" in projection.conversation_messages[-1].content
-            or "Next design action:" in projection.conversation_messages[-1].content
+        "question_count": (
+            projection.conversation_messages[-1].content.count("?")
+            + projection.conversation_messages[-1].content.count("？")
         ),
         "conversation_message_count": len(projection.conversation_messages),
         "created_at": turn.created_at.isoformat(),
@@ -361,6 +361,53 @@ def _preserve_real_provider_success_report(
         encoding="utf-8",
     )
     temporary.replace(destination)
+
+
+_DEFAULT_RESPONSE_METADATA_MARKERS = (
+    "设计方式：",
+    "当前阶段：",
+    "为什么先处理：",
+    "下一个设计动作：",
+    "Design approach:",
+    "Current stage:",
+    "Why now:",
+    "Next design action:",
+    "Facilitation strategy:",
+    "watt:guided-design:",
+)
+
+
+def _assert_default_response_quality(response: str) -> None:
+    paragraphs = [item.strip() for item in response.split("\n\n") if item.strip()]
+    assert response.strip() == response
+    assert 1 <= len(paragraphs) <= 5
+    assert len(response) <= 900
+    assert response.count("?") + response.count("？") <= 1
+    for marker in _DEFAULT_RESPONSE_METADATA_MARKERS:
+        assert marker not in response
+
+
+def _run_real_human_watt_turn(
+    service: WorkInteractionService,
+    interaction_id: UUID,
+    content: str,
+) -> tuple[str, object, bool]:
+    submitted = service.submit_turn(
+        interaction_id,
+        content,
+        human_identity="human:response-quality-proof",
+    )
+    completed, streamed_response, delta_before_terminal = (
+        _wait_for_turn_and_observe_stream(service, submitted.id, timeout=320)
+    )
+    if completed.status is InteractionTurnStatus.FAILED:
+        _fail_with_preserved_turn_evidence(completed)
+    assert completed.status is InteractionTurnStatus.COMPLETED
+    projection = service.get_shared_understanding(interaction_id)
+    assert streamed_response
+    assert delta_before_terminal is True
+    assert projection.conversation_messages[-1].content == streamed_response
+    return streamed_response, projection, delta_before_terminal
 
 
 def test_pre_work_progression_is_reconstructable_and_never_creates_work(
@@ -548,9 +595,10 @@ def test_async_turn_persists_history_schema_guidance_and_restarts(
         projection.design_progress_narrative or ""
     )
     response = projection.conversation_messages[1].content
-    assert "Design approach: General Product/System Design" in response
-    assert "Current stage: Motive, users, and problem" in response
-    assert "Next design action:" in response
+    assert response == projection.latest_assessment.natural_response
+    assert "Design approach:" not in response
+    assert "Current stage:" not in response
+    assert "Next design action:" not in response
     assert "Design path:" not in response
     assert _count(postgres_database, interaction_turns) == 1
     assert _count(postgres_database, interaction_messages) == 2
@@ -595,7 +643,9 @@ def test_async_turn_projects_real_delta_before_completion_and_persists_final_mes
     final_response = projection.conversation_messages[-1].content
     assert service.turn_response_delta(submitted.id, 0)[0] == final_response
     assert final_response.startswith(delta)
-    assert "Next design action:" in final_response
+    assert final_response == (
+        "I am mapping the design path now. Who is the primary operator?"
+    )
     assert "Design path:" not in final_response
     assert _count(postgres_database, product_works) == 0
     service.shutdown()
@@ -782,13 +832,11 @@ def test_real_provider_guides_mandatory_human_watt_scenario_in_one_turn(
         assert delta_before_terminal is True
         final_response = projection.conversation_messages[-1].content
         assert final_response == streamed_response
-        assert (
-            "设计方式：General Product/System Design" in final_response
-            or "Design approach: General Product/System Design" in final_response
-        )
+        assert "设计方式：" not in final_response
+        assert "Design approach:" not in final_response
         assert "设计路径：" not in final_response and "Design path:" not in final_response
-        assert "当前阶段：" in final_response or "Current stage:" in final_response
-        assert "下一个设计动作：" in final_response or "Next design action:" in final_response
+        assert "当前阶段：" not in final_response and "Current stage:" not in final_response
+        assert "下一个设计动作：" not in final_response and "Next design action:" not in final_response
         assert streamed_response.count("?") + streamed_response.count("？") <= 1
         assert _count(postgres_database, product_works) == 0
         assert _count(postgres_database, work_reality_revisions) == 0
@@ -803,6 +851,136 @@ def test_real_provider_guides_mandatory_human_watt_scenario_in_one_turn(
                 streamed_response=streamed_response,
                 delta_before_terminal=delta_before_terminal,
             )
+    finally:
+        service.shutdown()
+
+
+@pytest.mark.real_codex
+@pytest.mark.skipif(
+    os.environ.get("SPG_RUN_REAL_HUMAN_WATT_V22") != "1",
+    reason="explicit Human-Watt v2.2 real response-quality proof is required",
+)
+def test_real_provider_v22_response_quality_scenarios(
+    postgres_database: Database,
+) -> None:
+    service = WorkInteractionService(
+        postgres_database,
+        capability=CodexSdkWorkInteractionCapability(
+            repository_location=os.environ.get(
+                "SPG_WIC_PROVIDER_PROOF_ROOT",
+                str(PROJECT_ROOT),
+            ),
+            model="gpt-5.6-sol",
+            timeout_seconds=300,
+        ),
+    )
+    try:
+        new_goal = service.create_interaction(
+            human_identity="human:response-quality-proof"
+        )
+        response_a, projection_a, _ = _run_real_human_watt_turn(
+            service,
+            new_goal.id,
+            "我想做一个运营管理平台。",
+        )
+        _assert_default_response_quality(response_a)
+        assert any(marker in response_a for marker in ("先", "建议", "可以"))
+
+        known_context = service.create_interaction(
+            human_identity="human:response-quality-proof"
+        )
+        service.append_human_input(
+            known_context.id,
+            (
+                "主要用于推广 Watt，包括技术公众号、小红书和直播，"
+                "目标受众是个人开发者和小型开发工作室。"
+            ),
+            human_identity="human:response-quality-proof",
+        )
+        response_b, projection_b, _ = _run_real_human_watt_turn(
+            service,
+            known_context.id,
+            "请基于这些已知信息继续推进设计。",
+        )
+        _assert_default_response_quality(response_b)
+        assert any(
+            fact in response_b
+            for fact in ("个人开发者", "小型开发工作室", "公众号", "小红书", "直播")
+        )
+        assert not any(
+            repeated_question in response_b
+            for repeated_question in ("面向谁", "目标受众是谁", "谁是目标用户")
+        )
+
+        direct_question = service.create_interaction(
+            human_identity="human:response-quality-proof"
+        )
+        response_c, projection_c, _ = _run_real_human_watt_turn(
+            service,
+            direct_question.id,
+            "设计方案的文档会输出到哪里？",
+        )
+        _assert_default_response_quality(response_c)
+        first_paragraph = response_c.split("\n\n", 1)[0]
+        assert "文档" in first_paragraph
+        assert any(marker in first_paragraph for marker in ("不会", "未", "没有"))
+        assert not any(marker in response_c for marker in ("方法论", "设计路径"))
+
+        detail_request = service.create_interaction(
+            human_identity="human:response-quality-proof"
+        )
+        response_d, projection_d, _ = _run_real_human_watt_turn(
+            service,
+            detail_request.id,
+            "把整个设计方法和后续步骤详细给我讲一下。",
+        )
+        assert len(response_d) > len(response_c)
+        assert sum(
+            topic in response_d
+            for topic in ("用户", "场景", "边界", "能力", "架构", "验证", "生产")
+        ) >= 3
+
+        for projection in (projection_a, projection_b, projection_c, projection_d):
+            assert projection.latest_assessment is not None
+            assert projection.latest_assessment.provider_identity.startswith(
+                "codex-sdk:thread:"
+            )
+        assert _count(postgres_database, product_works) == 0
+        assert _count(postgres_database, work_reality_revisions) == 0
+        for table in runtime_tables:
+            assert _count(postgres_database, table) == 0, table.name
+
+        report = {
+            "evidence_kind": "HUMAN_WATT_RESPONSE_QUALITY_V22_REAL_PROVIDER_PROOF",
+            "provider_model": "gpt-5.6-sol",
+            "provider_threads": 4,
+            "provider_turns": 4,
+            "streaming_match": True,
+            "work_and_production_facts": 0,
+            "responses": {
+                "new_design_goal": response_a,
+                "known_context_reuse": response_b,
+                "direct_question": response_c,
+                "explicit_detail_request": response_d,
+            },
+        }
+        destination = Path(
+            os.environ.get(
+                "SPG_REAL_PROVIDER_V22_EVIDENCE_PATH",
+                PROJECT_ROOT
+                / ".spg"
+                / "validation-evidence"
+                / "human-watt-collaboration-v2.2-real-provider-20260908.json",
+            )
+        )
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = destination.with_suffix(destination.suffix + ".tmp")
+        temporary.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        temporary.replace(destination)
+        print("HUMAN_WATT_V22_REAL_PROOF", json.dumps(report, ensure_ascii=False))
     finally:
         service.shutdown()
 
