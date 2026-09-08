@@ -6,6 +6,9 @@ Closure: **PENDING ARCHITECTURE LEAD REALITY REVIEW.**
 
 Experience calibration v2: **IMPLEMENTED / FOCUSED VALIDATION PASS / REAL
 PROVIDER V2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+Experience refinement v2.1: **IMPLEMENTED / FOCUSED VALIDATION PASS / REAL
+PROVIDER V2.1 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+
 
 ## Purpose
 
@@ -69,9 +72,12 @@ stream and projects agent-message deltas while the Turn is still processing.
 Because the Provider response is a structured envelope, only the
 natural-response JSON string is incrementally exposed; advisory assessment
 fields and the structured envelope are never rendered as chat text. The final
-Watt message is still persisted atomically at completion. SSE reconciles the
-ephemeral stream with that persisted final message and can replace its local
-presentation if they do not share the expected prefix.
+Watt message is still persisted atomically at completion. The UI creates one
+transient Watt message for the Turn, applies deltas to that same conversation
+message, and replaces it with the persisted message when completion becomes
+authoritative. The application reconciles its bounded stream buffer to the
+exact final content, so the visible stream and persisted message converge
+without a second temporary response surface or duplicate message.
 
 The incremental buffer is bounded, process-local presentation state. It is not
 a message Truth source. A late connection or restarted process falls back to
@@ -84,17 +90,21 @@ combined with the already-selected or deterministically matched Design Schema.
 The Provider receives the ordered design stages and is instructed to:
 
 - use facts the Human already supplied instead of asking for them again;
-- explain the relevant design path and current stage;
+- use progressive disclosure instead of enumerating the full methodology,
+  agenda, or unresolved set;
+- briefly explain the design approach and current stage;
 - select and justify the highest-value current focus;
 - offer useful framing, alternatives, trade-offs, or decision order where the
   evidence supports them;
+- recommend one next design action;
 - ask at most one highest-impact unresolved question;
 - distinguish advisory facilitation from governed Reality and Authority.
 
-The final Human-facing message also projects the selected schema, complete
-stage path, current focus, and rationale from existing Guided Design
-definitions. This is behavior and presentation calibration; it does not create
-a new interpretation, Design, Plan, Work, or Authority owner.
+The final Human-facing message projects the selected approach, current stage,
+why that stage comes first, and one next design action from existing Guided
+Design definitions. It deliberately does not dump the complete stage path.
+This is behavior and presentation calibration; it does not create a new
+interpretation, Design, Plan, Work, or Authority owner.
 
 ## Persistence and restart
 

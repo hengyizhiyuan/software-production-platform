@@ -176,3 +176,31 @@ def test_wic4_lifecycle_taxonomies_are_small_and_human_governed() -> None:
         "START_NEW_WORK",
         "DISMISSED",
     }
+
+
+def test_wic_provider_instruction_requires_progressive_context_aware_leadership() -> None:
+    basis = SimpleNamespace(
+        model_dump=lambda mode: {
+            "records": [
+                {"content": "Design an operations management platform."},
+                {"content": "Regional operations managers are the primary users."},
+            ]
+        },
+        interaction=SimpleNamespace(
+            selected_design_schema_identity=None,
+            selected_design_schema_version=None,
+        ),
+        records=(
+            SimpleNamespace(content="Design an operations management platform."),
+            SimpleNamespace(content="Regional operations managers are the primary users."),
+        ),
+    )
+
+    instruction = CodexSdkWorkInteractionCapability._instruction(basis)
+
+    assert "progressive disclosure" in instruction
+    assert "do not enumerate the full Design Schema" in instruction
+    assert "recommend one next design action" in instruction
+    assert "ask at most one highest-impact unresolved question" in instruction
+    assert "never ask the Human to repeat it" in instruction
+    assert "lead with a useful proposal" in instruction

@@ -596,3 +596,40 @@ test("active Work interaction keeps revision admission explicit and Human govern
   assert.match(appSource, /reject-work-revision/);
   assert.match(appSource, /refine-work-revision/);
 });
+
+test("streaming assistant output occupies one message lifecycle until persisted truth arrives", () => {
+  const projection = {
+    conversation_messages: [{
+      actor: "HUMAN",
+      turn_id: "turn-1",
+      content: "Design an operations platform.",
+      processing_status: "PROCESSING",
+    }],
+    records: [],
+  };
+  const streaming = {
+    turnId: "turn-1",
+    content: "Let us start with the operator and problem.",
+    status: "PROCESSING",
+  };
+  const during = viewModel.interactionConversationMessages(projection, streaming);
+  assert.equal(during.length, 2);
+  assert.equal(during[1].actor, "WATT");
+  assert.equal(during[1].turn_id, "turn-1");
+  assert.equal(during[1].content, streaming.content);
+  assert.equal(during[1].streaming, true);
+
+  const persisted = {
+    ...projection,
+    conversation_messages: [
+      ...projection.conversation_messages,
+      { actor: "WATT", turn_id: "turn-1", content: streaming.content, processing_status: "COMPLETED" },
+    ],
+  };
+  const after = viewModel.interactionConversationMessages(persisted, streaming);
+  assert.equal(after.length, 2);
+  assert.equal(after[1].processing_status, "COMPLETED");
+  assert.equal(after[1].streaming, undefined);
+  assert.match(appSource, /streamingAssistantMessage\.content = streamed/);
+  assert.doesNotMatch(appSource, /elements\.wattResponse\.textContent = streamed/);
+});

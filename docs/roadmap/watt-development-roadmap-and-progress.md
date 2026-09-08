@@ -105,12 +105,15 @@ where the design is, why the current focus matters, and which decision would
 move the Motive forward. Any implementation must preserve Design Reality,
 Human Authority, and Plan Steering ownership.
 
-Current calibration status: **IMPLEMENTED / FOCUSED VALIDATION PASS / HUMAN
-ACCEPTANCE PENDING**. The implementation now supplies the ordered Design Schema
-to the Provider, requires path/stage/focus explanation and proactive bounded
-guidance, reuses known Interaction Reality, and projects the full design route
-in the persisted Watt response. This status does not yet claim that the Human
-experience is accepted.
+Current refinement status: **V2.1 IMPLEMENTED / FOCUSED VALIDATION PASS / REAL
+PROVIDER V2.1 PROOF PASS / HUMAN ACCEPTANCE PENDING**. The implementation now
+supplies the ordered Design Schema to the Provider while requiring progressive
+disclosure in the Human-facing response. It reuses known Interaction Reality,
+briefly explains the approach and current stage, leads with useful direction or
+trade-offs when supported, recommends one next design action, and asks at most
+one material question. It no longer projects the complete design route into the
+first persisted response. Engineering evidence resolves the identified
+implementation gap; Human experience acceptance remains separately pending.
 
 ### 3.2 Streaming Experience Gap
 
@@ -128,12 +131,14 @@ Further product work should evaluate:
 Streaming presentation must not become a second message truth source or cause
 partial model output to be mistaken for admitted Work Reality.
 
-Current calibration status: **IMPLEMENTED / FOCUSED VALIDATION PASS / REAL
-PROVIDER V2 PROOF PASS / HUMAN ACCEPTANCE PENDING**. The Codex adapter now
-consumes real agent-message deltas and SSE exposes only incremental
-Human-facing response content while the Turn is processing. The terminal
-message remains the durable conversation record; process-local deltas are
-bounded UX state.
+Current refinement status: **V2.1 IMPLEMENTED / FOCUSED VALIDATION PASS / REAL
+PROVIDER V2.1 PROOF PASS / HUMAN ACCEPTANCE PENDING**. The Codex adapter
+consumes real agent-message deltas, and the UI applies them directly to one
+transient Watt message in conversation history. Completion replaces that
+projection with the persisted message for the same Turn; deterministic and
+real Provider evidence prove exact stream/final equality and no duplicate
+response surface. The terminal message remains the only durable conversation
+record; process-local deltas remain bounded UX state.
 
 ## 4. Current Priority Roadmap
 

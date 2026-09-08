@@ -463,6 +463,15 @@ class WorkInteractionService:
             while len(self._turn_response_streams) > 32:
                 self._turn_response_streams.popitem(last=False)
 
+    def _reconcile_turn_response(self, turn_id: UUID, content: str) -> None:
+        """Align bounded streaming UX state with the final persisted message."""
+
+        with self._turn_lock:
+            self._turn_response_streams[turn_id] = content
+            self._turn_response_streams.move_to_end(turn_id)
+            while len(self._turn_response_streams) > 32:
+                self._turn_response_streams.popitem(last=False)
+
     def _process_turn(self, turn_id: UUID) -> None:
         now = datetime.now(UTC)
         with self.database.unit_of_work() as uow:
@@ -530,6 +539,7 @@ class WorkInteractionService:
                                 interaction.design_schema_selection_rationale or ""
                             ),
                         )
+                    self._reconcile_turn_response(turn_id, response_content)
                     store.insert_message(
                         {
                             "id": uuid4(),
@@ -623,25 +633,20 @@ class WorkInteractionService:
         selection_rationale: str,
     ) -> str:
         focus = schema.issues[0]
-        path = " → ".join(issue.title for issue in schema.issues)
         if any("\u4e00" <= character <= "\u9fff" for character in natural_response):
             return (
-                f"{natural_response}\n\n"
-                f"设计方法：{schema.title} v{schema.version}。"
-                f"{selection_rationale} "
-                f"设计路径：{path}。\n"
-                f"当前阶段：{focus.title}。当前重点：{focus.objective} "
-                f"之所以先处理它，是因为：{focus.why_it_matters} "
-                "我会直接沿用已经明确的信息，只把真正影响设计方向的未决问题带给你。"
+                f"{natural_response.strip()}\n\n"
+                f"设计方式：{schema.title}。{selection_rationale}\n"
+                f"当前阶段：{focus.title}。\n"
+                f"为什么先处理：{focus.why_it_matters}\n"
+                f"下一个设计动作：{focus.objective}"
             )
         return (
-            f"{natural_response}\n\n"
-            f"Design approach: {schema.title} v{schema.version}. "
-            f"{selection_rationale} Design path: {path}. "
-            f"Current stage: {focus.title}. Next, {focus.objective.lower()} "
-            f"Why now: {focus.why_it_matters} "
-            "I will reuse what is already known and surface only questions that "
-            "materially affect the design direction."
+            f"{natural_response.strip()}\n\n"
+            f"Design approach: {schema.title}. {selection_rationale}\n"
+            f"Current stage: {focus.title}.\n"
+            f"Why this stage comes first: {focus.why_it_matters}\n"
+            f"Next design action: {focus.objective}"
         )
 
     def admit_candidate(

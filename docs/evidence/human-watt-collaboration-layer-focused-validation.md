@@ -6,6 +6,9 @@ Closure: **VALIDATION COMPLETE — PENDING ARCHITECTURE LEAD REALITY REVIEW**
 
 Experience calibration v2: **FOCUSED DETERMINISTIC VALIDATION PASS / REAL
 PROVIDER V2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING**
+Experience refinement v2.1: **FOCUSED VALIDATION PASS / REAL PROVIDER V2.1
+PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING**
+
 
 ## Scope
 
@@ -187,3 +190,64 @@ This proves the real Provider transport, incremental-delivery path, schema
 selection, focus projection, and durable final-message alignment. It does not
 self-declare Human Product Acceptance; a Human must still judge whether the
 guidance feels sufficiently active and useful.
+
+## Experience refinement v2.1 evidence
+
+The v2.1 refinement closes the two implementation gaps identified by Human
+Acceptance while preserving Human Acceptance as a separate authority decision.
+
+### One assistant-message lifecycle
+
+- submitting a Turn creates one transient Watt message in the conversation;
+- SSE deltas update that same message rather than a separate processing area;
+- the persisted Watt message for the same Turn replaces the transient
+  projection at completion;
+- the Shared Understanding response surface is hidden when conversation owns
+  the visible Watt response;
+- the bounded application stream buffer reconciles to the exact persisted
+  response, without becoming durable Truth.
+
+Deterministic frontend coverage proves same-Turn replacement and no duplicate
+rendering. PostgreSQL/SSE coverage proves the concatenated emitted deltas equal
+the final persisted Watt message.
+
+### Progressive design-lead behavior
+
+The Provider policy now requires progressive disclosure, reuse of persisted
+Conversation Reality, concise approach/stage explanation, one next design
+action, useful direction or trade-offs when supported, and at most one
+highest-impact unresolved question. The deterministic completion wrapper no
+longer appends the complete Design Schema path to the first response.
+
+Focused validation at this checkpoint:
+
+- Node syntax: **PASS**;
+- frontend/state tests: **24 passed**;
+- WIC Provider and UI contract tests: **14 passed**;
+- Guided Design plus WIC PostgreSQL/SSE tests: **15 passed, 2 real Provider
+  tests skipped by the authorization gate**;
+- governed Work/WIC regression: **24 passed, 1 skipped**;
+- no Work or production fact created.
+
+An initial real-proof launch was rejected before process creation because
+repository-context egress had not yet been explicitly authorized. No data was
+sent and no Provider Thread or Turn was created. After explicit Human
+authorization, exactly one real Provider Turn ran with `gpt-5.6-sol`, no retry,
+and no Resume. The sanitized evidence records:
+
+- Interaction Turn: **COMPLETED**;
+- incremental response and pre-terminal delta observed: **true**;
+- streamed response equals persisted final response: **true**;
+- schema: **General Product/System Design v0.1**;
+- stage: **Motive, users, and problem**;
+- facilitation strategy: **CLARIFY**;
+- progressive disclosure: **true**;
+- next design action present: **true**;
+- persisted conversation messages: **2**.
+
+The local sanitized artifact is
+`.spg/validation-evidence/human-watt-collaboration-v2.1-real-provider-20260908.json`.
+It remains outside Git and contains no credentials. The disposable proof
+database contains no Work, PWU, production Run, Runtime Commit, or Trusted
+Baseline mutation. This is real product-path evidence, not Human Product
+Acceptance; that judgment remains pending.

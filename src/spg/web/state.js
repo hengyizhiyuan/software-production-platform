@@ -438,6 +438,38 @@
     return result.verification_summary.join(" · ");
   }
 
+  function interactionConversationMessages(projection, streamingAssistant) {
+    const persisted = projection && Array.isArray(projection.conversation_messages)
+      && projection.conversation_messages.length
+      ? projection.conversation_messages
+      : projection && Array.isArray(projection.records)
+        ? projection.records
+        : [];
+    if (!streamingAssistant || !streamingAssistant.turnId) {
+      return persisted;
+    }
+    const persistedAssistant = persisted.some((message) => (
+      message.actor === "WATT" && message.turn_id === streamingAssistant.turnId
+    ));
+    if (persistedAssistant) {
+      return persisted;
+    }
+    return [
+      ...persisted,
+      {
+        actor: "WATT",
+        turn_id: streamingAssistant.turnId,
+        content: streamingAssistant.content || "Watt is thinking...",
+        processing_status: streamingAssistant.status || "PROCESSING",
+        supporting_references: [],
+        design_result_references: [],
+        governance_event_references: [],
+        created_at: streamingAssistant.createdAt || null,
+        streaming: true,
+      },
+    ];
+  }
+
   root.SPGViewModel = Object.freeze({
     STATUS_LABELS,
     statusLabel,
@@ -454,5 +486,6 @@
     workTitle,
     artifactSummary,
     verificationSummary,
+    interactionConversationMessages,
   });
 })(globalThis);

@@ -6,6 +6,9 @@ Closure: **PENDING ARCHITECTURE LEAD REALITY REVIEW.**
 
 Human–Watt experience calibration v2: **IMPLEMENTED / FOCUSED VALIDATION PASS /
 REAL PROVIDER V2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+Human–Watt experience refinement v2.1: **IMPLEMENTED / FOCUSED VALIDATION PASS /
+REAL PROVIDER V2.1 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+
 
 ## Purpose
 
@@ -46,11 +49,13 @@ the selection.
 
 At the pre-Work conversation boundary, facilitation now receives the matched
 schema's ordered stages together with exact persisted Interaction Reality.
-Human-facing behavior must explain the route, locate the current discussion,
-reuse known information, recommend the next high-value design move, and surface
-only the most material unresolved question. Proactive guidance remains
-advisory: it can frame choices and explain trade-offs, but it cannot admit
-Design Reality, create Work, or transfer Authority.
+Human-facing behavior uses progressive disclosure: it locates the current
+discussion without dumping the complete methodology, reuses known information,
+recommends one next high-value design action, and surfaces at most the most
+material unresolved question. Proactive guidance should lead with useful
+framing, direction, alternatives, trade-offs, or decision order when Reality
+supports them. It remains advisory and cannot admit Design Reality, create
+Work, or transfer Authority.
 
 ## Seed Design Schema Registry
 
@@ -97,9 +102,9 @@ Watt selects **General Product/System Design v0.1**, explains that the input is
 a new software product/system design problem, establishes the opening stage and
 focus, explains why that focus precedes downstream capability design, and
 presents active guidance rather than merely returning a list of questions.
-The persisted conversation response includes the selected methodology, its
-ordered stage path, the opening stage, the current focus, and why that focus
-precedes downstream design commitments.
+The persisted conversation response briefly identifies the selected approach,
+opening stage, why it comes first, and one next design action. It does not
+enumerate the complete stage path in the first response.
 
 ## Ownership and progression
 

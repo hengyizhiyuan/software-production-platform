@@ -26,6 +26,7 @@
     pollTimer: null,
     activeInteractionTurnId: "",
     interactionEventSource: null,
+    streamingAssistantMessage: null,
   };
 
   const elements = {
@@ -375,6 +376,7 @@
       elements.interactionReadiness.className = "status-badge status-draft";
       elements.interactionProcessingStatus.textContent = "IDLE";
       elements.interactionProcessingStatus.className = "status-badge status-draft";
+      elements.wattResponse.hidden = false;
       elements.wattResponse.textContent = "Start anywhere. Watt will ask only for material clarification.";
       elements.interpretedMotive.textContent = "Not established yet";
       elements.interpretedOutcome.textContent = "Not established yet";
@@ -407,11 +409,16 @@
       elements.workTransitionDecision.hidden = true;
       return;
     }
-    const history = projection.conversation_messages && projection.conversation_messages.length
-      ? projection.conversation_messages
-      : projection.records;
+    const history = viewModel.interactionConversationMessages(
+      projection,
+      state.streamingAssistantMessage,
+    );
     history.forEach((record) => {
       const message = createElement("article", `interaction-message actor-${record.actor.toLowerCase()}`);
+      if (record.streaming) {
+        message.classList.add("is-streaming");
+        message.setAttribute("aria-busy", "true");
+      }
       message.append(createElement("p", "speaker-label", record.actor === "HUMAN" ? "You" : "Watt"));
       message.append(createElement("p", "", record.content));
       const timestamp = record.created_at ? new Date(record.created_at).toLocaleTimeString() : "";
@@ -430,7 +437,11 @@
     const latestTurn = projection.turns && projection.turns.length
       ? projection.turns[projection.turns.length - 1]
       : null;
-    const turnStatus = latestTurn ? latestTurn.status : "IDLE";
+    const turnStatus = state.streamingAssistantMessage
+      ? state.streamingAssistantMessage.status
+      : latestTurn
+        ? latestTurn.status
+        : "IDLE";
     elements.interactionProcessingStatus.textContent = turnStatus;
     elements.interactionProcessingStatus.className = `status-badge ${
       turnStatus === "FAILED"
@@ -447,6 +458,9 @@
     const latestWattMessage = [...(projection.conversation_messages || [])]
       .reverse()
       .find((message) => message.actor === "WATT");
+    elements.wattResponse.hidden = Boolean(
+      latestWattMessage || state.streamingAssistantMessage,
+    );
     elements.wattResponse.textContent = latestWattMessage
       ? latestWattMessage.content
       : assessment
@@ -1307,10 +1321,15 @@
       const turn = await apiRequest(
         `/api/interactions/${interactionId}/turns/${turnId}`,
       );
-      elements.interactionProcessingStatus.textContent = turn.status;
+      if (state.streamingAssistantMessage) {
+        state.streamingAssistantMessage.status = turn.status;
+      }
+      renderInteraction();
       if (turn.status === "COMPLETED" || turn.status === "FAILED") {
         state.activeInteractionTurnId = "";
         await refreshInteractionAfterTurn();
+        state.streamingAssistantMessage = null;
+        renderInteraction();
         if (turn.status === "FAILED") {
           showNotice(new ApiError(409, turn.failure_code || "TURN_FAILED", turn.failure_message || "Watt could not complete this Turn."));
         }
@@ -1322,7 +1341,15 @@
 
   function observeInteractionTurn(interactionId, turnId) {
     state.activeInteractionTurnId = turnId;
-    elements.wattResponse.textContent = "Watt is working from the persisted Interaction Reality…";
+    if (!state.streamingAssistantMessage || state.streamingAssistantMessage.turnId !== turnId) {
+      state.streamingAssistantMessage = {
+        turnId,
+        content: "",
+        status: "PROCESSING",
+        createdAt: new Date().toISOString(),
+      };
+    }
+    renderInteraction();
     if (typeof globalThis.EventSource !== "function") {
       void pollInteractionTurn(interactionId, turnId);
       return;
@@ -1337,22 +1364,26 @@
     let streamed = "";
     source.addEventListener("turn.status", (event) => {
       const turn = JSON.parse(event.data);
-      elements.interactionProcessingStatus.textContent = turn.status;
-      elements.interactionProcessingStatus.className = "status-badge status-draft";
+      state.streamingAssistantMessage.status = turn.status;
+      renderInteraction();
     });
     source.addEventListener("message.delta", (event) => {
       streamed += JSON.parse(event.data).delta;
-      elements.wattResponse.textContent = streamed;
+      state.streamingAssistantMessage.content = streamed;
+      renderInteraction();
     });
     source.addEventListener("message.reset", (event) => {
       streamed = JSON.parse(event.data).content;
-      elements.wattResponse.textContent = streamed;
+      state.streamingAssistantMessage.content = streamed;
+      renderInteraction();
     });
     source.addEventListener("message.completed", async () => {
       source.close();
       state.interactionEventSource = null;
       state.activeInteractionTurnId = "";
       await refreshInteractionAfterTurn();
+      state.streamingAssistantMessage = null;
+      renderInteraction();
       announce("Watt completed the Interaction Turn from persisted Reality.");
     });
     source.addEventListener("turn.failed", async (event) => {
@@ -1361,6 +1392,8 @@
       state.interactionEventSource = null;
       state.activeInteractionTurnId = "";
       await refreshInteractionAfterTurn();
+      state.streamingAssistantMessage = null;
+      renderInteraction();
       showNotice(new ApiError(409, failure.code || "TURN_FAILED", failure.message || "Watt could not complete this Turn."));
     });
     source.onerror = () => {
@@ -1407,6 +1440,12 @@
       state.sharedUnderstanding = await apiRequest(
         `/api/interactions/${state.selectedInteractionId}`,
       );
+      state.streamingAssistantMessage = {
+        turnId: turn.turn_id,
+        content: "",
+        status: turn.status || "RECEIVED",
+        createdAt: new Date().toISOString(),
+      };
       renderInteraction();
       observeInteractionTurn(state.selectedInteractionId, turn.turn_id);
       announce("Message received. No Work was created; Watt is processing it in the background.");
@@ -1552,6 +1591,7 @@
   function beginNewInteraction() {
     state.selectedInteractionId = "";
     state.sharedUnderstanding = null;
+    state.streamingAssistantMessage = null;
     state.selectedWorkId = "";
     try {
       localStorage.removeItem(INTERACTION_STORAGE_KEY);

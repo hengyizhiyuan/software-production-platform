@@ -335,14 +335,16 @@ def _preserve_real_provider_success_report(
         "design_facilitation_strategy": projection.design_facilitation_strategy,
         "incremental_response_observed": bool(streamed_response),
         "delta_observed_before_terminal": delta_before_terminal,
-        "stream_matches_persisted_response_prefix": (
-            projection.conversation_messages[-1].content.startswith(
-                streamed_response
-            )
+        "stream_matches_persisted_response": (
+            projection.conversation_messages[-1].content == streamed_response
         ),
-        "design_path_explained": (
+        "progressive_disclosure": not (
             "设计路径：" in projection.conversation_messages[-1].content
             or "Design path:" in projection.conversation_messages[-1].content
+        ),
+        "next_design_action_present": (
+            "下一个设计动作：" in projection.conversation_messages[-1].content
+            or "Next design action:" in projection.conversation_messages[-1].content
         ),
         "conversation_message_count": len(projection.conversation_messages),
         "created_at": turn.created_at.isoformat(),
@@ -545,9 +547,11 @@ def test_async_turn_persists_history_schema_guidance_and_restarts(
     assert "General Product/System Design" in (
         projection.design_progress_narrative or ""
     )
-    assert "Design approach: General Product/System Design" in (
-        projection.conversation_messages[1].content
-    )
+    response = projection.conversation_messages[1].content
+    assert "Design approach: General Product/System Design" in response
+    assert "Current stage: Motive, users, and problem" in response
+    assert "Next design action:" in response
+    assert "Design path:" not in response
     assert _count(postgres_database, interaction_turns) == 1
     assert _count(postgres_database, interaction_messages) == 2
     service.shutdown()
@@ -587,11 +591,12 @@ def test_async_turn_projects_real_delta_before_completion_and_persists_final_mes
     capability.release.set()
     completed = _wait_for_turn(service, submitted.id)
     assert completed.status is InteractionTurnStatus.COMPLETED
-    assert service.turn_response_delta(submitted.id, 0)[0] == delta
     projection = service.get_shared_understanding(interaction.id)
     final_response = projection.conversation_messages[-1].content
+    assert service.turn_response_delta(submitted.id, 0)[0] == final_response
     assert final_response.startswith(delta)
-    assert "Design path:" in final_response
+    assert "Next design action:" in final_response
+    assert "Design path:" not in final_response
     assert _count(postgres_database, product_works) == 0
     service.shutdown()
 
@@ -710,6 +715,15 @@ def test_async_http_turn_streams_persisted_status_and_response(
         assert "event: turn.status" in streamed.text
         assert "event: message.delta" in streamed.text
         assert "event: message.completed" in streamed.text
+        deltas = [
+            json.loads(line.removeprefix("data: "))["delta"]
+            for line in streamed.text.splitlines()
+            if line.startswith("data: ") and '"delta"' in line
+        ]
+        projection = client.get(
+            f"/api/interactions/{created['interaction_id']}"
+        ).json()
+        assert "".join(deltas) == projection["conversation_messages"][-1]["content"]
 
 
 @pytest.mark.real_codex
@@ -767,13 +781,15 @@ def test_real_provider_guides_mandatory_human_watt_scenario_in_one_turn(
         assert streamed_response
         assert delta_before_terminal is True
         final_response = projection.conversation_messages[-1].content
-        assert final_response.startswith(streamed_response)
+        assert final_response == streamed_response
         assert (
-            "设计方法：General Product/System Design" in final_response
+            "设计方式：General Product/System Design" in final_response
             or "Design approach: General Product/System Design" in final_response
         )
-        assert "设计路径：" in final_response or "Design path:" in final_response
+        assert "设计路径：" not in final_response and "Design path:" not in final_response
         assert "当前阶段：" in final_response or "Current stage:" in final_response
+        assert "下一个设计动作：" in final_response or "Next design action:" in final_response
+        assert streamed_response.count("?") + streamed_response.count("？") <= 1
         assert _count(postgres_database, product_works) == 0
         assert _count(postgres_database, work_reality_revisions) == 0
         for table in runtime_tables:
