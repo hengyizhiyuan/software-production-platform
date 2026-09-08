@@ -9,6 +9,7 @@ import subprocess
 from uuid import UUID, uuid4
 
 from spg.application.planning import ProductionPlanningService
+from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.refinement import RepositoryChangeProposalService
 from spg.application.runtime import RuntimeService
 from spg.application.steering_decision import PlanFrameAssembler
@@ -31,6 +32,7 @@ from spg.domain.refinement import (
 )
 from spg.domain.steering import (
     RealityReference,
+    RealityReferenceKind,
     SemanticContextMaterial,
     SemanticGovernanceDecision,
     SemanticStepCapability,
@@ -75,6 +77,7 @@ class SemanticStepApplicationService:
         self.change_proposals = RepositoryChangeProposalService(
             RepositoryAwareChangeProposalProvider()
         )
+        self.guided_design = GuidedDesignApplicationService(database)
 
     def assemble_input(self, work_id: UUID) -> SemanticStepInput:
         frame = self.frames.assemble(work_id)
@@ -94,6 +97,7 @@ class SemanticStepApplicationService:
             scope = product.scope_for_work(work_id)
             if work is None or scope is None:
                 raise ProductInvariantViolation("Semantic Work authority is incomplete")
+            work_revision = product.current_work_reality_revision(work.id)
             if (
                 work.condition is not WorkCondition.READY
                 or scope.condition is not EngineeringScopeCondition.ADMITTED
@@ -146,6 +150,12 @@ class SemanticStepApplicationService:
             work_id=work.id,
             desired_outcome=work.desired_outcome or work.raw_user_requirement,
             constraints=work.constraints,
+            work_context_facts=(
+                () if work_revision is None else work_revision.context_facts
+            ),
+            work_requests=(
+                () if work_revision is None else work_revision.requests
+            ),
             steering_plan_revision_id=frame.reconstruction.active_revision.revision.id,
             step=step,
             basis_fingerprint=frame.basis.fingerprint,
@@ -163,14 +173,34 @@ class SemanticStepApplicationService:
             governance_decisions=governance,
             repository_tree_paths=paths,
             context_materials=materials,
+            design_context=self.guided_design.semantic_context(work.id, step.id),
         )
 
     def execute(self, work_id: UUID) -> SemanticStepResultRecord:
         semantic_input = self.assemble_input(work_id)
         existing = self.result_for_step(semantic_input.step.id)
+        guided = self.guided_design.get_optional(work_id)
+        guided_issue = (
+            None
+            if guided is None
+            else next(
+                (
+                    issue
+                    for issue in guided.issues
+                    if issue.steering_step_id == semantic_input.step.id
+                ),
+                None,
+            )
+        )
         if (
             existing is not None
-            and existing.basis_fingerprint == semantic_input.basis_fingerprint
+            and (
+                existing.basis_fingerprint == semantic_input.basis_fingerprint
+                or (
+                    guided_issue is not None
+                    and self._guided_result_still_current(existing, semantic_input)
+                )
+            )
         ):
             return existing
         if self.capability is None:
@@ -179,6 +209,27 @@ class SemanticStepApplicationService:
             )
         candidate = self.capability.execute(semantic_input)
         return self.admit(semantic_input, candidate)
+
+    @staticmethod
+    def _guided_result_still_current(
+        result: SemanticStepResultRecord,
+        semantic_input: SemanticStepInput,
+    ) -> bool:
+        durable_basis_kinds = {
+            RealityReferenceKind.WORK_REALITY_REVISION,
+            RealityReferenceKind.TRUSTED_BASELINE,
+        }
+        result_basis = {
+            reference
+            for reference in result.evidence_refs
+            if reference.kind in durable_basis_kinds
+        }
+        current_basis = {
+            reference
+            for reference in semantic_input.reality_refs
+            if reference.kind in durable_basis_kinds
+        }
+        return current_basis == result_basis
 
     def admit(
         self,
@@ -212,6 +263,22 @@ class SemanticStepApplicationService:
             raise SteeringInvariantViolation(
                 "Semantic result references Reality outside its governed input"
             )
+        if fresh.design_context is not None:
+            production_transition_issue = bool(
+                fresh.design_context.get("production_transition_issue")
+            )
+            if candidate.proposed_production is not None and not production_transition_issue:
+                raise SteeringInvariantViolation(
+                    "An intermediate guided design issue cannot form production"
+                )
+            if (
+                candidate.completion_claimed
+                and production_transition_issue
+                and candidate.proposed_production is None
+            ):
+                raise SteeringInvariantViolation(
+                    "Implementation-readiness design requires a reviewable production proposal"
+                )
         new_constraints = set(candidate.derived_constraints) - set(fresh.constraints)
         if new_constraints and candidate.authority_assessment is (
             SteeringAuthorityAssessment.WITHIN_AUTHORITY

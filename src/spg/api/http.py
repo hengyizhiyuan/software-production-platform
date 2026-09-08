@@ -20,6 +20,7 @@ from spg.api.dto import (
     GoalCreateRequest,
     GoalResponse,
     GoalSummaryResponse,
+    GuidedDesignResponse,
     HealthResponse,
     HumanDecisionRequest,
     InteractionCreateRequest,
@@ -38,6 +39,7 @@ from spg.api.dto import (
 from spg.application.bootstrap import Application, bootstrap
 from spg.application.orchestration import ProductionOrchestrator
 from spg.application.interaction import WorkInteractionService
+from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.steering_bootstrap import SteeringBootstrapService
@@ -93,6 +95,7 @@ def create_http_application(
     steering_bootstrap: SteeringBootstrapService | None = None,
     runtime_activation: RuntimeActivationService | None = None,
     interaction_service: WorkInteractionService | None = None,
+    guided_design_service: GuidedDesignApplicationService | None = None,
 ) -> FastAPI:
     """Compose one ASGI application over the existing application bootstrap path."""
 
@@ -123,6 +126,11 @@ def create_http_application(
         selected_steering_bootstrap,
         selected_steering_driver,
         selected_orchestrator,
+    )
+    selected_guided_design = guided_design_service or (
+        container.guided_design(selected_database)
+        if hasattr(container, "guided_design")
+        else GuidedDesignApplicationService(selected_database)
     )
     selected_interaction = interaction_service
     if selected_interaction is None and hasattr(container, "interaction"):
@@ -188,18 +196,36 @@ def create_http_application(
                     )
                 })
         if not projection.steering_enabled:
-            return response
+            guided = selected_guided_design.get_optional(projection.work_id)
+            return response.model_copy(
+                update={
+                    "guided_design": (
+                        None
+                        if guided is None
+                        else GuidedDesignResponse.from_projection(guided)
+                    )
+                }
+            )
         try:
             steering = selected_steering_driver.project(projection.work_id)
         except SteeringRecordNotFound:
-            return response
+            guided = selected_guided_design.get_optional(projection.work_id)
+            return response.model_copy(
+                update={
+                    "guided_design": (
+                        None
+                        if guided is None
+                        else GuidedDesignResponse.from_projection(guided)
+                    )
+                }
+            )
         state = steering.automatic_progression_state.value
         stop_reason = (
             None
             if steering.last_stop_reason is None
             else steering.last_stop_reason.value
         )
-        updates: dict[str, str | None] = {
+        updates: dict[str, object] = {
             "automatic_progression_state": state,
             "last_stop_reason": stop_reason,
         }
@@ -213,6 +239,12 @@ def create_http_application(
                     ),
                 }
             )
+        guided = selected_guided_design.get_optional(projection.work_id)
+        updates["guided_design"] = (
+            None
+            if guided is None
+            else GuidedDesignResponse.from_projection(guided)
+        )
         return response.model_copy(update=updates)
 
     @api.exception_handler(ProductRecordNotFound)
@@ -477,6 +509,15 @@ def create_http_application(
     def get_steering_plan(work_id: UUID) -> SteeringPlanResponse:
         return SteeringPlanResponse.from_projection(
             selected_steering_driver.project(work_id)
+        )
+
+    @api.get(
+        "/api/works/{work_id}/guided-design",
+        response_model=GuidedDesignResponse,
+    )
+    def get_guided_design(work_id: UUID) -> GuidedDesignResponse:
+        return GuidedDesignResponse.from_projection(
+            selected_guided_design.get(work_id)
         )
 
     @api.post("/api/works/{work_id}/refine", response_model=WorkResponse)

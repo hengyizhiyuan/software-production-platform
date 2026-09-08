@@ -761,6 +761,50 @@ textarea {
   box-shadow: var(--shadow);
 }
 
+.guided-design-panel {
+  margin-block: 1rem;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+}
+
+.design-agenda-details {
+  margin-top: 1rem;
+}
+
+.design-agenda {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.8rem 0 0;
+  padding-left: 1.35rem;
+}
+
+.design-issue {
+  padding: 0.7rem 0.8rem;
+  border-left: 3px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.design-issue p {
+  margin: 0.3rem 0 0;
+}
+
+.design-issue-state {
+  margin-left: 0.55rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.design-issue-satisfied {
+  border-left-color: var(--green);
+}
+
+.design-issue-reopened {
+  border-left-color: var(--amber);
+}
+
 .alignment-heading {
   display: flex;
   align-items: flex-start;

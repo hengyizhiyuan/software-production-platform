@@ -94,6 +94,7 @@ Architecture Baseline remains **v0.1**. [Runtime Architecture Final Closure and 
 | Long-lived Motive Dogfood #10 | PASS — HUMAN-OPERATED END-TO-END ACCEPTANCE |
 | Governed Production + Plan Steering Core | CLOSED / PASS — HISTORICAL MVP CORE CLOSURE SCOPE |
 | WIC-1 Work Interaction Architecture | DEFINED / ADMITTED — SLICES 1–4 IMPLEMENTED / PASS; CORE CLOSED / PASS |
+| Guided Design Core | IMPLEMENTED / FOCUSED VALIDATION PASS — HUMAN PRODUCT ACCEPTANCE PENDING |
 | Watt Product MVP | NOT CLOSED — HUMAN WIC DOGFOOD AND CLOSURE REASSESSMENT REMAIN |
 
 S6-C2-HR1R, S6-C2-HR1, and S6-C2-DB1 remain CLOSED / PASS historical prerequisites. Authorization #4 subsequently created the first governed dogfood Attempt and exposed a Windows parent/child encoding mismatch before Provider binding. R1 persisted the admitted `UNKNOWN / REOBSERVE` Recovery Assessment with an active barrier. R2 replaces locale-dependent text transport with an explicit UTF-8/strict bytes wire for request, response, and diagnostic streams. Its 15 evidence obligations comprise 14 executable UTF8 pytest functions plus one external production Runtime immutability assertion. Synthetic R2 tests pass 14/14, affected B2-A/B2-B1 pass 30/30, and HOST tests pass 18/18. The serial full regression collected 462 tests, selected and passed 460, failed 0, skipped 0, and deselected two real Provider tests in 5440.85 seconds; the production Runtime snapshot remained identical. Provider Threads and Turns remain zero; the target artifact remains absent.

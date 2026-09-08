@@ -26,6 +26,7 @@ from spg.domain.steering import (
 )
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 
 
@@ -92,6 +93,27 @@ class PlanFrameAssembler:
                 if result.steering_plan_revision_id
                 == reconstruction.active_revision.revision.id
             )
+
+            guided = GuidedDesignStore(unit_of_work.session)
+            design_process = guided.process_for_work(work_id)
+            if design_process is not None:
+                design_agenda = guided.active_revision(design_process.id)
+                if design_agenda is None:
+                    raise SteeringInvariantViolation(
+                        "Guided design process has no active agenda Reality"
+                    )
+                references.extend(
+                    (
+                        RealityReference(
+                            kind=RealityReferenceKind.DESIGN_PROCESS,
+                            identity=design_process.id,
+                        ),
+                        RealityReference(
+                            kind=RealityReferenceKind.DESIGN_AGENDA_REVISION,
+                            identity=design_agenda.id,
+                        ),
+                    )
+                )
 
             governance_refs = tuple(
                 RealityReference(

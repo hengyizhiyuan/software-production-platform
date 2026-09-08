@@ -698,7 +698,12 @@ def test_steer_dec_10_through_14_human_attention_is_typed_and_projected(
 
     attention = works.list_attention(work_id=work.work_id)
     assert len(attention) == 1
-    assert attention[0].kind is AttentionKind.STEERING_DECISION_REQUIRED
+    assert attention[0].kind is (
+        AttentionKind.PRODUCTION_PROPOSAL_REVIEW
+        if attention_reason
+        is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+        else AttentionKind.STEERING_DECISION_REQUIRED
+    )
     assert attention[0].steering_reason is attention_reason
     assert attention[0].decision == candidate.objective
     assert attention[0].recommendation == candidate.recommendation

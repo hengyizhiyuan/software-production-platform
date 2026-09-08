@@ -35,6 +35,10 @@ from spg.infrastructure.persistence.product_schema import (
     product_works,
     work_reality_revisions,
 )
+from spg.infrastructure.persistence.guided_design_schema import (
+    guided_design_agenda_revisions,
+    guided_design_processes,
+)
 from spg.infrastructure.persistence.runtime_schema import (
     baseline_candidates,
     completion_evaluations,
@@ -71,6 +75,8 @@ _REALITY_TABLES = {
     RealityReferenceKind.RUNTIME_COMMIT: runtime_commits,
     RealityReferenceKind.RECOVERY_ASSESSMENT: recovery_assessments,
     RealityReferenceKind.SEMANTIC_RESULT: semantic_step_results,
+    RealityReferenceKind.DESIGN_PROCESS: guided_design_processes,
+    RealityReferenceKind.DESIGN_AGENDA_REVISION: guided_design_agenda_revisions,
 }
 
 
@@ -335,6 +341,7 @@ class SteeringStore:
             position=row["position"],
             state=SteeringStepState(row["state"]),
             elaborates_step_id=row["elaborates_step_id"],
+            design_issue_key=row["design_issue_key"],
             created_at=row["created_at"],
         )
 

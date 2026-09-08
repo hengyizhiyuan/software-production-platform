@@ -13,13 +13,18 @@ Priority
     FUTURE HIGH PRIORITY PRODUCT IMPROVEMENT
 
 Implementation
-    NOT IMPLEMENTED
+    PARTIALLY IMPLEMENTED FOR GUIDED DESIGN -> PRODUCTION
+
+Human Product Acceptance
+    PENDING
 ~~~
 
 This finding was identified during Control Room Slice 4 Human Product
-Acceptance. It records a future product-experience improvement direction only.
-It does not authorize a change to WIC, Work Admission, Human Authority, or the
-Control Room implementation.
+Acceptance. The later [Guided Design Core](../architecture/guided-design-core.md)
+implements one exact part: a governed design-to-production proposal is visible
+and must receive explicit Human review before PLAN-1B/SPG can create Run/PWU.
+The broader pre-Work formation experience remains open and this record does not
+authorize changes outside that admitted flow.
 
 ## 2. Problem
 
@@ -121,21 +126,25 @@ Admission Authority.
 ## 6. Current status
 
 ~~~text
-Future High Priority Product Improvement
+Guided Design -> Production Proposal Review
+    IMPLEMENTED / FOCUSED VALIDATION PASS
 
-Not implemented.
+Broader Work Formation Review
+    OPEN / HIGH PRIORITY PRODUCT IMPROVEMENT
 
-No current WIC or Control Room architecture change authorized.
+Human Product Acceptance
+    PENDING
 ~~~
 
-This finding must not be read as evidence that Work Formation Review already
-exists. Control Room Slice 4 acceptance closed independently with this finding
-classified as non-blocking. Any implementation requires a separate governed
-contract and authorization.
+The Guided Design implementation must not be read as a claim that the full
+pre-Work formation preview exists. Control Room Slice 4 acceptance closed
+independently with the broader finding classified as non-blocking. Further
+product expansion requires a separate governed contract and authorization.
 
 ## 7. Related source-of-truth context
 
 - [Work Interaction & Closed-loop Refinement](../architecture/work-interaction-closed-loop-refinement.md)
+- [Guided Design Core](../architecture/guided-design-core.md)
 - [Control Room State Experience Design](software-production-control-room-state-experience.md)
 - [Control Room Slice 4 Human Product Acceptance Contract](../architecture/software-production-control-room-slice-4-implementation-contract.md)
 - [Control Room Slice 4 Human Product Acceptance Evidence](../evidence/control-room-slice-4-human-product-acceptance.md)

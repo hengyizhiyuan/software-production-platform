@@ -6,6 +6,11 @@ from typing import Protocol
 from uuid import UUID
 
 from spg.application.runtime import RuntimeService
+from spg.application.guided_design import (
+    GuidedDesignApplicationService,
+    general_product_system_design_issues,
+    guided_design_step_specs,
+)
 from spg.application.steering import SteeringApplicationService
 from spg.domain.planning import OnePwuFitClassification
 from spg.domain.product import ProductInvariantViolation, WorkCondition, WorkMode, WorkRecord
@@ -150,6 +155,7 @@ class SteeringBootstrapService:
         self.capability = capability or DeterministicInitialSteeringPlanFormation()
         self.steering = SteeringApplicationService(database)
         self.runtime = RuntimeService(database)
+        self.guided_design = GuidedDesignApplicationService(database)
 
     def bootstrap(self, work_id: UUID) -> SteeringPlanReconstruction:
         with self.database.unit_of_work() as unit_of_work:
@@ -168,8 +174,14 @@ class SteeringBootstrapService:
                 )
             existing = steering.plan_for_work(work_id)
             if existing is not None:
-                return self.steering.reconstruct(work_id)
-            steps = self.capability.form(work)
+                reconstruction = self.steering.reconstruct(work_id)
+                self.guided_design.bootstrap(work, reconstruction)
+                return reconstruction
+            steps = (
+                guided_design_step_specs(general_product_system_design_issues())
+                if self.guided_design.eligible(work)
+                else self.capability.form(work)
+            )
 
         baseline = self.runtime.current_baseline()
         work_reference = RealityReference(
@@ -184,7 +196,7 @@ class SteeringBootstrapService:
                 else work.id
             ),
         )
-        return self.steering.create_plan(
+        reconstruction = self.steering.create_plan(
             CreateSteeringPlanRequest(
                 work_id=work_id,
                 rationale=(
@@ -201,3 +213,5 @@ class SteeringBootstrapService:
                 steps=steps,
             )
         )
+        self.guided_design.bootstrap(work, reconstruction)
+        return reconstruction

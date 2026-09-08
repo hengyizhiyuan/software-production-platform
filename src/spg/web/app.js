@@ -117,6 +117,16 @@
     alignmentConfirmedConstraints: document.getElementById("alignment-confirmed-constraints"),
     alignmentRelevantFacts: document.getElementById("alignment-relevant-facts"),
     alignmentUnresolvedQuestions: document.getElementById("alignment-unresolved-questions"),
+    guidedDesignPanel: document.getElementById("guided-design-panel"),
+    designReadiness: document.getElementById("design-readiness"),
+    designObjective: document.getElementById("design-objective"),
+    designProcess: document.getElementById("design-process"),
+    designCurrentFocus: document.getElementById("design-current-focus"),
+    designFocusRationale: document.getElementById("design-focus-rationale"),
+    designProgress: document.getElementById("design-progress"),
+    designBlockers: document.getElementById("design-blockers"),
+    designUpcoming: document.getElementById("design-upcoming"),
+    designAgenda: document.getElementById("design-agenda"),
     directionState: document.getElementById("direction-state"),
     directionRevision: document.getElementById("direction-revision"),
     directionObjective: document.getElementById("direction-objective"),
@@ -723,6 +733,43 @@
     elements.trustBasis.textContent = trust.basis;
   }
 
+  function renderGuidedDesign(work) {
+    const design = work && work.guided_design;
+    elements.guidedDesignPanel.hidden = !design;
+    if (!design) {
+      return;
+    }
+    elements.designReadiness.textContent = `Design ${design.readiness}`;
+    elements.designReadiness.className = design.readiness === "READY"
+      ? "status-badge status-ready"
+      : "status-badge status-attention";
+    elements.designObjective.textContent = design.process_objective;
+    elements.designProcess.textContent = `${design.schema_identity} v${design.schema_version} · agenda revision ${design.agenda_revision_number}`;
+    elements.designCurrentFocus.textContent = design.current_focus
+      ? `${design.current_focus.title}: ${design.current_focus.objective}`
+      : "No design issue is currently selected.";
+    elements.designFocusRationale.textContent = design.focus_rationale
+      || "Plan Steering has not recorded a focus rationale yet.";
+    elements.designProgress.textContent = `${design.resolved_count} of ${design.total_applicable_count} agenda issues resolved or intentionally skipped`;
+    elements.designBlockers.textContent = joined(
+      design.readiness_blockers,
+      "No unresolved critical design blockers.",
+    );
+    elements.designUpcoming.textContent = design.upcoming_transition
+      || "No next governed transition is known.";
+    elements.designAgenda.replaceChildren();
+    design.issues.forEach((issue) => {
+      const item = createElement("li", `design-issue design-issue-${String(issue.state).toLowerCase()}`);
+      const heading = createElement("strong", "", issue.title);
+      const stateLabel = createElement("span", "design-issue-state", issue.state);
+      const objective = createElement("p", "", issue.objective);
+      const reason = issue.skip_rationale || issue.reopen_rationale || issue.why_it_matters;
+      const rationale = createElement("p", "empty-copy", reason);
+      item.append(heading, stateLabel, objective, rationale);
+      elements.designAgenda.append(item);
+    });
+  }
+
   function renderResult() {
     const result = state.result;
     if (!result) {
@@ -784,6 +831,7 @@
     elements.attentionMarker.hidden = !work.human_attention_required;
     renderControlRoomFoundation(work);
     renderUnderstandingAlignment(work);
+    renderGuidedDesign(work);
     renderProductionIntelligence(work);
     elements.workRequest.textContent = work.raw_user_requirement || "No request text available.";
     elements.desiredOutcome.textContent = work.desired_outcome || "Not defined yet";

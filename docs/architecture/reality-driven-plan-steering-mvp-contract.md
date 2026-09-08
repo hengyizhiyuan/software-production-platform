@@ -704,6 +704,14 @@ change is admitted by 1L. `SEMANTIC_EXECUTION_OBSERVABILITY_GAP` remains
 #10 evidence closes the MVP Core while preserving this post-Core Product
 Experience deferral. See [Watt MVP Core Closure](../evidence/mvp-core-closure.md).
 
+The implemented [Guided Design Core](guided-design-core.md) supplies a
+provider-neutral design agenda and issue semantics. Plan Steering continues to
+own the active revision, current Step and `WHAT NEXT`; `design_issue_key` only
+binds a DESIGN Step to the agenda issue it is executing. Admitted semantic
+results and agenda revisions enter PlanFrame as governed Reality. Guided Design
+readiness may trigger a typed production-proposal review, but it cannot admit a
+Run/PWU or bypass PLAN-1B/SPG.
+
 ```text
 Reality-driven Plan Steering
     MVP BEHAVIORAL CONTRACT = DEFINED / ADMITTED

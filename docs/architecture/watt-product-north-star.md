@@ -169,7 +169,8 @@ reassess what happens next.
 
 Source basis: [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md),
 [Reality-driven Plan Steering Principles](reality-driven-plan-steering-principles.md),
-and [Work Interaction & Closed-loop Refinement Contract](work-interaction-closed-loop-refinement.md).
+[Work Interaction & Closed-loop Refinement Contract](work-interaction-closed-loop-refinement.md),
+and the implemented [Guided Design Core](guided-design-core.md).
 
 ## 5. Closed-loop software production
 
@@ -180,7 +181,7 @@ Watt's core abstraction is a continuing feedback-driven relationship, not
 Human interaction
     -> interpretation / shared understanding / governed refinement
     -> governed Work Reality
-    -> design and Reality-driven Plan Steering
+    -> reconstructable Guided Design agenda and Reality-driven Plan Steering
     -> exact production admission and bounded PWU execution
     -> independent observation and Verification
     -> Human Authority where required

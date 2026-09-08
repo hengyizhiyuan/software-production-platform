@@ -12,6 +12,8 @@ from spg.infrastructure.persistence.database import (
 )
 from spg.infrastructure.persistence.metadata import metadata
 from spg.infrastructure.persistence.interaction_store import InteractionStore
+from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
+from spg.infrastructure.persistence.guided_design_schema import guided_design_tables
 from spg.infrastructure.persistence.product_schema import product_tables
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_schema import runtime_tables
@@ -26,6 +28,7 @@ __all__ = [
     "DatabaseHealth",
     "OptimisticConcurrencyConflict",
     "InteractionStore",
+    "GuidedDesignStore",
     "ProductStore",
     "RuntimeStore",
     "SteeringStore",
@@ -35,5 +38,6 @@ __all__ = [
     "product_tables",
     "runtime_tables",
     "steering_tables",
+    "guided_design_tables",
     "update_versioned_row",
 ]

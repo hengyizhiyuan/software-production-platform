@@ -99,6 +99,8 @@ class RealityReferenceKind(StrEnum):
     RUNTIME_COMMIT = "RUNTIME_COMMIT"
     RECOVERY_ASSESSMENT = "RECOVERY_ASSESSMENT"
     SEMANTIC_RESULT = "SEMANTIC_RESULT"
+    DESIGN_PROCESS = "DESIGN_PROCESS"
+    DESIGN_AGENDA_REVISION = "DESIGN_AGENDA_REVISION"
 
 
 class SteeringAttentionReason(StrEnum):
@@ -109,6 +111,7 @@ class SteeringAttentionReason(StrEnum):
     SCOPE_OR_AUTHORITY_EXPANSION = "SCOPE_OR_AUTHORITY_EXPANSION"
     MATERIAL_RISK_OR_COST_DECISION = "MATERIAL_RISK_OR_COST_DECISION"
     PRODUCT_ACCEPTANCE_REQUIRED = "PRODUCT_ACCEPTANCE_REQUIRED"
+    PRODUCTION_PROPOSAL_REVIEW_REQUIRED = "PRODUCTION_PROPOSAL_REVIEW_REQUIRED"
 
 
 class SteeringAuthorityAssessment(StrEnum):
@@ -259,6 +262,8 @@ class SemanticStepInput(BaseModel):
     work_id: UUID
     desired_outcome: str = Field(min_length=1)
     constraints: tuple[str, ...]
+    work_context_facts: tuple[str, ...] = ()
+    work_requests: tuple[str, ...] = ()
     steering_plan_revision_id: UUID
     step: "SteeringStepRecord"
     basis_fingerprint: str = Field(min_length=64, max_length=64)
@@ -276,6 +281,7 @@ class SemanticStepInput(BaseModel):
     governance_decisions: tuple[SemanticGovernanceDecision, ...]
     repository_tree_paths: tuple[str, ...]
     context_materials: tuple[SemanticContextMaterial, ...]
+    design_context: dict[str, object] | None = None
 
     @model_validator(mode="after")
     def require_semantic_step(self) -> Self:
@@ -396,6 +402,10 @@ class SteeringStepSpec(BaseModel):
     objective: str = Field(min_length=1)
     completion_condition: str = Field(min_length=1)
     state: SteeringStepState = SteeringStepState.KNOWN
+    design_issue_key: str | None = Field(
+        default=None,
+        pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
+    )
 
 
 class SteeringPlanRecord(BaseModel):
@@ -431,6 +441,7 @@ class SteeringStepRecord(BaseModel):
     position: int = Field(ge=1)
     state: SteeringStepState
     elaborates_step_id: UUID | None
+    design_issue_key: str | None = None
     created_at: datetime
 
 

@@ -66,6 +66,13 @@ Work satisfaction, same-Motive continuation, and Human-governed transition to
 fresh Work formation. The WIC Core is **CLOSED / PASS**, while Watt Product MVP
 remains **NOT CLOSED** pending Human WIC Dogfood and closure reassessment.
 
+[Guided Design Core](guided-design-core.md) now implements the missing process
+bridge for vague long-lived product/system Work: a reconstructable agenda,
+Steering-owned current focus, governed multi-step DESIGN results, explicit
+readiness and Human review of the exact proposal before PLAN-1B/SPG. Its
+focused deterministic, PostgreSQL/restart, UI and real Provider evidence passes;
+Human Product Acceptance remains pending.
+
 The MVP uses **Single Intelligence Mode**:
 
 ```text

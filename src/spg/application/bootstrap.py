@@ -5,6 +5,7 @@ from pathlib import Path
 
 from spg.config import Settings
 from spg.application.runtime import RuntimeService
+from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.preparation import PreparationService
 from spg.application.materialization import ExecutionInputMaterializationService
 from spg.application.execution import ExecutionService
@@ -263,6 +264,14 @@ class Application:
         """Compose persisted Steering truth without a reasoning provider or driver."""
 
         return SteeringApplicationService(database or self.persistence())
+
+    def guided_design(
+        self,
+        database: Database | None = None,
+    ) -> GuidedDesignApplicationService:
+        """Compose reconstructable guided design process truth and projection."""
+
+        return GuidedDesignApplicationService(database or self.persistence())
 
     def steering_plan_frames(
         self,

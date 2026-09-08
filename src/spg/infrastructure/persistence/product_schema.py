@@ -20,6 +20,7 @@ from sqlalchemy.sql import func
 
 from spg.infrastructure.persistence.metadata import metadata
 from spg.infrastructure.persistence.steering_schema import steering_tables
+from spg.infrastructure.persistence.guided_design_schema import guided_design_tables
 
 
 product_goals = Table(
@@ -593,4 +594,5 @@ product_tables = (
     interaction_work_transitions,
     work_runtime_bindings,
     *steering_tables,
+    *guided_design_tables,
 )

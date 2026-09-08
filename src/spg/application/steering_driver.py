@@ -14,6 +14,7 @@ from spg.application.orchestration import (
     OrchestrationStopReason,
     ProductionOrchestrator,
 )
+from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.steering import SteeringApplicationService
 from spg.application.semantic_steps import SemanticStepApplicationService
 from spg.application.steering_decision import (
@@ -28,6 +29,7 @@ from spg.domain.product import (
     RuntimeFactSummary,
     WorkStatus,
 )
+from spg.domain.guided_design import DesignReadinessState
 from spg.domain.steering import (
     NextStepCandidate,
     PlanFrame,
@@ -50,11 +52,12 @@ from spg.domain.steering import (
 )
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 
 
 LOGGER = logging.getLogger(__name__)
-DEFAULT_MAX_STEERING_TRANSITIONS = 8
+DEFAULT_MAX_STEERING_TRANSITIONS = 32
 
 
 class PlanSteeringDriver:
@@ -87,6 +90,7 @@ class PlanSteeringDriver:
             database,
             semantic_capability,
         )
+        self.guided_design = GuidedDesignApplicationService(database)
         self._condition = Condition(RLock())
         self._active_work_ids: set[UUID] = set()
         self._pending_work_ids: set[UUID] = set()
@@ -319,9 +323,16 @@ class PlanSteeringDriver:
         with self.database.unit_of_work() as unit_of_work:
             product = ProductStore(unit_of_work.session)
             runtime = RuntimeStore(unit_of_work.session)
+            guided = GuidedDesignStore(unit_of_work.session)
             work = product.work(work_id)
             bindings = product.runtime_bindings(work_id)
             pointer = runtime.current_pointer()
+            design_process = guided.process_for_work(work_id)
+            design_agenda = (
+                None
+                if design_process is None
+                else guided.active_revision(design_process.id)
+            )
             payload = {
                 "work": None if work is None else work.model_dump(mode="json"),
                 "steering": reconstruction.model_dump(mode="json"),
@@ -337,6 +348,18 @@ class PlanSteeringDriver:
                 "baseline_pointer": (
                     None if pointer is None else pointer.model_dump(mode="json")
                 ),
+                "guided_design": {
+                    "process": (
+                        None
+                        if design_process is None
+                        else design_process.model_dump(mode="json")
+                    ),
+                    "agenda": (
+                        None
+                        if design_agenda is None
+                        else design_agenda.model_dump(mode="json")
+                    ),
+                },
             }
         canonical = json.dumps(
             payload,
@@ -476,30 +499,50 @@ class PlanSteeringDriver:
     ) -> SteeringIterationResult:
         current = frame.reconstruction.current_step
         assert current is not None
-        result = self.semantic.result_for_step(current.id)
-        if result is None:
-            if self.semantic.capability is None:
-                return self._result(
-                    frame.work_id,
-                    before,
-                    action=None,
-                    stop=SteeringDriverStopReason.NO_PROGRESS,
-                )
+        stored_result = self.semantic.result_for_step(current.id)
+        guided = self.guided_design.get_optional(frame.work_id)
+        if self.semantic.capability is not None and guided is not None:
             result = self.semantic.execute(frame.work_id)
-            if result.human_attention_recommendation is not None:
-                self._admit_semantic_attention(frame.work_id, result)
+            if stored_result is None or stored_result.id != result.id:
+                if result.human_attention_recommendation is not None:
+                    self._admit_semantic_attention(frame.work_id, result)
+                    return self._result(
+                        frame.work_id,
+                        before,
+                        action=SteeringActionType.HUMAN_ATTENTION,
+                        stop=SteeringDriverStopReason.HUMAN_ATTENTION,
+                    )
                 return self._result(
                     frame.work_id,
                     before,
-                    action=SteeringActionType.HUMAN_ATTENTION,
-                    stop=SteeringDriverStopReason.HUMAN_ATTENTION,
+                    action=SteeringActionType.SEMANTIC_RESULT_ADMISSION,
+                    stop=None,
+                )
+        elif stored_result is None:
+            if self.semantic.capability is not None:
+                result = self.semantic.execute(frame.work_id)
+                if result.human_attention_recommendation is not None:
+                    self._admit_semantic_attention(frame.work_id, result)
+                    return self._result(
+                        frame.work_id,
+                        before,
+                        action=SteeringActionType.HUMAN_ATTENTION,
+                        stop=SteeringDriverStopReason.HUMAN_ATTENTION,
+                    )
+                return self._result(
+                    frame.work_id,
+                    before,
+                    action=SteeringActionType.SEMANTIC_RESULT_ADMISSION,
+                    stop=None,
                 )
             return self._result(
                 frame.work_id,
                 before,
-                action=SteeringActionType.SEMANTIC_RESULT_ADMISSION,
-                stop=None,
+                action=None,
+                stop=SteeringDriverStopReason.NO_PROGRESS,
             )
+        else:
+            result = stored_result
         if result.human_attention_recommendation is not None:
             latest = frame.reconstruction.latest_decision
             if not (
@@ -522,8 +565,69 @@ class PlanSteeringDriver:
                 action=None,
                 stop=SteeringDriverStopReason.NO_PROGRESS,
             )
+        design = self.guided_design.record_semantic_result(frame.work_id, result)
         fresh = self.frames.assemble(frame.work_id)
+        if (
+            design is not None
+            and design.readiness.state is DesignReadinessState.READY
+            and result.proposed_production is not None
+            and not self._production_proposal_reviewed(frame.work_id, result.id)
+        ):
+            existing = fresh.reconstruction.latest_decision
+            if not (
+                existing is not None
+                and existing.current_step_id == current.id
+                and existing.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
+                and existing.attention_reason
+                is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+                and existing.basis_fingerprint == fresh.basis.fingerprint
+            ):
+                refs = tuple(item.reference for item in fresh.basis.resolved_reality)
+                self.decisions.admit(
+                    frame.work_id,
+                    NextStepCandidate(
+                        type=SteeringStepType.HUMAN_DECISION,
+                        objective="Review the governed production proposal",
+                        reason=(
+                            "Guided design is READY and has formed an exact proposal; "
+                            "Human must understand it before production admission"
+                        ),
+                        reality_refs=refs,
+                        human_required=True,
+                        completion_condition=(
+                            "Human explicitly admits or requests refinement of the exact proposal"
+                        ),
+                        proposed_outcome=SteeringOutcome.HUMAN_ATTENTION,
+                        basis_fingerprint=fresh.basis.fingerprint,
+                        authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+                        attention_reason=(
+                            SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+                        ),
+                        recommendation="Review objective, scope, constraints, impact, and verification before admitting production",
+                        expected_impact=(
+                            "Approval permits existing Plan Steering and SPG admission; "
+                            "no approval means no Run or PWU"
+                        ),
+                    ),
+                )
+            return self._result(
+                frame.work_id,
+                before,
+                action=SteeringActionType.HUMAN_ATTENTION,
+                stop=SteeringDriverStopReason.HUMAN_ATTENTION,
+            )
         return self._decision_iteration(fresh, before)
+
+    def _production_proposal_reviewed(self, work_id: UUID, result_id: UUID) -> bool:
+        with self.database.unit_of_work() as unit_of_work:
+            records = RuntimeStore(unit_of_work.session).governance_for_subject(
+                str(work_id)
+            )
+        return any(
+            record.decision_type == "APPROVE_GUIDED_PRODUCTION_PROPOSAL"
+            and record.scope.get("semantic_result_id") == str(result_id)
+            for record in records
+        )
 
     def _admit_semantic_attention(
         self,
@@ -629,6 +733,16 @@ class PlanSteeringDriver:
             and existing.current_step_id == current.id
             and existing.basis_fingerprint == frame.basis.fingerprint
             and existing.reality_refs == expected_refs
+            and not (
+                existing.attention_reason
+                is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+                and (semantic_result := self.semantic.result_for_step(current.id))
+                is not None
+                and self._production_proposal_reviewed(
+                    frame.work_id,
+                    semantic_result.id,
+                )
+            )
         ):
             return existing
         _fresh_frame, candidate = self.decisions.evaluate(frame.work_id)

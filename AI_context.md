@@ -207,6 +207,7 @@ without encoding either restriction as a permanent architecture limit.
 | WIC Slice 3 — Active Work Evolution, Focus Preservation, Feedback & Plan Reassessment | IMPLEMENTED / PASS — bounded focus/impact assessment, Human-governed append-only revision N+1, exact Scope/Plan/production revision lineage, feedback references, active-cycle immutability, and existing Steering reassessment bridge |
 | WIC Slice 4 — Work Satisfaction, Continuation & New Work Transition | IMPLEMENTED / PASS — exact satisfaction reconstruction, same-Motive continuation through existing revision/Steering, Human-governed new-Work formation transition, restart reconstruction, idempotency, and sequential Work focus provenance |
 | Work Interaction & Closed-loop Refinement Core | CLOSED / PASS — Slices 1–4 implemented with focused deterministic evidence; final Human WIC Dogfood remains separately governed |
+| Guided Design Core | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable agenda/current focus/readiness, governed multi-step DESIGN, production-proposal review, restart and real Provider proof; Human Product Acceptance PENDING |
 | Watt Product MVP | NOT CLOSED |
 | DCP-1 — Duration & Capacity Semantic Foundation | CLOSED / PASS |
 | DCP-2 — Production Measurement v0 | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable measurement and planning-time TaskShapeSnapshot; no decision influence |
@@ -708,6 +709,27 @@ real long-lived loop and Human acceptance; Reality-driven Plan Steering MVP is
 **CLOSED / PASS**. See
 [Reality-driven Plan Steering MVP Behavioral Contract](docs/architecture/reality-driven-plan-steering-mvp-contract.md).
 
+### Guided Design Core
+
+[Guided Design Core](docs/architecture/guided-design-core.md) is
+**IMPLEMENTED / FOCUSED VALIDATION PASS**. It adds the missing provider-neutral
+design-process layer between WIC Work formation and Plan Steering execution:
+an append-only agenda, typed issue state, one Steering-owned current focus,
+governed semantic-result continuity, explicit readiness, and a Human-reviewed
+production proposal before PLAN-1B/SPG admission. WIC remains Interaction and
+Work-evolution owner; Plan Steering remains `WHAT NEXT`; DESIGN/REFINE performs
+the current semantic work; SPG remains production owner.
+
+PostgreSQL restart/reconstruction, affected trust-boundary regression, Control
+Room projection and an isolated real Codex multi-step proof pass. The proof
+starts from “我想做一个运营管理平台。”, uses governed clarification rather than
+Provider memory, and stops on a lawful Human Attention boundary with zero
+production facts. [Focused evidence](docs/evidence/guided-design-core-focused-validation.md)
+distinguishes engineering proof from Human Product Acceptance, which remains
+**PENDING**. `PRE_AUTHORIZATION_WORK_PREVIEW_REQUIRED` is implemented for this
+Guided Design transition but remains a broader product-experience finding until
+separately accepted.
+
 ### Interpretation Externalization / Multimodal Alignment
 
 Textual confirmation does not prove equivalence between the Human's mental
@@ -817,6 +839,8 @@ The current system-level architecture baseline is:
 - [Interpretation Externalization and Multimodal Alignment](docs/architecture/interpretation-externalization-and-multimodal-alignment.md)
 - [工律 / Watt Product North Star](docs/architecture/watt-product-north-star.md)
 - [Work Interaction & Closed-loop Refinement Architecture Contract](docs/architecture/work-interaction-closed-loop-refinement.md)
+- [Guided Design Core](docs/architecture/guided-design-core.md)
+- [Guided Design Core Focused Validation](docs/evidence/guided-design-core-focused-validation.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -850,6 +874,7 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Motive Is Product Intent; Work Is the Current Governed Representation
 - PWU, Not Work, Is the Bounded Production Unit
 - Reality-driven Plan Steering
+- Guided Design Structures Design Questions; Plan Steering Owns What Happens Next
 - Duration/Capacity Measurement Before Optimization
 - Operational Plans May Recalculate; Governed Production Truth Does Not Drift
 - Facts Constrain the Plan

@@ -15,7 +15,9 @@ from sqlalchemy import func, inspect, select, text
 
 from spg.api import create_http_application
 from spg.application.interaction import WorkInteractionService
+from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.orchestration import OrchestrationStopReason, ProductionOrchestrator
+from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.runtime import RuntimeService
 from spg.application.steering import SteeringApplicationService
 from spg.application.steering_decision import (
@@ -27,6 +29,7 @@ from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.steering_production import SteeringProductionService
 from spg.application.work import WorkApplicationService
 from spg.domain.change import ProductionTargetKind
+from spg.domain.guided_design import DesignIssueState, DesignReadinessState
 from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.interaction import (
     InteractionAssessmentCandidate,
@@ -71,12 +74,19 @@ from spg.domain.runtime_activation import RuntimeActivationProjection, RuntimeAc
 from spg.domain.steering import (
     AdmitSteeringDecisionRequest,
     CreateSteeringPlanRequest,
+    RealityReference,
     RealityReferenceKind,
     SteeringOutcome,
+    SteeringRecordNotFound,
     SteeringStepSpec,
     SteeringStepState,
     SteeringStepType,
     TransitionSteeringStepRequest,
+    SemanticProductionProposal,
+    SemanticResultKind,
+    SemanticStepInput,
+    SemanticStepResultCandidate,
+    SteeringAuthorityAssessment,
 )
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_schema import (
@@ -109,6 +119,11 @@ from spg.infrastructure.persistence.runtime_schema import (
 )
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_schema import steering_plans
+from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
+from spg.infrastructure.persistence.guided_design_schema import (
+    guided_design_agenda_revisions,
+    guided_design_processes,
+)
 from spg.providers.deterministic_executor import (
     DeterministicExecutionSpecification,
     DeterministicFileOperation,
@@ -116,6 +131,7 @@ from spg.providers.deterministic_executor import (
     DeterministicTestExecutor,
 )
 from spg.providers.deterministic_verifier import DeterministicVerificationProvider
+from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
 from spg.domain.verification import VerificationResultValue
 
 
@@ -152,6 +168,30 @@ class _ReadyCapability:
             current_requests=(basis.records[-1].content,),
             natural_response="The understanding is ready for Human Work admission.",
             provider_identity="test:wic-slice-2",
+        )
+
+
+class _GeneralProductDesignCapability:
+    def interpret(
+        self, basis: InteractionInterpretationInput
+    ) -> InteractionAssessmentCandidate:
+        motive = basis.records[0].content
+        clarified_context = tuple(
+            record.content for record in basis.records[1:]
+        )
+        return InteractionAssessmentCandidate(
+            interpreted_motive=motive,
+            desired_outcome=(
+                "形成一个边界清楚、可验证并可分阶段进入生产的运营管理平台设计。"
+            ),
+            candidate_context=(
+                "初始输入是高层产品 Motive，尚未形成生产合同。",
+                *clarified_context,
+            ),
+            candidate_constraints=("在设计成熟且 Human 审阅前不得进入生产。",),
+            current_requests=(motive,),
+            natural_response="已形成可由 Human 治理准入的初始共同理解。",
+            provider_identity="test:guided-design-wic-formation",
         )
 
 
@@ -239,6 +279,54 @@ class _InventedReferenceCapability(_ActiveCapability):
         )
 
 
+class _GuidedDesignSemanticCapability:
+    identity = "test:guided-design-semantic"
+
+    def __init__(self) -> None:
+        self.inputs: list[SemanticStepInput] = []
+
+    def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+        self.inputs.append(input)
+        assert input.design_context is not None
+        issue = input.design_context["current_issue"]
+        assert isinstance(issue, dict)
+        final = bool(input.design_context["production_transition_issue"])
+        proposal = (
+            SemanticProductionProposal(
+                target_kind=ProductionTargetKind.DOCUMENTATION_WORK,
+                objective="Record the reviewed bounded product/system design",
+                artifact_targets=(
+                    ProductionPlanArtifactTarget(
+                        path="AI_context.md",
+                        operation=PlannedArtifactOperation.UPDATE,
+                    ),
+                ),
+                verification_expectation="Verify the exact governed design artifact",
+            )
+            if final
+            else None
+        )
+        return SemanticStepResultCandidate(
+            work_id=input.work_id,
+            steering_plan_revision_id=input.steering_plan_revision_id,
+            step_id=input.step.id,
+            step_type=input.step.type,
+            basis_fingerprint=input.basis_fingerprint,
+            result_kind=SemanticResultKind.DESIGN_DIRECTION,
+            bounded_summary=(
+                f"Resolved guided design issue {issue['key']} from governed Reality."
+            ),
+            decisions=(f"Admit the bounded result for {issue['key']}.",),
+            derived_constraints=input.constraints,
+            evidence_refs=input.reality_refs,
+            unresolved_questions=(),
+            authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+            proposed_production=proposal,
+            reasoning_provider_identity=self.identity,
+            completion_claimed=True,
+        )
+
+
 class _RecordingDriver:
     def __init__(self) -> None:
         self.scheduled: list[UUID] = []
@@ -254,7 +342,7 @@ class _RecordingDriver:
         return ()
 
     def project(self, _work_id: UUID):
-        raise AssertionError("projection is not needed by this test")
+        raise SteeringRecordNotFound("test projection is intentionally absent")
 
     def shutdown(self) -> None:
         return None
@@ -266,6 +354,27 @@ class _NoopOrchestrator:
 
     def resume_safely_eligible_works(self) -> tuple[()]:
         return ()
+
+    def shutdown(self) -> None:
+        return None
+
+
+class _SchedulingOrchestrator:
+    def __init__(self) -> None:
+        self.scheduled: list[UUID] = []
+
+    def add_outcome_listener(self, _listener) -> None:
+        return None
+
+    def is_active(self, _work_id: UUID) -> bool:
+        return False
+
+    def schedule(self, work_id: UUID) -> bool:
+        self.scheduled.append(work_id)
+        return True
+
+    def last_outcome(self, _work_id: UUID):
+        return None
 
     def shutdown(self) -> None:
         return None
@@ -570,6 +679,14 @@ def test_admission_bootstraps_revision_bound_steering_without_production(
         for ref in plan.active_revision.revision.reality_refs
     )
     assert _count(postgres_database, steering_plans) == 1
+
+    guided = GuidedDesignApplicationService(postgres_database).get(admitted.work_id)
+    assert guided.schema_identity == "watt:guided-design:general-product-system"
+    assert guided.current_focus_key == "motive-users-problem"
+    assert guided.readiness.state is DesignReadinessState.NOT_READY
+    assert len(guided.issues) == 7
+    assert _count(postgres_database, guided_design_processes) == 1
+    assert _count(postgres_database, guided_design_agenda_revisions) == 1
     for table in PRODUCTION_TABLES:
         assert _count(postgres_database, table) == 0, table.name
 
@@ -578,6 +695,222 @@ def test_admission_bootstraps_revision_bound_steering_without_production(
     )
     assert reconstructed.steering_plan_id == plan.steering_plan_id
     assert _count(postgres_database, steering_plans) == 1
+
+
+def test_guided_design_progresses_governed_issues_and_reconstructs_after_restart(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, interactions = services
+    admitted = _admit(work, _ready(interactions))
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    capability = _GuidedDesignSemanticCapability()
+    orchestrator = ProductionOrchestrator(work)
+    driver = PlanSteeringDriver(
+        postgres_database,
+        work,
+        orchestrator,
+        semantic_capability=capability,
+        max_automatic_transitions=4,
+    )
+    try:
+        outcome = driver.activate(admitted.work_id)
+    finally:
+        orchestrator.shutdown()
+        driver.shutdown()
+
+    assert outcome.stop_reason.value == "TRANSITION_BOUND"
+    design = GuidedDesignApplicationService(postgres_database).get(admitted.work_id)
+    assert design.current_focus_key == "boundary-non-goals"
+    assert tuple(issue.state for issue in design.issues[:2]) == (
+        DesignIssueState.SATISFIED,
+        DesignIssueState.SATISFIED,
+    )
+    assert design.agenda_revision_number == 3
+    assert len(capability.inputs) == 2
+    assert all(item.design_context is not None for item in capability.inputs)
+    assert capability.inputs[0].work_context_facts
+    assert capability.inputs[0].work_requests
+    second_context = capability.inputs[1].design_context
+    assert second_context is not None
+    admitted_results = second_context["admitted_results"]
+    assert isinstance(admitted_results, list)
+    assert [item["issue_key"] for item in admitted_results] == [
+        "motive-users-problem"
+    ]
+    assert admitted_results[0]["bounded_summary"].startswith(
+        "Resolved guided design issue"
+    )
+    restarted = GuidedDesignApplicationService(postgres_database).get(admitted.work_id)
+    assert restarted == design
+    for table in PRODUCTION_TABLES:
+        assert _count(postgres_database, table) == 0, table.name
+
+
+def test_guided_design_reaches_reviewable_proposal_and_stops_for_human_authority(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, interactions = services
+    admitted = _admit(work, _ready(interactions))
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    capability = _GuidedDesignSemanticCapability()
+    orchestrator = ProductionOrchestrator(work)
+    driver = PlanSteeringDriver(
+        postgres_database,
+        work,
+        orchestrator,
+        semantic_capability=capability,
+        max_automatic_transitions=32,
+    )
+    try:
+        outcome = driver.activate(admitted.work_id)
+    finally:
+        orchestrator.shutdown()
+        driver.shutdown()
+
+    assert outcome.stop_reason.value == "HUMAN_ATTENTION"
+    design = GuidedDesignApplicationService(postgres_database).get(admitted.work_id)
+    assert design.readiness.state is DesignReadinessState.READY
+    assert all(issue.state is DesignIssueState.SATISFIED for issue in design.issues)
+    assert work.get_work(admitted.work_id).production_plan is not None
+    attention = work.list_attention(work_id=admitted.work_id)
+    assert len(attention) == 1
+    assert attention[0].kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
+    assert attention[0].available_actions == (
+        AttentionAction.APPROVE,
+        AttentionAction.REQUEST_REFINEMENT,
+    )
+    for table in PRODUCTION_TABLES:
+        assert _count(postgres_database, table) == 0, table.name
+
+    work.resolve_attention(
+        attention[0].id,
+        AttentionResolutionRequest(
+            action=AttentionAction.APPROVE,
+            authority_identity="human:governor",
+            rationale="The bounded proposal is understood and admitted.",
+        ),
+    )
+    production = _SchedulingOrchestrator()
+    continuation = PlanSteeringDriver(
+        postgres_database,
+        work,
+        production,
+        semantic_capability=capability,
+        max_automatic_transitions=8,
+    )
+    try:
+        continued = continuation.activate(admitted.work_id)
+    finally:
+        continuation.shutdown()
+
+    assert continued.stop_reason.value == "PRODUCTION_RUNNING"
+    assert production.scheduled == [admitted.work_id]
+    projection = work.get_work(admitted.work_id)
+    assert projection.production_plan is not None
+    assert projection.production_plan.fit_classification is (
+        OnePwuFitClassification.ONE_PWU_FIT
+    )
+    assert _count(postgres_database, production_runs) == 1
+    assert _count(postgres_database, production_work_units) == 1
+
+
+def test_production_feedback_can_reopen_issue_and_revise_plan_without_rewriting_history(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, interactions = services
+    admitted = _admit(work, _ready(interactions))
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    service = GuidedDesignApplicationService(postgres_database)
+    before = service.get(admitted.work_id)
+    runtime_ref = RealityReference(
+        kind=RealityReferenceKind.TRUSTED_BASELINE,
+        identity=RuntimeService(postgres_database).current_baseline().id,
+    )
+    reopened = service.reopen_issue(
+        admitted.work_id,
+        "architecture-risk-assumptions",
+        rationale="Verification evidence challenged an earlier architecture assumption.",
+        reality_refs=(runtime_ref,),
+    )
+
+    assert reopened.agenda_revision_number > before.agenda_revision_number
+    issue = next(
+        item for item in reopened.issues if item.key == "architecture-risk-assumptions"
+    )
+    assert issue.state is DesignIssueState.REOPENED
+    assert issue.reopen_rationale
+    assert runtime_ref in issue.provenance_refs
+    assert reopened.current_focus_key == "motive-users-problem"
+    with postgres_database.unit_of_work() as unit_of_work:
+        history = GuidedDesignStore(unit_of_work.session).revisions(reopened.process_id)
+    assert history[0].condition.value == "SUPERSEDED"
+    assert history[-1].condition.value == "ACTIVE"
+    assert history[0].issues != ()
+
+
+def test_guided_design_reexecutes_current_issue_after_governed_work_reality_changes(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    capability = _GuidedDesignSemanticCapability()
+    orchestrator = ProductionOrchestrator(work)
+    driver = PlanSteeringDriver(
+        postgres_database,
+        work,
+        orchestrator,
+        semantic_capability=capability,
+        max_automatic_transitions=1,
+    )
+    try:
+        first = driver.iterate(admitted.work_id)
+        assert first.action.value == "SEMANTIC_RESULT_ADMISSION"
+
+        active = WorkInteractionService(
+            postgres_database,
+            capability=_ActiveCapability(
+                focus=WorkFocusClassification.ON_TOPIC,
+                impact=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
+                context_fact="Human clarified the primary operator and problem boundary.",
+            ),
+        )
+        pending = active.append_and_assess(
+            ready.interaction.id,
+            "The primary operator is the team lead coordinating daily operations.",
+            human_identity="human:test",
+        )
+        assessment = pending.latest_assessment
+        assert assessment is not None
+        assert assessment.basis_work_revision_id is not None
+        work.decide_interaction_work_revision(
+            ready.interaction.id,
+            assessment_id=assessment.id,
+            basis_fingerprint=assessment.basis_fingerprint,
+            expected_previous_revision_id=assessment.basis_work_revision_id,
+            action=AttentionAction.APPROVE,
+            authority_identity="human:governor",
+        )
+
+        refreshed = driver.iterate(admitted.work_id)
+        assert refreshed.action.value == "SEMANTIC_RESULT_ADMISSION"
+    finally:
+        orchestrator.shutdown()
+        driver.shutdown()
+
+    assert len(capability.inputs) == 2
+    assert capability.inputs[0].work_context_facts != (
+        capability.inputs[1].work_context_facts
+    )
+    reconstructed = SteeringApplicationService(postgres_database).reconstruct(
+        admitted.work_id
+    )
+    assert len(reconstructed.semantic_results) == 2
 
 
 def test_admission_api_requires_human_action_and_preserves_same_interaction(
@@ -623,8 +956,109 @@ def test_admission_api_requires_human_action_and_preserves_same_interaction(
         assert driver.scheduled == [UUID(payload["governed_work_id"])]
         assert _count(postgres_database, product_works) == 1
         assert _count(postgres_database, steering_plans) == 1
+        work_payload = client.get(
+            f"/api/works/{payload['governed_work_id']}"
+        ).json()
+        guided_payload = work_payload["guided_design"]
+        assert guided_payload["schema_identity"] == (
+            "watt:guided-design:general-product-system"
+        )
+        assert guided_payload["current_focus_key"] == "motive-users-problem"
+        assert guided_payload["readiness"] == "NOT_READY"
+        assert len(guided_payload["issues"]) == 7
+        assert client.get(
+            f"/api/works/{payload['governed_work_id']}/guided-design"
+        ).json() == guided_payload
         for table in PRODUCTION_TABLES:
             assert _count(postgres_database, table) == 0, table.name
+
+
+@pytest.mark.real_codex
+def test_guided_design_real_provider_leads_multi_step_design_without_production(
+    postgres_database: Database,
+    services,
+) -> None:
+    if os.environ.get("SPG_RUN_REAL_GUIDED_DESIGN") != "1":
+        pytest.skip(
+            "set SPG_RUN_REAL_GUIDED_DESIGN=1 for the authorized Guided Design proof"
+        )
+    work, _interactions = services
+    interactions = WorkInteractionService(
+        postgres_database,
+        capability=_GeneralProductDesignCapability(),
+    )
+    interaction = interactions.create_interaction(human_identity="human:proof")
+    shared = interactions.append_and_assess(
+        interaction.id,
+        "我想做一个运营管理平台。",
+        human_identity="human:proof",
+    )
+    shared = interactions.append_and_assess(
+        interaction.id,
+        (
+            "这个平台主要服务中小团队的运营负责人和一线运营人员，解决计划、"
+            "执行、结果反馈分散而难以形成闭环的问题。第一阶段希望让团队能从"
+            "运营目标形成计划、跟踪执行并把结果反馈到下一轮计划；不包含完整"
+            "企业 ERP、财务结算或大规模组织权限重构。"
+        ),
+        human_identity="human:proof",
+    )
+    assert shared.latest_assessment is not None
+    admitted = work.admit_interaction_work(
+        interaction.id,
+        assessment_id=shared.latest_assessment.id,
+        basis_fingerprint=shared.latest_assessment.basis_fingerprint,
+        authority_identity="human:guided-design-proof",
+        rationale="Admit the bounded product-design proof, not production.",
+    )
+    plan = SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    orchestrator = ProductionOrchestrator(work)
+    driver = PlanSteeringDriver(
+        postgres_database,
+        work,
+        orchestrator,
+        semantic_capability=CodexSdkSemanticStepCapability(timeout_seconds=180),
+        max_automatic_transitions=32,
+    )
+    try:
+        outcome = driver.activate(admitted.work_id)
+    finally:
+        orchestrator.shutdown()
+        driver.shutdown()
+
+    reconstructed = SteeringApplicationService(postgres_database).reconstruct(
+        admitted.work_id
+    )
+    guided = GuidedDesignApplicationService(postgres_database).get(admitted.work_id)
+    assert reconstructed.steering_plan_id == plan.steering_plan_id
+    assert len(reconstructed.semantic_results) >= 2
+    assert len(
+        [issue for issue in guided.issues if issue.state is DesignIssueState.SATISFIED]
+    ) >= 2
+    assert guided.agenda_revision_number >= 3
+    assert outcome.stop_reason.value == "HUMAN_ATTENTION"
+    assert guided.current_focus is not None
+    attention = work.list_attention(work_id=admitted.work_id)
+    assert attention
+    print(
+        "GUIDED_DESIGN_REAL_PROOF",
+        {
+            "semantic_results": len(reconstructed.semantic_results),
+            "agenda_revision": guided.agenda_revision_number,
+            "satisfied_issues": [
+                issue.key
+                for issue in guided.issues
+                if issue.state is DesignIssueState.SATISFIED
+            ],
+            "current_focus": guided.current_focus_key,
+            "readiness": guided.readiness.state.value,
+            "attention_kind": attention[0].kind.value,
+            "provider_threads": len(reconstructed.semantic_results),
+            "provider_turns": len(reconstructed.semantic_results),
+        },
+    )
+    for table in PRODUCTION_TABLES:
+        assert _count(postgres_database, table) == 0, table.name
 
 
 @pytest.mark.parametrize(

@@ -483,6 +483,13 @@ The architecture contract is admitted and all four bounded implementation
 slices are implemented with focused deterministic evidence. Final Human WIC
 Dogfood remains separate from this implementation checkpoint.
 
+The implemented [Guided Design Core](guided-design-core.md) consumes admitted
+Work Reality context and requests through the existing WIC boundary. It does
+not interpret raw conversation independently or replace Shared Understanding.
+An admitted design result can revise its agenda; later Human input still enters
+through WIC and requires the existing Work-evolution governance before it can
+change a design basis.
+
 ## 14. Slice 2 implementation checkpoint
 
 `POST /api/interactions/{interaction_id}/admit-work` accepts only the exact

@@ -7,6 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from spg.domain.change import CodeChangeContract, CodeVerificationObligation
+from spg.domain.guided_design import GuidedDesignProjection
 from spg.domain.interaction import SharedUnderstanding, WorkTransitionChoice
 from spg.domain.product import (
     AttentionAction,
@@ -707,6 +708,85 @@ class ExecutionProgressResponse(ApiDto):
     blocked_reason: str | None = None
 
 
+class GuidedDesignIssueResponse(ApiDto):
+    key: str
+    title: str
+    objective: str
+    why_it_matters: str
+    applicability: str
+    prerequisite_keys: tuple[str, ...]
+    completion_condition: str
+    authority_relevance: str
+    required_output: str
+    critical: bool
+    state: str
+    skip_rationale: str | None
+    reopen_rationale: str | None
+    steering_step_id: UUID | None
+    admitted_semantic_result_id: UUID | None
+
+
+class GuidedDesignResponse(ApiDto):
+    process_id: UUID
+    process_objective: str
+    schema_identity: str
+    schema_version: str
+    agenda_revision_id: UUID
+    agenda_revision_number: int
+    current_focus_key: str | None
+    current_focus: GuidedDesignIssueResponse | None
+    focus_rationale: str | None
+    issues: tuple[GuidedDesignIssueResponse, ...]
+    resolved_count: int
+    total_applicable_count: int
+    readiness: str
+    readiness_blockers: tuple[str, ...]
+    upcoming_transition: str | None
+
+    @classmethod
+    def from_projection(cls, projection: GuidedDesignProjection) -> Self:
+        def issue_response(issue):
+            return GuidedDesignIssueResponse(
+                key=issue.key,
+                title=issue.title,
+                objective=issue.objective,
+                why_it_matters=issue.why_it_matters,
+                applicability=issue.applicability,
+                prerequisite_keys=issue.prerequisite_keys,
+                completion_condition=issue.completion_condition,
+                authority_relevance=issue.authority_relevance.value,
+                required_output=issue.required_output.value,
+                critical=issue.critical,
+                state=issue.state.value,
+                skip_rationale=issue.skip_rationale,
+                reopen_rationale=issue.reopen_rationale,
+                steering_step_id=issue.steering_step_id,
+                admitted_semantic_result_id=issue.admitted_semantic_result_id,
+            )
+
+        return cls(
+            process_id=projection.process_id,
+            process_objective=projection.process_objective,
+            schema_identity=projection.schema_identity,
+            schema_version=projection.schema_version,
+            agenda_revision_id=projection.agenda_revision_id,
+            agenda_revision_number=projection.agenda_revision_number,
+            current_focus_key=projection.current_focus_key,
+            current_focus=(
+                None
+                if projection.current_focus is None
+                else issue_response(projection.current_focus)
+            ),
+            focus_rationale=projection.focus_rationale,
+            issues=tuple(issue_response(issue) for issue in projection.issues),
+            resolved_count=projection.resolved_count,
+            total_applicable_count=projection.total_applicable_count,
+            readiness=projection.readiness.state.value,
+            readiness_blockers=projection.readiness.blockers,
+            upcoming_transition=projection.upcoming_transition,
+        )
+
+
 class WorkResponse(ApiDto):
     work_id: UUID
     goal_id: UUID | None
@@ -740,6 +820,7 @@ class WorkResponse(ApiDto):
     automatic_progression_state: str | None = None
     last_stop_reason: str | None = None
     execution_progress: ExecutionProgressResponse | None = None
+    guided_design: GuidedDesignResponse | None = None
 
     @classmethod
     def from_projection(cls, work: WorkProjection) -> Self:
@@ -816,6 +897,7 @@ class SteeringStepResponse(ApiDto):
     completion_condition: str
     position: int
     state: str
+    design_issue_key: str | None = None
 
     @classmethod
     def from_record(cls, step: SteeringStepRecord) -> Self:
@@ -826,6 +908,7 @@ class SteeringStepResponse(ApiDto):
             completion_condition=step.completion_condition,
             position=step.position,
             state=step.state.value,
+            design_issue_key=step.design_issue_key,
         )
 
 

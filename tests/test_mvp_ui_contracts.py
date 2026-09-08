@@ -127,6 +127,12 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert 'id="work-satisfaction-state"' in html
     assert 'id="interaction-relationship-state"' in html
     assert 'id="work-focus-history"' in html
+    assert 'id="guided-design-panel"' in html
+    assert 'id="design-current-focus"' in html
+    assert 'id="design-agenda"' in html
+    assert 'id="design-readiness"' in html
+    assert "renderGuidedDesign" in javascript
+    assert "readiness_blockers" in javascript
     assert 'id="work-transition-summary"' in html
     assert 'id="work-transition-decision"' in html
     assert 'id="continue-current-work"' in html

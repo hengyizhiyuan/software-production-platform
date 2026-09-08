@@ -104,7 +104,11 @@ from spg.domain.verification import (
     VerificationResultValue,
 )
 from spg.domain.verifier import VerificationCapabilityContract
-from spg.domain.steering import RealityReferenceKind, SteeringOutcome
+from spg.domain.steering import (
+    RealityReferenceKind,
+    SteeringAttentionReason,
+    SteeringOutcome,
+)
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.interaction_store import InteractionStore
@@ -2047,15 +2051,42 @@ class WorkApplicationService:
                 continue
             with self.database.unit_of_work() as unit_of_work:
                 steering = SteeringStore(unit_of_work.session)
+                runtime = RuntimeStore(unit_of_work.session)
                 plan = steering.plan_for_work(projection.work_id)
                 revision = None if plan is None else steering.active_revision(plan.id)
                 decision = (
                     None if revision is None else steering.latest_decision(revision.id)
                 )
+                semantic_result = (
+                    None
+                    if decision is None
+                    else steering.latest_semantic_result_for_step(
+                        decision.current_step_id
+                    )
+                )
+                proposal_review_resolved = bool(
+                    decision is not None
+                    and decision.attention_reason
+                    is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+                    and semantic_result is not None
+                    and any(
+                        record.decision_type
+                        in {
+                            "APPROVE_GUIDED_PRODUCTION_PROPOSAL",
+                            "REFINE_GUIDED_PRODUCTION_PROPOSAL",
+                        }
+                        and record.scope.get("semantic_result_id")
+                        == str(semantic_result.id)
+                        for record in runtime.governance_for_subject(
+                            str(projection.work_id)
+                        )
+                    )
+                )
             if (
                 decision is not None
                 and decision.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
                 and decision.attention_reason is not None
+                and not proposal_review_resolved
             ):
                 items.append(
                     AttentionItem(
@@ -2064,11 +2095,29 @@ class WorkApplicationService:
                             f"spg:steering-attention:{decision.id}",
                         ),
                         work_id=projection.work_id,
-                        kind=AttentionKind.STEERING_DECISION_REQUIRED,
+                        kind=(
+                            AttentionKind.PRODUCTION_PROPOSAL_REVIEW
+                            if decision.attention_reason
+                            is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+                            else AttentionKind.STEERING_DECISION_REQUIRED
+                        ),
                         decision=decision.objective,
                         reason=decision.reason,
-                        available_actions=(),
-                        recommended_action=None,
+                        available_actions=(
+                            (
+                                AttentionAction.APPROVE,
+                                AttentionAction.REQUEST_REFINEMENT,
+                            )
+                            if decision.attention_reason
+                            is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+                            else ()
+                        ),
+                        recommended_action=(
+                            AttentionAction.APPROVE
+                            if decision.attention_reason
+                            is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+                            else None
+                        ),
                         governed_subject_ref=f"steering-decision:{decision.id}",
                         steering_reason=decision.attention_reason,
                         recommendation=decision.recommendation,
@@ -2185,6 +2234,94 @@ class WorkApplicationService:
                 authority_identity=request.authority_identity,
                 rationale=request.rationale,
             )
+
+        if attention.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW:
+            if (
+                attention.steering_step_id is None
+                or attention.steering_plan_revision_id is None
+            ):
+                raise ProductInvariantViolation(
+                    "Production proposal review lost its exact Steering basis"
+                )
+            timestamp = datetime.now(UTC)
+            with self.database.unit_of_work() as unit_of_work:
+                product = ProductStore(unit_of_work.session)
+                steering = SteeringStore(unit_of_work.session)
+                runtime = RuntimeStore(unit_of_work.session)
+                work = self._required_work(product, attention.work_id)
+                result = steering.latest_semantic_result_for_step(
+                    attention.steering_step_id
+                )
+                if result is None or result.proposed_production is None:
+                    raise ProductInvariantViolation(
+                        "Production proposal review lost its governed semantic result"
+                    )
+                decision_type = (
+                    "APPROVE_GUIDED_PRODUCTION_PROPOSAL"
+                    if request.action is AttentionAction.APPROVE
+                    else "REFINE_GUIDED_PRODUCTION_PROPOSAL"
+                )
+                governance_id = uuid5(
+                    NAMESPACE_URL,
+                    f"spg:guided-production-review:{result.id}:{decision_type}",
+                )
+                existing = next(
+                    (
+                        record
+                        for record in runtime.governance_for_subject(str(work.id))
+                        if record.id == governance_id
+                    ),
+                    None,
+                )
+                if existing is None:
+                    runtime.insert_governance(
+                        {
+                            "id": governance_id,
+                            "decision_type": decision_type,
+                            "authority_identity": request.authority_identity,
+                            "subject_type": "GUIDED_PRODUCTION_PROPOSAL",
+                            "subject_identity": str(work.id),
+                            "scope": {
+                                "work_id": str(work.id),
+                                "work_reality_revision_id": (
+                                    None
+                                    if work.current_work_reality_revision_id is None
+                                    else str(work.current_work_reality_revision_id)
+                                ),
+                                "steering_plan_revision_id": str(
+                                    attention.steering_plan_revision_id
+                                ),
+                                "steering_step_id": str(attention.steering_step_id),
+                                "semantic_result_id": str(result.id),
+                                "production_proposal": (
+                                    result.proposed_production.model_dump(mode="json")
+                                ),
+                            },
+                            "rationale": request.rationale,
+                            "created_at": timestamp,
+                        }
+                    )
+                unit_of_work.commit()
+            if request.action is AttentionAction.REQUEST_REFINEMENT:
+                from spg.application.guided_design import (
+                    GuidedDesignApplicationService,
+                )
+
+                GuidedDesignApplicationService(self.database).reopen_issue(
+                    attention.work_id,
+                    "verification-staged-readiness",
+                    rationale=(
+                        request.rationale
+                        or "Human requested refinement of the production proposal."
+                    ),
+                    reality_refs=(
+                        RealityReference(
+                            kind=RealityReferenceKind.GOVERNANCE_DECISION,
+                            identity=governance_id,
+                        ),
+                    ),
+                )
+            return self.get_work(attention.work_id)
 
         if attention.kind is AttentionKind.CANDIDATE_AUTHORIZATION:
             with self.database.unit_of_work() as unit_of_work:
@@ -2309,16 +2446,38 @@ class WorkApplicationService:
                 for item in latest_steering_decision.reality_refs
             )
         )
+        steering_attention = bool(
+            latest_steering_decision is not None
+            and latest_steering_decision.steering_outcome
+            is SteeringOutcome.HUMAN_ATTENTION
+        )
+        if (
+            steering_attention
+            and latest_steering_decision is not None
+            and latest_steering_decision.attention_reason
+            is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+        ):
+            semantic_result = steering.latest_semantic_result_for_step(
+                latest_steering_decision.current_step_id
+            )
+            if semantic_result is not None:
+                runtime = RuntimeStore(store.session)
+                steering_attention = not any(
+                    record.decision_type
+                    in {
+                        "APPROVE_GUIDED_PRODUCTION_PROPOSAL",
+                        "REFINE_GUIDED_PRODUCTION_PROPOSAL",
+                    }
+                    and record.scope.get("semantic_result_id")
+                    == str(semantic_result.id)
+                    for record in runtime.governance_for_subject(str(work.id))
+                )
         status, step, event, next_action = self._projection_state(
             work,
             summary,
             steering_enabled=steering_plan is not None,
             steering_complete=steering_complete,
-            steering_attention=bool(
-                latest_steering_decision is not None
-                and latest_steering_decision.steering_outcome
-                is SteeringOutcome.HUMAN_ATTENTION
-            ),
+            steering_attention=steering_attention,
         )
         if current_steering_step is not None:
             step = current_steering_step.type.value

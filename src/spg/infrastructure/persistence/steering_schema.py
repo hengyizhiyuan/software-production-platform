@@ -106,6 +106,7 @@ steering_steps = Table(
     Column("type", String(32), nullable=False),
     Column("objective", Text, nullable=False),
     Column("completion_condition", Text, nullable=False),
+    Column("design_issue_key", String(128), nullable=True),
     Column("position", Integer, nullable=False),
     Column("state", String(32), nullable=False),
     Column(
@@ -206,7 +207,8 @@ steering_decisions = Table(
         "'MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION', "
         "'SCOPE_OR_AUTHORITY_EXPANSION', "
         "'MATERIAL_RISK_OR_COST_DECISION', "
-        "'PRODUCT_ACCEPTANCE_REQUIRED')",
+        "'PRODUCT_ACCEPTANCE_REQUIRED', "
+        "'PRODUCTION_PROPOSAL_REVIEW_REQUIRED')",
         name="ck_steering_decisions_attention_reason_known",
     ),
     CheckConstraint(
