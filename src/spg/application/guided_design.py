@@ -16,6 +16,8 @@ from spg.domain.guided_design import (
     DesignProcessCondition,
     DesignReadiness,
     DesignReadinessState,
+    DesignFacilitationStrategy,
+    DesignSchemaDefinition,
     GuidedDesignInvariantViolation,
     GuidedDesignProjection,
 )
@@ -37,7 +39,11 @@ from spg.infrastructure.persistence.steering_store import SteeringStore
 
 
 GENERAL_SCHEMA_IDENTITY = "watt:guided-design:general-product-system"
-GENERAL_SCHEMA_VERSION = "1.0"
+GENERAL_SCHEMA_VERSION = "0.1"
+TECHNICAL_SCHEMA_IDENTITY = "watt:guided-design:technical-system"
+TECHNICAL_SCHEMA_VERSION = "0.1"
+EVOLUTION_SCHEMA_IDENTITY = "watt:guided-design:existing-product-evolution"
+EVOLUTION_SCHEMA_VERSION = "0.1"
 
 
 def general_product_system_design_issues() -> tuple[DesignIssue, ...]:
@@ -128,6 +134,147 @@ def general_product_system_design_issues() -> tuple[DesignIssue, ...]:
     )
 
 
+def technical_system_design_issues() -> tuple[DesignIssue, ...]:
+    """Seed technical-system methodology without prescribing implementation."""
+
+    stages = (
+        ("requirements", "Requirements", "Establish functional and operational requirements.", (), DesignOutputClass.SHARED_UNDERSTANDING),
+        ("constraints", "Constraints", "Make technical, organizational, and authority constraints explicit.", ("requirements",), DesignOutputClass.GOVERNED_HUMAN_DECISION),
+        ("scale-performance", "Scale and performance", "Define relevant scale, latency, capacity, and reliability expectations.", ("requirements",), DesignOutputClass.GOVERNED_DESIGN_DIRECTION),
+        ("data-model", "Data model", "Define the information semantics and ownership boundaries.", ("requirements", "constraints"), DesignOutputClass.GOVERNED_DESIGN_DIRECTION),
+        ("architecture-options", "Architecture options", "Compare viable architecture shapes and their trade-offs.", ("constraints", "scale-performance", "data-model"), DesignOutputClass.GOVERNED_HUMAN_DECISION),
+        ("failure-modes", "Failure modes", "Identify material failures, recovery boundaries, and operational risks.", ("architecture-options",), DesignOutputClass.GOVERNED_DESIGN_DIRECTION),
+        ("verification-strategy", "Verification strategy", "Define how the intended behavior and constraints will be proven.", ("architecture-options", "failure-modes"), DesignOutputClass.GOVERNED_DESIGN_DIRECTION),
+        ("implementation-readiness", "Implementation readiness", "Form a bounded, reviewable implementation proposal.", ("verification-strategy",), DesignOutputClass.REVIEWABLE_PRODUCTION_PROPOSAL),
+    )
+    return tuple(
+        DesignIssue(
+            key=key,
+            title=title,
+            objective=objective,
+            why_it_matters=f"{title} must be explicit before downstream technical commitments are safe.",
+            applicability="Applicable to technical systems, infrastructure, and architecture design.",
+            prerequisite_keys=prerequisites,
+            completion_condition=f"Governed Reality satisfies the {title.lower()} design basis.",
+            authority_relevance=(
+                DesignAuthorityRelevance.MATERIAL_HUMAN_DECISION
+                if output is DesignOutputClass.GOVERNED_HUMAN_DECISION
+                else DesignAuthorityRelevance.ROUTINE
+            ),
+            required_output=output,
+        )
+        for key, title, objective, prerequisites, output in stages
+    )
+
+
+def existing_product_evolution_design_issues() -> tuple[DesignIssue, ...]:
+    """Seed methodology for governed evolution of an existing product/system."""
+
+    stages = (
+        ("current-reality", "Current Reality", "Establish the trusted current product and runtime reality.", (), DesignOutputClass.SHARED_UNDERSTANDING),
+        ("user-feedback", "User feedback", "Connect observed user feedback to the current Reality.", ("current-reality",), DesignOutputClass.SHARED_UNDERSTANDING),
+        ("problem-prioritization", "Problem prioritization", "Prioritize the problems worth changing and explain why.", ("user-feedback",), DesignOutputClass.GOVERNED_HUMAN_DECISION),
+        ("solution-options", "Solution options", "Compare bounded ways to address the prioritized problem.", ("problem-prioritization",), DesignOutputClass.GOVERNED_DESIGN_DIRECTION),
+        ("impact-assessment", "Impact assessment", "Assess product, architecture, migration, and risk impact.", ("solution-options",), DesignOutputClass.GOVERNED_DESIGN_DIRECTION),
+        ("validation", "Validation", "Define evidence required to validate the proposed evolution.", ("impact-assessment",), DesignOutputClass.GOVERNED_DESIGN_DIRECTION),
+        ("evolution-plan", "Evolution plan", "Form a bounded and reviewable next evolution proposal.", ("validation",), DesignOutputClass.REVIEWABLE_PRODUCTION_PROPOSAL),
+    )
+    return tuple(
+        DesignIssue(
+            key=key,
+            title=title,
+            objective=objective,
+            why_it_matters=f"{title} prevents an existing product from evolving on unsupported assumptions.",
+            applicability="Applicable to optimization or evolution of an existing product/system.",
+            prerequisite_keys=prerequisites,
+            completion_condition=f"Governed Reality satisfies the {title.lower()} evolution basis.",
+            authority_relevance=(
+                DesignAuthorityRelevance.MATERIAL_HUMAN_DECISION
+                if output is DesignOutputClass.GOVERNED_HUMAN_DECISION
+                else DesignAuthorityRelevance.ROUTINE
+            ),
+            required_output=output,
+        )
+        for key, title, objective, prerequisites, output in stages
+    )
+
+
+def design_schema_registry() -> tuple[DesignSchemaDefinition, ...]:
+    """Built-in, versioned seed registry; no user workflow/schema editor is implied."""
+
+    return (
+        DesignSchemaDefinition(
+            identity=GENERAL_SCHEMA_IDENTITY,
+            version=GENERAL_SCHEMA_VERSION,
+            title="General Product/System Design",
+            applicability="New products, platforms, and internal systems.",
+            issues=general_product_system_design_issues(),
+        ),
+        DesignSchemaDefinition(
+            identity=TECHNICAL_SCHEMA_IDENTITY,
+            version=TECHNICAL_SCHEMA_VERSION,
+            title="Technical System Design",
+            applicability="Technical systems, infrastructure, and architecture design.",
+            issues=technical_system_design_issues(),
+        ),
+        DesignSchemaDefinition(
+            identity=EVOLUTION_SCHEMA_IDENTITY,
+            version=EVOLUTION_SCHEMA_VERSION,
+            title="Existing Product Evolution",
+            applicability="Optimization and evolution of existing products or systems.",
+            issues=existing_product_evolution_design_issues(),
+        ),
+    )
+
+
+def design_schema_by_identity(
+    identity: str,
+    version: str | None = None,
+) -> DesignSchemaDefinition:
+    for schema in design_schema_registry():
+        if schema.identity == identity and (version is None or schema.version == version):
+            return schema
+    requested_version = version if version is not None else "(any version)"
+    raise GuidedDesignInvariantViolation(
+        f"Unknown built-in Design Schema: {identity} {requested_version}"
+    )
+
+
+def match_design_schema_text(text: str) -> tuple[DesignSchemaDefinition, str]:
+    """Select a seed methodology from explicit Motive wording, conservatively."""
+
+    normalized = " ".join(text.casefold().split())
+    evolution_markers = (
+        "existing product", "existing system", "current product", "current system",
+        "已有", "现有", "当前产品", "当前系统",
+    )
+    technical_markers = (
+        "technical", "architecture", "infrastructure", "database", "performance",
+        "技术", "架构", "基础设施", "数据库", "性能",
+    )
+    registry = {item.identity: item for item in design_schema_registry()}
+    if any(marker in normalized for marker in evolution_markers):
+        schema = registry[EVOLUTION_SCHEMA_IDENTITY]
+        reason = "The Motive explicitly concerns an existing product/system and its evolution."
+    elif any(marker in normalized for marker in technical_markers):
+        schema = registry[TECHNICAL_SCHEMA_IDENTITY]
+        reason = "The Motive is primarily a technical-system or architecture design problem."
+    else:
+        schema = registry[GENERAL_SCHEMA_IDENTITY]
+        reason = "The Motive appears to describe a new product, platform, or internal software system."
+    return schema, reason
+
+
+def design_schema_for_work(work: WorkRecord) -> tuple[DesignSchemaDefinition, str]:
+    return match_design_schema_text(
+        " ".join(
+            value
+            for value in (work.raw_user_requirement, work.desired_outcome or "")
+            if value
+        )
+    )
+
+
 def guided_design_step_specs(
     issues: tuple[DesignIssue, ...],
 ) -> tuple[SteeringStepSpec, ...]:
@@ -206,6 +353,7 @@ class GuidedDesignApplicationService:
             kind=RealityReferenceKind.WORK,
             identity=work.id,
         )
+        schema, selection_rationale = design_schema_for_work(work)
         steps_by_key = {
             step.design_issue_key: step.id
             for step in reconstruction.active_revision.steps
@@ -213,7 +361,7 @@ class GuidedDesignApplicationService:
         }
         issues = tuple(
             issue.model_copy(update={"steering_step_id": steps_by_key.get(issue.key)})
-            for issue in general_product_system_design_issues()
+            for issue in schema.issues
         )
         if any(issue.steering_step_id is None for issue in issues):
             raise GuidedDesignInvariantViolation(
@@ -228,8 +376,9 @@ class GuidedDesignApplicationService:
                 {
                     "id": process_id,
                     "work_id": work.id,
-                    "schema_identity": GENERAL_SCHEMA_IDENTITY,
-                    "schema_version": GENERAL_SCHEMA_VERSION,
+                    "schema_identity": schema.identity,
+                    "schema_version": schema.version,
+                    "schema_selection_rationale": selection_rationale,
                     "objective": work.desired_outcome or work.raw_user_requirement,
                     "condition": DesignProcessCondition.ACTIVE.value,
                     "basis_work_reality_revision_id": work.current_work_reality_revision_id,
@@ -246,7 +395,7 @@ class GuidedDesignApplicationService:
                     "condition": DesignAgendaRevisionCondition.ACTIVE.value,
                     "supersedes_revision_id": None,
                     "basis_work_reality_revision_id": work.current_work_reality_revision_id,
-                    "rationale": "Initial general product/system design basis selected from the admitted Work shape.",
+                    "rationale": f"Initial {schema.title} basis selected. {selection_rationale}",
                     "reality_refs": [
                         item.model_dump(mode="json") for item in (work_ref, plan_ref)
                     ],
@@ -539,12 +688,52 @@ class GuidedDesignApplicationService:
             issue.state in {DesignIssueState.SATISFIED, DesignIssueState.SKIPPED}
             for issue in agenda.issues
         )
+        completed_areas = tuple(
+            issue.title
+            for issue in agenda.issues
+            if issue.state in {DesignIssueState.SATISFIED, DesignIssueState.SKIPPED}
+        )
+        unresolved_areas = tuple(
+            issue.title
+            for issue in agenda.issues
+            if issue.state in {DesignIssueState.OPEN, DesignIssueState.REOPENED}
+        )
+        satisfied_keys = {
+            issue.key
+            for issue in agenda.issues
+            if issue.state in {DesignIssueState.SATISFIED, DesignIssueState.SKIPPED}
+        }
+        dependency_blockers = (
+            ()
+            if current_focus is None
+            else tuple(
+                key
+                for key in current_focus.prerequisite_keys
+                if key not in satisfied_keys
+            )
+        )
+        strategy, guidance = self._facilitation(current_focus, dependency_blockers)
+        stage = "Production readiness" if current_focus is None else current_focus.title
+        progress_narrative = (
+            f"Current stage: {stage}. {resolved} of {len(agenda.issues)} design areas "
+            f"are resolved; {len(unresolved_areas)} remain. "
+            + (
+                "The design basis is ready for a governed production proposal review."
+                if readiness.state is DesignReadinessState.READY
+                else (
+                    f"Next focus: {current_focus.title}. {current_focus.why_it_matters}"
+                    if current_focus is not None
+                    else "Plan Steering has not selected a current design issue."
+                )
+            )
+        )
         return GuidedDesignProjection(
             work_id=work_id,
             process_id=process.id,
             process_objective=process.objective,
             schema_identity=process.schema_identity,
             schema_version=process.schema_version,
+            schema_selection_rationale=process.schema_selection_rationale,
             agenda_revision_id=agenda.id,
             agenda_revision_number=agenda.revision_number,
             current_focus_key=None if current_focus is None else current_focus.key,
@@ -554,6 +743,13 @@ class GuidedDesignApplicationService:
                 if latest_decision is None
                 else latest_decision.reason
             ),
+            current_stage=stage,
+            completed_areas=completed_areas,
+            unresolved_areas=unresolved_areas,
+            dependency_blockers=dependency_blockers,
+            facilitation_strategy=strategy,
+            facilitation_guidance=guidance,
+            progress_narrative=progress_narrative,
             issues=agenda.issues,
             resolved_count=resolved,
             total_applicable_count=len(agenda.issues),
@@ -563,6 +759,46 @@ class GuidedDesignApplicationService:
                 if readiness.state is DesignReadinessState.READY
                 else "Resolve the next critical design issue selected by Plan Steering"
             ),
+        )
+
+    @staticmethod
+    def _facilitation(
+        current_focus: DesignIssue | None,
+        dependency_blockers: tuple[str, ...],
+    ) -> tuple[DesignFacilitationStrategy, str]:
+        if current_focus is None:
+            return (
+                DesignFacilitationStrategy.PROPOSE_NEXT_DESIGN_STEP,
+                "Summarize the completed design basis and propose the governed production review.",
+            )
+        if dependency_blockers:
+            return (
+                DesignFacilitationStrategy.SUMMARIZE_UNDERSTANDING,
+                "Reconstruct the prerequisite decisions before continuing this design issue.",
+            )
+        if current_focus.key in {"architecture-options", "solution-options"}:
+            return (
+                DesignFacilitationStrategy.PRESENT_ALTERNATIVES,
+                "Present bounded alternatives and compare their material trade-offs.",
+            )
+        if current_focus.authority_relevance is DesignAuthorityRelevance.AUTHORITY_BOUNDARY:
+            return (
+                DesignFacilitationStrategy.REQUEST_HUMAN_DECISION,
+                "Explain the boundary and request the Human decision needed to govern it.",
+            )
+        if current_focus.authority_relevance is DesignAuthorityRelevance.MATERIAL_HUMAN_DECISION:
+            return (
+                DesignFacilitationStrategy.EXPLAIN_TRADE_OFFS,
+                "Clarify the known options and trade-offs before asking for Human judgment.",
+            )
+        if current_focus.required_output is DesignOutputClass.SHARED_UNDERSTANDING:
+            return (
+                DesignFacilitationStrategy.CLARIFY,
+                "Ask only the material clarification needed to establish shared understanding.",
+            )
+        return (
+            DesignFacilitationStrategy.SUMMARIZE_UNDERSTANDING,
+            "Summarize current understanding, then propose the next bounded design move.",
         )
 
     def get(self, work_id: UUID) -> GuidedDesignProjection:

@@ -103,6 +103,7 @@ class GuidedDesignStore:
             work_id=row["work_id"],
             schema_identity=row["schema_identity"],
             schema_version=row["schema_version"],
+            schema_selection_rationale=row["schema_selection_rationale"],
             objective=row["objective"],
             condition=DesignProcessCondition(row["condition"]),
             basis_work_reality_revision_id=row["basis_work_reality_revision_id"],

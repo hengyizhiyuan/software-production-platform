@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+import json
 import os
 from pathlib import Path
+import re
+import time
 from uuid import UUID
 
 from alembic import command
@@ -20,6 +23,7 @@ from spg.domain.interaction import (
     InteractionAssessmentCandidate,
     InteractionInterpretationInput,
     InteractionInvariantViolation,
+    InteractionTurnStatus,
     InterpretationMeaning,
     InterpretationMeaningKind,
     WorkAdmissionReadinessStatus,
@@ -29,6 +33,8 @@ from spg.infrastructure.persistence import Database, product_tables, runtime_tab
 from spg.infrastructure.persistence.product_schema import (
     interaction_assessments,
     interaction_records,
+    interaction_messages,
+    interaction_turns,
     product_interactions,
     product_works,
     work_reality_revisions,
@@ -98,6 +104,11 @@ class _NeverCalledWorkService:
         return ()
 
 
+class _FailingCapability:
+    def interpret(self, _basis: InteractionInterpretationInput):
+        raise InteractionInvariantViolation("provider unavailable for focused test")
+
+
 class _NoopDriver:
     def resume_safely_eligible_works(self) -> tuple[()]:
         return ()
@@ -152,6 +163,132 @@ def clean_wic_schema(postgres_database: Database) -> Iterator[None]:
 def _count(database: Database, table) -> int:
     with database.engine.connect() as connection:
         return int(connection.scalar(select(func.count()).select_from(table)) or 0)
+
+
+def _wait_for_turn(
+    service: WorkInteractionService,
+    turn_id: UUID,
+    *,
+    timeout: float = 3,
+):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        turn = service.get_turn(turn_id)
+        if turn.status in {
+            InteractionTurnStatus.COMPLETED,
+            InteractionTurnStatus.FAILED,
+        }:
+            return turn
+        time.sleep(0.02)
+    pytest.fail(f"Interaction Turn did not reach a terminal state: {turn_id}")
+
+
+_SENSITIVE_FAILURE_PATTERNS = (
+    re.compile(r"(?i)(authorization\s*[:=]\s*bearer\s+)\S+"),
+    re.compile(r"(?i)((?:api[_-]?key|token|secret|password)\s*[:=]\s*)\S+"),
+    re.compile(r"(?i)(postgres(?:ql)?(?:\+\w+)?://)[^@\s]+@"),
+    re.compile(r"(?i)\b(?:thread|turn|req)_[A-Za-z0-9_-]+\b"),
+    re.compile(r"(?i)([A-Z]:\\Users\\)[^\\\s]+"),
+    re.compile(r"(?i)(/home/)[^/\s]+"),
+)
+
+
+def _sanitized_failure_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+    sanitized = " ".join(value.splitlines())
+    for pattern in _SENSITIVE_FAILURE_PATTERNS:
+        if "postgres" in pattern.pattern:
+            sanitized = pattern.sub(r"\1<redacted>@", sanitized)
+        elif "Users" in pattern.pattern or "/home/" in pattern.pattern:
+            sanitized = pattern.sub(r"\1<user>", sanitized)
+        elif "thread" in pattern.pattern:
+            sanitized = pattern.sub("<redacted-provider-id>", sanitized)
+        else:
+            sanitized = pattern.sub(r"\1<redacted>", sanitized)
+    return sanitized[:2000]
+
+
+def _sanitized_turn_failure_report(turn) -> dict[str, str | None]:
+    if turn.status is not InteractionTurnStatus.FAILED:
+        raise ValueError("Failure evidence can only be produced for a FAILED Turn")
+    return {
+        "evidence_kind": "HUMAN_WATT_REAL_PROVIDER_TURN_FAILURE",
+        "turn_id": str(turn.id),
+        "status": turn.status.value,
+        "failure_code": _sanitized_failure_text(turn.failure_code),
+        "failure_message": _sanitized_failure_text(turn.failure_message),
+        "created_at": turn.created_at.isoformat(),
+        "started_at": None if turn.started_at is None else turn.started_at.isoformat(),
+        "completed_at": (
+            None if turn.completed_at is None else turn.completed_at.isoformat()
+        ),
+        "updated_at": turn.updated_at.isoformat(),
+    }
+
+
+def _preserve_turn_failure_report(turn, destination: Path) -> dict[str, str | None]:
+    report = _sanitized_turn_failure_report(turn)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(destination)
+    return report
+
+
+def _fail_with_preserved_turn_evidence(turn) -> None:
+    configured = os.environ.get("SPG_REAL_PROVIDER_EVIDENCE_PATH")
+    destination = (
+        Path(configured)
+        if configured
+        else PROJECT_ROOT
+        / ".spg"
+        / "validation-evidence"
+        / f"human-watt-provider-failure-{turn.id}.json"
+    )
+    report = _preserve_turn_failure_report(turn, destination)
+    pytest.fail(
+        "Real Human-Watt Provider proof failed. "
+        f"Sanitized evidence: {destination}\n"
+        + json.dumps(report, ensure_ascii=False, sort_keys=True),
+        pytrace=False,
+    )
+
+def _preserve_real_provider_success_report(
+    turn,
+    projection,
+    destination: Path,
+) -> None:
+    report = {
+        "evidence_kind": "HUMAN_WATT_REAL_PROVIDER_PROOF",
+        "input": "我想做一个运营管理平台。",
+        "turn_id": str(turn.id),
+        "status": turn.status.value,
+        "provider_model": os.environ.get("SPG_WIC_PROVIDER_MODEL"),
+        "design_schema_identity": projection.selected_design_schema_identity,
+        "design_schema_version": projection.selected_design_schema_version,
+        "design_stage": projection.design_stage,
+        "design_next_focus": projection.design_next_focus,
+        "design_focus_rationale": projection.design_focus_rationale,
+        "design_facilitation_strategy": projection.design_facilitation_strategy,
+        "conversation_message_count": len(projection.conversation_messages),
+        "created_at": turn.created_at.isoformat(),
+        "started_at": None if turn.started_at is None else turn.started_at.isoformat(),
+        "completed_at": (
+            None if turn.completed_at is None else turn.completed_at.isoformat()
+        ),
+        "updated_at": turn.updated_at.isoformat(),
+    }
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_suffix(destination.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(destination)
 
 
 def test_pre_work_progression_is_reconstructable_and_never_creates_work(
@@ -301,6 +438,241 @@ def test_interaction_api_keeps_ready_assessment_pre_work(
         assert refreshed.json() == payload
         assert _count(postgres_database, product_works) == 0
         assert _count(postgres_database, interaction_records) == 2
+
+
+def test_async_turn_persists_history_schema_guidance_and_restarts(
+    postgres_database: Database,
+) -> None:
+    service = WorkInteractionService(
+        postgres_database,
+        capability=DeterministicWorkInteractionCapability(),
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    turn = service.submit_turn(
+        interaction.id,
+        "我想做一个运营管理平台。",
+        human_identity="human:test",
+    )
+    assert turn.status in {
+        InteractionTurnStatus.RECEIVED,
+        InteractionTurnStatus.PROCESSING,
+        InteractionTurnStatus.COMPLETED,
+    }
+    completed = _wait_for_turn(service, turn.id)
+    assert completed.status is InteractionTurnStatus.COMPLETED
+    projection = service.get_shared_understanding(interaction.id)
+    assert [message.actor.value for message in projection.conversation_messages] == [
+        "HUMAN",
+        "WATT",
+    ]
+    assert projection.conversation_messages[1].interpretation_assessment_id
+    assert projection.selected_design_schema_identity == (
+        "watt:guided-design:general-product-system"
+    )
+    assert projection.selected_design_schema_version == "0.1"
+    assert projection.design_stage == "Motive, users, and problem"
+    assert projection.design_next_focus
+    assert "General Product/System Design" in (
+        projection.design_progress_narrative or ""
+    )
+    assert "Design approach: General Product/System Design" in (
+        projection.conversation_messages[1].content
+    )
+    assert _count(postgres_database, interaction_turns) == 1
+    assert _count(postgres_database, interaction_messages) == 2
+    service.shutdown()
+
+    restarted = WorkInteractionService(
+        postgres_database,
+        capability=DeterministicWorkInteractionCapability(),
+    )
+    reconstructed = restarted.get_shared_understanding(interaction.id)
+    assert reconstructed.conversation_messages == projection.conversation_messages
+    assert reconstructed.turns == projection.turns
+    assert reconstructed.design_progress_narrative == (
+        projection.design_progress_narrative
+    )
+    restarted.shutdown()
+
+
+def test_async_turn_failure_is_persisted_without_work(
+    postgres_database: Database,
+) -> None:
+    service = WorkInteractionService(
+        postgres_database,
+        capability=_FailingCapability(),
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    submitted = service.submit_turn(
+        interaction.id,
+        "Explore one bounded design question.",
+        human_identity="human:test",
+    )
+    failed = _wait_for_turn(service, submitted.id)
+    assert failed.status is InteractionTurnStatus.FAILED
+    assert failed.failure_code == "InteractionInvariantViolation"
+    assert "provider unavailable" in (failed.failure_message or "")
+    projection = service.get_shared_understanding(interaction.id)
+    assert projection.conversation_messages[0].processing_status is (
+        InteractionTurnStatus.FAILED
+    )
+    assert projection.latest_assessment is None
+    assert _count(postgres_database, product_works) == 0
+    service.shutdown()
+
+
+def test_failed_turn_evidence_is_sanitized_and_written_before_cleanup(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    service = WorkInteractionService(
+        postgres_database,
+        capability=_FailingCapability(),
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    submitted = service.submit_turn(
+        interaction.id,
+        "Exercise failure evidence extraction.",
+        human_identity="human:test",
+    )
+    failed = _wait_for_turn(service, submitted.id)
+    synthetic_sensitive_failure = failed.model_copy(
+        update={
+            "failure_message": (
+                "Authorization: Bearer sample-token password=sample-password "
+                "thread_sample req_sample C:\\Users\\sample-user\\.codex\\auth.json"
+            )
+        }
+    )
+    destination = tmp_path / "provider-failure.json"
+    report = _preserve_turn_failure_report(
+        synthetic_sensitive_failure,
+        destination,
+    )
+    persisted = json.loads(destination.read_text(encoding="utf-8"))
+
+    assert persisted == report
+    assert persisted["turn_id"] == str(failed.id)
+    assert persisted["status"] == "FAILED"
+    assert persisted["failure_code"] == "InteractionInvariantViolation"
+    assert persisted["created_at"]
+    assert persisted["started_at"]
+    assert persisted["completed_at"]
+    assert persisted["updated_at"]
+    rendered = destination.read_text(encoding="utf-8")
+    assert "sample-token" not in rendered
+    assert "sample-password" not in rendered
+    assert "sample-user" not in rendered
+    assert "thread_sample" not in rendered
+    assert "req_sample" not in rendered
+    assert "provider_identity" not in persisted
+    assert "model_identity" not in persisted
+    service.shutdown()
+
+
+def test_async_http_turn_streams_persisted_status_and_response(
+    postgres_database: Database,
+) -> None:
+    interaction_service = WorkInteractionService(
+        postgres_database,
+        capability=DeterministicWorkInteractionCapability(),
+    )
+    client = TestClient(
+        create_http_application(
+            application=object(),
+            database=postgres_database,
+            work_service=_NeverCalledWorkService(postgres_database),
+            orchestrator=_NoopOrchestrator(),
+            steering_driver=_NoopDriver(),
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=interaction_service,
+        ),
+        raise_server_exceptions=False,
+    )
+    with client:
+        created = client.post(
+            "/api/interactions", json={"human_identity": "human:test"}
+        ).json()
+        submitted = client.post(
+            f"/api/interactions/{created['interaction_id']}/turns",
+            json={
+                "content": "我想做一个运营管理平台。",
+                "human_identity": "human:test",
+            },
+        )
+        assert submitted.status_code == 202
+        turn_id = submitted.json()["turn_id"]
+        streamed = client.get(
+            f"/api/interactions/{created['interaction_id']}/turns/{turn_id}/events"
+        )
+        assert streamed.status_code == 200
+        assert "event: turn.status" in streamed.text
+        assert "event: message.delta" in streamed.text
+        assert "event: message.completed" in streamed.text
+
+
+@pytest.mark.real_codex
+@pytest.mark.skipif(
+    os.environ.get("SPG_RUN_REAL_HUMAN_WATT_COLLABORATION") != "1",
+    reason="explicit one-Turn Human–Watt Provider proof authorization is required",
+)
+def test_real_provider_guides_mandatory_human_watt_scenario_in_one_turn(
+    postgres_database: Database,
+) -> None:
+    service = WorkInteractionService(
+        postgres_database,
+        capability=CodexSdkWorkInteractionCapability(
+            repository_location=os.environ.get(
+                "SPG_WIC_PROVIDER_PROOF_ROOT",
+                str(PROJECT_ROOT),
+            ),
+            model=os.environ.get("SPG_WIC_PROVIDER_MODEL"),
+            timeout_seconds=300,
+        ),
+    )
+    try:
+        interaction = service.create_interaction(
+            human_identity="human:collaboration-proof"
+        )
+        submitted = service.submit_turn(
+            interaction.id,
+            "我想做一个运营管理平台。",
+            human_identity="human:collaboration-proof",
+        )
+        completed = _wait_for_turn(service, submitted.id, timeout=320)
+        if completed.status is InteractionTurnStatus.FAILED:
+            _fail_with_preserved_turn_evidence(completed)
+        assert completed.status is InteractionTurnStatus.COMPLETED
+
+        projection = service.get_shared_understanding(interaction.id)
+        assert projection.latest_assessment is not None
+        assert projection.latest_assessment.provider_identity.startswith(
+            "codex-sdk:thread:"
+        )
+        assert projection.selected_design_schema_identity == (
+            "watt:guided-design:general-product-system"
+        )
+        assert projection.selected_design_schema_version == "0.1"
+        assert projection.design_stage == "Motive, users, and problem"
+        assert projection.design_next_focus
+        assert projection.design_focus_rationale
+        assert projection.design_facilitation_strategy
+        assert "Design approach: General Product/System Design" in (
+            projection.conversation_messages[-1].content
+        )
+        assert _count(postgres_database, product_works) == 0
+        assert _count(postgres_database, work_reality_revisions) == 0
+        for table in runtime_tables:
+            assert _count(postgres_database, table) == 0, table.name
+        evidence_path = os.environ.get("SPG_REAL_PROVIDER_EVIDENCE_PATH")
+        if evidence_path:
+            _preserve_real_provider_success_report(
+                completed,
+                projection,
+                Path(evidence_path),
+            )
+    finally:
+        service.shutdown()
 
 
 @pytest.mark.real_codex

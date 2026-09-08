@@ -562,7 +562,10 @@ test("Work Composer preserves the user's expanded state across reloads", () => {
 
 test("pre-Work composer keeps messaging separate from explicit governed admission", () => {
   assert.match(appSource, /apiRequest\("\/api\/interactions"/);
-  assert.match(appSource, /\/api\/interactions\/\$\{state\.selectedInteractionId\}\/records/);
+  assert.match(appSource, /\/api\/interactions\/\$\{state\.selectedInteractionId\}\/turns/);
+  assert.match(appSource, /new globalThis\.EventSource\(/);
+  assert.match(appSource, /message\.delta/);
+  assert.match(appSource, /message\.completed/);
   assert.doesNotMatch(appSource, /apiRequest\("\/api\/works", \{ method: "POST"/);
   assert.match(appSource, /No Work was created/);
   assert.match(appSource, /\/api\/interactions\/\$\{projection\.interaction_id\}\/admit-work/);

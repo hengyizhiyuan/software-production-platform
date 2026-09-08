@@ -20,6 +20,15 @@ class InteractionActor(StrEnum):
     WATT = "WATT"
 
 
+class InteractionTurnStatus(StrEnum):
+    """Durable user-experience state for one Human-to-Watt exchange."""
+
+    RECEIVED = "RECEIVED"
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
 class InterpretationMeaningKind(StrEnum):
     CONTEXT = "CONTEXT"
     FACT = "FACT"
@@ -104,8 +113,50 @@ class Interaction(BaseModel):
     id: UUID
     condition: InteractionCondition
     current_work_id: UUID | None = None
+    selected_design_schema_identity: str | None = None
+    selected_design_schema_version: str | None = None
+    design_schema_selection_rationale: str | None = None
     created_by: str = Field(min_length=1, max_length=255)
     updated_by: str = Field(min_length=1, max_length=255)
+    created_at: datetime
+    updated_at: datetime
+
+
+class InteractionTurn(BaseModel):
+    """One durable asynchronous exchange; future waiting states can extend it."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: UUID
+    interaction_id: UUID
+    request_record_id: UUID
+    assessment_id: UUID | None = None
+    status: InteractionTurnStatus
+    failure_code: str | None = None
+    failure_message: str | None = None
+    created_at: datetime
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    updated_at: datetime
+
+
+class ConversationMessage(BaseModel):
+    """User-experience history linked to, but never replacing, governed truth."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: UUID
+    interaction_id: UUID
+    turn_id: UUID | None = None
+    sequence: int = Field(ge=1)
+    actor: InteractionActor
+    content: str = Field(min_length=1)
+    processing_status: InteractionTurnStatus
+    interaction_record_id: UUID | None = None
+    interpretation_assessment_id: UUID | None = None
+    design_result_references: tuple[str, ...] = ()
+    governance_event_references: tuple[str, ...] = ()
+    supporting_references: tuple[str, ...] = ()
     created_at: datetime
     updated_at: datetime
 
@@ -297,6 +348,8 @@ class SharedUnderstanding(BaseModel):
 
     interaction: Interaction
     records: tuple[InteractionRecord, ...]
+    conversation_messages: tuple[ConversationMessage, ...] = ()
+    turns: tuple[InteractionTurn, ...] = ()
     latest_assessment: InteractionAssessment | None
     latest_assessment_current: bool = True
     human_said: tuple[str, ...]
@@ -329,6 +382,14 @@ class SharedUnderstanding(BaseModel):
     work_focus_history: tuple[UUID, ...] = ()
     latest_work_transition: WorkTransitionRecord | None = None
     new_work_formation_pending: bool = False
+    selected_design_schema_identity: str | None = None
+    selected_design_schema_version: str | None = None
+    design_schema_selection_rationale: str | None = None
+    design_stage: str | None = None
+    design_next_focus: str | None = None
+    design_focus_rationale: str | None = None
+    design_facilitation_strategy: str | None = None
+    design_progress_narrative: str | None = None
 
 
 class WorkInteractionCapability(Protocol):

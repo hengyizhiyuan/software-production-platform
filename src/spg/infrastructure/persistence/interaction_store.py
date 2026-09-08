@@ -10,12 +10,15 @@ from sqlalchemy import func, insert, select, update
 from sqlalchemy.orm import Session
 
 from spg.domain.interaction import (
+    ConversationMessage,
     Interaction,
     InteractionActor,
     InteractionAssessment,
     InteractionCondition,
     InteractionInvariantViolation,
     InteractionRecord,
+    InteractionTurn,
+    InteractionTurnStatus,
     InterpretationMeaning,
     WorkEvolutionCandidateChange,
     WorkFocusClassification,
@@ -26,7 +29,9 @@ from spg.domain.interaction import (
 )
 from spg.infrastructure.persistence.product_schema import (
     interaction_assessments,
+    interaction_messages,
     interaction_records,
+    interaction_turns,
     interaction_work_transitions,
     product_interactions,
 )
@@ -76,6 +81,156 @@ class InteractionStore:
 
     def insert_record(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(interaction_records).values(**values))
+
+    def record(self, record_id: UUID) -> InteractionRecord | None:
+        row = self.session.execute(
+            select(interaction_records).where(interaction_records.c.id == record_id)
+        ).mappings().one_or_none()
+        return None if row is None else self._record(row)
+
+    def insert_turn(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(interaction_turns).values(**values))
+
+    def turn(self, turn_id: UUID, *, for_update: bool = False) -> InteractionTurn | None:
+        statement = select(interaction_turns).where(interaction_turns.c.id == turn_id)
+        if for_update:
+            statement = statement.with_for_update()
+        row = self.session.execute(statement).mappings().one_or_none()
+        return None if row is None else self._turn(row)
+
+    def turns(self, interaction_id: UUID) -> tuple[InteractionTurn, ...]:
+        rows = self.session.execute(
+            select(interaction_turns)
+            .where(interaction_turns.c.interaction_id == interaction_id)
+            .order_by(interaction_turns.c.created_at, interaction_turns.c.id)
+        ).mappings()
+        return tuple(self._turn(row) for row in rows)
+
+    def unfinished_turn(self, interaction_id: UUID) -> InteractionTurn | None:
+        row = self.session.execute(
+            select(interaction_turns)
+            .where(
+                (interaction_turns.c.interaction_id == interaction_id)
+                & interaction_turns.c.status.in_(
+                    (
+                        InteractionTurnStatus.RECEIVED.value,
+                        InteractionTurnStatus.PROCESSING.value,
+                    )
+                )
+            )
+            .order_by(interaction_turns.c.created_at)
+            .limit(1)
+        ).mappings().one_or_none()
+        return None if row is None else self._turn(row)
+
+    def pending_turns(self) -> tuple[InteractionTurn, ...]:
+        rows = self.session.execute(
+            select(interaction_turns)
+            .where(
+                interaction_turns.c.status.in_(
+                    (
+                        InteractionTurnStatus.RECEIVED.value,
+                        InteractionTurnStatus.PROCESSING.value,
+                    )
+                )
+            )
+            .order_by(interaction_turns.c.created_at, interaction_turns.c.id)
+        ).mappings()
+        return tuple(self._turn(row) for row in rows)
+
+    def update_turn(
+        self,
+        turn_id: UUID,
+        *,
+        status: InteractionTurnStatus,
+        updated_at,
+        assessment_id: UUID | None = None,
+        failure_code: str | None = None,
+        failure_message: str | None = None,
+        started_at=None,
+        completed_at=None,
+    ) -> None:
+        values: dict[str, Any] = {
+            "status": status.value,
+            "updated_at": updated_at,
+            "assessment_id": assessment_id,
+            "failure_code": failure_code,
+            "failure_message": failure_message,
+        }
+        if started_at is not None:
+            values["started_at"] = started_at
+        if completed_at is not None:
+            values["completed_at"] = completed_at
+        result = self.session.execute(
+            update(interaction_turns)
+            .where(interaction_turns.c.id == turn_id)
+            .values(**values)
+        )
+        if result.rowcount != 1:
+            raise InteractionInvariantViolation(f"Interaction Turn not found: {turn_id}")
+
+    def next_message_sequence(self, interaction_id: UUID) -> int:
+        value = self.session.execute(
+            select(func.max(interaction_messages.c.sequence)).where(
+                interaction_messages.c.interaction_id == interaction_id
+            )
+        ).scalar_one()
+        return int(value or 0) + 1
+
+    def insert_message(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(interaction_messages).values(**values))
+
+    def update_turn_messages_status(
+        self,
+        turn_id: UUID,
+        *,
+        status: InteractionTurnStatus,
+        updated_at,
+    ) -> None:
+        self.session.execute(
+            update(interaction_messages)
+            .where(interaction_messages.c.turn_id == turn_id)
+            .values(processing_status=status.value, updated_at=updated_at)
+        )
+
+    def messages(self, interaction_id: UUID) -> tuple[ConversationMessage, ...]:
+        rows = self.session.execute(
+            select(interaction_messages)
+            .where(interaction_messages.c.interaction_id == interaction_id)
+            .order_by(interaction_messages.c.sequence, interaction_messages.c.id)
+        ).mappings()
+        return tuple(self._message(row) for row in rows)
+
+    def message_for_turn(
+        self, turn_id: UUID, actor: InteractionActor
+    ) -> ConversationMessage | None:
+        row = self.session.execute(
+            select(interaction_messages).where(
+                (interaction_messages.c.turn_id == turn_id)
+                & (interaction_messages.c.actor == actor.value)
+            )
+        ).mappings().one_or_none()
+        return None if row is None else self._message(row)
+
+    def select_design_schema(
+        self,
+        interaction_id: UUID,
+        *,
+        identity: str,
+        version: str,
+        rationale: str,
+        updated_at,
+    ) -> None:
+        self.session.execute(
+            update(product_interactions)
+            .where(product_interactions.c.id == interaction_id)
+            .values(
+                selected_design_schema_identity=identity,
+                selected_design_schema_version=version,
+                design_schema_selection_rationale=rationale,
+                updated_at=updated_at,
+            )
+        )
 
     def touch_interaction(self, interaction_id: UUID, *, updated_by: str, updated_at) -> None:
         self.session.execute(
@@ -297,6 +452,9 @@ class InteractionStore:
             id=row["id"],
             condition=InteractionCondition(row["condition"]),
             current_work_id=row["current_work_id"],
+            selected_design_schema_identity=row["selected_design_schema_identity"],
+            selected_design_schema_version=row["selected_design_schema_version"],
+            design_schema_selection_rationale=row["design_schema_selection_rationale"],
             created_by=row["created_by"],
             updated_by=row["updated_by"],
             created_at=row["created_at"],
@@ -366,6 +524,41 @@ class InteractionStore:
             model_identity=row["model_identity"],
             schema_version=row["schema_version"],
             created_at=row["created_at"],
+        )
+
+    @staticmethod
+    def _turn(row: Mapping[str, Any]) -> InteractionTurn:
+        return InteractionTurn(
+            id=row["id"],
+            interaction_id=row["interaction_id"],
+            request_record_id=row["request_record_id"],
+            assessment_id=row["assessment_id"],
+            status=InteractionTurnStatus(row["status"]),
+            failure_code=row["failure_code"],
+            failure_message=row["failure_message"],
+            created_at=row["created_at"],
+            started_at=row["started_at"],
+            completed_at=row["completed_at"],
+            updated_at=row["updated_at"],
+        )
+
+    @staticmethod
+    def _message(row: Mapping[str, Any]) -> ConversationMessage:
+        return ConversationMessage(
+            id=row["id"],
+            interaction_id=row["interaction_id"],
+            turn_id=row["turn_id"],
+            sequence=row["sequence"],
+            actor=InteractionActor(row["actor"]),
+            content=row["content"],
+            processing_status=InteractionTurnStatus(row["processing_status"]),
+            interaction_record_id=row["interaction_record_id"],
+            interpretation_assessment_id=row["interpretation_assessment_id"],
+            design_result_references=tuple(row["design_result_references"]),
+            governance_event_references=tuple(row["governance_event_references"]),
+            supporting_references=tuple(row["supporting_references"]),
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
         )
 
     @staticmethod

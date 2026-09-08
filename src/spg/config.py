@@ -26,6 +26,7 @@ class Settings(BaseSettings):
         description="PostgreSQL URL supplied through SPG_DATABASE_URL",
     )
     executor_adapter: str = "unconfigured"
+    wic_provider_model: str | None = Field(default=None, min_length=1)
     executor_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
     executor_max_internal_turns: int = Field(default=3, ge=1)
     executor_sandbox_mode: Literal["workspace-write", "full-access"] = (

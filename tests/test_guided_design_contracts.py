@@ -6,6 +6,8 @@ from spg.application.guided_design import (
     GuidedDesignApplicationService,
     general_product_system_design_issues,
     guided_design_step_specs,
+    design_schema_registry,
+    match_design_schema_text,
 )
 from spg.domain.guided_design import (
     DesignIssueState,
@@ -38,6 +40,25 @@ def test_guided_design_schema_is_general_adaptive_and_steering_linked() -> None:
         SteeringStepType.PRODUCE,
         SteeringStepType.VERIFY_ACCEPT,
         SteeringStepType.COMPLETE,
+    )
+
+
+def test_seed_schema_registry_is_versioned_extensible_and_matches_motive() -> None:
+    registry = design_schema_registry()
+    assert tuple(schema.title for schema in registry) == (
+        "General Product/System Design",
+        "Technical System Design",
+        "Existing Product Evolution",
+    )
+    assert {schema.version for schema in registry} == {"0.1"}
+    assert match_design_schema_text("我想做一个运营管理平台。")[0].title == (
+        "General Product/System Design"
+    )
+    assert match_design_schema_text("设计高性能技术基础设施")[0].title == (
+        "Technical System Design"
+    )
+    assert match_design_schema_text("优化现有产品的用户反馈流程")[0].title == (
+        "Existing Product Evolution"
     )
 
 

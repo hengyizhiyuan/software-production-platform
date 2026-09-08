@@ -33,6 +33,7 @@ guided_design_processes = Table(
     ),
     Column("schema_identity", String(255), nullable=False),
     Column("schema_version", String(32), nullable=False),
+    Column("schema_selection_rationale", Text, nullable=False),
     Column("objective", Text, nullable=False),
     Column("condition", String(32), nullable=False),
     Column(

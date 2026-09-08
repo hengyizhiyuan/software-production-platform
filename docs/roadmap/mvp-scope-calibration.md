@@ -13,7 +13,9 @@ The current Product-MVP priority is:
 > governed Human WIC evidence and reassess Product-MVP closure before Product
 > Experience and deployment work.
 
-The MVP development workflow remains Human Governor + ChatGPT Architecture Lead + Codex repo-grounded Executor.
+The MVP development workflow remains Human Governor + ChatGPT Architecture
+Lead + Codex repo-grounded Executor, governed by the
+[AI-native Development Execution Principles](../architecture/ai-native-development-execution-principles.md).
 
 ## 2. MVP Product Definition
 
@@ -257,12 +259,13 @@ an evidence-backed follow-up rather than hidden success.
     Production Measurement v0 IMPLEMENTED / FOCUSED VALIDATION PASS; estimation,
     queue, scheduling, and runtime capacity behavior require separate admission
     and do not reopen Core.
-19. **Human WIC Product Dogfood** — separately admit and exercise the full formation/admission/evolution/satisfaction/new-direction journey.
-20. **Watt Product MVP closure reassessment** — only after real Human WIC evidence.
-21. **Necessary UI / Product Experience work** — improve observability and history within an admitted boundary.
-22. **Deployment readiness and promotion validation** — risk-based gates for the accepted checkpoint.
-23. **Linux server deployment and promotion** — bootstrap and validate from an exact accepted candidate.
-24. **Phase-2 hardening and systematic post-Core dogfood** — activate from evidence and triggers, not architectural interest alone.
+19. **Human–Watt Collaboration and Guided Design Facilitation** — IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS / PENDING ARCHITECTURE LEAD REALITY REVIEW. Adds persisted conversation/Turn experience, bounded asynchronous processing, SSE delivery, a three-schema seed registry, schema matching, design-stage/focus guidance, and restart reconstruction without changing WIC/Plan/SPG truth ownership. The mandatory real Provider scenario completed once with `gpt-5.6-sol`; deterministic evidence remains distinct from that real proof.
+20. **Human WIC Product Dogfood** — separately admit and exercise the full formation/admission/evolution/satisfaction/new-direction journey.
+21. **Watt Product MVP closure reassessment** — only after real Human WIC evidence.
+22. **Necessary UI / Product Experience work** — improve observability and history within an admitted boundary.
+23. **Deployment readiness and promotion validation** — risk-based gates for the accepted checkpoint.
+24. **Linux server deployment and promotion** — bootstrap and validate from an exact accepted candidate.
+25. **Phase-2 hardening and systematic post-Core dogfood** — activate from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
 

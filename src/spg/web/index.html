@@ -108,7 +108,10 @@
                 <p class="eyebrow">Human said</p>
                 <h3 id="interaction-heading">Interaction</h3>
               </div>
-              <button id="new-interaction-control" class="text-button" type="button">New interaction</button>
+              <div class="interaction-heading-actions">
+                <span id="interaction-processing-status" class="status-badge status-draft">IDLE</span>
+                <button id="new-interaction-control" class="text-button" type="button">New interaction</button>
+              </div>
             </div>
             <div id="interaction-history" class="interaction-history" aria-live="polite"></div>
 
@@ -140,6 +143,13 @@
                 <div><dt>Interaction relationship</dt><dd id="interaction-relationship-state">OPEN</dd></div>
                 <div><dt>Work focus history</dt><dd id="work-focus-history">None</dd></div>
                 <div><dt>Work transition</dt><dd id="work-transition-summary">None</dd></div>
+                <div><dt>Design process candidate</dt><dd id="interaction-design-schema">Not selected</dd></div>
+                <div><dt>Why this process</dt><dd id="interaction-design-schema-rationale">Not assessed</dd></div>
+                <div><dt>Current design stage</dt><dd id="interaction-design-stage">Not established</dd></div>
+                <div><dt>Next design focus</dt><dd id="interaction-design-next-focus">Not established</dd></div>
+                <div><dt>Why this focus</dt><dd id="interaction-design-focus-rationale">Not established</dd></div>
+                <div><dt>Facilitation strategy</dt><dd id="interaction-design-strategy">Not established</dd></div>
+                <div class="wide-fact"><dt>Design progress</dt><dd id="interaction-design-progress">No design process selected.</dd></div>
               </dl>
               <p id="readiness-affordance" class="empty-copy">Not ready to form Work.</p>
               <div id="interaction-admission" class="operator-panel compact-admission" hidden>
@@ -296,9 +306,17 @@
             <p id="design-objective" class="intelligence-primary"></p>
             <dl class="alignment-detail-grid">
               <div><dt>Active process</dt><dd id="design-process"></dd></div>
+              <div><dt>Why this process</dt><dd id="design-schema-rationale"></dd></div>
+              <div><dt>Current stage</dt><dd id="design-stage"></dd></div>
               <div><dt>Current focus</dt><dd id="design-current-focus"></dd></div>
               <div><dt>Why now</dt><dd id="design-focus-rationale"></dd></div>
+              <div><dt>Facilitation strategy</dt><dd id="design-facilitation-strategy"></dd></div>
+              <div><dt>How Watt will lead</dt><dd id="design-facilitation-guidance"></dd></div>
               <div><dt>Progress</dt><dd id="design-progress"></dd></div>
+              <div><dt>Progress narrative</dt><dd id="design-progress-narrative"></dd></div>
+              <div><dt>Completed areas</dt><dd id="design-completed-areas"></dd></div>
+              <div><dt>Unresolved areas</dt><dd id="design-unresolved-areas"></dd></div>
+              <div><dt>Dependency blockers</dt><dd id="design-dependency-blockers"></dd></div>
               <div><dt>Readiness blockers</dt><dd id="design-blockers"></dd></div>
               <div><dt>Upcoming transition</dt><dd id="design-upcoming"></dd></div>
             </dl>

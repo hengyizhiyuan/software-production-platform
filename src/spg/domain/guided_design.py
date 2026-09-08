@@ -48,6 +48,27 @@ class DesignReadinessState(StrEnum):
     NOT_READY = "NOT_READY"
 
 
+class DesignFacilitationStrategy(StrEnum):
+    CLARIFY = "CLARIFY"
+    SUMMARIZE_UNDERSTANDING = "SUMMARIZE_UNDERSTANDING"
+    PRESENT_ALTERNATIVES = "PRESENT_ALTERNATIVES"
+    EXPLAIN_TRADE_OFFS = "EXPLAIN_TRADE_OFFS"
+    PROPOSE_NEXT_DESIGN_STEP = "PROPOSE_NEXT_DESIGN_STEP"
+    REQUEST_HUMAN_DECISION = "REQUEST_HUMAN_DECISION"
+
+
+class DesignSchemaDefinition(BaseModel):
+    """Versioned built-in methodology asset, independent of any process instance."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    identity: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    applicability: str = Field(min_length=1)
+    issues: tuple["DesignIssue", ...] = Field(min_length=1)
+
+
 class DesignIssue(BaseModel):
     """One semantic issue in an agenda revision; current focus remains Plan truth."""
 
@@ -97,6 +118,7 @@ class GuidedDesignProcessRecord(BaseModel):
     work_id: UUID
     schema_identity: str = Field(min_length=1)
     schema_version: str = Field(min_length=1)
+    schema_selection_rationale: str = Field(min_length=1)
     objective: str = Field(min_length=1)
     condition: DesignProcessCondition
     basis_work_reality_revision_id: UUID | None = None
@@ -149,11 +171,19 @@ class GuidedDesignProjection(BaseModel):
     process_objective: str
     schema_identity: str
     schema_version: str
+    schema_selection_rationale: str
     agenda_revision_id: UUID
     agenda_revision_number: int
     current_focus_key: str | None
     current_focus: DesignIssue | None
     focus_rationale: str | None
+    current_stage: str
+    completed_areas: tuple[str, ...]
+    unresolved_areas: tuple[str, ...]
+    dependency_blockers: tuple[str, ...]
+    facilitation_strategy: DesignFacilitationStrategy
+    facilitation_guidance: str
+    progress_narrative: str
     issues: tuple[DesignIssue, ...]
     resolved_count: int = Field(ge=0)
     total_applicable_count: int = Field(ge=1)

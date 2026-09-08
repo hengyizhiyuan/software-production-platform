@@ -169,3 +169,50 @@ Its architectural question is:
 Production Intent Continuity is an important foundation capability for AI-native software production. As AI becomes more capable of exploration and generation, preserving goals and governing the process become increasingly important.
 
 This benchmark is a Future Evaluation Direction. It does not add an MVP feature or imply that the benchmark is currently implemented.
+
+## PWU Execution Continuity Benchmark
+
+> Evaluate whether segmented, governed Production Work Unit execution can
+> preserve the material production continuity of a long Executor run while
+> improving pause, recovery, replacement, verification, and auditability.
+
+The benchmark compares two execution patterns against an equivalent governed
+Work objective, source Reality, constraints, and completion obligations:
+
+```text
+Pattern A
+    Long Continuous Executor Run
+
+Pattern B
+    PWU-1
+        -> Reality update
+        -> governed context reconstruction
+        -> PWU-2
+        -> ...
+        -> PWU-N
+```
+
+The benchmark should evaluate:
+
+- material outcome and completion-obligation equivalence;
+- preservation of intent, decisions, constraints, and relevant learning;
+- context reconstruction fidelity between PWUs;
+- pause and lawful continuation behavior;
+- recovery after an interrupted or failed execution segment;
+- replacement of a model, Provider, or Executor between segments;
+- independent verification and evidence lineage;
+- failure radius and the ability to identify the first divergence;
+- auditability without dependence on hidden Provider session memory.
+
+Success does not require identical wording, internal reasoning, or micro-level
+execution order. Material divergence must be explainable by changed governed
+Reality, capability constraints, or evidence rather than transient session
+state alone.
+
+This benchmark tests the architecture hypothesis:
+
+> Execution continuity without execution monolithicity.
+
+The benchmark is a Future Evaluation Direction. It is not currently
+implemented or run, and this record does not add an MVP feature or authorize a
+benchmark harness.

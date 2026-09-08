@@ -66,11 +66,12 @@ Each `DesignIssue` records:
 - the exact Steering Step and admitted semantic result when applicable;
 - provenance references.
 
-The MVP ships one general product/system schema. It covers motive/users/problem,
-outcomes/scenarios, boundary/non-goals, capabilities/lifecycle,
-responsibility/information/interaction, architecture/risks/assumptions, and
-verification/staged readiness. This is an extensible design basis, not a fixed
-questionnaire or a hard-coded product example.
+The MVP ships a versioned seed registry containing General Product/System
+Design v0.1, Technical System Design v0.1, and Existing Product Evolution v0.1.
+The selected schema identity, version, and rationale are persisted. These are
+extensible methodology assets, not a fixed questionnaire, schema marketplace,
+or workflow editor. Active stage/focus guidance and facilitation semantics are
+defined in the [Guided Design Facilitation Layer](guided-design-facilitation-layer.md).
 
 ## Current focus and progression
 
@@ -156,7 +157,12 @@ claim the overall finding is universally closed.
 
 ## Persistence and restart
 
-Migration `20260908_27` adds:
+Migration `20260908_27` adds the original Guided Design persistence. Migration
+`20260908_28` adds persisted schema-selection rationale together with the
+Human–Watt conversation/Turn foundation described in the
+[Human–Watt Collaboration Layer](human-watt-collaboration-layer.md).
+
+The original Guided Design migration adds:
 
 - `guided_design_processes`;
 - append-only `guided_design_agenda_revisions`, with one active revision;

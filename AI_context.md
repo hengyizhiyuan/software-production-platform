@@ -99,6 +99,10 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **WORK INTERACTION & CLOSED-LOOP REFINEMENT CORE — CLOSED / PASS**
 
+**HUMAN–WATT COLLABORATION LAYER — IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — PENDING ARCHITECTURE LEAD REALITY REVIEW**
+
+**GUIDED DESIGN FACILITATION LAYER — IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — PENDING ARCHITECTURE LEAD REALITY REVIEW**
+
 **WATT PRODUCT MVP — NOT CLOSED**
 
 **REALITY-DRIVEN PLAN STEERING MVP — CLOSED / PASS**
@@ -841,6 +845,11 @@ The current system-level architecture baseline is:
 - [Work Interaction & Closed-loop Refinement Architecture Contract](docs/architecture/work-interaction-closed-loop-refinement.md)
 - [Guided Design Core](docs/architecture/guided-design-core.md)
 - [Guided Design Core Focused Validation](docs/evidence/guided-design-core-focused-validation.md)
+- [Human–Watt Collaboration Layer](docs/architecture/human-watt-collaboration-layer.md)
+- [Guided Design Facilitation Layer](docs/architecture/guided-design-facilitation-layer.md)
+- [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
+- [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)
+- [AI-native Development Execution Principles](docs/architecture/ai-native-development-execution-principles.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -875,6 +884,11 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - PWU, Not Work, Is the Bounded Production Unit
 - Reality-driven Plan Steering
 - Guided Design Structures Design Questions; Plan Steering Owns What Happens Next
+- System-level Production Capability over Isolated AI Features
+- Execution Continuity without Execution Monolithicity
+- Govern the Execution Envelope, Not Every Executor Move
+- Mission Contract before Autonomous Executor Implementation
+- Human-at-Authority-Points, Not Human-in-the-loop-everywhere
 - Duration/Capacity Measurement Before Optimization
 - Operational Plans May Recalculate; Governed Production Truth Does Not Drift
 - Facts Constrain the Plan

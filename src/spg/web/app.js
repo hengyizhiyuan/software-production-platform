@@ -24,6 +24,8 @@
     statusFilter: "",
     busy: false,
     pollTimer: null,
+    activeInteractionTurnId: "",
+    interactionEventSource: null,
   };
 
   const elements = {
@@ -45,6 +47,7 @@
     globalErrorMessage: document.getElementById("global-error-message"),
     noSelection: document.getElementById("no-selection"),
     interactionHistory: document.getElementById("interaction-history"),
+    interactionProcessingStatus: document.getElementById("interaction-processing-status"),
     newInteractionControl: document.getElementById("new-interaction-control"),
     interactionReadiness: document.getElementById("interaction-readiness"),
     wattResponse: document.getElementById("watt-response"),
@@ -66,6 +69,13 @@
     interactionRelationshipState: document.getElementById("interaction-relationship-state"),
     workFocusHistory: document.getElementById("work-focus-history"),
     workTransitionSummary: document.getElementById("work-transition-summary"),
+    interactionDesignSchema: document.getElementById("interaction-design-schema"),
+    interactionDesignSchemaRationale: document.getElementById("interaction-design-schema-rationale"),
+    interactionDesignStage: document.getElementById("interaction-design-stage"),
+    interactionDesignNextFocus: document.getElementById("interaction-design-next-focus"),
+    interactionDesignFocusRationale: document.getElementById("interaction-design-focus-rationale"),
+    interactionDesignStrategy: document.getElementById("interaction-design-strategy"),
+    interactionDesignProgress: document.getElementById("interaction-design-progress"),
     readinessAffordance: document.getElementById("readiness-affordance"),
     interactionAdmission: document.getElementById("interaction-admission"),
     interactionAuthorityIdentity: document.getElementById("interaction-authority-identity"),
@@ -121,9 +131,17 @@
     designReadiness: document.getElementById("design-readiness"),
     designObjective: document.getElementById("design-objective"),
     designProcess: document.getElementById("design-process"),
+    designSchemaRationale: document.getElementById("design-schema-rationale"),
+    designStage: document.getElementById("design-stage"),
     designCurrentFocus: document.getElementById("design-current-focus"),
     designFocusRationale: document.getElementById("design-focus-rationale"),
+    designFacilitationStrategy: document.getElementById("design-facilitation-strategy"),
+    designFacilitationGuidance: document.getElementById("design-facilitation-guidance"),
     designProgress: document.getElementById("design-progress"),
+    designProgressNarrative: document.getElementById("design-progress-narrative"),
+    designCompletedAreas: document.getElementById("design-completed-areas"),
+    designUnresolvedAreas: document.getElementById("design-unresolved-areas"),
+    designDependencyBlockers: document.getElementById("design-dependency-blockers"),
     designBlockers: document.getElementById("design-blockers"),
     designUpcoming: document.getElementById("design-upcoming"),
     designAgenda: document.getElementById("design-agenda"),
@@ -355,6 +373,8 @@
       );
       elements.interactionReadiness.textContent = "NOT_READY";
       elements.interactionReadiness.className = "status-badge status-draft";
+      elements.interactionProcessingStatus.textContent = "IDLE";
+      elements.interactionProcessingStatus.className = "status-badge status-draft";
       elements.wattResponse.textContent = "Start anywhere. Watt will ask only for material clarification.";
       elements.interpretedMotive.textContent = "Not established yet";
       elements.interpretedOutcome.textContent = "Not established yet";
@@ -374,18 +394,51 @@
       elements.interactionRelationshipState.textContent = "OPEN";
       elements.workFocusHistory.textContent = "None";
       elements.workTransitionSummary.textContent = "None";
+      elements.interactionDesignSchema.textContent = "Not selected";
+      elements.interactionDesignSchemaRationale.textContent = "Not assessed";
+      elements.interactionDesignStage.textContent = "Not established";
+      elements.interactionDesignNextFocus.textContent = "Not established";
+      elements.interactionDesignFocusRationale.textContent = "Not established";
+      elements.interactionDesignStrategy.textContent = "Not established";
+      elements.interactionDesignProgress.textContent = "No design process selected.";
       elements.readinessAffordance.textContent = "Not ready to form Work.";
       elements.interactionAdmission.hidden = true;
       elements.workRevisionAdmission.hidden = true;
       elements.workTransitionDecision.hidden = true;
       return;
     }
-    projection.records.forEach((record) => {
+    const history = projection.conversation_messages && projection.conversation_messages.length
+      ? projection.conversation_messages
+      : projection.records;
+    history.forEach((record) => {
       const message = createElement("article", `interaction-message actor-${record.actor.toLowerCase()}`);
       message.append(createElement("p", "speaker-label", record.actor === "HUMAN" ? "You" : "Watt"));
       message.append(createElement("p", "", record.content));
+      const timestamp = record.created_at ? new Date(record.created_at).toLocaleTimeString() : "";
+      const statusText = record.processing_status ? ` · ${record.processing_status}` : "";
+      message.append(createElement("p", "message-meta", `${timestamp}${statusText}`));
+      const references = [
+        ...(record.supporting_references || []),
+        ...(record.design_result_references || []),
+        ...(record.governance_event_references || []),
+      ];
+      if (references.length) {
+        message.append(createElement("p", "message-references", references.join(" · ")));
+      }
       elements.interactionHistory.append(message);
     });
+    const latestTurn = projection.turns && projection.turns.length
+      ? projection.turns[projection.turns.length - 1]
+      : null;
+    const turnStatus = latestTurn ? latestTurn.status : "IDLE";
+    elements.interactionProcessingStatus.textContent = turnStatus;
+    elements.interactionProcessingStatus.className = `status-badge ${
+      turnStatus === "FAILED"
+        ? "status-attention"
+        : turnStatus === "COMPLETED"
+          ? "status-completed"
+          : "status-draft"
+    }`;
     const assessment = projection.latest_assessment;
     const readiness = projection.readiness;
     const status = readiness ? readiness.status : "NOT_READY";
@@ -434,6 +487,19 @@
     elements.workTransitionSummary.textContent = transition
       ? `${transition.focus_classification} · ${transition.choice} · ${transition.reason}`
       : "None";
+    elements.interactionDesignSchema.textContent = projection.selected_design_schema_identity
+      ? `${projection.selected_design_schema_identity} v${projection.selected_design_schema_version}`
+      : "Not selected";
+    elements.interactionDesignSchemaRationale.textContent = projection.design_schema_selection_rationale
+      || "Not assessed";
+    elements.interactionDesignStage.textContent = projection.design_stage || "Not established";
+    elements.interactionDesignNextFocus.textContent = projection.design_next_focus || "Not established";
+    elements.interactionDesignFocusRationale.textContent = projection.design_focus_rationale
+      || "Not established";
+    elements.interactionDesignStrategy.textContent = projection.design_facilitation_strategy
+      || "Not established";
+    elements.interactionDesignProgress.textContent = projection.design_progress_narrative
+      || "No design process selected.";
     elements.readinessAffordance.textContent = projection.new_work_formation_pending
       ? "New Work formation context is open. Continue the Interaction; no Work exists until Human admission."
       : projection.work_satisfaction_state === "CURRENTLY_SATISFIED"
@@ -745,12 +811,29 @@
       : "status-badge status-attention";
     elements.designObjective.textContent = design.process_objective;
     elements.designProcess.textContent = `${design.schema_identity} v${design.schema_version} · agenda revision ${design.agenda_revision_number}`;
+    elements.designSchemaRationale.textContent = design.schema_selection_rationale;
+    elements.designStage.textContent = design.current_stage;
     elements.designCurrentFocus.textContent = design.current_focus
       ? `${design.current_focus.title}: ${design.current_focus.objective}`
       : "No design issue is currently selected.";
     elements.designFocusRationale.textContent = design.focus_rationale
       || "Plan Steering has not recorded a focus rationale yet.";
+    elements.designFacilitationStrategy.textContent = design.facilitation_strategy;
+    elements.designFacilitationGuidance.textContent = design.facilitation_guidance;
     elements.designProgress.textContent = `${design.resolved_count} of ${design.total_applicable_count} agenda issues resolved or intentionally skipped`;
+    elements.designProgressNarrative.textContent = design.progress_narrative;
+    elements.designCompletedAreas.textContent = joined(
+      design.completed_areas,
+      "No design areas completed yet.",
+    );
+    elements.designUnresolvedAreas.textContent = joined(
+      design.unresolved_areas,
+      "No unresolved design areas.",
+    );
+    elements.designDependencyBlockers.textContent = joined(
+      design.dependency_blockers,
+      "No unresolved dependencies for the current focus.",
+    );
     elements.designBlockers.textContent = joined(
       design.readiness_blockers,
       "No unresolved critical design blockers.",
@@ -1192,6 +1275,94 @@
     }
   }
 
+  async function refreshInteractionAfterTurn() {
+    if (!state.selectedInteractionId) {
+      return;
+    }
+    state.sharedUnderstanding = await apiRequest(
+      `/api/interactions/${state.selectedInteractionId}`,
+    );
+    await loadCollections();
+    const focusedWorkId = state.sharedUnderstanding
+      ? state.sharedUnderstanding.governed_work_id || ""
+      : "";
+    state.selectedWorkId = focusedWorkId;
+    if (focusedWorkId) {
+      await refreshSelected();
+      setSurface("selected");
+    } else {
+      state.selectedWork = null;
+      setSurface("empty");
+    }
+    renderInteraction();
+  }
+
+  async function pollInteractionTurn(interactionId, turnId) {
+    while (state.activeInteractionTurnId === turnId) {
+      const turn = await apiRequest(
+        `/api/interactions/${interactionId}/turns/${turnId}`,
+      );
+      elements.interactionProcessingStatus.textContent = turn.status;
+      if (turn.status === "COMPLETED" || turn.status === "FAILED") {
+        state.activeInteractionTurnId = "";
+        await refreshInteractionAfterTurn();
+        if (turn.status === "FAILED") {
+          showNotice(new ApiError(409, turn.failure_code || "TURN_FAILED", turn.failure_message || "Watt could not complete this Turn."));
+        }
+        return;
+      }
+      await new Promise((resolve) => globalThis.setTimeout(resolve, 400));
+    }
+  }
+
+  function observeInteractionTurn(interactionId, turnId) {
+    state.activeInteractionTurnId = turnId;
+    elements.wattResponse.textContent = "Watt is working from the persisted Interaction Reality…";
+    if (typeof globalThis.EventSource !== "function") {
+      void pollInteractionTurn(interactionId, turnId);
+      return;
+    }
+    if (state.interactionEventSource) {
+      state.interactionEventSource.close();
+    }
+    const source = new globalThis.EventSource(
+      `/api/interactions/${interactionId}/turns/${turnId}/events`,
+    );
+    state.interactionEventSource = source;
+    let streamed = "";
+    source.addEventListener("turn.status", (event) => {
+      const turn = JSON.parse(event.data);
+      elements.interactionProcessingStatus.textContent = turn.status;
+      elements.interactionProcessingStatus.className = "status-badge status-draft";
+    });
+    source.addEventListener("message.delta", (event) => {
+      streamed += JSON.parse(event.data).delta;
+      elements.wattResponse.textContent = streamed;
+    });
+    source.addEventListener("message.completed", async () => {
+      source.close();
+      state.interactionEventSource = null;
+      state.activeInteractionTurnId = "";
+      await refreshInteractionAfterTurn();
+      announce("Watt completed the Interaction Turn from persisted Reality.");
+    });
+    source.addEventListener("turn.failed", async (event) => {
+      const failure = JSON.parse(event.data);
+      source.close();
+      state.interactionEventSource = null;
+      state.activeInteractionTurnId = "";
+      await refreshInteractionAfterTurn();
+      showNotice(new ApiError(409, failure.code || "TURN_FAILED", failure.message || "Watt could not complete this Turn."));
+    });
+    source.onerror = () => {
+      source.close();
+      state.interactionEventSource = null;
+      if (state.activeInteractionTurnId === turnId) {
+        void pollInteractionTurn(interactionId, turnId);
+      }
+    };
+  }
+
   async function continueInteraction(event) {
     event.preventDefault();
     if (state.busy) {
@@ -1216,30 +1387,20 @@
           // Interaction remains durable server-side when browser storage is unavailable.
         }
       }
-      state.sharedUnderstanding = await apiRequest(
-        `/api/interactions/${state.selectedInteractionId}/records`,
+      const turn = await apiRequest(
+        `/api/interactions/${state.selectedInteractionId}/turns`,
         {
           method: "POST",
           body: { content, human_identity: "human:local-operator" },
         },
       );
       elements.workRequirement.value = "";
-      const focusedWorkId = state.sharedUnderstanding.governed_work_id || "";
-      state.selectedWorkId = focusedWorkId;
-      await loadCollections();
-      if (focusedWorkId) {
-        await refreshSelected();
-        setSurface("selected");
-      } else {
-        state.selectedWork = null;
-        setSurface("empty");
-      }
-      renderInteraction();
-      announce(
-        focusedWorkId
-          ? "Interaction updated while preserving governed Work focus."
-          : "Shared Understanding updated. No Work was created.",
+      state.sharedUnderstanding = await apiRequest(
+        `/api/interactions/${state.selectedInteractionId}`,
       );
+      renderInteraction();
+      observeInteractionTurn(state.selectedInteractionId, turn.turn_id);
+      announce("Message received. No Work was created; Watt is processing it in the background.");
     } catch (error) {
       showNotice(error);
     } finally {

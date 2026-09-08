@@ -1,14 +1,16 @@
 """FastAPI boundary for the minimal Goal / Work MVP product surface."""
 
 from contextlib import asynccontextmanager
+import asyncio
 from importlib.resources import files
+import json
 from pathlib import Path
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -25,6 +27,7 @@ from spg.api.dto import (
     HumanDecisionRequest,
     InteractionCreateRequest,
     InteractionMessageRequest,
+    InteractionTurnResponse,
     InteractionWorkAdmissionRequest,
     InteractionWorkRevisionDecisionRequest,
     InteractionWorkTransitionDecisionRequest,
@@ -138,6 +141,10 @@ def create_http_application(
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
+        if selected_interaction is not None:
+            resume_turns = getattr(selected_interaction, "resume_pending_turns", None)
+            if callable(resume_turns):
+                resume_turns()
         selected_post_admission.bootstrap_incomplete_ready_long_lived()
         selected_steering_driver.resume_safely_eligible_works()
         selected_orchestrator.resume_safely_eligible_works()
@@ -146,6 +153,10 @@ def create_http_application(
         finally:
             selected_steering_driver.shutdown()
             selected_orchestrator.shutdown()
+            if selected_interaction is not None:
+                shutdown_interaction = getattr(selected_interaction, "shutdown", None)
+                if callable(shutdown_interaction):
+                    shutdown_interaction()
 
     api = FastAPI(
         title="SPG Product API",
@@ -392,6 +403,114 @@ def create_http_application(
                 human_identity=request.human_identity,
                 supporting_references=request.supporting_references,
             )
+        )
+
+    @api.post(
+        "/api/interactions/{interaction_id}/turns",
+        response_model=InteractionTurnResponse,
+        status_code=202,
+    )
+    def submit_interaction_turn(
+        interaction_id: UUID,
+        request: InteractionMessageRequest,
+    ) -> InteractionTurnResponse:
+        turn = required_interaction_service().submit_turn(
+            interaction_id,
+            request.content,
+            human_identity=request.human_identity,
+            supporting_references=request.supporting_references,
+        )
+        return InteractionTurnResponse.from_turn(turn)
+
+    @api.get(
+        "/api/interactions/{interaction_id}/turns/{turn_id}",
+        response_model=InteractionTurnResponse,
+    )
+    def get_interaction_turn(
+        interaction_id: UUID,
+        turn_id: UUID,
+    ) -> InteractionTurnResponse:
+        turn = required_interaction_service().get_turn(turn_id)
+        if turn.interaction_id != interaction_id:
+            raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
+        return InteractionTurnResponse.from_turn(turn)
+
+    @api.get("/api/interactions/{interaction_id}/turns/{turn_id}/events")
+    async def stream_interaction_turn(
+        interaction_id: UUID,
+        turn_id: UUID,
+        request: Request,
+    ) -> StreamingResponse:
+        service = required_interaction_service()
+        initial = service.get_turn(turn_id)
+        if initial.interaction_id != interaction_id:
+            raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
+
+        async def events():
+            last_status: str | None = None
+            while True:
+                if await request.is_disconnected():
+                    return
+                turn = service.get_turn(turn_id)
+                if turn.status.value != last_status:
+                    payload = InteractionTurnResponse.from_turn(turn).model_dump(
+                        mode="json"
+                    )
+                    yield f"event: turn.status\ndata: {json.dumps(payload)}\n\n"
+                    last_status = turn.status.value
+                if turn.status.value == "COMPLETED":
+                    projection = service.get_shared_understanding(interaction_id)
+                    response = next(
+                        (
+                            message
+                            for message in projection.conversation_messages
+                            if message.turn_id == turn_id
+                            and message.actor.value == "WATT"
+                        ),
+                        None,
+                    )
+                    if response is not None:
+                        for offset in range(0, len(response.content), 48):
+                            delta = response.content[offset : offset + 48]
+                            yield (
+                                "event: message.delta\ndata: "
+                                + json.dumps({"delta": delta}, ensure_ascii=False)
+                                + "\n\n"
+                            )
+                            await asyncio.sleep(0)
+                        yield (
+                            "event: message.completed\ndata: "
+                            + json.dumps(
+                                {
+                                    "message_id": str(response.id),
+                                    "assessment_id": str(turn.assessment_id),
+                                }
+                            )
+                            + "\n\n"
+                        )
+                    return
+                if turn.status.value == "FAILED":
+                    yield (
+                        "event: turn.failed\ndata: "
+                        + json.dumps(
+                            {
+                                "code": turn.failure_code,
+                                "message": turn.failure_message,
+                            }
+                        )
+                        + "\n\n"
+                    )
+                    return
+                yield ": processing\n\n"
+                await asyncio.sleep(0.2)
+
+        return StreamingResponse(
+            events(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no",
+            },
         )
 
     @api.post(

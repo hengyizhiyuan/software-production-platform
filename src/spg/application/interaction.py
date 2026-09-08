@@ -2,10 +2,17 @@
 
 from __future__ import annotations
 
+from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import UTC, datetime
 import hashlib
 import json
+from threading import RLock
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
+
+from spg.application.guided_design import (
+    design_schema_by_identity,
+    match_design_schema_text,
+)
 
 from spg.domain.interaction import (
     ActiveWorkInterpretationContext,
@@ -18,6 +25,8 @@ from spg.domain.interaction import (
     InteractionInvariantViolation,
     InteractionRecord,
     InteractionRecordNotFound,
+    InteractionTurn,
+    InteractionTurnStatus,
     InterpretationMeaningKind,
     SharedUnderstanding,
     WorkEvolutionCandidateChange,
@@ -213,6 +222,12 @@ class WorkInteractionService:
     ) -> None:
         self.database = database
         self.capability = capability
+        self._turn_executor = ThreadPoolExecutor(
+            max_workers=1,
+            thread_name_prefix="watt-interaction",
+        )
+        self._turn_futures: dict[UUID, Future[None]] = {}
+        self._turn_lock = RLock()
 
     def create_interaction(self, *, human_identity: str) -> Interaction:
         identity = human_identity.strip()
@@ -313,6 +328,234 @@ class WorkInteractionService:
         self.assess_current(interaction_id)
         return self.get_shared_understanding(interaction_id)
 
+    def submit_turn(
+        self,
+        interaction_id: UUID,
+        content: str,
+        *,
+        human_identity: str,
+        supporting_references: tuple[str, ...] = (),
+    ) -> InteractionTurn:
+        """Persist and acknowledge one Turn before Provider-backed processing."""
+
+        value = content.strip()
+        identity = human_identity.strip()
+        if not value or not identity:
+            raise InteractionInvariantViolation("Human input and identity are required")
+        now = datetime.now(UTC)
+        record_id = uuid4()
+        turn_id = uuid4()
+        references = self._normalize_supporting_references(supporting_references)
+        with self.database.unit_of_work() as uow:
+            store = InteractionStore(uow.session)
+            interaction = store.interaction(interaction_id, for_update=True)
+            if interaction is None:
+                raise InteractionRecordNotFound(f"Interaction not found: {interaction_id}")
+            if interaction.condition is not InteractionCondition.OPEN:
+                raise InteractionInvariantViolation("Archived Interaction cannot accept input")
+            if store.unfinished_turn(interaction_id) is not None:
+                raise InteractionInvariantViolation(
+                    "Interaction already has a Turn in progress"
+                )
+            store.insert_record(
+                {
+                    "id": record_id,
+                    "interaction_id": interaction_id,
+                    "sequence": store.next_sequence(interaction_id),
+                    "actor": InteractionActor.HUMAN.value,
+                    "source": identity,
+                    "content": value,
+                    "content_fingerprint": hashlib.sha256(value.encode()).hexdigest(),
+                    "work_focus_id": interaction.current_work_id,
+                    "supporting_references": list(references),
+                    "created_at": now,
+                }
+            )
+            store.insert_turn(
+                {
+                    "id": turn_id,
+                    "interaction_id": interaction_id,
+                    "request_record_id": record_id,
+                    "assessment_id": None,
+                    "status": InteractionTurnStatus.RECEIVED.value,
+                    "failure_code": None,
+                    "failure_message": None,
+                    "created_at": now,
+                    "started_at": None,
+                    "completed_at": None,
+                    "updated_at": now,
+                }
+            )
+            store.insert_message(
+                {
+                    "id": uuid4(),
+                    "interaction_id": interaction_id,
+                    "turn_id": turn_id,
+                    "sequence": store.next_message_sequence(interaction_id),
+                    "actor": InteractionActor.HUMAN.value,
+                    "content": value,
+                    "processing_status": InteractionTurnStatus.RECEIVED.value,
+                    "interaction_record_id": record_id,
+                    "interpretation_assessment_id": None,
+                    "design_result_references": [],
+                    "governance_event_references": [],
+                    "supporting_references": list(references),
+                    "created_at": now,
+                    "updated_at": now,
+                }
+            )
+            store.touch_interaction(interaction_id, updated_by=identity, updated_at=now)
+            uow.commit()
+        turn = self.get_turn(turn_id)
+        self.schedule_turn(turn_id)
+        return turn
+
+    def get_turn(self, turn_id: UUID) -> InteractionTurn:
+        with self.database.unit_of_work() as uow:
+            turn = InteractionStore(uow.session).turn(turn_id)
+        if turn is None:
+            raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
+        return turn
+
+    def schedule_turn(self, turn_id: UUID) -> bool:
+        with self._turn_lock:
+            current = self._turn_futures.get(turn_id)
+            if current is not None and not current.done():
+                return False
+            future = self._turn_executor.submit(self._process_turn, turn_id)
+            self._turn_futures[turn_id] = future
+            future.add_done_callback(lambda _future: self._forget_turn(turn_id))
+        return True
+
+    def resume_pending_turns(self) -> tuple[UUID, ...]:
+        with self.database.unit_of_work() as uow:
+            pending = InteractionStore(uow.session).pending_turns()
+        return tuple(turn.id for turn in pending if self.schedule_turn(turn.id))
+
+    def shutdown(self) -> None:
+        self._turn_executor.shutdown(wait=True, cancel_futures=False)
+
+    def _forget_turn(self, turn_id: UUID) -> None:
+        with self._turn_lock:
+            self._turn_futures.pop(turn_id, None)
+
+    def _process_turn(self, turn_id: UUID) -> None:
+        now = datetime.now(UTC)
+        with self.database.unit_of_work() as uow:
+            store = InteractionStore(uow.session)
+            turn = store.turn(turn_id, for_update=True)
+            if turn is None or turn.status in {
+                InteractionTurnStatus.COMPLETED,
+                InteractionTurnStatus.FAILED,
+            }:
+                uow.rollback()
+                return
+            store.update_turn(
+                turn_id,
+                status=InteractionTurnStatus.PROCESSING,
+                updated_at=now,
+                started_at=turn.started_at or now,
+            )
+            store.update_turn_messages_status(
+                turn_id,
+                status=InteractionTurnStatus.PROCESSING,
+                updated_at=now,
+            )
+            uow.commit()
+        try:
+            assessment = self.assess_current(turn.interaction_id)
+            completed_at = datetime.now(UTC)
+            with self.database.unit_of_work() as uow:
+                store = InteractionStore(uow.session)
+                current = store.turn(turn_id, for_update=True)
+                if current is None:
+                    raise InteractionRecordNotFound(
+                        f"Interaction Turn not found: {turn_id}"
+                    )
+                if store.message_for_turn(turn_id, InteractionActor.WATT) is None:
+                    interaction = store.interaction(turn.interaction_id)
+                    design_refs = (
+                        ()
+                        if interaction is None
+                        or interaction.selected_design_schema_identity is None
+                        else (
+                            "DESIGN_SCHEMA:"
+                            f"{interaction.selected_design_schema_identity}@"
+                            f"{interaction.selected_design_schema_version}",
+                        )
+                    )
+                    response_content = assessment.natural_response
+                    if (
+                        interaction is not None
+                        and interaction.current_work_id is None
+                        and interaction.selected_design_schema_identity is not None
+                    ):
+                        schema = design_schema_by_identity(
+                            interaction.selected_design_schema_identity,
+                            interaction.selected_design_schema_version,
+                        )
+                        focus = schema.issues[0]
+                        response_content = (
+                            f"{assessment.natural_response}\n\n"
+                            f"Design approach: {schema.title} v{schema.version}. "
+                            f"{interaction.design_schema_selection_rationale} "
+                            f"Current stage: {focus.title}. Next, {focus.objective.lower()} "
+                            f"Why now: {focus.why_it_matters}"
+                        )
+                    store.insert_message(
+                        {
+                            "id": uuid4(),
+                            "interaction_id": turn.interaction_id,
+                            "turn_id": turn_id,
+                            "sequence": store.next_message_sequence(turn.interaction_id),
+                            "actor": InteractionActor.WATT.value,
+                            "content": response_content,
+                            "processing_status": InteractionTurnStatus.COMPLETED.value,
+                            "interaction_record_id": None,
+                            "interpretation_assessment_id": assessment.id,
+                            "design_result_references": list(design_refs),
+                            "governance_event_references": list(
+                                assessment.supporting_references
+                            ),
+                            "supporting_references": list(
+                                assessment.supporting_references
+                            ),
+                            "created_at": completed_at,
+                            "updated_at": completed_at,
+                        }
+                    )
+                store.update_turn(
+                    turn_id,
+                    status=InteractionTurnStatus.COMPLETED,
+                    updated_at=completed_at,
+                    assessment_id=assessment.id,
+                    completed_at=completed_at,
+                )
+                store.update_turn_messages_status(
+                    turn_id,
+                    status=InteractionTurnStatus.COMPLETED,
+                    updated_at=completed_at,
+                )
+                uow.commit()
+        except Exception as error:  # persisted failure is the product-facing truth
+            failed_at = datetime.now(UTC)
+            with self.database.unit_of_work() as uow:
+                store = InteractionStore(uow.session)
+                store.update_turn(
+                    turn_id,
+                    status=InteractionTurnStatus.FAILED,
+                    updated_at=failed_at,
+                    failure_code=type(error).__name__,
+                    failure_message=str(error),
+                    completed_at=failed_at,
+                )
+                store.update_turn_messages_status(
+                    turn_id,
+                    status=InteractionTurnStatus.FAILED,
+                    updated_at=failed_at,
+                )
+                uow.commit()
+
     def assess_current(self, interaction_id: UUID) -> InteractionAssessment:
         basis = self._basis(interaction_id)
         with self.database.unit_of_work() as uow:
@@ -388,6 +631,17 @@ class WorkInteractionService:
                 dict.fromkeys((*record_references, *candidate_references))
             )
             readiness = self._evaluate_readiness(candidate, current_basis)
+            if interaction.current_work_id is None:
+                schema, selection_rationale = match_design_schema_text(
+                    candidate.interpreted_motive or records[-1].content
+                )
+                store.select_design_schema(
+                    interaction_id,
+                    identity=schema.identity,
+                    version=schema.version,
+                    rationale=selection_rationale,
+                    updated_at=now,
+                )
             assessment_id = uuid4()
             store.insert_assessment(
                 {
@@ -577,6 +831,8 @@ class WorkInteractionService:
             if interaction is None:
                 raise InteractionRecordNotFound(f"Interaction not found: {interaction_id}")
             records = store.records(interaction_id)
+            messages = store.messages(interaction_id)
+            turns = store.turns(interaction_id)
             latest = store.latest_assessment(interaction_id)
             resource = product.default_resource()
             governed_revision = (
@@ -642,6 +898,8 @@ class WorkInteractionService:
         return SharedUnderstanding(
             interaction=interaction,
             records=records,
+            conversation_messages=messages,
+            turns=turns,
             latest_assessment=latest,
             latest_assessment_current=assessment_current,
             human_said=tuple(
@@ -710,7 +968,44 @@ class WorkInteractionService:
                 and latest_transition.choice is WorkTransitionChoice.START_NEW_WORK
                 and latest_transition.target_work_id is None
             ),
+            selected_design_schema_identity=(
+                interaction.selected_design_schema_identity
+            ),
+            selected_design_schema_version=(
+                interaction.selected_design_schema_version
+            ),
+            design_schema_selection_rationale=(
+                interaction.design_schema_selection_rationale
+            ),
+            **self._interaction_design_guidance(interaction),
         )
+
+    @staticmethod
+    def _interaction_design_guidance(interaction: Interaction) -> dict[str, str | None]:
+        if interaction.selected_design_schema_identity is None:
+            return {
+                "design_stage": None,
+                "design_next_focus": None,
+                "design_focus_rationale": None,
+                "design_facilitation_strategy": None,
+                "design_progress_narrative": None,
+            }
+        schema = design_schema_by_identity(
+            interaction.selected_design_schema_identity,
+            interaction.selected_design_schema_version,
+        )
+        focus = schema.issues[0]
+        return {
+            "design_stage": focus.title,
+            "design_next_focus": focus.objective,
+            "design_focus_rationale": focus.why_it_matters,
+            "design_facilitation_strategy": "CLARIFY",
+            "design_progress_narrative": (
+                f"Selected {schema.title} v{schema.version}. Current stage: "
+                f"{focus.title}. 0 of {len(schema.issues)} design areas are resolved. "
+                f"Next, {focus.objective.lower()}"
+            ),
+        }
 
     def pending_assessment_interactions(self) -> tuple[UUID, ...]:
         return tuple(

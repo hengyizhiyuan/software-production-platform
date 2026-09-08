@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from spg.domain.change import CodeChangeContract, CodeVerificationObligation
 from spg.domain.guided_design import GuidedDesignProjection
-from spg.domain.interaction import SharedUnderstanding, WorkTransitionChoice
+from spg.domain.interaction import InteractionTurn, SharedUnderstanding, WorkTransitionChoice
 from spg.domain.product import (
     AttentionAction,
     AttentionItem,
@@ -91,6 +91,52 @@ class InteractionRecordResponse(ApiDto):
     work_focus_id: UUID | None
     supporting_references: tuple[str, ...]
     created_at: datetime
+
+
+class ConversationMessageResponse(ApiDto):
+    message_id: UUID
+    turn_id: UUID | None
+    sequence: int
+    actor: str
+    content: str
+    processing_status: str
+    interaction_record_id: UUID | None
+    interpretation_assessment_id: UUID | None
+    design_result_references: tuple[str, ...]
+    governance_event_references: tuple[str, ...]
+    supporting_references: tuple[str, ...]
+    created_at: datetime
+    updated_at: datetime
+
+
+class InteractionTurnResponse(ApiDto):
+    turn_id: UUID
+    interaction_id: UUID
+    request_record_id: UUID
+    assessment_id: UUID | None
+    status: str
+    failure_code: str | None
+    failure_message: str | None
+    created_at: datetime
+    started_at: datetime | None
+    completed_at: datetime | None
+    updated_at: datetime
+
+    @classmethod
+    def from_turn(cls, turn: InteractionTurn) -> Self:
+        return cls(
+            turn_id=turn.id,
+            interaction_id=turn.interaction_id,
+            request_record_id=turn.request_record_id,
+            assessment_id=turn.assessment_id,
+            status=turn.status.value,
+            failure_code=turn.failure_code,
+            failure_message=turn.failure_message,
+            created_at=turn.created_at,
+            started_at=turn.started_at,
+            completed_at=turn.completed_at,
+            updated_at=turn.updated_at,
+        )
 
 
 class InteractionMeaningResponse(ApiDto):
@@ -194,6 +240,8 @@ class SharedUnderstandingResponse(ApiDto):
     created_at: datetime
     updated_at: datetime
     records: tuple[InteractionRecordResponse, ...]
+    conversation_messages: tuple[ConversationMessageResponse, ...]
+    turns: tuple[InteractionTurnResponse, ...]
     human_said: tuple[str, ...]
     latest_assessment: InteractionAssessmentResponse | None
     latest_assessment_current: bool
@@ -222,6 +270,14 @@ class SharedUnderstandingResponse(ApiDto):
     work_focus_history: tuple[UUID, ...]
     latest_work_transition: InteractionWorkTransitionResponse | None
     new_work_formation_pending: bool
+    selected_design_schema_identity: str | None
+    selected_design_schema_version: str | None
+    design_schema_selection_rationale: str | None
+    design_stage: str | None
+    design_next_focus: str | None
+    design_focus_rationale: str | None
+    design_facilitation_strategy: str | None
+    design_progress_narrative: str | None
 
     @classmethod
     def from_projection(cls, projection: SharedUnderstanding) -> Self:
@@ -245,6 +301,27 @@ class SharedUnderstandingResponse(ApiDto):
                     created_at=item.created_at,
                 )
                 for item in projection.records
+            ),
+            conversation_messages=tuple(
+                ConversationMessageResponse(
+                    message_id=item.id,
+                    turn_id=item.turn_id,
+                    sequence=item.sequence,
+                    actor=item.actor.value,
+                    content=item.content,
+                    processing_status=item.processing_status.value,
+                    interaction_record_id=item.interaction_record_id,
+                    interpretation_assessment_id=item.interpretation_assessment_id,
+                    design_result_references=item.design_result_references,
+                    governance_event_references=item.governance_event_references,
+                    supporting_references=item.supporting_references,
+                    created_at=item.created_at,
+                    updated_at=item.updated_at,
+                )
+                for item in projection.conversation_messages
+            ),
+            turns=tuple(
+                InteractionTurnResponse.from_turn(item) for item in projection.turns
             ),
             human_said=projection.human_said,
             latest_assessment=(
@@ -436,6 +513,20 @@ class SharedUnderstandingResponse(ApiDto):
                 )
             ),
             new_work_formation_pending=projection.new_work_formation_pending,
+            selected_design_schema_identity=(
+                projection.selected_design_schema_identity
+            ),
+            selected_design_schema_version=(
+                projection.selected_design_schema_version
+            ),
+            design_schema_selection_rationale=(
+                projection.design_schema_selection_rationale
+            ),
+            design_stage=projection.design_stage,
+            design_next_focus=projection.design_next_focus,
+            design_focus_rationale=projection.design_focus_rationale,
+            design_facilitation_strategy=projection.design_facilitation_strategy,
+            design_progress_narrative=projection.design_progress_narrative,
         )
 
 
@@ -731,11 +822,19 @@ class GuidedDesignResponse(ApiDto):
     process_objective: str
     schema_identity: str
     schema_version: str
+    schema_selection_rationale: str
     agenda_revision_id: UUID
     agenda_revision_number: int
     current_focus_key: str | None
     current_focus: GuidedDesignIssueResponse | None
     focus_rationale: str | None
+    current_stage: str
+    completed_areas: tuple[str, ...]
+    unresolved_areas: tuple[str, ...]
+    dependency_blockers: tuple[str, ...]
+    facilitation_strategy: str
+    facilitation_guidance: str
+    progress_narrative: str
     issues: tuple[GuidedDesignIssueResponse, ...]
     resolved_count: int
     total_applicable_count: int
@@ -769,6 +868,7 @@ class GuidedDesignResponse(ApiDto):
             process_objective=projection.process_objective,
             schema_identity=projection.schema_identity,
             schema_version=projection.schema_version,
+            schema_selection_rationale=projection.schema_selection_rationale,
             agenda_revision_id=projection.agenda_revision_id,
             agenda_revision_number=projection.agenda_revision_number,
             current_focus_key=projection.current_focus_key,
@@ -778,6 +878,13 @@ class GuidedDesignResponse(ApiDto):
                 else issue_response(projection.current_focus)
             ),
             focus_rationale=projection.focus_rationale,
+            current_stage=projection.current_stage,
+            completed_areas=projection.completed_areas,
+            unresolved_areas=projection.unresolved_areas,
+            dependency_blockers=projection.dependency_blockers,
+            facilitation_strategy=projection.facilitation_strategy.value,
+            facilitation_guidance=projection.facilitation_guidance,
+            progress_narrative=projection.progress_narrative,
             issues=tuple(issue_response(issue) for issue in projection.issues),
             resolved_count=projection.resolved_count,
             total_applicable_count=projection.total_applicable_count,

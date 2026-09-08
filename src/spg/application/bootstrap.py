@@ -240,6 +240,7 @@ class Application:
 
             capability = CodexSdkWorkInteractionCapability(
                 repository_location=str(self.settings.repository_path),
+                model=self.settings.wic_provider_model,
                 timeout_seconds=self.settings.executor_timeout_seconds,
             )
         return WorkInteractionService(selected_database, capability=capability)

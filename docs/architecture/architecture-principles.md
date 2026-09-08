@@ -649,3 +649,54 @@ It is responsible for:
 - Plan Adaptation
 
 It is not responsible for Business Decision, Product Strategy, Value Judgment, deciding whether a product should exist, or general-purpose Decision Intelligence. Those belong to Human Governor, Decision Intelligence Capability, or Architecture / Product Authority.
+
+## System-Level Production Differentiation
+
+**Architecture principle:** AI-native software-production differentiation is
+created by the coherent organization of intelligence, Authority, context,
+execution, evidence, Runtime Reality, and feedback—not by an isolated Agent,
+model, prompt, workflow, or UI.
+
+The qualitative model is:
+
+```text
+Production Capability
+    = Planning
+    x Context Fidelity
+    x Execution Discipline
+    x Assurance
+    x Reality Feedback
+```
+
+This is an architecture reasoning model rather than a measured metric. It
+expresses that severe weakness in one factor can dominate the complete system.
+Current capability, future direction, practical evidence, and unproven
+hypotheses are separated in
+[Software Production System Differentiation and Architectural Barriers](software-production-system-differentiation-and-barriers.md).
+
+## AI-native Development Execution
+
+**Development principle:** substantial Watt capabilities should be delivered
+through Product/Architecture alignment, a bounded Mission Contract, autonomous
+Executor implementation, Evidence/Reality review, and Human Acceptance.
+
+```text
+Human Governor
+    owns Intent, material Authority, risk, and acceptance
+
+Architecture Lead AI
+    preserves the capability boundary and reviews Reality
+
+AI Executor
+    owns HOW inside the admitted development envelope
+```
+
+The system rejects both unrestricted autonomy against a vague goal and Human
+micro-management of every technical move. The Executor should have the largest
+stable envelope that remains explicit and reviewable; it must stop when
+objective, Authority, risk, scope, acceptance conditions, or relevant Reality
+materially changes.
+
+The complete responsibility model, Mission Contract semantics, PWU continuity
+rationale, lessons learned, and current/future boundary are recorded in
+[AI-native Development Execution Principles](ai-native-development-execution-principles.md).

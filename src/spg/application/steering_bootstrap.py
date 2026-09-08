@@ -8,7 +8,7 @@ from uuid import UUID
 from spg.application.runtime import RuntimeService
 from spg.application.guided_design import (
     GuidedDesignApplicationService,
-    general_product_system_design_issues,
+    design_schema_for_work,
     guided_design_step_specs,
 )
 from spg.application.steering import SteeringApplicationService
@@ -178,7 +178,7 @@ class SteeringBootstrapService:
                 self.guided_design.bootstrap(work, reconstruction)
                 return reconstruction
             steps = (
-                guided_design_step_specs(general_product_system_design_issues())
+                guided_design_step_specs(design_schema_for_work(work)[0].issues)
                 if self.guided_design.eligible(work)
                 else self.capability.form(work)
             )
