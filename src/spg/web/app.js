@@ -444,9 +444,14 @@
     const status = readiness ? readiness.status : "NOT_READY";
     elements.interactionReadiness.textContent = status;
     elements.interactionReadiness.className = `status-badge ${status === "READY" ? "status-completed" : "status-draft"}`;
-    elements.wattResponse.textContent = assessment
-      ? assessment.natural_response
-      : "Watt has not completed an assessment for the latest message yet.";
+    const latestWattMessage = [...(projection.conversation_messages || [])]
+      .reverse()
+      .find((message) => message.actor === "WATT");
+    elements.wattResponse.textContent = latestWattMessage
+      ? latestWattMessage.content
+      : assessment
+        ? assessment.natural_response
+        : "Watt has not completed an assessment for the latest message yet.";
     elements.interpretedMotive.textContent = projection.interpreted_motive || "Not established yet";
     elements.interpretedOutcome.textContent = projection.desired_outcome || "Not established yet";
     elements.interpretedContext.textContent = joined(projection.candidate_context, "None yet");
@@ -1337,6 +1342,10 @@
     });
     source.addEventListener("message.delta", (event) => {
       streamed += JSON.parse(event.data).delta;
+      elements.wattResponse.textContent = streamed;
+    });
+    source.addEventListener("message.reset", (event) => {
+      streamed = JSON.parse(event.data).content;
       elements.wattResponse.textContent = streamed;
     });
     source.addEventListener("message.completed", async () => {

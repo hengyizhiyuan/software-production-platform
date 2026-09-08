@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import OrderedDict
+from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import UTC, datetime
 import hashlib
@@ -227,6 +229,7 @@ class WorkInteractionService:
             thread_name_prefix="watt-interaction",
         )
         self._turn_futures: dict[UUID, Future[None]] = {}
+        self._turn_response_streams: OrderedDict[UUID, str] = OrderedDict()
         self._turn_lock = RLock()
 
     def create_interaction(self, *, human_identity: str) -> Interaction:
@@ -434,10 +437,31 @@ class WorkInteractionService:
 
     def shutdown(self) -> None:
         self._turn_executor.shutdown(wait=True, cancel_futures=False)
+        with self._turn_lock:
+            self._turn_response_streams.clear()
 
     def _forget_turn(self, turn_id: UUID) -> None:
         with self._turn_lock:
             self._turn_futures.pop(turn_id, None)
+
+    def turn_response_delta(self, turn_id: UUID, offset: int) -> tuple[str, int]:
+        """Read ephemeral UX output; persisted messages remain conversation truth."""
+
+        with self._turn_lock:
+            content = self._turn_response_streams.get(turn_id, "")
+        safe_offset = min(max(offset, 0), len(content))
+        return content[safe_offset:], len(content)
+
+    def _publish_turn_response_delta(self, turn_id: UUID, delta: str) -> None:
+        if not delta:
+            return
+        with self._turn_lock:
+            self._turn_response_streams[turn_id] = (
+                self._turn_response_streams.get(turn_id, "") + delta
+            )
+            self._turn_response_streams.move_to_end(turn_id)
+            while len(self._turn_response_streams) > 32:
+                self._turn_response_streams.popitem(last=False)
 
     def _process_turn(self, turn_id: UUID) -> None:
         now = datetime.now(UTC)
@@ -463,7 +487,12 @@ class WorkInteractionService:
             )
             uow.commit()
         try:
-            assessment = self.assess_current(turn.interaction_id)
+            assessment = self._assess_current(
+                turn.interaction_id,
+                on_response_delta=lambda delta: self._publish_turn_response_delta(
+                    turn_id, delta
+                ),
+            )
             completed_at = datetime.now(UTC)
             with self.database.unit_of_work() as uow:
                 store = InteractionStore(uow.session)
@@ -494,13 +523,12 @@ class WorkInteractionService:
                             interaction.selected_design_schema_identity,
                             interaction.selected_design_schema_version,
                         )
-                        focus = schema.issues[0]
-                        response_content = (
-                            f"{assessment.natural_response}\n\n"
-                            f"Design approach: {schema.title} v{schema.version}. "
-                            f"{interaction.design_schema_selection_rationale} "
-                            f"Current stage: {focus.title}. Next, {focus.objective.lower()} "
-                            f"Why now: {focus.why_it_matters}"
+                        response_content = self._design_facilitation_response(
+                            assessment.natural_response,
+                            schema=schema,
+                            selection_rationale=(
+                                interaction.design_schema_selection_rationale or ""
+                            ),
                         )
                     store.insert_message(
                         {
@@ -557,6 +585,14 @@ class WorkInteractionService:
                 uow.commit()
 
     def assess_current(self, interaction_id: UUID) -> InteractionAssessment:
+        return self._assess_current(interaction_id, on_response_delta=None)
+
+    def _assess_current(
+        self,
+        interaction_id: UUID,
+        *,
+        on_response_delta: Callable[[str], None] | None,
+    ) -> InteractionAssessment:
         basis = self._basis(interaction_id)
         with self.database.unit_of_work() as uow:
             existing = InteractionStore(uow.session).assessment_for_basis(
@@ -564,11 +600,48 @@ class WorkInteractionService:
             )
         if existing is not None:
             return existing
-        candidate = self.capability.interpret(basis)
+        streaming_interpret = getattr(self.capability, "interpret_stream", None)
+        candidate = (
+            streaming_interpret(
+                basis,
+                on_response_delta=on_response_delta,
+            )
+            if on_response_delta is not None and callable(streaming_interpret)
+            else self.capability.interpret(basis)
+        )
         return self.admit_candidate(
             interaction_id,
             basis_fingerprint=basis.basis_fingerprint,
             candidate=candidate,
+        )
+
+    @staticmethod
+    def _design_facilitation_response(
+        natural_response: str,
+        *,
+        schema,
+        selection_rationale: str,
+    ) -> str:
+        focus = schema.issues[0]
+        path = " → ".join(issue.title for issue in schema.issues)
+        if any("\u4e00" <= character <= "\u9fff" for character in natural_response):
+            return (
+                f"{natural_response}\n\n"
+                f"设计方法：{schema.title} v{schema.version}。"
+                f"{selection_rationale} "
+                f"设计路径：{path}。\n"
+                f"当前阶段：{focus.title}。当前重点：{focus.objective} "
+                f"之所以先处理它，是因为：{focus.why_it_matters} "
+                "我会直接沿用已经明确的信息，只把真正影响设计方向的未决问题带给你。"
+            )
+        return (
+            f"{natural_response}\n\n"
+            f"Design approach: {schema.title} v{schema.version}. "
+            f"{selection_rationale} Design path: {path}. "
+            f"Current stage: {focus.title}. Next, {focus.objective.lower()} "
+            f"Why now: {focus.why_it_matters} "
+            "I will reuse what is already known and surface only questions that "
+            "materially affect the design direction."
         )
 
     def admit_candidate(

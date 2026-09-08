@@ -4,6 +4,9 @@ Status: **IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS
 
 Closure: **VALIDATION COMPLETE — PENDING ARCHITECTURE LEAD REALITY REVIEW**
 
+Experience calibration v2: **FOCUSED DETERMINISTIC VALIDATION PASS / REAL
+PROVIDER V2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING**
+
 ## Scope
 
 This evidence covers the Human–Watt conversation/Turn foundation, asynchronous
@@ -121,3 +124,66 @@ The mandatory real Provider scenario is proven. Deterministic validation and
 the real Provider proof are both PASS. Architecture closure remains subject to
 an Architecture Lead Reality Review; this evidence does not self-admit that
 separate authority decision.
+
+## Experience calibration v2 evidence
+
+The v2 calibration replaces completion-time response slicing with real
+Provider notification consumption. Focused deterministic evidence proves:
+
+- the structured Provider schema emits the Human-facing natural response first;
+- fragmented JSON, whitespace, escaped newlines, Chinese Unicode, and
+  supplementary Unicode characters are decoded incrementally;
+- only Human-facing response text is exposed, never the structured assessment
+  envelope;
+- response content is observable while an Interaction Turn is still
+  PROCESSING;
+- the final persisted Watt message retains the streamed prefix and adds the
+  existing Design Schema path/stage/focus projection;
+- late SSE consumers reconcile against the persisted final message;
+- restart reconstruction and the absence of automatic Work/production facts
+  remain unchanged;
+- the Provider instruction receives the matched ordered Design Schema and
+  requires active design-path explanation, focus selection, rationale,
+  proactive guidance, known-information reuse, and at most one material
+  question.
+
+Focused results at this validation point:
+
+- WIC Provider contract/stream tests: **6 passed**;
+- WIC PostgreSQL persistence/restart/SSE tests: **9 passed, 2 real Provider
+  tests skipped by authorization gate**;
+- affected Guided Design and governed Work integration tests: **10 passed**;
+- frontend/state tests: **23 passed**;
+- Python compile/import: **PASS**.
+
+One attempted launch of the v2 real proof was rejected before process creation
+because the current mission did not explicitly authorize repository-context
+egress to Codex/OpenAI. No Provider Thread or Turn was created and no data was
+sent. This is a pre-execution authorization boundary, not a Provider or product
+failure.
+
+After explicit Human authorization, exactly one v2 real Provider Turn ran with
+gpt-5.6-sol, no retry, and no Resume. The sanitized evidence records:
+
+- Interaction Turn: **COMPLETED**;
+- incremental Human-facing response observed: **true**;
+- response delta observed before terminal state: **true**;
+- streamed response matches the persisted final-message prefix: **true**;
+- schema: **General Product/System Design v0.1**;
+- stage: **Motive, users, and problem**;
+- next focus: clarify why the product/system should exist and for whom;
+- focus rationale: downstream direction is unsafe before beneficiary and
+  problem are explicit;
+- design path explanation present: **true**;
+- conversation messages persisted: **2**.
+
+The local sanitized artifact is
+.spg/validation-evidence/human-watt-collaboration-v2-real-provider-20260908.json.
+It remains outside Git. The disposable test database was cleared normally; no
+Work, PWU, production Run, Runtime Commit, or Trusted Baseline mutation was
+created.
+
+This proves the real Provider transport, incremental-delivery path, schema
+selection, focus projection, and durable final-message alignment. It does not
+self-declare Human Product Acceptance; a Human must still judge whether the
+guidance feels sufficiently active and useful.

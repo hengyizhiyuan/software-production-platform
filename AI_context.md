@@ -103,6 +103,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **GUIDED DESIGN FACILITATION LAYER — IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — PENDING ARCHITECTURE LEAD REALITY REVIEW**
 
+**HUMAN–WATT COLLABORATION EXPERIENCE V2 — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER V2 PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
+
 **WATT PRODUCT MVP — NOT CLOSED**
 
 **REALITY-DRIVEN PLAN STEERING MVP — CLOSED / PASS**
@@ -828,6 +830,7 @@ The current system-level architecture baseline is:
 - [Runtime Profile, Provider Placement, and Containerized Deployment](docs/architecture/runtime-profile-provider-deployment.md)
 - [SPG FVS-1 — Governed Documentation Production Loop Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md)
 - [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md)
+- [Watt Development Roadmap and Progress Reality](docs/roadmap/watt-development-roadmap-and-progress.md)
 - [Bounded Single-PWU Code Work](docs/architecture/bounded-single-pwu-code-work.md)
 - [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
 - [Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md)
@@ -847,6 +850,7 @@ The current system-level architecture baseline is:
 - [Guided Design Core Focused Validation](docs/evidence/guided-design-core-focused-validation.md)
 - [Human–Watt Collaboration Layer](docs/architecture/human-watt-collaboration-layer.md)
 - [Guided Design Facilitation Layer](docs/architecture/guided-design-facilitation-layer.md)
+- [External Design Intake Capability Direction](docs/architecture/external-design-intake-capability-direction.md)
 - [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
 - [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)
 - [AI-native Development Execution Principles](docs/architecture/ai-native-development-execution-principles.md)

@@ -448,6 +448,8 @@ def create_http_application(
 
         async def events():
             last_status: str | None = None
+            stream_offset = 0
+            streamed_response = ""
             while True:
                 if await request.is_disconnected():
                     return
@@ -458,6 +460,16 @@ def create_http_application(
                     )
                     yield f"event: turn.status\ndata: {json.dumps(payload)}\n\n"
                     last_status = turn.status.value
+                delta, stream_offset = service.turn_response_delta(
+                    turn_id, stream_offset
+                )
+                if delta:
+                    streamed_response += delta
+                    yield (
+                        "event: message.delta\ndata: "
+                        + json.dumps({"delta": delta}, ensure_ascii=False)
+                        + "\n\n"
+                    )
                 if turn.status.value == "COMPLETED":
                     projection = service.get_shared_understanding(interaction_id)
                     response = next(
@@ -470,14 +482,26 @@ def create_http_application(
                         None,
                     )
                     if response is not None:
-                        for offset in range(0, len(response.content), 48):
-                            delta = response.content[offset : offset + 48]
+                        if response.content.startswith(streamed_response):
+                            final_delta = response.content[len(streamed_response) :]
+                            if final_delta:
+                                yield (
+                                    "event: message.delta\ndata: "
+                                    + json.dumps(
+                                        {"delta": final_delta},
+                                        ensure_ascii=False,
+                                    )
+                                    + "\n\n"
+                                )
+                        else:
                             yield (
-                                "event: message.delta\ndata: "
-                                + json.dumps({"delta": delta}, ensure_ascii=False)
+                                "event: message.reset\ndata: "
+                                + json.dumps(
+                                    {"content": response.content},
+                                    ensure_ascii=False,
+                                )
                                 + "\n\n"
                             )
-                            await asyncio.sleep(0)
                         yield (
                             "event: message.completed\ndata: "
                             + json.dumps(

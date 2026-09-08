@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+from threading import Event
 import time
 from uuid import UUID
 
@@ -96,6 +97,32 @@ class _ProgressiveCapability:
         )
 
 
+class _BlockingStreamingCapability:
+    def __init__(self) -> None:
+        self.delta_published = Event()
+        self.release = Event()
+
+    def interpret(self, _basis: InteractionInterpretationInput):
+        raise AssertionError("stream-aware service must use interpret_stream")
+
+    def interpret_stream(
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_response_delta,
+    ) -> InteractionAssessmentCandidate:
+        on_response_delta("I am mapping the design path now. ")
+        self.delta_published.set()
+        if not self.release.wait(timeout=5):
+            raise RuntimeError("test did not release streaming capability")
+        return InteractionAssessmentCandidate(
+            interpreted_motive=basis.records[-1].content,
+            unresolved_material_questions=("Who is the primary operator?",),
+            natural_response="I am mapping the design path now. Who is the primary operator?",
+            provider_identity="test:streaming",
+        )
+
+
 class _NeverCalledWorkService:
     def __init__(self, database: Database) -> None:
         self.database = database
@@ -183,6 +210,35 @@ def _wait_for_turn(
     pytest.fail(f"Interaction Turn did not reach a terminal state: {turn_id}")
 
 
+def _wait_for_turn_and_observe_stream(
+    service: WorkInteractionService,
+    turn_id: UUID,
+    *,
+    timeout: float,
+):
+    deadline = time.monotonic() + timeout
+    offset = 0
+    streamed = ""
+    delta_before_terminal = False
+    while time.monotonic() < deadline:
+        turn = service.get_turn(turn_id)
+        delta, offset = service.turn_response_delta(turn_id, offset)
+        if delta:
+            streamed += delta
+            if turn.status not in {
+                InteractionTurnStatus.COMPLETED,
+                InteractionTurnStatus.FAILED,
+            }:
+                delta_before_terminal = True
+        if turn.status in {
+            InteractionTurnStatus.COMPLETED,
+            InteractionTurnStatus.FAILED,
+        }:
+            return turn, streamed, delta_before_terminal
+        time.sleep(0.01)
+    pytest.fail(f"Interaction Turn did not reach a terminal state: {turn_id}")
+
+
 _SENSITIVE_FAILURE_PATTERNS = (
     re.compile(r"(?i)(authorization\s*[:=]\s*bearer\s+)\S+"),
     re.compile(r"(?i)((?:api[_-]?key|token|secret|password)\s*[:=]\s*)\S+"),
@@ -261,6 +317,9 @@ def _preserve_real_provider_success_report(
     turn,
     projection,
     destination: Path,
+    *,
+    streamed_response: str,
+    delta_before_terminal: bool,
 ) -> None:
     report = {
         "evidence_kind": "HUMAN_WATT_REAL_PROVIDER_PROOF",
@@ -274,6 +333,17 @@ def _preserve_real_provider_success_report(
         "design_next_focus": projection.design_next_focus,
         "design_focus_rationale": projection.design_focus_rationale,
         "design_facilitation_strategy": projection.design_facilitation_strategy,
+        "incremental_response_observed": bool(streamed_response),
+        "delta_observed_before_terminal": delta_before_terminal,
+        "stream_matches_persisted_response_prefix": (
+            projection.conversation_messages[-1].content.startswith(
+                streamed_response
+            )
+        ),
+        "design_path_explained": (
+            "设计路径：" in projection.conversation_messages[-1].content
+            or "Design path:" in projection.conversation_messages[-1].content
+        ),
         "conversation_message_count": len(projection.conversation_messages),
         "created_at": turn.created_at.isoformat(),
         "started_at": None if turn.started_at is None else turn.started_at.isoformat(),
@@ -495,6 +565,37 @@ def test_async_turn_persists_history_schema_guidance_and_restarts(
     restarted.shutdown()
 
 
+def test_async_turn_projects_real_delta_before_completion_and_persists_final_message(
+    postgres_database: Database,
+) -> None:
+    capability = _BlockingStreamingCapability()
+    service = WorkInteractionService(postgres_database, capability=capability)
+    interaction = service.create_interaction(human_identity="human:test")
+    submitted = service.submit_turn(
+        interaction.id,
+        "Design an operations management platform.",
+        human_identity="human:test",
+    )
+
+    assert capability.delta_published.wait(timeout=2)
+    processing = service.get_turn(submitted.id)
+    delta, offset = service.turn_response_delta(submitted.id, 0)
+    assert processing.status is InteractionTurnStatus.PROCESSING
+    assert delta == "I am mapping the design path now. "
+    assert offset == len(delta)
+
+    capability.release.set()
+    completed = _wait_for_turn(service, submitted.id)
+    assert completed.status is InteractionTurnStatus.COMPLETED
+    assert service.turn_response_delta(submitted.id, 0)[0] == delta
+    projection = service.get_shared_understanding(interaction.id)
+    final_response = projection.conversation_messages[-1].content
+    assert final_response.startswith(delta)
+    assert "Design path:" in final_response
+    assert _count(postgres_database, product_works) == 0
+    service.shutdown()
+
+
 def test_async_turn_failure_is_persisted_without_work(
     postgres_database: Database,
 ) -> None:
@@ -639,7 +740,13 @@ def test_real_provider_guides_mandatory_human_watt_scenario_in_one_turn(
             "我想做一个运营管理平台。",
             human_identity="human:collaboration-proof",
         )
-        completed = _wait_for_turn(service, submitted.id, timeout=320)
+        completed, streamed_response, delta_before_terminal = (
+            _wait_for_turn_and_observe_stream(
+                service,
+                submitted.id,
+                timeout=320,
+            )
+        )
         if completed.status is InteractionTurnStatus.FAILED:
             _fail_with_preserved_turn_evidence(completed)
         assert completed.status is InteractionTurnStatus.COMPLETED
@@ -657,9 +764,16 @@ def test_real_provider_guides_mandatory_human_watt_scenario_in_one_turn(
         assert projection.design_next_focus
         assert projection.design_focus_rationale
         assert projection.design_facilitation_strategy
-        assert "Design approach: General Product/System Design" in (
-            projection.conversation_messages[-1].content
+        assert streamed_response
+        assert delta_before_terminal is True
+        final_response = projection.conversation_messages[-1].content
+        assert final_response.startswith(streamed_response)
+        assert (
+            "设计方法：General Product/System Design" in final_response
+            or "Design approach: General Product/System Design" in final_response
         )
+        assert "设计路径：" in final_response or "Design path:" in final_response
+        assert "当前阶段：" in final_response or "Current stage:" in final_response
         assert _count(postgres_database, product_works) == 0
         assert _count(postgres_database, work_reality_revisions) == 0
         for table in runtime_tables:
@@ -670,6 +784,8 @@ def test_real_provider_guides_mandatory_human_watt_scenario_in_one_turn(
                 completed,
                 projection,
                 Path(evidence_path),
+                streamed_response=streamed_response,
+                delta_before_terminal=delta_before_terminal,
             )
     finally:
         service.shutdown()

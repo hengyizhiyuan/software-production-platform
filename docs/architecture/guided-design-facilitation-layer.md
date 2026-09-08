@@ -4,6 +4,9 @@ Status: **IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS
 
 Closure: **PENDING ARCHITECTURE LEAD REALITY REVIEW.**
 
+Human–Watt experience calibration v2: **IMPLEMENTED / FOCUSED VALIDATION PASS /
+REAL PROVIDER V2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+
 ## Purpose
 
 Guided Design Facilitation makes the existing Guided Design structure active
@@ -40,6 +43,14 @@ The bounded strategy set is:
 Question asking is one strategy, not the default behavior. The current issue,
 dependencies, readiness, required output, and Human-Authority relevance govern
 the selection.
+
+At the pre-Work conversation boundary, facilitation now receives the matched
+schema's ordered stages together with exact persisted Interaction Reality.
+Human-facing behavior must explain the route, locate the current discussion,
+reuse known information, recommend the next high-value design move, and surface
+only the most material unresolved question. Proactive guidance remains
+advisory: it can frame choices and explain trade-offs, but it cannot admit
+Design Reality, create Work, or transfer Authority.
 
 ## Seed Design Schema Registry
 
@@ -86,6 +97,9 @@ Watt selects **General Product/System Design v0.1**, explains that the input is
 a new software product/system design problem, establishes the opening stage and
 focus, explains why that focus precedes downstream capability design, and
 presents active guidance rather than merely returning a list of questions.
+The persisted conversation response includes the selected methodology, its
+ordered stage path, the opening stage, the current focus, and why that focus
+precedes downstream design commitments.
 
 ## Ownership and progression
 

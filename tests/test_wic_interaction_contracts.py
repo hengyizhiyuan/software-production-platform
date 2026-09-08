@@ -1,4 +1,6 @@
 from collections.abc import Iterator
+import json
+from types import SimpleNamespace
 
 import pytest
 from pydantic import ValidationError
@@ -11,7 +13,10 @@ from spg.domain.interaction import (
     WorkSatisfactionState,
     WorkTransitionChoice,
 )
-from spg.providers.codex_interaction import CodexSdkWorkInteractionCapability
+from spg.providers.codex_interaction import (
+    CodexSdkWorkInteractionCapability,
+    _JsonStringFieldStream,
+)
 
 
 def _object_schemas(value: object, path: str = "$") -> Iterator[tuple[str, dict]]:
@@ -37,6 +42,7 @@ def _schema_nodes(value: object) -> Iterator[dict]:
 
 def test_wic_provider_schema_is_recursively_strict_and_ref_safe() -> None:
     schema = CodexSdkWorkInteractionCapability.output_schema()
+    assert next(iter(schema["properties"])) == "natural_response"
     for path, object_schema in _object_schemas(schema):
         assert set(object_schema["properties"]) == set(
             object_schema.get("required", [])
@@ -45,6 +51,80 @@ def test_wic_provider_schema_is_recursively_strict_and_ref_safe() -> None:
     for node in _schema_nodes(schema):
         if "$ref" in node:
             assert set(node) == {"$ref"}
+
+
+def test_wic_provider_stream_exposes_only_incremental_human_response() -> None:
+    payload = {
+        "natural_response": "先明确用户价值，再比较方案 A 与 B。\\n只问一个关键问题。🚦",
+        "interpreted_motive": "设计运营管理平台",
+        "desired_outcome": None,
+        "candidate_context": [],
+        "candidate_constraints": [],
+        "current_requests": [],
+        "unresolved_material_questions": [],
+        "meanings": [],
+        "focus_classification": None,
+        "impact_disposition": None,
+        "supporting_references": [],
+    }
+    encoded = json.dumps(payload, ensure_ascii=True, separators=(", ", " : "))
+    extractor = _JsonStringFieldStream("natural_response")
+    emitted = "".join(
+        extractor.feed(encoded[offset : offset + 5])
+        for offset in range(0, len(encoded), 5)
+    )
+
+    assert emitted == payload["natural_response"]
+    assert "interpreted_motive" not in emitted
+
+
+def test_wic_streaming_terminal_collects_provider_events_and_final_result() -> None:
+    payload = {
+        "natural_response": "I will lead with the highest-impact design decision.",
+        "interpreted_motive": "Design an operations platform",
+        "desired_outcome": None,
+        "candidate_context": [],
+        "candidate_constraints": [],
+        "current_requests": [],
+        "unresolved_material_questions": [],
+        "meanings": [],
+        "focus_classification": None,
+        "impact_disposition": None,
+        "supporting_references": [],
+    }
+    encoded = json.dumps(payload, separators=(",", ":"))
+
+    class Turn:
+        def stream(self):
+            for offset in range(0, len(encoded), 11):
+                yield SimpleNamespace(
+                    method="item/agentMessage/delta",
+                    payload=SimpleNamespace(delta=encoded[offset : offset + 11]),
+                )
+            yield SimpleNamespace(
+                method="item/completed",
+                payload=SimpleNamespace(
+                    item=SimpleNamespace(type="agentMessage", text=encoded)
+                ),
+            )
+            yield SimpleNamespace(
+                method="turn/completed",
+                payload=SimpleNamespace(
+                    turn=SimpleNamespace(status="completed", error=None)
+                ),
+            )
+
+    deltas: list[str] = []
+    terminal = CodexSdkWorkInteractionCapability._wait_for_streaming_terminal(
+        Turn(),
+        timeout_seconds=1,
+        on_response_delta=deltas.append,
+    )
+
+    assert terminal.timed_out is False
+    assert terminal.result is not None
+    assert terminal.result.final_response == encoded
+    assert "".join(deltas) == payload["natural_response"]
 
 
 def test_ready_readiness_cannot_hide_material_questions() -> None:

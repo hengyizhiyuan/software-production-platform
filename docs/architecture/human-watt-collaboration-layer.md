@@ -4,6 +4,9 @@ Status: **IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS
 
 Closure: **PENDING ARCHITECTURE LEAD REALITY REVIEW.**
 
+Experience calibration v2: **IMPLEMENTED / FOCUSED VALIDATION PASS / REAL
+PROVIDER V2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+
 ## Purpose
 
 The Human–Watt Collaboration Layer turns the existing Work Interaction and
@@ -61,11 +64,37 @@ event. Polling remains a compatibility fallback. This is deliberately SSE over
 the current HTTP architecture; it does not add WebSocket infrastructure, an
 event bus, or a new workflow system.
 
-The current Codex interpretation adapter exposes a final typed result rather
-than provider token events. Consequently, processing status is live, while
-message deltas are emitted from the persisted final Watt response after
-completion. Provider-token streaming is a known limitation, not a claimed
-current capability.
+The Codex interpretation adapter now consumes the public Turn notification
+stream and projects agent-message deltas while the Turn is still processing.
+Because the Provider response is a structured envelope, only the
+natural-response JSON string is incrementally exposed; advisory assessment
+fields and the structured envelope are never rendered as chat text. The final
+Watt message is still persisted atomically at completion. SSE reconciles the
+ephemeral stream with that persisted final message and can replace its local
+presentation if they do not share the expected prefix.
+
+The incremental buffer is bounded, process-local presentation state. It is not
+a message Truth source. A late connection or restarted process falls back to
+the persisted final message and durable Turn state.
+
+## Design-partner behavior
+
+For pre-Work product/system design, the exact persisted Interaction basis is
+combined with the already-selected or deterministically matched Design Schema.
+The Provider receives the ordered design stages and is instructed to:
+
+- use facts the Human already supplied instead of asking for them again;
+- explain the relevant design path and current stage;
+- select and justify the highest-value current focus;
+- offer useful framing, alternatives, trade-offs, or decision order where the
+  evidence supports them;
+- ask at most one highest-impact unresolved question;
+- distinguish advisory facilitation from governed Reality and Authority.
+
+The final Human-facing message also projects the selected schema, complete
+stage path, current focus, and rationale from existing Guided Design
+definitions. This is behavior and presentation calibration; it does not create
+a new interpretation, Design, Plan, Work, or Authority owner.
 
 ## Persistence and restart
 
@@ -101,6 +130,8 @@ Production Passport, Guardian redesign, external design intake, schema
 management UI/backend, a schema marketplace, BPM/workflow editing, multi-user
 governance, Workspace hierarchy, or provider-session continuity. Background
 work uses one in-process worker and is not a distributed durable queue.
+Incremental deltas are intentionally not persisted as partial messages; a
+terminal Watt message is the durable conversation record.
 
 ## References
 

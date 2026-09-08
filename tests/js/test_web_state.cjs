@@ -565,7 +565,9 @@ test("pre-Work composer keeps messaging separate from explicit governed admissio
   assert.match(appSource, /\/api\/interactions\/\$\{state\.selectedInteractionId\}\/turns/);
   assert.match(appSource, /new globalThis\.EventSource\(/);
   assert.match(appSource, /message\.delta/);
+  assert.match(appSource, /message\.reset/);
   assert.match(appSource, /message\.completed/);
+  assert.match(appSource, /latestWattMessage/);
   assert.doesNotMatch(appSource, /apiRequest\("\/api\/works", \{ method: "POST"/);
   assert.match(appSource, /No Work was created/);
   assert.match(appSource, /\/api\/interactions\/\$\{projection\.interaction_id\}\/admit-work/);
