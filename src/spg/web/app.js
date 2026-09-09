@@ -9,6 +9,8 @@
   const POLL_INTERVAL_MS = 2000;
   const COMPOSER_EXPANDED_STORAGE_KEY = "spg.workComposer.expanded";
   const INTERACTION_STORAGE_KEY = "spg.currentInteraction.id";
+  const OUTBOX_STORAGE_KEY = "spg.interaction.outbox.v1";
+  const DRAFT_STORAGE_KEY = "spg.interaction.drafts.v1";
   const state = {
     goals: [],
     works: [],
@@ -27,6 +29,13 @@
     activeInteractionTurnId: "",
     interactionEventSource: null,
     streamingAssistantMessage: null,
+    streamFrame: null,
+    sendInFlight: false,
+    finishingTurn: false,
+    outbox: [],
+    drafts: {},
+    freshInteraction: false,
+    storageAvailable: true,
   };
 
   const elements = {
@@ -48,6 +57,8 @@
     globalErrorMessage: document.getElementById("global-error-message"),
     noSelection: document.getElementById("no-selection"),
     interactionHistory: document.getElementById("interaction-history"),
+    interactionOutbox: document.getElementById("interaction-outbox"),
+    composerStatus: document.getElementById("composer-status"),
     interactionProcessingStatus: document.getElementById("interaction-processing-status"),
     newInteractionControl: document.getElementById("new-interaction-control"),
     interactionReadiness: document.getElementById("interaction-readiness"),
@@ -288,6 +299,10 @@
         control.disabled = value;
       }
     });
+    renderComposer();
+    // A Turn can finish while another UI action is still refreshing. Retry
+    // eligible browser intent when that action releases the busy guard.
+    if (!value) void drainOutbox();
   }
 
   function setSurface(name) {
@@ -365,13 +380,150 @@
     return Array.isArray(values) && values.length ? values.join(" · ") : emptyLabel;
   }
 
+  function messageKey(record, index) {
+    return `${state.selectedInteractionId}:${record.actor}:${record.turn_id || record.interaction_record_id || index}`;
+  }
+
+  function renderConversation() {
+    const history = viewModel.interactionConversationMessages(state.sharedUnderstanding, state.streamingAssistantMessage);
+    const container = elements.interactionHistory;
+    const existing = new Map(Array.from(container.children).map((node) => [node.dataset.messageKey, node]));
+    const retained = new Set();
+    history.forEach((record, index) => {
+      const key = messageKey(record, index);
+      let message = existing.get(key);
+      if (!message) {
+        message = createElement("article", `interaction-message actor-${record.actor.toLowerCase()}`);
+        message.dataset.messageKey = key;
+        message.append(createElement("p", "speaker-label", record.actor === "HUMAN" ? "You" : "Watt"));
+        message.append(createElement("p", "message-content"));
+        message.append(createElement("p", "message-meta"));
+        message.append(createElement("p", "message-references"));
+      }
+      retained.add(message);
+      updateMessageNode(message, record);
+      if (container.children[index] !== message) container.insertBefore(message, container.children[index] || null);
+    });
+    Array.from(container.children).forEach((node) => { if (!retained.has(node)) node.remove(); });
+    if (!history.length) container.append(createElement("p", "empty-copy", "No messages yet."));
+  }
+
+  function updateMessageNode(message, record) {
+    message.classList.toggle("is-streaming", Boolean(record.streaming));
+    message.setAttribute("aria-busy", String(Boolean(record.streaming)));
+    const content = message.querySelector(".message-content");
+    if (content.textContent !== record.content) content.textContent = record.content;
+    const timestamp = record.created_at ? new Date(record.created_at).toLocaleTimeString() : "";
+    const meta = `${timestamp}${record.processing_status ? ` · ${record.processing_status}` : ""}`;
+    if (message.children[2].textContent !== meta) message.children[2].textContent = meta;
+    const references = [...(record.supporting_references || []), ...(record.design_result_references || []), ...(record.governance_event_references || [])].join(" · ");
+    if (message.children[3].textContent !== references) message.children[3].textContent = references;
+    message.children[3].hidden = !references;
+  }
+
+  function renderInteractionStatus() {
+    const turns = (state.sharedUnderstanding && state.sharedUnderstanding.turns) || [];
+    const turnStatus = state.streamingAssistantMessage ? state.streamingAssistantMessage.status
+      : turns.length ? turns[turns.length - 1].status : "IDLE";
+    elements.interactionProcessingStatus.textContent = turnStatus;
+    elements.interactionProcessingStatus.className = `status-badge ${turnStatus === "FAILED" ? "status-attention" : turnStatus === "COMPLETED" ? "status-completed" : "status-draft"}`;
+  }
+
+  function scheduleStreamRender() {
+    if (state.streamFrame !== null) return;
+    state.streamFrame = globalThis.requestAnimationFrame(() => {
+      state.streamFrame = null;
+      const streamed = state.streamingAssistantMessage;
+      if (!streamed) return;
+      const key = messageKey({ actor: "WATT", turn_id: streamed.turnId }, 0);
+      const node = Array.from(elements.interactionHistory.children).find((item) => item.dataset.messageKey === key);
+      if (node) {
+        updateMessageNode(node, {
+          content: streamed.content || "Watt is thinking...", streaming: true,
+          processing_status: streamed.status, created_at: streamed.createdAt,
+        });
+      }
+      renderInteractionStatus();
+    });
+  }
+
+  function persistComposer() {
+    try {
+      // Tab-scoped storage prevents another open tab from draining this outbox.
+      sessionStorage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(state.outbox));
+      sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(state.drafts));
+      state.storageAvailable = true;
+    } catch (_error) {
+      state.storageAvailable = false;
+    }
+  }
+
+  function restoreComposer() {
+    try {
+      state.outbox = viewModel.restoreInteractionOutbox(JSON.parse(sessionStorage.getItem(OUTBOX_STORAGE_KEY) || "[]"));
+      const drafts = JSON.parse(sessionStorage.getItem(DRAFT_STORAGE_KEY) || "{}");
+      state.drafts = drafts && typeof drafts === "object" && !Array.isArray(drafts) ? drafts : {};
+      elements.workRequirement.value = state.drafts.new || "";
+    } catch (_error) {
+      state.storageAvailable = false;
+    }
+  }
+
+  function saveDraft() {
+    state.drafts[state.selectedInteractionId || "new"] = elements.workRequirement.value;
+    persistComposer();
+  }
+
+  function renderComposer() {
+    const waiting = Boolean(state.activeInteractionTurnId || state.finishingTurn || state.sendInFlight);
+    elements.workRequirement.disabled = state.busy;
+    elements.submitWork.disabled = state.busy;
+    elements.newInteractionControl.disabled = state.busy || state.sendInFlight;
+    elements.submitWork.textContent = waiting ? "Queue next message" : "Send";
+    elements.composerStatus.textContent = !state.storageAvailable
+      ? "Browser storage is unavailable. Keep this page open to retain drafts and waiting messages."
+      : waiting ? "You can write ahead. Queued messages send after this reply is complete."
+        : "Share a question, idea, or next step.";
+    elements.interactionOutbox.hidden = state.outbox.length === 0;
+    elements.interactionOutbox.replaceChildren();
+    state.outbox.forEach((item) => {
+      const row = createElement("article", "outbox-message");
+      row.append(createElement("p", "outbox-content", item.content));
+      const elsewhere = item.interactionId !== state.selectedInteractionId;
+      const status = item.status === "sending" ? "Sending — receipt not confirmed yet."
+        : item.status === "uncertain" ? "Delivery not confirmed. Check conversation history before sending again."
+          : item.status === "paused" ? "Paused — not sent. Resume when you are ready."
+            : "Waiting to send — Watt has not received this message.";
+      row.append(createElement("p", "message-meta", `${elsewhere ? "Another conversation · " : ""}${status}`));
+      const actions = createElement("div", "outbox-actions");
+      if (elsewhere || item.status === "paused" || item.status === "uncertain") {
+        const resume = createElement("button", "text-button", elsewhere || item.status === "uncertain" ? "View conversation" : "Resume");
+        resume.type = "button";
+        resume.disabled = state.busy || state.sendInFlight;
+        resume.addEventListener("click", () => resumeOutbox(item.id));
+        actions.append(resume);
+      }
+      if (item.status !== "sending") {
+        const cancel = createElement("button", "text-button", item.status === "uncertain" ? "Remove local copy" : "Cancel");
+        cancel.type = "button";
+        cancel.addEventListener("click", () => {
+          state.outbox = state.outbox.filter((entry) => entry.id !== item.id);
+          persistComposer();
+          renderComposer();
+          void drainOutbox();
+        });
+        actions.append(cancel);
+      }
+      row.append(actions);
+      elements.interactionOutbox.append(row);
+    });
+  }
+
   function renderInteraction() {
     const projection = state.sharedUnderstanding;
-    elements.interactionHistory.replaceChildren();
+    renderConversation();
+    renderComposer();
     if (!projection) {
-      elements.interactionHistory.append(
-        createElement("p", "empty-copy", "No messages yet."),
-      );
       elements.interactionReadiness.textContent = "NOT_READY";
       elements.interactionReadiness.className = "status-badge status-draft";
       elements.interactionProcessingStatus.textContent = "IDLE";
@@ -409,47 +561,7 @@
       elements.workTransitionDecision.hidden = true;
       return;
     }
-    const history = viewModel.interactionConversationMessages(
-      projection,
-      state.streamingAssistantMessage,
-    );
-    history.forEach((record) => {
-      const message = createElement("article", `interaction-message actor-${record.actor.toLowerCase()}`);
-      if (record.streaming) {
-        message.classList.add("is-streaming");
-        message.setAttribute("aria-busy", "true");
-      }
-      message.append(createElement("p", "speaker-label", record.actor === "HUMAN" ? "You" : "Watt"));
-      message.append(createElement("p", "", record.content));
-      const timestamp = record.created_at ? new Date(record.created_at).toLocaleTimeString() : "";
-      const statusText = record.processing_status ? ` · ${record.processing_status}` : "";
-      message.append(createElement("p", "message-meta", `${timestamp}${statusText}`));
-      const references = [
-        ...(record.supporting_references || []),
-        ...(record.design_result_references || []),
-        ...(record.governance_event_references || []),
-      ];
-      if (references.length) {
-        message.append(createElement("p", "message-references", references.join(" · ")));
-      }
-      elements.interactionHistory.append(message);
-    });
-    const latestTurn = projection.turns && projection.turns.length
-      ? projection.turns[projection.turns.length - 1]
-      : null;
-    const turnStatus = state.streamingAssistantMessage
-      ? state.streamingAssistantMessage.status
-      : latestTurn
-        ? latestTurn.status
-        : "IDLE";
-    elements.interactionProcessingStatus.textContent = turnStatus;
-    elements.interactionProcessingStatus.className = `status-badge ${
-      turnStatus === "FAILED"
-        ? "status-attention"
-        : turnStatus === "COMPLETED"
-          ? "status-completed"
-          : "status-draft"
-    }`;
+    renderInteractionStatus();
     const assessment = projection.latest_assessment;
     const readiness = projection.readiness;
     const status = readiness ? readiness.status : "NOT_READY";
@@ -1138,7 +1250,8 @@
     state.goals = goals;
     state.works = works;
     state.interactions = interactions;
-    if (!state.selectedInteractionId && interactions.length) {
+    const previousInteractionId = state.selectedInteractionId;
+    if (!state.selectedInteractionId && !state.freshInteraction && interactions.length) {
       let stored = "";
       try {
         stored = localStorage.getItem(INTERACTION_STORAGE_KEY) || "";
@@ -1154,6 +1267,12 @@
         (item) => item.interaction_id === state.selectedInteractionId,
       ) || null;
     }
+    if (state.selectedInteractionId !== previousInteractionId) {
+      elements.workRequirement.value = state.drafts[state.selectedInteractionId || "new"] || "";
+    }
+    const latestTurns = (state.sharedUnderstanding && state.sharedUnderstanding.turns) || [];
+    const active = latestTurns.find((turn) => turn.status !== "COMPLETED" && turn.status !== "FAILED");
+    if (active && !state.activeInteractionTurnId && !state.finishingTurn) observeInteractionTurn(state.selectedInteractionId, active.turn_id);
     renderGoalList();
     renderWorkList();
     renderInteraction();
@@ -1180,13 +1299,17 @@
       return;
     }
     const workId = state.selectedWorkId;
+    const interactionId = state.selectedInteractionId;
     const [work, attention, result, steering] = await Promise.all([
       apiRequest(`/api/works/${workId}`),
       apiRequest(`/api/attention?work_id=${encodeURIComponent(workId)}`),
       apiRequest(`/api/works/${workId}/result`),
       loadSteeringProjection(workId),
     ]);
+    if (state.selectedWorkId !== workId || state.selectedInteractionId !== interactionId) return;
     state.selectedWork = work;
+    state.works = state.works.map((item) => item.work_id === workId ? work : item);
+    renderWorkList();
     state.attention = attention;
     state.result = result;
     state.steering = steering;
@@ -1294,184 +1417,254 @@
     }
   }
 
-  async function refreshInteractionAfterTurn() {
-    if (!state.selectedInteractionId) {
-      return;
+  function observationIsCurrent(interactionId, turnId) {
+    return state.selectedInteractionId === interactionId && state.activeInteractionTurnId === turnId;
+  }
+
+  function stopTurnObservation() {
+    if (state.interactionEventSource) state.interactionEventSource.close();
+    state.interactionEventSource = null;
+    state.activeInteractionTurnId = "";
+    state.streamingAssistantMessage = null;
+    state.finishingTurn = false;
+    if (state.streamFrame !== null) globalThis.cancelAnimationFrame(state.streamFrame);
+    state.streamFrame = null;
+  }
+
+  function pauseOutbox(interactionId) {
+    state.outbox.forEach((item) => {
+      if (item.interactionId === interactionId && item.status === "queued") item.status = "paused";
+    });
+    persistComposer();
+  }
+
+  async function finishInteractionTurn(interactionId, turnId, failure) {
+    if (!observationIsCurrent(interactionId, turnId) || state.finishingTurn) return;
+    state.finishingTurn = true;
+    if (state.interactionEventSource) state.interactionEventSource.close();
+    state.interactionEventSource = null;
+    try {
+      const projection = await apiRequest(`/api/interactions/${interactionId}`);
+      if (!observationIsCurrent(interactionId, turnId)) return;
+      const savedTurn = (projection.turns || []).find((turn) => turn.turn_id === turnId);
+      if (!savedTurn || (savedTurn.status !== "COMPLETED" && savedTurn.status !== "FAILED")) {
+        throw new ApiError(409, "TURN_SYNC_PENDING", "The saved reply is not available yet. Refresh to check again; waiting messages remain paused.");
+      }
+      state.sharedUnderstanding = projection;
+      state.interactions = state.interactions.map((item) => item.interaction_id === interactionId ? projection : item);
+      stopTurnObservation();
+      if (failure || savedTurn.status === "FAILED") {
+        pauseOutbox(interactionId);
+        showNotice(new ApiError(409, (failure && failure.code) || savedTurn.failure_code || "TURN_FAILED", (failure && failure.message) || savedTurn.failure_message || "Watt could not complete this reply. Waiting messages are paused."));
+      } else {
+        announce("Watt completed the reply. You can continue the conversation.");
+      }
+      renderInteraction();
+      state.selectedWorkId = projection.governed_work_id || "";
+      if (state.selectedWorkId) {
+        setSurface("selected");
+        void refreshSelected().catch(showNotice);
+      } else {
+        state.selectedWork = null;
+        setSurface("empty");
+      }
+      if (!failure && savedTurn.status === "COMPLETED") void drainOutbox();
+    } catch (error) {
+      if (!observationIsCurrent(interactionId, turnId)) return;
+      stopTurnObservation();
+      pauseOutbox(interactionId);
+      renderInteraction();
+      showNotice(error);
     }
-    state.sharedUnderstanding = await apiRequest(
-      `/api/interactions/${state.selectedInteractionId}`,
-    );
-    await loadCollections();
-    const focusedWorkId = state.sharedUnderstanding
-      ? state.sharedUnderstanding.governed_work_id || ""
-      : "";
-    state.selectedWorkId = focusedWorkId;
-    if (focusedWorkId) {
-      await refreshSelected();
-      setSurface("selected");
-    } else {
-      state.selectedWork = null;
-      setSurface("empty");
-    }
-    renderInteraction();
   }
 
   async function pollInteractionTurn(interactionId, turnId) {
-    while (state.activeInteractionTurnId === turnId) {
-      const turn = await apiRequest(
-        `/api/interactions/${interactionId}/turns/${turnId}`,
-      );
-      if (state.streamingAssistantMessage) {
-        state.streamingAssistantMessage.status = turn.status;
-      }
-      renderInteraction();
-      if (turn.status === "COMPLETED" || turn.status === "FAILED") {
-        state.activeInteractionTurnId = "";
-        await refreshInteractionAfterTurn();
-        state.streamingAssistantMessage = null;
-        renderInteraction();
-        if (turn.status === "FAILED") {
-          showNotice(new ApiError(409, turn.failure_code || "TURN_FAILED", turn.failure_message || "Watt could not complete this Turn."));
+    let failures = 0;
+    while (observationIsCurrent(interactionId, turnId) && !state.finishingTurn) {
+      try {
+        const turn = await apiRequest(`/api/interactions/${interactionId}/turns/${turnId}`);
+        if (!observationIsCurrent(interactionId, turnId)) return;
+        failures = 0;
+        if (state.streamingAssistantMessage) state.streamingAssistantMessage.status = turn.status;
+        scheduleStreamRender();
+        if (turn.status === "COMPLETED" || turn.status === "FAILED") {
+          await finishInteractionTurn(interactionId, turnId, turn.status === "FAILED"
+            ? { code: turn.failure_code, message: turn.failure_message } : null);
+          return;
         }
-        return;
+      } catch (error) {
+        if (!observationIsCurrent(interactionId, turnId)) return;
+        failures += 1;
+        if (failures >= 3) {
+          stopTurnObservation();
+          pauseOutbox(interactionId);
+          renderInteraction();
+          showNotice(new ApiError(0, "CONNECTION_LOST", "Connection lost. Refresh to recover the reply. Waiting messages are paused and will not be resent."));
+          return;
+        }
       }
-      await new Promise((resolve) => globalThis.setTimeout(resolve, 400));
+      await new Promise((resolve) => globalThis.setTimeout(resolve, failures ? 2000 * failures : 600));
     }
   }
 
   function observeInteractionTurn(interactionId, turnId) {
+    if (state.selectedInteractionId !== interactionId) return;
+    if (state.interactionEventSource) state.interactionEventSource.close();
     state.activeInteractionTurnId = turnId;
-    if (!state.streamingAssistantMessage || state.streamingAssistantMessage.turnId !== turnId) {
-      state.streamingAssistantMessage = {
-        turnId,
-        content: "",
-        status: "PROCESSING",
-        createdAt: new Date().toISOString(),
-      };
-    }
+    state.streamingAssistantMessage = {
+      turnId, content: "", status: "PROCESSING", createdAt: new Date().toISOString(),
+    };
     renderInteraction();
     if (typeof globalThis.EventSource !== "function") {
       void pollInteractionTurn(interactionId, turnId);
       return;
     }
-    if (state.interactionEventSource) {
-      state.interactionEventSource.close();
-    }
-    const source = new globalThis.EventSource(
-      `/api/interactions/${interactionId}/turns/${turnId}/events`,
-    );
+    const source = new globalThis.EventSource(`/api/interactions/${interactionId}/turns/${turnId}/events`);
     state.interactionEventSource = source;
     let streamed = "";
+    const current = () => observationIsCurrent(interactionId, turnId) && state.interactionEventSource === source;
     source.addEventListener("turn.status", (event) => {
-      const turn = JSON.parse(event.data);
-      state.streamingAssistantMessage.status = turn.status;
-      renderInteraction();
+      if (!current()) return;
+      state.streamingAssistantMessage.status = JSON.parse(event.data).status;
+      scheduleStreamRender();
     });
     source.addEventListener("message.delta", (event) => {
+      if (!current()) return;
       streamed += JSON.parse(event.data).delta;
       state.streamingAssistantMessage.content = streamed;
-      renderInteraction();
+      scheduleStreamRender();
     });
     source.addEventListener("message.reset", (event) => {
+      if (!current()) return;
       streamed = JSON.parse(event.data).content;
       state.streamingAssistantMessage.content = streamed;
-      renderInteraction();
+      scheduleStreamRender();
     });
-    source.addEventListener("message.completed", async () => {
-      source.close();
-      state.interactionEventSource = null;
-      state.activeInteractionTurnId = "";
-      await refreshInteractionAfterTurn();
-      state.streamingAssistantMessage = null;
-      renderInteraction();
-      announce("Watt completed the Interaction Turn from persisted Reality.");
+    source.addEventListener("message.completed", () => {
+      if (current()) void finishInteractionTurn(interactionId, turnId, null);
     });
-    source.addEventListener("turn.failed", async (event) => {
-      const failure = JSON.parse(event.data);
-      source.close();
-      state.interactionEventSource = null;
-      state.activeInteractionTurnId = "";
-      await refreshInteractionAfterTurn();
-      state.streamingAssistantMessage = null;
-      renderInteraction();
-      showNotice(new ApiError(409, failure.code || "TURN_FAILED", failure.message || "Watt could not complete this Turn."));
+    source.addEventListener("turn.failed", (event) => {
+      if (current()) void finishInteractionTurn(interactionId, turnId, JSON.parse(event.data));
     });
     source.onerror = () => {
+      if (!current()) return;
       source.close();
       state.interactionEventSource = null;
-      if (state.activeInteractionTurnId === turnId) {
-        void pollInteractionTurn(interactionId, turnId);
-      }
+      void pollInteractionTurn(interactionId, turnId);
     };
   }
 
-  async function continueInteraction(event) {
-    event.preventDefault();
-    if (state.busy) {
-      return;
-    }
-    const content = elements.workRequirement.value.trim();
-    if (!content) {
-      return;
-    }
+  async function resumeOutbox(id) {
+    const item = state.outbox.find((entry) => entry.id === id);
+    if (!item || state.busy || state.sendInFlight) return;
+    saveDraft();
+    const previousId = state.selectedInteractionId;
     setBusy(true);
-    hideNotice();
     try {
-      if (!state.selectedInteractionId) {
-        const created = await apiRequest("/api/interactions", {
-          method: "POST",
-          body: { human_identity: "human:local-operator" },
-        });
-        state.selectedInteractionId = created.interaction_id;
-        state.sharedUnderstanding = created;
-        try {
-          localStorage.setItem(INTERACTION_STORAGE_KEY, state.selectedInteractionId);
-        } catch (_error) {
-          // Interaction remains durable server-side when browser storage is unavailable.
-        }
+      const projection = item.interactionId ? await apiRequest(`/api/interactions/${item.interactionId}`) : null;
+      if (previousId !== item.interactionId) pauseOutbox(previousId);
+      stopTurnObservation();
+      state.selectedInteractionId = item.interactionId;
+      state.freshInteraction = !item.interactionId;
+      state.sharedUnderstanding = projection;
+      elements.workRequirement.value = state.drafts[item.interactionId || "new"] || "";
+      const active = ((projection && projection.turns) || []).find((turn) => turn.status !== "COMPLETED" && turn.status !== "FAILED");
+      if (item.status === "paused" && previousId === item.interactionId) {
+        item.status = "queued";
+        // Resume is an explicit decision to proceed even after a failed prior Turn.
+        item.waitForTurnId = active ? active.turn_id : "";
       }
-      const turn = await apiRequest(
-        `/api/interactions/${state.selectedInteractionId}/turns`,
-        {
-          method: "POST",
-          body: { content, human_identity: "human:local-operator" },
-        },
-      );
-      elements.workRequirement.value = "";
-      // The 202 acknowledgement confirms this exact Human input was persisted.
-      // Render it before the streamed reply while the full projection refreshes.
-      state.sharedUnderstanding = {
-        ...state.sharedUnderstanding,
-        conversation_messages: [
-          ...viewModel.interactionConversationMessages(state.sharedUnderstanding, null),
-          {
-            actor: "HUMAN", turn_id: turn.turn_id, content,
-            interaction_record_id: turn.request_record_id,
-            processing_status: turn.status, created_at: turn.created_at,
-          },
-        ],
-      };
-      state.streamingAssistantMessage = {
-        turnId: turn.turn_id,
-        content: "",
-        status: turn.status || "RECEIVED",
-        createdAt: new Date().toISOString(),
-      };
+      try { localStorage.setItem(INTERACTION_STORAGE_KEY, item.interactionId); } catch (_error) { /* optional preference */ }
+      persistComposer();
+      if (active) observeInteractionTurn(item.interactionId, active.turn_id);
       renderInteraction();
-      observeInteractionTurn(state.selectedInteractionId, turn.turn_id);
-      announce("Message received. No Work was created; Watt is processing it in the background.");
-      const interactionId = state.selectedInteractionId;
-      const receivedProjection = await apiRequest(`/api/interactions/${interactionId}`);
-      // A fast completed event starts its own authoritative refresh. Do not
-      // overwrite it with this earlier, potentially incomplete projection.
-      if (state.selectedInteractionId === interactionId && state.activeInteractionTurnId === turn.turn_id) {
-        state.sharedUnderstanding = receivedProjection;
-      }
+      state.selectedWorkId = (projection && projection.governed_work_id) || "";
+      setSurface(state.selectedWorkId ? "selected" : "empty");
+      if (state.selectedWorkId) void refreshSelected().catch(showNotice);
     } catch (error) {
       showNotice(error);
     } finally {
       setBusy(false);
+      void drainOutbox();
+    }
+  }
+
+  async function continueInteraction(event) {
+    event.preventDefault();
+    if (state.busy) return;
+    const content = elements.workRequirement.value.trim();
+    if (!content) return;
+    if (state.outbox.filter((item) => item.interactionId === state.selectedInteractionId).length >= 3 || state.outbox.length >= 12) {
+      showNotice(new ApiError(409, "OUTBOX_FULL", "Up to three messages can wait per conversation. Cancel or send a waiting message first. Your draft is kept."));
+      return;
+    }
+    const id = globalThis.crypto.randomUUID();
+    state.outbox.push({ id, interactionId: state.selectedInteractionId, content, status: "queued", waitForTurnId: state.activeInteractionTurnId });
+    elements.workRequirement.value = "";
+    saveDraft();
+    hideNotice();
+    renderComposer();
+    if (state.activeInteractionTurnId || state.sendInFlight || state.finishingTurn) announce("Message queued in this browser. Watt has not received it yet.");
+    void drainOutbox();
+  }
+
+  async function drainOutbox() {
+    if (state.busy || state.sendInFlight || state.activeInteractionTurnId || state.finishingTurn) return;
+    const item = viewModel.nextInteractionOutboxItem(state.outbox, state.selectedInteractionId, state.sharedUnderstanding);
+    if (!item) return;
+    state.sendInFlight = true;
+    item.status = "sending";
+    persistComposer();
+    renderComposer();
+    let postStarted = false;
+    let accepted = false;
+    try {
+      if (!item.interactionId) {
+        const created = await apiRequest("/api/interactions", { method: "POST", body: { human_identity: "human:local-operator" } });
+        state.selectedInteractionId = created.interaction_id;
+        state.freshInteraction = false;
+        state.sharedUnderstanding = created;
+        state.outbox.forEach((entry) => { if (!entry.interactionId) entry.interactionId = created.interaction_id; });
+        state.drafts[created.interaction_id] = state.drafts.new || "";
+        delete state.drafts.new;
+        try { localStorage.setItem(INTERACTION_STORAGE_KEY, created.interaction_id); } catch (_error) { /* optional preference */ }
+        persistComposer();
+      }
+      const interactionId = item.interactionId;
+      postStarted = true;
+      const turn = await apiRequest(`/api/interactions/${state.selectedInteractionId}/turns`, {
+        method: "POST", body: { content: item.content, human_identity: "human:local-operator" },
+      });
+      accepted = true;
+      // Only a successful receipt removes browser intent and adds persisted input.
+      state.outbox = state.outbox.filter((entry) => entry.id !== item.id);
+      state.outbox.forEach((entry) => {
+        if (entry.interactionId === interactionId && entry.status === "queued") entry.waitForTurnId = turn.turn_id;
+      });
+      persistComposer();
+      state.sharedUnderstanding = {
+        ...state.sharedUnderstanding,
+        conversation_messages: [
+          ...viewModel.interactionConversationMessages(state.sharedUnderstanding, null),
+          { actor: "HUMAN", turn_id: turn.turn_id, content: item.content, interaction_record_id: turn.request_record_id, processing_status: turn.status, created_at: turn.created_at },
+        ],
+      };
+      observeInteractionTurn(interactionId, turn.turn_id);
+      announce("Message received. No Work was created; Watt is preparing the reply.");
+      const receivedProjection = await apiRequest(`/api/interactions/${interactionId}`);
+      if (observationIsCurrent(interactionId, turn.turn_id) && !state.finishingTurn) state.sharedUnderstanding = receivedProjection;
+    } catch (error) {
+      if (!accepted) {
+        item.status = postStarted && !(error instanceof ApiError && error.status >= 400 && error.status < 500) ? "uncertain" : "paused";
+        pauseOutbox(item.interactionId);
+      }
+      showNotice(error);
+    } finally {
+      state.sendInFlight = false;
+      persistComposer();
       renderInteraction();
+      // A reply can finish before the acknowledgement's projection request does.
+      if (accepted) void drainOutbox();
     }
   }
 
@@ -1607,15 +1800,16 @@
   }
 
   function beginNewInteraction() {
+    if (state.busy || state.sendInFlight) return;
+    saveDraft();
+    pauseOutbox(state.selectedInteractionId);
+    stopTurnObservation();
     state.selectedInteractionId = "";
+    state.freshInteraction = true;
     state.sharedUnderstanding = null;
-    state.streamingAssistantMessage = null;
     state.selectedWorkId = "";
-    try {
-      localStorage.removeItem(INTERACTION_STORAGE_KEY);
-    } catch (_error) {
-      // A fresh interaction will still be created on the next message.
-    }
+    elements.workRequirement.value = state.drafts.new || "";
+    try { localStorage.removeItem(INTERACTION_STORAGE_KEY); } catch (_error) { /* optional preference */ }
     setSurface("empty");
     renderInteraction();
     elements.workRequirement.focus();
@@ -1629,6 +1823,13 @@
   });
   elements.goalForm.addEventListener("submit", createGoal);
   elements.workForm.addEventListener("submit", continueInteraction);
+  elements.workRequirement.addEventListener("input", saveDraft);
+  globalThis.addEventListener("beforeunload", (event) => {
+    if (!state.storageAvailable && (state.outbox.length || elements.workRequirement.value)) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
   elements.admitWorkControl.addEventListener("click", admitInteractionWork);
   elements.approveWorkRevision.addEventListener("click", () => decideWorkRevision("APPROVE"));
   elements.rejectWorkRevision.addEventListener("click", () => decideWorkRevision("REJECT"));
@@ -1676,6 +1877,7 @@
   elements.healthControl.addEventListener("click", loadHealth);
   elements.dismissNotice.addEventListener("click", hideNotice);
 
+  restoreComposer();
   restoreComposerExpanded();
   reloadWorkspace();
 })();

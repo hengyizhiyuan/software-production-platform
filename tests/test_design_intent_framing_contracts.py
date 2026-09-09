@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import inspect
+import json
 
 import pytest
 from pydantic import ValidationError
@@ -91,26 +91,30 @@ def test_provider_wire_and_prompts_carry_frame_without_an_extra_provider_stage()
 
     assert "design_intent_frame" in collaboration["properties"]
     assert "design_intent_frame" in collaboration["required"]
-    assert "Before proposing Guided Design direction" in inspect.getsource(
-        CodexSdkInteractionSemanticCapability.instruction
-    )
+    frame_properties = schema["$defs"]["_DesignIntentFrameProviderPayload"]["properties"]
+    assert {"design_subject", "object_type", "business_context"}.issubset(frame_properties)
 
+    human_message = "我想做一个运营管理平台，主要用于推广 Watt。"
     context = ConversationContext(
         source_basis_fingerprint="a" * 64,
-        latest_human_message="我想做一个运营管理平台。",
+        latest_human_message=human_message,
         response_language="Chinese",
     )
+    frame = frame_design_intent_text(human_message)
     result = StructuredCollaborationResult(
         turn_intent=ConversationTurnIntent.NEW_GOAL,
-        design_intent_frame=frame_design_intent_text(
-            "我想做一个运营管理平台。"
-        ),
+        design_intent_frame=frame,
         response_language="Chinese",
     )
     instruction = CodexSdkConversationProvider.instruction(context, result)
-    assert '"design_intent_frame":' in instruction
-    assert "Keep the system separate from its business purpose" in instruction
-    assert "PRODUCT_SYSTEM" in instruction
+    supplied_result = json.loads(instruction.split("Structured Collaboration Result:\n", 1)[1])
+    supplied_frame = supplied_result["design_intent_frame"]
+
+    # The composer receives the object and its business context as separate values;
+    # preserving this contract must not require reciting a classification to users.
+    assert supplied_frame == frame.model_dump(mode="json")
+    assert supplied_frame["object_type"] == DesignObjectType.PRODUCT_SYSTEM.value
+    assert supplied_frame["business_context"] == "Support Watt promotion and related operations."
 
 
 @pytest.mark.parametrize(

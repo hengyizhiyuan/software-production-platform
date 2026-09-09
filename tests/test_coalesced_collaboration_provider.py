@@ -61,8 +61,16 @@ def _semantic() -> InteractionSemanticCandidate:
 
 
 def _semantics_payload() -> dict:
-    return {**_semantic().model_dump(mode="json", exclude={"provider_identity", "model_identity"}),
-            "retained_prior_meaning_indexes": [], "reuse_prior_design_intent_frame": False}
+    payload = _semantic().model_dump(mode="json", exclude={"provider_identity", "model_identity"})
+    payload["collaboration"] = {
+        key: payload["collaboration"][key] for key in (
+            "turn_intent", "direct_answer", "design_intent_frame",
+            "recommended_next_action", "concise_basis",
+            "detailed_explanation_requested", "response_language",
+        )
+    }
+    return {**payload, "retained_prior_meaning_indexes": [],
+            "reuse_prior_design_intent_frame": False}
 
 
 def _envelope(wording: str, *, reversed_order=False, semantics=None) -> str:
@@ -706,3 +714,50 @@ def test_frame_reuse_is_strict_coalesced_wire_only_and_active_work_prompt_is_ret
         "not automatically", "only source_record_ids", "creates no Work",
     ):
         assert invariant in coalesced
+
+
+def test_compact_handoff_preserves_explicit_answers_and_current_semantics(monkeypatch):
+    payload = _semantics_payload()
+    payload["collaboration"].update(
+        turn_intent="DIRECT_QUESTION", direct_answer="No document has been saved.",
+    )
+    candidate, capability, _ = _run_observed_payload(monkeypatch, _basis(), payload)
+    handoff = capability.last_collaboration_result
+    assert handoff.direct_answer == "No document has been saved."
+    assert handoff.known_relevant_facts == candidate.candidate_context
+    assert handoff.current_objective == candidate.desired_outcome
+    assert capability.last_pipeline_evidence.pipeline_reason == "native_pre_work_shared_configuration"
+    payload["collaboration"]["direct_answer"] = None
+    with pytest.raises(InteractionInvariantViolation, match="invalid structured result"):
+        _run_observed_payload(monkeypatch, _basis(), payload)
+
+
+def test_coalesced_handoff_excludes_duplicate_expression_context_only():
+    from spg.providers.codex_interaction import CodexSdkInteractionSemanticCapability
+
+    coalesced = CodexSdkWorkInteractionCapability.coalesced_output_schema()
+    staged = CodexSdkInteractionSemanticCapability.output_schema()
+    compact_keys = set(coalesced["$defs"]["_CoalescedCollaborationProviderPayload"]["properties"])
+    staged_keys = set(staged["$defs"]["_StructuredCollaborationProviderPayload"]["properties"])
+    assert compact_keys == {
+        "turn_intent", "direct_answer", "design_intent_frame", "recommended_next_action",
+        "concise_basis", "detailed_explanation_requested", "response_language",
+    }
+    assert compact_keys < staged_keys
+    assert {"known_relevant_facts", "current_objective", "alternatives", "policy_hints"} <= staged_keys - compact_keys
+
+
+@pytest.mark.parametrize("options,reason", (
+    ({}, "native_pre_work_shared_configuration"),
+    ({"coalesce_pre_work": False}, "explicit_opt_out"),
+    ({"conversation_model": "other"}, "models_differ"),
+    ({"reasoning_effort": "low"}, "reasoning_efforts_differ"),
+    ({"reasoning_effort": "low", "conversation_reasoning_effort": "low"},
+     "native_pre_work_shared_configuration"),
+))
+def test_effective_pipeline_selection_can_be_inspected_without_provider_calls(options, reason):
+    capability = CodexSdkWorkInteractionCapability(repository_location=".", model="same", **options)
+    mode, selected_reason = capability.pipeline_selection(_basis())
+    assert selected_reason == reason
+    assert mode == ("coalesced_pre_work" if reason.startswith("native_") else "staged")
+    assert capability.last_pipeline_evidence is None

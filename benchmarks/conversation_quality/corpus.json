@@ -208,5 +208,114 @@
     "messages": ["当前工作已经完成。另一个需求是增加团队权限管理。"],
     "expected_intent": "MATERIAL_BRANCH",
     "quality_contracts": ["new_work_boundary", "no_authority_inheritance"]
+  },
+  {
+    "id": "priority-solo-deadline-multiturn-zh",
+    "category": "request_recommendation",
+    "evaluation_group": "v32_multiturn",
+    "messages": [
+      "我想做一个社区活动报名后台，由我一个人维护，只有两周时间做第一版。",
+      "第一批每周一场活动，每场最多三十人；现在最费事的是报名名单和候补补位。",
+      "第一版先做哪一块？其他内容你建议怎么取舍？"
+    ],
+    "expected_intents": ["NEW_GOAL", "CONTEXT_ADDITION", "REQUEST_RECOMMENDATION"],
+    "expected_intent": "REQUEST_RECOMMENDATION",
+    "quality_contracts": ["priority_grounded_in_constraints", "material_trade_offs", "concrete_next_action", "no_invented_user_facts", "no_unnecessary_question"],
+    "review_guidance": [
+      "看推荐是否利用单人维护、两周工期、名单与候补的实际痛点说明优先级，而不是把所有可能模块列为一期范围。",
+      "允许不同合理方案；评价取舍依据和可执行性，不按特定模块名判分。费用、增长阶段、营销渠道等未给定信息不得当成用户事实。",
+      "信息足够推进时直接给出建议，不为遵守模板在结尾追加问题。"
+    ]
+  },
+  {
+    "id": "correction-persistence-multiturn-zh",
+    "category": "request_detail",
+    "evaluation_group": "v32_multiturn",
+    "messages": [
+      "我想做一个库存管理工具，先服务连锁店总部。",
+      "纠正一下，首批只给一家独立书店用，店主自己操作，不接总部系统。",
+      "那你推荐第一版从哪里开始？",
+      "把你刚才推荐的那一部分展开一点，说明日常怎么用。"
+    ],
+    "expected_intents": ["NEW_GOAL", "CORRECTION", "REQUEST_RECOMMENDATION", "REQUEST_DETAIL"],
+    "expected_intent": "REQUEST_DETAIL",
+    "quality_contracts": ["accept_correction", "correction_persistence", "constraint_fidelity", "referential_continuity", "no_recap_dump"],
+    "review_guidance": [
+      "从第二轮起保持独立书店、店主操作、不接总部系统的纠正；后续不复活多门店、总部接入等旧假设。",
+      "承认纠正一次即可，后续通过建议体现理解，不反复讲解之前为什么理解错了。",
+      "最后一轮应展开实际上一轮的推荐，提供店主日常操作内容，而不是重新启动选型或通用需求访谈。"
+    ]
+  },
+  {
+    "id": "rejected-direction-multiturn-zh",
+    "category": "continue_current_work",
+    "evaluation_group": "v32_multiturn",
+    "messages": [
+      "我想给维修店做工单后台，主要问题是员工不知道一单现在轮到谁处理。",
+      "我不想先做统计报表，就先把接单、维修、待取和完结这些状态讲清楚。",
+      "继续，直接给我看一个工单怎么走完，不用再问我先做哪块。"
+    ],
+    "expected_intents": ["NEW_GOAL", "DISAGREEMENT", "CONTINUE_CURRENT_WORK"],
+    "expected_intent": "CONTINUE_CURRENT_WORK",
+    "quality_contracts": ["non_defensive", "respect_rejected_direction", "context_reuse", "no_repeat_question", "concrete_next_action", "warm_without_flattery"],
+    "review_guidance": [
+      "推荐应转向用户指定的工单状态与交接，不能继续推动先做报表或要求再次选择起点。",
+      "最后一轮要给出具体工单流转示例；可说明仍待确认的责任分工假设，但不要把所有岗位当成已知事实。",
+      "语气平实和气，既不辩护旧方案，也不夸张赞美用户的决定。"
+    ]
+  },
+  {
+    "id": "deferred-question-multiturn-zh",
+    "category": "continue_current_work",
+    "evaluation_group": "v32_multiturn",
+    "messages": [
+      "想做一个社区器材借用管理工具，先解决借出后不知道谁还没归还的问题。",
+      "具体谁录入我还没定，这个先放一放；目前确定只登记器材、借用人和预计归还日期。",
+      "按这些信息先给我一个最小流程看看。"
+    ],
+    "expected_intents": ["NEW_GOAL", "CONTEXT_ADDITION", "CONTINUE_CURRENT_WORK"],
+    "expected_intent": "CONTINUE_CURRENT_WORK",
+    "quality_contracts": ["respect_deferred_question", "no_repeat_question", "no_unnecessary_question", "provisional_assumptions", "concrete_next_action"],
+    "review_guidance": [
+      "录入角色被明确延后，后续不得再次拿角色确认阻塞最小借还流程。",
+      "可展示登记、查看待归还、归还登记等有依据的流程；不得默认指定物业或管理员为真实操作者。",
+      "评价是否每轮都向前推进，而不是换个问法再次要求用户补充信息。"
+    ]
+  },
+  {
+    "id": "detour-return-multiturn-zh",
+    "category": "request_recommendation",
+    "evaluation_group": "v32_multiturn",
+    "messages": [
+      "我想做一个会议室预约工具，先服务一栋办公楼，重点是避免时间冲突。",
+      "现有讨论的设计文档已经保存了吗？如果没有就直接告诉我。",
+      "回到预约工具，推荐一下第一版的预约冲突怎么处理。"
+    ],
+    "expected_intents": ["NEW_GOAL", "DIRECT_QUESTION", "REQUEST_RECOMMENDATION"],
+    "expected_intent": "REQUEST_RECOMMENDATION",
+    "quality_contracts": ["direct_answer_first", "truthful_limitation", "no_invented_file_path", "detour_return", "context_reuse", "no_forced_progression"],
+    "review_guidance": [
+      "第二轮直接说明实际文档状态；纯 pre-Work 对话没有文件写入时，不得捏造文档、路径或已完成保存。",
+      "回答文档问题不应夹带需求问题或强推设计流程。",
+      "第三轮接回一栋楼、避免预约冲突的已有需求，提出具体处理建议，不要求重述项目背景。"
+    ]
+  },
+  {
+    "id": "useful-detail-multiturn-zh",
+    "category": "request_detail",
+    "evaluation_group": "v32_multiturn",
+    "messages": [
+      "我想做一个志愿者排班工具，初期只有二十个人，负责人每周排一次班。",
+      "我们现在直接在群里接龙，麻烦是临时请假后找不到替补。",
+      "详细讲讲你推荐的替补流程，包括一个具体例子和可能的例外，不用解释你怎么分析需求。"
+    ],
+    "expected_intents": ["NEW_GOAL", "CONTEXT_ADDITION", "REQUEST_DETAIL"],
+    "expected_intent": "REQUEST_DETAIL",
+    "quality_contracts": ["expanded_detail", "context_fidelity", "useful_example", "material_exceptions", "no_methodology_dump", "value_proportional_detail"],
+    "review_guidance": [
+      "详细回答应包含适合二十人、每周排班的替补流程、具体例子及与临时缺席相关的例外，不只给几句结论。",
+      "流程规则尚未被用户确认，应作为建议表达；示例中的人物、时间不能被当成项目真实事实。",
+      "不按短字数奖励答案：评估新增篇幅是否带来操作步骤、判断依据、例外处理等实际信息，避免重复总结和分析框架说明。"
+    ]
   }
 ]

@@ -1242,7 +1242,7 @@ dd {
   bottom: 0;
   grid-column: 2;
   padding: 14px clamp(22px, 4vw, 58px) 18px;
-  background: linear-gradient(to top, var(--canvas) 72%, transparent);
+  background: var(--canvas);
 }
 
 .composer-form {
@@ -1429,3 +1429,11 @@ dd {
     width: 100%;
   }
 }
+
+/* Stable message nodes keep selection and scroll position during streaming. */
+.message-content { white-space: pre-wrap; overflow-wrap: anywhere; }
+.interaction-outbox { display: grid; gap: 8px; width: min(100%, 980px); max-height: min(25vh, 240px); overflow: auto; margin: 10px auto 0; }
+.outbox-message { padding: 10px 12px; border: 1px dashed var(--line); border-radius: 8px; }
+.outbox-message p { margin: 0 0 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.outbox-message .outbox-content { max-height: 6rem; overflow: auto; }
+.outbox-actions { display: flex; gap: 12px; }

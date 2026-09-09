@@ -635,47 +635,291 @@ test("streaming assistant output occupies one message lifecycle until persisted 
 });
 
 
-test("Turn subscription starts before projection refresh and ignores stale refresh after completion", async () => {
-  const source = appSource.slice(
-    appSource.indexOf("  async function continueInteraction(event)"),
-    appSource.indexOf("  async function admitInteractionWork()"),
-  );
-  let resolveProjection;
-  let notifyProjectionRequested;
-  const projectionRequested = new Promise((resolve) => { notifyProjectionRequested = resolve; });
-  const pendingProjection = new Promise((resolve) => { resolveProjection = resolve; });
-  const state = { busy: false, selectedInteractionId: "interaction-1", sharedUnderstanding: { version: "prior" } };
-  let subscribed = false;
-  const harness = {
-    state,
-    viewModel,
-    elements: { workRequirement: { value: "Build a Web application." } },
-    setBusy: (busy) => { state.busy = busy; },
-    hideNotice() {},
-    renderInteraction() {},
-    announce() {},
-    showNotice(error) { throw error; },
-    observeInteractionTurn(_id, turnId) {
-      subscribed = true;
-      state.activeInteractionTurnId = turnId;
-    },
-    async apiRequest(url) {
-      if (url.endsWith("/turns")) return { turn_id: "turn-1", status: "RECEIVED" };
-      assert.equal(subscribed, true, "SSE must attach without waiting for the projection");
-      notifyProjectionRequested();
-      return pendingProjection;
-    },
+function conversationHarness(request) {
+  const state = {
+    busy: false, selectedInteractionId: "interaction-1", sharedUnderstanding: { turns: [], conversation_messages: [] },
+    sendInFlight: false, finishingTurn: false, activeInteractionTurnId: "", streamingAssistantMessage: null,
+    interactionEventSource: null, streamFrame: null, outbox: [], drafts: {}, interactions: [],
   };
-  vm.runInNewContext(source, harness);
-  const submitting = harness.continueInteraction({ preventDefault() {} });
-  await projectionRequested;
-  assert.equal(state.sharedUnderstanding.conversation_messages.at(-1).actor, "HUMAN");
-  assert.equal(state.sharedUnderstanding.conversation_messages.at(-1).content, "Build a Web application.");
-  const completedProjection = { version: "completed", conversation_messages: [{ actor: "WATT" }] };
-  state.activeInteractionTurnId = "";
-  state.sharedUnderstanding = completedProjection;
-  resolveProjection({ version: "stale-processing" });
-  await submitting;
-  assert.equal(state.sharedUnderstanding, completedProjection);
-  assert.equal(state.busy, false);
+  const sources = [];
+  const frames = [];
+  const notices = [];
+  let saved;
+  let nextId = 0;
+  class EventSource {
+    constructor() { this.handlers = {}; sources.push(this); }
+    addEventListener(name, handler) { this.handlers[name] = handler; }
+    close() { this.closed = true; }
+    emit(name, payload = {}) { return this.handlers[name]({ data: JSON.stringify(payload) }); }
+  }
+  class ApiError extends Error {
+    constructor(status, code, message) { super(message); this.status = status; this.code = code; }
+  }
+  const harness = {
+    state, viewModel, ApiError, EventSource, sources, frames, notices,
+    crypto: { randomUUID: () => `pending-${++nextId}` },
+    elements: { workRequirement: { value: "" } },
+    localStorage: { setItem() {} }, INTERACTION_STORAGE_KEY: "selection",
+    setTimeout: (callback) => setTimeout(callback, 0),
+    cancelAnimationFrame() {},
+    renderInteraction() {}, renderComposer() {}, setSurface() {}, announce() {}, hideNotice() {},
+    setBusy(value) { state.busy = value; },
+    showNotice(error) { notices.push(error); },
+    scheduleStreamRender() { frames.push("scheduled"); },
+    persistComposer() { saved = JSON.parse(JSON.stringify(state.outbox)); },
+    saveDraft() { state.drafts[state.selectedInteractionId || "new"] = harness.elements.workRequirement.value; harness.persistComposer(); },
+    apiRequest: request,
+  };
+  harness.globalThis = harness;
+  vm.runInNewContext(appSource.slice(appSource.indexOf("  function observationIsCurrent("), appSource.indexOf("  async function admitInteractionWork()")), harness);
+  harness.submit = async (content) => {
+    harness.elements.workRequirement.value = content;
+    await harness.continueInteraction({ preventDefault() {} });
+  };
+  harness.saved = () => saved;
+  return harness;
+}
+
+async function settle() {
+  for (let index = 0; index < 12; index += 1) await Promise.resolve();
+}
+
+test("Turn subscription precedes projection refresh; fast completion cannot overwrite saved truth", async () => {
+  let resolveProjection;
+  let harness;
+  const stale = new Promise((resolve) => { resolveProjection = resolve; });
+  harness = conversationHarness(async (url) => {
+    if (url.endsWith("/turns")) return { turn_id: "turn-1", status: "RECEIVED" };
+    assert.equal(harness.sources.length, 1, "subscribe before waiting for projection");
+    return stale;
+  });
+  await harness.submit("Build a Web application.");
+  await settle();
+  assert.equal(harness.state.sharedUnderstanding.conversation_messages.at(-1).content, "Build a Web application.");
+  const completed = { turns: [{ turn_id: "turn-1", status: "COMPLETED" }] };
+  harness.state.activeInteractionTurnId = "";
+  harness.state.sharedUnderstanding = completed;
+  resolveProjection({ turns: [{ turn_id: "turn-1", status: "PROCESSING" }] });
+  await settle();
+  assert.equal(harness.state.sharedUnderstanding, completed);
+  assert.equal(harness.state.sendInFlight, false);
+});
+
+test("messages queued while POST is in flight wait for persisted COMPLETED, exactly once", async () => {
+  let acknowledge;
+  let posts = 0;
+  let projection = { turns: [], conversation_messages: [] };
+  const harness = conversationHarness(async (url) => {
+    if (url.endsWith("/turns")) {
+      posts += 1;
+      if (posts === 1) return new Promise((resolve) => { acknowledge = resolve; });
+      return { turn_id: "turn-2", status: "RECEIVED" };
+    }
+    return projection;
+  });
+  await harness.submit("First");
+  await harness.submit("Second");
+  await harness.submit(""); // repeated submit after the composer was cleared
+  assert.equal(posts, 1);
+  assert.equal(harness.state.outbox[1].status, "queued");
+  projection = { turns: [{ turn_id: "turn-1", status: "PROCESSING" }], conversation_messages: [] };
+  acknowledge({ turn_id: "turn-1", status: "RECEIVED" });
+  await settle();
+  assert.equal(posts, 1);
+  assert.equal(harness.state.outbox[0].waitForTurnId, "turn-1");
+  harness.sources[0].emit("turn.status", { status: "COMPLETED" });
+  await settle();
+  assert.equal(posts, 1, "status or end of displayed text is insufficient to drain");
+  projection = { turns: [{ turn_id: "turn-1", status: "COMPLETED" }], conversation_messages: [] };
+  harness.sources[0].emit("message.completed");
+  await settle();
+  assert.equal(posts, 2);
+  harness.sources[0].emit("message.completed");
+  await settle();
+  assert.equal(posts, 2, "duplicate terminal event cannot resend");
+});
+
+test("uncertain delivery remains visible and survives refresh without an automatic retry", async () => {
+  let posts = 0;
+  const harness = conversationHarness(async () => { posts += 1; throw new Error("response lost"); });
+  await harness.submit("Keep this exact input");
+  await settle();
+  assert.equal(harness.state.outbox[0].status, "uncertain");
+  assert.equal(harness.saved()[0].content, "Keep this exact input");
+  await harness.drainOutbox();
+  assert.equal(posts, 1);
+  const recovered = viewModel.restoreInteractionOutbox(harness.saved());
+  assert.equal(recovered[0].status, "uncertain");
+  assert.equal(viewModel.nextInteractionOutboxItem(recovered, "interaction-1", { turns: [] }), null);
+});
+
+test("failed replies pause later messages, keeping exact content for explicit resume", async () => {
+  let posts = 0;
+  let projection = { turns: [{ turn_id: "turn-1", status: "PROCESSING" }] };
+  const harness = conversationHarness(async (url) => {
+    if (url.endsWith("/turns")) { posts += 1; return { turn_id: "turn-1", status: "RECEIVED" }; }
+    return projection;
+  });
+  await harness.submit("First"); await settle();
+  await harness.submit("Continue after the first reply");
+  projection = { turns: [{ turn_id: "turn-1", status: "FAILED" }] };
+  harness.sources[0].emit("turn.failed", { code: "TEST_FAILURE", message: "Fixture failure" });
+  await settle();
+  assert.equal(posts, 1);
+  assert.equal(harness.state.outbox[0].status, "paused");
+  assert.equal(harness.state.outbox[0].content, "Continue after the first reply");
+  assert.equal(harness.notices[0].code, "TEST_FAILURE");
+});
+
+test("switching conversations ignores stale deltas and leaves the prior queue isolated", async () => {
+  const harness = conversationHarness(async () => ({ turns: [] }));
+  harness.state.outbox = [{ id: "pending", interactionId: "interaction-1", content: "Only for one", status: "queued", waitForTurnId: "turn-1" }];
+  harness.observeInteractionTurn("interaction-1", "turn-1");
+  harness.pauseOutbox("interaction-1");
+  harness.stopTurnObservation();
+  harness.state.selectedInteractionId = "interaction-2";
+  harness.observeInteractionTurn("interaction-2", "turn-2");
+  harness.sources[0].emit("message.delta", { delta: "wrong conversation" });
+  harness.sources[0].emit("message.completed");
+  await settle();
+  assert.equal(harness.state.streamingAssistantMessage.content, "");
+  assert.equal(harness.state.activeInteractionTurnId, "turn-2");
+  assert.equal(harness.state.outbox[0].status, "paused");
+  assert.equal(viewModel.nextInteractionOutboxItem(harness.state.outbox, "interaction-2", { turns: [] }), null);
+});
+
+test("SSE disconnect falls back to observation and drains once after saved completion", async () => {
+  let posts = 0;
+  let polls = 0;
+  const harness = conversationHarness(async (url) => {
+    if (url.endsWith("/turns")) { posts += 1; return { turn_id: "turn-2", status: "RECEIVED" }; }
+    if (url.endsWith("/turn-1")) { polls += 1; return { status: "COMPLETED" }; }
+    return { turns: [{ turn_id: "turn-1", status: "COMPLETED" }] };
+  });
+  harness.state.outbox = [{ id: "pending", interactionId: "interaction-1", content: "Next", status: "queued", waitForTurnId: "turn-1" }];
+  harness.observeInteractionTurn("interaction-1", "turn-1");
+  harness.sources[0].onerror();
+  harness.sources[0].onerror();
+  await settle();
+  assert.equal(polls, 1);
+  assert.equal(posts, 1);
+});
+
+test("restored queues pause, interrupted sends remain uncertain, and failed bases never auto-drain", () => {
+  const restored = viewModel.restoreInteractionOutbox([
+    { id: "one", interactionId: "a", content: "First", status: "queued", waitForTurnId: "turn-a" },
+    { id: "two", interactionId: "b", content: "Second", status: "sending" },
+  ]);
+  assert.equal(restored[0].status, "paused");
+  assert.equal(restored[1].status, "uncertain");
+  restored[0].status = "queued";
+  assert.equal(viewModel.nextInteractionOutboxItem(restored, "a", { turns: [{ turn_id: "turn-a", status: "FAILED" }] }), null);
+  assert.equal(viewModel.nextInteractionOutboxItem(restored, "a", { turns: [{ turn_id: "turn-a", status: "COMPLETED" }] }).id, "one");
+});
+
+test("stream bursts repaint one message per frame and preserve historical DOM nodes", () => {
+  class Node {
+    constructor(className = "", text = "") {
+      this.className = className; this.dataset = {}; this.children = []; this._text = text; this.writes = 0;
+      this.classList = { toggle() {} };
+    }
+    get textContent() { return this._text; }
+    set textContent(value) { this._text = value; this.writes += 1; }
+    append(child) { child.parent = this; this.children.push(child); }
+    insertBefore(child, next) {
+      if (child.parent) child.remove();
+      child.parent = this;
+      const position = next ? this.children.indexOf(next) : this.children.length;
+      this.children.splice(position, 0, child);
+    }
+    remove() { this.parent.children.splice(this.parent.children.indexOf(this), 1); this.parent = null; }
+    setAttribute() {}
+    querySelector(selector) { return this.children.find((child) => child.className === selector.slice(1)); }
+  }
+  const frames = [];
+  const state = {
+    selectedInteractionId: "a", streamFrame: null,
+    sharedUnderstanding: { conversation_messages: [{ actor: "HUMAN", turn_id: "t", content: "Question" }] },
+    streamingAssistantMessage: { turnId: "t", content: "Answer", status: "PROCESSING" },
+  };
+  const harness = {
+    state, viewModel, elements: { interactionHistory: new Node(), interactionProcessingStatus: new Node() },
+    createElement: (_tag, className, text) => new Node(className, text),
+    requestAnimationFrame: (callback) => { frames.push(callback); return frames.length; },
+  };
+  harness.globalThis = harness;
+  vm.runInNewContext(appSource.slice(appSource.indexOf("  function messageKey("), appSource.indexOf("  function persistComposer(")), harness);
+  harness.renderConversation();
+  const [human, assistant] = harness.elements.interactionHistory.children;
+  const humanContent = human.children[1];
+  const assistantContent = assistant.children[1];
+  const priorWrites = assistantContent.writes;
+  for (let index = 0; index < 100; index += 1) {
+    state.streamingAssistantMessage.content += ".";
+    harness.scheduleStreamRender();
+  }
+  assert.equal(frames.length, 1);
+  frames.shift()();
+  assert.equal(assistantContent.writes, priorWrites + 1);
+  assert.equal(humanContent.writes, 1);
+  assert.equal(assistantContent.textContent, `Answer${".".repeat(100)}`);
+  state.sharedUnderstanding.conversation_messages.push({ actor: "WATT", turn_id: "t", content: assistantContent.textContent, processing_status: "COMPLETED" });
+  state.streamingAssistantMessage = null;
+  harness.renderConversation();
+  assert.equal(harness.elements.interactionHistory.children[0], human);
+  assert.equal(harness.elements.interactionHistory.children[1], assistant);
+});
+
+test("queue capacity leaves the unsent draft intact", async () => {
+  const harness = conversationHarness(async () => { throw new Error("must not submit"); });
+  harness.state.activeInteractionTurnId = "active";
+  await harness.submit("One"); await harness.submit("Two"); await harness.submit("Three");
+  await harness.submit("Fourth draft");
+  assert.equal(harness.state.outbox.length, 3);
+  assert.equal(harness.elements.workRequirement.value, "Fourth draft");
+  assert.equal(harness.notices[0].code, "OUTBOX_FULL");
+});
+
+test("a rejected POST pauses for explicit retry and never loses the message", async () => {
+  let harness;
+  harness = conversationHarness(async () => { throw new harness.ApiError(409, "TURN_ACTIVE", "Busy"); });
+  await harness.submit("Do not lose this"); await settle();
+  assert.equal(harness.state.outbox[0].status, "paused");
+  assert.equal(harness.saved()[0].content, "Do not lose this");
+});
+
+test("a reply completing during Refresh drains its queued message when busy clears", async () => {
+  let releaseHealth;
+  let posts = 0;
+  const projection = { turns: [{ turn_id: "turn-1", status: "COMPLETED" }], conversation_messages: [] };
+  const harness = conversationHarness(async (url) => {
+    if (url.endsWith("/turns")) {
+      posts += 1;
+      return { turn_id: "turn-2", status: "RECEIVED" };
+    }
+    return projection;
+  });
+  harness.document = { querySelectorAll: () => [] };
+  harness.loadHealth = () => new Promise((resolve) => { releaseHealth = resolve; });
+  harness.loadCollections = async () => {};
+  vm.runInNewContext(appSource.slice(appSource.indexOf("  function setBusy("), appSource.indexOf("  function setSurface(")), harness);
+  vm.runInNewContext(appSource.slice(appSource.indexOf("  async function reloadWorkspace("), appSource.indexOf("  async function createGoal(")), harness);
+  harness.state.outbox = [{ id: "pending", interactionId: "interaction-1", content: "Next after refresh", status: "queued", waitForTurnId: "turn-1" }];
+  harness.observeInteractionTurn("interaction-1", "turn-1");
+  const refreshing = harness.reloadWorkspace();
+  assert.equal(harness.state.busy, true);
+  harness.sources[0].emit("message.completed");
+  await settle();
+  assert.equal(harness.state.activeInteractionTurnId, "");
+  assert.equal(harness.state.outbox[0].status, "queued");
+  assert.equal(posts, 0, "UI mutation must finish before submitting the next Turn");
+  releaseHealth();
+  await refreshing;
+  await settle();
+  assert.equal(harness.state.busy, false);
+  assert.equal(posts, 1, "releasing busy must retry an eligible queued message");
+  assert.equal(harness.state.activeInteractionTurnId, "turn-2");
+  harness.setBusy(false);
+  await settle();
+  assert.equal(posts, 1, "repeated releases remain protected by the active Turn guard");
 });

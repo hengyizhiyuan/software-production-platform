@@ -15,6 +15,7 @@ import inspect
 import json
 import os
 from pathlib import Path
+import re
 import socket
 from threading import Thread
 import time
@@ -50,6 +51,131 @@ SCENARIOS_V31_ZH = (
     "设计方案的文档会输出到哪里？",
     "你建议下一步先设计什么？",
 )
+
+SCENARIOS_V32_ZH = (*SCENARIOS_V31_ZH,
+    "第一版只有我一个人开发，预算五千元，两周内要能用，先不做自动对接。",
+    "我不想先做渠道归因，也先别继续问问题。按手工维护内容和线索给我一个具体建议。",
+    "纠正一下，第一版只给我自己用，不需要团队协作和权限管理。",
+    "请详细解释这个精简版的页面、数据和日常使用流程，以及哪些功能应该后做。",
+)
+
+
+def stable_hash(value) -> str:
+    return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True,
+                                     separators=(",", ":")).encode()).hexdigest()
+
+
+def selected_case_numbers(value: str | None, count: int) -> set[int]:
+    if value is None:
+        return set(range(1, count + 1))
+    numbers = {int(item.strip()) for item in value.split(",")}
+    if not numbers or not numbers.issubset(range(1, count + 1)):
+        raise ValueError(f"--cases must contain numbers from 1 to {count}")
+    return numbers
+
+
+def load_scenarios(scenario_set: str, corpus_case: str | None = None):
+    if corpus_case:
+        corpus = json.loads(Path(__file__).with_name("corpus.json").read_text())
+        case = next((item for item in corpus if item["id"] == corpus_case), None)
+        if case is None:
+            raise ValueError(f"Unknown corpus case: {corpus_case}")
+        messages = tuple(case["messages"])
+        intents = case.get("expected_intents", [None] * (len(messages) - 1) + [case["expected_intent"]])
+        if len(intents) != len(messages):
+            raise ValueError("Corpus expected_intents must match messages")
+        return messages, tuple(intents)
+    intents = ("NEW_GOAL", "CONTEXT_ADDITION", "CORRECTION", "DIRECT_QUESTION", "REQUEST_DETAIL")
+    if scenario_set == "v3-en":
+        return SCENARIOS, intents
+    intents = (*intents[:4], "REQUEST_RECOMMENDATION")
+    if scenario_set == "v31-zh":
+        return SCENARIOS_V31_ZH, intents
+    # Open-ended follow-ups are reviewed from complete replies; do not hardcode
+    # an uncertain intent classification as a latency probe's success criterion.
+    return SCENARIOS_V32_ZH, (*intents, None, None, "CORRECTION", "REQUEST_DETAIL")
+
+
+def first_complete_sentence(text: str) -> str | None:
+    """A punctuation heuristic, explicitly not a usefulness/quality judgment."""
+    match = re.search(r"[。！？!?]|(?<!\d)\.|\.(?!\d)", text)
+    return text[:match.end()].strip() if match and text[:match.end()].strip() else None
+
+
+class TextObservation:
+    """Observe received deltas; resets/final snapshots never invent stream timing."""
+
+    def __init__(self):
+        self.content = ""
+        self.delta_events = []
+        self.reset_events = []
+        self.first_text_seconds = None
+        self.first_sentence_seconds = None
+        self.first_sentence_text = None
+        self.last_text_seconds = None
+        self.maximum_text_gap_seconds = None
+        self.completed_seconds = None
+        self.failed_seconds = None
+        self.terminal_received_seconds = None
+        self.had_reset = False
+
+    def delta(self, text: str, elapsed: float):
+        if not text:
+            return
+        self.delta_events.append({"seconds": elapsed, "characters": len(text),
+                                  "non_whitespace_characters": len(text.strip())})
+        self.content += text
+        if text.strip():
+            if self.first_text_seconds is None:
+                self.first_text_seconds = elapsed
+            if self.last_text_seconds is not None:
+                gap = elapsed - self.last_text_seconds
+                self.maximum_text_gap_seconds = max(self.maximum_text_gap_seconds or 0, gap)
+            self.last_text_seconds = elapsed
+        if not self.had_reset and self.first_sentence_seconds is None:
+            sentence = first_complete_sentence(self.content)
+            if sentence is not None:
+                self.first_sentence_seconds = elapsed
+                self.first_sentence_text = sentence
+
+    def reset(self, text: str, elapsed: float):
+        self.reset_events.append({"seconds": elapsed, "characters": len(text)})
+        self.had_reset = True
+        self.content = text
+
+    def terminal(self, elapsed: float, *, success: bool):
+        self.terminal_received_seconds = elapsed
+        # A later observation failure invalidates successful completion/tail
+        # metrics, while actual streamed text remains historical evidence.
+        self.completed_seconds = elapsed if success else None
+        self.failed_seconds = None if success else elapsed
+
+    def as_dict(self):
+        # A reset invalidates comparisons against final wording, but we retain
+        # the actual initial stream observations as historical presentation data.
+        return {
+            "first_text_seconds": self.first_text_seconds,
+            "first_complete_sentence_seconds": self.first_sentence_seconds,
+            "first_complete_sentence_text": self.first_sentence_text,
+            "sentence_measurement": "punctuation heuristic; usefulness requires Human review",
+            "last_text_delta_seconds": self.last_text_seconds,
+            "maximum_text_delta_gap_seconds": self.maximum_text_gap_seconds,
+            "text_delta_events": self.delta_events,
+            "text_reset_events": self.reset_events,
+            "stream_reset": self.had_reset,
+            "first_sentence_survives_final": (
+                None if self.completed_seconds is None or self.first_sentence_text is None
+                else self.content.strip().startswith(self.first_sentence_text)
+            ),
+            "completion_seconds": self.completed_seconds,
+            "failure_received_seconds": self.failed_seconds,
+            "terminal_received_seconds": self.terminal_received_seconds,
+            "last_text_to_completion_seconds": (
+                self.completed_seconds - self.last_text_seconds
+                if self.completed_seconds is not None and self.last_text_seconds is not None
+                and not self.had_reset else None
+            ),
+        }
 
 
 def completed_top_level_string(buffer: str, field: str) -> str | None:
@@ -128,7 +254,16 @@ class ProviderObservation:
 
             def turn(self, *args, **kwargs):
                 observation.mark("provider_turn_requested")
+                calls = observation.stage.setdefault("provider_calls", [])
+                call = {"number": len(calls) + 1,
+                        "requested_seconds": time.monotonic() - observation.request_clock[0],
+                        "model": kwargs.get("model"), "effort": kwargs.get("effort"),
+                        "prompt_sha256": stable_hash(args[0]) if args else None,
+                        "prompt_characters": len(args[0]) if args and isinstance(args[0], str) else None}
+                calls.append(call)
+                observation.stage["provider_call_attempts"] = len(calls)
                 turn = self.thread.turn(*args, **kwargs)
+                call["turn_created"] = True
                 observation.mark("provider_turn_ready")
                 return ObservedTurn(turn)
 
@@ -208,12 +343,18 @@ def main() -> None:
     parser.add_argument("--label", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", default="gpt-5.6-sol")
-    parser.add_argument("--scenario-set", choices=("v3-en", "v31-zh"), default="v3-en")
+    parser.add_argument("--scenario-set", choices=("v3-en", "v31-zh", "v32-zh"), default="v3-en")
+    parser.add_argument("--corpus-case", help="Run one corpus.json case's Human messages in order")
+    parser.add_argument("--cases", help="Comma-separated turn numbers; runs preceding context too")
+    parser.add_argument("--repeat", type=int, default=1, help="Fresh Interaction for each repetition")
     parser.add_argument("--separate-pre-work", action="store_true")
     parser.add_argument("--semantic-effort", default=None)
     parser.add_argument("--conversation-effort", default=None)
     args = parser.parse_args()
-    scenarios = SCENARIOS_V31_ZH if args.scenario_set == "v31-zh" else SCENARIOS
+    scenarios, expected_intents = load_scenarios(args.scenario_set, args.corpus_case)
+    selected = selected_case_numbers(args.cases, len(scenarios))
+    if args.repeat < 1:
+        parser.error("--repeat must be positive")
     database = Database.from_settings(Settings(database_url=os.environ["SPG_TEST_DATABASE_URL"]))
     database_name = database.engine.url.database or ""
     if not database_name.startswith("spg_pipeline_"):
@@ -272,6 +413,8 @@ def main() -> None:
         observation.mark("basis_started")
         value = original_basis(*args, **kwargs)
         observation.mark("basis_prepared")
+        stage["basis"] = value.model_dump(mode="json")
+        stage["basis_sha256"] = stable_hash(stage["basis"])
         return value
 
     def admit(*args, **kwargs):
@@ -317,19 +460,26 @@ def main() -> None:
               "source_files": source_files,
               "probe_fingerprint": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), "recorded_at": datetime.now(UTC).isoformat(),
               "model": args.model, "scenario_set": args.scenario_set, "semantic_effort": args.semantic_effort,
+              "corpus_case": args.corpus_case, "repetitions": args.repeat,
+              "selected_case_numbers": sorted(selected),
               "conversation_effort": args.conversation_effort, "cases": [],
-              "scope": "five Human turns, real provider, isolated database and loopback HTTP; no production"}
+              "scope": "sequential Human turns, real provider, isolated database and loopback HTTP; no production"}
 
     def save():
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
 
     try:
-        created = request("/api/interactions", {"human_identity": "human:pipeline-validation"})
-        interaction_id = created["interaction_id"]
-        for number, message in enumerate(scenarios, 1):
+        for repetition, number, message in (
+            (repetition, number, message)
+            for repetition in range(1, args.repeat + 1)
+            for number, message in enumerate(scenarios[:max(selected)], 1)
+        ):
+            if number == 1:
+                created = request("/api/interactions", {"human_identity": "human:pipeline-validation"})
+                interaction_id = created["interaction_id"]
             stage.clear()
-            case = {"number": number, "message": message,
+            case = {"number": number, "repetition": repetition, "selected": number in selected, "message": message,
                     "request_started_at": datetime.now(UTC).isoformat(),
                     "first_event_seconds": None, "first_text_seconds": None}
             report["cases"].append(case)
@@ -340,29 +490,29 @@ def main() -> None:
             case["ack_seconds"] = time.monotonic() - started
             turn_id = UUID(submitted["turn_id"])
             event = None
-            streamed = ""
-            with urlopen(f"{origin}/api/interactions/{interaction_id}/turns/{turn_id}/events", timeout=400) as stream:
-                for raw in stream:
-                    line = raw.decode("utf-8").strip()
-                    if line.startswith("event: "):
-                        event = line[7:]
-                        if case["first_event_seconds"] is None:
-                            case["first_event_seconds"] = time.monotonic() - started
-                    elif line.startswith("data: "):
-                        payload = json.loads(line[6:])
-                        if event == "message.delta" and payload["delta"]:
-                            if payload["delta"].strip() and case["first_text_seconds"] is None:
-                                case["first_text_seconds"] = time.monotonic() - started
-                            streamed += payload["delta"]
-                        elif event == "message.reset":
-                            if payload["content"].strip() and case["first_text_seconds"] is None:
-                                case["first_text_seconds"] = time.monotonic() - started
-                            streamed = payload["content"]
-                        elif event in {"message.completed", "turn.failed"}:
-                            case["completion_seconds"] = time.monotonic() - started
-                            break
+            text_observation = TextObservation()
+            try:
+                with urlopen(f"{origin}/api/interactions/{interaction_id}/turns/{turn_id}/events", timeout=400) as stream:
+                    for raw in stream:
+                        line = raw.decode("utf-8").strip()
+                        if line.startswith("event: "):
+                            event = line[7:]
+                            if case["first_event_seconds"] is None:
+                                case["first_event_seconds"] = time.monotonic() - started
+                        elif line.startswith("data: "):
+                            payload = json.loads(line[6:])
+                            if event == "message.delta" and payload["delta"]:
+                                text_observation.delta(payload["delta"], time.monotonic() - started)
+                            elif event == "message.reset":
+                                text_observation.reset(payload["content"], time.monotonic() - started)
+                            elif event in {"message.completed", "turn.failed"}:
+                                text_observation.terminal(time.monotonic() - started,
+                                                          success=event == "message.completed")
+                                break
+            finally:
+                case.update(text_observation.as_dict())
+                case.update(stage)
             turn = service.get_turn(turn_id)
-            case.update(stage)
             case.update(status=turn.status.value, request_received_at=turn.created_at.isoformat(),
                         persisted_completed_at=turn.completed_at.isoformat() if turn.completed_at else None)
             if hasattr(service, "turn_timing"):
@@ -371,23 +521,30 @@ def main() -> None:
                 case["failure_code"] = turn.failure_code
                 save()
                 raise RuntimeError(f"Probe case {number} failed: {turn.failure_code}")
+            if text_observation.completed_seconds is None:
+                raise RuntimeError("SSE ended without receiving successful completion")
             projection = service.get_shared_understanding(UUID(interaction_id))
             replies = [item for item in projection.conversation_messages
                        if item.turn_id == turn_id and item.actor.value == "WATT"]
-            assert len(replies) == 1 and replies[0].content == streamed
+            assert len(replies) == 1 and replies[0].content == text_observation.content
             case["response"] = replies[0].content
             case["intent"] = capability.last_collaboration_result.turn_intent.value
-            case["frame"] = projection.latest_assessment.design_intent_frame.model_dump(mode="json")
+            frame = projection.latest_assessment.design_intent_frame
+            case["frame"] = None if frame is None else frame.model_dump(mode="json")
             case["schema"] = projection.interaction.selected_design_schema_identity
             case["provider"] = asdict(capability.last_pipeline_evidence)
             if hasattr(service, "turn_timing"):
                 case["server_timing"] = service.turn_timing(turn_id)
-            assert case["frame"]["object_type"] == "PRODUCT_SYSTEM"
-            assert case["schema"] == "watt:guided-design:general-product-system"
-            expected_intents = ("NEW_GOAL", "CONTEXT_ADDITION", "CORRECTION", "DIRECT_QUESTION", "REQUEST_DETAIL")
-            if args.scenario_set == "v31-zh":
-                expected_intents = (*expected_intents[:4], "REQUEST_RECOMMENDATION")
-            assert case["intent"] == expected_intents[number - 1]
+            if not args.corpus_case:
+                assert case["frame"]["object_type"] == "PRODUCT_SYSTEM"
+                assert case["schema"] == "watt:guided-design:general-product-system"
+            if expected_intents[number - 1] is not None:
+                assert case["intent"] == expected_intents[number - 1]
+            case["natural_response_closed_to_completion_seconds"] = (
+                case["completion_seconds"] - case["natural_response_completed_seconds"]
+                if case["completion_seconds"] is not None and "natural_response_completed_seconds" in case
+                else None
+            )
             case["response_characters"] = len(case["response"])
             case["question_marks"] = case["response"].count("?") + case["response"].count("？")
             case["detailed_explanation_requested"] = capability.last_collaboration_result.detailed_explanation_requested
@@ -398,7 +555,7 @@ def main() -> None:
             case["work_and_runtime_rows"] = sum(counts.values())
             save()
             print(json.dumps({key: value for key, value in case.items()
-                              if key not in {"response", "frame", "provider"}}), flush=True)
+                              if key not in {"response", "frame", "provider", "basis", "text_delta_events"}}), flush=True)
         report["completed"] = True
         save()
     except Exception as error:

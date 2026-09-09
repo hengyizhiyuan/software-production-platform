@@ -13,7 +13,7 @@ from time import monotonic
 from typing import Any
 
 from openai_codex import ApprovalMode, Codex, Sandbox
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, ValidationError
 
 from spg.application.conversation import (
     ConversationResponseComposer,
@@ -122,11 +122,32 @@ class _ConversationProviderPayload(BaseModel):
     natural_response: str
 
 
+class _CoalescedCollaborationProviderPayload(BaseModel):
+    """Only the advisory values consumed after a single-call response.
+
+    The staged contract still carries the full expression handoff. Here the
+    wording is already present in the same envelope, so context projections,
+    turn-taking hints and alternatives need not be serialized a second time.
+    Explicit answers and recommendation grounds remain WIC-owned values.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    turn_intent: ConversationTurnIntent
+    direct_answer: str | None
+    design_intent_frame: _DesignIntentFrameProviderPayload | None
+    recommended_next_action: str | None
+    concise_basis: str | None
+    detailed_explanation_requested: bool
+    response_language: str = Field(min_length=1, max_length=32)
+
+
 class _CoalescedSemanticProviderPayload(_InteractionSemanticProviderPayload):
     """Full current facts with explicit reuse of immutable prior advisory values."""
 
     retained_prior_meaning_indexes: tuple[StrictInt, ...]
     reuse_prior_design_intent_frame: StrictBool
+    collaboration: _CoalescedCollaborationProviderPayload
 
 
 class _CoalescedInteractionProviderPayload(_ConversationProviderPayload):
@@ -166,6 +187,7 @@ class ConversationPipelineEvidence:
     semantic_reasoning_effort: str | None = None
     conversation_reasoning_effort: str | None = None
     pipeline_mode: str = "staged"
+    pipeline_reason: str | None = None
     provider_call_count: int = 2
     coalesced_thread_id: str | None = None
     coalesced_turn_id: str | None = None
@@ -560,6 +582,15 @@ class CodexSdkInteractionSemanticCapability:
             "actual file location, say that its location is unknown; do not infer that "
             "no artifact exists from a missing path. "
         )
+        collaboration_instruction = (
+            "Use the compact collaboration schema; do not duplicate current facts "
+            "as an expression handoff. Put material unresolved decisions in "
+            "semantics.unresolved_material_questions. "
+            if coalesced else
+            "Capture known relevant facts, current objective/focus, an unresolved "
+            "Human-owned decision and material alternatives/trade-offs. Choose small "
+            "policy_hints for the conversation composer. "
+        )
         return (
             "Interpret one Human–Watt interaction from the exact persisted basis. "
             + output_contract
@@ -574,57 +605,42 @@ class CodexSdkInteractionSemanticCapability:
             "meaning must cite only source_record_ids in the basis. Recent Watt dialogue "
             "is advisory wording for conversational continuity, not Human input or "
             "governed evidence; it cannot override source records or Work Reality. "
-            "\n\nBefore proposing Guided Design direction, create a concise candidate "
-            "Design Intent Frame for any input that asks Watt to create, change, "
-            "design, execute, or review something. Separate the object being designed "
-            "from its business scenario, audience, channels, and operating context. "
-            "Classify object_type as PRODUCT_SYSTEM, BUSINESS_PROCESS, FEATURE, "
-            "OPERATIONAL_ACTIVITY, REVIEW_ANALYSIS, or UNKNOWN; scope_level as "
-            "strategic, product, capability, or implementation; and collaboration_mode "
-            "as exploration, design, execution, or review. For example, an operations "
-            "management platform used to promote Watt is a PRODUCT_SYSTEM; promotion, "
-            "social channels, livestreaming, and target audiences are its business "
-            "context, not proof that the object is an operational campaign. An explicit "
-            "change to an existing system is FEATURE. Planning one launch livestream is "
-            "OPERATIONAL_ACTIVITY. 'Improve engineering efficiency' is UNKNOWN unless "
-            "the Human identifies whether the object is a tool, process, AI workflow, "
-            "or organization change. Preserve a prior frame when new facts do not alter "
-            "the object. A correction must replace the affected framing without "
-            "defending the previous interpretation. Use candidate_assumptions, "
-            "ambiguities, and calibrated confidence rather than false certainty. Put "
-            "material framing ambiguity into unresolved_material_questions. Store only "
-            "concise product-relevant interpretation, never private reasoning. "
+            "\n\nFor design/build/change/review intent, create a concise Design Intent "
+            "Frame using the schema enums. Separate the designed object from its "
+            "business scenario, audience and channels. A platform supporting promotion "
+            "is PRODUCT_SYSTEM; planning the promotion itself is OPERATIONAL_ACTIVITY; "
+            "changing an existing system is FEATURE. Use UNKNOWN for an unestablished "
+            "object. Preserve an unchanged frame; replace affected framing on correction. "
+            "Record candidate_assumptions, ambiguities and calibrated confidence; put "
+            "material ambiguities in unresolved_material_questions. These distinctions "
+            "belong in structured fields. Human-facing wording should use the corrected "
+            "understanding to help, without explaining the classification exercise. "
             + frame_null_instruction
             + "Keep the system's users/operators distinct from the audience of the "
             "business it supports: a promotion audience is not automatically the "
             "platform's operators. Keep an unknown operator provisional. "
-            "\n\nFor collaboration.turn_intent select the single best behavioral intent. "
-            "DIRECT_QUESTION asks for a concrete answer; NEW_GOAL introduces a Motive; "
-            "CONTEXT_ADDITION supplies facts; CORRECTION replaces a prior understanding; "
-            "DISAGREEMENT rejects a direction; REQUEST_RECOMMENDATION asks what Watt "
-            "recommends; REQUEST_DECISION_SUPPORT asks for alternatives or trade-offs; "
-            "REQUEST_DETAIL explicitly asks for a full explanation; SIDE_QUESTION is a "
-            "bounded detour; CONTINUE_CURRENT_WORK asks to progress; MATERIAL_BRANCH "
-            "opens a consequential branch; FEEDBACK evaluates experience or a result; "
-            "HUMAN_DECISION communicates an owned choice. WIC retains interpretation "
-            "ownership; this label is response-scoped and non-authoritative. "
+            "\n\nSelect the most specific collaboration.turn_intent for the latest input. "
+            "CONTEXT_ADDITION adds facts; CORRECTION replaces prior understanding; "
+            "DISAGREEMENT rejects a direction; HUMAN_DECISION owns a choice. "
+            "WIC owns these advisory interpretations. "
             "A DIRECT_QUESTION must include a concrete direct_answer. "
             + document_location_instruction
-            + "REQUEST_DETAIL must set detailed_explanation_requested true. Capture known "
-            "relevant facts, current objective/focus, one useful next action, concise "
-            "product rationale, any unresolved Human-owned decision, and only material "
-            "alternatives/trade-offs. Choose small policy_hints for the conversation "
-            "composer; do not include private reasoning or chain of thought. Set response "
-            "language to the Human's language. For a new goal or a request to proceed "
-            "or recommend, use candidate_assumptions, recommended_next_action and "
-            "concise_basis to offer one useful, explicitly provisional design hypothesis "
-            "or concrete recommendation grounded in supplied facts. Identify the next "
-            "artifact, workflow or decision and why it helps; do not substitute a generic "
-            "request to clarify requirements. REQUEST_RECOMMENDATION requires an actual "
-            "recommendation, brief rationale and tangible next action, even when qualified "
-            "by an assumption. Distinguish suggestions from Human facts and admitted "
-            "decisions. Ask only when an unresolved fact changes the next material choice; "
-            "do not turn every ambiguity into a question or reopen a corrected object. "
+            + "REQUEST_DETAIL must set detailed_explanation_requested true. "
+            + collaboration_instruction
+            + "Set response language to the Human's language. For a new goal, continuation "
+            "or recommendation, supply one useful priority in recommended_next_action "
+            "and its context-specific reason in concise_basis. Prefer a product decision "
+            "or concrete workflow over naming the next design document. Rank the choice "
+            "using the Human's actual objective, constraints and corrections; explain "
+            "a material trade-off when it helps. Do not assume a budget, launch stage "
+            "or operator the Human never supplied. If necessary, state one provisional "
+            "assumption and advance a useful draft. REQUEST_RECOMMENDATION requires "
+            "an actual recommendation, rationale and tangible next action; 'clarify "
+            "requirements' or a menu of modules alone is insufficient. Keep these "
+            "advisory values concise, never private reasoning or chain of thought. "
+            "Distinguish suggestions from Human facts and admitted decisions. Ask only "
+            "when an unresolved fact changes the next material choice. After a correction "
+            "or rejected recommendation, use the revised direction without reopening it. "
             "Return JSON only matching the schema, "
             "including every key and [] for empty arrays. Keep structured values concise "
             "without omitting explicit facts or requested explanation. Schema applicability "
@@ -875,20 +891,8 @@ class CodexSdkWorkInteractionCapability:
             raise InteractionInvariantViolation(
                 "Conversation composer Provider does not match the configured Provider"
             )
-        if (
-            self.coalesce_pre_work
-            and basis.active_work_context is None
-            # Explicitly replaced provider/context seams must be invoked as supplied.
-            and type(self.semantic_capability) is CodexSdkInteractionSemanticCapability
-            and type(self.conversation_provider) is CodexSdkConversationProvider
-            and type(self.response_composer) is ConversationResponseComposer
-            and type(self.response_composer.context_provider)
-            is WattNativeConversationContextAssembler
-            and self.response_composer.provider is self.conversation_provider
-            and self.semantic_capability.model == self.conversation_provider.model
-            and self.semantic_capability.reasoning_effort
-            == self.conversation_provider.reasoning_effort
-        ):
+        mode, selection_reason = self.pipeline_selection(basis)
+        if mode == "coalesced_pre_work":
             return self._interpret_coalesced(
                 basis, on_response_delta=on_response_delta,
                 on_pipeline_stage=on_pipeline_stage,
@@ -932,6 +936,7 @@ class CodexSdkWorkInteractionCapability:
                 "Conversation pipeline completed without Provider provenance"
             )
         self.last_pipeline_evidence = ConversationPipelineEvidence(
+            pipeline_reason=selection_reason,
             semantic_thread_id=str(self.semantic_capability.last_thread_id),
             semantic_turn_id=str(self.semantic_capability.last_turn_id),
             conversation_thread_id=str(self.conversation_provider.last_thread_id),
@@ -955,6 +960,29 @@ class CodexSdkWorkInteractionCapability:
             ),
         )
         return self._assessment_candidate(semantic, response)
+
+    def pipeline_selection(self, basis: InteractionInterpretationInput) -> tuple[str, str]:
+        """Expose the effective route without running a Provider or changing state."""
+
+        if not self.coalesce_pre_work:
+            return "staged", "explicit_opt_out"
+        if basis.active_work_context is not None:
+            return "staged", "active_work"
+        # Explicit replacements retain their own contracts and must be invoked.
+        if (
+            type(self.semantic_capability) is not CodexSdkInteractionSemanticCapability
+            or type(self.conversation_provider) is not CodexSdkConversationProvider
+            or type(self.response_composer) is not ConversationResponseComposer
+            or type(self.response_composer.context_provider)
+            is not WattNativeConversationContextAssembler
+            or self.response_composer.provider is not self.conversation_provider
+        ):
+            return "staged", "custom_provider_or_context"
+        if self.semantic_capability.model != self.conversation_provider.model:
+            return "staged", "models_differ"
+        if self.semantic_capability.reasoning_effort != self.conversation_provider.reasoning_effort:
+            return "staged", "reasoning_efforts_differ"
+        return "coalesced_pre_work", "native_pre_work_shared_configuration"
 
     @staticmethod
     def _assessment_candidate(
@@ -1083,6 +1111,7 @@ class CodexSdkWorkInteractionCapability:
         self.last_collaboration_result = semantic.collaboration
         self.last_pipeline_evidence = ConversationPipelineEvidence(
             pipeline_mode="coalesced_pre_work",
+            pipeline_reason="native_pre_work_shared_configuration",
             provider_call_count=1,
             coalesced_thread_id=str(thread.id),
             coalesced_turn_id=str(turn.id),
@@ -1158,10 +1187,17 @@ class CodexSdkWorkInteractionCapability:
             raise InteractionInvariantViolation(
                 "Coalesced prior frame requires explicit reuse or a complete replacement"
             )
-        return StructuredCollaborationResult(
-            **payload.collaboration.model_dump(exclude={"design_intent_frame"}),
-            design_intent_frame=frame,
-        )
+        try:
+            return StructuredCollaborationResult(
+                **payload.collaboration.model_dump(exclude={"design_intent_frame"}),
+                design_intent_frame=frame,
+                known_relevant_facts=payload.candidate_context,
+                current_objective=payload.desired_outcome,
+            )
+        except ValidationError as error:
+            raise InteractionInvariantViolation(
+                "Coalesced collaboration Provider returned an invalid structured result"
+            ) from error
 
     @staticmethod
     def coalesced_output_schema() -> dict[str, Any]:

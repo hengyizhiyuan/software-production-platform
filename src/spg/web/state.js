@@ -470,6 +470,32 @@
     ];
   }
 
+  // The outbox is browser intent only. It never participates in a Turn's basis.
+  // Restored queues pause; an interrupted POST is uncertain and must not retry.
+  function restoreInteractionOutbox(saved) {
+    if (!Array.isArray(saved)) return [];
+    return saved.filter((item) => item && typeof item.id === "string"
+      && typeof item.interactionId === "string" && typeof item.content === "string"
+      && item.content.trim()).slice(0, 12).map((item) => ({
+      id: item.id,
+      interactionId: item.interactionId,
+      content: item.content,
+      waitForTurnId: typeof item.waitForTurnId === "string" ? item.waitForTurnId : "",
+      status: item.status === "sending" || item.status === "uncertain" ? "uncertain" : "paused",
+    }));
+  }
+
+  function nextInteractionOutboxItem(outbox, interactionId, projection) {
+    const item = outbox.find((entry) => entry.interactionId === interactionId);
+    if (!item || item.status !== "queued") return null;
+    const turns = (projection && projection.turns) || [];
+    if (turns.some((turn) => turn.status !== "COMPLETED" && turn.status !== "FAILED")) return null;
+    if (item.waitForTurnId && !turns.some((turn) => (
+      turn.turn_id === item.waitForTurnId && turn.status === "COMPLETED"
+    ))) return null;
+    return item;
+  }
+
   root.SPGViewModel = Object.freeze({
     STATUS_LABELS,
     statusLabel,
@@ -487,5 +513,7 @@
     artifactSummary,
     verificationSummary,
     interactionConversationMessages,
+    restoreInteractionOutbox,
+    nextInteractionOutboxItem,
   });
 })(globalThis);

@@ -148,6 +148,38 @@ PostgreSQL integration: 41 passed (6 phase tests rerun on final source); JS: 25
 passed. All 15 real turns across three conditions preserved one call per message
 and created zero Work/Runtime rows.
 
+**HUMAN COLLABORATION EXPERIENCE v3.2 — IMPLEMENTED / HUMAN PRODUCT ACCEPTANCE PENDING**
+
+The [v3.2 report](docs/evidence/human-collaboration-experience-v32.md) preserves
+original, intermediate and final-source evidence. Eligible coalesced output now
+omits the unused full expression handoff while retaining explicit WIC answers,
+recommendations and grounds, complete current semantic snapshots, source/reuse
+guards and committed completion. Staged contracts retain their full handoff.
+Shared wording favors useful first sentences, context-grounded priorities and
+trade-offs, zero or one material question, and productive correction handling.
+`pipeline_selection(basis)` exposes route/reason without a Provider call.
+
+The UI keeps stable message DOM nodes and batches current-response updates with
+requestAnimationFrame. The editable composer holds at most 3 pending messages
+per Interaction / 12 per tab; these remain browser intent outside the active
+Turn basis. Delivery is serialized after persisted completion, including when a
+UI busy guard clears. Reload restores drafts and pauses pending input. Failed
+turns and Interaction switches pause delivery; uncertain POSTs never auto-retry.
+SSE loss falls back to read-only polling. sessionStorage is tab-local, not a
+durable server queue or an exactly-once guarantee.
+
+Fixed-basis replay separates historical-input drift from sequential product
+checks. First-sentence punctuation timing is not useful-answer quality; Provider
+candidate completion is not HTTP committed-completion receipt. Faster exploratory
+model settings were not promoted to defaults on limited quality evidence.
+Consistently fast first text is not established. No production deployment,
+Work/PWU/Executor/Guardian lifecycle or Human Authority boundary is changed.
+Final-source validation: 350 Python, 17 PostgreSQL/HTTP and 35 JavaScript tests
+passed; nine continuous real-Provider HTTP turns and four fixed-input candidates
+completed with one call per message. The original fixed-input comparison retains
+one failed candidate. Full replies, input/source hashes, speed regressions and
+remaining quality issues are preserved in the report and sample artifact.
+
 **WORK-CENTRIC PRODUCTION MODEL — ARCHITECTURE PRINCIPLE / ALIGNED**
 
 **WATT PRODUCT MVP — NOT CLOSED**

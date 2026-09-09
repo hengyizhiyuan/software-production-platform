@@ -51,6 +51,12 @@ retain separate calls explicitly. Set
 `SPG_WIC_PROVIDER_REASONING_EFFORT` and
 `SPG_CONVERSATION_PROVIDER_REASONING_EFFORT` independently to a supported value
 (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`).
+Set both efforts alike to preserve eligible single-call transport; a configured
+effort on one side and an unset effort on the other selects separate calls.
+`pipeline_selection(basis)` reports the effective route without calling a model;
+completed provider observations include `pipeline_reason`, models, efforts and
+actual call count. Unset effort remains an unknown provider default, not a
+measured reasoning budget.
 `SPG_COLLABORATION_PROVIDER_TIMEOUT_SECONDS` bounds each model stream (default
 120 seconds); it is independent of the Executor timeout and does not include
 SDK startup. The durable acknowledgement is prepared before provider work.
@@ -62,6 +68,15 @@ records Chinese before/after samples, useful recommendations and direct answers,
 explicit validated reuse of unchanged semantic values, and separate text,
 validation and persistence timings. It retains slower scenarios and intermediate
 trials; Human product acceptance remains open.
+
+The [v3.2 experience report](docs/evidence/human-collaboration-experience-v32.md)
+records a smaller single-call output contract, recommendations grounded in user
+constraints, fixed-input model comparisons and continuous conversation checks.
+The browser now keeps streamed message nodes stable and accepts pending input
+while a reply is running. Pending input is submitted after committed completion;
+reload restores drafts but pauses pending delivery. This uses tab-local browser
+storage, with uncertain sends never automatically retried. Model waiting remains
+variable, and the default model/effort configuration is unchanged.
 
 For the explicitly governed local Codex E2E only, set
 `SPG_CODEX_AUTH_FILE_HOST` in the ignored `.env` file to the absolute existing
