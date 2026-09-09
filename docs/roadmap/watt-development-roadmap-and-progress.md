@@ -300,6 +300,29 @@ replacement or capability marketplace is authorized. Sections 5.2–5.8 are
 governed together by the
 [Work-centric Production and Responsibility Principles](../architecture/work-centric-production-and-responsibility-principles.md).
 
+### 5.9 External Engineering Intelligence
+
+**Status:** **RECORDED / DEFERRED — valuable future product capability, not current implementation priority**.
+
+**Purpose:** a future Human-visible capability allowing users to research
+mature external engineering solutions, understand their mechanisms, compare
+alternatives, evaluate local applicability and risks, and govern adaptation
+into the user's system. Human-triggered research is the primary product form;
+future Watt-suggested research remains within explicit governance.
+
+**Placement:** after the current major development priorities and existing
+future backlog entries. Priorities 1–4 remain unchanged; this is not a new
+Priority 5, current MVP scope, or implementation authorization.
+
+External sources remain evidence and design inputs, not Truth. Work, WIC,
+Guided Design, Plan Steering, PWU/Executor, SPG, ECF, Guardian, and Human
+Authority retain their existing ownership. Future ECF, Executor/PWU, Guardian,
+and product/architecture reviews should revisit the
+[External Engineering Intelligence Direction](../architecture/external-engineering-intelligence-direction.md),
+including its User Story, expected research synthesis, adaptation provenance,
+invariants, and explicit non-goals. Internal Reference Engineering is a related
+use case, not a substitute for this user-facing product capability.
+
 ## 6. Roadmap Maintenance Rules
 
 Update this document when:

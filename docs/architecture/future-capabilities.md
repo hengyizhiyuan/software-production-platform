@@ -46,6 +46,27 @@ ECF
 
 These systems collaborate while preserving Ownership Separation, Source of Truth Separation, and Lifecycle Independence.
 
+## External Engineering Intelligence
+
+**RECORDED / DEFERRED — valuable future product capability, not current implementation priority**.
+
+Users may eventually initiate explicit research into mature external engineering
+solutions, compare their mechanisms and preconditions against local Repository
+Reality, and decide how suitable mechanisms should be adapted through existing
+design and production governance. The product result is an attributable
+engineering recommendation, not a list of search results or automatic code
+adoption. External sources are not Truth; Human Authority and existing
+Work / WIC / Guided Design / Steering / PWU / SPG ownership remain intact.
+ECF may preserve context and provenance; Guardian may verify adoption. Neither
+owns the Human's engineering direction.
+
+See [External Engineering Intelligence Direction](external-engineering-intelligence-direction.md)
+for the User Story, synthesis expectations, provenance, and boundaries, and
+[main Roadmap §5.9](../roadmap/watt-development-roadmap-and-progress.md#59-external-engineering-intelligence)
+for placement after the current major development items. Implementation has
+not started; current priorities 1–4 and MVP scope are unchanged. Internal
+Reference Engineering is a related future use case, not the primary product.
+
 ## Interpretation Externalization and Multimodal Alignment
 
 **FUTURE CORE DIFFERENTIATION CAPABILITY — NOT CURRENT MVP SCOPE — NOT YET

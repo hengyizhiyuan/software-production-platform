@@ -933,6 +933,7 @@ The current system-level architecture baseline is:
 - [Design Intent Framing Layer](docs/architecture/design-intent-framing-layer.md)
 - [Design Intent Framing Focused Validation](docs/evidence/design-intent-framing-focused-validation.md)
 - [External Design Intake Capability Direction](docs/architecture/external-design-intake-capability-direction.md)
+- [External Engineering Intelligence Direction — RECORDED / DEFERRED; future Human-visible capability](docs/architecture/external-engineering-intelligence-direction.md)
 - [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
 - [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)
 - [AI-native Development Execution Principles](docs/architecture/ai-native-development-execution-principles.md)
