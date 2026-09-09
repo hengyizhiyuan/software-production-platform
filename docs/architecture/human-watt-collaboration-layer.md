@@ -11,6 +11,9 @@ PROVIDER V2.1 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
 Response quality refinement v2.2: **IMPLEMENTED / FOCUSED VALIDATION PASS /
 REAL PROVIDER V2.2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
 
+Conversation Intelligence: **IMPLEMENTED / FOCUSED VALIDATION PASS / REAL
+PROVIDER PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+
 
 ## Purpose
 
@@ -126,6 +129,13 @@ The application persists the Provider-authored Human-facing text without
 appending a second mechanical metadata report at Turn completion, preserving
 the existing stream-to-final-message identity.
 
+The shared Human-facing policy now lives behind the provider-neutral
+[Human–Watt Conversation Intelligence](human-watt-conversation-intelligence.md)
+plane. WIC returns a `StructuredCollaborationResult` without writing response
+prose; a bounded context assembler and dedicated Conversation Provider realize
+the final message. This removes language/personality ownership from WIC while
+preserving WIC interpretation ownership and the existing assessment contract.
+
 ## Persistence and restart
 
 PostgreSQL persists Interaction, Turn, message, status, references, timestamps,
@@ -170,4 +180,5 @@ terminal Watt message is the durable conversation record.
 - [Work Interaction & Closed-loop Refinement](work-interaction-closed-loop-refinement.md)
 - [Guided Design Core](guided-design-core.md)
 - [Guided Design Facilitation Layer](guided-design-facilitation-layer.md)
+- [Human–Watt Conversation Intelligence](human-watt-conversation-intelligence.md)
 - [Focused Validation](../evidence/human-watt-collaboration-layer-focused-validation.md)

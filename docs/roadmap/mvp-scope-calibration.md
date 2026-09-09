@@ -56,6 +56,7 @@ The UI may be visually simple. It must be functional, not a static demonstration
 | [Reality-driven Plan Steering](../architecture/reality-driven-plan-steering-mvp-contract.md) | 1C through 1L are CLOSED / PASS. Dogfood #9 proves the complete machine-side long-lived loop; Dogfood #10 proves Human-operated acceptance and exact Runtime activation. The remaining observability gap is explicit and non-blocking. | MATERIAL MVP CORE PRODUCT CAPABILITY / MVP CLOSED / PASS |
 | [Work Interaction & Closed-loop Refinement](../architecture/work-interaction-closed-loop-refinement.md) | Slices 1–4 implement pre-Work formation, explicit Human Work admission, bounded active-Work evolution, exact satisfaction reconstruction, same-Motive continuation, and Human-governed new-Work formation transitions with preserved history and no inherited Authority | PRODUCT-SHAPE ESSENTIAL / SLICES 1–4 IMPLEMENTED / PASS / CORE CLOSED / PASS |
 | [Guided Design Core](../architecture/guided-design-core.md) | General product/system design agenda, Steering-owned current focus, governed result continuity, explicit readiness, production-proposal review, restart reconstruction and real Provider proof are implemented | PRODUCT-SHAPE ESSENTIAL / IMPLEMENTED / FOCUSED VALIDATION PASS / HUMAN PRODUCT ACCEPTANCE PENDING |
+| [Human–Watt Conversation Intelligence](../architecture/human-watt-conversation-intelligence.md) | Structured collaboration semantics, bounded Conversation Context Assembly, a dedicated configurable Human-facing Provider, preserved streaming, 30-case benchmark and six-mode real Provider proof are implemented without changing domain Truth ownership | PRODUCT-SHAPE ESSENTIAL / IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING |
 | [Interpretation Externalization / Multimodal Alignment](../architecture/interpretation-externalization-and-multimodal-alignment.md) | Externalize Watt's reconstructed Motive interpretation at the lowest sufficient representation cost so material semantic mismatch can be calibrated | FUTURE CORE DIFFERENTIATION CAPABILITY / NOT CURRENT MVP SCOPE / NOT YET DESIGNED FOR IMPLEMENTATION |
 | Production state view | Work, Goal, Attention, Steering, progress, and Work Result projections derive from authoritative Runtime facts | MVP CORE / CLOSED / PASS; real Provider loop and Human acceptance proven |
 | Docker integration | PostgreSQL, migration, FastAPI/Uvicorn, API, and Web UI run as one local Compose product; no Provider credential is required | MVP CORE / CLOSED / PASS |
@@ -260,12 +261,13 @@ an evidence-backed follow-up rather than hidden success.
     queue, scheduling, and runtime capacity behavior require separate admission
     and do not reopen Core.
 19. **Human–Watt Collaboration and Guided Design Facilitation** — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER V2.2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING. Adds persisted conversation/Turn experience, bounded asynchronous processing, SSE delivery, a three-schema seed registry, schema matching, design-stage/focus guidance, restart reconstruction, and direct-answer-first progressive Human-facing responses without changing WIC/Plan/SPG truth ownership. Four representative response-quality scenarios passed with `gpt-5.6-sol`; deterministic evidence remains distinct from that real proof and from Human Product Acceptance.
-20. **Human WIC Product Dogfood** — separately admit and exercise the full formation/admission/evolution/satisfaction/new-direction journey.
-21. **Watt Product MVP closure reassessment** — only after real Human WIC evidence.
-22. **Necessary UI / Product Experience work** — improve observability and history within an admitted boundary.
-23. **Deployment readiness and promotion validation** — risk-based gates for the accepted checkpoint.
-24. **Linux server deployment and promotion** — bootstrap and validate from an exact accepted candidate.
-25. **Phase-2 hardening and systematic post-Core dogfood** — activate from evidence and triggers, not architectural interest alone.
+20. **Human–Watt Conversation Intelligence** — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING. Separates WIC/domain collaboration semantics from bounded context assembly and a dedicated configurable Human-facing Provider; preserves streaming/persistence and truth ownership; establishes a reusable 30-case benchmark and passes six mandatory real scenarios.
+21. **Human WIC Product Dogfood** — separately admit and exercise the full formation/admission/evolution/satisfaction/new-direction journey.
+22. **Watt Product MVP closure reassessment** — only after real Human WIC evidence.
+23. **Necessary UI / Product Experience work** — improve observability and history within an admitted boundary.
+24. **Deployment readiness and promotion validation** — risk-based gates for the accepted checkpoint.
+25. **Linux server deployment and promotion** — bootstrap and validate from an exact accepted candidate.
+26. **Phase-2 hardening and systematic post-Core dogfood** — activate from evidence and triggers, not architectural interest alone.
 
 Detailed implementation slices after Step 1 require separate Architecture Lead admission.
 

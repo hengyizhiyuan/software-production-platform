@@ -12,6 +12,9 @@ Human–Watt response quality refinement v2.2: **IMPLEMENTED / FOCUSED
 VALIDATION PASS / REAL PROVIDER V2.2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE
 PENDING.**
 
+Human–Watt Conversation Intelligence: **IMPLEMENTED / FOCUSED VALIDATION PASS /
+REAL PROVIDER PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING.**
+
 
 ## Purpose
 
@@ -65,6 +68,12 @@ it. Direct questions are answered first. Schema/version, internal stage and
 facilitation labels remain in the detail projection by default, while normal
 conversation uses concise natural language. A Human may explicitly request the
 complete method or detailed reasoning and receive a longer explanation.
+
+Guided Design now supplies collaboration semantics and small policy hints to
+the shared
+[Human–Watt Conversation Intelligence](human-watt-conversation-intelligence.md)
+plane. It retains schema, issue, focus, readiness, and facilitation ownership;
+the conversation plane owns only final Human-facing realization.
 
 ## Seed Design Schema Registry
 
@@ -159,6 +168,7 @@ methodology.
 ## References
 
 - [Human–Watt Collaboration Layer](human-watt-collaboration-layer.md)
+- [Human–Watt Conversation Intelligence](human-watt-conversation-intelligence.md)
 - [Guided Design Core](guided-design-core.md)
 - [Reality-driven Plan Steering Principles](reality-driven-plan-steering-principles.md)
 - [Focused Validation](../evidence/human-watt-collaboration-layer-focused-validation.md)

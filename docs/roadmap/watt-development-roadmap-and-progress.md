@@ -72,10 +72,16 @@ from deterministic or Provider evidence.
 | Human–Watt Interaction Layer | Persisted Human/Watt conversation and Interaction Turn lifecycle are implemented. |
 | Async Interaction Processing | Bounded asynchronous Turn processing and durable terminal outcome projection are implemented. |
 | Conversation history | Human and Watt messages remain reconstructable without turning conversation into governed Work Truth. |
+| Conversation Intelligence | WIC/domain semantics are separated from bounded context assembly and a dedicated configurable Human-facing Provider; 30-case benchmark and six mandatory real Provider modes pass; Human Product Acceptance remains pending. |
 | Real Provider validation | The mandatory Chinese product-design scenario completed with `gpt-5.6-sol`; schema matching and Guided Design facilitation were reached with sanitized evidence. |
 
 Detailed evidence is recorded in
 [Human–Watt Collaboration Layer Focused Validation](../evidence/human-watt-collaboration-layer-focused-validation.md).
+
+The shared Human-facing language plane is specified in
+[Human–Watt Conversation Intelligence](../architecture/human-watt-conversation-intelligence.md),
+with focused and real-Provider evidence in
+[its validation record](../evidence/human-watt-conversation-intelligence-focused-validation.md).
 
 ## 3. Current Known Findings
 

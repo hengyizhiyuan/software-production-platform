@@ -11,6 +11,9 @@ PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING**
 Response quality refinement v2.2: **FOCUSED VALIDATION PASS / REAL PROVIDER
 V2.2 PROOF PASS / HUMAN PRODUCT ACCEPTANCE PENDING**
 
+Conversation Intelligence: **FOCUSED VALIDATION PASS / REAL PROVIDER PROOF
+PASS / HUMAN PRODUCT ACCEPTANCE PENDING**
+
 
 ## Scope
 
@@ -300,3 +303,16 @@ The full safe response artifact is
 `.spg/validation-evidence/human-watt-collaboration-v2.2-real-provider-20260908.json`.
 It remains outside Git. This proof validates Provider behavior and message
 lifecycle; Human Product Acceptance remains a separate pending judgment.
+
+## Human–Watt Conversation Intelligence evidence
+
+The post-v2.2 architecture separates WIC/domain semantics from Human-facing
+expression through a `StructuredCollaborationResult`, bounded native
+Conversation Context Assembly, Response Composer, and dedicated configurable
+Conversation Provider. The 30-case benchmark and six mandatory real Provider
+scenarios are recorded in
+[Human–Watt Conversation Intelligence Focused Validation](human-watt-conversation-intelligence-focused-validation.md).
+
+The earlier stiff/report-like output and methodology leakage remain truthful
+historical findings; they are not rewritten as if they never occurred. Human
+Product Acceptance remains pending.

@@ -109,6 +109,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **HUMAN–WATT COLLABORATION EXPERIENCE V2.2 RESPONSE QUALITY — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER V2.2 PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
 
+**HUMAN–WATT CONVERSATION INTELLIGENCE — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
+
 **WORK-CENTRIC PRODUCTION MODEL — ARCHITECTURE PRINCIPLE / ALIGNED**
 
 **WATT PRODUCT MVP — NOT CLOSED**
@@ -220,6 +222,7 @@ without encoding either restriction as a permanent architecture limit.
 | WIC Slice 4 — Work Satisfaction, Continuation & New Work Transition | IMPLEMENTED / PASS — exact satisfaction reconstruction, same-Motive continuation through existing revision/Steering, Human-governed new-Work formation transition, restart reconstruction, idempotency, and sequential Work focus provenance |
 | Work Interaction & Closed-loop Refinement Core | CLOSED / PASS — Slices 1–4 implemented with focused deterministic evidence; final Human WIC Dogfood remains separately governed |
 | Guided Design Core | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable agenda/current focus/readiness, governed multi-step DESIGN, production-proposal review, restart and real Provider proof; Human Product Acceptance PENDING |
+| Human–Watt Conversation Intelligence | IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER PROOF PASS — WIC/domain semantics separated from bounded context assembly and dedicated Human-facing Conversation Provider; 30-case benchmark; Human Product Acceptance PENDING |
 | Watt Product MVP | NOT CLOSED |
 | DCP-1 — Duration & Capacity Semantic Foundation | CLOSED / PASS |
 | DCP-2 — Production Measurement v0 | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable measurement and planning-time TaskShapeSnapshot; no decision influence |
@@ -742,6 +745,20 @@ distinguishes engineering proof from Human Product Acceptance, which remains
 Guided Design transition but remains a broader product-experience finding until
 separately accepted.
 
+### Human–Watt Conversation Intelligence
+
+[Human–Watt Conversation Intelligence](docs/architecture/human-watt-conversation-intelligence.md)
+is the shared Human-facing language plane over existing governed Watt semantics.
+WIC produces an advisory `StructuredCollaborationResult`; bounded native
+Conversation Context Assembly and a dedicated configurable Conversation
+Provider produce natural wording while the existing one-message SSE and
+persistence lifecycle remains unchanged. Conversation owns no Work, Design,
+Plan, Evidence, Runtime, SPG, or Human Authority truth. A reusable 30-case
+benchmark and six mandatory `gpt-5.6-sol` scenarios passed; see the
+[focused evidence](docs/evidence/human-watt-conversation-intelligence-focused-validation.md).
+The v2.x stiff/report-like response findings remain historical truth. Human
+Product Acceptance remains pending.
+
 ### Interpretation Externalization / Multimodal Alignment
 
 Textual confirmation does not prove equivalence between the Human's mental
@@ -858,6 +875,8 @@ The current system-level architecture baseline is:
 - [Guided Design Core Focused Validation](docs/evidence/guided-design-core-focused-validation.md)
 - [Human–Watt Collaboration Layer](docs/architecture/human-watt-collaboration-layer.md)
 - [Guided Design Facilitation Layer](docs/architecture/guided-design-facilitation-layer.md)
+- [Human–Watt Conversation Intelligence](docs/architecture/human-watt-conversation-intelligence.md)
+- [Human–Watt Conversation Intelligence Focused Validation](docs/evidence/human-watt-conversation-intelligence-focused-validation.md)
 - [External Design Intake Capability Direction](docs/architecture/external-design-intake-capability-direction.md)
 - [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
 - [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)

@@ -233,7 +233,13 @@ class Application:
 
         selected_database = database or self.persistence()
         capability = UnavailableWorkInteractionCapability()
-        if self.settings.executor_adapter == "codex-sdk":
+        semantic_adapter = (
+            self.settings.wic_provider_adapter or self.settings.executor_adapter
+        )
+        conversation_adapter = (
+            self.settings.conversation_provider_adapter or semantic_adapter
+        )
+        if semantic_adapter == "codex-sdk" and conversation_adapter == "codex-sdk":
             from spg.providers.codex_interaction import (
                 CodexSdkWorkInteractionCapability,
             )
@@ -241,6 +247,10 @@ class Application:
             capability = CodexSdkWorkInteractionCapability(
                 repository_location=str(self.settings.repository_path),
                 model=self.settings.wic_provider_model,
+                conversation_model=(
+                    self.settings.conversation_provider_model
+                    or self.settings.wic_provider_model
+                ),
                 timeout_seconds=self.settings.executor_timeout_seconds,
             )
         return WorkInteractionService(selected_database, capability=capability)

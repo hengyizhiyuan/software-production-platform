@@ -37,8 +37,11 @@ value and must not be reused outside this local environment.
 No Codex credential is required for startup. Without an explicitly configured
 Executor, Provider-required Work remains truthfully blocked or needs attention.
 Set SPG_WIC_PROVIDER_MODEL to an available model when enabling the WIC Codex
-interpretation capability. Leaving it unset preserves the Codex SDK
-configuration default.
+semantic capability. Human-facing realization can be selected and modeled
+independently with `SPG_CONVERSATION_PROVIDER_ADAPTER` and
+`SPG_CONVERSATION_PROVIDER_MODEL`. The current `codex-sdk` Conversation Provider
+preserves the existing WIC service and streaming contracts. Leaving model
+settings unset preserves the Codex SDK configuration default.
 
 For the explicitly governed local Codex E2E only, set
 `SPG_CODEX_AUTH_FILE_HOST` in the ignored `.env` file to the absolute existing

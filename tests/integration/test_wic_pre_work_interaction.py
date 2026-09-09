@@ -16,6 +16,7 @@ import pytest
 from sqlalchemy import func, select, text
 
 from spg.api import create_http_application
+from spg.domain.conversation import ConversationTurnIntent
 from spg.application.interaction import (
     DeterministicWorkInteractionCapability,
     WorkInteractionService,
@@ -391,6 +392,8 @@ def _run_real_human_watt_turn(
     service: WorkInteractionService,
     interaction_id: UUID,
     content: str,
+    *,
+    timeout: float = 320,
 ) -> tuple[str, object, bool]:
     submitted = service.submit_turn(
         interaction_id,
@@ -398,7 +401,7 @@ def _run_real_human_watt_turn(
         human_identity="human:response-quality-proof",
     )
     completed, streamed_response, delta_before_terminal = (
-        _wait_for_turn_and_observe_stream(service, submitted.id, timeout=320)
+        _wait_for_turn_and_observe_stream(service, submitted.id, timeout=timeout)
     )
     if completed.status is InteractionTurnStatus.FAILED:
         _fail_with_preserved_turn_evidence(completed)
@@ -818,7 +821,7 @@ def test_real_provider_guides_mandatory_human_watt_scenario_in_one_turn(
         projection = service.get_shared_understanding(interaction.id)
         assert projection.latest_assessment is not None
         assert projection.latest_assessment.provider_identity.startswith(
-            "codex-sdk:thread:"
+            "codex-sdk:semantic-thread:"
         )
         assert projection.selected_design_schema_identity == (
             "watt:guided-design:general-product-system"
@@ -943,7 +946,7 @@ def test_real_provider_v22_response_quality_scenarios(
         for projection in (projection_a, projection_b, projection_c, projection_d):
             assert projection.latest_assessment is not None
             assert projection.latest_assessment.provider_identity.startswith(
-                "codex-sdk:thread:"
+                "codex-sdk:semantic-thread:"
             )
         assert _count(postgres_database, product_works) == 0
         assert _count(postgres_database, work_reality_revisions) == 0
@@ -953,8 +956,8 @@ def test_real_provider_v22_response_quality_scenarios(
         report = {
             "evidence_kind": "HUMAN_WATT_RESPONSE_QUALITY_V22_REAL_PROVIDER_PROOF",
             "provider_model": "gpt-5.6-sol",
-            "provider_threads": 4,
-            "provider_turns": 4,
+            "provider_threads": 8,
+            "provider_turns": 8,
             "streaming_match": True,
             "work_and_production_facts": 0,
             "responses": {
@@ -987,6 +990,265 @@ def test_real_provider_v22_response_quality_scenarios(
 
 @pytest.mark.real_codex
 @pytest.mark.skipif(
+    os.environ.get("SPG_RUN_REAL_CONVERSATION_INTELLIGENCE") != "1",
+    reason="explicit Conversation Intelligence real Provider proof is required",
+)
+def test_real_provider_conversation_intelligence_mandatory_scenarios(
+    postgres_database: Database,
+) -> None:
+    capability = CodexSdkWorkInteractionCapability(
+        repository_location=os.environ.get(
+            "SPG_WIC_PROVIDER_PROOF_ROOT",
+            str(PROJECT_ROOT),
+        ),
+        model=os.environ.get("SPG_WIC_PROVIDER_MODEL", "gpt-5.6-sol"),
+        conversation_model=os.environ.get(
+            "SPG_CONVERSATION_PROVIDER_MODEL",
+            "gpt-5.6-sol",
+        ),
+        timeout_seconds=300,
+    )
+    service = WorkInteractionService(postgres_database, capability=capability)
+    pipeline_runs: list[dict[str, object]] = []
+
+    def execute(
+        name: str,
+        message: str,
+        expected_intent: ConversationTurnIntent,
+        *,
+        context: str | None = None,
+    ) -> tuple[str, object]:
+        interaction = service.create_interaction(
+            human_identity="human:conversation-intelligence-proof"
+        )
+        if context is not None:
+            service.append_human_input(
+                interaction.id,
+                context,
+                human_identity="human:conversation-intelligence-proof",
+            )
+        response, projection, delta_before_terminal = _run_real_human_watt_turn(
+            service,
+            interaction.id,
+            message,
+            timeout=650,
+        )
+        assert delta_before_terminal is True
+        assert capability.last_collaboration_result is not None
+        assert capability.last_collaboration_result.turn_intent is expected_intent
+        assert capability.last_pipeline_evidence is not None
+        evidence = capability.last_pipeline_evidence
+        pipeline_runs.append(
+            {
+                "scenario": name,
+                "turn_intent": expected_intent.value,
+                "semantic_thread_id": evidence.semantic_thread_id,
+                "semantic_turn_id": evidence.semantic_turn_id,
+                "conversation_thread_id": evidence.conversation_thread_id,
+                "conversation_turn_id": evidence.conversation_turn_id,
+                "response": response,
+            }
+        )
+        return response, projection
+
+    try:
+        response_a, projection_a = execute(
+            "vague_new_goal",
+            "我想做一个运营管理平台。",
+            ConversationTurnIntent.NEW_GOAL,
+        )
+        _assert_default_response_quality(response_a)
+        assert any(marker in response_a for marker in ("先", "建议", "可以"))
+
+        response_b, projection_b = execute(
+            "known_context_reuse",
+            "请基于这些已知信息继续推进设计。",
+            ConversationTurnIntent.CONTINUE_CURRENT_WORK,
+            context=(
+                "主要用于推广 Watt，包括技术公众号、小红书和直播，"
+                "目标受众是个人开发者和小型开发工作室。"
+            ),
+        )
+        _assert_default_response_quality(response_b)
+        assert any(
+            fact in response_b
+            for fact in ("个人开发者", "小型开发工作室", "公众号", "小红书", "直播")
+        )
+        assert not any(
+            repeated in response_b
+            for repeated in ("面向谁", "目标受众是谁", "谁是目标用户")
+        )
+
+        response_c, projection_c = execute(
+            "direct_question",
+            "设计方案的文档会输出到哪里？",
+            ConversationTurnIntent.DIRECT_QUESTION,
+        )
+        _assert_default_response_quality(response_c)
+        first_paragraph = response_c.split("\n\n", 1)[0]
+        assert "文档" in first_paragraph
+        assert any(marker in first_paragraph for marker in ("不会", "未", "没有"))
+
+        response_d, projection_d = execute(
+            "explicit_detail_request",
+            "把整个设计方法和后续步骤详细讲一下。",
+            ConversationTurnIntent.REQUEST_DETAIL,
+        )
+        assert len(response_d) > len(response_c)
+        assert sum(
+            topic in response_d
+            for topic in ("用户", "场景", "边界", "能力", "架构", "验证", "生产")
+        ) >= 3
+
+        response_e, projection_e = execute(
+            "correction",
+            "不对，首批用户其实是个人开发者，不是大型企业。请按这个修正。",
+            ConversationTurnIntent.CORRECTION,
+            context="首批目标用户是大型企业。",
+        )
+        _assert_default_response_quality(response_e)
+        assert "个人开发者" in response_e
+        assert any(marker in response_e for marker in ("明白", "修正", "按", "以"))
+
+        response_f, projection_f = execute(
+            "recommendation",
+            "你建议我们下一步先设计哪个部分？",
+            ConversationTurnIntent.REQUEST_RECOMMENDATION,
+            context="目标用户是个人开发者，首要问题是看不清自动任务状态。",
+        )
+        _assert_default_response_quality(response_f)
+        assert any(marker in response_f.split("\n\n", 1)[0] for marker in ("建议", "推荐", "先", "优先"))
+
+        all_ids = {
+            str(value)
+            for item in pipeline_runs
+            for key, value in item.items()
+            if key.endswith("_id")
+        }
+        assert len(pipeline_runs) == 6
+        assert len(all_ids) == 24
+        for projection in (
+            projection_a,
+            projection_b,
+            projection_c,
+            projection_d,
+            projection_e,
+            projection_f,
+        ):
+            assert projection.latest_assessment is not None
+            assert projection.latest_assessment.provider_identity.startswith(
+                "codex-sdk:semantic-thread:"
+            )
+        assert _count(postgres_database, product_works) == 0
+        assert _count(postgres_database, work_reality_revisions) == 0
+        for table in runtime_tables:
+            assert _count(postgres_database, table) == 0, table.name
+
+        report = {
+            "evidence_kind": "HUMAN_WATT_CONVERSATION_INTELLIGENCE_REAL_PROVIDER_PROOF",
+            "provider_model": capability.model,
+            "scenarios": pipeline_runs,
+            "provider_threads": 12,
+            "provider_turns": 12,
+            "streaming_match": True,
+            "work_and_production_facts": 0,
+        }
+        destination = Path(
+            os.environ.get(
+                "SPG_REAL_CONVERSATION_INTELLIGENCE_EVIDENCE_PATH",
+                PROJECT_ROOT
+                / ".spg"
+                / "validation-evidence"
+                / "human-watt-conversation-intelligence-real-provider.json",
+            )
+        )
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = destination.with_suffix(destination.suffix + ".tmp")
+        temporary.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        temporary.replace(destination)
+        print(
+            "HUMAN_WATT_CONVERSATION_INTELLIGENCE_REAL_PROOF",
+            json.dumps(report, ensure_ascii=False),
+        )
+    finally:
+        service.shutdown()
+
+
+@pytest.mark.real_codex
+@pytest.mark.skipif(
+    os.environ.get("SPG_RUN_REAL_CONVERSATION_INTELLIGENCE_SINGLE") != "1",
+    reason="explicit single-scenario Conversation Intelligence proof is required",
+)
+def test_real_provider_conversation_intelligence_single_scenario(
+    postgres_database: Database,
+) -> None:
+    message = os.environ["SPG_CONVERSATION_INTELLIGENCE_MESSAGE"]
+    context = os.environ.get("SPG_CONVERSATION_INTELLIGENCE_CONTEXT")
+    expected_intent = ConversationTurnIntent(
+        os.environ["SPG_CONVERSATION_INTELLIGENCE_EXPECTED_INTENT"]
+    )
+    capability = CodexSdkWorkInteractionCapability(
+        repository_location=os.environ.get(
+            "SPG_WIC_PROVIDER_PROOF_ROOT",
+            str(PROJECT_ROOT),
+        ),
+        model=os.environ.get("SPG_WIC_PROVIDER_MODEL", "gpt-5.6-sol"),
+        conversation_model=os.environ.get(
+            "SPG_CONVERSATION_PROVIDER_MODEL",
+            "gpt-5.6-sol",
+        ),
+        timeout_seconds=300,
+    )
+    service = WorkInteractionService(postgres_database, capability=capability)
+    try:
+        interaction = service.create_interaction(
+            human_identity="human:conversation-intelligence-single-proof"
+        )
+        if context:
+            service.append_human_input(
+                interaction.id,
+                context,
+                human_identity="human:conversation-intelligence-single-proof",
+            )
+        response, projection, streamed = _run_real_human_watt_turn(
+            service,
+            interaction.id,
+            message,
+            timeout=650,
+        )
+        assert streamed is True
+        assert capability.last_collaboration_result is not None
+        assert capability.last_collaboration_result.turn_intent is expected_intent
+        assert capability.last_pipeline_evidence is not None
+        assert projection.latest_assessment is not None
+        assert _count(postgres_database, product_works) == 0
+        for table in runtime_tables:
+            assert _count(postgres_database, table) == 0, table.name
+        print(
+            "HUMAN_WATT_CONVERSATION_INTELLIGENCE_SINGLE_PROOF",
+            json.dumps(
+                {
+                    "turn_intent": expected_intent.value,
+                    "response": response,
+                    "semantic_thread_id": (
+                        capability.last_pipeline_evidence.semantic_thread_id
+                    ),
+                    "conversation_thread_id": (
+                        capability.last_pipeline_evidence.conversation_thread_id
+                    ),
+                },
+                ensure_ascii=False,
+            ),
+        )
+    finally:
+        service.shutdown()
+
+
+@pytest.mark.real_codex
+@pytest.mark.skipif(
     os.environ.get("SPG_RUN_REAL_WIC_PROVIDER") != "1",
     reason="explicit real WIC Provider proof authorization is required",
 )
@@ -1012,7 +1274,9 @@ def test_real_provider_advances_multi_turn_readiness_without_work_or_production(
     assert first.readiness is not None
     assert first.readiness.status is WorkAdmissionReadinessStatus.NOT_READY
     assert first.latest_assessment is not None
-    assert first.latest_assessment.provider_identity.startswith("codex-sdk:thread:")
+    assert first.latest_assessment.provider_identity.startswith(
+        "codex-sdk:semantic-thread:"
+    )
 
     second = service.append_and_assess(
         interaction.id,
@@ -1026,7 +1290,9 @@ def test_real_provider_advances_multi_turn_readiness_without_work_or_production(
     assert second.readiness is not None
     assert second.readiness.status is WorkAdmissionReadinessStatus.READY
     assert second.latest_assessment is not None
-    assert second.latest_assessment.provider_identity.startswith("codex-sdk:thread:")
+    assert second.latest_assessment.provider_identity.startswith(
+        "codex-sdk:semantic-thread:"
+    )
     assert _count(postgres_database, product_works) == 0
     assert _count(postgres_database, work_reality_revisions) == 0
     for table in runtime_tables:

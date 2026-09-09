@@ -6,6 +6,12 @@ import pytest
 from pydantic import ValidationError
 
 from spg.application.interaction import WorkInteractionService
+from spg.domain.conversation import (
+    ConversationContext,
+    ConversationPolicyHint,
+    ConversationTurnIntent,
+    StructuredCollaborationResult,
+)
 from spg.domain.interaction import (
     WorkAdmissionReadiness,
     WorkAdmissionReadinessStatus,
@@ -15,6 +21,7 @@ from spg.domain.interaction import (
     WorkTransitionChoice,
 )
 from spg.providers.codex_interaction import (
+    CodexSdkConversationProvider,
     CodexSdkWorkInteractionCapability,
     _JsonStringFieldStream,
 )
@@ -43,7 +50,8 @@ def _schema_nodes(value: object) -> Iterator[dict]:
 
 def test_wic_provider_schema_is_recursively_strict_and_ref_safe() -> None:
     schema = CodexSdkWorkInteractionCapability.output_schema()
-    assert next(iter(schema["properties"])) == "natural_response"
+    assert "natural_response" not in schema["properties"]
+    assert "collaboration" in schema["properties"]
     for path, object_schema in _object_schemas(schema):
         assert set(object_schema["properties"]) == set(
             object_schema.get("required", [])
@@ -199,18 +207,41 @@ def test_wic_provider_instruction_requires_progressive_context_aware_leadership(
 
     instruction = CodexSdkWorkInteractionCapability._instruction(basis)
 
-    assert "progressive disclosure" in instruction
-    assert "Do not enumerate the full Design Schema" in instruction
-    assert "recommend one next design action" in instruction
-    assert "ask at most one highest-impact unresolved question" in instruction
-    assert "never ask the Human to repeat it" in instruction
-    assert "lead with a useful proposal" in instruction
-    assert "the first sentence must answer that exact question directly" in instruction
-    assert "two to five short paragraphs" in instruction
-    assert "never print the action label" in instruction
-    assert "Do not add headings such as Design approach" in instruction
-    assert "If the Human explicitly asks for detailed analysis" in instruction
+    assert "WIC semantic boundary" in instruction
+    assert "do not write the Human-facing response" in instruction
+    assert "DIRECT_QUESTION" in instruction
+    assert "REQUEST_RECOMMENDATION" in instruction
+    assert "REQUEST_DETAIL" in instruction
+    assert "CORRECTION" in instruction
     assert "does not automatically generate or write a design-document" in instruction
+
+
+def test_dedicated_conversation_provider_owns_human_facing_policy() -> None:
+    context = ConversationContext(
+        source_basis_fingerprint="a" * 64,
+        latest_human_message="你建议下一步做什么？",
+        known_relevant_facts=("用户是个人开发者",),
+        response_language="Chinese",
+    )
+    collaboration = StructuredCollaborationResult(
+        turn_intent=ConversationTurnIntent.REQUEST_RECOMMENDATION,
+        known_relevant_facts=("用户是个人开发者",),
+        recommended_next_action="先定义核心使用场景",
+        concise_basis="场景决定产品边界",
+        response_language="Chinese",
+        policy_hints=(ConversationPolicyHint.GUIDE_PROACTIVELY,),
+    )
+
+    instruction = CodexSdkConversationProvider.instruction(context, collaboration)
+
+    assert "dedicated Human-facing Conversation Provider" in instruction
+    assert "own wording" in instruction
+    assert "two to five short paragraphs" in instruction
+    assert "no more than one question mark" in instruction
+    assert "Reuse known facts" in instruction
+    assert "REQUEST_RECOMMENDATION" in instruction
+    assert "questionnaire" in instruction
+    assert "do not decide or modify Work, Design, Plan, Authority" in instruction
 
 
 def test_wic_human_facing_response_does_not_append_internal_design_metadata() -> None:

@@ -1,0 +1,212 @@
+[
+  {
+    "id": "new-goal-vague-zh",
+    "category": "vague_new_goal",
+    "messages": ["我想做一个运营管理平台。"],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": ["proactive_guidance", "at_most_one_question", "no_methodology_dump"]
+  },
+  {
+    "id": "new-goal-clear-zh",
+    "category": "new_goal",
+    "messages": ["我想为小型工作室做一个能统一项目进度和风险的运营平台。"],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": ["context_fidelity", "proactive_guidance"]
+  },
+  {
+    "id": "direct-design-document-location-zh",
+    "category": "direct_question",
+    "messages": ["设计方案的文档会输出到哪里？"],
+    "expected_intent": "DIRECT_QUESTION",
+    "quality_contracts": ["direct_answer_first", "truthful_limitation", "no_methodology_dump"]
+  },
+  {
+    "id": "direct-progress-zh",
+    "category": "direct_question",
+    "messages": ["现在设计推进到哪一步了？"],
+    "expected_intent": "DIRECT_QUESTION",
+    "quality_contracts": ["direct_answer_first", "context_fidelity"]
+  },
+  {
+    "id": "context-users-zh",
+    "category": "context_addition",
+    "messages": ["主要用户是个人开发者和小型开发工作室。"],
+    "expected_intent": "CONTEXT_ADDITION",
+    "quality_contracts": ["acknowledge_and_use", "no_forced_progression"]
+  },
+  {
+    "id": "context-channels-zh",
+    "category": "context_addition",
+    "messages": ["推广渠道已经确定为技术公众号、小红书和直播。"],
+    "expected_intent": "CONTEXT_ADDITION",
+    "quality_contracts": ["acknowledge_and_use", "no_repetition"]
+  },
+  {
+    "id": "known-context-reuse-zh",
+    "category": "known_context_reuse",
+    "messages": ["目标是推广 Watt，用户是个人开发者和小型工作室。", "基于这些信息继续推进。"],
+    "expected_intent": "CONTINUE_CURRENT_WORK",
+    "quality_contracts": ["context_reuse", "no_repeat_question", "proactive_guidance"]
+  },
+  {
+    "id": "correction-audience-zh",
+    "category": "correction",
+    "messages": ["目标用户是大型企业。", "不对，首批用户其实是个人开发者。"],
+    "expected_intent": "CORRECTION",
+    "quality_contracts": ["accept_correction", "context_fidelity", "non_defensive"]
+  },
+  {
+    "id": "correction-scope-zh",
+    "category": "correction",
+    "messages": ["这轮做完整工作台。", "纠正一下，这轮只改善对话体验，不重构整个 UI。"],
+    "expected_intent": "CORRECTION",
+    "quality_contracts": ["accept_correction", "constraint_fidelity"]
+  },
+  {
+    "id": "disagreement-zh",
+    "category": "disagreement",
+    "messages": ["我不同意先做报表，应该先解决任务状态看不懂的问题。"],
+    "expected_intent": "DISAGREEMENT",
+    "quality_contracts": ["non_defensive", "acknowledge_direction", "proactive_guidance"]
+  },
+  {
+    "id": "recommend-next-part-zh",
+    "category": "request_recommendation",
+    "messages": ["你建议我们下一步先设计哪个部分？"],
+    "expected_intent": "REQUEST_RECOMMENDATION",
+    "quality_contracts": ["recommendation_first", "concise_rationale", "not_questionnaire"]
+  },
+  {
+    "id": "recommend-release-zh",
+    "category": "request_recommendation",
+    "messages": ["这两个方案你更推荐哪一个？"],
+    "expected_intent": "REQUEST_RECOMMENDATION",
+    "quality_contracts": ["clear_recommendation", "decision_utility"]
+  },
+  {
+    "id": "decision-support-zh",
+    "category": "request_decision_support",
+    "messages": ["实时推送和轮询两种方式怎么取舍？"],
+    "expected_intent": "REQUEST_DECISION_SUPPORT",
+    "quality_contracts": ["material_alternatives", "trade_offs", "recommendation"]
+  },
+  {
+    "id": "detail-method-zh",
+    "category": "request_detail",
+    "messages": ["把整个设计方法和后续步骤详细讲一下。"],
+    "expected_intent": "REQUEST_DETAIL",
+    "quality_contracts": ["expanded_detail", "coherent_structure", "relevance"]
+  },
+  {
+    "id": "concise-answer-zh",
+    "category": "concise_request",
+    "messages": ["一句话告诉我当前最大的风险。"],
+    "expected_intent": "DIRECT_QUESTION",
+    "quality_contracts": ["direct_answer_first", "concise"]
+  },
+  {
+    "id": "side-question-zh",
+    "category": "side_question",
+    "messages": ["顺便问一下，这里为什么用 SSE？"],
+    "expected_intent": "SIDE_QUESTION",
+    "quality_contracts": ["bounded_answer", "optional_return_to_focus"]
+  },
+  {
+    "id": "material-branch-zh",
+    "category": "material_branch",
+    "messages": ["如果把多租户也放进第一版，会对当前方案产生什么影响？"],
+    "expected_intent": "MATERIAL_BRANCH",
+    "quality_contracts": ["surface_scope_impact", "preserve_authority"]
+  },
+  {
+    "id": "frustration-zh",
+    "category": "frustration",
+    "messages": ["别再重复问这些了，我刚才已经说过目标用户是谁。"],
+    "expected_intent": "FEEDBACK",
+    "quality_contracts": ["acknowledge_frustration", "context_reuse", "no_repeat_question"]
+  },
+  {
+    "id": "guided-design-progress-zh",
+    "category": "guided_design_progression",
+    "messages": ["用户和核心场景已经明确了，接下来怎么推进？"],
+    "expected_intent": "CONTINUE_CURRENT_WORK",
+    "quality_contracts": ["proactive_guidance", "next_unresolved_focus"]
+  },
+  {
+    "id": "human-decision-zh",
+    "category": "human_decision",
+    "messages": ["我决定先采用方案 A，暂不做方案 B。"],
+    "expected_intent": "HUMAN_DECISION",
+    "quality_contracts": ["confirm_choice", "immediate_implication", "preserve_authority"]
+  },
+  {
+    "id": "system-limitation-zh",
+    "category": "system_limitation",
+    "messages": ["Watt 现在能自动把设计文档写进仓库吗？"],
+    "expected_intent": "DIRECT_QUESTION",
+    "quality_contracts": ["truthful_limitation", "direct_answer_first", "no_overclaim"]
+  },
+  {
+    "id": "verification-failure-zh",
+    "category": "verification_explanation",
+    "messages": ["验证为什么没有通过？"],
+    "expected_intent": "DIRECT_QUESTION",
+    "quality_contracts": ["direct_failure_explanation", "evidence_fidelity"]
+  },
+  {
+    "id": "attention-required-zh",
+    "category": "human_attention",
+    "messages": ["为什么现在需要我决定？"],
+    "expected_intent": "DIRECT_QUESTION",
+    "quality_contracts": ["direct_answer_first", "authority_clarity"]
+  },
+  {
+    "id": "continue-work-zh",
+    "category": "continue_current_work",
+    "messages": ["按我们已经确定的方向继续。"],
+    "expected_intent": "CONTINUE_CURRENT_WORK",
+    "quality_contracts": ["context_reuse", "no_recap_dump"]
+  },
+  {
+    "id": "experience-feedback-zh",
+    "category": "feedback",
+    "messages": ["现在的回答太像报告了，我希望更自然直接。"],
+    "expected_intent": "FEEDBACK",
+    "quality_contracts": ["acknowledge_feedback", "adapt_response_style"]
+  },
+  {
+    "id": "new-goal-en",
+    "category": "new_goal",
+    "messages": ["I want to design a lightweight operations platform for small studios."],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": ["proactive_guidance", "language_match"]
+  },
+  {
+    "id": "direct-question-en",
+    "category": "direct_question",
+    "messages": ["Where will the design document be written?"],
+    "expected_intent": "DIRECT_QUESTION",
+    "quality_contracts": ["direct_answer_first", "truthful_limitation", "language_match"]
+  },
+  {
+    "id": "detail-request-en",
+    "category": "request_detail",
+    "messages": ["Walk me through the full design method and the steps that follow."],
+    "expected_intent": "REQUEST_DETAIL",
+    "quality_contracts": ["expanded_detail", "language_match"]
+  },
+  {
+    "id": "correction-en",
+    "category": "correction",
+    "messages": ["The first users are enterprises.", "Correction: the first users are individual developers."],
+    "expected_intent": "CORRECTION",
+    "quality_contracts": ["accept_correction", "non_defensive", "language_match"]
+  },
+  {
+    "id": "completed-work-new-demand-zh",
+    "category": "new_work_transition",
+    "messages": ["当前工作已经完成。另一个需求是增加团队权限管理。"],
+    "expected_intent": "MATERIAL_BRANCH",
+    "quality_contracts": ["new_work_boundary", "no_authority_inheritance"]
+  }
+]

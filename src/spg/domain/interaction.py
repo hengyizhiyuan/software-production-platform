@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from spg.domain.conversation import StructuredCollaborationResult
+
 
 class InteractionCondition(StrEnum):
     OPEN = "OPEN"
@@ -255,6 +257,26 @@ class InteractionAssessmentCandidate(BaseModel):
     model_identity: str | None = Field(default=None, max_length=255)
 
 
+class InteractionSemanticCandidate(BaseModel):
+    """Advisory WIC semantics before separate Human-facing realization."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    interpreted_motive: str | None = None
+    desired_outcome: str | None = None
+    candidate_context: tuple[str, ...] = ()
+    candidate_constraints: tuple[str, ...] = ()
+    current_requests: tuple[str, ...] = ()
+    unresolved_material_questions: tuple[str, ...] = ()
+    meanings: tuple[InterpretationMeaning, ...] = ()
+    focus_classification: WorkFocusClassification | None = None
+    impact_disposition: WorkImpactDisposition | None = None
+    supporting_references: tuple[str, ...] = ()
+    collaboration: StructuredCollaborationResult
+    provider_identity: str = Field(min_length=1, max_length=255)
+    model_identity: str | None = Field(default=None, max_length=255)
+
+
 class InteractionAssessment(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -396,6 +418,14 @@ class WorkInteractionCapability(Protocol):
     def interpret(
         self, basis: InteractionInterpretationInput
     ) -> InteractionAssessmentCandidate: ...
+
+
+class WorkInteractionSemanticCapability(Protocol):
+    """WIC-owned semantic interpretation without Human-facing prose."""
+
+    def interpret_semantics(
+        self, basis: InteractionInterpretationInput
+    ) -> InteractionSemanticCandidate: ...
 
 
 class InteractionInvariantViolation(RuntimeError):
