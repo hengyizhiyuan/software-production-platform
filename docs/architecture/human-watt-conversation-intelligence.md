@@ -29,7 +29,7 @@ Human Turn
     -> existing streaming Watt message
 ```
 
-The first implementation separates the existing WIC path into two Provider
+The original implementation separated the WIC path into two Provider
 contracts:
 
 1. `CodexSdkInteractionSemanticCapability` interprets the exact persisted WIC
@@ -40,7 +40,8 @@ contracts:
    wording, adaptive detail, conversational continuity, and turn-taking.
 
 `CodexSdkWorkInteractionCapability` remains the compatibility facade expected
-by `WorkInteractionService`. It composes those two stages, returns the existing
+by `WorkInteractionService`. It selects coalesced pre-Work or staged transport,
+while preserving both responsibilities, and returns the existing
 `InteractionAssessmentCandidate`, and therefore does not change the persisted
 Interaction, Work-admission, or streaming contracts.
 
@@ -107,8 +108,8 @@ through `SPG_CONVERSATION_PROVIDER_MODEL`; adapter selection is separated by
 `SPG_CONVERSATION_PROVIDER_ADAPTER`. WIC semantic model configuration remains
 independent.
 
-Default realization is direct and concise, normally two to five short
-paragraphs, one primary recommendation/action, and no more than one material
+Default realization is direct and concise; a direct answer may be one sentence.
+Longer replies use short paragraphs, one primary action, and at most one material
 question. Known facts must be reused. Explicit detail requests expand naturally.
 Internal schema versions, stage identifiers, policy enums, Provider contracts,
 and private reasoning remain hidden unless relevant system detail is requested.
@@ -183,7 +184,9 @@ Subjective quality is not reduced to one boolean or brittle exact strings.
 - Human Product Acceptance remains pending.
 - Design Intent Framing focused deterministic validation and its bounded real
   `gpt-5.6-sol` correction proof have passed.
-- Two independent Provider Turns preserve separation but increase latency.
+- Active Work and separately configured providers still require two serial Turns.
+- A coalesced pre-Work response remains provisional until its full semantic envelope
+  validates and admission completes; field order is requested, not guaranteed.
 - Context selection is bounded/native; semantic retrieval and full ECF are out
   of scope.
 - Existing non-conversational Control Room projections are not redesigned.
@@ -198,3 +201,97 @@ Subjective quality is not reduced to one boolean or brittle exact strings.
 - [Work Interaction & Closed-loop Refinement](work-interaction-closed-loop-refinement.md)
 - [Conversation Quality Benchmark](../../benchmarks/conversation_quality/README.md)
 - [Focused Validation](../evidence/human-watt-conversation-intelligence-focused-validation.md)
+
+## Human collaboration pipeline optimization (2026-09-09)
+
+The [pipeline review](human-collaboration-pipeline-review.md) found two serial
+model Turns in the original implementation. Framing remains inside WIC; Guided Design remains deterministic and
+owns its schema/readiness. Conversation receives current candidate semantics
+and eight actual persisted dialogue messages, including Watt replies. A legacy
+source-only Human input is preserved even when no message projection exists.
+The complete Human source ledger and exact basis fingerprint are unchanged.
+
+Current advisory facts, constraints, and requests replace stale candidates.
+Admitted Work facts/constraints/requests are separate fields in the response
+context. The replaceable context-provider protocol is unchanged. Context limits
+are selection bounds, not a token-limit or full-history compaction guarantee.
+
+Provider transport omits redundant audit metadata and schema first-focus
+priming. Prompts distinguish a business audience from the system's operators
+and allow a single-sentence direct answer. The browser attaches SSE immediately
+after durable acknowledgement. Independent model reasoning settings and a
+collaboration timeout avoid coupling expression policy to Executor settings.
+
+Ephemeral provider evidence records stage durations, prompt character counts,
+configured models/efforts, and first non-whitespace response delta. Bounded
+service telemetry records receipt, acknowledgement readiness, first server SSE
+event, first response text, and committed terminal state. Unobserved milestones
+remain null; restart does not invent historical timing. Client-side measurement
+in the probe separately establishes delivery latency. No metric owns product
+truth or changes the persisted lifecycle.
+
+### Coalesced pre-Work inference
+
+Measured two-stage first-response latency remained above one minute after
+lowering reasoning effort. The default pre-Work transport therefore uses one
+strict envelope containing `natural_response` and the unchanged WIC semantic
+schema. The same invocation supplies one interpretation and its wording;
+Conversation's expression policy is shared with the standalone adapter. It
+uses the exact current source basis plus bounded actual dialogue, and does not
+create a fabricated intermediate intent or a second context/Truth owner.
+
+The provider is asked to emit `natural_response` first. Only that JSON string
+is streamed. Complete envelope validation and exact-basis application admission
+still precede durable assessment/final-message publication. A later invalid
+semantic result fails the Turn and never persists the draft as a completed
+Watt reply. JSON field ordering changes latency, never validation requirements.
+
+Coalescing applies only without active Work and when both model and reasoning
+settings agree and all provider/context seams use the native implementations.
+Custom context/providers, different settings, active Work, or
+`SPG_WIC_COALESCE_PRE_WORK=false` retain the separate context/composer/provider
+path. Both model effort defaults remain unspecified. There is no shared hidden
+provider memory, model replacement, or change to Human Authority.
+
+Provider evidence reports `coalesced_pre_work` and one call with one pair of
+thread/turn IDs, or `staged` and two calls with separate provenance. Stage-only
+timings/IDs are null in the single-call mode; no unmeasured phase is inferred.
+
+## Product intelligence and latency refinement v3.1 (2026-09-09)
+
+The [pre-implementation assessment](human-collaboration-pipeline-v31-assessment.md)
+identifies policy-induced procedural prose and repeated semantic serialization.
+The existing application-owned Conversation policy now guides expression around
+useful provisional understanding, a concrete recommendation, its rationale and
+a tangible next action. It counts independent decisions rather than punctuation.
+WIC still owns interpretation and proposed recommendations; Conversation expresses
+them. Correction handling advances from the corrected object, and direct answers
+translate product facts into plain language.
+
+Eligible coalesced output can explicitly retain unchanged prior meanings by
+validated indexes. The adapter expands those indexes against the exact persisted
+basis into the existing complete candidate. Invalid, duplicated and out-of-basis
+references fail before admission. Current facts, constraints, requests and frames
+remain complete snapshots; no implicit union revives superseded assumptions.
+The coalesced prompt omits its unused schema catalogue and prior readiness,
+compacts indexed prior meanings, and removes a prior response only when identical
+text is already present in recent dialogue. All source records remain available.
+
+Natural-response closure, complete-envelope receipt, payload validation,
+exact-basis candidate validation, assessment commit and final-message persistence
+are separately observable. Partial text continues to be presentation only. Cached,
+failed and restarted observations do not fabricate generation or success stages.
+No new persistence schema, intelligence owner, admission authority or lifecycle
+was introduced. See the [v3.1 evidence report](../evidence/human-collaboration-pipeline-v31.md)
+for real Chinese comparisons and remaining Human Acceptance findings.
+
+### v3.1 explicit frame reuse
+
+The final coalesced transport may explicitly reuse an unchanged prior Design
+Intent Frame. A strict reuse flag requires an existing prior frame and a null
+replacement field; new/corrected frames remain complete. Correction intents or
+new correction meanings cannot reuse a frame. When a prior frame exists, an
+unspecified null replacement without explicit reuse is rejected before domain
+validation, avoiding implicit restoration by legacy service fallback. Reuse is
+expanded into the existing immutable full domain value; no new persisted frame
+format or owner is introduced. Full current facts and source records remain.

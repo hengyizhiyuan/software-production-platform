@@ -633,3 +633,49 @@ test("streaming assistant output occupies one message lifecycle until persisted 
   assert.match(appSource, /streamingAssistantMessage\.content = streamed/);
   assert.doesNotMatch(appSource, /elements\.wattResponse\.textContent = streamed/);
 });
+
+
+test("Turn subscription starts before projection refresh and ignores stale refresh after completion", async () => {
+  const source = appSource.slice(
+    appSource.indexOf("  async function continueInteraction(event)"),
+    appSource.indexOf("  async function admitInteractionWork()"),
+  );
+  let resolveProjection;
+  let notifyProjectionRequested;
+  const projectionRequested = new Promise((resolve) => { notifyProjectionRequested = resolve; });
+  const pendingProjection = new Promise((resolve) => { resolveProjection = resolve; });
+  const state = { busy: false, selectedInteractionId: "interaction-1", sharedUnderstanding: { version: "prior" } };
+  let subscribed = false;
+  const harness = {
+    state,
+    viewModel,
+    elements: { workRequirement: { value: "Build a Web application." } },
+    setBusy: (busy) => { state.busy = busy; },
+    hideNotice() {},
+    renderInteraction() {},
+    announce() {},
+    showNotice(error) { throw error; },
+    observeInteractionTurn(_id, turnId) {
+      subscribed = true;
+      state.activeInteractionTurnId = turnId;
+    },
+    async apiRequest(url) {
+      if (url.endsWith("/turns")) return { turn_id: "turn-1", status: "RECEIVED" };
+      assert.equal(subscribed, true, "SSE must attach without waiting for the projection");
+      notifyProjectionRequested();
+      return pendingProjection;
+    },
+  };
+  vm.runInNewContext(source, harness);
+  const submitting = harness.continueInteraction({ preventDefault() {} });
+  await projectionRequested;
+  assert.equal(state.sharedUnderstanding.conversation_messages.at(-1).actor, "HUMAN");
+  assert.equal(state.sharedUnderstanding.conversation_messages.at(-1).content, "Build a Web application.");
+  const completedProjection = { version: "completed", conversation_messages: [{ actor: "WATT" }] };
+  state.activeInteractionTurnId = "";
+  state.sharedUnderstanding = completedProjection;
+  resolveProjection({ version: "stale-processing" });
+  await submitting;
+  assert.equal(state.sharedUnderstanding, completedProjection);
+  assert.equal(state.busy, false);
+});

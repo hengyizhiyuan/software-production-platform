@@ -29,10 +29,12 @@ Human Input
     -> Human-facing response
 ```
 
-Framing is integrated into the existing WIC semantic Provider result. It does
-not add a Provider call. The current two-stage Conversation Intelligence path
-remains: one semantic Turn produces WIC semantics including the frame, and one
-conversation Turn realizes those semantics as natural language.
+Framing is integrated into the WIC semantic Provider result and adds no model
+call. Eligible pre-Work interactions now coalesce semantic interpretation and
+Conversation expression into one strict Provider envelope; active Work or
+separately configured model/effort settings retain two Provider Turns. The
+[pipeline review](human-collaboration-pipeline-review.md) records the measured
+reason for this transport refinement. WIC continues to own the candidate frame.
 
 ## Ownership boundary
 
@@ -171,3 +173,13 @@ and no Work or production fact was created.
 - [Guided Design Core](guided-design-core.md)
 - [Guided Design Facilitation Layer](guided-design-facilitation-layer.md)
 - [Human–Watt Conversation Intelligence](human-watt-conversation-intelligence.md)
+
+## Pipeline review refinement (2026-09-09)
+
+The [Human collaboration pipeline review](human-collaboration-pipeline-review.md)
+retains framing inside the single WIC semantic Turn. Technical-methodology
+selection now uses the framed design subject alone; incidental database or
+performance vocabulary in business context cannot select a technical schema.
+The expression handoff receives current candidate semantics and preserves the
+difference between promotion audiences and actual system operators. No framing
+owner, persistence column, or additional Provider Turn is introduced.

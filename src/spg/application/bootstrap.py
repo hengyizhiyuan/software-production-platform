@@ -251,7 +251,12 @@ class Application:
                     self.settings.conversation_provider_model
                     or self.settings.wic_provider_model
                 ),
-                timeout_seconds=self.settings.executor_timeout_seconds,
+                timeout_seconds=self.settings.collaboration_provider_timeout_seconds,
+                reasoning_effort=self.settings.wic_provider_reasoning_effort,
+                coalesce_pre_work=self.settings.wic_coalesce_pre_work,
+                conversation_reasoning_effort=(
+                    self.settings.conversation_provider_reasoning_effort
+                ),
             )
         return WorkInteractionService(selected_database, capability=capability)
 

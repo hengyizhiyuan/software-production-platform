@@ -5,15 +5,21 @@ from __future__ import annotations
 from collections.abc import Callable
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
+from inspect import Parameter, signature
 import json
 from queue import Empty, Queue
 from threading import Thread
+from time import monotonic
 from typing import Any
 
 from openai_codex import ApprovalMode, Codex, Sandbox
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, ValidationError
 
-from spg.application.conversation import ConversationResponseComposer
+from spg.application.conversation import (
+    ConversationResponseComposer,
+    WattNativeConversationContextAssembler,
+    conversation_response_policy,
+)
 from spg.application.guided_design import (
     design_schema_by_identity,
     design_schema_registry,
@@ -39,6 +45,7 @@ from spg.domain.interaction import (
     InteractionInvariantViolation,
     InteractionSemanticCandidate,
     InterpretationMeaning,
+    InterpretationMeaningKind,
     WorkFocusClassification,
     WorkImpactDisposition,
 )
@@ -115,6 +122,19 @@ class _ConversationProviderPayload(BaseModel):
     natural_response: str
 
 
+class _CoalescedSemanticProviderPayload(_InteractionSemanticProviderPayload):
+    """Full current facts with explicit reuse of immutable prior advisory values."""
+
+    retained_prior_meaning_indexes: tuple[StrictInt, ...]
+    reuse_prior_design_intent_frame: StrictBool
+
+
+class _CoalescedInteractionProviderPayload(_ConversationProviderPayload):
+    """One transport envelope preserving WIC and expression field ownership."""
+
+    semantics: _CoalescedSemanticProviderPayload
+
+
 @dataclass(frozen=True)
 class _StreamingTurnResult:
     status: object
@@ -132,10 +152,71 @@ class _StreamingTerminal:
 class ConversationPipelineEvidence:
     """Ephemeral Provider provenance for validation, never product truth."""
 
-    semantic_thread_id: str
-    semantic_turn_id: str
-    conversation_thread_id: str
-    conversation_turn_id: str
+    semantic_thread_id: str | None = None
+    semantic_turn_id: str | None = None
+    conversation_thread_id: str | None = None
+    conversation_turn_id: str | None = None
+    semantic_seconds: float | None = None
+    conversation_seconds: float | None = None
+    first_response_delta_seconds: float | None = None
+    semantic_prompt_characters: int | None = None
+    conversation_prompt_characters: int | None = None
+    semantic_model: str | None = None
+    conversation_model: str | None = None
+    semantic_reasoning_effort: str | None = None
+    conversation_reasoning_effort: str | None = None
+    pipeline_mode: str = "staged"
+    provider_call_count: int = 2
+    coalesced_thread_id: str | None = None
+    coalesced_turn_id: str | None = None
+    coalesced_seconds: float | None = None
+    coalesced_prompt_characters: int | None = None
+    coalesced_model: str | None = None
+    coalesced_reasoning_effort: str | None = None
+    coalesced_output_characters: int | None = None
+    coalesced_semantic_characters: int | None = None
+    retained_prior_meaning_count: int | None = None
+    new_meaning_count: int | None = None
+    reused_prior_design_intent_frame: bool | None = None
+    provider_stage_seconds: dict[str, float] | None = None
+
+
+def _compact_interaction_basis(
+    basis: InteractionInterpretationInput, *, coalesced: bool = False
+) -> dict[str, Any]:
+    """Remove transport-only duplication without truncating interpretation evidence."""
+
+    payload = basis.model_dump(mode="json")
+    for key in ("created_by", "updated_by", "created_at", "updated_at"):
+        payload.get("interaction", {}).pop(key, None)
+    for record in payload.get("records", ()):
+        for key in ("interaction_id", "content_fingerprint", "created_at"):
+            record.pop(key, None)
+    prior = payload.get("prior_assessment")
+    if prior is not None:
+        for key in (
+            "interaction_id", "provider_identity", "model_identity", "schema_version",
+            "created_at",
+        ):
+            prior.pop(key, None)
+        if coalesced:
+            prior.pop("readiness", None)
+            if any(
+                message.get("actor") == "WATT"
+                and message.get("content") == prior.get("natural_response")
+                for message in payload.get("recent_conversation_messages", ())
+            ):
+                prior.pop("natural_response", None)
+            prior["meanings"] = [
+                {
+                    "index": index,
+                    "kind": meaning["kind"],
+                    "statement": meaning["statement"],
+                    "source_record_ids": meaning["source_record_ids"],
+                }
+                for index, meaning in enumerate(prior.get("meanings", ()))
+            ]
+    return payload
 
 
 class _JsonStringFieldStream:
@@ -145,8 +226,11 @@ class _JsonStringFieldStream:
         self._marker = json.dumps(field)
         self._buffer = ""
         self._emitted = ""
+        self.complete = False
 
     def feed(self, delta: str) -> str:
+        if self.complete:
+            return ""
         self._buffer += delta
         marker_at = self._buffer.find(self._marker)
         if marker_at < 0:
@@ -166,8 +250,7 @@ class _JsonStringFieldStream:
         self._emitted = decoded
         return emitted
 
-    @staticmethod
-    def _decode_prefix(value: str) -> str:
+    def _decode_prefix(self, value: str) -> str:
         decoded: list[str] = []
         index = 0
         escapes = {
@@ -183,6 +266,7 @@ class _JsonStringFieldStream:
         while index < len(value):
             character = value[index]
             if character == '"':
+                self.complete = True
                 break
             if character != "\\":
                 decoded.append(character)
@@ -238,6 +322,7 @@ def _wait_for_streaming_terminal(
     timeout_seconds: float | None,
     on_response_delta: Callable[[str], None] | None,
     response_field: str | None,
+    on_pipeline_stage: Callable[[str], None] | None = None,
 ) -> _StreamingTerminal:
     completed: Queue[tuple[str, Any]] = Queue(maxsize=1)
 
@@ -248,21 +333,41 @@ def _wait_for_streaming_terminal(
         extractor = (
             None if response_field is None else _JsonStringFieldStream(response_field)
         )
+        response_closed = False
+
+        def observe_response_complete(probe: _JsonStringFieldStream) -> None:
+            nonlocal response_closed
+            if probe.complete and not response_closed:
+                response_closed = True
+                if on_pipeline_stage is not None:
+                    on_pipeline_stage("natural_response_completed")
+
         try:
             for notification in turn.stream():
                 if notification.method == "item/agentMessage/delta":
                     delta = str(notification.payload.delta)
                     raw_response.append(delta)
-                    if on_response_delta is not None and extractor is not None:
+                    if extractor is not None:
                         response_delta = extractor.feed(delta)
-                        if response_delta:
+                        if response_delta and on_response_delta is not None:
                             on_response_delta(response_delta)
+                        observe_response_complete(extractor)
                 elif notification.method == "item/completed":
                     item = notification.payload.item
                     if getattr(item, "type", None) == "agentMessage":
                         final_item_text = str(item.text)
+                        if response_field is not None and not response_closed:
+                            final_probe = _JsonStringFieldStream(response_field)
+                            final_probe.feed(final_item_text)
+                            observe_response_complete(final_probe)
                 elif notification.method == "turn/completed":
                     completed_turn = notification.payload.turn
+                    if (
+                        on_pipeline_stage is not None
+                        and _enum_value(completed_turn.status) == "completed"
+                        and completed_turn.error is None
+                    ):
+                        on_pipeline_stage("semantic_envelope_completed")
             if completed_turn is None:
                 raise RuntimeError("turn completed event not received")
             completed.put(
@@ -310,18 +415,25 @@ class CodexSdkInteractionSemanticCapability:
         repository_location: str,
         codex_factory: CodexFactory | None = None,
         model: str | None = None,
+        reasoning_effort: str | None = None,
         timeout_seconds: float | None = None,
     ) -> None:
         self.repository_location = repository_location
         self.codex_factory = codex_factory or Codex
         self.model = model
+        self.reasoning_effort = reasoning_effort
         self.timeout_seconds = timeout_seconds
         self.last_thread_id: str | None = None
         self.last_turn_id: str | None = None
+        self.last_prompt_characters: int | None = None
 
     def interpret_semantics(
         self, basis: InteractionInterpretationInput
     ) -> InteractionSemanticCandidate:
+        self.last_thread_id = None
+        self.last_turn_id = None
+        instruction = self.instruction(basis)
+        self.last_prompt_characters = len(instruction)
         with self.codex_factory() as codex:
             thread = codex.thread_start(
                 approval_mode=ApprovalMode.deny_all,
@@ -331,9 +443,10 @@ class CodexSdkInteractionSemanticCapability:
                 sandbox=Sandbox.read_only,
             )
             turn = thread.turn(
-                self.instruction(basis),
+                instruction,
                 approval_mode=ApprovalMode.deny_all,
                 cwd=self.repository_location,
+                effort=self.reasoning_effort,
                 model=self.model,
                 output_schema=self.output_schema(),
                 sandbox=Sandbox.read_only,
@@ -389,8 +502,10 @@ class CodexSdkInteractionSemanticCapability:
         )
 
     @staticmethod
-    def instruction(basis: InteractionInterpretationInput) -> str:
-        payload = basis.model_dump(mode="json")
+    def instruction(
+        basis: InteractionInterpretationInput, *, coalesced: bool = False
+    ) -> str:
+        payload = _compact_interaction_basis(basis, coalesced=coalesced)
         selected_schema = (
             design_schema_by_identity(
                 basis.interaction.selected_design_schema_identity,
@@ -405,30 +520,60 @@ class CodexSdkInteractionSemanticCapability:
                 "version": schema.version,
                 "title": schema.title,
                 "applicability": schema.applicability,
-                "first_focus": {
-                    "stage": schema.issues[0].title,
-                    "objective": schema.issues[0].objective,
-                    "why_it_matters": schema.issues[0].why_it_matters,
-                },
             }
             for schema in design_schema_registry()
         ]
+        output_contract = (
+            "This is the WIC semantic boundary: populate the semantics object in the "
+            "joint transport envelope. The natural_response field belongs to "
+            "Conversation Intelligence and must express the same interpretation. "
+            if coalesced else
+            "This is the WIC semantic boundary: return structured collaboration "
+            "semantics only and do not write the Human-facing response. "
+        )
+        active_work_instruction = (
+            "When active_work_context exists, preserve its governed Motive, outcome, "
+            "context, constraints, and requests unless the latest input actually proposes "
+            "change. Classify focus and production impact without silently rewriting Work "
+            "or injecting input into an active cycle. When Work is currently satisfied, "
+            "distinguish same-Motive continuation from new Work. "
+            if not coalesced or getattr(basis, "active_work_context", None) is not None else ""
+        )
+        frame_null_instruction = (
+            "Use null for design_intent_frame only for explicit prior-frame reuse or when "
+            "the turn and persisted basis contain no design/build/change/review intent. "
+            if coalesced else
+            "Use null for design_intent_frame only when the turn and persisted basis contain no "
+            "design/build/change/review intent. "
+        )
+        document_location_instruction = (
+            "For a question about a design document location, the current facts are: "
+            "no design-document file has been generated or saved during this discussion, "
+            "so no output path is determined. The discussion is retained. An exact file "
+            "and location are established through the existing reviewable production "
+            "proposal before writing; express this fact without requiring internal "
+            "process terminology. "
+            if getattr(basis, "active_work_context", None) is None else
+            "For a question about a design document location, answer from the supplied "
+            "governed Work facts and Reality references. Distinguish a requested output "
+            "path from a produced artifact. If the supplied basis does not establish an "
+            "actual file location, say that its location is unknown; do not infer that "
+            "no artifact exists from a missing path. "
+        )
         return (
             "Interpret one Human–Watt interaction from the exact persisted basis. "
-            "This is the WIC semantic boundary: return structured collaboration "
-            "semantics only and do not write the Human-facing response. Do not use "
-            "tools, hidden conversation memory, or repository inspection. Provider "
+            + output_contract
+            + "Do not use tools, hidden conversation memory, or repository inspection. Provider "
             "output is advisory and creates no Work, Design, Plan, Authority, Evidence, "
             "or Runtime truth. Distinguish idle context from an actionable Motive. A "
             "clear long-lived Motive needs a desired outcome but not an exact production "
             "target. Preserve explicit facts, constraints, requests, corrections, and "
-            "Human decisions. When active_work_context exists, preserve its governed "
-            "Motive, outcome, context, constraints, and requests unless the latest input "
-            "actually proposes change. Classify focus and production impact without "
-            "silently rewriting Work or injecting input into an active cycle. When Work "
-            "is currently satisfied, distinguish same-Motive continuation from new Work. "
-            "supporting_references may only repeat references present in the basis. Every "
-            "meaning must cite only source_record_ids in the basis. "
+            "Human decisions. "
+            + active_work_instruction
+            + "supporting_references may only repeat references present in the basis. Every "
+            "meaning must cite only source_record_ids in the basis. Recent Watt dialogue "
+            "is advisory wording for conversational continuity, not Human input or "
+            "governed evidence; it cannot override source records or Work Reality. "
             "\n\nBefore proposing Guided Design direction, create a concise candidate "
             "Design Intent Frame for any input that asks Watt to create, change, "
             "design, execute, or review something. Separate the object being designed "
@@ -448,9 +593,11 @@ class CodexSdkInteractionSemanticCapability:
             "defending the previous interpretation. Use candidate_assumptions, "
             "ambiguities, and calibrated confidence rather than false certainty. Put "
             "material framing ambiguity into unresolved_material_questions. Store only "
-            "concise product-relevant interpretation, never private reasoning. Use null "
-            "for design_intent_frame only when the turn and persisted basis contain no "
-            "design/build/change/review intent. "
+            "concise product-relevant interpretation, never private reasoning. "
+            + frame_null_instruction
+            + "Keep the system's users/operators distinct from the audience of the "
+            "business it supports: a promotion audience is not automatically the "
+            "platform's operators. Keep an unknown operator provisional. "
             "\n\nFor collaboration.turn_intent select the single best behavioral intent. "
             "DIRECT_QUESTION asks for a concrete answer; NEW_GOAL introduces a Motive; "
             "CONTEXT_ADDITION supplies facts; CORRECTION replaces a prior understanding; "
@@ -461,18 +608,29 @@ class CodexSdkInteractionSemanticCapability:
             "opens a consequential branch; FEEDBACK evaluates experience or a result; "
             "HUMAN_DECISION communicates an owned choice. WIC retains interpretation "
             "ownership; this label is response-scoped and non-authoritative. "
-            "A DIRECT_QUESTION must include a concrete direct_answer. For the question "
-            "about where a design document is output, the current product truth is that "
-            "pre-Work Guided Design does not automatically generate or write a design-document "
-            "artifact and has no artifact path yet; the design basis is retained and an "
-            "exact target is decided later through a reviewable production proposal. "
-            "REQUEST_DETAIL must set detailed_explanation_requested true. Capture known "
+            "A DIRECT_QUESTION must include a concrete direct_answer. "
+            + document_location_instruction
+            + "REQUEST_DETAIL must set detailed_explanation_requested true. Capture known "
             "relevant facts, current objective/focus, one useful next action, concise "
             "product rationale, any unresolved Human-owned decision, and only material "
             "alternatives/trade-offs. Choose small policy_hints for the conversation "
             "composer; do not include private reasoning or chain of thought. Set response "
-            "language to the Human's language. Return JSON only matching the schema, "
-            "including every key and [] for empty arrays."
+            "language to the Human's language. For a new goal or a request to proceed "
+            "or recommend, use candidate_assumptions, recommended_next_action and "
+            "concise_basis to offer one useful, explicitly provisional design hypothesis "
+            "or concrete recommendation grounded in supplied facts. Identify the next "
+            "artifact, workflow or decision and why it helps; do not substitute a generic "
+            "request to clarify requirements. REQUEST_RECOMMENDATION requires an actual "
+            "recommendation, brief rationale and tangible next action, even when qualified "
+            "by an assumption. Distinguish suggestions from Human facts and admitted "
+            "decisions. Ask only when an unresolved fact changes the next material choice; "
+            "do not turn every ambiguity into a question or reopen a corrected object. "
+            "Return JSON only matching the schema, "
+            "including every key and [] for empty arrays. Keep structured values concise "
+            "without omitting explicit facts or requested explanation. Schema applicability "
+            "does not establish the current design issue or readiness; never infer agenda "
+            "progress from the schema catalogue."
+            + ("" if coalesced else
             "\n\nAvailable Design Schemas (selection occurs after framing):\n"
             + json.dumps(
                 {
@@ -489,9 +647,10 @@ class CodexSdkInteractionSemanticCapability:
                 },
                 ensure_ascii=False,
                 sort_keys=True,
-            )
+                separators=(",", ":"),
+            ))
             + "\n\nExact persisted Interaction basis:\n"
-            + json.dumps(payload, ensure_ascii=False, sort_keys=True)
+            + json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         )
 
 
@@ -504,14 +663,17 @@ class CodexSdkConversationProvider:
         repository_location: str,
         codex_factory: CodexFactory | None = None,
         model: str | None = None,
+        reasoning_effort: str | None = None,
         timeout_seconds: float | None = None,
     ) -> None:
         self.repository_location = repository_location
         self.codex_factory = codex_factory or Codex
         self.model = model
+        self.reasoning_effort = reasoning_effort
         self.timeout_seconds = timeout_seconds
         self.last_thread_id: str | None = None
         self.last_turn_id: str | None = None
+        self.last_prompt_characters: int | None = None
 
     def respond(
         self,
@@ -540,6 +702,10 @@ class CodexSdkConversationProvider:
         *,
         on_response_delta: Callable[[str], None] | None,
     ) -> ConversationResponseCandidate:
+        self.last_thread_id = None
+        self.last_turn_id = None
+        instruction = self.instruction(context, collaboration)
+        self.last_prompt_characters = len(instruction)
         with self.codex_factory() as codex:
             thread = codex.thread_start(
                 approval_mode=ApprovalMode.deny_all,
@@ -549,9 +715,10 @@ class CodexSdkConversationProvider:
                 sandbox=Sandbox.read_only,
             )
             turn = thread.turn(
-                self.instruction(context, collaboration),
+                instruction,
                 approval_mode=ApprovalMode.deny_all,
                 cwd=self.repository_location,
+                effort=self.reasoning_effort,
                 model=self.model,
                 output_schema=self.output_schema(),
                 sandbox=Sandbox.read_only,
@@ -592,6 +759,12 @@ class CodexSdkConversationProvider:
         return _provider_strict_output_schema(_ConversationProviderPayload.model_json_schema())
 
     @staticmethod
+    def response_policy() -> str:
+        """Conversation Intelligence owns this policy in both transport modes."""
+
+        return conversation_response_policy()
+
+    @staticmethod
     def instruction(
         context: ConversationContext,
         collaboration: StructuredCollaborationResult,
@@ -599,49 +772,24 @@ class CodexSdkConversationProvider:
         return (
             "You are Watt's dedicated Human-facing Conversation Provider. Turn the "
             "supplied structured collaboration result and bounded conversation context "
-            "into one natural response. You own wording, coherence, adaptive detail, and "
-            "turn-taking only. You do not decide or modify Work, Design, Plan, Authority, "
-            "Evidence, Verification, Repository, or Runtime truth. Do not use tools, hidden "
-            "memory, or outside facts. Do not expose the JSON structure, enums, schema "
-            "identity/version, internal stage identifiers, policy hints, provider contracts, "
-            "or private reasoning unless the Human explicitly asks for relevant system "
-            "details. Never claim advisory wording is governed truth. "
-            "Use the Design Intent Frame to state the currently understood design object "
-            "naturally when it materially prevents confusion. Keep business context "
-            "distinct from what is being built. If the frame is ambiguous or low "
-            "confidence, present it as a candidate understanding and invite one concise "
-            "correction; never turn enum names or confidence numbers into normal prose. "
-            "\n\nBehavior policy: for DIRECT_QUESTION, answer direct_answer in the first "
-            "sentence and add progression only when useful. For CONTEXT_ADDITION, use and "
-            "acknowledge the new fact without forcing progression. For CORRECTION or "
-            "DISAGREEMENT, accept the correction without defensiveness or repetition. For "
-            "REQUEST_RECOMMENDATION, make one clear recommendation with concise rationale. "
-            "For REQUEST_DECISION_SUPPORT, explain material alternatives and trade-offs. "
-            "For SIDE_QUESTION, answer boundedly and return to focus only when useful. For "
-            "HUMAN_DECISION, confirm the choice and its immediate implication without "
-            "inventing authority. Preserve proactive Guided Design leadership: lead with a "
-            "useful framing or next action when supported, not a questionnaire. "
-            "\n\nUse progressive disclosure. An ordinary response should usually be two "
-            "to five short paragraphs, with one primary recommendation/action and at most "
-            "one highest-impact question. Use no more than one question mark in the entire "
-            "response; if several unknowns exist, ask only the single one whose answer most "
-            "changes the next decision. Reuse known facts and never ask the Human to "
-            "repeat supplied information. If detailed_explanation_requested is true, expand "
-            "enough to answer the request rather than enforcing artificial brevity. Respond "
-            "in response_language. Return JSON only with natural_response."
-            "\n\nBounded Conversation Context:\n"
-            + json.dumps(context.model_dump(mode="json"), ensure_ascii=False, sort_keys=True)
+            "into one natural response. "
+            + CodexSdkConversationProvider.response_policy()
+            + " Return JSON only with natural_response."
+            + "\n\nBounded Conversation Context:\n"
+            + json.dumps(
+                context.model_dump(mode="json"), ensure_ascii=False,
+                sort_keys=True, separators=(",", ":"),
+            )
             + "\n\nStructured Collaboration Result:\n"
             + json.dumps(
                 collaboration.model_dump(mode="json"),
-                ensure_ascii=False,
-                sort_keys=True,
+                ensure_ascii=False, sort_keys=True, separators=(",", ":"),
             )
         )
 
 
 class CodexSdkWorkInteractionCapability:
-    """Compatibility facade over separated WIC semantics and conversation wording."""
+    """Keep semantic/expression ownership while coalescing eligible pre-Work transport."""
 
     def __init__(
         self,
@@ -650,24 +798,31 @@ class CodexSdkWorkInteractionCapability:
         codex_factory: CodexFactory | None = None,
         model: str | None = None,
         conversation_model: str | None = None,
+        reasoning_effort: str | None = None,
+        conversation_reasoning_effort: str | None = None,
+        coalesce_pre_work: bool = True,
         timeout_seconds: float | None = None,
     ) -> None:
         self.repository_location = repository_location
         self.codex_factory = codex_factory or Codex
         self.model = model
+        self.reasoning_effort = reasoning_effort
         self.timeout_seconds = timeout_seconds
         self.semantic_capability = CodexSdkInteractionSemanticCapability(
             repository_location=repository_location,
             codex_factory=self.codex_factory,
             model=model,
+            reasoning_effort=reasoning_effort,
             timeout_seconds=timeout_seconds,
         )
         self.conversation_provider = CodexSdkConversationProvider(
             repository_location=repository_location,
             codex_factory=self.codex_factory,
             model=conversation_model or model,
+            reasoning_effort=conversation_reasoning_effort,
             timeout_seconds=timeout_seconds,
         )
+        self.coalesce_pre_work = coalesce_pre_work
         self.response_composer = ConversationResponseComposer(
             self.conversation_provider
         )
@@ -687,19 +842,84 @@ class CodexSdkWorkInteractionCapability:
     ) -> InteractionAssessmentCandidate:
         return self._interpret(basis, on_response_delta=on_response_delta)
 
+    def interpret_stream_observed(
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_response_delta: Callable[[str], None],
+        on_pipeline_stage: Callable[[str], None],
+    ) -> InteractionAssessmentCandidate:
+        if (
+            getattr(self.interpret_stream, "__func__", None)
+            is not CodexSdkWorkInteractionCapability.interpret_stream
+        ):
+            return self.interpret_stream(basis, on_response_delta=on_response_delta)
+        return self._interpret(
+            basis, on_response_delta=on_response_delta,
+            on_pipeline_stage=on_pipeline_stage,
+        )
+
     def _interpret(
         self,
         basis: InteractionInterpretationInput,
         *,
         on_response_delta: Callable[[str], None] | None,
+        on_pipeline_stage: Callable[[str], None] | None = None,
     ) -> InteractionAssessmentCandidate:
+        self.last_pipeline_evidence = None
+        self.last_collaboration_result = None
+        if (
+            getattr(self.response_composer, "provider", self.conversation_provider)
+            is not self.conversation_provider
+        ):
+            raise InteractionInvariantViolation(
+                "Conversation composer Provider does not match the configured Provider"
+            )
+        if (
+            self.coalesce_pre_work
+            and basis.active_work_context is None
+            # Explicitly replaced provider/context seams must be invoked as supplied.
+            and type(self.semantic_capability) is CodexSdkInteractionSemanticCapability
+            and type(self.conversation_provider) is CodexSdkConversationProvider
+            and type(self.response_composer) is ConversationResponseComposer
+            and type(self.response_composer.context_provider)
+            is WattNativeConversationContextAssembler
+            and self.response_composer.provider is self.conversation_provider
+            and self.semantic_capability.model == self.conversation_provider.model
+            and self.semantic_capability.reasoning_effort
+            == self.conversation_provider.reasoning_effort
+        ):
+            return self._interpret_coalesced(
+                basis, on_response_delta=on_response_delta,
+                on_pipeline_stage=on_pipeline_stage,
+            )
+        started_at = monotonic()
+        first_response_delta_seconds: float | None = None
+
+        def publish_delta(delta: str) -> None:
+            nonlocal first_response_delta_seconds
+            if delta.strip() and first_response_delta_seconds is None:
+                first_response_delta_seconds = monotonic() - started_at
+            if on_response_delta is not None:
+                on_response_delta(delta)
+
         semantic = self.semantic_capability.interpret_semantics(basis)
+        semantic_completed_at = monotonic()
         self.last_collaboration_result = semantic.collaboration
-        response = self.response_composer.compose(
-            basis,
-            semantic.collaboration,
-            on_response_delta=on_response_delta,
-        )
+        compose = self.response_composer.compose
+        try:
+            semantic_parameter = signature(compose).parameters.get("current_semantics")
+        except (TypeError, ValueError):
+            semantic_parameter = None
+        composition_options: dict[str, Any] = {
+            "on_response_delta": publish_delta if on_response_delta is not None else None
+        }
+        if semantic_parameter is not None and semantic_parameter.kind in (
+            Parameter.POSITIONAL_OR_KEYWORD, Parameter.KEYWORD_ONLY
+        ):
+            composition_options["current_semantics"] = semantic
+        response = compose(basis, semantic.collaboration, **composition_options)
+        conversation_completed_at = monotonic()
         if not all(
             (
                 self.semantic_capability.last_thread_id,
@@ -716,7 +936,31 @@ class CodexSdkWorkInteractionCapability:
             semantic_turn_id=str(self.semantic_capability.last_turn_id),
             conversation_thread_id=str(self.conversation_provider.last_thread_id),
             conversation_turn_id=str(self.conversation_provider.last_turn_id),
+            semantic_seconds=semantic_completed_at - started_at,
+            conversation_seconds=conversation_completed_at - semantic_completed_at,
+            first_response_delta_seconds=first_response_delta_seconds,
+            semantic_prompt_characters=getattr(
+                self.semantic_capability, "last_prompt_characters", None
+            ),
+            conversation_prompt_characters=getattr(
+                self.conversation_provider, "last_prompt_characters", None
+            ),
+            semantic_model=getattr(self.semantic_capability, "model", None),
+            conversation_model=getattr(self.conversation_provider, "model", None),
+            semantic_reasoning_effort=getattr(
+                self.semantic_capability, "reasoning_effort", None
+            ),
+            conversation_reasoning_effort=getattr(
+                self.conversation_provider, "reasoning_effort", None
+            ),
         )
+        return self._assessment_candidate(semantic, response)
+
+    @staticmethod
+    def _assessment_candidate(
+        semantic: InteractionSemanticCandidate,
+        response: ConversationResponseCandidate,
+    ) -> InteractionAssessmentCandidate:
         return InteractionAssessmentCandidate(
             interpreted_motive=semantic.interpreted_motive,
             desired_outcome=semantic.desired_outcome,
@@ -732,6 +976,220 @@ class CodexSdkWorkInteractionCapability:
             natural_response=response.content,
             provider_identity=semantic.provider_identity,
             model_identity=semantic.model_identity,
+        )
+
+    def _interpret_coalesced(
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_response_delta: Callable[[str], None] | None,
+        on_pipeline_stage: Callable[[str], None] | None = None,
+    ) -> InteractionAssessmentCandidate:
+        """Share one ephemeral call; admission still waits for the complete envelope."""
+
+        started_at = monotonic()
+        first_response_delta_seconds: float | None = None
+        stages: dict[str, float] = {}
+
+        def stage(name: str) -> None:
+            if name not in stages:
+                stages[name] = monotonic() - started_at
+                if on_pipeline_stage is not None:
+                    on_pipeline_stage(name)
+
+        def publish_delta(delta: str) -> None:
+            nonlocal first_response_delta_seconds
+            if delta.strip() and first_response_delta_seconds is None:
+                first_response_delta_seconds = monotonic() - started_at
+            if on_response_delta is not None:
+                on_response_delta(delta)
+
+        stage("provider_context_started")
+        instruction = self.coalesced_instruction(basis)
+        stage("provider_context_prepared")
+        model = self.semantic_capability.model
+        effort = self.semantic_capability.reasoning_effort
+        stage("provider_starting")
+        with self.codex_factory() as codex:
+            thread = codex.thread_start(
+                approval_mode=ApprovalMode.deny_all,
+                cwd=self.repository_location,
+                ephemeral=True,
+                model=model,
+                sandbox=Sandbox.read_only,
+            )
+            turn = thread.turn(
+                instruction,
+                approval_mode=ApprovalMode.deny_all,
+                cwd=self.repository_location,
+                effort=effort,
+                model=model,
+                output_schema=self.coalesced_output_schema(),
+                sandbox=Sandbox.read_only,
+            )
+            stage("provider_turn_started")
+            terminal = _wait_for_streaming_terminal(
+                turn,
+                timeout_seconds=self.timeout_seconds,
+                on_response_delta=(publish_delta if on_response_delta is not None else None),
+                response_field="natural_response",
+                on_pipeline_stage=stage,
+            )
+        stage("provider_teardown_completed")
+        if terminal.timed_out or terminal.result is None:
+            raise InteractionInvariantViolation(
+                "Coalesced collaboration Provider did not complete in its bounded Turn"
+            )
+        result = terminal.result
+        if _enum_value(result.status) != "completed" or result.error is not None:
+            raise InteractionInvariantViolation(
+                "Coalesced collaboration Provider did not return a completed result"
+            )
+        stage("payload_validation_started")
+        try:
+            payload = _CoalescedInteractionProviderPayload.model_validate_json(
+                result.final_response.strip()
+            )
+        except (ValueError, TypeError) as error:
+            raise InteractionInvariantViolation(
+                "Coalesced collaboration Provider returned an invalid structured result"
+            ) from error
+        content = payload.natural_response.strip()
+        if not content:
+            raise InteractionInvariantViolation(
+                "Coalesced collaboration Provider returned an empty Human-facing response"
+            )
+        identity = f"codex-sdk:collaboration-thread:{thread.id}:turn:{turn.id}"
+        semantic_values = payload.semantics.model_dump(
+            exclude={
+                "retained_prior_meaning_indexes", "reuse_prior_design_intent_frame",
+                "meanings", "collaboration",
+            }
+        )
+        semantic_values["meanings"] = self._expand_coalesced_meanings(payload.semantics, basis)
+        semantic_values["collaboration"] = self._expand_coalesced_collaboration(
+            payload.semantics, basis
+        )
+        semantic = InteractionSemanticCandidate(
+            **semantic_values,
+            provider_identity=identity,
+            model_identity=model,
+        )
+        response = ConversationResponseCandidate(
+            content=content, provider_identity=identity, model_identity=model
+        )
+        candidate = self._assessment_candidate(semantic, response)
+        stage("payload_validated")
+        self.last_collaboration_result = semantic.collaboration
+        self.last_pipeline_evidence = ConversationPipelineEvidence(
+            pipeline_mode="coalesced_pre_work",
+            provider_call_count=1,
+            coalesced_thread_id=str(thread.id),
+            coalesced_turn_id=str(turn.id),
+            coalesced_seconds=monotonic() - started_at,
+            coalesced_prompt_characters=len(instruction),
+            coalesced_model=model,
+            coalesced_reasoning_effort=effort,
+            first_response_delta_seconds=first_response_delta_seconds,
+            coalesced_output_characters=len(result.final_response),
+            coalesced_semantic_characters=len(json.dumps(
+                payload.semantics.model_dump(mode="json"),
+                ensure_ascii=False, separators=(",", ":"),
+            )),
+            retained_prior_meaning_count=len(payload.semantics.retained_prior_meaning_indexes),
+            new_meaning_count=len(payload.semantics.meanings),
+            reused_prior_design_intent_frame=payload.semantics.reuse_prior_design_intent_frame,
+            provider_stage_seconds=dict(stages),
+        )
+        return candidate
+
+    @staticmethod
+    def _expand_coalesced_meanings(
+        payload: _CoalescedSemanticProviderPayload,
+        basis: InteractionInterpretationInput,
+    ) -> tuple[InterpretationMeaning, ...]:
+        indexes = payload.retained_prior_meaning_indexes
+        prior = basis.prior_assessment
+        if len(set(indexes)) != len(indexes) or any(
+            index < 0 or prior is None or index >= len(prior.meanings)
+            for index in indexes
+        ):
+            raise InteractionInvariantViolation(
+                "Coalesced meaning retention references an invalid prior meaning index"
+            )
+        retained = () if prior is None else tuple(prior.meanings[index] for index in indexes)
+        meanings = (*retained, *payload.meanings)
+        source_ids = {record.id for record in basis.records}
+        if any(
+            source_id not in source_ids
+            for meaning in meanings
+            for source_id in meaning.source_record_ids
+        ):
+            raise InteractionInvariantViolation(
+                "Coalesced meaning references a source record outside the exact basis"
+            )
+        return meanings
+
+    @staticmethod
+    def _expand_coalesced_collaboration(
+        payload: _CoalescedSemanticProviderPayload,
+        basis: InteractionInterpretationInput,
+    ) -> StructuredCollaborationResult:
+        frame = payload.collaboration.design_intent_frame
+        prior = basis.prior_assessment
+        if payload.reuse_prior_design_intent_frame:
+            if prior is None or prior.design_intent_frame is None:
+                raise InteractionInvariantViolation(
+                    "Coalesced frame reuse requires an existing prior design intent frame"
+                )
+            if frame is not None:
+                raise InteractionInvariantViolation(
+                    "Coalesced frame reuse cannot also supply a new design intent frame"
+                )
+            if (
+                payload.collaboration.turn_intent is ConversationTurnIntent.CORRECTION
+                or any(meaning.kind is InterpretationMeaningKind.CORRECTION for meaning in payload.meanings)
+            ):
+                raise InteractionInvariantViolation(
+                    "Coalesced frame reuse is not allowed for a correction"
+                )
+            frame = prior.design_intent_frame
+        elif frame is None and prior is not None and prior.design_intent_frame is not None:
+            raise InteractionInvariantViolation(
+                "Coalesced prior frame requires explicit reuse or a complete replacement"
+            )
+        return StructuredCollaborationResult(
+            **payload.collaboration.model_dump(exclude={"design_intent_frame"}),
+            design_intent_frame=frame,
+        )
+
+    @staticmethod
+    def coalesced_output_schema() -> dict[str, Any]:
+        return _provider_strict_output_schema(
+            _CoalescedInteractionProviderPayload.model_json_schema()
+        )
+
+    @staticmethod
+    def coalesced_instruction(basis: InteractionInterpretationInput) -> str:
+        return (
+            CodexSdkInteractionSemanticCapability.instruction(basis, coalesced=True)
+            + "\n\nConversation Intelligence expression policy:\n"
+            + CodexSdkConversationProvider.response_policy()
+            + "\n\nReturn one JSON envelope with natural_response FIRST, then semantics. "
+            "Use the same interpretation for both; begin the useful answer before the "
+            "semantic ledger. The response remains advisory until complete validation. "
+            "Keep current facts, constraints and requests complete, including removals. "
+            "For unchanged prior meanings, return their indexes in retained_prior_meaning_indexes; "
+            "meanings contains only new/revised source interpretations. Omit superseded or "
+            "irrelevant indexes; never rephrase retained meanings. Use [] when none exist. "
+            "Every new meaning cites existing source_record_ids. Set reuse_prior_design_intent_frame "
+            "true only when the entire prior frame remains unchanged and neither the turn "
+            "nor new meanings express a CORRECTION; then set collaboration.design_intent_frame "
+            "null to reuse the exact prior value. Otherwise set reuse false and provide the "
+            "complete new/corrected frame; null without reuse is allowed only with no prior "
+            "frame and no design intent. Never "
+            "combine reuse with a supplied frame or carry a superseded frame into a changed "
+            "object. Return no text outside the JSON."
         )
 
     @staticmethod

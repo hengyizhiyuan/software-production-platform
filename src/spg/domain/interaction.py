@@ -9,7 +9,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from spg.domain.conversation import StructuredCollaborationResult
+from spg.domain.conversation import ConversationContextMessage, StructuredCollaborationResult
 from spg.domain.design_intent import DesignIntentFrame
 
 
@@ -204,6 +204,7 @@ class InteractionInterpretationInput(BaseModel):
     prior_assessment: "InteractionAssessment | None" = None
     active_work_context: "ActiveWorkInterpretationContext | None" = None
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    recent_conversation_messages: tuple[ConversationContextMessage, ...] = ()
 
 
 class ActiveWorkInterpretationContext(BaseModel):

@@ -213,7 +213,8 @@ def test_wic_provider_instruction_requires_progressive_context_aware_leadership(
     assert "REQUEST_RECOMMENDATION" in instruction
     assert "REQUEST_DETAIL" in instruction
     assert "CORRECTION" in instruction
-    assert "does not automatically generate or write a design-document" in instruction
+    assert "no design-document file has been generated or saved" in instruction
+    assert "no output path is determined" in instruction
 
 
 def test_dedicated_conversation_provider_owns_human_facing_policy() -> None:
@@ -236,8 +237,8 @@ def test_dedicated_conversation_provider_owns_human_facing_policy() -> None:
 
     assert "dedicated Human-facing Conversation Provider" in instruction
     assert "own wording" in instruction
-    assert "two to five short paragraphs" in instruction
-    assert "no more than one question mark" in instruction
+    assert "one sentence" in instruction
+    assert "at most one independent decision" in instruction
     assert "Reuse known facts" in instruction
     assert "REQUEST_RECOMMENDATION" in instruction
     assert "questionnaire" in instruction

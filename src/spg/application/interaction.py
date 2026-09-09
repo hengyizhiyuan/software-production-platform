@@ -5,10 +5,12 @@ from __future__ import annotations
 from collections import OrderedDict
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 import hashlib
 import json
 from threading import RLock
+from time import monotonic
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.guided_design import (
@@ -17,6 +19,7 @@ from spg.application.guided_design import (
 )
 from spg.application.design_intent import frame_design_intent_text
 
+from spg.domain.conversation import ConversationContextMessage
 from spg.domain.interaction import (
     ActiveWorkInterpretationContext,
     Interaction,
@@ -217,6 +220,26 @@ class UnavailableWorkInteractionCapability:
         )
 
 
+_TURN_TIMING_MILESTONES = (
+    "acknowledged", "processing_started", "basis_prepared", "assessment_cache_hit",
+    "provider_started", "provider_context_started", "provider_context_prepared",
+    "provider_starting", "provider_turn_started", "first_response_delta",
+    "first_sse_event", "natural_response_completed", "semantic_envelope_completed",
+    "provider_teardown_completed", "payload_validation_started", "payload_validated",
+    "provider_returned", "admission_started", "candidate_validated",
+    "assessment_persisted", "final_persistence_started", "completed", "failed",
+)
+
+
+@dataclass(slots=True)
+class _TurnTiming:
+    """Bounded process-local diagnostics, never persisted collaboration truth."""
+
+    received_at: datetime
+    received_clock: float
+    milestones: dict[str, tuple[datetime, float]] = field(default_factory=dict)
+
+
 class WorkInteractionService:
     def __init__(
         self,
@@ -232,6 +255,7 @@ class WorkInteractionService:
         )
         self._turn_futures: dict[UUID, Future[None]] = {}
         self._turn_response_streams: OrderedDict[UUID, str] = OrderedDict()
+        self._turn_timings: OrderedDict[UUID, _TurnTiming] = OrderedDict()
         self._turn_lock = RLock()
 
     def create_interaction(self, *, human_identity: str) -> Interaction:
@@ -343,6 +367,8 @@ class WorkInteractionService:
     ) -> InteractionTurn:
         """Persist and acknowledge one Turn before Provider-backed processing."""
 
+        received_clock = monotonic()
+        received_at = datetime.now(UTC)
         value = content.strip()
         identity = human_identity.strip()
         if not value or not identity:
@@ -411,7 +437,12 @@ class WorkInteractionService:
             )
             store.touch_interaction(interaction_id, updated_by=identity, updated_at=now)
             uow.commit()
+        with self._turn_lock:
+            self._turn_timings[turn_id] = _TurnTiming(received_at, received_clock)
+            while len(self._turn_timings) > 128:
+                self._turn_timings.popitem(last=False)
         turn = self.get_turn(turn_id)
+        self._mark_turn_timing(turn_id, "acknowledged")
         self.schedule_turn(turn_id)
         return turn
 
@@ -441,6 +472,50 @@ class WorkInteractionService:
         self._turn_executor.shutdown(wait=True, cancel_futures=False)
         with self._turn_lock:
             self._turn_response_streams.clear()
+            self._turn_timings.clear()
+
+    def turn_timing(self, turn_id: UUID) -> dict[str, object] | None:
+        """Observe monotonic latency; absent/restarted observations remain unknown.
+
+        Acknowledgement means the durable response is ready to return. The first
+        SSE event is the server yield, not confirmed browser receipt. A response
+        delta measures text delivery separately from that status acknowledgement.
+        Provider phases distinguish text/envelope arrival from payload validation.
+        Assessment and final-message persistence mark their separate committed
+        transactions; cache reuse does not fabricate either earlier phase.
+        """
+
+        with self._turn_lock:
+            timing = self._turn_timings.get(turn_id)
+            if timing is None:
+                return None
+            result: dict[str, object] = {
+                "request_received_at": timing.received_at.isoformat(),
+                "request_received_ms": 0.0,
+            }
+            for event in _TURN_TIMING_MILESTONES:
+                milestone = timing.milestones.get(event)
+                result[f"{event}_at"] = (
+                    None if milestone is None else milestone[0].isoformat()
+                )
+                result[f"{event}_ms"] = (
+                    None if milestone is None
+                    else round(1000 * (milestone[1] - timing.received_clock), 3)
+                )
+            return result
+
+    def record_turn_stream_event(self, turn_id: UUID) -> None:
+        """Record the first status/text event emitted to any SSE subscriber."""
+
+        self._mark_turn_timing(turn_id, "first_sse_event")
+
+    def _mark_turn_timing(self, turn_id: UUID, event: str) -> None:
+        if event not in _TURN_TIMING_MILESTONES:
+            return
+        with self._turn_lock:
+            timing = self._turn_timings.get(turn_id)
+            if timing is not None and event not in timing.milestones:
+                timing.milestones[event] = (datetime.now(UTC), monotonic())
 
     def _forget_turn(self, turn_id: UUID) -> None:
         with self._turn_lock:
@@ -458,6 +533,8 @@ class WorkInteractionService:
         if not delta:
             return
         with self._turn_lock:
+            if delta.strip():
+                self._mark_turn_timing(turn_id, "first_response_delta")
             self._turn_response_streams[turn_id] = (
                 self._turn_response_streams.get(turn_id, "") + delta
             )
@@ -497,13 +574,16 @@ class WorkInteractionService:
                 updated_at=now,
             )
             uow.commit()
+        self._mark_turn_timing(turn_id, "processing_started")
         try:
             assessment = self._assess_current(
                 turn.interaction_id,
                 on_response_delta=lambda delta: self._publish_turn_response_delta(
                     turn_id, delta
                 ),
+                on_pipeline_stage=lambda stage: self._mark_turn_timing(turn_id, stage),
             )
+            self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
             with self.database.unit_of_work() as uow:
                 store = InteractionStore(uow.session)
@@ -563,6 +643,7 @@ class WorkInteractionService:
                     updated_at=completed_at,
                 )
                 uow.commit()
+            self._mark_turn_timing(turn_id, "completed")
         except Exception as error:  # persisted failure is the product-facing truth
             failed_at = datetime.now(UTC)
             with self.database.unit_of_work() as uow:
@@ -581,6 +662,7 @@ class WorkInteractionService:
                     updated_at=failed_at,
                 )
                 uow.commit()
+            self._mark_turn_timing(turn_id, "failed")
 
     def assess_current(self, interaction_id: UUID) -> InteractionAssessment:
         return self._assess_current(interaction_id, on_response_delta=None)
@@ -590,27 +672,44 @@ class WorkInteractionService:
         interaction_id: UUID,
         *,
         on_response_delta: Callable[[str], None] | None,
+        on_pipeline_stage: Callable[[str], None] | None = None,
     ) -> InteractionAssessment:
         basis = self._basis(interaction_id)
+        if on_pipeline_stage is not None:
+            on_pipeline_stage("basis_prepared")
         with self.database.unit_of_work() as uow:
             existing = InteractionStore(uow.session).assessment_for_basis(
                 interaction_id, basis.basis_fingerprint
             )
         if existing is not None:
+            if on_pipeline_stage is not None:
+                on_pipeline_stage("assessment_cache_hit")
             return existing
         streaming_interpret = getattr(self.capability, "interpret_stream", None)
-        candidate = (
-            streaming_interpret(
+        observed_interpret = getattr(self.capability, "interpret_stream_observed", None)
+        if on_pipeline_stage is not None:
+            on_pipeline_stage("provider_started")
+        if (
+            on_response_delta is not None
+            and on_pipeline_stage is not None
+            and callable(observed_interpret)
+        ):
+            candidate = observed_interpret(
                 basis,
                 on_response_delta=on_response_delta,
+                on_pipeline_stage=on_pipeline_stage,
             )
-            if on_response_delta is not None and callable(streaming_interpret)
-            else self.capability.interpret(basis)
-        )
+        elif on_response_delta is not None and callable(streaming_interpret):
+            candidate = streaming_interpret(basis, on_response_delta=on_response_delta)
+        else:
+            candidate = self.capability.interpret(basis)
+        if on_pipeline_stage is not None:
+            on_pipeline_stage("provider_returned")
         return self.admit_candidate(
             interaction_id,
             basis_fingerprint=basis.basis_fingerprint,
             candidate=candidate,
+            on_pipeline_stage=on_pipeline_stage,
         )
 
     @staticmethod
@@ -625,7 +724,10 @@ class WorkInteractionService:
         *,
         basis_fingerprint: str,
         candidate: InteractionAssessmentCandidate,
+        on_pipeline_stage: Callable[[str], None] | None = None,
     ) -> InteractionAssessment:
+        if on_pipeline_stage is not None:
+            on_pipeline_stage("admission_started")
         now = datetime.now(UTC)
         with self.database.unit_of_work() as uow:
             store = InteractionStore(uow.session)
@@ -647,6 +749,8 @@ class WorkInteractionService:
                 )
             existing = store.assessment_for_basis(interaction_id, current_basis)
             if existing is not None:
+                if on_pipeline_stage is not None:
+                    on_pipeline_stage("assessment_cache_hit")
                 return existing
             record_ids = {record.id for record in records}
             if any(
@@ -688,6 +792,8 @@ class WorkInteractionService:
                 dict.fromkeys((*record_references, *candidate_references))
             )
             readiness = self._evaluate_readiness(candidate, current_basis)
+            if on_pipeline_stage is not None:
+                on_pipeline_stage("candidate_validated")
             if (
                 interaction.current_work_id is None
                 and candidate.design_intent_frame is not None
@@ -795,6 +901,8 @@ class WorkInteractionService:
                     }
                 )
             uow.commit()
+        if on_pipeline_stage is not None:
+            on_pipeline_stage("assessment_persisted")
         return self.get_assessment(assessment_id)
 
     def decide_work_transition(
@@ -1098,6 +1206,13 @@ class WorkInteractionService:
             if interaction is None:
                 raise InteractionRecordNotFound(f"Interaction not found: {interaction_id}")
             records = store.records(interaction_id)
+            # Presentation context does not alter the governed source fingerprint.
+            messages = tuple(
+                ConversationContextMessage(actor=message.actor.value, content=message.content)
+                for message in store.messages(interaction_id, limit=8)
+                if message.actor is InteractionActor.HUMAN
+                or message.processing_status is InteractionTurnStatus.COMPLETED
+            )
             prior = store.latest_assessment(interaction_id)
             active_context = self._active_work_context(uow.session, interaction)
         if not records:
@@ -1115,6 +1230,7 @@ class WorkInteractionService:
             prior_assessment=prior,
             active_work_context=active_context,
             basis_fingerprint=fingerprint,
+            recent_conversation_messages=messages,
         )
 
     @staticmethod

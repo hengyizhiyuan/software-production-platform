@@ -324,3 +324,46 @@ Each update must:
 4. keep Human Authority, architecture boundaries, and explicit deferrals
    visible;
 5. avoid presenting a roadmap item as implementation authorization.
+
+## Human collaboration pipeline review — 2026-09-09
+
+The [architecture review and measured optimization](../evidence/human-collaboration-pipeline-optimization.md)
+completed within the Human collaboration envelope. Native pre-Work conversations
+with matching models and reasoning settings now share one strict Provider Turn;
+WIC interpretation, Guided Design structure, Conversation expression and Human
+Authority ownership remain distinct. Active Work and explicitly replaced or
+separately configured providers retain staged processing.
+
+Five real cases reduced median first-text delivery from 58.45 s to 20.63 s.
+Median full completion changed from 63.55 s to 59.12 s, with two slower cases.
+The intermediate low-effort two-stage trial did not reliably improve latency
+and was not adopted as default. Context correction/reuse and dialogue continuity
+were repaired. The final language still needs Human acceptance: it remains
+formal and sometimes repeats or bundles clarification questions.
+
+Validation: 94 related contract tests, 39 isolated PostgreSQL integration tests,
+25 JavaScript tests and the five-case real coalesced proof passed. No deployed
+Runtime or Trusted Baseline changed. Watt Product MVP is not thereby closed.
+
+
+## Human collaboration v3.1 — product intelligence and latency refinement
+
+The [v3.1 report](../evidence/human-collaboration-pipeline-v31.md) records a bounded
+quality/performance refinement of the existing single-call pre-Work pipeline.
+It adds useful provisional recommendations, plain direct answers, one independent
+clarification, validated reuse of unchanged meanings/frames, and explicit
+semantic-validation/assessment-commit/final-persistence observations. Full current
+facts and source records remain; no new intelligence owner or production lifecycle
+was introduced. The first measured trial is retained despite its latency regression.
+Final same-model Chinese samples improve median first text **23.84 → 18.80 s**
+and completion **63.57 → 52.89 s**, but A/C regressions increase mean first text
+**23.48 → 26.28 s** and leave mean completion effectively unchanged
+(**58.38 → 58.85 s**). Consistent latency improvement is not proven. Quality,
+source/authority fidelity and complete final-source validation are documented;
+Human product acceptance remains pending. Final contracts: 128 passed; related
+PostgreSQL integration: 41 passed (6 phase tests rerun on final source); JS: 25
+passed. All 15 real turns across three conditions preserved one call per message
+and created zero Work/Runtime rows.
+
+Human product acceptance and consistently mature-assistant response speed remain
+open. This record adds current evidence without rewriting historical shortcomings.

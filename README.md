@@ -43,6 +43,26 @@ independently with `SPG_CONVERSATION_PROVIDER_ADAPTER` and
 preserves the existing WIC service and streaming contracts. Leaving model
 settings unset preserves the Codex SDK configuration default.
 
+Human collaboration retains WIC interpretation (including Design Intent Framing)
+and Conversation expression as separate responsibilities. Pre-Work conversations
+use one model call when model and reasoning settings match; active Work or
+different settings or custom provider/context implementations use separate calls. Set `SPG_WIC_COALESCE_PRE_WORK=false` to
+retain separate calls explicitly. Set
+`SPG_WIC_PROVIDER_REASONING_EFFORT` and
+`SPG_CONVERSATION_PROVIDER_REASONING_EFFORT` independently to a supported value
+(`none`, `minimal`, `low`, `medium`, `high`, `xhigh`).
+`SPG_COLLABORATION_PROVIDER_TIMEOUT_SECONDS` bounds each model stream (default
+120 seconds); it is independent of the Executor timeout and does not include
+SDK startup. The durable acknowledgement is prepared before provider work.
+See the [pipeline assessment](docs/architecture/human-collaboration-pipeline-review.md)
+for ownership, context, and latency-measurement details.
+
+The [v3.1 quality and latency report](docs/evidence/human-collaboration-pipeline-v31.md)
+records Chinese before/after samples, useful recommendations and direct answers,
+explicit validated reuse of unchanged semantic values, and separate text,
+validation and persistence timings. It retains slower scenarios and intermediate
+trials; Human product acceptance remains open.
+
 For the explicitly governed local Codex E2E only, set
 `SPG_CODEX_AUTH_FILE_HOST` in the ignored `.env` file to the absolute existing
 `auth.json` cache file, then use the optional override:

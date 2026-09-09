@@ -194,13 +194,25 @@ class InteractionStore:
             .values(processing_status=status.value, updated_at=updated_at)
         )
 
-    def messages(self, interaction_id: UUID) -> tuple[ConversationMessage, ...]:
-        rows = self.session.execute(
-            select(interaction_messages)
-            .where(interaction_messages.c.interaction_id == interaction_id)
-            .order_by(interaction_messages.c.sequence, interaction_messages.c.id)
-        ).mappings()
-        return tuple(self._message(row) for row in rows)
+    def messages(
+        self, interaction_id: UUID, *, limit: int | None = None
+    ) -> tuple[ConversationMessage, ...]:
+        statement = select(interaction_messages).where(
+            interaction_messages.c.interaction_id == interaction_id
+        )
+        if limit is None:
+            statement = statement.order_by(
+                interaction_messages.c.sequence, interaction_messages.c.id
+            )
+        else:
+            if limit < 1:
+                raise ValueError("Message limit must be positive")
+            statement = statement.order_by(
+                interaction_messages.c.sequence.desc(), interaction_messages.c.id.desc()
+            ).limit(limit)
+        rows = self.session.execute(statement).mappings()
+        messages = tuple(self._message(row) for row in rows)
+        return messages if limit is None else tuple(reversed(messages))
 
     def message_for_turn(
         self, turn_id: UUID, actor: InteractionActor

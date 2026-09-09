@@ -1,0 +1,753 @@
+{
+  "date": "2026-09-09",
+  "baseline_commit": "af1d29595a8f352d0fa0ec6135612895c0347623",
+  "final_source_fingerprint": "71dae23d4bee0f1444b4d4873786d14e400e9cca3443103059b69f7a21fcb5e6",
+  "post_probe_source_changes": [
+    "spg/providers/codex_interaction.py"
+  ],
+  "post_probe_change_explanation": "Native-only eligibility guard preserves custom provider/context seams; built-in measured path unchanged; five additional regressions passed.",
+  "runs": {
+    "baseline": {
+      "label": "baseline-af1d295",
+      "model": "gpt-5.6-sol",
+      "semantic_effort": null,
+      "conversation_effort": null,
+      "source_fingerprint": "7c90929fc15f810a5ef703d6c86eb894fe0c3c69533ccbd523ddf46b60f28167",
+      "provider_turns_per_human_message": 2,
+      "cases": [
+        {
+          "number": 1,
+          "message": "I want to build an operation management platform.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:46:57.493401+00:00",
+          "request_received_at": "2026-09-09T10:46:57.494635+00:00",
+          "persisted_completed_at": "2026-09-09T10:47:46.182279+00:00",
+          "ack_seconds": 0.021996022998791886,
+          "first_event_seconds": 0.02901254400057951,
+          "first_text_seconds": 45.62727468099911,
+          "completion_seconds": 48.88987269599966,
+          "semantic_seconds": 36.07626616299967,
+          "conversation_seconds": 12.555873026001791,
+          "response": "Let’s define the platform around one clear user group and its most costly operational problem before choosing features. This could become either a commercial product or an internal system; that distinction will shape workflows, permissions, integrations, and reporting.\n\nWho will use it first, and what is the main operational problem they struggle with today?",
+          "intent": "NEW_GOAL",
+          "frame": {
+            "design_subject": "Operations management platform",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Operations management; intended users, organizational setting, and channels are not yet specified.",
+            "desired_outcome": "Create a platform that helps its intended users manage operations effectively.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The Human is proposing a new product or internal system rather than a change to an existing platform."
+            ],
+            "ambiguities": [
+              "The intended users are unspecified.",
+              "The operational problems and workflows in scope are unspecified.",
+              "It is unclear whether this is a commercial product, an internal system, or another platform type."
+            ],
+            "confidence": 0.91
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "work_and_runtime_rows": 0
+        },
+        {
+          "number": 2,
+          "message": "The platform is for promoting Watt, targeting individual developers and small teams.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:47:46.422413+00:00",
+          "request_received_at": "2026-09-09T10:47:46.424199+00:00",
+          "persisted_completed_at": "2026-09-09T10:48:50.089419+00:00",
+          "ack_seconds": 0.017047764999006176,
+          "first_event_seconds": 0.021675533997040475,
+          "first_text_seconds": 59.556656815999304,
+          "completion_seconds": 63.84080686000016,
+          "semantic_seconds": 51.23713267200219,
+          "conversation_seconds": 12.374016165002104,
+          "response": "Got it—the product remains an operations management platform, with the business goal of promoting Watt to individual developers and small teams.\n\nThe key distinction now is whether it will be an internal system for Watt’s team to plan campaigns, coordinate content and channels, and measure results, or an audience-facing platform through which developers discover and evaluate Watt. Who will operate the platform, and what first promotional workflow should it manage?",
+          "intent": "CONTEXT_ADDITION",
+          "frame": {
+            "design_subject": "Operations management platform",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Promotion of Watt to individual developers and small teams; the operators, channels, and promotional workflows are not yet specified.",
+            "desired_outcome": "Create a platform that helps its operators manage promotion of Watt effectively for individual developers and small teams.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The Human is still proposing a new product or internal system rather than a change to an existing platform.",
+              "Promotion is the platform's operating context, not evidence that the design object is a promotional campaign."
+            ],
+            "ambiguities": [
+              "The people who will operate the platform are unspecified.",
+              "It is unclear whether the platform manages promotional operations or directly serves as a promotional channel.",
+              "The promotional workflows, channels, and operational problems in scope are unspecified.",
+              "It remains unclear whether this is an internal system, a commercial product, or another platform type."
+            ],
+            "confidence": 0.94
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "work_and_runtime_rows": 0
+        },
+        {
+          "number": 3,
+          "message": "Not an operation plan. I want a Web application system.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:48:50.293631+00:00",
+          "request_received_at": "2026-09-09T10:48:50.295399+00:00",
+          "persisted_completed_at": "2026-09-09T10:49:53.792131+00:00",
+          "ack_seconds": 0.013320557998667937,
+          "first_event_seconds": 0.019125816001178464,
+          "first_text_seconds": 58.446828000000096,
+          "completion_seconds": 63.5465510110007,
+          "semantic_seconds": 48.788220930000534,
+          "conversation_seconds": 14.67628980399968,
+          "response": "Understood—you want to build a web application system, not an operations plan. The current concept is a web-based operations management platform whose business purpose is to help promote Watt to individual developers and small teams.\n\nThe key product decision is whether it should be an internal tool for managing promotional work, an audience-facing application where developers discover and evaluate Watt, or eventually both. I recommend starting with the internal system to keep the first version focused, then adding audience-facing capabilities later if needed.\n\nWho will use the first version: Watt’s internal team or prospective Watt users?",
+          "intent": "CORRECTION",
+          "frame": {
+            "design_subject": "Web-based operations management platform",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Promotion of Watt to individual developers and small teams; the operators, channels, and promotional workflows are not yet specified.",
+            "desired_outcome": "Create a web application that helps its operators manage promotion of Watt effectively for individual developers and small teams.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The Human is proposing a new web application rather than a change to an existing system.",
+              "Promotion is the application's business context, not evidence that the requested object is an operation plan.",
+              "The phrase “operation management” describes the application's intended domain, although the exact managed workflows remain unspecified."
+            ],
+            "ambiguities": [
+              "The people who will operate the web application are unspecified.",
+              "It is unclear whether the application manages promotional operations or directly serves as a promotional channel.",
+              "The promotional workflows, channels, and operational problems in scope are unspecified.",
+              "It remains unclear whether the application is an internal system, an audience-facing product, or a combination of both."
+            ],
+            "confidence": 0.98
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "work_and_runtime_rows": 0
+        },
+        {
+          "number": 4,
+          "message": "Where will the design document be output?",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:49:53.852832+00:00",
+          "request_received_at": "2026-09-09T10:49:53.856170+00:00",
+          "persisted_completed_at": "2026-09-09T10:50:46.193855+00:00",
+          "ack_seconds": 0.017488043999037473,
+          "first_event_seconds": 0.0246860769984778,
+          "first_text_seconds": 49.89241073299854,
+          "completion_seconds": 52.54657789900011,
+          "semantic_seconds": 41.83059485800186,
+          "conversation_seconds": 10.460599586996977,
+          "response": "There is no output path yet. This design phase retains the design basis for the web application, but it does not automatically create a design-document file.\n\nWhen the design is ready to be produced, I’ll present a reviewable proposal specifying the exact document format and location for your approval before anything is written.",
+          "intent": "DIRECT_QUESTION",
+          "frame": {
+            "design_subject": "Web-based operations management platform",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Promotion of Watt to individual developers and small teams; the operators, channels, and promotional workflows are not yet specified.",
+            "desired_outcome": "Create a web application that helps its operators manage promotion of Watt effectively for individual developers and small teams.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The Human is proposing a new web application rather than a change to an existing system.",
+              "Promotion is the application's business context, not evidence that the requested object is an operation plan.",
+              "The phrase “operation management” describes the application's intended domain, although the exact managed workflows remain unspecified."
+            ],
+            "ambiguities": [
+              "The people who will operate the web application are unspecified.",
+              "It is unclear whether the application manages promotional operations or directly serves as a promotional channel.",
+              "The promotional workflows, channels, and operational problems in scope are unspecified.",
+              "It remains unclear whether the application is an internal system, an audience-facing product, or a combination of both."
+            ],
+            "confidence": 0.98
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "work_and_runtime_rows": 0
+        },
+        {
+          "number": 5,
+          "message": "Please explain the design approach and next steps in detail.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:50:46.421286+00:00",
+          "request_received_at": "2026-09-09T10:50:46.422598+00:00",
+          "persisted_completed_at": "2026-09-09T10:52:08.413172+00:00",
+          "ack_seconds": 0.01751070200043614,
+          "first_event_seconds": 0.024812917999952333,
+          "first_text_seconds": 67.6897500160012,
+          "completion_seconds": 82.15145787200163,
+          "semantic_seconds": 56.851627449999796,
+          "conversation_seconds": 25.085310072998254,
+          "response": "The design will treat this as a new web-based operations management product whose business context is promoting Watt to individual developers and small teams. The immediate goal is not to select screens or technologies, but to establish who operates the application, what role it plays in promotion, and which first workflow it must improve.\n\nI recommend beginning with an internal promotional-operations system. That interpretation best matches “operations management” and gives the first release a clear boundary: authorized operators could plan campaigns, manage promotional content and channels, coordinate tasks, track execution, and review results. An audience-facing product would instead directly engage developers or teams through experiences such as discovery, onboarding, education, or conversion. Combining both is possible, but it would introduce two user models and substantially more scope before either side has been validated.\n\nOnce the boundary is chosen, the design will proceed from motive, users, and problem into concrete workflows. We will identify the primary operators and their responsibilities; map the first end-to-end promotional workflow; define its current pain points and desired outcome; establish the minimum product capabilities, roles, data, and success measures; and only then develop the information architecture, key screens, system behavior, integrations, security constraints, and phased delivery scope. This keeps feature decisions tied to real operational needs rather than assumptions.\n\nNo design-document file or output path exists yet. This design phase retains the design basis without automatically writing an artifact. When the design is sufficiently resolved, the next production proposal will name the exact document format and location for review before anything is created.\n\nShould the first product boundary be the recommended internal promotional-operations system, an audience-facing promotional product, or a deliberate combination of both?",
+          "intent": "REQUEST_DETAIL",
+          "frame": {
+            "design_subject": "Web-based operations management platform",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Promotion of Watt to individual developers and small teams; the operators, channels, and promotional workflows are not yet specified.",
+            "desired_outcome": "Create a web application that helps its operators manage promotion of Watt effectively for individual developers and small teams.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The Human is proposing a new web application rather than a change to an existing system.",
+              "Promotion is the application's business context, not evidence that the requested object is an operation plan.",
+              "The phrase “operation management” describes the application's intended domain, although the exact managed workflows remain unspecified."
+            ],
+            "ambiguities": [
+              "The people who will operate the web application are unspecified.",
+              "It is unclear whether the application manages promotional operations or directly serves as a promotional channel.",
+              "The promotional workflows, channels, and operational problems in scope are unspecified.",
+              "It remains unclear whether the application is an internal system, an audience-facing product, or a combination of both."
+            ],
+            "confidence": 0.98
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "work_and_runtime_rows": 0
+        }
+      ]
+    },
+    "two_stage_low": {
+      "label": "optimized-low-low",
+      "model": "gpt-5.6-sol",
+      "semantic_effort": "low",
+      "conversation_effort": "low",
+      "source_fingerprint": "33ba838e8065921a7940ba5b02261479f129eeda78c52648171e04251cae7c90",
+      "provider_turns_per_human_message": 2,
+      "cases": [
+        {
+          "number": 1,
+          "message": "I want to build an operation management platform.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:53:25.645623+00:00",
+          "request_received_at": "2026-09-09T10:53:25.646975+00:00",
+          "persisted_completed_at": "2026-09-09T10:54:05.919572+00:00",
+          "ack_seconds": 0.029412448999210028,
+          "first_event_seconds": 0.03667118399971514,
+          "first_text_seconds": 38.726406678000785,
+          "completion_seconds": 40.36440892199971,
+          "semantic_seconds": 30.65668894600094,
+          "conversation_seconds": 9.54117204999784,
+          "response": "Let’s define the product around its real operating context first: which operations must the platform manage, and who will use it day to day?",
+          "intent": "NEW_GOAL",
+          "frame": {
+            "design_subject": "Operations management platform",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": null,
+            "desired_outcome": "Enable effective management of operations through a dedicated platform.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new software product or internal system.",
+              "The platform's operators and supported operational domain are not yet identified."
+            ],
+            "ambiguities": [
+              "The meaning and domain of 'operations' are unspecified.",
+              "The platform's users/operators, business scenario, and required capabilities are unknown."
+            ],
+            "confidence": 0.9
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T10:53:25.646972+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T10:53:25.672146+00:00",
+            "acknowledged_ms": 25.182,
+            "processing_started_at": "2026-09-09T10:53:25.679991+00:00",
+            "processing_started_ms": 33.024,
+            "first_response_delta_at": "2026-09-09T10:54:04.302457+00:00",
+            "first_response_delta_ms": 38657.249,
+            "first_sse_event_at": "2026-09-09T10:53:25.682119+00:00",
+            "first_sse_event_ms": 35.149,
+            "completed_at": "2026-09-09T10:54:05.932554+00:00",
+            "completed_ms": 40287.348,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0
+        },
+        {
+          "number": 2,
+          "message": "The platform is for promoting Watt, targeting individual developers and small teams.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:54:06.048769+00:00",
+          "request_received_at": "2026-09-09T10:54:06.050234+00:00",
+          "persisted_completed_at": "2026-09-09T10:55:02.208069+00:00",
+          "ack_seconds": 0.02128257300137193,
+          "first_event_seconds": 0.02840924300107872,
+          "first_text_seconds": 53.18371635800213,
+          "completion_seconds": 56.251828571999795,
+          "semantic_seconds": 44.52522394200059,
+          "conversation_seconds": 11.583288046000234,
+          "response": "Got it—the product is an operations management platform whose business purpose is promoting Watt to individual developers and small teams. The key next step is defining the work it will coordinate: which promotional workflow matters most—content and campaigns, community outreach, developer onboarding, partnerships, or something else—and who will run it day to day?",
+          "intent": "CONTEXT_ADDITION",
+          "frame": {
+            "design_subject": "Operations management platform",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "A platform used to promote Watt to individual developers and small teams.",
+            "desired_outcome": "Enable effective management of Watt promotion through a dedicated platform.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new software product or internal system.",
+              "Individual developers and small teams are the promotion audience, not necessarily platform operators.",
+              "The platform will coordinate or manage promotional operations, but the specific workflows are not yet known."
+            ],
+            "ambiguities": [
+              "The promotional operations and required capabilities are unspecified.",
+              "The platform's users and day-to-day operators are unknown.",
+              "The channels and operating model for Watt promotion are unknown."
+            ],
+            "confidence": 0.94
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T10:54:06.050230+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T10:54:06.067286+00:00",
+            "acknowledged_ms": 17.063,
+            "processing_started_at": "2026-09-09T10:54:06.071444+00:00",
+            "processing_started_ms": 21.218,
+            "first_response_delta_at": "2026-09-09T10:54:59.065992+00:00",
+            "first_response_delta_ms": 53018.789,
+            "first_sse_event_at": "2026-09-09T10:54:06.076639+00:00",
+            "first_sse_event_ms": 26.413,
+            "completed_at": "2026-09-09T10:55:02.215584+00:00",
+            "completed_ms": 56168.379,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0
+        },
+        {
+          "number": 3,
+          "message": "Not an operation plan. I want a Web application system.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:55:02.330936+00:00",
+          "request_received_at": "2026-09-09T10:55:02.332309+00:00",
+          "persisted_completed_at": "2026-09-09T10:56:05.967922+00:00",
+          "ack_seconds": 0.013117050999426283,
+          "first_event_seconds": 0.018819926997821312,
+          "first_text_seconds": 61.361341185998754,
+          "completion_seconds": 63.811725136998575,
+          "semantic_seconds": 53.22299007100082,
+          "conversation_seconds": 10.368820755000343,
+          "response": "Understood—you want to build a web application system, not write an operations plan. The product will support promoting Watt to individual developers and small teams; the next design decision is which promotional workflow it should handle first and who will use it day to day.",
+          "intent": "CORRECTION",
+          "frame": {
+            "design_subject": "Web-based operations management system",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "A web application used to support promotion of Watt to individual developers and small teams.",
+            "desired_outcome": "Enable effective management of Watt promotion through a dedicated web application system.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new web application product or internal system.",
+              "Individual developers and small teams are the promotion audience, not necessarily the application's operators.",
+              "The application will coordinate promotional operations, though its workflows are not yet specified."
+            ],
+            "ambiguities": [
+              "The promotional workflows and required capabilities are unspecified.",
+              "The application's users and day-to-day operators are unknown.",
+              "The promotion channels and operating model are unknown."
+            ],
+            "confidence": 0.98
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T10:55:02.332306+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T10:55:02.341765+00:00",
+            "acknowledged_ms": 9.467,
+            "processing_started_at": "2026-09-09T10:55:02.347184+00:00",
+            "processing_started_ms": 14.883,
+            "first_response_delta_at": "2026-09-09T10:56:03.604176+00:00",
+            "first_response_delta_ms": 61275.226,
+            "first_sse_event_at": "2026-09-09T10:55:02.349610+00:00",
+            "first_sse_event_ms": 17.31,
+            "completed_at": "2026-09-09T10:56:05.975830+00:00",
+            "completed_ms": 63646.882,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0
+        },
+        {
+          "number": 4,
+          "message": "Where will the design document be output?",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:56:06.160899+00:00",
+          "request_received_at": "2026-09-09T10:56:06.163284+00:00",
+          "persisted_completed_at": "2026-09-09T10:57:09.772284+00:00",
+          "ack_seconds": 0.015685534999647643,
+          "first_event_seconds": 0.0233572839970293,
+          "first_text_seconds": 61.53335769499972,
+          "completion_seconds": 63.77839236299769,
+          "semantic_seconds": 51.790645130000485,
+          "conversation_seconds": 11.778673077998974,
+          "response": "There is no output path yet: at this stage, the design is retained as our working basis but is not automatically written to a document. We’ll choose the exact file and location later through a reviewable production proposal, once the application’s first promotional workflow and day-to-day operators are defined.",
+          "intent": "DIRECT_QUESTION",
+          "frame": {
+            "design_subject": "Web-based operations management system",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "A web application used to support promotion of Watt to individual developers and small teams.",
+            "desired_outcome": "Enable effective management of Watt promotion through a dedicated web application system.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new web application product or internal system.",
+              "Individual developers and small teams are the promotion audience, not necessarily the application's operators.",
+              "The application will coordinate promotional operations, though its workflows are not yet specified."
+            ],
+            "ambiguities": [
+              "The promotional workflows and required capabilities are unspecified.",
+              "The application's users and day-to-day operators are unknown.",
+              "The promotion channels and operating model are unknown."
+            ],
+            "confidence": 0.98
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T10:56:06.163279+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T10:56:06.172554+00:00",
+            "acknowledged_ms": 9.283,
+            "processing_started_at": "2026-09-09T10:56:06.178779+00:00",
+            "processing_started_ms": 15.509,
+            "first_response_delta_at": "2026-09-09T10:57:07.504483+00:00",
+            "first_response_delta_ms": 61344.22,
+            "first_sse_event_at": "2026-09-09T10:56:06.183951+00:00",
+            "first_sse_event_ms": 20.679,
+            "completed_at": "2026-09-09T10:57:09.779355+00:00",
+            "completed_ms": 63619.093,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0
+        },
+        {
+          "number": 5,
+          "message": "Please explain the design approach and next steps in detail.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T10:57:09.955742+00:00",
+          "request_received_at": "2026-09-09T10:57:09.958029+00:00",
+          "persisted_completed_at": "2026-09-09T10:58:39.349343+00:00",
+          "ack_seconds": 0.014557967999280663,
+          "first_event_seconds": 0.020553761001792736,
+          "first_text_seconds": 69.44589565099886,
+          "completion_seconds": 89.6208423700009,
+          "semantic_seconds": 60.68999406399962,
+          "conversation_seconds": 28.646323872999346,
+          "response": "The design approach is to define a focused web application—not an operations plan—by moving from product intent to workflows, users, capabilities, and then a reviewable production proposal.\n\nThe current design object is a web-based operations management system whose business purpose is to help promote Watt to individual developers and small teams. That audience is not automatically the application’s user base: the day-to-day operators might instead be Watt’s marketing team, community managers, founders, or another group.\n\nThe design will progress in this sequence:\n\n1. Define the first promotional workflow. For example, the application might initially manage content and campaigns, community outreach, developer onboarding, partnerships, or a different promotion process. This determines the system’s functional center.\n\n2. Identify the day-to-day operators. This establishes roles, permissions, approval responsibilities, and the information each user needs.\n\n3. Model the workflow. We will describe its inputs, stages, decisions, outputs, ownership, and exceptions. This turns the business goal into concrete application behavior without drifting into an operations-plan deliverable.\n\n4. Derive the application capabilities. These may include dashboards, campaign or content records, task coordination, approval flows, audience or channel tracking, reusable assets, performance reporting, notifications, and integrations—but none should be treated as required until justified by the chosen workflow.\n\n5. Define the product structure. Once the capabilities are known, we can specify the main screens, navigation, data entities, role boundaries, and important user journeys.\n\n6. Address production qualities. The proposal can then cover authentication, authorization, auditability, data handling, accessibility, responsiveness, reliability, deployment, and integration constraints at an appropriate level.\n\n7. Prepare a reviewable production proposal. That proposal will make the intended scope, assumptions, architecture direction, implementation stages, verification approach, and proposed artifact destination explicit before anything is written or built.\n\nThere is still no design-document file or output path. During this guided-design stage, the design basis is retained conversationally rather than automatically written as an artifact. The production proposal will later identify an exact document name and location for review; only after that target is accepted would document creation become a concrete work action.\n\nI recommend defining the first workflow and its operators together. Doing only the workflow first would leave roles and permissions provisional, while defining only the operators would leave the functional scope too broad. Which promotional workflow must the first version support, and who will operate it day to day?",
+          "intent": "REQUEST_DETAIL",
+          "frame": {
+            "design_subject": "Web-based operations management system",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "A web application used to support promotion of Watt to individual developers and small teams.",
+            "desired_outcome": "Enable effective management of Watt promotion through a dedicated web application system.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new web application product or internal system.",
+              "Individual developers and small teams are the promotion audience, not necessarily the application's operators.",
+              "The application will coordinate promotional operations, though its workflows are not yet specified."
+            ],
+            "ambiguities": [
+              "The promotional workflows and required capabilities are unspecified.",
+              "The application's users and day-to-day operators are unknown.",
+              "The promotion channels and operating model are unknown."
+            ],
+            "confidence": 0.98
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T10:57:09.958025+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T10:57:09.967790+00:00",
+            "acknowledged_ms": 9.773,
+            "processing_started_at": "2026-09-09T10:57:09.972623+00:00",
+            "processing_started_ms": 14.603,
+            "first_response_delta_at": "2026-09-09T10:58:19.220219+00:00",
+            "first_response_delta_ms": 69267.799,
+            "first_sse_event_at": "2026-09-09T10:57:09.976092+00:00",
+            "first_sse_event_ms": 18.073,
+            "completed_at": "2026-09-09T10:58:39.359783+00:00",
+            "completed_ms": 89407.363,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0
+        }
+      ]
+    },
+    "coalesced": {
+      "label": "coalesced-default-effort",
+      "model": "gpt-5.6-sol",
+      "semantic_effort": null,
+      "conversation_effort": null,
+      "source_fingerprint": "091f8c2495d1b989c7d995a3c2d7357b9c68acf5b0435d35c3e307f1dfdb3894",
+      "provider_turns_per_human_message": 1,
+      "cases": [
+        {
+          "number": 1,
+          "message": "I want to build an operation management platform.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T11:02:52.187247+00:00",
+          "request_received_at": "2026-09-09T11:02:52.188974+00:00",
+          "persisted_completed_at": "2026-09-09T11:03:41.777812+00:00",
+          "ack_seconds": 0.041693718998430995,
+          "first_event_seconds": 0.05119093599932967,
+          "first_text_seconds": 27.172370665000926,
+          "completion_seconds": 49.63323744700028,
+          "response": "I understand the design object as a new operations management platform. The most useful next step is to establish its operational domain and primary operator, because those choices will shape the workflows, permissions, and capabilities: which type of operations and primary operator should it support?",
+          "intent": "NEW_GOAL",
+          "frame": {
+            "design_subject": "Operations management platform",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Operations management; the specific scenario, audience, channels, operators, and operating environment are not yet supplied.",
+            "desired_outcome": "Define and ultimately build a platform that supports the intended operations-management needs.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new product/system rather than a feature of an identified existing system.",
+              "The platform's primary operators remain provisional."
+            ],
+            "ambiguities": [
+              "The operational domain is unspecified.",
+              "The primary system operators and their core workflows are unspecified."
+            ],
+            "confidence": 0.91
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T11:02:52.188970+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T11:02:52.224034+00:00",
+            "acknowledged_ms": 35.071,
+            "processing_started_at": "2026-09-09T11:02:52.241674+00:00",
+            "processing_started_ms": 52.713,
+            "first_response_delta_at": "2026-09-09T11:03:19.256230+00:00",
+            "first_response_delta_ms": 27069.138,
+            "first_sse_event_at": "2026-09-09T11:02:52.238256+00:00",
+            "first_sse_event_ms": 49.293,
+            "completed_at": "2026-09-09T11:03:41.788065+00:00",
+            "completed_ms": 49602.6,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0,
+          "provider_total_seconds": 49.46648535699933,
+          "provider_prompt_characters": 9606
+        },
+        {
+          "number": 2,
+          "message": "The platform is for promoting Watt, targeting individual developers and small teams.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T11:03:41.875166+00:00",
+          "request_received_at": "2026-09-09T11:03:41.878998+00:00",
+          "persisted_completed_at": "2026-09-09T11:04:28.724639+00:00",
+          "ack_seconds": 0.02611229799731518,
+          "first_event_seconds": 0.03399564299979829,
+          "first_text_seconds": 15.56618245399659,
+          "completion_seconds": 47.005153997997695,
+          "response": "Got it: the design object remains an operations management platform, while promoting Watt to individual developers and small teams is the business context and target audience. The next useful decision is the platform’s primary operator and workflow: who will operate it day to day, and what promotion work should they manage?",
+          "intent": "CONTEXT_ADDITION",
+          "frame": {
+            "design_subject": "Operations management platform",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Supports promoting Watt to individual developers and small teams; channels, operators, and operating environment are not yet identified.",
+            "desired_outcome": "Define and ultimately build a platform that supports the intended Watt-promotion operations.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new product/system rather than a feature of an identified existing system.",
+              "Individual developers and small teams are the promotion audience, not necessarily the platform's operators.",
+              "The platform's primary operators remain provisional."
+            ],
+            "ambiguities": [
+              "The platform's primary operators and their core workflows are unspecified.",
+              "The operations-management capabilities needed for Watt promotion are unspecified.",
+              "Promotion channels and operating environment are unspecified."
+            ],
+            "confidence": 0.94
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T11:03:41.878988+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T11:03:41.897408+00:00",
+            "acknowledged_ms": 18.431,
+            "processing_started_at": "2026-09-09T11:03:41.903411+00:00",
+            "processing_started_ms": 24.435,
+            "first_response_delta_at": "2026-09-09T11:03:57.369987+00:00",
+            "first_response_delta_ms": 15491.014,
+            "first_sse_event_at": "2026-09-09T11:03:41.908609+00:00",
+            "first_sse_event_ms": 29.631,
+            "completed_at": "2026-09-09T11:04:28.742918+00:00",
+            "completed_ms": 46865.943,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0,
+          "provider_total_seconds": 46.77511259300081,
+          "provider_prompt_characters": 13615
+        },
+        {
+          "number": 3,
+          "message": "Not an operation plan. I want a Web application system.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T11:04:28.936408+00:00",
+          "request_received_at": "2026-09-09T11:04:28.939389+00:00",
+          "persisted_completed_at": "2026-09-09T11:05:27.843395+00:00",
+          "ack_seconds": 0.027956410998740466,
+          "first_event_seconds": 0.03620431200033636,
+          "first_text_seconds": 20.62814540399995,
+          "completion_seconds": 59.115681660998234,
+          "response": "Understood—the design object is a Web application system, not an operations plan. It will support promoting Watt to individual developers and small teams. The next useful decision is its primary operator and core workflow: who will use the application day to day, and what promotion work should it help them manage?",
+          "intent": "CORRECTION",
+          "frame": {
+            "design_subject": "Web application system for operations management",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Supports promoting Watt to individual developers and small teams; operators, promotion channels, workflows, and operating environment remain unidentified.",
+            "desired_outcome": "Define and ultimately build a Web application system that supports Watt-promotion operations.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new Web product/system rather than a feature of an identified existing system.",
+              "Individual developers and small teams are the promotion audience, not necessarily the application's operators.",
+              "The application's primary operators remain provisional."
+            ],
+            "ambiguities": [
+              "The application's primary operators and their core workflows are unspecified.",
+              "The operations-management capabilities needed for Watt promotion are unspecified.",
+              "Promotion channels and operating environment are unspecified."
+            ],
+            "confidence": 0.97
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T11:04:28.939384+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T11:04:28.960369+00:00",
+            "acknowledged_ms": 20.994,
+            "processing_started_at": "2026-09-09T11:04:28.969607+00:00",
+            "processing_started_ms": 30.231,
+            "first_response_delta_at": "2026-09-09T11:04:49.440506+00:00",
+            "first_response_delta_ms": 20502.984,
+            "first_sse_event_at": "2026-09-09T11:04:28.972391+00:00",
+            "first_sse_event_ms": 33.016,
+            "completed_at": "2026-09-09T11:05:27.860513+00:00",
+            "completed_ms": 58924.627,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0,
+          "provider_total_seconds": 58.8404861529998,
+          "provider_prompt_characters": 15323
+        },
+        {
+          "number": 4,
+          "message": "Where will the design document be output?",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T11:05:28.073071+00:00",
+          "request_received_at": "2026-09-09T11:05:28.075039+00:00",
+          "persisted_completed_at": "2026-09-09T11:06:35.798733+00:00",
+          "ack_seconds": 0.015922202001092955,
+          "first_event_seconds": 0.021636181001667865,
+          "first_text_seconds": 23.438054869999178,
+          "completion_seconds": 67.82136233100027,
+          "response": "Pre-Work Guided Design does not automatically generate or write a design-document artifact, so there is no artifact path yet. The design basis is retained, and an exact output target can be decided later through a reviewable production proposal.",
+          "intent": "DIRECT_QUESTION",
+          "frame": {
+            "design_subject": "Web application system for operations management",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Supports promoting Watt to individual developers and small teams; operators, promotion channels, workflows, and operating environment remain unidentified.",
+            "desired_outcome": "Define and ultimately build a Web application system that supports Watt-promotion operations.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new Web product/system rather than a feature of an identified existing system.",
+              "Individual developers and small teams are the promotion audience, not necessarily the application's operators.",
+              "The application's primary operators remain provisional."
+            ],
+            "ambiguities": [
+              "The application's primary operators and their core workflows are unspecified.",
+              "The operations-management capabilities needed for Watt promotion are unspecified.",
+              "Promotion channels and operating environment are unspecified."
+            ],
+            "confidence": 0.97
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T11:05:28.075035+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T11:05:28.086196+00:00",
+            "acknowledged_ms": 11.168,
+            "processing_started_at": "2026-09-09T11:05:28.091894+00:00",
+            "processing_started_ms": 16.865,
+            "first_response_delta_at": "2026-09-09T11:05:51.441984+00:00",
+            "first_response_delta_ms": 23368.881,
+            "first_sse_event_at": "2026-09-09T11:05:28.094521+00:00",
+            "first_sse_event_ms": 19.492,
+            "completed_at": "2026-09-09T11:06:35.813994+00:00",
+            "completed_ms": 67742.352,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0,
+          "provider_total_seconds": 67.67394598199826,
+          "provider_prompt_characters": 16668
+        },
+        {
+          "number": 5,
+          "message": "Please explain the design approach and next steps in detail.",
+          "status": "COMPLETED",
+          "request_started_at": "2026-09-09T11:06:35.910083+00:00",
+          "request_received_at": "2026-09-09T11:06:35.911669+00:00",
+          "persisted_completed_at": "2026-09-09T11:07:50.395508+00:00",
+          "ack_seconds": 0.01499716399848694,
+          "first_event_seconds": 0.023413096998410765,
+          "first_text_seconds": 18.54886627900123,
+          "completion_seconds": 74.54872553400128,
+          "response": "The design approach is to define the Web application as a product system first, then establish the workflows and capabilities needed to support Watt-promotion operations. Promoting Watt to individual developers and small teams is the business context and audience; it does not identify the application’s day-to-day operators.\n\nThe design should progress in this order:\n\n1. Identify the primary operator and the promotion workflow they need to manage. This drives roles, permissions, workflow states, and the application’s information model.\n2. Define the smallest useful product scope around that workflow—for example, planning activities, managing content or channels, coordinating execution, and reviewing results. These are possibilities, not established requirements.\n3. Describe the main user journeys, system boundaries, data, integrations, access controls, and operational requirements.\n4. Review the resulting design basis, resolve material choices, and only then propose an exact production target for implementation or documentation.\n\nNo design-document artifact is automatically written during this pre-Work Guided Design phase, so there is currently no output path. The design basis is retained, while any file, repository location, or other artifact target must be established later through a reviewable production proposal.\n\nThe most useful next decision is: who will operate the Web application day to day, and what single Watt-promotion workflow should it primarily support?",
+          "intent": "REQUEST_DETAIL",
+          "frame": {
+            "design_subject": "Web application system for operations management",
+            "object_type": "PRODUCT_SYSTEM",
+            "business_context": "Supports promoting Watt to individual developers and small teams; operators, promotion channels, workflows, and operating environment remain unidentified.",
+            "desired_outcome": "Define and ultimately build a Web application system that supports Watt-promotion operations.",
+            "scope_level": "product",
+            "collaboration_mode": "design",
+            "candidate_assumptions": [
+              "The requested object is a new Web product/system rather than a feature of an identified existing system.",
+              "Individual developers and small teams are the promotion audience, not necessarily the application's operators.",
+              "The application's primary operators remain provisional."
+            ],
+            "ambiguities": [
+              "The application's primary operators and their core workflows are unspecified.",
+              "The operations-management capabilities needed for Watt promotion are unspecified.",
+              "Promotion channels and operating environment are unspecified."
+            ],
+            "confidence": 0.97
+          },
+          "schema": "watt:guided-design:general-product-system",
+          "server_timing": {
+            "request_received_at": "2026-09-09T11:06:35.911664+00:00",
+            "request_received_ms": 0.0,
+            "acknowledged_at": "2026-09-09T11:06:35.922990+00:00",
+            "acknowledged_ms": 11.335,
+            "processing_started_at": "2026-09-09T11:06:35.930486+00:00",
+            "processing_started_ms": 18.832,
+            "first_response_delta_at": "2026-09-09T11:06:54.265734+00:00",
+            "first_response_delta_ms": 18356.391,
+            "first_sse_event_at": "2026-09-09T11:06:35.932543+00:00",
+            "first_sse_event_ms": 20.887,
+            "completed_at": "2026-09-09T11:07:50.402987+00:00",
+            "completed_ms": 74496.978,
+            "failed_at": null,
+            "failed_ms": null
+          },
+          "work_and_runtime_rows": 0,
+          "provider_total_seconds": 74.44149746000039,
+          "provider_prompt_characters": 17703
+        }
+      ]
+    }
+  }
+}

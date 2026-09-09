@@ -272,11 +272,8 @@ def match_design_schema_frame(
     """Route only an explicit framed object into an applicable seed schema."""
 
     registry = {item.identity: item for item in design_schema_registry()}
-    normalized = " ".join(
-        value.casefold()
-        for value in (frame.design_subject, frame.business_context or "")
-        if value
-    )
+    # Methodology follows the design object, not technical vocabulary in its context.
+    normalized = " ".join(frame.design_subject.casefold().split())
     if frame.object_type is DesignObjectType.FEATURE:
         return (
             registry[EVOLUTION_SCHEMA_IDENTITY],

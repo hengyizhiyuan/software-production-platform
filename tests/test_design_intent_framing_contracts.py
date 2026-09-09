@@ -108,5 +108,39 @@ def test_provider_wire_and_prompts_carry_frame_without_an_extra_provider_stage()
         response_language="Chinese",
     )
     instruction = CodexSdkConversationProvider.instruction(context, result)
-    assert "Design Intent Frame" in instruction
+    assert '"design_intent_frame":' in instruction
+    assert "Keep the system separate from its business purpose" in instruction
     assert "PRODUCT_SYSTEM" in instruction
+
+
+@pytest.mark.parametrize(
+    ("subject", "context", "expected_schema"),
+    (
+        (
+            "Operations management platform",
+            "Promote infrastructure and database products to architecture teams",
+            "General Product/System Design",
+        ),
+        (
+            "Database architecture",
+            "Support promotion operations",
+            "Technical System Design",
+        ),
+    ),
+)
+def test_methodology_follows_framed_subject_not_business_context(
+    subject: str, context: str, expected_schema: str
+) -> None:
+    frame = DesignIntentFrame(
+        design_subject=subject,
+        object_type=DesignObjectType.PRODUCT_SYSTEM,
+        business_context=context,
+        scope_level=DesignScopeLevel.PRODUCT,
+        collaboration_mode=DesignCollaborationMode.DESIGN,
+        confidence=0.9,
+    )
+
+    schema, _ = match_design_schema_frame(frame)
+
+    assert schema is not None
+    assert schema.title == expected_schema

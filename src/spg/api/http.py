@@ -458,6 +458,7 @@ def create_http_application(
                     payload = InteractionTurnResponse.from_turn(turn).model_dump(
                         mode="json"
                     )
+                    service.record_turn_stream_event(turn_id)
                     yield f"event: turn.status\ndata: {json.dumps(payload)}\n\n"
                     last_status = turn.status.value
                 delta, stream_offset = service.turn_response_delta(

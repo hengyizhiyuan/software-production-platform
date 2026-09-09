@@ -1423,6 +1423,7 @@
           body: { human_identity: "human:local-operator" },
         });
         state.selectedInteractionId = created.interaction_id;
+        state.sharedUnderstanding = created;
         try {
           localStorage.setItem(INTERACTION_STORAGE_KEY, state.selectedInteractionId);
         } catch (_error) {
@@ -1437,9 +1438,19 @@
         },
       );
       elements.workRequirement.value = "";
-      state.sharedUnderstanding = await apiRequest(
-        `/api/interactions/${state.selectedInteractionId}`,
-      );
+      // The 202 acknowledgement confirms this exact Human input was persisted.
+      // Render it before the streamed reply while the full projection refreshes.
+      state.sharedUnderstanding = {
+        ...state.sharedUnderstanding,
+        conversation_messages: [
+          ...viewModel.interactionConversationMessages(state.sharedUnderstanding, null),
+          {
+            actor: "HUMAN", turn_id: turn.turn_id, content,
+            interaction_record_id: turn.request_record_id,
+            processing_status: turn.status, created_at: turn.created_at,
+          },
+        ],
+      };
       state.streamingAssistantMessage = {
         turnId: turn.turn_id,
         content: "",
@@ -1449,6 +1460,13 @@
       renderInteraction();
       observeInteractionTurn(state.selectedInteractionId, turn.turn_id);
       announce("Message received. No Work was created; Watt is processing it in the background.");
+      const interactionId = state.selectedInteractionId;
+      const receivedProjection = await apiRequest(`/api/interactions/${interactionId}`);
+      // A fast completed event starts its own authoritative refresh. Do not
+      // overwrite it with this earlier, potentially incomplete projection.
+      if (state.selectedInteractionId === interactionId && state.activeInteractionTurnId === turn.turn_id) {
+        state.sharedUnderstanding = receivedProjection;
+      }
     } catch (error) {
       showNotice(error);
     } finally {

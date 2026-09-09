@@ -30,6 +30,14 @@ class Settings(BaseSettings):
     wic_provider_model: str | None = Field(default=None, min_length=1)
     conversation_provider_adapter: str | None = Field(default=None, min_length=1)
     conversation_provider_model: str | None = Field(default=None, min_length=1)
+    wic_coalesce_pre_work: bool = True
+    wic_provider_reasoning_effort: Literal[
+        "none", "minimal", "low", "medium", "high", "xhigh"
+    ] | None = None
+    conversation_provider_reasoning_effort: Literal[
+        "none", "minimal", "low", "medium", "high", "xhigh"
+    ] | None = None
+    collaboration_provider_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
     executor_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
     executor_max_internal_turns: int = Field(default=3, ge=1)
     executor_sandbox_mode: Literal["workspace-write", "full-access"] = (

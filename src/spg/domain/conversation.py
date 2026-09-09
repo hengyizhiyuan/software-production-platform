@@ -63,8 +63,11 @@ class ConversationContext(BaseModel):
     latest_human_message: str = Field(min_length=1)
     recent_relevant_messages: tuple[ConversationContextMessage, ...] = ()
     known_relevant_facts: tuple[str, ...] = ()
+    governed_work_facts: tuple[str, ...] = ()
     governing_constraints: tuple[str, ...] = ()
+    candidate_constraints: tuple[str, ...] = ()
     current_requests: tuple[str, ...] = ()
+    governed_work_requests: tuple[str, ...] = ()
     current_objective: str | None = None
     current_collaboration_focus: str | None = None
     current_work_reference: str | None = None

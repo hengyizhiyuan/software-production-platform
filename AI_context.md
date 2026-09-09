@@ -113,6 +113,41 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **DESIGN INTENT FRAMING LAYER — IMPLEMENTED / FOCUSED DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
 
+**HUMAN COLLABORATION PIPELINE REVIEW / OPTIMIZATION — IMPLEMENTED / FOCUSED AND REAL PROVIDER VALIDATION PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
+
+The [pipeline review and validation report](docs/evidence/human-collaboration-pipeline-optimization.md)
+records the original two serial model Turns, a low-effort trial that did not
+reliably improve latency, and default single-call native pre-Work inference when
+model/effort settings match. WIC, framing, Guided Design, Conversation and Human
+Authority ownership are preserved. Five real cases reduced median first text
+from 58.45 s to 20.63 s; full completion improved only modestly and remains
+variable. Active Work, custom providers/context, differing model/effort settings
+and explicit opt-out retain the staged path. Context fidelity, bounded actual
+dialogue, stream timing and late-validation failure safeguards are covered by
+94 contract, 39 PostgreSQL integration and 25 JavaScript tests. No Work/PWU/
+Executor/Guardian lifecycle, Runtime deployment or Trusted Baseline was changed.
+
+**HUMAN COLLABORATION PIPELINE v3.1 — PRODUCT QUALITY / LATENCY REFINEMENT — HUMAN PRODUCT ACCEPTANCE PENDING**
+
+The [v3.1 evidence report](docs/evidence/human-collaboration-pipeline-v31.md)
+retains the exact Chinese A–E baseline, first refinement trial and final source
+comparison. Shared Conversation policy favors grounded hypotheses, concrete
+recommendations with rationale and one independent clarification. WIC semantics
+and unchanged frames can be explicitly reused on the coalesced wire, then expanded
+and validated against the exact basis. Corrected/current facts are full snapshots;
+partial text remains presentation only. Milestones separate SDK/provider waiting,
+validation and committed persistence. Existing Work, Human Authority and staged
+custom-provider boundaries remain. Historical problem reports are preserved.
+Final same-model Chinese samples improve median first text **23.84 → 18.80 s**
+and completion **63.57 → 52.89 s**, but A/C regressions increase mean first text
+**23.48 → 26.28 s** and leave mean completion effectively unchanged
+(**58.38 → 58.85 s**). Consistent latency improvement is not proven. Quality,
+source/authority fidelity and complete final-source validation are documented;
+Human product acceptance remains pending. Final contracts: 128 passed; related
+PostgreSQL integration: 41 passed (6 phase tests rerun on final source); JS: 25
+passed. All 15 real turns across three conditions preserved one call per message
+and created zero Work/Runtime rows.
+
 **WORK-CENTRIC PRODUCTION MODEL — ARCHITECTURE PRINCIPLE / ALIGNED**
 
 **WATT PRODUCT MVP — NOT CLOSED**

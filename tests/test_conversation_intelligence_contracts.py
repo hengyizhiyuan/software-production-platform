@@ -10,9 +10,11 @@ from pydantic import ValidationError
 from spg.application.conversation import (
     ConversationResponseComposer,
     WattNativeConversationContextAssembler,
+    conversation_response_policy,
 )
 from spg.domain.conversation import (
     ConversationContext,
+    ConversationContextMessage,
     ConversationPolicyHint,
     ConversationResponseCandidate,
     ConversationTurnIntent,
@@ -24,6 +26,7 @@ from spg.domain.interaction import (
 )
 from spg.providers.codex_interaction import (
     CodexSdkConversationProvider,
+    CodexSdkInteractionSemanticCapability,
     CodexSdkWorkInteractionCapability,
 )
 
@@ -31,7 +34,7 @@ from spg.providers.codex_interaction import (
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
-def _basis(*messages: str, prior=None):
+def _basis(*messages: str, prior=None, recent=(), active=None):
     return SimpleNamespace(
         basis_fingerprint="a" * 64,
         records=tuple(
@@ -43,7 +46,8 @@ def _basis(*messages: str, prior=None):
             for message in messages
         ),
         prior_assessment=prior,
-        active_work_context=None,
+        active_work_context=active,
+        recent_conversation_messages=recent,
     )
 
 
@@ -186,7 +190,7 @@ def test_compatibility_facade_runs_two_provider_neutral_stages_and_streams_wordi
                 model_identity="test-model",
             )
 
-    capability = CodexSdkWorkInteractionCapability(repository_location=".")
+    capability = CodexSdkWorkInteractionCapability(repository_location=".", coalesce_pre_work=False)
     capability.semantic_capability = SemanticCapability()
     capability.conversation_provider = ConversationProvider()
     capability.response_composer = ConversationResponseComposer(
@@ -268,3 +272,177 @@ def test_conversation_quality_benchmark_has_broad_reusable_coverage() -> None:
         "no_methodology_dump",
         "preserve_authority",
     }.issubset(contracts)
+
+
+def test_actual_dialogue_preserves_watt_options_for_referential_follow_up() -> None:
+    dialogue = tuple(
+        ConversationContextMessage(actor=actor, content=content)
+        for actor, content in (
+            ("HUMAN", "An older message"),
+            ("WATT", "An older reply"),
+            ("HUMAN", "I want an operations management platform."),
+            ("WATT", "Who operates it?"),
+            ("HUMAN", "Our marketing team."),
+            ("WATT", "We could begin with a content calendar or a lead inbox."),
+            ("HUMAN", "The audience is individual developers and small teams."),
+            ("WATT", "That is the audience for Watt promotion."),
+            ("HUMAN", "Explain your second suggestion."),
+        )
+    )
+    context = WattNativeConversationContextAssembler().assemble(
+        _basis("Explain your second suggestion.", recent=dialogue),
+        _collaboration(ConversationTurnIntent.REQUEST_DETAIL,
+                       detailed_explanation_requested=True),
+    )
+
+    assert context.recent_relevant_messages == dialogue[-8:]
+    assert context.recent_relevant_messages[-1].content == context.latest_human_message
+    assert any("lead inbox" in message.content
+               for message in context.recent_relevant_messages)
+    assert [message.actor for message in context.recent_relevant_messages].count("WATT") == 4
+
+
+def test_current_correction_replaces_stale_candidates_and_supplies_current_constraints() -> None:
+    prior = SimpleNamespace(
+        natural_response="Let us design a promotion campaign.",
+        candidate_context=("Design an operating plan", "Audience: large enterprises"),
+        candidate_constraints=("Produce a campaign document",),
+        current_requests=("Plan a launch livestream",),
+        desired_outcome="An operating plan",
+    )
+    collaboration = _collaboration(
+        ConversationTurnIntent.CORRECTION,
+        current_objective="Build a Web application system for Watt promotion",
+        known_relevant_facts=("Audience: individual developers and small teams",),
+    )
+    semantic = InteractionSemanticCandidate(
+        candidate_context=("Design a Web application system",),
+        candidate_constraints=("Reuse the existing authentication",),
+        current_requests=("Correct the system design",),
+        collaboration=collaboration,
+        provider_identity="test:semantic",
+    )
+    received = []
+
+    class Provider:
+        def respond(self, context, collaboration):
+            received.append(context)
+            return ConversationResponseCandidate(
+                content="Understood: a Web application system for Watt promotion.",
+                provider_identity="test:conversation",
+            )
+
+    ConversationResponseComposer(Provider()).compose(
+        _basis("Not an operation plan. I want a Web application system.", prior=prior),
+        collaboration,
+        current_semantics=semantic,
+    )
+    context = received[0]
+    assert context.known_relevant_facts == (
+        "Design a Web application system",
+        "Audience: individual developers and small teams",
+    )
+    assert context.candidate_constraints == ("Reuse the existing authentication",)
+    assert context.governing_constraints == ()
+    assert context.current_requests == ("Correct the system design",)
+    assert context.current_objective == "Build a Web application system for Watt promotion"
+    assert prior.candidate_context == ("Design an operating plan", "Audience: large enterprises")
+
+
+def test_current_candidates_do_not_rewrite_admitted_work_context_or_provider_contract() -> None:
+    active = SimpleNamespace(
+        work_revision=SimpleNamespace(
+            work_id="existing-work",
+            context_facts=("Admitted audience: enterprises",),
+            constraints=("Keep the current authentication",),
+            requests=("Deliver the admitted application",),
+            desired_outcome="The admitted application",
+        ),
+        relevant_reality_references=(),
+        steering_plan_revision_id=None,
+    )
+    collaboration = _collaboration(ConversationTurnIntent.CORRECTION)
+    semantic = InteractionSemanticCandidate(
+        candidate_context=("Proposed audience: individual developers",),
+        candidate_constraints=(),
+        current_requests=(),
+        collaboration=collaboration,
+        provider_identity="test:semantic",
+    )
+    received = []
+
+    class ExistingContextProvider:
+        # The context extension does not require plugins/ECF to accept new arguments.
+        def assemble(self, basis, collaboration):
+            return WattNativeConversationContextAssembler().assemble(basis, collaboration)
+
+    class Provider:
+        def respond(self, context, collaboration):
+            received.append(context)
+            return ConversationResponseCandidate(
+                content="The proposed audience change needs the existing Work review.",
+                provider_identity="test:conversation",
+            )
+
+    ConversationResponseComposer(
+        Provider(), context_provider=ExistingContextProvider()
+    ).compose(
+        _basis("Change the target audience.", active=active),
+        collaboration,
+        current_semantics=semantic,
+    )
+    context = received[0]
+    assert context.known_relevant_facts == ("Proposed audience: individual developers",)
+    assert context.governed_work_facts == ("Admitted audience: enterprises",)
+    assert context.governing_constraints == ("Keep the current authentication",)
+    assert context.governed_work_requests == ("Deliver the admitted application",)
+    assert context.candidate_constraints == ()
+    assert context.current_requests == ()
+    assert active.work_revision.context_facts == ("Admitted audience: enterprises",)
+
+
+def test_latest_source_input_is_present_after_legacy_synchronous_append() -> None:
+    dialogue = (
+        ConversationContextMessage(actor="HUMAN", content="Recommend a starting point."),
+        ConversationContextMessage(actor="WATT", content="Start with the content calendar."),
+    )
+    context = WattNativeConversationContextAssembler().assemble(
+        _basis("Explain the data model for that calendar.", recent=dialogue),
+        _collaboration(ConversationTurnIntent.REQUEST_DETAIL,
+                       detailed_explanation_requested=True),
+    )
+
+    assert context.recent_relevant_messages[:-1] == dialogue
+    assert context.recent_relevant_messages[-1] == ConversationContextMessage(
+        actor="HUMAN", content="Explain the data model for that calendar."
+    )
+    assert context.latest_human_message == context.recent_relevant_messages[-1].content
+
+
+def test_staged_and_coalesced_transport_share_one_conversation_policy(monkeypatch) -> None:
+    # This guards ownership and prompt wiring; real responses still need Human review.
+    monkeypatch.setattr(
+        CodexSdkInteractionSemanticCapability,
+        "instruction",
+        staticmethod(lambda _basis, *, coalesced=False: "WIC semantic instructions"),
+    )
+    context = ConversationContext(
+        source_basis_fingerprint="a" * 64,
+        latest_human_message="你建议下一步先设计什么？",
+        response_language="Chinese",
+    )
+    collaboration = _collaboration(
+        ConversationTurnIntent.REQUEST_RECOMMENDATION,
+        recommended_next_action="先画出跨渠道内容从选题到发布记录的流程",
+        concise_basis="公众号、小红书和直播需要协调内容与排期",
+    )
+    policy = conversation_response_policy()
+    staged = CodexSdkConversationProvider.instruction(context, collaboration)
+    coalesced = CodexSdkWorkInteractionCapability.coalesced_instruction(object())
+
+    assert CodexSdkConversationProvider.response_policy() == policy
+    assert staged.count(policy) == 1
+    assert coalesced.count(policy) == 1
+    assert collaboration.recommended_next_action in staged
+    assert collaboration.concise_basis in staged
+    assert context.latest_human_message in staged

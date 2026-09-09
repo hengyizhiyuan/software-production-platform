@@ -1103,6 +1103,7 @@ def test_real_provider_conversation_intelligence_mandatory_scenarios(
     postgres_database: Database,
 ) -> None:
     capability = CodexSdkWorkInteractionCapability(
+        coalesce_pre_work=False,  # Preserve this historical two-provider proof.
         repository_location=os.environ.get(
             "SPG_WIC_PROVIDER_PROOF_ROOT",
             str(PROJECT_ROOT),
@@ -1297,6 +1298,7 @@ def test_real_provider_conversation_intelligence_single_scenario(
         os.environ["SPG_CONVERSATION_INTELLIGENCE_EXPECTED_INTENT"]
     )
     capability = CodexSdkWorkInteractionCapability(
+        coalesce_pre_work=False,  # Preserve this historical two-provider proof.
         repository_location=os.environ.get(
             "SPG_WIC_PROVIDER_PROOF_ROOT",
             str(PROJECT_ROOT),
@@ -1362,6 +1364,7 @@ def test_real_provider_frames_design_intent_and_accepts_correction(
     postgres_database: Database,
 ) -> None:
     capability = CodexSdkWorkInteractionCapability(
+        coalesce_pre_work=False,  # Preserve this historical two-provider proof.
         repository_location=os.environ.get(
             "SPG_WIC_PROVIDER_PROOF_ROOT",
             str(PROJECT_ROOT),
