@@ -21,6 +21,7 @@ mature general AI product.
 ```text
 Human Turn
     -> WIC / relevant Watt domain capability
+    -> Design Intent Frame when the turn concerns design/build/change/review
     -> StructuredCollaborationResult
     -> ConversationContextProvider
     -> ConversationResponseComposer
@@ -47,14 +48,15 @@ Interaction, Work-admission, or streaming contracts.
 
 `StructuredCollaborationResult` is a provider-neutral advisory handoff. It can
 express the current turn intent, a direct answer, relevant facts, current
-objective/focus, one recommended action and concise basis, an unresolved
+objective/focus, the candidate Design Intent Frame, one recommended action and
+concise basis, an unresolved
 Human-owned decision, material alternatives, attention/progression hints,
 requested detail, and response language.
 
 It does not contain chain of thought and is not persisted as authoritative
 Work, Design, Plan, Evidence, Runtime, or Human Authority. The existing WIC
-assessment remains the persisted advisory interpretation; composed wording
-remains Conversation History.
+assessment remains the persisted advisory interpretation, including the
+reconstructable candidate frame; composed wording remains Conversation History.
 
 ## Turn intent behavior
 
@@ -115,6 +117,11 @@ Guided Design remains proactive: it may frame the problem, recommend discussion
 order, identify the next material focus, and explain trade-offs. The language
 plane changes expression, not who owns the next Step or product decision.
 
+The implemented [Design Intent Framing Layer](design-intent-framing-layer.md)
+now precedes schema selection. It separates the object being designed from its
+business context and supplies the same structured frame to Conversation
+Intelligence without adding another Provider Turn.
+
 ## Watt domain integration
 
 The implemented integration covers WIC/pre-Work Interaction and its existing
@@ -174,6 +181,8 @@ Subjective quality is not reduced to one boolean or brittle exact strings.
 ## Known limitations
 
 - Human Product Acceptance remains pending.
+- Design Intent Framing focused deterministic validation and its bounded real
+  `gpt-5.6-sol` correction proof have passed.
 - Two independent Provider Turns preserve separation but increase latency.
 - Context selection is bounded/native; semantic retrieval and full ECF are out
   of scope.
@@ -185,6 +194,7 @@ Subjective quality is not reduced to one boolean or brittle exact strings.
 
 - [Human–Watt Collaboration Layer](human-watt-collaboration-layer.md)
 - [Guided Design Facilitation Layer](guided-design-facilitation-layer.md)
+- [Design Intent Framing Layer](design-intent-framing-layer.md)
 - [Work Interaction & Closed-loop Refinement](work-interaction-closed-loop-refinement.md)
 - [Conversation Quality Benchmark](../../benchmarks/conversation_quality/README.md)
 - [Focused Validation](../evidence/human-watt-conversation-intelligence-focused-validation.md)

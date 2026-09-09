@@ -16,7 +16,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 from spg.application.conversation import ConversationResponseComposer
 from spg.application.guided_design import (
     design_schema_by_identity,
-    match_design_schema_text,
+    design_schema_registry,
 )
 from spg.domain.conversation import (
     CollaborationAlternative,
@@ -26,6 +26,12 @@ from spg.domain.conversation import (
     ConversationResponseCandidate,
     ConversationTurnIntent,
     StructuredCollaborationResult,
+)
+from spg.domain.design_intent import (
+    DesignCollaborationMode,
+    DesignIntentFrame,
+    DesignObjectType,
+    DesignScopeLevel,
 )
 from spg.domain.interaction import (
     InteractionAssessmentCandidate,
@@ -49,6 +55,20 @@ class _InteractionProviderMeaning(InterpretationMeaning):
     clarification_required: bool
 
 
+class _DesignIntentFrameProviderPayload(DesignIntentFrame):
+    """Strict wire requiredness over advisory frame defaults."""
+
+    design_subject: str
+    object_type: DesignObjectType
+    business_context: str | None
+    desired_outcome: str | None
+    scope_level: DesignScopeLevel
+    collaboration_mode: DesignCollaborationMode
+    candidate_assumptions: tuple[str, ...]
+    ambiguities: tuple[str, ...]
+    confidence: float
+
+
 class _StructuredCollaborationProviderPayload(StructuredCollaborationResult):
     """Strict wire requiredness over domain-level optional/default semantics."""
 
@@ -57,6 +77,7 @@ class _StructuredCollaborationProviderPayload(StructuredCollaborationResult):
     known_relevant_facts: tuple[str, ...]
     current_objective: str | None
     current_collaboration_focus: str | None
+    design_intent_frame: _DesignIntentFrameProviderPayload | None
     recommended_next_action: str | None
     concise_basis: str | None
     unresolved_human_decision: str | None
@@ -370,23 +391,27 @@ class CodexSdkInteractionSemanticCapability:
     @staticmethod
     def instruction(basis: InteractionInterpretationInput) -> str:
         payload = basis.model_dump(mode="json")
-        schema = (
+        selected_schema = (
             design_schema_by_identity(
                 basis.interaction.selected_design_schema_identity,
                 basis.interaction.selected_design_schema_version,
             )
             if basis.interaction.selected_design_schema_identity is not None
-            else match_design_schema_text(
-                "\n".join(record.content for record in basis.records)
-            )[0]
+            else None
         )
-        design_path = [
+        schema_candidates = [
             {
-                "stage": issue.title,
-                "objective": issue.objective,
-                "why_it_matters": issue.why_it_matters,
+                "identity": schema.identity,
+                "version": schema.version,
+                "title": schema.title,
+                "applicability": schema.applicability,
+                "first_focus": {
+                    "stage": schema.issues[0].title,
+                    "objective": schema.issues[0].objective,
+                    "why_it_matters": schema.issues[0].why_it_matters,
+                },
             }
-            for issue in schema.issues
+            for schema in design_schema_registry()
         ]
         return (
             "Interpret one Human–Watt interaction from the exact persisted basis. "
@@ -404,6 +429,28 @@ class CodexSdkInteractionSemanticCapability:
             "is currently satisfied, distinguish same-Motive continuation from new Work. "
             "supporting_references may only repeat references present in the basis. Every "
             "meaning must cite only source_record_ids in the basis. "
+            "\n\nBefore proposing Guided Design direction, create a concise candidate "
+            "Design Intent Frame for any input that asks Watt to create, change, "
+            "design, execute, or review something. Separate the object being designed "
+            "from its business scenario, audience, channels, and operating context. "
+            "Classify object_type as PRODUCT_SYSTEM, BUSINESS_PROCESS, FEATURE, "
+            "OPERATIONAL_ACTIVITY, REVIEW_ANALYSIS, or UNKNOWN; scope_level as "
+            "strategic, product, capability, or implementation; and collaboration_mode "
+            "as exploration, design, execution, or review. For example, an operations "
+            "management platform used to promote Watt is a PRODUCT_SYSTEM; promotion, "
+            "social channels, livestreaming, and target audiences are its business "
+            "context, not proof that the object is an operational campaign. An explicit "
+            "change to an existing system is FEATURE. Planning one launch livestream is "
+            "OPERATIONAL_ACTIVITY. 'Improve engineering efficiency' is UNKNOWN unless "
+            "the Human identifies whether the object is a tool, process, AI workflow, "
+            "or organization change. Preserve a prior frame when new facts do not alter "
+            "the object. A correction must replace the affected framing without "
+            "defending the previous interpretation. Use candidate_assumptions, "
+            "ambiguities, and calibrated confidence rather than false certainty. Put "
+            "material framing ambiguity into unresolved_material_questions. Store only "
+            "concise product-relevant interpretation, never private reasoning. Use null "
+            "for design_intent_frame only when the turn and persisted basis contain no "
+            "design/build/change/review intent. "
             "\n\nFor collaboration.turn_intent select the single best behavioral intent. "
             "DIRECT_QUESTION asks for a concrete answer; NEW_GOAL introduces a Motive; "
             "CONTEXT_ADDITION supplies facts; CORRECTION replaces a prior understanding; "
@@ -426,14 +473,19 @@ class CodexSdkInteractionSemanticCapability:
             "composer; do not include private reasoning or chain of thought. Set response "
             "language to the Human's language. Return JSON only matching the schema, "
             "including every key and [] for empty arrays."
-            "\n\nCandidate Design Schema and ordered path:\n"
+            "\n\nAvailable Design Schemas (selection occurs after framing):\n"
             + json.dumps(
                 {
-                    "identity": schema.identity,
-                    "version": schema.version,
-                    "title": schema.title,
-                    "applicability": schema.applicability,
-                    "path": design_path,
+                    "currently_selected": (
+                        None
+                        if selected_schema is None
+                        else {
+                            "identity": selected_schema.identity,
+                            "version": selected_schema.version,
+                            "title": selected_schema.title,
+                        }
+                    ),
+                    "candidates": schema_candidates,
                 },
                 ensure_ascii=False,
                 sort_keys=True,
@@ -554,6 +606,11 @@ class CodexSdkConversationProvider:
             "identity/version, internal stage identifiers, policy hints, provider contracts, "
             "or private reasoning unless the Human explicitly asks for relevant system "
             "details. Never claim advisory wording is governed truth. "
+            "Use the Design Intent Frame to state the currently understood design object "
+            "naturally when it materially prevents confusion. Keep business context "
+            "distinct from what is being built. If the frame is ambiguous or low "
+            "confidence, present it as a candidate understanding and invite one concise "
+            "correction; never turn enum names or confidence numbers into normal prose. "
             "\n\nBehavior policy: for DIRECT_QUESTION, answer direct_answer in the first "
             "sentence and add progression only when useful. For CONTEXT_ADDITION, use and "
             "acknowledge the new fact without forcing progression. For CORRECTION or "
@@ -663,6 +720,7 @@ class CodexSdkWorkInteractionCapability:
         return InteractionAssessmentCandidate(
             interpreted_motive=semantic.interpreted_motive,
             desired_outcome=semantic.desired_outcome,
+            design_intent_frame=semantic.collaboration.design_intent_frame,
             candidate_context=semantic.candidate_context,
             candidate_constraints=semantic.candidate_constraints,
             current_requests=semantic.current_requests,

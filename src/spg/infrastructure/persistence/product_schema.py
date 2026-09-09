@@ -316,6 +316,7 @@ interaction_assessments = Table(
     Column("basis_last_sequence", Integer, nullable=False),
     Column("interpreted_motive", Text, nullable=True),
     Column("desired_outcome", Text, nullable=True),
+    Column("design_intent_frame", JSONB, nullable=True),
     Column("candidate_context", JSONB, nullable=False),
     Column("candidate_constraints", JSONB, nullable=False),
     Column("current_requests", JSONB, nullable=False),

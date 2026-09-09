@@ -2,7 +2,7 @@
 
 Status: **PROGRAM-LEVEL NAVIGATION / CURRENT REALITY**
 
-Last updated: **2026-09-08**
+Last updated: **2026-09-09**
 
 This document maintains one high-level view of Watt's current development
 phase, completed capability foundations, active findings, near-term priorities,
@@ -70,6 +70,7 @@ from deterministic or Provider evidence.
 | Software Production Control Room | Human-facing projection foundation and WIC/production-intelligence integration are implemented and accepted without creating a new Truth owner. |
 | Guided Design foundation | Schema selection, design agenda, stage, current focus, rationale, progress, readiness, and restart reconstruction are implemented. |
 | Human–Watt Interaction Layer | Persisted Human/Watt conversation and Interaction Turn lifecycle are implemented. |
+| Design Intent Framing Layer | A persisted advisory frame separates the object being designed from business context before Guided Design schema selection; focused deterministic validation and the bounded real `gpt-5.6-sol` correction proof passed; Human Product Acceptance remains pending. |
 | Async Interaction Processing | Bounded asynchronous Turn processing and durable terminal outcome projection are implemented. |
 | Conversation history | Human and Watt messages remain reconstructable without turning conversation into governed Work Truth. |
 | Conversation Intelligence | WIC/domain semantics are separated from bounded context assembly and a dedicated configurable Human-facing Provider; 30-case benchmark and six mandatory real Provider modes pass; Human Product Acceptance remains pending. |

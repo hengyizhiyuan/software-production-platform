@@ -108,9 +108,13 @@ workflow editor, or BPM engine.
 
 Matching is deterministic and explainable. Explicit existing-product Reality
 takes precedence, technical/infrastructure intent selects the technical schema,
-and a new product/system Motive selects the general schema. The selected schema
-identity, version, and rationale are persisted on the Interaction and later
-Guided Design process.
+and a new product/system intent selects the general schema. Pre-Work matching
+now consumes the advisory
+[Design Intent Frame](design-intent-framing-layer.md), so business-context
+keywords cannot silently redefine the object being designed. Ambiguous or
+currently unsupported object classes defer selection instead of being forced
+into a product/system schema. The selected schema identity, version, and
+rationale are persisted on the Interaction and later Guided Design process.
 
 For the mandatory scenario:
 
@@ -169,6 +173,7 @@ methodology.
 
 - [Human–Watt Collaboration Layer](human-watt-collaboration-layer.md)
 - [Human–Watt Conversation Intelligence](human-watt-conversation-intelligence.md)
+- [Design Intent Framing Layer](design-intent-framing-layer.md)
 - [Guided Design Core](guided-design-core.md)
 - [Reality-driven Plan Steering Principles](reality-driven-plan-steering-principles.md)
 - [Focused Validation](../evidence/human-watt-collaboration-layer-focused-validation.md)

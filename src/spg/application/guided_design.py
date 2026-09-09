@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.steering import SteeringApplicationService
+from spg.domain.design_intent import DesignIntentFrame, DesignObjectType
 from spg.domain.guided_design import (
     DesignAgendaRevisionCondition,
     DesignAgendaRevisionRecord,
@@ -263,6 +264,50 @@ def match_design_schema_text(text: str) -> tuple[DesignSchemaDefinition, str]:
         schema = registry[GENERAL_SCHEMA_IDENTITY]
         reason = "The Motive appears to describe a new product, platform, or internal software system."
     return schema, reason
+
+
+def match_design_schema_frame(
+    frame: DesignIntentFrame,
+) -> tuple[DesignSchemaDefinition | None, str]:
+    """Route only an explicit framed object into an applicable seed schema."""
+
+    registry = {item.identity: item for item in design_schema_registry()}
+    normalized = " ".join(
+        value.casefold()
+        for value in (frame.design_subject, frame.business_context or "")
+        if value
+    )
+    if frame.object_type is DesignObjectType.FEATURE:
+        return (
+            registry[EVOLUTION_SCHEMA_IDENTITY],
+            "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+        )
+    if frame.object_type is DesignObjectType.PRODUCT_SYSTEM:
+        technical_markers = (
+            "technical",
+            "architecture",
+            "infrastructure",
+            "database",
+            "performance",
+            "技术",
+            "架构",
+            "基础设施",
+            "数据库",
+            "性能",
+        )
+        if any(marker in normalized for marker in technical_markers):
+            return (
+                registry[TECHNICAL_SCHEMA_IDENTITY],
+                "The framed design subject is a technical system or architecture concern.",
+            )
+        return (
+            registry[GENERAL_SCHEMA_IDENTITY],
+            "The Design Intent Frame identifies a product, platform, or software system.",
+        )
+    return (
+        None,
+        "The framed object is outside the current product/system seed schemas or remains ambiguous; Guided Design selection is deferred.",
+    )
 
 
 def design_schema_for_work(work: WorkRecord) -> tuple[DesignSchemaDefinition, str]:

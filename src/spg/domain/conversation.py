@@ -12,6 +12,8 @@ from typing import Any, Callable, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from spg.domain.design_intent import DesignIntentFrame
+
 
 class ConversationTurnIntent(StrEnum):
     DIRECT_QUESTION = "DIRECT_QUESTION"
@@ -90,6 +92,7 @@ class StructuredCollaborationResult(BaseModel):
     known_relevant_facts: tuple[str, ...] = ()
     current_objective: str | None = None
     current_collaboration_focus: str | None = None
+    design_intent_frame: DesignIntentFrame | None = None
     recommended_next_action: str | None = None
     concise_basis: str | None = None
     unresolved_human_decision: str | None = None

@@ -159,12 +159,25 @@ class InteractionReadinessResponse(ApiDto):
     basis_fingerprint: str
 
 
+class DesignIntentFrameResponse(ApiDto):
+    design_subject: str
+    object_type: str
+    business_context: str | None
+    desired_outcome: str | None
+    scope_level: str
+    collaboration_mode: str
+    candidate_assumptions: tuple[str, ...]
+    ambiguities: tuple[str, ...]
+    confidence: float
+
+
 class InteractionAssessmentResponse(ApiDto):
     assessment_id: UUID
     basis_fingerprint: str
     basis_last_sequence: int
     interpreted_motive: str | None
     desired_outcome: str | None
+    design_intent_frame: DesignIntentFrameResponse | None
     candidate_context: tuple[str, ...]
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
@@ -247,6 +260,7 @@ class SharedUnderstandingResponse(ApiDto):
     latest_assessment_current: bool
     interpreted_motive: str | None
     desired_outcome: str | None
+    design_intent_frame: DesignIntentFrameResponse | None
     candidate_context: tuple[str, ...]
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
@@ -333,6 +347,25 @@ class SharedUnderstandingResponse(ApiDto):
                     basis_last_sequence=assessment.basis_last_sequence,
                     interpreted_motive=assessment.interpreted_motive,
                     desired_outcome=assessment.desired_outcome,
+                    design_intent_frame=(
+                        None
+                        if assessment.design_intent_frame is None
+                        else DesignIntentFrameResponse(
+                            design_subject=assessment.design_intent_frame.design_subject,
+                            object_type=assessment.design_intent_frame.object_type.value,
+                            business_context=assessment.design_intent_frame.business_context,
+                            desired_outcome=assessment.design_intent_frame.desired_outcome,
+                            scope_level=assessment.design_intent_frame.scope_level.value,
+                            collaboration_mode=(
+                                assessment.design_intent_frame.collaboration_mode.value
+                            ),
+                            candidate_assumptions=(
+                                assessment.design_intent_frame.candidate_assumptions
+                            ),
+                            ambiguities=assessment.design_intent_frame.ambiguities,
+                            confidence=assessment.design_intent_frame.confidence,
+                        )
+                    ),
                     candidate_context=assessment.candidate_context,
                     candidate_constraints=assessment.candidate_constraints,
                     current_requests=assessment.current_requests,
@@ -392,6 +425,25 @@ class SharedUnderstandingResponse(ApiDto):
             latest_assessment_current=projection.latest_assessment_current,
             interpreted_motive=projection.interpreted_motive,
             desired_outcome=projection.desired_outcome,
+            design_intent_frame=(
+                None
+                if projection.design_intent_frame is None
+                else DesignIntentFrameResponse(
+                    design_subject=projection.design_intent_frame.design_subject,
+                    object_type=projection.design_intent_frame.object_type.value,
+                    business_context=projection.design_intent_frame.business_context,
+                    desired_outcome=projection.design_intent_frame.desired_outcome,
+                    scope_level=projection.design_intent_frame.scope_level.value,
+                    collaboration_mode=(
+                        projection.design_intent_frame.collaboration_mode.value
+                    ),
+                    candidate_assumptions=(
+                        projection.design_intent_frame.candidate_assumptions
+                    ),
+                    ambiguities=projection.design_intent_frame.ambiguities,
+                    confidence=projection.design_intent_frame.confidence,
+                )
+            ),
             candidate_context=projection.candidate_context,
             candidate_constraints=projection.candidate_constraints,
             current_requests=projection.current_requests,

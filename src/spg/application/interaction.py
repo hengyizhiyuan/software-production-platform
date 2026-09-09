@@ -13,8 +13,9 @@ from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.guided_design import (
     design_schema_by_identity,
-    match_design_schema_text,
+    match_design_schema_frame,
 )
+from spg.application.design_intent import frame_design_intent_text
 
 from spg.domain.interaction import (
     ActiveWorkInterpretationContext,
@@ -41,6 +42,7 @@ from spg.domain.interaction import (
     WorkAdmissionReadinessStatus,
     WorkInteractionCapability,
 )
+from spg.domain.design_intent import DesignObjectType
 from spg.domain.product import ProductionCycleBindingCondition
 from spg.domain.steering import RealityReferenceKind, SteeringOutcome, SteeringStepType
 from spg.infrastructure.persistence import Database
@@ -50,7 +52,7 @@ from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 
 
-ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v2"
+ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v3"
 READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
 
@@ -655,6 +657,15 @@ class WorkInteractionService:
                 raise InteractionInvariantViolation(
                     "Interpretation meaning references a record outside its basis"
                 )
+            candidate = self._with_design_intent_frame(
+                candidate,
+                prior_assessment=store.latest_assessment(interaction_id),
+                latest_human_input=next(
+                    record.content
+                    for record in reversed(records)
+                    if record.actor is InteractionActor.HUMAN
+                ),
+            )
             focus, impact, candidate_change = self._normalize_active_candidate(
                 candidate,
                 active_context,
@@ -677,17 +688,23 @@ class WorkInteractionService:
                 dict.fromkeys((*record_references, *candidate_references))
             )
             readiness = self._evaluate_readiness(candidate, current_basis)
-            if interaction.current_work_id is None:
-                schema, selection_rationale = match_design_schema_text(
-                    candidate.interpreted_motive or records[-1].content
+            if (
+                interaction.current_work_id is None
+                and candidate.design_intent_frame is not None
+            ):
+                schema, selection_rationale = match_design_schema_frame(
+                    candidate.design_intent_frame
                 )
-                store.select_design_schema(
-                    interaction_id,
-                    identity=schema.identity,
-                    version=schema.version,
-                    rationale=selection_rationale,
-                    updated_at=now,
-                )
+                if schema is None:
+                    store.clear_design_schema(interaction_id, updated_at=now)
+                else:
+                    store.select_design_schema(
+                        interaction_id,
+                        identity=schema.identity,
+                        version=schema.version,
+                        rationale=selection_rationale,
+                        updated_at=now,
+                    )
             assessment_id = uuid4()
             store.insert_assessment(
                 {
@@ -697,6 +714,11 @@ class WorkInteractionService:
                     "basis_last_sequence": records[-1].sequence,
                     "interpreted_motive": candidate.interpreted_motive,
                     "desired_outcome": candidate.desired_outcome,
+                    "design_intent_frame": (
+                        None
+                        if candidate.design_intent_frame is None
+                        else candidate.design_intent_frame.model_dump(mode="json")
+                    ),
                     "candidate_context": list(candidate.candidate_context),
                     "candidate_constraints": list(candidate.candidate_constraints),
                     "current_requests": list(candidate.current_requests),
@@ -953,6 +975,9 @@ class WorkInteractionService:
             ),
             interpreted_motive=None if latest is None else latest.interpreted_motive,
             desired_outcome=None if latest is None else latest.desired_outcome,
+            design_intent_frame=(
+                None if latest is None else latest.design_intent_frame
+            ),
             candidate_context=() if latest is None else latest.candidate_context,
             candidate_constraints=() if latest is None else latest.candidate_constraints,
             current_requests=() if latest is None else latest.current_requests,
@@ -1225,6 +1250,40 @@ class WorkInteractionService:
                 if currently_satisfied
                 else WorkSatisfactionState.IN_PROGRESS
             ),
+        )
+
+    @staticmethod
+    def _with_design_intent_frame(
+        candidate: InteractionAssessmentCandidate,
+        *,
+        prior_assessment: InteractionAssessment | None,
+        latest_human_input: str,
+    ) -> InteractionAssessmentCandidate:
+        frame = candidate.design_intent_frame
+        if (
+            frame is None
+            and prior_assessment is not None
+            and (
+                candidate.interpreted_motive is None
+                or candidate.interpreted_motive == prior_assessment.interpreted_motive
+            )
+        ):
+            frame = prior_assessment.design_intent_frame
+        if frame is None and candidate.interpreted_motive:
+            frame = frame_design_intent_text(
+                candidate.interpreted_motive or latest_human_input,
+                desired_outcome=candidate.desired_outcome,
+            )
+        if frame is None:
+            return candidate
+        questions = candidate.unresolved_material_questions
+        if frame.object_type is DesignObjectType.UNKNOWN:
+            questions = tuple(dict.fromkeys((*questions, *frame.ambiguities)))
+        return candidate.model_copy(
+            update={
+                "design_intent_frame": frame,
+                "unresolved_material_questions": questions,
+            }
         )
 
     @staticmethod

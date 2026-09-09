@@ -9,6 +9,7 @@ from uuid import UUID
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.orm import Session
 
+from spg.domain.design_intent import DesignIntentFrame
 from spg.domain.interaction import (
     ConversationMessage,
     Interaction,
@@ -228,6 +229,18 @@ class InteractionStore:
                 selected_design_schema_identity=identity,
                 selected_design_schema_version=version,
                 design_schema_selection_rationale=rationale,
+                updated_at=updated_at,
+            )
+        )
+
+    def clear_design_schema(self, interaction_id: UUID, *, updated_at) -> None:
+        self.session.execute(
+            update(product_interactions)
+            .where(product_interactions.c.id == interaction_id)
+            .values(
+                selected_design_schema_identity=None,
+                selected_design_schema_version=None,
+                design_schema_selection_rationale=None,
                 updated_at=updated_at,
             )
         )
@@ -485,6 +498,11 @@ class InteractionStore:
             basis_last_sequence=row["basis_last_sequence"],
             interpreted_motive=row["interpreted_motive"],
             desired_outcome=row["desired_outcome"],
+            design_intent_frame=(
+                None
+                if row["design_intent_frame"] is None
+                else DesignIntentFrame.model_validate(row["design_intent_frame"])
+            ),
             candidate_context=tuple(row["candidate_context"]),
             candidate_constraints=tuple(row["candidate_constraints"]),
             current_requests=tuple(row["current_requests"]),

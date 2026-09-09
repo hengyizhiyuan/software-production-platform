@@ -16,7 +16,14 @@ import pytest
 from sqlalchemy import func, select, text
 
 from spg.api import create_http_application
+from spg.api.dto import SharedUnderstandingResponse
 from spg.domain.conversation import ConversationTurnIntent
+from spg.domain.design_intent import (
+    DesignCollaborationMode,
+    DesignIntentFrame,
+    DesignObjectType,
+    DesignScopeLevel,
+)
 from spg.application.interaction import (
     DeterministicWorkInteractionCapability,
     WorkInteractionService,
@@ -95,6 +102,51 @@ class _ProgressiveCapability:
             ),
             natural_response="The Motive and outcome are now clear enough to form Work.",
             provider_identity="test:progressive",
+        )
+
+
+class _FramingCorrectionCapability:
+    def interpret(
+        self, basis: InteractionInterpretationInput
+    ) -> InteractionAssessmentCandidate:
+        latest = basis.records[-1]
+        corrected = len(basis.records) > 1
+        frame = DesignIntentFrame(
+            design_subject=(
+                "支撑 Watt 推广运营的后台系统"
+                if corrected
+                else "Watt 发布直播活动"
+            ),
+            object_type=(
+                DesignObjectType.PRODUCT_SYSTEM
+                if corrected
+                else DesignObjectType.OPERATIONAL_ACTIVITY
+            ),
+            business_context="Watt promotion",
+            desired_outcome=(
+                "形成可实施的后台系统设计"
+                if corrected
+                else "完成一次发布直播策划"
+            ),
+            scope_level=(
+                DesignScopeLevel.PRODUCT
+                if corrected
+                else DesignScopeLevel.CAPABILITY
+            ),
+            collaboration_mode=DesignCollaborationMode.DESIGN,
+            confidence=0.96,
+        )
+        return InteractionAssessmentCandidate(
+            interpreted_motive=frame.design_subject,
+            desired_outcome=frame.desired_outcome,
+            design_intent_frame=frame,
+            current_requests=(latest.content,),
+            natural_response=(
+                "明白，修正为开发一个支撑 Watt 推广运营的后台系统。"
+                if corrected
+                else "我理解你当前要策划一次 Watt 发布直播。"
+            ),
+            provider_identity="test:design-intent-framing",
         )
 
 
@@ -453,6 +505,60 @@ def test_pre_work_progression_is_reconstructable_and_never_creates_work(
     assert capability.calls == 2
     assert service.assess_current(interaction.id).id == second.latest_assessment.id
     assert capability.calls == 2
+
+
+def test_design_intent_correction_reframes_schema_and_reconstructs_history(
+    postgres_database: Database,
+) -> None:
+    capability = _FramingCorrectionCapability()
+    service = WorkInteractionService(postgres_database, capability=capability)
+    interaction = service.create_interaction(human_identity="human:framing-test")
+
+    first = service.append_and_assess(
+        interaction.id,
+        "我想策划一次 Watt 发布直播。",
+        human_identity="human:framing-test",
+    )
+    assert first.design_intent_frame is not None
+    assert (
+        first.design_intent_frame.object_type
+        is DesignObjectType.OPERATIONAL_ACTIVITY
+    )
+    assert first.selected_design_schema_identity is None
+    assert first.design_stage is None
+
+    corrected = service.append_and_assess(
+        interaction.id,
+        "不对，我不是要设计运营活动，我是要开发一个后台系统。",
+        human_identity="human:framing-test",
+    )
+    assert corrected.design_intent_frame is not None
+    assert corrected.design_intent_frame.object_type is DesignObjectType.PRODUCT_SYSTEM
+    assert corrected.design_intent_frame.design_subject == "支撑 Watt 推广运营的后台系统"
+    assert corrected.selected_design_schema_identity == (
+        "watt:guided-design:general-product-system"
+    )
+    assert corrected.design_stage == "Motive, users, and problem"
+    assert corrected.latest_assessment is not None
+    assert corrected.latest_assessment.schema_version == "wic-assessment-v3"
+
+    history = service.assessment_history(interaction.id)
+    assert tuple(item.design_intent_frame.object_type for item in history) == (
+        DesignObjectType.OPERATIONAL_ACTIVITY,
+        DesignObjectType.PRODUCT_SYSTEM,
+    )
+    reconstructed = WorkInteractionService(
+        postgres_database,
+        capability=capability,
+    ).get_shared_understanding(interaction.id)
+    assert reconstructed == corrected
+    api_projection = SharedUnderstandingResponse.from_projection(reconstructed)
+    assert api_projection.design_intent_frame is not None
+    assert api_projection.design_intent_frame.object_type == "PRODUCT_SYSTEM"
+    assert api_projection.latest_assessment is not None
+    assert api_projection.latest_assessment.design_intent_frame is not None
+    assert _count(postgres_database, product_works) == 0
+    assert _count(postgres_database, work_reality_revisions) == 0
 
 
 def test_idle_conversation_is_valid_interaction_but_not_ready_or_work(
@@ -1242,6 +1348,142 @@ def test_real_provider_conversation_intelligence_single_scenario(
                 },
                 ensure_ascii=False,
             ),
+        )
+    finally:
+        service.shutdown()
+
+
+@pytest.mark.real_codex
+@pytest.mark.skipif(
+    os.environ.get("SPG_RUN_REAL_DESIGN_INTENT_FRAMING") != "1",
+    reason="explicit Design Intent Framing real Provider proof is required",
+)
+def test_real_provider_frames_design_intent_and_accepts_correction(
+    postgres_database: Database,
+) -> None:
+    capability = CodexSdkWorkInteractionCapability(
+        repository_location=os.environ.get(
+            "SPG_WIC_PROVIDER_PROOF_ROOT",
+            str(PROJECT_ROOT),
+        ),
+        model=os.environ.get("SPG_WIC_PROVIDER_MODEL", "gpt-5.6-sol"),
+        conversation_model=os.environ.get(
+            "SPG_CONVERSATION_PROVIDER_MODEL",
+            "gpt-5.6-sol",
+        ),
+        timeout_seconds=300,
+    )
+    service = WorkInteractionService(postgres_database, capability=capability)
+    interaction = service.create_interaction(
+        human_identity="human:design-intent-framing-proof"
+    )
+    runs: list[dict[str, object]] = []
+
+    def execute(message: str):
+        response, projection, streamed = _run_real_human_watt_turn(
+            service,
+            interaction.id,
+            message,
+            timeout=650,
+        )
+        assert streamed is True
+        assert capability.last_collaboration_result is not None
+        assert capability.last_pipeline_evidence is not None
+        frame = projection.design_intent_frame
+        assert frame is not None
+        evidence = capability.last_pipeline_evidence
+        runs.append(
+            {
+                "input": message,
+                "turn_intent": capability.last_collaboration_result.turn_intent.value,
+                "object_type": frame.object_type.value,
+                "design_subject": frame.design_subject,
+                "scope_level": frame.scope_level.value,
+                "collaboration_mode": frame.collaboration_mode.value,
+                "confidence": frame.confidence,
+                "ambiguities": list(frame.ambiguities),
+                "schema_identity": projection.selected_design_schema_identity,
+                "response": response,
+                "semantic_thread_id": evidence.semantic_thread_id,
+                "semantic_turn_id": evidence.semantic_turn_id,
+                "conversation_thread_id": evidence.conversation_thread_id,
+                "conversation_turn_id": evidence.conversation_turn_id,
+            }
+        )
+        return response, projection
+
+    try:
+        first_response, first = execute("我想做一个运营管理平台。")
+        assert first.design_intent_frame.object_type is DesignObjectType.PRODUCT_SYSTEM
+        assert first.selected_design_schema_identity == (
+            "watt:guided-design:general-product-system"
+        )
+        assert any(value in first_response for value in ("系统", "平台", "后台"))
+
+        context_response, contextual = execute(
+            "这个平台主要用于推广 Watt，目标用户包括个人开发者、小型开发团队，"
+            "渠道包括公众号、小红书和直播。"
+        )
+        assert (
+            contextual.design_intent_frame.object_type
+            is DesignObjectType.PRODUCT_SYSTEM
+        )
+        assert any(
+            value in context_response
+            for value in ("个人开发者", "小型开发团队", "公众号", "小红书", "直播")
+        )
+
+        correction_response, corrected = execute(
+            "不对，我不是要设计运营活动，我是要开发一个后台系统。"
+        )
+        assert (
+            corrected.design_intent_frame.object_type
+            is DesignObjectType.PRODUCT_SYSTEM
+        )
+        assert corrected.selected_design_schema_identity == (
+            "watt:guided-design:general-product-system"
+        )
+        assert any(value in correction_response for value in ("明白", "修正", "后台系统"))
+        assert tuple(
+            item.design_intent_frame.object_type
+            for item in service.assessment_history(interaction.id)
+        ) == (
+            DesignObjectType.PRODUCT_SYSTEM,
+            DesignObjectType.PRODUCT_SYSTEM,
+            DesignObjectType.PRODUCT_SYSTEM,
+        )
+        assert _count(postgres_database, product_works) == 0
+        assert _count(postgres_database, work_reality_revisions) == 0
+        for table in runtime_tables:
+            assert _count(postgres_database, table) == 0, table.name
+
+        report = {
+            "evidence_kind": "DESIGN_INTENT_FRAMING_REAL_PROVIDER_PROOF",
+            "provider_model": capability.model,
+            "scenarios": runs,
+            "provider_threads": 6,
+            "provider_turns": 6,
+            "work_and_production_facts": 0,
+        }
+        destination = Path(
+            os.environ.get(
+                "SPG_REAL_DESIGN_INTENT_FRAMING_EVIDENCE_PATH",
+                PROJECT_ROOT
+                / ".spg"
+                / "validation-evidence"
+                / "design-intent-framing-real-provider.json",
+            )
+        )
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = destination.with_suffix(destination.suffix + ".tmp")
+        temporary.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        temporary.replace(destination)
+        print(
+            "DESIGN_INTENT_FRAMING_REAL_PROVIDER_PROOF",
+            json.dumps(report, ensure_ascii=False),
         )
     finally:
         service.shutdown()

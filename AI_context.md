@@ -111,6 +111,8 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **HUMAN–WATT CONVERSATION INTELLIGENCE — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
 
+**DESIGN INTENT FRAMING LAYER — IMPLEMENTED / FOCUSED DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
+
 **WORK-CENTRIC PRODUCTION MODEL — ARCHITECTURE PRINCIPLE / ALIGNED**
 
 **WATT PRODUCT MVP — NOT CLOSED**
@@ -223,6 +225,7 @@ without encoding either restriction as a permanent architecture limit.
 | Work Interaction & Closed-loop Refinement Core | CLOSED / PASS — Slices 1–4 implemented with focused deterministic evidence; final Human WIC Dogfood remains separately governed |
 | Guided Design Core | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable agenda/current focus/readiness, governed multi-step DESIGN, production-proposal review, restart and real Provider proof; Human Product Acceptance PENDING |
 | Human–Watt Conversation Intelligence | IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER PROOF PASS — WIC/domain semantics separated from bounded context assembly and dedicated Human-facing Conversation Provider; 30-case benchmark; Human Product Acceptance PENDING |
+| Design Intent Framing Layer | IMPLEMENTED / FOCUSED DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — persisted advisory frame separates design object from business context before schema selection; bounded `gpt-5.6-sol` correction proof passed with zero Work/production facts; Human Product Acceptance PENDING |
 | Watt Product MVP | NOT CLOSED |
 | DCP-1 — Duration & Capacity Semantic Foundation | CLOSED / PASS |
 | DCP-2 — Production Measurement v0 | IMPLEMENTED / FOCUSED VALIDATION PASS — reconstructable measurement and planning-time TaskShapeSnapshot; no decision influence |
@@ -759,6 +762,21 @@ benchmark and six mandatory `gpt-5.6-sol` scenarios passed; see the
 The v2.x stiff/report-like response findings remain historical truth. Human
 Product Acceptance remains pending.
 
+### Design Intent Framing Layer
+
+[Design Intent Framing](docs/architecture/design-intent-framing-layer.md)
+extends the existing WIC semantic assessment with a concise, persisted advisory
+frame for the object being designed, its business context, desired outcome,
+scope, collaboration mode, assumptions, ambiguities, and confidence. Pre-Work
+Guided Design schema selection now consumes this frame and defers when the
+object is ambiguous or outside the current product/system seed schemas. The
+layer adds no Provider call, lifecycle, Work/Design Truth owner, Plan authority,
+or production authority. Focused deterministic and migration validation pass.
+The bounded real `gpt-5.6-sol` proof preserved `PRODUCT_SYSTEM` across three
+Human turns, incorporated business context, accepted explicit correction to a
+backend-system intent, retained frame-driven schema selection, and created zero
+Work or production facts. Human Product Acceptance remains pending.
+
 ### Interpretation Externalization / Multimodal Alignment
 
 Textual confirmation does not prove equivalence between the Human's mental
@@ -877,6 +895,8 @@ The current system-level architecture baseline is:
 - [Guided Design Facilitation Layer](docs/architecture/guided-design-facilitation-layer.md)
 - [Human–Watt Conversation Intelligence](docs/architecture/human-watt-conversation-intelligence.md)
 - [Human–Watt Conversation Intelligence Focused Validation](docs/evidence/human-watt-conversation-intelligence-focused-validation.md)
+- [Design Intent Framing Layer](docs/architecture/design-intent-framing-layer.md)
+- [Design Intent Framing Focused Validation](docs/evidence/design-intent-framing-focused-validation.md)
 - [External Design Intake Capability Direction](docs/architecture/external-design-intake-capability-direction.md)
 - [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
 - [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)

@@ -10,6 +10,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from spg.domain.conversation import StructuredCollaborationResult
+from spg.domain.design_intent import DesignIntentFrame
 
 
 class InteractionCondition(StrEnum):
@@ -244,6 +245,7 @@ class InteractionAssessmentCandidate(BaseModel):
 
     interpreted_motive: str | None = None
     desired_outcome: str | None = None
+    design_intent_frame: DesignIntentFrame | None = None
     candidate_context: tuple[str, ...] = ()
     candidate_constraints: tuple[str, ...] = ()
     current_requests: tuple[str, ...] = ()
@@ -286,6 +288,7 @@ class InteractionAssessment(BaseModel):
     basis_last_sequence: int = Field(ge=1)
     interpreted_motive: str | None = None
     desired_outcome: str | None = None
+    design_intent_frame: DesignIntentFrame | None = None
     candidate_context: tuple[str, ...]
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
@@ -377,6 +380,7 @@ class SharedUnderstanding(BaseModel):
     human_said: tuple[str, ...]
     interpreted_motive: str | None
     desired_outcome: str | None
+    design_intent_frame: DesignIntentFrame | None = None
     candidate_context: tuple[str, ...]
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
