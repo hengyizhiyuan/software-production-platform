@@ -25,6 +25,10 @@ class Settings(BaseSettings):
         pattern=r"^postgresql(?:\+psycopg)?://\S+$",
         description="PostgreSQL URL supplied through SPG_DATABASE_URL",
     )
+    delivery_runtime_enabled: bool = False
+    delivery_runtime_bind_host: str = "127.0.0.1"
+    delivery_runtime_first_port: int = Field(default=8010, ge=1024, le=65000)
+    delivery_runtime_port_count: int = Field(default=10, ge=1, le=20)
     executor_adapter: str = "unconfigured"
     wic_provider_adapter: str | None = Field(default=None, min_length=1)
     wic_provider_model: str | None = Field(default=None, min_length=1)

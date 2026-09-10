@@ -1,5 +1,5 @@
 """Append-only product delivery records, independent of SPG lifecycle."""
-from sqlalchemy import Column, DateTime, ForeignKey, Table, Uuid
+from sqlalchemy import Column, DateTime, ForeignKey, Table, Uuid, Integer
 from sqlalchemy.dialects.postgresql import JSONB
 from spg.infrastructure.persistence.metadata import metadata
 
@@ -27,3 +27,11 @@ work_delivery_acceptances = Table(
     Column("created_at", DateTime(timezone=True), nullable=False),
 )
 delivery_tables = (work_delivery_targets, work_delivery_manifests, work_delivery_acceptances)
+
+work_delivery_runtimes = Table(
+    "work_delivery_runtimes", metadata,
+    Column("manifest_id", Uuid(as_uuid=True), ForeignKey("work_delivery_manifests.id"), primary_key=True),
+    Column("port", Integer, nullable=False, unique=True),
+    Column("payload", JSONB, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)

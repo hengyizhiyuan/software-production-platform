@@ -6,10 +6,12 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class DeliveryTargetKind(StrEnum):
+    SOFTWARE_ARTIFACT = "SOFTWARE_ARTIFACT"
+    CLI_TOOL = "CLI_TOOL"
     WEB_APPLICATION = "WEB_APPLICATION"
     MOBILE_APPLICATION = "MOBILE_APPLICATION"
     MINI_PROGRAM = "MINI_PROGRAM"
@@ -21,12 +23,51 @@ class DeliveryTargetKind(StrEnum):
     OTHER_SOFTWARE_ARTIFACT = "OTHER_SOFTWARE_ARTIFACT"
 
 
+class SoftwareRuntimeRecipe(BaseModel):
+    """Typed adapter selection; never an arbitrary shell command."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    adapter: str = Field(pattern=r"^STATIC_WEB$")
+    entrypoint: str = "index.html"
+
+    @field_validator("entrypoint")
+    @classmethod
+    def safe_entrypoint(cls, value: str) -> str:
+        from spg.domain.change import safe_repository_path
+        normalized = safe_repository_path(value)
+        if normalized != value or not value.endswith(".html"):
+            raise ValueError("Static Web entrypoint must be an exact HTML repository path")
+        return value
+
+
+class SoftwareDeliveryDetails(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    form: DeliveryTargetKind
+    runtime_recipe: SoftwareRuntimeRecipe
+    repository_ref: str
+    source_revision: str
+    commit_message: str
+    changed_files: tuple[dict[str, str], ...]
+    verification: tuple[dict, ...]
+    reproduction: tuple[str, ...]
+
+
 class DeliveryTargetRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     kind: DeliveryTargetKind
     title: str = Field(min_length=1, max_length=255)
     acceptance_criteria: tuple[str, ...] = Field(min_length=1, max_length=20)
     authority_identity: str = Field(min_length=1, max_length=255)
+    software_form: DeliveryTargetKind | None = None
+    runtime_recipe: SoftwareRuntimeRecipe | None = None
+
+    @model_validator(mode="after")
+    def delivery_adapter_contract(self):
+        if self.kind is DeliveryTargetKind.SOFTWARE_ARTIFACT:
+            if self.software_form is not DeliveryTargetKind.WEB_APPLICATION or self.runtime_recipe is None:
+                raise ValueError("The first software adapter requires WEB_APPLICATION and a STATIC_WEB runtime recipe")
+        elif self.software_form is not None or self.runtime_recipe is not None:
+            raise ValueError("Software configuration belongs to SOFTWARE_ARTIFACT")
+        return self
 
     @field_validator("title", "authority_identity")
     @classmethod
@@ -69,6 +110,7 @@ class DeliveryManifest(BaseModel):
     repository_revision: str
     verification_record_ids: tuple[UUID, ...]
     artifacts: tuple[DeliveryArtifact, ...] = Field(min_length=1)
+    software: SoftwareDeliveryDetails | None = None
     fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     created_at: datetime
 

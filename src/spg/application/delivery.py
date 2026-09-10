@@ -7,13 +7,13 @@ from pathlib import Path, PurePosixPath
 import re
 import subprocess
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
-from zipfile import ZipFile, ZIP_DEFLATED
+from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 
 from sqlalchemy import insert, select
 
 from spg.domain.delivery import (
     DeliveryArtifact, DeliveryManifest, DeliveryTarget, DeliveryTargetKind,
-    DeliveryTargetRequest, HumanAcceptance, HumanAcceptanceRequest,
+    DeliveryTargetRequest, HumanAcceptance, HumanAcceptanceRequest, SoftwareDeliveryDetails,
 )
 from spg.domain.product import ProductInvariantViolation, ProductRecordNotFound
 from spg.infrastructure.persistence import Database
@@ -32,14 +32,15 @@ def fingerprint(payload: dict) -> str:
     return sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
-def read_artifact(repository: str, revision: str, path: str) -> bytes:
-    """Read only a bounded regular Markdown blob at an immutable Git revision."""
+def read_artifact(repository: str, revision: str, path: str, *, software: bool = False) -> bytes:
+    """Read a bounded regular blob at an immutable Git revision, never a working tree."""
     parts = PurePosixPath(path)
     if (not re.fullmatch(r"[0-9a-f]{40,64}", revision)
             or parts.is_absolute() or str(parts) != path
             or any(part in {".", "..", ".git"} for part in parts.parts)
             or "\\" in path or ":" in path or "\x00" in path
-            or not path.endswith(".md")):
+            or any(ord(char) < 32 for char in path)
+            or (not software and not path.endswith(".md"))):
         raise ProductInvariantViolation("Delivery artifact path or exact revision is invalid")
     def git(*args):
         try:
@@ -57,17 +58,33 @@ def read_artifact(repository: str, revision: str, path: str) -> bytes:
     if size > MAX_ARTIFACT_BYTES:
         raise ProductInvariantViolation("Delivery artifact exceeds the 1 MiB inspection limit")
     data = git("cat-file", "blob", blob)
-    try:
-        data.decode("utf-8")
-    except UnicodeDecodeError as exc:
-        raise ProductInvariantViolation("Document Package requires UTF-8 Markdown artifacts") from exc
+    if not software:
+        try:
+            data.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ProductInvariantViolation("Document Package requires UTF-8 Markdown artifacts") from exc
     return data
+
+
+def artifact_media_type(path: str) -> str:
+    return {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
+        ".mjs": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
+        ".json": "application/json", ".md": "text/markdown; charset=utf-8",
+        ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon"}.get(PurePosixPath(path).suffix, "application/octet-stream")
+
+
+def git_bytes(repository: str, *args: str) -> bytes:
+    try:
+        return subprocess.run(["git", "--no-replace-objects", "-C", str(repository), *args], check=True, capture_output=True, timeout=20).stdout
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ProductInvariantViolation("Exact software repository evidence is unavailable") from exc
 
 
 class DeliveryApplicationService:
     """Product acceptance never authorizes a Candidate or advances a PWU."""
     def __init__(self, database: Database):
         self.database = database
+        self.runtime_probe = None
 
     @staticmethod
     def _work(session, work_id: UUID):
@@ -91,8 +108,8 @@ class DeliveryApplicationService:
         return DeliveryManifest.model_validate(payload)
 
     def set_target(self, work_id: UUID, request: DeliveryTargetRequest) -> DeliveryTarget:
-        if request.kind is not DeliveryTargetKind.DOCUMENT_PACKAGE:
-            raise ProductInvariantViolation("This first delivery adapter supports Document Package only")
+        if request.kind not in {DeliveryTargetKind.DOCUMENT_PACKAGE, DeliveryTargetKind.SOFTWARE_ARTIFACT}:
+            raise ProductInvariantViolation("Choose Document Package or Software Artifact with a supported runtime adapter")
         with self.database.unit_of_work() as uow:
             self._work(uow.session, work_id)
             existing = self._target(uow.session, work_id)
@@ -129,6 +146,44 @@ class DeliveryApplicationService:
             raise ProductInvariantViolation("Delivery evidence is outside this Work's exact production cycle")
         return work, binding, summary, commit, resource
 
+    @staticmethod
+    def _software_basis(session, target, binding, commit, resource):
+        from spg.domain.verification import VerificationResultValue
+        runtime = RuntimeStore(session)
+        unit = runtime.work_unit(binding.work_unit_id)
+        contract = None if unit is None else unit.completion_contract.change_contract
+        if contract is None:
+            raise ProductInvariantViolation("Software delivery requires a governed Code Work contract")
+        records = [runtime.verification_record(identity) for identity in commit.verification_record_ids]
+        if not records or any(record is None or record.result is not VerificationResultValue.PASS
+                or record.proposed_commit_identity != commit.repository_revision
+                or record.work_unit_id != binding.work_unit_id for record in records):
+            raise ProductInvariantViolation("Software delivery requires exact-commit passing Verification")
+        tests = [record for record in records if record.obligation.startswith(("NODE_TEST_TARGET:", "PYTEST_TARGET:"))]
+        if not tests:
+            raise ProductInvariantViolation("Software delivery requires an independently passing executable test obligation")
+        paths = git_bytes(resource.location_ref, "ls-tree", "-r", "--name-only", "-z", commit.repository_revision).decode("utf-8").split("\0")[:-1]
+        if len(paths) > 500:
+            raise ProductInvariantViolation("Software package exceeds the 500-file limit")
+        if target.runtime_recipe.entrypoint not in paths or "README.md" not in paths:
+            raise ProductInvariantViolation("Software package requires its declared entrypoint and README.md")
+        if not any(path.endswith((".js", ".mjs", ".cjs")) and not path.startswith("tests/") for path in paths):
+            raise ProductInvariantViolation("Static Web delivery requires implementation code, not documents alone")
+        changes_raw = git_bytes(resource.location_ref, "diff-tree", "--no-commit-id", "--no-renames", "--name-status", "-z", "-r", contract.source_revision, commit.repository_revision).decode("utf-8").split("\0")[:-1]
+        changes = tuple({"status": changes_raw[i], "path": changes_raw[i + 1]} for i in range(0, len(changes_raw), 2))
+        if not any(item["path"].endswith((".js", ".mjs", ".cjs", ".html", ".css")) for item in changes):
+            raise ProductInvariantViolation("Software delivery requires a software change in this production cycle")
+        test_commands = tuple(("node --test " if record.obligation.startswith("NODE_TEST_TARGET:") else "python -m pytest -q ") + record.obligation.split(":", 1)[1] for record in tests)
+        return SoftwareDeliveryDetails(
+            form=target.software_form, runtime_recipe=target.runtime_recipe,
+            repository_ref=resource.authoritative_ref, source_revision=contract.source_revision,
+            commit_message=git_bytes(resource.location_ref, "show", "-s", "--format=%B", commit.repository_revision).decode("utf-8").strip(),
+            changed_files=changes, verification=tuple(record.model_dump(mode="json") for record in records),
+            reproduction=("Extract the package and open a terminal in source/.", "Prerequisites: Node.js 18+ for JavaScript tests; Python 3 for the optional local HTTP server.", *test_commands,
+                "python -m http.server 8080 --bind 127.0.0.1", "Open http://127.0.0.1:8080/" + target.runtime_recipe.entrypoint,
+                "Use the delivered README for behavior and acceptance instructions. No build or dependency download is required by STATIC_WEB."),
+        ), sorted(paths)
+
     def publish(self, work_id: UUID) -> DeliveryManifest:
         with self.database.unit_of_work() as uow:
             self._work(uow.session, work_id)
@@ -138,14 +193,18 @@ class DeliveryApplicationService:
             work, binding, summary, commit, resource = self._trusted_basis(uow.session, work_id)
             artifacts = []
             total_size = 0
-            for path in sorted(set(summary.artifact_paths)):
-                data = read_artifact(resource.location_ref, commit.repository_revision, path)
+            software = None
+            paths = sorted(set(summary.artifact_paths))
+            if target.kind is DeliveryTargetKind.SOFTWARE_ARTIFACT:
+                software, paths = self._software_basis(uow.session, target, binding, commit, resource)
+            for path in paths:
+                data = read_artifact(resource.location_ref, commit.repository_revision, path, software=software is not None)
                 total_size += len(data)
                 if total_size > MAX_PACKAGE_BYTES:
                     raise ProductInvariantViolation("Delivery package exceeds the 10 MiB inspection limit")
-                artifacts.append(DeliveryArtifact(path=path, sha256=sha256(data).hexdigest(), size_bytes=len(data), media_type="text/markdown; charset=utf-8"))
+                artifacts.append(DeliveryArtifact(path=path, sha256=sha256(data).hexdigest(), size_bytes=len(data), media_type=artifact_media_type(path) if software else "text/markdown; charset=utf-8"))
             if not artifacts:
-                raise ProductInvariantViolation("The trusted cycle has no inspectable document artifacts")
+                raise ProductInvariantViolation("The trusted cycle has no inspectable artifacts")
             payload = {
                 "work_id": str(work_id), "target_id": str(target.id),
                 "work_reality_revision_id": str(work.current_work_reality_revision_id) if work.current_work_reality_revision_id else None,
@@ -155,6 +214,8 @@ class DeliveryApplicationService:
                 "verification_record_ids": [str(item) for item in commit.verification_record_ids],
                 "artifacts": [item.model_dump(mode="json") for item in artifacts],
             }
+            if software is not None:
+                payload["software"] = software.model_dump(mode="json")
             digest = fingerprint(payload)
             manifest_id = uuid5(NAMESPACE_URL, "spg:delivery:" + digest)
             existing = uow.session.execute(select(work_delivery_manifests.c.payload).where(work_delivery_manifests.c.id == manifest_id)).scalar_one_or_none()
@@ -185,7 +246,7 @@ class DeliveryApplicationService:
                 current = bool(binding and binding.id == manifest.runtime_binding_id and current_commit == manifest.runtime_commit_id and work.current_work_reality_revision_id == manifest.work_reality_revision_id)
                 manifests.append({"manifest": row, "current": current, "acceptance": decision})
             return {"work_id": str(work_id), "target": None if target is None else target.model_dump(mode="json"),
-                    "supported_target_kinds": [DeliveryTargetKind.DOCUMENT_PACKAGE.value], "deliveries": manifests}
+                    "supported_target_kinds": [DeliveryTargetKind.DOCUMENT_PACKAGE.value, DeliveryTargetKind.SOFTWARE_ARTIFACT.value], "deliveries": manifests}
 
     def artifact(self, work_id: UUID, manifest_id: UUID, path: str) -> bytes:
         with self.database.unit_of_work() as uow:
@@ -198,7 +259,7 @@ class DeliveryApplicationService:
             resource = None if binding is None else product.resource(binding.resource_id)
             if resource is None:
                 raise ProductInvariantViolation("Delivery's bound repository is unavailable")
-        data = read_artifact(resource.location_ref, manifest.repository_revision, path)
+        data = read_artifact(resource.location_ref, manifest.repository_revision, path, software=manifest.software is not None)
         if len(data) != descriptor.size_bytes or sha256(data).hexdigest() != descriptor.sha256:
             raise ProductInvariantViolation("Delivery bytes differ from the exact published manifest")
         return data
@@ -209,10 +270,18 @@ class DeliveryApplicationService:
             target = self._target(uow.session, work_id)
         output = BytesIO()
         with ZipFile(output, "w", ZIP_DEFLATED) as archive:
-            archive.writestr("delivery-manifest.json", manifest.model_dump_json(indent=2))
-            archive.writestr("delivery-target.json", target.model_dump_json(indent=2))
+            def write(path, data):
+                info = ZipInfo(path, date_time=(1980, 1, 1, 0, 0, 0))
+                info.compress_type = ZIP_DEFLATED
+                info.external_attr = 0o100644 << 16
+                archive.writestr(info, data)
+            write("delivery-manifest.json", manifest.model_dump_json(indent=2))
+            write("delivery-target.json", target.model_dump_json(indent=2))
+            if manifest.software:
+                write("verification.json", json.dumps(manifest.software.verification, ensure_ascii=False, indent=2))
+                write("DELIVERY_README.md", "# Software delivery\n\nExact commit: " + manifest.repository_revision + "\n\n" + "\n".join(manifest.software.reproduction) + "\n")
             for artifact in manifest.artifacts:
-                archive.writestr("artifacts/" + artifact.path, self.artifact(work_id, manifest_id, artifact.path))
+                write(("source/" if manifest.software else "artifacts/") + artifact.path, self.artifact(work_id, manifest_id, artifact.path))
         return output.getvalue()
 
     def decide(self, work_id: UUID, manifest_id: UUID, request: HumanAcceptanceRequest) -> HumanAcceptance:
@@ -231,6 +300,10 @@ class DeliveryApplicationService:
                 if all(getattr(record, field) == getattr(request, field) for field in HumanAcceptanceRequest.model_fields):
                     return record
                 raise ProductInvariantViolation("This exact delivery already has an immutable Human decision")
+            if manifest.software is not None and request.decision.value == "ACCEPT":
+                if self.runtime_probe is None:
+                    raise ProductInvariantViolation("Software acceptance requires an accessible exact-manifest runtime")
+                self.runtime_probe(work_id, manifest_id)
             record = HumanAcceptance(**request.model_dump(), id=uuid4(), manifest_id=manifest_id, created_at=datetime.now(UTC))
             uow.session.execute(insert(work_delivery_acceptances).values(
                 id=record.id, manifest_id=manifest_id, payload=record.model_dump(mode="json"), created_at=record.created_at,

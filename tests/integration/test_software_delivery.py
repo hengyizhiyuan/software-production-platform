@@ -1,0 +1,156 @@
+"""Real Git/PostgreSQL/Node proof of software delivery and an isolated HTTP runtime."""
+from hashlib import sha256
+from io import BytesIO
+import json
+from pathlib import Path
+import socket
+import subprocess
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+from uuid import UUID
+from zipfile import ZipFile
+import pytest
+
+from test_work_delivery import (clean_schema, create_asset, bind, _GuidedDesignSemanticCapability,
+    _SchedulingOrchestrator, _GeneralProductDesignCapability)
+from spg.application.assets import RepositoryAssetService
+from spg.application.delivery import DeliveryApplicationService, read_artifact
+from spg.application.software_runtime import SoftwareRuntimeService
+from spg.application.interaction import WorkInteractionService
+from spg.application.work import WorkApplicationService
+from spg.application.steering_bootstrap import SteeringBootstrapService
+from spg.application.steering_driver import PlanSteeringDriver
+from spg.domain.change import ProductionTargetKind
+from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
+from spg.domain.steering import SemanticProductionProposal
+from spg.domain.product import AttentionAction, AttentionKind, AttentionResolutionRequest, ProductInvariantViolation
+from spg.domain.execution import ProviderReportedOutcome
+from spg.providers.contract_verifier import ContractDrivenRepositoryVerifier
+from spg.providers.deterministic_executor import (DeterministicTestExecutor, DeterministicExecutionSpecification,
+    DeterministicFileOperation, DeterministicFileOperationType)
+
+pytestmark = pytest.mark.postgresql
+SOURCE = {
+    'index.html': '<!doctype html><html><body><h1>Inventory</h1><script src="inventory.js"></script></body></html>\n',
+    'inventory.js': 'function low(q, threshold) { return q < threshold; }\nif (typeof module !== "undefined") module.exports = {low};\n',
+    'tests/inventory.test.cjs': 'const {test}=require("node:test"); const assert=require("node:assert/strict"); const {low}=require("../inventory.js");\ntest("threshold boundary",()=>{assert.equal(low(1,2),true); assert.equal(low(2,2),false);});\n',
+}
+
+class SoftwareIntent(_GeneralProductDesignCapability):
+    def interpret(self, basis):
+        return super().interpret(basis).model_copy(update={'desired_outcome': 'Implement a runnable inventory application with tested low-stock rules'})
+
+class SoftwareDesign(_GuidedDesignSemanticCapability):
+    def execute(self, input):
+        result = super().execute(input)
+        if result.proposed_production:
+            result = result.model_copy(update={'proposed_production': SemanticProductionProposal(
+                target_kind=ProductionTargetKind.CODE_WORK, objective='Implement the reviewed inventory behavior with executable tests',
+                code_targets=tuple(SOURCE), verification_expectation='Node tests independently prove threshold boundary behavior')})
+        return result
+
+def produce(database, tmp_path, *, failing=False):
+    interaction = WorkInteractionService(database, capability=SoftwareIntent())
+    item = interaction.create_interaction(human_identity='human:test')
+    understanding = interaction.append_and_assess(item.id, 'Build an inventory application', human_identity='human:test')
+    service = WorkApplicationService(database, workspace_root=tmp_path/'workspaces')
+    work = service.admit_interaction_work(item.id, assessment_id=understanding.latest_assessment.id,
+        basis_fingerprint=understanding.latest_assessment.basis_fingerprint, authority_identity='human:test', use_default_resource=False)
+    assert work.engineering_scope.bindings == ()
+    assets = RepositoryAssetService(database, tmp_path/'assets', tmp_path/'imports')
+    asset = create_asset(assets, 'Software')
+    work = bind(service, work, asset)
+    sources = dict(SOURCE)
+    if failing:
+        sources['inventory.js'] = sources['inventory.js'].replace('q < threshold', 'q <= threshold')
+    executor = DeterministicTestExecutor(DeterministicExecutionSpecification(operations=tuple(
+        DeterministicFileOperation(operation=DeterministicFileOperationType.CREATE, repository_relative_path=path, content=content)
+        for path, content in sources.items()), reported_outcome=ProviderReportedOutcome.SUCCESS))
+    service = WorkApplicationService(database, workspace_root=tmp_path/'workspaces', executor=executor, verifier=ContractDrivenRepositoryVerifier(database))
+    SteeringBootstrapService(database).bootstrap(work.work_id)
+    driver = PlanSteeringDriver(database, service, _SchedulingOrchestrator(), semantic_capability=SoftwareDesign())
+    driver.activate(work.work_id)
+    attention = next(a for a in service.list_attention(work_id=work.work_id) if a.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW)
+    service.resolve_attention(attention.id, AttentionResolutionRequest(action=AttentionAction.APPROVE, authority_identity='human:test'))
+    driver.activate(work.work_id)
+    for _ in range(20):
+        service.advance_work(work.work_id)
+        for a in service.list_attention(work_id=work.work_id):
+            if a.kind is AttentionKind.CANDIDATE_AUTHORIZATION:
+                service.resolve_attention(a.id, AttentionResolutionRequest(action=AttentionAction.AUTHORIZE, authority_identity='human:test'))
+        if service.get_work_result(work.work_id).trusted_result or service.get_work(work.work_id).status.value == 'BLOCKED':
+            break
+    driver.shutdown()
+    delivery = DeliveryApplicationService(database)
+    delivery.set_target(work.work_id, DeliveryTargetRequest(kind='SOFTWARE_ARTIFACT', title='Inventory', acceptance_criteria=('Low-stock boundary works',),
+        authority_identity='human:test', software_form='WEB_APPLICATION', runtime_recipe={'adapter':'STATIC_WEB', 'entrypoint':'index.html'}))
+    return service, work.work_id, delivery, assets
+
+def free_port():
+    with socket.socket() as sock:
+        sock.bind(('127.0.0.1', 0))
+        return sock.getsockname()[1]
+
+def test_code_to_package_runtime_restore_and_explicit_acceptance(postgres_database, tmp_path):
+    service, work_id, delivery, assets = produce(postgres_database, tmp_path)
+    assert service.get_work_result(work_id).trusted_result
+    manifest = delivery.publish(work_id)
+    assert manifest.software and manifest.software.changed_files
+    assert any(item['obligation'].startswith('NODE_TEST_TARGET:') for item in manifest.software.verification)
+    assert all(item['result']=='PASS' for item in manifest.software.verification)
+    assert delivery.publish(work_id).id == manifest.id
+    bundle = delivery.package(work_id, manifest.id)
+    assert delivery.package(work_id, manifest.id) == bundle
+    with ZipFile(BytesIO(bundle)) as archive:
+        assert 'verification.json' in archive.namelist()
+        for artifact in manifest.artifacts:
+            assert sha256(archive.read('source/'+artifact.path)).hexdigest() == artifact.sha256
+        extract = tmp_path/'reproduce'; archive.extractall(extract)
+    check = subprocess.run(['node','--test','tests/inventory.test.cjs'], cwd=extract/'source', capture_output=True)
+    assert check.returncode == 0, check.stderr
+    request = HumanAcceptanceRequest(manifest_fingerprint=manifest.fingerprint, decision='ACCEPT', authority_identity='human:test', rationale='Manually inspected test fixture')
+    with pytest.raises(ProductInvariantViolation, match='accessible'):
+        delivery.decide(work_id, manifest.id, request)
+    runtime = SoftwareRuntimeService(delivery, enabled=True, first_port=free_port(), port_count=1)
+    delivery.runtime_probe = runtime.probe
+    try:
+        with pytest.raises(ProductInvariantViolation, match='Start and inspect'):
+            delivery.decide(work_id, manifest.id, request)
+        ready = runtime.start(work_id, manifest.id)
+        assert ready['status']=='READY'
+        with urlopen(ready['url']) as response:
+            assert response.read() == SOURCE['index.html'].encode()
+            assert "connect-src 'none'" in response.headers['Content-Security-Policy']
+        with pytest.raises(HTTPError):
+            urlopen(ready['url'].replace('index.html','../.git/config'))
+        with pytest.raises(HTTPError):
+            urlopen(Request(ready['url'], headers={'Host':'untrusted.example'}))
+        assert delivery.view(work_id)['deliveries'][0]['acceptance'] is None
+        runtime.shutdown()
+        assert runtime.view(work_id, manifest.id)['status']=='NOT_READY'
+        runtime.restore()
+        assert runtime.probe(work_id, manifest.id)['status']=='READY'
+        assert delivery.decide(work_id, manifest.id, request).decision.value=='ACCEPT'
+    finally:
+        runtime.shutdown()
+
+def test_failing_behavior_test_cannot_publish_software(postgres_database, tmp_path):
+    service, work_id, delivery, _ = produce(postgres_database, tmp_path, failing=True)
+    assert not service.get_work_result(work_id).trusted_result
+    with pytest.raises(ProductInvariantViolation, match='Verification'):
+        delivery.publish(work_id)
+
+def test_software_blob_reader_rejects_links_and_traversal(tmp_path):
+    repo=tmp_path/'repo';repo.mkdir()
+    def git(*args):return subprocess.run(['git','-C',str(repo),*args],check=True,capture_output=True).stdout.decode().strip()
+    git('init','-b','main');(repo/'index.html').write_text('<html></html>\n');(repo/'secret.txt').write_text('fixture\n')
+    git('add','.');git('-c','user.name=Test','-c','user.email=test@localhost','commit','-m','fixture')
+    revision=git('rev-parse','HEAD')
+    assert read_artifact(str(repo),revision,'index.html',software=True)
+    for path in ['../secret.txt','.git/config','x//index.html','/index.html','index.html\x00']:
+        with pytest.raises(ProductInvariantViolation):read_artifact(str(repo),revision,path,software=True)
+    blob=git('rev-parse',revision+':secret.txt')
+    git('update-index','--add','--cacheinfo','120000',blob,'linked.html')
+    git('-c','user.name=Test','-c','user.email=test@localhost','commit','-m','link fixture')
+    with pytest.raises(ProductInvariantViolation,match='regular Git blob'):
+        read_artifact(str(repo),git('rev-parse','HEAD'),'linked.html',software=True)

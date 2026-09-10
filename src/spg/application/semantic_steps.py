@@ -260,8 +260,7 @@ class SemanticStepApplicationService:
                 raise SteeringInvariantViolation(
                     "Implementation-readiness design requires a reviewable production proposal"
                 )
-        if (fresh.design_context is not None and candidate.proposed_production is not None
-                and candidate.proposed_production.target_kind is ProductionTargetKind.DOCUMENTATION_WORK):
+        if fresh.design_context is not None and candidate.proposed_production is not None:
             with self.database.unit_of_work() as design_uow:
                 design_store = SteeringStore(design_uow.session)
                 records = [design_store.semantic_result(ref.identity) for ref in fresh.reality_refs

@@ -25,6 +25,8 @@ services:
     environment:
       SPG_DATABASE_URL: postgresql+psycopg://spg:spg-local-dev@postgres:5432/spg_delivery_acceptance
       SPG_WORKSPACE_ROOT: /var/lib/spg/workspaces
+      SPG_DELIVERY_RUNTIME_ENABLED: "true"
+      SPG_DELIVERY_RUNTIME_BIND_HOST: "0.0.0.0"
       SPG_RUNTIME_PROFILE: work-to-delivery-acceptance
       PYTHONPATH: /opt/watt-source
       SPG_EXECUTOR_ADAPTER: codex-sdk
@@ -43,8 +45,10 @@ services:
       - spg-codex-auth
     ports:
       - "127.0.0.1:8009:8000"
+      - "127.0.0.1:8010-8019:8010-8019"
     volumes:
       - ./src:/opt/watt-source:ro
+      - ./migrations:/app/migrations:ro
       - delivery-runtime:/var/lib/spg
       - delivery-codex:/home/spg/.codex
 secrets:

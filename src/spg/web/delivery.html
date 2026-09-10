@@ -12,10 +12,11 @@
 <label for="repo-source">已有 Git 地址（留空则创建本地 Git 仓库）</label><input id="repo-source" maxlength="2000" placeholder="https://… 或允许导入目录中的本地仓库路径">
 <label for="repo-description">软件描述与期望用途</label><textarea id="repo-description" required maxlength="4000" placeholder="这是一个……，我想继续……"></textarea>
 <button type="submit">接入 / 创建仓库</button></form><div id="assets"></div></section>
-<section><h2>交付目标</h2><p>首版支持文档包：通过受治理生产生成设计文档，提供精确版本的预览和下载。</p>
-<form id="target"><label for="target-kind">交付类型</label><select id="target-kind"><option value="DOCUMENT_PACKAGE">Document Package · 文档包</option></select>
-<label for="target-title">交付名称</label><input id="target-title" required maxlength="255" value="运营平台设计文档包">
-<label for="criteria">验收标准（每行一条）</label><textarea id="criteria" required>目的、用户、范围与约束清晰
-可以据此判断下一步研发工作</textarea><button type="submit">记录交付目标</button></form>
+<section><h2>交付目标</h2><p>支持文档包与软件产物。软件首版支持无需构建的静态 Web 应用，可下载源码、查看验证证据并启动独立验收入口。</p>
+<form id="target"><label for="target-kind">交付类型</label><select id="target-kind"><option value="SOFTWARE_ARTIFACT">Software Artifact · 软件产物</option><option value="DOCUMENT_PACKAGE">Document Package · 文档包</option></select>
+<div id="software-config"><label for="software-form">软件形态</label><select id="software-form"><option value="WEB_APPLICATION">Web 应用 · 静态运行适配器</option></select><label for="entrypoint">应用入口文件</label><input id="entrypoint" value="index.html" maxlength="255"><p>本适配器提供独立本地地址。应用使用外部 JS/CSS 文件，无构建或外部服务依赖；其他软件形态可由后续适配器扩展。</p></div><label for="target-title">交付名称</label><input id="target-title" required maxlength="255" value="库存管理软件">
+<label for="criteria">验收标准（每行一条）</label><textarea id="criteria" required>商品可新增和修改
+库存数量可维护，低库存提醒正确
+刷新后数据保留，输入校验有效</textarea><button type="submit">记录交付目标</button></form>
 <p id="target-summary"></p><button id="publish" type="button">从已验证的受信结果生成交付包</button><div id="deliveries"></div></section>
-<p class="foot">自动验证通过、仓库变更授权、Human 产品接受分别记录。完整应用的运行和部署取决于后续交付类型的支持。</p></main></body></html>
+<p class="foot">自动验证通过、仓库变更授权、Human 产品接受分别记录。软件通过独立运行入口验收；自动验证不会代替 Human 接受。</p></main></body></html>

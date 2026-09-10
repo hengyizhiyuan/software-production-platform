@@ -50,6 +50,7 @@ from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.application.assets import RepositoryAssetService
 from spg.application.delivery import DeliveryApplicationService
+from spg.application.software_runtime import SoftwareRuntimeService
 from spg.domain.assets import RepositoryIntakeRequest, AssetScopeAdmissionRequest
 from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
 from spg.domain.product import (
@@ -117,6 +118,13 @@ def create_http_application(
     configured_workspace = getattr(getattr(container, "settings", None), "workspace_root", Path(".spg/workspaces"))
     asset_service = RepositoryAssetService(selected_database, configured_workspace.parent / "repository-assets", configured_workspace.parent / "repository-imports")
     delivery_service = DeliveryApplicationService(selected_database)
+    settings = getattr(container, "settings", None)
+    software_runtime = SoftwareRuntimeService(delivery_service,
+        enabled=getattr(settings, "delivery_runtime_enabled", False),
+        bind_host=getattr(settings, "delivery_runtime_bind_host", "127.0.0.1"),
+        first_port=getattr(settings, "delivery_runtime_first_port", 8010),
+        port_count=getattr(settings, "delivery_runtime_port_count", 10))
+    delivery_service.runtime_probe = software_runtime.probe
 
     selected_orchestrator = orchestrator or container.production_orchestrator(
         work_service
@@ -149,6 +157,7 @@ def create_http_application(
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
+        software_runtime.restore()
         if selected_interaction is not None:
             resume_turns = getattr(selected_interaction, "resume_pending_turns", None)
             if callable(resume_turns):
@@ -159,6 +168,7 @@ def create_http_application(
         try:
             yield
         finally:
+            software_runtime.shutdown()
             selected_steering_driver.shutdown()
             selected_orchestrator.shutdown()
             if selected_interaction is not None:
@@ -784,6 +794,14 @@ def create_http_application(
     @api.post("/api/works/{work_id}/deliveries")
     def publish_delivery(work_id: UUID):
         return delivery_service.publish(work_id)
+
+    @api.post("/api/works/{work_id}/deliveries/{manifest_id}/runtime")
+    def start_software_runtime(work_id: UUID, manifest_id: UUID):
+        return software_runtime.start(work_id, manifest_id)
+
+    @api.get("/api/works/{work_id}/deliveries/{manifest_id}/runtime")
+    def get_software_runtime(work_id: UUID, manifest_id: UUID):
+        return software_runtime.view(work_id, manifest_id)
 
     @api.get("/api/works/{work_id}/deliveries/{manifest_id}/artifact")
     def delivery_artifact(work_id: UUID, manifest_id: UUID, path: str):

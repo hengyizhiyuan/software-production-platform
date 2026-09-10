@@ -95,6 +95,7 @@ def test_production_metadata_contains_runtime_and_mvp_app_product_tables() -> No
         "work_delivery_targets",
         "work_delivery_manifests",
         "work_delivery_acceptances",
+        "work_delivery_runtimes",
     }
 
 
@@ -103,4 +104,4 @@ def test_alembic_environment_has_work_delivery_head() -> None:
     config = Config(project_root / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260910_32"]
+    assert scripts.get_heads() == ["20260910_33"]
