@@ -152,6 +152,16 @@ def test_compact_transport_preserves_all_source_evidence_and_exact_basis() -> No
     assert all(record.content in instruction for record in basis.records)
 
 
+def test_active_work_prompt_requires_distinct_object_boundary_and_human_confirmation() -> None:
+    instruction = CodexSdkInteractionSemanticCapability.instruction(_basis())
+
+    assert "Regardless of satisfaction state" in instruction
+    assert "different product, system, platform" in instruction
+    assert "UNRELATED_NEW_DEMAND with NEW_WORK_RECOMMENDED" in instruction
+    assert "explicit Human confirmation" in instruction
+    assert "Never create Work or transfer production authority automatically" in instruction
+
+
 @pytest.mark.parametrize(
     ("semantic_effort", "conversation_effort"),
     ((None, None), ("medium", "low")),

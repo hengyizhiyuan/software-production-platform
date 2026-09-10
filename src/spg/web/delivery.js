@@ -17,10 +17,13 @@
   function requireWork() {if(!work) throw new Error("请先在对话中准入 Work，再选择它。"); return work.work_id;}
   function showAsset(asset) {
     const card=node("article","","card");
-    card.append(node("h3",asset.title+(asset.selected_for_production?" · 当前生产目标":asset.bound?" · 已关联":"")), node("p",asset.description),
-      node("p",asset.repository_identity+" · "+asset.repository_ref,"meta"), node("p","接入观察版本："+asset.revision,"meta"));
+    const unresolved=!asset.resource_id;
+    card.append(node("h3",asset.title+(unresolved?" · 访问能力未解析":asset.selected_for_production?" · 当前生产目标":asset.bound?" · 已关联":"")), node("p",asset.description),
+      node("p",asset.repository_identity+(asset.repository_ref?" · "+asset.repository_ref:""),"meta"));
+    if(unresolved) card.append(node("p",asset.message||"授权与集成确认前不会用于生产；当前 Work 可继续使用 Watt 管理的执行工作区。","meta"));
+    else card.append(node("p","接入观察版本："+asset.revision,"meta"));
     const details=node("details"); details.append(node("summary","查看接入目录与观察依据"),node("pre",JSON.stringify({paths:asset.paths,observed_at:asset.observed_at,fingerprint:asset.fingerprint},null,2))); card.append(details);
-    if(work) {const button=node("button",asset.bound?"选择为后续生产目标":"绑定到当前 Work"); button.type="button";
+    if(work&&!unresolved) {const button=node("button",asset.bound?"选择为后续生产目标":"绑定到当前 Work"); button.type="button";
       button.addEventListener("click",()=>action(()=>api(`/api/works/${requireWork()}/asset-scope-admissions`,{resource_id:asset.resource_id,
         expected_work_revision_id:work.current_work_reality_revision_id,observation_fingerprint:asset.fingerprint,authority_identity:"human:local-operator",rationale:"Human selected this observed repository as the Work production target"})));card.append(button);}
     $("assets").append(card);
@@ -48,7 +51,7 @@
     $("work").replaceChildren(node("option","选择 Work（或先返回对话进行准入）"));$("work").firstChild.value="";
     list.forEach(item=>{const option=node("option",item.title||item.desired_outcome||item.work_id);option.value=item.work_id;$("work").append(option);});$("work").value=selected;
     const [current,assets,delivery,attention]=await Promise.all([selected?api(`/api/works/${selected}`):null,api("/api/repository-assets"+(selected?`?work_id=${selected}`:"")),selected?api(`/api/works/${selected}/delivery`):null,selected?api(`/api/attention?work_id=${selected}`):[]]);if(currentGeneration!==generation)return;
-    work=current;$("assets").replaceChildren();assets.forEach(showAsset);$("work-summary").textContent=work?`${work.desired_outcome} · ${work.status==="COMPLETED"?"生产已完成；产品接受状态见下方交付版本":work.status+" · "+work.what_happens_next}`:"先接入仓库，或返回对话澄清并准入一个尚无仓库的 Work。";
+    work=current;$("assets").replaceChildren();assets.forEach(showAsset);$("work-summary").textContent=work?`${work.desired_outcome} · ${work.status==="COMPLETED"?"生产已完成；产品接受状态见下方交付版本":work.status+" · "+work.what_happens_next}`:"返回对话澄清并准入 Work；用户仓库可稍后按需接入。";
     $("plan").textContent=work&&work.production_plan?JSON.stringify(work.production_plan,null,2):"尚无生产计划。继续对话与 Guided Design，成熟后审阅具体生产建议。";
     $("attention").replaceChildren();for(const item of attention){const card=node("article","","card");card.append(node("h3",item.decision),node("p",item.reason));for(const available of item.available_actions){const labels={APPROVE:"批准此项",REJECT:"拒绝此项",AUTHORIZE:"授权精确仓库变更",REQUEST_REFINEMENT:"请求细化"};const button=node("button",labels[available]||available);
       button.addEventListener("click",()=>action(()=>api(`/api/attention/${item.attention_id||item.id}/resolve`,{action:available,authority_identity:"human:local-operator",rationale:"Human reviewed the displayed exact decision and production plan"})));card.append(button);}$("attention").append(card);}

@@ -12,7 +12,7 @@ Repository namespaces use the existing immutable `(repository_identity, reposito
 
 ## B. Work Model Changes
 
-WIC can admit a long-lived Work without a repository. Empty admitted Engineering Scope and nullable repository facts are explicit, including API responses. Design can run; production still requires a selected repository. Work Reality source distinguishes WIC assessment from Work-owned asset-scope admission. Scope changes append revisions and preserve old production bindings.
+WIC can admit a long-lived Work without a repository. Empty admitted Engineering Scope and nullable repository facts are explicit, including API responses. Design runs without repository input. At production readiness, either an explicitly admitted Repository Asset or a deterministic Watt-managed local execution workspace supplies the exact Git/Baseline substrate required by SPG. Work Reality source distinguishes WIC assessment from later asset/workspace scope admission. Scope changes append revisions and preserve old production bindings. See [Repository Asset and Managed Execution Workspace](../architecture/repository-asset-and-managed-execution-workspace.md).
 
 ## C. Asset Model
 
@@ -127,7 +127,7 @@ Native Codex browser automation could not start due to Windows `CreateProcessWit
 
 - [ ] Open the existing Work. Inspect its imported repository, observed revision and design agenda.
 - [ ] Open the original new Work to inspect design history before its later asset-scope revision and the preserved format failure. Open the recheck Work to inspect its verified document package; its asset is independent of the inventory repo.
-- [ ] To repeat from scratch, clarify a new intent at `/app`, leave the repository selection empty when admitting Work, then create and bind a repository at `/delivery`.
+- [ ] To repeat from scratch, clarify a new intent at `/app` and leave the repository selection empty. Continue through production using the Watt-managed workspace; optionally repeat with a Human-selected observed repository.
 - [ ] Review the bounded document production proposal and its artifact paths before approval.
 - [ ] Review the exact Candidate change and authorize repository integration through the existing Attention workflow.
 - [ ] Publish the document package from the verified trusted result; inspect and download its exact files and manifest.

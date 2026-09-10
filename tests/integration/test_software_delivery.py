@@ -28,6 +28,7 @@ from spg.domain.execution import ProviderReportedOutcome
 from spg.providers.contract_verifier import ContractDrivenRepositoryVerifier
 from spg.providers.deterministic_executor import (DeterministicTestExecutor, DeterministicExecutionSpecification,
     DeterministicFileOperation, DeterministicFileOperationType)
+from spg.infrastructure.persistence.product_store import ProductStore
 
 pytestmark = pytest.mark.postgresql
 SOURCE = {
@@ -49,7 +50,7 @@ class SoftwareDesign(_GuidedDesignSemanticCapability):
                 code_targets=tuple(SOURCE), verification_expectation='Node tests independently prove threshold boundary behavior')})
         return result
 
-def produce(database, tmp_path, *, failing=False):
+def produce(database, tmp_path, *, failing=False, user_repository=True):
     interaction = WorkInteractionService(database, capability=SoftwareIntent())
     item = interaction.create_interaction(human_identity='human:test')
     understanding = interaction.append_and_assess(item.id, 'Build an inventory application', human_identity='human:test')
@@ -58,8 +59,9 @@ def produce(database, tmp_path, *, failing=False):
         basis_fingerprint=understanding.latest_assessment.basis_fingerprint, authority_identity='human:test', use_default_resource=False)
     assert work.engineering_scope.bindings == ()
     assets = RepositoryAssetService(database, tmp_path/'assets', tmp_path/'imports')
-    asset = create_asset(assets, 'Software')
-    work = bind(service, work, asset)
+    if user_repository:
+        asset = create_asset(assets, 'Software')
+        work = bind(service, work, asset)
     sources = dict(SOURCE)
     if failing:
         sources['inventory.js'] = sources['inventory.js'].replace('q < threshold', 'q <= threshold')
@@ -131,6 +133,47 @@ def test_code_to_package_runtime_restore_and_explicit_acceptance(postgres_databa
         runtime.restore()
         assert runtime.probe(work_id, manifest.id)['status']=='READY'
         assert delivery.decide(work_id, manifest.id, request).decision.value=='ACCEPT'
+    finally:
+        runtime.shutdown()
+
+
+def test_work_without_user_repository_uses_managed_workspace_and_delivers(postgres_database, tmp_path):
+    service, work_id, delivery, _ = produce(
+        postgres_database,
+        tmp_path,
+        user_repository=False,
+    )
+
+    assert service.get_work_result(work_id).trusted_result
+    projection = service.get_work(work_id)
+    assert projection.engineering_scope is not None
+    assert len(projection.engineering_scope.bindings) == 1
+    with postgres_database.unit_of_work() as uow:
+        product = ProductStore(uow.session)
+        resource = product.resource_for_work(work_id)
+        revision = product.current_work_reality_revision(work_id)
+        assert resource is not None
+        assert revision is not None
+        assert resource.repository_identity.startswith("watt://repositories/")
+        assert revision.change_set == ("execution-workspace:ALLOCATED",)
+        assert revision.admitted_by == "system:watt-managed-execution-workspace"
+
+    manifest = delivery.publish(work_id)
+    assert manifest.software is not None
+    assert {item.path for item in manifest.artifacts} >= set(SOURCE)
+    with ZipFile(BytesIO(delivery.package(work_id, manifest.id))) as archive:
+        assert archive.read("source/index.html") == SOURCE["index.html"].encode()
+    runtime = SoftwareRuntimeService(
+        delivery,
+        enabled=True,
+        first_port=free_port(),
+        port_count=1,
+    )
+    try:
+        ready = runtime.start(work_id, manifest.id)
+        assert ready["status"] == "READY"
+        with urlopen(ready["url"]) as response:
+            assert response.read() == SOURCE["index.html"].encode()
     finally:
         runtime.shutdown()
 

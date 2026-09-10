@@ -1380,7 +1380,9 @@
         const select = document.getElementById("admission-resource");
         const previous = select.value;
         select.replaceChildren(new Option("尚无仓库，先开始 Work 与设计", ""));
-        for (const asset of assets) select.add(new Option(asset.title + " · " + asset.repository_identity, asset.resource_id));
+        for (const asset of assets) {
+          if (asset.resource_id) select.add(new Option(asset.title + " · " + asset.repository_identity, asset.resource_id));
+        }
         select.value = previous;
       } catch (_error) { /* Existing interaction remains available if asset listing fails. */ }
       await Promise.all([loadHealth(), loadCollections()]);
@@ -1824,6 +1826,18 @@
     elements.workRequirement.focus();
   }
 
+  function consumeNewWorkEntry() {
+    const url = new URL(globalThis.location.href);
+    if (url.searchParams.get("new") !== "1") return;
+    state.selectedInteractionId = "";
+    state.freshInteraction = true;
+    state.sharedUnderstanding = null;
+    state.selectedWorkId = "";
+    try { localStorage.removeItem(INTERACTION_STORAGE_KEY); } catch (_error) { /* optional preference */ }
+    url.searchParams.delete("new");
+    globalThis.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+
   elements.showGoalForm.addEventListener("click", () => {
     elements.goalForm.hidden = !elements.goalForm.hidden;
     if (!elements.goalForm.hidden) {
@@ -1888,5 +1902,6 @@
 
   restoreComposer();
   restoreComposerExpanded();
+  consumeNewWorkEntry();
   reloadWorkspace();
 })();

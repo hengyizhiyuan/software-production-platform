@@ -14,7 +14,10 @@ import pytest
 from sqlalchemy import func, inspect, select, text
 
 from spg.api import create_http_application
-from spg.application.interaction import WorkInteractionService
+from spg.application.interaction import (
+    DeterministicWorkInteractionCapability,
+    WorkInteractionService,
+)
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.orchestration import OrchestrationStopReason, ProductionOrchestrator
 from spg.application.steering_driver import PlanSteeringDriver
@@ -1823,7 +1826,6 @@ def test_wic4_new_work_transition_survives_restart_and_forms_independent_work(
     assert _count(postgres_database, product_works) == 1
     for table in PRODUCTION_TABLES:
         assert _count(postgres_database, table) == 0, table.name
-
     restarted = WorkInteractionService(
         postgres_database,
         capability=_ReadyCapability(),
@@ -1879,6 +1881,40 @@ def test_wic4_new_work_transition_survives_restart_and_forms_independent_work(
     assert final.governed_revision.governance_record_id != (
         old_revision.governance_record_id
     )
+    for table in PRODUCTION_TABLES:
+        assert _count(postgres_database, table) == 0, table.name
+
+
+def test_wic4_explicit_different_system_object_requires_human_new_work_decision(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    original_revision = work.get_work(admitted.work_id).current_work_reality_revision_id
+    active = WorkInteractionService(
+        postgres_database,
+        capability=DeterministicWorkInteractionCapability(),
+    )
+
+    pending = active.append_and_assess(
+        ready.interaction.id,
+        "I want to develop a CRM system.",
+        human_identity="human:test",
+    )
+
+    transition = pending.latest_work_transition
+    assert transition is not None
+    assert transition.originating_work_id == admitted.work_id
+    assert transition.focus_classification is WorkFocusClassification.UNRELATED_NEW_DEMAND
+    assert transition.impact_disposition is WorkImpactDisposition.NEW_WORK_RECOMMENDED
+    assert transition.choice is WorkTransitionChoice.PENDING_HUMAN
+    assert pending.governed_work_id == admitted.work_id
+    assert pending.latest_assessment.candidate_change is None
+    assert "This appears to be a new Work" in pending.latest_assessment.natural_response
+    assert _count(postgres_database, product_works) == 1
+    assert work.get_work(admitted.work_id).current_work_reality_revision_id == original_revision
     for table in PRODUCTION_TABLES:
         assert _count(postgres_database, table) == 0, table.name
 

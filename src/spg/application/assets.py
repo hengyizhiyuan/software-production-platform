@@ -6,13 +6,13 @@ import json
 from pathlib import Path
 import subprocess
 from urllib.parse import urlsplit, urlunsplit
-from uuid import UUID
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from sqlalchemy import insert, select, text, update
 
 from spg.application.runtime import RuntimeService
 from spg.application.work import WorkApplicationService
-from spg.domain.assets import RepositoryIntakeRequest
+from spg.domain.assets import AssetScopeAdmissionRequest, RepositoryIntakeRequest
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import EngineeringContextReference, ProductInvariantViolation, ProductRecordNotFound
 from spg.domain.runtime import BootstrapRequest
@@ -91,7 +91,48 @@ class RepositoryAssetService:
                     self._git(repository, "add", "--", "README.md")
                     self._git(repository, "-c", "user.name=Watt", "-c", "user.email=watt@localhost", "commit", "-m", "Initialize repository asset")
                 else:
-                    self._git(self.asset_root, "clone", "--no-local", "--", source, str(repository))
+                    try:
+                        self._git(self.asset_root, "clone", "--no-local", "--", source, str(repository))
+                    except ProductInvariantViolation:
+                        candidate = {
+                            "resource_id": None,
+                            "repository_identity": source,
+                            "repository_ref": None,
+                            "revision": None,
+                            "tree": None,
+                            "paths": [],
+                            "context_path": None,
+                            "observed_at": datetime.now(UTC).isoformat(),
+                            "source": source,
+                            "title": request.title,
+                            "description": request.description,
+                            "intake_request_id": str(request.request_id),
+                            "condition": "UNRESOLVED",
+                            "authorization": {
+                                capability: "UNKNOWN"
+                                for capability in (
+                                    "READ",
+                                    "WRITE",
+                                    "CREATE_BRANCH",
+                                    "CREATE_PR",
+                                    "PUSH",
+                                )
+                            },
+                            "message": (
+                                "Repository access was not confirmed. Work may continue "
+                                "without this Asset; authorization and integration are "
+                                "required before production can use it."
+                            ),
+                        }
+                        candidate["fingerprint"] = canonical_fingerprint(candidate)
+                        with self.database.unit_of_work() as uow:
+                            uow.session.execute(
+                                update(repository_intakes)
+                                .where(repository_intakes.c.id == request.request_id)
+                                .values(observation=candidate)
+                            )
+                            uow.commit()
+                        return candidate
             # A previous interrupted intake may leave a valid repository: observe, never overwrite.
             ref = self._git(repository, "symbolic-ref", "HEAD")
             revision = self._git(repository, "rev-parse", "HEAD")
@@ -127,6 +168,58 @@ class RepositoryAssetService:
                 uow.commit()
             return observation
 
+    def ensure_managed_execution_workspace(
+        self,
+        work_service: WorkApplicationService,
+        work_id: UUID,
+    ):
+        """Allocate one local Git-backed execution workspace within admitted Work authority."""
+        with self.database.unit_of_work() as uow:
+            selected = ProductStore(uow.session).resource_for_work(work_id)
+        if selected is not None:
+            return work_service.get_work(work_id)
+
+        request_id = uuid5(
+            NAMESPACE_URL,
+            f"watt:managed-execution-workspace:{work_id}",
+        )
+        authority = "system:watt-managed-execution-workspace"
+        observation = self.intake(
+            RepositoryIntakeRequest(
+                request_id=request_id,
+                title="Watt-managed execution workspace",
+                description=(
+                    "Local execution substrate allocated only when this admitted Work "
+                    "reaches production readiness."
+                ),
+                authority_identity=authority,
+            )
+        )
+        projection = work_service.get_work(work_id)
+        with self.database.unit_of_work() as uow:
+            selected = ProductStore(uow.session).resource_for_work(work_id)
+        if selected is not None:
+            return projection
+        if observation.get("resource_id") is None:
+            raise ProductInvariantViolation(
+                "Watt-managed execution workspace could not be observed"
+            )
+        return work_service.admit_asset_scope(
+            work_id,
+            AssetScopeAdmissionRequest(
+                resource_id=UUID(observation["resource_id"]),
+                expected_work_revision_id=projection.current_work_reality_revision_id,
+                observation_fingerprint=observation["fingerprint"],
+                authority_identity=authority,
+                rationale=(
+                    "Allocate Watt-owned local execution substrate within the already "
+                    "admitted Work authority; no external repository authority is implied."
+                ),
+            ),
+            observation,
+            managed_execution_workspace=True,
+        )
+
     def observation(self, resource_id: UUID):
         with self.database.unit_of_work() as uow:
             row = uow.session.execute(select(repository_intakes.c.observation).where(repository_intakes.c.resource_id == resource_id)).scalar_one_or_none()
@@ -141,5 +234,5 @@ class RepositoryAssetService:
             scope = None if work_id is None else product.scope_for_work(work_id)
             bound = set() if scope is None else {str(item.resource_id) for item in scope.bindings}
             selected = None if work_id is None else product.resource_for_work(work_id)
-            return [{**row, "bound": row["resource_id"] in bound,
+            return [{**row, "bound": row["resource_id"] is not None and row["resource_id"] in bound,
                 "selected_for_production": selected is not None and str(selected.id) == row["resource_id"]} for row in observations]

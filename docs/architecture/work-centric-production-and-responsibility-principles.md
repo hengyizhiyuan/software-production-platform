@@ -92,9 +92,12 @@ Both are Work-centered flows. The Human should not have to choose between a
 New Project and Import Project mode, understand an asset-attachment workflow,
 or manually assemble engineering context merely to express the Motive.
 
-This principle does not authorize Work Asset Intake or Repository Intake
-implementation. It defines the product experience those future capabilities
-must support.
+The current local MVP implements the narrow repository-independent path: Work
+and design can begin without a Repository Asset, and Watt allocates local
+execution substrate only when production becomes ready. Explicit external
+Repository Asset binding remains separately governed. Remote provider access,
+OAuth/SSH credentials, and push authority remain future capabilities; see
+[Repository Asset and Managed Execution Workspace](repository-asset-and-managed-execution-workspace.md).
 
 ## 4. Industrial analogy: responsibility, not rigidity
 

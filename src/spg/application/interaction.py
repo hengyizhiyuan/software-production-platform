@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 import hashlib
 import json
+import re
 from threading import RLock
 from time import monotonic
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
@@ -58,6 +59,99 @@ from spg.infrastructure.persistence.steering_store import SteeringStore
 ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v3"
 READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
+
+
+_LONG_LIVED_OBJECT_TERMS = (
+    "system",
+    "platform",
+    "application",
+    " app",
+    "product",
+    "service",
+    "portal",
+    "website",
+    "系统",
+    "平台",
+    "应用",
+    "软件",
+    "服务",
+    "门户",
+    "网站",
+)
+_NEW_OBJECT_PATTERNS = (
+    re.compile(
+        r"\b(?:i\s+(?:want|would like|need)\s+to|let(?:'s| us))\s+"
+        r"(?:build|develop|create|make|launch|design)\s+(?:an|a|the)?\s*(?P<object>.+)",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"(?:我想|我要|希望)(?:做|开发|创建|搭建|建设|设计)"
+        r"(?:一个|一套|新的?)?(?P<object>.+)"
+    ),
+)
+_GENERIC_OBJECT_WORDS = {
+    "a",
+    "an",
+    "the",
+    "new",
+    "system",
+    "platform",
+    "application",
+    "app",
+    "product",
+    "service",
+    "portal",
+    "website",
+}
+
+
+def _declares_distinct_long_lived_object(
+    latest_human_input: str,
+    active: ActiveWorkInterpretationContext | None,
+) -> bool:
+    """Conservatively detect an explicitly declared, different Work-scale object."""
+
+    if active is None:
+        return False
+    value = latest_human_input.strip()
+    lowered = value.casefold()
+    if not any(term in lowered for term in _LONG_LIVED_OBJECT_TERMS):
+        return False
+    declared = next(
+        (
+            match.group("object").strip(" .。!！?？")
+            for pattern in _NEW_OBJECT_PATTERNS
+            if (match := pattern.search(value)) is not None
+        ),
+        None,
+    )
+    if not declared:
+        return False
+    current = (
+        f"{active.work_revision.motive} {active.work_revision.desired_outcome}"
+    ).casefold()
+    declared_words = tuple(
+        word
+        for word in re.findall(r"[a-z0-9]+", declared.casefold())
+        if word not in _GENERIC_OBJECT_WORDS
+    )
+    if declared_words:
+        return not any(word in current for word in declared_words)
+    declared_core = re.sub(
+        r"(?:一个|一套|新的?|系统|平台|应用|软件|服务|门户|网站)",
+        "",
+        declared,
+    ).strip()
+    return bool(declared_core) and declared_core.casefold() not in current
+
+
+def _new_work_confirmation(latest_human_input: str) -> str:
+    if re.search(r"[\u4e00-\u9fff]", latest_human_input):
+        return "这看起来是一个新的 Work。你想创建一个新的 Work 吗？当前 Work 不会被自动修改。"
+    return (
+        "This appears to be a new Work. Would you like to create a new Work? "
+        "The current Work will not be changed automatically."
+    )
 
 
 def interaction_basis_fingerprint(
@@ -118,7 +212,8 @@ class DeterministicWorkInteractionCapability:
             value = latest.content.strip()
             normalized_latest = value.casefold()
             references = latest.supporting_references
-            if any(
+            distinct_object = _declares_distinct_long_lived_object(value, active)
+            if distinct_object or any(
                 marker in normalized_latest
                 for marker in ("另一个需求", "另外一个需求", "unrelated", "new work")
             ):
@@ -167,6 +262,9 @@ class DeterministicWorkInteractionCapability:
                 impact_disposition=impact,
                 supporting_references=references,
                 natural_response=(
+                    _new_work_confirmation(value)
+                    if impact is WorkImpactDisposition.NEW_WORK_RECOMMENDED
+                    else
                     "I kept the current Work focus and recorded this without changing governed Work."
                     if impact is WorkImpactDisposition.NO_GOVERNED_CHANGE
                     else "I assessed this against the current Work. Human governance is required before any Work revision."
@@ -761,14 +859,26 @@ class WorkInteractionService:
                 raise InteractionInvariantViolation(
                     "Interpretation meaning references a record outside its basis"
                 )
+            latest_human_input = next(
+                record.content
+                for record in reversed(records)
+                if record.actor is InteractionActor.HUMAN
+            )
+            if _declares_distinct_long_lived_object(
+                latest_human_input,
+                active_context,
+            ):
+                candidate = candidate.model_copy(
+                    update={
+                        "focus_classification": WorkFocusClassification.UNRELATED_NEW_DEMAND,
+                        "impact_disposition": WorkImpactDisposition.NEW_WORK_RECOMMENDED,
+                        "natural_response": _new_work_confirmation(latest_human_input),
+                    }
+                )
             candidate = self._with_design_intent_frame(
                 candidate,
                 prior_assessment=store.latest_assessment(interaction_id),
-                latest_human_input=next(
-                    record.content
-                    for record in reversed(records)
-                    if record.actor is InteractionActor.HUMAN
-                ),
+                latest_human_input=latest_human_input,
             )
             focus, impact, candidate_change = self._normalize_active_candidate(
                 candidate,

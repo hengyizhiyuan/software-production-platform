@@ -960,13 +960,45 @@ class WorkApplicationService:
             unit_of_work.commit()
         return self.get_work(work.id)
 
-    def admit_asset_scope(self, work_id: UUID, request, observation: dict) -> WorkProjection:
-        """Work Admission owns the exact Human-authorized asset-scope revision."""
+    def admit_asset_scope(
+        self,
+        work_id: UUID,
+        request,
+        observation: dict,
+        *,
+        managed_execution_workspace: bool = False,
+    ) -> WorkProjection:
+        """Admit an exact observed asset or allocate Watt's local execution substrate."""
         from spg.domain.interaction import WorkRealityRevision
         if observation.get("resource_id") != str(request.resource_id) or observation.get("fingerprint") != request.observation_fingerprint:
             raise ProductInvariantViolation("Repository observation does not match the exact asset decision")
-        basis = self._fingerprint({"work_id": str(work_id), **request.model_dump(mode="json")})
-        revision_id = uuid5(NAMESPACE_URL, "spg:asset-scope:" + basis)
+        if managed_execution_workspace and (
+            request.authority_identity != "system:watt-managed-execution-workspace"
+            or observation.get("source") is not None
+            or not str(observation.get("repository_identity", "")).startswith(
+                "watt://repositories/"
+            )
+        ):
+            raise ProductInvariantViolation(
+                "Managed execution allocation accepts only Watt-owned local workspace Reality"
+            )
+        binding_kind = (
+            "MANAGED_EXECUTION_WORKSPACE"
+            if managed_execution_workspace
+            else "HUMAN_REPOSITORY_ASSET"
+        )
+        basis = self._fingerprint(
+            {
+                "work_id": str(work_id),
+                "binding_kind": binding_kind,
+                **request.model_dump(mode="json"),
+            }
+        )
+        revision_id = uuid5(
+            NAMESPACE_URL,
+            ("spg:managed-execution-workspace:" if managed_execution_workspace else "spg:asset-scope:")
+            + basis,
+        )
         with self.database.unit_of_work() as uow:
             product = ProductStore(uow.session)
             runtime = RuntimeStore(uow.session)
@@ -997,8 +1029,13 @@ class WorkApplicationService:
             timestamp = datetime.now(UTC)
             scope_id, governance_id = uuid4(), uuid4()
             scope_fingerprint = self._fingerprint({"work_id": str(work_id), "resources": sorted(str(item) for item in resource_ids), "selected": str(resource.id), "basis": basis})
+            scope_summary = (
+                f"Watt-managed execution workspace {resource.repository_identity}"
+                if managed_execution_workspace
+                else f"Work assets; production target {resource.repository_identity}"
+            )
             product.insert_scope(scope_values={"id": scope_id, "work_id": work_id,
-                "summary": f"Work assets; production target {resource.repository_identity}",
+                "summary": scope_summary,
                 "fingerprint": scope_fingerprint, "condition": EngineeringScopeCondition.ADMITTED.value,
                 "created_at": timestamp, "updated_at": timestamp}, binding_values=tuple({
                     "id": uuid4(), "engineering_scope_id": scope_id, "resource_id": resource_id,
@@ -1010,24 +1047,37 @@ class WorkApplicationService:
                 basis_fingerprint=basis, engineering_scope_id=str(scope_id), engineering_resource_id=str(resource.id),
                 scope_basis_fingerprint=scope_fingerprint, repository_identity=resource.repository_identity,
                 repository_ref=resource.authoritative_ref, source_baseline_id=str(baseline.id), source_revision=baseline.repository_revision,
-                governance_record_id=str(governance_id), change_set=["asset:PRODUCTION_TARGET_ADMITTED"],
-                supporting_references=[*previous.supporting_references, "REPOSITORY_OBSERVATION:"+request.observation_fingerprint],
+                governance_record_id=str(governance_id), change_set=[
+                    "execution-workspace:ALLOCATED"
+                    if managed_execution_workspace
+                    else "asset:PRODUCTION_TARGET_ADMITTED"
+                ],
+                supporting_references=[
+                    *previous.supporting_references,
+                    ("MANAGED_EXECUTION_WORKSPACE:" if managed_execution_workspace else "REPOSITORY_OBSERVATION:")
+                    + request.observation_fingerprint,
+                ],
                 rationale=request.rationale, admitted_by=request.authority_identity, schema_version="work-reality-v2", created_at=timestamp.isoformat())
             payload.pop("revision_fingerprint")
             payload["revision_fingerprint"] = self._fingerprint(payload)
             revision = WorkRealityRevision.model_validate(payload)
-            runtime.insert_governance({"id": governance_id, "decision_type": "ADMIT_WORK_ASSET_SCOPE",
+            runtime.insert_governance({"id": governance_id, "decision_type": (
+                    "ALLOCATE_MANAGED_EXECUTION_WORKSPACE"
+                    if managed_execution_workspace
+                    else "ADMIT_WORK_ASSET_SCOPE"
+                ),
                 "authority_identity": request.authority_identity, "subject_type": "PRODUCT_WORK", "subject_identity": str(work_id),
                 "scope": {"previous_work_revision_id": str(previous.id), "work_reality_revision_id": str(revision.id),
                     "resource_id": str(resource.id), "observation_fingerprint": request.observation_fingerprint,
-                    "source_baseline_id": str(baseline.id), "scope_fingerprint": scope_fingerprint},
+                    "source_baseline_id": str(baseline.id), "scope_fingerprint": scope_fingerprint,
+                    "binding_kind": binding_kind},
                 "rationale": request.rationale, "created_at": timestamp})
             values = revision.model_dump(mode="python")
             for field in ("source_record_ids", "supporting_references", "change_set", "context_facts", "constraints", "requests"):
                 values[field] = [str(item) for item in values[field]]
             product.insert_work_reality_revision(values)
             product.update_work(work_id, {"current_work_reality_revision_id": revision.id,
-                "current_engineering_scope_id": scope_id, "scope_summary": f"Work assets; production target {resource.repository_identity}",
+                "current_engineering_scope_id": scope_id, "scope_summary": scope_summary,
                 "production_plan_proposal": None, "code_change_proposal": None,
                 "expected_artifact_path": None, "artifact_operation": None,
                 "artifact_source_baseline_id": None, "artifact_source_revision": None, "updated_at": timestamp})

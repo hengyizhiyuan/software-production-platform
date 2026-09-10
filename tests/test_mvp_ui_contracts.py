@@ -91,6 +91,15 @@ def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
             assert content_marker in response.text
 
         assert client.get("/delivery").status_code == 200
+        assert 'id="new-work-entry"' in client.get("/delivery").text
+        assert 'href="/app?new=1"' in client.get("/delivery").text
+        assert "用户仓库是可选 Asset" in client.get("/delivery").text
+        assert "访问能力未解析" in (WEB_ROOT / "delivery.js").read_text(
+            encoding="utf-8"
+        )
+        assert "if (asset.resource_id)" in (WEB_ROOT / "app.js").read_text(
+            encoding="utf-8"
+        )
 
         activation = client.get("/api/runtime-activation")
         assert activation.status_code == 200
@@ -112,6 +121,8 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "artifact target" in combined
     assert "artifact operation" in combined
     assert 'id="interaction-history"' in html
+    assert 'id="new-interaction-control"' in html
+    assert ">New Work</button>" in html
     assert 'id="shared-understanding"' in html
     assert '<details class="collaboration-detail-disclosure">' in html
     assert "Review collaboration details" in html

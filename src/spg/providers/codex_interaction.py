@@ -557,8 +557,15 @@ class CodexSdkInteractionSemanticCapability:
             "When active_work_context exists, preserve its governed Motive, outcome, "
             "context, constraints, and requests unless the latest input actually proposes "
             "change. Classify focus and production impact without silently rewriting Work "
-            "or injecting input into an active cycle. When Work is currently satisfied, "
-            "distinguish same-Motive continuation from new Work. "
+            "or injecting input into an active cycle. Regardless of satisfaction state, "
+            "compare an explicitly declared long-lived objective with the active Work. "
+            "If the Human names a different product, system, platform or similarly durable "
+            "objective, classify it as UNRELATED_NEW_DEMAND with NEW_WORK_RECOMMENDED, "
+            "preserve the current governed Work, and recommend explicit Human confirmation "
+            "before independent Work formation. Do not treat an ordinary feature, question "
+            "or relevant exploration as a new Work merely because its wording differs. "
+            "Never create Work or transfer production authority automatically. When Work is "
+            "currently satisfied, also distinguish same-Motive continuation from new Work. "
             if not coalesced or getattr(basis, "active_work_context", None) is not None else ""
         )
         frame_null_instruction = (

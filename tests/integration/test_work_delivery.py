@@ -107,6 +107,46 @@ def test_empty_work_then_two_repository_namespaces(postgres_database, tmp_path):
     assert response.governed_revision.source_assessment_id is None
 
 
+def test_unconfirmed_remote_repository_remains_nonblocking_asset_candidate(
+    postgres_database,
+    tmp_path,
+    monkeypatch,
+):
+    work, projection = admit_empty(postgres_database, tmp_path)
+    assets = RepositoryAssetService(
+        postgres_database,
+        tmp_path / "assets",
+        tmp_path / "imports",
+    )
+    original_git = assets._git
+
+    def inaccessible(path, *args):
+        if args and args[0] == "clone":
+            raise ProductInvariantViolation("synthetic access denial")
+        return original_git(path, *args)
+
+    monkeypatch.setattr(assets, "_git", inaccessible)
+    request = RepositoryIntakeRequest(
+        request_id=uuid4(),
+        source="https://example.invalid/private/repository.git",
+        title="Unconfirmed external repository",
+        description="Candidate input; access has not been authorized",
+        authority_identity="human:test",
+    )
+
+    candidate = assets.intake(request)
+
+    assert assets.intake(request) == candidate
+    assert candidate["condition"] == "UNRESOLVED"
+    assert candidate["resource_id"] is None
+    assert set(candidate["authorization"].values()) == {"UNKNOWN"}
+    assert "Work may continue" in candidate["message"]
+    assert assets.list_assets(work_id=projection.work_id) == [
+        {**candidate, "bound": False, "selected_for_production": False}
+    ]
+    assert work.get_work(projection.work_id).engineering_scope.bindings == ()
+
+
 def test_design_to_trusted_delivery_and_explicit_acceptance(postgres_database, tmp_path):
     work, projection = admit_empty(postgres_database, tmp_path)
     assets = RepositoryAssetService(postgres_database, tmp_path / "assets", tmp_path / "imports")

@@ -9,6 +9,7 @@ import subprocess
 from uuid import UUID, uuid4
 
 from spg.application.planning import ProductionPlanningService
+from spg.application.assets import RepositoryAssetService
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.refinement import RepositoryChangeProposalService
 from spg.application.runtime import RuntimeService
@@ -49,6 +50,7 @@ from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
+from spg.application.work import WorkApplicationService
 from spg.providers.repository_change_proposal import (
     RepositoryAwareChangeProposalProvider,
 )
@@ -68,6 +70,9 @@ class SemanticStepApplicationService:
         self,
         database: Database,
         capability: SemanticStepCapability | None,
+        *,
+        work_service: WorkApplicationService | None = None,
+        repository_assets: RepositoryAssetService | None = None,
     ) -> None:
         self.database = database
         self.capability = capability
@@ -78,6 +83,8 @@ class SemanticStepApplicationService:
             RepositoryAwareChangeProposalProvider()
         )
         self.guided_design = GuidedDesignApplicationService(database)
+        self.work_service = work_service
+        self.repository_assets = repository_assets
 
     def assemble_input(self, work_id: UUID) -> SemanticStepInput:
         frame = self.frames.assemble(work_id)
@@ -159,6 +166,18 @@ class SemanticStepApplicationService:
 
     def execute(self, work_id: UUID) -> SemanticStepResultRecord:
         semantic_input = self.assemble_input(work_id)
+        if (
+            semantic_input.engineering_resource_id is None
+            and semantic_input.design_context is not None
+            and semantic_input.design_context.get("production_transition_issue") is True
+            and self.work_service is not None
+            and self.repository_assets is not None
+        ):
+            self.repository_assets.ensure_managed_execution_workspace(
+                self.work_service,
+                work_id,
+            )
+            semantic_input = self.assemble_input(work_id)
         existing = self.result_for_step(semantic_input.step.id)
         guided = self.guided_design.get_optional(work_id)
         guided_issue = (
@@ -430,7 +449,9 @@ class SemanticStepApplicationService:
         candidate: SemanticStepResultCandidate,
     ) -> tuple[ProductionPlanProposal, RepositoryChangeProposal | None]:
         if semantic_input.engineering_resource_id is None or semantic_input.source_baseline_id is None:
-            raise SteeringInvariantViolation("Bind a Repository Asset before materializing production")
+            raise SteeringInvariantViolation(
+                "Production requires an observed execution workspace; user repository binding is optional"
+            )
         proposal = candidate.proposed_production
         assert proposal is not None
         change_proposal = None

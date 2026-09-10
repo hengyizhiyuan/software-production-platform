@@ -2,16 +2,16 @@
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>Watt · Work 资产与交付</title><link rel="stylesheet" href="/assets/delivery.css"><script src="/assets/delivery.js" defer></script></head>
-<body><header><a href="/app">← 返回对话与设计</a><span>Watt / Work-to-Delivery</span></header>
-<main><h1>从 Work 到可验收的交付</h1><p class="lead">明确目标，绑定仓库，审阅生产计划，再检查交付物。</p>
+<body><header><a href="/app">← 返回对话与设计</a><span>Watt / Work-to-Delivery</span><a id="new-work-entry" href="/app?new=1">新建 Work</a></header>
+<main><h1>从 Work 到可验收的交付</h1><p class="lead">明确目标，审阅生产计划，再检查交付物。用户仓库是可选 Asset；没有仓库时 Watt 会在生产就绪时分配本地执行工作区。</p>
 <div id="notice" role="status" aria-live="polite"></div>
-<section><h2>当前 Work</h2><label for="work">选择 Work</label><select id="work"><option value="">先在对话中澄清并准入 Work</option></select><button id="refresh" type="button">刷新状态</button>
+<section><h2>当前 Work</h2><p><a href="/app?new=1">从独立对话开始新的 Work</a>，不会继承当前 Work 上下文或生产权限。</p><label for="work">选择 Work</label><select id="work"><option value="">先在对话中澄清并准入 Work</option></select><button id="refresh" type="button">刷新状态</button>
 <p id="work-summary"></p><div id="attention"></div><details><summary>已准入的生产计划</summary><pre id="plan">尚无生产计划</pre></details></section>
-<section><h2>仓库资产</h2><p>每个仓库保留独立基线。绑定会形成新的 Work 资产范围，并将所选仓库作为后续生产目标。</p>
+<section><h2>可选仓库资产</h2><p>Work 不以仓库为身份，也不要求用户先提供仓库。已确认访问能力的仓库可由 Human 绑定为生产目标；只有 URL、尚未确认访问能力的仓库会保留为未解析候选，不阻断 Watt 管理的本地生产。</p>
 <form id="intake"><label for="repo-title">仓库名称</label><input id="repo-title" required maxlength="200" placeholder="运营平台设计">
 <label for="repo-source">已有 Git 地址（留空则创建本地 Git 仓库）</label><input id="repo-source" maxlength="2000" placeholder="https://… 或允许导入目录中的本地仓库路径">
 <label for="repo-description">软件描述与期望用途</label><textarea id="repo-description" required maxlength="4000" placeholder="这是一个……，我想继续……"></textarea>
-<button type="submit">接入 / 创建仓库</button></form><div id="assets"></div></section>
+<button type="submit">接入 / 创建可选仓库</button></form><div id="assets"></div></section>
 <section><h2>交付目标</h2><p>支持文档包与软件产物。软件首版支持无需构建的静态 Web 应用，可下载源码、查看验证证据并启动独立验收入口。</p>
 <form id="target"><label for="target-kind">交付类型</label><select id="target-kind"><option value="SOFTWARE_ARTIFACT">Software Artifact · 软件产物</option><option value="DOCUMENT_PACKAGE">Document Package · 文档包</option></select>
 <div id="software-config"><label for="software-form">软件形态</label><select id="software-form"><option value="WEB_APPLICATION">Web 应用 · 静态运行适配器</option></select><label for="entrypoint">应用入口文件</label><input id="entrypoint" value="index.html" maxlength="255"><p>本适配器提供独立本地地址。应用使用外部 JS/CSS 文件，无构建或外部服务依赖；其他软件形态可由后续适配器扩展。</p></div><label for="target-title">交付名称</label><input id="target-title" required maxlength="255" value="库存管理软件">

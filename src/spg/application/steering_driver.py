@@ -14,6 +14,7 @@ from spg.application.orchestration import (
     OrchestrationStopReason,
     ProductionOrchestrator,
 )
+from spg.application.assets import RepositoryAssetService
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.steering import SteeringApplicationService
 from spg.application.semantic_steps import SemanticStepApplicationService
@@ -86,9 +87,16 @@ class PlanSteeringDriver:
             capability or DeterministicPlanSteeringCapability(),
         )
         self.production = SteeringProductionService(database)
+        repository_assets = RepositoryAssetService(
+            database,
+            work_service.workspace_root.parent / "repository-assets",
+            work_service.workspace_root.parent / "repository-imports",
+        )
         self.semantic = SemanticStepApplicationService(
             database,
             semantic_capability,
+            work_service=work_service,
+            repository_assets=repository_assets,
         )
         self.guided_design = GuidedDesignApplicationService(database)
         self._condition = Condition(RLock())

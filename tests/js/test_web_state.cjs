@@ -555,7 +555,7 @@ test("Work Composer preserves the user's expanded state across reloads", () => {
   );
   assert.match(
     appSource,
-    /restoreComposerExpanded\(\);\s*reloadWorkspace\(\)/,
+    /restoreComposerExpanded\(\);\s*consumeNewWorkEntry\(\);\s*reloadWorkspace\(\)/,
   );
   assert.ok((appSource.match(/catch \(_error\)/g) || []).length >= 2);
 });
@@ -587,6 +587,26 @@ test("WIC Slice 4 exposes Human-governed Work transition controls only", () => {
     appSource,
     /apiRequest\("\/api\/works",\s*\{\s*method:\s*"POST"/,
   );
+});
+
+test("explicit New Work entry clears restored context without creating Work authority", () => {
+  const htmlSource = fs.readFileSync(
+    path.join(repositoryRoot, "src", "spg", "web", "index.html"),
+    "utf8",
+  );
+  const deliverySource = fs.readFileSync(
+    path.join(repositoryRoot, "src", "spg", "web", "delivery.html"),
+    "utf8",
+  );
+  assert.match(htmlSource, /id="new-interaction-control"[^>]*>New Work</);
+  assert.match(deliverySource, /id="new-work-entry"[^>]*href="\/app\?new=1"/);
+  assert.match(deliverySource, /不会继承当前 Work 上下文或生产权限/);
+  assert.match(appSource, /function consumeNewWorkEntry\(\)/);
+  assert.match(appSource, /url\.searchParams\.get\("new"\) !== "1"/);
+  assert.match(appSource, /state\.freshInteraction = true/);
+  assert.match(appSource, /localStorage\.removeItem\(INTERACTION_STORAGE_KEY\)/);
+  assert.match(appSource, /history\.replaceState/);
+  assert.doesNotMatch(appSource, /apiRequest\("\/api\/works",\s*\{\s*method:\s*"POST"/);
 });
 
 test("active Work interaction keeps revision admission explicit and Human governed", () => {
