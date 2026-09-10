@@ -47,6 +47,8 @@ See [AI-native Development Execution Principles](../architecture/ai-native-devel
 
 ### New mission: Work-to-Delivery with multiple repositories
 
+**2026-09-10 — Software Artifact Delivery — implemented, automated validation passed, runtime ready.** Adds first-class software delivery, exact source/commit/test evidence, reproducible source packages and an isolated local static-Web runtime adapter. See the [software delivery report](../validation/software-artifact-delivery-slice.md); Human product acceptance remains pending.
+
 **2026-09-10 — Work-to-Delivery first slice: IMPLEMENTED / AUTOMATED VALIDATION PASS / RUNTIME READY / HUMAN PRODUCT ACCEPTANCE PENDING.** Human confirmed multiple repositories in one runtime and clarified that implementation should continue. The [as-built design](../architecture/work-to-delivery-multi-repository-spg-proposal.md) covers repository-scoped baseline/recovery, Work before asset binding, Document Package delivery and explicit Human acceptance. See the [implementation and acceptance report](../validation/work-to-delivery-first-slice.md) for actual evidence and runtime access. Existing closed foundations retain their original scope.
 
 ### Existing collaboration checkpoint
