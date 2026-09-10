@@ -353,7 +353,7 @@ class SteeringApplicationService:
                 "PRODUCE Step cannot close without trusted SPG evidence"
             )
         commit = runtime.runtime_commit(summary.runtime_commit_id)
-        pointer = runtime.current_pointer()
+        pointer = None if commit is None else runtime.current_pointer(source_baseline_id=commit.source_baseline_id)
         if (
             commit is None
             or pointer is None

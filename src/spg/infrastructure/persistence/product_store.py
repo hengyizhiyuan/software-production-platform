@@ -277,6 +277,18 @@ class ProductStore:
             updated_at=row["updated_at"],
         )
 
+    def resource_for_work(self, work_id: UUID):
+        scope = self.scope_for_work(work_id)
+        if scope is None or not scope.bindings:
+            return None
+        revision = self.current_work_reality_revision(work_id)
+        selected = None if revision is None else revision.engineering_resource_id
+        if selected is None and len(scope.bindings) == 1:
+            selected = scope.bindings[0].resource_id
+        if selected is None or selected not in {item.resource_id for item in scope.bindings}:
+            return None
+        return self.resource(selected)
+
     def insert_runtime_binding(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(work_runtime_bindings).values(**values))
 
@@ -650,6 +662,7 @@ class ProductStore:
             revision_fingerprint=row["revision_fingerprint"],
             source_interaction_id=row["source_interaction_id"],
             source_assessment_id=row["source_assessment_id"],
+            source_kind=row.get("source_kind", "INTERACTION_ASSESSMENT"),
             source_record_ids=tuple(UUID(item) for item in row["source_record_ids"]),
             motive=row["motive"],
             desired_outcome=row["desired_outcome"],

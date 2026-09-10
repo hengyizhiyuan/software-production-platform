@@ -81,12 +81,16 @@ def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
             ("styles.css", ".control-room"),
             ("state.js", "SPGViewModel"),
             ("app.js", "startControlRoom"),
+            ("delivery.js", "showDelivery"),
+            ("delivery.css", ".card"),
         ):
             packaged = WEB_ROOT / asset_name
             assert packaged.is_file()
             response = client.get(f"/assets/{asset_name}")
             assert response.status_code == 200
             assert content_marker in response.text
+
+        assert client.get("/delivery").status_code == 200
 
         activation = client.get("/api/runtime-activation")
         assert activation.status_code == 200

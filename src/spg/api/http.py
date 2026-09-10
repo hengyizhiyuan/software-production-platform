@@ -10,7 +10,7 @@ from uuid import UUID
 
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import Response, FileResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -48,6 +48,10 @@ from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
+from spg.application.assets import RepositoryAssetService
+from spg.application.delivery import DeliveryApplicationService
+from spg.domain.assets import RepositoryIntakeRequest, AssetScopeAdmissionRequest
+from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
 from spg.domain.product import (
     AttentionAction,
     AttentionResolutionRequest,
@@ -109,6 +113,10 @@ def create_http_application(
         work_service = container.work(selected_database)
     else:
         selected_database = selected_database or work_service.database
+
+    configured_workspace = getattr(getattr(container, "settings", None), "workspace_root", Path(".spg/workspaces"))
+    asset_service = RepositoryAssetService(selected_database, configured_workspace.parent / "repository-assets", configured_workspace.parent / "repository-imports")
+    delivery_service = DeliveryApplicationService(selected_database)
 
     selected_orchestrator = orchestrator or container.production_orchestrator(
         work_service
@@ -550,6 +558,8 @@ def create_http_application(
         service = required_interaction_service()
         work = work_service.admit_interaction_work(
             interaction_id,
+            engineering_resource_id=request.engineering_resource_id,
+            use_default_resource=False,
             assessment_id=request.assessment_id,
             basis_fingerprint=request.basis_fingerprint,
             authority_identity=request.authority_identity,
@@ -743,6 +753,51 @@ def create_http_application(
         elif projection.status in {WorkStatus.READY, WorkStatus.RUNNING}:
             selected_orchestrator.schedule(projection.work_id)
         return work_response(projection)
+
+    @api.get("/delivery", include_in_schema=False)
+    def delivery_page():
+        return FileResponse(web_root / "delivery.html")
+
+    @api.get("/api/repository-assets")
+    def repository_assets(work_id: UUID | None = None):
+        return asset_service.list_assets(work_id)
+
+    @api.post("/api/repository-assets/intake")
+    def intake_repository(request: RepositoryIntakeRequest):
+        return asset_service.intake(request)
+
+    @api.post("/api/works/{work_id}/asset-scope-admissions")
+    def admit_asset_scope(work_id: UUID, request: AssetScopeAdmissionRequest):
+        observation = asset_service.observation(request.resource_id)
+        work = work_service.admit_asset_scope(work_id, request, observation)
+        selected_steering_driver.schedule(work_id)
+        return work_response(work)
+
+    @api.get("/api/works/{work_id}/delivery")
+    def delivery_view(work_id: UUID):
+        return delivery_service.view(work_id)
+
+    @api.post("/api/works/{work_id}/delivery-target")
+    def delivery_target(work_id: UUID, request: DeliveryTargetRequest):
+        return delivery_service.set_target(work_id, request)
+
+    @api.post("/api/works/{work_id}/deliveries")
+    def publish_delivery(work_id: UUID):
+        return delivery_service.publish(work_id)
+
+    @api.get("/api/works/{work_id}/deliveries/{manifest_id}/artifact")
+    def delivery_artifact(work_id: UUID, manifest_id: UUID, path: str):
+        return Response(delivery_service.artifact(work_id, manifest_id, path), media_type="text/plain; charset=utf-8",
+            headers={"X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'"})
+
+    @api.get("/api/works/{work_id}/deliveries/{manifest_id}/download")
+    def delivery_download(work_id: UUID, manifest_id: UUID):
+        return Response(delivery_service.package(work_id, manifest_id), media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="delivery-{manifest_id}.zip"', "X-Content-Type-Options": "nosniff"})
+
+    @api.post("/api/works/{work_id}/deliveries/{manifest_id}/acceptance")
+    def human_acceptance(work_id: UUID, manifest_id: UUID, request: HumanAcceptanceRequest):
+        return delivery_service.decide(work_id, manifest_id, request)
 
     @api.get("/api/works/{work_id}/result", response_model=WorkResultResponse)
     def get_work_result(work_id: UUID) -> WorkResultResponse:

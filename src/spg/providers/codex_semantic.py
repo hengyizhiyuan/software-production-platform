@@ -88,7 +88,7 @@ class _SemanticProviderResolvedDisposition(BaseModel):
     authority_assessment: Literal[SteeringAuthorityAssessment.WITHIN_AUTHORITY]
     unresolved_questions: tuple[str, ...] = Field(max_length=0)
     human_attention_recommendation: None
-    completion_claimed: bool
+    completion_claimed: Literal[True]
 
 
 class _SemanticProviderUnresolvedDisposition(BaseModel):
@@ -267,12 +267,20 @@ class CodexSdkSemanticStepCapability:
             "Execute exactly one governed semantic Steering Step. This is read-only "
             "reasoning: do not modify files, create production authority, commit, or "
             "push. Do not invoke shell, filesystem, or repository tools in this Turn. "
-            "Repository access is bounded to the supplied repository_tree_paths and "
-            "context_materials, which are authoritative for the exact baseline. A path "
+            "Repository access is bounded to the supplied repository_tree_paths and context_materials. "
+            "When engineering_resource_id is null, continue design without claiming repository evidence. "
+            "For intermediate design issues (production_transition_issue=false), repository absence "
+            "does not prevent completion: claim completion when that issue is resolved. "
+            "Only when production_transition_issue=true and no repository is bound, request Repository "
+            "Asset binding with an UNRESOLVED disposition/question, set completion_claimed=false "
+            "and omit proposed_production. "
+            "The supplied context_materials are authoritative for the exact baseline. A path "
             "inventory that identifies existing implementation and test seams may "
             "support exact production targets even when full source contents are not "
             "included; missing full contents alone is not a Human decision. Never "
-            "fabricate a path absent from that inventory, and select an unresolved "
+            "claim that a path absent from that inventory already exists. A CREATE proposal "
+            "may specify a new bounded path supported by the admitted Work request; absence "
+            "from the tree is expected for CREATE, not missing evidence. Select an unresolved "
             "disposition when the bounded supplied Reality still leaves material "
             "uncertainty. Ground the result in the supplied Work, authority, exact baseline, "
             "repository tree, and bounded context. Return JSON only, with exactly these "
@@ -283,7 +291,8 @@ class CodexSdkSemanticStepCapability:
             "code_targets, allowed_areas, forbidden_areas, verification_expectation); "
             "disposition (exactly one schema-selected object). disposition RESOLVED "
             "requires authority_assessment WITHIN_AUTHORITY, unresolved_questions [], "
-            "human_attention_recommendation null, and a boolean completion_claimed. "
+            "human_attention_recommendation null, and completion_claimed true. Completion here "
+            "means this current issue only, not the whole design agenda or Human product acceptance. "
             "disposition UNRESOLVED requires authority_assessment WITHIN_AUTHORITY or "
             "UNCERTAIN, at least one unresolved question, a non-empty Human "
             "recommendation, and completion_claimed false. disposition "
@@ -299,7 +308,11 @@ class CodexSdkSemanticStepCapability:
             "decision; routine analysis and synthesis remain automatic. "
             "For proposed production, target_kind must be exactly DOCUMENTATION_WORK or "
             "CODE_WORK. DOCUMENTATION_WORK uses exactly one artifact_targets object with "
-            "repository-relative path and CREATE or UPDATE operation; CODE_WORK leaves "
+            "repository-relative path and CREATE or UPDATE operation, and MUST set code_targets, "
+            "allowed_areas and forbidden_areas to empty arrays. For example a new document "
+            "may use artifact_targets=[{\"path\":\"docs/design.md\",\"operation\":\"CREATE\"}], "
+            "with code_targets=[], allowed_areas=[], forbidden_areas=[]. Put documentation "
+            "scope exclusions in objective/verification_expectation instead of those code fields. CODE_WORK leaves "
             "artifact_targets empty and uses exact repository-relative code_targets and/or "
             "allowed_areas. Every allowed_areas value must be a repository-relative "
             "subdirectory ending with /** and with at least two path segments before it; "

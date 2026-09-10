@@ -53,6 +53,7 @@ class InteractionMessageRequest(ApiDto):
 
 
 class InteractionWorkAdmissionRequest(ApiDto):
+    engineering_resource_id: UUID | None = None
     assessment_id: UUID
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     authority_identity: str = Field(
@@ -207,7 +208,8 @@ class WorkRealityRevisionResponse(ApiDto):
     basis_fingerprint: str
     revision_fingerprint: str
     source_interaction_id: UUID
-    source_assessment_id: UUID
+    source_kind: str = "INTERACTION_ASSESSMENT"
+    source_assessment_id: UUID | None
     source_record_ids: tuple[UUID, ...]
     motive: str
     desired_outcome: str
@@ -215,12 +217,12 @@ class WorkRealityRevisionResponse(ApiDto):
     constraints: tuple[str, ...]
     requests: tuple[str, ...]
     engineering_scope_id: UUID
-    engineering_resource_id: UUID
+    engineering_resource_id: UUID | None
     scope_basis_fingerprint: str
-    repository_identity: str
-    repository_ref: str
-    source_baseline_id: UUID
-    source_revision: str
+    repository_identity: str | None
+    repository_ref: str | None
+    source_baseline_id: UUID | None
+    source_revision: str | None
     governance_record_id: UUID
     supporting_references: tuple[str, ...]
     change_set: tuple[str, ...]
@@ -480,6 +482,7 @@ class SharedUnderstandingResponse(ApiDto):
                     basis_fingerprint=projection.governed_revision.basis_fingerprint,
                     revision_fingerprint=projection.governed_revision.revision_fingerprint,
                     source_interaction_id=projection.governed_revision.source_interaction_id,
+                    source_kind=projection.governed_revision.source_kind,
                     source_assessment_id=projection.governed_revision.source_assessment_id,
                     source_record_ids=projection.governed_revision.source_record_ids,
                     motive=projection.governed_revision.motive,

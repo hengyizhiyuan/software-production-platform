@@ -1,0 +1,22 @@
+import pytest
+from pydantic import ValidationError
+from spg.application.delivery import read_artifact
+from spg.domain.product import ProductInvariantViolation
+from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
+
+@pytest.mark.parametrize("path", ["../secret.md", "/secret.md", ".git/config.md", "x\\y.md", "x:y.md", "docs/../secret.md", "docs//file.md", "page.html"])
+def test_delivery_paths_cannot_address_unadmitted_content(path):
+    with pytest.raises(ProductInvariantViolation):
+        read_artifact("unused", "a"*40, path)
+
+@pytest.mark.parametrize("revision", ["HEAD", "main", "--help", "a"*39, "g"*40])
+def test_delivery_requires_immutable_commit_identity(revision):
+    with pytest.raises(ProductInvariantViolation):
+        read_artifact("unused", revision, "docs/design.md")
+
+
+def test_target_and_human_decision_require_substantive_input():
+    with pytest.raises(ValidationError):
+        DeliveryTargetRequest(kind="DOCUMENT_PACKAGE", title="Design", acceptance_criteria=(" ",), authority_identity="human:test")
+    with pytest.raises(ValidationError):
+        HumanAcceptanceRequest(manifest_fingerprint="a"*64, decision="ACCEPT", authority_identity=" ", rationale="Read it")

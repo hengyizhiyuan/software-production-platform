@@ -91,12 +91,16 @@ def test_production_metadata_contains_runtime_and_mvp_app_product_tables() -> No
         "work_runtime_bindings",
         "guided_design_processes",
         "guided_design_agenda_revisions",
+        "repository_intakes",
+        "work_delivery_targets",
+        "work_delivery_manifests",
+        "work_delivery_acceptances",
     }
 
 
-def test_alembic_environment_has_design_intent_framing_head() -> None:
+def test_alembic_environment_has_work_delivery_head() -> None:
     project_root = Path(__file__).resolve().parents[1]
     config = Config(project_root / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260909_29"]
+    assert scripts.get_heads() == ["20260910_32"]

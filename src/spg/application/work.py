@@ -298,6 +298,8 @@ class WorkApplicationService:
         basis_fingerprint: str,
         authority_identity: str,
         rationale: str | None = None,
+        engineering_resource_id: UUID | None = None,
+        use_default_resource: bool = True,
     ) -> WorkProjection:
         """Atomically admit one exact READY interpretation as long-lived Work."""
 
@@ -380,46 +382,35 @@ class WorkApplicationService:
                     "READY assessment lacks a valid Motive or desired outcome"
                 )
 
-            resource = product.default_resource()
-            if resource is None:
-                raise ProductInvariantViolation(
-                    "A configured default Engineering Resource is required"
-                )
-            pointer = runtime.current_pointer(for_update=True)
-            if pointer is None:
-                raise ProductInvariantViolation(
-                    "A Current Trusted Baseline is required for Work admission"
-                )
-            baseline = runtime.snapshot(pointer.snapshot_id)
-            if baseline is None:
-                raise ProductInvariantViolation(
-                    "Current Trusted Baseline snapshot is missing"
-                )
-            if (
-                baseline.repository_identity != resource.repository_identity
-                or baseline.repository_ref != resource.authoritative_ref
-            ):
-                raise ProductInvariantViolation(
-                    "Engineering Resource does not match current governed Baseline"
-                )
+            resource = (product.resource(engineering_resource_id) if engineering_resource_id else
+                        product.default_resource() if use_default_resource else None)
+            if engineering_resource_id is not None and resource is None:
+                raise ProductInvariantViolation("Selected Repository Asset does not exist")
+            pointer = None if resource is None else runtime.current_pointer(
+                repository_identity=(resource.repository_identity if resource else None), repository_ref=(resource.authoritative_ref if resource else None),
+                for_update=True,
+            )
+            baseline = None if pointer is None else runtime.snapshot(pointer.snapshot_id)
+            if resource is not None and baseline is None:
+                raise ProductInvariantViolation("Selected Repository Asset requires its own Trusted Baseline")
 
             scope_id = uuid5(NAMESPACE_URL, f"spg:wic-scope:{work_id}")
             governance_id = uuid5(NAMESPACE_URL, f"spg:wic-governance:{work_id}")
             revision_id = uuid5(NAMESPACE_URL, f"spg:wic-work-revision:1:{work_id}")
             scope_summary = (
                 "Long-lived Work authority envelope for "
-                f"{resource.repository_identity} at {resource.authoritative_ref}"
+                + (f"{(resource.repository_identity if resource else None)} at {(resource.authoritative_ref if resource else None)}" if resource else "design before repository binding")
             )
             scope_fingerprint = self._fingerprint(
                 {
                     "work_id": str(work_id),
                     "assessment_id": str(assessment.id),
                     "basis_fingerprint": current_basis,
-                    "resource_id": str(resource.id),
-                    "repository_identity": resource.repository_identity,
-                    "repository_ref": resource.authoritative_ref,
-                    "source_baseline_id": str(baseline.id),
-                    "source_revision": baseline.repository_revision,
+                    "resource_id": (str(resource.id) if resource else None),
+                    "repository_identity": (resource.repository_identity if resource else None),
+                    "repository_ref": (resource.authoritative_ref if resource else None),
+                    "source_baseline_id": (str(baseline.id) if baseline else None),
+                    "source_revision": (baseline.repository_revision if baseline else None),
                     "constraints": list(assessment.candidate_constraints),
                 }
             )
@@ -451,12 +442,12 @@ class WorkApplicationService:
                 "constraints": list(assessment.candidate_constraints),
                 "requests": list(assessment.current_requests),
                 "engineering_scope_id": str(scope_id),
-                "engineering_resource_id": str(resource.id),
+                "engineering_resource_id": (str(resource.id) if resource else None),
                 "scope_basis_fingerprint": scope_fingerprint,
-                "repository_identity": resource.repository_identity,
-                "repository_ref": resource.authoritative_ref,
-                "source_baseline_id": str(baseline.id),
-                "source_revision": baseline.repository_revision,
+                "repository_identity": (resource.repository_identity if resource else None),
+                "repository_ref": (resource.authoritative_ref if resource else None),
+                "source_baseline_id": (str(baseline.id) if baseline else None),
+                "source_revision": (baseline.repository_revision if baseline else None),
                 "governance_record_id": str(governance_id),
                 "supporting_references": supporting_references,
                 "change_set": [],
@@ -508,7 +499,7 @@ class WorkApplicationService:
                         "created_at": timestamp,
                         "updated_at": timestamp,
                     },
-                    binding_values=(
+                    binding_values=() if resource is None else (
                         {
                             "id": uuid5(
                                 NAMESPACE_URL,
@@ -536,11 +527,11 @@ class WorkApplicationService:
                             "work_reality_revision_id": str(revision_id),
                             "engineering_scope_id": str(scope_id),
                             "scope_fingerprint": scope_fingerprint,
-                            "resource_id": str(resource.id),
-                            "repository_identity": resource.repository_identity,
-                            "repository_ref": resource.authoritative_ref,
-                            "source_baseline_id": str(baseline.id),
-                            "source_revision": baseline.repository_revision,
+                            "resource_id": (str(resource.id) if resource else None),
+                            "repository_identity": (resource.repository_identity if resource else None),
+                            "repository_ref": (resource.authoritative_ref if resource else None),
+                            "source_baseline_id": (str(baseline.id) if baseline else None),
+                            "source_revision": (baseline.repository_revision if baseline else None),
                             "desired_outcome": desired_outcome,
                             "constraints": list(assessment.candidate_constraints),
                             "artifact_target": None,
@@ -571,12 +562,12 @@ class WorkApplicationService:
                         "constraints": list(assessment.candidate_constraints),
                         "requests": list(assessment.current_requests),
                         "engineering_scope_id": scope_id,
-                        "engineering_resource_id": resource.id,
+                        "engineering_resource_id": (resource.id if resource else None),
                         "scope_basis_fingerprint": scope_fingerprint,
-                        "repository_identity": resource.repository_identity,
-                        "repository_ref": resource.authoritative_ref,
-                        "source_baseline_id": baseline.id,
-                        "source_revision": baseline.repository_revision,
+                        "repository_identity": (resource.repository_identity if resource else None),
+                        "repository_ref": (resource.authoritative_ref if resource else None),
+                        "source_baseline_id": (baseline.id if baseline else None),
+                        "source_revision": (baseline.repository_revision if baseline else None),
                         "governance_record_id": governance_id,
                         "supporting_references": supporting_references,
                         "change_set": [],
@@ -825,22 +816,12 @@ class WorkApplicationService:
 
             candidate = assessment.candidate_change
             current_scope = product.scope(current_revision.engineering_scope_id)
-            resource = product.resource(current_revision.engineering_resource_id)
-            pointer = runtime.current_pointer(for_update=True)
-            if current_scope is None or resource is None or pointer is None:
-                raise ProductInvariantViolation(
-                    "Current Work scope, Resource, or Trusted Baseline is missing"
-                )
-            baseline = runtime.snapshot(pointer.snapshot_id)
-            if baseline is None:
-                raise ProductInvariantViolation("Current Trusted Baseline is missing")
-            if (
-                baseline.repository_identity != resource.repository_identity
-                or baseline.repository_ref != resource.authoritative_ref
-            ):
-                raise ProductInvariantViolation(
-                    "Current Work Resource no longer matches Trusted Baseline"
-                )
+            resource = product.resource_for_work(work.id)
+            pointer = None if resource is None else runtime.current_pointer(
+                repository_identity=(resource.repository_identity if resource else None), repository_ref=(resource.authoritative_ref if resource else None), for_update=True)
+            baseline = None if pointer is None else runtime.snapshot(pointer.snapshot_id)
+            if current_scope is None or (resource is not None and baseline is None):
+                raise ProductInvariantViolation("Current Work scope or repository baseline is missing")
 
             revision_number = current_revision.revision_number + 1
             revision_id = uuid5(
@@ -856,7 +837,7 @@ class WorkApplicationService:
                 scope_summary = (
                     "Long-lived Work revision "
                     f"{revision_number} authority envelope for "
-                    f"{resource.repository_identity} at {resource.authoritative_ref}"
+                    f"{(resource.repository_identity if resource else None)} at {(resource.authoritative_ref if resource else None)}"
                 )
                 scope_fingerprint = self._fingerprint(
                     {
@@ -864,7 +845,7 @@ class WorkApplicationService:
                         "revision_number": revision_number,
                         "assessment_id": str(assessment.id),
                         "previous_scope_id": str(current_scope.id),
-                        "resource_id": str(resource.id),
+                        "resource_id": (str(resource.id) if resource else None),
                         "constraints": list(candidate.constraints),
                     }
                 )
@@ -878,18 +859,11 @@ class WorkApplicationService:
                         "created_at": timestamp,
                         "updated_at": timestamp,
                     },
-                    binding_values=(
-                        {
-                            "id": uuid5(
-                                NAMESPACE_URL,
-                                f"spg:wic-scope-binding:{scope_id}:{resource.id}",
-                            ),
-                            "engineering_scope_id": scope_id,
-                            "resource_id": resource.id,
-                            "condition": ResourceBindingCondition.ACTIVE.value,
-                            "created_at": timestamp,
-                        },
-                    ),
+                    binding_values=tuple({
+                        "id": uuid5(NAMESPACE_URL, f"spg:wic-scope-binding:{scope_id}:{item.resource_id}"),
+                        "engineering_scope_id": scope_id, "resource_id": item.resource_id,
+                        "condition": ResourceBindingCondition.ACTIVE.value, "created_at": timestamp,
+                    } for item in current_scope.bindings),
                 )
                 scope = product.scope(scope_id)
                 assert scope is not None
@@ -921,12 +895,12 @@ class WorkApplicationService:
                 "constraints": list(candidate.constraints),
                 "requests": list(candidate.requests),
                 "engineering_scope_id": str(scope.id),
-                "engineering_resource_id": str(resource.id),
+                "engineering_resource_id": (str(resource.id) if resource else None),
                 "scope_basis_fingerprint": scope.fingerprint,
-                "repository_identity": resource.repository_identity,
-                "repository_ref": resource.authoritative_ref,
-                "source_baseline_id": str(baseline.id),
-                "source_revision": baseline.repository_revision,
+                "repository_identity": (resource.repository_identity if resource else None),
+                "repository_ref": (resource.authoritative_ref if resource else None),
+                "source_baseline_id": (str(baseline.id) if baseline else None),
+                "source_revision": (baseline.repository_revision if baseline else None),
                 "governance_record_id": str(governance_id),
                 "supporting_references": list(supporting_references),
                 "change_set": [
@@ -952,8 +926,8 @@ class WorkApplicationService:
                     "source_assessment_id": assessment.id,
                     "source_record_ids": [str(item) for item in source_record_ids],
                     "engineering_scope_id": scope.id,
-                    "engineering_resource_id": resource.id,
-                    "source_baseline_id": baseline.id,
+                    "engineering_resource_id": (resource.id if resource else None),
+                    "source_baseline_id": (baseline.id if baseline else None),
                     "governance_record_id": governance_id,
                     "revision_fingerprint": self._fingerprint(revision_payload),
                     "created_at": timestamp,
@@ -986,6 +960,80 @@ class WorkApplicationService:
             unit_of_work.commit()
         return self.get_work(work.id)
 
+    def admit_asset_scope(self, work_id: UUID, request, observation: dict) -> WorkProjection:
+        """Work Admission owns the exact Human-authorized asset-scope revision."""
+        from spg.domain.interaction import WorkRealityRevision
+        if observation.get("resource_id") != str(request.resource_id) or observation.get("fingerprint") != request.observation_fingerprint:
+            raise ProductInvariantViolation("Repository observation does not match the exact asset decision")
+        basis = self._fingerprint({"work_id": str(work_id), **request.model_dump(mode="json")})
+        revision_id = uuid5(NAMESPACE_URL, "spg:asset-scope:" + basis)
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            runtime = RuntimeStore(uow.session)
+            work = product.work(work_id, for_update=True)
+            if work is None:
+                raise ProductRecordNotFound(f"Work not found: {work_id}")
+            if product.work_reality_revision(revision_id) is not None:
+                return self._projection(product, work)
+            previous = product.current_work_reality_revision(work_id)
+            if (work.condition is not WorkCondition.READY or previous is None
+                    or previous.id != request.expected_work_revision_id):
+                raise ProductInvariantViolation("Asset admission requires the exact current admitted Work Reality")
+            resource = product.resource(request.resource_id)
+            if resource is None:
+                raise ProductInvariantViolation("Repository Asset is missing")
+            pointer = runtime.current_pointer(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
+            baseline = None if pointer is None else runtime.snapshot(pointer.snapshot_id)
+            if baseline is None:
+                raise ProductInvariantViolation("Repository Asset has no Trusted Baseline")
+            from spg.infrastructure.git_repository import GitRepositoryObserver
+            reality = GitRepositoryObserver().observe(Path(resource.location_ref), resource.repository_identity, resource.authoritative_ref)
+            if reality.exact_revision != baseline.repository_revision:
+                raise ProductInvariantViolation("Repository Reality differs from its Trusted Baseline; reconcile before binding")
+            old_scope = product.scope_for_work(work_id)
+            resource_ids = {request.resource_id}
+            if old_scope is not None:
+                resource_ids.update(item.resource_id for item in old_scope.bindings)
+            timestamp = datetime.now(UTC)
+            scope_id, governance_id = uuid4(), uuid4()
+            scope_fingerprint = self._fingerprint({"work_id": str(work_id), "resources": sorted(str(item) for item in resource_ids), "selected": str(resource.id), "basis": basis})
+            product.insert_scope(scope_values={"id": scope_id, "work_id": work_id,
+                "summary": f"Work assets; production target {resource.repository_identity}",
+                "fingerprint": scope_fingerprint, "condition": EngineeringScopeCondition.ADMITTED.value,
+                "created_at": timestamp, "updated_at": timestamp}, binding_values=tuple({
+                    "id": uuid4(), "engineering_scope_id": scope_id, "resource_id": resource_id,
+                    "condition": ResourceBindingCondition.ACTIVE.value, "created_at": timestamp
+                } for resource_id in sorted(resource_ids, key=str)))
+            payload = previous.model_dump(mode="json")
+            payload.update(id=str(revision_id), revision_number=previous.revision_number+1,
+                previous_revision_id=str(previous.id), source_kind="ASSET_SCOPE_ADMISSION", source_assessment_id=None,
+                basis_fingerprint=basis, engineering_scope_id=str(scope_id), engineering_resource_id=str(resource.id),
+                scope_basis_fingerprint=scope_fingerprint, repository_identity=resource.repository_identity,
+                repository_ref=resource.authoritative_ref, source_baseline_id=str(baseline.id), source_revision=baseline.repository_revision,
+                governance_record_id=str(governance_id), change_set=["asset:PRODUCTION_TARGET_ADMITTED"],
+                supporting_references=[*previous.supporting_references, "REPOSITORY_OBSERVATION:"+request.observation_fingerprint],
+                rationale=request.rationale, admitted_by=request.authority_identity, schema_version="work-reality-v2", created_at=timestamp.isoformat())
+            payload.pop("revision_fingerprint")
+            payload["revision_fingerprint"] = self._fingerprint(payload)
+            revision = WorkRealityRevision.model_validate(payload)
+            runtime.insert_governance({"id": governance_id, "decision_type": "ADMIT_WORK_ASSET_SCOPE",
+                "authority_identity": request.authority_identity, "subject_type": "PRODUCT_WORK", "subject_identity": str(work_id),
+                "scope": {"previous_work_revision_id": str(previous.id), "work_reality_revision_id": str(revision.id),
+                    "resource_id": str(resource.id), "observation_fingerprint": request.observation_fingerprint,
+                    "source_baseline_id": str(baseline.id), "scope_fingerprint": scope_fingerprint},
+                "rationale": request.rationale, "created_at": timestamp})
+            values = revision.model_dump(mode="python")
+            for field in ("source_record_ids", "supporting_references", "change_set", "context_facts", "constraints", "requests"):
+                values[field] = [str(item) for item in values[field]]
+            product.insert_work_reality_revision(values)
+            product.update_work(work_id, {"current_work_reality_revision_id": revision.id,
+                "current_engineering_scope_id": scope_id, "scope_summary": f"Work assets; production target {resource.repository_identity}",
+                "production_plan_proposal": None, "code_change_proposal": None,
+                "expected_artifact_path": None, "artifact_operation": None,
+                "artifact_source_baseline_id": None, "artifact_source_revision": None, "updated_at": timestamp})
+            uow.commit()
+        return self.get_work(work_id)
+
     def refine_work(
         self,
         work_id: UUID,
@@ -1001,7 +1049,7 @@ class WorkApplicationService:
                 WorkCondition.AWAITING_APPROVAL,
             }:
                 raise ProductInvariantViolation("Only a draft Work may be refined")
-            resource = store.default_resource()
+            resource = store.resource_for_work(work_id) or (store.default_resource() if store.scope_for_work(work_id) is None else None)
             if resource is None:
                 raise ProductInvariantViolation(
                     "A configured default Engineering Resource is required"
@@ -1013,7 +1061,7 @@ class WorkApplicationService:
                 or f"Change {resource.repository_identity} at {resource.authoritative_ref}"
             )
             objective = request.production_objective or desired_outcome
-            baseline = self.runtime.current_baseline()
+            baseline = self.runtime.current_baseline(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
             if baseline.repository_identity != resource.repository_identity:
                 raise ProductInvariantViolation(
                     "Engineering Resource does not match current governed Baseline"
@@ -1287,7 +1335,7 @@ class WorkApplicationService:
             change_proposal = work.code_change_proposal
             change_contract = plan.change_contract
 
-        baseline = self.runtime.current_baseline()
+        baseline = self.runtime.current_baseline(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
         if (
             baseline.repository_identity != resource.repository_identity
             or baseline.repository_ref != resource.authoritative_ref
@@ -1578,7 +1626,7 @@ class WorkApplicationService:
             change_proposal = work.code_change_proposal
             plan = work.production_plan
 
-        baseline = self.runtime.current_baseline()
+        baseline = self.runtime.current_baseline(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
         if (
             baseline.repository_identity != resource.repository_identity
             or baseline.repository_ref != resource.authoritative_ref
@@ -2084,6 +2132,7 @@ class WorkApplicationService:
                 )
             if (
                 decision is not None
+                and self._decision_matches_work_revision(decision, projection.current_work_reality_revision_id)
                 and decision.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
                 and decision.attention_reason is not None
                 and not proposal_review_resolved
@@ -2390,6 +2439,15 @@ class WorkApplicationService:
             human_attention_required=projection.human_attention_required,
         )
 
+    @staticmethod
+    def _decision_matches_work_revision(decision, revision_id: UUID | None) -> bool:
+        """Historical semantic attention cannot block a newly admitted Work basis."""
+        return revision_id is None or any(
+            ref.kind is RealityReferenceKind.WORK_REALITY_REVISION
+            and ref.identity == revision_id
+            for ref in decision.reality_refs
+        )
+
     def _projection(
         self,
         store: ProductStore,
@@ -2448,6 +2506,7 @@ class WorkApplicationService:
         )
         steering_attention = bool(
             latest_steering_decision is not None
+            and self._decision_matches_work_revision(latest_steering_decision, work.current_work_reality_revision_id)
             and latest_steering_decision.steering_outcome
             is SteeringOutcome.HUMAN_ATTENTION
         )

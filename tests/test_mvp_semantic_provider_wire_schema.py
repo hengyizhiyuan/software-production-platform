@@ -375,3 +375,10 @@ def test_sem_wire_04_15_absent_proposal_collections_are_not_defaulted(
         CodexSdkSemanticStepCapability._parse_payload(
             json.dumps(_payload(proposal))
         )
+
+
+def test_resolved_issue_cannot_silently_claim_incomplete_without_a_question():
+    payload = _payload()
+    payload["disposition"]["completion_claimed"] = False
+    with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
+        CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))

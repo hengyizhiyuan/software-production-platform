@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Protocol
+from typing import Literal, Protocol
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -323,7 +323,8 @@ class WorkRealityRevision(BaseModel):
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     revision_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     source_interaction_id: UUID
-    source_assessment_id: UUID
+    source_kind: Literal["INTERACTION_ASSESSMENT", "ASSET_SCOPE_ADMISSION"] = "INTERACTION_ASSESSMENT"
+    source_assessment_id: UUID | None
     source_record_ids: tuple[UUID, ...] = ()
     motive: str = Field(min_length=1)
     desired_outcome: str = Field(min_length=1)
@@ -331,12 +332,12 @@ class WorkRealityRevision(BaseModel):
     constraints: tuple[str, ...]
     requests: tuple[str, ...]
     engineering_scope_id: UUID
-    engineering_resource_id: UUID
+    engineering_resource_id: UUID | None
     scope_basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
-    repository_identity: str = Field(min_length=1)
-    repository_ref: str = Field(min_length=1)
-    source_baseline_id: UUID
-    source_revision: str = Field(min_length=1)
+    repository_identity: str | None = Field(default=None, min_length=1)
+    repository_ref: str | None = Field(default=None, min_length=1)
+    source_baseline_id: UUID | None
+    source_revision: str | None = Field(default=None, min_length=1)
     governance_record_id: UUID
     supporting_references: tuple[str, ...]
     change_set: tuple[str, ...]
@@ -344,6 +345,16 @@ class WorkRealityRevision(BaseModel):
     admitted_by: str = Field(min_length=1)
     schema_version: str = Field(min_length=1)
     created_at: datetime
+
+    @model_validator(mode="after")
+    def require_exact_asset_and_source_basis(self):
+        repository_fields = (self.engineering_resource_id, self.repository_identity,
+            self.repository_ref, self.source_baseline_id, self.source_revision)
+        if any(value is None for value in repository_fields) and not all(value is None for value in repository_fields):
+            raise ValueError("Work repository facts must be wholly present or absent")
+        if (self.source_kind == "INTERACTION_ASSESSMENT") != (self.source_assessment_id is not None):
+            raise ValueError("Work revision source kind and assessment provenance disagree")
+        return self
 
 
 class WorkTransitionRecord(BaseModel):

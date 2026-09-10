@@ -5,6 +5,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
     Index,
     Integer,
     SmallInteger,
@@ -43,10 +44,17 @@ production_snapshots = Table(
     ),
 )
 
+production_snapshots.append_constraint(UniqueConstraint("id", "repository_identity", "repository_ref", name="uq_snapshot_repository"))
+production_snapshots.append_constraint(ForeignKeyConstraint(
+    ["source_baseline_id", "repository_identity", "repository_ref"],
+    ["production_snapshots.id", "production_snapshots.repository_identity", "production_snapshots.repository_ref"],
+    name="fk_snapshot_same_repository_source"))
+
 current_trusted_baseline_pointer = Table(
     "current_trusted_baseline_pointer",
     metadata,
-    Column("singleton_id", SmallInteger, primary_key=True),
+    Column("repository_identity", String(255), primary_key=True),
+    Column("repository_ref", String(512), primary_key=True),
     Column(
         "snapshot_id",
         Uuid(as_uuid=True),
@@ -60,7 +68,9 @@ current_trusted_baseline_pointer = Table(
         nullable=False,
         server_default=func.now(),
     ),
-    CheckConstraint("singleton_id = 1", name="singleton_id_is_one"),
+    ForeignKeyConstraint(["snapshot_id", "repository_identity", "repository_ref"],
+        ["production_snapshots.id", "production_snapshots.repository_identity", "production_snapshots.repository_ref"],
+        name="fk_pointer_repository_baseline"),
 )
 
 production_runs = Table(

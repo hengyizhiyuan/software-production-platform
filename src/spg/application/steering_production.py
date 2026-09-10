@@ -96,7 +96,6 @@ class SteeringProductionService:
             None if inbound is None else inbound.steering_decision_id
         )
 
-        baseline = self.runtime.current_baseline()
         with self.database.unit_of_work() as unit_of_work:
             product = ProductStore(unit_of_work.session)
             work = product.work(work_id)
@@ -105,14 +104,15 @@ class SteeringProductionService:
                 raise ProductInvariantViolation("Work authority envelope is incomplete")
             if (
                 scope.condition is not EngineeringScopeCondition.ADMITTED
-                or len(scope.bindings) != 1
+                or not scope.bindings
             ):
                 raise ProductInvariantViolation(
                     "Steering production requires one admitted Engineering Resource"
                 )
-            resource = product.resource(scope.bindings[0].resource_id)
+            resource = product.resource_for_work(work_id)
             if resource is None:
                 raise ProductInvariantViolation("Admitted Engineering Resource is missing")
+            baseline = self.runtime.current_baseline(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
             if (
                 baseline.repository_identity != resource.repository_identity
                 or baseline.repository_ref != resource.authoritative_ref
@@ -348,7 +348,7 @@ class SteeringProductionService:
         return SteeringProductionAdmission(request=request, binding=binding)
 
     def _production_contract(self, request: SteeringProductionRequest):
-        baseline = self.runtime.current_baseline()
+        baseline = self.runtime.current_baseline(source_baseline_id=request.source_baseline_id)
         with self.database.unit_of_work() as unit_of_work:
             product = ProductStore(unit_of_work.session)
             work = product.work(request.work_id)

@@ -137,6 +137,7 @@ class InitialRunRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    source_baseline_id: UUID | None = None
     intent_ref: str = Field(min_length=1)
     goal: str = Field(min_length=1)
     production_horizon: ProductionHorizon

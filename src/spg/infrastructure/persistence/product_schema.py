@@ -19,6 +19,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
 from spg.infrastructure.persistence.metadata import metadata
+from spg.infrastructure.persistence.delivery_schema import delivery_tables
+from spg.infrastructure.persistence.asset_schema import repository_intakes
 from spg.infrastructure.persistence.steering_schema import steering_tables
 from spg.infrastructure.persistence.guided_design_schema import guided_design_tables
 
@@ -425,8 +427,9 @@ work_reality_revisions = Table(
             "interaction_assessments.id",
             name="fk_work_reality_revisions_source_assessment",
         ),
-        nullable=False,
+        nullable=True,
     ),
+    Column("source_kind", String(32), nullable=False, server_default="INTERACTION_ASSESSMENT"),
     Column("source_record_ids", JSONB, nullable=False),
     Column("motive", Text, nullable=False),
     Column("desired_outcome", Text, nullable=False),
@@ -446,11 +449,11 @@ work_reality_revisions = Table(
             "engineering_resources.id",
             name="fk_work_reality_revisions_resource",
         ),
-        nullable=False,
+        nullable=True,
     ),
     Column("scope_basis_fingerprint", String(64), nullable=False),
-    Column("repository_identity", String(255), nullable=False),
-    Column("repository_ref", String(512), nullable=False),
+    Column("repository_identity", String(255), nullable=True),
+    Column("repository_ref", String(512), nullable=True),
     Column(
         "source_baseline_id",
         Uuid(as_uuid=True),
@@ -458,9 +461,9 @@ work_reality_revisions = Table(
             "production_snapshots.id",
             name="fk_work_reality_revisions_baseline",
         ),
-        nullable=False,
+        nullable=True,
     ),
-    Column("source_revision", String(64), nullable=False),
+    Column("source_revision", String(64), nullable=True),
     Column(
         "governance_record_id",
         Uuid(as_uuid=True),
@@ -476,6 +479,7 @@ work_reality_revisions = Table(
     Column("admitted_by", String(255), nullable=False),
     Column("schema_version", String(32), nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    CheckConstraint("(source_kind = 'INTERACTION_ASSESSMENT' AND source_assessment_id IS NOT NULL) OR (source_kind = 'ASSET_SCOPE_ADMISSION' AND source_assessment_id IS NULL)", name="ck_work_revision_source_kind"),
     UniqueConstraint(
         "work_id",
         "revision_number",
@@ -686,4 +690,6 @@ product_tables = (
     work_runtime_bindings,
     *steering_tables,
     *guided_design_tables,
+    repository_intakes,
+    *delivery_tables,
 )

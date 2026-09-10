@@ -61,6 +61,7 @@ from spg.domain.runtime import (
     ProductionHorizon,
     ProductionRunRecord,
     RunCondition,
+    RuntimeInvariantViolation,
     SnapshotCondition,
     SnapshotRecord,
     TransitionRecord,
@@ -129,6 +130,12 @@ class RuntimeStore:
         self.session.execute(insert(production_snapshots).values(**values))
 
     def insert_baseline_pointer(self, values: Mapping[str, Any]) -> None:
+        values = dict(values)
+        values.pop("singleton_id", None)
+        source = self.snapshot(values["snapshot_id"])
+        if source is None:
+            raise RuntimeInvariantViolation("Baseline pointer requires an existing snapshot")
+        values.update(repository_identity=source.repository_identity, repository_ref=source.repository_ref)
         self.session.execute(
             insert(current_trusted_baseline_pointer).values(**values)
         )
@@ -343,7 +350,11 @@ class RuntimeStore:
     ) -> int:
         """Advance by version and, when supplied, exact expected Source Baseline."""
 
-        identity: dict[str, Any] = {"singleton_id": 1}
+        source = self.snapshot(expected_snapshot_id or snapshot_id)
+        target = self.snapshot(snapshot_id)
+        if source is None or target is None or (source.repository_identity, source.repository_ref) != (target.repository_identity, target.repository_ref):
+            raise RuntimeInvariantViolation("Baseline advancement cannot cross repository namespaces")
+        identity: dict[str, Any] = {"repository_identity": source.repository_identity, "repository_ref": source.repository_ref}
         if expected_snapshot_id is not None:
             identity["snapshot_id"] = expected_snapshot_id
 
@@ -355,18 +366,36 @@ class RuntimeStore:
             values={"snapshot_id": snapshot_id, "updated_at": func.now()},
         )
 
-    def current_pointer(self, *, for_update: bool = False) -> BaselinePointerRecord | None:
-        statement = select(current_trusted_baseline_pointer).where(
-            current_trusted_baseline_pointer.c.singleton_id == 1
-        )
+    def current_pointer(
+        self, *, source_baseline_id: UUID | None = None,
+        repository_identity: str | None = None, repository_ref: str | None = None,
+        for_update: bool = False,
+    ) -> BaselinePointerRecord | None:
+        """Select an exact repository namespace; never choose an arbitrary default."""
+        if source_baseline_id is not None:
+            source = self.snapshot(source_baseline_id)
+            if source is None:
+                raise RuntimeInvariantViolation("Namespace source baseline does not exist")
+            if ((repository_identity is not None and repository_identity != source.repository_identity)
+                    or (repository_ref is not None and repository_ref != source.repository_ref)):
+                raise RuntimeInvariantViolation("Requested namespace conflicts with source baseline")
+            repository_identity, repository_ref = source.repository_identity, source.repository_ref
+        if (repository_identity is None) != (repository_ref is None):
+            raise RuntimeInvariantViolation("Repository namespace requires identity and ref")
+        statement = select(current_trusted_baseline_pointer)
+        if repository_identity is not None:
+            statement = statement.where(
+                (current_trusted_baseline_pointer.c.repository_identity == repository_identity)
+                & (current_trusted_baseline_pointer.c.repository_ref == repository_ref)
+            )
         if for_update:
             statement = statement.with_for_update()
-        row = self.session.execute(statement).mappings().one_or_none()
-        if row is None:
+        rows = self.session.execute(statement).mappings().all()
+        if len(rows) > 1:
+            raise RuntimeInvariantViolation("Multiple repository namespaces require an explicit baseline selection")
+        if not rows:
             return None
-        values = dict(row)
-        values.pop("singleton_id")
-        return BaselinePointerRecord.model_validate(values)
+        return BaselinePointerRecord.model_validate({key: rows[0][key] for key in ("snapshot_id", "version", "updated_at")})
 
     def snapshot(self, snapshot_id: UUID) -> SnapshotRecord | None:
         row = self._one(production_snapshots, production_snapshots.c.id == snapshot_id)

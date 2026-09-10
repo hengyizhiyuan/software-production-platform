@@ -1010,7 +1010,7 @@ class WorkInteractionService:
             messages = store.messages(interaction_id)
             turns = store.turns(interaction_id)
             latest = store.latest_assessment(interaction_id)
-            resource = product.default_resource()
+            resource = None if interaction.current_work_id is None else product.resource_for_work(interaction.current_work_id)
             governed_revision = (
                 None
                 if interaction.current_work_id is None

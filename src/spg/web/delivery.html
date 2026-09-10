@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>Watt · Work 资产与交付</title><link rel="stylesheet" href="/assets/delivery.css"><script src="/assets/delivery.js" defer></script></head>
+<body><header><a href="/app">← 返回对话与设计</a><span>Watt / Work-to-Delivery</span></header>
+<main><h1>从 Work 到可验收的交付</h1><p class="lead">明确目标，绑定仓库，审阅生产计划，再检查交付物。</p>
+<div id="notice" role="status" aria-live="polite"></div>
+<section><h2>当前 Work</h2><label for="work">选择 Work</label><select id="work"><option value="">先在对话中澄清并准入 Work</option></select><button id="refresh" type="button">刷新状态</button>
+<p id="work-summary"></p><div id="attention"></div><details><summary>已准入的生产计划</summary><pre id="plan">尚无生产计划</pre></details></section>
+<section><h2>仓库资产</h2><p>每个仓库保留独立基线。绑定会形成新的 Work 资产范围，并将所选仓库作为后续生产目标。</p>
+<form id="intake"><label for="repo-title">仓库名称</label><input id="repo-title" required maxlength="200" placeholder="运营平台设计">
+<label for="repo-source">已有 Git 地址（留空则创建本地 Git 仓库）</label><input id="repo-source" maxlength="2000" placeholder="https://… 或允许导入目录中的本地仓库路径">
+<label for="repo-description">软件描述与期望用途</label><textarea id="repo-description" required maxlength="4000" placeholder="这是一个……，我想继续……"></textarea>
+<button type="submit">接入 / 创建仓库</button></form><div id="assets"></div></section>
+<section><h2>交付目标</h2><p>首版支持文档包：通过受治理生产生成设计文档，提供精确版本的预览和下载。</p>
+<form id="target"><label for="target-kind">交付类型</label><select id="target-kind"><option value="DOCUMENT_PACKAGE">Document Package · 文档包</option></select>
+<label for="target-title">交付名称</label><input id="target-title" required maxlength="255" value="运营平台设计文档包">
+<label for="criteria">验收标准（每行一条）</label><textarea id="criteria" required>目的、用户、范围与约束清晰
+可以据此判断下一步研发工作</textarea><button type="submit">记录交付目标</button></form>
+<p id="target-summary"></p><button id="publish" type="button">从已验证的受信结果生成交付包</button><div id="deliveries"></div></section>
+<p class="foot">自动验证通过、仓库变更授权、Human 产品接受分别记录。完整应用的运行和部署取决于后续交付类型的支持。</p></main></body></html>

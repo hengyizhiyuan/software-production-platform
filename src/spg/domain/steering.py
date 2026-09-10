@@ -267,16 +267,16 @@ class SemanticStepInput(BaseModel):
     steering_plan_revision_id: UUID
     step: "SteeringStepRecord"
     basis_fingerprint: str = Field(min_length=64, max_length=64)
-    engineering_resource_id: UUID
+    engineering_resource_id: UUID | None
     engineering_scope_id: UUID
     engineering_scope_summary: str = Field(min_length=1)
     engineering_scope_fingerprint: str = Field(min_length=64, max_length=64)
-    repository_identity: str = Field(min_length=1)
-    repository_location: str = Field(min_length=1)
-    repository_ref: str = Field(min_length=1)
-    source_baseline_id: UUID
-    source_revision: str = Field(min_length=1)
-    source_tree: str = Field(min_length=1)
+    repository_identity: str | None = Field(default=None, min_length=1)
+    repository_location: str | None = Field(default=None, min_length=1)
+    repository_ref: str | None = Field(default=None, min_length=1)
+    source_baseline_id: UUID | None
+    source_revision: str | None = Field(default=None, min_length=1)
+    source_tree: str | None = Field(default=None, min_length=1)
     reality_refs: tuple[RealityReference, ...] = Field(min_length=1)
     governance_decisions: tuple[SemanticGovernanceDecision, ...]
     repository_tree_paths: tuple[str, ...]

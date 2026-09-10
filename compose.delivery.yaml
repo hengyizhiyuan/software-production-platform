@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_USER: spg
+      POSTGRES_PASSWORD: spg-local-dev
+      POSTGRES_DB: spg_delivery_acceptance
+    ports:
+      - "127.0.0.1:54339:5432"
+    volumes:
+      - delivery-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spg -d spg_delivery_acceptance"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  app:
+    build:
+      context: .
+      target: codex-executor
+    command: ["python", "/app/docker/start_delivery.py"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPG_DATABASE_URL: postgresql+psycopg://spg:spg-local-dev@postgres:5432/spg_delivery_acceptance
+      SPG_WORKSPACE_ROOT: /var/lib/spg/workspaces
+      SPG_RUNTIME_PROFILE: work-to-delivery-acceptance
+      PYTHONPATH: /opt/watt-source
+      SPG_EXECUTOR_ADAPTER: codex-sdk
+      SPG_WIC_PROVIDER_ADAPTER: codex-sdk
+      SPG_WIC_PROVIDER_MODEL: gpt-5.6-sol
+      SPG_CONVERSATION_PROVIDER_ADAPTER: codex-sdk
+      SPG_CONVERSATION_PROVIDER_MODEL: gpt-5.6-sol
+      SPG_EXECUTOR_TIMEOUT_SECONDS: "600"
+      SPG_COLLABORATION_PROVIDER_TIMEOUT_SECONDS: "180"
+      SPG_EXECUTOR_MAX_INTERNAL_TURNS: "3"
+      SPG_EXECUTOR_SANDBOX_MODE: full-access
+      SPG_VERIFICATION_ADAPTER: contract-driven-repository
+      CODEX_HOME: /home/spg/.codex
+      SPG_CODEX_AUTH_SOURCE: /run/secrets/spg-codex-auth
+    secrets:
+      - spg-codex-auth
+    ports:
+      - "127.0.0.1:8009:8000"
+    volumes:
+      - ./src:/opt/watt-source:ro
+      - delivery-runtime:/var/lib/spg
+      - delivery-codex:/home/spg/.codex
+secrets:
+  spg-codex-auth:
+    file: ${SPG_CODEX_AUTH_FILE_HOST:?Set SPG_CODEX_AUTH_FILE_HOST to the existing host Codex auth.json}
+volumes:
+  delivery-postgres:
+  delivery-runtime:
+  delivery-codex:

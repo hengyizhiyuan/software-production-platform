@@ -75,7 +75,7 @@ class VerifiedMaintenanceRecoveryService:
             if existing_admission is not None:
                 return self._result(store, existing_admission, idempotent=True)
 
-            pointer = store.current_pointer(for_update=True)
+            pointer = store.current_pointer(source_baseline_id=request.expected_old_trusted_baseline_id, for_update=True)
             if pointer is None:
                 raise RuntimeNotBootstrapped("no Current Trusted Baseline exists")
             if (
@@ -541,7 +541,7 @@ class VerifiedMaintenanceRecoveryService:
     def _result(self, store, admission, *, idempotent: bool):
         old_baseline = store.snapshot(admission.old_trusted_baseline_id)
         new_baseline = store.snapshot(admission.new_trusted_baseline_id)
-        pointer = store.current_pointer()
+        pointer = store.current_pointer(source_baseline_id=admission.old_trusted_baseline_id)
         old_run = store.run(admission.old_run_id)
         old_plan = store.plan_revision(admission.old_plan_revision_id)
         old_work_unit = store.work_unit(admission.old_work_unit_id)

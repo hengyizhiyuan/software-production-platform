@@ -205,7 +205,7 @@ class RuntimeCommitService:
 
             runtime_commit = store.runtime_commit(runtime_commit_id)
             trusted_baseline = store.snapshot(new_baseline_id)
-            pointer = store.current_pointer()
+            pointer = store.current_pointer(source_baseline_id=candidate.source_baseline_id)
             if runtime_commit is None or trusted_baseline is None or pointer is None:
                 raise RuntimeInvariantViolation(
                     "Runtime Commit transaction did not construct complete state"
@@ -260,7 +260,7 @@ class RuntimeCommitService:
         self._require_exact_authorization(candidate, authorization)
         self._require_converged_effect(candidate, authorization, effect)
 
-        pointer = store.current_pointer(for_update=True)
+        pointer = store.current_pointer(source_baseline_id=candidate.source_baseline_id, for_update=True)
         source_baseline = store.snapshot(candidate.source_baseline_id)
         run = store.run(candidate.production_run_id, for_update=True)
         plan = store.plan_revision(candidate.plan_revision_id)

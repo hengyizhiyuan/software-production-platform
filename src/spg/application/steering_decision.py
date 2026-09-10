@@ -61,7 +61,6 @@ class PlanFrameAssembler:
                 scope is None
                 or work.engineering_scope_id != scope.id
                 or scope.condition is not EngineeringScopeCondition.ADMITTED
-                or len(scope.bindings) != 1
             ):
                 raise SteeringInvariantViolation(
                     "Plan Frame requires the exact admitted Engineering Scope"
@@ -124,27 +123,14 @@ class PlanFrameAssembler:
             )
             references.extend(governance_refs)
 
-            pointer = runtime.current_pointer()
-            if pointer is None:
-                raise SteeringInvariantViolation(
-                    "Plan Frame requires current Trusted Baseline Reality"
-                )
-            snapshot = runtime.snapshot(pointer.snapshot_id)
-            resource = product.resource(scope.bindings[0].resource_id)
-            if (
-                snapshot is None
-                or resource is None
-                or snapshot.repository_identity != resource.repository_identity
-                or snapshot.repository_ref != resource.authoritative_ref
-            ):
-                raise SteeringInvariantViolation(
-                    "Plan Frame Trusted Baseline and Engineering Resource are inconsistent"
-                )
-            trusted_baseline_ref = RealityReference(
-                kind=RealityReferenceKind.TRUSTED_BASELINE,
-                identity=snapshot.id,
-            )
-            references.append(trusted_baseline_ref)
+            resource = product.resource_for_work(work_id)
+            trusted_baseline_ref = None
+            if resource is not None:
+                pointer = runtime.current_pointer(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
+                if pointer is None:
+                    raise SteeringInvariantViolation("Selected repository has no Trusted Baseline")
+                trusted_baseline_ref = RealityReference(kind=RealityReferenceKind.TRUSTED_BASELINE, identity=pointer.snapshot_id)
+                references.append(trusted_baseline_ref)
 
             runtime_refs: list[RealityReference] = []
             blockers: list[PlanFrameBlocker] = []

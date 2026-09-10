@@ -287,11 +287,11 @@ class CandidateGovernanceService:
                 f"Production Admissibility not found: {request.production_admissibility_id}"
             )
         completion = store.completion_evaluation(proposed.completion_evaluation_id)
+        pointer = store.current_pointer(source_baseline_id=proposed.source_baseline_id, for_update=True)
         work_unit = store.work_unit(proposed.work_unit_id, for_update=True)
         run = store.run(proposed.production_run_id, for_update=True)
         plan = store.plan_revision(proposed.plan_revision_id)
         source_baseline = store.snapshot(proposed.source_baseline_id)
-        pointer = store.current_pointer(for_update=True)
         observation = store.repository_observation_by_id(
             proposed.repository_observation_id
         )

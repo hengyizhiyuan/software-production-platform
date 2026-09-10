@@ -171,6 +171,10 @@ def render_governed_instruction(
             f"- Path: {artifact.artifact_path}\n"
             f"- Operation: {artifact.operation.value}\n"
             f"- Desired outcome: {artifact.expected_outcome}\n"
+            "- Document format verification: write UTF-8 text with no trailing spaces/tabs "
+            "and no extra blank line at EOF. Markdown two-space hard breaks also fail "
+            "the existing git diff --check requirement. Inspect newly created/untracked "
+            "files explicitly: plain git diff --check does not cover untracked files.\n"
             f"- Constraints:\n{constraints or '- None beyond the admitted contract.'}\n\n"
         )
     change_authority = ""

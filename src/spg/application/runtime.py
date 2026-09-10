@@ -44,7 +44,7 @@ class RuntimeService:
         """Explicitly observe and admit one initial trusted repository reality."""
 
         with self.database.unit_of_work() as unit_of_work:
-            if RuntimeStore(unit_of_work.session).current_pointer() is not None:
+            if RuntimeStore(unit_of_work.session).current_pointer(repository_identity=request.repository_identity, repository_ref=request.repository_ref) is not None:
                 raise BootstrapAlreadyInitialized(
                     "a Current Trusted Baseline already exists"
                 )
@@ -60,7 +60,7 @@ class RuntimeService:
 
         with self.database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
-            if store.current_pointer() is not None:
+            if store.current_pointer(repository_identity=request.repository_identity, repository_ref=request.repository_ref) is not None:
                 raise BootstrapAlreadyInitialized(
                     "a Current Trusted Baseline already exists"
                 )
@@ -114,7 +114,7 @@ class RuntimeService:
             )
 
             snapshot = self._required_snapshot(store, snapshot_id)
-            pointer = store.current_pointer()
+            pointer = store.current_pointer(repository_identity=request.repository_identity, repository_ref=request.repository_ref)
             governance = store.governance_for_subject(str(snapshot_id))
             if pointer is None or len(governance) != 1:
                 raise RuntimeInvariantViolation("bootstrap records were not constructed")
@@ -126,10 +126,10 @@ class RuntimeService:
             unit_of_work.commit()
             return result
 
-    def current_baseline(self) -> SnapshotRecord:
+    def current_baseline(self, *, repository_identity: str | None = None, repository_ref: str | None = None, source_baseline_id: UUID | None = None) -> SnapshotRecord:
         with self.database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
-            pointer = store.current_pointer()
+            pointer = store.current_pointer(repository_identity=repository_identity, repository_ref=repository_ref, source_baseline_id=source_baseline_id)
             if pointer is None:
                 raise RuntimeNotBootstrapped("no Current Trusted Baseline exists")
             return self._required_snapshot(store, pointer.snapshot_id)
@@ -144,7 +144,16 @@ class RuntimeService:
         run_id, plan_id, work_unit_id = uuid4(), uuid4(), uuid4()
         with self.database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
-            pointer = store.current_pointer()
+            contract = request.completion_contract
+            exact_source = request.source_baseline_id
+            for boundary in (contract.artifact_contract, contract.change_contract, contract.production_plan):
+                if boundary is not None:
+                    if exact_source is not None and exact_source != boundary.source_baseline_id:
+                        raise RuntimeInvariantViolation("Run contracts disagree on Source Baseline")
+                    exact_source = boundary.source_baseline_id
+            pointer = store.current_pointer(source_baseline_id=exact_source, for_update=True)
+            if pointer is not None and exact_source is not None and pointer.snapshot_id != exact_source:
+                raise RuntimeInvariantViolation("Run Source Baseline is stale")
             if pointer is None:
                 raise RuntimeNotBootstrapped("bootstrap is required before Run creation")
             baseline = self._required_snapshot(store, pointer.snapshot_id)

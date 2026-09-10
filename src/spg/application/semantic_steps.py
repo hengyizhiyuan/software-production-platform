@@ -89,7 +89,6 @@ class SemanticStepApplicationService:
             raise SteeringInvariantViolation(
                 "Semantic execution requires a current DESIGN or REFINE Step"
             )
-        baseline = self.runtime.current_baseline()
         with self.database.unit_of_work() as unit_of_work:
             product = ProductStore(unit_of_work.session)
             runtime = RuntimeStore(unit_of_work.session)
@@ -101,14 +100,11 @@ class SemanticStepApplicationService:
             if (
                 work.condition is not WorkCondition.READY
                 or scope.condition is not EngineeringScopeCondition.ADMITTED
-                or len(scope.bindings) != 1
             ):
                 raise SteeringInvariantViolation(
                     "Semantic execution requires admitted Work and Scope Reality"
                 )
-            resource = product.resource(scope.bindings[0].resource_id)
-            if resource is None:
-                raise ProductInvariantViolation("Semantic Engineering Resource is missing")
+            resource = product.resource_for_work(work_id)
             governance = tuple(
                 SemanticGovernanceDecision(
                     id=record.id,
@@ -119,32 +115,17 @@ class SemanticStepApplicationService:
                 )
                 for record in runtime.governance_for_subject(str(work_id))
             )
-        if (
-            baseline.repository_identity != resource.repository_identity
-            or baseline.repository_ref != resource.authoritative_ref
-        ):
-            raise SteeringInvariantViolation(
-                "Semantic input Resource and Trusted Baseline are inconsistent"
-            )
-
-        repository = Path(resource.location_ref).resolve()
-        source_tree = self._git(repository, "rev-parse", f"{baseline.repository_revision}^{{tree}}")
-        paths = tuple(
-            self._git(
-                repository,
-                "ls-tree",
-                "-r",
-                "--name-only",
-                baseline.repository_revision,
-            ).splitlines()[:MAX_TREE_PATHS]
-        )
-        materials = self._context_materials(
-            repository,
-            baseline.repository_revision,
-            tuple(
-                item.repository_relative_path for item in resource.context_references
-            ),
-        )
+        baseline = None if resource is None else self.runtime.current_baseline(
+            repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
+        repository = None if resource is None else Path(resource.location_ref).resolve()
+        source_tree = None
+        paths = ()
+        materials = ()
+        if baseline is not None:
+            source_tree = self._git(repository, "rev-parse", f"{baseline.repository_revision}^{{tree}}")
+            paths = tuple(self._git(repository, "ls-tree", "-r", "--name-only", baseline.repository_revision).splitlines()[:MAX_TREE_PATHS])
+            materials = self._context_materials(repository, baseline.repository_revision,
+                tuple(item.repository_relative_path for item in resource.context_references))
         refs = tuple(item.reference for item in frame.basis.resolved_reality)
         return SemanticStepInput(
             work_id=work.id,
@@ -159,15 +140,15 @@ class SemanticStepApplicationService:
             steering_plan_revision_id=frame.reconstruction.active_revision.revision.id,
             step=step,
             basis_fingerprint=frame.basis.fingerprint,
-            engineering_resource_id=resource.id,
+            engineering_resource_id=None if resource is None else resource.id,
             engineering_scope_id=scope.id,
             engineering_scope_summary=scope.summary,
             engineering_scope_fingerprint=scope.fingerprint,
-            repository_identity=resource.repository_identity,
-            repository_location=str(repository),
-            repository_ref=resource.authoritative_ref,
-            source_baseline_id=baseline.id,
-            source_revision=baseline.repository_revision,
+            repository_identity=None if resource is None else resource.repository_identity,
+            repository_location=None if repository is None else str(repository),
+            repository_ref=None if resource is None else resource.authoritative_ref,
+            source_baseline_id=None if baseline is None else baseline.id,
+            source_revision=None if baseline is None else baseline.repository_revision,
             source_tree=source_tree,
             reality_refs=refs,
             governance_decisions=governance,
@@ -279,6 +260,20 @@ class SemanticStepApplicationService:
                 raise SteeringInvariantViolation(
                     "Implementation-readiness design requires a reviewable production proposal"
                 )
+        if (fresh.design_context is not None and candidate.proposed_production is not None
+                and candidate.proposed_production.target_kind is ProductionTargetKind.DOCUMENTATION_WORK):
+            with self.database.unit_of_work() as design_uow:
+                design_store = SteeringStore(design_uow.session)
+                records = [design_store.semantic_result(ref.identity) for ref in fresh.reality_refs
+                           if ref.kind is RealityReferenceKind.SEMANTIC_RESULT]
+            latest = {}
+            for record in sorted((item for item in records if item is not None and item.completion_satisfied), key=lambda item: item.created_at):
+                latest[record.step_id] = record
+            sections = [f"Design result {item.id}: {item.bounded_summary}\n" + "\n".join(item.decisions) for item in latest.values()]
+            sections.append(candidate.bounded_summary + "\n" + "\n".join(candidate.decisions))
+            objective = candidate.proposed_production.objective + "\n\nDesign baseline to materialize (admitted source results):\n" + "\n\n".join(sections)
+            candidate = candidate.model_copy(update={"proposed_production": candidate.proposed_production.model_copy(update={"objective": objective})})
+
         new_constraints = set(candidate.derived_constraints) - set(fresh.constraints)
         if new_constraints and candidate.authority_assessment is (
             SteeringAuthorityAssessment.WITHIN_AUTHORITY
@@ -435,6 +430,8 @@ class SemanticStepApplicationService:
         semantic_input: SemanticStepInput,
         candidate: SemanticStepResultCandidate,
     ) -> tuple[ProductionPlanProposal, RepositoryChangeProposal | None]:
+        if semantic_input.engineering_resource_id is None or semantic_input.source_baseline_id is None:
+            raise SteeringInvariantViolation("Bind a Repository Asset before materializing production")
         proposal = candidate.proposed_production
         assert proposal is not None
         change_proposal = None

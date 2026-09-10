@@ -177,13 +177,14 @@ class SteeringBootstrapService:
                 reconstruction = self.steering.reconstruct(work_id)
                 self.guided_design.bootstrap(work, reconstruction)
                 return reconstruction
+            resource = product.resource_for_work(work_id)
             steps = (
                 guided_design_step_specs(design_schema_for_work(work)[0].issues)
                 if self.guided_design.eligible(work)
                 else self.capability.form(work)
             )
 
-        baseline = self.runtime.current_baseline()
+        baseline = None if resource is None else self.runtime.current_baseline(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
         work_reference = RealityReference(
             kind=(
                 RealityReferenceKind.WORK_REALITY_REVISION
@@ -203,7 +204,7 @@ class SteeringBootstrapService:
                     "Initial provider-neutral Steering trajectory formed from the "
                     f"Human-admitted Work envelope by {self.capability.identity}"
                 ),
-                reality_refs=(
+                reality_refs=(work_reference,) if baseline is None else (
                     work_reference,
                     RealityReference(
                         kind=RealityReferenceKind.TRUSTED_BASELINE,

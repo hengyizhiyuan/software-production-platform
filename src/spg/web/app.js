@@ -1375,6 +1375,14 @@
     setBusy(true);
     hideNotice();
     try {
+      try {
+        const assets = await apiRequest("/api/repository-assets");
+        const select = document.getElementById("admission-resource");
+        const previous = select.value;
+        select.replaceChildren(new Option("尚无仓库，先开始 Work 与设计", ""));
+        for (const asset of assets) select.add(new Option(asset.title + " · " + asset.repository_identity, asset.resource_id));
+        select.value = previous;
+      } catch (_error) { /* Existing interaction remains available if asset listing fails. */ }
       await Promise.all([loadHealth(), loadCollections()]);
       if (state.selectedWorkId) {
         await refreshSelected();
@@ -1687,6 +1695,7 @@
         {
           method: "POST",
           body: {
+            engineering_resource_id: document.getElementById("admission-resource").value || null,
             assessment_id: assessment.assessment_id,
             basis_fingerprint: assessment.basis_fingerprint,
             authority_identity: identity,

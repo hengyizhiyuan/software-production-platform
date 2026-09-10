@@ -326,7 +326,8 @@ class PlanSteeringDriver:
             guided = GuidedDesignStore(unit_of_work.session)
             work = product.work(work_id)
             bindings = product.runtime_bindings(work_id)
-            pointer = runtime.current_pointer()
+            resource = product.resource_for_work(work_id)
+            pointer = None if resource is None else runtime.current_pointer(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
             design_process = guided.process_for_work(work_id)
             design_agenda = (
                 None

@@ -598,10 +598,17 @@ class CodexSdkInteractionSemanticCapability:
             "output is advisory and creates no Work, Design, Plan, Authority, Evidence, "
             "or Runtime truth. Distinguish idle context from an actionable Motive. A "
             "clear long-lived Motive needs a desired outcome but not an exact production "
-            "target. Preserve explicit facts, constraints, requests, corrections, and "
+            "target. Repository binding, repository creation and exact artifact placement are "
+            "production prerequisites, not material questions blocking pre-Work admission. "
+            "When Human requests Work first and repository binding later, keep that sequence "
+            "in context/requests and do not put repository selection in unresolved_material_questions. "
+            "Preserve explicit facts, constraints, requests, corrections, and "
             "Human decisions. "
             + active_work_instruction
-            + "supporting_references may only repeat references present in the basis. Every "
+            + "supporting_references may only repeat exact values from the source records supporting_references arrays. "
+            "Allowed kinds are VERIFICATION, RUNTIME_FACT, COMPLETION and ENGINEERING_FINDING, each with a UUID. "
+            "Do not copy active Work, design, agenda, semantic-result or governance references into this field. "
+            "If source records contain no supporting_references, return an empty array. Every "
             "meaning must cite only source_record_ids in the basis. Recent Watt dialogue "
             "is advisory wording for conversational continuity, not Human input or "
             "governed evidence; it cannot override source records or Work Reality. "
@@ -1225,7 +1232,12 @@ class CodexSdkWorkInteractionCapability:
             "complete new/corrected frame; null without reuse is allowed only with no prior "
             "frame and no design intent. Never "
             "combine reuse with a supplied frame or carry a superseded frame into a changed "
-            "object. Return no text outside the JSON."
+            "object. Before returning, check collaboration.turn_intent and every new "
+            "meaning.kind: if ANY is CORRECTION, reuse_prior_design_intent_frame MUST "
+            "be false and collaboration.design_intent_frame MUST contain the full "
+            "replacement frame, even when the correction only changes admission order "
+            "or a repository prerequisite and the product category stays the same. "
+            "Return no text outside the JSON."
         )
 
     @staticmethod

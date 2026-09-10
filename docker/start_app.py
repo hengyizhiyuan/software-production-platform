@@ -153,7 +153,7 @@ def synchronize_repository_checkout(repository: Path) -> None:
     try:
         with database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
-            pointer = store.current_pointer()
+            pointer = store.current_pointer(repository_identity=REPOSITORY_IDENTITY, repository_ref=_current_repository_ref(repository))
             if pointer is None:
                 current_ref = _current_repository_ref(repository)
                 current_revision = git.read_ref(repository, current_ref)
@@ -279,7 +279,7 @@ def ensure_local_product_foundation(repository: Path) -> None:
     runtime = application.runtime(database)
     try:
         try:
-            baseline = runtime.current_baseline()
+            baseline = runtime.current_baseline(repository_identity=REPOSITORY_IDENTITY, repository_ref=_current_repository_ref(repository))
         except RuntimeNotBootstrapped:
             repository_ref = _current_repository_ref(repository)
             baseline = runtime.bootstrap_trusted_baseline(
@@ -344,7 +344,7 @@ def prepare_local_runtime_activation(repository: Path) -> ActiveRuntimeEvidence:
     try:
         with database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
-            pointer = store.current_pointer()
+            pointer = store.current_pointer(repository_identity=REPOSITORY_IDENTITY, repository_ref=_current_repository_ref(repository))
             if pointer is None:
                 raise RuntimeActivationError(
                     "RUNTIME_ACTIVATION_BLOCKED: Current Trusted Baseline is unavailable"

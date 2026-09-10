@@ -9,6 +9,7 @@ from spg.domain.runtime_activation import (
 )
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.runtime_activation import GitLocalRuntimeActivation
 
 
@@ -22,7 +23,8 @@ class RuntimeActivationService:
     def project(self) -> RuntimeActivationProjection:
         with self.database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
-            pointer = store.current_pointer()
+            resource = ProductStore(unit_of_work.session).default_resource()
+            pointer = None if resource is None else store.current_pointer(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
             baseline = None if pointer is None else store.snapshot(pointer.snapshot_id)
         if baseline is None or baseline.condition is not SnapshotCondition.TRUSTED:
             return RuntimeActivationProjection(

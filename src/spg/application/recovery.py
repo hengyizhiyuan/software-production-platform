@@ -173,7 +173,7 @@ class RecoveryAssessmentService:
                 "Recovery Assessment request does not bind the exact Attempt lineage"
             )
         work_unit = store.work_unit(attempt.work_unit_id)
-        pointer = store.current_pointer()
+        pointer = store.current_pointer(source_baseline_id=attempt.source_baseline_id)
         if work_unit is None or pointer is None:
             raise RuntimeInvariantViolation(
                 "Attempt Recovery Assessment lineage is incomplete"
@@ -350,7 +350,7 @@ class RecoveryAssessmentService:
                 "Recovery Assessment request does not bind the exact integration operation"
             )
         candidate = store.baseline_candidate(effect.candidate_id)
-        pointer = store.current_pointer()
+        pointer = store.current_pointer(repository_identity=effect.repository_identity, repository_ref=effect.target_authoritative_ref)
         if candidate is None or pointer is None:
             raise RuntimeInvariantViolation(
                 "Repository Recovery Assessment lineage is incomplete"

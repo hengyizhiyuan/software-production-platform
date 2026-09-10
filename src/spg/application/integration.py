@@ -30,6 +30,7 @@ from spg.domain.verification import (
     VerificationResultValue,
 )
 from spg.infrastructure.git_integration import GitRepositoryIntegrationAdapter
+from spg.infrastructure.repository_lock import repository_lock
 from spg.infrastructure.persistence import Database, OptimisticConcurrencyConflict
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 
@@ -54,7 +55,15 @@ class RepositoryIntegrationService:
         self.database = database
         self.git = git or GitRepositoryIntegrationAdapter()
 
-    def integrate_repository_candidate(
+    def integrate_repository_candidate(self, request: RepositoryIntegrationRequest) -> RepositoryIntegrationResult:
+        with self.database.unit_of_work() as uow:
+            candidate = RuntimeStore(uow.session).baseline_candidate(request.candidate_id)
+            if candidate is None:
+                raise RuntimeRecordNotFound(f"Baseline Candidate not found: {request.candidate_id}")
+        with repository_lock(self.database, candidate.repository_identity, candidate.target_authoritative_ref):
+            return self._integrate_repository_candidate(request)
+
+    def _integrate_repository_candidate(
         self,
         request: RepositoryIntegrationRequest,
     ) -> RepositoryIntegrationResult:
@@ -299,7 +308,7 @@ class RepositoryIntegrationService:
                 "Human Authorization does not cover the exact repository integration"
             )
 
-        pointer = store.current_pointer(for_update=True)
+        pointer = store.current_pointer(source_baseline_id=candidate.source_baseline_id, for_update=True)
         source_baseline = store.snapshot(candidate.source_baseline_id)
         run = store.run(candidate.production_run_id, for_update=True)
         plan = store.plan_revision(candidate.plan_revision_id)

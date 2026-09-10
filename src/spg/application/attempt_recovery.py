@@ -199,8 +199,8 @@ class AttemptRecoveryService:
                 raise RuntimeRecordNotFound(
                     f"Attempt not found: {assessment.subject_identity}"
                 )
+            pointer = store.current_pointer(source_baseline_id=original.source_baseline_id, for_update=True)
             work_unit = store.work_unit(original.work_unit_id, for_update=True)
-            pointer = store.current_pointer(for_update=True)
             if work_unit is None or pointer is None:
                 raise RuntimeInvariantViolation(
                     "Retry Attempt current PWU/Baseline lineage is incomplete"
