@@ -64,7 +64,16 @@ Existing-repository case traversed real `gpt-5.6-sol` WIC, Guided Design and Exe
 
 The first new-Work production produced `docs/design.md` but independent verification correctly FAILED `git diff --check` because line 3 contained Markdown trailing spaces. Its Work, snapshot and failure remain preserved, and no delivery was published from it. The existing verifier was not weakened and the failed snapshot was not edited or relabelled PASS. Executor materialization now explicitly communicates the existing whitespace/UTF-8 requirement, including the fact that untracked files are not covered by a plain working-tree diff check. A separate synthetic new-Work recheck uses the same still-trusted repository. Failed-Verification replan/retry UI is not implemented by this slice; it does not invent a PWU lifecycle transition.
 
-The original new Work remains an intentional failed-history fixture at its original URL. The recheck result is recorded separately below when finished. Provider structural-response errors are preserved as failed turns; retries do not grant authority or overwrite previous evidence.
+The original new Work remains an intentional failed-history fixture at its original URL. The separate new-Work recheck completed all seven design issues, real Executor production and independent Verification PASS. Its exact Candidate `5a387728-a7ad-5811-8c0b-0884e067fc6a` was inspected before integration: only CREATE `docs/design.md`, 118 lines, no application implementation. The actual browser published, previewed and downloaded its package with zero page errors.
+
+- Recheck Runtime Commit: `5fd33f18-deed-5d7d-97ca-d620f4fda390`.
+- Recheck Manifest: `c9565333-4846-58c1-802f-09d548a671a6`.
+- Recheck Git revision: `e77b831bef9c39b3d783e6df0a991c1729f7f773`.
+- Artifact: `docs/design.md`, 6,774 bytes, SHA-256 `21d4a3edeaf387dacd07b794fc9d740c208ffdbc6586e53368a36d52ef49416d`.
+- Verification: `f233fd46-d8cd-5ac8-b42f-3cab078b421b` PASS.
+- Evidence: `delivery-recheck-proposal-ui.log`, `delivery-new-published.log`, `new-document-package.zip`.
+
+Both downloaded ZIPs match every artifact size/hash in their manifests. After the final app restart, both exact manifests and artifact bytes remain available and current, repository A remains unchanged while B advances independently, and the acceptance database contains zero Human acceptance decisions (`delivery-restart-final.log`). Screenshots of both completed delivery pages were visually inspected. Provider structural-response errors remain failed turns; corrections/retries do not grant authority or overwrite evidence. Prompt corrections explicitly preserve Work-before-repository admission and forbid reusing a prior frame on a correction.
 
 ## H. Automated Validation
 
@@ -81,7 +90,7 @@ Automated checks pass after the recorded corrections. Local evidence is under `.
 | Runtime, Git integration, trusted commit, recovery, WIC, API, delivery | Initial 262-case run: 260 passed, 1 test-fixture failure, 1 opt-in case skipped; failed case corrected and passed in the final scope run | `delivery-linux-regression-final.log` |
 | Final Work/asset/attention/WIC/API regression | 40 passed, 1 opt-in case skipped | `delivery-scope-regression.log` |
 | Semantic integration plus delivery | 15 passed, 1 prompt-wording assertion failed, 1 opt-in case skipped; corrected assertion passed on rerun | `delivery-linux-focused.log`, `delivery-semantic-recheck.log` |
-| Actual browser pages | Import, create, bind, record target and proposal approval succeed; no page JavaScript errors, preview/download/ZIP hash checks pass | `delivery-ui-final.log`, `delivery-proposal-ui.log`, `delivery-existing-published.log` |
+| Actual browser pages | Import, create, bind, record target and proposal approval succeed; no page JavaScript errors, preview/download/ZIP hash checks pass | `delivery-ui-final.log`, `delivery-proposal-ui.log`, `delivery-existing-published.log`, `delivery-new-published.log` |
 
 The final delivery tests prove empty-scope Work/semantic input, later multi-asset binding, exact provenance DTOs, independent namespaces, explicit conflicting ref/cross-repo pointer rejection, historical attention no longer blocking a newly admitted basis, unverified publication rejection, exact Markdown/ZIP retrieval, explicit-manifest acceptance, and recovery of A after B is independently bootstrapped. Independent repository B stays unchanged during A's production and recovery.
 
@@ -117,7 +126,7 @@ Native Codex browser automation could not start due to Windows `CreateProcessWit
 ## J. Human Acceptance Checklist
 
 - [ ] Open the existing Work. Inspect its imported repository, observed revision and design agenda.
-- [ ] Open the new Work. Confirm it contains design history before its later asset-scope revision; its asset is independent of the inventory repo.
+- [ ] Open the original new Work to inspect design history before its later asset-scope revision and the preserved format failure. Open the recheck Work to inspect its verified document package; its asset is independent of the inventory repo.
 - [ ] To repeat from scratch, clarify a new intent at `/app`, leave the repository selection empty when admitting Work, then create and bind a repository at `/delivery`.
 - [ ] Review the bounded document production proposal and its artifact paths before approval.
 - [ ] Review the exact Candidate change and authorize repository integration through the existing Attention workflow.
@@ -134,4 +143,4 @@ As-built multi-repository architecture replaces the obsolete design-pending prop
 
 ## L. Commit / Push
 
-Commit/push details will be recorded after final validation. Branch: `feature/spg-first-vertical-slice`. Feature acceptance remains **HUMAN PRODUCT ACCEPTANCE PENDING** regardless of repository publication.
+Implementation commit: `0953197adeb20950e4aa9e12ae3036634e0e71ec`. This evidence supplement is committed separately. Destination is the existing tracking branch `origin/feature/spg-first-vertical-slice` at `https://github.com/hengyizhiyuan/software-production-platform.git`, descended from `d8aece326366ef329d15c1bc0a6779f59be9ec46`. The initial push was blocked by automatic approval review pending destination/payload authorization checks; final publication outcome is reported in the task response. Only the 55 reviewed implementation/test/document files are included; local `.spg` execution evidence and auth material are not tracked. Feature acceptance remains **HUMAN PRODUCT ACCEPTANCE PENDING** regardless of repository publication.
