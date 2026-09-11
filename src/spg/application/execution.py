@@ -182,6 +182,28 @@ class ExecutionService:
             unit_of_work.commit()
             return observation, work_products
 
+    def complete_existing_dispatch(
+        self,
+        dispatch_id: UUID,
+        provider_result: ExecutorDispatchResult,
+    ) -> GovernedExecutionResult:
+        """Complete a previously durable native dispatch after process recovery."""
+
+        with self.database.unit_of_work() as unit_of_work:
+            store = RuntimeStore(unit_of_work.session)
+            dispatch = store.execution_dispatch(dispatch_id)
+            if dispatch is None:
+                raise RuntimeRecordNotFound(f"Execution dispatch not found: {dispatch_id}")
+            existing = store.provider_execution_report(dispatch_id)
+        report = existing or self._persist_provider_report(dispatch, provider_result)
+        observation, work_products = self.observe_dispatch(dispatch_id)
+        return GovernedExecutionResult(
+            dispatch=dispatch,
+            provider_report=report,
+            observation=observation,
+            work_products=work_products,
+        )
+
     def _persist_dispatch(self, request) -> ExecutionDispatchRecord:
         dispatch_id = uuid4()
         timestamp = datetime.now(UTC)

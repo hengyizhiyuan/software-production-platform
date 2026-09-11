@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -30,6 +30,22 @@ class Settings(BaseSettings):
     delivery_runtime_first_port: int = Field(default=8010, ge=1024, le=65000)
     delivery_runtime_port_count: int = Field(default=10, ge=1, le=20)
     executor_adapter: str = "unconfigured"
+    native_executor_enabled: bool = False
+    native_executor_backend: Literal["watt-native", "legacy-codex"] = "watt-native"
+    native_executor_worker_id: str = "native-worker-local-1"
+    native_executor_worker_profile: str = "local-container-v1"
+    native_executor_resource_profile: str = "standard"
+    native_executor_storage_root: Path = Path(".watt/native-executor")
+    native_executor_inference_model: str | None = None
+    native_executor_openai_api_key: SecretStr | None = None
+    native_executor_openai_base_url: str = "https://api.openai.com/v1"
+    native_executor_tool_host_url: str = "http://native-tool-host:8011"
+    native_executor_internal_token: SecretStr | None = None
+    native_executor_workspace_root: Path = Path(".watt/native-executor/workspaces")
+    native_executor_poll_seconds: float = Field(default=1.0, ge=0.1, le=30)
+    native_executor_compatibility_wait_seconds: float = Field(
+        default=7200.0, ge=30.0, le=86400.0
+    )
     wic_provider_adapter: str | None = Field(default=None, min_length=1)
     wic_provider_model: str | None = Field(default=None, min_length=1)
     conversation_provider_adapter: str | None = Field(default=None, min_length=1)

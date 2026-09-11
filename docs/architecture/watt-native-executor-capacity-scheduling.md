@@ -1,12 +1,16 @@
 # Watt-native Executor Capacity Scheduling & Execution Queue
 
-Date: 2026-09-11. Status: **ARCHITECTURE AMENDMENT COMPLETE; IMPLEMENTATION NOT STARTED**.
+Date: 2026-09-11. Status: **ARCHITECTURE AMENDMENT COMPLETE; MVP FOUNDATION IMPLEMENTED; FULL QUALIFICATION PENDING**.
 
 This document amends the [Watt-native Executor Blueprint](watt-native-executor-blueprint.md)
 by defining how finite execution capacity is assigned when multiple users and
-Production Work Units (PWUs) compete for Executor resources. It does not
-authorize a scheduler implementation, change the PWU lifecycle, or introduce a
-new source of product or production truth.
+Production Work Units (PWUs) compete for Executor resources. The current
+PostgreSQL-backed implementation supplies fair round-robin, FIFO, aging,
+eligibility, fenced allocation leases, resource waits that release workers,
+and Human-visible queue projections. Concurrency, crash, starvation,
+performance, and Human acceptance qualification remain open. This does not
+change the PWU lifecycle or introduce a new source of product or production
+truth.
 
 The following invariants remain normative:
 

@@ -978,6 +978,8 @@ The current system-level architecture baseline is:
 - [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
 - [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)
 - [AI-native Development Execution Principles](docs/architecture/ai-native-development-execution-principles.md)
+- [Watt-native Executor Runtime Architecture Blueprint](docs/architecture/watt-native-executor-blueprint.md)
+- [Watt-native Executor Runtime Implementation and Qualification Progress](docs/evidence/watt-native-executor-runtime-implementation-progress.md)
 
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
@@ -1043,6 +1045,27 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Production Cycle Completion Does Not End the Work Relationship Automatically
 - Controlled Autonomy
 - AI Capability Evolution Independence
+
+## Watt-native Executor Runtime Implementation Reality
+
+The Watt-native Executor Runtime foundation is **IMPLEMENTED / FOCUSED
+VALIDATION PASS / NOT TECHNICALLY QUALIFIED**. Current code adds typed native
+execution contracts, additive PostgreSQL durability through migration
+`20260911_34`, fair capacity scheduling, leases, a checkpointed reasoning/tool
+kernel, bounded Tool Host, OpenAI Responses adapter boundary, legacy/native
+backend routing, queue/control/event APIs, Human-visible queue projection, and
+an isolated container topology. Executor output remains `RESULT_READY`; existing
+Completion, Verification, Candidate, Human Authorization, Runtime Commit, and
+Trusted Baseline owners remain unchanged.
+
+This status does **not** claim complete crash-frontier recovery, controlled
+process-tree termination, multi-repository downstream integration, full
+security isolation, retention/hibernation, event relay/reset, live-provider
+qualification, continuity benchmark, or Human Product Acceptance. The isolated
+no-Provider runtime is available for technical inspection only and is not a
+Human acceptance runtime. Exact passed checks and open qualification cases are
+recorded in [Watt-native Executor Runtime Implementation and Qualification
+Progress](docs/evidence/watt-native-executor-runtime-implementation-progress.md).
 
 ## Current Major Components
 

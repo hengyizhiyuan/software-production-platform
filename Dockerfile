@@ -28,7 +28,7 @@ COPY migrations ./migrations
 COPY docker ./docker
 
 RUN useradd --create-home --uid 10001 spg \
-    && mkdir -p /var/lib/spg /home/spg/.codex \
+    && mkdir -p /var/lib/spg /var/lib/spg/native-workspaces /var/lib/spg/native-checkpoints /home/spg/.codex \
     && chown -R spg:spg /var/lib/spg /home/spg/.codex
 
 USER spg

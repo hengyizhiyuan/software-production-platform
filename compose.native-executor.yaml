@@ -1,0 +1,140 @@
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: spg_dev
+      POSTGRES_USER: spg
+      POSTGRES_PASSWORD: spg-native-local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    networks: [control]
+    volumes:
+      - native-postgres-data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPG_APPLICATION_NAME: Watt Native Executor Acceptance
+      SPG_DATABASE_URL: postgresql+psycopg://spg:spg-native-local@postgres:5432/spg_dev?sslmode=disable&connect_timeout=5
+      SPG_REPOSITORY_PATH: /var/lib/spg/repository
+      SPG_RUNTIME_PROFILE: watt-native-executor-acceptance
+      SPG_WORKSPACE_ROOT: /var/lib/spg/native-workspaces
+      SPG_EXECUTOR_ADAPTER: watt-native
+      SPG_NATIVE_EXECUTOR_ENABLED: "true"
+      SPG_NATIVE_EXECUTOR_BACKEND: watt-native
+      SPG_NATIVE_EXECUTOR_WORKER_PROFILE: local-container-v1
+      SPG_NATIVE_EXECUTOR_RESOURCE_PROFILE: standard
+    init: true
+    ports:
+      - "127.0.0.1:${SPG_NATIVE_APP_PORT:-8040}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 3s
+      timeout: 4s
+      retries: 30
+      start_period: 15s
+    networks: [control]
+    volumes:
+      - type: bind
+        source: ./.git
+        target: /source/.git
+        read_only: true
+      - native-app-data:/var/lib/spg
+      - native-workspaces:/var/lib/spg/native-workspaces
+
+  native-coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    command: ["python", "-m", "spg.executor_coordinator"]
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      SPG_DATABASE_URL: postgresql+psycopg://spg:spg-native-local@postgres:5432/spg_dev?sslmode=disable&connect_timeout=5
+      SPG_NATIVE_EXECUTOR_ENABLED: "true"
+      SPG_NATIVE_EXECUTOR_POLL_SECONDS: "1"
+    init: true
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [control]
+
+  native-tool-host:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    command: ["uvicorn", "spg.tool_host_api:create_tool_host_application", "--factory", "--host", "0.0.0.0", "--port", "8011"]
+    environment:
+      SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT: /var/lib/spg/native-workspaces
+      SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN: ${SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN:?Set a dedicated native Tool Host token}
+    init: true
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8011/health', timeout=3).read()"]
+      interval: 3s
+      timeout: 4s
+      retries: 20
+    networks: [executor]
+    volumes:
+      - native-workspaces:/var/lib/spg/native-workspaces
+
+  native-worker:
+    profiles: [provider]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    command: ["python", "-m", "spg.executor_worker"]
+    depends_on:
+      app:
+        condition: service_healthy
+      native-tool-host:
+        condition: service_healthy
+    environment:
+      SPG_DATABASE_URL: postgresql+psycopg://spg:spg-native-local@postgres:5432/spg_dev?sslmode=disable&connect_timeout=5
+      SPG_NATIVE_EXECUTOR_ENABLED: "true"
+      SPG_NATIVE_EXECUTOR_WORKER_ID: native-worker-acceptance-1
+      SPG_NATIVE_EXECUTOR_WORKER_PROFILE: local-container-v1
+      SPG_NATIVE_EXECUTOR_RESOURCE_PROFILE: standard
+      SPG_NATIVE_EXECUTOR_STORAGE_ROOT: /var/lib/spg/native-checkpoints
+      SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT: /var/lib/spg/native-workspaces
+      SPG_NATIVE_EXECUTOR_TOOL_HOST_URL: http://native-tool-host:8011
+      SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN: ${SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN:?Set a dedicated native Tool Host token}
+      SPG_NATIVE_EXECUTOR_INFERENCE_MODEL: ${SPG_NATIVE_EXECUTOR_INFERENCE_MODEL:?Set an admitted exact OpenAI model}
+      SPG_NATIVE_EXECUTOR_OPENAI_API_KEY: ${SPG_NATIVE_EXECUTOR_OPENAI_API_KEY:?Set an admitted OpenAI API key}
+    init: true
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [control, executor]
+    volumes:
+      - native-workspaces:/var/lib/spg/native-workspaces
+      - native-checkpoints:/var/lib/spg/native-checkpoints
+
+networks:
+  control:
+  executor:
+    internal: true
+
+volumes:
+  native-postgres-data:
+  native-app-data:
+  native-workspaces:
+  native-checkpoints:

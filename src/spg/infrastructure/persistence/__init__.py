@@ -11,6 +11,9 @@ from spg.infrastructure.persistence.database import (
     configured_database_url,
 )
 from spg.infrastructure.persistence.metadata import metadata
+from spg.infrastructure.persistence.native_execution_schema import (
+    native_execution_tables,
+)
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
 from spg.infrastructure.persistence.guided_design_schema import guided_design_tables
@@ -35,6 +38,7 @@ __all__ = [
     "UnitOfWork",
     "configured_database_url",
     "metadata",
+    "native_execution_tables",
     "product_tables",
     "runtime_tables",
     "steering_tables",

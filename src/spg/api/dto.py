@@ -24,6 +24,7 @@ from spg.domain.product import (
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
 from spg.domain.runtime_activation import RuntimeActivationProjection
+from spg.domain.native_execution import ControlAction, ExecutionQueueEntryRecord
 from spg.domain.steering import (
     RealityReference,
     SteeringAttentionReason,
@@ -1328,3 +1329,39 @@ class HealthResponse(ApiDto):
 class ErrorResponse(ApiDto):
     code: str
     message: str
+
+
+class NativeQueueEntryResponse(ApiDto):
+    queue_entry_id: UUID
+    work_id: UUID
+    pwu_id: UUID
+    attempt_id: UUID
+    fairness_group: str
+    condition: str
+    wait_reason: str | None
+    enqueued_at: datetime
+    available_at: datetime
+    resume_count: int
+
+    @classmethod
+    def from_record(cls, record: ExecutionQueueEntryRecord) -> Self:
+        return cls(
+            queue_entry_id=record.id,
+            work_id=record.work_id,
+            pwu_id=record.pwu_id,
+            attempt_id=record.attempt_id,
+            fairness_group=record.fairness_group,
+            condition=record.condition.value,
+            wait_reason=record.wait_reason,
+            enqueued_at=record.enqueued_at,
+            available_at=record.available_at,
+            resume_count=record.resume_count,
+        )
+
+
+class NativeExecutionControlRequest(ApiDto):
+    command_id: UUID
+    action: ControlAction
+    expected_control_version: int = Field(ge=0)
+    actor_identity: str = Field(default="human:local-operator", min_length=1)
+    reason: str = Field(min_length=1)

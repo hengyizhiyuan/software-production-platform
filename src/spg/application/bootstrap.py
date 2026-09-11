@@ -36,6 +36,7 @@ from spg.application.steering_bootstrap import (
     SteeringBootstrapService,
 )
 from spg.application.runtime_activation import RuntimeActivationService
+from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
 from spg.domain.preparation import ExecutorBinding
@@ -69,6 +70,14 @@ class Application:
         """Compose governed Runtime operations over explicit persistence."""
 
         return RuntimeService(database or self.persistence())
+
+    def native_executor_runtime(
+        self,
+        database: Database | None = None,
+    ) -> NativeExecutorRuntimeService:
+        """Compose the additive Watt-native Executor v2 runtime."""
+
+        return NativeExecutorRuntimeService(database or self.persistence())
 
     def preparation(self, database: Database | None = None) -> PreparationService:
         """Compose S2-A preparation without composing or dispatching an Executor."""
@@ -192,6 +201,25 @@ class Application:
                 binding_ref="binding:codex-sdk-dedicated-process",
                 capability_identity="capability:executor",
                 profile_identity="profile:local-docker-codex-e2e",
+            )
+        elif selected_executor is None and self.settings.executor_adapter == "watt-native":
+            from spg.infrastructure.executor_runtime.native_compatibility_executor import (
+                NativeQueuedExecutorCapability,
+            )
+
+            selected_executor = NativeQueuedExecutorCapability(
+                selected_database,
+                self.native_executor_runtime(selected_database),
+                provider_profile="openai-responses",
+                resource_profile=self.settings.native_executor_resource_profile,
+                environment_profile=self.settings.native_executor_worker_profile,
+                poll_seconds=self.settings.native_executor_poll_seconds,
+                wait_seconds=self.settings.native_executor_compatibility_wait_seconds,
+            )
+            selected_binding = ExecutorBinding(
+                binding_ref="binding:watt-native-queue-v2",
+                capability_identity="capability:watt-native-executor",
+                profile_identity=self.settings.native_executor_worker_profile,
             )
         if (
             selected_verifier is None

@@ -31,6 +31,8 @@ from spg.api.dto import (
     InteractionWorkAdmissionRequest,
     InteractionWorkRevisionDecisionRequest,
     InteractionWorkTransitionDecisionRequest,
+    NativeExecutionControlRequest,
+    NativeQueueEntryResponse,
     SharedUnderstandingResponse,
     RuntimeActivationResponse,
     SteeringPlanResponse,
@@ -48,6 +50,7 @@ from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
+from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.application.assets import RepositoryAssetService
 from spg.application.delivery import DeliveryApplicationService
 from spg.application.software_runtime import SoftwareRuntimeService
@@ -67,6 +70,13 @@ from spg.domain.interaction import (
     InteractionRecordNotFound,
 )
 from spg.domain.steering import SteeringRecordNotFound
+from spg.domain.native_execution import (
+    BackendControlCommand,
+    ExecutionHandle,
+    NativeExecutionAdmission,
+    NativeExecutionError,
+)
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.persistence import Database, DatabaseConfigurationError
 
 
@@ -104,6 +114,7 @@ def create_http_application(
     runtime_activation: RuntimeActivationService | None = None,
     interaction_service: WorkInteractionService | None = None,
     guided_design_service: GuidedDesignApplicationService | None = None,
+    native_executor_runtime: NativeExecutorRuntimeService | None = None,
 ) -> FastAPI:
     """Compose one ASGI application over the existing application bootstrap path."""
 
@@ -154,6 +165,11 @@ def create_http_application(
     selected_interaction = interaction_service
     if selected_interaction is None and hasattr(container, "interaction"):
         selected_interaction = container.interaction(selected_database)
+    selected_native_executor = native_executor_runtime or (
+        container.native_executor_runtime(selected_database)
+        if hasattr(container, "native_executor_runtime")
+        else NativeExecutorRuntimeService(selected_database)
+    )
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
@@ -191,6 +207,7 @@ def create_http_application(
     api.state.steering_bootstrap = selected_steering_bootstrap
     api.state.work_post_admission = selected_post_admission
     api.state.interaction_service = selected_interaction
+    api.state.native_executor_runtime = selected_native_executor
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
@@ -305,6 +322,12 @@ def create_http_application(
         error: ProductHttpError,
     ) -> JSONResponse:
         return _error(error.status_code, error.code, str(error))
+
+    @api.exception_handler(NativeExecutionError)
+    async def native_execution_error_handler(
+        _request: Request, error: NativeExecutionError
+    ) -> JSONResponse:
+        return _error(409, "NATIVE_EXECUTION_CONFLICT", str(error))
 
     @api.exception_handler(RequestValidationError)
     async def validation_handler(
@@ -665,6 +688,118 @@ def create_http_application(
     @api.get("/api/works/{work_id}", response_model=WorkResponse)
     def get_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.get_work(work_id))
+
+    @api.get(
+        "/api/native-execution/queue",
+        response_model=list[NativeQueueEntryResponse],
+    )
+    def native_execution_queue(work_id: UUID | None = None) -> list[NativeQueueEntryResponse]:
+        with selected_database.unit_of_work() as uow:
+            records = NativeExecutionStore(uow.session).list_queue(work_id=work_id)
+        return [NativeQueueEntryResponse.from_record(record) for record in records]
+
+    @api.post(
+        "/api/native-execution/admissions",
+        response_model=NativeQueueEntryResponse,
+    )
+    def admit_native_execution(
+        admission: NativeExecutionAdmission,
+    ) -> NativeQueueEntryResponse:
+        if not getattr(settings, "native_executor_enabled", False):
+            raise ProductHttpError(
+                409,
+                "NATIVE_EXECUTOR_DISABLED",
+                "Watt-native Executor admission is not enabled for this Runtime",
+            )
+        return NativeQueueEntryResponse.from_record(
+            selected_native_executor.admit(admission)
+        )
+
+    @api.get("/api/native-execution/pwus/{pwu_id}/events")
+    async def native_execution_events(
+        pwu_id: UUID,
+        request: Request,
+        after_sequence: int = Query(default=0, ge=0),
+    ) -> StreamingResponse:
+        async def stream():
+            cursor = after_sequence
+            idle_cycles = 0
+            while not await request.is_disconnected() and idle_cycles < 60:
+                def load_events():
+                    with selected_database.unit_of_work() as uow:
+                        return NativeExecutionStore(uow.session).events_since(
+                            pwu_id, after_sequence=cursor
+                        )
+
+                events = await asyncio.to_thread(load_events)
+                if not events:
+                    idle_cycles += 1
+                    yield ": keep-alive\n\n"
+                    await asyncio.sleep(0.5)
+                    continue
+                idle_cycles = 0
+                for event in events:
+                    cursor = event.sequence
+                    payload = json.dumps(event.model_dump(mode="json"), ensure_ascii=False)
+                    yield f"id: {event.sequence}\nevent: {event.event_type}\ndata: {payload}\n\n"
+
+        return StreamingResponse(stream(), media_type="text/event-stream")
+
+    @api.get("/api/native-execution/attempts/{attempt_id}")
+    def native_execution_attempt(attempt_id: UUID):
+        with selected_database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            state = store.attempt_state(attempt_id)
+            queue = store.queue_for_attempt(attempt_id)
+            steps = store.steps_for_attempt(attempt_id)
+            effects = store.effects_for_attempt(attempt_id)
+            evidence = store.evidence_for_attempt(attempt_id)
+            checkpoint = store.latest_checkpoint(attempt_id)
+        handle = ExecutionHandle(
+            backend_identity="watt-native",
+            dispatch_id=queue.id if queue else attempt_id,
+            attempt_id=attempt_id,
+            generation=state.generation,
+            opaque_reference=f"attempt:{attempt_id}",
+        )
+        return {
+            "observation": selected_native_executor.observe(handle).model_dump(mode="json"),
+            "state": state.model_dump(mode="json"),
+            "queue": queue.model_dump(mode="json") if queue else None,
+            "steps": [item.model_dump(mode="json") for item in steps],
+            "effects": [item.model_dump(mode="json") for item in effects],
+            "evidence": [item.model_dump(mode="json") for item in evidence],
+            "checkpoint": checkpoint.model_dump(mode="json") if checkpoint else None,
+        }
+
+    @api.post("/api/native-execution/attempts/{attempt_id}/control")
+    def native_execution_control(attempt_id: UUID, request: NativeExecutionControlRequest):
+        if not getattr(settings, "native_executor_enabled", False):
+            raise ProductHttpError(
+                409,
+                "NATIVE_EXECUTOR_DISABLED",
+                "Watt-native Executor control is not enabled for this Runtime",
+            )
+        with selected_database.unit_of_work() as uow:
+            state = NativeExecutionStore(uow.session).attempt_state(attempt_id)
+        handle = ExecutionHandle(
+            backend_identity="watt-native",
+            dispatch_id=attempt_id,
+            attempt_id=attempt_id,
+            generation=state.generation,
+            opaque_reference=f"attempt:{attempt_id}",
+        )
+        receipt = selected_native_executor.control(
+            BackendControlCommand(
+                command_id=request.command_id,
+                handle=handle,
+                action=request.action,
+                expected_control_version=request.expected_control_version,
+                actor_identity=request.actor_identity,
+                reason=request.reason,
+            )
+        )
+        return receipt.model_dump(mode="json")
 
     @api.get(
         "/api/works/{work_id}/steering",

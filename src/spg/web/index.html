@@ -244,6 +244,24 @@
                 <div><dt>Emerging Direction</dt><dd id="control-emerging-direction"></dd></div>
               </dl>
             </section>
+
+            <section id="execution-queue-card" class="control-room-card" aria-labelledby="execution-queue-heading">
+              <p class="eyebrow">Execution Queue</p>
+              <h3 id="execution-queue-heading">Where is execution capacity?</h3>
+              <p id="execution-queue-state" class="control-room-state">No native execution is queued.</p>
+              <p id="execution-queue-summary" class="control-room-summary">Runnable work consumes capacity only after allocation.</p>
+              <ol id="execution-queue-history" class="compact-list"></ol>
+              <div id="execution-queue-controls" class="button-row" hidden>
+                <button id="native-pause-control" type="button" class="secondary">Pause</button>
+                <button id="native-resume-control" type="button" class="secondary">Resume</button>
+                <button id="native-stop-control" type="button" class="secondary">Stop</button>
+                <button id="native-cancel-control" type="button" class="secondary">Cancel</button>
+              </div>
+              <details id="native-execution-details" hidden>
+                <summary>Execution evidence and checkpoint</summary>
+                <pre id="native-execution-evidence"></pre>
+              </details>
+            </section>
           </section>
 
           <section id="understanding-alignment" class="understanding-alignment" aria-labelledby="understanding-alignment-heading">

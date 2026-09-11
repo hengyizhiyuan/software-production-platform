@@ -1,8 +1,10 @@
 # Watt-native Executor — Qualification and Human Acceptance Plan
 
-Date: 2026-09-11. Status: **PROPOSED FOR HUMAN ARCHITECTURE CLOSURE; NOT EXECUTED**.
+Date: 2026-09-11. Status: **APPROVED QUALIFICATION CONTRACT; PARTIALLY EXECUTED; RELEASE GATES NOT MET**.
 
 This is the qualification contract for the [Blueprint](watt-native-executor-blueprint.md) and [lifecycle/recovery specification](watt-native-executor-lifecycle.md). It defines future implementation evidence, not results obtained during this architecture mission. Passing an automated suite does not constitute Human Product Acceptance.
+
+The foundation contract, PostgreSQL, API/UI, migration, container health, and bounded Tool Host checks have now been executed. They do not amount to `DETERMINISTIC_SYSTEM_PASS`, `TECHNICALLY_QUALIFIED`, or Human acceptance. Exact evidence and the still-open Q cases are in the [implementation progress report](../evidence/watt-native-executor-runtime-implementation-progress.md).
 
 ## 1. Evidence levels and gates
 

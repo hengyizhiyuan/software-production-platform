@@ -2,9 +2,9 @@
 
 Date: 2026-09-11 (Asia/Shanghai). Repository basis: `a0394daaa59351f7e92a3f4f2482e675e751a64e`.
 
-**Architecture assessment: READY_FOR_WATT_NATIVE_EXECUTOR_IMPLEMENTATION.**
+**Architecture assessment: APPROVED; IMPLEMENTATION IN PROGRESS.**
 
-**Closure status: PROPOSED FOR HUMAN ARCHITECTURE CLOSURE. Implementation: NOT STARTED.** D1–D7 below are Human-approved directions supplied by this mission. The concrete defaults and contracts in this Blueprint are the completed proposal for Human closure; this document does not claim that Human has approved those additional details. No production code, migrations or runtime settings are changed by this mission.
+**Current implementation status: FOUNDATION IMPLEMENTED / FOCUSED VALIDATION PASS / NOT TECHNICALLY QUALIFIED.** The additive native domain, PostgreSQL durability, capacity queue/allocation, checkpointed kernel, bounded Tool Host, provider adapter boundary, compatibility routing, APIs, UI projection, and isolated container topology now exist. The full qualification contract and Human acceptance runtime remain incomplete; in particular, complete process supervision, crash-frontier recovery, multi-repository downstream integration, retention, event-relay, security, live-provider, continuity, and Human acceptance gates are not yet satisfied. See the [implementation and qualification progress evidence](../evidence/watt-native-executor-runtime-implementation-progress.md). D1–D7 below remain the governing architecture and must not be weakened to fit the current subset.
 
 This is one specification in four documents:
 

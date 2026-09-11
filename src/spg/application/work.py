@@ -1949,6 +1949,13 @@ class WorkApplicationService:
             return self.get_work(work_id)
 
         if summary.observation_id is None:
+            terminal_result = getattr(self.executor, "terminal_result", None)
+            if callable(terminal_result) and summary.dispatch_id is not None:
+                provider_result = terminal_result(summary.attempt_id)
+                if provider_result is not None:
+                    self.execution.complete_existing_dispatch(
+                        summary.dispatch_id, provider_result
+                    )
             return self.get_work(work_id)
         if summary.completion_id is None:
             if (

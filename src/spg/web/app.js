@@ -23,6 +23,8 @@
     attention: [],
     result: null,
     steering: null,
+    nativeQueue: [],
+    nativeAttempt: null,
     statusFilter: "",
     busy: false,
     pollTimer: null,
@@ -126,6 +128,16 @@
     controlAttentionState: document.getElementById("control-attention-state"),
     controlAttentionSummary: document.getElementById("control-attention-summary"),
     controlEmergingDirection: document.getElementById("control-emerging-direction"),
+    executionQueueState: document.getElementById("execution-queue-state"),
+    executionQueueSummary: document.getElementById("execution-queue-summary"),
+    executionQueueHistory: document.getElementById("execution-queue-history"),
+    executionQueueControls: document.getElementById("execution-queue-controls"),
+    nativePauseControl: document.getElementById("native-pause-control"),
+    nativeResumeControl: document.getElementById("native-resume-control"),
+    nativeStopControl: document.getElementById("native-stop-control"),
+    nativeCancelControl: document.getElementById("native-cancel-control"),
+    nativeExecutionDetails: document.getElementById("native-execution-details"),
+    nativeExecutionEvidence: document.getElementById("native-execution-evidence"),
     alignmentStatus: document.getElementById("alignment-status"),
     alignmentStatusBasis: document.getElementById("alignment-status-basis"),
     alignmentHumanSaid: document.getElementById("alignment-human-said"),
@@ -855,6 +867,52 @@
     elements.controlEmergingDirection.textContent = projection.attention.emergingDirection;
   }
 
+  function renderExecutionQueue() {
+    elements.executionQueueHistory.replaceChildren();
+    if (!state.nativeQueue.length) {
+      elements.executionQueueState.textContent = "No native execution is queued.";
+      elements.executionQueueSummary.textContent = "Waiting for Human input or other non-runnable Reality does not occupy a worker.";
+      elements.executionQueueControls.hidden = true;
+      elements.nativeExecutionDetails.hidden = true;
+      return;
+    }
+    const current = state.nativeQueue[state.nativeQueue.length - 1];
+    const labels = {
+      QUEUED: "Entered queue · waiting for resource",
+      WAITING_RESOURCE: "Waiting for an eligible resource",
+      WAITING_HUMAN: "Waiting for Human input · no worker occupied",
+      ALLOCATED: "Execution capacity allocated",
+      EXECUTING: "Executor is running",
+      CHECKPOINTED: "Checkpoint completed",
+      RETURNED_TO_QUEUE: "Returned to queue for a later execution slice",
+      COMPLETED: "Execution completed",
+      CANCELLED: "Execution cancelled",
+    };
+    elements.executionQueueState.textContent = labels[current.condition] || current.condition;
+    elements.executionQueueSummary.textContent = current.wait_reason || `Attempt ${current.attempt_id}`;
+    state.nativeQueue.forEach((entry) => {
+      elements.executionQueueHistory.append(
+        createElement("li", "", labels[entry.condition] || entry.condition),
+      );
+    });
+    elements.executionQueueControls.hidden = false;
+    const runtimeMode = state.nativeAttempt?.state?.runtime_mode || "";
+    elements.nativePauseControl.disabled = ![
+      "QUEUED", "RUNNING", "WAITING_RESOURCE", "RESUME_REQUESTED"
+    ].includes(runtimeMode);
+    elements.nativeResumeControl.disabled = runtimeMode !== "PAUSED";
+    elements.nativeStopControl.disabled = runtimeMode === "FINISHED";
+    elements.nativeCancelControl.disabled = runtimeMode === "FINISHED";
+    elements.nativeExecutionDetails.hidden = !state.nativeAttempt;
+    elements.nativeExecutionEvidence.textContent = state.nativeAttempt
+      ? JSON.stringify({
+          checkpoint: state.nativeAttempt.checkpoint,
+          effects: state.nativeAttempt.effects,
+          evidence: state.nativeAttempt.evidence,
+        }, null, 2)
+      : "";
+  }
+
   function renderUnderstandingAlignment(work) {
     const projection = viewModel.understandingAlignmentProjection(
       work,
@@ -1047,6 +1105,7 @@
     renderUnderstandingAlignment(work);
     renderGuidedDesign(work);
     renderProductionIntelligence(work);
+    renderExecutionQueue();
     elements.workRequest.textContent = work.raw_user_requirement || "No request text available.";
     elements.desiredOutcome.textContent = work.desired_outcome || "Not defined yet";
     elements.scopeSummary.textContent = work.engineering_scope
@@ -1295,16 +1354,19 @@
       state.attention = [];
       state.result = null;
       state.steering = null;
+      state.nativeQueue = [];
+      state.nativeAttempt = null;
       renderSelectedWork();
       return;
     }
     const workId = state.selectedWorkId;
     const interactionId = state.selectedInteractionId;
-    const [work, attention, result, steering] = await Promise.all([
+    const [work, attention, result, steering, nativeQueue] = await Promise.all([
       apiRequest(`/api/works/${workId}`),
       apiRequest(`/api/attention?work_id=${encodeURIComponent(workId)}`),
       apiRequest(`/api/works/${workId}/result`),
       loadSteeringProjection(workId),
+      apiRequest(`/api/native-execution/queue?work_id=${encodeURIComponent(workId)}`),
     ]);
     if (state.selectedWorkId !== workId || state.selectedInteractionId !== interactionId) return;
     state.selectedWork = work;
@@ -1313,6 +1375,11 @@
     state.attention = attention;
     state.result = result;
     state.steering = steering;
+    state.nativeQueue = nativeQueue;
+    state.nativeAttempt = nativeQueue.length
+      ? await apiRequest(`/api/native-execution/attempts/${nativeQueue[nativeQueue.length - 1].attempt_id}`)
+      : null;
+    if (state.selectedWorkId !== workId || state.selectedInteractionId !== interactionId) return;
     renderSelectedWork();
   }
 
@@ -1826,6 +1893,28 @@
     elements.workRequirement.focus();
   }
 
+  async function controlNativeExecution(action) {
+    const current = state.nativeQueue[state.nativeQueue.length - 1];
+    if (!current) return;
+    const currentVersion = state.nativeAttempt?.state?.control_version;
+    if (!Number.isInteger(currentVersion)) {
+      await refreshSelected();
+      return;
+    }
+    await apiRequest(`/api/native-execution/attempts/${current.attempt_id}/control`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        command_id: globalThis.crypto.randomUUID(),
+        action,
+        expected_control_version: currentVersion,
+        actor_identity: "human:local-operator",
+        reason: `Human requested ${action.toLowerCase()} from the execution queue`,
+      }),
+    });
+    await refreshSelected();
+  }
+
   function consumeNewWorkEntry() {
     const url = new URL(globalThis.location.href);
     if (url.searchParams.get("new") !== "1") return;
@@ -1894,6 +1983,10 @@
     "click",
     () => performWorkAction("ADVANCE"),
   );
+  elements.nativePauseControl.addEventListener("click", () => controlNativeExecution("PAUSE"));
+  elements.nativeResumeControl.addEventListener("click", () => controlNativeExecution("RESUME"));
+  elements.nativeStopControl.addEventListener("click", () => controlNativeExecution("STOP"));
+  elements.nativeCancelControl.addEventListener("click", () => controlNativeExecution("CANCEL"));
   elements.saveArtifactTarget.addEventListener("click", updateArtifactTarget);
   elements.saveCodeChangeContract.addEventListener("click", updateCodeChangeContract);
   elements.retryControl.addEventListener("click", reloadWorkspace);
