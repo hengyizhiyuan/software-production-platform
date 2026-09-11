@@ -6,11 +6,12 @@ Date: 2026-09-11 (Asia/Shanghai). Repository basis: `a0394daaa59351f7e92a3f4f248
 
 **Closure status: PROPOSED FOR HUMAN ARCHITECTURE CLOSURE. Implementation: NOT STARTED.** D1–D7 below are Human-approved directions supplied by this mission. The concrete defaults and contracts in this Blueprint are the completed proposal for Human closure; this document does not claim that Human has approved those additional details. No production code, migrations or runtime settings are changed by this mission.
 
-This is one specification in three documents:
+This is one specification in four documents:
 
 - This document owns boundaries, data contracts, topology, persistence, integration and migration.
 - [Lifecycle and recovery specification](watt-native-executor-lifecycle.md) owns exhaustive transition rules, command contracts, recovery frontiers and crash outcomes.
 - [Qualification and Human acceptance plan](watt-native-executor-qualification.md) owns test cases, measurable gates, implementation sequence and acceptance procedure.
+- [Capacity Scheduling and Execution Queue amendment](watt-native-executor-capacity-scheduling.md) owns the Capacity Scheduling Plane boundary, Queue and Execution Allocation semantics, MVP fairness policy, and Human-visible capacity-waiting model.
 
 Formal evidence inputs, read in full: [external architecture study](../research/external-executor-architecture-study.md), [38-pattern matrix](../research/external-executor-pattern-matrix.md), [source evidence register](../research/external-executor-source-evidence.md), and [research contract](../research/executor-architecture-study-research-contract.md). External mechanisms are evidence, never Watt authority. The source register pins the ten reference revisions; its limitations remain applicable. No new claim of running those systems or their tests is made here.
 
