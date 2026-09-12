@@ -1,10 +1,11 @@
 # Watt-native Executor Runtime — Architecture Blueprint
 
-Date: 2026-09-11 (Asia/Shanghai). Repository basis: `a0394daaa59351f7e92a3f4f2482e675e751a64e`.
+Date: 2026-09-11 (Asia/Shanghai). Final technical closure status updated
+2026-09-13. Original architecture basis: `a0394daaa59351f7e92a3f4f2482e675e751a64e`.
 
-**Architecture assessment: APPROVED; IMPLEMENTATION IN PROGRESS.**
+**Architecture assessment: APPROVED; IMPLEMENTATION COMPLETE; TECHNICAL PHASE CLOSED.**
 
-**Current implementation status: FOUNDATION IMPLEMENTED / FOCUSED VALIDATION PASS / NOT TECHNICALLY QUALIFIED.** The additive native domain, PostgreSQL durability, capacity queue/allocation, checkpointed kernel, bounded Tool Host, provider adapter boundary, compatibility routing, APIs, UI projection, and isolated container topology now exist. The full qualification contract and Human acceptance runtime remain incomplete; in particular, complete process supervision, crash-frontier recovery, multi-repository downstream integration, retention, event-relay, security, live-provider, continuity, and Human acceptance gates are not yet satisfied. See the [implementation and qualification progress evidence](../evidence/watt-native-executor-runtime-implementation-progress.md). D1–D7 below remain the governing architecture and must not be weakened to fit the current subset.
+**Current status: IMPLEMENTATION COMPLETE / TECHNICALLY QUALIFIED / CONTINUITY QUALIFIED / HUMAN ACCEPTANCE DEFERRED BY HUMAN GOVERNANCE.** The approved architecture has been implemented and Q01–Q50 technical release requirements have closed. Continuity Benchmark v8 passed all 18 A/B pairs and real model replacement. Human Product Acceptance is intentionally deferred to the later system-wide Human Journey and UX/UI reconstruction phase; it is not inferred from technical evidence. See the [final technical closure](../evidence/watt-native-executor-technical-closure.md). D1–D7 remain the governing architecture.
 
 This is one specification in four documents:
 
@@ -56,7 +57,7 @@ Freeze the following for the implementation specification after Human closure:
 | D6 — multiple repositories | Immutable source/output vectors, independent aggregate verification, exact aggregate authorization, per-target CAS and truthful partial convergence. Only complete convergence permits the aggregate Runtime Commit. |
 | D7 — qualification | Outcome/intent/acceptance equivalence, not identical traces. Fault matrix, deterministic safety gates, paired real-provider trials and separately recorded Human acceptance. |
 
-No fundamental architecture question is left for the implementation agent. Deployment secrets, a permitted exact model profile, and later Human feature acceptance are operational inputs, not architecture gaps. Human closure of this proposal remains the next governance step.
+No fundamental architecture question is left for the implementation agent. Deployment secrets, an admitted exact model profile and later Human Product Acceptance are operational inputs, not architecture gaps. The architecture and technical implementation phase is closed; the Human acceptance decision is deferred by Human governance.
 
 ## B. Current Watt Reality
 
@@ -561,9 +562,9 @@ Deferred remote external-effect adapters must not be advertised as executable to
 
 No external implementation is copied or vendored. Any future code reuse needs file/version-specific license review under the research register's [license inventory](../research/external-executor-source-evidence.md#license-inventory-file-statements-not-a-reuse-clearance); architecture inspiration is not permission to copy code or service credentials.
 
-## AH. Implementation readiness gate
+## AH. Implementation readiness and closure gate
 
-**READY_FOR_WATT_NATIVE_EXECUTOR_IMPLEMENTATION** — the architecture package is complete enough for a large autonomous implementation mission **after Human Architecture Closure**.
+**WATT_NATIVE_EXECUTOR_TECHNICAL_PHASE_CLOSED** — the architecture package was implemented and its technical qualification completed. The table below remains the implementation-contract mapping used for that work.
 
 | Required closure dimension | Concrete resolution |
 |---|---|
@@ -579,6 +580,4 @@ No external implementation is copied or vendored. Any future code reuse needs fi
 | Modules/migration | AA/AB/AC define additive packages, contract versions, capability-aware legacy compatibility and rollback. |
 | Qualification/acceptance | Companion plan supplies deterministic matrix, paired live trials, thresholds and operable Human environment. |
 
-Remaining Human architecture action: accept this version as the implementation contract or specify changes. The proposed retention, finite runtime limits, local-container trust boundary and benchmark thresholds are explicit choices for that closure; there is no hidden unresolved design alternative for the implementation agent to select. Closure is not recorded by this document and is not requested as permission to start implementation in this mission.
-
-This mission ends with architecture documents. Runtime implementation, schema migrations, deployment changes, real-provider spend and feature acceptance have not occurred.
+The retention limits, finite runtime envelope, local-container trust boundary and benchmark thresholds are now implemented and technically qualified. Human Product Acceptance has not occurred and is explicitly deferred to later Human Journey integration. Exact closure status and revisions are recorded in the [final technical closure](../evidence/watt-native-executor-technical-closure.md).

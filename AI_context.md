@@ -1048,24 +1048,25 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 
 ## Watt-native Executor Runtime Implementation Reality
 
-The Watt-native Executor Runtime foundation is **IMPLEMENTED / FOCUSED
-VALIDATION PASS / NOT TECHNICALLY QUALIFIED**. Current code adds typed native
-execution contracts, additive PostgreSQL durability through migration
-`20260911_34`, fair capacity scheduling, leases, a checkpointed reasoning/tool
-kernel, bounded Tool Host, OpenAI Responses adapter boundary, legacy/native
-backend routing, queue/control/event APIs, Human-visible queue projection, and
-an isolated container topology. Executor output remains `RESULT_READY`; existing
-Completion, Verification, Candidate, Human Authorization, Runtime Commit, and
-Trusted Baseline owners remain unchanged.
+The Watt-native Executor Runtime is **IMPLEMENTATION COMPLETE /
+TECHNICALLY_QUALIFIED / CONTINUITY_QUALIFIED / TECHNICAL PHASE CLOSED**.
+Q01–Q50 technical release requirements and Continuity Benchmark v8 are closed
+against migration `20260912_39`. The direct DeepSeek primary profile is
+`deepseek-flash / high`; compatible real replacement with
+`deepseek-v4-pro / high` passed across multiple task types. Executor output
+remains `RESULT_READY`; Completion, Verification, Candidate, Human
+Authorization, Runtime Commit and Trusted Baseline owners remain unchanged.
 
-This status does **not** claim complete crash-frontier recovery, controlled
-process-tree termination, multi-repository downstream integration, full
-security isolation, retention/hibernation, event relay/reset, live-provider
-qualification, continuity benchmark, or Human Product Acceptance. The isolated
-no-Provider runtime is available for technical inspection only and is not a
-Human acceptance runtime. Exact passed checks and open qualification cases are
-recorded in [Watt-native Executor Runtime Implementation and Qualification
-Progress](docs/evidence/watt-native-executor-runtime-implementation-progress.md).
+Human Product Acceptance is
+**DEFERRED_BY_HUMAN_GOVERNANCE** until the later system-wide Human Journey,
+architecture/data-model calibration and UX/UI reconstruction phase. No Human
+acceptance is inferred. The current classification, exact revisions, technical
+evidence, preserved historical failures and non-blocking future directions are
+recorded in the [Watt-native Executor Final Technical Closure](docs/evidence/watt-native-executor-technical-closure.md).
+
+The recommended next program step is **WIC Model Decoupling / API-based
+Provider Migration with DeepSeek as the first target Provider**. This context
+record does not authorize or start that phase.
 
 ## Current Major Components
 

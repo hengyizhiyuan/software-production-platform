@@ -7,6 +7,10 @@ This report records the resumed qualification run against branch
 as `af4ea416e426450cb3a03ba89005f398942e0520` on top of base revision
 `e40f69b0c001604b9149a491695116fb2200289f`. It preserves every failed and
 response-unknown Provider request. It does not claim Human Product Acceptance.
+The Human Governor subsequently deferred Human Product Acceptance to the later
+system-wide Human Journey and UX/UI reconstruction phase. The authoritative
+current disposition is recorded in the
+[final technical closure](watt-native-executor-technical-closure.md).
 
 ## Amendment v2 update
 
@@ -106,8 +110,11 @@ TECHNICALLY_QUALIFIED
 RUNTIME_READY_FOR_HUMAN_ACCEPTANCE
     YES
 
-HUMAN_ACCEPTED
-    NOT ASSESSED
+HUMAN PRODUCT ACCEPTANCE
+    DEFERRED_BY_HUMAN_GOVERNANCE
+
+TECHNICAL PHASE
+    CLOSED
 ```
 
 The v1-v7 failures remain immutable historical evidence. V8 is a separately
@@ -226,5 +233,6 @@ limited to this Compose project: `down -v --remove-orphans`, followed by
 8040 service and all retained v1-v8 qualification environments were not
 modified by this reset.
 
-Human Product Acceptance remains a separate Human action and has not been
-performed or inferred.
+Human Product Acceptance remains a separate Human action, has not been
+performed or inferred, and is intentionally deferred by Human governance until
+the later system-wide Human Journey and UX/UI reconstruction phase.

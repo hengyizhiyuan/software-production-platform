@@ -1,8 +1,10 @@
 # Watt-native Executor Runtime — Implementation and Qualification Progress
 
-Date: 2026-09-11. Repository basis before the uncommitted implementation:
-`8d85100bac5505462d0866398bd076ecb21fcf39` on
-`feature/spg-first-vertical-slice`.
+Date: 2026-09-11. Final technical closure status updated 2026-09-13. This
+document preserves implementation and qualification history beginning from
+repository basis `8d85100bac5505462d0866398bd076ecb21fcf39` on
+`feature/spg-first-vertical-slice`. Current authoritative status is recorded in
+the [final technical closure](watt-native-executor-technical-closure.md).
 
 DeepSeek migration continuation is recorded separately in
 [watt-native-executor-deepseek-provider-migration.md](watt-native-executor-deepseek-provider-migration.md).
@@ -18,16 +20,19 @@ FOCUSED VALIDATION
     PASS
 
 QUALIFICATION CLOSURE
-    IN PROGRESS; DEEPSEEK P1/P2 AND Q01 PASS
+    Q01–Q50 TECHNICAL REQUIREMENTS CLOSED
 
 TECHNICALLY_QUALIFIED
-    NO — NORMATIVE CONTINUITY AND REMAINING Q-CASE GATES REMAIN
+    YES
 
-RUNTIME_READY_FOR_HUMAN_ACCEPTANCE
-    PRELIMINARY RUNTIME RUNNING; COMPLETE ACCEPTANCE SCRIPT NOT YET QUALIFIED
+CONTINUITY_QUALIFIED
+    YES — V8 18/18 A AND 18/18 B PASS
 
-HUMAN ACCEPTANCE
-    PENDING HUMAN DECISION
+HUMAN PRODUCT ACCEPTANCE
+    DEFERRED_BY_HUMAN_GOVERNANCE
+
+TECHNICAL PHASE
+    CLOSED
 ```
 
 This record deliberately separates implementation progress from qualification.
@@ -185,12 +190,13 @@ Generic runtime closure added after Q01 now includes:
   content-addressed archive, restore, 180-day cold retirement tombstones and
   retention of the last recovery bundle.
 
-The additive schema head is now `20260912_37`: CandidateVector and trusted
+The additive schema head at this implementation checkpoint was `20260912_37`: CandidateVector and trusted
 source pointers (`35`), retention actions/pins/tombstones (`36`), and exact
 native vector Verification (`37`). These migrations do not rewrite legacy
-rows.
+rows. Final qualification later advanced the head to `20260912_39` for exact
+Provider-profile admission and checkpoint schema-version handling.
 
-## Open Mandatory Qualification
+## Historical open qualification snapshot before final closure
 
 The following areas remain materially open:
 
@@ -222,13 +228,13 @@ The following areas remain materially open:
   100 seeded transition matrix and the 36-run PWU continuity benchmark remain
   release gates.
 
-## Acceptance Environment Reality
+## Retained acceptance environment Reality
 
 The earlier Q01 environment remains on `http://127.0.0.1:8040/app` with its
 database and volumes unchanged. A separate current-tree Human environment is
 running under Compose project `watt-native-human-acceptance-v32` at
 `http://127.0.0.1:8042/app`. It has its own PostgreSQL, workspace, checkpoint
-and application volumes, migration head `20260912_37`, and five independent
+and application volumes, migration head `20260912_39`, and five independent
 healthy processes (application, coordinator, Worker, Tool Host, PostgreSQL).
 
 The acceptance startup overlay is tracked in
@@ -238,32 +244,36 @@ working source read-only rather than silently switching to the old activated
 checkout. DeepSeek readiness is exact `deepseek-flash / high`, with no request
 issued during readiness.
 
-Seed Work `e49b7a20-f6f6-4dd3-8831-e3af98c22547` is visible in the UI and
+Seed Work `2e92e1eb-6aa7-4749-8c60-1527afe45197` is visible in the UI and
 intentionally remains DRAFT. It has zero PWUs, Steps and Effects, so the Human
 owns admission and no Provider spend was consumed by environment preparation.
 Browser inspection confirmed the UI, health state, Work detail and execution
-queue render. Human product acceptance remains pending.
+queue render. Human Product Acceptance is deferred by Human governance; the
+retained environment does not imply an acceptance decision.
 
 ## Current Classification
 
 ```text
 WATT-NATIVE EXECUTOR RUNTIME
-    IMPLEMENTATION IN PROGRESS
+    IMPLEMENTATION COMPLETE
 
-CURRENT FOUNDATION / DEEPSEEK Q01
+TECHNICAL QUALIFICATION
     PASS
 
-DETERMINISTIC CLOSURE
-    BROAD REGRESSION PASS; NORMATIVE CONTINUITY BENCHMARK REMAINS
+CONTINUITY QUALIFICATION
+    PASS
 
-RELEASE / CUTOVER
-    BLOCKED ON CONTINUITY QUALIFICATION AND HUMAN ACCEPTANCE
+HUMAN PRODUCT ACCEPTANCE
+    DEFERRED_BY_HUMAN_GOVERNANCE
+
+TECHNICAL PHASE
+    CLOSED
 ```
 
-Legacy Codex remains the admitted operational backend unless a later governed
-qualification and cutover explicitly changes that fact.
+Legacy/native coexistence and rollback are qualified. Any future default change
+or legacy removal remains a separate governed operational action.
 
-## 2026-09-12 qualification closure addendum
+## Historical 2026-09-12 v1 qualification closure attempt
 
 The resumed frozen continuity benchmark is complete. It contains all 18 A/B
 pairs and all 36 executions under plan digest
@@ -289,3 +299,19 @@ with the immutable failed continuity result, it prevents
 The complete current result, Q-case ledger, performance figures, fixes,
 cutover/rollback limits and Human runtime identity are recorded in
 [watt-native-executor-qualification-closure-20260912.md](watt-native-executor-qualification-closure-20260912.md).
+
+## 2026-09-13 final technical closure addendum
+
+The failed and response-unknown v1–v7 attempts above remain immutable history.
+The separately authorized v8 amendment preserved the six meaningful task
+types, 18 A/B pairs, 36 executions, quality rubric, fault classes, exact
+Provider profiles and aggregate RMB 100 cap. All 18 A and 18 B executions
+passed, reached `RESULT_READY`, passed independent checks and scored
+4/4/4/4/4. Three replacement B executions across three task types passed with
+`deepseek-v4-pro / high`; all others used `deepseek-flash / high`.
+
+Q01–Q50 technical requirements are closed. Combined conservative v1–v8 spend
+is RMB 6.91698952. The Human Governor has deferred Human Product Acceptance to
+the later system-wide Human Journey and UX/UI reconstruction phase. This
+governance deferral does not keep the Watt-native Executor technical phase
+open. See the [final technical closure](watt-native-executor-technical-closure.md).

@@ -2,7 +2,7 @@
 
 Status: **PROGRAM-LEVEL NAVIGATION / CURRENT REALITY**
 
-Last updated: **2026-09-10**
+Last updated: **2026-09-13**
 
 This document maintains one high-level view of Watt's current development
 phase, completed capability foundations, active findings, near-term priorities,
@@ -44,6 +44,20 @@ Product / Architecture Alignment
 See [AI-native Development Execution Principles](../architecture/ai-native-development-execution-principles.md).
 
 ## 2. Current Overall Status
+
+### Watt-native Executor Runtime technical closure
+
+**2026-09-13 — IMPLEMENTATION COMPLETE / TECHNICALLY QUALIFIED / CONTINUITY
+QUALIFIED / TECHNICAL PHASE CLOSED.** Q01–Q50 technical requirements are
+closed, and Continuity Benchmark v8 passed all 18 A/B pairs and 36 real
+executions, including compatible DeepSeek model replacement. Human Product
+Acceptance is `DEFERRED_BY_HUMAN_GOVERNANCE` until the later system-wide Human
+Journey and UX/UI reconstruction phase; no acceptance is inferred. See the
+[final technical closure](../evidence/watt-native-executor-technical-closure.md).
+
+The recommended next program step is **WIC Model Decoupling / API-based
+Provider Migration with DeepSeek as the first target Provider**. It remains a
+separate future mission and is not authorized by this roadmap update.
 
 ### New mission: Work-to-Delivery with multiple repositories
 
@@ -162,7 +176,15 @@ The following order is the current program priority. Changing it requires an
 explicit product or architecture decision rather than ordinary implementation
 convenience.
 
-### Priority 1 — External Design Intake Capability
+### Priority 1 — WIC Model Decoupling / API-based Provider Migration
+
+**Recommended next program step.** DeepSeek is the first target Provider. The
+mission must preserve WIC's interpretation and governance ownership while
+moving model access behind an explicit replaceable API Provider boundary. This
+roadmap records sequencing only; implementation requires its own admitted
+mission.
+
+### Priority 2 — External Design Intake Capability
 
 **Current action:** documentation only.
 
@@ -177,7 +199,7 @@ Design as bounded, attributable input without becoming automatic Design Truth.
 No intake implementation, schema, Provider behavior, or new admission path is
 authorized by this roadmap.
 
-### Priority 2 — Human–Watt Collaboration Experience Improvement
+### Priority 3 — Human–Watt Collaboration Experience Improvement
 
 Current Reality: response-quality refinement v2.2 is implemented with focused
 validation and four-scenario real `gpt-5.6-sol` proof. Human Product Acceptance
@@ -191,7 +213,7 @@ Focus:
 - proactive guidance that remains inside governed boundaries;
 - preservation of Human Authority and reconstructable Interaction Reality.
 
-### Priority 3 — UX/UI Reconstruction
+### Priority 4 — UX/UI Reconstruction
 
 Goal: transform the current interface into a Human-facing AI collaboration
 workspace, not merely restyle the existing screens.
@@ -207,7 +229,7 @@ Focus:
 This priority does not itself authorize a Workspace entity, a new state store,
 or duplicated product truth.
 
-### Priority 4 — TNGA to Watt Full Text Migration
+### Priority 5 — TNGA to Watt Full Text Migration
 
 Scope:
 
@@ -246,7 +268,10 @@ objective, boundary, context, access, acceptance, and Evidence responsibility
 for an Executor to complete a meaningful production increment autonomously;
 it should not regress into micro-task or line-by-line orchestration.
 
-**Status:** future deepening beyond the current one-PWU-first MVP boundary.
+**Status:** the initial Watt-native continuity, recovery and multi-repository
+deepening is technically qualified. Distributed execution, broader capacity
+evolution and later integrations remain future work behind the closed native
+contracts.
 
 ### 5.3 Engineering Context Fabric (ECF)
 
@@ -320,8 +345,8 @@ into the user's system. Human-triggered research is the primary product form;
 future Watt-suggested research remains within explicit governance.
 
 **Placement:** after the current major development priorities and existing
-future backlog entries. Priorities 1–4 remain unchanged; this is not a new
-Priority 5, current MVP scope, or implementation authorization.
+future backlog entries. Priorities 1–5 remain unchanged; this is not a new
+current priority, MVP scope, or implementation authorization.
 
 External sources remain evidence and design inputs, not Truth. Work, WIC,
 Guided Design, Plan Steering, PWU/Executor, SPG, ECF, Guardian, and Human

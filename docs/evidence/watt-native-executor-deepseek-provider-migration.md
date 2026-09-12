@@ -1,17 +1,17 @@
 # Watt-native Executor — DeepSeek Provider Migration Evidence
 
-> Qualification continuation note (2026-09-12): the frozen continuity run and
-> subsequent Q29/Q38–Q40/Q43/Q48/Q50 work supersede the open-case snapshot in
-> this document. See
-> [watt-native-executor-qualification-closure-20260912.md](watt-native-executor-qualification-closure-20260912.md)
-> for the current classification. Historical P1/P2/Q01 evidence below remains
-> unchanged.
+> Final closure note (2026-09-13): Q01–Q50 and Continuity Benchmark v8 are
+> technically closed. Human Product Acceptance is deferred by Human governance.
+> See the [final technical closure](watt-native-executor-technical-closure.md)
+> and [qualification closure](watt-native-executor-qualification-closure-20260912.md)
+> for current classification. Historical P1/P2/Q01 evidence, including the P2
+> HTTP 400, remains unchanged below.
 
 Date: 2026-09-11. Continuation basis:
 `e40f69b0c001604b9149a491695116fb2200289f` on
 `feature/spg-first-vertical-slice`.
 
-## Current classification
+## Historical classification at the Q01 checkpoint
 
 ```text
 DEEPSEEK PROVIDER ADAPTER
@@ -202,7 +202,7 @@ attempted blanket volume cleanup was rejected by automatic approval review
 because emptiness could not be independently guaranteed, so those named
 resources were left intact.
 
-## Next governed boundary
+## Historical next governed boundary
 
 P0, P1, the corrected P2 flow and Q01 real native production are complete.
 Explicit Human authorization continues the original Watt-native Executor

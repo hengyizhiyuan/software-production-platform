@@ -1,13 +1,20 @@
 # Watt-native Executor — Human Acceptance Preparation
 
-Status: **NOT READY / PREPARATION ONLY**.
+Status: **HISTORICAL PREPARATION SNAPSHOT / SUPERSEDED BY TECHNICAL CLOSURE**.
+
+The technical qualification prerequisites described below are now complete.
+The Human Governor has deferred Human Product Acceptance to the later
+system-wide Human Journey and UX/UI reconstruction phase. This retained script
+does not represent an acceptance decision and does not keep the Watt-native
+Executor technical phase open. See the
+[final technical closure](../evidence/watt-native-executor-technical-closure.md).
 
 The architecture requires a Human to start a governed PWU, observe queue and
 allocation, interrupt and resume execution, inspect retained checkpoints and
 artifacts, preview the exact Candidate, authorize it, and observe delivery. No
 automated test may substitute for that decision.
 
-## Current technical environment
+## Historical technical environment at preparation time
 
 - Compose project: `watt-native-executor-runtime-qualification`
 - UI: `http://127.0.0.1:8040/app`
@@ -23,7 +30,7 @@ contains the uncommitted implementation while its Git Source of Truth remains
 the prior clean HEAD, so it cannot serve as an exact reviewed acceptance
 baseline.
 
-## Required admission before Human acceptance
+## Historical prerequisites before Human acceptance
 
 1. Close the open mandatory qualification gaps documented in
    [implementation progress](../evidence/watt-native-executor-runtime-implementation-progress.md).

@@ -17,6 +17,11 @@ Plan digest: `6bcd04af0d4eef2d951767c6d1e20ae3930e259b49da0202eae7fe4c939b481a`.
 
 `CONTINUITY_QUALIFIED`: **YES**.
 
+This result is accepted as final continuity evidence for the Watt-native
+Executor technical closure. Human Product Acceptance is deferred by Human
+governance and is neither performed nor implied by this benchmark. See the
+[final technical closure](watt-native-executor-technical-closure.md).
+
 ## Paired outcomes
 
 | Pair | A/B outcome | A/B quality | A/B known cost RMB | A/B elapsed seconds | B successors | B repeated inference/effect digests |

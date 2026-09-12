@@ -1,16 +1,18 @@
 # Watt-native Executor Capacity Scheduling & Execution Queue
 
-Date: 2026-09-11. Status: **ARCHITECTURE AMENDMENT COMPLETE; MVP FOUNDATION IMPLEMENTED; FULL QUALIFICATION PENDING**.
+Date: 2026-09-11. Final technical closure status updated 2026-09-13. Status:
+**ARCHITECTURE AMENDMENT COMPLETE; IMPLEMENTED; TECHNICALLY QUALIFIED**.
 
 This document amends the [Watt-native Executor Blueprint](watt-native-executor-blueprint.md)
 by defining how finite execution capacity is assigned when multiple users and
 Production Work Units (PWUs) compete for Executor resources. The current
 PostgreSQL-backed implementation supplies fair round-robin, FIFO, aging,
 eligibility, fenced allocation leases, resource waits that release workers,
-and Human-visible queue projections. Concurrency, crash, starvation,
-performance, and Human acceptance qualification remain open. This does not
-change the PWU lifecycle or introduce a new source of product or production
-truth.
+and Human-visible queue projections. Concurrency, crash, starvation and
+performance qualification passed under the final Q-case and continuity
+evidence. Human Product Acceptance is deferred by Human governance. This does
+not change the PWU lifecycle or introduce a new source of product or production
+truth. See the [final technical closure](../evidence/watt-native-executor-technical-closure.md).
 
 The following invariants remain normative:
 
@@ -286,13 +288,13 @@ The initial direction remains compatible with the Blueprint's single-host,
 database-backed coordination model. Distributed scheduling is a future
 extension, not an MVP dependency.
 
-## 11. Consistency and future qualification
+## 11. Consistency and qualification closure
 
 This document refines the Blueprint's existing queue, lease, resource
 reservation, and single-host coordination seams. It does not change the
 approved lifecycle or qualification contracts.
 
-A future implementation/qualification amendment should prove:
+The completed implementation and qualification evidence proves:
 
 - no execution without both production authority and allocation;
 - one active allocation/write owner for the applicable Attempt boundary;
@@ -302,11 +304,15 @@ A future implementation/qualification amendment should prove:
 - Human-visible states are truthful projections;
 - scheduler replacement cannot change Product Intent, Plan, or PWU scope.
 
-These are future obligations. No scheduling capability is claimed as currently
-implemented.
+These obligations are closed by the focused scheduling tests, the 100-round
+allocation race, prescribed continuity injections and final Q-case ledger.
+Future distributed/capacity evolution remains behind the same contracts and
+does not reopen the qualified local scheduling plane.
 
 ## Final status
 
 ~~~text
 CAPACITY_SCHEDULING_ARCHITECTURE_AMENDMENT_COMPLETE
+CAPACITY_SCHEDULING_IMPLEMENTED
+CAPACITY_SCHEDULING_TECHNICALLY_QUALIFIED
 ~~~

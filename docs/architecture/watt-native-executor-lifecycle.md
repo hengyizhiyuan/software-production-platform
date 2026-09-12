@@ -1,6 +1,14 @@
 # Watt-native Executor — Lifecycle, Contracts and Recovery
 
-Date: 2026-09-11. Status: **APPROVED CONTRACT; FOUNDATION IMPLEMENTED; FULL LIFECYCLE QUALIFICATION INCOMPLETE**. Normative companion to the [Blueprint](watt-native-executor-blueprint.md). Migration `20260911_34` and the native runtime foundation implement a bounded subset of these contracts; unqualified transitions and crash frontiers remain obligations, not current capability claims. The main document owns topology, retention and data shape. This document owns transition semantics and recovery behavior. Qualification references the transition and fault IDs below. Current evidence is recorded in the [implementation progress report](../evidence/watt-native-executor-runtime-implementation-progress.md).
+Date: 2026-09-11. Final technical closure status updated 2026-09-13.
+Status: **APPROVED CONTRACT; IMPLEMENTED; TECHNICALLY QUALIFIED**. Normative
+companion to the [Blueprint](watt-native-executor-blueprint.md). The main
+document owns topology, retention and data shape. This document owns transition
+semantics and recovery behavior. Q01–Q50 and Continuity Benchmark v8 now close
+the prescribed technical lifecycle and recovery qualification. Human Product
+Acceptance remains separate and is deferred by Human governance. Current
+classification and exact revisions are recorded in the
+[final technical closure](../evidence/watt-native-executor-technical-closure.md).
 
 ## Transition conventions
 

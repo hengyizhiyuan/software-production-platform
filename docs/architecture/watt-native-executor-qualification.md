@@ -1,10 +1,16 @@
 # Watt-native Executor — Qualification and Human Acceptance Plan
 
-Date: 2026-09-11. Status: **APPROVED QUALIFICATION CONTRACT; PARTIALLY EXECUTED; RELEASE GATES NOT MET**.
+Date: 2026-09-11. Final technical closure status updated 2026-09-13. Status:
+**APPROVED QUALIFICATION CONTRACT; TECHNICAL EXECUTION COMPLETE; Q01–Q50
+CLOSED; HUMAN ACCEPTANCE DEFERRED BY HUMAN GOVERNANCE**.
 
-This is the qualification contract for the [Blueprint](watt-native-executor-blueprint.md) and [lifecycle/recovery specification](watt-native-executor-lifecycle.md). It defines future implementation evidence, not results obtained during this architecture mission. Passing an automated suite does not constitute Human Product Acceptance.
+This is the qualification contract for the [Blueprint](watt-native-executor-blueprint.md) and [lifecycle/recovery specification](watt-native-executor-lifecycle.md). The technical program has executed this contract; exact results are in the [final technical closure](../evidence/watt-native-executor-technical-closure.md) and its linked evidence. Passing technical qualification does not constitute Human Product Acceptance.
 
-The foundation contract, PostgreSQL, API/UI, migration, container health, and bounded Tool Host checks have now been executed. They do not amount to `DETERMINISTIC_SYSTEM_PASS`, `TECHNICALLY_QUALIFIED`, or Human acceptance. Exact evidence and the still-open Q cases are in the [implementation progress report](../evidence/watt-native-executor-runtime-implementation-progress.md).
+The foundation contract, PostgreSQL, API/UI, migration, Tool Host, real
+Provider, recovery, security, continuity and cutover/rollback checks have been
+executed. Q01–Q50 are technically closed and Continuity Benchmark v8 passed.
+Human Product Acceptance was not performed and is intentionally deferred to
+later Human Journey and UX/UI integration.
 
 ## 1. Evidence levels and gates
 
@@ -14,7 +20,7 @@ The foundation contract, PostgreSQL, API/UI, migration, container health, and bo
 | P — real provider | Direct inference adapter with an explicitly admitted exact provider/model/account envelope; real edits/tools/debugging and independent checks. Effective identity/usage available or explicitly unknown. | All failure frontiers, statistical reliability or final Human acceptance. |
 | H — Human | Operable isolated acceptance environment; Human observes native production/control/recovery, exact result inspection and records acceptance or requested changes. | Automatic proof of every concurrency/security property. |
 
-Gate progression: `CONTRACT_TESTS_PASS → DETERMINISTIC_SYSTEM_PASS → LIVE_PROVIDER_QUALIFIED → CONTINUITY_QUALIFIED → HUMAN_ACCEPTANCE_PENDING → HUMAN_ACCEPTED`. Feature completion requires the final gate plus the applicable migration/rollback evidence. These are feature-qualification labels, not new PWU production states.
+Gate progression remains `CONTRACT_TESTS_PASS → DETERMINISTIC_SYSTEM_PASS → LIVE_PROVIDER_QUALIFIED → CONTINUITY_QUALIFIED → HUMAN_ACCEPTANCE_PENDING → HUMAN_ACCEPTED`. The technical phase closes after the technical, continuity and migration/rollback gates. `HUMAN_ACCEPTED` still requires an actual Human decision; the current governance state is `HUMAN_ACCEPTANCE_DEFERRED_BY_HUMAN_GOVERNANCE`. These are qualification labels, not PWU production states.
 
 Mandatory zero-tolerance invariants across all levels:
 
@@ -147,7 +153,9 @@ Quality scoring does not allow a lower score to excuse failed acceptance, lost c
 
 ## 8. Implementation sequence and migration evidence
 
-This is the sequence for a later authorized implementation mission, not authorization to start now.
+This was the authorized implementation sequence and is retained as historical
+contract structure. Its technical evidence is now complete. Human acceptance
+and any eventual legacy removal remain later governed actions.
 
 | Stage | Build boundary | Exit evidence |
 |---|---|---|
@@ -207,4 +215,8 @@ Every numbered Blueprint mission concern maps to the following implementation sp
 | 40–41 qualification and Human acceptance | This full plan; main AD/AE. |
 | 42–46 non-goals, A–AH deliverables, closure, documentation-only scope, final report | Main C/AF/AH; all three documents and final Human report. |
 
-Architecture package assessment: **READY_FOR_WATT_NATIVE_EXECUTOR_IMPLEMENTATION**, pending Human Architecture Closure of the proposed specification. Qualification execution and Human feature acceptance are future work. This architecture mission stops at documents.
+Qualification package assessment:
+**IMPLEMENTATION_COMPLETE / TECHNICALLY_QUALIFIED / CONTINUITY_QUALIFIED /
+HUMAN_ACCEPTANCE_DEFERRED_BY_HUMAN_GOVERNANCE / TECHNICAL_PHASE_CLOSED**.
+Historical failures remain evidence. Human Product Acceptance is a later Human
+action and is not asserted here.
