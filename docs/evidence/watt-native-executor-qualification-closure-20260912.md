@@ -3,10 +3,10 @@
 Date: 2026-09-12
 
 This report records the resumed qualification run against branch
-`feature/spg-first-vertical-slice`, base revision
-`e40f69b0c001604b9149a491695116fb2200289f`, plus the current uncommitted
-qualification delta. It preserves every failed and response-unknown Provider
-request. It does not claim Human Product Acceptance.
+`feature/spg-first-vertical-slice`. The qualified implementation was committed
+as `af4ea416e426450cb3a03ba89005f398942e0520` on top of base revision
+`e40f69b0c001604b9149a491695116fb2200289f`. It preserves every failed and
+response-unknown Provider request. It does not claim Human Product Acceptance.
 
 ## Amendment v2 update
 
@@ -214,7 +214,7 @@ Compose project:  watt-native-human-acceptance-v32
 UI:               http://127.0.0.1:8042/app
 API:              http://127.0.0.1:8042
 Seed Work:        2e92e1eb-6aa7-4749-8c60-1527afe45197 (DRAFT)
-Source basis:     e40f69b0c001604b9149a491695116fb2200289f + qualification delta
+Source basis:     af4ea416e426450cb3a03ba89005f398942e0520
 Provider profile: deepseek-flash / high
 ```
 
