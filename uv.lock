@@ -526,6 +526,7 @@ source = { editable = "." }
 dependencies = [
     { name = "alembic" },
     { name = "fastapi" },
+    { name = "httpx2" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -539,7 +540,6 @@ codex-executor = [
     { name = "openai-codex-cli-bin" },
 ]
 test = [
-    { name = "httpx2" },
     { name = "pytest" },
 ]
 
@@ -547,7 +547,7 @@ test = [
 requires-dist = [
     { name = "alembic", specifier = ">=1,<2" },
     { name = "fastapi", specifier = ">=0.115,<1" },
-    { name = "httpx2", marker = "extra == 'test'", specifier = ">=2,<3" },
+    { name = "httpx2", specifier = ">=2,<3" },
     { name = "openai-codex", marker = "extra == 'codex-executor'", specifier = "==0.147.0" },
     { name = "openai-codex-cli-bin", marker = "extra == 'codex-executor'", specifier = "==0.147.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3,<4" },

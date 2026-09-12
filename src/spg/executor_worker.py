@@ -45,13 +45,19 @@ def _required_model(settings: Settings) -> str:
 
 
 def _deepseek_adapter(settings: Settings) -> ResponsesInferenceAdapter:
-    credential = settings.native_executor_deepseek_api_key
+    credential = (
+        settings.deepseek_api_key or settings.native_executor_deepseek_api_key
+    )
     if credential is None or not credential.get_secret_value():
         raise RuntimeError("native Executor DeepSeek credential is required")
     return DeepSeekResponsesInferenceAdapter(
         model=_required_model(settings),
         api_key=credential.get_secret_value,
-        base_url=settings.native_executor_deepseek_base_url,
+        base_url=(
+            settings.deepseek_base_url
+            if settings.deepseek_api_key is not None
+            else settings.native_executor_deepseek_base_url
+        ),
         timeout_seconds=settings.executor_timeout_seconds,
         reasoning_effort=settings.native_executor_inference_reasoning_effort,
     )

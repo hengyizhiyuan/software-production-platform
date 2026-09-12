@@ -3,6 +3,32 @@ from pathlib import Path
 from spg.config import Settings
 
 
+def test_default_wic_uses_deepseek_with_logically_separate_role_profiles() -> None:
+    settings = Settings()
+    assert settings.wic_provider_adapter == "deepseek"
+    assert settings.wic_provider_model == "deepseek-flash"
+    assert settings.conversation_provider_adapter is None
+    assert settings.conversation_provider_model is None
+    assert settings.wic_provider_reasoning_effort == "low"
+    assert settings.conversation_provider_reasoning_effort == "low"
+
+
+def test_default_runtime_exposes_all_three_exact_role_profiles() -> None:
+    from spg.application.bootstrap import bootstrap
+    from spg.domain.model_runtime import ModelPurpose
+
+    service = bootstrap(Settings(deepseek_api_key="test-only")).interaction(
+        database=object()
+    )
+    try:
+        runtime = service.capability.runtime
+        assert runtime.profile(ModelPurpose.WIC_SEMANTIC).model == "deepseek-flash"
+        assert runtime.profile(ModelPurpose.CONVERSATION_RESPONSE).model == "deepseek-flash"
+        assert runtime.profile(ModelPurpose.EXECUTOR_PRODUCTION).model == "unconfigured"
+    finally:
+        service.shutdown()
+
+
 def test_settings_load_from_environment(monkeypatch) -> None:
     monkeypatch.setenv("SPG_RUNTIME_PROFILE", "test-fvs")
     monkeypatch.setenv("SPG_REPOSITORY_PATH", ".")

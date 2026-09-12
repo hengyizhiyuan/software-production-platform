@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from contextlib import AbstractContextManager
+from copy import deepcopy
 from dataclasses import dataclass
 from inspect import Parameter, signature
 import json
@@ -12,7 +13,6 @@ from threading import Thread
 from time import monotonic
 from typing import Any
 
-from openai_codex import ApprovalMode, Codex, Sandbox
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, ValidationError
 
 from spg.application.conversation import (
@@ -49,11 +49,49 @@ from spg.domain.interaction import (
     WorkFocusClassification,
     WorkImpactDisposition,
 )
-from spg.providers.codex_sdk_executor import INTERRUPT_GRACE_SECONDS, _enum_value
-from spg.providers.codex_semantic import _provider_strict_output_schema
 
 
 CodexFactory = Callable[[], AbstractContextManager[Any]]
+INTERRUPT_GRACE_SECONDS = 5.0
+
+
+def _enum_value(value: object) -> str:
+    candidate = getattr(value, "value", value)
+    return str(candidate).lower()
+
+
+def _provider_strict_output_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    normalized = deepcopy(schema)
+
+    def normalize(value: object) -> None:
+        if isinstance(value, dict):
+            if "$ref" in value:
+                reference = value["$ref"]
+                value.clear()
+                value["$ref"] = reference
+                return
+            for nested in value.values():
+                normalize(nested)
+        elif isinstance(value, list):
+            for nested in value:
+                normalize(nested)
+
+    normalize(normalized)
+    return normalized
+
+
+def _default_codex_factory() -> AbstractContextManager[Any]:
+    """Load the legacy SDK only when that explicit rollback adapter is used."""
+
+    from openai_codex import Codex
+
+    return Codex()
+
+
+def _codex_controls() -> tuple[Any, Any]:
+    from openai_codex import ApprovalMode, Sandbox
+
+    return ApprovalMode, Sandbox
 
 
 class _InteractionProviderMeaning(InterpretationMeaning):
@@ -201,6 +239,18 @@ class ConversationPipelineEvidence:
     new_meaning_count: int | None = None
     reused_prior_design_intent_frame: bool | None = None
     provider_stage_seconds: dict[str, float] | None = None
+    semantic_request_id: str | None = None
+    conversation_request_id: str | None = None
+    coalesced_request_id: str | None = None
+    semantic_provider: str | None = None
+    conversation_provider: str | None = None
+    coalesced_provider: str | None = None
+    semantic_usage: dict[str, object] | None = None
+    conversation_usage: dict[str, object] | None = None
+    coalesced_usage: dict[str, object] | None = None
+    semantic_retry_count: int | None = None
+    conversation_retry_count: int | None = None
+    coalesced_retry_count: int | None = None
 
 
 def _compact_interaction_basis(
@@ -441,7 +491,7 @@ class CodexSdkInteractionSemanticCapability:
         timeout_seconds: float | None = None,
     ) -> None:
         self.repository_location = repository_location
-        self.codex_factory = codex_factory or Codex
+        self.codex_factory = codex_factory or _default_codex_factory
         self.model = model
         self.reasoning_effort = reasoning_effort
         self.timeout_seconds = timeout_seconds
@@ -456,6 +506,7 @@ class CodexSdkInteractionSemanticCapability:
         self.last_turn_id = None
         instruction = self.instruction(basis)
         self.last_prompt_characters = len(instruction)
+        ApprovalMode, Sandbox = _codex_controls()
         with self.codex_factory() as codex:
             thread = codex.thread_start(
                 approval_mode=ApprovalMode.deny_all,
@@ -558,6 +609,12 @@ class CodexSdkInteractionSemanticCapability:
             "context, constraints, and requests unless the latest input actually proposes "
             "change. Classify focus and production impact without silently rewriting Work "
             "or injecting input into an active cycle. Regardless of satisfaction state, "
+            "an explicit addition, removal or correction of a constraint applying to the "
+            "current Work is an ON_TOPIC governed change: include the complete resulting "
+            "constraint set and use HUMAN_GOVERNANCE_REQUIRED, or "
+            "CURRENT_RESULT_MAY_BE_INSUFFICIENT when an active production binding or "
+            "current satisfaction makes that boundary applicable. Never classify such a "
+            "constraint change as NO_GOVERNED_CHANGE. "
             "compare an explicitly declared long-lived objective with the active Work. "
             "If the Human names a different product, system, platform or similarly durable "
             "objective, classify it as UNRELATED_NEW_DEMAND with NEW_WORK_RECOMMENDED, "
@@ -697,7 +754,7 @@ class CodexSdkConversationProvider:
         timeout_seconds: float | None = None,
     ) -> None:
         self.repository_location = repository_location
-        self.codex_factory = codex_factory or Codex
+        self.codex_factory = codex_factory or _default_codex_factory
         self.model = model
         self.reasoning_effort = reasoning_effort
         self.timeout_seconds = timeout_seconds
@@ -736,6 +793,7 @@ class CodexSdkConversationProvider:
         self.last_turn_id = None
         instruction = self.instruction(context, collaboration)
         self.last_prompt_characters = len(instruction)
+        ApprovalMode, Sandbox = _codex_controls()
         with self.codex_factory() as codex:
             thread = codex.thread_start(
                 approval_mode=ApprovalMode.deny_all,
@@ -832,20 +890,24 @@ class CodexSdkWorkInteractionCapability:
         conversation_reasoning_effort: str | None = None,
         coalesce_pre_work: bool = True,
         timeout_seconds: float | None = None,
+        semantic_capability: Any | None = None,
+        conversation_provider: Any | None = None,
     ) -> None:
         self.repository_location = repository_location
-        self.codex_factory = codex_factory or Codex
+        self.codex_factory = codex_factory or _default_codex_factory
         self.model = model
         self.reasoning_effort = reasoning_effort
         self.timeout_seconds = timeout_seconds
-        self.semantic_capability = CodexSdkInteractionSemanticCapability(
+        if (semantic_capability is None) != (conversation_provider is None):
+            raise ValueError("Semantic and Conversation providers must be supplied together")
+        self.semantic_capability = semantic_capability or CodexSdkInteractionSemanticCapability(
             repository_location=repository_location,
             codex_factory=self.codex_factory,
             model=model,
             reasoning_effort=reasoning_effort,
             timeout_seconds=timeout_seconds,
         )
-        self.conversation_provider = CodexSdkConversationProvider(
+        self.conversation_provider = conversation_provider or CodexSdkConversationProvider(
             repository_location=repository_location,
             codex_factory=self.codex_factory,
             model=conversation_model or model,
@@ -938,12 +1000,18 @@ class CodexSdkWorkInteractionCapability:
             composition_options["current_semantics"] = semantic
         response = compose(basis, semantic.collaboration, **composition_options)
         conversation_completed_at = monotonic()
+        semantic_request_id = getattr(
+            self.semantic_capability, "last_request_id",
+            getattr(self.semantic_capability, "last_turn_id", None),
+        )
+        conversation_request_id = getattr(
+            self.conversation_provider, "last_request_id",
+            getattr(self.conversation_provider, "last_turn_id", None),
+        )
         if not all(
             (
-                self.semantic_capability.last_thread_id,
-                self.semantic_capability.last_turn_id,
-                self.conversation_provider.last_thread_id,
-                self.conversation_provider.last_turn_id,
+                semantic_request_id,
+                conversation_request_id,
             )
         ):
             raise InteractionInvariantViolation(
@@ -951,10 +1019,18 @@ class CodexSdkWorkInteractionCapability:
             )
         self.last_pipeline_evidence = ConversationPipelineEvidence(
             pipeline_reason=selection_reason,
-            semantic_thread_id=str(self.semantic_capability.last_thread_id),
-            semantic_turn_id=str(self.semantic_capability.last_turn_id),
-            conversation_thread_id=str(self.conversation_provider.last_thread_id),
-            conversation_turn_id=str(self.conversation_provider.last_turn_id),
+            semantic_thread_id=getattr(self.semantic_capability, "last_thread_id", None),
+            semantic_turn_id=getattr(self.semantic_capability, "last_turn_id", None),
+            conversation_thread_id=getattr(self.conversation_provider, "last_thread_id", None),
+            conversation_turn_id=getattr(self.conversation_provider, "last_turn_id", None),
+            semantic_request_id=str(semantic_request_id),
+            conversation_request_id=str(conversation_request_id),
+            semantic_provider=getattr(self.semantic_capability, "provider_identity", None),
+            conversation_provider=getattr(self.conversation_provider, "provider_identity", None),
+            semantic_usage=getattr(self.semantic_capability, "last_usage", None),
+            conversation_usage=getattr(self.conversation_provider, "last_usage", None),
+            semantic_retry_count=getattr(self.semantic_capability, "last_retry_count", None),
+            conversation_retry_count=getattr(self.conversation_provider, "last_retry_count", None),
             semantic_seconds=semantic_completed_at - started_at,
             conversation_seconds=conversation_completed_at - semantic_completed_at,
             first_response_delta_seconds=first_response_delta_seconds,
@@ -1052,6 +1128,7 @@ class CodexSdkWorkInteractionCapability:
         model = self.semantic_capability.model
         effort = self.semantic_capability.reasoning_effort
         stage("provider_starting")
+        ApprovalMode, Sandbox = _codex_controls()
         with self.codex_factory() as codex:
             thread = codex.thread_start(
                 approval_mode=ApprovalMode.deny_all,

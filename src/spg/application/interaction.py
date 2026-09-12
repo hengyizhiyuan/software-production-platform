@@ -319,13 +319,19 @@ class UnavailableWorkInteractionCapability:
 
 
 _TURN_TIMING_MILESTONES = (
-    "acknowledged", "processing_started", "basis_prepared", "assessment_cache_hit",
+    "acknowledged", "processing_started", "reality_load_started",
+    "reality_load_completed", "basis_prepared", "assessment_cache_hit",
     "provider_started", "provider_context_started", "provider_context_prepared",
-    "provider_starting", "provider_turn_started", "first_response_delta",
+    "context_assembly_started", "context_assembly_completed",
+    "provider_starting", "provider_turn_started", "provider_request_queued",
+    "provider_request_sent", "provider_response_accepted",
+    "provider_first_response_event", "provider_first_token", "first_response_delta",
     "first_sse_event", "natural_response_completed", "semantic_envelope_completed",
     "provider_teardown_completed", "payload_validation_started", "payload_validated",
-    "provider_returned", "admission_started", "candidate_validated",
-    "assessment_persisted", "final_persistence_started", "completed", "failed",
+    "semantic_result_completed", "validation_completed", "provider_returned",
+    "admission_started", "candidate_validated", "assessment_persisted",
+    "final_persistence_started", "persistence_completed", "completed", "failed",
+    "response_stream_completed",
 )
 
 
@@ -568,6 +574,9 @@ class WorkInteractionService:
 
     def shutdown(self) -> None:
         self._turn_executor.shutdown(wait=True, cancel_futures=False)
+        close_capability = getattr(self.capability, "close", None)
+        if callable(close_capability):
+            close_capability()
         with self._turn_lock:
             self._turn_response_streams.clear()
             self._turn_timings.clear()
@@ -606,6 +615,11 @@ class WorkInteractionService:
         """Record the first status/text event emitted to any SSE subscriber."""
 
         self._mark_turn_timing(turn_id, "first_sse_event")
+
+    def record_turn_stream_completed(self, turn_id: UUID) -> None:
+        """Record final SSE message emission separately from durable completion."""
+
+        self._mark_turn_timing(turn_id, "response_stream_completed")
 
     def _mark_turn_timing(self, turn_id: UUID, event: str) -> None:
         if event not in _TURN_TIMING_MILESTONES:
@@ -741,6 +755,7 @@ class WorkInteractionService:
                     updated_at=completed_at,
                 )
                 uow.commit()
+            self._mark_turn_timing(turn_id, "persistence_completed")
             self._mark_turn_timing(turn_id, "completed")
         except Exception as error:  # persisted failure is the product-facing truth
             failed_at = datetime.now(UTC)
@@ -772,8 +787,11 @@ class WorkInteractionService:
         on_response_delta: Callable[[str], None] | None,
         on_pipeline_stage: Callable[[str], None] | None = None,
     ) -> InteractionAssessment:
+        if on_pipeline_stage is not None:
+            on_pipeline_stage("reality_load_started")
         basis = self._basis(interaction_id)
         if on_pipeline_stage is not None:
+            on_pipeline_stage("reality_load_completed")
             on_pipeline_stage("basis_prepared")
         with self.database.unit_of_work() as uow:
             existing = InteractionStore(uow.session).assessment_for_basis(

@@ -29,21 +29,46 @@ Human Turn
     -> existing streaming Watt message
 ```
 
-The original implementation separated the WIC path into two Provider
+The implementation separates the WIC path into two Watt-owned Provider
 contracts:
 
-1. `CodexSdkInteractionSemanticCapability` interprets the exact persisted WIC
+1. the WIC semantic capability interprets the exact persisted WIC
    basis and returns advisory domain/collaboration semantics. Its wire schema
    contains no Human-facing response.
-2. `CodexSdkConversationProvider` receives only the bounded
+2. the Conversation provider receives only the bounded
    `ConversationContext` and `StructuredCollaborationResult`. It owns natural
    wording, adaptive detail, conversational continuity, and turn-taking.
 
-`CodexSdkWorkInteractionCapability` remains the compatibility facade expected
-by `WorkInteractionService`. It selects coalesced pre-Work or staged transport,
+`WorkInteractionService` receives a compatibility facade that selects
+coalesced pre-Work or staged transport,
 while preserving both responsibilities, and returns the existing
 `InteractionAssessmentCandidate`, and therefore does not change the persisted
 Interaction, Work-admission, or streaming contracts.
+
+### Provider-neutral model runtime (2026-09-13)
+
+The default path now routes exact role profiles through `WattModelRuntime`:
+
+```text
+WIC_SEMANTIC -----------\
+                        PurposeProfileRouter -> ModelProviderRegistry
+CONVERSATION_RESPONSE --/                         |
+                                              DeepSeek Responses
+```
+
+Both roles currently select `deepseek-flash` with low reasoning effort, but
+remain independently configured. Compatible pre-Work profiles share one
+request; active Work or differing profiles use the staged path. The Registry
+owns Provider identity and capability metadata. The Responses adapter owns the
+credential handle, endpoint, persistent keep-alive client, strict JSON Schema
+transport, streaming events, normalized failures, request identity, usage and
+timing. WIC business code contains no DeepSeek branch.
+
+The default path does not import `openai_codex`, inspect `CODEX_HOME`, or create
+Codex threads. The legacy Codex SDK adapters remain lazy-loaded behind the
+explicit `codex-sdk` configuration for rollback. Executor profile selection
+remains independent; it may reuse the canonical `SPG_DEEPSEEK_API_KEY` secret
+handle without sharing WIC or Executor high-level inference contracts.
 
 ## Structured collaboration result
 
@@ -101,9 +126,9 @@ does not create parallel context truth.
 selects streaming or non-streaming realization, rejects an empty response, and
 returns provider provenance plus text. It does not alter source semantics.
 
-`ConversationProvider` is a dedicated, replaceable contract. The current Codex
-SDK adapter uses an ephemeral read-only, deny-all Turn and a response schema
-containing only `natural_response`. Its model is independently configurable
+`ConversationProvider` is a dedicated, replaceable contract. The default
+adapter uses DeepSeek's stateless Responses API and a response schema containing
+only `natural_response`. Its model is independently configurable
 through `SPG_CONVERSATION_PROVIDER_MODEL`; adapter selection is separated by
 `SPG_CONVERSATION_PROVIDER_ADAPTER`. WIC semantic model configuration remains
 independent.
@@ -250,12 +275,13 @@ Coalescing applies only without active Work and when both model and reasoning
 settings agree and all provider/context seams use the native implementations.
 Custom context/providers, different settings, active Work, or
 `SPG_WIC_COALESCE_PRE_WORK=false` retain the separate context/composer/provider
-path. Both model effort defaults remain unspecified. There is no shared hidden
-provider memory, model replacement, or change to Human Authority.
+path. The DeepSeek defaults use low effort for both roles. There is no shared
+hidden provider memory, model replacement, or change to Human Authority.
 
-Provider evidence reports `coalesced_pre_work` and one call with one pair of
-thread/turn IDs, or `staged` and two calls with separate provenance. Stage-only
-timings/IDs are null in the single-call mode; no unmeasured phase is inferred.
+Provider evidence reports `coalesced_pre_work` and one request ID, or `staged`
+and two request IDs with separate provenance. The legacy adapter continues to
+report thread/turn IDs. Stage-only timings/IDs are null in the single-call mode;
+no unmeasured phase is inferred.
 
 ## Product intelligence and latency refinement v3.1 (2026-09-09)
 

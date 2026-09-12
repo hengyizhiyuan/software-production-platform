@@ -11,6 +11,7 @@ requires-python = ">=3.12"
 dependencies = [
     "alembic>=1,<2",
     "fastapi>=0.115,<1",
+    "httpx2>=2,<3",
     "psycopg[binary]>=3,<4",
     "pydantic>=2,<3",
     "pydantic-settings>=2,<3",
@@ -24,7 +25,6 @@ codex-executor = [
     "openai-codex-cli-bin==0.147.0",
 ]
 test = [
-    "httpx2>=2,<3",
     "pytest>=8,<10",
 ]
 

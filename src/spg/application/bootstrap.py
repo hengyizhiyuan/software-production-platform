@@ -267,6 +267,78 @@ class Application:
         conversation_adapter = (
             self.settings.conversation_provider_adapter or semantic_adapter
         )
+        if semantic_adapter == "deepseek" and conversation_adapter == "deepseek":
+            from spg.domain.model_runtime import (
+                ModelProfile,
+                ModelProvider,
+                ModelProviderRegistry,
+                ModelPurpose,
+                PurposeProfileRouter,
+                WattModelRuntime,
+            )
+            from spg.infrastructure.model_runtime import DeepSeekResponsesModelAdapter
+            from spg.providers.deepseek_interaction import (
+                DeepSeekWorkInteractionCapability,
+            )
+
+            credential = self.settings.deepseek_api_key
+            registry = ModelProviderRegistry()
+            registry.register(DeepSeekResponsesModelAdapter(
+                api_key=lambda: (
+                    "" if credential is None else credential.get_secret_value()
+                ),
+                base_url=self.settings.deepseek_base_url,
+            ))
+            timeout = self.settings.collaboration_provider_timeout_seconds
+            runtime = WattModelRuntime(
+                registry,
+                PurposeProfileRouter(profiles={
+                    ModelPurpose.WIC_SEMANTIC: ModelProfile(
+                        purpose=ModelPurpose.WIC_SEMANTIC,
+                        provider=ModelProvider.DEEPSEEK,
+                        model=self.settings.wic_provider_model or "deepseek-flash",
+                        reasoning_effort=self.settings.wic_provider_reasoning_effort,
+                        timeout_seconds=timeout,
+                        max_output_tokens=(
+                            self.settings.collaboration_provider_max_output_tokens
+                        ),
+                    ),
+                    ModelPurpose.CONVERSATION_RESPONSE: ModelProfile(
+                        purpose=ModelPurpose.CONVERSATION_RESPONSE,
+                        provider=ModelProvider.DEEPSEEK,
+                        model=(
+                            self.settings.conversation_provider_model
+                            or self.settings.wic_provider_model
+                            or "deepseek-flash"
+                        ),
+                        reasoning_effort=(
+                            self.settings.conversation_provider_reasoning_effort
+                        ),
+                        timeout_seconds=timeout,
+                        max_output_tokens=(
+                            self.settings.collaboration_provider_max_output_tokens
+                        ),
+                    ),
+                    ModelPurpose.EXECUTOR_PRODUCTION: ModelProfile(
+                        purpose=ModelPurpose.EXECUTOR_PRODUCTION,
+                        provider=ModelProvider(
+                            self.settings.native_executor_inference_provider
+                        ),
+                        model=(
+                            self.settings.native_executor_inference_model
+                            or "unconfigured"
+                        ),
+                        reasoning_effort=(
+                            self.settings.native_executor_inference_reasoning_effort
+                        ),
+                        timeout_seconds=self.settings.executor_timeout_seconds,
+                    ),
+                }),
+            )
+            capability = DeepSeekWorkInteractionCapability(
+                runtime=runtime,
+                coalesce_pre_work=self.settings.wic_coalesce_pre_work,
+            )
         if semantic_adapter == "codex-sdk" and conversation_adapter == "codex-sdk":
             from spg.providers.codex_interaction import (
                 CodexSdkWorkInteractionCapability,

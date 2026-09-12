@@ -575,14 +575,16 @@ def test_tool_flow_probe_is_two_submissions_and_one_read_only_delivery(
     assert report["mutation_count"] == 0
 
 
-def test_native_compose_selects_deepseek_without_changing_wic() -> None:
+def test_native_compose_reuses_shared_deepseek_credential_with_separate_profiles() -> None:
     compose = open("compose.native-executor.yaml", encoding="utf-8").read()
     app = compose[compose.index("  app:"):compose.index("  native-coordinator:")]
     assert "SPG_VERIFICATION_ADAPTER: contract-driven-repository" in app
     assert "target: native-verification" in app
     assert "SPG_NATIVE_EXECUTOR_INFERENCE_PROVIDER" in compose
-    assert "SPG_NATIVE_EXECUTOR_DEEPSEEK_API_KEY" in compose
+    assert "SPG_DEEPSEEK_API_KEY" in compose
     assert "deepseek-flash" in compose
+    assert "SPG_WIC_PROVIDER_ADAPTER" in app
+    assert "SPG_CONVERSATION_PROVIDER_ADAPTER" in app
     assert "native-app-data:/var/lib/spg:ro" in compose
     tool_host = compose[compose.index("  native-tool-host:"):compose.index("  native-worker:")]
     assert "target: native-tool-host" in tool_host

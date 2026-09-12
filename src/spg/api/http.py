@@ -483,6 +483,24 @@ def create_http_application(
             raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
         return InteractionTurnResponse.from_turn(turn)
 
+    @api.get("/api/interactions/{interaction_id}/turns/{turn_id}/timing")
+    def get_interaction_turn_timing(
+        interaction_id: UUID,
+        turn_id: UUID,
+    ) -> dict[str, object]:
+        service = required_interaction_service()
+        turn = service.get_turn(turn_id)
+        if turn.interaction_id != interaction_id:
+            raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
+        timing = service.turn_timing(turn_id)
+        if timing is None:
+            raise ProductHttpError(
+                404,
+                "TIMING_OBSERVATION_UNAVAILABLE",
+                "Process-local Turn timing is unavailable after restart or eviction",
+            )
+        return timing
+
     @api.get("/api/interactions/{interaction_id}/turns/{turn_id}/events")
     async def stream_interaction_turn(
         interaction_id: UUID,
@@ -561,6 +579,7 @@ def create_http_application(
                             )
                             + "\n\n"
                         )
+                        service.record_turn_stream_completed(turn_id)
                     return
                 if turn.status.value == "FAILED":
                     yield (

@@ -34,14 +34,12 @@ uses `spg_dev`; automated tests use the separate `spg_test`; historical
 committed database password is an intentionally non-secret local-development
 value and must not be reused outside this local environment.
 
-No Codex credential is required for startup. Without an explicitly configured
-Executor, Provider-required Work remains truthfully blocked or needs attention.
-Set SPG_WIC_PROVIDER_MODEL to an available model when enabling the WIC Codex
-semantic capability. Human-facing realization can be selected and modeled
-independently with `SPG_CONVERSATION_PROVIDER_ADAPTER` and
-`SPG_CONVERSATION_PROVIDER_MODEL`. The current `codex-sdk` Conversation Provider
-preserves the existing WIC service and streaming contracts. Leaving model
-settings unset preserves the Codex SDK configuration default.
+The default WIC and Conversation path uses the DeepSeek Responses API with
+`deepseek-flash` at low reasoning effort. Configure `SPG_DEEPSEEK_API_KEY` in the
+ignored local environment. Human-facing realization remains independently
+selectable through `SPG_CONVERSATION_PROVIDER_ADAPTER` and
+`SPG_CONVERSATION_PROVIDER_MODEL`; `codex-sdk` remains an explicit rollback
+adapter and is not imported by the default path.
 
 Human collaboration retains WIC interpretation (including Design Intent Framing)
 and Conversation expression as separate responsibilities. Pre-Work conversations
@@ -58,8 +56,8 @@ completed provider observations include `pipeline_reason`, models, efforts and
 actual call count. Unset effort remains an unknown provider default, not a
 measured reasoning budget.
 `SPG_COLLABORATION_PROVIDER_TIMEOUT_SECONDS` bounds each model stream (default
-120 seconds); it is independent of the Executor timeout and does not include
-SDK startup. The durable acknowledgement is prepared before provider work.
+120 seconds); it is independent of the Executor timeout. The durable
+acknowledgement is prepared before provider work.
 See the [pipeline assessment](docs/architecture/human-collaboration-pipeline-review.md)
 for ownership, context, and latency-measurement details.
 

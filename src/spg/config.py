@@ -41,6 +41,8 @@ class Settings(BaseSettings):
     native_executor_inference_reasoning_effort: Literal[
         "none", "low", "high", "max"
     ] = "high"
+    deepseek_api_key: SecretStr | None = None
+    deepseek_base_url: str = "https://api.deepseek.com"
     native_executor_deepseek_api_key: SecretStr | None = None
     native_executor_deepseek_base_url: str = "https://api.deepseek.com"
     native_executor_openai_api_key: SecretStr | None = None
@@ -52,18 +54,19 @@ class Settings(BaseSettings):
     native_executor_compatibility_wait_seconds: float = Field(
         default=7200.0, ge=30.0, le=86400.0
     )
-    wic_provider_adapter: str | None = Field(default=None, min_length=1)
-    wic_provider_model: str | None = Field(default=None, min_length=1)
+    wic_provider_adapter: str | None = Field(default="deepseek", min_length=1)
+    wic_provider_model: str | None = Field(default="deepseek-flash", min_length=1)
     conversation_provider_adapter: str | None = Field(default=None, min_length=1)
     conversation_provider_model: str | None = Field(default=None, min_length=1)
     wic_coalesce_pre_work: bool = True
     wic_provider_reasoning_effort: Literal[
         "none", "minimal", "low", "medium", "high", "xhigh"
-    ] | None = None
+    ] | None = "low"
     conversation_provider_reasoning_effort: Literal[
         "none", "minimal", "low", "medium", "high", "xhigh"
-    ] | None = None
+    ] | None = "low"
     collaboration_provider_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
+    collaboration_provider_max_output_tokens: int = Field(default=4096, ge=512, le=32768)
     executor_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
     executor_max_internal_turns: int = Field(default=3, ge=1)
     executor_sandbox_mode: Literal["workspace-write", "full-access"] = (
