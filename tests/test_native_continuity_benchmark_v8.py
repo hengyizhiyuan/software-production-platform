@@ -1,0 +1,120 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from spg.domain.native_execution import canonical_digest
+
+from benchmarks.native_executor_continuity_v8.evaluator import evaluate
+from benchmarks.native_executor_continuity_v8.runner import (
+    BudgetLedger,
+    SPEC_PATH,
+    plan,
+    prepare_repositories,
+)
+
+
+EXPECTED_DIGEST = "6bcd04af0d4eef2d951767c6d1e20ae3930e259b49da0202eae7fe4c939b481a"
+
+
+def _spec() -> dict:
+    return json.loads(SPEC_PATH.read_text())
+
+
+def test_v8_plan_preserves_the_frozen_execution_count_and_replacements() -> None:
+    spec = _spec()
+    generated = plan(spec)
+    frozen = json.loads(
+        (SPEC_PATH.parent / "../../.spg/validation-evidence/native-cont-v8/frozen-plan.json")
+        .resolve()
+        .read_text()
+    )
+
+    assert canonical_digest(spec) == EXPECTED_DIGEST
+    assert frozen == {"spec_digest": EXPECTED_DIGEST, "trials": generated}
+    assert len(generated) == 36
+    assert sum(item["arm"] == "A" for item in generated) == 18
+    assert sum(item["arm"] == "B" for item in generated) == 18
+    assert {
+        item["execution_id"]
+        for item in generated
+        if "model_replacement" in item["injections"]
+    } == {"T3-2-B", "T4-1-B", "T5-2-B"}
+
+
+def test_v8_budget_includes_the_original_conservative_spend(tmp_path: Path) -> None:
+    spec = _spec()
+    ledger = BudgetLedger(tmp_path / "results.json", spec)
+
+    assert ledger.data["prior_conservative_cost_rmb"] == 5.23686778
+    assert spec["hard_cost_limit"] == 100.0
+
+
+def test_v8_t5_verification_isolated_by_repository() -> None:
+    task = next(item for item in _spec()["tasks"] if item["id"] == "T5")
+
+    assert [(item["cwd"], item["command"]) for item in task["verification"]] == [
+        ("client", "pytest -q tests/test_status_client.py"),
+        ("server", "pytest -q tests/test_status_api.py"),
+        ("client", "python -m compileall -q src"),
+        ("server", "python -m compileall -q src"),
+    ]
+
+
+def test_v8_evaluator_applies_frozen_scope_and_quality_anchors(tmp_path: Path) -> None:
+    task = next(item for item in _spec()["tasks"] if item["id"] == "T3")
+    root, _ = prepare_repositories(tmp_path / "fixture", task)
+    (root / "src/labels.py").write_text(
+        "def normalize_label(value: str) -> str:\n"
+        "    return value.strip().lower().replace(' ', '-')\n\n"
+        "def normalize_many(values: list[str]) -> list[str]:\n"
+        "    return [normalize_label(value) for value in values]\n",
+        encoding="utf-8",
+    )
+
+    assessment = evaluate(
+        root,
+        task,
+        [{"command": "frozen", "returncode": 0}],
+        "RESULT_READY",
+    )
+
+    assert assessment["mandatory_gate_passed"] is True
+    assert assessment["material_defects"] == []
+    assert assessment["score"] == {
+        "correctness": 4,
+        "maintainability": 4,
+        "scope_discipline": 4,
+        "tests": 4,
+        "operability": 4,
+    }
+
+
+def test_v8_evaluator_counts_pytest_methods_inside_test_classes(tmp_path: Path) -> None:
+    task = next(item for item in _spec()["tasks"] if item["id"] == "T4")
+    root, _ = prepare_repositories(tmp_path / "fixture", task)
+    (root / "src/watt_ids").mkdir(parents=True)
+    (root / "src/watt_ids/__init__.py").write_text(
+        "def parse_work_id(value):\n    return value.upper()\n",
+        encoding="utf-8",
+    )
+    (root / "pyproject.toml").write_text("[project]\nname='watt-ids'\n", encoding="utf-8")
+    (root / "tests").mkdir(exist_ok=True)
+    (root / "tests/test_watt_ids.py").write_text(
+        "class TestContract:\n"
+        "    def test_one(self): pass\n"
+        "    def test_two(self): pass\n"
+        "    def test_three(self): pass\n"
+        "    def test_four(self): pass\n",
+        encoding="utf-8",
+    )
+
+    assessment = evaluate(
+        root,
+        task,
+        [{"command": "frozen", "returncode": 0}],
+        "RESULT_READY",
+    )
+
+    assert assessment["evidence"]["test_count"] == 4
+    assert assessment["score"]["tests"] == 4

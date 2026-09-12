@@ -97,6 +97,15 @@ class DurableKernelAudit:
             condition = StepCondition.COMPLETED
         else:
             payload = {"error_type": type(error).__name__ if error else "UnknownError"}
+            reason_code = getattr(error, "reason_code", None)
+            if isinstance(reason_code, str) and reason_code:
+                payload["reason_code"] = reason_code
+            validation_issues = getattr(error, "validation_issues", ())
+            if validation_issues:
+                payload["validation_issues"] = list(validation_issues)
+            request_sent = getattr(error, "request_sent", None)
+            if isinstance(request_sent, bool):
+                payload["request_sent"] = request_sent
             condition = StepCondition.FAILED
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
@@ -247,6 +256,7 @@ class DurableCheckpointPort:
         now = _utcnow()
         record = CheckpointBundleRecord(
             id=uuid4(),
+            schema_version=checkpoint.schema_version,
             session_id=self.session_id,
             attempt_id=self.attempt_id,
             step_sequence=checkpoint.step_sequence,

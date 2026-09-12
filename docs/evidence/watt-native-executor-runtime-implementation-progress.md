@@ -4,6 +4,10 @@ Date: 2026-09-11. Repository basis before the uncommitted implementation:
 `8d85100bac5505462d0866398bd076ecb21fcf39` on
 `feature/spg-first-vertical-slice`.
 
+DeepSeek migration continuation is recorded separately in
+[watt-native-executor-deepseek-provider-migration.md](watt-native-executor-deepseek-provider-migration.md).
+It preserves the OpenAI qualification history below rather than rewriting it.
+
 ## Status
 
 ```text
@@ -13,14 +17,17 @@ WATT-NATIVE EXECUTOR RUNTIME FOUNDATION
 FOCUSED VALIDATION
     PASS
 
+QUALIFICATION CLOSURE
+    IN PROGRESS; DEEPSEEK P1/P2 AND Q01 PASS
+
 TECHNICALLY_QUALIFIED
-    NO
+    NO — NORMATIVE CONTINUITY AND REMAINING Q-CASE GATES REMAIN
 
 RUNTIME_READY_FOR_HUMAN_ACCEPTANCE
-    NO
+    PRELIMINARY RUNTIME RUNNING; COMPLETE ACCEPTANCE SCRIPT NOT YET QUALIFIED
 
 HUMAN ACCEPTANCE
-    NOT STARTED
+    PENDING HUMAN DECISION
 ```
 
 This record deliberately separates implementation progress from qualification.
@@ -100,6 +107,12 @@ The corrected command used `PYTHONPATH=src;.` and `PYTHONUTF8=1`. It reached
 interrupted because the feature still had known mandatory qualification gaps.
 This attempt is **NOT** a full-regression pass and must not be cited as one.
 
+The final current-tree rerun used the corrected environment against an isolated
+PostgreSQL qualification database. All 412 non-integration cases passed. The
+integration suite collected 607 cases and exited successfully: 599 passed and
+eight existing conditional cases skipped. The only warnings were known Pydantic
+2.11 deprecations in the existing MVP application-flow test.
+
 ## Qualification Closure Attempt — Q01
 
 The Provider configuration was supplied through the ignored local `.env` and
@@ -141,60 +154,95 @@ against the same isolated database/workspace volumes. This process is not a
 Trusted Baseline admission and must not be represented as the Human acceptance
 Runtime.
 
+## DeepSeek continuation implementation delta
+
+The DeepSeek continuation kept all earlier failed/UNKNOWN Attempts immutable
+and completed Q01 through independent Verification, exact Candidate
+authorization and isolated Trusted Baseline advancement. Exact IDs, Provider
+requests and usage are in the companion DeepSeek evidence record.
+
+Generic runtime closure added after Q01 now includes:
+
+- supervised no-shell process groups with bounded output, exact delivery-owned
+  cancellation, TERM/KILL receipts and mid-tool Pause/Stop/Cancel barriers;
+- safe same-Attempt recovery before any effect, receipt rehydration after a
+  worker crash, and `UNKNOWN / RECONCILING` fencing when an effect is unresolved;
+- bounded context compaction that preserves the exact contract/source capsule,
+  conservative quota/unknown-spend accounting across successor envelopes, and
+  retained residual obligations on Provider resource failure;
+- Session checkpoint inheritance, exact checkpoint fork and explicit close;
+- at-least-once outbox claim/ack, cursor-expiry/ahead `RESET`, snapshot
+  high-water, and bounded 256-event replay batches;
+- five-class latency projection with measured spans and explicit unavailable
+  fields instead of a fabricated aggregate duration;
+- descriptor-anchored Tool Host reads/writes that reject traversal, symlinks,
+  hardlinks, non-regular files and `.git` metadata; live remote process-tree
+  cancellation left no child process behind;
+- exact multi-repository `CandidateVector`, independent per-target Verification,
+  digest-bound authorization, sorted per-target CAS, durable `PARTIAL` physical
+  Reality, forward recovery and one atomic aggregate Runtime Commit; and
+- explicit workspace pins plus crash-resumable 30-day hibernation to a verified
+  content-addressed archive, restore, 180-day cold retirement tombstones and
+  retention of the last recovery bundle.
+
+The additive schema head is now `20260912_37`: CandidateVector and trusted
+source pointers (`35`), retention actions/pins/tombstones (`36`), and exact
+native vector Verification (`37`). These migrations do not rewrite legacy
+rows.
+
 ## Open Mandatory Qualification
 
 The following areas remain materially open:
 
-- Q01 and provider-level cases: no real native Provider Turn, multi-round real
-  code production, live model identity/usage, or repair proof.
-- Q06, Q12–Q14, Q17–Q30: complete Session fork/update races, quiescent process
-  pause, process-tree termination, worker/API/host crash frontiers, effect
-  reconciliation, checkpoint publication failures, compaction, salvage, and
-  host-reboot recovery are not qualified.
-- Q10/Q26: the current bounded subprocess call does not yet provide the required
-  supervised process identity, descendant termination receipts, or mid-tool
-  control barrier semantics.
-- Q15/Q45/Q46: direct PostgreSQL-backed SSE replay exists, but durable relay
-  publish/ack, cursor expiry `RESET`, snapshot high-water, and subscriber
-  backpressure qualification do not.
-- Q31–Q35: `SourceVector` and multi-mount Workspace are first-class, but
-  per-target Verification, Candidate vector integration, partial convergence,
-  forward recovery, and aggregate multi-repository Runtime Commit are not
-  implemented by this slice.
+- Q06, Q12–Q14, Q17–Q30 now have focused crash/control/Session/compaction
+  coverage, but the complete prescribed cross-product and host-reboot rehearsal
+  have not yet been recorded.
+- Q15/Q45/Q46 now cover durable relay reclaim, `RESET`, snapshot high-water and
+  bounded lossless replay. A measured slow-browser disconnect/coalescing run is
+  still required.
+- Q31–Q35 are implemented and pass real PostgreSQL plus two-real-Git-repository
+  partial-convergence/forward-recovery tests. A Human-visible two-repository
+  preview rehearsal remains part of acceptance preparation.
 - Q38–Q40: traversal, one symlink escape, secret filtering, internal networking,
   and Docker-socket absence are proven only as a subset. Symlink race, hardlink,
   archive escape, metadata/control egress, per-Work host isolation, and warm
   reuse isolation remain unqualified. A shared Tool Host plus bearer token is
   not claimed as complete hostile-code isolation.
-- Q41–Q43: durable reservations exist, but cumulative PWU-pool enforcement,
-  unknown-spend policy, retention/hibernation/pins, cleanup crash safety, and
-  DB/disk outage behavior remain open.
+- Q41 cumulative PWU enforcement and unknown-spend retention pass focused
+  tests. Q42 pin/hibernation/restore/retirement behavior passes focused tests;
+  DB/disk-full and host-reboot fault injection remain open under Q43.
 - Q44: no seeded exact-Candidate preview and Human authorization/delivery
   acceptance path has been qualified for the native backend.
-- Q47/Q48: no five-class latency instrumentation or cold/warm benchmark.
+- Q47 exposes the five latency classes with unavailable stages explicit. Q48
+  still requires the prescribed cold/warm measurement set.
 - Q49/Q50: legacy/native implementations coexist and the additive migration
   round trip passes, but controlled cutover/rollback readers and checkpoint
   schema-evolution qualification are incomplete.
-- The prescribed 100 seeded race interleavings and PWU continuity benchmark
-  have not run.
+- A 100-round two-scheduler allocation contention test passes, but the broader prescribed
+  100 seeded transition matrix and the 36-run PWU continuity benchmark remain
+  release gates.
 
 ## Acceptance Environment Reality
 
-The isolated technical environment is named
-`watt-native-executor-runtime-qualification`. Its Trusted-Baseline application
-is exposed at `http://127.0.0.1:8040/app`; a temporary current-tree technical
-qualification application is exposed at `http://127.0.0.1:8041/app`. PostgreSQL,
-the baseline application, lease coordinator, and Tool Host remain available.
-The Provider Worker exited after the recorded Q01 defects. One Provider request
-reached schema validation, but no model result or production Effect was
-created, and no seeded Human acceptance PWU exists.
+The earlier Q01 environment remains on `http://127.0.0.1:8040/app` with its
+database and volumes unchanged. A separate current-tree Human environment is
+running under Compose project `watt-native-human-acceptance-v32` at
+`http://127.0.0.1:8042/app`. It has its own PostgreSQL, workspace, checkpoint
+and application volumes, migration head `20260912_37`, and five independent
+healthy processes (application, coordinator, Worker, Tool Host, PostgreSQL).
 
-Therefore this environment is suitable for no-Provider technical inspection,
-not for the Blueprint's Human acceptance journey. A later acceptance admission
-must bind an exact clean checkpoint, configure an authorized Provider without
-leaking credentials, seed a governed PWU through normal authority, and prove
-queue, interruption, recovery, artifact inspection, preview, authorization,
-Runtime Commit, and delivery.
+The acceptance startup overlay is tracked in
+`compose.native-executor.human-acceptance.yaml` and
+`docker/start_human_acceptance.py`; every application process loads the current
+working source read-only rather than silently switching to the old activated
+checkout. DeepSeek readiness is exact `deepseek-flash / high`, with no request
+issued during readiness.
+
+Seed Work `e49b7a20-f6f6-4dd3-8831-e3af98c22547` is visible in the UI and
+intentionally remains DRAFT. It has zero PWUs, Steps and Effects, so the Human
+owns admission and no Provider spend was consumed by environment preparation.
+Browser inspection confirmed the UI, health state, Work detail and execution
+queue render. Human product acceptance remains pending.
 
 ## Current Classification
 
@@ -202,12 +250,42 @@ Runtime Commit, and delivery.
 WATT-NATIVE EXECUTOR RUNTIME
     IMPLEMENTATION IN PROGRESS
 
-CURRENT FOUNDATION
-    FOCUSED VALIDATION PASS
+CURRENT FOUNDATION / DEEPSEEK Q01
+    PASS
+
+DETERMINISTIC CLOSURE
+    BROAD REGRESSION PASS; NORMATIVE CONTINUITY BENCHMARK REMAINS
 
 RELEASE / CUTOVER
-    BLOCKED ON MANDATORY QUALIFICATION AND MISSING RUNTIME CAPABILITIES
+    BLOCKED ON CONTINUITY QUALIFICATION AND HUMAN ACCEPTANCE
 ```
 
 Legacy Codex remains the admitted operational backend unless a later governed
 qualification and cutover explicitly changes that fact.
+
+## 2026-09-12 qualification closure addendum
+
+The resumed frozen continuity benchmark is complete. It contains all 18 A/B
+pairs and all 36 executions under plan digest
+`e57d664eb9dbe2988949c0cecf1bb37ab010ecdaf07808dc1921d93bcac91c57`.
+Only 8/18 B executions passed, so `CONTINUITY_QUALIFIED` is **NO**. Known spend
+was RMB 2.26231347 and the conservative total including response-unknown
+reservations was RMB 3.69511347 of the RMB 100 cap. The three assigned
+`deepseek-v4-pro / high` executions ran across T3, T4 and T5 task types and all
+remain failed outcomes.
+
+Closure continued after the benchmark: Q29 retained-volume reboot passed with
+zero Provider requests; Q38 symlink-race/archive/disk-full negative coverage
+was added; Q48 completed 30 cold and 30 warm measurements; and migration
+`20260912_39` added fail-closed checkpoint schema versioning with a successful
+38→39→38→39 data-preserving rehearsal.
+
+Q40 failed a real warm-reuse isolation probe because the shared Tool Host can
+see another Work's private workspace. This violates a zero-tolerance invariant
+and requires an architecture-owned per-Work execution/mount boundary. Together
+with the immutable failed continuity result, it prevents
+`TECHNICALLY_QUALIFIED` and `RUNTIME_READY_FOR_HUMAN_ACCEPTANCE`.
+
+The complete current result, Q-case ledger, performance figures, fixes,
+cutover/rollback limits and Human runtime identity are recorded in
+[watt-native-executor-qualification-closure-20260912.md](watt-native-executor-qualification-closure-20260912.md).

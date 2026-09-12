@@ -1,0 +1,347 @@
+{
+  "schema_version": 4,
+  "contract": "docs/architecture/watt-native-executor-qualification-amendment-v4.md",
+  "randomization_seed": 320260912,
+  "currency": "RMB",
+  "hard_cost_limit": 100.0,
+  "usd_to_rmb_reservation_rate": 8.0,
+  "profiles": {
+    "primary": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "reasoning_effort": "high",
+      "profile_id": "deepseek-responses:deepseek-flash:high"
+    },
+    "replacement": {
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "reasoning_effort": "high",
+      "profile_id": "deepseek-responses:deepseek-v4-pro:high"
+    }
+  },
+  "pricing_usd_per_million_tokens": {
+    "deepseek-flash": {
+      "cache_hit_input": 0.0028,
+      "cache_miss_input": 0.14,
+      "output": 0.28
+    },
+    "deepseek-v4-pro": {
+      "cache_hit_input": 0.003625,
+      "cache_miss_input": 0.435,
+      "output": 0.87
+    }
+  },
+  "tasks": [
+    {
+      "id": "T1",
+      "type": "multi_file_feature_with_tests",
+      "objective": "Implement a bounded reservation ledger across src/reservations.py and tests/test_reservations.py. reserve(stock, requests) must preserve request order, reject non-positive quantities, never oversell, return accepted request ids plus remaining stock, and leave inputs unchanged.",
+      "repositories": {
+        "primary": {
+          "initial_files": {
+            "README.md": "# Reservation fixture\n",
+            "src/__init__.py": "",
+            "tests/__init__.py": ""
+          },
+          "write_scope": [
+            "src/reservations.py",
+            "tests/test_reservations.py"
+          ]
+        }
+      },
+      "verification": [
+        "pytest -q tests/test_reservations.py",
+        "python -m compileall -q src"
+      ],
+      "acceptance": [
+        "order is stable",
+        "non-positive quantity raises ValueError",
+        "stock never becomes negative",
+        "inputs are not mutated",
+        "tests include rejection and boundary cases"
+      ]
+    },
+    {
+      "id": "T2",
+      "type": "bug_diagnosis_and_repair",
+      "objective": "Diagnose and repair the inclusive date-window overlap bug in src/windows.py without changing the public signature. Adjacent inclusive windows sharing one endpoint overlap; reversed ranges raise ValueError. Preserve and satisfy the frozen tests.",
+      "repositories": {
+        "primary": {
+          "initial_files": {
+            "src/__init__.py": "",
+            "src/windows.py": "from datetime import date\n\ndef overlaps(left_start: date, left_end: date, right_start: date, right_end: date) -> bool:\n    return left_start < right_end and right_start < left_end\n",
+            "tests/__init__.py": "",
+            "tests/test_windows.py": "from datetime import date\nimport pytest\nfrom src.windows import overlaps\n\ndef d(day): return date(2026, 1, day)\n\ndef test_shared_endpoint_overlaps(): assert overlaps(d(1), d(3), d(3), d(5))\ndef test_disjoint(): assert not overlaps(d(1), d(2), d(3), d(4))\ndef test_reversed_left_rejected():\n    with pytest.raises(ValueError): overlaps(d(4), d(2), d(5), d(6))\ndef test_reversed_right_rejected():\n    with pytest.raises(ValueError): overlaps(d(1), d(2), d(6), d(5))\n"
+          },
+          "write_scope": [
+            "src/windows.py"
+          ]
+        }
+      },
+      "verification": [
+        "pytest -q tests/test_windows.py",
+        "git diff --check"
+      ],
+      "acceptance": [
+        "shared endpoints overlap",
+        "disjoint ranges do not",
+        "both reversed-range forms raise ValueError",
+        "public signature is unchanged"
+      ]
+    },
+    {
+      "id": "T3",
+      "type": "constrained_refactor",
+      "objective": "Refactor src/labels.py to remove duplicated normalization logic while preserving normalize_label and normalize_many signatures and exact behavior. Do not add dependencies or change tests.",
+      "repositories": {
+        "primary": {
+          "initial_files": {
+            "src/__init__.py": "",
+            "src/labels.py": "import re\n\ndef normalize_label(value: str) -> str:\n    value = value.strip().lower()\n    value = re.sub(r'[^a-z0-9]+', '-', value)\n    return value.strip('-')\n\ndef normalize_many(values: list[str]) -> list[str]:\n    result = []\n    for value in values:\n        value = value.strip().lower()\n        value = re.sub(r'[^a-z0-9]+', '-', value)\n        result.append(value.strip('-'))\n    return result\n",
+            "tests/__init__.py": "",
+            "tests/test_labels.py": "from src.labels import normalize_label, normalize_many\n\ndef test_single(): assert normalize_label('  Hello, Watt!  ') == 'hello-watt'\ndef test_many(): assert normalize_many([' A  B ', 'C_D']) == ['a-b', 'c-d']\ndef test_empty(): assert normalize_many([]) == []\n"
+          },
+          "write_scope": [
+            "src/labels.py"
+          ]
+        }
+      },
+      "verification": [
+        "pytest -q tests/test_labels.py",
+        "python -m compileall -q src"
+      ],
+      "acceptance": [
+        "both public signatures remain",
+        "one normalization implementation is reused",
+        "behavior is unchanged",
+        "no dependency is added"
+      ]
+    },
+    {
+      "id": "T4",
+      "type": "new_managed_repository_software",
+      "objective": "Create a small dependency-free Python package watt_ids in a new managed repository. public function parse_work_id(value) must accept W- followed by exactly eight uppercase hex characters, return the normalized uppercase id, and raise ValueError otherwise. Add precise tests and package metadata.",
+      "repositories": {
+        "primary": {
+          "initial_files": {
+            "README.md": "# watt-ids\nA new managed repository fixture.\n"
+          },
+          "write_scope": [
+            "pyproject.toml",
+            "src/watt_ids/__init__.py",
+            "tests/test_watt_ids.py"
+          ]
+        }
+      },
+      "verification": [
+        "pytest -q tests/test_watt_ids.py",
+        "python -m compileall -q src"
+      ],
+      "acceptance": [
+        "exact W-XXXXXXXX contract",
+        "lowercase input normalizes",
+        "wrong length and non-hex values fail",
+        "dependency-free package metadata exists"
+      ]
+    },
+    {
+      "id": "T5",
+      "type": "coordinated_api_client_two_repositories",
+      "objective": "Coordinate two repositories. In server implement encode_status(code, message) returning the exact JSON-compatible shape {code: uppercase code, message: trimmed message}. In client implement read_status(payload) validating that exact shape and returning the tuple. Add local tests in both repositories; do not weaken either side's validation.",
+      "repositories": {
+        "client": {
+          "initial_files": {
+            "src/__init__.py": "",
+            "tests/__init__.py": ""
+          },
+          "write_scope": [
+            "src/status_client.py",
+            "tests/test_status_client.py"
+          ]
+        },
+        "server": {
+          "initial_files": {
+            "src/__init__.py": "",
+            "tests/__init__.py": ""
+          },
+          "write_scope": [
+            "src/status_api.py",
+            "tests/test_status_api.py"
+          ]
+        }
+      },
+      "verification": [
+        {
+          "cwd": "client",
+          "command": "pytest -q tests/test_status_client.py"
+        },
+        {
+          "cwd": "server",
+          "command": "pytest -q tests/test_status_api.py"
+        },
+        {
+          "cwd": "client",
+          "command": "python -m compileall -q src"
+        },
+        {
+          "cwd": "server",
+          "command": "python -m compileall -q src"
+        }
+      ],
+      "acceptance": [
+        "two repositories are modified",
+        "server uppercases and trims",
+        "client rejects missing/extra/non-string fields",
+        "cross-repository shape is exact"
+      ]
+    },
+    {
+      "id": "T6",
+      "type": "artifact_with_executable_preview",
+      "objective": "Produce a dependency-free status dashboard artifact at site/index.html with site/app.js and tests/test_dashboard.py. It must render service name and state from a fixed JS data object, expose data-testid hooks service-name and service-state, include an accessible main heading, and show unknown for missing state. Keep JavaScript free of network calls.",
+      "repositories": {
+        "primary": {
+          "initial_files": {
+            "README.md": "# Static dashboard fixture\n",
+            "tests/__init__.py": ""
+          },
+          "write_scope": [
+            "site/index.html",
+            "site/app.js",
+            "tests/test_dashboard.py"
+          ]
+        }
+      },
+      "verification": [
+        "pytest -q tests/test_dashboard.py",
+        "node --check site/app.js",
+        "preview.inspect site/index.html"
+      ],
+      "acceptance": [
+        "accessible main heading",
+        "both data-testid hooks",
+        "fixed local data object",
+        "missing state renders unknown",
+        "no network call"
+      ]
+    }
+  ],
+  "b_injections": {
+    "T1-1": [
+      "graceful_pause_after_first_checkpoint"
+    ],
+    "T1-2": [
+      "worker_loss_before_effect"
+    ],
+    "T1-3": [
+      "ui_disconnect"
+    ],
+    "T2-1": [
+      "worker_loss_after_effect_before_checkpoint"
+    ],
+    "T2-2": [
+      "simulated_provider_capacity_before_request"
+    ],
+    "T2-3": [
+      "quota_after_useful_edit"
+    ],
+    "T3-1": [
+      "compaction_failure"
+    ],
+    "T3-2": [
+      "model_replacement"
+    ],
+    "T3-3": [
+      "material_human_correction"
+    ],
+    "T4-1": [
+      "model_replacement",
+      "graceful_pause_after_first_checkpoint"
+    ],
+    "T4-2": [
+      "stale_worker_late_publication"
+    ],
+    "T4-3": [
+      "worker_loss_during_test"
+    ],
+    "T5-1": [
+      "two_repo_partial_convergence"
+    ],
+    "T5-2": [
+      "model_replacement"
+    ],
+    "T5-3": [
+      "worker_loss_after_effect_before_checkpoint"
+    ],
+    "T6-1": [
+      "graceful_pause_during_test"
+    ],
+    "T6-2": [
+      "ui_disconnect",
+      "simulated_provider_capacity_before_request"
+    ],
+    "T6-3": [
+      "compaction_failure",
+      "material_human_correction"
+    ]
+  },
+  "quality_rubric": {
+    "scale": {
+      "4": "all mandatory evidence passes with no material issue",
+      "3": "mandatory evidence passes with only minor non-material debt",
+      "2": "useful result but material repair or evidence is still required",
+      "1": "limited, fragile, or substantially incomplete",
+      "0": "absent, incorrect, out of scope, or unsafe"
+    },
+    "dimensions": {
+      "correctness": {
+        "4": "RESULT_READY and every frozen verification passes",
+        "3": "RESULT_READY and mandatory behavior passes with a minor non-mandatory defect",
+        "2": "local checks pass but the execution does not truthfully claim completion",
+        "1": "partial behavior with failed mandatory checks",
+        "0": "wrong or absent result"
+      },
+      "maintainability": {
+        "4": "syntax is valid and no TODO, FIXME, or NotImplementedError debt remains",
+        "3": "syntax is valid with one minor debt marker",
+        "2": "material duplication or unclear structure requires repair",
+        "1": "brittle or substantially incomplete",
+        "0": "unusable source"
+      },
+      "scope_discipline": {
+        "4": "every required output exists and all changes stay in exact write scopes",
+        "3": "exact required changes plus a harmless generated artifact",
+        "2": "required output is missing without an out-of-scope change",
+        "1": "broad unrelated changes",
+        "0": "unauthorized path mutation"
+      },
+      "tests": {
+        "4": "all frozen checks pass and the task-specific minimum test count is met",
+        "3": "all frozen checks pass with at least two focused tests",
+        "2": "checks pass but submitted test evidence is materially thin",
+        "1": "superficial or failing tests",
+        "0": "tests absent"
+      },
+      "operability": {
+        "4": "checks pass, execution reaches RESULT_READY, sources are bounded, and forbidden network calls are absent",
+        "3": "operational result with only a minor non-material gap",
+        "2": "checks pass but terminal or operational evidence is incomplete",
+        "1": "opaque or fragile operation",
+        "0": "unsafe or unusable result"
+      }
+    },
+    "task_minimum_test_count": {
+      "T1": 4,
+      "T2": 4,
+      "T3": 3,
+      "T4": 4,
+      "T5": 6,
+      "T6": 4
+    },
+    "material_defect_threshold": "any dimension below 3",
+    "pair_equivalence": "mean B score may be no more than 0.25 below paired A score",
+    "acceptance_independence": "mandatory verification, exact git scope, required outputs, and forbidden network checks are evaluated outside the model execution"
+  },
+  "amends_plan_digest": "3877434d4c25e80dda179133054495e80b3be26ff0488b9f502f71ad6004d056",
+  "prior_conservative_provider_spend_rmb": 3.88252724
+}

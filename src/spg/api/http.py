@@ -51,6 +51,7 @@ from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.work import WorkApplicationService
 from spg.application.executor_runtime import NativeExecutorRuntimeService
+from spg.application.native_vector import NativeCandidateVectorService
 from spg.application.assets import RepositoryAssetService
 from spg.application.delivery import DeliveryApplicationService
 from spg.application.software_runtime import SoftwareRuntimeService
@@ -75,6 +76,10 @@ from spg.domain.native_execution import (
     ExecutionHandle,
     NativeExecutionAdmission,
     NativeExecutionError,
+)
+from spg.domain.native_vector import (
+    CandidateVectorAuthorizationRequest,
+    CandidateVectorSealRequest,
 )
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.persistence import Database, DatabaseConfigurationError
@@ -170,6 +175,7 @@ def create_http_application(
         if hasattr(container, "native_executor_runtime")
         else NativeExecutorRuntimeService(selected_database)
     )
+    selected_native_vectors = NativeCandidateVectorService(selected_database)
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
@@ -208,6 +214,7 @@ def create_http_application(
     api.state.work_post_admission = selected_post_admission
     api.state.interaction_service = selected_interaction
     api.state.native_executor_runtime = selected_native_executor
+    api.state.native_candidate_vectors = selected_native_vectors
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
@@ -727,11 +734,36 @@ def create_http_application(
             while not await request.is_disconnected() and idle_cycles < 60:
                 def load_events():
                     with selected_database.unit_of_work() as uow:
-                        return NativeExecutionStore(uow.session).events_since(
-                            pwu_id, after_sequence=cursor
+                        store = NativeExecutionStore(uow.session)
+                        return (
+                            store.event_sequence_window(pwu_id),
+                            store.events_since(pwu_id, after_sequence=cursor),
                         )
 
-                events = await asyncio.to_thread(load_events)
+                window, events = await asyncio.to_thread(load_events)
+                minimum, high_water = window
+                cursor_expired = (
+                    cursor > 0
+                    and minimum is not None
+                    and cursor < minimum - 1
+                )
+                cursor_ahead = high_water is not None and cursor > high_water
+                if cursor_expired or cursor_ahead:
+                    reset_to = high_water or 0
+                    payload = json.dumps(
+                        {
+                            "reason": (
+                                "CURSOR_EXPIRED" if cursor_expired else "CURSOR_AHEAD"
+                            ),
+                            "pwu_id": str(pwu_id),
+                            "high_water_sequence": reset_to,
+                            "snapshot_url": f"/api/native-execution/pwus/{pwu_id}/snapshot",
+                        },
+                        ensure_ascii=False,
+                    )
+                    cursor = reset_to
+                    yield f"id: {reset_to}\nevent: RESET\ndata: {payload}\n\n"
+                    continue
                 if not events:
                     idle_cycles += 1
                     yield ": keep-alive\n\n"
@@ -743,7 +775,85 @@ def create_http_application(
                     payload = json.dumps(event.model_dump(mode="json"), ensure_ascii=False)
                     yield f"id: {event.sequence}\nevent: {event.event_type}\ndata: {payload}\n\n"
 
-        return StreamingResponse(stream(), media_type="text/event-stream")
+        return StreamingResponse(
+            stream(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
+    @api.get("/api/native-execution/pwus/{pwu_id}/snapshot")
+    def native_execution_snapshot(pwu_id: UUID) -> dict[str, object]:
+        with selected_database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            minimum, high_water = store.event_sequence_window(pwu_id)
+            attempts = []
+            for attempt_id in store.attempt_ids_for_pwu(pwu_id):
+                state = store.attempt_state(attempt_id)
+                queue = store.queue_for_attempt(attempt_id)
+                attempts.append(
+                    {
+                        "attempt_id": str(attempt_id),
+                        "state": state.model_dump(mode="json"),
+                        "queue": (
+                            queue.model_dump(mode="json") if queue is not None else None
+                        ),
+                    }
+                )
+        return {
+            "pwu_id": str(pwu_id),
+            "minimum_retained_sequence": minimum,
+            "high_water_sequence": high_water or 0,
+            "attempts": attempts,
+        }
+
+    @api.post("/api/native-execution/candidate-vectors")
+    def seal_native_candidate_vector(request: CandidateVectorSealRequest):
+        if not getattr(settings, "native_executor_enabled", False):
+            raise ProductHttpError(
+                409, "NATIVE_EXECUTOR_DISABLED",
+                "Watt-native Executor Candidate sealing is not enabled",
+            )
+        return selected_native_vectors.seal(request).model_dump(mode="json")
+
+    @api.get("/api/native-execution/candidate-vectors/{vector_id}")
+    def inspect_native_candidate_vector(vector_id: UUID):
+        return selected_native_vectors.projection(vector_id).model_dump(mode="json")
+
+    @api.post("/api/native-execution/candidate-vectors/{vector_id}/authorize")
+    def authorize_native_candidate_vector(
+        vector_id: UUID, request: CandidateVectorAuthorizationRequest
+    ):
+        if not getattr(settings, "native_executor_enabled", False):
+            raise ProductHttpError(
+                409, "NATIVE_EXECUTOR_DISABLED",
+                "Watt-native Executor Candidate authorization is not enabled",
+            )
+        if vector_id != request.vector_id:
+            raise ProductHttpError(
+                409, "VECTOR_ID_MISMATCH", "Route and authorization vector differ"
+            )
+        return selected_native_vectors.authorize(request).model_dump(mode="json")
+
+    @api.post("/api/native-execution/candidate-vectors/{vector_id}/integrate")
+    def integrate_native_candidate_vector(vector_id: UUID):
+        if not getattr(settings, "native_executor_enabled", False):
+            raise ProductHttpError(
+                409, "NATIVE_EXECUTOR_DISABLED",
+                "Watt-native Executor integration is not enabled",
+            )
+        return selected_native_vectors.integrate(vector_id).model_dump(mode="json")
+
+    @api.post("/api/native-execution/candidate-vectors/{vector_id}/commit")
+    def commit_native_candidate_vector(vector_id: UUID):
+        if not getattr(settings, "native_executor_enabled", False):
+            raise ProductHttpError(
+                409, "NATIVE_EXECUTOR_DISABLED",
+                "Watt-native Executor aggregate commit is not enabled",
+            )
+        return selected_native_vectors.commit(vector_id).model_dump(mode="json")
 
     @api.get("/api/native-execution/attempts/{attempt_id}")
     def native_execution_attempt(attempt_id: UUID):
@@ -755,6 +865,7 @@ def create_http_application(
             effects = store.effects_for_attempt(attempt_id)
             evidence = store.evidence_for_attempt(attempt_id)
             checkpoint = store.latest_checkpoint(attempt_id)
+            timing = store.timing_projection(attempt_id)
         handle = ExecutionHandle(
             backend_identity="watt-native",
             dispatch_id=queue.id if queue else attempt_id,
@@ -770,6 +881,7 @@ def create_http_application(
             "effects": [item.model_dump(mode="json") for item in effects],
             "evidence": [item.model_dump(mode="json") for item in evidence],
             "checkpoint": checkpoint.model_dump(mode="json") if checkpoint else None,
+            "timing": timing,
         }
 
     @api.post("/api/native-execution/attempts/{attempt_id}/control")

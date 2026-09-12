@@ -36,7 +36,13 @@ class Settings(BaseSettings):
     native_executor_worker_profile: str = "local-container-v1"
     native_executor_resource_profile: str = "standard"
     native_executor_storage_root: Path = Path(".watt/native-executor")
+    native_executor_inference_provider: Literal["deepseek", "openai"] = "deepseek"
     native_executor_inference_model: str | None = None
+    native_executor_inference_reasoning_effort: Literal[
+        "none", "low", "high", "max"
+    ] = "high"
+    native_executor_deepseek_api_key: SecretStr | None = None
+    native_executor_deepseek_base_url: str = "https://api.deepseek.com"
     native_executor_openai_api_key: SecretStr | None = None
     native_executor_openai_base_url: str = "https://api.openai.com/v1"
     native_executor_tool_host_url: str = "http://native-tool-host:8011"
@@ -70,3 +76,12 @@ class Settings(BaseSettings):
     active_runtime_package_fingerprint: str | None = None
     active_runtime_static_asset_fingerprint: str | None = None
     active_runtime_source_root: Path | None = None
+
+    @property
+    def native_executor_provider_profile(self) -> str:
+        model = self.native_executor_inference_model or "unconfigured"
+        effort = self.native_executor_inference_reasoning_effort
+        return (
+            f"{self.native_executor_inference_provider}-responses:"
+            f"{model}:{effort}"
+        )

@@ -1,0 +1,46 @@
+services:
+  app:
+    command: ["python", "/acceptance/start.py"]
+    ports: !override
+      - "127.0.0.1:8042:8000"
+    volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true
+      - type: bind
+        source: ./docker/start_human_acceptance.py
+        target: /acceptance/start.py
+        read_only: true
+      - type: bind
+        source: ./migrations
+        target: /app/migrations
+        read_only: true
+      - type: bind
+        source: ./alembic.ini
+        target: /app/alembic.ini
+        read_only: true
+  native-coordinator:
+    environment:
+      PYTHONPATH: /acceptance-source
+    volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true
+  native-tool-host:
+    environment:
+      PYTHONPATH: /acceptance-source
+    volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true
+  native-worker:
+    environment:
+      PYTHONPATH: /acceptance-source
+    volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true

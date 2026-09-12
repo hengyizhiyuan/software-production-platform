@@ -94,6 +94,12 @@ execution_resource_envelopes = Table(
     Column("schema_version", Integer, nullable=False),
     Column("policy_version", String(128), nullable=False),
     Column("provider_profile", String(255), nullable=False),
+    Column(
+        "permitted_provider_profiles",
+        JSONB,
+        nullable=False,
+        server_default=text("'[]'::jsonb"),
+    ),
     Column("max_inference_submissions", Integer, nullable=False),
     Column("max_tool_effects", Integer, nullable=False),
     Column("max_active_seconds", Integer, nullable=False),
@@ -449,6 +455,7 @@ checkpoint_bundles = Table(
     "checkpoint_bundles",
     metadata,
     Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("schema_version", Integer, nullable=False),
     Column(
         "session_id",
         Uuid(as_uuid=True),
@@ -648,6 +655,162 @@ executor_scheduler_state = Table(
     Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 
+native_candidate_vectors = Table(
+    "native_candidate_vectors",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "pwu_id", Uuid(as_uuid=True),
+        ForeignKey("production_work_units.id", ondelete="CASCADE"), nullable=False,
+    ),
+    Column("source_vector_digest", String(64), nullable=False),
+    Column(
+        "checkpoint_id", Uuid(as_uuid=True),
+        ForeignKey("checkpoint_bundles.id"), nullable=False,
+    ),
+    Column("manifest", JSONB, nullable=False),
+    Column("manifest_digest", String(64), nullable=False, unique=True),
+    Column("condition", String(32), nullable=False),
+    Column("version", Integer, nullable=False, server_default="1"),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("updated_at", DateTime(timezone=True), nullable=False),
+)
+
+native_vector_verifications = Table(
+    "native_vector_verifications",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "pwu_id", Uuid(as_uuid=True),
+        ForeignKey("production_work_units.id", ondelete="CASCADE"), nullable=False,
+    ),
+    Column("mount_id", String(255), nullable=False),
+    Column("proposed_revision", String(128), nullable=False),
+    Column("proposed_tree_identity", String(128), nullable=False),
+    Column("obligation", Text, nullable=False),
+    Column("provider_identity", String(255), nullable=False),
+    Column("result", String(32), nullable=False),
+    Column("evidence", JSONB, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    UniqueConstraint(
+        "pwu_id", "mount_id", "proposed_revision", "obligation", "provider_identity",
+        name="uq_native_vector_verification_basis",
+    ),
+)
+
+native_candidate_vector_targets = Table(
+    "native_candidate_vector_targets",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "vector_id", Uuid(as_uuid=True),
+        ForeignKey("native_candidate_vectors.id", ondelete="CASCADE"), nullable=False,
+    ),
+    Column("mount_id", String(255), nullable=False),
+    Column("target", JSONB, nullable=False),
+    Column("condition", String(32), nullable=False),
+    Column("observed_revision", String(128), nullable=True),
+    Column("operation_key", String(64), nullable=False, unique=True),
+    Column("version", Integer, nullable=False, server_default="1"),
+    Column("prepared_at", DateTime(timezone=True), nullable=False),
+    Column("settled_at", DateTime(timezone=True), nullable=True),
+    UniqueConstraint("vector_id", "mount_id", name="uq_native_candidate_vector_mount"),
+)
+
+native_candidate_vector_authorizations = Table(
+    "native_candidate_vector_authorizations",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "vector_id", Uuid(as_uuid=True),
+        ForeignKey("native_candidate_vectors.id", ondelete="CASCADE"),
+        nullable=False, unique=True,
+    ),
+    Column("manifest_digest", String(64), nullable=False),
+    Column("authority_identity", String(255), nullable=False),
+    Column("rationale", Text, nullable=False),
+    Column("authorized_at", DateTime(timezone=True), nullable=False),
+)
+
+native_trusted_source_pointers = Table(
+    "native_trusted_source_pointers",
+    metadata,
+    Column("repository_identity", String(1024), primary_key=True),
+    Column("target_authoritative_ref", String(1024), primary_key=True),
+    Column("repository_revision", String(128), nullable=False),
+    Column("tree_identity", String(128), nullable=False),
+    Column("trusted_vector_digest", String(64), nullable=False),
+    Column("version", Integer, nullable=False, server_default="1"),
+    Column("updated_at", DateTime(timezone=True), nullable=False),
+)
+
+native_aggregate_runtime_commits = Table(
+    "native_aggregate_runtime_commits",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "vector_id", Uuid(as_uuid=True),
+        ForeignKey("native_candidate_vectors.id"), nullable=False, unique=True,
+    ),
+    Column("manifest_digest", String(64), nullable=False),
+    Column(
+        "authorization_id", Uuid(as_uuid=True),
+        ForeignKey("native_candidate_vector_authorizations.id"), nullable=False,
+    ),
+    Column("trusted_vector_digest", String(64), nullable=False, unique=True),
+    Column("committed_at", DateTime(timezone=True), nullable=False),
+)
+
+native_resource_pins = Table(
+    "native_resource_pins",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("resource_kind", String(64), nullable=False),
+    Column("resource_id", String(1024), nullable=False),
+    Column("owner_kind", String(64), nullable=False),
+    Column("owner_id", String(1024), nullable=False),
+    Column("reason", Text, nullable=False),
+    Column("active", Boolean, nullable=False, server_default=text("true")),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("released_at", DateTime(timezone=True), nullable=True),
+    UniqueConstraint(
+        "resource_kind", "resource_id", "owner_kind", "owner_id",
+        name="uq_native_resource_pin_owner",
+    ),
+)
+
+native_retention_actions = Table(
+    "native_retention_actions",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "workspace_id", Uuid(as_uuid=True),
+        ForeignKey("execution_workspaces.id", ondelete="CASCADE"), nullable=False,
+    ),
+    Column("action_key", String(64), nullable=False, unique=True),
+    Column("action_kind", String(32), nullable=False),
+    Column("condition", String(32), nullable=False),
+    Column("bundle_digest", String(64), nullable=True),
+    Column("bundle_path", String(2048), nullable=True),
+    Column("physical_receipt", JSONB, nullable=True),
+    Column("failure", Text, nullable=True),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("updated_at", DateTime(timezone=True), nullable=False),
+    Column("completed_at", DateTime(timezone=True), nullable=True),
+)
+
+native_workspace_tombstones = Table(
+    "native_workspace_tombstones",
+    metadata,
+    Column("workspace_id", Uuid(as_uuid=True), primary_key=True),
+    Column("pwu_id", Uuid(as_uuid=True), nullable=False),
+    Column("attempt_id", Uuid(as_uuid=True), nullable=False),
+    Column("manifest_digest", String(64), nullable=False),
+    Column("last_bundle_digest", String(64), nullable=True),
+    Column("retention_action_id", Uuid(as_uuid=True), nullable=False, unique=True),
+    Column("deleted_at", DateTime(timezone=True), nullable=False),
+)
+
 
 native_execution_tables = (
     pwu_contract_versions,
@@ -673,4 +836,13 @@ native_execution_tables = (
     execution_events,
     event_outbox,
     executor_scheduler_state,
+    native_candidate_vectors,
+    native_vector_verifications,
+    native_candidate_vector_targets,
+    native_candidate_vector_authorizations,
+    native_trusted_source_pointers,
+    native_aggregate_runtime_commits,
+    native_resource_pins,
+    native_retention_actions,
+    native_workspace_tombstones,
 )

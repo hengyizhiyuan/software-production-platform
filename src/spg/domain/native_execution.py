@@ -328,6 +328,17 @@ class ResourceEnvelope(NativeRecord):
     max_parallel_workers: int = Field(default=1, ge=1)
     max_cost_units: int | None = Field(default=None, ge=0)
     provider_profile: str = Field(min_length=1)
+    permitted_provider_profiles: tuple[str, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_provider_profiles(self) -> "ResourceEnvelope":
+        profiles = self.permitted_provider_profiles or (self.provider_profile,)
+        if self.provider_profile not in profiles:
+            raise ValueError("active provider profile must be pre-admitted")
+        if len(set(profiles)) != len(profiles):
+            raise ValueError("permitted provider profiles must be unique")
+        object.__setattr__(self, "permitted_provider_profiles", profiles)
+        return self
 
 
 class ExecutionBindingV2(NativeRecord):
@@ -537,6 +548,7 @@ class EffectReceiptRecord(NativeRecord):
 
 class CheckpointBundleRecord(NativeRecord):
     id: UUID
+    schema_version: int = Field(default=1, ge=1)
     session_id: UUID
     attempt_id: UUID
     step_sequence: int = Field(ge=0)
@@ -743,10 +755,19 @@ class InferenceAction(StrEnum):
     BOUNDARY_CROSSING_REQUIRED = "BOUNDARY_CROSSING_REQUIRED"
 
 
+class InferenceDecisionRejected(RuntimeError):
+    """An observed Provider response that cannot become an executable decision."""
+
+    def __init__(self, reason_code: str, message: str) -> None:
+        super().__init__(message)
+        self.reason_code = reason_code
+
+
 class ToolCallProposal(NativeRecord):
     proposal_index: int = Field(ge=0)
     tool_identity: str = Field(min_length=1)
     arguments: dict[str, Any]
+    provider_call_id: str | None = Field(default=None, min_length=1)
 
 
 class InferenceRequest(NativeRecord):
@@ -761,6 +782,23 @@ class InferenceRequest(NativeRecord):
     previous_results: tuple[dict[str, Any], ...] = ()
 
 
+class InferenceUsage(NativeRecord):
+    input_tokens: int = Field(ge=0)
+    output_tokens: int = Field(ge=0)
+    total_tokens: int = Field(ge=0)
+    cached_input_tokens: int | None = Field(default=None, ge=0)
+    reasoning_tokens: int | None = Field(default=None, ge=0)
+
+
+class InferenceProviderObservation(NativeRecord):
+    provider_identity: str = Field(min_length=1)
+    requested_model: str = Field(min_length=1)
+    effective_model: str | None = Field(default=None, min_length=1)
+    provider_request_id: str | None = Field(default=None, min_length=1)
+    response_status: str = Field(min_length=1)
+    usage: InferenceUsage | None = None
+
+
 class InferenceResponse(NativeRecord):
     action: InferenceAction
     summary: str = Field(min_length=1)
@@ -768,6 +806,7 @@ class InferenceResponse(NativeRecord):
     tool_calls: tuple[ToolCallProposal, ...] = ()
     result_claim: dict[str, Any] | None = None
     residual_obligations: tuple[str, ...] = ()
+    provider_observation: InferenceProviderObservation | None = None
 
     @model_validator(mode="after")
     def validate_action_payload(self) -> "InferenceResponse":
@@ -800,6 +839,7 @@ class ToolExecutionResult(NativeRecord):
 
 
 class KernelCheckpoint(NativeRecord):
+    schema_version: int = Field(default=1, ge=1)
     step_sequence: int = Field(ge=0)
     working_plan: WorkingPlan
     tool_results: tuple[ToolExecutionResult, ...]

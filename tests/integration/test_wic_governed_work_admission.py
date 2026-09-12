@@ -221,6 +221,7 @@ class _ActiveCapability:
         motive: str | None = None,
         desired_outcome: str | None = None,
         meaning: InterpretationMeaningKind | None = None,
+        request: str | None = None,
     ) -> None:
         self.focus = focus
         self.impact = impact
@@ -229,6 +230,7 @@ class _ActiveCapability:
         self.motive = motive
         self.desired_outcome = desired_outcome
         self.meaning = meaning
+        self.request = request
 
     def interpret(
         self, basis: InteractionInterpretationInput
@@ -250,7 +252,11 @@ class _ActiveCapability:
                 if self.constraint is None
                 else (*revision.constraints, self.constraint)
             ),
-            current_requests=revision.requests,
+            current_requests=(
+                revision.requests
+                if self.request is None
+                else (*revision.requests, self.request)
+            ),
             meanings=(
                 ()
                 if self.meaning is None
@@ -1128,6 +1134,101 @@ def test_wic3_focus_preservation_never_silently_mutates_work(
     assert result.governed_revision == original
     assert _count(postgres_database, work_reality_revisions) == 1
     assert work.list_attention(work_id=admitted.work_id) == ()
+
+
+@pytest.mark.parametrize(
+    ("human_text", "focus", "impact", "meaning", "change_kwargs", "changed_field", "status"),
+    (
+        (
+            "New runtime fact: the deployment region is Shanghai.",
+            WorkFocusClassification.ON_TOPIC,
+            WorkImpactDisposition.CURRENT_CYCLE_REMAINS_VALID,
+            InterpretationMeaningKind.FACT,
+            {"context_fact": "Deployment region is Shanghai."},
+            "context_facts",
+            WorkRevisionAdmissionStatus.PENDING_HUMAN,
+        ),
+        (
+            "The service must keep all customer data in mainland China.",
+            WorkFocusClassification.ON_TOPIC,
+            WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT,
+            InterpretationMeaningKind.CONSTRAINT,
+            {"constraint": "Customer data must remain in mainland China."},
+            "constraints",
+            WorkRevisionAdmissionStatus.PENDING_HUMAN,
+        ),
+        (
+            "Correction: the target is a backend system, not a campaign.",
+            WorkFocusClassification.ON_TOPIC,
+            WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT,
+            InterpretationMeaningKind.CORRECTION,
+            {"context_fact": "The target is a backend system, not a campaign."},
+            "context_facts",
+            WorkRevisionAdmissionStatus.PENDING_HUMAN,
+        ),
+        (
+            "Please use an incremental migration for this local approach.",
+            WorkFocusClassification.ON_TOPIC,
+            WorkImpactDisposition.DEFER_TO_PRODUCTION_BOUNDARY,
+            InterpretationMeaningKind.REQUEST,
+            {"request": "Use an incremental migration."},
+            "requests",
+            WorkRevisionAdmissionStatus.PENDING_HUMAN,
+        ),
+        (
+            "Separately, build an unrelated billing analytics product.",
+            WorkFocusClassification.UNRELATED_NEW_DEMAND,
+            WorkImpactDisposition.NEW_WORK_RECOMMENDED,
+            InterpretationMeaningKind.NEW_WORK_CANDIDATE,
+            {"motive": "Build a billing analytics product."},
+            None,
+            WorkRevisionAdmissionStatus.NEW_WORK_RECOMMENDED,
+        ),
+    ),
+)
+def test_q36_five_human_steering_kinds_receive_exact_durable_dispositions(
+    postgres_database: Database,
+    services,
+    human_text: str,
+    focus: WorkFocusClassification,
+    impact: WorkImpactDisposition,
+    meaning: InterpretationMeaningKind,
+    change_kwargs: dict[str, str],
+    changed_field: str | None,
+    status: WorkRevisionAdmissionStatus,
+) -> None:
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    binding, _ = _bind_active_cycle(postgres_database, admitted)
+    active = WorkInteractionService(
+        postgres_database,
+        capability=_ActiveCapability(
+            focus=focus, impact=impact, meaning=meaning, **change_kwargs
+        ),
+    )
+
+    result = active.append_and_assess(
+        ready.interaction.id,
+        human_text,
+        human_identity="human:q36",
+    )
+    assessment = result.latest_assessment
+
+    assert assessment is not None
+    assert assessment.basis_active_runtime_binding_id == binding.id
+    assert assessment.focus_classification is focus
+    assert assessment.impact_disposition is impact
+    assert result.work_revision_admission_status is status
+    assert assessment.meanings[0].kind is meaning
+    if changed_field is None:
+        assert assessment.candidate_change is None
+    else:
+        assert assessment.candidate_change is not None
+        assert changed_field in assessment.candidate_change.changed_fields
+        if changed_field == "constraints":
+            assert assessment.candidate_change.scope_change_required is True
 
 
 def test_wic3_human_governed_revision_is_append_only_exact_and_idempotent(

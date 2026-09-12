@@ -3218,9 +3218,11 @@ class WorkApplicationService:
             for target in contract.exact_targets
         )
         areas = "\n".join(f"- {area}" for area in contract.allowed_areas)
+        constraints = "\n".join(f"- {item}" for item in contract.constraints)
         return (
             f"Produce the admitted code change.\n"
             f"Desired outcome: {contract.desired_outcome}\n"
+            f"Admitted constraints:\n{constraints or '- None.'}\n"
             f"Exact targets:\n{exact or '- None.'}\n"
             f"Bounded areas:\n{areas or '- None.'}"
         )

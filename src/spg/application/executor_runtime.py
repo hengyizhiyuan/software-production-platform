@@ -15,8 +15,10 @@ from spg.domain.native_execution import (
     BackendControlCommand,
     BackendControlReceipt,
     BackendObservation,
+    CheckpointCondition,
     ControlAction,
     ControlRequestCondition,
+    EffectCondition,
     ExecutionAllocationGrant,
     ExecutionAllocationRecord,
     ExecutionEventRecord,
@@ -38,6 +40,7 @@ from spg.domain.native_execution import (
     ResultReadyClaimRecord,
     SchedulingDecision,
     SessionCondition,
+    StepCondition,
     WorkerLeaseRecord,
     WorkerOffer,
     canonical_digest,
@@ -172,21 +175,38 @@ class NativeExecutorRuntimeService:
             try:
                 store.attempt_binding(binding.attempt_id)
             except NativeExecutionNotFound:
-                store.insert_contract(command.contract)
+                try:
+                    persisted_contract = store.contract(command.contract.id)
+                except NativeExecutionNotFound:
+                    store.insert_contract(command.contract)
+                else:
+                    if persisted_contract != command.contract:
+                        raise NativeExecutionConflict(
+                            "PWU contract identity was reused with different content"
+                        )
                 try:
                     source_vector_id = store.source_vector_id(binding.source_vector.digest or "")
                 except NativeExecutionNotFound:
                     source_vector_id = uuid4()
                     store.insert_source_vector(source_vector_id, binding.source_vector)
                 store.insert_resource_envelope(binding.pwu_id, binding.resource_envelope)
-                store.insert_session(
-                    ExecutionSessionRecord(
-                        id=binding.session_id,
-                        pwu_id=binding.pwu_id,
-                        condition=SessionCondition.OPEN,
-                        created_at=self._now(),
+                session = store.execution_session(binding.session_id)
+                if session is None:
+                    store.insert_session(
+                        ExecutionSessionRecord(
+                            id=binding.session_id,
+                            pwu_id=binding.pwu_id,
+                            condition=SessionCondition.OPEN,
+                            created_at=self._now(),
+                        )
                     )
-                )
+                elif (
+                    session.pwu_id != binding.pwu_id
+                    or session.condition is not SessionCondition.OPEN
+                ):
+                    raise NativeExecutionConflict(
+                        "execution Session is closed or belongs to another PWU"
+                    )
                 store.insert_workspace(
                     binding.workspace,
                     condition="READY",
@@ -229,6 +249,65 @@ class NativeExecutorRuntimeService:
                 )
             uow.commit()
             return persisted
+
+    def fork_session(
+        self,
+        *,
+        source_session_id: UUID,
+        checkpoint_id: UUID,
+        actor_identity: str,
+    ) -> ExecutionSessionRecord:
+        del actor_identity  # Identity is represented by the caller's governed command.
+        now = self._now()
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            source = store.execution_session(source_session_id)
+            checkpoint = store.checkpoint(checkpoint_id)
+            if source is None:
+                raise NativeExecutionNotFound(
+                    f"execution session not found: {source_session_id}"
+                )
+            if source.condition is not SessionCondition.OPEN:
+                raise NativeExecutionConflict("only an open Session can be forked")
+            if (
+                checkpoint is None
+                or checkpoint.session_id != source.id
+                or checkpoint.condition is not CheckpointCondition.COMMITTED
+            ):
+                raise NativeExecutionConflict(
+                    "Session fork requires an exact committed source checkpoint"
+                )
+            child = ExecutionSessionRecord(
+                id=uuid4(),
+                pwu_id=source.pwu_id,
+                condition=SessionCondition.OPEN,
+                parent_checkpoint_id=checkpoint.id,
+                current_checkpoint_id=checkpoint.id,
+                current_working_state_version=source.current_working_state_version,
+                created_at=now,
+            )
+            store.insert_session(child)
+            uow.commit()
+            return child
+
+    def close_session(self, session_id: UUID) -> ExecutionSessionRecord:
+        now = self._now()
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            current = store.execution_session(session_id)
+            if current is None:
+                raise NativeExecutionNotFound(f"execution session not found: {session_id}")
+            if current.condition is SessionCondition.CLOSED:
+                return current
+            store.close_session(session_id, closed_at=now)
+            uow.commit()
+            return current.model_copy(
+                update={
+                    "condition": SessionCondition.CLOSED,
+                    "closed_at": now,
+                    "version": current.version + 1,
+                }
+            )
 
     def allocate(self, offer: WorkerOffer) -> ExecutionAllocationGrant | None:
         now = self._now()
@@ -474,6 +553,27 @@ class NativeExecutorRuntimeService:
                         created_at=self._now(),
                     )
                 )
+            applied_control = {
+                ExecutionMode.PAUSED: ControlAction.PAUSE,
+                ExecutionMode.FINISHED: (
+                    ControlAction.STOP
+                    if terminal is AttemptTerminalOutcome.STOPPED
+                    else ControlAction.CANCEL
+                    if terminal is AttemptTerminalOutcome.CANCELLED
+                    else None
+                ),
+            }.get(result.runtime_mode)
+            if applied_control is not None:
+                pending = store.pending_control_request(
+                    allocation.attempt_id,
+                    action=applied_control.value,
+                )
+                if pending is not None:
+                    store.set_control_request_condition(
+                        pending.command_id,
+                        ControlRequestCondition.APPLIED,
+                        applied_at=self._now(),
+                    )
             self._append_event(
                 store,
                 pwu_id=allocation.pwu_id,
@@ -512,7 +612,7 @@ class NativeExecutorRuntimeService:
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
             state = store.attempt_state(command.handle.attempt_id, lock=True)
-            record = store.insert_control_request(
+            record, inserted = store.insert_control_request(
                 ExecutionControlRequestRecord(
                     id=uuid4(),
                     command_id=command.command_id,
@@ -526,10 +626,10 @@ class NativeExecutorRuntimeService:
                     created_at=now,
                 )
             )
-            if record.condition is not ControlRequestCondition.REQUESTED:
+            if not inserted:
                 return BackendControlReceipt(
                     command_id=command.command_id,
-                    accepted=record.condition is ControlRequestCondition.APPLIED,
+                    accepted=record.condition is not ControlRequestCondition.REJECTED,
                     condition=record.condition,
                     message="idempotent control result",
                     recorded_at=record.applied_at or record.created_at,
@@ -561,10 +661,14 @@ class NativeExecutorRuntimeService:
                     recorded_at=now,
                 )
             queue = store.queue_for_attempt(state.attempt_id)
-            worker_owned = queue is not None and queue.condition in {
-                QueueCondition.ALLOCATED,
-                QueueCondition.EXECUTING,
-            }
+            worker_owned = (
+                queue is not None
+                and queue.condition in {
+                    QueueCondition.ALLOCATED,
+                    QueueCondition.EXECUTING,
+                }
+                and store.allocation_for_attempt(state.attempt_id) is not None
+            )
             if not worker_owned and command.action is ControlAction.PAUSE:
                 target = ExecutionMode.PAUSED
             terminal = None
@@ -619,23 +723,29 @@ class NativeExecutorRuntimeService:
                     ),
                     wait_reason=f"{command.action.value.lower()} applied before allocation",
                 )
-            store.set_control_request_condition(
-                command.command_id, ControlRequestCondition.APPLIED, applied_at=now
-            )
+            applied_immediately = not worker_owned or command.action is ControlAction.RESUME
+            if applied_immediately:
+                store.set_control_request_condition(
+                    command.command_id, ControlRequestCondition.APPLIED, applied_at=now
+                )
             uow.commit()
             return BackendControlReceipt(
                 command_id=command.command_id,
                 accepted=True,
-                condition=ControlRequestCondition.APPLIED,
+                condition=(
+                    ControlRequestCondition.APPLIED
+                    if applied_immediately
+                    else ControlRequestCondition.REQUESTED
+                ),
                 message=f"{command.action.value} request recorded",
                 recorded_at=now,
             )
 
     def reconcile_expired_leases(self) -> tuple[UUID, ...]:
-        """Fence crashed workers as UNKNOWN; never convert uncertainty into retry."""
+        """Requeue only settled crash frontiers; fence every unresolved effect."""
 
         now = self._now()
-        fenced: list[UUID] = []
+        reconciled: list[UUID] = []
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
             for lease in store.expired_leases_locked(now):
@@ -644,7 +754,83 @@ class NativeExecutorRuntimeService:
                 if state.worker_epoch != lease.epoch:
                     store.release_allocation(allocation.id, expired=True)
                     continue
+                effects = tuple(store.effects_for_attempt(lease.attempt_id))
+                steps = tuple(store.steps_for_attempt(lease.attempt_id))
+                checkpoint = store.latest_checkpoint(lease.attempt_id)
+                unresolved = any(
+                    effect.condition not in {
+                        EffectCondition.SETTLED,
+                        EffectCondition.FAILED,
+                    }
+                    for effect in effects
+                ) or any(step.condition is StepCondition.RUNNING for step in steps)
                 store.release_allocation(allocation.id, expired=True)
+                if not unresolved:
+                    queue = store.queue_entry(allocation.queue_entry_id)
+                    store.set_queue_condition(
+                        queue.id,
+                        expected_version=queue.version,
+                        condition=QueueCondition.RETURNED_TO_QUEUE,
+                        wait_reason="worker lost; settled journal permits same-Attempt restart",
+                        available_at=now,
+                        increment_resume=True,
+                    )
+                    store.update_attempt_state(
+                        lease.attempt_id,
+                        expected_version=state.version,
+                        values={
+                            "grant_state": AttemptGrantState.GRANTED,
+                            "runtime_mode": ExecutionMode.QUEUED,
+                            "terminal_outcome": None,
+                            "effect_uncertainty": False,
+                            "blocker_reasons": (),
+                        },
+                    )
+                    residual = tuple(
+                        store.attempt_binding(lease.attempt_id).binding.obligation_references
+                    )
+                    if checkpoint is not None:
+                        saved = checkpoint.semantic_manifest.get("residual_obligations")
+                        if isinstance(saved, list) and all(
+                            isinstance(item, str) for item in saved
+                        ):
+                            residual = tuple(saved)
+                    store.insert_recovery_case(
+                        ExecutionRecoveryCaseRecord(
+                            id=uuid4(),
+                            pwu_id=allocation.pwu_id,
+                            attempt_id=allocation.attempt_id,
+                            classification=(
+                                RecoveryClassification.NO_EFFECT
+                                if not effects
+                                else RecoveryClassification.PARTIAL
+                            ),
+                            basis_checkpoint_id=(checkpoint.id if checkpoint else None),
+                            observed_reality={
+                                "worker_id": lease.worker_id,
+                                "lease_epoch": lease.epoch,
+                                "settled_effect_count": len(effects),
+                            },
+                            residual_obligations=residual,
+                            effect_uncertainty=False,
+                            resolution="same-Attempt restart admitted from settled journal",
+                            created_at=now,
+                            resolved_at=now,
+                        )
+                    )
+                    self._append_event(
+                        store,
+                        pwu_id=allocation.pwu_id,
+                        attempt_id=allocation.attempt_id,
+                        event_type="NativeExecutionWorkerRestartAdmitted",
+                        payload={
+                            "expired_worker_epoch": lease.epoch,
+                            "checkpoint_id": str(checkpoint.id) if checkpoint else None,
+                            "settled_effect_count": len(effects),
+                        },
+                    )
+                    reconciled.append(lease.attempt_id)
+                    continue
                 store.update_attempt_state(
                     lease.attempt_id,
                     expected_version=state.version,
@@ -672,9 +858,9 @@ class NativeExecutorRuntimeService:
                         created_at=now,
                     )
                 )
-                fenced.append(lease.attempt_id)
+                reconciled.append(lease.attempt_id)
             uow.commit()
-        return tuple(fenced)
+        return tuple(reconciled)
 
     @staticmethod
     def _append_event(

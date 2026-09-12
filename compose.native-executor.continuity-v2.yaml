@@ -1,0 +1,60 @@
+services:
+  app:
+    image: sha256:f0325d35f9de624a8426be227b7ea6c09d9ed69e4c0d82d7849e4863b3c45195
+    command: ["python", "/acceptance/start.py"]
+    environment:
+      SPG_APPLICATION_NAME: Watt Native Continuity v2
+      SPG_RUNTIME_PROFILE: watt-native-continuity-v2
+    ports: !override
+      - "127.0.0.1:8044:8000"
+    volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true
+      - type: bind
+        source: ./docker/start_human_acceptance.py
+        target: /acceptance/start.py
+        read_only: true
+      - type: bind
+        source: ./migrations
+        target: /app/migrations
+        read_only: true
+  native-coordinator:
+    image: sha256:fc658a71f4049676c468d746fb8f594dc194840031b41eb4128b2efe1a13d977
+    environment:
+      PYTHONPATH: /acceptance-source
+    volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true
+  native-tool-host:
+    image: sha256:8b72f7a69ed6a00fdadbb234aa2f8330a7d140e64fd3a3f816bac6fb55c9d627
+    environment:
+      PYTHONPATH: /acceptance-source
+    volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true
+  native-worker:
+    image: sha256:8b72f7a69ed6a00fdadbb234aa2f8330a7d140e64fd3a3f816bac6fb55c9d627
+    environment:
+      PYTHONPATH: /acceptance-source
+    volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true
+      - type: bind
+        source: ./benchmarks/native_executor_continuity_v2
+        target: /benchmark
+        read_only: true
+      - type: bind
+        source: ./benchmarks/native_executor_qualification
+        target: /qualification
+        read_only: true
+      - type: bind
+        source: ./.spg/validation-evidence/native-cont-v2
+        target: /evidence

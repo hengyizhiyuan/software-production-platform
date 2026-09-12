@@ -210,7 +210,7 @@ class Application:
             selected_executor = NativeQueuedExecutorCapability(
                 selected_database,
                 self.native_executor_runtime(selected_database),
-                provider_profile="openai-responses",
+                provider_profile=self.settings.native_executor_provider_profile,
                 resource_profile=self.settings.native_executor_resource_profile,
                 environment_profile=self.settings.native_executor_worker_profile,
                 poll_seconds=self.settings.native_executor_poll_seconds,

@@ -16,6 +16,7 @@ from spg.domain.native_execution import (
     ControlRequestCondition,
     ExecutionHandle,
     NativeExecutionAdmission,
+    NativeExecutionConflict,
 )
 
 
@@ -91,3 +92,58 @@ class LegacyCodexExecutionBackend:
             message="legacy Codex backend does not support native control",
             recorded_at=datetime.now(timezone.utc),
         )
+
+
+class PinnedExecutionBackendRouter:
+    """Route existing handles by their immutable backend, across default cutovers."""
+
+    def __init__(self, backends: tuple[object, ...], *, default_backend: str) -> None:
+        self._backends = {
+            backend.capabilities().backend_identity: backend for backend in backends
+        }
+        if len(self._backends) != len(backends):
+            raise ValueError("execution backend identities must be unique")
+        self.set_default(default_backend)
+
+    @property
+    def default_backend(self) -> str:
+        return self._default_backend
+
+    def set_default(self, backend_identity: str) -> None:
+        if backend_identity not in self._backends:
+            raise NativeExecutionConflict("execution backend is not registered")
+        self._default_backend = backend_identity
+
+    async def start(
+        self,
+        admission: NativeExecutionAdmission,
+        *,
+        backend_identity: str | None = None,
+    ) -> ExecutionHandle:
+        selected = backend_identity or self._default_backend
+        if admission.binding.backend_implementation != selected:
+            raise NativeExecutionConflict(
+                "admission binding is pinned to a different execution backend"
+            )
+        backend = self._backends[selected]
+        writable = len(admission.binding.workspace.mounts)
+        capabilities = backend.capabilities()
+        if writable > capabilities.max_writable_repositories:
+            raise NativeExecutionConflict(
+                "execution backend cannot admit this repository vector"
+            )
+        return await backend.start(admission)
+
+    async def observe(self, handle: ExecutionHandle) -> BackendObservation:
+        return await self._backend_for_handle(handle).observe(handle)
+
+    async def control(
+        self, command: BackendControlCommand
+    ) -> BackendControlReceipt:
+        return await self._backend_for_handle(command.handle).control(command)
+
+    def _backend_for_handle(self, handle: ExecutionHandle):
+        backend = self._backends.get(handle.backend_identity)
+        if backend is None:
+            raise NativeExecutionConflict("execution handle backend is not registered")
+        return backend

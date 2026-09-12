@@ -37,6 +37,14 @@ EXPOSE 8000
 
 CMD ["python", "/app/docker/start_app.py"]
 
+FROM runtime-base AS native-verification
+
+USER root
+RUN uv sync --locked --no-dev --no-editable --extra test
+USER spg
+
+FROM native-verification AS native-tool-host
+
 FROM runtime-base AS codex-executor
 
 USER root

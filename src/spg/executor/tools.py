@@ -35,7 +35,12 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
     {
         "identity": "process.run",
         "version": "1",
-        "description": "Run one allowlisted argv process without a shell.",
+        "description": (
+            "Run one allowlisted argv process without a shell. Inline code flags such as "
+            "python -c are rejected. For a Python import check, use "
+            "['python', '-m', 'package.module'] with cwd='src', or use test.run with "
+            "pytest --collect-only."
+        ),
         "input_schema": {"type": "object", "properties": {"argv": {"type": "array", "items": {"type": "string"}}, "cwd": {"type": "string"}}, "required": ["argv"], "additionalProperties": False},
         "effect_classification": "PROCESS",
     },
@@ -56,7 +61,7 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
     {
         "identity": "test.run",
         "version": "1",
-        "description": "Run an admitted Python or Node test recipe.",
+        "description": "Run an admitted Python or Node test recipe. cwd is workspace-relative (for example '.', 'client', or 'server'), never '/workspace'.",
         "input_schema": {"type": "object", "properties": {"argv": {"type": "array", "items": {"type": "string"}}, "cwd": {"type": "string"}}, "required": ["argv", "cwd"], "additionalProperties": False},
         "effect_classification": "PROCESS",
     },
@@ -145,21 +150,29 @@ class NativeToolRegistry:
         request: ToolExecutionRequest,
         grant: CapabilityGrant,
     ) -> None:
-        raw_path = request.proposal.arguments.get("path")
-        if not isinstance(raw_path, str):
-            return
-        if "\\" in raw_path:
-            raise NativeExecutionConflict("tool paths must use POSIX separators")
-        path = PurePosixPath(raw_path)
-        if path.is_absolute() or ".." in path.parts:
-            raise NativeExecutionConflict("tool path escapes the workspace")
         allowed = tuple(str(item) for item in grant.scope.get("paths", ()))
         forbidden = tuple(str(item) for item in grant.scope.get("forbidden_paths", ()))
-        normalized = str(path)
-        if forbidden and any(_within(normalized, root) for root in forbidden):
-            raise NativeExecutionConflict("tool path is explicitly forbidden")
-        if allowed and not any(_within(normalized, root) for root in allowed):
-            raise NativeExecutionConflict("tool path is outside the granted scope")
+        for key in ("path", "cwd"):
+            raw_path = request.proposal.arguments.get(key)
+            if not isinstance(raw_path, str):
+                continue
+            if key == "cwd" and raw_path == ".":
+                continue
+            if "\\" in raw_path:
+                raise NativeExecutionConflict("tool paths must use POSIX separators")
+            path = PurePosixPath(raw_path)
+            if path.is_absolute() or ".." in path.parts:
+                raise NativeExecutionConflict("tool path escapes the workspace")
+            normalized = str(path)
+            if forbidden and any(_within(normalized, root) for root in forbidden):
+                raise NativeExecutionConflict("tool path is explicitly forbidden")
+            if not allowed:
+                continue
+            in_scope = any(_within(normalized, root) for root in allowed)
+            if key == "cwd":
+                in_scope = in_scope or any(_within(root, normalized) for root in allowed)
+            if not in_scope:
+                raise NativeExecutionConflict("tool path is outside the granted scope")
 
 
 def _within(path: str, root: str) -> bool:

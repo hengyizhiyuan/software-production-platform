@@ -141,6 +141,16 @@ def test_code_09_10_11_plan_and_mei_preserve_one_pwu_change_authority() -> None:
     assert "repository root" not in instruction
 
 
+def test_code_pwu_objective_surfaces_every_admitted_constraint() -> None:
+    from spg.application.work import WorkApplicationService
+
+    contract = _contract()
+    objective = WorkApplicationService._code_change_objective(contract)
+
+    assert "Admitted constraints:" in objective
+    assert "- Do not change public API shape." in objective
+
+
 class _WideningPlanner:
     def propose(self, request: ProductionPlanningRequest) -> ProductionPlanProposal:
         admitted = request.change_contract

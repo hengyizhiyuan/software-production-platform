@@ -8,6 +8,7 @@ import pytest
 from spg.application import bootstrap
 from spg.config import Settings
 from spg.infrastructure.persistence import DatabaseConfigurationError, metadata
+from spg.infrastructure.persistence.native_execution_schema import native_execution_tables
 
 
 def test_settings_load_postgresql_url_from_environment(monkeypatch) -> None:
@@ -43,7 +44,7 @@ def test_postgresql_engine_composition_has_no_connection_side_effect() -> None:
 
 
 def test_production_metadata_contains_runtime_and_mvp_app_product_tables() -> None:
-    assert set(metadata.tables) == {
+    expected_product_tables = {
         "production_snapshots",
         "current_trusted_baseline_pointer",
         "production_runs",
@@ -97,11 +98,14 @@ def test_production_metadata_contains_runtime_and_mvp_app_product_tables() -> No
         "work_delivery_acceptances",
         "work_delivery_runtimes",
     }
+    assert set(metadata.tables) == expected_product_tables | {
+        table.name for table in native_execution_tables
+    }
 
 
-def test_alembic_environment_has_work_delivery_head() -> None:
+def test_alembic_environment_has_native_executor_head() -> None:
     project_root = Path(__file__).resolve().parents[1]
     config = Config(project_root / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260910_33"]
+    assert scripts.get_heads() == ["20260912_39"]

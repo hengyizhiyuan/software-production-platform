@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -22,7 +23,20 @@ class RemoteNativeToolHost:
         return PUBLIC_NATIVE_TOOL_CONTRACTS
 
     async def execute(self, execution: ToolExecutionRequest) -> ToolExecutionResult:
-        return await asyncio.to_thread(self._execute_sync, execution)
+        try:
+            return await asyncio.to_thread(self._execute_sync, execution)
+        except asyncio.CancelledError:
+            cancellation = await asyncio.shield(
+                asyncio.to_thread(self._cancel_sync, execution.delivery_id)
+            )
+            if not cancellation.get("termination_proven", False):
+                raise RuntimeError(
+                    "native Tool Host could not prove process-tree termination"
+                ) from None
+            raise
+
+    async def receipt(self, delivery_id) -> ToolExecutionResult | None:
+        return await asyncio.to_thread(self._receipt_sync, delivery_id)
 
     def _execute_sync(self, execution: ToolExecutionRequest) -> ToolExecutionResult:
         request = Request(
@@ -40,3 +54,36 @@ class RemoteNativeToolHost:
         except (URLError, TimeoutError) as error:
             raise RuntimeError(f"native Tool Host unavailable: {error}") from None
         return ToolExecutionResult.model_validate_json(payload)
+
+    def _cancel_sync(self, delivery_id) -> dict[str, object]:
+        request = Request(
+            f"{self.base_url}/internal/native-tools/executions/{delivery_id}/cancel",
+            data=b"{}",
+            method="POST",
+            headers={"Content-Type": "application/json", "X-Watt-Internal-Token": self._token},
+        )
+        try:
+            with urlopen(request, timeout=min(self.timeout_seconds, 10)) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as error:
+            raise RuntimeError(f"native Tool Host cancellation failed: {error}") from None
+
+    def _receipt_sync(self, delivery_id) -> ToolExecutionResult | None:
+        request = Request(
+            f"{self.base_url}/internal/native-tools/executions/{delivery_id}/receipt",
+            method="GET",
+            headers={"X-Watt-Internal-Token": self._token},
+        )
+        try:
+            with urlopen(request, timeout=min(self.timeout_seconds, 10)) as response:
+                return ToolExecutionResult.model_validate_json(
+                    response.read().decode("utf-8")
+                )
+        except HTTPError as error:
+            if error.code == 404:
+                return None
+            raise RuntimeError(
+                f"native Tool Host receipt query failed ({error.code})"
+            ) from None
+        except (URLError, TimeoutError) as error:
+            raise RuntimeError(f"native Tool Host unavailable: {error}") from None

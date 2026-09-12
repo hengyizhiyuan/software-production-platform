@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -37,6 +37,7 @@ from spg.domain.native_execution import (
     ResourceUsageEntryRecord,
     ResultReadyClaimRecord,
     SourceVector,
+    ToolExecutionResult,
     UsageCertainty,
     WorkerLeaseRecord,
     WorkspaceManifest,
@@ -136,6 +137,32 @@ class NativeExecutionStore:
         values = record.model_dump()
         values["condition"] = record.condition.value
         self.session.execute(insert(execution_sessions).values(**values))
+
+    def execution_session(self, session_id: UUID) -> ExecutionSessionRecord | None:
+        row = self.session.execute(
+            select(execution_sessions).where(execution_sessions.c.id == session_id)
+        ).mappings().one_or_none()
+        return (
+            ExecutionSessionRecord.model_validate(dict(row))
+            if row is not None
+            else None
+        )
+
+    def close_session(self, session_id: UUID, *, closed_at: datetime) -> None:
+        row = self.session.execute(
+            select(execution_sessions.c.version)
+            .where(execution_sessions.c.id == session_id)
+            .with_for_update()
+        ).one_or_none()
+        if row is None:
+            raise NativeExecutionNotFound(f"execution session not found: {session_id}")
+        update_versioned_row(
+            self.session,
+            execution_sessions,
+            identity={"id": session_id},
+            expected_version=row[0],
+            values={"condition": "CLOSED", "closed_at": closed_at},
+        )
 
     def insert_workspace(
         self,
@@ -528,6 +555,72 @@ class NativeExecutionStore:
         )
 
     def insert_resource_usage(self, record: ResourceUsageEntryRecord) -> ResourceUsageEntryRecord:
+        existing_row = self.session.execute(
+            select(execution_resource_usage).where(
+                execution_resource_usage.c.envelope_id == record.envelope_id,
+                execution_resource_usage.c.reservation_key == record.reservation_key,
+                execution_resource_usage.c.resource_type == record.resource_type,
+            )
+        ).mappings().one_or_none()
+        if existing_row is not None:
+            existing = ResourceUsageEntryRecord.model_validate(dict(existing_row))
+            if existing.amount != record.amount:
+                raise NativeExecutionConflict("resource reservation key was reused")
+            return existing
+
+        envelope = self.session.execute(
+            select(execution_resource_envelopes)
+            .where(execution_resource_envelopes.c.id == record.envelope_id)
+        ).mappings().one_or_none()
+        if envelope is None:
+            raise NativeExecutionNotFound(
+                f"resource envelope not found: {record.envelope_id}"
+            )
+        pwu_id = envelope["pwu_id"]
+        # Serialize every envelope for the PWU so a successor cannot reset or
+        # race the finite resource pool with a new envelope identity.
+        self.session.execute(
+            select(execution_resource_envelopes.c.id)
+            .where(execution_resource_envelopes.c.pwu_id == pwu_id)
+            .order_by(execution_resource_envelopes.c.id)
+            .with_for_update()
+        ).all()
+        cap_column = {
+            "inference_submission": execution_resource_envelopes.c.max_inference_submissions,
+            "tool_effect": execution_resource_envelopes.c.max_tool_effects,
+            "cost_unit": execution_resource_envelopes.c.max_cost_units,
+        }.get(record.resource_type)
+        caps = ()
+        if cap_column is not None:
+            caps = tuple(
+                value
+                for value in self.session.scalars(
+                    select(cap_column).where(
+                        execution_resource_envelopes.c.pwu_id == pwu_id,
+                        cap_column.is_not(None),
+                    )
+                )
+                if value is not None
+            )
+        if caps:
+            consumed = self.session.scalar(
+                select(func.coalesce(func.sum(execution_resource_usage.c.amount), 0))
+                .select_from(
+                    execution_resource_usage.join(
+                        execution_resource_envelopes,
+                        execution_resource_usage.c.envelope_id
+                        == execution_resource_envelopes.c.id,
+                    )
+                )
+                .where(
+                    execution_resource_envelopes.c.pwu_id == pwu_id,
+                    execution_resource_usage.c.resource_type == record.resource_type,
+                    execution_resource_usage.c.condition
+                    != ResourceReservationCondition.RELEASED.value,
+                )
+            )
+            if int(consumed or 0) + record.amount > min(caps):
+                raise NativeExecutionConflict("PWU resource pool is exhausted")
         values = record.model_dump(mode="json")
         statement = (
             pg_insert(execution_resource_usage)
@@ -580,7 +673,7 @@ class NativeExecutionStore:
 
     def insert_control_request(
         self, record: ExecutionControlRequestRecord
-    ) -> ExecutionControlRequestRecord:
+    ) -> tuple[ExecutionControlRequestRecord, bool]:
         statement = (
             pg_insert(execution_control_requests)
             .values(**record.model_dump(mode="json"))
@@ -597,8 +690,30 @@ class NativeExecutionStore:
             existing = ExecutionControlRequestRecord.model_validate(dict(row))
             if existing.request_digest != record.request_digest:
                 raise NativeExecutionConflict("control command_id was reused")
-            return existing
-        return record
+            return existing, False
+        return record, True
+
+    def pending_control_request(
+        self,
+        attempt_id: UUID,
+        *,
+        action: str | None = None,
+    ) -> ExecutionControlRequestRecord | None:
+        statement = select(execution_control_requests).where(
+            execution_control_requests.c.attempt_id == attempt_id,
+            execution_control_requests.c.condition
+            == ControlRequestCondition.REQUESTED.value,
+        )
+        if action is not None:
+            statement = statement.where(execution_control_requests.c.action == action)
+        row = self.session.execute(
+            statement.order_by(execution_control_requests.c.created_at.desc())
+        ).mappings().first()
+        return (
+            ExecutionControlRequestRecord.model_validate(dict(row))
+            if row is not None
+            else None
+        )
 
     def set_control_request_condition(
         self,
@@ -659,6 +774,66 @@ class NativeExecutionStore:
         ).mappings()
         return tuple(ExecutionEventRecord.model_validate(dict(row)) for row in rows)
 
+    def event_sequence_window(self, pwu_id: UUID) -> tuple[int | None, int | None]:
+        row = self.session.execute(
+            select(
+                func.min(execution_events.c.sequence),
+                func.max(execution_events.c.sequence),
+            ).where(execution_events.c.pwu_id == pwu_id)
+        ).one()
+        return (
+            int(row[0]) if row[0] is not None else None,
+            int(row[1]) if row[1] is not None else None,
+        )
+
+    def claim_outbox(
+        self,
+        *,
+        now: datetime,
+        lease_seconds: int = 30,
+        limit: int = 100,
+    ) -> Sequence[ExecutionEventRecord]:
+        event_ids = tuple(
+            self.session.scalars(
+                select(event_outbox.c.event_id)
+                .where(
+                    event_outbox.c.condition == "PENDING",
+                    event_outbox.c.available_at <= now,
+                )
+                .order_by(event_outbox.c.available_at, event_outbox.c.event_id)
+                .limit(limit)
+                .with_for_update(skip_locked=True)
+            )
+        )
+        if not event_ids:
+            return ()
+        self.session.execute(
+            update(event_outbox)
+            .where(event_outbox.c.event_id.in_(event_ids))
+            .values(
+                attempt_count=event_outbox.c.attempt_count + 1,
+                available_at=now + timedelta(seconds=lease_seconds),
+            )
+        )
+        rows = self.session.execute(
+            select(execution_events)
+            .where(execution_events.c.id.in_(event_ids))
+            .order_by(execution_events.c.pwu_id, execution_events.c.sequence)
+        ).mappings()
+        return tuple(ExecutionEventRecord.model_validate(dict(row)) for row in rows)
+
+    def acknowledge_outbox(self, event_id: UUID, *, published_at: datetime) -> None:
+        result = self.session.execute(
+            update(event_outbox)
+            .where(
+                event_outbox.c.event_id == event_id,
+                event_outbox.c.condition == "PENDING",
+            )
+            .values(condition="PUBLISHED", published_at=published_at)
+        )
+        if result.rowcount != 1:
+            raise NativeExecutionConflict("outbox event is missing or already acknowledged")
+
     def source_vector_id(self, digest: str) -> UUID:
         value = self.session.scalar(
             select(execution_source_vectors.c.id).where(
@@ -680,6 +855,15 @@ class NativeExecutionStore:
         values = dict(row)
         values["binding"] = values.pop("binding_payload")
         return NativeAttemptBindingRecord.model_validate(values)
+
+    def attempt_ids_for_pwu(self, pwu_id: UUID) -> tuple[UUID, ...]:
+        return tuple(
+            self.session.scalars(
+                select(native_attempt_bindings.c.attempt_id)
+                .where(native_attempt_bindings.c.pwu_id == pwu_id)
+                .order_by(native_attempt_bindings.c.created_at)
+            )
+        )
 
     def contract(self, contract_id: UUID) -> PWUContractVersionRecord:
         row = self.session.execute(
@@ -714,6 +898,14 @@ class NativeExecutionStore:
         ).mappings()
         return tuple(ExecutionStepRecord.model_validate(dict(row)) for row in rows)
 
+    def latest_step_sequence_for_session(self, session_id: UUID) -> int:
+        value = self.session.scalar(
+            select(func.coalesce(func.max(execution_steps.c.sequence), 0)).where(
+                execution_steps.c.session_id == session_id
+            )
+        )
+        return int(value or 0)
+
     def evidence_for_attempt(self, attempt_id: UUID) -> Sequence[ExecutionEvidenceRecord]:
         rows = self.session.execute(
             select(execution_evidence)
@@ -731,6 +923,52 @@ class NativeExecutionStore:
         ).mappings()
         return tuple(ExecutionEffectRecord.model_validate(dict(row)) for row in rows)
 
+    def tool_results_after(
+        self,
+        attempt_id: UUID,
+        *,
+        after_step_sequence: int,
+    ) -> tuple[ToolExecutionResult, ...]:
+        rows = self.session.execute(
+            select(
+                execution_steps.c.sequence,
+                execution_effects.c.proposal_index,
+                execution_effects.c.tool_identity,
+                effect_receipts.c.delivery_id,
+                effect_receipts.c.condition,
+                effect_receipts.c.output,
+                effect_receipts.c.output_digest,
+            )
+            .select_from(
+                execution_steps.join(
+                    execution_effects,
+                    execution_steps.c.id == execution_effects.c.step_id,
+                ).join(
+                    effect_receipts,
+                    execution_effects.c.id == effect_receipts.c.effect_id,
+                )
+            )
+            .where(
+                execution_steps.c.attempt_id == attempt_id,
+                execution_steps.c.sequence > after_step_sequence,
+            )
+            .order_by(
+                execution_steps.c.sequence,
+                execution_effects.c.proposal_index,
+                effect_receipts.c.created_at,
+            )
+        ).mappings()
+        return tuple(
+            ToolExecutionResult(
+                delivery_id=row["delivery_id"],
+                tool_identity=row["tool_identity"],
+                condition=row["condition"],
+                output=row["output"],
+                output_digest=row["output_digest"],
+            )
+            for row in rows
+        )
+
     def latest_checkpoint(self, attempt_id: UUID) -> CheckpointBundleRecord | None:
         row = self.session.execute(
             select(checkpoint_bundles)
@@ -738,6 +976,192 @@ class NativeExecutionStore:
             .order_by(checkpoint_bundles.c.step_sequence.desc())
         ).mappings().first()
         return CheckpointBundleRecord.model_validate(dict(row)) if row else None
+
+    def checkpoint(self, checkpoint_id: UUID) -> CheckpointBundleRecord | None:
+        row = self.session.execute(
+            select(checkpoint_bundles).where(checkpoint_bundles.c.id == checkpoint_id)
+        ).mappings().one_or_none()
+        return (
+            CheckpointBundleRecord.model_validate(dict(row))
+            if row is not None
+            else None
+        )
+
+    def timing_projection(self, attempt_id: UUID) -> dict[str, object]:
+        allocation = self.session.execute(
+            select(execution_allocations)
+            .where(execution_allocations.c.attempt_id == attempt_id)
+            .order_by(execution_allocations.c.issued_at.desc())
+        ).mappings().first()
+        queue = self.queue_for_attempt(attempt_id)
+        workspace = self.session.execute(
+            select(execution_workspaces).where(
+                execution_workspaces.c.attempt_id == attempt_id
+            )
+        ).mappings().one_or_none()
+        inference_rows = self.session.execute(
+            select(
+                execution_steps.c.id,
+                execution_steps.c.sequence,
+                execution_steps.c.started_at,
+                execution_steps.c.finished_at,
+            ).where(
+                execution_steps.c.attempt_id == attempt_id,
+                execution_steps.c.kind == "INFERENCE",
+            ).order_by(execution_steps.c.sequence)
+        ).mappings()
+        tool_rows = self.session.execute(
+            select(
+                execution_effects.c.id,
+                execution_effects.c.tool_identity,
+                execution_effects.c.created_at,
+                effect_receipts.c.created_at.label("receipt_at"),
+            )
+            .select_from(
+                execution_steps.join(
+                    execution_effects,
+                    execution_steps.c.id == execution_effects.c.step_id,
+                ).outerjoin(
+                    effect_receipts,
+                    execution_effects.c.id == effect_receipts.c.effect_id,
+                )
+            )
+            .where(execution_steps.c.attempt_id == attempt_id)
+            .order_by(execution_steps.c.sequence, execution_effects.c.proposal_index)
+        ).mappings()
+        checkpoint_rows = self.session.execute(
+            select(
+                checkpoint_bundles.c.id,
+                checkpoint_bundles.c.created_at,
+                checkpoint_bundles.c.committed_at,
+            ).where(checkpoint_bundles.c.attempt_id == attempt_id)
+            .order_by(checkpoint_bundles.c.step_sequence)
+        ).mappings()
+        event_rows = self.session.execute(
+            select(
+                execution_events.c.id,
+                execution_events.c.event_type,
+                execution_events.c.created_at,
+                event_outbox.c.published_at,
+            )
+            .select_from(
+                execution_events.join(
+                    event_outbox, execution_events.c.id == event_outbox.c.event_id
+                )
+            )
+            .where(execution_events.c.attempt_id == attempt_id)
+            .order_by(execution_events.c.sequence)
+        ).mappings()
+        first_step_started = self.session.scalar(
+            select(func.min(execution_steps.c.started_at)).where(
+                execution_steps.c.attempt_id == attempt_id
+            )
+        )
+
+        def span(latency_class: str, kind: str, identity: object, start, end):
+            return {
+                "latency_class": latency_class,
+                "kind": kind,
+                "identity": str(identity),
+                "started_at": start.isoformat() if start else None,
+                "finished_at": end.isoformat() if end else None,
+                "duration_ms": (
+                    round((end - start).total_seconds() * 1000, 3)
+                    if start is not None and end is not None
+                    else None
+                ),
+            }
+
+        spans: list[dict[str, object]] = []
+        if queue is not None:
+            spans.append(
+                span(
+                    "RUNTIME_ORCHESTRATION",
+                    "QUEUE",
+                    queue.id,
+                    queue.enqueued_at,
+                    allocation["issued_at"] if allocation else None,
+                )
+            )
+            spans.append(
+                span(
+                    "PERCEIVED_HUMAN",
+                    "FIRST_MEANINGFUL_ACTION",
+                    attempt_id,
+                    queue.enqueued_at,
+                    first_step_started,
+                )
+            )
+        if allocation is not None:
+            spans.append(
+                span(
+                    "RUNTIME_ORCHESTRATION",
+                    "ALLOCATION",
+                    allocation["id"],
+                    allocation["issued_at"],
+                    allocation["released_at"],
+                )
+            )
+        if workspace is not None:
+            spans.append(
+                span(
+                    "TOOL_WORKSPACE",
+                    "WORKSPACE_RECORDED_LIFETIME",
+                    workspace["id"],
+                    workspace["created_at"],
+                    workspace["updated_at"],
+                )
+            )
+        spans.extend(
+            span(
+                "MODEL_PROVIDER", "INFERENCE", row["id"],
+                row["started_at"], row["finished_at"]
+            )
+            for row in inference_rows
+        )
+        spans.extend(
+            span(
+                "TOOL_WORKSPACE", "TOOL", row["id"],
+                row["created_at"], row["receipt_at"]
+            )
+            for row in tool_rows
+        )
+        spans.extend(
+            span(
+                "RUNTIME_ORCHESTRATION", "CHECKPOINT", row["id"],
+                row["created_at"], row["committed_at"]
+            )
+            for row in checkpoint_rows
+        )
+        spans.extend(
+            span(
+                "PERCEIVED_HUMAN", f"EVENT:{row['event_type']}", row["id"],
+                row["created_at"], row["published_at"]
+            )
+            for row in event_rows
+        )
+        return {
+            "spans": spans,
+            "latency_classes": {
+                "MODEL_PROVIDER": "measured per completed inference step",
+                "RUNTIME_ORCHESTRATION": "queue, allocation, and checkpoint spans",
+                "TOOL_WORKSPACE": "tool receipts and recorded workspace lifetime",
+                "INFRASTRUCTURE": "unavailable without host/container trace ingestion",
+                "PERCEIVED_HUMAN": "durable admission to first action and event publish",
+            },
+            "unavailable": {
+                "admission_transport": "HTTP receive timestamp is not persisted",
+                "worker_activation": "allocation activation timestamp is not persisted",
+                "workspace_materialization": "materialization start/finish timestamps are not persisted",
+                "context": "context assembly timing is not persisted",
+                "verification": "independent Verification is owned downstream",
+                "infrastructure": "container, disk, network, and DB spans require host trace ingestion",
+                "event_delivery": "publish is measured when acked; subscriber render acknowledgement is unavailable",
+                "reconnect": "client reconnect timing is not persisted",
+            },
+            "aggregate_duration_ms": None,
+            "aggregate_reason": "phase spans may overlap and are not summed",
+        }
 
     def expired_leases_locked(self, now: datetime) -> list[WorkerLeaseRecord]:
         rows = self.session.execute(
