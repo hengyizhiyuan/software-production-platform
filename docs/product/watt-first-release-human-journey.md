@@ -1,385 +1,291 @@
-# Watt First-release Human Journey and Information Architecture
+# Watt 首发版用户旅程与信息架构
 
-## 1. Status, purpose, and boundary
+## 1. 状态、目的与边界
 
 ```text
-Document type
-    PRODUCT JOURNEY ARCHITECTURE / FIRST-RELEASE EXPERIENCE PLAN
+文档类型
+    产品旅程架构 / 首发版体验规划
 
-Journey status
-    PROPOSED FOR CLICKABLE-PROTOTYPE CALIBRATION
+旅程状态
+    已提出 / 待可点击原型校准
 
-Production implementation authority
-    NONE
+生产实现授权
+    无
 ```
 
-This document defines the target first-release Human journey, mental model, and
-information architecture for Watt. It is grounded in current repository and UI
-Reality, but it does not make the current UI the target. It does not change
-production UI, APIs, schemas, Runtime behavior, Work semantics, or Executor
-architecture.
+本文定义 Watt 首发版的目标用户旅程、用户心智模型与信息架构。方案以当前代码库和 UI Reality 为依据，但不把当前 UI 当作目标。本文不改变生产 UI、API、Schema、Runtime 行为、Work 语义或 Executor 架构。
 
-The companion documents are:
+配套文档：
 
-- [First-release Scenario Inventory](watt-first-release-scenario-inventory.md)
-- [Clickable Prototype Scope, Acceptance, and Implementation Plan](watt-clickable-prototype-plan.md)
-- [Human Journey Architecture Tension Register](watt-human-journey-architecture-tensions.md)
+- [首发版场景清单](watt-first-release-scenario-inventory.md)
+- [可点击原型范围、验收与实施计划](watt-clickable-prototype-plan.md)
+- [用户旅程架构张力登记表](watt-human-journey-architecture-tensions.md)
 
-The required deliverables are organized as follows:
+必需交付物的组织方式如下：
 
-| Deliverable | Location |
+| 交付物 | 所在位置 |
 |---|---|
-| A. First-release Human Journey Map | Sections 3–9 of this document |
-| B. Scenario Inventory | First-release Scenario Inventory |
-| C. Information Architecture Proposal | Sections 5–6 of this document |
-| D. Human Mental Model | Section 4 of this document |
-| E. Prototype Scope | Prototype Plan sections 1–5 |
-| F. Prototype Scenario Packs | Prototype Plan section 4 |
-| G. Architecture Tension Register | Human Journey Architecture Tension Register |
-| H. Prototype Acceptance Plan | Prototype Plan section 6 |
-| I. Formal Implementation Plan | Prototype Plan sections 7–8 |
+| A. 首发版用户旅程地图 | 本文第 3–9 节 |
+| B. 场景清单 | 首发版场景清单 |
+| C. 信息架构方案 | 本文第 5–6 节 |
+| D. 用户心智模型 | 本文第 4 节 |
+| E. 原型范围 | 原型计划第 1–5 节 |
+| F. 原型场景包 | 原型计划第 4 节 |
+| G. 架构张力登记表 | 用户旅程架构张力登记表 |
+| H. 原型验收计划 | 原型计划第 6 节 |
+| I. 正式实施计划 | 原型计划第 7–8 节 |
 
-The product principle remains:
+产品原则保持不变：
 
-> Human defines intent. AI amplifies capability. System ensures trust.
+> 人定义意图，AI 放大能力，系统保障可信。
 
-## 2. Repository Reality reviewed
+## 2. 已审查的代码库 Reality
 
-The plan was checked against the current sources of truth for Motive and Work
-formation, WIC, Conversation Intelligence, Guided Design, Steering, SPG/PWU,
-Watt-native Executor, queue and capacity, Verification, Candidate and Human
-Authorization, Runtime Commit, Delivery, recovery, Human Attention, Control
-Room, and repository assets.
+本方案核对了 Motive 与 Work 形成、WIC、Conversation Intelligence、Guided Design、Steering、SPG/PWU、Watt-native Executor、队列与容量、Verification、Candidate 与 Human Authorization、Runtime Commit、Delivery、恢复、Human Attention、Control Room 以及代码库资产等当前事实来源。
 
-Primary Reality references include:
+主要 Reality 参考：
 
-- [Watt Product North Star](../architecture/watt-product-north-star.md)
-- [Motive / Work / Plan Concept Calibration](../architecture/motive-work-plan-concept-calibration.md)
-- [Work Interaction and Closed-loop Refinement](../architecture/work-interaction-closed-loop-refinement.md)
+- [Watt 产品北极星](../architecture/watt-product-north-star.md)
+- [Motive / Work / Plan 概念校准](../architecture/motive-work-plan-concept-calibration.md)
+- [Work 交互与闭环细化](../architecture/work-interaction-closed-loop-refinement.md)
 - [Human–Watt Conversation Intelligence](../architecture/human-watt-conversation-intelligence.md)
 - [Guided Design Core](../architecture/guided-design-core.md)
-- [Reality-driven Plan Steering Principles](../architecture/reality-driven-plan-steering-principles.md)
-- [SPG Core Architecture Model](../architecture/SPG_Core_Architecture_Model.md)
-- [Watt-native Executor Lifecycle](../architecture/watt-native-executor-lifecycle.md)
-- [Watt-native Executor Capacity Scheduling](../architecture/watt-native-executor-capacity-scheduling.md)
-- [Completion and Trust](../architecture/spg-completion-trust.md)
-- [Reconciliation and Recovery](../architecture/spg-reconciliation-recovery.md)
+- [Reality-driven Plan Steering 原则](../architecture/reality-driven-plan-steering-principles.md)
+- [SPG 核心架构模型](../architecture/SPG_Core_Architecture_Model.md)
+- [Watt-native Executor 生命周期](../architecture/watt-native-executor-lifecycle.md)
+- [Watt-native Executor 容量调度](../architecture/watt-native-executor-capacity-scheduling.md)
+- [完成与信任](../architecture/spg-completion-trust.md)
+- [对账与恢复](../architecture/spg-reconciliation-recovery.md)
 - [Human Governance](../governance/human-governance.md)
-- [Repository Asset and Managed Execution Workspace](../architecture/repository-asset-and-managed-execution-workspace.md)
-- [Work-to-Delivery Multi-repository Proposal](../architecture/work-to-delivery-multi-repository-spg-proposal.md)
-- [Control Room Information Architecture](software-production-control-room-mvp-information-architecture.md)
-- [Control Room State Experience](software-production-control-room-state-experience.md)
-- [Work Formation Review Before Admission](work-formation-review-before-admission.md)
-- [Software Artifact Delivery Validation](../validation/software-artifact-delivery-slice.md)
+- [代码库资产与托管执行工作区](../architecture/repository-asset-and-managed-execution-workspace.md)
+- [Work-to-Delivery 多代码库方案](../architecture/work-to-delivery-multi-repository-spg-proposal.md)
+- [Control Room 信息架构](software-production-control-room-mvp-information-architecture.md)
+- [Control Room 状态体验](software-production-control-room-state-experience.md)
+- [Work 准入前形成审阅](work-formation-review-before-admission.md)
+- [软件制品交付验证](../validation/software-artifact-delivery-slice.md)
 
-Current architecture already preserves the necessary ownership boundaries:
+当前架构已经守住必要的所有权边界：
 
-- Conversation is expression and provenance, not governed truth.
-- A first utterance may remain pre-Work; Work Admission is explicit.
-- Work and Motive remain distinct. Work may later be refined or re-entered.
-- Guided Design structures the design; Steering decides what should happen next.
-- A PWU is a meaningful production outcome. An Execution Slice is an internal
-  resource interval.
-- Executor produces a `RESULT_READY` claim. Independent Verification and Human
-  Authority remain separate from execution.
-- `UNKNOWN` requires reconciliation and never permits blind replay.
-- Assets are subordinate to Work. A repository is optional at admission, and
-  Watt can allocate a managed local workspace when production becomes ready.
-- Queue, pause, resume, checkpoint, requeue, capacity wait, and recovery have
-  durable Runtime support.
-- Delivery distinguishes generated material, verified Candidate, authorized
-  integration, Runtime Commit, Trusted Baseline, active Runtime, and Human
-  product acceptance.
+- Conversation 是表达与溯源，不是受治理的事实。
+- 第一次输入可以停留在 Work 之前；Work Admission 必须明确发生。
+- Work 与 Motive 相互独立；Work 后续可以继续细化或重新进入。
+- Guided Design 负责组织设计，Steering 决定下一步应该做什么。
+- PWU 是有意义的生产成果；Execution Slice 是内部资源时间片。
+- Executor 产出 `RESULT_READY` 声明；独立 Verification 和 Human Authority 与执行保持分离。
+- `UNKNOWN` 必须对账，绝不允许盲目重放。
+- Asset 从属于 Work。准入时可以没有代码库；生产就绪时，Watt 可以分配本地托管工作区。
+- 队列、暂停、恢复、检查点、重新入队、容量等待和恢复都有持久化 Runtime 支持。
+- Delivery 区分已生成材料、已验证 Candidate、已授权集成、Runtime Commit、Trusted Baseline、活跃 Runtime 与 Human 产品验收。
 
-The current UI at `/app` is a dense Work-oriented Control Room with Goals and
-Works in a sidebar, Conversation and Shared Understanding in the main surface,
-and production, direction, trust, attention, queue, and engineering details in
-the selected Work. `/delivery` is a separate asset and delivery surface. The UI
-already exposes useful governed projections and controls, but it also exposes
-technical language such as design-schema identifiers, candidate labels, and
-raw lifecycle states. Its brand header still says `TNGA Software Production`.
-There is no coherent returning-user home that summarizes what changed, active
-Work, and required attention. These observations describe current Reality only.
+当前 `/app` 是一个信息密集、以 Work 为中心的 Control Room：侧栏包含 Goal 和 Work，主区域包含 Conversation 与 Shared Understanding，选中 Work 后还会展示生产、方向、信任、Attention、队列及工程详情。`/delivery` 是独立的资产与交付页面。当前 UI 已经投射了不少有用的治理事实与控制能力，但仍直接暴露设计 Schema 标识、Candidate 标签和原始生命周期状态等技术语言，品牌标题仍为 `TNGA Software Production`。目前也没有一个连贯的回访首页，用于汇总发生了什么、哪些 Work 正在推进、什么需要用户处理。以上仅描述当前 Reality，不代表目标体验。
 
-One prior accepted product finding remains central:
-`PRE_AUTHORIZATION_WORK_PREVIEW_REQUIRED`. Guided Design has a bounded
-design-to-production review, while the broader pre-Work formation preview is
-still open. The target journey therefore shows the proposed Work objective,
-outcome, scope, constraints, expected artifact, and production boundary before
-Work Admission.
+一项既有产品发现仍是本方案的核心：`PRE_AUTHORIZATION_WORK_PREVIEW_REQUIRED`。Guided Design 已有范围受限的“设计到生产”审阅，但更广义的 Work 形成预览仍未完成。因此，目标旅程要求在 Work Admission 前展示拟议的 Work 目标、预期结果、范围、约束、预期制品和生产边界。
 
-## 3. First-release user model
+## 3. 首发版用户模型
 
-The first release serves one primary role: an individual or small-team operator
-who has an idea, problem, or desired outcome and remains the Human decision
-authority. The operator may bring existing assets, or ask Watt to create a new
-software outcome without a repository. They expect Watt to clarify the goal,
-recommend a direction, produce autonomously inside admitted authority, surface
-only meaningful decisions, show evidence before authorization, and make the
-result usable.
+首发版服务一个主要角色：对结果负责的个人或小团队操作者。他们有一个想法、问题或预期结果，并始终保留 Human 决策权。用户可能带来已有资产，也可能在没有代码库的情况下让 Watt 创建新的软件成果。他们期待 Watt 澄清目标、推荐方向、在已准入权限内自主生产、只在真正需要时请求决策、授权前展示证据，并最终交付可用结果。
 
-The prototype can label the acting person as `You`. It should not invent
-enterprise organizations, role administration, approval chains, shared inboxes,
-or IAM policy editors. Existing authority identities may appear in engineering
-detail, but the default experience assumes one accountable operator.
+原型可以把操作者标记为“你”。首发版不虚构企业组织、角色管理、审批链、共享收件箱或 IAM 策略编辑器。已有 authority identity 可以在工程详情中出现，但默认体验只假设一个负责的操作者。
 
-## 4. Human mental model
+## 4. 用户心智模型
 
-### 4.1 Concepts an ordinary user needs
+### 4.1 普通用户需要理解的概念
 
-| Human concept | Meaning in the product | What it helps answer |
+| 用户概念 | 在产品中的含义 | 帮助回答的问题 |
 |---|---|---|
-| Conversation | The place to express, clarify, correct, and discuss | “Does Watt understand me?” |
-| Work | A durable collaboration around one intended outcome | “What are we working toward?” |
-| Direction | Watt's current recommendation for what should happen next and why | “Why this next?” |
-| Stage | A meaningful outcome on the way to the Work result | “What has finished, and what remains?” |
-| Queue | Work ready to proceed but waiting for capacity or a prerequisite | “Why has it not started?” |
-| Needs me | A decision or authority boundary that only the Human can resolve | “Do I need to act?” |
-| Result | What Watt produced, with preview, checks, limits, and risks | “What actually changed, and can I trust it?” |
-| Delivery | The usable output and its history after the required authority steps | “Where is the finished thing?” |
-| Asset | A repository, document, design, runtime target, external system, or generated artifact used by one Work | “What material does this Work use or produce?” |
+| 对话 | 表达、澄清、纠正和讨论的地方 | “Watt 理解我了吗？” |
+| Work | 围绕一个预期结果持续存在的协作 | “我们正在实现什么？” |
+| 方向 | Watt 对下一步及其理由的当前建议 | “为什么接下来做这个？” |
+| 阶段 | 通往 Work 结果途中一个有意义的成果 | “什么已经完成，还剩什么？” |
+| 队列 | 已经可以推进，但仍在等待容量或前置条件的工作 | “为什么还没开始？” |
+| 需要我 | 只有用户才能解决的决策或授权边界 | “现在需要我做什么吗？” |
+| 结果 | Watt 产出的内容，以及预览、检查、限制和风险 | “究竟改了什么，值得信任吗？” |
+| 交付 | 完成必要授权后可用的成果及其历史 | “完成的东西在哪里？” |
+| 资产 | 某个 Work 使用或生成的代码库、文档、设计、运行目标、外部系统或制品 | “这个 Work 使用或产出了什么材料？” |
 
-`Stage` is the Human-facing expression of a meaningful PWU. The product may
-show the formal term “production unit” in engineering detail, but the default
-surface should name the outcome, such as “Build account setup” or “Verify the
-deployment.”
+“阶段”是有意义 PWU 的用户表达。工程详情可以展示正式术语“生产单元”，默认界面则应该直接说出成果，例如“完成账号设置”或“验证部署结果”。
 
-### 4.2 Concepts kept out of the default experience
+### 4.2 默认体验中隐藏的概念
 
-Attempt, Step, Effect, Execution Slice, CandidateVector, checkpoint schema
-version, lease epoch, provider request, reasoning effort, migration head,
-transport retry, raw SPG/PWU identifiers, and Runtime Commit internals remain
-engineering detail. They may support traceability or advanced diagnostics, but
-they are not navigation objects and must not be required to make an ordinary
-product decision.
+Attempt、Step、Effect、Execution Slice、CandidateVector、checkpoint schema version、lease epoch、provider request、reasoning effort、migration head、transport retry、原始 SPG/PWU 标识和 Runtime Commit 内部细节，都应留在工程详情中。这些信息可以支持追踪或高级诊断，但不应成为导航对象，也不应成为普通产品决策的前提。
 
-The product does not ask the Human to equate these distinct statements:
+产品不能让用户混淆以下不同事实：
 
 ```text
-Watt generated something
-    != checks passed
-    != Human authorized integration
-    != trusted baseline advanced
-    != active runtime matches
-    != Human says the product is accepted
+Watt 生成了结果
+    != 检查通过
+    != 用户授权集成
+    != 可信基线已推进
+    != 活跃运行环境与结果一致
+    != 用户已经验收产品
 ```
 
-It translates them into a short trust story and provides exact evidence on
-demand.
+默认界面应把它们转译为简洁的信任叙事，并允许用户按需查看精确证据。
 
-## 5. Conversation as the interaction plane
+## 5. 以对话作为交互平面
 
-Conversation should be the universal entry for a new Motive and the persistent
-plane for clarification, correction, refinement, recommendation, and decision
-discussion. It should remain available inside every Work and after completion.
+Conversation 应成为新 Motive 的统一入口，也是澄清、纠正、细化、获取建议和讨论决策的持续交互平面。它在每个 Work 内以及 Work 完成后都应继续可用。
 
-Conversation is secondary when the Human needs to inspect structured facts.
-Queue position, milestone history, asset bindings, result comparison,
-verification evidence, delivery manifests, and prior versions work better as
-structured contextual projections. A decision may be discussed in conversation,
-but the resulting explicit authority action belongs beside the exact proposal or
-result it governs.
+当用户需要检查结构化事实时，对话退居次要位置。队列位置、阶段历史、资产绑定、结果比较、验证证据、交付清单和历史版本更适合结构化呈现。用户可以在对话中讨论决策，但真正的授权动作必须放在它所治理的精确方案或结果旁边。
 
-Conversation is inappropriate as the only representation of truth, progress,
-or authorization. Chat history must not be mined by the Human to discover the
-current scope, whether production is waiting, or exactly what is being approved.
+对话不适合作为事实、进度或授权的唯一载体。用户不应通过翻找聊天记录来确认当前范围、生产是否在等待或自己究竟要批准什么。
 
-The recommendation is therefore:
+建议采用：
 
 ```text
-One conversation entry
-    + one Work context
-    + state-aware structured projections and governed actions
+一个对话入口
+    + 一个 Work 上下文
+    + 随状态变化的结构化投影与治理动作
 ```
 
-This avoids duplicate interaction channels without turning Watt into a chat-only
-product.
+这样既不会产生重复交互渠道，也不会把 Watt 做成只有聊天的产品。
 
-## 6. Proposed global information architecture
+## 6. 全局信息架构方案
 
-The first-release top level is deliberately small.
+首发版顶层区域保持精简：
 
-| Area | User question | Contains | Does not contain |
+| 区域 | 用户问题 | 包含 | 不包含 |
 |---|---|---|---|
-| Home | “What matters now, and where should I continue?” | New-Motive entry; returning summary; recent changes; active Work; Needs me; next delivery | Engineering dashboards, raw logs, a duplicate Work detail view |
-| Work | “What are Watt and I trying to make happen?” | Conversation; shared understanding; formation review; direction; stages; contextual attention; result; Work assets and history | A Project entity, global capacity administration, unrelated approvals |
-| Queue | “What is waiting or running, and why?” | Cross-Work ready/waiting/running view; capacity reason; ordering; pause/resume where governed; links into Work | Execution Slices, provider calls, retry consoles, a second source of lifecycle truth |
-| Deliveries | “What usable outcomes do I have?” | Current and prior deliveries; runtime/open/download actions; trust summary; related Work; refine again | Unverified work in progress, generic file management, internal CandidateVector records |
+| 首页 | “现在什么最重要，我该从哪里继续？” | 新 Motive 入口、回访摘要、最近变化、活跃 Work、需要我、近期交付 | 工程仪表盘、原始日志、重复的 Work 详情 |
+| Work | “Watt 和我正在共同实现什么？” | 对话、共同理解、形成审阅、方向、阶段、上下文 Attention、结果、Work 资产与历史 | Project 实体、全局容量管理、无关审批 |
+| 队列 | “什么正在等待或运行，为什么？” | 跨 Work 的就绪/等待/运行视图、容量原因、顺序、受治理的暂停/恢复、Work 深链 | Execution Slice、Provider 请求、重试控制台、第二套生命周期事实 |
+| 交付 | “我已经有哪些可用成果？” | 当前和历史交付、运行/打开/下载动作、信任摘要、关联 Work、再次细化 | 未验证的生产中结果、通用文件管理、内部 CandidateVector 记录 |
 
-“Needs me” is not a fifth destination. It is a projection on Home, Work, and
-Queue. Every item deep-links to the exact Work context, explains why action is
-needed, and presents the governed action there. Dismissing a notification does
-not resolve the underlying decision.
+“需要我”不是第五个顶层目的地，而是首页、Work 和队列中的投影。每一项都深链到准确的 Work 上下文，解释为什么需要行动，并在那里提供受治理的动作。消除通知不等于解决底层决策。
 
-Assets live inside their Work because their authority and meaning are contextual.
-An optional cross-Work asset finder can arrive later, but first release must not
-turn assets into a competing top-level organizing model.
+资产位于其所属 Work 内，因为它的权限与意义都依赖上下文。跨 Work 资产搜索可以以后增加，但首发版不能让资产成为与 Work 竞争的顶层组织模型。
 
-### 6.1 New-user Home
+### 6.1 新用户首页
 
-A new user sees one calm prompt: “What would you like to make happen?” with a
-few optional examples. The first response is useful conversation, not a Work
-creation form. Watt can offer a provisional understanding, a judgment, and one
-high-value next move. No Goal, repository, provider, production mode, or schema
-choice is required.
+新用户首先看到一个平静的问题：“你想实现什么？”并可选择查看少量示例。第一次回复应该是有价值的对话，而不是创建 Work 的表单。Watt 可以给出暂定理解、判断和一个高价值的下一步。用户无需先选择 Goal、代码库、Provider、生产模式或 Schema。
 
-When understanding becomes actionable, Watt presents a Work Formation Review.
-The user can refine it, decline it, postpone it, or admit it. Nothing that looks
-like production begins before the applicable authority is clear.
+当理解已经可以转化为行动时，Watt 展示 Work Formation Review。用户可以继续细化、拒绝、稍后决定或准入。适用的权限尚未明确前，不应出现仿佛已经开始生产的行为。
 
-### 6.2 Returning-user Home
+### 6.2 回访用户首页
 
-A returning user first sees:
+回访用户首先看到：
 
-1. what needs their action, ordered by consequence rather than technical time;
-2. what changed since their last visit;
-3. active Work and its current meaningful activity;
-4. queued or recovering Work with plain reasons;
-5. recent deliveries and an obvious way to continue or refine.
+1. 哪些事情需要自己处理，并按后果而非技术时间排序；
+2. 上次离开后发生了什么；
+3. 活跃 Work 及当前有意义的活动；
+4. 正在排队或恢复的 Work，以及通俗的原因；
+5. 最近交付，以及继续或细化的明确入口。
 
-The page avoids fake percentages. It uses completed stages, current activity,
-next stage, and honest waiting or recovery language.
+首页不展示虚假的完成百分比，而应展示已完成阶段、当前活动、下一阶段，以及真实的等待或恢复说明。
 
-### 6.3 Work context
+### 6.3 Work 上下文
 
-The Work surface keeps a stable header with outcome, current condition, trust
-summary, and relevant controls. Its main body changes emphasis with Reality:
+Work 界面使用稳定的页头展示结果目标、当前状况、信任摘要和相关控制。主体根据 Reality 调整重点：
 
-- formation emphasizes shared understanding and formation review;
-- design emphasizes the current decision and Watt's recommendation;
-- planning emphasizes direction, meaningful stages, and rationale;
-- production emphasizes current activity, queue/wait reason, and milestones;
-- attention emphasizes the decision, impact, options, and authority boundary;
-- result review emphasizes preview, changes, checks, limitations, and action;
-- completion emphasizes delivery, achieved outcome, and “refine this Work.”
+- 形成阶段突出共同理解与 Work 形成审阅；
+- 设计阶段突出当前决策与 Watt 的建议；
+- 规划阶段突出方向、有意义的阶段和理由；
+- 生产阶段突出当前活动、排队/等待原因和里程碑；
+- Attention 阶段突出决策、影响、选项和授权边界；
+- 结果审阅阶段突出预览、变化、检查、限制和动作；
+- 完成阶段突出交付、已实现结果和“继续细化这个 Work”。
 
-Conversation remains visible or one action away without displacing the current
-governed state.
+Conversation 始终可见或一步可达，但不能遮蔽当前受治理的事实。
 
-## 7. Primary end-to-end journey
+## 7. 主端到端旅程
 
-| Stage | Human goal | Watt responsibility | Human sees and can do | Automatic work / Human authority | Existing truth basis | Entry, success, and important exits |
+| 阶段 | 用户目标 | Watt 的职责 | 用户看到什么、能做什么 | 自动行为 / 用户权限 | 现有事实依据 | 进入、成功与重要出口 |
 |---|---|---|---|---|---|---|
-| 1. Express Motive | Explain an idea, problem, or question | Respond usefully and form a provisional interpretation | Natural reply; add context, correct, ask, explore, or leave | Interpretation may update; no Work or production authority | Interaction/WIC | Enter from Home or new conversation; succeed when useful shared direction exists; exit as question-only or dormant Motive |
-| 2. Refine understanding | Know that Watt understands the real outcome | Preserve corrections, expose assumptions, recommend rather than interrogate | Shared understanding; confirmed facts; open question; continue, disagree, or defer | WIC may refine interpretation; Human owns intent | Interaction, interpretation candidates, design intent | Succeeds when material ambiguity is low enough; branches to alternate interpretation or new Motive |
-| 3. Review proposed Work | Understand what admitting Work would mean | Translate understanding into objective, scope, constraints, expected artifact, and production boundary | Review; refine; reject; postpone; admit | Watt drafts; Human explicitly admits | Proposed formation projection; Human governance | Enter on readiness; success is informed admission or deliberate non-admission |
-| 4. Admit Work | Establish a durable governed collaboration | Create Work from the exact reviewed proposal and preserve provenance | New Work context and admitted objective | Admission transition requires Human authority; production remains separate | Work revision and admission decision | Failure leaves proposal pre-Work; success opens durable Work |
-| 5. Establish assets | Supply or let Watt allocate needed material | Discover need, inspect capability, explain access, bind only authorized assets | Asset list; attach; authorize; select managed workspace; resolve unsupported item | Safe discovery may be automatic; external access/binding requires appropriate authority | Work asset scope, repository intake, capability observations | Zero, one, or many assets; unresolved asset need may wait or use managed workspace |
-| 6. Guided Design | Turn outcome into an implementable design | Lead with judgment, show rationale and decisions, remember constraints | Current design focus; recommendation; alternatives; accept or change | Watt structures/facilitates; Human decides material business or risk choices | Guided Design issues/revisions | Success when required design areas are satisfied; unresolved decisions enter Needs me |
-| 7. Set direction and plan | Know what will happen next and why | Convert current Reality into meaningful outcome stages and reassess when Reality changes | Stage plan, rationale, dependencies, unresolved items | Steering proposes WHAT NEXT; Human governs material destination/scope changes | Steering plan/revision and Work Reality | Success is a production-ready proposal; branch to redesign or scoped change review |
-| 8. Review production proposal | Confirm the next production boundary | Explain intended output, asset targets, verification, and material effects | Plain proposal; accept, refine, or decline | Preparation may inspect safely; production authority is explicit where required | Plan/PWU contract, source and asset bindings | Failure returns to design/plan; success creates runnable governed work |
-| 9. Enter Queue | Understand that ready work is waiting rather than stuck | Admit once, show reason and honest expectation, preserve ordering | Ready/queued state; reason; relevant pause/cancel controls | Scheduler allocates; no Human action for ordinary capacity wait | Queue entry, capacity allocation, PWU identity | Succeeds on allocation; branches to resource wait, Human wait, or cancellation |
-| 10. Execute and continue | Let Watt work without babysitting | Execute HOW, checkpoint useful progress, surface meaningful activity | Current stage/activity, elapsed time, completed milestones; may pause or return later | Executor runs and yields/resumes; Human is not asked to relay debug output | Session/Attempt/Steps/Effects, checkpoints, queue lease | Succeeds at result-ready frontier; interruption may checkpoint, requeue, recover, or reconcile |
-| 11. Reconcile exceptions | Know whether Watt is safe and whether action is needed | Classify known/unknown effects, fence unsafe continuation, recover autonomously where allowed | “Recovering” with impact; or exact Human decision with safe options | Safe residual work may resume; `UNKNOWN` blocks blind replay; material authority remains Human | Recovery case, evidence, checkpoints, trusted baseline | Succeeds when coherent frontier restored; may require new execution, plan, or Human decision |
-| 12. Verify | Learn whether output satisfies the admitted outcome | Independently observe and check the exact result | Checking status; passed/failed obligations; correction underway when safe | Verification is independent; routine correction can form governed follow-up | Completion, Verification, evidence lineage | Pass advances to reviewable result; fail returns to production or Needs me if destination changes |
-| 13. Preview result | Understand what was actually produced before approval | Present runnable/inspectable output, changes, checks, limitations, risks, and asset impact | Open preview, compare, inspect evidence; request changes, reject, or proceed | Preview is isolated and cannot integrate; Human decides acceptability | Immutable result/Candidate and preview record | Success is an informed decision; correction creates a new exact result revision |
-| 14. Authorize integration | Approve an exact meaningful outcome and target set | Bind decision to the exact result and explain effect | Clear “what will change where”; authorize or decline | Exact Human authority is required; prior authorization never covers a revised result | Candidate/aggregate manifest and authorization | Drift or expiry returns to revalidation; multi-target partial state enters convergence handling |
-| 15. Commit trusted result | Advance governed targets without hiding partial facts | Apply authorized exact changes, query uncertain effects, converge or block safely | Commit progress and target-specific outcome | Integration/Runtime Commit follow granted authority; no blind repeat | Integration effects, Runtime Commit, Trusted Baseline | Success advances trusted baseline; partial convergence is visible and recoverable |
-| 16. Deliver | Receive and use the outcome | Produce a delivery manifest and truthful access actions | Open runtime, download output, inspect repository update and delivery history | Packaging may be automatic after trust requirements; external publishing may need separate authority | Delivery manifest, trusted baseline, active Runtime | Success means the promised usable form exists; active Runtime mismatch remains explicit |
-| 17. Human review and satisfaction | Decide whether the real outcome is good enough | Keep technical trust separate from product satisfaction | Accept, request changes, or explain unmet need | Human product acceptance is explicit; technical PASS cannot claim it | Human acceptance and Work satisfaction | Satisfied Work remains open to later conversation; request changes re-enters design/production |
-| 18. Re-enter | Refine an achieved Work or start a distinct Motive | Recall history, distinguish continuation from scope change/new Work | Prior outcome and delivery; describe next need; choose continue or new Work when needed | Watt recommends relationship; Human confirms material transition | Interaction relationship, Work revisions, satisfaction history | Continuation preserves identity; unrelated Motive creates no silent mutation |
+| 1. 表达 Motive | 说明想法、问题或疑问 | 给出有用回应并形成暂定解释 | 自然回复；补充、纠正、提问、探索或离开 | 解释可以更新；不会创建 Work 或生产权限 | Interaction/WIC | 从首页或新对话进入；形成有用共同方向即成功；可作为单纯问答或暂存 Motive 退出 |
+| 2. 细化理解 | 确认 Watt 理解真实结果 | 保留纠正、揭示假设、给建议而非盘问 | 共同理解、已确认事实、开放问题；可继续、不同意或推迟 | WIC 可细化解释；用户拥有意图 | Interaction、interpretation candidate、design intent | 实质歧义足够少即成功；可转向另一解释或新 Motive |
+| 3. 审阅拟议 Work | 理解准入 Work 的真实含义 | 把理解转成目标、范围、约束、预期制品与生产边界 | 审阅、细化、拒绝、推迟或准入 | Watt 起草；用户明确准入 | 拟议形成投影、Human governance | 达到 readiness 后进入；知情准入或明确不准入都属于有效结果 |
+| 4. 准入 Work | 建立持续、受治理的协作 | 从精确审阅方案创建 Work 并保留溯源 | 新 Work 上下文和已准入目标 | 准入需要用户授权；生产权限仍独立 | Work revision、admission decision | 失败则方案仍停留在 Work 之前；成功后开启持续 Work |
+| 5. 建立资产 | 提供所需材料，或让 Watt 负责配置 | 发现需求、检查能力、解释权限，只绑定已授权资产 | 资产清单；添加、授权、选择托管工作区、处理不支持项 | 安全发现可以自动进行；外部访问和绑定需要相应权限 | Work asset scope、repository intake、capability observation | 可以有零个、一个或多个资产；未解决需求可等待或使用托管工作区 |
+| 6. Guided Design | 把结果目标转成可实现设计 | 给出判断、理由和关键决策，并记住约束 | 当前设计重点、建议、备选方案；接受或修改 | Watt 组织和引导；用户决定重要业务或风险事项 | Guided Design issue/revision | 所需设计领域得到满足即成功；未决事项进入“需要我” |
+| 7. 确定方向与计划 | 知道接下来做什么以及为什么 | 把当前 Reality 转成有意义的结果阶段，并在 Reality 变化时重新评估 | 阶段计划、理由、依赖、未解决事项 | Steering 提议 WHAT NEXT；用户治理重大目标/范围变化 | Steering plan/revision、Work Reality | 产出生产就绪方案即成功；也可返回重新设计或变更审阅 |
+| 8. 审阅生产方案 | 确认下一次生产边界 | 说明预期输出、资产目标、验证方式和重要影响 | 通俗方案；接受、细化或拒绝 | Preparation 可安全检查；需要时生产权限必须明确 | Plan/PWU contract、source 和 asset binding | 失败返回设计/计划；成功后形成可运行的受治理工作 |
+| 9. 进入队列 | 知道工作已就绪，只是在正常等待 | 只准入一次，显示原因与诚实预期并保留顺序 | 就绪/排队状态、原因和相关暂停/取消控制 | Scheduler 分配容量；普通容量等待不需要用户行动 | Queue entry、capacity allocation、PWU identity | 分配成功后退出；也可能进入资源等待、用户等待或取消 |
+| 10. 执行与继续 | 让 Watt 工作而不必守着 | 执行 HOW、保存有价值的检查点、展示有意义的活动 | 当前阶段/活动、耗时、已完成里程碑；可暂停或稍后回来 | Executor 运行、让出并恢复；用户无需转发调试信息 | Session/Attempt/Step/Effect、checkpoint、queue lease | 到达 result-ready 前沿即成功；中断后可检查点、重新入队、恢复或对账 |
+| 11. 对账异常 | 确认系统安全，以及是否需要自己处理 | 区分已知/未知影响，阻断不安全继续，在允许范围内自动恢复 | “正在恢复”及影响；或需要用户处理的精确决策与安全选项 | 安全残余工作可继续；`UNKNOWN` 禁止盲目重放；重大权限仍归用户 | Recovery case、evidence、checkpoint、trusted baseline | 恢复一致前沿即成功；也可能需要新执行、新计划或用户决策 |
+| 12. 验证 | 确认输出是否满足已准入结果 | 独立观察并检查精确结果 | 检查状态、通过/失败义务；安全时可看到正在修正 | Verification 独立进行；常规修正可形成受治理后续 | Completion、Verification、evidence lineage | 通过后进入结果审阅；失败后返回生产，或因目标变化进入“需要我” |
+| 13. 预览结果 | 授权前理解实际产出 | 展示可运行/可检查结果、变化、检查、限制、风险与资产影响 | 打开预览、比较、检查证据；要求修改、拒绝或继续 | 预览隔离运行且不能集成；用户判断是否可接受 | 不可变 result/Candidate、preview record | 形成知情决定即成功；修改会创建新的精确结果版本 |
+| 14. 授权集成 | 批准一个精确、有意义的结果及目标集合 | 把决策绑定到精确结果并解释影响 | 清楚看到“什么将在哪些位置发生变化”；授权或拒绝 | 必须有精确 Human Authority；旧授权不覆盖新版结果 | Candidate/aggregate manifest、authorization | 漂移或过期后重新验证；多目标部分状态进入收敛处理 |
+| 15. 提交可信结果 | 推进受治理目标，不隐藏部分事实 | 应用已授权的精确变化；查询不确定影响；安全收敛或阻断 | 提交进度和每个目标的结果 | Integration/Runtime Commit 遵循已授权限；禁止盲目重复 | Integration effect、Runtime Commit、Trusted Baseline | 成功后推进可信基线；部分收敛保持可见、可恢复 |
+| 16. 交付 | 获取并使用成果 | 生成交付清单和真实的访问动作 | 打开运行环境、下载输出、检查代码库更新和交付历史 | 满足信任要求后可自动打包；外部发布可能需要独立授权 | Delivery manifest、trusted baseline、active Runtime | 约定的可用形态存在即成功；活跃 Runtime 不一致时必须如实展示 |
+| 17. 用户审阅与满意 | 判断真实结果是否足够好 | 将技术信任与产品满意分开 | 接受、要求修改或说明未满足之处 | 产品验收必须由用户明确作出；技术 PASS 不能代替 | Human acceptance、Work satisfaction | 满意 Work 仍可继续对话；要求修改则重新进入设计/生产 |
+| 18. 重新进入 | 细化已实现 Work，或开始不同 Motive | 恢复历史，区分继续、范围变化与新 Work | 看到历史结果和交付；描述新需求；必要时选择继续或新建 Work | Watt 建议关系；用户确认重大转向 | Interaction relationship、Work revision、satisfaction history | 继续时保留身份；无关 Motive 不会静默改变原 Work |
 
-## 8. Management and control journeys
+## 8. 管理与控制旅程
 
-### 8.1 Find and continue Work
+### 8.1 查找并继续 Work
 
-Home provides recency and “changed since last visit”; Work provides search and
-filters for active, paused, needs-me, and completed. A user can rename a Work,
-switch without losing a draft, hide/archive it from the default list, inspect
-prior deliveries, and re-enter a completed Work. A Goal may remain optional
-metadata in current Reality, but it is not required for navigation.
+首页提供最近使用和“上次离开后的变化”；Work 区支持搜索，并按活跃、暂停、需要我和已完成筛选。用户可以重命名 Work、切换时保留草稿、从默认列表隐藏/归档、查看历史交付，并重新进入已完成 Work。Goal 可以继续作为当前 Reality 中的可选元数据，但不是导航前提。
 
-### 8.2 Manage capacity without operating infrastructure
+### 8.2 管理容量，而非操作基础设施
 
-Queue shows meaningful Work stages competing for capacity, their reason for
-waiting, current activity, and whether Watt or the Human owns the next action.
-Pause, resume, stop, and cancel appear only when their governed semantics are
-available. Normal users do not choose provider requests, reasoning effort,
-workers, leases, or Execution Slices.
+队列展示竞争容量的有意义 Work 阶段、等待原因、当前活动，以及下一步由 Watt 还是用户负责。只有在存在受治理语义时，才展示暂停、恢复、停止和取消。普通用户不选择 Provider 请求、reasoning effort、worker、lease 或 Execution Slice。
 
-### 8.3 Manage assets in context
+### 8.3 在上下文中管理资产
 
-Each Work has an asset area that distinguishes input, production target,
-generated output, and delivery. It can show capability and access loss in Human
-language. Adding a repository does not turn it into the Work identity, and lack
-of a repository does not block design or managed production.
+每个 Work 都有自己的资产区域，区分输入、生产目标、生成输出和交付。它使用用户语言说明能力与访问丢失。添加代码库不会使其成为 Work 身份；没有代码库也不会阻止设计或托管生产。
 
-### 8.4 Allocate Human attention
+### 8.4 分配用户注意力
 
-Attention has three severities based on required action and consequence:
+Attention 根据所需动作与后果分成三级：
 
-- **Act now:** a governed decision, credential, authorization, or unresolved
-  unsafe state blocks the current path.
-- **Review soon:** a result is ready or a material choice awaits the Human.
-- **For awareness:** Watt is recovering or a non-blocking condition changed.
+- **立即处理：** 当前路径被受治理决策、凭据、授权或未解决的不安全状态阻断。
+- **尽快审阅：** 结果已就绪，或重要选择等待用户决定。
+- **仅供知悉：** Watt 正在恢复，或某个不阻断的条件发生变化。
 
-Each item answers what happened, why it matters, what Watt already did, what the
-Human can choose, and what follows. Awareness items never masquerade as required
-actions.
+每一项都要回答发生了什么、为什么重要、Watt 已经做了什么、用户可以选择什么、接下来会怎样。“仅供知悉”绝不能伪装成必须执行的任务。
 
-## 9. Branch and recovery model
+## 9. 分支与恢复模型
 
-The experience classifies every interruption into one of three Human contracts:
+体验把所有中断归入三种用户契约：
 
-| Contract | Product behavior | Examples |
+| 契约 | 产品行为 | 示例 |
 |---|---|---|
-| Watt recovers | Show calm, truthful status; preserve progress; notify only if materially useful | transient provider failure within policy, worker restart with checkpoint, browser disconnect, safe requeue |
-| Human informed, no action | Explain impact and next step without creating a task for the Human | capacity wait, autonomous verification correction, runtime restart recovery |
-| Human action required | Deep-link to governed context with options and consequence | credential/access needed, material scope change, unsafe ambiguity, failed reconciliation, exact result authorization |
+| Watt 自行恢复 | 平静、真实地展示状态；保留进度；只有具备实际价值时才通知 | 策略内的短暂 Provider 失败、带检查点的 worker 重启、浏览器断连、安全重新入队 |
+| 告知用户，无需行动 | 解释影响和下一步，不给用户制造任务 | 容量等待、自动验证修正、Runtime 重启恢复 |
+| 需要用户行动 | 深链到受治理上下文，说明选项与后果 | 需要凭据/访问、重大范围变化、不安全歧义、对账失败、精确结果授权 |
 
-Browser disconnect never cancels Work. Returning after a long absence starts
-with a change summary derived from durable events and current projections.
-Stale browser state is revalidated before a decision. Partial multi-repository
-convergence shows which targets advanced, which did not, whether forward
-completion remains authorized, and why a new decision may be required.
+浏览器断连绝不取消 Work。用户长时间离开后回来，首先看到根据持久事件和当前投影生成的变化摘要。执行决策前必须重新验证过期浏览器状态。多代码库部分收敛时，要展示哪些目标已推进、哪些未推进、原授权是否仍允许向前完成，以及为什么可能需要新授权。
 
-## 10. Dependency graph
+## 10. 依赖关系图
 
 ```mermaid
 flowchart LR
-  H[Human Motive] --> WIC[WIC / Conversation]
-  WIC -->|explicit admission| W[Work]
+  H[用户 Motive] --> WIC[WIC / Conversation]
+  WIC -->|明确准入| W[Work]
   W --> GD[Guided Design]
   GD --> S[Steering: WHAT NEXT]
-  S --> Q[Queue]
+  S --> Q[队列]
   Q --> E[Executor: HOW]
-  E --> V[Independent Verification]
+  E --> V[独立 Verification]
   V --> HA[Human Authority]
   HA --> D[Runtime Commit / Delivery]
-  A[Assets] --> W
+  A[Asset] --> W
   A --> S
   A --> E
-  Q --> AT[Attention projection]
+  Q --> AT[Attention 投影]
   V --> AT
   D --> AT
   AT --> W
-  G[Future Guardian] -. independent assurance .-> V
-  ECF[Future ECF] -. future capability qualification .-> S
+  G[未来 Guardian] -. 独立保障 .-> V
+  ECF[未来 ECF] -. 未来能力资格 .-> S
   ECF -.-> E
 ```
 
-| Scenario family | WIC | Work | Guided Design | Steering | Queue | Executor | Verification | Human Authority | Delivery | Assets | Future Guardian | Future ECF |
+| 场景族 | WIC | Work | Guided Design | Steering | Queue | Executor | Verification | Human Authority | Delivery | Assets | 未来 Guardian | 未来 ECF |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Pre-Work exploration | Primary | — | Advisory | — | — | — | — | Admission only | — | Candidate refs | Not required | Not required |
-| Work formation/admission | Primary | Primary | — | — | — | — | — | Primary | — | Optional | Not required | Not required |
-| Design and planning | Context | Primary | Primary | Primary | — | — | — | Material decisions | — | Inputs/targets | Not required | Future enhancement |
-| Queue and production | Context | Primary | — | Direction | Primary | Primary | Evidence input | Controls as needed | — | Production scope | Not required | Future enhancement |
-| Recovery | Context | Primary | Possible re-entry | Replan | Requeue | Residual work | Re-observe | Unsafe/material cases | Preserve | Revalidate | Future enhancement | Future enhancement |
-| Result review | Conversation | Primary | Possible correction | Follow-up | — | Claim only | Primary | Exact result decision | Preview context | Result vector | Not required | Not required |
-| Commit and delivery | Context | Primary | — | — | — | — | Required basis | Primary | Primary | Targets/outputs | Not required | Not required |
-| Completion and re-entry | Primary | Primary | On refinement | Reassess | — | — | Historical trust | New authority if needed | History | Historical/current | Not required | Not required |
+| Work 前探索 | 主要 | — | 建议性 | — | — | — | — | 仅准入时 | — | 候选引用 | 不需要 | 不需要 |
+| Work 形成/准入 | 主要 | 主要 | — | — | — | — | — | 主要 | — | 可选 | 不需要 | 不需要 |
+| 设计与规划 | 上下文 | 主要 | 主要 | 主要 | — | — | — | 重大决策 | — | 输入/目标 | 不需要 | 未来增强 |
+| 队列与生产 | 上下文 | 主要 | — | 决定方向 | 主要 | 主要 | 提供证据 | 需要时控制 | — | 生产范围 | 不需要 | 未来增强 |
+| 恢复 | 上下文 | 主要 | 可能重新进入 | 重新规划 | 重新入队 | 残余工作 | 重新观察 | 不安全/重大事项 | 保留 | 重新验证 | 未来增强 | 未来增强 |
+| 结果审阅 | Conversation | 主要 | 可能修正 | 后续方向 | — | 仅声明 | 主要 | 精确结果决策 | 预览上下文 | 结果向量 | 不需要 | 不需要 |
+| 提交与交付 | 上下文 | 主要 | — | — | — | — | 必需依据 | 主要 | 主要 | 目标/输出 | 不需要 | 不需要 |
+| 完成与重新进入 | 主要 | 主要 | 细化时 | 重新评估 | — | — | 历史信任 | 需要时重新授权 | 历史 | 历史/当前 | 不需要 | 不需要 |
 
-Guardian and ECF are future independent capabilities. No first-release journey
-or prototype PASS depends on pretending that either exists.
+Guardian 和 ECF 都是未来的独立能力。首发版旅程和原型 PASS 不依赖于假装其中任何一个已经存在。
 
-## 11. Done in Human terms
+## 11. 用户语境中的“完成”
 
-For the first release, “Done” means the promised outcome is available in the
-agreed usable form, required checks and exact authority steps are complete, the
-delivery can be opened or obtained, known limitations remain visible, and the
-Human has decided the Work is currently satisfactory. The product must use more
-specific language before all of these are true: “produced,” “checks passed,”
-“ready for your review,” “authorized,” or “delivered.”
+对首发版而言，“完成”表示：约定的结果已经以约定的可用形态提供；必要检查和精确授权步骤都已完成；交付可以打开或取得；已知限制仍然可见；用户已经判断当前 Work 令人满意。在全部条件达成前，产品必须使用更准确的词语，例如“已生成”“检查通过”“待你审阅”“已授权”或“已交付”。
 
-Completion closes neither Conversation nor history. The user can return to the
-same Work, see the accepted basis, and begin another governed refinement cycle.
+完成不会关闭 Conversation 或历史。用户可以回到同一个 Work，查看已接受的依据，并开始新的受治理细化周期。
