@@ -40,6 +40,10 @@ Formation Review、统一 Attention 投影、通用 Asset、授权前 Preview、
 
 本记录不改写四篇规划文档，也不构成生产能力或 Human Experience Acceptance 证据。
 
+本次 dogfood 中发现的 Experience-before-Production 模式已单独记录为
+[候选治理模式](../product/experience-before-production-candidate.md)。其状态仍为
+`CANDIDATE / DOGFOOD_PENDING`，不构成冻结的产品要求或正式生产门禁。
+
 ## 实现验证
 
 - `npm run check`：6 项 fixture/隔离/验收记录测试通过，TypeScript 与 Vite production build 通过；
