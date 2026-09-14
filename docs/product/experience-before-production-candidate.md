@@ -605,3 +605,8 @@ Until then:
 
 CANDIDATE
 DOGFOOD_PENDING
+
+Related candidate: [Adaptive Work Patterns](watt-adaptive-work-patterns-candidate.md)
+may later guide whether this process is needed for a particular Work and how
+deeply it should be applied. That relationship remains unimplemented and is not
+yet an architecture decision.
