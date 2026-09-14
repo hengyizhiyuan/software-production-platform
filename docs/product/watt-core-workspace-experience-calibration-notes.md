@@ -11,7 +11,7 @@ HUMAN_DIRECTION
     PARTIALLY_APPROVED
 
 PROTOTYPE_V2
-    NOT_STARTED_BY_THIS_MISSION
+    IMPLEMENTED_AS_DOGFOOD_CANDIDATE
 
 PRODUCTION_IMPLEMENTATION
     NOT_AUTHORIZED
@@ -551,7 +551,7 @@ HUMAN_DIRECTION
     PARTIALLY_APPROVED
 
 PROTOTYPE_V2
-    NOT_STARTED_BY_THIS_MISSION
+    IMPLEMENTED_AS_DOGFOOD_CANDIDATE
 
 PRODUCTION_IMPLEMENTATION
     NOT_AUTHORIZED
@@ -559,3 +559,99 @@ PRODUCTION_IMPLEMENTATION
 ARCHITECTURE_CHANGES
     NOT_YET_AUTHORIZED
 ~~~
+
+The earlier documentation mission did not start Prototype v2. The separately
+authorized v2 prototype mission subsequently implemented the candidate under
+`prototype/human-journey/`. This status update preserves that sequence rather
+than rewriting the original planning history.
+
+## 18. Transient Current Interaction Layer
+
+### 18.1 Human-approved direction
+
+The v2 workspace places engineering and product Reality in the center and
+Conversation History on the right. Showing Watt's active reply only in the
+history panel would repeatedly move Human attention away from the Work itself.
+
+The approved candidate direction introduces a transient Current Interaction
+Layer near the expanded Composer. `Current Interaction Surface` and `Transient
+Reply Surface` remain working terms.
+
+The active pair behaves conceptually as:
+
+~~~text
+Human submits
+    -> submitted Human turn remains visible near Composer
+    -> Watt acknowledges and interprets impact
+    -> Watt reply streams in the central Work context
+    -> completed reply receives a reading grace period
+    -> the pair calmly leaves the transient surface
+    -> the same ordered pair becomes Conversation History
+~~~
+
+The current Human turn remains visible because the Human may need to reread the
+exact instruction, verify wording and compare Watt's interpretation with it.
+It is visually subordinate to Watt's current response and Work Reality.
+
+### 18.2 Communication fades; Reality remains
+
+The transient surface owns communication presentation, not accumulated truth.
+After an exchange archives:
+
+- a changed constraint remains in Reality;
+- a changed next step remains in Agenda;
+- a required decision remains in Actions;
+- an affected execution state remains in Production.
+
+~~~text
+Transient interaction = current communication
+Work surfaces         = accumulated current Reality
+~~~
+
+This makes `Conversation != Truth` visible rather than merely documented.
+
+### 18.3 Reading protection and long replies
+
+Prototype v2 uses a reversible reading grace period. Archival pauses while the
+transient response is hovered, keyboard-focused, selected or manually expanded.
+Long responses have bounded height, local scrolling and an explicit expand
+action so they do not cover the Work workspace indefinitely. Reduced-motion
+preference removes meaningful movement and uses a clean state change.
+
+Exact timing is a prototype calibration value, not product truth.
+
+### 18.4 One active pair and ordered archival
+
+Only one active Human-Watt pair appears near the Composer. If a new Human turn
+starts before the previous pair archives, the previous pair first settles into
+Conversation History and the new Human turn becomes current. Each settled
+message appears in history exactly once and in source order.
+
+### 18.5 Unified Watt identity
+
+The transient response appears to come from the Work workspace and uses the
+same Watt identity as the rest of the product. It does not introduce a mascot,
+virtual pet, second assistant or mediation personality. Internal mediation may
+remain architecturally distinct in future work, but the Human experiences one
+coherent Watt system.
+
+### 18.6 Calm transfer
+
+The approved transition is a restrained central fade-out and right-history
+fade-in. There are no flying messages, game-like physics, fireworks or mascot
+motion. Small opacity, position and blur changes may clarify continuity.
+
+The governing principle is:
+
+> 差异，不是怪异。
+
+### 18.7 Human Turn Mediation feedback in v2
+
+The deterministic prototype may communicate receipt, current interpretation,
+whether Work Reality is affected, whether an effect is immediate, whether a
+Human decision is required, and whether production must first reach a safe
+frontier. It must distinguish a request from a completed Runtime effect—for
+example, `pause requested` does not mean `production safely paused`.
+
+This is experience simulation only. It does not establish a production owner,
+persistence contract, governance rule or WIC architecture change.

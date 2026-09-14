@@ -1,395 +1,80 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useReducer, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { getPack, getScene, scenarioPacks } from "./scenarios";
-import type {
-  AttentionFact,
-  DeliveryFact,
-  Message,
-  Milestone,
-  ResultFact,
-  ScenarioPack,
-  Scene,
-  Surface,
-  Tone,
-  Transition,
-} from "./types";
+import { initialInteraction, interactionReducer, transitionMotion, type CurrentInteraction } from "./interactionModel";
+import { DEFAULT_WORKS, WORKSPACE_LABELS, assignHumanGroup, assignSemanticGroup, projectWorkspace, splitWorkHistory, togglePinned, type WorkNavItem, type WorkspaceFunction } from "./workspaceModel";
+import type { Message, Milestone, ResultFact, ScenarioPack, Scene, Surface, Transition } from "./types";
 
-type IconName =
-  | "home"
-  | "work"
-  | "delivery"
-  | "spark"
-  | "check"
-  | "clock"
-  | "arrow"
-  | "chevron"
-  | "close"
-  | "sliders"
-  | "layers"
-  | "shield"
-  | "asset"
-  | "message"
-  | "play"
-  | "refresh"
-  | "info"
-  | "pause";
-
+type IconName = "home" | "work" | "delivery" | "spark" | "check" | "clock" | "arrow" | "chevron" | "close" | "sliders" | "layers" | "shield" | "asset" | "message" | "play" | "refresh" | "info" | "pause" | "search" | "pin" | "history" | "focus" | "settings" | "user";
 const icons: Record<IconName, ReactNode> = {
-  home: <><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M9.5 20v-6h5v6"/></>,
-  work: <><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M8 5V3h8v2M3 11h18"/></>,
-  delivery: <><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 8V5a3 3 0 0 1 6 0v3"/></>,
-  spark: <><path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></>,
-  check: <path d="m5 12 4 4L19 6"/>,
-  clock: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
-  arrow: <><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></>,
-  chevron: <path d="m9 18 6-6-6-6"/>,
-  close: <><path d="m6 6 12 12M18 6 6 18"/></>,
-  sliders: <><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></>,
-  layers: <><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></>,
-  shield: <><path d="M12 3 5 6v5c0 4.6 2.8 8.2 7 10 4.2-1.8 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></>,
-  asset: <><path d="M4 4h6l2 3h8v13H4V4Z"/><path d="M4 9h16"/></>,
-  message: <path d="M4 5h16v11H9l-5 4V5Z"/>,
-  play: <path d="m9 6 9 6-9 6V6Z"/>,
-  refresh: <><path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M18 12a6 6 0 0 0-10.3-4.2L4 12M6 12a6 6 0 0 0 10.3 4.2L20 12"/></>,
-  info: <><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></>,
-  pause: <><path d="M9 7v10M15 7v10"/></>,
+  home:<><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/></>, work:<><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M8 5V3h8v2M3 11h18"/></>, delivery:<><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 8V5a3 3 0 0 1 6 0v3"/></>,
+  spark:<><path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></>, check:<path d="m5 12 4 4L19 6"/>, clock:<><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>, arrow:<><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></>, chevron:<path d="m9 18 6-6-6-6"/>, close:<><path d="m6 6 12 12M18 6 6 18"/></>,
+  sliders:<><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></>, layers:<><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></>, shield:<><path d="M12 3 5 6v5c0 4.6 2.8 8.2 7 10 4.2-1.8 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></>, asset:<><path d="M4 4h6l2 3h8v13H4V4Z"/><path d="M4 9h16"/></>, message:<path d="M4 5h16v11H9l-5 4V5Z"/>, play:<path d="m9 6 9 6-9 6V6Z"/>,
+  refresh:<><path d="M20 7v5h-5M4 17v-5h5"/><path d="M18 12a6 6 0 0 0-10.3-4.2L4 12M6 12a6 6 0 0 0 10.3 4.2L20 12"/></>, info:<><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></>, pause:<path d="M9 7v10M15 7v10"/>, search:<><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></>, pin:<><path d="m9 4h6l1 6 3 3H5l3-3 1-6ZM12 13v8"/></>, history:<><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></>, focus:<path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/>, settings:<><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></>, user:<><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>
 };
+function Icon({name,size=18}:{name:IconName;size?:number}){return <svg className="icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icons[name]}</svg>}
 
-function Icon({ name, size = 19 }: { name: IconName; size?: number }) {
-  return <svg className="icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icons[name]}</svg>;
+const nav:Record<Surface,{label:string;icon:IconName}>={home:{label:"首页",icon:"home"},work:{label:"Work",icon:"work"},deliveries:{label:"交付",icon:"delivery"}};
+const phase:Record<Scene["phase"],string>={PRE_WORK:"尚未形成 Work",REFINING:"正在理解",READY_FOR_WORK:"目标待确认",DESIGNING:"正在形成方案",PLANNING:"准备生产",QUEUED:"已就绪",WAITING_FOR_CAPACITY:"等待生产容量",RUNNING:"正在生产",CHECKPOINTED:"进展已保存",PAUSED:"已暂停",RECOVERING:"正在恢复",WAITING_FOR_HUMAN:"需要你的决定",VERIFYING:"正在验证",RESULT_READY:"结果已就绪",READY_FOR_AUTHORIZATION:"结果待审阅",AUTHORIZED:"已授权",DELIVERED:"已交付",COMPLETED:"当前目标已完成",REOPENED:"继续细化"};
+
+interface State{packId:string;sceneId:string;surface:Surface;reviewer:boolean;drawer:"production"|"evidence"|null;preview:boolean;focus:WorkspaceFunction|null;historyCollapsed:boolean;composerExpanded:boolean}
+type Action={type:"pack";pack:ScenarioPack}|{type:"scene";pack:ScenarioPack;scene:Scene}|{type:"move";pack:ScenarioPack;to:string}|{type:"surface";surface:Surface}|{type:"reset";pack:ScenarioPack}|{type:"reviewer"|"history"|"composer"|"preview"}|{type:"drawer";value:State["drawer"]}|{type:"focus";value:WorkspaceFunction|null};
+function readHash(){const p=new URLSearchParams(location.hash.slice(1));return{pack:p.get("pack")??"P01",scene:p.get("scene")}}
+function initialState():State{const h=readHash(),p=getPack(h.pack),s=getScene(p,h.scene??p.seed);return{packId:p.id,sceneId:s.id,surface:s.surface,reviewer:false,drawer:null,preview:s.id.endsWith("preview"),focus:null,historyCollapsed:false,composerExpanded:s.id==="p01-home"}}
+function reducer(s:State,a:Action):State{switch(a.type){case"pack":{const x=getScene(a.pack,a.pack.seed);return{...s,packId:a.pack.id,sceneId:x.id,surface:x.surface,focus:null,drawer:null,preview:false,composerExpanded:x.id==="p01-home"}}case"scene":return{...s,packId:a.pack.id,sceneId:a.scene.id,surface:a.scene.surface,focus:null,drawer:null,preview:a.scene.id.endsWith("preview"),composerExpanded:a.scene.id==="p01-home"};case"move":{const x=getScene(a.pack,a.to);return{...s,sceneId:x.id,surface:x.surface,drawer:null,preview:x.id.endsWith("preview")}}case"surface":return{...s,surface:a.surface};case"reset":{const x=getScene(a.pack,a.pack.seed);return{...s,sceneId:x.id,surface:x.surface,focus:null,drawer:null,preview:false,composerExpanded:x.id==="p01-home"}}case"reviewer":return{...s,reviewer:!s.reviewer};case"history":return{...s,historyCollapsed:!s.historyCollapsed};case"composer":return{...s,composerExpanded:!s.composerExpanded};case"preview":return{...s,preview:!s.preview};case"drawer":return{...s,drawer:a.value};case"focus":return{...s,focus:a.value}}}
+
+function sceneInteraction(s:Scene):{history:Message[];seed?:Partial<CurrentInteraction>}{
+  if(s.id==="p07-running")return{history:[],seed:{id:1,phase:"complete",humanTurn:s.messages?.[0]?.text,wattReply:s.messages?.[1]?.text,visibleReply:s.messages?.[1]?.text??"",realityEffect:"当前活动模板正在停在安全位置；新的后台目标等待治理。"}};
+  if(s.id==="p14-stream")return{history:s.messages?.slice(0,2)??[],seed:{id:1,phase:"streaming",humanTurn:s.messages?.[2]?.text,wattReply:"会纳入。直播回放应作为核心内容资产，短视频切片和图文摘要作为衍生版本，这样复用和归因都更清楚。",visibleReply:"我正在把这项补充放回当前内容模型里…",realityEffect:"Agenda 已加入直播回放二次剪辑。"}};
+  return{history:s.messages??[]}
+}
+function responseFor(text:string,s:Scene){if(/暂停|停一下/.test(text))return{reply:"已收到暂停请求。当前生产还没有被立即中断；Watt 正在让进行中的操作到达安全位置，确认后会把状态更新为“已暂停”。",effect:"生产正在前往安全暂停点，当前仍保持可恢复。"};if(/登录|跳转/.test(text))return{reply:"已收到。我理解为你正在修改当前 Work 的登录后导航约束。我已把它加入当前情况，并调整接下来的设计检查；如果生产已覆盖这部分，我会先在安全位置停下再应用。",effect:"新增约束：登录后保留当前位置，不自动跳转。"};if(/不对|纠正|不是/.test(text))return{reply:"明白，我会采用你的新表述，不为之前的理解辩解。相关事实已经更新；正在进行的工作会先停在安全位置，再按修订后的目标继续。",effect:"目标理解已按最新纠正更新，旧方向停止扩展。"};if(s.attention?.contract==="decision")return{reply:`已收到。这个输入涉及“${s.attention.title}”。我会保留你的原话并核对影响，在需要你授权之前不会替你作决定。`,effect:"新的输入已进入影响核对，原决定边界保持不变。"};return{reply:"已收到。我会把这项补充和当前 Work 的目标、约束与进展一起判断。它会先进入当前情况和接下来；如果影响生产或权限边界，我会明确告诉你何时生效。",effect:"当前情况已记录这项补充，接下来会据此调整。"}}
+
+export function App(){
+  const[state,dispatch]=useReducer(reducer,undefined,initialState),pack=useMemo(()=>getPack(state.packId),[state.packId]),scene=useMemo(()=>getScene(pack,state.sceneId),[pack,state.sceneId]),projection=projectWorkspace(scene,state.focus);
+  const[works,setWorks]=useState<WorkNavItem[]>(()=>{const saved=localStorage.getItem("watt-prototype-v2-work-nav");return saved?JSON.parse(saved):DEFAULT_WORKS.map(assignSemanticGroup)}),[interaction,interact]=useReducer(interactionReducer,undefined,()=>initialInteraction(sceneInteraction(scene).history)),[realityNote,setRealityNote]=useState(""),[archiving,setArchiving]=useState(false),[toast,setToast]=useState("");
+  const timer=useRef<number|undefined>(undefined),reduceMotion=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  useEffect(()=>{const h=`pack=${pack.id}&scene=${scene.id}`;if(location.hash.slice(1)!==h)history.replaceState(null,"",`#${h}`)},[pack.id,scene.id]);
+  useEffect(()=>{const fn=()=>{const h=readHash(),p=getPack(h.pack);dispatch({type:"scene",pack:p,scene:getScene(p,h.scene??p.seed)})};addEventListener("hashchange",fn);return()=>removeEventListener("hashchange",fn)},[]);
+  useEffect(()=>{const x=sceneInteraction(scene);interact({type:"reset",history:x.history,seed:x.seed});setRealityNote("");setArchiving(false)},[scene.id]);
+  useEffect(()=>localStorage.setItem("watt-prototype-v2-work-nav",JSON.stringify(works)),[works]);
+  useEffect(()=>{if(interaction.phase==="received"){const id=setTimeout(()=>interact({type:"start"}),240);return()=>clearTimeout(id)}if(interaction.phase!=="streaming"||!interaction.wattReply)return;let n=interaction.visibleReply.length;timer.current=setInterval(()=>{n+=3;if(n>=interaction.wattReply!.length){clearInterval(timer.current);interact({type:"complete"})}else interact({type:"reveal",length:n})},reduceMotion?1:32);return()=>clearInterval(timer.current)},[interaction.id,interaction.phase,interaction.wattReply,reduceMotion]);
+  useEffect(()=>{if(interaction.phase==="complete"&&interaction.realityEffect)setRealityNote(interaction.realityEffect)},[interaction.phase,interaction.realityEffect]);
+  useEffect(()=>{if(interaction.phase!=="complete"||interaction.readingProtected){setArchiving(false);return}const id=setTimeout(()=>{if(reduceMotion)interact({type:"archive"});else{setArchiving(true);setTimeout(()=>{interact({type:"archive"});setArchiving(false)},320)}},5200);return()=>clearTimeout(id)},[interaction.phase,interaction.readingProtected,reduceMotion]);
+  const move=(t:Transition)=>{dispatch({type:"move",pack,to:t.to});setToast(t.hint??"模拟状态已推进");setTimeout(()=>setToast(""),1600)},submit=(text:string)=>{const r=responseFor(text,scene);interact({type:"submit",text,reply:r.reply,realityEffect:r.effect});if(!state.composerExpanded)dispatch({type:"composer"})};
+  const selectWork=(w:WorkNavItem)=>{const target=w.id==="feedback"?["P05","p05-wait"]:w.id==="invite"?["P12","p12-context"]:w.historical?["P11","p11-delivery"]:[pack.id,scene.workName?scene.id:"p01-admitted"],p=getPack(target[0]);dispatch({type:"scene",pack:p,scene:getScene(p,target[1])})};
+  const dockOpen=state.composerExpanded||Boolean(interaction.humanTurn);
+  return <div className={`app v2-app ${state.historyCollapsed?"history-collapsed":""}`}><Topbar surface={state.surface} onSurface={surface=>dispatch({type:"surface",surface})} onReview={()=>dispatch({type:"reviewer"})}/><main className="v2-shell"><WorkNavigator works={works} selected={scene.workName??""} onSelect={selectWork} onPin={id=>setWorks(xs=>xs.map(x=>x.id===id?togglePinned(x):x))} onGroup={(id,label)=>setWorks(xs=>xs.map(x=>x.id===id?assignHumanGroup(x,label):x))}/><section className="workspace-stage">{state.surface==="home"&&<HomeView scene={scene} pack={pack} onMove={move} onWork={()=>dispatch({type:"surface",surface:"work"})}/>} {state.surface==="work"&&<AdaptiveWorkView scene={scene} pack={pack} projection={projection} realityNote={realityNote} onFocus={value=>dispatch({type:"focus",value})} onMove={move} onPreview={()=>dispatch({type:"preview"})} onEvidence={()=>dispatch({type:"drawer",value:"evidence"})} onProduction={()=>dispatch({type:"drawer",value:"production"})}/>} {state.surface==="deliveries"&&<DeliveryView scene={scene} onMove={move} onWork={()=>dispatch({type:"surface",surface:"work"})}/>} {dockOpen&&<div className="interaction-dock"><CurrentInteractionSurface value={interaction} archiving={archiving} reducedMotion={reduceMotion} onProtect={value=>interact({type:"protect-reading",value})} onExpand={()=>interact({type:"toggle-expanded"})}/><Composer expanded onSend={submit} onCollapse={state.composerExpanded?()=>dispatch({type:"composer"}):undefined}/></div>}</section><ConversationHistory value={interaction} collapsed={state.historyCollapsed} composerExpanded={dockOpen} onToggle={()=>dispatch({type:"history"})} onExpandComposer={()=>dispatch({type:"composer"})} onSend={submit}/></main><span className="simulation-badge"><span/>Watt Experience Prototype v2 — simulated data</span>
+  {state.drawer==="production"&&<InfoDrawer title="生产详情" onClose={()=>dispatch({type:"drawer",value:null})}><ProductionContent scene={scene}/></InfoDrawer>}{state.drawer==="evidence"&&<InfoDrawer title="事实来源与工程详情" onClose={()=>dispatch({type:"drawer",value:null})}><div className="owner-list">{Object.entries(scene.ownerFacts).map(([k,v])=><div key={k}><strong>{k}</strong><p>{v}</p></div>)}</div><p className="simulation-note">这些是体验验证用的 owner-specific mock facts，不代表生产能力。</p></InfoDrawer>}{state.preview&&scene.result&&<PreviewOverlay result={scene.result} onClose={()=>dispatch({type:"preview"})}/>} {state.reviewer&&<ReviewerPanel pack={pack} scene={scene} projection={projection} focus={state.focus} interaction={interaction} selectedWork={works.find(w=>scene.workName?.includes(w.name))??works[0]} onClose={()=>dispatch({type:"reviewer"})} onPack={p=>dispatch({type:"pack",pack:p})} onScene={s=>dispatch({type:"scene",pack,scene:s})} onReset={()=>dispatch({type:"reset",pack})} onAdvance={()=>scene.transitions[0]&&move(scene.transitions[0])}/>} {toast&&<div className="toast"><Icon name="check" size={14}/>{toast}</div>}</div>
 }
 
-const surfaceMeta: Record<Surface, { label: string; icon: IconName }> = {
-  home: { label: "首页", icon: "home" },
-  work: { label: "Work", icon: "work" },
-  deliveries: { label: "交付", icon: "delivery" },
-};
+function Topbar({surface,onSurface,onReview}:{surface:Surface;onSurface:(s:Surface)=>void;onReview:()=>void}){return <header className="topbar"><button className="brand" onClick={()=>onSurface("home")}><span className="brand-mark"><Icon name="spark" size={17}/></span><span>Watt</span></button><nav className="primary-nav" aria-label="主导航">{(Object.keys(nav)as Surface[]).map(s=><button key={s} className={surface===s?"active":""} onClick={()=>onSurface(s)}><Icon name={nav[s].icon} size={15}/>{nav[s].label}</button>)}</nav><div className="top-actions"><button className="icon-button" onClick={onReview} aria-label="打开评审模式"><Icon name="sliders"/></button></div></header>}
 
-interface AppState {
-  packId: string;
-  sceneId: string;
-  surface: Surface;
-  reviewerOpen: boolean;
-  productionOpen: boolean;
-  evidenceOpen: boolean;
-  previewOpen: boolean;
-}
+function WorkNavigator({works,selected,onSelect,onPin,onGroup}:{works:WorkNavItem[];selected:string;onSelect:(w:WorkNavItem)=>void;onPin:(id:string)=>void;onGroup:(id:string,label:string)=>void}){const[q,setQ]=useState(""),[past,setPast]=useState(false),[closed,setClosed]=useState<string[]>([]),split=splitWorkHistory(works),filtered=(past?split.historical:split.active).filter(w=>(w.name+w.outcome).toLowerCase().includes(q.toLowerCase())),pinned=filtered.filter(w=>w.pinned),groups=filtered.filter(w=>!w.pinned).reduce<Record<string,WorkNavItem[]>>((a,w)=>{(a[w.groupLabel||"其他"]??=[]).push(w);return a},{});const card=(w:WorkNavItem)=><article draggable onDragStart={e=>e.dataTransfer.setData("text/work-id",w.id)} key={w.id} className={`work-nav-item ${selected.includes(w.name)?"selected":""}`} onClick={()=>onSelect(w)}><div><strong>{w.name}</strong><span>{w.status}</span></div><button onClick={e=>{e.stopPropagation();onPin(w.id)}} aria-label={`${w.pinned?"取消置顶":"置顶"}${w.name}`}><Icon name="pin" size={12}/></button>{selected.includes(w.name)&&<label onClick={e=>e.stopPropagation()}>分组<select value={w.groupLabel} onChange={e=>onGroup(w.id,e.target.value)}><option>推广与增长</option><option>产品体验</option><option>团队能力</option><option>我关心的工作</option><option>其他</option></select></label>}</article>;return <aside className="work-nav"><div className="work-nav-head"><span>我的 Work</span><strong>让结果持续向前</strong></div><label className="work-search"><Icon name="search" size={14}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="搜索 Work" aria-label="搜索 Work"/></label><div className="work-tabs"><button className={!past?"active":""} onClick={()=>setPast(false)}>当前</button><button className={past?"active":""} onClick={()=>setPast(true)}>历史工作项</button></div><div className="work-groups">{pinned.length>0&&<WorkGroup label="置顶" closed={closed.includes("置顶")} onToggle={()=>setClosed(xs=>xs.includes("置顶")?xs.filter(x=>x!=="置顶"):[...xs,"置顶"])} onDrop={onPin}>{pinned.map(card)}</WorkGroup>}{Object.entries(groups).map(([label,items])=><WorkGroup key={label} label={label} badge={items[0]?.groupSource==="human"?"我的分组":items[0]?.groupSource==="ai"?"Watt 归类":""} closed={closed.includes(label)} onToggle={()=>setClosed(xs=>xs.includes(label)?xs.filter(x=>x!==label):[...xs,label])} onDrop={id=>onGroup(id,label)}>{items.map(card)}</WorkGroup>)}</div><div className="nav-global"><button><Icon name="user" size={14}/>账户</button><button><Icon name="settings" size={14}/>设置</button></div></aside>}
+function WorkGroup({label,badge,closed,onToggle,onDrop,children}:{label:string;badge?:string;closed:boolean;onToggle:()=>void;onDrop:(id:string)=>void;children:ReactNode}){return <section className="work-group" onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const id=e.dataTransfer.getData("text/work-id");if(id)onDrop(id)}}><button className="work-group-title" onClick={onToggle}><Icon name="chevron" size={11}/><strong>{label}</strong>{badge&&<span>{badge}</span>}</button>{!closed&&<div>{children}</div>}</section>}
+function PageHeader({scene,actions}:{scene:Scene;actions?:ReactNode}){return <header className="page-header"><div><span>{scene.eyebrow}</span><h1>{scene.title}</h1><p>{scene.summary}</p></div>{actions}</header>}
 
-type AppAction =
-  | { type: "select-pack"; pack: ScenarioPack }
-  | { type: "select-scene"; pack: ScenarioPack; scene: Scene }
-  | { type: "navigate"; surface: Surface }
-  | { type: "transition"; pack: ScenarioPack; target: string }
-  | { type: "reset"; pack: ScenarioPack }
-  | { type: "toggle-reviewer" }
-  | { type: "toggle-production" }
-  | { type: "toggle-evidence" }
-  | { type: "toggle-preview" };
+function HomeView({scene,pack,onMove,onWork}:{scene:Scene;pack:ScenarioPack;onMove:(t:Transition)=>void;onWork:()=>void}){return <div className="page-view home-view"><PageHeader scene={scene}/><div className="home-focus"><section className="welcome-card"><span className="workspace-kicker">{scene.phase==="PRE_WORK"?"从一次自然表达开始":"Watt 持续照看的 Reality"}</span><h2>{scene.phase==="PRE_WORK"?"把想法告诉 Watt，当前情况会逐渐变得清楚。":scene.workName??"Watt 运营后台"}</h2><p>{scene.workOutcome??"不必先配置项目、队列或代码库。当前交流会在这里发生，稳定事实会留在 Work。"}</p>{scene.changedSince&&<ul>{scene.changedSince.map(x=><li key={x}><Icon name="check" size={13}/>{x}</li>)}</ul>}<button className="primary-button" onClick={scene.transitions[0]?()=>onMove(scene.transitions[0]):onWork}>{scene.phase==="PRE_WORK"?"开始一次模拟交流":"进入当前 Work"}<Icon name="arrow" size={14}/></button></section>{scene.attention&&<AttentionBlock scene={scene} onMove={onMove}/>}</div><div className="page-foot">{pack.id} · {pack.reviewReason}</div></div>}
+function AdaptiveWorkView({scene,pack,projection,realityNote,onFocus,onMove,onPreview,onEvidence,onProduction}:{scene:Scene;pack:ScenarioPack;projection:ReturnType<typeof projectWorkspace>;realityNote:string;onFocus:(x:WorkspaceFunction|null)=>void;onMove:(t:Transition)=>void;onPreview:()=>void;onEvidence:()=>void;onProduction:()=>void}){const content:Record<WorkspaceFunction,ReactNode>={reality:<RealityContent scene={scene} note={realityNote} onPreview={onPreview}/>,agenda:<AgendaContent scene={scene} onMove={onMove}/>,production:<ProductionContent scene={scene} onOpen={onProduction}/>,actions:<ActionsContent scene={scene} onMove={onMove} onPreview={onPreview}/>};return <div className={`page-view work-view ${projection.focused?"focus-active":""}`}><PageHeader scene={scene} actions={<div className="header-actions"><span className={`phase-pill ${scene.tone}`}><i/>{phase[scene.phase]}</span><button className="quiet-button" onClick={onEvidence}><Icon name="shield" size={14}/>事实来源</button></div>}/><div className="outcome-line"><span>当前结果目标</span><strong>{scene.workOutcome??scene.summary}</strong></div><div className="adaptive-workspace">{projection.visible.map(name=><WorkspacePanel key={name} name={name} focused={projection.focused===name} compact={projection.compact.includes(name)} emphasized={!projection.focused&&projection.emphasized===name} important={name==="actions"&&scene.attention?.contract==="decision"} onFocus={()=>onFocus(projection.focused===name?null:name)}>{content[name]}</WorkspacePanel>)}</div><div className="page-foot">Prototype v2 · {pack.id}/{scene.id} · 四项功能按当前事实自适应</div></div>}
+function WorkspacePanel({name,focused,compact,emphasized,important,onFocus,children}:{name:WorkspaceFunction;focused:boolean;compact:boolean;emphasized:boolean;important:boolean;onFocus:()=>void;children:ReactNode}){return <section className={`workspace-panel panel-${name} ${focused?"focused":""} ${compact?"compact":""} ${emphasized?"emphasized":""}`}><header><div><span className="panel-icon"><Icon name={name==="reality"?"shield":name==="agenda"?"layers":name==="production"?"play":"spark"} size={14}/></span><strong>{WORKSPACE_LABELS[name]}</strong>{important&&<em>1</em>}</div><button onClick={onFocus} aria-label={`${focused?"退出":"聚焦"}${WORKSPACE_LABELS[name]}`}><Icon name={focused?"close":"focus"} size={13}/>{focused?"恢复布局":"聚焦"}</button></header>{compact?<button className="compact-summary" onClick={onFocus}>{important?"有一项决定等待你":`展开查看${WORKSPACE_LABELS[name]}`}<Icon name="chevron" size={13}/></button>:<div className="panel-body">{children}</div>}</section>}
 
-function reducer(state: AppState, action: AppAction): AppState {
-  switch (action.type) {
-    case "select-pack": {
-      const scene = getScene(action.pack, action.pack.seed);
-      return { ...state, packId: action.pack.id, sceneId: scene.id, surface: scene.surface, productionOpen: false, evidenceOpen: false, previewOpen: false };
-    }
-    case "select-scene":
-      return { ...state, packId: action.pack.id, sceneId: action.scene.id, surface: action.scene.surface, productionOpen: false, evidenceOpen: false, previewOpen: false };
-    case "navigate": return { ...state, surface: action.surface };
-    case "transition": {
-      const scene = getScene(action.pack, action.target);
-      return { ...state, sceneId: scene.id, surface: scene.surface, productionOpen: false, evidenceOpen: false, previewOpen: scene.id.endsWith("preview") };
-    }
-    case "reset": {
-      const scene = getScene(action.pack, action.pack.seed);
-      return { ...state, sceneId: scene.id, surface: scene.surface, productionOpen: false, evidenceOpen: false, previewOpen: false };
-    }
-    case "toggle-reviewer": return { ...state, reviewerOpen: !state.reviewerOpen };
-    case "toggle-production": return { ...state, productionOpen: !state.productionOpen };
-    case "toggle-evidence": return { ...state, evidenceOpen: !state.evidenceOpen };
-    case "toggle-preview": return { ...state, previewOpen: !state.previewOpen };
-  }
-}
+function RealityContent({scene,note,onPreview}:{scene:Scene;note:string;onPreview:()=>void}){return <div className="reality-content">{note&&<div className="reality-change"><span>刚刚更新</span><strong>{note}</strong><p>当前交流归入历史后，这项事实仍会保留。</p></div>}<div className="reality-summary"><span>现在可以确定</span><h2>{scene.workName??scene.title}</h2><p>{scene.summary}</p></div>{scene.understanding&&<><FactList title="已确认范围" items={scene.understanding.scope}/><FactList title="重要约束" items={scene.understanding.constraints}/></>}{scene.assets&&<div className="asset-grid">{scene.assets.map(a=><div key={a.name}><Icon name="asset" size={14}/><span><strong>{a.name}</strong><small>{a.role} · {a.state}</small></span></div>)}</div>}{scene.result&&<div className="result-inline"><MockPreview variant={scene.result.previewVariant??"dashboard"}/><div><span>当前结果</span><strong>{scene.result.title}</strong><p>{scene.result.summary}</p><button onClick={onPreview}>打开完整预览</button></div></div>}{scene.deliveries&&<TrustLines deliveries={scene.deliveries}/>}</div>}
+function AgendaContent({scene,onMove}:{scene:Scene;onMove:(t:Transition)=>void}){return <div className="agenda-content">{scene.recommendation&&<div className="recommendation"><span><Icon name="spark" size={13}/>Watt 的建议</span><h2>{scene.recommendation.title}</h2><p>{scene.recommendation.body}</p><aside><strong>判断依据</strong>{scene.recommendation.rationale}</aside></div>}{scene.milestones&&<Milestones items={scene.milestones}/>} {!scene.recommendation&&!scene.milestones&&scene.understanding&&<FactList title="形成 Work 前还可以修正" items={[scene.understanding.deliverable,scene.understanding.boundary]}/>}<SceneActions transitions={scene.transitions.filter(t=>t.label!==scene.attention?.action)} onMove={onMove}/></div>}
+function ProductionContent({scene,onOpen}:{scene:Scene;onOpen?:()=>void}){if(!scene.production)return <div className="empty-function"><Icon name="pause"/><strong>当前没有生产活动</strong><p>只有事实支持时，生产信息才会出现在主工作区。</p></div>;return <div className="production-content"><div className="production-now"><span className="production-pulse"><i/><i/><i/></span><div><small>{scene.production.label}</small><strong>{scene.production.activity}</strong><p>{scene.production.reason??"Watt 正在按当前目标继续。"}</p></div></div>{scene.production.queueDetail&&<FactList title="更多上下文" items={scene.production.queueDetail}/>} {scene.milestones&&<Milestones items={scene.milestones}/>} {onOpen&&<button className="text-button" onClick={onOpen}>查看生产与恢复详情<Icon name="chevron" size={13}/></button>}</div>}
+function ActionsContent({scene,onMove,onPreview}:{scene:Scene;onMove:(t:Transition)=>void;onPreview:()=>void}){return <div className="actions-content">{scene.attention&&<AttentionBlock scene={scene} onMove={onMove}/>} {scene.result&&<div className="result-action"><span>审阅后再决定</span><strong>{scene.result.title}</strong><p>{scene.result.checks.join(" · ")}</p><button onClick={onPreview}>体验精确结果<Icon name="play" size={13}/></button></div>}</div>}
+function AttentionBlock({scene,onMove}:{scene:Scene;onMove:(t:Transition)=>void}){const a=scene.attention!,t=scene.transitions.find(x=>x.label===a.action)??scene.transitions[0];return <div className={`attention-block ${a.contract}`}><span>{a.contract==="decision"?"需要你的决定":a.contract==="handling"?"Watt 正在处理":"值得知道"}</span><h2>{a.title}</h2><p>{a.body}</p>{a.consequence&&<aside><strong>接下来</strong>{a.consequence}</aside>}{a.action&&t&&<button onClick={()=>onMove(t)}>{a.action}<Icon name="arrow" size={13}/></button>}</div>}
 
-function readHash(): { packId: string; sceneId?: string } {
-  const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-  return { packId: params.get("pack") ?? "P01", sceneId: params.get("scene") ?? undefined };
-}
+function DeliveryView({scene,onMove,onWork}:{scene:Scene;onMove:(t:Transition)=>void;onWork:()=>void}){const ds=scene.deliveries??[{title:"Watt 运营工作台",form:"Web 应用",detail:"最近交付 · 模拟数据",action:"打开交付",trust:"检查通过 · 已授权",runtimeState:"aligned" as const}],primary=scene.transitions[0];return <div className="page-view delivery-view"><PageHeader scene={{...scene,eyebrow:"按 Work 查看可用成果",title:scene.workName??scene.title,summary:scene.workOutcome??scene.summary}} actions={<button className="quiet-button" onClick={onWork}><Icon name="work" size={14}/>返回 Work</button>}/><section className="delivery-work"><header><div><span>Work 的交付</span><h2>{scene.workName??"Watt 运营后台"}</h2></div><span className="delivery-revision">最新修订 · v2</span></header><article><span>最新交付</span>{ds.map(d=><div className="delivery-item" key={d.title}><span className="delivery-type"><Icon name="delivery"/></span><div><strong>{d.title}</strong><p>{d.form} · {d.detail}</p><em className={d.runtimeState==="different"?"warning":""}>{d.trust}</em></div><button onClick={()=>primary?onMove(primary):onWork()}>{d.action}<Icon name="arrow" size={13}/></button></div>)}</article><details><summary>历史交付修订</summary><div className="historical-delivery">v1 · 保留当时的结果、检查与运行关系</div></details></section>{scene.attention&&<AttentionBlock scene={scene} onMove={onMove}/>}<SceneActions transitions={scene.transitions.filter(t=>t.label!==scene.attention?.action)} onMove={onMove}/></div>}
 
-function initialState(): AppState {
-  const hash = readHash();
-  const pack = getPack(hash.packId);
-  const scene = getScene(pack, hash.sceneId ?? pack.seed);
-  return { packId: pack.id, sceneId: scene.id, surface: scene.surface, reviewerOpen: false, productionOpen: false, evidenceOpen: false, previewOpen: scene.id.endsWith("preview") };
-}
+function ConversationHistory({value,collapsed,composerExpanded,onToggle,onExpandComposer,onSend}:{value:CurrentInteraction;collapsed:boolean;composerExpanded:boolean;onToggle:()=>void;onExpandComposer:()=>void;onSend:(x:string)=>void}){if(collapsed)return <aside className="conversation-history collapsed"><button onClick={onToggle} aria-label="展开对话历史"><Icon name="message"/><span>{value.history.length}</span></button></aside>;return <aside className={`conversation-history ${value.phase==="archived"?"fresh-history":""}`}><header><div><span>Conversation</span><strong>对话历史</strong></div><button onClick={onToggle} aria-label="收起对话历史"><Icon name="chevron"/></button></header><div className="history-list">{value.history.length?value.history.map((m,i)=><div className={`history-message ${m.actor}`} key={`${i}-${m.text}`}><span>{m.actor==="human"?"你":"Watt"}</span><p>{m.text}</p></div>):<div className="history-empty"><Icon name="message"/><p>当前交流完成后，会在这里留下可追溯的对话历史。</p></div>}</div>{composerExpanded?<button className="composer-return" onClick={onExpandComposer}><Icon name="arrow" size={13}/>输入区正在 Work 下方展开</button>:<Composer compact onSend={onSend} onExpand={onExpandComposer}/>}</aside>}
+function CurrentInteractionSurface({value,archiving,reducedMotion,onProtect,onExpand}:{value:CurrentInteraction;archiving:boolean;reducedMotion:boolean;onProtect:(x:boolean)=>void;onExpand:()=>void}){if(!value.humanTurn&&value.phase!=="archived")return <div className="current-interaction idle"><span><Icon name="spark" size={13}/>当前交流会在这里出现</span><p>语言会归入历史，形成的事实会留在上方 Work。</p></div>;if(value.phase==="archived")return <div className="current-interaction archived"><Icon name="check" size={13}/>刚才的交流已归入右侧历史；Work Reality 保持更新。</div>;return <section className={`current-interaction active phase-${value.phase} ${archiving?"archiving":""} ${transitionMotion(reducedMotion)}`} onMouseEnter={()=>onProtect(true)} onMouseLeave={()=>onProtect(false)} onFocus={()=>onProtect(true)} onBlur={()=>onProtect(false)} onMouseUp={()=>{if(getSelection()?.toString())onProtect(true)}} tabIndex={0}><header><div><span className="watt-presence"><Icon name="spark" size={13}/></span><span><small>Watt · 当前回应</small><strong>{value.phase==="received"?"已收到，正在理解影响":value.phase==="streaming"?"正在结合 Work Reality 回应":"回应完成 · 为你保留阅读时间"}</strong></span></div><button onClick={onExpand}>{value.expanded?"恢复":"展开阅读"}</button></header><div className={`live-reply ${value.expanded?"expanded":""}`}>{value.visibleReply||<span className="thinking"><i/><i/><i/></span>}</div>{value.realityEffect&&<div className="mediation-line"><span>对 Work 的影响</span>{value.phase==="complete"?value.realityEffect:"正在确认何时生效"}</div>}<div className="submitted-turn"><span>你刚刚说</span><p>{value.humanTurn}</p></div></section>}
+function Composer({compact=false,expanded=false,onSend,onExpand,onCollapse}:{compact?:boolean;expanded?:boolean;onSend:(x:string)=>void;onExpand?:()=>void;onCollapse?:()=>void}){const[text,setText]=useState("");const submit=(e:FormEvent)=>{e.preventDefault();if(!text.trim())return;onSend(text.trim());setText("")};return <form className={`v2-composer ${compact?"compact":""} ${expanded?"expanded":""}`} onSubmit={submit}><textarea aria-label="给 Watt 发消息" rows={expanded?3:2} value={text} onChange={e=>setText(e.target.value)} onFocus={()=>compact&&onExpand?.()} placeholder="补充、纠正，或直接问 Watt…"/><div><span>{expanded?"当前 Work Reality 就在上方":"输入时可在 Work 下方展开"}</span>{expanded&&onCollapse&&<button type="button" onClick={onCollapse}>收回</button>}<button type="submit" disabled={!text.trim()} aria-label="发送消息"><Icon name="arrow" size={14}/></button></div></form>}
 
-const phaseLabels: Record<Scene["phase"], string> = {
-  PRE_WORK: "尚未形成 Work", REFINING: "正在理解", READY_FOR_WORK: "目标待确认", DESIGNING: "正在形成方案", PLANNING: "准备生产", QUEUED: "已就绪", WAITING_FOR_CAPACITY: "等待生产容量", RUNNING: "正在生产", CHECKPOINTED: "进展已保存", PAUSED: "已暂停", RECOVERING: "正在恢复", WAITING_FOR_HUMAN: "需要你的决定", VERIFYING: "正在验证", RESULT_READY: "结果已就绪", READY_FOR_AUTHORIZATION: "结果待审阅", AUTHORIZED: "已授权", DELIVERED: "已交付", COMPLETED: "当前目标已完成", REOPENED: "继续细化",
-};
+function FactList({title,items}:{title:string;items:string[]}){return <div className="fact-list"><span>{title}</span>{items.map(x=><p key={x}><Icon name="check" size={12}/>{x}</p>)}</div>}
+function Milestones({items}:{items:Milestone[]}){return <div className="v2-milestones">{items.map((x,i)=><div className={x.state} key={x.label}><span>{x.state==="done"?<Icon name="check" size={11}/>:i+1}</span><p><strong>{x.label}</strong><small>{x.detail}</small></p><em>{x.state==="done"?"已完成":x.state==="current"?"当前":x.state==="blocked"?"等待决定":"随后"}</em></div>)}</div>}
+function SceneActions({transitions,onMove}:{transitions:Transition[];onMove:(t:Transition)=>void}){if(!transitions.length)return <div className="path-end"><Icon name="check" size={13}/>当前模拟路径已走完，可从 Reviewer Mode 重置或换场景。</div>;return <div className="scene-actions">{transitions.map(t=><button key={`${t.label}-${t.to}`} className={t.kind??"primary"} onClick={()=>onMove(t)}>{t.label}<Icon name="arrow" size={13}/></button>)}</div>}
+function TrustLines({deliveries}:{deliveries:NonNullable<Scene["deliveries"]>}){return <div className="trust-lines">{deliveries.map(d=><p className={d.runtimeState==="different"?"warning":""} key={d.title}><Icon name={d.runtimeState==="different"?"info":"shield"} size={13}/><span><strong>{d.title}</strong><small>{d.trust}</small></span></p>)}</div>}
+function MockPreview({variant}:{variant:NonNullable<ResultFact["previewVariant"]>}){return <div className={`mock-preview ${variant}`}><header><i/><i/><i/><span>运营工作台</span></header><div><aside><b/><i/><i/><i/></aside><main><strong>今天值得关注</strong><div className="mock-stats"><i/><i/><i/></div><div className="mock-chart"><i/><i/><i/><i/><i/></div><p/><p/></main></div></div>}
+function PreviewOverlay({result,onClose}:{result:ResultFact;onClose:()=>void}){return <div className="preview-overlay"><header><div><span/><strong>隔离结果预览</strong><em>模拟数据 · 不影响真实环境</em></div><button onClick={onClose} aria-label="关闭结果预览"><Icon name="close"/></button></header><div className="preview-stage"><div className="preview-canvas"><MockPreview variant={result.previewVariant??"dashboard"}/></div><aside><span>正在预览</span><h2>{result.title}</h2><p>{result.summary}</p><FactList title="关键变化" items={result.highlights}/><FactList title="检查通过" items={result.checks}/>{result.limitations&&<FactList title="已知限制" items={result.limitations}/>}<button className="primary-button" onClick={onClose}>返回 Work 审阅</button></aside></div></div>}
+function InfoDrawer({title,onClose,children}:{title:string;onClose:()=>void;children:ReactNode}){return <div className="drawer-overlay" onMouseDown={e=>e.target===e.currentTarget&&onClose()}><aside><header><div><span>渐进详情</span><h2>{title}</h2></div><button onClick={onClose} aria-label={`关闭${title}`}><Icon name="close"/></button></header><div className="drawer-content">{children}</div></aside></div>}
 
-export function App() {
-  const [state, dispatch] = useReducer(reducer, undefined, initialState);
-  const pack = useMemo(() => getPack(state.packId), [state.packId]);
-  const scene = useMemo(() => getScene(pack, state.sceneId), [pack, state.sceneId]);
-  const [toast, setToast] = useState("");
-
-  useEffect(() => {
-    const next = `pack=${pack.id}&scene=${scene.id}`;
-    if (window.location.hash.slice(1) !== next) window.history.replaceState(null, "", `#${next}`);
-  }, [pack.id, scene.id]);
-
-  useEffect(() => {
-    const onHash = () => {
-      const hash = readHash();
-      const nextPack = getPack(hash.packId);
-      const nextScene = getScene(nextPack, hash.sceneId ?? nextPack.seed);
-      dispatch({ type: "select-scene", pack: nextPack, scene: nextScene });
-    };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
-
-  const move = (transition: Transition) => {
-    dispatch({ type: "transition", pack, target: transition.to });
-    setToast(transition.hint ?? "模拟状态已推进");
-    window.setTimeout(() => setToast(""), 1800);
-  };
-
-  return (
-    <div className={`app tone-${scene.tone}`}>
-      <header className="topbar">
-        <button className="brand" onClick={() => dispatch({ type: "navigate", surface: "home" })} aria-label="返回 Watt 首页">
-          <span className="brand-mark"><Icon name="spark" size={18} /></span>
-          <span>Watt</span>
-        </button>
-        <nav className="primary-nav" aria-label="主导航">
-          {(Object.keys(surfaceMeta) as Surface[]).map((surface) => (
-            <button key={surface} className={state.surface === surface ? "active" : ""} onClick={() => dispatch({ type: "navigate", surface })}>
-              <Icon name={surfaceMeta[surface].icon} size={17} />
-              {surfaceMeta[surface].label}
-            </button>
-          ))}
-        </nav>
-        <div className="top-actions">
-          <span className="simulation-badge"><span />Watt Experience Prototype — simulated data</span>
-          <button className="icon-button reviewer-trigger" onClick={() => dispatch({ type: "toggle-reviewer" })} aria-label="打开评审模式"><Icon name="sliders" /></button>
-        </div>
-      </header>
-
-      <main className="main-shell">
-        <ContextRail pack={pack} scene={scene} surface={state.surface} onNavigate={(surface) => dispatch({ type: "navigate", surface })} />
-        <section className="content-area">
-          {state.surface === "home" && <HomeSurface scene={scene} pack={pack} onOpenWork={() => dispatch({ type: "navigate", surface: "work" })} onMove={move} onProduction={() => dispatch({ type: "toggle-production" })} />}
-          {state.surface === "work" && <WorkSurface scene={scene} pack={pack} onMove={move} onProduction={() => dispatch({ type: "toggle-production" })} onEvidence={() => dispatch({ type: "toggle-evidence" })} onPreview={() => dispatch({ type: "toggle-preview" })} />}
-          {state.surface === "deliveries" && <DeliveriesSurface scene={scene} onMove={move} onWork={() => dispatch({ type: "navigate", surface: "work" })} />}
-        </section>
-      </main>
-
-      {state.productionOpen && <ProductionDrawer scene={scene} onClose={() => dispatch({ type: "toggle-production" })} />}
-      {state.evidenceOpen && <EvidenceDrawer scene={scene} onClose={() => dispatch({ type: "toggle-evidence" })} />}
-      {state.previewOpen && scene.result && <PreviewOverlay result={scene.result} onClose={() => dispatch({ type: "toggle-preview" })} />}
-      {state.reviewerOpen && <ReviewerPanel pack={pack} scene={scene} onClose={() => dispatch({ type: "toggle-reviewer" })} onPack={(next) => dispatch({ type: "select-pack", pack: next })} onScene={(next) => dispatch({ type: "select-scene", pack, scene: next })} onReset={() => dispatch({ type: "reset", pack })} onAdvance={() => scene.transitions[0] && move(scene.transitions[0])} />}
-      {toast && <div className="toast"><Icon name="check" size={16} />{toast}</div>}
-    </div>
-  );
-}
-
-function ContextRail({ pack, scene, surface, onNavigate }: { pack: ScenarioPack; scene: Scene; surface: Surface; onNavigate: (surface: Surface) => void }) {
-  return (
-    <aside className="context-rail">
-      <div className="rail-heading"><span className="rail-kicker">当前体验</span><strong>{pack.shortTitle}</strong></div>
-      <div className="rail-phase"><span className={`status-orb ${scene.tone}`} /><div><small>当前状态</small><span>{phaseLabels[scene.phase]}</span></div></div>
-      {scene.workName ? (
-        <button className={`rail-work ${surface === "work" ? "selected" : ""}`} onClick={() => onNavigate("work")}>
-          <span className="mini-icon"><Icon name="work" size={16} /></span><span><small>当前 Work</small><strong>{scene.workName}</strong></span><Icon name="chevron" size={15} />
-        </button>
-      ) : <div className="rail-empty"><Icon name="message" size={18} /><span>先从一次自然对话开始，不会自动创建 Work。</span></div>}
-      <div className="rail-divider" />
-      <button className="rail-secondary" onClick={() => onNavigate("home")}><Icon name="clock" size={16} />最近变化</button>
-      <button className="rail-secondary" onClick={() => onNavigate("deliveries")}><Icon name="delivery" size={16} />交付历史</button>
-      <div className="rail-foot">场景 {pack.id} · {pack.scenes.findIndex((item) => item.id === scene.id) + 1}/{pack.scenes.length}</div>
-    </aside>
-  );
-}
-
-function SurfaceHeader({ scene, trailing }: { scene: Scene; trailing?: ReactNode }) {
-  return <div className="surface-header"><div><span className="eyebrow">{scene.eyebrow}</span><h1>{scene.title}</h1><p>{scene.summary}</p></div>{trailing}</div>;
-}
-
-function HomeSurface({ scene, pack, onOpenWork, onMove, onProduction }: { scene: Scene; pack: ScenarioPack; onOpenWork: () => void; onMove: (t: Transition) => void; onProduction: () => void }) {
-  const isNew = scene.phase === "PRE_WORK" && !scene.messages?.length;
-  const [starterPrompt, setStarterPrompt] = useState("");
-  const primaryTransition = scene.transitions[0];
-  return (
-    <div className={`surface home-surface ${isNew ? "new-user" : ""}`}>
-      <SurfaceHeader scene={scene} trailing={!isNew && <button className="soft-button" onClick={onProduction}><Icon name="layers" size={16} />生产动态</button>} />
-      {isNew ? (
-        <div className="motive-hero">
-          <div className="motive-glow" />
-          <Composer placeholder="比如：我想做一个能帮助 Watt 推广的运营后台……" featured suggestion={starterPrompt} onSend={() => primaryTransition && onMove(primaryTransition)} />
-          <div className="starter-row"><span>也可以从这里开始</span><button onClick={() => setStarterPrompt("我有个还比较模糊的想法，想请你先帮我理清楚。")}>梳理一个模糊想法</button><button onClick={() => setStarterPrompt("我想改进一个已有产品，先帮我判断最值得解决的问题。")}>改进已有产品</button><button onClick={() => setStarterPrompt("我想先问你一个问题，再决定是否形成正式的 Work。")}>直接问 Watt</button></div>
-          <SceneActions transitions={scene.transitions} onMove={onMove} />
-        </div>
-      ) : (
-        <div className="home-grid">
-          <div className="home-main">
-            {scene.attention && <AttentionCard attention={scene.attention} onAction={() => primaryTransition && onMove(primaryTransition)} />}
-            {scene.changedSince && <ChangedCard items={scene.changedSince} />}
-            {scene.messages && <Conversation messages={scene.messages} compact />}
-            <div className="active-work-card" onClick={onOpenWork} role="button" tabIndex={0}>
-              <div className="card-top"><span className="mini-icon violet"><Icon name="work" size={17} /></span><span className="card-kicker">可以继续</span><Icon name="chevron" size={18} /></div>
-              <h3>{scene.workName ?? "Watt 运营后台"}</h3>
-              <p>{scene.workOutcome ?? "把内容、渠道和用户反馈形成持续运营闭环。"}</p>
-              <span className="inline-status"><span className={`status-orb ${scene.tone}`} />{phaseLabels[scene.phase]}</span>
-            </div>
-          </div>
-          <div className="home-side">
-            {scene.production && <ProductionCard production={scene.production} onOpen={onProduction} />}
-            {scene.deliveries && <DeliveryList deliveries={scene.deliveries} compact onAction={() => primaryTransition && onMove(primaryTransition)} />}
-            <div className="quiet-card"><Icon name="spark" /><div><strong>Watt 会继续照看这些工作</strong><p>只有真正需要你的判断时，才会明确提出。</p></div></div>
-          </div>
-          <SceneActions transitions={scene.transitions} onMove={onMove} />
-        </div>
-      )}
-      <div className="scenario-caption">{pack.reviewReason}</div>
-    </div>
-  );
-}
-
-function WorkSurface({ scene, pack, onMove, onProduction, onEvidence, onPreview }: { scene: Scene; pack: ScenarioPack; onMove: (t: Transition) => void; onProduction: () => void; onEvidence: () => void; onPreview: () => void }) {
-  const primaryTransition = scene.transitions[0];
-  return (
-    <div className="surface work-surface">
-      <SurfaceHeader scene={scene} trailing={<div className="header-actions"><span className={`phase-pill ${scene.tone}`}><span className={`status-orb ${scene.tone}`} />{phaseLabels[scene.phase]}</span>{scene.production && <button className="icon-button" onClick={onProduction} aria-label="查看生产详情"><Icon name="layers" /></button>}</div>} />
-      {scene.workOutcome && <div className="outcome-strip"><span>当前结果目标</span><strong>{scene.workOutcome}</strong></div>}
-      <div className="work-grid">
-        <div className="work-primary">
-          {scene.attention && <AttentionCard attention={scene.attention} onAction={() => primaryTransition && onMove(primaryTransition)} />}
-          {scene.understanding && <FormationReview value={scene.understanding} />}
-          {scene.recommendation && <RecommendationCard value={scene.recommendation} />}
-          {scene.result && <ResultCard result={scene.result} onPreview={onPreview} onEvidence={onEvidence} />}
-          {scene.production && <ProductionCard production={scene.production} onOpen={onProduction} />}
-          {scene.milestones && <MilestoneCard milestones={scene.milestones} />}
-          {scene.deliveries && <DeliveryList deliveries={scene.deliveries} onAction={() => primaryTransition && onMove(primaryTransition)} />}
-          {scene.assets && <AssetsCard assets={scene.assets} />}
-          <SceneActions transitions={scene.transitions} onMove={onMove} />
-        </div>
-        <aside className="conversation-column">
-          <div className="column-title"><div><Icon name="message" size={17} /><strong>与 Watt 对话</strong></div><span>上下文会持续保留</span></div>
-          <Conversation messages={scene.messages ?? defaultConversation(scene)} />
-          <Composer placeholder="继续补充、纠正，或直接问 Watt……" />
-        </aside>
-      </div>
-      <div className="work-meta"><span>{pack.id} · {scene.label}</span><button onClick={onEvidence}>查看事实来源与工程详情 <Icon name="chevron" size={14} /></button></div>
-    </div>
-  );
-}
-
-function DeliveriesSurface({ scene, onMove, onWork }: { scene: Scene; onMove: (t: Transition) => void; onWork: () => void }) {
-  const deliveries = scene.deliveries ?? [{ title: "Watt 运营工作台", form: "Web 应用", detail: "最近交付 · 演示数据", action: "打开交付", trust: "检查通过 · 已授权", runtimeState: "aligned" as const }];
-  const primaryTransition = scene.transitions[0];
-  return <div className="surface deliveries-surface"><SurfaceHeader scene={{ ...scene, eyebrow: scene.surface === "deliveries" ? scene.eyebrow : "你的可用成果", title: scene.surface === "deliveries" ? scene.title : "交付", summary: scene.surface === "deliveries" ? scene.summary : "查看已经真正形成的结果，以及它们与 Work 的关系。" }} trailing={<button className="soft-button" onClick={onWork}><Icon name="work" size={16} />返回相关 Work</button>} />{scene.attention && <AttentionCard attention={scene.attention} onAction={() => primaryTransition && onMove(primaryTransition)} />}<DeliveryList deliveries={deliveries} onAction={() => primaryTransition ? onMove(primaryTransition) : onWork()} />{scene.milestones && <MilestoneCard milestones={scene.milestones} />}<SceneActions transitions={scene.transitions} onMove={onMove} /></div>;
-}
-
-function defaultConversation(scene: Scene): Message[] {
-  if (scene.phase === "READY_FOR_WORK") return [{ actor: "watt", text: "我已经把我们讨论的目标整理成可审阅的 Work。你可以继续补充，也可以按这个理解正式继续。" }];
-  if (scene.phase === "RUNNING") return [{ actor: "watt", text: "我正在按当前目标继续生产。你可以随时补充信息；如果它会改变范围，我会先说明影响。" }];
-  if (scene.phase === "READY_FOR_AUTHORIZATION") return [{ actor: "watt", text: "结果已经通过必要检查。你可以先体验和查看限制，再决定是否授权。" }];
-  return [{ actor: "watt", text: "我会保留当前 Work 的目标和约束。你可以直接说想补充或改变什么。" }];
-}
-
-function Composer({ placeholder, featured = false, suggestion = "", onSend }: { placeholder: string; featured?: boolean; suggestion?: string; onSend?: (value: string) => void }) {
-  const [value, setValue] = useState("");
-  const [sent, setSent] = useState(false);
-  useEffect(() => {
-    if (suggestion) setValue(suggestion);
-  }, [suggestion]);
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    if (!value.trim()) return;
-    const submitted = value.trim();
-    setSent(true); setValue("");
-    window.setTimeout(() => setSent(false), 1800);
-    onSend?.(submitted);
-  };
-  return <form className={`composer ${featured ? "featured" : ""}`} onSubmit={submit}><textarea value={value} onChange={(event) => setValue(event.target.value)} placeholder={placeholder} rows={featured ? 3 : 2} aria-label="给 Watt 发消息" /><div className="composer-footer"><span>{sent ? "已加入当前对话 · 模拟" : "Watt 会结合当前上下文回应"}</span><button type="submit" disabled={!value.trim()} aria-label="发送消息"><Icon name="arrow" size={18} /></button></div></form>;
-}
-
-function Conversation({ messages, compact = false }: { messages: Message[]; compact?: boolean }) {
-  if (!messages.length) return null;
-  return <div className={`conversation ${compact ? "compact" : ""}`}>{messages.map((message, index) => <div className={`message ${message.actor} ${message.pending ? "pending" : ""}`} key={`${message.actor}-${index}`}><div className="avatar">{message.actor === "watt" ? <Icon name="spark" size={14} /> : "你"}</div><div><span className="speaker">{message.actor === "watt" ? "Watt" : "你"}{message.pending && <em>等待发送</em>}</span><p>{message.text}</p></div></div>)}</div>;
-}
-
-function SceneActions({ transitions, onMove }: { transitions: Transition[]; onMove: (t: Transition) => void }) {
-  if (!transitions.length) return <div className="end-state"><Icon name="check" size={17} /><span>此场景路径已走完。你可以打开评审模式切换场景或重置。</span></div>;
-  return <div className="scene-actions">{transitions.map((transition) => <button key={`${transition.label}-${transition.to}`} className={`action-button ${transition.kind ?? "primary"}`} onClick={() => onMove(transition)}>{transition.label}<Icon name={transition.kind === "secondary" ? "chevron" : "arrow"} size={16} /></button>)}</div>;
-}
-
-function AttentionCard({ attention, onAction }: { attention: AttentionFact; onAction?: () => void }) {
-  const labels = { handling: "Watt 正在处理", awareness: "值得知道", decision: "需要你的决定" };
-  const icon: IconName = attention.contract === "decision" ? "spark" : attention.contract === "handling" ? "refresh" : "info";
-  return <section className={`attention-card ${attention.contract}`}><div className="attention-icon"><Icon name={icon} /></div><div className="attention-copy"><span className="card-kicker">{labels[attention.contract]}</span><h2>{attention.title}</h2><p>{attention.body}</p>{attention.consequence && <div className="consequence"><strong>接下来</strong>{attention.consequence}</div>}{attention.action && <button className="inline-action" onClick={onAction}>{attention.action}<Icon name="chevron" size={15} /></button>}</div></section>;
-}
-
-function FormationReview({ value }: { value: NonNullable<Scene["understanding"]> }) {
-  return <section className="formation-card"><div className="section-heading"><div><span className="card-kicker">Work 形成审阅</span><h2>Watt 对目标的当前理解</h2></div><span className="soft-tag">尚未创建 Work</span></div><div className="objective-block"><span>想实现的结果</span><strong>{value.objective}</strong></div><div className="formation-grid"><ListBlock title="主要范围" items={value.scope} /><ListBlock title="重要约束" items={value.constraints} /></div><div className="formation-foot"><div><span>预期交付</span><strong>{value.deliverable}</strong></div><div><span>当前边界</span><p>{value.boundary}</p></div></div></section>;
-}
-
-function ListBlock({ title, items }: { title: string; items: string[] }) {
-  return <div className="list-block"><span>{title}</span><ul>{items.map((item) => <li key={item}><Icon name="check" size={14} />{item}</li>)}</ul></div>;
-}
-
-function RecommendationCard({ value }: { value: NonNullable<Scene["recommendation"]> }) {
-  return <section className="recommendation-card"><div className="recommendation-mark"><Icon name="spark" /></div><div><span className="card-kicker">Watt 的建议</span><h2>{value.title}</h2><p className="recommendation-body">{value.body}</p><div className="rationale"><strong>为什么这样建议</strong><p>{value.rationale}</p></div>{value.alternatives && <details><summary>查看其他可行方向</summary><ul>{value.alternatives.map((item) => <li key={item}>{item}</li>)}</ul></details>}</div></section>;
-}
-
-function MilestoneCard({ milestones }: { milestones: Milestone[] }) {
-  return <section className="milestone-card"><div className="section-heading"><div><span className="card-kicker">有意义的进展</span><h2>从结果看进度</h2></div><span className="soft-tag">不使用虚假百分比</span></div><div className="milestone-list">{milestones.map((item, index) => <div className={`milestone ${item.state}`} key={`${item.label}-${index}`}><div className="milestone-line"><span>{item.state === "done" ? <Icon name="check" size={14} /> : index + 1}</span></div><div><strong>{item.label}</strong><p>{item.detail}</p></div><em>{item.state === "done" ? "已完成" : item.state === "current" ? "当前" : item.state === "blocked" ? "等待决定" : "下一步"}</em></div>)}</div></section>;
-}
-
-function ProductionCard({ production, onOpen }: { production: NonNullable<Scene["production"]>; onOpen: () => void }) {
-  return <section className="production-card"><div className="production-pulse"><span /><span /><span /></div><div className="production-copy"><span className="card-kicker">生产状态</span><h2>{production.label}</h2><p>{production.activity}</p>{production.reason && <div className="reason"><Icon name="clock" size={16} /><span>{production.reason}</span></div>}</div><div className="production-side">{production.elapsed && <span>{production.elapsed}</span>}<button onClick={onOpen}>查看生产详情<Icon name="chevron" size={14} /></button></div></section>;
-}
-
-function AssetsCard({ assets }: { assets: NonNullable<Scene["assets"]> }) {
-  return <section className="assets-card"><div className="section-heading"><div><span className="card-kicker">当前 Work 的资产</span><h2>相关材料与目标</h2></div><Icon name="asset" /></div><div className="asset-list">{assets.map((asset) => <div className="asset-row" key={asset.name}><span className="mini-icon"><Icon name="asset" size={16} /></span><div><strong>{asset.name}</strong><p>{asset.role}</p></div><em>{asset.state}</em></div>)}</div></section>;
-}
-
-function ResultCard({ result, onPreview, onEvidence }: { result: ResultFact; onPreview: () => void; onEvidence: () => void }) {
-  return <section className="result-card"><div className="result-preview-mini"><MockPreview variant={result.previewVariant ?? "dashboard"} /></div><div className="result-copy"><span className="card-kicker">可以审阅的结果</span><h2>{result.title}</h2><p>{result.summary}</p><ul className="highlight-list">{result.highlights.map((item) => <li key={item}><Icon name="check" size={15} />{item}</li>)}</ul><div className="result-actions"><button className="action-button primary" onClick={onPreview}><Icon name="play" size={16} />打开完整预览</button><button className="action-button secondary" onClick={onEvidence}>查看检查与影响</button></div></div></section>;
-}
-
-function MockPreview({ variant }: { variant: NonNullable<ResultFact["previewVariant"]> }) {
-  if (variant === "diff") return <div className="mock-diff"><div className="mock-window-bar"><i /><i /><i /></div><div><span className="minus">−</span><code>状态：处理中</code></div><div><span className="plus">+</span><code>正在处理 · 预计下一步由团队回复</code></div><div><span className="plus">+</span><code>最近更新：已确认问题影响范围</code></div></div>;
-  return <div className={`mock-app ${variant}`}><div className="mock-window-bar"><i /><i /><i /><b>运营工作台</b></div><div className="mock-app-body"><aside><span className="mock-logo" /><i className="on"/><i/><i/><i/></aside><main><div className="mock-title"><b>今天值得关注</b><span /></div><div className="mock-stats"><i/><i/><i/></div><div className="mock-chart"><span/><span/><span/><span/><span/><span/></div><div className="mock-list"><i/><i/><i/></div></main></div></div>;
-}
-
-function DeliveryList({ deliveries, compact = false, onAction }: { deliveries: DeliveryFact[]; compact?: boolean; onAction?: () => void }) {
-  return <section className={`delivery-list-card ${compact ? "compact" : ""}`}><div className="section-heading"><div><span className="card-kicker">{compact ? "最近交付" : "可用成果"}</span><h2>{compact ? "已经真正拿到的结果" : "交付与历史"}</h2></div><Icon name="delivery" /></div><div className="delivery-list">{deliveries.map((delivery, index) => <article className="delivery-row" key={`${delivery.title}-${index}`}><span className="delivery-icon"><Icon name="delivery" /></span><div className="delivery-main"><strong>{delivery.title}</strong><p>{delivery.form} · {delivery.detail}</p><span className={`trust-line ${delivery.runtimeState === "different" ? "different" : ""}`}><Icon name={delivery.runtimeState === "different" ? "info" : "shield"} size={14} />{delivery.trust}</span></div><button onClick={onAction}>{delivery.action}<Icon name="arrow" size={15} /></button></article>)}</div></section>;
-}
-
-function ChangedCard({ items }: { items: string[] }) {
-  return <section className="changed-card"><div className="section-heading"><div><span className="card-kicker">上次离开后</span><h2>这些事情有了进展</h2></div><span className="soft-tag">{items.length} 项变化</span></div><ol>{items.map((item, index) => <li key={item}><span>{index + 1}</span><p>{item}</p><Icon name="chevron" size={15} /></li>)}</ol></section>;
-}
-
-function ProductionDrawer({ scene, onClose }: { scene: Scene; onClose: () => void }) {
-  const detail = scene.production?.queueDetail ?? ["当前阶段与 Work 身份保持不变", "生产可以安全暂停、让出和恢复", "普通故障由 Watt 自行处理"];
-  return <div className="overlay-shell" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><aside className="side-drawer"><DrawerHeader label="生产详情" title={scene.production?.label ?? phaseLabels[scene.phase]} onClose={onClose} /><div className="drawer-body"><div className="drawer-status"><span className={`status-orb ${scene.tone}`} /><div><strong>{scene.production?.activity ?? scene.summary}</strong><p>{scene.production?.reason ?? "这是当前 Work 的上下文生产状态，不是独立的队列管理任务。"}</p></div></div><div className="drawer-section"><span>当前状态说明</span>{detail.map((item) => <div className="detail-row" key={item}><Icon name="check" size={15} /><p>{item}</p></div>)}</div>{scene.milestones && <MilestoneCard milestones={scene.milestones} />}<div className="simulation-note"><Icon name="info" size={16} />此处仅模拟 Queue/Executor 的用户投影，不运行真实生产。</div></div></aside></div>;
-}
-
-function EvidenceDrawer({ scene, onClose }: { scene: Scene; onClose: () => void }) {
-  return <div className="overlay-shell" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><aside className="side-drawer"><DrawerHeader label="渐进详情" title="事实来源与检查" onClose={onClose} /><div className="drawer-body"><div className="simulation-note"><Icon name="shield" size={16} />这些是用于体验验证的 owner-specific mock facts，不是生产事实。</div><div className="drawer-section"><span>架构所有者投影</span>{Object.entries(scene.ownerFacts).map(([owner, fact]) => <div className="owner-fact" key={owner}><strong>{owner}</strong><p>{fact}</p></div>)}</div>{scene.result && <><div className="drawer-section"><span>检查结果</span>{scene.result.checks.map((check) => <div className="detail-row" key={check}><Icon name="check" size={15} /><p>{check}</p></div>)}</div>{scene.result.limitations && <div className="drawer-section warning"><span>已知限制</span>{scene.result.limitations.map((item) => <div className="detail-row" key={item}><Icon name="info" size={15} /><p>{item}</p></div>)}</div>}</>}</div></aside></div>;
-}
-
-function PreviewOverlay({ result, onClose }: { result: ResultFact; onClose: () => void }) {
-  return <div className="preview-overlay"><div className="preview-toolbar"><div><span className="preview-dot" /><strong>隔离结果预览</strong><em>模拟数据 · 不会影响真实环境</em></div><button onClick={onClose}><Icon name="close" /></button></div><div className="preview-stage"><div className="preview-frame"><MockPreview variant={result.previewVariant ?? "dashboard"} /></div><aside className="preview-inspector"><span className="card-kicker">正在预览</span><h2>{result.title}</h2><p>{result.summary}</p><ListBlock title="关键变化" items={result.highlights} /><ListBlock title="检查通过" items={result.checks} />{result.limitations && <ListBlock title="已知限制" items={result.limitations} />}<button className="action-button primary" onClick={onClose}>返回结果审阅<Icon name="arrow" size={16} /></button></aside></div></div>;
-}
-
-function DrawerHeader({ label, title, onClose }: { label: string; title: string; onClose: () => void }) {
-  return <header className="drawer-header"><div><span>{label}</span><h2>{title}</h2></div><button onClick={onClose} aria-label={`关闭${title}`}><Icon name="close" /></button></header>;
-}
-
-function ReviewerPanel({ pack, scene, onClose, onPack, onScene, onReset, onAdvance }: { pack: ScenarioPack; scene: Scene; onClose: () => void; onPack: (pack: ScenarioPack) => void; onScene: (scene: Scene) => void; onReset: () => void; onAdvance: () => void }) {
-  const key = `watt-prototype-note:${pack.id}:${scene.id}`;
-  const [note, setNote] = useState(() => localStorage.getItem(key) ?? "");
-  useEffect(() => setNote(localStorage.getItem(key) ?? ""), [key]);
-  return <div className="reviewer-overlay" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><aside className="reviewer-panel"><DrawerHeader label="独立评审工具" title="体验评审模式" onClose={onClose} /><div className="reviewer-body"><label>场景包<select value={pack.id} onChange={(event) => onPack(getPack(event.target.value))}>{scenarioPacks.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.shortTitle}</option>)}</select></label><div className="reviewer-description"><strong>{pack.title}</strong><p>{pack.description}</p><span>{pack.reviewReason}</span></div><label>当前场景<select value={scene.id} onChange={(event) => onScene(getScene(pack, event.target.value))}>{pack.scenes.map((item, index) => <option value={item.id} key={item.id}>{index + 1}. {item.label}</option>)}</select></label><div className="reviewer-buttons"><button onClick={onReset}><Icon name="refresh" size={16} />重置场景包</button><button className="primary" onClick={onAdvance} disabled={!scene.transitions.length}><Icon name="play" size={16} />推进模拟</button></div><div className="reviewer-meta"><div><span>模拟状态</span><code>{scene.phase}</code></div><div><span>场景清单</span><p>{scene.scenarioIds.join(" · ") || "—"}</p></div><div><span>架构张力</span><p>{scene.tensionIds.join(" · ") || "—"}</p></div><div><span>本场景验收重点</span><p>{scene.acceptanceFocus}</p></div></div><label>本地评审笔记<textarea rows={4} value={note} onChange={(event) => setNote(event.target.value)} placeholder="记录让你困惑、安心或想调整的地方……" /></label><button className="save-note" onClick={() => localStorage.setItem(key, note)}><Icon name="check" size={16} />保存在此浏览器</button><div className="simulation-note"><Icon name="info" size={16} />评审笔记只保存在当前浏览器，不写入产品数据或代码库。</div></div></aside></div>;
-}
+function ReviewerPanel({pack,scene,projection,focus,interaction,selectedWork,onClose,onPack,onScene,onReset,onAdvance}:{pack:ScenarioPack;scene:Scene;projection:ReturnType<typeof projectWorkspace>;focus:WorkspaceFunction|null;interaction:CurrentInteraction;selectedWork:WorkNavItem;onClose:()=>void;onPack:(p:ScenarioPack)=>void;onScene:(s:Scene)=>void;onReset:()=>void;onAdvance:()=>void}){const key=`watt-prototype-v2-note:${pack.id}:${scene.id}`,[note,setNote]=useState(()=>localStorage.getItem(key)??"");useEffect(()=>setNote(localStorage.getItem(key)??""),[key]);return <div className="reviewer-overlay" onMouseDown={e=>e.target===e.currentTarget&&onClose()}><aside className="reviewer-panel"><header><div><span>独立评审工具</span><h2>Prototype v2 Reviewer</h2></div><button onClick={onClose} aria-label="关闭体验评审模式"><Icon name="close"/></button></header><div className="reviewer-content"><label>场景包<select value={pack.id} onChange={e=>onPack(getPack(e.target.value))}>{scenarioPacks.map(p=><option value={p.id} key={p.id}>{p.id} · {p.shortTitle}</option>)}</select></label><p className="reviewer-summary"><strong>{pack.title}</strong>{pack.reviewReason}</p><label>当前场景<select value={scene.id} onChange={e=>onScene(getScene(pack,e.target.value))}>{pack.scenes.map((s,i)=><option value={s.id} key={s.id}>{i+1}. {s.label}</option>)}</select></label><div className="reviewer-controls"><button onClick={onReset}><Icon name="refresh" size={13}/>重置</button><button onClick={onAdvance} disabled={!scene.transitions.length}><Icon name="play" size={13}/>推进模拟</button></div><div className="reviewer-facts"><p><span>可见功能</span>{projection.visible.map(x=>WORKSPACE_LABELS[x]).join(" · ")}</p><p><span>聚焦功能</span>{focus?WORKSPACE_LABELS[focus]:"自适应布局"}</p><p><span>当前交流</span>{interaction.phase}</p><p><span>Work 分组</span>{selectedWork.groupLabel} · {selectedWork.groupSource==="human"?"Human-defined":"AI-assigned"}</p><p><span>Scenario / Tension</span>{[...scene.scenarioIds,...scene.tensionIds].join(" · ")||"—"}</p><p><span>验收重点</span>{scene.acceptanceFocus}</p><p><span>设计记录</span>Core Workspace §18 · Transient Interaction</p></div><label>本地评审笔记<textarea rows={4} value={note} onChange={e=>setNote(e.target.value)} placeholder="记录注意力、理解或交互问题…"/></label><button className="save-note" onClick={()=>localStorage.setItem(key,note)}>保存在此浏览器</button><p className="reviewer-boundary">仅模拟数据；记录不会写入产品或生产系统。</p></div></aside></div>}

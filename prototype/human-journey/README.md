@@ -2,7 +2,7 @@
 
 ## 用途
 
-这是 Watt 首发版用户旅程的高保真、可点击、确定性体验模拟。它供 Human Governor 在任何正式 UI 或后端实现开始前，评审产品心智模型、导航、对话、Work 形成、生产感知、Attention、结果授权、交付与重新进入。
+这是 Watt 首发版用户旅程的高保真、可点击、确定性体验模拟。Prototype v2 用于评审 Work-centric 核心工作区、Current Interaction Layer 与双态 Composer，同时保留 v1 的完整场景覆盖。
 
 所有界面都是候选体验，当前状态均为 `DRAFT`，不代表 Human 已接受。
 
@@ -45,6 +45,7 @@ npm run check
 - 按默认路径推进模拟；
 - 查看 J 场景 ID、T 张力 ID 和验收重点；
 - 保存仅存在当前浏览器 `localStorage` 中的短评审笔记。
+- 查看当前可见的 Reality/Agenda/Production/Actions、Focus 状态、Current Interaction 状态与 Work 分组来源。
 
 当前场景会同步到 URL fragment：
 
@@ -70,3 +71,16 @@ npm run check
 - 顶层导航按本轮 Human Governor 覆盖调整为“首页 / Work / 交付”；Queue 通过首页、Work 和二级生产详情呈现。
 - 当前使用临时视觉系统，不冻结最终品牌、色彩或字体。
 - 窄屏布局用于体验方向评审，不代表最终移动端产品范围。
+- Current Interaction 的 5.2 秒阅读宽限、流式节奏、Focus 比例与 Composer 展开方式都是可逆 dogfood 参数。
+- Work 分组、置顶、历史与投影逻辑是本地模拟元数据，不改变生产优先级或 Work 领域事实。
+
+## Prototype v2 的主要变化
+
+- 左侧以当前 Work 为核心，支持搜索、置顶、语义/人工分组、折叠、拖放和历史工作项；
+- 中央按场景事实自适应显示“当前情况 / 接下来 / 生产进展 / 需要你处理”，而非固定四宫格；
+- 每个可见功能可进入 Focus Mode，其余功能收成可发现的摘要条；
+- Conversation History 位于右侧，可收起，承担历史溯源而非当前真相；
+- Composer 被动时位于右侧，获得焦点后在 Work 下方展开；
+- 刚提交的 Human turn 与流式 Watt 回复保留在中央 Current Interaction Layer；
+- 回复完成后经过阅读保护与安静 crossfade 进入对话历史，已形成的 Reality 继续保留；
+- 交付按 Work → Delivery revision → Artifact/Runtime/Repository/Documentation 组织。
