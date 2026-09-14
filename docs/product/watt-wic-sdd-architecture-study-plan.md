@@ -269,7 +269,142 @@ and label the evidence boundary clearly.
   documents, maintenance, synchronization and review?
 - What mechanisms reduce that cost?
 
-## 11. Failure modes to investigate
+## 11. WIC / Spec System Experimentability
+
+WIC is expected to be a long-lived optimization surface. Where safe, its
+interaction intelligence should eventually be testable and evolvable without
+requiring an ordinary full main-application release for every strategy change.
+
+An engineering UI with independent checkboxes such as Pattern Recognition,
+Requirements Analysis or Extra Conflict Analysis is only one candidate
+experiment interaction. Checkbox-based, single-variable ablation is not frozen
+as Watt's design. The study must first examine mature mechanisms including
+capability toggles, strategy profiles, configuration bundles, instruction
+versions, experiment variants, replay, shadow evaluation, canary activation,
+dynamic configuration, rollback and policy/version management.
+
+For every relevant external system, investigate:
+
+### A. Behavioral-layer configuration
+
+- Can requirement analysis, Pattern routing, planning, context selection,
+  structured output, validation, readiness, artifact generation and prompt
+  strategies vary independently?
+- Are they hard-coded, configuration-driven, plugin-driven, policy-driven or
+  dynamically selectable?
+
+### B. Formal experiment abstraction
+
+- Does the system expose experiment, variant, profile, mode, strategy, policy,
+  preset, pipeline, recipe or feature-flag concepts?
+- Are experiments first-class or improvised through configuration?
+
+### C. Same-input comparison
+
+Can the same input, repository and context be evaluated through Strategy A, B
+and C? Look for deterministic replay, recorded conversations, fixtures,
+benchmark corpora, scenario replay, golden cases and evaluation suites.
+
+### D. Ablation
+
+Can a mechanism be removed or replaced to measure marginal contribution, for
+example baseline versus spec analysis, Pattern routing or context optimization?
+Study dependencies and interaction effects; do not assume single-variable
+testing is sufficient.
+
+### E. Strategy bundles
+
+Investigate coherent profiles such as OPEN_BASELINE, PATTERN_LIGHT, SPEC_LIGHT
+or HIGH_STRUCTURE. Compare individual flags, bundles/presets, composable
+policies, pipeline definitions and hierarchical configuration.
+
+### F. Online and offline evaluation
+
+Inspect offline replay, interactive sandbox testing, shadow execution,
+production A/B, canary and gradual rollout. Identify which mechanisms are safe
+for intent/refinement systems and which risk inconsistent Human experience.
+
+### G. Metrics
+
+Relevant measures may include refinement turns, time to readiness, Human
+corrections, relevant/unnecessary question ratios, Work Formation completeness,
+intent drift, Pattern errors/rerouting, token cost, latency, artifact count,
+implementation rework, Human acceptance and perceived intelligence. External
+metrics are evidence, not automatically sufficient for Watt.
+
+The external study must also identify what is hard-coded and difficult to
+optimize, how variants/prompts/policies are versioned, whether activation and
+rollback exist, whether behavior is attributable to a revision, how config is
+prevented from becoming Truth, and which experiment mechanisms add more
+platform complexity than value.
+
+## 12. Future capability candidate: WIC Lab
+
+WIC Lab is a candidate isolated internal environment for testing and optimizing
+Watt interaction intelligence independently from production product UX. It is
+not approved for implementation.
+
+Candidate areas for post-study design:
+
+- **Interactive Lab:** converse with WIC under a selected strategy or Policy
+  revision. Engineering-only diagnostics may show selected Pattern and routing
+  evidence, satisfied/missing semantic obligations, selected context,
+  readiness, model/profile, Provider latency, token use, Policy revision and
+  intermediate structured results. These diagnostics must remain separate from
+  customer-facing UX.
+- **Replay Lab:** replay frozen interactions against multiple strategies while
+  preserving exact input evidence where possible.
+- **Comparative evaluation:** side-by-side or blind Human review, semantic
+  diff, metrics, scenario evaluation and batch-corpus execution.
+- **Ablation:** assess whether Pattern Recognition, conflict analysis, context
+  strategy, readiness logic, model profile, instruction revision or coalesced
+  versus staged inference earns its cost.
+
+WIC Lab must account for interaction effects and must not create an uncontrolled
+combinatorial matrix. Exact UI and evaluation methodology remain open.
+
+## 13. Future architecture candidate: WIC Policy
+
+WIC Policy / Interaction Policy is a candidate separation between frequently
+optimized interaction strategy and slower capability-code releases.
+
+~~~text
+Production Watt
+    -> WIC capability runtime
+    -> active immutable WIC Policy revision
+~~~
+
+A future Policy might describe some subset of Provider/model profile,
+instructions, Pattern definitions, routing configuration, semantic obligations,
+readiness strategy, context policy, artifact triggers, response strategy and
+experiment metadata. Its exact contents are not frozen.
+
+Policy may influence how Watt interprets, what it asks, which context it
+selects, which Pattern it recommends and when it believes refinement is
+sufficient. It does not own Human Intent, Work Reality, Human Authority,
+Steering truth, Verification or Repository Reality. Policy is behavior and
+configuration, not Product Truth.
+
+Strategy/config changes might later ship as immutable Policy revisions.
+Capability-code changes such as a new inference engine, parser, context
+provider, domain type or Runtime capability still require ordinary code release
+and technical qualification.
+
+> Dynamic Policy release must never become dynamic arbitrary-code injection.
+
+The future study should examine immutable versions, attribution, qualification,
+activation and rollback, for example candidate -> Lab evaluation ->
+qualification -> dogfood/canary -> activation, with a safe rollback from v19 to
+v18. Historical interactions should ideally remain attributable to the exact
+Policy revision used; no persistence design is frozen here.
+
+Shadow research should separate the production response from a candidate
+evaluation-only result. Canary research should cover internal dogfood, limited
+cohort, broader cohort and default activation. Both must consider consistency,
+attribution, rollback, Human experience discontinuity, privacy and cost. No
+shadow, canary, feature flag or Policy Runtime is implemented by this plan.
+
+## 14. Failure modes to investigate
 
 The study must actively seek evidence of:
 
@@ -286,7 +421,7 @@ The study must actively seek evidence of:
 - **One-way waterfall:** implementation Reality cannot challenge earlier
   intent.
 
-## 12. Watt guardrail: every artifact must earn its keep
+## 15. Watt guardrail: every artifact must earn its keep
 
 > Every production artifact must earn its keep.
 
@@ -305,7 +440,7 @@ of:
 If it does not, simplify or remove it. More artifacts do not automatically mean
 better governance.
 
-## 13. Learn mechanisms, not product metaphors
+## 16. Learn mechanisms, not product metaphors
 
 For each external mechanism, classify it from evidence as:
 
@@ -327,7 +462,7 @@ production object, repository/project as universal identity, repeated approval
 gates and chat/session as Truth. These classifications must not be assumed
 before evidence is gathered.
 
-## 14. Required comparison matrix
+## 17. Required comparison matrix
 
 The future study should compare systems across:
 
@@ -344,10 +479,22 @@ The future study should compare systems across:
 | Verification linkage | | | | |
 | Versioning and context strategy | | | | |
 | Cost/bureaucracy control | | | | |
+| Experiment abstraction | | | | |
+| Strategy configuration | | | | |
+| Feature/mechanism toggles | | | | |
+| Bundle/profile support | | | | |
+| Replay and evaluation corpus | | | | |
+| Ablation | | | | |
+| A/B, shadow and canary | | | | |
+| Policy versioning | | | | |
+| Dynamic activation and rollback | | | | |
+| Behavior attribution | | | | |
+| Experiment metrics | | | | |
+| Operational complexity | | | | |
 
 The matrix supports mechanism analysis; it is not a feature checklist.
 
-## 15. Required source evidence
+## 18. Required source evidence
 
 For every significant mechanism, record:
 
@@ -359,7 +506,7 @@ For every significant mechanism, record:
 
 Marketing claims must remain separate from source-proven Reality.
 
-## 16. Expected future deliverables
+## 19. Expected future deliverables
 
 Only after explicit study authorization:
 
@@ -370,10 +517,12 @@ Only after explicit study authorization:
    changes Watt assumptions.
 5. **Candidate WIC Architecture Amendment:** only after study completion and
    independent review.
+6. **Experimentability Mechanism Review:** evidence about profiles, replay,
+   ablation, Policy versioning, activation, rollback and operational cost.
 
 This mission does not create the final architecture amendment.
 
-## 17. Adaptive Work Patterns relationship
+## 20. Adaptive Work Patterns relationship
 
 The [Adaptive Work Patterns candidate](watt-adaptive-work-patterns-candidate.md)
 is a hypothesis to test, not a presumed answer. The study should ask:
@@ -384,7 +533,7 @@ is a hypothesis to test, not a presumed answer. The study should ask:
 - What belongs to Pattern, WIC, Guided Design and Steering?
 - How should versions and production-evidence learning be represented?
 
-## 18. Experience-before-Production relationship
+## 21. Experience-before-Production relationship
 
 The [Experience-before-Production candidate](experience-before-production-candidate.md)
 uses Scenario Inventory, Architecture Tension Register, Prototype Scenario
@@ -395,7 +544,7 @@ whether versioned Work facts, scenarios, prototype and design/engineering facts
 collectively form a stronger AI-native specification. Markdown specification
 files are not assumed to be Watt's desired end state.
 
-## 19. Future ECF relationship
+## 22. Future ECF relationship
 
 SDD systems often use specifications as persistent context. Watt's future ECF
 instead aims to assemble decision-scoped engineering Reality. The study should
@@ -404,7 +553,7 @@ one source among Work, Scenario, Decision and Repository Reality.
 
 This plan does not implement ECF.
 
-## 20. Guardian and Verification boundary
+## 23. Guardian and Verification boundary
 
 The existing principle remains:
 
@@ -416,7 +565,51 @@ Future intent/spec artifacts may define verification obligations, expected
 behavior, scenario coverage and acceptance boundaries. They do not make the
 Executor self-verifying.
 
-## 21. Study timing
+## 24. Future WIC Optimization phase
+
+If external evidence supports the direction, a later WIC Optimization / WIC Lab
+phase should design two goals together.
+
+### Goal 1: WIC intelligence calibration
+
+Revisit open refinement, Adaptive Work Patterns, SDD mechanisms, Work
+Formation, readiness, context selection, Human Journey/prototype triggers and
+perceived intelligence.
+
+### Goal 2: experiment and release infrastructure
+
+Design an appropriately small WIC Lab, replay/evaluation harness, candidate
+Policy model, strategy comparison workflow, immutable versioning and
+activation/rollback seam. These goals should evolve together so Watt can
+improve WIC without repeatedly restructuring the main product.
+
+> The goal is to make WIC easier to improve, not to create a second complex
+> product for configuring WIC.
+
+Every layer must earn its keep. Experiment and Policy machinery must justify
+itself through faster iteration, better evaluation, safer release, lower
+main-application coupling, clearer attribution or lower rollback risk. If its
+flags, configuration or tooling become more complex than the interaction
+behavior being optimized, simplify it.
+
+The intended program order is:
+
+~~~text
+clickable prototype review
+    -> collect UX / WIC findings
+    -> external SDD / WIC architecture study
+    -> study external experimentation mechanisms
+    -> Architecture Lead synthesis
+    -> decide Adaptive Work Pattern / WIC architecture
+    -> design WIC Lab + Policy architecture
+    -> bounded implementation
+    -> dogfood / benchmark
+    -> production activation
+~~~
+
+WIC Lab implementation must not jump ahead of the external study.
+
+## 25. Study timing
 
 The Human Governor explicitly does not authorize this study now. The sequence
 remains:
@@ -432,7 +625,7 @@ remains:
 
 The plan must not interrupt the current prototype-review sequence.
 
-## 22. Future dogfood and benchmark
+## 26. Future dogfood and benchmark
 
 If later study results lead to architecture changes, evaluate real Human
 experience and production economics, not design elegance alone:
@@ -450,7 +643,7 @@ experience and production economics, not design elegance alone:
 Where practical compare current open refinement with pattern-guided refinement.
 Do not claim improvement without evidence.
 
-## 23. Explicit non-goals and non-decisions
+## 27. Explicit non-goals and non-decisions
 
 This plan does not:
 
@@ -461,9 +654,10 @@ This plan does not:
 - define a Spec, Pattern or persistence model;
 - alter WIC, Work Formation, Guided Design or Steering;
 - implement ECF or change Guardian/Verification;
+- implement WIC Lab, WIC Policy, Runtime feature flags, shadow or canary;
 - modify the clickable prototype.
 
-## 24. Revisit point
+## 28. Revisit point
 
 ~~~text
 REVISIT_POINT
@@ -473,7 +667,7 @@ REVISIT_POINT
 At that point, the Human Governor will decide whether accumulated dogfood
 evidence justifies launching the external study.
 
-## 25. Current plan status
+## 29. Current plan status
 
 ~~~text
 STUDY_STATUS
