@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { interactionReducer, initialInteraction, transitionMotion } from "./interactionModel";
 import { getPack, getScene } from "./scenarios";
-import { DEFAULT_WORKS, assignHumanGroup, assignSemanticGroup, projectWorkspace, splitWorkHistory, togglePinned } from "./workspaceModel";
+import { DEFAULT_WORKS, WORKSPACE_SURFACE_IDS, assignHumanGroup, assignSemanticGroup, projectWorkspace, splitWorkHistory, togglePinned, workspaceMode, workspacePlacements, workspaceSummary, type WorkspaceFunction } from "./workspaceModel";
 
 describe("v2 Work navigation", () => {
   it("assigns semantic grouping only when the label is empty", () => {
@@ -39,6 +39,48 @@ describe("v2 adaptive workspace", () => {
     expect(focused.focused).toBe("reality");
     expect(focused.compact).toContain("actions");
     expect(projectWorkspace(scene, null).focused).toBeNull();
+  });
+});
+
+describe("v2.1 adaptive workspace morph", () => {
+  const all: WorkspaceFunction[] = ["reality", "agenda", "production", "actions"];
+
+  it("uses a true 2x2 overview for four surfaces", () => {
+    const layout = workspacePlacements(all, null);
+    expect(workspaceMode(null)).toBe("OVERVIEW");
+    expect([layout.reality?.gridRow, layout.agenda?.gridRow, layout.production?.gridRow, layout.actions?.gridRow]).toEqual([1, 1, 2, 2]);
+    expect([layout.reality?.gridColumn, layout.agenda?.gridColumn]).toEqual(["1 / 7", "7 / 13"]);
+  });
+
+  it.each([
+    ["reality", "FOCUS_1", [1, 2, 2, 2]],
+    ["agenda", "FOCUS_2", [1, 2, 3, 3]],
+    ["production", "FOCUS_3", [1, 1, 2, 3]],
+    ["actions", "FOCUS_4", [1, 1, 1, 2]],
+  ] as const)("maps %s to its distinct spatial focus configuration", (focused, mode, rows) => {
+    const layout = workspacePlacements(all, focused);
+    expect(workspaceMode(focused)).toBe(mode);
+    expect([layout.reality?.gridRow, layout.agenda?.gridRow, layout.production?.gridRow, layout.actions?.gridRow]).toEqual(rows);
+    expect(layout[focused]?.dominant).toBe(true);
+    expect(all.filter((surface) => surface !== focused).every((surface) => layout[surface]?.compact)).toBe(true);
+  });
+
+  it("fills available space for three and two surfaces without empty placements", () => {
+    const three = workspacePlacements(["reality", "agenda", "actions"], null);
+    expect(three.actions).toMatchObject({ gridColumn: "1 / 13", gridRow: 2 });
+    const two = workspacePlacements(["reality", "agenda"], null);
+    expect([two.reality?.gridColumn, two.agenda?.gridColumn]).toEqual(["1 / 7", "7 / 13"]);
+    expect(two.production).toBeUndefined();
+    expect(two.actions).toBeUndefined();
+  });
+
+  it("keeps stable surface identity and does not steal focus for a critical Action", () => {
+    expect(WORKSPACE_SURFACE_IDS).toEqual({ reality: "surface-1", agenda: "surface-2", production: "surface-3", actions: "surface-4" });
+    const base = getScene(getPack("P09"), "p09-failed");
+    const scene = { ...base, attention: { ...base.attention!, contract: "decision" as const, title: "是否采用修订方案？" } };
+    const projection = projectWorkspace(scene, "production");
+    expect(projection.focused).toBe("production");
+    expect(workspaceSummary(scene, "actions")).toMatch(/^1 项决定/);
   });
 });
 

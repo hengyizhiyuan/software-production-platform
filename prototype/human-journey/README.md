@@ -2,7 +2,7 @@
 
 ## 用途
 
-这是 Watt 首发版用户旅程的高保真、可点击、确定性体验模拟。Prototype v2 用于评审 Work-centric 核心工作区、Current Interaction Layer 与双态 Composer，同时保留 v1 的完整场景覆盖。
+这是 Watt 首发版用户旅程的高保真、可点击、确定性体验模拟。Prototype v2.1 用于评审 Work-centric 核心工作区、Current Interaction Layer、双态 Composer 与四表面连续变形，同时保留 v1/v2 的完整场景覆盖。
 
 所有界面都是候选体验，当前状态均为 `DRAFT`，不代表 Human 已接受。
 
@@ -84,3 +84,17 @@ npm run check
 - 刚提交的 Human turn 与流式 Watt 回复保留在中央 Current Interaction Layer；
 - 回复完成后经过阅读保护与安静 crossfade 进入对话历史，已形成的 Reality 继续保留；
 - 交付按 Work → Delivery revision → Artifact/Runtime/Repository/Documentation 组织。
+
+## Prototype v2.1 的聚焦修订
+
+v2 的四项功能在聚焦时更像卡片最大化与纵向替换，没有充分表达 Human Governor 草图中的空间连续性。v2.1 只修订中央工作空间：
+
+- 四个可见表面默认形成一个连贯的 2×2 概览；不足四个表面时自然填满可用区域；
+- `surface-1` 至 `surface-4` 在概览、聚焦和直接切换期间保持同一 React identity；
+- Surface 1–4 各自使用与原始空间关系一致的主区和摘要区构型；
+- 压缩表面仍显示标题、当前状态摘要与切换入口，重要 Actions 只提示，不自动夺取焦点；
+- 使用 360ms、无弹跳的 FLIP 位移与缩放动画解释空间变化；连续点击会取消旧动画并转向最新布局；
+- `prefers-reduced-motion` 下跳过空间动画，键盘仍可访问所有聚焦和恢复控件；
+- 正文始终挂载，压缩只改变呈现，因此局部 disclosure、草稿和选择状态可继续保留。
+
+这轮没有调整四个表面的内部内容、Work 导航、Delivery、Current Interaction、Composer、场景语义或生产架构。360ms 只是可逆原型参数。

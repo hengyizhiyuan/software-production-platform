@@ -655,3 +655,40 @@ example, `pause requested` does not mean `production safely paused`.
 
 This is experience simulation only. It does not establish a production owner,
 persistence contract, governance rule or WIC architecture change.
+
+## 19. Adaptive Workspace Morphing
+
+Prototype v2.1 applies the Human Governor's sketch as the spatial source of
+truth for the central Work workspace. Reality, Agenda, Production and Actions
+remain the same four information functions with stable implementation
+identities `surface-1` through `surface-4`.
+
+With four applicable surfaces, overview is a coherent 2×2 field. Focus does
+not open another page: the selected surface grows from its current position,
+while the remaining applicable surfaces move into meaningful summary regions.
+The four focus configurations preserve the relationships in the sketch:
+
+~~~text
+FOCUS_1    1 main above; 2 / 3 / 4 summaries below
+FOCUS_2    1 summary above; 2 main; 3 / 4 summaries below
+FOCUS_3    1 / 2 summaries above; 3 main; 4 summary below
+FOCUS_4    1 / 2 / 3 summaries above; 4 main below
+~~~
+
+The implementation keeps each surface component and its body mounted while
+changing grid coordinates. A restrained FLIP transition explains movement and
+size change; a new focus request interrupts the old transition and becomes the
+latest target. Reduced-motion preference switches directly to the new layout.
+Compressed surfaces remain keyboard-selectable and expose a title, meaningful
+current summary and any Human-required signal. Such a signal does not steal
+focus.
+
+When fewer surfaces apply, the visible set fills the available area without
+inventing empty functions. Narrow layouts retain the same surface identities
+and use a readable vertical arrangement.
+
+This focused correction does not decide final surface names, panel ratios,
+timing, visual branding or lower-level Reality, Agenda, PWU/Production and
+Actions design. It does not change Current Interaction, Conversation,
+Composer, Work navigation, Delivery, lifecycle semantics or production
+architecture.

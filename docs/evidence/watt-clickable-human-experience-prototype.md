@@ -4,7 +4,7 @@
 
 ```text
 原型候选
-    PROTOTYPE V2 IMPLEMENTED
+    PROTOTYPE V2.1 IMPLEMENTED
 
 Human Experience Acceptance
     PENDING
@@ -41,6 +41,25 @@ v1 验证了完整 Journey 和 16 个场景包，但 Work 页面在多张内容�
 
 v1 的提交与记录仍保留在 Git 历史；本次没有把 v1 改写成从未存在。
 
+## v2 → v2.1：Human Governor 草图空间校正
+
+v2 已具备四项功能和 Human-controlled Focus Mode，但实际表现仍接近“卡片最大化”：聚焦表面置顶，其余表面统一纵向压缩，无法直观看出表面来自 2×2 空间中的哪个位置。
+
+v2.1 按 Human Governor 草图把中央区域改为一个持续存在的 adaptive workspace：
+
+- 四表面场景默认是完整 2×2 概览，而非互不相关的 dashboard cards；
+- Surface 1 聚焦时位于主区上方，2/3/4 在底部并列；
+- Surface 2 聚焦时保留 Surface 1 顶部摘要，3/4 位于底部；
+- Surface 3 聚焦时保留 1/2 顶部摘要和 4 底部摘要；
+- Surface 4 聚焦时保留 1/2/3 顶部摘要；
+- 每个表面的 `surface-1`—`surface-4` identity 和正文实例持续保留；
+- 360ms FLIP 动画从实际旧位置过渡到新位置，焦点间可直接切换并中断旧动画；
+- 压缩表面展示真实状态摘要；关键 Actions 会增强提示，但不夺取 Human 当前焦点；
+- 1–3 个表面时重新分配现有空间，不产生空象限；窄屏改为保持 identity 的纵向布局；
+- reduced-motion 环境不执行空间动画，所有原生按钮继续支持键盘访问。
+
+本次刻意不改 Reality、Agenda、Production、Actions 内部内容，也不改 Work 导航、Delivery、Human Turn Mediation、Current Interaction、场景 taxonomy 或生产实现。
+
 ## Mock 目标假设
 
 Formation Review、统一 Attention 投影、通用 Asset、授权前 Preview、多目标结果、跨所有者 Trust 摘要、过期决策对比、部分目标收敛、回访 Home 与 reconnect continuity 均按目标体验模拟。Reviewer Mode 会显示相应 Tension ID；这些界面不表示生产 Runtime 已具备能力。
@@ -64,7 +83,12 @@ Formation Review、统一 Attention 投影、通用 Asset、授权前 Preview、
 
 ## 实现验证
 
-- `npm run check`：14 项 fixture、Work 导航、workspace 投影、Current Interaction、隔离与验收记录测试通过，TypeScript 与 Vite production build 通过；
+- `npm run check`：21 项 fixture、Work 导航、workspace 投影与四种 morph 构型、Current Interaction、隔离与验收记录测试通过，TypeScript 与 Vite production build 通过；
+- v2.1 浏览器检查：P09 四表面 2×2 概览、FOCUS_1–FOCUS_4 四种独立构型、焦点间直接切换及概览恢复均通过；每个构型保留 4 个相同 `data-surface-id`；
+- 动态表面：P01 Formation Review 只显示 Reality 与 Agenda，Production/Actions 不产生占位；
+- 共存与控制：FOCUS_3 中提交“请暂停当前生产”后，四表面、Current Interaction 与展开 Composer 同时可用；Enter 键可进入聚焦并恢复概览；Reviewer 深链显示正确 mode、visible surfaces 与 focused surface；
+- 响应式：390×844 下四表面保持同一实例并纵向可读，顶部导航和 v2.1 模拟标识保持可见；临时 viewport override 已在验证后恢复；
+- reduced-motion：布局动画由运行期 media preference 直接关闭，现有 reduced-motion 单元路径与 CSS media override 均通过构建；当前浏览器工具不提供 media emulation，因此未伪造手工 reduced-motion 结果；
 - v2 浏览器路径：P01、P05、P07、P10、P11、P12、P14 已完成代表性点击验证；v1 已完成 P01、P05、P06、P10、P11、P12、P14、P16 全路径；
 - 关键交互：Work Formation、按事实隐藏 Production、Focus expand/restore、Actions 提示保留、人工分组 reload 后保留、历史/当前搜索分离、授权前 Preview 与 Work-centric Delivery 已实际操作；
 - Current Interaction：Human turn 保留、Watt 逐步回应、Reality effect、诚实 pause mediation、阅读聚焦暂停归档、归档后历史恰好一次、Conversation collapse 不丢当前交流均已验证；
