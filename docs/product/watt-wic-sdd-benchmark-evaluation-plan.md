@@ -4,9 +4,6 @@
 Date: 2026-09-14
 
 ~~~text
-STATUS
-    CANDIDATE
-
 BENCHMARK_IMPLEMENTATION
     NOT_STARTED
 
@@ -16,17 +13,16 @@ EXTERNAL_BENCHMARK_STUDY
 WIC_LAB_INTEGRATION
     FUTURE
 
-ARCHITECTURE_DECISION
-    NOT_FROZEN
-
-REVISIT_POINT
-    AFTER_CLICKABLE_PROTOTYPE_REVIEW
-    AND DURING WIC/SDD ARCHITECTURE STUDY
+BENCHMARK_ARCHITECTURE_DIRECTION
+    REVIEWED / APPROVED_AT_PRINCIPLE_LEVEL
 ~~~
 
-This is a future evaluation plan, not current architecture truth. It authorizes
-no benchmark implementation, WIC Lab, Provider experiment, production WIC or
-Work Formation change, prototype change, or external repository clone.
+This is a reviewed future evaluation direction, not an implemented benchmark
+or WIC Lab. The principle-level architecture is approved in the
+[WIC Intelligence Architecture Closure](../architecture/watt-wic-intelligence-architecture-closure.md).
+It authorizes no benchmark implementation, WIC Lab, Provider experiment,
+production WIC or Work Formation change, prototype change, or external
+repository clone.
 
 Related candidate records:
 
@@ -475,48 +471,38 @@ This plan does not freeze:
 - repeated-trial count or holdout ratio;
 - whether an aggregate score exists.
 
-These decisions require external study and first dogfood.
+These decisions require future benchmark design and dogfood. The external
+study is complete.
 
 ## 33. Program timing
 
 ~~~text
-clickable-prototype review
-    -> collect WIC / UX findings
-    -> external WIC / SDD architecture study
-    -> Benchmark & Evaluation Landscape
-    -> Architecture Lead synthesis
-    -> WIC / Adaptive Work Pattern architecture
-    -> WIC Lab + Policy + Benchmark design
-    -> bounded implementation
-    -> dogfood and comparison
-    -> Human feedback
+external WIC / SDD architecture study       COMPLETE
+    -> Benchmark & Evaluation Landscape     COMPLETE
+    -> Architecture Lead synthesis          COMPLETE
+    -> capture bounded OPEN_WIC baseline
+    -> WIC Intelligence reconstruction
+    -> bounded replay / dogfood / evaluation
     -> production activation
 ~~~
 
 Benchmark implementation must not start early.
 
-## 34. Current status and revisit point
+## 34. Current closure status
 
 ~~~text
-STATUS
-    CANDIDATE
-
 BENCHMARK_IMPLEMENTATION
     NOT_STARTED
 
 EXTERNAL_BENCHMARK_STUDY
-    PLANNED
+    COMPLETE
 
 WIC_LAB_INTEGRATION
     FUTURE
 
-ARCHITECTURE_DECISION
-    NOT_FROZEN
-
-REVISIT_POINT
-    AFTER_CLICKABLE_PROTOTYPE_REVIEW
-    AND DURING WIC/SDD ARCHITECTURE STUDY
+BENCHMARK_ARCHITECTURE_DIRECTION
+    REVIEWED / APPROVED_AT_PRINCIPLE_LEVEL
 ~~~
 
-No benchmark, WIC Lab, Provider experiment or external benchmark study has
-started.
+No benchmark harness, WIC Lab, or Provider experiment has started. The external
+benchmark study is complete; implementation remains future work.

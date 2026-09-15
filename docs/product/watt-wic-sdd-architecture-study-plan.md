@@ -5,28 +5,27 @@ Date: 2026-09-14
 
 ~~~text
 STUDY_STATUS
-    EXECUTED
+    CLOSED
 
 EXTERNAL_SOURCE_STUDY
     COMPLETE
 
 ARCHITECTURE_SYNTHESIS
-    PENDING
+    COMPLETE
 
 IMPLEMENTATION_AUTHORITY
     NONE
 
-REVISIT_POINT
-    AFTER_CLICKABLE_PROTOTYPE_REVIEW
-
-ARCHITECTURE_DECISION
-    NOT_FROZEN
+WIC_VNEXT_DIRECTION
+    APPROVED
 ~~~
 
-The authorized external source study is complete. This plan and its outputs are
-Decision Input, not current Watt architecture truth, and authorize no
-implementation or change to WIC, Work Formation, Guided Design, Steering or the
-clickable prototype.
+The authorized external source study and Architecture Lead synthesis are
+complete. This plan and its research outputs remain Decision Input rather than
+current Watt architecture truth. The approved direction is recorded in the
+[WIC Intelligence Architecture Closure](../architecture/watt-wic-intelligence-architecture-closure.md),
+which authorizes no implementation or change to WIC, Work Formation, Guided
+Design, Steering, or the clickable prototype.
 
 Study outputs:
 
@@ -667,33 +666,34 @@ This plan does not:
 - implement WIC Lab, WIC Policy, Runtime feature flags, shadow or canary;
 - modify the clickable prototype.
 
-## 28. Revisit point
+## 28. Historical pre-execution revisit point
 
 ~~~text
 REVISIT_POINT
     AFTER_CLICKABLE_PROTOTYPE_REVIEW
 ~~~
 
-At that point, the Human Governor will decide whether accumulated dogfood
-evidence justifies launching the external study.
+This was the pre-execution revisit gate. The Human Governor subsequently
+authorized the study; the external evidence and architecture synthesis are now
+complete. The block remains here only as historical planning provenance.
 
-## 29. Current plan status
+## 29. Current closure status
 
 ~~~text
 STUDY_STATUS
-    PLANNED
+    CLOSED
 
-EXECUTION
-    NOT_STARTED
+EXTERNAL_SOURCE_STUDY
+    COMPLETE
+
+ARCHITECTURE_SYNTHESIS
+    COMPLETE
 
 IMPLEMENTATION_AUTHORITY
     NONE
 
-REVISIT_POINT
-    AFTER_CLICKABLE_PROTOTYPE_REVIEW
-
-ARCHITECTURE_DECISION
-    NOT_FROZEN
+WIC_VNEXT_DIRECTION
+    APPROVED
 ~~~
 
-No implementation or external repository study has started.
+No WIC reconstruction implementation has started or is authorized by this plan.

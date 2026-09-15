@@ -108,6 +108,18 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 **WORK INTERACTION & CLOSED-LOOP REFINEMENT CORE — CLOSED / PASS**
 
+**WIC / SDD EXTERNAL STUDY — CLOSED / ARCHITECTURE SYNTHESIS COMPLETE / WIC VNEXT APPROVED FOR FUTURE RECONSTRUCTION / IMPLEMENTATION NOT STARTED**
+
+The approved WIC vNext direction is Reality-grounded progressive structuring,
+tentative and reroutable Adaptive Work Pattern guidance, semantic readiness for
+the next governed step, consumer-bound artifacts, delta/revision semantics,
+and a provisional read-only Fast Semantic Reception path. External lightweight
+model execution is the first strategy; self-hosted reception remains long-term
+deferred. A bounded `OPEN_WIC_BASELINE` is required before destructive
+replacement. Policy schema, WIC Lab, Pattern taxonomy, benchmark harness, ECF,
+and implementation remain deferred. See the
+[WIC Intelligence Architecture Closure](docs/architecture/watt-wic-intelligence-architecture-closure.md).
+
 **HUMAN–WATT COLLABORATION LAYER — IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — PENDING ARCHITECTURE LEAD REALITY REVIEW**
 
 **GUIDED DESIGN FACILITATION LAYER — IMPLEMENTED / DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — PENDING ARCHITECTURE LEAD REALITY REVIEW**
@@ -991,6 +1003,7 @@ The current system-level architecture baseline is:
 - [Design Intent Framing Focused Validation](docs/evidence/design-intent-framing-focused-validation.md)
 - [External Design Intake Capability Direction](docs/architecture/external-design-intake-capability-direction.md)
 - [External Engineering Intelligence Direction — RECORDED / DEFERRED; future Human-visible capability](docs/architecture/external-engineering-intelligence-direction.md)
+- [WIC Intelligence Architecture Closure](docs/architecture/watt-wic-intelligence-architecture-closure.md)
 - [Autonomous Governed Deployment - Phase 2 Product Direction](docs/product/watt-autonomous-governed-deployment-phase-2.md)
 - [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
 - [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)
@@ -1084,9 +1097,10 @@ acceptance is inferred. The current classification, exact revisions, technical
 evidence, preserved historical failures and non-blocking future directions are
 recorded in the [Watt-native Executor Final Technical Closure](docs/evidence/watt-native-executor-technical-closure.md).
 
-The recommended next program step is **WIC Model Decoupling / API-based
-Provider Migration with DeepSeek as the first target Provider**. This context
-record does not authorize or start that phase.
+The recommended next program step is **WIC Intelligence Architecture vNext
+reconstruction**, preceded by bounded `OPEN_WIC_BASELINE` capture and followed
+by replay/dogfood/evaluation before activation. This context record does not
+authorize or start that phase.
 
 ## Current Major Components
 

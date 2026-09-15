@@ -4,24 +4,29 @@
 Date: 2026-09-14
 
 ~~~text
-STATUS
-    CANDIDATE
+PATTERN_GUIDANCE_DIRECTION
+    APPROVED
+
+PATTERN_TAXONOMY
+    NOT_FROZEN
 
 IMPLEMENTATION
-    NOT AUTHORIZED
+    NOT_STARTED
 
 UX_DOGFOOD_REVIEW
     PENDING
 
-ARCHITECTURE_DECISION
-    NOT FROZEN
+PATTERN_DETAIL
+    CANDIDATE / REQUIRES_DOGFOOD
 ~~~
 
-This memo preserves a product and architecture candidate discovered through
-Watt WIC dogfood and review of an external spec-driven workflow. It does not
-change current Watt architecture, lifecycle, ownership or implementation
-status. Reconsider it with other UX/WIC findings after the Human Governor
-completes the current clickable-prototype review.
+This memo preserves the candidate detail discovered through Watt WIC dogfood
+and external SDD study. The
+[WIC Intelligence Architecture Closure](../architecture/watt-wic-intelligence-architecture-closure.md)
+approves Adaptive Work Pattern guidance as an architecture direction while
+leaving taxonomy, representation, routing, confidence, blending, switching,
+UI, and implementation unfrozen. Existing lifecycle and ownership boundaries
+remain unchanged.
 
 ## 1. Dogfood finding
 
@@ -351,18 +356,21 @@ Evaluate:
 9. Do Patterns constrain AI freedom only where useful?
 10. Does quality improve without workflow bureaucracy?
 
-Until that review and a separate architecture decision:
+After architecture synthesis, the calibrated status is:
 
 ~~~text
-STATUS
-    CANDIDATE
+PATTERN_GUIDANCE_DIRECTION
+    APPROVED
+
+PATTERN_TAXONOMY
+    NOT_FROZEN
 
 IMPLEMENTATION
-    NOT AUTHORIZED
+    NOT_STARTED
 
 UX_DOGFOOD_REVIEW
     PENDING
 
-ARCHITECTURE_DECISION
-    NOT FROZEN
+PATTERN_DETAIL
+    CANDIDATE / REQUIRES_DOGFOOD
 ~~~

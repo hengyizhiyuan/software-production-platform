@@ -55,9 +55,11 @@ Acceptance is `DEFERRED_BY_HUMAN_GOVERNANCE` until the later system-wide Human
 Journey and UX/UI reconstruction phase; no acceptance is inferred. See the
 [final technical closure](../evidence/watt-native-executor-technical-closure.md).
 
-The recommended next program step is **WIC Model Decoupling / API-based
-Provider Migration with DeepSeek as the first target Provider**. It remains a
-separate future mission and is not authorized by this roadmap update.
+The recommended next program step is **WIC Intelligence Architecture vNext
+reconstruction**. Before materially replacing current WIC behavior, preserve a
+bounded `OPEN_WIC_BASELINE`; then reconstruct, evaluate through bounded replay
+and dogfood, and activate only after evidence supports it. Implementation
+requires its own admitted mission.
 
 ### New mission: Work-to-Delivery with multiple repositories
 
@@ -176,13 +178,17 @@ The following order is the current program priority. Changing it requires an
 explicit product or architecture decision rather than ordinary implementation
 convenience.
 
-### Priority 1 — WIC Model Decoupling / API-based Provider Migration
+### Priority 1 — WIC Intelligence Architecture vNext Reconstruction
 
-**Recommended next program step.** DeepSeek is the first target Provider. The
-mission must preserve WIC's interpretation and governance ownership while
-moving model access behind an explicit replaceable API Provider boundary. This
-roadmap records sequencing only; implementation requires its own admitted
-mission.
+**Recommended next program step.** The external WIC/SDD study and architecture
+synthesis are complete. The approved direction is progressive structuring,
+tentative/reroutable Pattern guidance, semantic next-step readiness,
+consumer-bound artifacts, delta/revision semantics, and Fast Semantic
+Reception. Capture a bounded `OPEN_WIC_BASELINE` before destructive
+replacement, then perform reconstruction, bounded replay/dogfood/evaluation,
+and governed production activation. See the
+[WIC Intelligence Architecture Closure](../architecture/watt-wic-intelligence-architecture-closure.md).
+This roadmap records sequence only and does not authorize implementation.
 
 ### Priority 2 — External Design Intake Capability
 
