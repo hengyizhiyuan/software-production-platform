@@ -173,6 +173,23 @@ def test_ow_c_final_visible_response_does_not_leak_stale_motive() -> None:
     assert "继续策划" not in response
 
 
+def test_ow_e_final_visible_response_names_new_object_without_relabeling_work() -> None:
+    candidate = _candidate(
+        "OW-E",
+        natural_response="我会把当前运营后台直接改成招聘网站。",
+    )
+    semantics = _build("OW-E", candidate=candidate)
+    response = policy_governed_response(
+        candidate,
+        semantics,
+        latest_human_input=_case("OW-E").human_turns[-1].content,
+        active_context=_inputs("OW-E")[1],
+    )
+    assert "新的长期对象：一个独立的招聘网站" in response
+    assert "保持当前 Work 不变" in response
+    assert "新的长期对象：开发用于推广 Watt 的运营管理后台" not in response
+
+
 def test_fast_and_deep_share_basis_and_reconcile_as_one_response() -> None:
     record, active, fingerprint = _inputs("OW-D")
     interaction = Interaction(

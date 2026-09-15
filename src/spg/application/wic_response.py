@@ -17,6 +17,14 @@ from spg.domain.wic_reception import FastReceptionCandidate
 from spg.domain.wic_response import ResponseReconciliation
 
 
+def _explicit_new_object(text: str) -> str | None:
+    match = re.search(
+        r"(?:另外|还有).*?(?:我想|我要|想).*?(?:开发|做|创建)(.+?(?:系统|平台|网站|应用))",
+        text,
+    )
+    return None if match is None else match.group(1).strip("，,。 ")
+
+
 def policy_governed_response(
     candidate: InteractionAssessmentCandidate,
     semantics: ProgressiveSemanticStructure,
@@ -124,7 +132,11 @@ def policy_governed_response(
 
     # New-Work boundaries are a Human decision even when the Provider sounds decisive.
     if semantics.governance_candidate is GovernanceCandidateKind.NEW_MOTIVE_CANDIDATE:
-        motive = semantics.working_motive or latest_human_input.strip()
+        motive = (
+            _explicit_new_object(latest_human_input)
+            or candidate.interpreted_motive
+            or latest_human_input.strip()
+        )
         if chinese:
             return f"这看起来是一个新的长期对象：{motive}。我会保持当前 Work 不变，由你决定是否为它创建新的 Work。"
         return f"This appears to be a new long-lived object: {motive}. The current Work stays unchanged until you decide whether to create a new Work."
