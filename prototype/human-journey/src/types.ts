@@ -1,4 +1,4 @@
-export type Surface = "home" | "work" | "deliveries";
+export type Surface = "home" | "work" | "history" | "deliveries";
 
 export type PrototypePhase =
   | "PRE_WORK"

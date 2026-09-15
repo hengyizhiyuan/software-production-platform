@@ -2,7 +2,7 @@
 
 ## 用途
 
-这是 Watt 首发版用户旅程的高保真、可点击、确定性体验模拟。Prototype v2.1 用于评审 Work-centric 核心工作区、Current Interaction Layer、双态 Composer 与四表面连续变形，同时保留 v1/v2 的完整场景覆盖。
+这是 Watt 首发版用户旅程的高保真、可点击、确定性体验模拟。Prototype v2.2 用于评审 Work-centric 核心工作区、Active/History 边界、workspace-native Composer、Current Interaction Layer 与四表面连续变形，同时保留此前版本的完整场景覆盖。
 
 所有界面都是候选体验，当前状态均为 `DRAFT`，不代表 Human 已接受。
 
@@ -68,7 +68,7 @@ npm run check
 
 - Conversation 回复是人工编写的确定性内容，不评价真实 WIC 智能或首字符延迟。
 - 应用 Preview、代码 Diff、Queue、Recovery、Verification、Authorization 与 Delivery 均为体验模拟。
-- 顶层导航按本轮 Human Governor 覆盖调整为“首页 / Work / 交付”；Queue 通过首页、Work 和二级生产详情呈现。
+- 顶层导航按 Human Governor 校准为“首页 / 历史 / 交付”；左侧导航只保留 Active Work，Queue 通过首页、Work 和二级生产详情呈现。
 - 当前使用临时视觉系统，不冻结最终品牌、色彩或字体。
 - 窄屏布局用于体验方向评审，不代表最终移动端产品范围。
 - Current Interaction 的 5.2 秒阅读宽限、流式节奏、Focus 比例与 Composer 展开方式都是可逆 dogfood 参数。
@@ -76,11 +76,11 @@ npm run check
 
 ## Prototype v2 的主要变化
 
-- 左侧以当前 Work 为核心，支持搜索、置顶、语义/人工分组、折叠、拖放和历史工作项；
+- 左侧以当前 Work 为核心，支持搜索、置顶、语义/人工分组、折叠和拖放；
 - 中央按场景事实自适应显示“当前情况 / 接下来 / 生产进展 / 需要你处理”，而非固定四宫格；
 - 每个可见功能可进入 Focus Mode，其余功能收成可发现的摘要条；
 - Conversation History 位于右侧，可收起，承担历史溯源而非当前真相；
-- Composer 被动时位于右侧，获得焦点后在 Work 下方展开；
+- Composer 永久属于中央 Work Workspace：空闲时是一行安静的停靠栏，获得焦点后从底部向上展开；
 - 刚提交的 Human turn 与流式 Watt 回复保留在中央 Current Interaction Layer；
 - 回复完成后经过阅读保护与安静 crossfade 进入对话历史，已形成的 Reality 继续保留；
 - 交付按 Work → Delivery revision → Artifact/Runtime/Repository/Documentation 组织。
@@ -98,3 +98,14 @@ v2 的四项功能在聚焦时更像卡片最大化与纵向替换，没有充�
 - 正文始终挂载，压缩只改变呈现，因此局部 disclosure、草稿和选择状态可继续保留。
 
 这轮没有调整四个表面的内部内容、Work 导航、Delivery、Current Interaction、Composer、场景语义或生产架构。360ms 只是可逆原型参数。
+
+## Prototype v2.2 的边界校准
+
+- 左侧只显示仍需关注或生产的 Active Work，不再提供“当前 / 历史工作项”切换；
+- 已完成或归档的 Work 位于顶层“历史”，可查看结果、状态和摘要，但不能在原型中重新打开；
+- 顶层冗余 Work 入口被“历史”替代，选择左侧 Active Work 仍直接进入其中央 workspace；
+- Composer 从右侧 Conversation rail 完全移除，始终停靠在中央 Work 下方；
+- 空闲 Composer 约一行高度；聚焦后在同一底部锚点向上扩展，Escape 仅在空内容时安全收回；
+- 发送后 Composer 收回，Human turn 与 Watt reply 在中央形成 bounded Current Interaction，完成后安静归入右侧历史；
+- 右侧只承担较弱的 Conversation provenance，不提供输入或伪输入跳转；
+- Reality / Agenda / Production / Actions 的 identity、内容和 Overview/Focus morph 规则保持不变。

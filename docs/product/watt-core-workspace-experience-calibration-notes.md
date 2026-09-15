@@ -788,3 +788,68 @@ but none is authorized here.
 This direction does not freeze Watt's visual identity, colors, typography,
 theme count, theme selector, density selector, motion selector or token names.
 It changes no prototype or production implementation.
+
+## 21. Active Work Boundary and Workspace-native Interaction
+
+### 21.1 Human-approved prototype calibration
+
+~~~text
+ACTIVE_WORK_RAIL
+    active Works only
+
+HISTORICAL_WORK
+    separate top-level History surface
+
+CURRENT_INTERACTION
+    belongs to central Work Workspace
+
+COMPOSER
+    permanently workspace-native
+
+CONVERSATION_HISTORY
+    secondary provenance surface
+~~~
+
+The left rail represents the current workshop floor: Works that still require
+Human attention, judgment or production. Completed and archived Works leave
+that rail and appear behind a top-level History destination as completed
+production records. Browsing History does not reactivate a Work. A later
+desired change forms a new Motive-bound Work as defined by
+[Work Identity, Closure and Archive Invariants](../architecture/work-identity-closure-and-archive-invariants.md).
+
+The top-level prototype navigation is therefore:
+
+~~~text
+首页 | 历史 | 交付
+~~~
+
+Home remains the cross-Work current overview and Motive entry. The Active Work
+rail remains the direct path into a current Work. History is a separate
+historical projection, not a filter state inside the current workshop.
+
+### 21.2 Interaction ownership
+
+> The Human should feel they are speaking directly to Watt's engineering and
+> product Reality.
+
+The Composer belongs permanently to the central Work Workspace. At rest it is
+a quiet one-line dock below the adaptive four-surface area. Focus expands the
+same surface upward; submission collapses it and reallocates the released space
+to bounded Current Interaction.
+
+The just-submitted Human turn and Watt's current response remain together in
+the central interaction area. Once reading protection and the grace period end,
+the pair settles quietly into the right Conversation History. The right rail
+contains no primary Composer or fake input control.
+
+Conversation History should not compete with engineering Reality for Human
+attention. Its role is secondary linguistic provenance: what was previously
+said or discussed. Governed effects remain in Reality, Agenda, Production or
+Actions after conversational wording settles into History.
+
+### 21.3 Preserved boundaries
+
+This calibration does not redesign Reality, Agenda, Production, Actions,
+their Focus/Overview morph grammar, Work lifecycle, Archive eligibility,
+Delivery, WIC, PWU or Runtime semantics. It adds no Project, archived-Work
+reopen behavior, production connection or final visual theme.

@@ -4,7 +4,7 @@
 
 ```text
 原型候选
-    PROTOTYPE V2.1 IMPLEMENTED
+    PROTOTYPE V2.2 IMPLEMENTED
 
 Human Experience Acceptance
     PENDING
@@ -60,6 +60,26 @@ v2.1 按 Human Governor 草图把中央区域改为一个持续存在的 adaptiv
 
 本次刻意不改 Reality、Agenda、Production、Actions 内部内容，也不改 Work 导航、Delivery、Human Turn Mediation、Current Interaction、场景 taxonomy 或生产实现。
 
+## v2.1 → v2.2：Active Work 与当前交互归属校准
+
+Human Governor 的原型体验确认了两个边界：
+
+- 左侧是当前车间，只显示 Active Work；已完成/归档 Work 进入独立顶层“历史”；
+- 当前交互属于中央 Work Reality，不属于右侧 Conversation History。
+
+实现变化：
+
+- 顶层导航从“首页 / Work / 交付”调整为“首页 / 历史 / 交付”；
+- 左侧移除“当前 / 历史工作项”切换，仅保留三个 Active Work fixture；
+- 顶层 History 展示两个归档 Work 的目标、状态与历史语义，不提供重新打开；
+- Composer 从右栏完全移除，空闲时作为中央一行停靠栏，聚焦时在同一底部锚点向上展开；
+- 发送后 Composer 收回，Human turn 与 Watt reply 在中央 Current Interaction 中共同显示；
+- 完成且无人阅读交互后，当前 pair 通过安静 crossfade 恰好一次归入右侧 Conversation History；
+- 右栏增加 provenance 说明并降低视觉权重，不承担当前动作；
+- 四个 Work surface 的 identity、2×2 Overview、FOCUS_1–FOCUS_4 和响应式布局未改变。
+
+这次变化只校准原型 shell 和交互几何。它没有实现 Archive 生命周期、新 Work Formation、生产 API 或最终视觉系统。
+
 ## Mock 目标假设
 
 Formation Review、统一 Attention 投影、通用 Asset、授权前 Preview、多目标结果、跨所有者 Trust 摘要、过期决策对比、部分目标收敛、回访 Home 与 reconnect continuity 均按目标体验模拟。Reviewer Mode 会显示相应 Tension ID；这些界面不表示生产 Runtime 已具备能力。
@@ -84,6 +104,9 @@ Formation Review、统一 Attention 投影、通用 Asset、授权前 Preview、
 ## 实现验证
 
 - `npm run check`：21 项 fixture、Work 导航、workspace 投影与四种 morph 构型、Current Interaction、隔离与验收记录测试通过，TypeScript 与 Vite production build 通过；
+- v2.2 静态边界：顶层只有首页/历史/交付；Active rail 不渲染 historical fixtures；右栏源码不含 Composer；中央 Work 始终渲染 idle/expanded Composer；
+- v2.2 真实 Edge 烟测：从首页选择 Active Work 后，中央 Composer 由 idle 聚焦展开并在发送后收回；Human turn/Watt reply 只在中央显示，阅读聚焦超过归档宽限仍保留，结束阅读后恰好一次归入右侧 History；顶层 History 显示两个归档 Work 且左栏仍只有三个 Active Work；
+- v2.2 共存路径：P09 四表面保持 `OVERVIEW` 与相同 `surface-1`—`surface-4`，Production 聚焦为 `FOCUS_3` 后 Current Interaction 出现但不改变焦点或表面数量；Reviewer Mode v2.2 与 Network Guard 均通过；
 - v2.1 浏览器检查：P09 四表面 2×2 概览、FOCUS_1–FOCUS_4 四种独立构型、焦点间直接切换及概览恢复均通过；每个构型保留 4 个相同 `data-surface-id`；
 - 动态表面：P01 Formation Review 只显示 Reality 与 Agenda，Production/Actions 不产生占位；
 - 共存与控制：FOCUS_3 中提交“请暂停当前生产”后，四表面、Current Interaction 与展开 Composer 同时可用；Enter 键可进入聚焦并恢复概览；Reviewer 深链显示正确 mode、visible surfaces 与 focused surface；
