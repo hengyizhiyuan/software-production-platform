@@ -357,6 +357,18 @@ including its User Story, expected research synthesis, adaptation provenance,
 invariants, and explicit non-goals. Internal Reference Engineering is a related
 use case, not a substitute for this user-facing product capability.
 
+### 5.10 Autonomous Governed Deployment
+
+**Purpose:** take a governed Delivery into a Human-authorized external runtime
+through provider-neutral Deployment Contracts and Adapters, with autonomous
+observation, diagnosis, bounded remediation, recovery, and verification.
+
+**Status:** **Phase 2 product direction approved / detailed architecture not
+frozen / implementation not authorized / no current-release dependency.** See
+[Autonomous Governed Deployment - Phase 2 Product Direction](../product/watt-autonomous-governed-deployment-phase-2.md).
+This direction does not reorder the current first-release roadmap or authorize
+cloud access, credentials, adapters, runtime changes, or deployment work.
+
 ## 6. Roadmap Maintenance Rules
 
 Update this document when:
