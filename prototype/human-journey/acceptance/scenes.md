@@ -1,6 +1,6 @@
 # Watt 原型场景验收记录
 
-本记录用于 Human Governor 按场景校准体验。状态只能是 `DRAFT`、`UNDER_HUMAN_REVIEW`、`CALIBRATION_REQUIRED` 或 `HUMAN_EXPERIENCE_ACCEPTED`。v1 状态保留为历史记录；v2 在相同 53 个场景上建立 `workspace-v2` 候选修订，当前均为 DRAFT。v2.2 的 Active/History 边界和 workspace-native Composer 是覆盖全部 53 个场景的 shell 校准，不删除或替换任一场景记录；Human Acceptance 状态保持不变。
+本记录用于 Human Governor 按场景校准体验。状态只能是 `DRAFT`、`UNDER_HUMAN_REVIEW`、`CALIBRATION_REQUIRED` 或 `HUMAN_EXPERIENCE_ACCEPTED`。v1 状态保留为历史记录；v2 在相同 53 个场景上建立 `workspace-v2` 候选修订，当前均为 DRAFT。v2.2 的 Active/History 边界和 workspace-native Composer，以及 v2.3 的稳定四工作面 2×2 Overview 与 Human-controlled Focus，均是覆盖全部 53 个场景的 shell 校准，不删除或替换任一场景记录；Human Acceptance 状态保持不变。
 
 | 场景包 | 场景 ID | 场景 | v1 原型版本 | v1 状态 | Human 观察 | 所需校准 | 决定日期 | 替代记录 | v2 修订 | v2 状态 |
 |---|---|---|---|---|---|---|---|---|---|---|

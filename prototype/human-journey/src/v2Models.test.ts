@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { interactionReducer, initialInteraction, transitionMotion } from "./interactionModel";
 import { getPack, getScene } from "./scenarios";
-import { DEFAULT_WORKS, WORKSPACE_SURFACE_IDS, assignHumanGroup, assignSemanticGroup, projectWorkspace, splitWorkHistory, togglePinned, workspaceMode, workspacePlacements, workspaceSummary, type WorkspaceFunction } from "./workspaceModel";
+import { CORE_WORKSPACE_SURFACES, DEFAULT_WORKS, WORKSPACE_SURFACE_IDS, assignHumanGroup, assignSemanticGroup, projectWorkspace, splitWorkHistory, togglePinned, workspaceMode, workspacePlacements, workspaceSummary, type WorkspaceFunction } from "./workspaceModel";
 
 describe("v2 Work navigation", () => {
   it("assigns semantic grouping only when the label is empty", () => {
@@ -27,22 +27,24 @@ describe("v2 Work navigation", () => {
   });
 });
 
-describe("v2 adaptive workspace", () => {
-  it("hides Production when facts do not support it", () => {
-    const scene = getScene(getPack("P01"), "p01-review");
-    expect(projectWorkspace(scene, null).visible).not.toContain("production");
+describe("v2.3 stable four-surface workspace", () => {
+  it("keeps all four surfaces present before and during production", () => {
+    const review = getScene(getPack("P01"), "p01-review");
+    const failed = getScene(getPack("P09"), "p09-failed");
+    expect(projectWorkspace(review, null).visible).toEqual(CORE_WORKSPACE_SURFACES);
+    expect(projectWorkspace(failed, null).visible).toEqual(CORE_WORKSPACE_SURFACES);
   });
 
-  it("expands and restores Focus Mode while keeping Actions discoverable", () => {
+  it("expands and restores Human-controlled Focus while keeping every surface discoverable", () => {
     const scene = getScene(getPack("P10"), "p10-limits");
     const focused = projectWorkspace(scene, "reality");
     expect(focused.focused).toBe("reality");
-    expect(focused.compact).toContain("actions");
+    expect(focused.compact).toEqual(["agenda", "production", "actions"]);
     expect(projectWorkspace(scene, null).focused).toBeNull();
   });
 });
 
-describe("v2.1 adaptive workspace morph", () => {
+describe("v2.3 Human-controlled workspace morph", () => {
   const all: WorkspaceFunction[] = ["reality", "agenda", "production", "actions"];
 
   it("uses a true 2x2 overview for four surfaces", () => {
@@ -65,13 +67,12 @@ describe("v2.1 adaptive workspace morph", () => {
     expect(all.filter((surface) => surface !== focused).every((surface) => layout[surface]?.compact)).toBe(true);
   });
 
-  it("fills available space for three and two surfaces without empty placements", () => {
-    const three = workspacePlacements(["reality", "agenda", "actions"], null);
-    expect(three.actions).toMatchObject({ gridColumn: "1 / 13", gridRow: 2 });
-    const two = workspacePlacements(["reality", "agenda"], null);
-    expect([two.reality?.gridColumn, two.agenda?.gridColumn]).toEqual(["1 / 7", "7 / 13"]);
-    expect(two.production).toBeUndefined();
-    expect(two.actions).toBeUndefined();
+  it("does not change default geometry when scenario Reality changes", () => {
+    const review = projectWorkspace(getScene(getPack("P01"), "p01-review"), null);
+    const failed = projectWorkspace(getScene(getPack("P09"), "p09-failed"), null);
+    expect(workspacePlacements(review.visible, review.focused)).toEqual(workspacePlacements(failed.visible, failed.focused));
+    expect(review.focused).toBeNull();
+    expect(failed.focused).toBeNull();
   });
 
   it("keeps stable surface identity and does not steal focus for a critical Action", () => {
@@ -80,7 +81,10 @@ describe("v2.1 adaptive workspace morph", () => {
     const scene = { ...base, attention: { ...base.attention!, contract: "decision" as const, title: "是否采用修订方案？" } };
     const projection = projectWorkspace(scene, "production");
     expect(projection.focused).toBe("production");
+    expect(projection.visible).toEqual(all);
     expect(workspaceSummary(scene, "actions")).toMatch(/^1 项决定/);
+    expect(projectWorkspace(scene, "actions").focused).toBe("actions");
+    expect(projectWorkspace(scene, null).focused).toBeNull();
   });
 });
 

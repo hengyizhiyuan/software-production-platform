@@ -2,7 +2,7 @@
 
 ## 用途
 
-这是 Watt 首发版用户旅程的高保真、可点击、确定性体验模拟。Prototype v2.2 用于评审 Work-centric 核心工作区、Active/History 边界、workspace-native Composer、Current Interaction Layer 与四表面连续变形，同时保留此前版本的完整场景覆盖。
+这是 Watt 首发版用户旅程的高保真、可点击、确定性体验模拟。Prototype v2.3 用于评审 Work-centric 核心工作区、稳定四工作面、Human-controlled Focus、Active/History 边界、workspace-native Composer 与 Current Interaction Layer，同时保留此前版本的完整场景覆盖。
 
 所有界面都是候选体验，当前状态均为 `DRAFT`，不代表 Human 已接受。
 
@@ -77,7 +77,7 @@ npm run check
 ## Prototype v2 的主要变化
 
 - 左侧以当前 Work 为核心，支持搜索、置顶、语义/人工分组、折叠和拖放；
-- 中央按场景事实自适应显示“当前情况 / 接下来 / 生产进展 / 需要你处理”，而非固定四宫格；
+- 中央持续显示“当前情况 / 接下来 / 生产进展 / 需要你处理”四个工作面；
 - 每个可见功能可进入 Focus Mode，其余功能收成可发现的摘要条；
 - Conversation History 位于右侧，可收起，承担历史溯源而非当前真相；
 - Composer 永久属于中央 Work Workspace：空闲时是一行安静的停靠栏，获得焦点后从底部向上展开；
@@ -97,7 +97,7 @@ v2 的四项功能在聚焦时更像卡片最大化与纵向替换，没有充�
 - `prefers-reduced-motion` 下跳过空间动画，键盘仍可访问所有聚焦和恢复控件；
 - 正文始终挂载，压缩只改变呈现，因此局部 disclosure、草稿和选择状态可继续保留。
 
-这轮没有调整四个表面的内部内容、Work 导航、Delivery、Current Interaction、Composer、场景语义或生产架构。360ms 只是可逆原型参数。
+这轮没有调整四个表面的内部内容、Work 导航、Delivery、Current Interaction、Composer、场景语义或生产架构。360ms 只是可逆原型参数。v2.3 保留这一 Human-controlled morph，但不再允许场景事实自动改变工作面的存在或默认几何。
 
 ## Prototype v2.2 的边界校准
 
@@ -109,3 +109,13 @@ v2 的四项功能在聚焦时更像卡片最大化与纵向替换，没有充�
 - 发送后 Composer 收回，Human turn 与 Watt reply 在中央形成 bounded Current Interaction，完成后安静归入右侧历史；
 - 右侧只承担较弱的 Conversation provenance，不提供输入或伪输入跳转；
 - Reality / Agenda / Production / Actions 的 identity、内容和 Overview/Focus morph 规则保持不变。
+
+## Prototype v2.3 的稳定四工作面校准
+
+- Reality、Agenda、Production、Actions 在每个 Active Work 场景中持续存在；
+- 默认 Overview 始终采用同一 2×2 空间：Reality 左上、Agenda 右上、Production 左下、Actions 右下；
+- Work Stage、生产状态和 Attention 只能改变内容与提示，不得自动重排、隐藏、聚焦或最大化工作面；
+- Human 可以聚焦任一工作面、在焦点之间直接切换，并随时返回 Overview；
+- Focus 时其他三个工作面仍以真实摘要保留，重要 Actions 只增强信号，不抢夺 Human 当前焦点；
+- reduced-motion 偏好继续关闭空间动画，不改变相同的可达状态与键盘路径；
+- 四个工作面的深层信息结构留待真实生产 Dogfood，不在本轮扩展。

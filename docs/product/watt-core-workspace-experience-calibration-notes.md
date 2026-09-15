@@ -661,6 +661,10 @@ persistence contract, governance rule or WIC architecture change.
 
 ## 19. Adaptive Workspace Morphing
 
+This section records the v2.1 prototype experiment. Its variable surface
+presence and automatic space reclamation are superseded by the final
+calibration in section 22; its Human-controlled focus geometry remains useful.
+
 Prototype v2.1 applies the Human Governor's sketch as the spatial source of
 truth for the central Work workspace. Reality, Agenda, Production and Actions
 remain the same four information functions with stable implementation
@@ -686,9 +690,10 @@ Compressed surfaces remain keyboard-selectable and expose a title, meaningful
 current summary and any Human-required signal. Such a signal does not steal
 focus.
 
-When fewer surfaces apply, the visible set fills the available area without
-inventing empty functions. Narrow layouts retain the same surface identities
-and use a readable vertical arrangement.
+The v2.1 experiment allowed fewer applicable surfaces to reclaim available
+space. Human review later rejected that automatic geometry as a stable default;
+section 22 records the replacement rule. Narrow layouts still retain the same
+surface identities and use a readable vertical arrangement.
 
 This focused correction does not decide final surface names, panel ratios,
 timing, visual branding or lower-level Reality, Agenda, PWU/Production and
@@ -706,7 +711,7 @@ visual style remains explicitly unapproved and replaceable.
 > Experience semantics are stable; visual expression is replaceable.
 
 Product and interaction semantics include Work identity, Reality / Agenda /
-Production / Actions, adaptive workspace morphing, Conversation History,
+Production / Actions, stable presence with Human-controlled workspace morphing, Conversation History,
 Current Interaction, Composer behavior, Human Turn Mediation, navigation,
 lifecycle and governed actions.
 
@@ -758,7 +763,7 @@ information architecture, workspace state, Focus/Morph behavior, Actions,
 Conversation, lifecycle or Production semantics.
 
 Conversation placement, Current Interaction, the four workspace functions,
-adaptive presence, morph/focus behavior, Work navigation and History separation
+persistent presence, Human-controlled morph/focus behavior, Work navigation and History separation
 are product/interaction architecture. Accent color, border treatment,
 typography personality, shadow depth, background tone and icon style are
 replaceable visual expression.
@@ -853,3 +858,77 @@ This calibration does not redesign Reality, Agenda, Production, Actions,
 their Focus/Overview morph grammar, Work lifecycle, Archive eligibility,
 Delivery, WIC, PWU or Runtime semantics. It adds no Project, archived-Work
 reopen behavior, production connection or final visual theme.
+
+## 22. Stable Four-Surface Workspace
+
+### 22.1 Final clickable-prototype calibration
+
+~~~text
+FOUR_SURFACE_PRESENCE
+    persistent
+
+DEFAULT_GEOMETRY
+    stable 2x2
+
+AUTOMATIC_SURFACE_REORDERING
+    removed from prototype direction
+
+AUTOMATIC_SURFACE_FOCUS
+    prohibited
+
+HUMAN_CONTROLLED_FOCUS
+    preserved
+
+SPACE_OPTIMIZATION
+    Human controlled
+
+DEEP_SURFACE_DESIGN
+    deferred to real production dogfood
+~~~
+
+Every Active Work continuously presents the same four spatial functions:
+
+~~~text
+Reality       | Agenda
+--------------+--------------
+Production    | Actions
+~~~
+
+Work stage, production activity, available facts and Attention may change the
+content and signaling within a surface. They do not change surface presence,
+default position, geometry or Human focus. Empty Production and Actions states
+remain useful Reality rather than disappearing layout holes.
+
+This supersedes the v2/v2.1 prototype experiment in which scene facts could
+remove surfaces and automatically reclaim space. That experiment remains
+historical evidence. Human review found that automatic space optimization
+reduced spatial stability and made the workspace harder to build a durable
+mental model around.
+
+### 22.2 Human-controlled space optimization
+
+The default is the stable Overview. A Human may focus Reality, Agenda,
+Production or Actions, switch directly between them and return to Overview.
+The other three surfaces remain present as truthful summaries. Important
+Attention may strengthen signaling, but must not steal focus or initiate a
+morph.
+
+> Watt should not perform UI intelligence merely to appear intelligent.
+
+When the Human can cheaply control presentation, predictability and spatial
+continuity take priority over speculative automatic layout optimization. This
+does not prohibit all future adaptive presentation; any later adaptation must
+prove clear decision value without weakening orientation or Human control.
+
+### 22.3 Prototype closure boundary
+
+The stable outer workspace structure is now sufficiently calibrated for the
+clickable prototype. Deep design of Reality, Agenda, Production and Actions is
+deferred to real production dogfood, where actual information density and
+decision needs can provide evidence. This calibration does not redesign their
+internal semantics, PWU, Work lifecycle, Current Interaction, Conversation
+History, Composer, WIC, Steering, SPG or Runtime.
+
+This remains a candidate production UX direction until real-runtime dogfood
+provides further evidence. It does not constitute automatic Human Experience
+Acceptance.
