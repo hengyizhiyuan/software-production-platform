@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     conversation_provider_adapter: str | None = Field(default=None, min_length=1)
     conversation_provider_model: str | None = Field(default=None, min_length=1)
     wic_coalesce_pre_work: bool = True
+    wic_runtime_mode: Literal[
+        "LEGACY_WIC", "WIC_VNEXT_SHADOW", "WIC_VNEXT_CONTROLLED"
+    ] = "WIC_VNEXT_SHADOW"
     wic_fast_reception_shadow_enabled: bool = True
     wic_fast_reception_timeout_seconds: float = Field(default=2.0, gt=0, le=10)
     wic_fast_reception_max_output_tokens: int = Field(default=256, ge=64, le=1024)

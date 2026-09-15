@@ -49,7 +49,21 @@ from spg.domain.interaction import (
 from spg.domain.design_intent import DesignObjectType
 from spg.application.wic_reception import ShadowFastReceptionRuntime
 from spg.application.wic_intelligence import build_progressive_semantics
+from spg.application.wic_response import (
+    corrected_continuation,
+    policy_governed_response,
+    reconcile_fast_and_deep,
+    reconcile_provisional_intent,
+)
 from spg.domain.product import ProductionCycleBindingCondition
+from spg.domain.wic_reception import FastReceptionVisibility
+from spg.domain.wic_response import (
+    FastSuppressionReason,
+    ResponseReconciliation,
+    WicResponseEvent,
+    WicResponseEventType,
+    WicRuntimeMode,
+)
 from spg.domain.steering import RealityReferenceKind, SteeringOutcome, SteeringStepType
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.interaction_store import InteractionStore
@@ -354,10 +368,12 @@ class WorkInteractionService:
         *,
         capability: WorkInteractionCapability,
         fast_reception: ShadowFastReceptionRuntime | None = None,
+        runtime_mode: WicRuntimeMode = WicRuntimeMode.LEGACY_WIC,
     ) -> None:
         self.database = database
         self.capability = capability
         self.fast_reception = fast_reception
+        self.runtime_mode = runtime_mode
         self._turn_executor = ThreadPoolExecutor(
             max_workers=1,
             thread_name_prefix="watt-interaction",
@@ -365,6 +381,7 @@ class WorkInteractionService:
         self._turn_futures: dict[UUID, Future[None]] = {}
         self._turn_response_streams: OrderedDict[UUID, str] = OrderedDict()
         self._turn_timings: OrderedDict[UUID, _TurnTiming] = OrderedDict()
+        self._turn_fast_candidates: OrderedDict[UUID, object] = OrderedDict()
         self._turn_lock = RLock()
 
     def create_interaction(self, *, human_identity: str) -> Interaction:
@@ -517,6 +534,7 @@ class WorkInteractionService:
                     "interaction_id": interaction_id,
                     "request_record_id": record_id,
                     "assessment_id": None,
+                    "wic_mode": self.runtime_mode.value,
                     "status": InteractionTurnStatus.RECEIVED.value,
                     "failure_code": None,
                     "failure_message": None,
@@ -544,6 +562,18 @@ class WorkInteractionService:
                     "updated_at": now,
                 }
             )
+            if self.runtime_mode is not WicRuntimeMode.LEGACY_WIC:
+                store.insert_response_event(
+                    {
+                        "id": uuid4(), "interaction_id": interaction_id,
+                        "turn_id": turn_id, "response_id": turn_id, "sequence": 1,
+                        "event_type": WicResponseEventType.TURN_ACCEPTED.value,
+                        "content": None, "basis_fingerprint": None,
+                        "reconciliation": None,
+                        "event_metadata": {"wic_mode": self.runtime_mode.value},
+                        "created_at": now,
+                    }
+                )
             store.touch_interaction(interaction_id, updated_by=identity, updated_at=now)
             uow.commit()
         with self._turn_lock:
@@ -587,6 +617,7 @@ class WorkInteractionService:
         with self._turn_lock:
             self._turn_response_streams.clear()
             self._turn_timings.clear()
+            self._turn_fast_candidates.clear()
 
     def turn_timing(self, turn_id: UUID) -> dict[str, object] | None:
         """Observe monotonic latency; absent/restarted observations remain unknown.
@@ -632,6 +663,58 @@ class WorkInteractionService:
         """Return bounded shadow evidence; it is never Conversation or Work truth."""
 
         return None if self.fast_reception is None else self.fast_reception.observation(turn_id)
+
+    def response_events(
+        self, turn_id: UUID, *, after_sequence: int = 0
+    ) -> tuple[WicResponseEvent, ...]:
+        with self.database.unit_of_work() as uow:
+            return InteractionStore(uow.session).response_events(
+                turn_id, after_sequence=after_sequence
+            )
+
+    def _record_response_event(
+        self,
+        turn_id: UUID,
+        event_type: WicResponseEventType,
+        *,
+        content: str | None = None,
+        basis_fingerprint: str | None = None,
+        reconciliation: ResponseReconciliation | None = None,
+        metadata: dict[str, object] | None = None,
+        only_while_processing: bool = False,
+    ) -> WicResponseEvent | None:
+        now = datetime.now(UTC)
+        with self.database.unit_of_work() as uow:
+            store = InteractionStore(uow.session)
+            # The Turn row serializes sequence allocation without coupling the
+            # database lock to the process-local stream lock.
+            turn = store.turn(turn_id, for_update=True)
+            if turn is None:
+                return None
+            if only_while_processing and turn.status not in {
+                InteractionTurnStatus.RECEIVED,
+                InteractionTurnStatus.PROCESSING,
+            }:
+                return None
+            sequence = store.next_response_event_sequence(turn_id)
+            event_id = uuid4()
+            store.insert_response_event(
+                {
+                    "id": event_id, "interaction_id": turn.interaction_id,
+                    "turn_id": turn_id, "response_id": turn_id,
+                    "sequence": sequence, "event_type": event_type.value,
+                    "content": content, "basis_fingerprint": basis_fingerprint,
+                    "reconciliation": None if reconciliation is None else reconciliation.value,
+                    "event_metadata": metadata or {}, "created_at": now,
+                }
+            )
+            uow.commit()
+        return WicResponseEvent(
+            id=event_id, interaction_id=turn.interaction_id, turn_id=turn_id,
+            response_id=turn_id, sequence=sequence, event_type=event_type,
+            content=content, basis_fingerprint=basis_fingerprint,
+            reconciliation=reconciliation, metadata=metadata or {}, created_at=now,
+        )
 
     def _mark_turn_timing(self, turn_id: UUID, event: str) -> None:
         if event not in _TURN_TIMING_MILESTONES:
@@ -704,9 +787,16 @@ class WorkInteractionService:
                 if self.fast_reception is None:
                     return
                 self._mark_turn_timing(turn_id, "fast_path_started")
+                if turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED:
+                    self._record_response_event(
+                        turn_id, WicResponseEventType.FAST_RECEPTION_STARTED,
+                        basis_fingerprint=basis.basis_fingerprint,
+                        only_while_processing=True,
+                    )
                 future = self.fast_reception.start(basis, turn_id)
 
                 def observed(done: Future) -> None:
+                    result = None
                     try:
                         result = done.result()
                         milestone = (
@@ -719,16 +809,61 @@ class WorkInteractionService:
                     except Exception:
                         milestone = "fast_failed"
                     self._mark_turn_timing(turn_id, milestone)
+                    if turn.wic_mode is not WicRuntimeMode.WIC_VNEXT_CONTROLLED:
+                        return
+                    if result is not None and result.status == "CANDIDATE" and result.candidate is not None:
+                        candidate = result.candidate.model_copy(
+                            update={"visibility_disposition": FastReceptionVisibility.SAFE_TO_EMIT}
+                        )
+                        event = self._record_response_event(
+                            turn_id, WicResponseEventType.PROVISIONAL_RESPONSE,
+                            content=candidate.meaningful_sentence,
+                            basis_fingerprint=candidate.basis_fingerprint,
+                            metadata={
+                                "eligibility": candidate.provisional_turn_intent,
+                                "profile": candidate.profile,
+                                "authority": candidate.authority,
+                                "fast_context_fingerprint": candidate.fast_context_fingerprint,
+                            },
+                            only_while_processing=True,
+                        )
+                        if event is not None:
+                            with self._turn_lock:
+                                self._turn_fast_candidates[turn_id] = candidate
+                                while len(self._turn_fast_candidates) > 128:
+                                    self._turn_fast_candidates.popitem(last=False)
+                            self._publish_turn_response_delta(
+                                turn_id, candidate.meaningful_sentence
+                            )
+                    else:
+                        reason = (
+                            FastSuppressionReason.FAST_FAILURE
+                            if result is None or result.status in {"FAILED", "TIMED_OUT"}
+                            else FastSuppressionReason.NO_EXPLICIT_MEANING
+                        )
+                        self._record_response_event(
+                            turn_id, WicResponseEventType.FAST_SUPPRESSED,
+                            basis_fingerprint=basis.basis_fingerprint,
+                            metadata={
+                                "reason": reason.value,
+                                "status": "FAILED" if result is None else result.status,
+                            },
+                            only_while_processing=True,
+                        )
 
                 future.add_done_callback(observed)
 
+            controlled = turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED
             assessment = self._assess_current(
                 turn.interaction_id,
-                on_response_delta=lambda delta: self._publish_turn_response_delta(
-                    turn_id, delta
+                on_response_delta=(
+                    (lambda _delta: None)
+                    if controlled
+                    else lambda delta: self._publish_turn_response_delta(turn_id, delta)
                 ),
                 on_pipeline_stage=lambda stage: self._mark_turn_timing(turn_id, stage),
                 on_basis_ready=start_fast_reception,
+                policy_governed=controlled,
             )
             self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
@@ -751,9 +886,68 @@ class WorkInteractionService:
                             f"{interaction.selected_design_schema_version}",
                         )
                     )
-                    response_content = self._human_facing_response(
-                        assessment.natural_response
-                    )
+                    deep_content = self._human_facing_response(assessment.natural_response)
+                    response_content = deep_content
+                    if controlled:
+                        events = store.response_events(turn_id)
+                        provisional_event = next(
+                            (event for event in events if event.event_type is WicResponseEventType.PROVISIONAL_RESPONSE),
+                            None,
+                        )
+                        provisional = None if provisional_event is None else provisional_event.content
+                        fast = self._turn_fast_candidates.get(turn_id)
+                        semantics = assessment.progressive_semantics
+                        reconciliation = (
+                            ResponseReconciliation.REFINE
+                            if semantics is None
+                            else reconcile_fast_and_deep(fast, semantics)
+                            if fast is not None
+                            else reconcile_provisional_intent(
+                                str(provisional_event.metadata.get("eligibility")),
+                                semantics,
+                            )
+                            if provisional_event is not None
+                            else ResponseReconciliation.REFINE
+                        )
+                        if provisional:
+                            if reconciliation is ResponseReconciliation.MATERIAL_CORRECTION:
+                                continuation = "\n\n" + corrected_continuation(
+                                    deep_content,
+                                    chinese=bool(re.search(r"[\u4e00-\u9fff]", deep_content)),
+                                )
+                            elif deep_content.startswith(provisional):
+                                continuation = deep_content[len(provisional):]
+                            else:
+                                continuation = "\n\n" + deep_content
+                            response_content = provisional + continuation
+                        else:
+                            continuation = deep_content
+                        event_type = (
+                            WicResponseEventType.RESPONSE_CORRECTION
+                            if reconciliation is ResponseReconciliation.MATERIAL_CORRECTION
+                            else WicResponseEventType.RESPONSE_REFINEMENT
+                        )
+                        sequence = store.next_response_event_sequence(turn_id)
+                        store.insert_response_event({
+                            "id": uuid4(), "interaction_id": turn.interaction_id,
+                            "turn_id": turn_id, "response_id": turn_id,
+                            "sequence": sequence, "event_type": event_type.value,
+                            "content": continuation, "basis_fingerprint": assessment.basis_fingerprint,
+                            "reconciliation": reconciliation.value,
+                            "event_metadata": {"policy_governed": True},
+                            "created_at": completed_at,
+                        })
+                        store.insert_response_event({
+                            "id": uuid4(), "interaction_id": turn.interaction_id,
+                            "turn_id": turn_id, "response_id": turn_id,
+                            "sequence": sequence + 1,
+                            "event_type": WicResponseEventType.FINAL_RESPONSE.value,
+                            "content": response_content,
+                            "basis_fingerprint": assessment.basis_fingerprint,
+                            "reconciliation": reconciliation.value,
+                            "event_metadata": {"conversation_truth_pending": True},
+                            "created_at": completed_at,
+                        })
                     self._reconcile_turn_response(turn_id, response_content)
                     store.insert_message(
                         {
@@ -789,6 +983,16 @@ class WorkInteractionService:
                     status=InteractionTurnStatus.COMPLETED,
                     updated_at=completed_at,
                 )
+                if controlled:
+                    store.insert_response_event({
+                        "id": uuid4(), "interaction_id": turn.interaction_id,
+                        "turn_id": turn_id, "response_id": turn_id,
+                        "sequence": store.next_response_event_sequence(turn_id),
+                        "event_type": WicResponseEventType.TURN_COMPLETED.value,
+                        "content": None, "basis_fingerprint": assessment.basis_fingerprint,
+                        "reconciliation": None, "event_metadata": {},
+                        "created_at": completed_at,
+                    })
                 uow.commit()
             self._mark_turn_timing(turn_id, "persistence_completed")
             self._mark_turn_timing(turn_id, "completed")
@@ -809,11 +1013,26 @@ class WorkInteractionService:
                     status=InteractionTurnStatus.FAILED,
                     updated_at=failed_at,
                 )
+                if turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED:
+                    store.insert_response_event({
+                        "id": uuid4(), "interaction_id": turn.interaction_id,
+                        "turn_id": turn_id, "response_id": turn_id,
+                        "sequence": store.next_response_event_sequence(turn_id),
+                        "event_type": WicResponseEventType.TURN_FAILED.value,
+                        "content": None, "basis_fingerprint": None,
+                        "reconciliation": None,
+                        "event_metadata": {"code": type(error).__name__, "provisional_is_not_final": True},
+                        "created_at": failed_at,
+                    })
                 uow.commit()
             self._mark_turn_timing(turn_id, "failed")
 
     def assess_current(self, interaction_id: UUID) -> InteractionAssessment:
-        return self._assess_current(interaction_id, on_response_delta=None)
+        return self._assess_current(
+            interaction_id,
+            on_response_delta=None,
+            policy_governed=self.runtime_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED,
+        )
 
     def _assess_current(
         self,
@@ -822,6 +1041,7 @@ class WorkInteractionService:
         on_response_delta: Callable[[str], None] | None,
         on_pipeline_stage: Callable[[str], None] | None = None,
         on_basis_ready: Callable[[InteractionInterpretationInput], None] | None = None,
+        policy_governed: bool = False,
     ) -> InteractionAssessment:
         if on_pipeline_stage is not None:
             on_pipeline_stage("reality_load_started")
@@ -864,6 +1084,7 @@ class WorkInteractionService:
             basis_fingerprint=basis.basis_fingerprint,
             candidate=candidate,
             on_pipeline_stage=on_pipeline_stage,
+            policy_governed=policy_governed,
         )
 
     @staticmethod
@@ -879,6 +1100,7 @@ class WorkInteractionService:
         basis_fingerprint: str,
         candidate: InteractionAssessmentCandidate,
         on_pipeline_stage: Callable[[str], None] | None = None,
+        policy_governed: bool = False,
     ) -> InteractionAssessment:
         if on_pipeline_stage is not None:
             on_pipeline_stage("admission_started")
@@ -950,6 +1172,17 @@ class WorkInteractionService:
                 focus=focus,
                 impact=impact,
             )
+            if policy_governed:
+                candidate = candidate.model_copy(
+                    update={
+                        "natural_response": policy_governed_response(
+                            candidate,
+                            progressive_semantics,
+                            latest_human_input=latest_human_input,
+                            active_context=active_context,
+                        )
+                    }
+                )
             record_references = self._normalize_supporting_references(
                 tuple(
                     reference

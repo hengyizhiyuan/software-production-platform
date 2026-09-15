@@ -808,6 +808,55 @@ test("switching conversations ignores stale deltas and leaves the prior queue is
   assert.equal(viewModel.nextInteractionOutboxItem(harness.state.outbox, "interaction-2", { turns: [] }), null);
 });
 
+test("controlled WIC response events evolve one bubble and suppress duplicate replay", () => {
+  const harness = conversationHarness(async () => ({ turns: [] }));
+  harness.observeInteractionTurn("interaction-1", "turn-1");
+  const source = harness.sources[0];
+  const provisional = {
+    sequence: 3, response_id: "turn-1",
+    content: "我已捕捉到新增约束：登录后不要跳首页。",
+  };
+  source.emit("response.provisional", provisional);
+  source.emit("response.provisional", provisional);
+  assert.equal(harness.state.streamingAssistantMessage.content, provisional.content);
+  source.emit("response.refinement", {
+    sequence: 4, response_id: "turn-1", reconciliation: "REFINE",
+    content: "\n\n这不会改变现有鉴权协议。",
+  });
+  assert.equal(
+    harness.state.streamingAssistantMessage.content,
+    provisional.content + "\n\n这不会改变现有鉴权协议。",
+  );
+  source.emit("response.final", {
+    sequence: 5, response_id: "turn-1",
+    content: provisional.content + "\n\n这不会改变现有鉴权协议。",
+  });
+  assert.equal(harness.state.streamingAssistantMessage.phase, "FINAL");
+  assert.equal(harness.state.streamingAssistantMessage.responseSequence, 5);
+  assert.equal(harness.state.streamingAssistantMessage.turnId, "turn-1");
+});
+
+test("refresh during Deep WIC rebuilds provisional text without duplication", () => {
+  const harness = conversationHarness(async () => ({ turns: [] }));
+  harness.observeInteractionTurn("interaction-1", "turn-1");
+  harness.sources[0].emit("response.provisional", {
+    sequence: 3, response_id: "turn-1", content: "已记录这个明确约束。",
+  });
+  harness.stopTurnObservation();
+  harness.observeInteractionTurn("interaction-1", "turn-1");
+  harness.sources[1].emit("response.provisional", {
+    sequence: 3, response_id: "turn-1", content: "已记录这个明确约束。",
+  });
+  harness.sources[1].emit("response.refinement", {
+    sequence: 4, response_id: "turn-1", reconciliation: "REFINE",
+    content: "\n\n原有范围保持不变。",
+  });
+  assert.equal(
+    harness.state.streamingAssistantMessage.content,
+    "已记录这个明确约束。\n\n原有范围保持不变。",
+  );
+});
+
 test("SSE disconnect falls back to observation and drains once after saved completion", async () => {
   let posts = 0;
   let polls = 0;

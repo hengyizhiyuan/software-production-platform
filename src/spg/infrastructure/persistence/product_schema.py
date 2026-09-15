@@ -243,6 +243,7 @@ interaction_turns = Table(
         nullable=True,
         unique=True,
     ),
+    Column("wic_mode", String(32), nullable=False, server_default="LEGACY_WIC"),
     Column("status", String(32), nullable=False),
     Column("failure_code", String(128), nullable=True),
     Column("failure_message", Text, nullable=True),
@@ -254,6 +255,38 @@ interaction_turns = Table(
         "status IN ('RECEIVED', 'PROCESSING', 'COMPLETED', 'FAILED')",
         name="ck_interaction_turns_status_known",
     ),
+    CheckConstraint(
+        "wic_mode IN ('LEGACY_WIC', 'WIC_VNEXT_SHADOW', 'WIC_VNEXT_CONTROLLED')",
+        name="ck_interaction_turns_wic_mode_known",
+    ),
+)
+
+interaction_response_events = Table(
+    "interaction_response_events",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column(
+        "interaction_id",
+        Uuid(as_uuid=True),
+        ForeignKey("product_interactions.id", name="fk_interaction_response_events_interaction"),
+        nullable=False,
+    ),
+    Column(
+        "turn_id",
+        Uuid(as_uuid=True),
+        ForeignKey("interaction_turns.id", name="fk_interaction_response_events_turn"),
+        nullable=False,
+    ),
+    Column("response_id", Uuid(as_uuid=True), nullable=False),
+    Column("sequence", Integer, nullable=False),
+    Column("event_type", String(64), nullable=False),
+    Column("content", Text, nullable=True),
+    Column("basis_fingerprint", String(64), nullable=True),
+    Column("reconciliation", String(32), nullable=True),
+    Column("event_metadata", JSONB, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    UniqueConstraint("turn_id", "sequence", name="uq_interaction_response_events_turn_sequence"),
+    CheckConstraint("response_id = turn_id", name="ck_interaction_response_events_response_identity"),
 )
 
 interaction_messages = Table(
@@ -684,6 +717,7 @@ product_tables = (
     product_interactions,
     interaction_records,
     interaction_turns,
+    interaction_response_events,
     interaction_messages,
     interaction_assessments,
     work_reality_revisions,

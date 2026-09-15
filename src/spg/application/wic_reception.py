@@ -30,6 +30,14 @@ _NARROW_CHANGE = re.compile(r"(把.+?(?:改成|改为).+?)(?:[。；;]|$)")
 _NEW_OBJECT = re.compile(r"(?:另外|还有).*(我想|我要).*(开发|做|创建)(.+?(?:系统|平台|网站|应用))")
 
 
+def _correction_target(value: str) -> str:
+    reversed_object = re.search(r"不是.+?[，,]是(.+)", value)
+    if reversed_object:
+        return reversed_object.group(1).strip("。 ")
+    positive = re.split(r"[,，]不是", value, maxsplit=1)[0].strip()
+    return positive or value.strip("。 ")
+
+
 def apply_fast_grounding_policy(candidate: FastReceptionCandidate, basis: InteractionInterpretationInput, card: FastContextCard) -> FastReceptionCandidate:
     latest = basis.records[-1]
     blocked = False
@@ -68,8 +76,9 @@ class DeterministicFastReceptionCapability:
             captured = "客户数据" if "客户数据" in text else None
             sentence = "这涉及客户数据外发；权限和保留期需要由你决定，我不会先替你设定。" if "客户数据" in text else "这涉及需要由你决定的高影响条件，我不会先替你设定。"
         elif match := _CORRECTION.search(text):
-            intent = "CORRECTION"; correction = match.group(1).strip("。 "); captured = correction
-            sentence = f"我已按你的纠正理解为：{correction}。"
+            intent = "CORRECTION"; correction = match.group(1).strip("。 ")
+            captured = _correction_target(correction)
+            sentence = f"明白，你是在纠正对象：{captured}。"
         elif match := _CONSTRAINT.search(text):
             intent = "CONSTRAINT_ADDITION"; value = match.group(1).strip("。 "); constraints = (value,)
             sentence = f"我已捕捉到新增约束：{value}。"

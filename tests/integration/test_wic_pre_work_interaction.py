@@ -28,6 +28,10 @@ from spg.application.interaction import (
     DeterministicWorkInteractionCapability,
     WorkInteractionService,
 )
+from spg.application.wic_reception import (
+    DeterministicFastReceptionCapability,
+    ShadowFastReceptionRuntime,
+)
 from spg.domain.interaction import (
     InteractionAssessmentCandidate,
     InteractionInterpretationInput,
@@ -38,11 +42,13 @@ from spg.domain.interaction import (
     WorkAdmissionReadinessStatus,
 )
 from spg.domain.runtime_activation import RuntimeActivationProjection, RuntimeActivationState
+from spg.domain.wic_response import WicResponseEventType, WicRuntimeMode
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_schema import (
     interaction_assessments,
     interaction_records,
     interaction_messages,
+    interaction_response_events,
     interaction_turns,
     product_interactions,
     product_works,
@@ -760,6 +766,137 @@ def test_async_turn_projects_real_delta_before_completion_and_persists_final_mes
     service.shutdown()
 
 
+def test_controlled_vnext_exposes_fast_and_settles_one_policy_governed_response(
+    postgres_database: Database,
+) -> None:
+    capability = _BlockingStreamingCapability()
+    service = WorkInteractionService(
+        postgres_database,
+        capability=capability,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
+        fast_reception=ShadowFastReceptionRuntime(
+            DeterministicFastReceptionCapability()
+        ),
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    submitted = service.submit_turn(
+        interaction.id,
+        "新增约束：登录后不要跳首页。",
+        human_identity="human:test",
+    )
+    assert capability.delta_published.wait(timeout=2)
+    deadline = time.monotonic() + 2
+    events = ()
+    while time.monotonic() < deadline:
+        events = service.response_events(submitted.id)
+        if any(item.event_type is WicResponseEventType.PROVISIONAL_RESPONSE for item in events):
+            break
+        time.sleep(0.01)
+    provisional = next(
+        item for item in events
+        if item.event_type is WicResponseEventType.PROVISIONAL_RESPONSE
+    )
+    streamed, _ = service.turn_response_delta(submitted.id, 0)
+    assert streamed == provisional.content
+    assert "mapping the design path" not in streamed
+    assert provisional.response_id == submitted.id
+
+    capability.release.set()
+    completed = _wait_for_turn(service, submitted.id)
+    assert completed.status is InteractionTurnStatus.COMPLETED
+    projection = service.get_shared_understanding(interaction.id)
+    watt_messages = [
+        item for item in projection.conversation_messages if item.actor.value == "WATT"
+    ]
+    assert len(watt_messages) == 1
+    assert watt_messages[0].turn_id == submitted.id
+    assert watt_messages[0].content.startswith(provisional.content)
+    settled_events = service.response_events(submitted.id)
+    assert [item.sequence for item in settled_events] == list(
+        range(1, len(settled_events) + 1)
+    )
+    assert all(item.response_id == submitted.id for item in settled_events)
+    assert any(item.event_type is WicResponseEventType.RESPONSE_REFINEMENT for item in settled_events)
+    assert settled_events[-2].event_type is WicResponseEventType.FINAL_RESPONSE
+    assert settled_events[-1].event_type is WicResponseEventType.TURN_COMPLETED
+    assert _count(postgres_database, interaction_messages) == 2
+    service.shutdown()
+
+
+def test_controlled_vnext_blocks_unsafe_provider_prose_in_actual_response_path(
+    postgres_database: Database,
+) -> None:
+    class UnsafeAuthorityCapability:
+        def interpret(self, basis: InteractionInterpretationInput):
+            return InteractionAssessmentCandidate(
+                interpreted_motive="把客户数据接入外部模型",
+                desired_outcome="形成数据接入方案",
+                current_requests=(basis.records[-1].content,),
+                natural_response="我会默认开放全部客户数据，并设定保留 90 天。",
+                provider_identity="test:unsafe-raw-prose",
+            )
+
+    service = WorkInteractionService(
+        postgres_database,
+        capability=UnsafeAuthorityCapability(),
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
+        fast_reception=ShadowFastReceptionRuntime(
+            DeterministicFastReceptionCapability()
+        ),
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    submitted = service.submit_turn(
+        interaction.id,
+        "把客户数据接入外部模型，权限和保留期你看着办。",
+        human_identity="human:test",
+    )
+    assert _wait_for_turn(service, submitted.id).status is InteractionTurnStatus.COMPLETED
+    projection = service.get_shared_understanding(interaction.id)
+    visible = projection.conversation_messages[-1].content
+    assert "由你决定" in visible
+    assert "不会替你设定" in visible
+    assert "默认开放全部" not in visible
+    assert "90 天" not in visible
+    assert projection.latest_assessment.natural_response in visible
+    service.shutdown()
+
+
+def test_runtime_rollback_keeps_vnext_evidence_inert_and_resumes_legacy(
+    postgres_database: Database,
+) -> None:
+    controlled = WorkInteractionService(
+        postgres_database,
+        capability=DeterministicWorkInteractionCapability(),
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
+        fast_reception=ShadowFastReceptionRuntime(
+            DeterministicFastReceptionCapability()
+        ),
+    )
+    first = controlled.create_interaction(human_identity="human:test")
+    first_turn = controlled.submit_turn(
+        first.id, "新增约束：登录后不要跳首页。", human_identity="human:test"
+    )
+    assert _wait_for_turn(controlled, first_turn.id).status is InteractionTurnStatus.COMPLETED
+    retained_count = _count(postgres_database, interaction_response_events)
+    controlled.shutdown()
+
+    legacy = WorkInteractionService(
+        postgres_database,
+        capability=DeterministicWorkInteractionCapability(),
+        runtime_mode=WicRuntimeMode.LEGACY_WIC,
+    )
+    second = legacy.create_interaction(human_identity="human:test")
+    second_turn = legacy.submit_turn(
+        second.id, "我想做一个运营管理平台。", human_identity="human:test"
+    )
+    assert _wait_for_turn(legacy, second_turn.id).status is InteractionTurnStatus.COMPLETED
+    assert legacy.get_turn(second_turn.id).wic_mode is WicRuntimeMode.LEGACY_WIC
+    assert legacy.response_events(second_turn.id) == ()
+    assert _count(postgres_database, interaction_response_events) == retained_count
+    assert len(legacy.get_shared_understanding(second.id).conversation_messages) == 2
+    legacy.shutdown()
+
+
 def test_async_turn_failure_is_persisted_without_work(
     postgres_database: Database,
 ) -> None:
@@ -883,6 +1020,71 @@ def test_async_http_turn_streams_persisted_status_and_response(
             f"/api/interactions/{created['interaction_id']}"
         ).json()
         assert "".join(deltas) == projection["conversation_messages"][-1]["content"]
+
+
+def test_controlled_http_stream_replays_one_response_without_duplicate_identity(
+    postgres_database: Database,
+) -> None:
+    interaction_service = WorkInteractionService(
+        postgres_database,
+        capability=DeterministicWorkInteractionCapability(),
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
+        fast_reception=ShadowFastReceptionRuntime(
+            DeterministicFastReceptionCapability()
+        ),
+    )
+    client = TestClient(
+        create_http_application(
+            application=object(), database=postgres_database,
+            work_service=_NeverCalledWorkService(postgres_database),
+            orchestrator=_NoopOrchestrator(), steering_driver=_NoopDriver(),
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=interaction_service,
+        ),
+        raise_server_exceptions=False,
+    )
+    with client:
+        created = client.post(
+            "/api/interactions", json={"human_identity": "human:test"}
+        ).json()
+        submitted = client.post(
+            f"/api/interactions/{created['interaction_id']}/turns",
+            json={
+                "content": "新增约束：登录后不要跳首页。",
+                "human_identity": "human:test",
+            },
+        )
+        assert submitted.status_code == 202
+        turn_id = submitted.json()["turn_id"]
+        streamed = client.get(
+            f"/api/interactions/{created['interaction_id']}/turns/{turn_id}/events"
+        )
+        assert streamed.status_code == 200
+        assert "event: response.provisional" in streamed.text
+        assert "event: response.refinement" in streamed.text
+        assert "event: response.final" in streamed.text
+        assert "event: message.completed" in streamed.text
+        event_ids = [
+            int(line.removeprefix("id: "))
+            for line in streamed.text.splitlines() if line.startswith("id: ")
+        ]
+        assert event_ids == sorted(set(event_ids))
+        replay = client.get(
+            f"/api/interactions/{created['interaction_id']}/turns/{turn_id}/events",
+            params={"after_sequence": event_ids[1]},
+        )
+        replay_ids = [
+            int(line.removeprefix("id: "))
+            for line in replay.text.splitlines() if line.startswith("id: ")
+        ]
+        assert replay_ids
+        assert min(replay_ids) > event_ids[1]
+        projection = client.get(
+            f"/api/interactions/{created['interaction_id']}"
+        ).json()
+        watt = [item for item in projection["conversation_messages"] if item["actor"] == "WATT"]
+        assert len(watt) == 1
+        assert watt[0]["turn_id"] == turn_id
 
 
 @pytest.mark.real_codex

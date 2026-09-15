@@ -86,6 +86,7 @@ def test_production_metadata_contains_runtime_and_mvp_app_product_tables() -> No
         "interaction_records",
         "interaction_assessments",
         "interaction_turns",
+        "interaction_response_events",
         "interaction_messages",
         "interaction_work_transitions",
         "work_reality_revisions",
@@ -108,4 +109,4 @@ def test_alembic_environment_has_native_executor_head() -> None:
     config = Config(project_root / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260915_40"]
+    assert scripts.get_heads() == ["20260915_41"]

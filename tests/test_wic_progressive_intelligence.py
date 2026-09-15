@@ -8,6 +8,9 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 
 from spg.application.interaction import WorkInteractionService, interaction_basis_fingerprint
 from spg.application.wic_intelligence import build_progressive_semantics
+from spg.application.wic_response import policy_governed_response, reconcile_fast_and_deep
+from spg.application.wic_context import build_fast_context_card
+from spg.application.wic_reception import DeterministicFastReceptionCapability
 from spg.domain.interaction import (
     Interaction, InteractionActor, InteractionAssessment,
     InteractionAssessmentCandidate, InteractionCondition,
@@ -19,6 +22,7 @@ from spg.domain.wic_intelligence import (
     QuestionDisposition, ReadinessTarget, SemanticAuthority,
     SemanticDeltaOperation, TransitionReadinessStatus,
 )
+from spg.domain.wic_response import ResponseReconciliation
 from spg.evaluation.open_wic_baseline import _active_context, load_corpus
 
 
@@ -120,6 +124,76 @@ def test_ow_d_adds_constraints_and_preserves_existing_obligations() -> None:
     assert PatternSignal.CONSTRAINT_ADDITION in result.pattern_signals
 
 
+def test_ow_f_final_visible_response_reserves_human_authority() -> None:
+    candidate = _candidate(
+        "OW-F",
+        natural_response="我建议默认允许全部客户数据外发，保留 90 天。",
+    )
+    semantics = _build("OW-F", candidate=candidate)
+    response = policy_governed_response(
+        candidate,
+        semantics,
+        latest_human_input=_case("OW-F").human_turns[-1].content,
+        active_context=_inputs("OW-F")[1],
+    )
+    assert "由你决定" in response
+    assert "不会替你设定" in response
+    assert "默认允许全部" not in response
+    assert "90 天" not in response
+
+
+def test_ow_h_final_visible_response_corrects_reality_and_keeps_motive() -> None:
+    candidate = _candidate(
+        "OW-H",
+        natural_response="既然系统使用 MySQL，我会直接修改 MySQL 表。",
+    )
+    semantics = _build("OW-H", candidate=candidate)
+    response = policy_governed_response(
+        candidate,
+        semantics,
+        latest_human_input=_case("OW-H").human_turns[-1].content,
+        active_context=_inputs("OW-H")[1],
+    )
+    assert "PostgreSQL" in response
+    assert "目标仍然有效" in response
+    assert "直接修改 MySQL" not in response
+
+
+def test_ow_c_final_visible_response_does_not_leak_stale_motive() -> None:
+    prior = _prior("策划一次 Watt 推广活动")
+    candidate = _candidate("OW-C", natural_response="我继续策划这次推广活动。")
+    semantics = _build("OW-C", candidate=candidate, prior=prior)
+    response = policy_governed_response(
+        candidate,
+        semantics,
+        latest_human_input=_case("OW-C").human_turns[-1].content,
+        active_context=_inputs("OW-C", prior=prior)[1],
+    )
+    assert "运营后台" in response
+    assert "继续策划" not in response
+
+
+def test_fast_and_deep_share_basis_and_reconcile_as_one_response() -> None:
+    record, active, fingerprint = _inputs("OW-D")
+    interaction = Interaction(
+        id=record.interaction_id, condition=InteractionCondition.OPEN,
+        current_work_id=active.work_revision.work_id,
+        created_by="test", updated_by="test", created_at=record.created_at,
+        updated_at=record.created_at,
+    )
+    basis = InteractionInterpretationInput(
+        interaction=interaction, records=(record,), active_work_context=active,
+        basis_fingerprint=fingerprint,
+    )
+    fast = DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=812)
+    )
+    assert fast is not None
+    semantics = _build("OW-D")
+    assert fast.basis_fingerprint == semantics.basis_fingerprint
+    assert reconcile_fast_and_deep(fast, semantics) is ResponseReconciliation.REFINE
+
+
 def test_ow_e_is_new_motive_candidate_and_cannot_expand_current_work() -> None:
     result = _build("OW-E")
     assert result.governance_candidate is GovernanceCandidateKind.NEW_MOTIVE_CANDIDATE
@@ -187,3 +261,83 @@ def test_slice2_adversarial_corpus_is_bounded_and_high_signal() -> None:
         "architecture_ambiguity", "partial_progress",
     }
     assert {case["kind"] for case in payload["cases"]} == required
+
+
+def test_slice2_adversarial_corpus_runs_through_visible_policy_path() -> None:
+    payload = json.loads(Path("benchmarks/open_wic/slice2-corpus-v1.json").read_text())
+    mapping = {
+        "multiple_corrections": "OW-C",
+        "correction_reversal": "OW-C",
+        "two_constraints": "OW-D",
+        "safe_reversible_inference": "OW-G",
+        "privacy_authority": "OW-F",
+        "explicit_new_motive": "OW-E",
+        "ambiguous_work_boundary": "OW-D",
+        "stale_repository_fact": "OW-D",
+        "brownfield_contradiction": "OW-H",
+        "low_value_detail": "OW-G",
+        "architecture_ambiguity": "OW-F",
+        "partial_progress": "OW-F",
+    }
+    observed: dict[str, tuple[object, str]] = {}
+    for case in payload["cases"]:
+        case_id = mapping[case["kind"]]
+        prior = _prior("策划一次推广活动") if "correction" in case["kind"] else None
+        unresolved = (
+            ("这个门户属于当前 Work 还是新的长期对象？",)
+            if case["kind"] == "ambiguous_work_boundary" else ()
+        )
+        candidate = _candidate(
+            case_id,
+            unresolved_material_questions=unresolved,
+            natural_response="RAW_UNSAFE_PROVIDER_WORDING",
+        )
+        semantics = _build(case_id, candidate=candidate, prior=prior, text=case["turn"])
+        response = policy_governed_response(
+            candidate,
+            semantics,
+            latest_human_input=case["turn"],
+            active_context=_inputs(case_id, prior=prior, text=case["turn"])[1],
+        )
+        observed[case["kind"]] = (semantics, response)
+
+    assert "长期运营后台" in observed["multiple_corrections"][0].working_motive
+    assert PatternSignal.EXPLICIT_CORRECTION in observed["correction_reversal"][0].pattern_signals
+    assert len(observed["two_constraints"][0].working_constraints) >= 2
+    assert observed["safe_reversible_inference"][0].inference_disposition is InferenceDisposition.SAFE_REVERSIBLE_INFERENCE
+    assert "由你决定" in observed["privacy_authority"][1]
+    assert observed["explicit_new_motive"][0].governance_candidate is GovernanceCandidateKind.NEW_MOTIVE_CANDIDATE
+    assert observed["ambiguous_work_boundary"][0].selected_question
+    assert PatternSignal.CONSTRAINT_ADDITION in observed["stale_repository_fact"][0].pattern_signals
+    assert "PostgreSQL" in observed["brownfield_contradiction"][1]
+    assert observed["low_value_detail"][0].selected_question is None
+    assert "由你决定" in observed["architecture_ambiguity"][1]
+    partial = observed["partial_progress"][0]
+    assert partial.inference_disposition is InferenceDisposition.HUMAN_OWNED_DECISION
+    assert any(
+        item.target in {ReadinessTarget.WORK_FORMATION, ReadinessTarget.WORK_REVISION}
+        and item.status is TransitionReadinessStatus.NOT_READY
+        for item in partial.readiness
+    )
+
+
+def test_material_fast_correction_is_explicitly_classified() -> None:
+    record, active, fingerprint = _inputs("OW-C", text="不对，我要开发运营后台，不是策划活动。")
+    interaction = Interaction(
+        id=record.interaction_id, condition=InteractionCondition.OPEN,
+        current_work_id=None, created_by="test", updated_by="test",
+        created_at=record.created_at, updated_at=record.created_at,
+    )
+    basis = InteractionInterpretationInput(
+        interaction=interaction, records=(record,), active_work_context=active,
+        basis_fingerprint=fingerprint,
+    )
+    fast = DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=913)
+    )
+    assert fast is not None
+    wrong_fast = fast.model_copy(update={"provisional_turn_intent": "BOUNDED_CHANGE"})
+    semantics = _build("OW-C", prior=_prior("策划活动"), text=record.content)
+    assert reconcile_fast_and_deep(
+        wrong_fast, semantics
+    ) is ResponseReconciliation.MATERIAL_CORRECTION

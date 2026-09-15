@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    container_name: watt-wic-slice3-postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: spg
+      POSTGRES_PASSWORD: spg-wic-slice3-local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spg -d postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - watt-wic-slice3-postgres:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: watt-wic-slice3-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPG_APPLICATION_NAME: Watt WIC Slice 3 Human Dogfood
+      SPG_DATABASE_URL: postgresql+psycopg://spg:spg-wic-slice3-local@postgres:5432/spg_dev?sslmode=disable&connect_timeout=5
+      SPG_REPOSITORY_PATH: /var/lib/spg/repository
+      SPG_RUNTIME_PROFILE: watt-wic-slice3-dogfood
+      SPG_WORKSPACE_ROOT: /var/lib/spg/workspaces
+      SPG_DEEPSEEK_API_KEY: ${SPG_DEEPSEEK_API_KEY:?SPG_DEEPSEEK_API_KEY must be configured in the ignored .env file}
+      SPG_DEEPSEEK_BASE_URL: ${SPG_DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      SPG_WIC_PROVIDER_ADAPTER: deepseek
+      SPG_WIC_PROVIDER_MODEL: deepseek-flash
+      SPG_WIC_PROVIDER_REASONING_EFFORT: low
+      SPG_CONVERSATION_PROVIDER_ADAPTER: deepseek
+      SPG_CONVERSATION_PROVIDER_MODEL: deepseek-flash
+      SPG_CONVERSATION_PROVIDER_REASONING_EFFORT: low
+      SPG_WIC_COALESCE_PRE_WORK: "true"
+      SPG_WIC_RUNTIME_MODE: WIC_VNEXT_CONTROLLED
+      SPG_WIC_FAST_RECEPTION_SHADOW_ENABLED: "true"
+    init: true
+    ports:
+      - "127.0.0.1:8045:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"
+      interval: 3s
+      timeout: 4s
+      retries: 30
+      start_period: 12s
+    volumes:
+      - type: bind
+        source: ./.git
+        target: /source/.git
+        read_only: true
+      - type: volume
+        source: watt-wic-slice3-runtime
+        target: /var/lib/spg
+
+volumes:
+  watt-wic-slice3-postgres:
+  watt-wic-slice3-runtime:

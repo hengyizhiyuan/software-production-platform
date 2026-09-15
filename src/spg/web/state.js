@@ -459,7 +459,7 @@
       {
         actor: "WATT",
         turn_id: streamingAssistant.turnId,
-        content: streamingAssistant.content || "Watt is thinking...",
+        content: streamingAssistant.content || "正在处理…",
         processing_status: streamingAssistant.status || "PROCESSING",
         supporting_references: [],
         design_result_references: [],

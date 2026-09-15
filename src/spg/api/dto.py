@@ -116,6 +116,7 @@ class InteractionTurnResponse(ApiDto):
     interaction_id: UUID
     request_record_id: UUID
     assessment_id: UUID | None
+    wic_mode: str
     status: str
     failure_code: str | None
     failure_message: str | None
@@ -131,6 +132,7 @@ class InteractionTurnResponse(ApiDto):
             interaction_id=turn.interaction_id,
             request_record_id=turn.request_record_id,
             assessment_id=turn.assessment_id,
+            wic_mode=turn.wic_mode.value,
             status=turn.status.value,
             failure_code=turn.failure_code,
             failure_message=turn.failure_message,

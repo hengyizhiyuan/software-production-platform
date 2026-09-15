@@ -467,7 +467,7 @@
       const node = Array.from(elements.interactionHistory.children).find((item) => item.dataset.messageKey === key);
       if (node) {
         updateMessageNode(node, {
-          content: streamed.content || "Watt is thinking...", streaming: true,
+          content: streamed.content || "正在处理…", streaming: true,
           processing_status: streamed.status, created_at: streamed.createdAt,
         });
       }
@@ -1605,7 +1605,8 @@
     if (state.interactionEventSource) state.interactionEventSource.close();
     state.activeInteractionTurnId = turnId;
     state.streamingAssistantMessage = {
-      turnId, content: "", status: "PROCESSING", createdAt: new Date().toISOString(),
+      turnId, content: "", status: "PROCESSING", responseSequence: 0,
+      responseId: turnId, createdAt: new Date().toISOString(),
     };
     renderInteraction();
     if (typeof globalThis.EventSource !== "function") {
@@ -1616,6 +1617,20 @@
     state.interactionEventSource = source;
     let streamed = "";
     const current = () => observationIsCurrent(interactionId, turnId) && state.interactionEventSource === source;
+    const acceptResponseEvent = (payload) => {
+      const sequence = Number(payload.sequence || 0);
+      if (payload.response_id && payload.response_id !== turnId) return false;
+      if (sequence && sequence <= state.streamingAssistantMessage.responseSequence) return false;
+      if (sequence) state.streamingAssistantMessage.responseSequence = sequence;
+      return true;
+    };
+    const observeMeaningfulPaint = () => {
+      if (typeof globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__ === "function" && globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__(streamed)) {
+        globalThis.requestAnimationFrame(() => {
+          if (current() && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "firstMeaningfulTextRendered");
+        });
+      }
+    };
     source.addEventListener("turn.status", (event) => {
       if (!current()) return;
       state.streamingAssistantMessage.status = JSON.parse(event.data).status;
@@ -1627,11 +1642,40 @@
       streamed += JSON.parse(event.data).delta;
       state.streamingAssistantMessage.content = streamed;
       scheduleStreamRender();
-      if (typeof globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__ === "function" && globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__(streamed)) {
-        globalThis.requestAnimationFrame(() => {
-          if (current() && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "firstMeaningfulTextRendered");
-        });
-      }
+      observeMeaningfulPaint();
+    });
+    source.addEventListener("response.provisional", (event) => {
+      if (!current()) return;
+      const payload = JSON.parse(event.data);
+      if (!acceptResponseEvent(payload)) return;
+      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "browserProvisionalReceived");
+      streamed = payload.content || "";
+      state.streamingAssistantMessage.content = streamed;
+      state.streamingAssistantMessage.phase = "PROVISIONAL";
+      scheduleStreamRender();
+      observeMeaningfulPaint();
+    });
+    const appendReconciled = (event, phase) => {
+      if (!current()) return;
+      const payload = JSON.parse(event.data);
+      if (!acceptResponseEvent(payload)) return;
+      streamed += payload.content || "";
+      state.streamingAssistantMessage.content = streamed;
+      state.streamingAssistantMessage.phase = phase;
+      state.streamingAssistantMessage.reconciliation = payload.reconciliation || null;
+      scheduleStreamRender();
+      observeMeaningfulPaint();
+    };
+    source.addEventListener("response.refinement", (event) => appendReconciled(event, "REFINEMENT"));
+    source.addEventListener("response.correction", (event) => appendReconciled(event, "CORRECTION"));
+    source.addEventListener("response.final", (event) => {
+      if (!current()) return;
+      const payload = JSON.parse(event.data);
+      if (!acceptResponseEvent(payload)) return;
+      streamed = payload.content || streamed;
+      state.streamingAssistantMessage.content = streamed;
+      state.streamingAssistantMessage.phase = "FINAL";
+      scheduleStreamRender();
     });
     source.addEventListener("message.reset", (event) => {
       if (!current()) return;

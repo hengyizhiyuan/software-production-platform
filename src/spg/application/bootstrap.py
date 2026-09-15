@@ -21,6 +21,7 @@ from spg.application.wic_reception import (
     DeterministicFastReceptionCapability,
     ShadowFastReceptionRuntime,
 )
+from spg.domain.wic_response import WicRuntimeMode
 from spg.application.runtime_commit import RuntimeCommitService
 from spg.application.recovery import RecoveryAssessmentService
 from spg.application.reconciliation import RecoveryReconciliationService
@@ -268,12 +269,14 @@ class Application:
         return WorkInteractionService(
             selected_database,
             capability=self.interaction_capability(),
+            runtime_mode=WicRuntimeMode(self.settings.wic_runtime_mode),
             fast_reception=(
                 ShadowFastReceptionRuntime(
                     DeterministicFastReceptionCapability(),
                     timeout_seconds=self.settings.wic_fast_reception_timeout_seconds,
                 )
                 if self.settings.wic_fast_reception_shadow_enabled
+                and self.settings.wic_runtime_mode != "LEGACY_WIC"
                 else None
             ),
         )

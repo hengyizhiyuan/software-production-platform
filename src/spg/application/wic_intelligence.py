@@ -26,6 +26,14 @@ _CORRECTION = re.compile(r"(?:不对|不是|纠正|改口)[，,:：\s]*(.+)")
 _NEW_OBJECT = re.compile(r"(?:另外|还有).*(?:我想|我要).*(?:开发|做|创建).*(?:系统|平台|网站|应用)")
 
 
+def _correction_target(value: str) -> str:
+    reversed_object = re.search(r"不是.+?[，,]是(.+)", value)
+    if reversed_object:
+        return reversed_object.group(1).strip("。 ")
+    positive = re.split(r"[,，]不是", value, maxsplit=1)[0].strip()
+    return positive or value.strip("。 ")
+
+
 def _delta_id(basis: str, category: SemanticCategory, operation: SemanticDeltaOperation, value: str | None):
     return uuid5(NAMESPACE_URL, f"watt:wic-delta:{basis}:{category.value}:{operation.value}:{value or ''}")
 
@@ -68,9 +76,7 @@ def build_progressive_semantics(
     if correction:
         signals.append(PatternSignal.EXPLICIT_CORRECTION)
         explicit = correction.group(1).strip("。 ")
-        positive = re.split(r"[,，]不是", explicit, maxsplit=1)[0].strip()
-        if positive:
-            working_motive = positive
+        working_motive = _correction_target(explicit)
         deltas.append(_delta(
             SemanticCategory.MOTIVE, SemanticDeltaOperation.SUPERSEDED,
             working_motive, latest, basis_fingerprint, prior=base_motive,

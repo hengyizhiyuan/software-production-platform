@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from spg.domain.conversation import ConversationContextMessage, StructuredCollaborationResult
 from spg.domain.design_intent import DesignIntentFrame
 from spg.domain.wic_intelligence import ProgressiveSemanticStructure
+from spg.domain.wic_response import WicRuntimeMode
 
 
 class InteractionCondition(StrEnum):
@@ -135,6 +136,7 @@ class InteractionTurn(BaseModel):
     interaction_id: UUID
     request_record_id: UUID
     assessment_id: UUID | None = None
+    wic_mode: WicRuntimeMode = WicRuntimeMode.LEGACY_WIC
     status: InteractionTurnStatus
     failure_code: str | None = None
     failure_message: str | None = None

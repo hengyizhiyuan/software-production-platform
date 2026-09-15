@@ -29,9 +29,16 @@ from spg.domain.interaction import (
     WorkTransitionRecord,
 )
 from spg.domain.wic_intelligence import ProgressiveSemanticStructure
+from spg.domain.wic_response import (
+    ResponseReconciliation,
+    WicResponseEvent,
+    WicResponseEventType,
+    WicRuntimeMode,
+)
 from spg.infrastructure.persistence.product_schema import (
     interaction_assessments,
     interaction_messages,
+    interaction_response_events,
     interaction_records,
     interaction_turns,
     interaction_work_transitions,
@@ -181,6 +188,30 @@ class InteractionStore:
 
     def insert_message(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(interaction_messages).values(**values))
+
+    def next_response_event_sequence(self, turn_id: UUID) -> int:
+        value = self.session.execute(
+            select(func.max(interaction_response_events.c.sequence)).where(
+                interaction_response_events.c.turn_id == turn_id
+            )
+        ).scalar_one()
+        return int(value or 0) + 1
+
+    def insert_response_event(self, values: Mapping[str, Any]) -> None:
+        self.session.execute(insert(interaction_response_events).values(**values))
+
+    def response_events(
+        self, turn_id: UUID, *, after_sequence: int = 0
+    ) -> tuple[WicResponseEvent, ...]:
+        rows = self.session.execute(
+            select(interaction_response_events)
+            .where(
+                (interaction_response_events.c.turn_id == turn_id)
+                & (interaction_response_events.c.sequence > after_sequence)
+            )
+            .order_by(interaction_response_events.c.sequence)
+        ).mappings()
+        return tuple(self._response_event(row) for row in rows)
 
     def update_turn_messages_status(
         self,
@@ -569,6 +600,7 @@ class InteractionStore:
             interaction_id=row["interaction_id"],
             request_record_id=row["request_record_id"],
             assessment_id=row["assessment_id"],
+            wic_mode=WicRuntimeMode(row["wic_mode"]),
             status=InteractionTurnStatus(row["status"]),
             failure_code=row["failure_code"],
             failure_message=row["failure_message"],
@@ -595,6 +627,26 @@ class InteractionStore:
             supporting_references=tuple(row["supporting_references"]),
             created_at=row["created_at"],
             updated_at=row["updated_at"],
+        )
+
+    @staticmethod
+    def _response_event(row: Mapping[str, Any]) -> WicResponseEvent:
+        return WicResponseEvent(
+            id=row["id"],
+            interaction_id=row["interaction_id"],
+            turn_id=row["turn_id"],
+            response_id=row["response_id"],
+            sequence=row["sequence"],
+            event_type=WicResponseEventType(row["event_type"]),
+            content=row["content"],
+            basis_fingerprint=row["basis_fingerprint"],
+            reconciliation=(
+                None
+                if row["reconciliation"] is None
+                else ResponseReconciliation(row["reconciliation"])
+            ),
+            metadata=dict(row["event_metadata"]),
+            created_at=row["created_at"],
         )
 
     @staticmethod

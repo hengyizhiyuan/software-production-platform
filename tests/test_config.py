@@ -30,6 +30,9 @@ def test_default_runtime_exposes_all_three_exact_role_profiles() -> None:
 
 
 def test_settings_load_from_environment(monkeypatch) -> None:
+    # Real PostgreSQL integration fixtures may temporarily point Alembic at their
+    # isolated database. This unit contract owns its complete environment basis.
+    monkeypatch.delenv("SPG_DATABASE_URL", raising=False)
     monkeypatch.setenv("SPG_RUNTIME_PROFILE", "test-fvs")
     monkeypatch.setenv("SPG_REPOSITORY_PATH", ".")
     monkeypatch.setenv("SPG_WIC_PROVIDER_MODEL", "gpt-5.6-sol")

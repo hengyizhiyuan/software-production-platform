@@ -506,6 +506,7 @@ def create_http_application(
         interaction_id: UUID,
         turn_id: UUID,
         request: Request,
+        after_sequence: int = Query(default=0, ge=0),
     ) -> StreamingResponse:
         service = required_interaction_service()
         initial = service.get_turn(turn_id)
@@ -513,6 +514,54 @@ def create_http_application(
             raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
 
         async def events():
+            if initial.wic_mode.value == "WIC_VNEXT_CONTROLLED":
+                cursor = after_sequence
+                header_cursor = request.headers.get("last-event-id")
+                if header_cursor and header_cursor.isdigit():
+                    cursor = max(cursor, int(header_cursor))
+                event_names = {
+                    "TURN_ACCEPTED": "turn.accepted",
+                    "FAST_RECEPTION_STARTED": "fast.started",
+                    "PROVISIONAL_RESPONSE": "response.provisional",
+                    "FAST_SUPPRESSED": "fast.suppressed",
+                    "RESPONSE_REFINEMENT": "response.refinement",
+                    "RESPONSE_CORRECTION": "response.correction",
+                    "FINAL_RESPONSE": "response.final",
+                    "TURN_COMPLETED": "message.completed",
+                    "TURN_FAILED": "turn.failed",
+                }
+                while True:
+                    if await request.is_disconnected():
+                        return
+                    response_events = await asyncio.to_thread(
+                        service.response_events,
+                        turn_id,
+                        after_sequence=cursor,
+                    )
+                    for response_event in response_events:
+                        cursor = response_event.sequence
+                        payload = response_event.model_dump(mode="json")
+                        payload["response_id"] = str(response_event.response_id)
+                        if response_event.event_type.value == "TURN_FAILED":
+                            current = service.get_turn(turn_id)
+                            payload.update(
+                                code=current.failure_code,
+                                message=current.failure_message,
+                            )
+                        event_name = event_names[response_event.event_type.value]
+                        service.record_turn_stream_event(turn_id)
+                        yield (
+                            f"id: {cursor}\nevent: {event_name}\ndata: "
+                            + json.dumps(payload, ensure_ascii=False)
+                            + "\n\n"
+                        )
+                        if response_event.event_type.value in {"TURN_COMPLETED", "TURN_FAILED"}:
+                            if response_event.event_type.value == "TURN_COMPLETED":
+                                service.record_turn_stream_completed(turn_id)
+                            return
+                    yield ": processing\n\n"
+                    await asyncio.sleep(0.05)
+
             last_status: str | None = None
             stream_offset = 0
             streamed_response = ""
