@@ -1,0 +1,158 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+import hashlib
+import json
+from pathlib import Path
+import time
+from uuid import UUID
+
+from spg.application.interaction import interaction_basis_fingerprint
+from spg.application.wic_context import build_fast_context_card, fast_context_is_fresh
+from spg.application.wic_reception import (
+    DeterministicFastReceptionCapability,
+    ShadowFastReceptionRuntime,
+    apply_fast_grounding_policy,
+)
+from spg.domain.interaction import (
+    Interaction, InteractionActor, InteractionCondition,
+    InteractionInterpretationInput, InteractionRecord,
+)
+from spg.domain.wic_reception import FastReceptionVisibility
+from spg.evaluation.open_wic_baseline import _active_context, load_corpus
+
+
+def _basis(case_id: str, text: str | None = None) -> InteractionInterpretationInput:
+    corpus, _ = load_corpus(Path("benchmarks/open_wic/corpus-v1.json"))
+    case = next(case for case in corpus.cases if case.case_id == case_id)
+    now = datetime(2026, 9, 15, tzinfo=UTC)
+    interaction_id = UUID(int=100 + ord(case_id[-1]))
+    active = _active_context(case, now)
+    interaction = Interaction(
+        id=interaction_id, condition=InteractionCondition.OPEN,
+        current_work_id=None if active is None else active.work_revision.work_id,
+        created_by="test", updated_by="test", created_at=now, updated_at=now,
+    )
+    content = text or case.human_turns[-1].content
+    record = InteractionRecord(
+        id=UUID(int=200 + ord(case_id[-1])), interaction_id=interaction_id,
+        sequence=1, actor=InteractionActor.HUMAN, source="test", content=content,
+        content_fingerprint=hashlib.sha256(content.encode()).hexdigest(),
+        supporting_references=case.human_turns[-1].supporting_references,
+        created_at=now,
+    )
+    fingerprint = interaction_basis_fingerprint(interaction, (record,), active)
+    return InteractionInterpretationInput(
+        interaction=interaction, records=(record,), active_work_context=active,
+        basis_fingerprint=fingerprint,
+    )
+
+
+def test_fast_context_is_small_deterministic_and_preserves_active_references() -> None:
+    basis = _basis("OW-H")
+    first = build_fast_context_card(basis)
+    second = build_fast_context_card(basis)
+
+    assert first.source_fingerprint == second.source_fingerprint
+    assert first.active_work_revision_id == basis.active_work_context.work_revision.id
+    assert first.source_references == basis.active_work_context.relevant_reality_references
+    assert first.serialized_bytes < 4096
+    assert not hasattr(first, "admit_work")
+
+
+def test_pre_work_card_and_stale_sequence_are_distinguished() -> None:
+    basis = _basis("OW-A")
+    card = build_fast_context_card(basis)
+    assert card.condition == "PRE_WORK"
+    assert fast_context_is_fresh(card, basis)
+    assert not fast_context_is_fresh(card.model_copy(update={"interaction_sequence": 2}), basis)
+
+
+def test_deterministic_correction_and_constraint_are_grounded_shadow_candidates() -> None:
+    capability = DeterministicFastReceptionCapability()
+    correction = _basis("OW-C")
+    result = capability.receive(correction, build_fast_context_card(correction), UUID(int=1))
+    assert result.detected_correction
+    assert result.policy_disposition is FastReceptionVisibility.SAFE_TO_EMIT
+    assert result.visibility_disposition is FastReceptionVisibility.SHADOW
+    assert result.authority == "PROVISIONAL_READ_ONLY"
+
+    constraint = _basis("OW-D")
+    result = capability.receive(constraint, build_fast_context_card(constraint), UUID(int=2))
+    assert result.captured_explicit_constraints
+    assert result.policy_disposition is FastReceptionVisibility.SAFE_TO_EMIT
+
+
+def test_ow_f_keeps_privacy_and_retention_with_human_authority() -> None:
+    basis = _basis("OW-F")
+    result = DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=3)
+    )
+    assert result.detected_human_owned_decision
+    assert "需要由你决定" in result.meaningful_sentence
+    assert "不会先替你" in result.meaningful_sentence
+    assert result.policy_disposition is FastReceptionVisibility.SAFE_TO_EMIT
+
+
+def test_policy_blocks_stale_low_confidence_and_ungrounded_object() -> None:
+    basis = _basis("OW-G")
+    card = build_fast_context_card(basis)
+    candidate = DeterministicFastReceptionCapability().receive(basis, card, UUID(int=4))
+    assert candidate is not None
+    assert apply_fast_grounding_policy(
+        candidate.model_copy(update={"confidence": 0.2}), basis, card
+    ).policy_disposition is FastReceptionVisibility.BLOCKED
+    assert apply_fast_grounding_policy(
+        candidate.model_copy(update={"captured_object": "不存在的财务系统"}), basis, card
+    ).policy_disposition is FastReceptionVisibility.BLOCKED
+    stale = card.model_copy(update={"source_fingerprint": "0" * 64})
+    assert apply_fast_grounding_policy(candidate, basis, stale).policy_disposition is FastReceptionVisibility.BLOCKED
+
+
+def test_vague_turn_uses_no_emission_lane() -> None:
+    basis = _basis("OW-A")
+    assert DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=5)
+    ) is None
+
+
+def test_shadow_failure_is_observed_without_retry_or_exception() -> None:
+    class Broken:
+        calls = 0
+        def receive(self, *_args):
+            self.calls += 1
+            raise RuntimeError("fast failed")
+
+    broken = Broken(); runtime = ShadowFastReceptionRuntime(broken)
+    observation = runtime.start(_basis("OW-A"), UUID(int=6)).result(timeout=1)
+    runtime.close()
+    assert observation.status == "FAILED"
+    assert observation.retry_count == 0
+    assert broken.calls == 1
+
+
+def test_deep_work_can_start_without_waiting_for_slow_fast_lane() -> None:
+    class Slow:
+        def receive(self, *_args):
+            time.sleep(0.2)
+            return None
+
+    runtime = ShadowFastReceptionRuntime(Slow())
+    future = runtime.start(_basis("OW-A"), UUID(int=7))
+    deep_started = time.monotonic()
+    deep_result = "deep-started"
+    elapsed = time.monotonic() - deep_started
+    assert deep_result == "deep-started"
+    assert elapsed < 0.05
+    assert not future.done()
+    assert future.result(timeout=1).status == "NO_EMISSION"
+    runtime.close()
+
+
+def test_frozen_open_wic_artifacts_are_byte_unchanged() -> None:
+    expected = {
+        "benchmarks/open_wic/corpus-v1.json": "7eb5e78b7a9dd23cf403d75af45166ee23b7ecf9eb55a70b3bb53b9b1056db4e",
+        "docs/evidence/open-wic-baseline-runs/2026-09-15-deepseek-flash-low.json": "14464c07f6d4b61e142e0c38d82e0e7a6ae1f727678aba88e4c24eab93794ff1",
+    }
+    for name, digest in expected.items():
+        assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == digest

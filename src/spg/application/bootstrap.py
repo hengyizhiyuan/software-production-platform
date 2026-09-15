@@ -17,6 +17,10 @@ from spg.application.interaction import (
     UnavailableWorkInteractionCapability,
     WorkInteractionService,
 )
+from spg.application.wic_reception import (
+    DeterministicFastReceptionCapability,
+    ShadowFastReceptionRuntime,
+)
 from spg.application.runtime_commit import RuntimeCommitService
 from spg.application.recovery import RecoveryAssessmentService
 from spg.application.reconciliation import RecoveryReconciliationService
@@ -264,6 +268,14 @@ class Application:
         return WorkInteractionService(
             selected_database,
             capability=self.interaction_capability(),
+            fast_reception=(
+                ShadowFastReceptionRuntime(
+                    DeterministicFastReceptionCapability(),
+                    timeout_seconds=self.settings.wic_fast_reception_timeout_seconds,
+                )
+                if self.settings.wic_fast_reception_shadow_enabled
+                else None
+            ),
         )
 
     def interaction_capability(self) -> WorkInteractionCapability:
@@ -302,6 +314,14 @@ class Application:
             runtime = WattModelRuntime(
                 registry,
                 PurposeProfileRouter(profiles={
+                    ModelPurpose.WIC_FAST_RECEPTION: ModelProfile(
+                        purpose=ModelPurpose.WIC_FAST_RECEPTION,
+                        provider=ModelProvider.DEEPSEEK,
+                        model="deepseek-flash",
+                        reasoning_effort="low",
+                        timeout_seconds=self.settings.wic_fast_reception_timeout_seconds,
+                        max_output_tokens=self.settings.wic_fast_reception_max_output_tokens,
+                    ),
                     ModelPurpose.WIC_SEMANTIC: ModelProfile(
                         purpose=ModelPurpose.WIC_SEMANTIC,
                         provider=ModelProvider.DEEPSEEK,

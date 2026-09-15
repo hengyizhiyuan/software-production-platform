@@ -1006,6 +1006,7 @@ The current system-level architecture baseline is:
 - [WIC Intelligence Architecture Closure](docs/architecture/watt-wic-intelligence-architecture-closure.md)
 - [OPEN_WIC Baseline Evidence](docs/evidence/open-wic-baseline.md)
 - [WIC Intelligence Reconstruction Blueprint](docs/architecture/wic-intelligence-reconstruction-blueprint.md)
+- [WIC Fast Reception Slice 1 Qualification](docs/evidence/wic-fast-reception-slice-1-qualification.md)
 - [Autonomous Governed Deployment - Phase 2 Product Direction](docs/product/watt-autonomous-governed-deployment-phase-2.md)
 - [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
 - [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)
@@ -1117,9 +1118,16 @@ gap, and the successful server-side first-meaningful-sentence proxy ranged from
 9.07 to 18.93 seconds. Fast Semantic Reception, Fast Context Card, policy,
 progressive structuring, delta/revision integration and a three-slice additive
 migration are defined in the canonical baseline and reconstruction blueprint.
-Current WIC behavior is unchanged. The next step is
-**WIC Intelligence Reconstruction**, followed by replay, dogfood, technical
-qualification and separate Human Product Acceptance before activation.
+Slice 1 is now implementation-complete: Fast Context Card, provisional read-only
+Fast Reception, deterministic grounding and OW-F authority protection run
+independently in shadow mode. Deterministic reception safely covered six of
+eight frozen cases below one millisecond and suppressed two; the bounded
+`deepseek-flash / low` hosted lane returned `incomplete` for all eight attempts
+and is not qualified. Browser/server TTFMS observability is materially narrowed
+but awaits persisted live-browser evidence. Current production-visible WIC
+behavior remains unchanged. The next step is **WIC Intelligence Reconstruction
+Slice 2**; replay, dogfood, technical qualification and separate Human Product
+Acceptance remain required before visible activation.
 
 ## Current Major Components
 

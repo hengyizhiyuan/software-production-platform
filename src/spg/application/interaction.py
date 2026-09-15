@@ -47,6 +47,7 @@ from spg.domain.interaction import (
     WorkInteractionCapability,
 )
 from spg.domain.design_intent import DesignObjectType
+from spg.application.wic_reception import ShadowFastReceptionRuntime
 from spg.domain.product import ProductionCycleBindingCondition
 from spg.domain.steering import RealityReferenceKind, SteeringOutcome, SteeringStepType
 from spg.infrastructure.persistence import Database
@@ -326,6 +327,7 @@ _TURN_TIMING_MILESTONES = (
     "provider_starting", "provider_turn_started", "provider_request_queued",
     "provider_request_sent", "provider_response_accepted",
     "provider_first_response_event", "provider_first_token", "first_response_delta",
+    "fast_path_started", "fast_candidate_ready", "fast_no_emission", "fast_failed",
     "first_sse_event", "natural_response_completed", "semantic_envelope_completed",
     "provider_teardown_completed", "payload_validation_started", "payload_validated",
     "semantic_result_completed", "validation_completed", "provider_returned",
@@ -350,9 +352,11 @@ class WorkInteractionService:
         database: Database,
         *,
         capability: WorkInteractionCapability,
+        fast_reception: ShadowFastReceptionRuntime | None = None,
     ) -> None:
         self.database = database
         self.capability = capability
+        self.fast_reception = fast_reception
         self._turn_executor = ThreadPoolExecutor(
             max_workers=1,
             thread_name_prefix="watt-interaction",
@@ -577,6 +581,8 @@ class WorkInteractionService:
         close_capability = getattr(self.capability, "close", None)
         if callable(close_capability):
             close_capability()
+        if self.fast_reception is not None:
+            self.fast_reception.close()
         with self._turn_lock:
             self._turn_response_streams.clear()
             self._turn_timings.clear()
@@ -620,6 +626,11 @@ class WorkInteractionService:
         """Record final SSE message emission separately from durable completion."""
 
         self._mark_turn_timing(turn_id, "response_stream_completed")
+
+    def fast_reception_observation(self, turn_id: UUID):
+        """Return bounded shadow evidence; it is never Conversation or Work truth."""
+
+        return None if self.fast_reception is None else self.fast_reception.observation(turn_id)
 
     def _mark_turn_timing(self, turn_id: UUID, event: str) -> None:
         if event not in _TURN_TIMING_MILESTONES:
@@ -688,12 +699,35 @@ class WorkInteractionService:
             uow.commit()
         self._mark_turn_timing(turn_id, "processing_started")
         try:
+            def start_fast_reception(basis: InteractionInterpretationInput) -> None:
+                if self.fast_reception is None:
+                    return
+                self._mark_turn_timing(turn_id, "fast_path_started")
+                future = self.fast_reception.start(basis, turn_id)
+
+                def observed(done: Future) -> None:
+                    try:
+                        result = done.result()
+                        milestone = (
+                            "fast_candidate_ready"
+                            if result.status == "CANDIDATE"
+                            else "fast_no_emission"
+                            if result.status == "NO_EMISSION"
+                            else "fast_failed"
+                        )
+                    except Exception:
+                        milestone = "fast_failed"
+                    self._mark_turn_timing(turn_id, milestone)
+
+                future.add_done_callback(observed)
+
             assessment = self._assess_current(
                 turn.interaction_id,
                 on_response_delta=lambda delta: self._publish_turn_response_delta(
                     turn_id, delta
                 ),
                 on_pipeline_stage=lambda stage: self._mark_turn_timing(turn_id, stage),
+                on_basis_ready=start_fast_reception,
             )
             self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
@@ -786,6 +820,7 @@ class WorkInteractionService:
         *,
         on_response_delta: Callable[[str], None] | None,
         on_pipeline_stage: Callable[[str], None] | None = None,
+        on_basis_ready: Callable[[InteractionInterpretationInput], None] | None = None,
     ) -> InteractionAssessment:
         if on_pipeline_stage is not None:
             on_pipeline_stage("reality_load_started")
@@ -793,6 +828,8 @@ class WorkInteractionService:
         if on_pipeline_stage is not None:
             on_pipeline_stage("reality_load_completed")
             on_pipeline_stage("basis_prepared")
+        if on_basis_ready is not None:
+            on_basis_ready(basis)
         with self.database.unit_of_work() as uow:
             existing = InteractionStore(uow.session).assessment_for_basis(
                 interaction_id, basis.basis_fingerprint

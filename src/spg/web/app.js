@@ -38,7 +38,23 @@
     drafts: {},
     freshInteraction: false,
     storageAvailable: true,
+    turnTimings: {},
   };
+  // Reviewer/browser instrumentation only. It is not product or governance truth.
+  globalThis.__WATT_TURN_TIMINGS__ = state.turnTimings;
+
+  function markTurnTiming(turnId, event, startedAt) {
+    const timing = state.turnTimings[turnId] || { correlationId: turnId, humanSend: startedAt || null };
+    if (timing[event] == null) timing[event] = globalThis.performance.now();
+    state.turnTimings[turnId] = timing;
+  }
+  globalThis.__WATT_MARK_TURN_TIMING__ = markTurnTiming;
+
+  function containsMeaningfulSentence(text) {
+    return /[。！？.!?](?:["'”’）)]|\s|$)/.test(text) && text.replace(/\s/g, "").length >= 8
+      && !/^(收到|明白了|好的|我来看看)[。.!]?$/.test(text.trim());
+  }
+  globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__ = containsMeaningfulSentence;
 
   const elements = {
     healthControl: document.getElementById("health-control"),
@@ -1607,9 +1623,15 @@
     });
     source.addEventListener("message.delta", (event) => {
       if (!current()) return;
+      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "browserEventReceived");
       streamed += JSON.parse(event.data).delta;
       state.streamingAssistantMessage.content = streamed;
       scheduleStreamRender();
+      if (typeof globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__ === "function" && globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__(streamed)) {
+        globalThis.requestAnimationFrame(() => {
+          if (current() && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "firstMeaningfulTextRendered");
+        });
+      }
     });
     source.addEventListener("message.reset", (event) => {
       if (!current()) return;
@@ -1618,6 +1640,7 @@
       scheduleStreamRender();
     });
     source.addEventListener("message.completed", () => {
+      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "finalResponseReceived");
       if (current()) void finishInteractionTurn(interactionId, turnId, null);
     });
     source.addEventListener("turn.failed", (event) => {
@@ -1676,7 +1699,7 @@
       return;
     }
     const id = globalThis.crypto.randomUUID();
-    state.outbox.push({ id, interactionId: state.selectedInteractionId, content, status: "queued", waitForTurnId: state.activeInteractionTurnId });
+    state.outbox.push({ id, interactionId: state.selectedInteractionId, content, status: "queued", waitForTurnId: state.activeInteractionTurnId, humanSendMark: globalThis.performance?.now?.() ?? Date.now() });
     elements.workRequirement.value = "";
     saveDraft();
     hideNotice();
@@ -1713,6 +1736,7 @@
         method: "POST", body: { content: item.content, human_identity: "human:local-operator" },
       });
       accepted = true;
+      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turn.turn_id, "turnDurablyAccepted", item.humanSendMark);
       // Only a successful receipt removes browser intent and adds persisted input.
       state.outbox = state.outbox.filter((entry) => entry.id !== item.id);
       state.outbox.forEach((entry) => {

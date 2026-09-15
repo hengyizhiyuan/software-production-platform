@@ -315,6 +315,15 @@ shadow execution, grounding policy, failure provenance, and benchmark comparison
 Pass when no production mutation is possible, browser TTFMS is measured, and a
 qualified fast profile materially improves the first meaningful sentence.
 
+Implementation reality (2026-09-15): Fast Context Card, typed read-only
+candidate, deterministic grounding and authority policy, independent shadow
+runtime, hosted DeepSeek candidate, failure provenance, and browser timing are
+implemented. Deterministic reception safely covered six of eight frozen cases;
+two suppressed output. `deepseek-flash/low` with the tiny 256-token schema
+returned `incomplete` in all eight hosted trials and is not qualified.
+Production visibility remains shadow-only; browser/server observability is
+materially narrowed pending persisted live-browser samples.
+
 ### Slice 2 — Progressive intelligence and governance policy
 
 Implement semantic deltas, correction supersession, question-value decisions,
