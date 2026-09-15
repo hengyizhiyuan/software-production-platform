@@ -39,6 +39,7 @@ from spg.application.runtime_activation import RuntimeActivationService
 from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
+from spg.domain.interaction import WorkInteractionCapability
 from spg.domain.preparation import ExecutorBinding
 from spg.domain.planning import ProductionPlanner
 from spg.domain.steering import PlanSteeringCapability, SemanticStepCapability
@@ -260,6 +261,14 @@ class Application:
         """Compose pre-Work interpretation without composing Work or production."""
 
         selected_database = database or self.persistence()
+        return WorkInteractionService(
+            selected_database,
+            capability=self.interaction_capability(),
+        )
+
+    def interaction_capability(self) -> WorkInteractionCapability:
+        """Compose the configured WIC provider without persistence or admission."""
+
         capability = UnavailableWorkInteractionCapability()
         semantic_adapter = (
             self.settings.wic_provider_adapter or self.settings.executor_adapter
@@ -358,7 +367,7 @@ class Application:
                     self.settings.conversation_provider_reasoning_effort
                 ),
             )
-        return WorkInteractionService(selected_database, capability=capability)
+        return capability
 
     def production_orchestrator(
         self,

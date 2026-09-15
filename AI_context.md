@@ -1004,6 +1004,8 @@ The current system-level architecture baseline is:
 - [External Design Intake Capability Direction](docs/architecture/external-design-intake-capability-direction.md)
 - [External Engineering Intelligence Direction — RECORDED / DEFERRED; future Human-visible capability](docs/architecture/external-engineering-intelligence-direction.md)
 - [WIC Intelligence Architecture Closure](docs/architecture/watt-wic-intelligence-architecture-closure.md)
+- [OPEN_WIC Baseline Evidence](docs/evidence/open-wic-baseline.md)
+- [WIC Intelligence Reconstruction Blueprint](docs/architecture/wic-intelligence-reconstruction-blueprint.md)
 - [Autonomous Governed Deployment - Phase 2 Product Direction](docs/product/watt-autonomous-governed-deployment-phase-2.md)
 - [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
 - [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)
@@ -1107,9 +1109,17 @@ evidence, preserved historical failures and non-blocking future directions are
 recorded in the [Watt-native Executor Final Technical Closure](docs/evidence/watt-native-executor-technical-closure.md).
 
 The recommended next program step is **WIC Intelligence Architecture vNext
-reconstruction**, preceded by bounded `OPEN_WIC_BASELINE` capture and followed
-by replay/dogfood/evaluation before activation. This context record does not
-authorize or start that phase.
+reconstruction**. The bounded `OPEN_WIC_BASELINE` preparation is now complete:
+eight A–H cases and a real `deepseek-flash / low` run are preserved without
+Work or production mutation. Four of eight cases produced validated candidates;
+four retained real Provider/contract failures. Browser-observed TTFMS remains a
+gap, and the successful server-side first-meaningful-sentence proxy ranged from
+9.07 to 18.93 seconds. Fast Semantic Reception, Fast Context Card, policy,
+progressive structuring, delta/revision integration and a three-slice additive
+migration are defined in the canonical baseline and reconstruction blueprint.
+Current WIC behavior is unchanged. The next step is
+**WIC Intelligence Reconstruction**, followed by replay, dogfood, technical
+qualification and separate Human Product Acceptance before activation.
 
 ## Current Major Components
 

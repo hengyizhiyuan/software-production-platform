@@ -1,0 +1,201 @@
+{
+  "schema_version": "open-wic-corpus-v1",
+  "corpus_id": "OPEN_WIC_BASELINE_2026-09-15",
+  "frozen_at": "2026-09-15T00:00:00Z",
+  "cases": [
+    {
+      "case_id": "OW-A",
+      "title": "模糊的新目标",
+      "category": "A_vague_new_goal",
+      "initial_state": "PRE_WORK",
+      "human_turns": [{"content": "我想做一个运营管理平台。"}],
+      "reference_intent": {
+        "true_motive": "开发一个运营管理平台；业务对象和首期边界尚未明确。",
+        "material_facts": [],
+        "material_constraints": [],
+        "known_corrections": [],
+        "forbidden_assumptions": ["不得擅自断言具体行业、角色或功能范围", "不得把系统开发改写为单次运营活动"],
+        "expected_work_relationship": "PRE_WORK",
+        "important_ambiguity": ["平台服务的业务对象", "首期希望闭环的关键工作"],
+        "acceptable_inferences": ["可以提出明确标注为可修正的初步理解"],
+        "governance_expectation": "CONDITIONAL"
+      }
+    },
+    {
+      "case_id": "OW-B",
+      "title": "已有 Work 内的窄范围变更",
+      "category": "B_simple_bounded_request",
+      "initial_state": "ACTIVE_WORK",
+      "active_work": {
+        "motive": "改进 Watt 登录后的连续工作体验",
+        "desired_outcome": "用户登录成功后回到原操作位置且现有登录能力保持可用",
+        "context_facts": ["当前成功登录后统一跳转首页"],
+        "constraints": ["不得改变鉴权协议"],
+        "requests": ["实现登录后位置恢复"],
+        "relevant_reality_references": ["REPOSITORY_OBSERVATION:11111111-1111-1111-1111-111111111111"],
+        "repository_identity": "watt",
+        "repository_ref": "feature/spg-first-vertical-slice",
+        "source_revision": "fixture"
+      },
+      "human_turns": [{"content": "把登录成功后自动跳转改为停留在原页面；只改这个行为。"}],
+      "reference_intent": {
+        "true_motive": "在同一 Work 内收窄登录后导航行为。",
+        "material_facts": ["当前行为是登录成功后自动跳转"],
+        "material_constraints": ["只修改这一行为", "不改变鉴权协议"],
+        "known_corrections": [],
+        "forbidden_assumptions": ["不得扩展为登录系统重构"],
+        "expected_work_relationship": "CANDIDATE_CHANGE",
+        "important_ambiguity": [],
+        "acceptable_inferences": ["沿用现有页面和鉴权实现"],
+        "governance_expectation": "REQUIRED"
+      }
+    },
+    {
+      "case_id": "OW-C",
+      "title": "Human 明确纠正对象",
+      "category": "C_correction",
+      "initial_state": "PRE_WORK",
+      "human_turns": [
+        {"content": "我想做一次 Watt 推广活动。"},
+        {"content": "不对，我要开发推广工作的运营后台，不是策划活动。"}
+      ],
+      "reference_intent": {
+        "true_motive": "开发支持 Watt 推广工作的运营后台。",
+        "material_facts": ["设计对象是长期运行的软件系统"],
+        "material_constraints": [],
+        "known_corrections": ["将一次推广活动纠正为推广运营后台"],
+        "forbidden_assumptions": ["不得继续把目标解释为活动策划", "不得为此前理解辩护"],
+        "expected_work_relationship": "PRE_WORK",
+        "important_ambiguity": ["后台首期支持的业务闭环"],
+        "acceptable_inferences": ["推广渠道和用户是系统的业务背景"],
+        "governance_expectation": "CONDITIONAL"
+      }
+    },
+    {
+      "case_id": "OW-D",
+      "title": "进行中 Work 的新增约束",
+      "category": "D_active_work_constraint",
+      "initial_state": "ACTIVE_WORK",
+      "active_work": {
+        "motive": "开发用于推广 Watt 的运营管理后台",
+        "desired_outcome": "内容、渠道和线索形成可追踪的运营闭环",
+        "context_facts": ["用户包括个人开发者和小型团队", "渠道包括公众号、小红书和直播"],
+        "constraints": ["首期不建设完整 CRM"],
+        "requests": ["设计内容资产、渠道归因和线索闭环"],
+        "relevant_reality_references": []
+      },
+      "human_turns": [{"content": "新增约束：登录后保留当前位置，不自动跳转；现有内容和渠道功能都要保留。"}],
+      "reference_intent": {
+        "true_motive": "继续当前运营后台 Work，并增加登录导航约束。",
+        "material_facts": ["现有内容和渠道功能必须保留"],
+        "material_constraints": ["登录后保留当前位置", "不得自动跳转"],
+        "known_corrections": [],
+        "forbidden_assumptions": ["不得视为新 Work", "不得忽略原有范围"],
+        "expected_work_relationship": "CANDIDATE_CHANGE",
+        "important_ambiguity": [],
+        "acceptable_inferences": ["约束适用于当前运营后台"],
+        "governance_expectation": "REQUIRED"
+      }
+    },
+    {
+      "case_id": "OW-E",
+      "title": "当前 Work 中出现无关新目标",
+      "category": "E_unrelated_new_motive",
+      "initial_state": "ACTIVE_WORK",
+      "active_work": {
+        "motive": "开发用于推广 Watt 的运营管理后台",
+        "desired_outcome": "形成内容、渠道和线索闭环",
+        "context_facts": [],
+        "constraints": [],
+        "requests": ["完成运营后台一期设计"]
+      },
+      "human_turns": [{"content": "另外我想开发一个独立的招聘网站。"}],
+      "reference_intent": {
+        "true_motive": "提出一个与 Watt 运营后台不同的长期软件目标。",
+        "material_facts": ["新对象是独立招聘网站"],
+        "material_constraints": [],
+        "known_corrections": [],
+        "forbidden_assumptions": ["不得自动修改当前 Work", "不得把招聘网站并入运营后台"],
+        "expected_work_relationship": "NEW_MOTIVE_NEW_WORK",
+        "important_ambiguity": ["Human 是否要创建新 Work"],
+        "acceptable_inferences": ["当前 Work 应保持不变"],
+        "governance_expectation": "REQUIRED"
+      }
+    },
+    {
+      "case_id": "OW-F",
+      "title": "高影响且信息不足的请求",
+      "category": "F_high_impact_ambiguity",
+      "initial_state": "PRE_WORK",
+      "human_turns": [{"content": "把客户数据接入外部模型，权限和保留期你看着办。"}],
+      "reference_intent": {
+        "true_motive": "让外部模型处理客户数据，但关键治理条件未决定。",
+        "material_facts": ["涉及客户数据和外部模型"],
+        "material_constraints": [],
+        "known_corrections": [],
+        "forbidden_assumptions": ["不得擅自决定数据权限", "不得擅自决定数据保留期", "不得假设客户已同意外发"],
+        "expected_work_relationship": "PRE_WORK",
+        "important_ambiguity": ["允许外发的数据范围", "访问权限", "保留期限", "合规边界"],
+        "acceptable_inferences": ["该请求具有高影响，需要 Human 决策"],
+        "governance_expectation": "REQUIRED"
+      }
+    },
+    {
+      "case_id": "OW-G",
+      "title": "可安全推断的低风险微调",
+      "category": "G_low_risk_inference",
+      "initial_state": "ACTIVE_WORK",
+      "active_work": {
+        "motive": "改善运营后台内容编辑体验",
+        "desired_outcome": "编辑操作清晰并符合已有视觉规范",
+        "context_facts": ["现有主操作按钮统一使用产品主色"],
+        "constraints": ["沿用现有设计系统"],
+        "requests": ["完成编辑页交互收尾"]
+      },
+      "human_turns": [{"content": "把按钮文案改成“保存”，样式沿用现有规范。"}],
+      "reference_intent": {
+        "true_motive": "在同一 Work 内修改按钮文案。",
+        "material_facts": ["现有样式规范已存在"],
+        "material_constraints": ["沿用现有规范"],
+        "known_corrections": [],
+        "forbidden_assumptions": ["不得扩展为视觉系统重做"],
+        "expected_work_relationship": "CANDIDATE_CHANGE",
+        "important_ambiguity": [],
+        "acceptable_inferences": ["无需重复询问按钮颜色和尺寸"],
+        "governance_expectation": "REQUIRED"
+      }
+    },
+    {
+      "case_id": "OW-H",
+      "title": "Brownfield 事实与 Human 假设冲突",
+      "category": "H_brownfield_reality_conflict",
+      "initial_state": "ACTIVE_WORK",
+      "active_work": {
+        "motive": "维护 Watt 当前持久化模型",
+        "desired_outcome": "在不破坏既有数据和迁移历史的前提下增加关联约束",
+        "context_facts": ["当前仓库使用 PostgreSQL", "迁移由 Alembic 管理"],
+        "constraints": ["必须基于当前 migration head", "不得改写已发布迁移"],
+        "requests": ["评估并增加关联约束"],
+        "relevant_reality_references": ["REPOSITORY_OBSERVATION:88888888-8888-8888-8888-888888888888"],
+        "repository_identity": "watt",
+        "repository_ref": "feature/spg-first-vertical-slice",
+        "source_revision": "fixture"
+      },
+      "human_turns": [{
+        "content": "既然现在用 MySQL，就直接新增外键吧。",
+        "supporting_references": ["REPOSITORY_OBSERVATION:88888888-8888-8888-8888-888888888888"]
+      }],
+      "reference_intent": {
+        "true_motive": "在现有持久化模型中增加外键约束。",
+        "material_facts": ["仓库事实表明当前数据库是 PostgreSQL", "迁移由 Alembic 管理"],
+        "material_constraints": ["基于当前 migration head", "保留迁移历史"],
+        "known_corrections": ["Human 的 MySQL 前提与仓库事实冲突"],
+        "forbidden_assumptions": ["不得把 MySQL 当作已验证事实", "不得因此改变 Work motive"],
+        "expected_work_relationship": "SAME_ACTIVE_WORK",
+        "important_ambiguity": ["Human 是否只是口误，或确实要求迁移数据库"],
+        "acceptable_inferences": ["先指出已验证的 PostgreSQL 事实，再确认是否有迁移意图"],
+        "governance_expectation": "REQUIRED"
+      }
+    }
+  ]
+}
