@@ -1011,6 +1011,15 @@ The current system-level architecture baseline is:
 - [Watt-native Executor Runtime Architecture Blueprint](docs/architecture/watt-native-executor-blueprint.md)
 - [Watt-native Executor Runtime Implementation and Qualification Progress](docs/evidence/watt-native-executor-runtime-implementation-progress.md)
 
+The approved Phase 2 Autonomous Governed Deployment direction now includes
+WeChat Mini Program as its first representative platform-managed Deployment
+Target. Authorization is delegated platform authority, not PAM; external
+review is a legitimate wait state, not failure; safely remediable rejection
+enters governed diagnosis/recovery; and one Motive-bound Work may coordinate
+Mini Program plus backend targets. This is a target-specific extension, not a
+separate initiative. Implementation remains deferred and the first-release
+scope is unchanged; the canonical document above owns the detailed boundary.
+
 The system baseline governs mission and system boundaries. The SPG Lite baseline consolidates the current SPG domain objects and capability contracts under those boundaries. Detailed documents refine their own scope without silently changing these program-level decisions.
 
 ## Core Principles

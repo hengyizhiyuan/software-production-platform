@@ -374,6 +374,13 @@ frozen / implementation not authorized / no current-release dependency.** See
 [Autonomous Governed Deployment - Phase 2 Product Direction](../product/watt-autonomous-governed-deployment-phase-2.md).
 This direction does not reorder the current first-release roadmap or authorize
 cloud access, credentials, adapters, runtime changes, or deployment work.
+WeChat Mini Program is the first approved representative platform-managed
+Deployment Target under this same Phase 2 direction. It confirms that the
+Deployment Plane must be non-server-centric, treats platform review as an
+external authority gate rather than failure, and preserves compound Mini
+Program + backend deployment under one Motive-bound Work. Its Adapter,
+credentials, platform connection, upload, review, and release implementation
+remain deferred and do not change current priorities.
 
 ## 6. Roadmap Maintenance Rules
 
