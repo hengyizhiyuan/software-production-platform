@@ -1,12 +1,40 @@
 # WIC Intelligence Reconstruction Blueprint
 
-Status: **READY_WITH_FINDINGS**
+Status: **SLICE_3_IMPLEMENTED / READY_WITH_FINDINGS**
 Architecture basis: `watt-wic-intelligence-architecture-closure.md`
 Behavioral basis: `OPEN_WIC_BASELINE_2026-09-15`
 
 This blueprint defines how to reconstruct WIC intelligence without reopening
 the closed Work, Design, Plan, Authority, Evidence, or Runtime ownership model.
-It does not activate WIC vNext and does not change current product behavior.
+WIC vNext now has an explicit controlled activation mode; legacy and shadow
+modes remain available. Human Product Acceptance is still pending.
+
+## Implementation Reality — Slice 3
+
+As of 2026-09-16, all three reconstruction slices are implemented:
+
+- Slice 1: exact-basis Fast Context Card, deterministic Fast Reception,
+  fail-closed grounding and a provider-neutral Fast seam;
+- Slice 2: progressive semantics, typed deltas, correction supersession,
+  question-value policy, safe inference and transition-specific readiness;
+- Slice 3: one evolving response identity, durable replayable response events,
+  conservative Human-visible deterministic Fast, explicit Fast/Deep
+  reconciliation, policy-governed final realization, browser TTFMS evidence,
+  and reversible legacy/shadow/controlled modes.
+
+Migration `20260915_41` adds the Turn's selected WIC mode and append-only
+response-lifecycle evidence. `InteractionTurn.id` is the response identity;
+provisional UX evidence never becomes assessment or Work truth. In controlled
+mode Deep raw prose is buffered until the typed semantic state and deterministic
+authority/Repository Reality policy have produced the accepted Human-facing
+response.
+
+The bounded deterministic-visible sample met the browser target with TTFMS P50
+152.65 ms and P95 171.8 ms across eight completed real integrated trials. TTCR
+P50 was 10.916 s and P95 was 17.830 s. The sample is qualification evidence,
+not a population SLA. The hosted `deepseek-flash/low` Fast profile remains
+unqualified and disabled. See
+[Slice 3 Qualification](../evidence/wic-human-visible-reconstruction-slice-3-qualification.md).
 
 ## Architectural boundary
 
@@ -131,12 +159,12 @@ the first durable semantic truth; provisional content never enters Work Reality.
 
 ### Fast-path Provider recommendation
 
-The initial candidate profile is DeepSeek `deepseek-flash/low` with a small,
-strict reception schema and a sharply bounded output budget. This is a
-qualification candidate, not an approved production profile. The baseline used
-the same model/effort but a roughly 9.6k-character combined instruction and
-large reasoning/output envelope, producing 8.77–18.86 s first deltas. Changing
-the model name alone will not meet the goal.
+The controlled visible path currently uses deterministic explicit reception.
+DeepSeek `deepseek-flash/low` with a small, strict reception schema was tested
+as a hosted Fast candidate and produced zero qualified candidates across eight
+frozen cases, so it remains disabled. The Deep WIC profile still uses that
+model/effort for full interpretation. Changing the model name alone does not
+solve the reception contract.
 
 Qualification must compare at least:
 

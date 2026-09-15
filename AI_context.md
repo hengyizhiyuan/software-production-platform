@@ -1008,6 +1008,7 @@ The current system-level architecture baseline is:
 - [WIC Intelligence Reconstruction Blueprint](docs/architecture/wic-intelligence-reconstruction-blueprint.md)
 - [WIC Fast Reception Slice 1 Qualification](docs/evidence/wic-fast-reception-slice-1-qualification.md)
 - [WIC Progressive Intelligence Slice 2 Qualification](docs/evidence/wic-progressive-intelligence-slice-2-qualification.md)
+- [WIC Human-visible Reconstruction Slice 3 Qualification](docs/evidence/wic-human-visible-reconstruction-slice-3-qualification.md)
 - [Autonomous Governed Deployment - Phase 2 Product Direction](docs/product/watt-autonomous-governed-deployment-phase-2.md)
 - [Human–Watt Collaboration Layer Focused Validation](docs/evidence/human-watt-collaboration-layer-focused-validation.md)
 - [Software Production System Differentiation and Architectural Barriers](docs/architecture/software-production-system-differentiation-and-barriers.md)
@@ -1110,13 +1111,13 @@ acceptance is inferred. The current classification, exact revisions, technical
 evidence, preserved historical failures and non-blocking future directions are
 recorded in the [Watt-native Executor Final Technical Closure](docs/evidence/watt-native-executor-technical-closure.md).
 
-The recommended next program step is **WIC Intelligence Architecture vNext
-reconstruction**. The bounded `OPEN_WIC_BASELINE` preparation is now complete:
-eight A–H cases and a real `deepseek-flash / low` run are preserved without
-Work or production mutation. Four of eight cases produced validated candidates;
-four retained real Provider/contract failures. Browser-observed TTFMS remains a
-gap, and the successful server-side first-meaningful-sentence proxy ranged from
-9.07 to 18.93 seconds. Fast Semantic Reception, Fast Context Card, policy,
+The **WIC Intelligence Architecture vNext reconstruction** is now technically
+complete through Slice 3. The bounded `OPEN_WIC_BASELINE` preparation preserved
+eight A–H cases and a real `deepseek-flash / low` run without Work or production
+mutation. At baseline time, four of eight cases produced validated candidates,
+four retained real Provider/contract failures, and the successful server-side
+first-meaningful-sentence proxy ranged from 9.07 to 18.93 seconds. Fast Semantic
+Reception, Fast Context Card, policy,
 progressive structuring, delta/revision integration and a three-slice additive
 migration are defined in the canonical baseline and reconstruction blueprint.
 Slice 1 is now implementation-complete: Fast Context Card, provisional read-only
@@ -1124,18 +1125,23 @@ Fast Reception, deterministic grounding and OW-F authority protection run
 independently in shadow mode. Deterministic reception safely covered six of
 eight frozen cases below one millisecond and suppressed two; the bounded
 `deepseek-flash / low` hosted lane returned `incomplete` for all eight attempts
-and is not qualified. Browser/server TTFMS observability is materially narrowed
-but awaits persisted live-browser evidence. Slice 2 is now
+and is not qualified. Slice 2 is now
 implementation-complete: `wic-assessment-v4` adds append-preserving semantic
 deltas, correction supersession, deterministic inference and question-value
 policy, advisory signals, consumer-bound artifact recommendations, and
 transition-specific readiness. A real A–H run retained one Provider failure, one
 OW-F prose authority violation, and one OW-H factual misunderstanding;
 deterministic policy preserved Human authority and repository facts around them.
-Current production-visible WIC response behavior remains unchanged. The next
-step is **WIC Intelligence Reconstruction Slice 3** with controlled one-response
-reconciliation and rollout. Technical qualification and separate Human Product
-Acceptance remain required before visible activation.
+Slice 3 now exposes only qualified deterministic Fast receipts in
+`WIC_VNEXT_CONTROLLED`, evolves one response identity through durable replayable
+SSE events, buffers raw Deep prose until policy-governed realization, and keeps
+legacy/shadow rollback modes. Migration head is `20260915_41`. Eight completed
+real browser Fast trials measured TTFMS P50 152.65 ms and P95 171.8 ms; TTCR P50
+10.916 s and P95 17.830 s. Hosted Fast remains unqualified and disabled. The
+local Human dogfood runtime is isolated at `http://127.0.0.1:8045/app` on exact
+code revision `c8455651024b7f7e98a457709e1676fb7feef921`. Technical Slice 3 is
+`PASS_WITH_FINDINGS`; the next step is Human WIC dogfood and Product Acceptance.
+No Human acceptance is inferred.
 
 ## Current Major Components
 

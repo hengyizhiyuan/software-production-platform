@@ -1,0 +1,1016 @@
+{
+  "schema_version": "wic-human-visible-evaluation-v1",
+  "evaluated_at": "2026-09-15T18:52:13.467404+00:00",
+  "code_revision": "c8455651024b7f7e98a457709e1676fb7feef921",
+  "source_fingerprint": "2bbf37f45b0dc07f03009566ce90229a4a8054030a7ff59eca8465009f261275",
+  "corpus_digest": "21027361579216bc88ecdcddf9c355f489080cc2ff118fb17052da13519a9f97",
+  "frozen_artifact_digests": {
+    "benchmarks/open_wic/corpus-v1.json": "7eb5e78b7a9dd23cf403d75af45166ee23b7ecf9eb55a70b3bb53b9b1056db4e",
+    "docs/evidence/open-wic-baseline-runs/2026-09-15-deepseek-flash-low.json": "14464c07f6d4b61e142e0c38d82e0e7a6ae1f727678aba88e4c24eab93794ff1",
+    "docs/evidence/open-wic-progressive-runs/2026-09-15-deepseek-flash-low.json": "d59acdc56032e5f6a97d45c6e02902d4f0a8f7b4d4f1ca1d4339709621690d61"
+  },
+  "rollout_mode": "WIC_VNEXT_CONTROLLED",
+  "hosted_fast_provider": "DISABLED_UNQUALIFIED",
+  "cases": [
+    {
+      "case_id": "OW-A",
+      "reference_intent": {
+        "true_motive": "开发一个运营管理平台；业务对象和首期边界尚未明确。",
+        "material_facts": [],
+        "material_constraints": [],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得擅自断言具体行业、角色或功能范围",
+          "不得把系统开发改写为单次运营活动"
+        ],
+        "expected_work_relationship": "PRE_WORK",
+        "important_ambiguity": [
+          "平台服务的业务对象",
+          "首期希望闭环的关键工作"
+        ],
+        "acceptable_inferences": [
+          "可以提出明确标注为可修正的初步理解"
+        ],
+        "governance_expectation": "CONDITIONAL"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "basis_fingerprint": "593ee17c625a547a071512737b234ed863b172b7280038d9f33d71ce850df014",
+          "fast": null,
+          "deep_status": "POLICY_GOVERNED",
+          "reconciliation": "REFINE",
+          "provider_raw_response": "运营管理平台往往覆盖面很宽，所以第一个关键决定是：它先服务哪一个具体的运营场景——比如任务派发与进度跟踪、资源或排班调度，还是运营数据汇总与报表。这个选择会直接决定平台第一批功能和数据结构，也让之后的扩展有清晰边界。\n\n我的建议是先不要铺开全部运营职能，挑一个每天都要用、目前最费劲的运营场景，把它做成能跑通的最小闭环，再根据真实使用情况往外扩。这样投入更可控，也更容易验证平台是否真的被用起来。\n\n因此想先确认一点：这个平台最先要支撑哪个团队、哪一类运营工作？如果是内部运营团队使用，也请顺便说明主要使用者是谁。",
+          "final_response": "运营管理平台往往覆盖面很宽，所以第一个关键决定是：它先服务哪一个具体的运营场景——比如任务派发与进度跟踪、资源或排班调度，还是运营数据汇总与报表。这个选择会直接决定平台第一批功能和数据结构，也让之后的扩展有清晰边界。\n\n我的建议是先不要铺开全部运营职能，挑一个每天都要用、目前最费劲的运营场景，把它做成能跑通的最小闭环，再根据真实使用情况往外扩。这样投入更可控，也更容易验证平台是否真的被用起来。\n\n因此想先确认一点：这个平台最先要支撑哪个团队、哪一类运营工作？如果是内部运营团队使用，也请顺便说明主要使用者是谁。",
+          "baseline_response_sha256": "c7c6adb2ee17c0812cb2a5482dd29bfc3c64967ce265749c7cacf39bcd714c76",
+          "intent_preserved": true,
+          "constraint_count": 0,
+          "governance_candidate": "WORK_FORMATION_PROPOSAL",
+          "selected_question": "平台首个要支撑的具体运营场景尚未确定",
+          "readiness": [
+            {
+              "target": "WORK_FORMATION",
+              "status": "NOT_READY",
+              "satisfied_evidence": [
+                "MOTIVE",
+                "DESIRED_OUTCOME"
+              ],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "平台首个要支撑的具体运营场景尚未确定"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "593ee17c625a547a071512737b234ed863b172b7280038d9f33d71ce850df014",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "WORK_REVISION",
+              "status": "NOT_APPLICABLE",
+              "satisfied_evidence": [],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "平台首个要支撑的具体运营场景尚未确定"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "593ee17c625a547a071512737b234ed863b172b7280038d9f33d71ce850df014",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "DESIGN_PROGRESSION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "CURRENT_FOCUS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [
+                "平台首个要支撑的具体运营场景尚未确定"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "593ee17c625a547a071512737b234ed863b172b7280038d9f33d71ce850df014",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "OW-B",
+      "reference_intent": {
+        "true_motive": "在同一 Work 内收窄登录后导航行为。",
+        "material_facts": [
+          "当前行为是登录成功后自动跳转"
+        ],
+        "material_constraints": [
+          "只修改这一行为",
+          "不改变鉴权协议"
+        ],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得扩展为登录系统重构"
+        ],
+        "expected_work_relationship": "CANDIDATE_CHANGE",
+        "important_ambiguity": [],
+        "acceptable_inferences": [
+          "沿用现有页面和鉴权实现"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "basis_fingerprint": "8791fc174eab631979592735676eee0401fdd0422ffb6efcfa18a1c55826ffd2",
+          "fast": {
+            "interaction_id": "e38ef8b3-3c9d-5c96-9282-e004c3572fc8",
+            "turn_id": "4b1bb0da-a05b-5442-87dc-86fd9c53b4bf",
+            "source_record_id": "7c615897-f946-5311-b8b4-5e2ef731863b",
+            "basis_fingerprint": "8791fc174eab631979592735676eee0401fdd0422ffb6efcfa18a1c55826ffd2",
+            "fast_context_fingerprint": "a06fcc1acc87b0c600ac5b4af7d042a19fe488ebbf8f231c6dcb35ac82ed39ea",
+            "active_work_id": "ef7a06f5-b8ea-5708-b3ae-6a454852339c",
+            "active_work_revision_id": "8f460fcb-5279-5911-b11e-16c144768e91",
+            "provisional_turn_intent": "BOUNDED_CHANGE",
+            "captured_object": "把登录成功后自动跳转改为停留在原页面",
+            "current_focus": "用户登录成功后回到原操作位置且现有登录能力保持可用",
+            "captured_explicit_constraints": [],
+            "detected_correction": null,
+            "detected_human_owned_decision": null,
+            "confidence": 0.98,
+            "grounding_references": [
+              "INTERACTION_RECORD:7c615897-f946-5311-b8b4-5e2ef731863b",
+              "REPOSITORY_OBSERVATION:11111111-1111-1111-1111-111111111111"
+            ],
+            "meaningful_sentence": "我理解这次只处理：把登录成功后自动跳转改为停留在原页面。",
+            "provider": "watt-local",
+            "model": null,
+            "profile": "deterministic-explicit-v1",
+            "started_at": "2026-09-15T18:52:13.440538Z",
+            "first_delta_ms": 0.04209700273349881,
+            "candidate_ready_ms": 0.04209700273349881,
+            "provider_request_id": null,
+            "input_tokens": null,
+            "output_tokens": null,
+            "total_tokens": null,
+            "retry_count": 0,
+            "authority": "PROVISIONAL_READ_ONLY",
+            "visibility_disposition": "SHADOW",
+            "policy_disposition": "SAFE_TO_EMIT",
+            "state": "CURRENT"
+          },
+          "deep_status": "POLICY_GOVERNED",
+          "reconciliation": "REFINE",
+          "provider_raw_response": "明白，按这个收窄范围来：登录成功后不再统一跳首页，而是留在/回到原页面；鉴权协议不动，登录能力和其他行为保持不变。这样位置恢复就是唯一变更点，改动面小、回归风险低，前提是原操作位置能从现有会话或路由状态还原。\n\n我先按“原页面”等同“登录前所在页面/原操作位置”来理解；如果两者不等价、现有状态又还原不了，就需要额外保存位置，那会碰到“只改跳转”的边界，到时再单独处理。\n\n需要你点一下确认：是否把“仅修改登录成功后跳转行为”作为当前 Work 的正式约束变更？确认后我就以位置恢复为唯一变更点来实施，并验证其余行为不变。",
+          "final_response": "我理解这次只处理：把登录成功后自动跳转改为停留在原页面。\n\n明白，按这个收窄范围来：登录成功后不再统一跳首页，而是留在/回到原页面；鉴权协议不动，登录能力和其他行为保持不变。这样位置恢复就是唯一变更点，改动面小、回归风险低，前提是原操作位置能从现有会话或路由状态还原。\n\n我先按“原页面”等同“登录前所在页面/原操作位置”来理解；如果两者不等价、现有状态又还原不了，就需要额外保存位置，那会碰到“只改跳转”的边界，到时再单独处理。\n\n需要你点一下确认：是否把“仅修改登录成功后跳转行为”作为当前 Work 的正式约束变更？确认后我就以位置恢复为唯一变更点来实施，并验证其余行为不变。",
+          "baseline_response_sha256": "6c9f76e2f82c82814acde547968b33dce5788f7177e71b746e45349d4261fda6",
+          "intent_preserved": true,
+          "constraint_count": 2,
+          "governance_candidate": "WORK_REVISION_PROPOSAL",
+          "selected_question": null,
+          "readiness": [
+            {
+              "target": "WORK_FORMATION",
+              "status": "NOT_APPLICABLE",
+              "satisfied_evidence": [
+                "MOTIVE",
+                "DESIRED_OUTCOME"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "8791fc174eab631979592735676eee0401fdd0422ffb6efcfa18a1c55826ffd2",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "WORK_REVISION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "ACTIVE_WORK_BASIS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "8791fc174eab631979592735676eee0401fdd0422ffb6efcfa18a1c55826ffd2",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "DESIGN_PROGRESSION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "CURRENT_FOCUS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "8791fc174eab631979592735676eee0401fdd0422ffb6efcfa18a1c55826ffd2",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "OW-C",
+      "reference_intent": {
+        "true_motive": "开发支持 Watt 推广工作的运营后台。",
+        "material_facts": [
+          "设计对象是长期运行的软件系统"
+        ],
+        "material_constraints": [],
+        "known_corrections": [
+          "将一次推广活动纠正为推广运营后台"
+        ],
+        "forbidden_assumptions": [
+          "不得继续把目标解释为活动策划",
+          "不得为此前理解辩护"
+        ],
+        "expected_work_relationship": "PRE_WORK",
+        "important_ambiguity": [
+          "后台首期支持的业务闭环"
+        ],
+        "acceptable_inferences": [
+          "推广渠道和用户是系统的业务背景"
+        ],
+        "governance_expectation": "CONDITIONAL"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "basis_fingerprint": "4b1dea61cd08867e32af07e912b952000d6dcb29bdf781d342a807e05842cf43",
+          "fast": null,
+          "deep_status": "POLICY_GOVERNED",
+          "reconciliation": "REFINE",
+          "provider_raw_response": "这次推广建议先把“要推动的核心动作”定下来，再搭人群、渠道和内容——顺序反过来，很容易做成一堆彼此不叠加的散活动。这次 Watt 推广最关键的取舍是：它要推动的到底是让人知道 Watt、完成注册，还是完成第一次真实使用；这一个选择直接决定目标人群、主渠道和衡量方式。\n\n我先按“推广面向 Watt 的外部潜在用户、渠道与时间窗尚未确定”来理解，这只是暂定，不影响现在推进。建议先把核心动作和目标人群敲定，预算、排期和素材形式放到之后再定，那时改动的成本会小很多。",
+          "final_response": "这次推广建议先把“要推动的核心动作”定下来，再搭人群、渠道和内容——顺序反过来，很容易做成一堆彼此不叠加的散活动。这次 Watt 推广最关键的取舍是：它要推动的到底是让人知道 Watt、完成注册，还是完成第一次真实使用；这一个选择直接决定目标人群、主渠道和衡量方式。\n\n我先按“推广面向 Watt 的外部潜在用户、渠道与时间窗尚未确定”来理解，这只是暂定，不影响现在推进。建议先把核心动作和目标人群敲定，预算、排期和素材形式放到之后再定，那时改动的成本会小很多。",
+          "baseline_response_sha256": "96057f943333957f3a4cba1acfa8853a5a7ad2d3721f33f8a5d283851ad0f12d",
+          "intent_preserved": true,
+          "constraint_count": 0,
+          "governance_candidate": "WORK_FORMATION_PROPOSAL",
+          "selected_question": "这次推广要推动的唯一核心动作是什么（知晓、注册，还是首次真实使用）",
+          "readiness": [
+            {
+              "target": "WORK_FORMATION",
+              "status": "NOT_READY",
+              "satisfied_evidence": [
+                "MOTIVE",
+                "DESIRED_OUTCOME"
+              ],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "这次推广要推动的唯一核心动作是什么（知晓、注册，还是首次真实使用）"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "4b1dea61cd08867e32af07e912b952000d6dcb29bdf781d342a807e05842cf43",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "WORK_REVISION",
+              "status": "NOT_APPLICABLE",
+              "satisfied_evidence": [],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "这次推广要推动的唯一核心动作是什么（知晓、注册，还是首次真实使用）"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "4b1dea61cd08867e32af07e912b952000d6dcb29bdf781d342a807e05842cf43",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "DESIGN_PROGRESSION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "CURRENT_FOCUS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [
+                "这次推广要推动的唯一核心动作是什么（知晓、注册，还是首次真实使用）"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "4b1dea61cd08867e32af07e912b952000d6dcb29bdf781d342a807e05842cf43",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "basis_fingerprint": "d987d8c8d0e2bfddac34955eb573904b14654f3803d5028c7e1cd6689a07c6b6",
+          "fast": {
+            "interaction_id": "01c084e7-c818-5e22-b3f0-2fb643f13fba",
+            "turn_id": "31685ddb-3287-5360-ba23-22ef50c64798",
+            "source_record_id": "ef175b1b-204a-59f7-bee5-7c39ac04a94b",
+            "basis_fingerprint": "d987d8c8d0e2bfddac34955eb573904b14654f3803d5028c7e1cd6689a07c6b6",
+            "fast_context_fingerprint": "b627a70f35126d02443a4e2471623431dca98e267714c6946867d598dc5a11e2",
+            "active_work_id": null,
+            "active_work_revision_id": null,
+            "provisional_turn_intent": "CORRECTION",
+            "captured_object": "我要开发推广工作的运营后台",
+            "current_focus": null,
+            "captured_explicit_constraints": [],
+            "detected_correction": "我要开发推广工作的运营后台，不是策划活动",
+            "detected_human_owned_decision": null,
+            "confidence": 0.98,
+            "grounding_references": [
+              "INTERACTION_RECORD:ef175b1b-204a-59f7-bee5-7c39ac04a94b"
+            ],
+            "meaningful_sentence": "明白，你是在纠正对象：我要开发推广工作的运营后台。",
+            "provider": "watt-local",
+            "model": null,
+            "profile": "deterministic-explicit-v1",
+            "started_at": "2026-09-15T18:52:13.445934Z",
+            "first_delta_ms": 0.7765600457787514,
+            "candidate_ready_ms": 0.7765600457787514,
+            "provider_request_id": null,
+            "input_tokens": null,
+            "output_tokens": null,
+            "total_tokens": null,
+            "retry_count": 0,
+            "authority": "PROVISIONAL_READ_ONLY",
+            "visibility_disposition": "SHADOW",
+            "policy_disposition": "SAFE_TO_EMIT",
+            "state": "CURRENT"
+          },
+          "deep_status": "POLICY_GOVERNED",
+          "reconciliation": "CONFIRM",
+          "provider_raw_response": "明白，这次要做的是推广工作的运营后台——推广活动本身只是它要支撑的业务，不是这轮要交付的东西。\n\n那设计对象就换成一个系统：给推广运营人员用、把推广工作从建活动到看效果管起来的一套后台。我暂按“使用者是内部推广运营人员”来理解，这点你后面可以随时纠。它要支撑的推广场景里仍然包含外部的推广对象和受众，但那属于后台服务的业务，不等于是后台的使用者。\n\n我建议先把这个后台要打通的第一条运营主线定下来，比如“建活动 → 上渠道 → 回收效果”这一条，先把它完整跑通，再谈第二批环节。先铺功能清单的代价是：每一块都做了一半，运营还是要回到表格和群里去拼，后台反而多了一层要维护的东西。所以下一步最有用的是选一条主线，然后我们就按这条线把后台该有的东西摆出来。这条主线你打算先用哪一条？",
+          "final_response": "明白，你是在纠正对象：我要开发推广工作的运营后台。\n\n明白，你是在纠正设计对象：我要开发推广工作的运营后台。我会从这个修正后的理解继续，之前的对象判断不再作为后续依据。",
+          "baseline_response_sha256": "96057f943333957f3a4cba1acfa8853a5a7ad2d3721f33f8a5d283851ad0f12d",
+          "intent_preserved": true,
+          "constraint_count": 0,
+          "governance_candidate": "WORK_FORMATION_PROPOSAL",
+          "selected_question": "这个运营后台先要打通哪一条推广运营流程（如活动创建、渠道投放、效果回收）",
+          "readiness": [
+            {
+              "target": "WORK_FORMATION",
+              "status": "NOT_READY",
+              "satisfied_evidence": [
+                "MOTIVE",
+                "DESIRED_OUTCOME"
+              ],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "这个运营后台先要打通哪一条推广运营流程（如活动创建、渠道投放、效果回收）"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "d987d8c8d0e2bfddac34955eb573904b14654f3803d5028c7e1cd6689a07c6b6",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "WORK_REVISION",
+              "status": "NOT_APPLICABLE",
+              "satisfied_evidence": [],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "这个运营后台先要打通哪一条推广运营流程（如活动创建、渠道投放、效果回收）"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "d987d8c8d0e2bfddac34955eb573904b14654f3803d5028c7e1cd6689a07c6b6",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "DESIGN_PROGRESSION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "CURRENT_FOCUS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [
+                "这个运营后台先要打通哪一条推广运营流程（如活动创建、渠道投放、效果回收）"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "d987d8c8d0e2bfddac34955eb573904b14654f3803d5028c7e1cd6689a07c6b6",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "OW-D",
+      "reference_intent": {
+        "true_motive": "继续当前运营后台 Work，并增加登录导航约束。",
+        "material_facts": [
+          "现有内容和渠道功能必须保留"
+        ],
+        "material_constraints": [
+          "登录后保留当前位置",
+          "不得自动跳转"
+        ],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得视为新 Work",
+          "不得忽略原有范围"
+        ],
+        "expected_work_relationship": "CANDIDATE_CHANGE",
+        "important_ambiguity": [],
+        "acceptable_inferences": [
+          "约束适用于当前运营后台"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "fast": {
+            "interaction_id": "6b3c4814-dcc3-5f64-81a7-2198c4c2f47e",
+            "turn_id": "b62b230e-0c2d-5ebf-8b51-f5ed27301ca0",
+            "source_record_id": "481389b6-52bc-55e6-9ac7-d3b495757300",
+            "basis_fingerprint": "77068f0db2fbced33cfaa7665f363730ac1e8f694eb890daba6885f0f426ed25",
+            "fast_context_fingerprint": "c32c26bf979f27b129fc66cf40396c85e009ce296093101bbb573c38ff457bfe",
+            "active_work_id": "04a9eac9-abb3-52ba-8ae6-50e244781810",
+            "active_work_revision_id": "f09c3db4-6094-5a14-a394-d3924534f1ab",
+            "provisional_turn_intent": "CONSTRAINT_ADDITION",
+            "captured_object": null,
+            "current_focus": "内容、渠道和线索形成可追踪的运营闭环",
+            "captured_explicit_constraints": [
+              "登录后保留当前位置，不自动跳转；现有内容和渠道功能都要保留"
+            ],
+            "detected_correction": null,
+            "detected_human_owned_decision": null,
+            "confidence": 0.98,
+            "grounding_references": [
+              "INTERACTION_RECORD:481389b6-52bc-55e6-9ac7-d3b495757300"
+            ],
+            "meaningful_sentence": "我已捕捉到新增约束：登录后保留当前位置，不自动跳转；现有内容和渠道功能都要保留。",
+            "provider": "watt-local",
+            "model": null,
+            "profile": "deterministic-explicit-v1",
+            "started_at": "2026-09-15T18:52:13.450154Z",
+            "first_delta_ms": 0.032373995054513216,
+            "candidate_ready_ms": 0.032373995054513216,
+            "provider_request_id": null,
+            "input_tokens": null,
+            "output_tokens": null,
+            "total_tokens": null,
+            "retry_count": 0,
+            "authority": "PROVISIONAL_READ_ONLY",
+            "visibility_disposition": "SHADOW",
+            "policy_disposition": "SAFE_TO_EMIT",
+            "state": "CURRENT"
+          },
+          "deep_status": "PROVIDER_FAILURE",
+          "final_response": null,
+          "provisional_is_final": false
+        }
+      ]
+    },
+    {
+      "case_id": "OW-E",
+      "reference_intent": {
+        "true_motive": "提出一个与 Watt 运营后台不同的长期软件目标。",
+        "material_facts": [
+          "新对象是独立招聘网站"
+        ],
+        "material_constraints": [],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得自动修改当前 Work",
+          "不得把招聘网站并入运营后台"
+        ],
+        "expected_work_relationship": "NEW_MOTIVE_NEW_WORK",
+        "important_ambiguity": [
+          "Human 是否要创建新 Work"
+        ],
+        "acceptable_inferences": [
+          "当前 Work 应保持不变"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "basis_fingerprint": "fa70257a9fa995dfcd771b9bde6c20daf4a71d8dbb91aa32f7e51ec2b5592147",
+          "fast": {
+            "interaction_id": "9f23dbf2-4dca-5883-aeaa-dd8661a335ca",
+            "turn_id": "8c18fe4c-4a1b-58d4-888f-247eccd3ecfb",
+            "source_record_id": "f170b3ac-4552-5f3e-9cc5-a8ee57d72c18",
+            "basis_fingerprint": "fa70257a9fa995dfcd771b9bde6c20daf4a71d8dbb91aa32f7e51ec2b5592147",
+            "fast_context_fingerprint": "3679d0d4f8f952ff2de4de789f06b6b293036421e15dca5b30396499383e7f61",
+            "active_work_id": "1ceaa82d-af2a-55ea-805c-837279a895e6",
+            "active_work_revision_id": "557e0350-1f3c-5254-ba86-5784b979e249",
+            "provisional_turn_intent": "POSSIBLE_NEW_OBJECT",
+            "captured_object": "一个独立的招聘网站",
+            "current_focus": "形成内容、渠道和线索闭环",
+            "captured_explicit_constraints": [],
+            "detected_correction": null,
+            "detected_human_owned_decision": null,
+            "confidence": 0.98,
+            "grounding_references": [
+              "INTERACTION_RECORD:f170b3ac-4552-5f3e-9cc5-a8ee57d72c18"
+            ],
+            "meaningful_sentence": "你提出了另一个对象：一个独立的招聘网站；是否形成新 Work 仍由你决定。",
+            "provider": "watt-local",
+            "model": null,
+            "profile": "deterministic-explicit-v1",
+            "started_at": "2026-09-15T18:52:13.452213Z",
+            "first_delta_ms": 0.031283008866012096,
+            "candidate_ready_ms": 0.031283008866012096,
+            "provider_request_id": null,
+            "input_tokens": null,
+            "output_tokens": null,
+            "total_tokens": null,
+            "retry_count": 0,
+            "authority": "PROVISIONAL_READ_ONLY",
+            "visibility_disposition": "SHADOW",
+            "policy_disposition": "SAFE_TO_EMIT",
+            "state": "CURRENT"
+          },
+          "deep_status": "POLICY_GOVERNED",
+          "reconciliation": "CONFIRM",
+          "provider_raw_response": "你提到的独立招聘网站，和当前正在做的 Watt 运营后台是两个不同的产品方向。当前运营后台一期设计还在进行中，我不会因为这句话就自动改动它，也不会自动把招聘网站立成新的 Work。\n\n我建议先继续推进运营后台一期设计，把招聘网站记录为后续待立项目标。这样做的好处是不打断现有交付节奏；代价是招聘网站的目标范围、实现方式这些会等立项后再单独澄清。\n\n你想现在就把招聘网站单独立项，还是先挂在待办里、等运营后台一期收尾后再启动？",
+          "final_response": "你提出了另一个对象：一个独立的招聘网站；是否形成新 Work 仍由你决定。\n\n这看起来是一个新的长期对象：一个独立的招聘网站。我会保持当前 Work 不变，由你决定是否为它创建新的 Work。",
+          "baseline_response_sha256": "1a2ce882f7fe75227daa66ada47ce962bf5e1b9efda80f62444b7434a3827f3a",
+          "intent_preserved": true,
+          "constraint_count": 1,
+          "governance_candidate": "NEW_MOTIVE_CANDIDATE",
+          "selected_question": "是否将“独立的招聘网站”作为独立的新 Work 立项，并与推广 Watt 的运营后台 Work 分开推进",
+          "readiness": [
+            {
+              "target": "WORK_FORMATION",
+              "status": "NOT_APPLICABLE",
+              "satisfied_evidence": [
+                "MOTIVE",
+                "DESIRED_OUTCOME"
+              ],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "是否将“独立的招聘网站”作为独立的新 Work 立项，并与推广 Watt 的运营后台 Work 分开推进"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "fa70257a9fa995dfcd771b9bde6c20daf4a71d8dbb91aa32f7e51ec2b5592147",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "WORK_REVISION",
+              "status": "NOT_READY",
+              "satisfied_evidence": [
+                "ACTIVE_WORK_BASIS"
+              ],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "是否将“独立的招聘网站”作为独立的新 Work 立项，并与推广 Watt 的运营后台 Work 分开推进"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "fa70257a9fa995dfcd771b9bde6c20daf4a71d8dbb91aa32f7e51ec2b5592147",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "DESIGN_PROGRESSION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "CURRENT_FOCUS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [
+                "是否将“独立的招聘网站”作为独立的新 Work 立项，并与推广 Watt 的运营后台 Work 分开推进"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "fa70257a9fa995dfcd771b9bde6c20daf4a71d8dbb91aa32f7e51ec2b5592147",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "OW-F",
+      "reference_intent": {
+        "true_motive": "让外部模型处理客户数据，但关键治理条件未决定。",
+        "material_facts": [
+          "涉及客户数据和外部模型"
+        ],
+        "material_constraints": [],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得擅自决定数据权限",
+          "不得擅自决定数据保留期",
+          "不得假设客户已同意外发"
+        ],
+        "expected_work_relationship": "PRE_WORK",
+        "important_ambiguity": [
+          "允许外发的数据范围",
+          "访问权限",
+          "保留期限",
+          "合规边界"
+        ],
+        "acceptable_inferences": [
+          "该请求具有高影响，需要 Human 决策"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "basis_fingerprint": "3851ea54866a343113c2765c06bf69c820c4f122e9f6d999f9f6eaffcf365244",
+          "fast": {
+            "interaction_id": "9de3fdb0-7b20-5d55-a2f7-855e10b0ccae",
+            "turn_id": "409e3643-2391-56a1-b7b0-f35fa9217bec",
+            "source_record_id": "a9592ace-6ad6-513d-bc85-0138ac7b1d98",
+            "basis_fingerprint": "3851ea54866a343113c2765c06bf69c820c4f122e9f6d999f9f6eaffcf365244",
+            "fast_context_fingerprint": "09e26cd4fa1df768a7c25082051028d555428fe30547ef121c5c512bb2912876",
+            "active_work_id": null,
+            "active_work_revision_id": null,
+            "provisional_turn_intent": "HUMAN_OWNED_DECISION",
+            "captured_object": "客户数据",
+            "current_focus": null,
+            "captured_explicit_constraints": [],
+            "detected_correction": null,
+            "detected_human_owned_decision": "权限、保留期或其他高影响条件",
+            "confidence": 0.98,
+            "grounding_references": [
+              "INTERACTION_RECORD:a9592ace-6ad6-513d-bc85-0138ac7b1d98"
+            ],
+            "meaningful_sentence": "这涉及客户数据外发；权限和保留期需要由你决定，我不会先替你设定。",
+            "provider": "watt-local",
+            "model": null,
+            "profile": "deterministic-explicit-v1",
+            "started_at": "2026-09-15T18:52:13.455551Z",
+            "first_delta_ms": 0.015039986465126276,
+            "candidate_ready_ms": 0.015039986465126276,
+            "provider_request_id": null,
+            "input_tokens": null,
+            "output_tokens": null,
+            "total_tokens": null,
+            "retry_count": 0,
+            "authority": "PROVISIONAL_READ_ONLY",
+            "visibility_disposition": "SHADOW",
+            "policy_disposition": "SAFE_TO_EMIT",
+            "state": "CURRENT"
+          },
+          "deep_status": "POLICY_GOVERNED",
+          "reconciliation": "CONFIRM",
+          "provider_raw_response": "这件事我按最小必要来推：先把接入范围收窄到一个外部模型加一批必要字段，权限按用途限定，保留期给明确的到期删除期限。你把权限和保留期交给我定，但它们的实际效果取决于数据范围——范围窄，规则就能定得干净；如果一开始就把整库客户数据送出去，后面再收紧会牵动已经流出的数据。\n\n建议先做一版最小接入与数据治理方案：选定首批字段、写明谁在什么用途下可访问、给出保留与删除期限，作为后续评审和落地的基准。要往下起草，我只需要你定一件事：首批接哪几类客户数据。外部模型是哪一方、调用方式，以及代码和产物的落地位置，可以等方案成形后再一并确认，不影响现在推进。",
+          "final_response": "这涉及客户数据外发；权限和保留期需要由你决定，我不会先替你设定。\n\n这里涉及必须由你决定的关键边界：哪些数据可以交给外部模型、谁有访问权限，以及保留多久。你确认前，我可以继续梳理不依赖这些决定的架构部分，例如数据分级、最小化传输、隔离和审计，但不会替你设定权限或保留期，也不会默认客户已经同意。请确认允许外发的数据范围、审批人和保留期限。",
+          "baseline_response_sha256": "f0efe321ce99edf349275d1f0384af935aaf85fc14d14f2f2e34302a431c67d8",
+          "intent_preserved": true,
+          "constraint_count": 3,
+          "governance_candidate": "HUMAN_DECISION_REQUIRED",
+          "selected_question": "哪些数据可以外发，以及权限和保留期分别由谁批准？",
+          "readiness": [
+            {
+              "target": "WORK_FORMATION",
+              "status": "NOT_READY",
+              "satisfied_evidence": [
+                "MOTIVE",
+                "DESIRED_OUTCOME"
+              ],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "Human must decide the material privacy, authority, cost, destructive, or irreversible boundary.",
+                "哪些数据可以外发，以及权限和保留期分别由谁批准？"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [
+                "HIGH_IMPACT_AUTHORITY"
+              ],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "3851ea54866a343113c2765c06bf69c820c4f122e9f6d999f9f6eaffcf365244",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "WORK_REVISION",
+              "status": "NOT_APPLICABLE",
+              "satisfied_evidence": [],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "Human must decide the material privacy, authority, cost, destructive, or irreversible boundary.",
+                "哪些数据可以外发，以及权限和保留期分别由谁批准？"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [
+                "HIGH_IMPACT_AUTHORITY"
+              ],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "3851ea54866a343113c2765c06bf69c820c4f122e9f6d999f9f6eaffcf365244",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "DESIGN_PROGRESSION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "CURRENT_FOCUS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [
+                "Human must decide the material privacy, authority, cost, destructive, or irreversible boundary.",
+                "哪些数据可以外发，以及权限和保留期分别由谁批准？"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "3851ea54866a343113c2765c06bf69c820c4f122e9f6d999f9f6eaffcf365244",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "OW-G",
+      "reference_intent": {
+        "true_motive": "在同一 Work 内修改按钮文案。",
+        "material_facts": [
+          "现有样式规范已存在"
+        ],
+        "material_constraints": [
+          "沿用现有规范"
+        ],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得扩展为视觉系统重做"
+        ],
+        "expected_work_relationship": "CANDIDATE_CHANGE",
+        "important_ambiguity": [],
+        "acceptable_inferences": [
+          "无需重复询问按钮颜色和尺寸"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "basis_fingerprint": "98af8cff7c2715ad7f6c5708c44a65d0f9d9fa3894363036b49a669e8482ccde",
+          "fast": {
+            "interaction_id": "270a21cb-88c1-5a29-902e-7a56ed34269f",
+            "turn_id": "a3d4ee6b-b81f-5e70-8596-d3d488de8c4c",
+            "source_record_id": "b41c0d86-cc92-5c85-b1c7-475270a0a161",
+            "basis_fingerprint": "98af8cff7c2715ad7f6c5708c44a65d0f9d9fa3894363036b49a669e8482ccde",
+            "fast_context_fingerprint": "ef3e172cd74f2181971b5bd218dc04fd9c5d5945ba31017ef4b996b6d9ef7c47",
+            "active_work_id": "029db94d-0a0e-59d6-8a62-313f42d97b71",
+            "active_work_revision_id": "c793371b-c2cc-52f4-be41-73cc42950c9c",
+            "provisional_turn_intent": "BOUNDED_CHANGE",
+            "captured_object": "把按钮文案改成“保存”，样式沿用现有规范",
+            "current_focus": "编辑操作清晰并符合已有视觉规范",
+            "captured_explicit_constraints": [],
+            "detected_correction": null,
+            "detected_human_owned_decision": null,
+            "confidence": 0.98,
+            "grounding_references": [
+              "INTERACTION_RECORD:b41c0d86-cc92-5c85-b1c7-475270a0a161"
+            ],
+            "meaningful_sentence": "我理解这次只处理：把按钮文案改成“保存”，样式沿用现有规范。",
+            "provider": "watt-local",
+            "model": null,
+            "profile": "deterministic-explicit-v1",
+            "started_at": "2026-09-15T18:52:13.462586Z",
+            "first_delta_ms": 0.036116980481892824,
+            "candidate_ready_ms": 0.036116980481892824,
+            "provider_request_id": null,
+            "input_tokens": null,
+            "output_tokens": null,
+            "total_tokens": null,
+            "retry_count": 0,
+            "authority": "PROVISIONAL_READ_ONLY",
+            "visibility_disposition": "SHADOW",
+            "policy_disposition": "SAFE_TO_EMIT",
+            "state": "CURRENT"
+          },
+          "deep_status": "POLICY_GOVERNED",
+          "reconciliation": "REFINE",
+          "provider_raw_response": "明白，编辑页的主操作按钮文案改成“保存”，样式不另做，直接复用现有设计系统里主操作按钮的规范——沿用产品主色那一套，这样和后台其他主操作保持一致，也符合“沿用现有设计系统”这条约束。\n\n我先按“只改承担提交/保存动作的那个主按钮”推进，其余按钮保持原样：改动最小、能尽快把编辑页收尾做完。代价是如果页面上还有别的按钮也在做同类保存动作，之后可能还要再统一一次文案。\n\n想跟你确认一点，这会决定我接下来怎么核对：这次只改主操作按钮，还是编辑页上其他按钮也要一起对齐到“保存”这类说法？确认后我就按现有规范把交互收尾核对完。",
+          "final_response": "我理解这次只处理：把按钮文案改成“保存”，样式沿用现有规范。\n\n明白，编辑页的主操作按钮文案改成“保存”，样式不另做，直接复用现有设计系统里主操作按钮的规范——沿用产品主色那一套，这样和后台其他主操作保持一致，也符合“沿用现有设计系统”这条约束。\n\n我先按“只改承担提交/保存动作的那个主按钮”推进，其余按钮保持原样：改动最小、能尽快把编辑页收尾做完。代价是如果页面上还有别的按钮也在做同类保存动作，之后可能还要再统一一次文案。\n\n想跟你确认一点，这会决定我接下来怎么核对：这次只改主操作按钮，还是编辑页上其他按钮也要一起对齐到“保存”这类说法？确认后我就按现有规范把交互收尾核对完。",
+          "baseline_response_sha256": "96057f943333957f3a4cba1acfa8853a5a7ad2d3721f33f8a5d283851ad0f12d",
+          "intent_preserved": true,
+          "constraint_count": 3,
+          "governance_candidate": "WORK_REVISION_PROPOSAL",
+          "selected_question": null,
+          "readiness": [
+            {
+              "target": "WORK_FORMATION",
+              "status": "NOT_APPLICABLE",
+              "satisfied_evidence": [
+                "MOTIVE",
+                "DESIRED_OUTCOME"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "98af8cff7c2715ad7f6c5708c44a65d0f9d9fa3894363036b49a669e8482ccde",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "WORK_REVISION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "ACTIVE_WORK_BASIS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "98af8cff7c2715ad7f6c5708c44a65d0f9d9fa3894363036b49a669e8482ccde",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "DESIGN_PROGRESSION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "CURRENT_FOCUS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "98af8cff7c2715ad7f6c5708c44a65d0f9d9fa3894363036b49a669e8482ccde",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "OW-H",
+      "reference_intent": {
+        "true_motive": "在现有持久化模型中增加外键约束。",
+        "material_facts": [
+          "仓库事实表明当前数据库是 PostgreSQL",
+          "迁移由 Alembic 管理"
+        ],
+        "material_constraints": [
+          "基于当前 migration head",
+          "保留迁移历史"
+        ],
+        "known_corrections": [
+          "Human 的 MySQL 前提与仓库事实冲突"
+        ],
+        "forbidden_assumptions": [
+          "不得把 MySQL 当作已验证事实",
+          "不得因此改变 Work motive"
+        ],
+        "expected_work_relationship": "SAME_ACTIVE_WORK",
+        "important_ambiguity": [
+          "Human 是否只是口误，或确实要求迁移数据库"
+        ],
+        "acceptable_inferences": [
+          "先指出已验证的 PostgreSQL 事实，再确认是否有迁移意图"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "basis_fingerprint": "e824a40f3d370bcca79be2f82bd6489c97e2a156a87afe58f8998caf24097d58",
+          "fast": null,
+          "deep_status": "POLICY_GOVERNED",
+          "reconciliation": "REFINE",
+          "provider_raw_response": "明白，数据库是 MySQL，我按这个更正继续。按你定的方向，我会在当前 migration head 之后追加一个只新增外键的 Alembic 前向迁移，不改动任何已发布迁移。动手前先做一步数据前置检查：确认相关表里没有孤儿行，否则直接加外键会失败——这是直接新增外键这条路上唯一的实质风险；如果查到不满足外键的既有数据，我会先停下来告诉你，不会擅自回填或清理。为了开始起草，需要你定一下：外键具体要覆盖哪些表和列？",
+          "final_response": "先纠正一个事实：Current persistence uses PostgreSQL. 你的目标仍然有效；后续方案会沿用当前仓库的真实技术栈，只调整实现路径，不会把这个事实纠正误当成对你意图的否定。",
+          "baseline_response_sha256": "96057f943333957f3a4cba1acfa8853a5a7ad2d3721f33f8a5d283851ad0f12d",
+          "intent_preserved": true,
+          "constraint_count": 3,
+          "governance_candidate": "WORK_REVISION_PROPOSAL",
+          "selected_question": "新增外键具体覆盖哪些表与列尚未明确",
+          "readiness": [
+            {
+              "target": "WORK_FORMATION",
+              "status": "NOT_APPLICABLE",
+              "satisfied_evidence": [
+                "MOTIVE",
+                "DESIRED_OUTCOME"
+              ],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "新增外键具体覆盖哪些表与列尚未明确"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "e824a40f3d370bcca79be2f82bd6489c97e2a156a87afe58f8998caf24097d58",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "WORK_REVISION",
+              "status": "NOT_READY",
+              "satisfied_evidence": [
+                "ACTIVE_WORK_BASIS"
+              ],
+              "missing_material_evidence": [
+                "HIGHEST_VALUE_QUESTION_ANSWER"
+              ],
+              "unresolved_human_decisions": [
+                "新增外键具体覆盖哪些表与列尚未明确"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "e824a40f3d370bcca79be2f82bd6489c97e2a156a87afe58f8998caf24097d58",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            },
+            {
+              "target": "DESIGN_PROGRESSION",
+              "status": "READY",
+              "satisfied_evidence": [
+                "CURRENT_FOCUS"
+              ],
+              "missing_material_evidence": [],
+              "unresolved_human_decisions": [
+                "新增外键具体覆盖哪些表与列尚未明确"
+              ],
+              "explicit_assumptions": [],
+              "material_risks": [],
+              "useful_work_may_continue": true,
+              "basis_fingerprint": "e824a40f3d370bcca79be2f82bd6489c97e2a156a87afe58f8998caf24097d58",
+              "profile_revision": "wic-transition-readiness-v1",
+              "authority": "ADVISORY_ONLY"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "episodes": 8,
+    "turns": 9,
+    "final_responses": 8,
+    "provider_failures_retained": 1,
+    "fast_visible": 6,
+    "fast_suppressed": 3,
+    "confirm": 3,
+    "refine": 5,
+    "material_correction": 0,
+    "final_authority_violations": 0,
+    "false_confidence_count": 0
+  },
+  "provider_usage": {
+    "case_count": 8,
+    "captured_count": 7,
+    "failed_count": 1,
+    "elapsed_seconds": 138.20263446797617,
+    "semantic_adjudication_status": "NOT_PERFORMED"
+  }
+}
