@@ -401,6 +401,7 @@ Each requires a separate, bounded architecture and implementation decision.
 
 ## References
 
+- [Work Identity, Closure and Archive Invariants](work-identity-closure-and-archive-invariants.md)
 - [Watt Product North Star](watt-product-north-star.md)
 - [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md)
 - [Work-centric Production Model](work-centric-production-model.md)

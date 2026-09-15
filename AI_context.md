@@ -936,6 +936,21 @@ DEFERRED**. See
 [Trusted Baseline / Active Runtime Convergence Lite](docs/architecture/trusted-baseline-active-runtime-convergence-lite.md)
 and [Code Dogfood #2 Runtime Divergence](docs/evidence/dogfood/code-dogfood-2-trusted-baseline-active-runtime-divergence.md).
 
+## Work Identity and UI Expression Guardrails
+
+Work identity is Motive-bound, not Project- or Asset-bound. After genuine Work
+closure, a later desired change creates a new Work even when it modifies the
+same software Asset. Archived Work remains historical provenance and is not
+normally reopened; Asset continuity carries cross-Work continuity. Executor
+Pause/Resume does not imply Work reactivation.
+
+Production UI interaction semantics must remain decoupled from visual style.
+Prototype styling is not frozen. Future formal UI should use a Design
+Token/Theme boundary so visual redesign does not require reworking Work,
+lifecycle or product semantics. See
+[Work Identity, Closure and Archive Invariants](docs/architecture/work-identity-closure-and-archive-invariants.md)
+and [Core Workspace Experience Calibration](docs/product/watt-core-workspace-experience-calibration-notes.md).
+
 ## Program-level Architecture Source of Truth
 
 The current system-level architecture baseline is:
@@ -947,6 +962,7 @@ The current system-level architecture baseline is:
 - [Runtime Profile, Provider Placement, and Containerized Deployment](docs/architecture/runtime-profile-provider-deployment.md)
 - [SPG FVS-1 — Governed Documentation Production Loop Implementation Contract](docs/architecture/spg-fvs-1-implementation-contract.md)
 - [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md)
+- [Work Identity, Closure and Archive Invariants](docs/architecture/work-identity-closure-and-archive-invariants.md)
 - [Watt Development Roadmap and Progress Reality](docs/roadmap/watt-development-roadmap-and-progress.md)
 - [Bounded Single-PWU Code Work](docs/architecture/bounded-single-pwu-code-work.md)
 - [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
@@ -1012,6 +1028,8 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Production Work Unit Generalization
 - Motive Is Product Intent; Work Is the Current Governed Representation
 - Work Is the Primary Production Entity; Project Is Not a Watt Lifecycle
+- Work Identity Is Motive-bound; Asset Continuity Does Not Imply Work Continuity
+- Genuine Work Closure Is Historical; Later Motive Creates New Work
 - Assets Are Attributable Work Inputs, Not Work or Truth Owners
 - One Reality, Different Responsibility Projections
 - Minimum-Sufficient Information — Need-to-know / Least Context
@@ -1041,6 +1059,7 @@ The system baseline governs mission and system boundaries. The SPG Lite baseline
 - Conversation-to-Contract — raw conversation is never authoritative execution input
 - First Utterance Does Not Automatically Create Work
 - Continuing Human–Watt Interaction Is Product Shape
+- Product Interaction Semantics Are Decoupled from Replaceable Visual Expression
 - Shared Understanding Distinguishes Candidate from Governed Reality
 - Production Cycle Completion Does Not End the Work Relationship Automatically
 - Controlled Autonomy

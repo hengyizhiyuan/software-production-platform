@@ -95,6 +95,11 @@ Understanding distinguishes what was communicated, what Watt interpreted, and
 what was admitted. The detailed semantic contract is
 [Work Interaction & Closed-loop Refinement](work-interaction-closed-loop-refinement.md).
 
+The identity and closure boundary is
+[Work Identity, Closure and Archive Invariants](work-identity-closure-and-archive-invariants.md):
+the same active Motive may continue in the same Work, while genuine closure
+makes the Work historical and a later desired change forms a new Work.
+
 Existing implementation does not yet provide this capability. WIC-1 is
 **DEFINED / ADMITTED** and ready for bounded MVP implementation planning.
 

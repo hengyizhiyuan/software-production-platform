@@ -355,8 +355,11 @@ production completed
 
 Likely archive candidates include Human-satisfied, explicitly closed,
 Human-archived or future policy-dormant Work. Exact archive semantics remain
-unresolved. History is likely a projection, not destruction; a Work may later
-be reopened or refined.
+unresolved. History is a projection, not destruction. Once a Work is genuinely
+closed and archived, it remains historical Reality; a later desired change
+creates a new Motive-bound Work informed by that history rather than reopening
+the old Work. See the canonical
+[Work Identity, Closure and Archive Invariants](../architecture/work-identity-closure-and-archive-invariants.md).
 
 ### 8.4 Global controls
 
@@ -692,3 +695,96 @@ timing, visual branding or lower-level Reality, Agenda, PWU/Production and
 Actions design. It does not change Current Interaction, Conversation,
 Composer, Work navigation, Delivery, lifecycle semantics or production
 architecture.
+
+## 20. Visual Expression Decoupling
+
+### 20.1 Approved direction
+
+Prototype v2 interaction and workspace exploration may be promising while its
+visual style remains explicitly unapproved and replaceable.
+
+> Experience semantics are stable; visual expression is replaceable.
+
+Product and interaction semantics include Work identity, Reality / Agenda /
+Production / Actions, adaptive workspace morphing, Conversation History,
+Current Interaction, Composer behavior, Human Turn Mediation, navigation,
+lifecycle and governed actions.
+
+Visual expression includes color, surface material, typography, border, radius,
+shadow, spacing, density, icon treatment, motion intensity and visual hierarchy
+styling. Changing visual expression must not require redesigning product
+semantics.
+
+### 20.2 Future Design Token / Theme boundary
+
+When production UI work is authorized, establish an explicit visual-system
+boundary using Design Tokens / Theme Tokens. Candidate families include:
+
+~~~text
+color.background.*
+color.surface.*
+color.text.*
+color.border.*
+color.accent.*
+radius.*
+shadow.*
+spacing.*
+typography.*
+motion.duration.*
+motion.easing.*
+density.*
+~~~
+
+Names are not frozen and no tokens are implemented by this note.
+
+Avoid scattering arbitrary visual constants through domain-oriented components
+or directly binding domain state to a color:
+
+~~~text
+semantic state
+    -> presentation semantic role
+    -> theme token
+
+PRODUCTION_RUNNING
+    -> status-active
+    -> theme-specific expression
+~~~
+
+### 20.3 Theme does not redefine product behavior
+
+A Calm, Industrial or Dark Theme may look materially different while
+describing the same Watt product. Theme must not redefine Work identity,
+information architecture, workspace state, Focus/Morph behavior, Actions,
+Conversation, lifecycle or Production semantics.
+
+Conversation placement, Current Interaction, the four workspace functions,
+adaptive presence, morph/focus behavior, Work navigation and History separation
+are product/interaction architecture. Accent color, border treatment,
+typography personality, shadow depth, background tone and icon style are
+replaceable visual expression.
+
+Theme, Density Profile and Motion Profile may eventually vary independently,
+for example Neutral Theme + Compact Density + Reduced Motion. This is future
+flexibility, not a first-release commitment or current theme-switcher priority.
+
+### 20.4 Future implementation guardrail
+
+When formal UI implementation begins:
+
+1. establish the default Design System;
+2. express visual semantics through tokens and components;
+3. implement the default Watt style carefully;
+4. when economically appropriate, prove decoupling with one materially
+   different visual configuration;
+5. only then consider broader user-selectable themes.
+
+The first release does not need many themes. The architecture must simply avoid
+turning temporary prototype aesthetics into permanent product architecture.
+Future visual evolution, enterprise branding and accessibility may benefit,
+but none is authorized here.
+
+### 20.5 Open decisions
+
+This direction does not freeze Watt's visual identity, colors, typography,
+theme count, theme selector, density selector, motion selector or token names.
+It changes no prototype or production implementation.

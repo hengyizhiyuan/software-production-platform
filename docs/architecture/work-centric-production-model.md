@@ -219,6 +219,7 @@ change is introduced here.
 
 ## References
 
+- [Work Identity, Closure and Archive Invariants](work-identity-closure-and-archive-invariants.md)
 - [Work-centric Production and Responsibility Principles](work-centric-production-and-responsibility-principles.md)
 - [Watt Product North Star](watt-product-north-star.md)
 - [Motive / Work / Plan Concept Calibration](motive-work-plan-concept-calibration.md)

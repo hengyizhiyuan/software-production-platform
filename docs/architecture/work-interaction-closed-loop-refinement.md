@@ -330,13 +330,18 @@ These are Product semantics, not required database enums. Existing Steering
 outcome was satisfied. In the WIC product model, completion normally yields
 `CURRENTLY_SATISFIED + OPEN`, so interaction remains possible.
 
-Input may continue the same Work when it materially serves the same Motive,
-preserves historical truth, and passes Work-revision Authority. A materially
-new primary outcome, independent resource/scope, or demand whose admission
-would obscure the completed boundary produces `NEW_WORK_RECOMMENDED`. The MVP
-may offer a notice and default transition; no production or Authority is
-inherited silently. Explicit archival closes the relationship without deleting
-its reconstructable history.
+While the Work relationship remains open and the same Motive remains active,
+input may continue the same Work when it preserves historical truth and passes
+Work-revision Authority. A materially new primary outcome, independent
+resource/scope, or demand whose admission would obscure the completed boundary
+produces `NEW_WORK_RECOMMENDED`. The MVP may offer a notice and default
+transition; no production or Authority is inherited silently.
+
+Genuine Work closure and Archive establish a terminal Work-identity boundary.
+After that boundary, a later desired change creates a new Motive-bound Work even
+when it modifies the same Asset. The historical Work remains reconstructable
+provenance and is not normally reactivated. See
+[Work Identity, Closure and Archive Invariants](work-identity-closure-and-archive-invariants.md).
 
 ## 7. Plan Steering and SPG integration
 

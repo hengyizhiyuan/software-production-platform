@@ -219,6 +219,12 @@ boundary remains truthful. A lightweight Product Experience may default to
 must not silently inherit Authority or admit production, and its exact countdown
 or visual treatment is not architecture truth.
 
+This continuation applies only while the same Motive remains active and the
+Work relationship has not genuinely closed. Genuine closure/Archive preserves
+the historical Work as provenance; a later desired change creates a new
+Motive-bound Work even when it affects the same Asset. The canonical boundary
+is [Work Identity, Closure and Archive Invariants](work-identity-closure-and-archive-invariants.md).
+
 ## 6. Human Authority and trust
 
 Human Authority governs intent, direction, material scope and constraints,
