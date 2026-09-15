@@ -28,6 +28,7 @@ from spg.domain.interaction import (
     WorkTransitionChoice,
     WorkTransitionRecord,
 )
+from spg.domain.wic_intelligence import ProgressiveSemanticStructure
 from spg.infrastructure.persistence.product_schema import (
     interaction_assessments,
     interaction_messages,
@@ -550,6 +551,11 @@ class InteractionStore:
             supporting_references=tuple(row["supporting_references"]),
             natural_response=row["natural_response"],
             readiness=WorkAdmissionReadiness.model_validate(row["readiness"]),
+            progressive_semantics=(
+                None
+                if row["progressive_semantics"] is None
+                else ProgressiveSemanticStructure.model_validate(row["progressive_semantics"])
+            ),
             provider_identity=row["provider_identity"],
             model_identity=row["model_identity"],
             schema_version=row["schema_version"],

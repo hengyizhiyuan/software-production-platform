@@ -1,0 +1,3045 @@
+{
+  "schema_version": "open-wic-result-v1",
+  "baseline_identity": "OPEN_WIC_BASELINE",
+  "corpus_id": "OPEN_WIC_BASELINE_2026-09-15",
+  "corpus_digest": "21027361579216bc88ecdcddf9c355f489080cc2ff118fb17052da13519a9f97",
+  "captured_at": "2026-09-15T15:39:08.490649+00:00",
+  "provider_attribution": {
+    "provider_adapter": "deepseek",
+    "semantic_model": "deepseek-flash",
+    "semantic_reasoning_effort": "low",
+    "conversation_model": "deepseek-flash",
+    "conversation_reasoning_effort": "low",
+    "coalesce_pre_work": true,
+    "wic_schema_version": "wic-assessment-v4",
+    "code_revision": "1c4b08bfec5271d455b0c2e5232e0e3b42da9cb6",
+    "source_fingerprint": "7896d275c8bc321a69292ad21b8bad6a059c5072509c446fdd452dcc31405691"
+  },
+  "scope": "WIC Provider candidates only; no admission, database, Work, or production",
+  "cases": [
+    {
+      "case_id": "OW-A",
+      "status": "CANDIDATES_CAPTURED",
+      "raw_turn_outputs": [
+        {
+          "turn_number": 1,
+          "input_basis_fingerprint": "96d988eb38d4fdc9a38239bae9e5cbaa096feb5d3609c13735d3c9eedd8e7ee1",
+          "input_basis_sha256": "7084c464932910483612eaac94974f8db78d066af1f636520498f0db44e87da6",
+          "candidate": {
+            "interpreted_motive": "构建一个支撑日常运营管理工作的平台",
+            "desired_outcome": "让运营管理工作有一个统一、可持续演进的平台承载",
+            "design_intent_frame": {
+              "design_subject": "运营管理平台",
+              "object_type": "PRODUCT_SYSTEM",
+              "business_context": "组织内部的运营管理工作",
+              "desired_outcome": "用平台承载并支撑日常运营管理工作",
+              "scope_level": "product",
+              "collaboration_mode": "exploration",
+              "candidate_assumptions": [
+                "先聚焦一个核心运营场景做成最小闭环，而不是一次性覆盖全部运营职能"
+              ],
+              "ambiguities": [
+                "平台首个要支撑的运营场景未知",
+                "平台的使用者与运营对象未知",
+                "平台边界（内部管理工具还是对外服务）未知"
+              ],
+              "confidence": 0.55
+            },
+            "candidate_context": [
+              "Human 自行提出要做一个运营管理平台"
+            ],
+            "candidate_constraints": [],
+            "current_requests": [
+              "创建一个运营管理平台"
+            ],
+            "unresolved_material_questions": [
+              "平台首个要支撑的具体运营场景尚未确定",
+              "平台的使用者与运营对象（内部运营团队还是其他角色）尚未确定"
+            ],
+            "meanings": [
+              {
+                "kind": "NEW_WORK_CANDIDATE",
+                "statement": "Human 提出想做一个运营管理平台，属于新的目标方向。",
+                "source_record_ids": [
+                  "3f65d441-8e5a-57b4-ac31-8c31507b46f3"
+                ],
+                "confidence": 0.9,
+                "rationale": "该记录是唯一的 Human 输入，内容为提出建设一个运营管理平台。",
+                "clarification_required": false
+              }
+            ],
+            "focus_classification": "ON_TOPIC",
+            "impact_disposition": "NEW_WORK_RECOMMENDED",
+            "supporting_references": [],
+            "natural_response": "运营管理平台往往覆盖面很宽，所以第一个关键决定是：它先服务哪一个具体的运营场景——比如任务派发与进度跟踪、资源或排班调度，还是运营数据汇总与报表。这个选择会直接决定平台第一批功能和数据结构，也让之后的扩展有清晰边界。\n\n我的建议是先不要铺开全部运营职能，挑一个每天都要用、目前最费劲的运营场景，把它做成能跑通的最小闭环，再根据真实使用情况往外扩。这样投入更可控，也更容易验证平台是否真的被用起来。\n\n因此想先确认一点：这个平台最先要支撑哪个团队、哪一类运营工作？如果是内部运营团队使用，也请顺便说明主要使用者是谁。",
+            "provider_identity": "deepseek-responses:collaboration:request:9bc3e91b-7af2-4be9-96d6-20111088c984",
+            "model_identity": "deepseek-flash"
+          },
+          "progressive_semantics": {
+            "basis_fingerprint": "96d988eb38d4fdc9a38239bae9e5cbaa096feb5d3609c13735d3c9eedd8e7ee1",
+            "source_record_ids": [
+              "3f65d441-8e5a-57b4-ac31-8c31507b46f3"
+            ],
+            "reception_meanings": [
+              "DEEP_WIC_WORKING_UNDERSTANDING"
+            ],
+            "working_motive": "构建一个支撑日常运营管理工作的平台",
+            "working_desired_outcome": "让运营管理工作有一个统一、可持续演进的平台承载",
+            "working_facts": [
+              "Human 自行提出要做一个运营管理平台"
+            ],
+            "working_constraints": [],
+            "working_requests": [
+              "创建一个运营管理平台"
+            ],
+            "explicit_assumptions": [],
+            "unresolved_human_decisions": [],
+            "deltas": [
+              {
+                "id": "f9f06d60-6dc3-56b2-a818-1c33514b59cb",
+                "category": "MOTIVE",
+                "operation": "ADDED",
+                "value": "构建一个支撑日常运营管理工作的平台",
+                "prior_value": null,
+                "source_record_ids": [
+                  "3f65d441-8e5a-57b4-ac31-8c31507b46f3"
+                ],
+                "basis_fingerprint": "96d988eb38d4fdc9a38239bae9e5cbaa096feb5d3609c13735d3c9eedd8e7ee1",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+                "authority": "ADVISORY"
+              }
+            ],
+            "pattern_signals": [],
+            "inference_disposition": "NO_INFERENCE",
+            "questions": [
+              {
+                "question": "平台首个要支撑的具体运营场景尚未确定",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "ASK_HUMAN_NOW",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              },
+              {
+                "question": "平台的使用者与运营对象（内部运营团队还是其他角色）尚未确定",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "DEFER_UNTIL_RELEVANT",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              }
+            ],
+            "selected_question": "平台首个要支撑的具体运营场景尚未确定",
+            "governance_candidate": "WORK_FORMATION_PROPOSAL",
+            "readiness": [
+              {
+                "target": "WORK_FORMATION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "MOTIVE",
+                  "DESIRED_OUTCOME"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "96d988eb38d4fdc9a38239bae9e5cbaa096feb5d3609c13735d3c9eedd8e7ee1",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "WORK_REVISION",
+                "status": "NOT_APPLICABLE",
+                "satisfied_evidence": [],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "96d988eb38d4fdc9a38239bae9e5cbaa096feb5d3609c13735d3c9eedd8e7ee1",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "DESIGN_PROGRESSION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "CURRENT_FOCUS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "96d988eb38d4fdc9a38239bae9e5cbaa096feb5d3609c13735d3c9eedd8e7ee1",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              }
+            ],
+            "artifact_recommendation": null,
+            "factual_contradictions": [],
+            "semantic_policy_revision": "wic-semantic-policy-v1",
+            "question_policy_revision": "wic-question-value-v1"
+          },
+          "readiness": {
+            "status": "NOT_READY",
+            "profile": "LONG_LIVED_STEERING",
+            "profile_version": "v0",
+            "satisfied_requirements": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_information": [],
+            "unresolved_material_questions": [
+              "平台首个要支撑的具体运营场景尚未确定",
+              "平台的使用者与运营对象（内部运营团队还是其他角色）尚未确定"
+            ],
+            "reasons": [
+              "Material Work-admission information remains unresolved."
+            ],
+            "basis_fingerprint": "96d988eb38d4fdc9a38239bae9e5cbaa096feb5d3609c13735d3c9eedd8e7ee1"
+          },
+          "natural_response": "运营管理平台往往覆盖面很宽，所以第一个关键决定是：它先服务哪一个具体的运营场景——比如任务派发与进度跟踪、资源或排班调度，还是运营数据汇总与报表。这个选择会直接决定平台第一批功能和数据结构，也让之后的扩展有清晰边界。\n\n我的建议是先不要铺开全部运营职能，挑一个每天都要用、目前最费劲的运营场景，把它做成能跑通的最小闭环，再根据真实使用情况往外扩。这样投入更可控，也更容易验证平台是否真的被用起来。\n\n因此想先确认一点：这个平台最先要支撑哪个团队、哪一类运营工作？如果是内部运营团队使用，也请顺便说明主要使用者是谁。",
+          "metrics": {
+            "first_delta_seconds": 7.348996485001408,
+            "ttfms_seconds": 7.555073908006307,
+            "ttfms_boundary": "provider_stream_first_sentence_min_8_nonspace_chars",
+            "turn_candidate_ready_seconds": 10.08296358701773,
+            "question_count": 1,
+            "provider_call_count": 1,
+            "usage": {
+              "input_tokens": 3524,
+              "output_tokens": 1664,
+              "total_tokens": 5188,
+              "cost_rmb": null
+            }
+          },
+          "provider_evidence": {
+            "semantic_thread_id": null,
+            "semantic_turn_id": null,
+            "conversation_thread_id": null,
+            "conversation_turn_id": null,
+            "semantic_seconds": null,
+            "conversation_seconds": null,
+            "first_response_delta_seconds": 7.348946145037189,
+            "semantic_prompt_characters": null,
+            "conversation_prompt_characters": null,
+            "semantic_model": null,
+            "conversation_model": null,
+            "semantic_reasoning_effort": null,
+            "conversation_reasoning_effort": null,
+            "pipeline_mode": "coalesced_pre_work",
+            "pipeline_reason": "native_pre_work_shared_configuration",
+            "provider_call_count": 1,
+            "coalesced_thread_id": null,
+            "coalesced_turn_id": null,
+            "coalesced_seconds": 10.08279037399916,
+            "coalesced_prompt_characters": 9586,
+            "coalesced_model": "deepseek-flash",
+            "coalesced_reasoning_effort": "low",
+            "coalesced_output_characters": 1613,
+            "coalesced_semantic_characters": 1316,
+            "retained_prior_meaning_count": 0,
+            "new_meaning_count": 1,
+            "reused_prior_design_intent_frame": false,
+            "provider_stage_seconds": {
+              "provider_context_started": 2.0328036043792963e-05,
+              "context_assembly_started": 2.4742039386183023e-05,
+              "provider_context_prepared": 0.0016442390042357147,
+              "context_assembly_completed": 0.0016460830229334533,
+              "provider_request_queued": 0.007472908997442573,
+              "provider_request_sent": 0.007478643034119159,
+              "provider_response_accepted": 1.305336959019769,
+              "provider_first_response_event": 1.3919712160131894,
+              "provider_first_token": 7.347597750020213,
+              "natural_response_completed": 8.111672579019796,
+              "semantic_result_completed": 10.082383626024239,
+              "semantic_envelope_completed": 10.082386272028089,
+              "provider_teardown_completed": 10.082386941998266,
+              "payload_validation_started": 10.082387418020517,
+              "payload_validated": 10.082746978034265,
+              "validation_completed": 10.082748893008102
+            },
+            "semantic_request_id": null,
+            "conversation_request_id": null,
+            "coalesced_request_id": "9bc3e91b-7af2-4be9-96d6-20111088c984",
+            "semantic_provider": null,
+            "conversation_provider": null,
+            "coalesced_provider": "deepseek",
+            "semantic_usage": null,
+            "conversation_usage": null,
+            "coalesced_usage": {
+              "input_tokens": 3524,
+              "output_tokens": 1664,
+              "cached_tokens": 3328,
+              "reasoning_tokens": 1038,
+              "total_tokens": 5188,
+              "unknown": false
+            },
+            "semantic_retry_count": null,
+            "conversation_retry_count": null,
+            "coalesced_retry_count": 0
+          },
+          "pipeline_stages": [
+            {
+              "name": "provider_context_started",
+              "seconds": 6.968702655285597e-05
+            },
+            {
+              "name": "context_assembly_started",
+              "seconds": 7.541402010247111e-05
+            },
+            {
+              "name": "provider_context_prepared",
+              "seconds": 0.0016930770361796021
+            },
+            {
+              "name": "context_assembly_completed",
+              "seconds": 0.0016942680231295526
+            },
+            {
+              "name": "provider_request_queued",
+              "seconds": 0.007522499014157802
+            },
+            {
+              "name": "provider_request_sent",
+              "seconds": 0.007527012028731406
+            },
+            {
+              "name": "provider_response_accepted",
+              "seconds": 1.3053871809970587
+            },
+            {
+              "name": "provider_first_response_event",
+              "seconds": 1.3920206850161776
+            },
+            {
+              "name": "provider_first_token",
+              "seconds": 7.347647974034771
+            },
+            {
+              "name": "natural_response_completed",
+              "seconds": 8.111722490983084
+            },
+            {
+              "name": "semantic_result_completed",
+              "seconds": 10.082433425006457
+            },
+            {
+              "name": "semantic_envelope_completed",
+              "seconds": 10.082434458017815
+            },
+            {
+              "name": "provider_teardown_completed",
+              "seconds": 10.082435041025747
+            },
+            {
+              "name": "payload_validation_started",
+              "seconds": 10.082435649004765
+            },
+            {
+              "name": "payload_validated",
+              "seconds": 10.082796144997701
+            },
+            {
+              "name": "validation_completed",
+              "seconds": 10.08279701200081
+            }
+          ]
+        }
+      ],
+      "reference_intent": {
+        "true_motive": "开发一个运营管理平台；业务对象和首期边界尚未明确。",
+        "material_facts": [],
+        "material_constraints": [],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得擅自断言具体行业、角色或功能范围",
+          "不得把系统开发改写为单次运营活动"
+        ],
+        "expected_work_relationship": "PRE_WORK",
+        "important_ambiguity": [
+          "平台服务的业务对象",
+          "首期希望闭环的关键工作"
+        ],
+        "acceptable_inferences": [
+          "可以提出明确标注为可修正的初步理解"
+        ],
+        "governance_expectation": "CONDITIONAL"
+      },
+      "semantic_adjudication": null,
+      "failure": null,
+      "mutation_boundary": {
+        "production_mutation_attempts": 0,
+        "work_or_assessment_admissions": 0,
+        "database_dependency_present": false
+      }
+    },
+    {
+      "case_id": "OW-B",
+      "status": "CANDIDATES_CAPTURED",
+      "raw_turn_outputs": [
+        {
+          "turn_number": 1,
+          "input_basis_fingerprint": "774dab2965c330f70ee255a652ec4167b74b848657e0a57423069b3834545ed3",
+          "input_basis_sha256": "c75dcb7386306686e851ecbaa7bda693f8c81703e7752828cf96e81fd4ebd40e",
+          "candidate": {
+            "interpreted_motive": "改进 Watt 登录后的连续工作体验",
+            "desired_outcome": "用户登录成功后回到原操作位置且现有登录能力保持可用",
+            "design_intent_frame": {
+              "design_subject": "Watt 登录成功后的跳转行为（改为停留原页面/恢复原操作位置）",
+              "object_type": "FEATURE",
+              "business_context": null,
+              "desired_outcome": "用户登录成功后回到原操作位置且现有登录能力保持可用",
+              "scope_level": "implementation",
+              "collaboration_mode": "execution",
+              "candidate_assumptions": [
+                "原操作位置可由现有会话或路由状态恢复",
+                "鉴权协议与登录本身不需改动"
+              ],
+              "ambiguities": [
+                "“原页面”与“原操作位置”是否等价未明确"
+              ],
+              "confidence": 0.65
+            },
+            "candidate_context": [
+              "当前成功登录后统一跳转首页"
+            ],
+            "candidate_constraints": [
+              "不得改变鉴权协议",
+              "仅修改登录成功后的跳转行为，不改变其他行为"
+            ],
+            "current_requests": [
+              "实现登录后位置恢复",
+              "将登录成功后自动跳转首页改为停留在原页面，仅修改该行为"
+            ],
+            "unresolved_material_questions": [],
+            "meanings": [
+              {
+                "kind": "CONTEXT",
+                "statement": "当前成功登录后统一跳转首页。",
+                "source_record_ids": [
+                  "d57ceef2-8a87-540a-a1ba-f0ca1c159b23"
+                ],
+                "confidence": 0.95,
+                "rationale": "Human 指出现有跳转行为，作为被修改的现状事实。",
+                "clarification_required": false
+              },
+              {
+                "kind": "CORRECTION",
+                "statement": "将“登录成功自动跳转首页”更正为“登录成功后停留在原页面”。",
+                "source_record_ids": [
+                  "d57ceef2-8a87-540a-a1ba-f0ca1c159b23"
+                ],
+                "confidence": 0.9,
+                "rationale": "Human 明确要求替换既有跳转行为，而非新增并行行为。",
+                "clarification_required": false
+              },
+              {
+                "kind": "CONSTRAINT",
+                "statement": "本次变更范围限定为登录后跳转行为，不修改其他行为；原有约束“不得改变鉴权协议”继续有效。",
+                "source_record_ids": [
+                  "d57ceef2-8a87-540a-a1ba-f0ca1c159b23"
+                ],
+                "confidence": 0.9,
+                "rationale": "Human 说“只改这个行为”，构成适用于当前 Work 的约束新增。",
+                "clarification_required": false
+              },
+              {
+                "kind": "REQUEST",
+                "statement": "请求实现登录后停留原页面/恢复原操作位置。",
+                "source_record_ids": [
+                  "d57ceef2-8a87-540a-a1ba-f0ca1c159b23"
+                ],
+                "confidence": 0.85,
+                "rationale": "该输入延续当前 Work 的位置恢复请求并收窄其实现范围。",
+                "clarification_required": false
+              }
+            ],
+            "focus_classification": "ON_TOPIC",
+            "impact_disposition": "HUMAN_GOVERNANCE_REQUIRED",
+            "supporting_references": [],
+            "natural_response": "明白，按这个收窄范围来：登录成功后不再统一跳首页，而是留在/回到原页面；鉴权协议不动，登录能力和其他行为保持不变。这样位置恢复就是唯一变更点，改动面小、回归风险低，前提是原操作位置能从现有会话或路由状态还原。\n\n我先按“原页面”等同“登录前所在页面/原操作位置”来理解；如果两者不等价、现有状态又还原不了，就需要额外保存位置，那会碰到“只改跳转”的边界，到时再单独处理。\n\n需要你点一下确认：是否把“仅修改登录成功后跳转行为”作为当前 Work 的正式约束变更？确认后我就以位置恢复为唯一变更点来实施，并验证其余行为不变。",
+            "provider_identity": "deepseek-responses:semantic:request:8df0ebf0-efc1-4e61-982a-0e4d370557c2",
+            "model_identity": "deepseek-flash"
+          },
+          "progressive_semantics": {
+            "basis_fingerprint": "774dab2965c330f70ee255a652ec4167b74b848657e0a57423069b3834545ed3",
+            "source_record_ids": [
+              "d57ceef2-8a87-540a-a1ba-f0ca1c159b23"
+            ],
+            "reception_meanings": [
+              "DEEP_WIC_WORKING_UNDERSTANDING"
+            ],
+            "working_motive": "改进 Watt 登录后的连续工作体验",
+            "working_desired_outcome": "用户登录成功后回到原操作位置且现有登录能力保持可用",
+            "working_facts": [
+              "当前成功登录后统一跳转首页"
+            ],
+            "working_constraints": [
+              "不得改变鉴权协议",
+              "仅修改登录成功后的跳转行为，不改变其他行为"
+            ],
+            "working_requests": [
+              "实现登录后位置恢复",
+              "将登录成功后自动跳转首页改为停留在原页面，仅修改该行为"
+            ],
+            "explicit_assumptions": [],
+            "unresolved_human_decisions": [],
+            "deltas": [
+              {
+                "id": "26e33984-51e5-5bf9-a712-0a22c743b760",
+                "category": "CONSTRAINT",
+                "operation": "ADDED",
+                "value": "仅修改登录成功后的跳转行为，不改变其他行为",
+                "prior_value": null,
+                "source_record_ids": [
+                  "d57ceef2-8a87-540a-a1ba-f0ca1c159b23"
+                ],
+                "basis_fingerprint": "774dab2965c330f70ee255a652ec4167b74b848657e0a57423069b3834545ed3",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+                "authority": "ADVISORY"
+              }
+            ],
+            "pattern_signals": [
+              "BOUNDED_CHANGE"
+            ],
+            "inference_disposition": "NO_INFERENCE",
+            "questions": [],
+            "selected_question": null,
+            "governance_candidate": "WORK_REVISION_PROPOSAL",
+            "readiness": [
+              {
+                "target": "WORK_FORMATION",
+                "status": "NOT_APPLICABLE",
+                "satisfied_evidence": [
+                  "MOTIVE",
+                  "DESIRED_OUTCOME"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "774dab2965c330f70ee255a652ec4167b74b848657e0a57423069b3834545ed3",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "WORK_REVISION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "ACTIVE_WORK_BASIS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "774dab2965c330f70ee255a652ec4167b74b848657e0a57423069b3834545ed3",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "DESIGN_PROGRESSION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "CURRENT_FOCUS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "774dab2965c330f70ee255a652ec4167b74b848657e0a57423069b3834545ed3",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              }
+            ],
+            "artifact_recommendation": null,
+            "factual_contradictions": [],
+            "semantic_policy_revision": "wic-semantic-policy-v1",
+            "question_policy_revision": "wic-question-value-v1"
+          },
+          "readiness": {
+            "status": "READY",
+            "profile": "LONG_LIVED_STEERING",
+            "profile_version": "v0",
+            "satisfied_requirements": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_information": [],
+            "unresolved_material_questions": [],
+            "reasons": [
+              "Motive and desired outcome are clear enough to form governed Work."
+            ],
+            "basis_fingerprint": "774dab2965c330f70ee255a652ec4167b74b848657e0a57423069b3834545ed3"
+          },
+          "natural_response": "明白，按这个收窄范围来：登录成功后不再统一跳首页，而是留在/回到原页面；鉴权协议不动，登录能力和其他行为保持不变。这样位置恢复就是唯一变更点，改动面小、回归风险低，前提是原操作位置能从现有会话或路由状态还原。\n\n我先按“原页面”等同“登录前所在页面/原操作位置”来理解；如果两者不等价、现有状态又还原不了，就需要额外保存位置，那会碰到“只改跳转”的边界，到时再单独处理。\n\n需要你点一下确认：是否把“仅修改登录成功后跳转行为”作为当前 Work 的正式约束变更？确认后我就以位置恢复为唯一变更点来实施，并验证其余行为不变。",
+          "metrics": {
+            "first_delta_seconds": 16.863345468998887,
+            "ttfms_seconds": 16.99487733800197,
+            "ttfms_boundary": "provider_stream_first_sentence_min_8_nonspace_chars",
+            "turn_candidate_ready_seconds": 17.56374701700406,
+            "question_count": 1,
+            "provider_call_count": 2,
+            "usage": {
+              "input_tokens": 5799,
+              "output_tokens": 3437,
+              "total_tokens": 9236,
+              "cost_rmb": null
+            }
+          },
+          "provider_evidence": {
+            "semantic_thread_id": null,
+            "semantic_turn_id": null,
+            "conversation_thread_id": null,
+            "conversation_turn_id": null,
+            "semantic_seconds": 9.368473552982323,
+            "conversation_seconds": 8.195180336013436,
+            "first_response_delta_seconds": 16.863326894002967,
+            "semantic_prompt_characters": 9418,
+            "conversation_prompt_characters": 5175,
+            "semantic_model": "deepseek-flash",
+            "conversation_model": "deepseek-flash",
+            "semantic_reasoning_effort": "low",
+            "conversation_reasoning_effort": "low",
+            "pipeline_mode": "staged",
+            "pipeline_reason": "active_work",
+            "provider_call_count": 2,
+            "coalesced_thread_id": null,
+            "coalesced_turn_id": null,
+            "coalesced_seconds": null,
+            "coalesced_prompt_characters": null,
+            "coalesced_model": null,
+            "coalesced_reasoning_effort": null,
+            "coalesced_output_characters": null,
+            "coalesced_semantic_characters": null,
+            "retained_prior_meaning_count": null,
+            "new_meaning_count": null,
+            "reused_prior_design_intent_frame": null,
+            "provider_stage_seconds": null,
+            "semantic_request_id": "8df0ebf0-efc1-4e61-982a-0e4d370557c2",
+            "conversation_request_id": "38683abf-aa86-4361-b093-e84cdbf9640f",
+            "coalesced_request_id": null,
+            "semantic_provider": "deepseek-responses",
+            "conversation_provider": "deepseek-responses",
+            "coalesced_provider": null,
+            "semantic_usage": {
+              "input_tokens": 4169,
+              "output_tokens": 2008,
+              "cached_tokens": 1408,
+              "reasoning_tokens": 962,
+              "total_tokens": 6177,
+              "unknown": false
+            },
+            "conversation_usage": {
+              "input_tokens": 1630,
+              "output_tokens": 1429,
+              "cached_tokens": 384,
+              "reasoning_tokens": 1256,
+              "total_tokens": 3059,
+              "unknown": false
+            },
+            "coalesced_usage": null,
+            "semantic_retry_count": 0,
+            "conversation_retry_count": 0,
+            "coalesced_retry_count": null
+          },
+          "pipeline_stages": []
+        }
+      ],
+      "reference_intent": {
+        "true_motive": "在同一 Work 内收窄登录后导航行为。",
+        "material_facts": [
+          "当前行为是登录成功后自动跳转"
+        ],
+        "material_constraints": [
+          "只修改这一行为",
+          "不改变鉴权协议"
+        ],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得扩展为登录系统重构"
+        ],
+        "expected_work_relationship": "CANDIDATE_CHANGE",
+        "important_ambiguity": [],
+        "acceptable_inferences": [
+          "沿用现有页面和鉴权实现"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "semantic_adjudication": null,
+      "failure": null,
+      "mutation_boundary": {
+        "production_mutation_attempts": 0,
+        "work_or_assessment_admissions": 0,
+        "database_dependency_present": false
+      }
+    },
+    {
+      "case_id": "OW-C",
+      "status": "CANDIDATES_CAPTURED",
+      "raw_turn_outputs": [
+        {
+          "turn_number": 1,
+          "input_basis_fingerprint": "5c3509f432c4f30f4efefcfa1f8c731d19e27df1feaf92e925300e5edeb87a7b",
+          "input_basis_sha256": "8a97bd7b4dc363908c749b295d6e93ca42ce21156e0a97d868150911b3ba9570",
+          "candidate": {
+            "interpreted_motive": "发起一次 Watt 推广活动",
+            "desired_outcome": "完成一次 Watt 推广活动",
+            "design_intent_frame": {
+              "design_subject": "Watt 推广活动",
+              "object_type": "OPERATIONAL_ACTIVITY",
+              "business_context": "为 Watt 做市场推广",
+              "desired_outcome": "完成一次 Watt 推广活动",
+              "scope_level": "product",
+              "collaboration_mode": "exploration",
+              "candidate_assumptions": [
+                "推广面向 Watt 的外部潜在用户",
+                "渠道与时间窗可在核心目标确定之后再定"
+              ],
+              "ambiguities": [
+                "推广要推动的核心动作与成功标准未说明",
+                "目标人群与投放渠道未说明",
+                "预算与时间窗未说明"
+              ],
+              "confidence": 0.62
+            },
+            "candidate_context": [
+              "Watt 是被推广的对象"
+            ],
+            "candidate_constraints": [],
+            "current_requests": [
+              "发起一次 Watt 推广活动"
+            ],
+            "unresolved_material_questions": [
+              "这次推广要推动的唯一核心动作是什么（知晓、注册，还是首次真实使用）",
+              "目标人群是谁"
+            ],
+            "meanings": [
+              {
+                "kind": "NEW_WORK_CANDIDATE",
+                "statement": "Human 希望发起一次 Watt 推广活动。",
+                "source_record_ids": [
+                  "f6a6c716-b91b-57dd-b6a0-6057e7806970"
+                ],
+                "confidence": 0.95,
+                "rationale": "直接来自 Human 的本轮陈述。",
+                "clarification_required": false
+              },
+              {
+                "kind": "CONTEXT",
+                "statement": "Watt 在这轮对话中被当作可推广的对象。",
+                "source_record_ids": [
+                  "f6a6c716-b91b-57dd-b6a0-6057e7806970"
+                ],
+                "confidence": 0.8,
+                "rationale": "推广活动以 Watt 为对象，说明 Watt 是可被推广的产品或事物。",
+                "clarification_required": false
+              }
+            ],
+            "focus_classification": "ON_TOPIC",
+            "impact_disposition": "NEW_WORK_RECOMMENDED",
+            "supporting_references": [],
+            "natural_response": "这次推广建议先把“要推动的核心动作”定下来，再搭人群、渠道和内容——顺序反过来，很容易做成一堆彼此不叠加的散活动。这次 Watt 推广最关键的取舍是：它要推动的到底是让人知道 Watt、完成注册，还是完成第一次真实使用；这一个选择直接决定目标人群、主渠道和衡量方式。\n\n我先按“推广面向 Watt 的外部潜在用户、渠道与时间窗尚未确定”来理解，这只是暂定，不影响现在推进。建议先把核心动作和目标人群敲定，预算、排期和素材形式放到之后再定，那时改动的成本会小很多。",
+            "provider_identity": "deepseek-responses:collaboration:request:f586fa36-3b54-40e6-b754-b5017ef41ebe",
+            "model_identity": "deepseek-flash"
+          },
+          "progressive_semantics": {
+            "basis_fingerprint": "5c3509f432c4f30f4efefcfa1f8c731d19e27df1feaf92e925300e5edeb87a7b",
+            "source_record_ids": [
+              "f6a6c716-b91b-57dd-b6a0-6057e7806970"
+            ],
+            "reception_meanings": [
+              "DEEP_WIC_WORKING_UNDERSTANDING"
+            ],
+            "working_motive": "发起一次 Watt 推广活动",
+            "working_desired_outcome": "完成一次 Watt 推广活动",
+            "working_facts": [
+              "Watt 是被推广的对象"
+            ],
+            "working_constraints": [],
+            "working_requests": [
+              "发起一次 Watt 推广活动"
+            ],
+            "explicit_assumptions": [],
+            "unresolved_human_decisions": [],
+            "deltas": [
+              {
+                "id": "021447d0-d2bc-547d-abe7-54a28a7962f8",
+                "category": "MOTIVE",
+                "operation": "ADDED",
+                "value": "发起一次 Watt 推广活动",
+                "prior_value": null,
+                "source_record_ids": [
+                  "f6a6c716-b91b-57dd-b6a0-6057e7806970"
+                ],
+                "basis_fingerprint": "5c3509f432c4f30f4efefcfa1f8c731d19e27df1feaf92e925300e5edeb87a7b",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+                "authority": "ADVISORY"
+              }
+            ],
+            "pattern_signals": [],
+            "inference_disposition": "NO_INFERENCE",
+            "questions": [
+              {
+                "question": "这次推广要推动的唯一核心动作是什么（知晓、注册，还是首次真实使用）",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "ASK_HUMAN_NOW",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              },
+              {
+                "question": "目标人群是谁",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "DEFER_UNTIL_RELEVANT",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              }
+            ],
+            "selected_question": "这次推广要推动的唯一核心动作是什么（知晓、注册，还是首次真实使用）",
+            "governance_candidate": "WORK_FORMATION_PROPOSAL",
+            "readiness": [
+              {
+                "target": "WORK_FORMATION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "MOTIVE",
+                  "DESIRED_OUTCOME"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "5c3509f432c4f30f4efefcfa1f8c731d19e27df1feaf92e925300e5edeb87a7b",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "WORK_REVISION",
+                "status": "NOT_APPLICABLE",
+                "satisfied_evidence": [],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "5c3509f432c4f30f4efefcfa1f8c731d19e27df1feaf92e925300e5edeb87a7b",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "DESIGN_PROGRESSION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "CURRENT_FOCUS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "5c3509f432c4f30f4efefcfa1f8c731d19e27df1feaf92e925300e5edeb87a7b",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              }
+            ],
+            "artifact_recommendation": null,
+            "factual_contradictions": [],
+            "semantic_policy_revision": "wic-semantic-policy-v1",
+            "question_policy_revision": "wic-question-value-v1"
+          },
+          "readiness": {
+            "status": "NOT_READY",
+            "profile": "LONG_LIVED_STEERING",
+            "profile_version": "v0",
+            "satisfied_requirements": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_information": [],
+            "unresolved_material_questions": [
+              "这次推广要推动的唯一核心动作是什么（知晓、注册，还是首次真实使用）",
+              "目标人群是谁"
+            ],
+            "reasons": [
+              "Material Work-admission information remains unresolved."
+            ],
+            "basis_fingerprint": "5c3509f432c4f30f4efefcfa1f8c731d19e27df1feaf92e925300e5edeb87a7b"
+          },
+          "natural_response": "这次推广建议先把“要推动的核心动作”定下来，再搭人群、渠道和内容——顺序反过来，很容易做成一堆彼此不叠加的散活动。这次 Watt 推广最关键的取舍是：它要推动的到底是让人知道 Watt、完成注册，还是完成第一次真实使用；这一个选择直接决定目标人群、主渠道和衡量方式。\n\n我先按“推广面向 Watt 的外部潜在用户、渠道与时间窗尚未确定”来理解，这只是暂定，不影响现在推进。建议先把核心动作和目标人群敲定，预算、排期和素材形式放到之后再定，那时改动的成本会小很多。",
+          "metrics": {
+            "first_delta_seconds": 10.997800018987618,
+            "ttfms_seconds": 11.152711854025256,
+            "ttfms_boundary": "provider_stream_first_sentence_min_8_nonspace_chars",
+            "turn_candidate_ready_seconds": 13.596357256988995,
+            "question_count": 0,
+            "provider_call_count": 1,
+            "usage": {
+              "input_tokens": 3519,
+              "output_tokens": 2460,
+              "total_tokens": 5979,
+              "cost_rmb": null
+            }
+          },
+          "provider_evidence": {
+            "semantic_thread_id": null,
+            "semantic_turn_id": null,
+            "conversation_thread_id": null,
+            "conversation_turn_id": null,
+            "semantic_seconds": null,
+            "conversation_seconds": null,
+            "first_response_delta_seconds": 10.997779336001258,
+            "semantic_prompt_characters": null,
+            "conversation_prompt_characters": null,
+            "semantic_model": null,
+            "conversation_model": null,
+            "semantic_reasoning_effort": null,
+            "conversation_reasoning_effort": null,
+            "pipeline_mode": "coalesced_pre_work",
+            "pipeline_reason": "native_pre_work_shared_configuration",
+            "provider_call_count": 1,
+            "coalesced_thread_id": null,
+            "coalesced_turn_id": null,
+            "coalesced_seconds": 13.596220106992405,
+            "coalesced_prompt_characters": 9590,
+            "coalesced_model": "deepseek-flash",
+            "coalesced_reasoning_effort": "low",
+            "coalesced_output_characters": 1764,
+            "coalesced_semantic_characters": 1495,
+            "retained_prior_meaning_count": 0,
+            "new_meaning_count": 2,
+            "reused_prior_design_intent_frame": false,
+            "provider_stage_seconds": {
+              "provider_context_started": 5.810987204313278e-06,
+              "context_assembly_started": 7.370021194219589e-06,
+              "provider_context_prepared": 0.0007378719747066498,
+              "context_assembly_completed": 0.0007399459718726575,
+              "provider_request_queued": 0.01881168899126351,
+              "provider_request_sent": 0.01882020296761766,
+              "provider_response_accepted": 0.6391586060053669,
+              "provider_first_response_event": 0.7399236059864052,
+              "provider_first_token": 10.997700340987649,
+              "natural_response_completed": 11.716977236967068,
+              "semantic_result_completed": 13.59594270697562,
+              "semantic_envelope_completed": 13.595945720968302,
+              "provider_teardown_completed": 13.595946357992943,
+              "payload_validation_started": 13.595946879999246,
+              "payload_validated": 13.596197368984576,
+              "validation_completed": 13.5961990209762
+            },
+            "semantic_request_id": null,
+            "conversation_request_id": null,
+            "coalesced_request_id": "f586fa36-3b54-40e6-b754-b5017ef41ebe",
+            "semantic_provider": null,
+            "conversation_provider": null,
+            "coalesced_provider": "deepseek",
+            "semantic_usage": null,
+            "conversation_usage": null,
+            "coalesced_usage": {
+              "input_tokens": 3519,
+              "output_tokens": 2460,
+              "cached_tokens": 3328,
+              "reasoning_tokens": 1789,
+              "total_tokens": 5979,
+              "unknown": false
+            },
+            "semantic_retry_count": null,
+            "conversation_retry_count": null,
+            "coalesced_retry_count": 0
+          },
+          "pipeline_stages": [
+            {
+              "name": "provider_context_started",
+              "seconds": 2.6044028345495462e-05
+            },
+            {
+              "name": "context_assembly_started",
+              "seconds": 2.7247995603829622e-05
+            },
+            {
+              "name": "provider_context_prepared",
+              "seconds": 0.0007585100247524679
+            },
+            {
+              "name": "context_assembly_completed",
+              "seconds": 0.0007598120137117803
+            },
+            {
+              "name": "provider_request_queued",
+              "seconds": 0.018833902024198323
+            },
+            {
+              "name": "provider_request_sent",
+              "seconds": 0.018840555974747986
+            },
+            {
+              "name": "provider_response_accepted",
+              "seconds": 0.6391798909753561
+            },
+            {
+              "name": "provider_first_response_event",
+              "seconds": 0.7399449489894323
+            },
+            {
+              "name": "provider_first_token",
+              "seconds": 10.99773451098008
+            },
+            {
+              "name": "natural_response_completed",
+              "seconds": 11.716998410003725
+            },
+            {
+              "name": "semantic_result_completed",
+              "seconds": 13.595964309992269
+            },
+            {
+              "name": "semantic_envelope_completed",
+              "seconds": 13.595965547021478
+            },
+            {
+              "name": "provider_teardown_completed",
+              "seconds": 13.595966077991761
+            },
+            {
+              "name": "payload_validation_started",
+              "seconds": 13.595966745982878
+            },
+            {
+              "name": "payload_validated",
+              "seconds": 13.59621791599784
+            },
+            {
+              "name": "validation_completed",
+              "seconds": 13.596218807972036
+            }
+          ]
+        },
+        {
+          "turn_number": 2,
+          "input_basis_fingerprint": "21dd0f94b167b41949ce431a6e9228e51b93cf75931f4707ea613035433b2341",
+          "input_basis_sha256": "ae9a79d64bb6cdcff373244757436877d9454944e6cf90828eebcf704178e10e",
+          "candidate": {
+            "interpreted_motive": "开发一个支撑推广工作的运营后台",
+            "desired_outcome": "完成推广工作运营后台的开发",
+            "design_intent_frame": {
+              "design_subject": "推广工作的运营后台",
+              "object_type": "PRODUCT_SYSTEM",
+              "business_context": "支撑 Watt 的推广运营工作",
+              "desired_outcome": "完成推广工作运营后台的开发",
+              "scope_level": "product",
+              "collaboration_mode": "design",
+              "candidate_assumptions": [
+                "使用该后台的是内部推广运营人员",
+                "后台首先覆盖推广活动从创建到效果回收的运营流程"
+              ],
+              "ambiguities": [
+                "后台要覆盖的运营环节与首个流程未说明",
+                "使用者角色与权限范围未说明",
+                "与现有推广渠道或工具的对接方式未说明"
+              ],
+              "confidence": 0.7
+            },
+            "candidate_context": [
+              "Watt 是被推广的对象",
+              "推广活动是运营后台需要支撑的业务场景"
+            ],
+            "candidate_constraints": [],
+            "current_requests": [
+              "开发用于推广工作的运营后台"
+            ],
+            "unresolved_material_questions": [
+              "这个运营后台先要打通哪一条推广运营流程（如活动创建、渠道投放、效果回收）",
+              "后台的使用者角色与权限范围是谁"
+            ],
+            "meanings": [
+              {
+                "kind": "CONTEXT",
+                "statement": "Watt 在这轮对话中被当作可推广的对象。",
+                "source_record_ids": [
+                  "f6a6c716-b91b-57dd-b6a0-6057e7806970"
+                ],
+                "confidence": 0.8,
+                "rationale": "推广活动以 Watt 为对象，说明 Watt 是可被推广的产品或事物。",
+                "clarification_required": false
+              },
+              {
+                "kind": "CORRECTION",
+                "statement": "Human 更正：要做的是推广工作的运营后台，不是策划一次推广活动。",
+                "source_record_ids": [
+                  "b9eae498-7ddd-5ed3-bee6-5b4bec0e6657"
+                ],
+                "confidence": 0.93,
+                "rationale": "Human 以“不对”明确否定先前的活动策划方向并给出新对象。",
+                "clarification_required": false
+              },
+              {
+                "kind": "NEW_WORK_CANDIDATE",
+                "statement": "Human 希望开发一个用于推广工作的运营后台系统。",
+                "source_record_ids": [
+                  "b9eae498-7ddd-5ed3-bee6-5b4bec0e6657"
+                ],
+                "confidence": 0.9,
+                "rationale": "Human 直接陈述要开发的对象。",
+                "clarification_required": false
+              },
+              {
+                "kind": "CONTEXT",
+                "statement": "Watt 的推广活动由设计对象转为该后台需要支撑的业务场景。",
+                "source_record_ids": [
+                  "f6a6c716-b91b-57dd-b6a0-6057e7806970",
+                  "b9eae498-7ddd-5ed3-bee6-5b4bec0e6657"
+                ],
+                "confidence": 0.82,
+                "rationale": "推广活动仍是业务背景，但不再是本轮要交付的对象。",
+                "clarification_required": false
+              }
+            ],
+            "focus_classification": "ON_TOPIC",
+            "impact_disposition": "NEW_WORK_RECOMMENDED",
+            "supporting_references": [],
+            "natural_response": "明白，这次要做的是推广工作的运营后台——推广活动本身只是它要支撑的业务，不是这轮要交付的东西。\n\n那设计对象就换成一个系统：给推广运营人员用、把推广工作从建活动到看效果管起来的一套后台。我暂按“使用者是内部推广运营人员”来理解，这点你后面可以随时纠。它要支撑的推广场景里仍然包含外部的推广对象和受众，但那属于后台服务的业务，不等于是后台的使用者。\n\n我建议先把这个后台要打通的第一条运营主线定下来，比如“建活动 → 上渠道 → 回收效果”这一条，先把它完整跑通，再谈第二批环节。先铺功能清单的代价是：每一块都做了一半，运营还是要回到表格和群里去拼，后台反而多了一层要维护的东西。所以下一步最有用的是选一条主线，然后我们就按这条线把后台该有的东西摆出来。这条主线你打算先用哪一条？",
+            "provider_identity": "deepseek-responses:collaboration:request:73b31478-a3a1-46fc-a0eb-172070d5d993",
+            "model_identity": "deepseek-flash"
+          },
+          "progressive_semantics": {
+            "basis_fingerprint": "21dd0f94b167b41949ce431a6e9228e51b93cf75931f4707ea613035433b2341",
+            "source_record_ids": [
+              "f6a6c716-b91b-57dd-b6a0-6057e7806970",
+              "b9eae498-7ddd-5ed3-bee6-5b4bec0e6657"
+            ],
+            "reception_meanings": [
+              "EXPLICIT_CORRECTION"
+            ],
+            "working_motive": "我要开发推广工作的运营后台",
+            "working_desired_outcome": "完成推广工作运营后台的开发",
+            "working_facts": [
+              "Watt 是被推广的对象",
+              "推广活动是运营后台需要支撑的业务场景"
+            ],
+            "working_constraints": [],
+            "working_requests": [
+              "开发用于推广工作的运营后台"
+            ],
+            "explicit_assumptions": [],
+            "unresolved_human_decisions": [],
+            "deltas": [
+              {
+                "id": "0c3dec86-59c8-5562-aeb3-f48ca7504b88",
+                "category": "MOTIVE",
+                "operation": "SUPERSEDED",
+                "value": "我要开发推广工作的运营后台",
+                "prior_value": "发起一次 Watt 推广活动",
+                "source_record_ids": [
+                  "b9eae498-7ddd-5ed3-bee6-5b4bec0e6657"
+                ],
+                "basis_fingerprint": "21dd0f94b167b41949ce431a6e9228e51b93cf75931f4707ea613035433b2341",
+                "prior_assessment_id": "d4e63ee0-f9d6-5854-adb5-d271ce6e66c2",
+                "supersedes_delta_ids": [],
+                "confidence": 1.0,
+                "rationale": "The latest Human Turn explicitly corrects the prior interpretation.",
+                "authority": "ADVISORY"
+              }
+            ],
+            "pattern_signals": [
+              "EXPLICIT_CORRECTION"
+            ],
+            "inference_disposition": "NO_INFERENCE",
+            "questions": [
+              {
+                "question": "这个运营后台先要打通哪一条推广运营流程（如活动创建、渠道投放、效果回收）",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "ASK_HUMAN_NOW",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              },
+              {
+                "question": "后台的使用者角色与权限范围是谁",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "DEFER_UNTIL_RELEVANT",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              }
+            ],
+            "selected_question": "这个运营后台先要打通哪一条推广运营流程（如活动创建、渠道投放、效果回收）",
+            "governance_candidate": "WORK_FORMATION_PROPOSAL",
+            "readiness": [
+              {
+                "target": "WORK_FORMATION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "MOTIVE",
+                  "DESIRED_OUTCOME"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "21dd0f94b167b41949ce431a6e9228e51b93cf75931f4707ea613035433b2341",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "WORK_REVISION",
+                "status": "NOT_APPLICABLE",
+                "satisfied_evidence": [],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "21dd0f94b167b41949ce431a6e9228e51b93cf75931f4707ea613035433b2341",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "DESIGN_PROGRESSION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "CURRENT_FOCUS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "21dd0f94b167b41949ce431a6e9228e51b93cf75931f4707ea613035433b2341",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              }
+            ],
+            "artifact_recommendation": null,
+            "factual_contradictions": [],
+            "semantic_policy_revision": "wic-semantic-policy-v1",
+            "question_policy_revision": "wic-question-value-v1"
+          },
+          "readiness": {
+            "status": "NOT_READY",
+            "profile": "LONG_LIVED_STEERING",
+            "profile_version": "v0",
+            "satisfied_requirements": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_information": [],
+            "unresolved_material_questions": [
+              "这个运营后台先要打通哪一条推广运营流程（如活动创建、渠道投放、效果回收）",
+              "后台的使用者角色与权限范围是谁"
+            ],
+            "reasons": [
+              "Material Work-admission information remains unresolved."
+            ],
+            "basis_fingerprint": "21dd0f94b167b41949ce431a6e9228e51b93cf75931f4707ea613035433b2341"
+          },
+          "natural_response": "明白，这次要做的是推广工作的运营后台——推广活动本身只是它要支撑的业务，不是这轮要交付的东西。\n\n那设计对象就换成一个系统：给推广运营人员用、把推广工作从建活动到看效果管起来的一套后台。我暂按“使用者是内部推广运营人员”来理解，这点你后面可以随时纠。它要支撑的推广场景里仍然包含外部的推广对象和受众，但那属于后台服务的业务，不等于是后台的使用者。\n\n我建议先把这个后台要打通的第一条运营主线定下来，比如“建活动 → 上渠道 → 回收效果”这一条，先把它完整跑通，再谈第二批环节。先铺功能清单的代价是：每一块都做了一半，运营还是要回到表格和群里去拼，后台反而多了一层要维护的东西。所以下一步最有用的是选一条主线，然后我们就按这条线把后台该有的东西摆出来。这条主线你打算先用哪一条？",
+          "metrics": {
+            "first_delta_seconds": 8.07231540302746,
+            "ttfms_seconds": 8.215459275990725,
+            "ttfms_boundary": "provider_stream_first_sentence_min_8_nonspace_chars",
+            "turn_candidate_ready_seconds": 12.32433450903045,
+            "question_count": 1,
+            "provider_call_count": 1,
+            "usage": {
+              "input_tokens": 5322,
+              "output_tokens": 2276,
+              "total_tokens": 7598,
+              "cost_rmb": null
+            }
+          },
+          "provider_evidence": {
+            "semantic_thread_id": null,
+            "semantic_turn_id": null,
+            "conversation_thread_id": null,
+            "conversation_turn_id": null,
+            "semantic_seconds": null,
+            "conversation_seconds": null,
+            "first_response_delta_seconds": 8.072301401989534,
+            "semantic_prompt_characters": null,
+            "conversation_prompt_characters": null,
+            "semantic_model": null,
+            "conversation_model": null,
+            "semantic_reasoning_effort": null,
+            "conversation_reasoning_effort": null,
+            "pipeline_mode": "coalesced_pre_work",
+            "pipeline_reason": "native_pre_work_shared_configuration",
+            "provider_call_count": 1,
+            "coalesced_thread_id": null,
+            "coalesced_turn_id": null,
+            "coalesced_seconds": 12.324196762987413,
+            "coalesced_prompt_characters": 14641,
+            "coalesced_model": "deepseek-flash",
+            "coalesced_reasoning_effort": "low",
+            "coalesced_output_characters": 2219,
+            "coalesced_semantic_characters": 1840,
+            "retained_prior_meaning_count": 1,
+            "new_meaning_count": 3,
+            "reused_prior_design_intent_frame": false,
+            "provider_stage_seconds": {
+              "provider_context_started": 4.171975888311863e-06,
+              "context_assembly_started": 5.64398942515254e-06,
+              "provider_context_prepared": 0.0004925120156258345,
+              "context_assembly_completed": 0.0004942690138705075,
+              "provider_request_queued": 0.005217374011408538,
+              "provider_request_sent": 0.005220883991569281,
+              "provider_response_accepted": 0.6668820719933137,
+              "provider_first_response_event": 0.7573494199896231,
+              "provider_first_token": 8.067235140013508,
+              "natural_response_completed": 9.494410522980615,
+              "semantic_result_completed": 12.323882528988179,
+              "semantic_envelope_completed": 12.32388532801997,
+              "provider_teardown_completed": 12.323885891993996,
+              "payload_validation_started": 12.323886430996936,
+              "payload_validated": 12.324175086978357,
+              "validation_completed": 12.324176993977744
+            },
+            "semantic_request_id": null,
+            "conversation_request_id": null,
+            "coalesced_request_id": "73b31478-a3a1-46fc-a0eb-172070d5d993",
+            "semantic_provider": null,
+            "conversation_provider": null,
+            "coalesced_provider": "deepseek",
+            "semantic_usage": null,
+            "conversation_usage": null,
+            "coalesced_usage": {
+              "input_tokens": 5322,
+              "output_tokens": 2276,
+              "cached_tokens": 768,
+              "reasoning_tokens": 1355,
+              "total_tokens": 7598,
+              "unknown": false
+            },
+            "semantic_retry_count": null,
+            "conversation_retry_count": null,
+            "coalesced_retry_count": 0
+          },
+          "pipeline_stages": [
+            {
+              "name": "provider_context_started",
+              "seconds": 1.7227022908627987e-05
+            },
+            {
+              "name": "context_assembly_started",
+              "seconds": 1.8441001884639263e-05
+            },
+            {
+              "name": "provider_context_prepared",
+              "seconds": 0.0005058620008639991
+            },
+            {
+              "name": "context_assembly_completed",
+              "seconds": 0.0005069790058769286
+            },
+            {
+              "name": "provider_request_queued",
+              "seconds": 0.005230657989159226
+            },
+            {
+              "name": "provider_request_sent",
+              "seconds": 0.005234032985754311
+            },
+            {
+              "name": "provider_response_accepted",
+              "seconds": 0.6668960599927232
+            },
+            {
+              "name": "provider_first_response_event",
+              "seconds": 0.7573636129964143
+            },
+            {
+              "name": "provider_first_token",
+              "seconds": 8.067249257990625
+            },
+            {
+              "name": "natural_response_completed",
+              "seconds": 9.494424776989035
+            },
+            {
+              "name": "semantic_result_completed",
+              "seconds": 12.323896847025026
+            },
+            {
+              "name": "semantic_envelope_completed",
+              "seconds": 12.323897978989407
+            },
+            {
+              "name": "provider_teardown_completed",
+              "seconds": 12.32389849901665
+            },
+            {
+              "name": "payload_validation_started",
+              "seconds": 12.323899172013626
+            },
+            {
+              "name": "payload_validated",
+              "seconds": 12.324188812985085
+            },
+            {
+              "name": "validation_completed",
+              "seconds": 12.324189667997416
+            }
+          ]
+        }
+      ],
+      "reference_intent": {
+        "true_motive": "开发支持 Watt 推广工作的运营后台。",
+        "material_facts": [
+          "设计对象是长期运行的软件系统"
+        ],
+        "material_constraints": [],
+        "known_corrections": [
+          "将一次推广活动纠正为推广运营后台"
+        ],
+        "forbidden_assumptions": [
+          "不得继续把目标解释为活动策划",
+          "不得为此前理解辩护"
+        ],
+        "expected_work_relationship": "PRE_WORK",
+        "important_ambiguity": [
+          "后台首期支持的业务闭环"
+        ],
+        "acceptable_inferences": [
+          "推广渠道和用户是系统的业务背景"
+        ],
+        "governance_expectation": "CONDITIONAL"
+      },
+      "semantic_adjudication": null,
+      "failure": null,
+      "mutation_boundary": {
+        "production_mutation_attempts": 0,
+        "work_or_assessment_admissions": 0,
+        "database_dependency_present": false
+      }
+    },
+    {
+      "case_id": "OW-D",
+      "status": "FAILED",
+      "raw_turn_outputs": [
+        {
+          "turn_number": 1,
+          "input_basis_fingerprint": "e5862328a307c89fa1dd539e7f85538207d6808790dec9a48037a1bd6843f8e1",
+          "input_basis_sha256": "8eb9440b514cf6100490a4f48596e2233b00cf0a98b8f47f1357fe0e191440f1",
+          "failure": {
+            "type": "InteractionInvariantViolation",
+            "message": "Conversation Provider returned an invalid Human-facing result"
+          },
+          "metrics": {
+            "first_delta_seconds": null,
+            "ttfms_seconds": null,
+            "turn_candidate_ready_seconds": 14.161888146016281
+          },
+          "pipeline_stages": []
+        }
+      ],
+      "reference_intent": {
+        "true_motive": "继续当前运营后台 Work，并增加登录导航约束。",
+        "material_facts": [
+          "现有内容和渠道功能必须保留"
+        ],
+        "material_constraints": [
+          "登录后保留当前位置",
+          "不得自动跳转"
+        ],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得视为新 Work",
+          "不得忽略原有范围"
+        ],
+        "expected_work_relationship": "CANDIDATE_CHANGE",
+        "important_ambiguity": [],
+        "acceptable_inferences": [
+          "约束适用于当前运营后台"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "semantic_adjudication": null,
+      "failure": {
+        "type": "InteractionInvariantViolation",
+        "message": "Conversation Provider returned an invalid Human-facing result"
+      },
+      "mutation_boundary": {
+        "production_mutation_attempts": 0,
+        "work_or_assessment_admissions": 0,
+        "database_dependency_present": false
+      }
+    },
+    {
+      "case_id": "OW-E",
+      "status": "CANDIDATES_CAPTURED",
+      "raw_turn_outputs": [
+        {
+          "turn_number": 1,
+          "input_basis_fingerprint": "8122af9add2d12e910b04b8a91f0daa0de48d2111ba0ebaa34ea85e3884a5caf",
+          "input_basis_sha256": "1e222755244d7600f403203ddc190b5c8bfa713a13d0842c08c252ec6437d146",
+          "candidate": {
+            "interpreted_motive": "开发用于推广 Watt 的运营管理后台（当前 governed Work 的 Motive，保持有效）",
+            "desired_outcome": "形成内容、渠道和线索闭环",
+            "design_intent_frame": {
+              "design_subject": "一个独立的招聘网站",
+              "object_type": "PRODUCT_SYSTEM",
+              "business_context": "招聘与求职匹配的业务场景，独立于 Watt 推广运营后台",
+              "desired_outcome": "建成并运营一个独立的招聘网站（具体范围尚未澄清）",
+              "scope_level": "product",
+              "collaboration_mode": "exploration",
+              "candidate_assumptions": [
+                "招聘网站面向求职者与招聘方两类使用者",
+                "招聘网站与 Watt 运营后台是相互独立的两套系统"
+              ],
+              "ambiguities": [
+                "招聘网站的目标行业、地域与用户范围",
+                "是否与 Watt 运营后台共享账号或数据",
+                "现在是否立项以及优先级"
+              ],
+              "confidence": 0.4
+            },
+            "candidate_context": [
+              "Human 另想开发一个独立的招聘网站，指向与当前 Work 不同的产品方向",
+              "当前 Work 处于 IN_PROGRESS，尚无 active cycle、生产绑定或仓库绑定"
+            ],
+            "candidate_constraints": [
+              "招聘网站应为独立站点（人类表述为“独立的招聘网站”）"
+            ],
+            "current_requests": [
+              "完成运营后台一期设计",
+              "开发一个独立的招聘网站"
+            ],
+            "unresolved_material_questions": [
+              "是否将“独立的招聘网站”作为独立的新 Work 立项，并与推广 Watt 的运营后台 Work 分开推进"
+            ],
+            "meanings": [
+              {
+                "kind": "NEW_WORK_CANDIDATE",
+                "statement": "Human 表示想开发一个独立的招聘网站，这是一个与当前 Work 的 Motive（推广 Watt 的运营管理后台）不同的持久目标。",
+                "source_record_ids": [
+                  "da5dcd66-909b-5e1d-9190-18987870470b"
+                ],
+                "confidence": 0.85,
+                "rationale": "输入明确提出另一个独立站点，属于不同产品/系统的持久目标，而非当前 Work 的功能或探索。",
+                "clarification_required": false
+              },
+              {
+                "kind": "CONTEXT",
+                "statement": "当前 governed Work 的 Motive 是开发用于推广 Watt 的运营管理后台，期望结果是形成内容、渠道和线索闭环，当前请求是完成运营后台一期设计。",
+                "source_record_ids": [
+                  "8ee3b0f6-b4c2-5ef3-9f9b-c861747fec35"
+                ],
+                "confidence": 0.9,
+                "rationale": "来自持久化的 active work context 中的 work_revision 字段。",
+                "clarification_required": false
+              },
+              {
+                "kind": "DECISION_INPUT",
+                "statement": "Human 未表示要修改或终止当前 Work；招聘网站的方向是否立项需由 Human 明确确认。",
+                "source_record_ids": [
+                  "da5dcd66-909b-5e1d-9190-18987870470b",
+                  "8ee3b0f6-b4c2-5ef3-9f9b-c861747fec35"
+                ],
+                "confidence": 0.8,
+                "rationale": "最新输入只新增了一个独立目标，未对当前 Motive、约束或请求作出修改。",
+                "clarification_required": false
+              }
+            ],
+            "focus_classification": "UNRELATED_NEW_DEMAND",
+            "impact_disposition": "NEW_WORK_RECOMMENDED",
+            "supporting_references": [],
+            "natural_response": "你提到的独立招聘网站，和当前正在做的 Watt 运营后台是两个不同的产品方向。当前运营后台一期设计还在进行中，我不会因为这句话就自动改动它，也不会自动把招聘网站立成新的 Work。\n\n我建议先继续推进运营后台一期设计，把招聘网站记录为后续待立项目标。这样做的好处是不打断现有交付节奏；代价是招聘网站的目标范围、实现方式这些会等立项后再单独澄清。\n\n你想现在就把招聘网站单独立项，还是先挂在待办里、等运营后台一期收尾后再启动？",
+            "provider_identity": "deepseek-responses:semantic:request:b64a2c54-5dc5-42ab-a3eb-c6694733a643",
+            "model_identity": "deepseek-flash"
+          },
+          "progressive_semantics": {
+            "basis_fingerprint": "8122af9add2d12e910b04b8a91f0daa0de48d2111ba0ebaa34ea85e3884a5caf",
+            "source_record_ids": [
+              "da5dcd66-909b-5e1d-9190-18987870470b"
+            ],
+            "reception_meanings": [
+              "DEEP_WIC_WORKING_UNDERSTANDING"
+            ],
+            "working_motive": "开发用于推广 Watt 的运营管理后台（当前 governed Work 的 Motive，保持有效）",
+            "working_desired_outcome": "形成内容、渠道和线索闭环",
+            "working_facts": [
+              "Human 另想开发一个独立的招聘网站，指向与当前 Work 不同的产品方向",
+              "当前 Work 处于 IN_PROGRESS，尚无 active cycle、生产绑定或仓库绑定"
+            ],
+            "working_constraints": [
+              "招聘网站应为独立站点（人类表述为“独立的招聘网站”）"
+            ],
+            "working_requests": [
+              "完成运营后台一期设计",
+              "开发一个独立的招聘网站"
+            ],
+            "explicit_assumptions": [],
+            "unresolved_human_decisions": [],
+            "deltas": [
+              {
+                "id": "d03bb184-a2ca-59be-9c68-38b641ec1927",
+                "category": "MOTIVE",
+                "operation": "REVISED",
+                "value": "开发用于推广 Watt 的运营管理后台（当前 governed Work 的 Motive，保持有效）",
+                "prior_value": "开发用于推广 Watt 的运营管理后台",
+                "source_record_ids": [
+                  "da5dcd66-909b-5e1d-9190-18987870470b"
+                ],
+                "basis_fingerprint": "8122af9add2d12e910b04b8a91f0daa0de48d2111ba0ebaa34ea85e3884a5caf",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+                "authority": "ADVISORY"
+              },
+              {
+                "id": "bbe4d047-3492-50ec-aebf-28bd60b0337d",
+                "category": "CONSTRAINT",
+                "operation": "ADDED",
+                "value": "招聘网站应为独立站点（人类表述为“独立的招聘网站”）",
+                "prior_value": null,
+                "source_record_ids": [
+                  "da5dcd66-909b-5e1d-9190-18987870470b"
+                ],
+                "basis_fingerprint": "8122af9add2d12e910b04b8a91f0daa0de48d2111ba0ebaa34ea85e3884a5caf",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+                "authority": "ADVISORY"
+              }
+            ],
+            "pattern_signals": [
+              "NEW_LONG_LIVED_OBJECT"
+            ],
+            "inference_disposition": "NO_INFERENCE",
+            "questions": [
+              {
+                "question": "是否将“独立的招聘网站”作为独立的新 Work 立项，并与推广 Watt 的运营后台 Work 分开推进",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "ASK_HUMAN_NOW",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              }
+            ],
+            "selected_question": "是否将“独立的招聘网站”作为独立的新 Work 立项，并与推广 Watt 的运营后台 Work 分开推进",
+            "governance_candidate": "NEW_MOTIVE_CANDIDATE",
+            "readiness": [
+              {
+                "target": "WORK_FORMATION",
+                "status": "NOT_APPLICABLE",
+                "satisfied_evidence": [
+                  "MOTIVE",
+                  "DESIRED_OUTCOME"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "8122af9add2d12e910b04b8a91f0daa0de48d2111ba0ebaa34ea85e3884a5caf",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "WORK_REVISION",
+                "status": "NOT_READY",
+                "satisfied_evidence": [
+                  "ACTIVE_WORK_BASIS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "8122af9add2d12e910b04b8a91f0daa0de48d2111ba0ebaa34ea85e3884a5caf",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "DESIGN_PROGRESSION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "CURRENT_FOCUS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "8122af9add2d12e910b04b8a91f0daa0de48d2111ba0ebaa34ea85e3884a5caf",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              }
+            ],
+            "artifact_recommendation": null,
+            "factual_contradictions": [],
+            "semantic_policy_revision": "wic-semantic-policy-v1",
+            "question_policy_revision": "wic-question-value-v1"
+          },
+          "readiness": {
+            "status": "NOT_READY",
+            "profile": "LONG_LIVED_STEERING",
+            "profile_version": "v0",
+            "satisfied_requirements": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_information": [],
+            "unresolved_material_questions": [
+              "是否将“独立的招聘网站”作为独立的新 Work 立项，并与推广 Watt 的运营后台 Work 分开推进"
+            ],
+            "reasons": [
+              "Material Work-admission information remains unresolved."
+            ],
+            "basis_fingerprint": "8122af9add2d12e910b04b8a91f0daa0de48d2111ba0ebaa34ea85e3884a5caf"
+          },
+          "natural_response": "你提到的独立招聘网站，和当前正在做的 Watt 运营后台是两个不同的产品方向。当前运营后台一期设计还在进行中，我不会因为这句话就自动改动它，也不会自动把招聘网站立成新的 Work。\n\n我建议先继续推进运营后台一期设计，把招聘网站记录为后续待立项目标。这样做的好处是不打断现有交付节奏；代价是招聘网站的目标范围、实现方式这些会等立项后再单独澄清。\n\n你想现在就把招聘网站单独立项，还是先挂在待办里、等运营后台一期收尾后再启动？",
+          "metrics": {
+            "first_delta_seconds": 19.34529120498337,
+            "ttfms_seconds": 19.40254276501946,
+            "ttfms_boundary": "provider_stream_first_sentence_min_8_nonspace_chars",
+            "turn_candidate_ready_seconds": 19.73986271600006,
+            "question_count": 1,
+            "provider_call_count": 2,
+            "usage": {
+              "input_tokens": 5718,
+              "output_tokens": 3885,
+              "total_tokens": 9603,
+              "cost_rmb": null
+            }
+          },
+          "provider_evidence": {
+            "semantic_thread_id": null,
+            "semantic_turn_id": null,
+            "conversation_thread_id": null,
+            "conversation_turn_id": null,
+            "semantic_seconds": 13.376471687981393,
+            "conversation_seconds": 6.3633238499751315,
+            "first_response_delta_seconds": 19.345278923981823,
+            "semantic_prompt_characters": 9145,
+            "conversation_prompt_characters": 5424,
+            "semantic_model": "deepseek-flash",
+            "conversation_model": "deepseek-flash",
+            "semantic_reasoning_effort": "low",
+            "conversation_reasoning_effort": "low",
+            "pipeline_mode": "staged",
+            "pipeline_reason": "active_work",
+            "provider_call_count": 2,
+            "coalesced_thread_id": null,
+            "coalesced_turn_id": null,
+            "coalesced_seconds": null,
+            "coalesced_prompt_characters": null,
+            "coalesced_model": null,
+            "coalesced_reasoning_effort": null,
+            "coalesced_output_characters": null,
+            "coalesced_semantic_characters": null,
+            "retained_prior_meaning_count": null,
+            "new_meaning_count": null,
+            "reused_prior_design_intent_frame": null,
+            "provider_stage_seconds": null,
+            "semantic_request_id": "b64a2c54-5dc5-42ab-a3eb-c6694733a643",
+            "conversation_request_id": "6e34275f-9f5b-4f04-ab43-2fcb45a5009e",
+            "coalesced_request_id": null,
+            "semantic_provider": "deepseek-responses",
+            "conversation_provider": "deepseek-responses",
+            "coalesced_provider": null,
+            "semantic_usage": {
+              "input_tokens": 4055,
+              "output_tokens": 2860,
+              "cached_tokens": 1280,
+              "reasoning_tokens": 1499,
+              "total_tokens": 6915,
+              "unknown": false
+            },
+            "conversation_usage": {
+              "input_tokens": 1663,
+              "output_tokens": 1025,
+              "cached_tokens": 384,
+              "reasoning_tokens": 896,
+              "total_tokens": 2688,
+              "unknown": false
+            },
+            "coalesced_usage": null,
+            "semantic_retry_count": 0,
+            "conversation_retry_count": 0,
+            "coalesced_retry_count": null
+          },
+          "pipeline_stages": []
+        }
+      ],
+      "reference_intent": {
+        "true_motive": "提出一个与 Watt 运营后台不同的长期软件目标。",
+        "material_facts": [
+          "新对象是独立招聘网站"
+        ],
+        "material_constraints": [],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得自动修改当前 Work",
+          "不得把招聘网站并入运营后台"
+        ],
+        "expected_work_relationship": "NEW_MOTIVE_NEW_WORK",
+        "important_ambiguity": [
+          "Human 是否要创建新 Work"
+        ],
+        "acceptable_inferences": [
+          "当前 Work 应保持不变"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "semantic_adjudication": null,
+      "failure": null,
+      "mutation_boundary": {
+        "production_mutation_attempts": 0,
+        "work_or_assessment_admissions": 0,
+        "database_dependency_present": false
+      }
+    },
+    {
+      "case_id": "OW-F",
+      "status": "CANDIDATES_CAPTURED",
+      "raw_turn_outputs": [
+        {
+          "turn_number": 1,
+          "input_basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+          "input_basis_sha256": "06242296ecbd9f72e967f5a9f7b87aa3ffa170a9fdffc98e15be9f4adc0520ab",
+          "candidate": {
+            "interpreted_motive": "把客户数据用于外部模型，并在受控的权限与保留期下推进落地",
+            "desired_outcome": "客户数据在明确权限范围与保留期限下接入外部模型并可用",
+            "design_intent_frame": {
+              "design_subject": "将客户数据接入外部模型的集成能力，含访问权限与数据保留期规则",
+              "object_type": "FEATURE",
+              "business_context": "以客户数据支撑外部模型服务的业务场景",
+              "desired_outcome": "客户数据在受控的权限与保留期下接入外部模型并可用",
+              "scope_level": "capability",
+              "collaboration_mode": "design",
+              "candidate_assumptions": [
+                "已有承载客户数据的系统或数据源",
+                "权限范围与保留期限由交付方代为确定",
+                "外部模型以调用方式使用客户数据，而非数据被买断"
+              ],
+              "ambiguities": [
+                "外部模型提供方与调用方式（一次性导出或持续同步）未知",
+                "首批接入的客户数据类别与字段未知",
+                "适用的合规、数据驻留与跨境要求未知"
+              ],
+              "confidence": 0.62
+            },
+            "candidate_context": [
+              "客户数据属于受控资产，接入外部模型意味着数据离开原有边界",
+              "人类把权限范围与保留期的具体设定授权给交付方"
+            ],
+            "candidate_constraints": [
+              "接入必须限定访问权限",
+              "必须为数据设定保留期限",
+              "权限范围与保留期的具体取值由交付方自行确定"
+            ],
+            "current_requests": [
+              "把客户数据接入外部模型",
+              "由交付方确定访问权限与数据保留期限"
+            ],
+            "unresolved_material_questions": [
+              "外部模型是哪一方、以一次性导出还是持续同步方式接入？",
+              "首批接入哪些客户数据类别与字段？",
+              "是否存在适用的合规、数据驻留或跨境要求？"
+            ],
+            "meanings": [
+              {
+                "kind": "REQUEST",
+                "statement": "把客户数据接入外部模型。",
+                "source_record_ids": [
+                  "c5264235-728b-5cab-9b1b-6bae940c91c4"
+                ],
+                "confidence": 0.95,
+                "rationale": "人类明确要求把客户数据接入外部模型。",
+                "clarification_required": false
+              },
+              {
+                "kind": "DECISION_INPUT",
+                "statement": "访问权限与数据保留期由交付方自行确定，人类不做指定。",
+                "source_record_ids": [
+                  "c5264235-728b-5cab-9b1b-6bae940c91c4"
+                ],
+                "confidence": 0.9,
+                "rationale": "“你看着办”把这两项取值交由交付方决定。",
+                "clarification_required": false
+              },
+              {
+                "kind": "NEW_WORK_CANDIDATE",
+                "statement": "客户数据接入外部模型构成一项新的工作候选，需在受控权限与保留期下落地。",
+                "source_record_ids": [
+                  "c5264235-728b-5cab-9b1b-6bae940c91c4"
+                ],
+                "confidence": 0.8,
+                "rationale": "该请求指向尚未存在的接入与治理工作。",
+                "clarification_required": false
+              }
+            ],
+            "focus_classification": "ON_TOPIC",
+            "impact_disposition": "NEW_WORK_RECOMMENDED",
+            "supporting_references": [],
+            "natural_response": "这件事我按最小必要来推：先把接入范围收窄到一个外部模型加一批必要字段，权限按用途限定，保留期给明确的到期删除期限。你把权限和保留期交给我定，但它们的实际效果取决于数据范围——范围窄，规则就能定得干净；如果一开始就把整库客户数据送出去，后面再收紧会牵动已经流出的数据。\n\n建议先做一版最小接入与数据治理方案：选定首批字段、写明谁在什么用途下可访问、给出保留与删除期限，作为后续评审和落地的基准。要往下起草，我只需要你定一件事：首批接哪几类客户数据。外部模型是哪一方、调用方式，以及代码和产物的落地位置，可以等方案成形后再一并确认，不影响现在推进。",
+            "provider_identity": "deepseek-responses:collaboration:request:e3517f29-b040-437d-ab32-697f1a66b49e",
+            "model_identity": "deepseek-flash"
+          },
+          "progressive_semantics": {
+            "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+            "source_record_ids": [
+              "c5264235-728b-5cab-9b1b-6bae940c91c4"
+            ],
+            "reception_meanings": [
+              "HUMAN_OWNED_DECISION"
+            ],
+            "working_motive": "把客户数据用于外部模型，并在受控的权限与保留期下推进落地",
+            "working_desired_outcome": "客户数据在明确权限范围与保留期限下接入外部模型并可用",
+            "working_facts": [
+              "客户数据属于受控资产，接入外部模型意味着数据离开原有边界",
+              "人类把权限范围与保留期的具体设定授权给交付方"
+            ],
+            "working_constraints": [
+              "接入必须限定访问权限",
+              "必须为数据设定保留期限",
+              "权限范围与保留期的具体取值由交付方自行确定"
+            ],
+            "working_requests": [
+              "把客户数据接入外部模型",
+              "由交付方确定访问权限与数据保留期限"
+            ],
+            "explicit_assumptions": [],
+            "unresolved_human_decisions": [
+              "Human must decide the material privacy, authority, cost, destructive, or irreversible boundary."
+            ],
+            "deltas": [
+              {
+                "id": "88da79c3-6180-5ec0-af8f-38efbc6375e4",
+                "category": "MOTIVE",
+                "operation": "ADDED",
+                "value": "把客户数据用于外部模型，并在受控的权限与保留期下推进落地",
+                "prior_value": null,
+                "source_record_ids": [
+                  "c5264235-728b-5cab-9b1b-6bae940c91c4"
+                ],
+                "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+                "authority": "ADVISORY"
+              },
+              {
+                "id": "fe46e16e-0cb0-5689-8245-85870ac8c4fd",
+                "category": "CONSTRAINT",
+                "operation": "ADDED",
+                "value": "接入必须限定访问权限",
+                "prior_value": null,
+                "source_record_ids": [
+                  "c5264235-728b-5cab-9b1b-6bae940c91c4"
+                ],
+                "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+                "authority": "ADVISORY"
+              },
+              {
+                "id": "ff12aa05-e87a-518c-8516-9e4221265898",
+                "category": "CONSTRAINT",
+                "operation": "ADDED",
+                "value": "必须为数据设定保留期限",
+                "prior_value": null,
+                "source_record_ids": [
+                  "c5264235-728b-5cab-9b1b-6bae940c91c4"
+                ],
+                "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+                "authority": "ADVISORY"
+              },
+              {
+                "id": "d97d0880-af1d-5a63-b85a-d631ae083516",
+                "category": "CONSTRAINT",
+                "operation": "ADDED",
+                "value": "权限范围与保留期的具体取值由交付方自行确定",
+                "prior_value": null,
+                "source_record_ids": [
+                  "c5264235-728b-5cab-9b1b-6bae940c91c4"
+                ],
+                "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+                "authority": "ADVISORY"
+              },
+              {
+                "id": "b1e4717c-aa4a-5e43-b4ed-70a700a940c9",
+                "category": "HUMAN_DECISION",
+                "operation": "ADDED",
+                "value": "Human must decide the material privacy, authority, cost, destructive, or irreversible boundary.",
+                "prior_value": null,
+                "source_record_ids": [
+                  "c5264235-728b-5cab-9b1b-6bae940c91c4"
+                ],
+                "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Governance-critical policy reserves this decision for the Human.",
+                "authority": "HUMAN_OWNED"
+              }
+            ],
+            "pattern_signals": [
+              "HIGH_IMPACT_AMBIGUITY"
+            ],
+            "inference_disposition": "HUMAN_OWNED_DECISION",
+            "questions": [
+              {
+                "question": "哪些数据可以外发，以及权限和保留期分别由谁批准？",
+                "affected_dimensions": [
+                  "SAFETY_PRIVACY",
+                  "AUTHORITY"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "MEDIUM",
+                "decision_value": 100,
+                "disposition": "ASK_HUMAN_NOW",
+                "rationale": "The answer changes a Human-owned high-impact boundary."
+              },
+              {
+                "question": "外部模型是哪一方、以一次性导出还是持续同步方式接入？",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "DEFER_UNTIL_RELEVANT",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              },
+              {
+                "question": "首批接入哪些客户数据类别与字段？",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "DEFER_UNTIL_RELEVANT",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              },
+              {
+                "question": "是否存在适用的合规、数据驻留或跨境要求？",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "DEFER_UNTIL_RELEVANT",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              }
+            ],
+            "selected_question": "哪些数据可以外发，以及权限和保留期分别由谁批准？",
+            "governance_candidate": "HUMAN_DECISION_REQUIRED",
+            "readiness": [
+              {
+                "target": "WORK_FORMATION",
+                "status": "NOT_READY",
+                "satisfied_evidence": [
+                  "MOTIVE",
+                  "DESIRED_OUTCOME"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [
+                  "Human must decide the material privacy, authority, cost, destructive, or irreversible boundary."
+                ],
+                "explicit_assumptions": [],
+                "material_risks": [
+                  "HIGH_IMPACT_AUTHORITY"
+                ],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "WORK_REVISION",
+                "status": "NOT_APPLICABLE",
+                "satisfied_evidence": [],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [
+                  "Human must decide the material privacy, authority, cost, destructive, or irreversible boundary."
+                ],
+                "explicit_assumptions": [],
+                "material_risks": [
+                  "HIGH_IMPACT_AUTHORITY"
+                ],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "DESIGN_PROGRESSION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "CURRENT_FOCUS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [
+                  "Human must decide the material privacy, authority, cost, destructive, or irreversible boundary."
+                ],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              }
+            ],
+            "artifact_recommendation": null,
+            "factual_contradictions": [],
+            "semantic_policy_revision": "wic-semantic-policy-v1",
+            "question_policy_revision": "wic-question-value-v1"
+          },
+          "readiness": {
+            "status": "NOT_READY",
+            "profile": "LONG_LIVED_STEERING",
+            "profile_version": "v0",
+            "satisfied_requirements": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_information": [],
+            "unresolved_material_questions": [
+              "外部模型是哪一方、以一次性导出还是持续同步方式接入？",
+              "首批接入哪些客户数据类别与字段？",
+              "是否存在适用的合规、数据驻留或跨境要求？"
+            ],
+            "reasons": [
+              "Material Work-admission information remains unresolved."
+            ],
+            "basis_fingerprint": "96f6ff5c9bef85d4861235adcddb919865a6f152301f882cef5772ba427992b3"
+          },
+          "natural_response": "这件事我按最小必要来推：先把接入范围收窄到一个外部模型加一批必要字段，权限按用途限定，保留期给明确的到期删除期限。你把权限和保留期交给我定，但它们的实际效果取决于数据范围——范围窄，规则就能定得干净；如果一开始就把整库客户数据送出去，后面再收紧会牵动已经流出的数据。\n\n建议先做一版最小接入与数据治理方案：选定首批字段、写明谁在什么用途下可访问、给出保留与删除期限，作为后续评审和落地的基准。要往下起草，我只需要你定一件事：首批接哪几类客户数据。外部模型是哪一方、调用方式，以及代码和产物的落地位置，可以等方案成形后再一并确认，不影响现在推进。",
+          "metrics": {
+            "first_delta_seconds": 15.09498568600975,
+            "ttfms_seconds": 15.15270470699761,
+            "ttfms_boundary": "provider_stream_first_sentence_min_8_nonspace_chars",
+            "turn_candidate_ready_seconds": 18.56114832800813,
+            "question_count": 0,
+            "provider_call_count": 1,
+            "usage": {
+              "input_tokens": 3521,
+              "output_tokens": 3635,
+              "total_tokens": 7156,
+              "cost_rmb": null
+            }
+          },
+          "provider_evidence": {
+            "semantic_thread_id": null,
+            "semantic_turn_id": null,
+            "conversation_thread_id": null,
+            "conversation_turn_id": null,
+            "semantic_seconds": null,
+            "conversation_seconds": null,
+            "first_response_delta_seconds": 15.094970058009494,
+            "semantic_prompt_characters": null,
+            "conversation_prompt_characters": null,
+            "semantic_model": null,
+            "conversation_model": null,
+            "semantic_reasoning_effort": null,
+            "conversation_reasoning_effort": null,
+            "pipeline_mode": "coalesced_pre_work",
+            "pipeline_reason": "native_pre_work_shared_configuration",
+            "provider_call_count": 1,
+            "coalesced_thread_id": null,
+            "coalesced_turn_id": null,
+            "coalesced_seconds": 18.561005601019133,
+            "coalesced_prompt_characters": 9597,
+            "coalesced_model": "deepseek-flash",
+            "coalesced_reasoning_effort": "low",
+            "coalesced_output_characters": 2268,
+            "coalesced_semantic_characters": 1958,
+            "retained_prior_meaning_count": 0,
+            "new_meaning_count": 3,
+            "reused_prior_design_intent_frame": false,
+            "provider_stage_seconds": {
+              "provider_context_started": 4.067027475684881e-06,
+              "context_assembly_started": 5.425012204796076e-06,
+              "provider_context_prepared": 0.0002868340234272182,
+              "context_assembly_completed": 0.00028822902822867036,
+              "provider_request_queued": 0.005248571978881955,
+              "provider_request_sent": 0.0052539409953169525,
+              "provider_response_accepted": 0.6497737879981287,
+              "provider_first_response_event": 0.7163312640041113,
+              "provider_first_token": 15.09491624700604,
+              "natural_response_completed": 15.634079982992262,
+              "semantic_result_completed": 18.560662632982712,
+              "semantic_envelope_completed": 18.560666343022604,
+              "provider_teardown_completed": 18.560666929988656,
+              "payload_validation_started": 18.560667463985737,
+              "payload_validated": 18.560983571980614,
+              "validation_completed": 18.56098563899286
+            },
+            "semantic_request_id": null,
+            "conversation_request_id": null,
+            "coalesced_request_id": "e3517f29-b040-437d-ab32-697f1a66b49e",
+            "semantic_provider": null,
+            "conversation_provider": null,
+            "coalesced_provider": "deepseek",
+            "semantic_usage": null,
+            "conversation_usage": null,
+            "coalesced_usage": {
+              "input_tokens": 3521,
+              "output_tokens": 3635,
+              "cached_tokens": 3328,
+              "reasoning_tokens": 2671,
+              "total_tokens": 7156,
+              "unknown": false
+            },
+            "semantic_retry_count": null,
+            "conversation_retry_count": null,
+            "coalesced_retry_count": 0
+          },
+          "pipeline_stages": [
+            {
+              "name": "provider_context_started",
+              "seconds": 1.9368017092347145e-05
+            },
+            {
+              "name": "context_assembly_started",
+              "seconds": 2.0394043531268835e-05
+            },
+            {
+              "name": "provider_context_prepared",
+              "seconds": 0.00030221103224903345
+            },
+            {
+              "name": "context_assembly_completed",
+              "seconds": 0.0003032420063391328
+            },
+            {
+              "name": "provider_request_queued",
+              "seconds": 0.005264697014354169
+            },
+            {
+              "name": "provider_request_sent",
+              "seconds": 0.005269164044875652
+            },
+            {
+              "name": "provider_response_accepted",
+              "seconds": 0.6497902850387618
+            },
+            {
+              "name": "provider_first_response_event",
+              "seconds": 0.7163476290297695
+            },
+            {
+              "name": "provider_first_token",
+              "seconds": 15.094932786014397
+            },
+            {
+              "name": "natural_response_completed",
+              "seconds": 15.634095960995182
+            },
+            {
+              "name": "semantic_result_completed",
+              "seconds": 18.560679798014462
+            },
+            {
+              "name": "semantic_envelope_completed",
+              "seconds": 18.560681344999466
+            },
+            {
+              "name": "provider_teardown_completed",
+              "seconds": 18.560681827017106
+            },
+            {
+              "name": "payload_validation_started",
+              "seconds": 18.560682490002364
+            },
+            {
+              "name": "payload_validated",
+              "seconds": 18.560999503999483
+            },
+            {
+              "name": "validation_completed",
+              "seconds": 18.561000559013337
+            }
+          ]
+        }
+      ],
+      "reference_intent": {
+        "true_motive": "让外部模型处理客户数据，但关键治理条件未决定。",
+        "material_facts": [
+          "涉及客户数据和外部模型"
+        ],
+        "material_constraints": [],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得擅自决定数据权限",
+          "不得擅自决定数据保留期",
+          "不得假设客户已同意外发"
+        ],
+        "expected_work_relationship": "PRE_WORK",
+        "important_ambiguity": [
+          "允许外发的数据范围",
+          "访问权限",
+          "保留期限",
+          "合规边界"
+        ],
+        "acceptable_inferences": [
+          "该请求具有高影响，需要 Human 决策"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "semantic_adjudication": null,
+      "failure": null,
+      "mutation_boundary": {
+        "production_mutation_attempts": 0,
+        "work_or_assessment_admissions": 0,
+        "database_dependency_present": false
+      }
+    },
+    {
+      "case_id": "OW-G",
+      "status": "CANDIDATES_CAPTURED",
+      "raw_turn_outputs": [
+        {
+          "turn_number": 1,
+          "input_basis_fingerprint": "ce16eb41f1abe7c88fd36a4a8189fad29a6795c453bab332fc3c18c8f683a82a",
+          "input_basis_sha256": "40dedf4922300c9fcf44b5eb3627176ff5a273ef30fe1c7fe6f04649a414eefe",
+          "candidate": {
+            "interpreted_motive": "改善运营后台内容编辑体验",
+            "desired_outcome": "编辑操作清晰并符合已有视觉规范",
+            "design_intent_frame": {
+              "design_subject": "运营后台内容编辑页的主操作按钮（文案与样式）",
+              "object_type": "FEATURE",
+              "business_context": "运营后台内容编辑体验改善",
+              "desired_outcome": "编辑操作清晰并符合已有视觉规范",
+              "scope_level": "implementation",
+              "collaboration_mode": "execution",
+              "candidate_assumptions": [
+                "所指按钮为编辑页的主操作按钮（提交/保存动作）"
+              ],
+              "ambiguities": [
+                "未明确“按钮”是否仅指主操作按钮，或包含其他按钮"
+              ],
+              "confidence": 0.72
+            },
+            "candidate_context": [
+              "现有主操作按钮统一使用产品主色",
+              "编辑页交互收尾仍在进行中"
+            ],
+            "candidate_constraints": [
+              "沿用现有设计系统",
+              "按钮文案改为“保存”",
+              "按钮样式与现有视觉规范保持一致"
+            ],
+            "current_requests": [
+              "完成编辑页交互收尾",
+              "把按钮文案改成“保存”，样式沿用现有规范"
+            ],
+            "unresolved_material_questions": [],
+            "meanings": [
+              {
+                "kind": "REQUEST",
+                "statement": "将按钮文案改为“保存”，样式沿用现有规范。",
+                "source_record_ids": [
+                  "66322bdb-d0d7-523e-951c-78cb50063190"
+                ],
+                "confidence": 0.95,
+                "rationale": "Human input直接给出对当前编辑页按钮文案与样式的具体指令。",
+                "clarification_required": false
+              },
+              {
+                "kind": "CONSTRAINT",
+                "statement": "按钮样式须沿用现有设计系统与视觉规范，不改动现有视觉体系。",
+                "source_record_ids": [
+                  "66322bdb-d0d7-523e-951c-78cb50063190",
+                  "5a4b4fa4-ef01-59de-ba63-1970d8af3fd9"
+                ],
+                "confidence": 0.9,
+                "rationale": "Human明确要求样式沿用现有规范，与已持久化的“沿用现有设计系统”约束一致并构成新的完整约束集合。",
+                "clarification_required": false
+              },
+              {
+                "kind": "FACT",
+                "statement": "现有主操作按钮统一使用产品主色。",
+                "source_record_ids": [
+                  "5a4b4fa4-ef01-59de-ba63-1970d8af3fd9"
+                ],
+                "confidence": 0.9,
+                "rationale": "该事实来自当前Work修订的context_facts，属已持久化的现有设计事实。",
+                "clarification_required": false
+              }
+            ],
+            "focus_classification": "ON_TOPIC",
+            "impact_disposition": "HUMAN_GOVERNANCE_REQUIRED",
+            "supporting_references": [],
+            "natural_response": "明白，编辑页的主操作按钮文案改成“保存”，样式不另做，直接复用现有设计系统里主操作按钮的规范——沿用产品主色那一套，这样和后台其他主操作保持一致，也符合“沿用现有设计系统”这条约束。\n\n我先按“只改承担提交/保存动作的那个主按钮”推进，其余按钮保持原样：改动最小、能尽快把编辑页收尾做完。代价是如果页面上还有别的按钮也在做同类保存动作，之后可能还要再统一一次文案。\n\n想跟你确认一点，这会决定我接下来怎么核对：这次只改主操作按钮，还是编辑页上其他按钮也要一起对齐到“保存”这类说法？确认后我就按现有规范把交互收尾核对完。",
+            "provider_identity": "deepseek-responses:semantic:request:582defcd-0584-4503-bc9b-ed8ccbfe1b06",
+            "model_identity": "deepseek-flash"
+          },
+          "progressive_semantics": {
+            "basis_fingerprint": "ce16eb41f1abe7c88fd36a4a8189fad29a6795c453bab332fc3c18c8f683a82a",
+            "source_record_ids": [
+              "66322bdb-d0d7-523e-951c-78cb50063190"
+            ],
+            "reception_meanings": [
+              "DEEP_WIC_WORKING_UNDERSTANDING"
+            ],
+            "working_motive": "改善运营后台内容编辑体验",
+            "working_desired_outcome": "编辑操作清晰并符合已有视觉规范",
+            "working_facts": [
+              "现有主操作按钮统一使用产品主色",
+              "编辑页交互收尾仍在进行中"
+            ],
+            "working_constraints": [
+              "沿用现有设计系统",
+              "按钮文案改为“保存”",
+              "按钮样式与现有视觉规范保持一致"
+            ],
+            "working_requests": [
+              "完成编辑页交互收尾",
+              "把按钮文案改成“保存”，样式沿用现有规范"
+            ],
+            "explicit_assumptions": [
+              "Use the existing reversible convention."
+            ],
+            "unresolved_human_decisions": [],
+            "deltas": [
+              {
+                "id": "10252c28-9c69-58c7-9f4e-1d7f330f9452",
+                "category": "CONSTRAINT",
+                "operation": "ADDED",
+                "value": "按钮文案改为“保存”",
+                "prior_value": null,
+                "source_record_ids": [
+                  "66322bdb-d0d7-523e-951c-78cb50063190"
+                ],
+                "basis_fingerprint": "ce16eb41f1abe7c88fd36a4a8189fad29a6795c453bab332fc3c18c8f683a82a",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+                "authority": "ADVISORY"
+              },
+              {
+                "id": "5e2b720a-da73-5a35-9542-2f403c948497",
+                "category": "CONSTRAINT",
+                "operation": "ADDED",
+                "value": "按钮样式与现有视觉规范保持一致",
+                "prior_value": null,
+                "source_record_ids": [
+                  "66322bdb-d0d7-523e-951c-78cb50063190"
+                ],
+                "basis_fingerprint": "ce16eb41f1abe7c88fd36a4a8189fad29a6795c453bab332fc3c18c8f683a82a",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+                "authority": "ADVISORY"
+              }
+            ],
+            "pattern_signals": [
+              "BOUNDED_CHANGE"
+            ],
+            "inference_disposition": "SAFE_REVERSIBLE_INFERENCE",
+            "questions": [],
+            "selected_question": null,
+            "governance_candidate": "WORK_REVISION_PROPOSAL",
+            "readiness": [
+              {
+                "target": "WORK_FORMATION",
+                "status": "NOT_APPLICABLE",
+                "satisfied_evidence": [
+                  "MOTIVE",
+                  "DESIRED_OUTCOME"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "ce16eb41f1abe7c88fd36a4a8189fad29a6795c453bab332fc3c18c8f683a82a",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "WORK_REVISION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "ACTIVE_WORK_BASIS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "ce16eb41f1abe7c88fd36a4a8189fad29a6795c453bab332fc3c18c8f683a82a",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "DESIGN_PROGRESSION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "CURRENT_FOCUS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "ce16eb41f1abe7c88fd36a4a8189fad29a6795c453bab332fc3c18c8f683a82a",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              }
+            ],
+            "artifact_recommendation": null,
+            "factual_contradictions": [],
+            "semantic_policy_revision": "wic-semantic-policy-v1",
+            "question_policy_revision": "wic-question-value-v1"
+          },
+          "readiness": {
+            "status": "READY",
+            "profile": "LONG_LIVED_STEERING",
+            "profile_version": "v0",
+            "satisfied_requirements": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_information": [],
+            "unresolved_material_questions": [],
+            "reasons": [
+              "Motive and desired outcome are clear enough to form governed Work."
+            ],
+            "basis_fingerprint": "ce16eb41f1abe7c88fd36a4a8189fad29a6795c453bab332fc3c18c8f683a82a"
+          },
+          "natural_response": "明白，编辑页的主操作按钮文案改成“保存”，样式不另做，直接复用现有设计系统里主操作按钮的规范——沿用产品主色那一套，这样和后台其他主操作保持一致，也符合“沿用现有设计系统”这条约束。\n\n我先按“只改承担提交/保存动作的那个主按钮”推进，其余按钮保持原样：改动最小、能尽快把编辑页收尾做完。代价是如果页面上还有别的按钮也在做同类保存动作，之后可能还要再统一一次文案。\n\n想跟你确认一点，这会决定我接下来怎么核对：这次只改主操作按钮，还是编辑页上其他按钮也要一起对齐到“保存”这类说法？确认后我就按现有规范把交互收尾核对完。",
+          "metrics": {
+            "first_delta_seconds": 15.560947923979256,
+            "ttfms_seconds": 15.764880601025652,
+            "ttfms_boundary": "provider_stream_first_sentence_min_8_nonspace_chars",
+            "turn_candidate_ready_seconds": 16.367065941973124,
+            "question_count": 1,
+            "provider_call_count": 2,
+            "usage": {
+              "input_tokens": 5555,
+              "output_tokens": 3164,
+              "total_tokens": 8719,
+              "cost_rmb": null
+            }
+          },
+          "provider_evidence": {
+            "semantic_thread_id": null,
+            "semantic_turn_id": null,
+            "conversation_thread_id": null,
+            "conversation_turn_id": null,
+            "semantic_seconds": 12.405179365014192,
+            "conversation_seconds": 3.961824367986992,
+            "first_response_delta_seconds": 15.560936335008591,
+            "semantic_prompt_characters": 9172,
+            "conversation_prompt_characters": 4889,
+            "semantic_model": "deepseek-flash",
+            "conversation_model": "deepseek-flash",
+            "semantic_reasoning_effort": "low",
+            "conversation_reasoning_effort": "low",
+            "pipeline_mode": "staged",
+            "pipeline_reason": "active_work",
+            "provider_call_count": 2,
+            "coalesced_thread_id": null,
+            "coalesced_turn_id": null,
+            "coalesced_seconds": null,
+            "coalesced_prompt_characters": null,
+            "coalesced_model": null,
+            "coalesced_reasoning_effort": null,
+            "coalesced_output_characters": null,
+            "coalesced_semantic_characters": null,
+            "retained_prior_meaning_count": null,
+            "new_meaning_count": null,
+            "reused_prior_design_intent_frame": null,
+            "provider_stage_seconds": null,
+            "semantic_request_id": "582defcd-0584-4503-bc9b-ed8ccbfe1b06",
+            "conversation_request_id": "70c66822-7ddf-4577-8424-6c6c057c1448",
+            "coalesced_request_id": null,
+            "semantic_provider": "deepseek-responses",
+            "conversation_provider": "deepseek-responses",
+            "coalesced_provider": null,
+            "semantic_usage": {
+              "input_tokens": 4081,
+              "output_tokens": 2600,
+              "cached_tokens": 1408,
+              "reasoning_tokens": 1718,
+              "total_tokens": 6681,
+              "unknown": false
+            },
+            "conversation_usage": {
+              "input_tokens": 1474,
+              "output_tokens": 564,
+              "cached_tokens": 384,
+              "reasoning_tokens": 393,
+              "total_tokens": 2038,
+              "unknown": false
+            },
+            "coalesced_usage": null,
+            "semantic_retry_count": 0,
+            "conversation_retry_count": 0,
+            "coalesced_retry_count": null
+          },
+          "pipeline_stages": []
+        }
+      ],
+      "reference_intent": {
+        "true_motive": "在同一 Work 内修改按钮文案。",
+        "material_facts": [
+          "现有样式规范已存在"
+        ],
+        "material_constraints": [
+          "沿用现有规范"
+        ],
+        "known_corrections": [],
+        "forbidden_assumptions": [
+          "不得扩展为视觉系统重做"
+        ],
+        "expected_work_relationship": "CANDIDATE_CHANGE",
+        "important_ambiguity": [],
+        "acceptable_inferences": [
+          "无需重复询问按钮颜色和尺寸"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "semantic_adjudication": null,
+      "failure": null,
+      "mutation_boundary": {
+        "production_mutation_attempts": 0,
+        "work_or_assessment_admissions": 0,
+        "database_dependency_present": false
+      }
+    },
+    {
+      "case_id": "OW-H",
+      "status": "CANDIDATES_CAPTURED",
+      "raw_turn_outputs": [
+        {
+          "turn_number": 1,
+          "input_basis_fingerprint": "89e91ae5b7b076cb2eb9d37a6e9ac6282ad0ba865428e841717a3263e4001f82",
+          "input_basis_sha256": "7a4b540128e4eb9b6926943de917f2c0b8c518514a8507724d54d13f821a799e",
+          "candidate": {
+            "interpreted_motive": "维护 Watt 当前持久化模型",
+            "desired_outcome": "在不破坏既有数据和迁移历史的前提下增加关联约束",
+            "design_intent_frame": {
+              "design_subject": "在现有迁移链上为 Watt 持久化模型新增外键关联约束",
+              "object_type": "FEATURE",
+              "business_context": "Watt 持久化模型的维护与演进（MySQL + Alembic）",
+              "desired_outcome": "在不破坏既有数据和迁移历史的前提下增加关联约束",
+              "scope_level": "implementation",
+              "collaboration_mode": "design",
+              "candidate_assumptions": [
+                "Human 的更正取代此前 PostgreSQL 的上下文记录",
+                "目标数据库为 MySQL，迁移仍由 Alembic 在前向 head 上追加"
+              ],
+              "ambiguities": [
+                "新增外键涉及的具体表与列未确定",
+                "既有数据是否已满足外键前提（无孤儿行）尚未确认"
+              ],
+              "confidence": 0.72
+            },
+            "candidate_context": [
+              "当前使用 MySQL（Human 更正此前“使用 PostgreSQL”的上下文事实）",
+              "迁移由 Alembic 管理"
+            ],
+            "candidate_constraints": [
+              "必须基于当前 migration head",
+              "不得改写已发布迁移",
+              "直接新增外键（不采用其它约束实现方式）"
+            ],
+            "current_requests": [
+              "评估并增加关联约束"
+            ],
+            "unresolved_material_questions": [
+              "新增外键具体覆盖哪些表与列尚未明确"
+            ],
+            "meanings": [
+              {
+                "kind": "CORRECTION",
+                "statement": "当前数据库是 MySQL，取代此前“当前仓库使用 PostgreSQL”的记录",
+                "source_record_ids": [
+                  "c3f72a6a-5ad1-58f0-984f-97cf55725c62"
+                ],
+                "confidence": 0.93,
+                "rationale": "Human 明确以“既然现在用 MySQL”直接替换既有数据库事实",
+                "clarification_required": false
+              },
+              {
+                "kind": "DECISION_INPUT",
+                "statement": "Human 决定直接新增外键来落实关联约束",
+                "source_record_ids": [
+                  "c3f72a6a-5ad1-58f0-984f-97cf55725c62"
+                ],
+                "confidence": 0.85,
+                "rationale": "“就直接新增外键吧”是 Human 对实现方向的取舍",
+                "clarification_required": false
+              },
+              {
+                "kind": "CONSTRAINT",
+                "statement": "更新后的约束集：必须基于当前 migration head；不得改写已发布迁移；直接新增外键",
+                "source_record_ids": [
+                  "c3f72a6a-5ad1-58f0-984f-97cf55725c62"
+                ],
+                "confidence": 0.8,
+                "rationale": "Human 在原约束之上对实现方式作出限定，构成对当前 Work 的约束变更",
+                "clarification_required": false
+              }
+            ],
+            "focus_classification": "ON_TOPIC",
+            "impact_disposition": "HUMAN_GOVERNANCE_REQUIRED",
+            "supporting_references": [
+              "REPOSITORY_OBSERVATION:88888888-8888-8888-8888-888888888888"
+            ],
+            "natural_response": "明白，数据库是 MySQL，我按这个更正继续。按你定的方向，我会在当前 migration head 之后追加一个只新增外键的 Alembic 前向迁移，不改动任何已发布迁移。动手前先做一步数据前置检查：确认相关表里没有孤儿行，否则直接加外键会失败——这是直接新增外键这条路上唯一的实质风险；如果查到不满足外键的既有数据，我会先停下来告诉你，不会擅自回填或清理。为了开始起草，需要你定一下：外键具体要覆盖哪些表和列？",
+            "provider_identity": "deepseek-responses:semantic:request:c4a9ca13-e6c4-4fd9-b1bd-4942986bd1da",
+            "model_identity": "deepseek-flash"
+          },
+          "progressive_semantics": {
+            "basis_fingerprint": "89e91ae5b7b076cb2eb9d37a6e9ac6282ad0ba865428e841717a3263e4001f82",
+            "source_record_ids": [
+              "c3f72a6a-5ad1-58f0-984f-97cf55725c62"
+            ],
+            "reception_meanings": [
+              "FACTUAL_CONTRADICTION"
+            ],
+            "working_motive": "维护 Watt 当前持久化模型",
+            "working_desired_outcome": "在不破坏既有数据和迁移历史的前提下增加关联约束",
+            "working_facts": [
+              "当前仓库使用 PostgreSQL",
+              "迁移由 Alembic 管理",
+              "当前使用 MySQL（Human 更正此前“使用 PostgreSQL”的上下文事实）"
+            ],
+            "working_constraints": [
+              "必须基于当前 migration head",
+              "不得改写已发布迁移",
+              "直接新增外键（不采用其它约束实现方式）"
+            ],
+            "working_requests": [
+              "评估并增加关联约束"
+            ],
+            "explicit_assumptions": [],
+            "unresolved_human_decisions": [],
+            "deltas": [
+              {
+                "id": "bce5b131-add4-5dbd-8632-db64484284f5",
+                "category": "CONSTRAINT",
+                "operation": "ADDED",
+                "value": "直接新增外键（不采用其它约束实现方式）",
+                "prior_value": null,
+                "source_record_ids": [
+                  "c3f72a6a-5ad1-58f0-984f-97cf55725c62"
+                ],
+                "basis_fingerprint": "89e91ae5b7b076cb2eb9d37a6e9ac6282ad0ba865428e841717a3263e4001f82",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 0.9,
+                "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+                "authority": "ADVISORY"
+              },
+              {
+                "id": "05b40730-6115-5376-982d-c570bdab953e",
+                "category": "FACT",
+                "operation": "SUPERSEDED",
+                "value": "Current persistence uses PostgreSQL.",
+                "prior_value": "Current persistence uses MySQL.",
+                "source_record_ids": [
+                  "c3f72a6a-5ad1-58f0-984f-97cf55725c62"
+                ],
+                "basis_fingerprint": "89e91ae5b7b076cb2eb9d37a6e9ac6282ad0ba865428e841717a3263e4001f82",
+                "prior_assessment_id": null,
+                "supersedes_delta_ids": [],
+                "confidence": 1.0,
+                "rationale": "Repository Reality corrects a factual premise without changing Human Motive.",
+                "authority": "GOVERNED_REALITY"
+              }
+            ],
+            "pattern_signals": [
+              "BROWNFIELD_REALITY_CONFLICT"
+            ],
+            "inference_disposition": "NO_INFERENCE",
+            "questions": [
+              {
+                "question": "新增外键具体覆盖哪些表与列尚未明确",
+                "affected_dimensions": [
+                  "SCOPE"
+                ],
+                "answer_already_available": false,
+                "safe_reversible_assumption_available": false,
+                "watt_authorized_to_choose": false,
+                "blocks_next_governed_step": true,
+                "cognitive_cost": "LOW",
+                "decision_value": 70,
+                "disposition": "ASK_HUMAN_NOW",
+                "rationale": "v1 selects only the highest-value unresolved decision and carries lower-value detail."
+              }
+            ],
+            "selected_question": "新增外键具体覆盖哪些表与列尚未明确",
+            "governance_candidate": "WORK_REVISION_PROPOSAL",
+            "readiness": [
+              {
+                "target": "WORK_FORMATION",
+                "status": "NOT_APPLICABLE",
+                "satisfied_evidence": [
+                  "MOTIVE",
+                  "DESIRED_OUTCOME"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "89e91ae5b7b076cb2eb9d37a6e9ac6282ad0ba865428e841717a3263e4001f82",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "WORK_REVISION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "ACTIVE_WORK_BASIS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "89e91ae5b7b076cb2eb9d37a6e9ac6282ad0ba865428e841717a3263e4001f82",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              },
+              {
+                "target": "DESIGN_PROGRESSION",
+                "status": "READY",
+                "satisfied_evidence": [
+                  "CURRENT_FOCUS"
+                ],
+                "missing_material_evidence": [],
+                "unresolved_human_decisions": [],
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "useful_work_may_continue": true,
+                "basis_fingerprint": "89e91ae5b7b076cb2eb9d37a6e9ac6282ad0ba865428e841717a3263e4001f82",
+                "profile_revision": "wic-transition-readiness-v1",
+                "authority": "ADVISORY_ONLY"
+              }
+            ],
+            "artifact_recommendation": null,
+            "factual_contradictions": [
+              "Human premise says MySQL; governed repository Reality says PostgreSQL."
+            ],
+            "semantic_policy_revision": "wic-semantic-policy-v1",
+            "question_policy_revision": "wic-question-value-v1"
+          },
+          "readiness": {
+            "status": "NOT_READY",
+            "profile": "LONG_LIVED_STEERING",
+            "profile_version": "v0",
+            "satisfied_requirements": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_information": [],
+            "unresolved_material_questions": [
+              "新增外键具体覆盖哪些表与列尚未明确"
+            ],
+            "reasons": [
+              "Material Work-admission information remains unresolved."
+            ],
+            "basis_fingerprint": "89e91ae5b7b076cb2eb9d37a6e9ac6282ad0ba865428e841717a3263e4001f82"
+          },
+          "natural_response": "明白，数据库是 MySQL，我按这个更正继续。按你定的方向，我会在当前 migration head 之后追加一个只新增外键的 Alembic 前向迁移，不改动任何已发布迁移。动手前先做一步数据前置检查：确认相关表里没有孤儿行，否则直接加外键会失败——这是直接新增外键这条路上唯一的实质风险；如果查到不满足外键的既有数据，我会先停下来告诉你，不会擅自回填或清理。为了开始起草，需要你定一下：外键具体要覆盖哪些表和列？",
+          "metrics": {
+            "first_delta_seconds": 15.190720328013413,
+            "ttfms_seconds": 15.310696027008817,
+            "ttfms_boundary": "provider_stream_first_sentence_min_8_nonspace_chars",
+            "turn_candidate_ready_seconds": 15.79043177101994,
+            "question_count": 1,
+            "provider_call_count": 2,
+            "usage": {
+              "input_tokens": 5807,
+              "output_tokens": 3026,
+              "total_tokens": 8833,
+              "cost_rmb": null
+            }
+          },
+          "provider_evidence": {
+            "semantic_thread_id": null,
+            "semantic_turn_id": null,
+            "conversation_thread_id": null,
+            "conversation_turn_id": null,
+            "semantic_seconds": 11.347425299987663,
+            "conversation_seconds": 4.442944035050459,
+            "first_response_delta_seconds": 15.190708957030438,
+            "semantic_prompt_characters": 9515,
+            "conversation_prompt_characters": 5319,
+            "semantic_model": "deepseek-flash",
+            "conversation_model": "deepseek-flash",
+            "semantic_reasoning_effort": "low",
+            "conversation_reasoning_effort": "low",
+            "pipeline_mode": "staged",
+            "pipeline_reason": "active_work",
+            "provider_call_count": 2,
+            "coalesced_thread_id": null,
+            "coalesced_turn_id": null,
+            "coalesced_seconds": null,
+            "coalesced_prompt_characters": null,
+            "coalesced_model": null,
+            "coalesced_reasoning_effort": null,
+            "coalesced_output_characters": null,
+            "coalesced_semantic_characters": null,
+            "retained_prior_meaning_count": null,
+            "new_meaning_count": null,
+            "reused_prior_design_intent_frame": null,
+            "provider_stage_seconds": null,
+            "semantic_request_id": "c4a9ca13-e6c4-4fd9-b1bd-4942986bd1da",
+            "conversation_request_id": "5e3472b9-6988-4147-8fb8-b22ad3218af8",
+            "coalesced_request_id": null,
+            "semantic_provider": "deepseek-responses",
+            "conversation_provider": "deepseek-responses",
+            "coalesced_provider": null,
+            "semantic_usage": {
+              "input_tokens": 4188,
+              "output_tokens": 2320,
+              "cached_tokens": 1408,
+              "reasoning_tokens": 1326,
+              "total_tokens": 6508,
+              "unknown": false
+            },
+            "conversation_usage": {
+              "input_tokens": 1619,
+              "output_tokens": 706,
+              "cached_tokens": 384,
+              "reasoning_tokens": 579,
+              "total_tokens": 2325,
+              "unknown": false
+            },
+            "coalesced_usage": null,
+            "semantic_retry_count": 0,
+            "conversation_retry_count": 0,
+            "coalesced_retry_count": null
+          },
+          "pipeline_stages": []
+        }
+      ],
+      "reference_intent": {
+        "true_motive": "在现有持久化模型中增加外键约束。",
+        "material_facts": [
+          "仓库事实表明当前数据库是 PostgreSQL",
+          "迁移由 Alembic 管理"
+        ],
+        "material_constraints": [
+          "基于当前 migration head",
+          "保留迁移历史"
+        ],
+        "known_corrections": [
+          "Human 的 MySQL 前提与仓库事实冲突"
+        ],
+        "forbidden_assumptions": [
+          "不得把 MySQL 当作已验证事实",
+          "不得因此改变 Work motive"
+        ],
+        "expected_work_relationship": "SAME_ACTIVE_WORK",
+        "important_ambiguity": [
+          "Human 是否只是口误，或确实要求迁移数据库"
+        ],
+        "acceptable_inferences": [
+          "先指出已验证的 PostgreSQL 事实，再确认是否有迁移意图"
+        ],
+        "governance_expectation": "REQUIRED"
+      },
+      "semantic_adjudication": null,
+      "failure": null,
+      "mutation_boundary": {
+        "production_mutation_attempts": 0,
+        "work_or_assessment_admissions": 0,
+        "database_dependency_present": false
+      }
+    }
+  ],
+  "summary": {
+    "case_count": 8,
+    "captured_count": 7,
+    "failed_count": 1,
+    "elapsed_seconds": 138.20263446797617,
+    "semantic_adjudication_status": "NOT_PERFORMED"
+  }
+}

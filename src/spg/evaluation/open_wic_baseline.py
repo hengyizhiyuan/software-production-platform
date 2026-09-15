@@ -28,6 +28,7 @@ from spg.application.interaction import (
     WorkInteractionService,
     interaction_basis_fingerprint,
 )
+from spg.application.wic_intelligence import build_progressive_semantics
 from spg.domain.conversation import ConversationContextMessage
 from spg.domain.interaction import (
     ActiveWorkInterpretationContext,
@@ -397,7 +398,17 @@ def replay_episode(
             if streamed and streamed.strip() != candidate.natural_response.strip():
                 raise AssertionError("Observed response stream differs from candidate")
             evidence = _provider_evidence(capability)
+            progressive = build_progressive_semantics(
+                candidate=candidate,
+                records=tuple(records),
+                basis_fingerprint=fingerprint,
+                prior_assessment=prior,
+                active_context=active,
+                focus=candidate.focus_classification,
+                impact=candidate.impact_disposition,
+            )
             prior = _assessment_from_candidate(case, index, basis, candidate, now)
+            prior = prior.model_copy(update={"progressive_semantics": progressive})
             conversation.extend((
                 ConversationContextMessage(actor="HUMAN", content=turn.content),
                 ConversationContextMessage(actor="WATT", content=candidate.natural_response),
@@ -407,6 +418,7 @@ def replay_episode(
                 "input_basis_fingerprint": fingerprint,
                 "input_basis_sha256": _sha256(before),
                 "candidate": candidate.model_dump(mode="json"),
+                "progressive_semantics": progressive.model_dump(mode="json"),
                 "readiness": prior.readiness.model_dump(mode="json"),
                 "natural_response": candidate.natural_response,
                 "metrics": {

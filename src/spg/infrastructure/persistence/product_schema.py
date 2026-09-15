@@ -368,6 +368,7 @@ interaction_assessments = Table(
     Column("supporting_references", JSONB, nullable=False),
     Column("natural_response", Text, nullable=False),
     Column("readiness", JSONB, nullable=False),
+    Column("progressive_semantics", JSONB, nullable=True),
     Column("provider_identity", String(255), nullable=False),
     Column("model_identity", String(255), nullable=True),
     Column("schema_version", String(32), nullable=False),

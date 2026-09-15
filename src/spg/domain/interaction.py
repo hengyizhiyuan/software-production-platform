@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from spg.domain.conversation import ConversationContextMessage, StructuredCollaborationResult
 from spg.domain.design_intent import DesignIntentFrame
+from spg.domain.wic_intelligence import ProgressiveSemanticStructure
 
 
 class InteractionCondition(StrEnum):
@@ -305,6 +306,7 @@ class InteractionAssessment(BaseModel):
     supporting_references: tuple[str, ...] = ()
     natural_response: str
     readiness: WorkAdmissionReadiness
+    progressive_semantics: ProgressiveSemanticStructure | None = None
     provider_identity: str
     model_identity: str | None = None
     schema_version: str

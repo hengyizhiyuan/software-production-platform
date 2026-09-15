@@ -48,6 +48,7 @@ from spg.domain.interaction import (
 )
 from spg.domain.design_intent import DesignObjectType
 from spg.application.wic_reception import ShadowFastReceptionRuntime
+from spg.application.wic_intelligence import build_progressive_semantics
 from spg.domain.product import ProductionCycleBindingCondition
 from spg.domain.steering import RealityReferenceKind, SteeringOutcome, SteeringStepType
 from spg.infrastructure.persistence import Database
@@ -57,7 +58,7 @@ from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 
 
-ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v3"
+ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v4"
 READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
 
@@ -930,14 +931,24 @@ class WorkInteractionService:
                         "natural_response": _new_work_confirmation(latest_human_input),
                     }
                 )
+            prior_assessment = store.latest_assessment(interaction_id)
             candidate = self._with_design_intent_frame(
                 candidate,
-                prior_assessment=store.latest_assessment(interaction_id),
+                prior_assessment=prior_assessment,
                 latest_human_input=latest_human_input,
             )
             focus, impact, candidate_change = self._normalize_active_candidate(
                 candidate,
                 active_context,
+            )
+            progressive_semantics = build_progressive_semantics(
+                candidate=candidate,
+                records=records,
+                basis_fingerprint=current_basis,
+                prior_assessment=prior_assessment,
+                active_context=active_context,
+                focus=focus,
+                impact=impact,
             )
             record_references = self._normalize_supporting_references(
                 tuple(
@@ -1029,6 +1040,7 @@ class WorkInteractionService:
                     "supporting_references": list(supporting_references),
                     "natural_response": candidate.natural_response,
                     "readiness": readiness.model_dump(mode="json"),
+                    "progressive_semantics": progressive_semantics.model_dump(mode="json"),
                     "provider_identity": candidate.provider_identity,
                     "model_identity": candidate.model_identity,
                     "schema_version": ASSESSMENT_SCHEMA_VERSION,

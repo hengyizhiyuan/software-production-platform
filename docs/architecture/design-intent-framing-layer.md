@@ -140,7 +140,8 @@ frontend state owner, or admission path is introduced.
 
 Migration `20260909_29` adds one nullable JSONB column,
 `interaction_assessments.design_intent_frame`. Historical assessments remain
-valid with `null`. New assessments use schema version `wic-assessment-v3`.
+valid with `null`. New assessments use schema version `wic-assessment-v4`, which
+adds the progressive semantic projection without changing Design Intent ownership.
 
 The Watt-native deterministic fallback conservatively produces a frame for
 legacy/test capabilities that do not yet emit one. It preserves an unchanged

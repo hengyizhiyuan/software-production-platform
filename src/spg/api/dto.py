@@ -195,6 +195,7 @@ class InteractionAssessmentResponse(ApiDto):
     supporting_references: tuple[str, ...]
     natural_response: str
     readiness: InteractionReadinessResponse
+    progressive_semantics: dict[str, object] | None
     provider_identity: str
     model_identity: str | None
     schema_version: str
@@ -418,6 +419,11 @@ class SharedUnderstandingResponse(ApiDto):
                         unresolved_material_questions=assessment.readiness.unresolved_material_questions,
                         reasons=assessment.readiness.reasons,
                         basis_fingerprint=assessment.readiness.basis_fingerprint,
+                    ),
+                    progressive_semantics=(
+                        None
+                        if assessment.progressive_semantics is None
+                        else assessment.progressive_semantics.model_dump(mode="json")
                     ),
                     provider_identity=assessment.provider_identity,
                     model_identity=assessment.model_identity,

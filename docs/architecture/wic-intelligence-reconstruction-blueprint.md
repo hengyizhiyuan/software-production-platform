@@ -331,6 +331,16 @@ safe-inference boundaries, adaptive signals, and transition-specific readiness.
 Pass against A–H plus expanded adversarial and continuity cases, including OW-F
 authority preservation.
 
+Implementation reality (2026-09-15): `wic-assessment-v4` persists one
+progressive semantic projection through additive migration `20260915_40`.
+Versioned deterministic policy owns correction supersession, constraint
+preservation, safe versus Human-owned inference, highest-value question
+selection, advisory pattern signals, consumer-bound artifact recommendations,
+and transition-specific readiness. Provider prose remains evidence rather than
+policy authority: the real A–H run retained an OW-F authority violation, OW-H
+factual misunderstanding, and OW-D contract failure while policy constrained the
+corresponding governance candidates.
+
 ### Slice 3 — Human experience integration and cutover
 
 Implement single-response reconciliation in SSE/UI, shadow comparison, feature
