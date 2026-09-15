@@ -47,6 +47,7 @@
     const timing = state.turnTimings[turnId] || { correlationId: turnId, humanSend: startedAt || null };
     if (timing[event] == null) timing[event] = globalThis.performance.now();
     state.turnTimings[turnId] = timing;
+    document.documentElement.dataset.wattTurnTimings = JSON.stringify(state.turnTimings);
   }
   globalThis.__WATT_MARK_TURN_TIMING__ = markTurnTiming;
 
@@ -1624,10 +1625,10 @@
       if (sequence) state.streamingAssistantMessage.responseSequence = sequence;
       return true;
     };
-    const observeMeaningfulPaint = () => {
+    const observeMeaningfulPaint = (allowSettled = false) => {
       if (typeof globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__ === "function" && globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__(streamed)) {
         globalThis.requestAnimationFrame(() => {
-          if (current() && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "firstMeaningfulTextRendered");
+          if ((current() || allowSettled) && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "firstMeaningfulTextRendered");
         });
       }
     };
@@ -1676,6 +1677,7 @@
       state.streamingAssistantMessage.content = streamed;
       state.streamingAssistantMessage.phase = "FINAL";
       scheduleStreamRender();
+      observeMeaningfulPaint(true);
     });
     source.addEventListener("message.reset", (event) => {
       if (!current()) return;

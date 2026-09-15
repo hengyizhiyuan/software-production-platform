@@ -390,5 +390,5 @@ def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None
     assert "https://" not in html
     assert "http://" not in html
     assert 'src="/assets/state.js"' in html
-    assert 'src="/assets/app.js"' in html
+    assert 'src="/assets/app.js?v=wic-vnext-slice3-3"' in html
     assert 'href="/assets/styles.css"' in html

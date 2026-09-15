@@ -15,10 +15,8 @@ services:
       - watt-wic-slice3-postgres:/var/lib/postgresql/data
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: runtime
+    image: watt-native-human-acceptance-v32-app:latest
+    command: ["python", "/acceptance/start.py"]
     container_name: watt-wic-slice3-app
     depends_on:
       postgres:
@@ -54,6 +52,22 @@ services:
       retries: 30
       start_period: 12s
     volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true
+      - type: bind
+        source: ./docker/start_human_acceptance.py
+        target: /acceptance/start.py
+        read_only: true
+      - type: bind
+        source: ./migrations
+        target: /app/migrations
+        read_only: true
+      - type: bind
+        source: ./alembic.ini
+        target: /app/alembic.ini
+        read_only: true
       - type: bind
         source: ./.git
         target: /source/.git

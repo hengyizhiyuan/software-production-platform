@@ -28,6 +28,7 @@ from spg.application.interaction import (
     DeterministicWorkInteractionCapability,
     WorkInteractionService,
 )
+from spg.application.work import WorkApplicationService
 from spg.application.wic_reception import (
     DeterministicFastReceptionCapability,
     ShadowFastReceptionRuntime,
@@ -858,6 +859,74 @@ def test_controlled_vnext_blocks_unsafe_provider_prose_in_actual_response_path(
     assert "默认开放全部" not in visible
     assert "90 天" not in visible
     assert projection.latest_assessment.natural_response in visible
+    service.shutdown()
+
+
+def test_controlled_vnext_corrects_brownfield_premise_in_actual_response_path(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    class RealityConflictCapability:
+        def interpret(self, basis: InteractionInterpretationInput):
+            if basis.active_work_context is None:
+                return InteractionAssessmentCandidate(
+                    interpreted_motive="Improve the existing persistence workflow",
+                    desired_outcome="Keep existing behavior while improving persistence",
+                    candidate_context=("Current persistence uses PostgreSQL.",),
+                    current_requests=(basis.records[-1].content,),
+                    natural_response="This understanding is ready for review.",
+                    provider_identity="test:postgres-reality-formation",
+                )
+            return InteractionAssessmentCandidate(
+                interpreted_motive=basis.active_work_context.work_revision.motive,
+                desired_outcome=basis.active_work_context.work_revision.desired_outcome,
+                current_requests=(basis.records[-1].content,),
+                natural_response="既然当前系统使用 MySQL，我会直接修改 MySQL 表。",
+                provider_identity="test:unsafe-brownfield-prose",
+            )
+
+    service = WorkInteractionService(
+        postgres_database,
+        capability=RealityConflictCapability(),
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
+        fast_reception=ShadowFastReceptionRuntime(
+            DeterministicFastReceptionCapability()
+        ),
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    ready = service.append_and_assess(
+        interaction.id,
+        "Improve the existing persistence workflow without replacing it.",
+        human_identity="human:test",
+    )
+    assert ready.latest_assessment is not None
+    WorkApplicationService(
+        postgres_database,
+        workspace_root=tmp_path / "workspaces",
+    ).admit_interaction_work(
+        interaction.id,
+        assessment_id=ready.latest_assessment.id,
+        basis_fingerprint=ready.latest_assessment.basis_fingerprint,
+        authority_identity="human:test",
+        use_default_resource=False,
+    )
+
+    submitted = service.submit_turn(
+        interaction.id,
+        "既然现在用 MySQL，就直接新增外键吧。",
+        human_identity="human:test",
+    )
+    assert _wait_for_turn(service, submitted.id).status is InteractionTurnStatus.COMPLETED
+    projection = service.get_shared_understanding(interaction.id)
+    visible = projection.conversation_messages[-1].content
+    assert "PostgreSQL" in visible
+    assert "当前系统使用 MySQL" not in visible
+    assert "直接修改 MySQL" not in visible
+    assert "目标" in visible
+    assert projection.governed_revision is not None
+    assert projection.governed_revision.context_facts == (
+        "Current persistence uses PostgreSQL.",
+    )
     service.shutdown()
 
 
