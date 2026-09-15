@@ -5,10 +5,13 @@ Date: 2026-09-14
 
 ~~~text
 STUDY_STATUS
-    PLANNED
+    EXECUTED
 
-EXECUTION
-    NOT_STARTED
+EXTERNAL_SOURCE_STUDY
+    COMPLETE
+
+ARCHITECTURE_SYNTHESIS
+    PENDING
 
 IMPLEMENTATION_AUTHORITY
     NONE
@@ -20,10 +23,17 @@ ARCHITECTURE_DECISION
     NOT_FROZEN
 ~~~
 
-This is a future architecture research plan, not current Watt architecture
-truth. It authorizes no external repository study, cloning, implementation or
-change to WIC, Work Formation, Guided Design, Steering or the clickable
-prototype.
+The authorized external source study is complete. This plan and its outputs are
+Decision Input, not current Watt architecture truth, and authorize no
+implementation or change to WIC, Work Formation, Guided Design, Steering or the
+clickable prototype.
+
+Study outputs:
+
+- [External Architecture Study](../research/wic-sdd-external-architecture-study.md)
+- [Mechanism Matrix](../research/wic-sdd-mechanism-matrix.md)
+- [Source Evidence Ledger](../research/wic-sdd-source-evidence.md)
+- [Benchmark Landscape](../research/wic-sdd-benchmark-landscape.md)
 
 ## 1. Why this study exists
 

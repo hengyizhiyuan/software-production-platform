@@ -11,7 +11,7 @@ BENCHMARK_IMPLEMENTATION
     NOT_STARTED
 
 EXTERNAL_BENCHMARK_STUDY
-    PLANNED
+    COMPLETE
 
 WIC_LAB_INTEGRATION
     FUTURE
@@ -33,6 +33,14 @@ Related candidate records:
 - [WIC / SDD Architecture Study Plan](watt-wic-sdd-architecture-study-plan.md)
 - [Adaptive Work Patterns](watt-adaptive-work-patterns-candidate.md)
 - [Experience-before-Production](experience-before-production-candidate.md)
+
+Completed study input:
+
+- [WIC / SDD Benchmark Landscape](../research/wic-sdd-benchmark-landscape.md)
+- [External Source Evidence Ledger](../research/wic-sdd-source-evidence.md)
+
+Benchmark design and implementation remain pending. The completed external
+study does not activate WIC Lab or freeze an evaluation architecture.
 
 ## 1. Why benchmarking is needed
 
