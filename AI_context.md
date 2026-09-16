@@ -976,6 +976,7 @@ The current system-level architecture baseline is:
 - [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md)
 - [Work Identity, Closure and Archive Invariants](docs/architecture/work-identity-closure-and-archive-invariants.md)
 - [Watt Development Roadmap and Progress Reality](docs/roadmap/watt-development-roadmap-and-progress.md)
+- [Watt Dogfood Project Pool & Production Coverage](docs/roadmap/watt-dogfood-project-pool-and-production-coverage.md)
 - [Bounded Single-PWU Code Work](docs/architecture/bounded-single-pwu-code-work.md)
 - [Repository-Aware Code Change Proposal Lite](docs/architecture/repository-aware-code-change-proposal-lite.md)
 - [Typed Node Test Verification Lite](docs/architecture/typed-node-test-verification-lite.md)
