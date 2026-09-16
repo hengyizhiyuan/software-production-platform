@@ -4,7 +4,7 @@ Date: 2026-09-16
 
 Starting revision: `d36e658a2c4898ef330c4c4cc0f3bd8c5a35f774`
 
-Implementation revision: pending final qualification checkpoint
+Implementation revision: qualified by the checkpoint carrying this evidence
 
 Runtime mode: `WIC_VNEXT_CONTROLLED`
 
