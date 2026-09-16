@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from spg.domain.conversation import InteractionStrategy
+
 
 class WicRuntimeMode(StrEnum):
     LEGACY_WIC = "LEGACY_WIC"
@@ -92,6 +94,7 @@ class GovernedResponseEnvelope(BaseModel):
     semantic_policy_revision: str
     question_policy_revision: str
     response_language: str
+    interaction_strategy: InteractionStrategy
 
 
 class GovernedResponseRealization(BaseModel):

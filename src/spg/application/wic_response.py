@@ -19,6 +19,8 @@ from spg.domain.wic_intelligence import (
     SemanticDeltaOperation,
 )
 from spg.domain.wic_reception import FastReceptionCandidate
+from spg.application.interaction_strategy import select_interaction_strategy
+from spg.domain.conversation import ConversationalMove, InteractionStrategy
 from spg.domain.wic_response import (
     GovernedResponseEnvelope,
     GovernedResponseRealization,
@@ -132,6 +134,7 @@ def governed_response_envelope(
     governed_content: str,
     provisional_content: str | None,
     reconciliation: ResponseReconciliation,
+    latest_human_input: str,
 ) -> GovernedResponseEnvelope:
     """Build the expression handoff exclusively from admitted WIC semantics."""
 
@@ -165,6 +168,15 @@ def governed_response_envelope(
                 "current system uses MySQL",
             )
         )
+    strategy = select_interaction_strategy(
+        assessment, latest_human_input=latest_human_input
+    )
+    governed_content = _content_at_strategy_granularity(governed_content, strategy)
+    selected_question = (
+        semantics.selected_question
+        if strategy.primary_move is ConversationalMove.ESCALATE_HUMAN_DECISION
+        else None
+    )
     return GovernedResponseEnvelope(
         basis_fingerprint=assessment.basis_fingerprint,
         governed_content=governed_content,
@@ -176,7 +188,7 @@ def governed_response_envelope(
         constraints_to_preserve=semantics.working_constraints,
         unresolved_human_decisions=semantics.unresolved_human_decisions,
         explicit_assumptions=semantics.explicit_assumptions,
-        selected_question=semantics.selected_question,
+        selected_question=selected_question,
         governance_candidate=semantics.governance_candidate.value,
         forbidden_claims=tuple(dict.fromkeys(forbidden)),
         source_references=assessment.supporting_references,
@@ -185,7 +197,27 @@ def governed_response_envelope(
         response_language=(
             "zh-CN" if re.search(r"[\u4e00-\u9fff]", governed_content) else "en"
         ),
+        interaction_strategy=strategy,
     )
+
+
+def _content_at_strategy_granularity(
+    content: str,
+    strategy: InteractionStrategy,
+) -> str:
+    """Enforce question allowance without choosing domain-specific content."""
+
+    if strategy.question_allowed:
+        return content
+    value = content.rstrip()
+    # Deep WIC owns the case-specific next move. Deterministic policy may suppress
+    # a question when this turn disallows one, but it must never author a replacement.
+    while value.endswith(("?", "？")):
+        trimmed = re.sub(r"(?:^|(?<=[。！？!?\n]))[^。！？!?\n]*[?？]\s*$", "", value)
+        if trimmed == value:
+            break
+        value = trimmed.rstrip()
+    return value or content
 
 
 def _explicit_new_object(text: str) -> str | None:
@@ -221,10 +253,9 @@ def policy_governed_response(
                     "请确认允许的范围、审批人和回退条件。"
                 )
             return (
-                "这里涉及必须由你决定的关键边界：哪些数据可以交给外部模型、谁有访问权限，以及保留多久。"
-                "你确认前，我可以继续梳理不依赖这些决定的架构部分，例如数据分级、最小化传输、隔离和审计，"
-                "但不会替你设定权限或保留期，也不会默认客户已经同意。"
-                "请确认允许外发的数据范围、审批人和保留期限。"
+                "客户数据能否交给外部模型，必须由你决定；我不会替你设定权限、保留期，也不会默认客户已经同意。"
+                "不依赖这项决定的数据分级、最小化传输、隔离和审计可以先继续。"
+                "先确认一件事：哪些数据允许发给外部模型？"
             )
         return (
             "This crosses Human-owned data and authority boundaries: the data allowed outside, "
@@ -266,8 +297,7 @@ def policy_governed_response(
     if correction is not None and correction.value:
         if chinese:
             return (
-                f"明白，你是在纠正设计对象：{correction.value}。"
-                "我会从这个修正后的理解继续，之前的对象判断不再作为后续依据。"
+                f"收到，后续按“{correction.value}”继续；原先的对象判断不再采用。"
             )
         return (
             f"Understood—you are correcting the design object to: {correction.value}. "
@@ -289,10 +319,10 @@ def policy_governed_response(
             added_text = "；".join(additions) or latest_human_input.strip()
             retained_text = "；".join(retained)
             suffix = (
-                f"原有目标和既有约束继续保留：{retained_text}。"
-                if retained_text else "当前 Work 的目标和既有范围保持不变。"
+                f"既有约束继续保留：{retained_text}。"
+                if retained_text else "当前目标和范围保持不变。"
             )
-            return f"我会把这次输入作为当前 Work 的新增约束处理：{added_text}。{suffix}这不会创建新的 Work。"
+            return f"新增约束已纳入：{added_text}。{suffix}"
         added_text = "; ".join(additions) or latest_human_input.strip()
         retained_text = "; ".join(retained)
         suffix = (
@@ -309,7 +339,7 @@ def policy_governed_response(
             or latest_human_input.strip()
         )
         if chinese:
-            return f"这看起来是一个新的长期对象：{motive}。我会保持当前 Work 不变，由你决定是否为它创建新的 Work。"
+            return f"这更像另一个独立目标：{motive}。当前目标先保持不变；是否单独立项由你决定。"
         return f"This appears to be a new long-lived object: {motive}. The current Work stays unchanged until you decide whether to create a new Work."
 
     content = candidate.natural_response.strip()
@@ -340,6 +370,10 @@ def reconcile_provisional_intent(
         "HUMAN_OWNED_DECISION": PatternSignal.HIGH_IMPACT_AMBIGUITY,
         "DIRECT_QUESTION": PatternSignal.DIRECT_QUESTION,
     }.get(intent)
+    if intent in {"BROAD_MOTIVE", "CONTEXT_ADDITION", "HUMAN_UNCERTAINTY"} and not (
+        PatternSignal.BROWNFIELD_REALITY_CONFLICT in signals
+    ):
+        return ResponseReconciliation.REFINE
     if expected is None or expected not in signals:
         return ResponseReconciliation.MATERIAL_CORRECTION
     if PatternSignal.BROWNFIELD_REALITY_CONFLICT in signals:

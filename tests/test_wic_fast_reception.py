@@ -109,10 +109,31 @@ def test_policy_blocks_stale_low_confidence_and_ungrounded_object() -> None:
     assert apply_fast_grounding_policy(candidate, basis, stale).policy_disposition is FastReceptionVisibility.BLOCKED
 
 
-def test_vague_turn_uses_no_emission_lane() -> None:
+def test_broad_motive_waits_for_context_sensitive_model_response() -> None:
     basis = _basis("OW-A")
     assert DeterministicFastReceptionCapability().receive(
         basis, build_fast_context_card(basis), UUID(int=5)
+    ) is None
+
+
+def test_direct_question_is_not_repeated_as_a_fast_response() -> None:
+    basis = _basis("OW-A", "企业官网一般都需要哪些页面？")
+    assert DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=51)
+    ) is None
+
+
+def test_domain_context_waits_for_context_sensitive_model_response() -> None:
+    basis = _basis("OW-A", "这是一家为制造企业提供节能改造服务的公司。")
+    assert DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=52)
+    ) is None
+
+
+def test_human_uncertainty_waits_for_model_contribution() -> None:
+    basis = _basis("OW-A", "我其实也不知道该做成什么样。")
+    assert DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=53)
     ) is None
 
 

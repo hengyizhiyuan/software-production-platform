@@ -44,8 +44,12 @@
   globalThis.__WATT_TURN_TIMINGS__ = state.turnTimings;
 
   function markTurnTiming(turnId, event, startedAt) {
-    const timing = state.turnTimings[turnId] || { correlationId: turnId, humanSend: startedAt || null };
+    const timing = state.turnTimings[turnId] || { correlationId: turnId, humanSend: startedAt ?? null, durationsMs: {} };
+    if (!timing.durationsMs) timing.durationsMs = {};
     if (timing[event] == null) timing[event] = globalThis.performance.now();
+    if (typeof timing.humanSend === "number" && timing.durationsMs[event] == null) {
+      timing.durationsMs[event] = timing[event] - timing.humanSend;
+    }
     state.turnTimings[turnId] = timing;
     document.documentElement.dataset.wattTurnTimings = JSON.stringify(state.turnTimings);
   }
@@ -478,6 +482,18 @@
           content: streamed.content || "正在处理…", streaming: true,
           processing_status: streamed.status, created_at: streamed.createdAt,
         });
+        if (streamed.content && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") {
+          globalThis.__WATT_MARK_TURN_TIMING__(streamed.turnId, "browserFirstTextPainted");
+        }
+        if (typeof globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__ === "function"
+          && globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__(streamed.content)
+          && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") {
+          globalThis.__WATT_MARK_TURN_TIMING__(streamed.turnId, "firstMeaningfulTextRendered");
+        }
+        if (streamed.phase === "FINAL" && streamed.deferredFinalContent == null
+          && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") {
+          globalThis.__WATT_MARK_TURN_TIMING__(streamed.turnId, "finalResponsePainted");
+        }
       }
       renderInteractionStatus();
       if ((streamed.pendingResponseDeltas && streamed.pendingResponseDeltas.length)
@@ -1643,47 +1659,45 @@
       if (sequence) state.streamingAssistantMessage.responseSequence = sequence;
       return true;
     };
-    const observeMeaningfulPaint = (allowSettled = false) => {
-      if (typeof globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__ === "function" && globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__(streamed)) {
-        globalThis.requestAnimationFrame(() => {
-          if ((current() || allowSettled) && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "firstMeaningfulTextRendered");
-        });
-      }
+    const markBrowserEvent = (name) => {
+      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ !== "function") return;
+      globalThis.__WATT_MARK_TURN_TIMING__(turnId, "browserFirstSseEventReceived");
+      globalThis.__WATT_MARK_TURN_TIMING__(turnId, name);
     };
+    source.addEventListener("open", () => { if (current()) markBrowserEvent("browserSseConnected"); });
     source.addEventListener("turn.status", (event) => {
       if (!current()) return;
+      markBrowserEvent("browserTurnStatusReceived");
       state.streamingAssistantMessage.status = JSON.parse(event.data).status;
       scheduleStreamRender();
     });
     source.addEventListener("message.delta", (event) => {
       if (!current()) return;
-      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "browserEventReceived");
+      markBrowserEvent("browserEventReceived");
       streamed += JSON.parse(event.data).delta;
       state.streamingAssistantMessage.content = streamed;
       scheduleStreamRender();
-      observeMeaningfulPaint();
     });
     source.addEventListener("response.provisional", (event) => {
       if (!current()) return;
       const payload = JSON.parse(event.data);
       if (!acceptResponseEvent(payload)) return;
-      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "browserProvisionalReceived");
+      markBrowserEvent("browserProvisionalReceived");
       streamed = payload.content || "";
       state.streamingAssistantMessage.content = streamed;
       state.streamingAssistantMessage.phase = "PROVISIONAL";
       scheduleStreamRender();
-      observeMeaningfulPaint();
     });
     const appendReconciled = (event, phase) => {
       if (!current()) return;
       const payload = JSON.parse(event.data);
       if (!acceptResponseEvent(payload)) return;
+      markBrowserEvent(`browser${phase}Received`);
       streamed += payload.content || "";
       state.streamingAssistantMessage.content = streamed;
       state.streamingAssistantMessage.phase = phase;
       state.streamingAssistantMessage.reconciliation = payload.reconciliation || null;
       scheduleStreamRender();
-      observeMeaningfulPaint();
     };
     source.addEventListener("response.refinement", (event) => appendReconciled(event, "REFINEMENT"));
     source.addEventListener("response.correction", (event) => appendReconciled(event, "CORRECTION"));
@@ -1691,6 +1705,7 @@
       if (!current()) return;
       const payload = JSON.parse(event.data);
       if (!acceptResponseEvent(payload)) return;
+      markBrowserEvent("browserRealizationStartedReceived");
       state.streamingAssistantMessage.phase = "REALIZING";
       state.streamingAssistantMessage.reconciliation = payload.reconciliation || null;
       scheduleStreamRender();
@@ -1699,22 +1714,21 @@
       if (!current()) return;
       const payload = JSON.parse(event.data);
       if (!acceptResponseEvent(payload)) return;
-      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "browserRealizationDeltaReceived");
+      markBrowserEvent("browserRealizationDeltaReceived");
       streamed += payload.content || "";
       state.streamingAssistantMessage.pendingResponseDeltas.push(payload.content || "");
       state.streamingAssistantMessage.phase = "REALIZING";
       state.streamingAssistantMessage.reconciliation = payload.reconciliation || null;
       scheduleStreamRender();
-      observeMeaningfulPaint();
     });
     source.addEventListener("response.final", (event) => {
       if (!current()) return;
       const payload = JSON.parse(event.data);
       if (!acceptResponseEvent(payload)) return;
+      markBrowserEvent("browserFinalResponseEventReceived");
       streamed = payload.content || streamed;
       state.streamingAssistantMessage.deferredFinalContent = streamed;
       scheduleStreamRender();
-      observeMeaningfulPaint(true);
     });
     source.addEventListener("message.reset", (event) => {
       if (!current()) return;
@@ -1725,7 +1739,7 @@
       scheduleStreamRender();
     });
     source.addEventListener("message.completed", () => {
-      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "finalResponseReceived");
+      markBrowserEvent("finalResponseReceived");
       if (!current()) return;
       state.streamingAssistantMessage.pendingSettlement = { interactionId, turnId, failure: null };
       scheduleStreamRender();

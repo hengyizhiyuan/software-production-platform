@@ -421,6 +421,8 @@ def _wait_for_streaming_terminal(
         try:
             for notification in turn.stream():
                 if notification.method == "item/agentMessage/delta":
+                    if on_pipeline_stage is not None:
+                        on_pipeline_stage("provider_first_token")
                     delta = str(notification.payload.delta)
                     raw_response.append(delta)
                     if extractor is not None:
@@ -912,8 +914,18 @@ class CodexSdkGovernedResponseRealizer:
             "You are Watt's Governed Response Realizer. The supplied envelope is "
             "already governed. Express it naturally without changing intent, facts, "
             "constraints, Work boundaries, readiness, authority, corrections, or its "
-            "single selected question. Never emit forbidden_claims and never add a "
-            "production decision. Return JSON only with natural_response.\n\n"
+            "Human-owned decisions. Interaction Strategy owns only the conversational "
+            "move, altitude, and whether a question is useful; follow it exactly. Treat "
+            "governed_content as semantic material rather than wording to echo. Show "
+            "understanding by advancing the thinking, not by paraphrasing the Human. "
+            "Lead with the answer, judgment, useful frame, comparison, or proposal named "
+            "by primary_move. Stay at next_conversational_granularity. If question_allowed "
+            "is false, ask no question. If true, ask at most max_questions and follow "
+            "question_guidance. A selected_question is governed input but Interaction "
+            "Strategy decides whether it should be visible this turn. Never emit "
+            "forbidden_claims, narrate internal workflow, or add a production decision. "
+            "Use concise, natural language unless depth is needed. Return JSON only with "
+            "natural_response.\n\n"
             + json.dumps(
                 envelope.model_dump(mode="json"),
                 ensure_ascii=False,
@@ -922,6 +934,19 @@ class CodexSdkGovernedResponseRealizer:
             )
         )
         ApprovalMode, Sandbox = _codex_controls()
+        started_at = monotonic()
+        first_delta_seconds: float | None = None
+        stages: dict[str, float] = {}
+
+        def stage(name: str) -> None:
+            stages.setdefault(name, monotonic() - started_at)
+
+        def publish(delta: str) -> None:
+            nonlocal first_delta_seconds
+            if delta.strip() and first_delta_seconds is None:
+                first_delta_seconds = monotonic() - started_at
+            on_response_delta(delta)
+
         with self.codex_factory() as codex:
             thread = codex.thread_start(
                 approval_mode=ApprovalMode.deny_all,
@@ -942,8 +967,9 @@ class CodexSdkGovernedResponseRealizer:
             terminal = _wait_for_streaming_terminal(
                 turn,
                 timeout_seconds=self.timeout_seconds,
-                on_response_delta=on_response_delta,
+                on_response_delta=publish,
                 response_field="natural_response",
+                on_pipeline_stage=stage,
             )
         if terminal.timed_out or terminal.result is None:
             raise InteractionInvariantViolation(
@@ -970,6 +996,11 @@ class CodexSdkGovernedResponseRealizer:
                 f"codex-sdk:governed-realizer-thread:{thread.id}:turn:{turn.id}"
             ),
             model_identity=self.model_identity,
+            timing={
+                "request_to_first_text_seconds": first_delta_seconds,
+                "request_to_complete_seconds": monotonic() - started_at,
+                **stages,
+            },
         )
 
 

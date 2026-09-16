@@ -2,212 +2,379 @@
   {
     "id": "new-goal-vague-zh",
     "category": "vague_new_goal",
-    "messages": ["我想做一个运营管理平台。"],
+    "messages": [
+      "我想做一个运营管理平台。"
+    ],
     "expected_intent": "NEW_GOAL",
-    "quality_contracts": ["proactive_guidance", "at_most_one_question", "no_methodology_dump"]
+    "quality_contracts": [
+      "proactive_guidance",
+      "at_most_one_question",
+      "no_methodology_dump"
+    ]
   },
   {
     "id": "new-goal-clear-zh",
     "category": "new_goal",
-    "messages": ["我想为小型工作室做一个能统一项目进度和风险的运营平台。"],
+    "messages": [
+      "我想为小型工作室做一个能统一项目进度和风险的运营平台。"
+    ],
     "expected_intent": "NEW_GOAL",
-    "quality_contracts": ["context_fidelity", "proactive_guidance"]
+    "quality_contracts": [
+      "context_fidelity",
+      "proactive_guidance"
+    ]
   },
   {
     "id": "direct-design-document-location-zh",
     "category": "direct_question",
-    "messages": ["设计方案的文档会输出到哪里？"],
+    "messages": [
+      "设计方案的文档会输出到哪里？"
+    ],
     "expected_intent": "DIRECT_QUESTION",
-    "quality_contracts": ["direct_answer_first", "truthful_limitation", "no_methodology_dump"]
+    "quality_contracts": [
+      "direct_answer_first",
+      "truthful_limitation",
+      "no_methodology_dump"
+    ]
   },
   {
     "id": "direct-progress-zh",
     "category": "direct_question",
-    "messages": ["现在设计推进到哪一步了？"],
+    "messages": [
+      "现在设计推进到哪一步了？"
+    ],
     "expected_intent": "DIRECT_QUESTION",
-    "quality_contracts": ["direct_answer_first", "context_fidelity"]
+    "quality_contracts": [
+      "direct_answer_first",
+      "context_fidelity"
+    ]
   },
   {
     "id": "context-users-zh",
     "category": "context_addition",
-    "messages": ["主要用户是个人开发者和小型开发工作室。"],
+    "messages": [
+      "主要用户是个人开发者和小型开发工作室。"
+    ],
     "expected_intent": "CONTEXT_ADDITION",
-    "quality_contracts": ["acknowledge_and_use", "no_forced_progression"]
+    "quality_contracts": [
+      "acknowledge_and_use",
+      "no_forced_progression"
+    ]
   },
   {
     "id": "context-channels-zh",
     "category": "context_addition",
-    "messages": ["推广渠道已经确定为技术公众号、小红书和直播。"],
+    "messages": [
+      "推广渠道已经确定为技术公众号、小红书和直播。"
+    ],
     "expected_intent": "CONTEXT_ADDITION",
-    "quality_contracts": ["acknowledge_and_use", "no_repetition"]
+    "quality_contracts": [
+      "acknowledge_and_use",
+      "no_repetition"
+    ]
   },
   {
     "id": "known-context-reuse-zh",
     "category": "known_context_reuse",
-    "messages": ["目标是推广 Watt，用户是个人开发者和小型工作室。", "基于这些信息继续推进。"],
+    "messages": [
+      "目标是推广 Watt，用户是个人开发者和小型工作室。",
+      "基于这些信息继续推进。"
+    ],
     "expected_intent": "CONTINUE_CURRENT_WORK",
-    "quality_contracts": ["context_reuse", "no_repeat_question", "proactive_guidance"]
+    "quality_contracts": [
+      "context_reuse",
+      "no_repeat_question",
+      "proactive_guidance"
+    ]
   },
   {
     "id": "correction-audience-zh",
     "category": "correction",
-    "messages": ["目标用户是大型企业。", "不对，首批用户其实是个人开发者。"],
+    "messages": [
+      "目标用户是大型企业。",
+      "不对，首批用户其实是个人开发者。"
+    ],
     "expected_intent": "CORRECTION",
-    "quality_contracts": ["accept_correction", "context_fidelity", "non_defensive"]
+    "quality_contracts": [
+      "accept_correction",
+      "context_fidelity",
+      "non_defensive"
+    ]
   },
   {
     "id": "correction-scope-zh",
     "category": "correction",
-    "messages": ["这轮做完整工作台。", "纠正一下，这轮只改善对话体验，不重构整个 UI。"],
+    "messages": [
+      "这轮做完整工作台。",
+      "纠正一下，这轮只改善对话体验，不重构整个 UI。"
+    ],
     "expected_intent": "CORRECTION",
-    "quality_contracts": ["accept_correction", "constraint_fidelity"]
+    "quality_contracts": [
+      "accept_correction",
+      "constraint_fidelity"
+    ]
   },
   {
     "id": "disagreement-zh",
     "category": "disagreement",
-    "messages": ["我不同意先做报表，应该先解决任务状态看不懂的问题。"],
+    "messages": [
+      "我不同意先做报表，应该先解决任务状态看不懂的问题。"
+    ],
     "expected_intent": "DISAGREEMENT",
-    "quality_contracts": ["non_defensive", "acknowledge_direction", "proactive_guidance"]
+    "quality_contracts": [
+      "non_defensive",
+      "acknowledge_direction",
+      "proactive_guidance"
+    ]
   },
   {
     "id": "recommend-next-part-zh",
     "category": "request_recommendation",
-    "messages": ["你建议我们下一步先设计哪个部分？"],
+    "messages": [
+      "你建议我们下一步先设计哪个部分？"
+    ],
     "expected_intent": "REQUEST_RECOMMENDATION",
-    "quality_contracts": ["recommendation_first", "concise_rationale", "not_questionnaire"]
+    "quality_contracts": [
+      "recommendation_first",
+      "concise_rationale",
+      "not_questionnaire"
+    ]
   },
   {
     "id": "recommend-release-zh",
     "category": "request_recommendation",
-    "messages": ["这两个方案你更推荐哪一个？"],
+    "messages": [
+      "这两个方案你更推荐哪一个？"
+    ],
     "expected_intent": "REQUEST_RECOMMENDATION",
-    "quality_contracts": ["clear_recommendation", "decision_utility"]
+    "quality_contracts": [
+      "clear_recommendation",
+      "decision_utility"
+    ]
   },
   {
     "id": "decision-support-zh",
     "category": "request_decision_support",
-    "messages": ["实时推送和轮询两种方式怎么取舍？"],
+    "messages": [
+      "实时推送和轮询两种方式怎么取舍？"
+    ],
     "expected_intent": "REQUEST_DECISION_SUPPORT",
-    "quality_contracts": ["material_alternatives", "trade_offs", "recommendation"]
+    "quality_contracts": [
+      "material_alternatives",
+      "trade_offs",
+      "recommendation"
+    ]
   },
   {
     "id": "detail-method-zh",
     "category": "request_detail",
-    "messages": ["把整个设计方法和后续步骤详细讲一下。"],
+    "messages": [
+      "把整个设计方法和后续步骤详细讲一下。"
+    ],
     "expected_intent": "REQUEST_DETAIL",
-    "quality_contracts": ["expanded_detail", "coherent_structure", "relevance"]
+    "quality_contracts": [
+      "expanded_detail",
+      "coherent_structure",
+      "relevance"
+    ]
   },
   {
     "id": "concise-answer-zh",
     "category": "concise_request",
-    "messages": ["一句话告诉我当前最大的风险。"],
+    "messages": [
+      "一句话告诉我当前最大的风险。"
+    ],
     "expected_intent": "DIRECT_QUESTION",
-    "quality_contracts": ["direct_answer_first", "concise"]
+    "quality_contracts": [
+      "direct_answer_first",
+      "concise"
+    ]
   },
   {
     "id": "side-question-zh",
     "category": "side_question",
-    "messages": ["顺便问一下，这里为什么用 SSE？"],
+    "messages": [
+      "顺便问一下，这里为什么用 SSE？"
+    ],
     "expected_intent": "SIDE_QUESTION",
-    "quality_contracts": ["bounded_answer", "optional_return_to_focus"]
+    "quality_contracts": [
+      "bounded_answer",
+      "optional_return_to_focus"
+    ]
   },
   {
     "id": "material-branch-zh",
     "category": "material_branch",
-    "messages": ["如果把多租户也放进第一版，会对当前方案产生什么影响？"],
+    "messages": [
+      "如果把多租户也放进第一版，会对当前方案产生什么影响？"
+    ],
     "expected_intent": "MATERIAL_BRANCH",
-    "quality_contracts": ["surface_scope_impact", "preserve_authority"]
+    "quality_contracts": [
+      "surface_scope_impact",
+      "preserve_authority"
+    ]
   },
   {
     "id": "frustration-zh",
     "category": "frustration",
-    "messages": ["别再重复问这些了，我刚才已经说过目标用户是谁。"],
+    "messages": [
+      "别再重复问这些了，我刚才已经说过目标用户是谁。"
+    ],
     "expected_intent": "FEEDBACK",
-    "quality_contracts": ["acknowledge_frustration", "context_reuse", "no_repeat_question"]
+    "quality_contracts": [
+      "acknowledge_frustration",
+      "context_reuse",
+      "no_repeat_question"
+    ]
   },
   {
     "id": "guided-design-progress-zh",
     "category": "guided_design_progression",
-    "messages": ["用户和核心场景已经明确了，接下来怎么推进？"],
+    "messages": [
+      "用户和核心场景已经明确了，接下来怎么推进？"
+    ],
     "expected_intent": "CONTINUE_CURRENT_WORK",
-    "quality_contracts": ["proactive_guidance", "next_unresolved_focus"]
+    "quality_contracts": [
+      "proactive_guidance",
+      "next_unresolved_focus"
+    ]
   },
   {
     "id": "human-decision-zh",
     "category": "human_decision",
-    "messages": ["我决定先采用方案 A，暂不做方案 B。"],
+    "messages": [
+      "我决定先采用方案 A，暂不做方案 B。"
+    ],
     "expected_intent": "HUMAN_DECISION",
-    "quality_contracts": ["confirm_choice", "immediate_implication", "preserve_authority"]
+    "quality_contracts": [
+      "confirm_choice",
+      "immediate_implication",
+      "preserve_authority"
+    ]
   },
   {
     "id": "system-limitation-zh",
     "category": "system_limitation",
-    "messages": ["Watt 现在能自动把设计文档写进仓库吗？"],
+    "messages": [
+      "Watt 现在能自动把设计文档写进仓库吗？"
+    ],
     "expected_intent": "DIRECT_QUESTION",
-    "quality_contracts": ["truthful_limitation", "direct_answer_first", "no_overclaim"]
+    "quality_contracts": [
+      "truthful_limitation",
+      "direct_answer_first",
+      "no_overclaim"
+    ]
   },
   {
     "id": "verification-failure-zh",
     "category": "verification_explanation",
-    "messages": ["验证为什么没有通过？"],
+    "messages": [
+      "验证为什么没有通过？"
+    ],
     "expected_intent": "DIRECT_QUESTION",
-    "quality_contracts": ["direct_failure_explanation", "evidence_fidelity"]
+    "quality_contracts": [
+      "direct_failure_explanation",
+      "evidence_fidelity"
+    ]
   },
   {
     "id": "attention-required-zh",
     "category": "human_attention",
-    "messages": ["为什么现在需要我决定？"],
+    "messages": [
+      "为什么现在需要我决定？"
+    ],
     "expected_intent": "DIRECT_QUESTION",
-    "quality_contracts": ["direct_answer_first", "authority_clarity"]
+    "quality_contracts": [
+      "direct_answer_first",
+      "authority_clarity"
+    ]
   },
   {
     "id": "continue-work-zh",
     "category": "continue_current_work",
-    "messages": ["按我们已经确定的方向继续。"],
+    "messages": [
+      "按我们已经确定的方向继续。"
+    ],
     "expected_intent": "CONTINUE_CURRENT_WORK",
-    "quality_contracts": ["context_reuse", "no_recap_dump"]
+    "quality_contracts": [
+      "context_reuse",
+      "no_recap_dump"
+    ]
   },
   {
     "id": "experience-feedback-zh",
     "category": "feedback",
-    "messages": ["现在的回答太像报告了，我希望更自然直接。"],
+    "messages": [
+      "现在的回答太像报告了，我希望更自然直接。"
+    ],
     "expected_intent": "FEEDBACK",
-    "quality_contracts": ["acknowledge_feedback", "adapt_response_style"]
+    "quality_contracts": [
+      "acknowledge_feedback",
+      "adapt_response_style"
+    ]
   },
   {
     "id": "new-goal-en",
     "category": "new_goal",
-    "messages": ["I want to design a lightweight operations platform for small studios."],
+    "messages": [
+      "I want to design a lightweight operations platform for small studios."
+    ],
     "expected_intent": "NEW_GOAL",
-    "quality_contracts": ["proactive_guidance", "language_match"]
+    "quality_contracts": [
+      "proactive_guidance",
+      "language_match"
+    ]
   },
   {
     "id": "direct-question-en",
     "category": "direct_question",
-    "messages": ["Where will the design document be written?"],
+    "messages": [
+      "Where will the design document be written?"
+    ],
     "expected_intent": "DIRECT_QUESTION",
-    "quality_contracts": ["direct_answer_first", "truthful_limitation", "language_match"]
+    "quality_contracts": [
+      "direct_answer_first",
+      "truthful_limitation",
+      "language_match"
+    ]
   },
   {
     "id": "detail-request-en",
     "category": "request_detail",
-    "messages": ["Walk me through the full design method and the steps that follow."],
+    "messages": [
+      "Walk me through the full design method and the steps that follow."
+    ],
     "expected_intent": "REQUEST_DETAIL",
-    "quality_contracts": ["expanded_detail", "language_match"]
+    "quality_contracts": [
+      "expanded_detail",
+      "language_match"
+    ]
   },
   {
     "id": "correction-en",
     "category": "correction",
-    "messages": ["The first users are enterprises.", "Correction: the first users are individual developers."],
+    "messages": [
+      "The first users are enterprises.",
+      "Correction: the first users are individual developers."
+    ],
     "expected_intent": "CORRECTION",
-    "quality_contracts": ["accept_correction", "non_defensive", "language_match"]
+    "quality_contracts": [
+      "accept_correction",
+      "non_defensive",
+      "language_match"
+    ]
   },
   {
     "id": "completed-work-new-demand-zh",
     "category": "new_work_transition",
-    "messages": ["当前工作已经完成。另一个需求是增加团队权限管理。"],
+    "messages": [
+      "当前工作已经完成。另一个需求是增加团队权限管理。"
+    ],
     "expected_intent": "MATERIAL_BRANCH",
-    "quality_contracts": ["new_work_boundary", "no_authority_inheritance"]
+    "quality_contracts": [
+      "new_work_boundary",
+      "no_authority_inheritance"
+    ]
   },
   {
     "id": "priority-solo-deadline-multiturn-zh",
@@ -218,9 +385,19 @@
       "第一批每周一场活动，每场最多三十人；现在最费事的是报名名单和候补补位。",
       "第一版先做哪一块？其他内容你建议怎么取舍？"
     ],
-    "expected_intents": ["NEW_GOAL", "CONTEXT_ADDITION", "REQUEST_RECOMMENDATION"],
+    "expected_intents": [
+      "NEW_GOAL",
+      "CONTEXT_ADDITION",
+      "REQUEST_RECOMMENDATION"
+    ],
     "expected_intent": "REQUEST_RECOMMENDATION",
-    "quality_contracts": ["priority_grounded_in_constraints", "material_trade_offs", "concrete_next_action", "no_invented_user_facts", "no_unnecessary_question"],
+    "quality_contracts": [
+      "priority_grounded_in_constraints",
+      "material_trade_offs",
+      "concrete_next_action",
+      "no_invented_user_facts",
+      "no_unnecessary_question"
+    ],
     "review_guidance": [
       "看推荐是否利用单人维护、两周工期、名单与候补的实际痛点说明优先级，而不是把所有可能模块列为一期范围。",
       "允许不同合理方案；评价取舍依据和可执行性，不按特定模块名判分。费用、增长阶段、营销渠道等未给定信息不得当成用户事实。",
@@ -237,9 +414,20 @@
       "那你推荐第一版从哪里开始？",
       "把你刚才推荐的那一部分展开一点，说明日常怎么用。"
     ],
-    "expected_intents": ["NEW_GOAL", "CORRECTION", "REQUEST_RECOMMENDATION", "REQUEST_DETAIL"],
+    "expected_intents": [
+      "NEW_GOAL",
+      "CORRECTION",
+      "REQUEST_RECOMMENDATION",
+      "REQUEST_DETAIL"
+    ],
     "expected_intent": "REQUEST_DETAIL",
-    "quality_contracts": ["accept_correction", "correction_persistence", "constraint_fidelity", "referential_continuity", "no_recap_dump"],
+    "quality_contracts": [
+      "accept_correction",
+      "correction_persistence",
+      "constraint_fidelity",
+      "referential_continuity",
+      "no_recap_dump"
+    ],
     "review_guidance": [
       "从第二轮起保持独立书店、店主操作、不接总部系统的纠正；后续不复活多门店、总部接入等旧假设。",
       "承认纠正一次即可，后续通过建议体现理解，不反复讲解之前为什么理解错了。",
@@ -255,9 +443,20 @@
       "我不想先做统计报表，就先把接单、维修、待取和完结这些状态讲清楚。",
       "继续，直接给我看一个工单怎么走完，不用再问我先做哪块。"
     ],
-    "expected_intents": ["NEW_GOAL", "DISAGREEMENT", "CONTINUE_CURRENT_WORK"],
+    "expected_intents": [
+      "NEW_GOAL",
+      "DISAGREEMENT",
+      "CONTINUE_CURRENT_WORK"
+    ],
     "expected_intent": "CONTINUE_CURRENT_WORK",
-    "quality_contracts": ["non_defensive", "respect_rejected_direction", "context_reuse", "no_repeat_question", "concrete_next_action", "warm_without_flattery"],
+    "quality_contracts": [
+      "non_defensive",
+      "respect_rejected_direction",
+      "context_reuse",
+      "no_repeat_question",
+      "concrete_next_action",
+      "warm_without_flattery"
+    ],
     "review_guidance": [
       "推荐应转向用户指定的工单状态与交接，不能继续推动先做报表或要求再次选择起点。",
       "最后一轮要给出具体工单流转示例；可说明仍待确认的责任分工假设，但不要把所有岗位当成已知事实。",
@@ -273,9 +472,19 @@
       "具体谁录入我还没定，这个先放一放；目前确定只登记器材、借用人和预计归还日期。",
       "按这些信息先给我一个最小流程看看。"
     ],
-    "expected_intents": ["NEW_GOAL", "CONTEXT_ADDITION", "CONTINUE_CURRENT_WORK"],
+    "expected_intents": [
+      "NEW_GOAL",
+      "CONTEXT_ADDITION",
+      "CONTINUE_CURRENT_WORK"
+    ],
     "expected_intent": "CONTINUE_CURRENT_WORK",
-    "quality_contracts": ["respect_deferred_question", "no_repeat_question", "no_unnecessary_question", "provisional_assumptions", "concrete_next_action"],
+    "quality_contracts": [
+      "respect_deferred_question",
+      "no_repeat_question",
+      "no_unnecessary_question",
+      "provisional_assumptions",
+      "concrete_next_action"
+    ],
     "review_guidance": [
       "录入角色被明确延后，后续不得再次拿角色确认阻塞最小借还流程。",
       "可展示登记、查看待归还、归还登记等有依据的流程；不得默认指定物业或管理员为真实操作者。",
@@ -291,9 +500,20 @@
       "现有讨论的设计文档已经保存了吗？如果没有就直接告诉我。",
       "回到预约工具，推荐一下第一版的预约冲突怎么处理。"
     ],
-    "expected_intents": ["NEW_GOAL", "DIRECT_QUESTION", "REQUEST_RECOMMENDATION"],
+    "expected_intents": [
+      "NEW_GOAL",
+      "DIRECT_QUESTION",
+      "REQUEST_RECOMMENDATION"
+    ],
     "expected_intent": "REQUEST_RECOMMENDATION",
-    "quality_contracts": ["direct_answer_first", "truthful_limitation", "no_invented_file_path", "detour_return", "context_reuse", "no_forced_progression"],
+    "quality_contracts": [
+      "direct_answer_first",
+      "truthful_limitation",
+      "no_invented_file_path",
+      "detour_return",
+      "context_reuse",
+      "no_forced_progression"
+    ],
     "review_guidance": [
       "第二轮直接说明实际文档状态；纯 pre-Work 对话没有文件写入时，不得捏造文档、路径或已完成保存。",
       "回答文档问题不应夹带需求问题或强推设计流程。",
@@ -309,13 +529,264 @@
       "我们现在直接在群里接龙，麻烦是临时请假后找不到替补。",
       "详细讲讲你推荐的替补流程，包括一个具体例子和可能的例外，不用解释你怎么分析需求。"
     ],
-    "expected_intents": ["NEW_GOAL", "CONTEXT_ADDITION", "REQUEST_DETAIL"],
+    "expected_intents": [
+      "NEW_GOAL",
+      "CONTEXT_ADDITION",
+      "REQUEST_DETAIL"
+    ],
     "expected_intent": "REQUEST_DETAIL",
-    "quality_contracts": ["expanded_detail", "context_fidelity", "useful_example", "material_exceptions", "no_methodology_dump", "value_proportional_detail"],
+    "quality_contracts": [
+      "expanded_detail",
+      "context_fidelity",
+      "useful_example",
+      "material_exceptions",
+      "no_methodology_dump",
+      "value_proportional_detail"
+    ],
     "review_guidance": [
       "详细回答应包含适合二十人、每周排班的替补流程、具体例子及与临时缺席相关的例外，不只给几句结论。",
       "流程规则尚未被用户确认，应作为建议表达；示例中的人物、时间不能被当成项目真实事实。",
       "不按短字数奖励答案：评估新增篇幅是否带来操作步骤、判断依据、例外处理等实际信息，避免重复总结和分析框架说明。"
+    ]
+  },
+  {
+    "id": "recovery-broad-enterprise-site-zh",
+    "category": "vague_new_goal",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我想做一个企业官网。"
+    ],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": [
+      "no_repetition",
+      "cognitive_alignment",
+      "orient_before_detail",
+      "at_most_one_question",
+      "object_relevant_next_move",
+      "no_unsupported_domain_premise",
+      "no_cross_domain_template"
+    ],
+    "review_guidance": [
+      "回应应从企业官网这一实际对象出发，先提供有用定位；如提问，只问一个会改变下一步方向的已知事实。",
+      "不得把网站场景的思考顺序提升为所有宽泛产品需求的固定模板。"
+    ]
+  },
+  {
+    "id": "recovery-domain-context-zh",
+    "category": "context_addition",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我想做一个企业官网。",
+      "我们是一家给制造企业做节能改造的公司。"
+    ],
+    "expected_intent": "CONTEXT_ADDITION",
+    "quality_contracts": [
+      "context_fidelity",
+      "relevant_framing",
+      "progressive_narrowing",
+      "no_repetition"
+    ]
+  },
+  {
+    "id": "recovery-specific-style-question-zh",
+    "category": "request_recommendation",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我们的客户男女比例是3:7，你觉得我们应该如何设计官网风格？"
+    ],
+    "expected_intent": "REQUEST_RECOMMENDATION",
+    "quality_contracts": [
+      "recommendation_first",
+      "decision_utility",
+      "cognitive_alignment",
+      "not_questionnaire"
+    ]
+  },
+  {
+    "id": "recovery-direct-pages-question-zh",
+    "category": "direct_question",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "企业官网一般都需要哪些页面？"
+    ],
+    "expected_intent": "DIRECT_QUESTION",
+    "quality_contracts": [
+      "direct_answer_first",
+      "useful_information",
+      "no_forced_progression",
+      "no_repetition"
+    ]
+  },
+  {
+    "id": "recovery-human-uncertainty-zh",
+    "category": "human_uncertainty",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我其实也不知道该做成什么样。"
+    ],
+    "expected_intent": "REQUEST_DECISION_SUPPORT",
+    "quality_contracts": [
+      "proactive_guidance",
+      "meaningful_alternatives",
+      "not_questionnaire",
+      "warm_without_flattery"
+    ]
+  },
+  {
+    "id": "recovery-long-context-zh",
+    "category": "long_context",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我们是一家做工业节能改造的公司，客户主要是华东地区年产值一亿以上的制造企业，决策人通常是老板或生产负责人。官网主要用于建立信任、展示真实案例并承接销售线索；第一版不做客户登录，也不需要复杂内容系统，销售同事要能方便地把案例链接发给客户。"
+    ],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": [
+      "context_fidelity",
+      "no_recap_dump",
+      "advance_the_thinking",
+      "priority_grounded_in_constraints",
+      "value_proportional_detail"
+    ]
+  },
+  {
+    "id": "recovery-consumer-decision-mini-program-zh",
+    "category": "partially_formed_product_concept",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我想做一个面向C端用户的决策助手类小程序。"
+    ],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": [
+      "object_relevant_next_move",
+      "context_fidelity",
+      "advance_the_thinking",
+      "not_questionnaire",
+      "no_unsupported_domain_premise",
+      "no_cross_domain_template"
+    ],
+    "review_guidance": [
+      "必须识别C端用户、决策助手和小程序均已给出，推进重点应与用户要做何种决策、怎样获得决策价值或使用方式有关。",
+      "不得引入企业或组织类型、官网页面、访客转化等未提供前提，也不得仅替换名词复用企业官网问法。"
+    ]
+  },
+  {
+    "id": "recovery-mobile-app-zh",
+    "category": "partially_formed_product_concept",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我想做一个帮助独居老人按时吃药的手机应用。"
+    ],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": [
+      "object_relevant_next_move",
+      "context_fidelity",
+      "advance_the_thinking",
+      "human_context_sensitivity",
+      "no_cross_domain_template"
+    ],
+    "review_guidance": [
+      "回应应利用独居老人、按时用药和手机应用这些已知信息，贡献与可靠提醒或照护闭环有关的判断。",
+      "不得退回泛化的行业、企业、受众问卷，也不得重复询问已经给出的目标用户。"
+    ]
+  },
+  {
+    "id": "recovery-internal-approval-system-zh",
+    "category": "internal_product",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我想做一个员工请假审批系统。"
+    ],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": [
+      "object_relevant_next_move",
+      "use_context_appropriate_frame",
+      "not_questionnaire",
+      "no_unsupported_domain_premise",
+      "no_cross_domain_template"
+    ],
+    "review_guidance": [
+      "回应应围绕真实请假和审批情境推进，例如现行链路、关键角色或例外，而不是消费者或网站语境。",
+      "不得询问访客、企业对外展示、页面或转化目标。"
+    ]
+  },
+  {
+    "id": "recovery-developer-cli-zh",
+    "category": "developer_tool",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我想做一个日志分析 CLI。"
+    ],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": [
+      "object_relevant_next_move",
+      "technical_context_sensitivity",
+      "advance_the_thinking",
+      "no_unsupported_domain_premise",
+      "no_cross_domain_template"
+    ],
+    "review_guidance": [
+      "回应应把它理解为开发者命令行工具，并从日志诊断场景、输入来源或期望输出等高价值概念推进。",
+      "不得引入企业官网、访客、页面、渠道或C端用户画像。"
+    ]
+  },
+  {
+    "id": "recovery-engineering-infrastructure-zh",
+    "category": "engineering_infrastructure",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我想设计一个工程上下文基础设施。"
+    ],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": [
+      "object_relevant_next_move",
+      "technical_context_sensitivity",
+      "help_frame_immature_concept",
+      "advance_the_thinking",
+      "no_cross_domain_template"
+    ],
+    "review_guidance": [
+      "回应应帮助界定工程上下文基础设施解决的问题、责任边界或跨工具一致性，不应假装概念已经充分具体。",
+      "不得套用产品页面、消费者受众或企业类型的需求访谈。"
+    ]
+  },
+  {
+    "id": "recovery-content-site-zh",
+    "category": "content_product",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我想做一个介绍地方非遗的内容网站。"
+    ],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": [
+      "object_relevant_next_move",
+      "content_context_sensitivity",
+      "advance_the_thinking",
+      "not_questionnaire",
+      "no_cross_domain_template"
+    ],
+    "review_guidance": [
+      "回应应识别内容传播与地方非遗语境，优先推进内容价值、叙事对象或持续维护等真正影响方向的概念。",
+      "不能因为同为网站就照搬企业官网的业务、组织类型或销售线索问法。"
+    ]
+  },
+  {
+    "id": "recovery-vague-business-idea-zh",
+    "category": "vague_business_idea",
+    "evaluation_group": "wic_experience_recovery",
+    "messages": [
+      "我有个想法，想做点能帮小团队提高效率的东西。"
+    ],
+    "expected_intent": "NEW_GOAL",
+    "quality_contracts": [
+      "help_frame_immature_concept",
+      "proactive_guidance",
+      "meaningful_alternatives",
+      "not_questionnaire",
+      "no_cross_domain_template"
+    ],
+    "review_guidance": [
+      "对象尚未形成，Watt应先帮助拆解小团队效率问题或给出可比较方向，而不是假定具体产品形态。",
+      "不得只复述输入或用固定的企业、受众、页面顺序开始问卷。"
     ]
   }
 ]

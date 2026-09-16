@@ -4,6 +4,13 @@ from datetime import UTC, datetime
 import json
 from uuid import UUID
 
+from spg.domain.conversation import (
+    CognitiveMaturity,
+    ConversationalMove,
+    HumanAbstractionLevel,
+    HumanConversationMode,
+    InteractionStrategy,
+)
 from spg.domain.interaction import (
     Interaction,
     InteractionActor,
@@ -168,6 +175,13 @@ def test_governed_realizer_uses_configured_conversation_profile_and_streams() ->
         semantic_policy_revision="policy-v1",
         question_policy_revision="question-v1",
         response_language="zh-CN",
+        interaction_strategy=InteractionStrategy(
+            human_abstraction_level=HumanAbstractionLevel.SOLUTION,
+            cognitive_maturity=CognitiveMaturity.FRAMING,
+            human_mode=HumanConversationMode.EXPLORING,
+            primary_move=ConversationalMove.ORIENT,
+            next_conversational_granularity="Stay at product direction level.",
+        ),
     )
     deltas: list[str] = []
 

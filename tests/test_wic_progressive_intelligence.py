@@ -8,6 +8,13 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 
 import pytest
 
+from spg.domain.conversation import (
+    CognitiveMaturity,
+    ConversationalMove,
+    HumanAbstractionLevel,
+    HumanConversationMode,
+    InteractionStrategy,
+)
 from spg.application.interaction import WorkInteractionService, interaction_basis_fingerprint
 from spg.application.wic_intelligence import build_progressive_semantics
 from spg.application.wic_response import (
@@ -22,7 +29,7 @@ from spg.domain.interaction import (
     Interaction, InteractionActor, InteractionAssessment,
     InteractionAssessmentCandidate, InteractionCondition,
     InteractionInterpretationInput, InteractionRecord,
-    WorkFocusClassification, WorkImpactDisposition,
+    WorkAdmissionReadinessStatus, WorkFocusClassification, WorkImpactDisposition,
 )
 from spg.domain.wic_intelligence import (
     GovernanceCandidateKind, InferenceDisposition, PatternSignal,
@@ -192,9 +199,9 @@ def test_ow_e_final_visible_response_names_new_object_without_relabeling_work() 
         latest_human_input=_case("OW-E").human_turns[-1].content,
         active_context=_inputs("OW-E")[1],
     )
-    assert "新的长期对象：一个独立的招聘网站" in response
-    assert "保持当前 Work 不变" in response
-    assert "新的长期对象：开发用于推广 Watt 的运营管理后台" not in response
+    assert "另一个独立目标：一个独立的招聘网站" in response
+    assert "当前目标先保持不变" in response
+    assert "另一个独立目标：开发用于推广 Watt 的运营管理后台" not in response
 
 
 def test_fast_and_deep_share_basis_and_reconcile_as_one_response() -> None:
@@ -248,6 +255,16 @@ def test_governed_delta_gate_rejects_forbidden_claim_split_across_raw_deltas() -
         semantic_policy_revision="policy-v1",
         question_policy_revision="question-v1",
         response_language="zh-CN",
+        interaction_strategy=InteractionStrategy(
+            human_abstraction_level=HumanAbstractionLevel.DOMAIN,
+            cognitive_maturity=CognitiveMaturity.EVALUATING,
+            human_mode=HumanConversationMode.DECIDING,
+            primary_move=ConversationalMove.ESCALATE_HUMAN_DECISION,
+            next_conversational_granularity="Stay at the authority boundary.",
+            question_allowed=True,
+            max_questions=1,
+            question_guidance="Ask for one Human-owned boundary.",
+        ),
     )
     emitted: list[str] = []
     gate = GovernedDeltaGate(envelope, emitted.append)
@@ -300,6 +317,53 @@ def test_readiness_is_advisory_and_artifact_requires_a_consumer() -> None:
     assert all(item.authority == "ADVISORY_ONLY" for item in result.readiness)
     assert result.artifact_recommendation is None
     assert not hasattr(result, "admit_work")
+
+
+def test_general_information_question_remains_conversation_only() -> None:
+    candidate = _candidate(
+        "OW-A",
+        interpreted_motive="规划一个企业官网",
+        desired_outcome="形成完整的网站页面结构",
+    )
+    result = _build(
+        "OW-A",
+        candidate=candidate,
+        text="企业官网一般都需要哪些页面？",
+    )
+
+    assert result.governance_candidate is GovernanceCandidateKind.CONVERSATION_ONLY
+    formation = next(
+        item for item in result.readiness if item.target is ReadinessTarget.WORK_FORMATION
+    )
+    assert formation.status is TransitionReadinessStatus.NOT_READY
+    assert formation.missing_material_evidence == ("WORK_MOTIVE",)
+
+    readiness = WorkInteractionService._evaluate_readiness(
+        candidate,
+        result.basis_fingerprint,
+        governance_candidate=result.governance_candidate,
+    )
+    assert readiness.status is WorkAdmissionReadinessStatus.NOT_READY
+    assert readiness.missing_information == ("WORK_MOTIVE",)
+
+
+def test_english_general_information_question_remains_conversation_only() -> None:
+    candidate = _candidate(
+        "OW-A",
+        interpreted_motive="Plan a corporate website",
+        desired_outcome="Produce a complete sitemap",
+    )
+    result = _build(
+        "OW-A",
+        candidate=candidate,
+        text="What pages does a corporate website usually need?",
+    )
+
+    assert result.governance_candidate is GovernanceCandidateKind.CONVERSATION_ONLY
+    formation = next(
+        item for item in result.readiness if item.target is ReadinessTarget.WORK_FORMATION
+    )
+    assert formation.status is TransitionReadinessStatus.NOT_READY
 
 
 def test_selected_material_question_prevents_early_formation_readiness() -> None:

@@ -24,6 +24,16 @@ _HUMAN_AUTHORITY = re.compile(
 _SAFE_REVERSIBLE = re.compile(r"(沿用现有规范|现有样式|文案|可撤销|可逆)")
 _CORRECTION = re.compile(r"(?:不对|不是|纠正|改口)[，,:：\s]*(.+)")
 _NEW_OBJECT = re.compile(r"(?:另外|还有).*(?:我想|我要).*(?:开发|做|创建).*(?:系统|平台|网站|应用)")
+_GENERAL_INFORMATION_QUESTION = re.compile(
+    r"(?:一般|通常|常见|是什么|有哪些|包括哪些|区别|为什么|怎么理解|需要哪些|"
+    r"\bwhat\b|\bwhich\b|\bwhy\b|\bhow\b|\busually\b|\btypically\b|\bcommon\b)",
+    re.IGNORECASE,
+)
+_WORK_INTENT = re.compile(
+    r"(?:我想|我要|我们想|我们要|请帮|帮我|开发|创建|搭建|建设|改造|实现|"
+    r"\bi want\b|\bwe want\b|\bhelp me\b|\bbuild\b|\bcreate\b|\bimplement\b)",
+    re.IGNORECASE,
+)
 
 
 def _correction_target(value: str) -> str:
@@ -163,10 +173,19 @@ def build_progressive_semantics(
     selected = next((q.question for q in questions if q.disposition is QuestionDisposition.ASK_HUMAN_NOW), None)
     unresolved = tuple(dict.fromkeys((*decisions, *((selected,) if selected else ()))))
 
+    conversation_only = (
+        active_context is None
+        and prior_assessment is None
+        and PatternSignal.DIRECT_QUESTION in signals
+        and bool(_GENERAL_INFORMATION_QUESTION.search(text))
+        and not bool(_WORK_INTENT.search(text))
+    )
     if PatternSignal.NEW_LONG_LIVED_OBJECT in signals:
         governance = GovernanceCandidateKind.NEW_MOTIVE_CANDIDATE
     elif human_owned:
         governance = GovernanceCandidateKind.HUMAN_DECISION_REQUIRED
+    elif conversation_only:
+        governance = GovernanceCandidateKind.CONVERSATION_ONLY
     elif active_context is None:
         governance = GovernanceCandidateKind.WORK_FORMATION_PROPOSAL
     elif impact is WorkImpactDisposition.NO_GOVERNED_CHANGE:
@@ -180,9 +199,14 @@ def build_progressive_semantics(
     readiness = (
         TransitionReadiness(
             target=ReadinessTarget.WORK_FORMATION,
-            status=TransitionReadinessStatus.READY if active_context is None and motive_ok and outcome_ok and not blocked else TransitionReadinessStatus.NOT_READY if active_context is None else TransitionReadinessStatus.NOT_APPLICABLE,
+            status=TransitionReadinessStatus.READY if active_context is None and not conversation_only and motive_ok and outcome_ok and not blocked else TransitionReadinessStatus.NOT_READY if active_context is None else TransitionReadinessStatus.NOT_APPLICABLE,
             satisfied_evidence=tuple(x for x, ok in (("MOTIVE", motive_ok), ("DESIRED_OUTCOME", outcome_ok)) if ok),
-            missing_material_evidence=tuple(x for x, ok in (("MOTIVE", motive_ok), ("DESIRED_OUTCOME", outcome_ok)) if not ok) + (("HIGHEST_VALUE_QUESTION_ANSWER",) if selected else ()),
+            missing_material_evidence=(
+                ("WORK_MOTIVE",)
+                if conversation_only
+                else tuple(x for x, ok in (("MOTIVE", motive_ok), ("DESIRED_OUTCOME", outcome_ok)) if not ok)
+                + (("HIGHEST_VALUE_QUESTION_ANSWER",) if selected else ())
+            ),
             unresolved_human_decisions=unresolved, material_risks=("HIGH_IMPACT_AUTHORITY",) if decisions else (),
             useful_work_may_continue=True, basis_fingerprint=basis_fingerprint,
         ),

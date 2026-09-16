@@ -1,8 +1,8 @@
 # Human–Watt Conversation Intelligence
 
-Status: **IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER PROOF PASS**
+Status: **IMPLEMENTED / GOVERNED STREAMING QUALIFIED / EXPERIENCE RECOVERY PENDING HUMAN RETEST**
 
-Human Product Acceptance: **PENDING**
+Human Product Acceptance: **FAIL (2026-09-16); RECOVERY RETEST PENDING**
 
 ## Purpose
 
@@ -24,8 +24,10 @@ Human Turn
     -> Design Intent Frame when the turn concerns design/build/change/review
     -> StructuredCollaborationResult
     -> ConversationContextProvider
-    -> ConversationResponseComposer
-    -> ConversationProvider
+    -> policy / Repository Reality / Human Authority
+    -> InteractionStrategy
+    -> GovernedResponseEnvelope
+    -> Conversation Realizer
     -> existing streaming Watt message
 ```
 
@@ -143,6 +145,32 @@ Guided Design remains proactive: it may frame the problem, recommend discussion
 order, identify the next material focus, and explain trade-offs. The language
 plane changes expression, not who owns the next Step or product decision.
 
+## Interaction strategy
+
+`InteractionStrategy` is the bounded seam between admitted semantics and
+Human-facing realization. It classifies the Human's current abstraction level,
+cognitive maturity and conversation mode, then selects one primary move:
+`ORIENT`, `EXPLAIN`, `PROPOSE`, `COMPARE`, `ANSWER`, `ASK`, `CONFIRM`, `CORRECT`
+or `ESCALATE_HUMAN_DECISION`. It also sets the next useful granularity and
+whether one question is warranted.
+
+The strategy owns conversational advancement only. It cannot redefine Human
+Intent, Work identity or readiness, Repository Reality, or a Human-owned
+decision. It also does not author a domain interview or choose the case-specific
+question. The configured model reasons from the actual object and supplied
+context; deterministic policy only bounds the move, abstraction level, question
+allowance, and governance constraints. `ASK` is not the fallback for
+uncertainty: an early vague motive is oriented at its current level, a concrete
+question is answered, and Human uncertainty receives useful framing or
+alternatives before Watt asks for more. Explicit restatement is reserved for
+correction, material ambiguity, Human Authority, or a costly constraint.
+
+For a coalesced pre-Work call, the admitted natural wording already comes from
+the configured Conversation role. The Realizer seam therefore uses bounded
+deterministic streaming after strategy and policy admission instead of issuing
+a second serial Provider request. Separately configured or custom pipelines
+retain the replaceable Realizer contract.
+
 The implemented [Design Intent Framing Layer](design-intent-framing-layer.md)
 now precedes schema selection. It separates the object being designed from its
 business context and supplies the same structured frame to Conversation
@@ -192,11 +220,15 @@ production governance. Human remains the Authority owner.
 
 ## Conversation quality benchmark
 
-`benchmarks/conversation_quality/` contains 30 Chinese and English cases across
+`benchmarks/conversation_quality/` contains 49 Chinese and English cases across
 all 13 intents and realistic Watt categories: vague goals, context reuse,
 questions, corrections, disagreement, recommendations, decision support,
 detail requests, side questions, frustration, Guided Design progression, Human
-decisions, limitations, Verification, and Human Attention.
+decisions, limitations, Verification, and Human Attention. Thirteen experience
+recovery cases additionally span an enterprise site, consumer mini program,
+mobile application, internal approval system, developer CLI, engineering
+infrastructure, content site, vague business idea, domain context, specific
+design and factual questions, Human uncertainty, and a long contextual turn.
 
 Quality uses deterministic contract/structural assertions plus a bounded
 real-Provider subset and Human-reviewable evidence. Dimensions are directness,
@@ -206,7 +238,8 @@ Subjective quality is not reduced to one boolean or brittle exact strings.
 
 ## Known limitations
 
-- Human Product Acceptance remains pending.
+- The 2026-09-16 Human Product Acceptance result is `FAIL`; the experience
+  recovery iteration requires a new Human retest.
 - Design Intent Framing focused deterministic validation and its bounded real
   `gpt-5.6-sol` correction proof have passed.
 - Active Work and separately configured providers still require two serial Turns.

@@ -47,6 +47,68 @@ class ConversationPolicyHint(StrEnum):
     RETURN_TO_CURRENT_FOCUS = "RETURN_TO_CURRENT_FOCUS"
 
 
+class HumanAbstractionLevel(StrEnum):
+    """Altitude of the Human's latest expression, not product readiness."""
+
+    VISION = "VISION"
+    DOMAIN = "DOMAIN"
+    SOLUTION = "SOLUTION"
+    IMPLEMENTATION = "IMPLEMENTATION"
+
+
+class CognitiveMaturity(StrEnum):
+    """How formed the Human's current thinking is for this turn."""
+
+    EXPLORING = "EXPLORING"
+    FRAMING = "FRAMING"
+    EVALUATING = "EVALUATING"
+    SPECIFYING = "SPECIFYING"
+
+
+class HumanConversationMode(StrEnum):
+    EXPLORING = "EXPLORING"
+    DECIDING = "DECIDING"
+    CORRECTING = "CORRECTING"
+    ASKING = "ASKING"
+    SPECIFYING = "SPECIFYING"
+
+
+class ConversationalMove(StrEnum):
+    ORIENT = "ORIENT"
+    EXPLAIN = "EXPLAIN"
+    PROPOSE = "PROPOSE"
+    COMPARE = "COMPARE"
+    ANSWER = "ANSWER"
+    ASK = "ASK"
+    CONFIRM = "CONFIRM"
+    CORRECT = "CORRECT"
+    ESCALATE_HUMAN_DECISION = "ESCALATE_HUMAN_DECISION"
+
+
+class InteractionStrategy(BaseModel):
+    """Turn-taking advice over governed semantics; never a Product Truth owner."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    human_abstraction_level: HumanAbstractionLevel
+    cognitive_maturity: CognitiveMaturity
+    human_mode: HumanConversationMode
+    primary_move: ConversationalMove
+    next_conversational_granularity: str = Field(min_length=1)
+    question_allowed: bool = False
+    max_questions: int = Field(default=0, ge=0, le=1)
+    question_guidance: str | None = None
+    demonstrate_understanding_without_restating: bool = True
+
+    @model_validator(mode="after")
+    def question_contract_is_consistent(self) -> "InteractionStrategy":
+        if self.question_allowed != (self.max_questions == 1):
+            raise ValueError("question allowance and maximum must agree")
+        if not self.question_allowed and self.question_guidance is not None:
+            raise ValueError("question guidance requires an allowed question")
+        return self
+
+
 class ConversationContextMessage(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -76,6 +138,7 @@ class ConversationContext(BaseModel):
     relevant_reality_references: tuple[str, ...] = ()
     response_language: str = Field(min_length=1, max_length=32)
     detailed_explanation_requested: bool = False
+    interaction_strategy: InteractionStrategy | None = None
 
 
 class CollaborationAlternative(BaseModel):

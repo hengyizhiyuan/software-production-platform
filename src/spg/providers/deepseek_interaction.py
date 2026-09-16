@@ -210,9 +210,14 @@ class DeepSeekGovernedResponseRealizer:
             "already admitted by WIC policy. You own only clear, natural wording and "
             "pacing. Do not reinterpret intent, change Work boundaries, invent facts, "
             "make Human-owned decisions, change readiness, or add production authority. "
-            "Preserve every fact, constraint, correction, question, and authority "
-            "boundary. Never emit any forbidden_claim. Return JSON only with one "
-            "natural_response string.\n\nGoverned Response Envelope:\n"
+            "Preserve every fact, constraint, correction, and authority boundary. "
+            "Follow interaction_strategy for the primary conversational move, altitude, "
+            "and question allowance. Treat governed_content as semantic material, not "
+            "wording to repeat. Demonstrate understanding by advancing the thinking; "
+            "avoid paraphrasing the Human, workflow narration, and questionnaire behavior. "
+            "If question_allowed is false, ask none; otherwise ask at most max_questions. "
+            "Never emit any forbidden_claim. Return JSON only with one natural_response "
+            "string.\n\nGoverned Response Envelope:\n"
             + json.dumps(
                 envelope.model_dump(mode="json"),
                 ensure_ascii=False,

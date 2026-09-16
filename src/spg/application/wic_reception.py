@@ -28,8 +28,6 @@ _CORRECTION = re.compile(r"(?:不对|不是|纠正|改口)[，,:：\s]*(.+)")
 _CONSTRAINT = re.compile(r"(?:新增约束|约束是|必须|不得|不要)[：,:，\s]*(.+)")
 _NARROW_CHANGE = re.compile(r"(把.+?(?:改成|改为).+?)(?:[。；;]|$)")
 _NEW_OBJECT = re.compile(r"(?:另外|还有).*(我想|我要).*(开发|做|创建)(.+?(?:系统|平台|网站|应用))")
-
-
 def _correction_target(value: str) -> str:
     reversed_object = re.search(r"不是.+?[，,]是(.+)", value)
     if reversed_object:
@@ -89,8 +87,9 @@ class DeterministicFastReceptionCapability:
             intent = "POSSIBLE_NEW_OBJECT"; captured = match.group(3).strip("。 ")
             sentence = f"你提出了另一个对象：{captured}；是否形成新 Work 仍由你决定。"
         elif text.endswith(("?", "？")):
-            intent = "DIRECT_QUESTION"; captured = text.rstrip("?？")
-            sentence = f"你现在问的是：{captured}。"
+            # Repeating a question is not a meaningful fast response. Let the
+            # governed answer become the first visible text instead.
+            return None
         if sentence is None:
             return None
         ready = (monotonic() - started) * 1000

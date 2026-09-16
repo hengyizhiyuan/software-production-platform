@@ -848,6 +848,63 @@ def test_controlled_vnext_exposes_fast_and_settles_one_policy_governed_response(
     service.shutdown()
 
 
+def test_controlled_vnext_reuses_admitted_conversation_text_without_second_provider(
+    postgres_database: Database,
+) -> None:
+    class Evidence:
+        provider_call_count = 1
+
+    class CompleteConversationCapability:
+        last_pipeline_evidence = Evidence()
+
+        def interpret(self, basis: InteractionInterpretationInput):
+            return InteractionAssessmentCandidate(
+                interpreted_motive="设计企业官网",
+                desired_outcome="形成可信的官网方向",
+                current_requests=(basis.records[-1].content,),
+                natural_response=(
+                    "建议先把官网定位为企业的可信入口。"
+                    "访客最希望完成什么动作？"
+                ),
+                provider_identity="test:complete-conversation",
+            )
+
+    class UnexpectedSecondProvider:
+        provider_identity = "test:unexpected-second-provider"
+        model_identity = "test-model"
+        called = False
+
+        def realize_stream(self, envelope, *, on_response_delta):
+            self.called = True
+            raise AssertionError("a second Provider request is unnecessary")
+
+    second = UnexpectedSecondProvider()
+    service = WorkInteractionService(
+        postgres_database,
+        capability=CompleteConversationCapability(),
+        response_realizer=second,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    submitted = service.submit_turn(
+        interaction.id,
+        "我想做一个企业官网。",
+        human_identity="human:test",
+    )
+    assert _wait_for_turn(service, submitted.id).status is InteractionTurnStatus.COMPLETED
+    visible = service.get_shared_understanding(interaction.id).conversation_messages[-1].content
+    assert not second.called
+    assert "企业的可信入口" in visible
+    assert "访客最希望" in visible
+    assert "主要提供什么产品或服务" not in visible
+    stream_started = next(
+        event for event in service.response_events(submitted.id)
+        if event.event_type is WicResponseEventType.RESPONSE_STREAM_STARTED
+    )
+    assert stream_started.metadata["provider"] == "watt:governed-response-realizer"
+    service.shutdown()
+
+
 def test_controlled_vnext_blocks_unsafe_provider_prose_in_actual_response_path(
     postgres_database: Database,
 ) -> None:

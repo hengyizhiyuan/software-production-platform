@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import OrderedDict
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field, is_dataclass
 from datetime import UTC, datetime
 import hashlib
 import json
@@ -687,6 +687,14 @@ class WorkInteractionService:
                 ),
                 None,
             )
+            fast_suppressed = next(
+                (
+                    event
+                    for event in response_events
+                    if event.event_type is WicResponseEventType.FAST_SUPPRESSED
+                ),
+                None,
+            )
             first_meaningful = provisional or (deltas[0] if deltas else None)
             intervals = [
                 round(
@@ -744,6 +752,31 @@ class WorkInteractionService:
                     else round(sum(intervals) / len(intervals), 3)
                 ),
                 response_delta_median_interval_ms=median_interval,
+                fast_visible=provisional is not None,
+                fast_suppression_reason=(
+                    None
+                    if fast_suppressed is None
+                    else fast_suppressed.metadata.get("reason")
+                ),
+                semantic_provider_evidence=(
+                    None
+                    if final is None
+                    else final.metadata.get("semantic_provider_evidence")
+                ),
+                realizer_provider=(
+                    None if final is None else final.metadata.get("realizer_provider")
+                ),
+                realizer_model=(
+                    None if final is None else final.metadata.get("realizer_model")
+                ),
+                realizer_timing=(
+                    None if final is None else final.metadata.get("realizer_timing")
+                ),
+                interaction_strategy=(
+                    None
+                    if final is None
+                    else final.metadata.get("interaction_strategy")
+                ),
             )
             return result
 
@@ -861,7 +894,15 @@ class WorkInteractionService:
         self,
         turn_id: UUID,
         assessment: InteractionAssessment,
-    ) -> tuple[str, GovernedResponseRealization, ResponseReconciliation, int]:
+        *,
+        latest_human_input: str,
+    ) -> tuple[
+        str,
+        GovernedResponseRealization,
+        ResponseReconciliation,
+        int,
+        dict[str, object],
+    ]:
         """Stream expression only after semantic/policy governance has settled."""
 
         with self._turn_lock:
@@ -908,8 +949,19 @@ class WorkInteractionService:
             governed_content=continuation,
             provisional_content=provisional,
             reconciliation=reconciliation,
+            latest_human_input=latest_human_input,
         )
         response_realizer = self.response_realizer
+        pipeline_evidence = getattr(self.capability, "last_pipeline_evidence", None)
+        provider_call_count = getattr(pipeline_evidence, "provider_call_count", None)
+        if isinstance(pipeline_evidence, dict):
+            provider_call_count = pipeline_evidence.get("provider_call_count")
+        if isinstance(provider_call_count, int) and provider_call_count >= 1:
+            # The dedicated/coalesced Conversation provider already supplied
+            # natural wording. After semantic policy and Interaction Strategy
+            # admission, another external wording call adds latency and can only
+            # introduce drift. Keep the Realizer seam, but make it deterministic.
+            response_realizer = DeterministicGovernedResponseRealizer()
         if (
             envelope.governance_candidate
             == GovernanceCandidateKind.HUMAN_DECISION_REQUIRED.value
@@ -995,7 +1047,13 @@ class WorkInteractionService:
             )
         self._mark_turn_timing(turn_id, "realization_completed")
         response_content = (provisional or "") + admitted_content
-        return response_content, realization, reconciliation, delta_count
+        return (
+            response_content,
+            realization,
+            reconciliation,
+            delta_count,
+            envelope.interaction_strategy.model_dump(mode="json"),
+        )
 
     def _process_turn(self, turn_id: UUID) -> None:
         now = datetime.now(UTC)
@@ -1008,6 +1066,11 @@ class WorkInteractionService:
             }:
                 uow.rollback()
                 return
+            request_record = store.record(turn.request_record_id)
+            if request_record is None:
+                raise InteractionRecordNotFound(
+                    f"Interaction record not found: {turn.request_record_id}"
+                )
             store.update_turn(
                 turn_id,
                 status=InteractionTurnStatus.PROCESSING,
@@ -1126,6 +1189,16 @@ class WorkInteractionService:
             realization: GovernedResponseRealization | None = None
             reconciliation: ResponseReconciliation | None = None
             delta_count = 0
+            interaction_strategy: dict[str, object] | None = None
+            pipeline_evidence = getattr(self.capability, "last_pipeline_evidence", None)
+            if is_dataclass(pipeline_evidence):
+                pipeline_evidence = asdict(pipeline_evidence)
+            elif hasattr(pipeline_evidence, "model_dump"):
+                pipeline_evidence = pipeline_evidence.model_dump(mode="json")
+            elif pipeline_evidence is not None and not isinstance(
+                pipeline_evidence, dict
+            ):
+                pipeline_evidence = {"type": type(pipeline_evidence).__name__}
             response_content = self._human_facing_response(
                 assessment.natural_response
             )
@@ -1135,7 +1208,12 @@ class WorkInteractionService:
                     realization,
                     reconciliation,
                     delta_count,
-                ) = self._realize_controlled_response(turn_id, assessment)
+                    interaction_strategy,
+                ) = self._realize_controlled_response(
+                    turn_id,
+                    assessment,
+                    latest_human_input=request_record.content,
+                )
             self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
             with self.database.unit_of_work() as uow:
@@ -1174,6 +1252,8 @@ class WorkInteractionService:
                                 "realizer_request_id": None if realization is None else realization.request_id,
                                 "realizer_usage": None if realization is None else realization.usage,
                                 "realizer_timing": None if realization is None else realization.timing,
+                                "semantic_provider_evidence": pipeline_evidence,
+                                "interaction_strategy": interaction_strategy,
                             },
                             "created_at": completed_at,
                         })
@@ -1429,7 +1509,11 @@ class WorkInteractionService:
             supporting_references = tuple(
                 dict.fromkeys((*record_references, *candidate_references))
             )
-            readiness = self._evaluate_readiness(candidate, current_basis)
+            readiness = self._evaluate_readiness(
+                candidate,
+                current_basis,
+                governance_candidate=progressive_semantics.governance_candidate,
+            )
             if on_pipeline_stage is not None:
                 on_pipeline_stage("candidate_validated")
             if (
@@ -2169,7 +2253,22 @@ class WorkInteractionService:
     def _evaluate_readiness(
         candidate: InteractionAssessmentCandidate,
         basis_fingerprint: str,
+        *,
+        governance_candidate: GovernanceCandidateKind | None = None,
     ) -> WorkAdmissionReadiness:
+        if governance_candidate is GovernanceCandidateKind.CONVERSATION_ONLY:
+            return WorkAdmissionReadiness(
+                status=WorkAdmissionReadinessStatus.NOT_READY,
+                profile=READINESS_PROFILE,
+                profile_version=READINESS_PROFILE_VERSION,
+                satisfied_requirements=(),
+                missing_information=("WORK_MOTIVE",),
+                unresolved_material_questions=(),
+                reasons=(
+                    "This Turn is an informational conversation and does not establish a Work motive.",
+                ),
+                basis_fingerprint=basis_fingerprint,
+            )
         missing: list[str] = []
         satisfied: list[str] = []
         if candidate.interpreted_motive and candidate.interpreted_motive.strip():
