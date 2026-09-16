@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable, Iterable
 
-from spg.domain.interaction import ActiveWorkInterpretationContext, InteractionAssessmentCandidate
+from spg.domain.interaction import (
+    ActiveWorkInterpretationContext,
+    InteractionAssessment,
+    InteractionAssessmentCandidate,
+)
 from spg.domain.wic_intelligence import (
     GovernanceCandidateKind,
     PatternSignal,
@@ -14,7 +19,173 @@ from spg.domain.wic_intelligence import (
     SemanticDeltaOperation,
 )
 from spg.domain.wic_reception import FastReceptionCandidate
-from spg.domain.wic_response import ResponseReconciliation
+from spg.domain.wic_response import (
+    GovernedResponseEnvelope,
+    GovernedResponseRealization,
+    ResponseReconciliation,
+)
+
+
+_CLAUSE_BOUNDARIES = frozenset("，,；;。！？!?\n")
+
+
+def bounded_response_chunks(content: str, *, max_chars: int = 96) -> Iterable[str]:
+    """Yield readable clauses without changing the admitted response text."""
+
+    pending = ""
+    for character in content:
+        pending += character
+        if character in _CLAUSE_BOUNDARIES or (
+            len(pending) >= max_chars and character.isspace()
+        ):
+            yield pending
+            pending = ""
+    if pending:
+        yield pending
+
+
+class GovernedResponsePolicyViolation(ValueError):
+    """A Realizer attempted to emit wording forbidden by the envelope."""
+
+
+class GovernedDeltaGate:
+    """Validate bounded clauses before any text becomes Human-visible."""
+
+    def __init__(
+        self,
+        envelope: GovernedResponseEnvelope,
+        emit: Callable[[str], None],
+    ) -> None:
+        self.envelope = envelope
+        self.emit = emit
+        self.pending = ""
+        self.emitted: list[str] = []
+
+    def feed(self, delta: str) -> None:
+        self.pending += delta
+        complete: list[str] = []
+        start = 0
+        for index, character in enumerate(self.pending):
+            if character in _CLAUSE_BOUNDARIES:
+                complete.append(self.pending[start : index + 1])
+                start = index + 1
+        self.pending = self.pending[start:]
+        for clause in complete:
+            self._admit(clause)
+
+    def finish(self) -> str:
+        if self.pending:
+            self._admit(self.pending)
+            self.pending = ""
+        content = "".join(self.emitted)
+        if not content.strip():
+            raise GovernedResponsePolicyViolation(
+                "Governed response Realizer produced no admissible content"
+            )
+        return content
+
+    def _admit(self, clause: str) -> None:
+        normalized = clause.casefold()
+        forbidden = next(
+            (
+                claim
+                for claim in self.envelope.forbidden_claims
+                if claim.casefold() in normalized
+            ),
+            None,
+        )
+        if forbidden is not None:
+            raise GovernedResponsePolicyViolation(
+                f"Realizer emitted a forbidden governed claim: {forbidden}"
+            )
+        self.emitted.append(clause)
+        # Validate the complete clause first, then expose bounded visual chunks.
+        # This keeps forbidden phrases atomic at the gate without reverting to
+        # whole-response buffering.
+        for start in range(0, len(clause), 32):
+            self.emit(clause[start : start + 32])
+
+
+class DeterministicGovernedResponseRealizer:
+    """Provider-neutral fallback that streams the admitted wording itself."""
+
+    provider_identity = "watt:governed-response-realizer"
+    model_identity = None
+
+    def realize_stream(
+        self,
+        envelope: GovernedResponseEnvelope,
+        *,
+        on_response_delta: Callable[[str], None],
+    ) -> GovernedResponseRealization:
+        for chunk in bounded_response_chunks(envelope.governed_content):
+            on_response_delta(chunk)
+        return GovernedResponseRealization(
+            content=envelope.governed_content,
+            provider_identity=self.provider_identity,
+        )
+
+
+def governed_response_envelope(
+    assessment: InteractionAssessment,
+    *,
+    governed_content: str,
+    provisional_content: str | None,
+    reconciliation: ResponseReconciliation,
+) -> GovernedResponseEnvelope:
+    """Build the expression handoff exclusively from admitted WIC semantics."""
+
+    semantics = assessment.progressive_semantics
+    if semantics is None:
+        raise ValueError("Controlled WIC realization requires progressive semantics")
+    forbidden: list[str] = []
+    if semantics.unresolved_human_decisions or any(
+        delta.category is SemanticCategory.HUMAN_DECISION
+        and delta.authority is SemanticAuthority.HUMAN_OWNED
+        for delta in semantics.deltas
+    ):
+        forbidden.extend(
+            (
+                "默认开放全部客户数据",
+                "全部客户数据",
+                "保留 90 天",
+                "保留90天",
+                "我会默认客户已经同意",
+                "我们默认客户已经同意",
+                "assume that the customer has consented",
+            )
+        )
+    if PatternSignal.BROWNFIELD_REALITY_CONFLICT in semantics.pattern_signals:
+        forbidden.extend(
+            (
+                "当前系统使用 MySQL",
+                "当前系统使用MySQL",
+                "直接修改 MySQL",
+                "直接修改MySQL",
+                "current system uses MySQL",
+            )
+        )
+    return GovernedResponseEnvelope(
+        basis_fingerprint=assessment.basis_fingerprint,
+        governed_content=governed_content,
+        provisional_content=provisional_content,
+        reconciliation=reconciliation,
+        working_motive=semantics.working_motive,
+        working_desired_outcome=semantics.working_desired_outcome,
+        facts_to_preserve=semantics.working_facts,
+        constraints_to_preserve=semantics.working_constraints,
+        unresolved_human_decisions=semantics.unresolved_human_decisions,
+        explicit_assumptions=semantics.explicit_assumptions,
+        selected_question=semantics.selected_question,
+        governance_candidate=semantics.governance_candidate.value,
+        forbidden_claims=tuple(dict.fromkeys(forbidden)),
+        source_references=assessment.supporting_references,
+        semantic_policy_revision=semantics.semantic_policy_revision,
+        question_policy_revision=semantics.question_policy_revision,
+        response_language=(
+            "zh-CN" if re.search(r"[\u4e00-\u9fff]", governed_content) else "en"
+        ),
+    )
 
 
 def _explicit_new_object(text: str) -> str | None:

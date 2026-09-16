@@ -526,6 +526,8 @@ def create_http_application(
                     "FAST_SUPPRESSED": "fast.suppressed",
                     "RESPONSE_REFINEMENT": "response.refinement",
                     "RESPONSE_CORRECTION": "response.correction",
+                    "RESPONSE_STREAM_STARTED": "response.stream.started",
+                    "RESPONSE_DELTA": "response.delta",
                     "FINAL_RESPONSE": "response.final",
                     "TURN_COMPLETED": "message.completed",
                     "TURN_FAILED": "turn.failed",

@@ -464,6 +464,13 @@
       state.streamFrame = null;
       const streamed = state.streamingAssistantMessage;
       if (!streamed) return;
+      if (streamed.pendingResponseDeltas && streamed.pendingResponseDeltas.length) {
+        streamed.content += streamed.pendingResponseDeltas.shift();
+      } else if (streamed.deferredFinalContent !== null && streamed.deferredFinalContent !== undefined) {
+        streamed.content = streamed.deferredFinalContent;
+        streamed.deferredFinalContent = null;
+        streamed.phase = "FINAL";
+      }
       const key = messageKey({ actor: "WATT", turn_id: streamed.turnId }, 0);
       const node = Array.from(elements.interactionHistory.children).find((item) => item.dataset.messageKey === key);
       if (node) {
@@ -473,6 +480,16 @@
         });
       }
       renderInteractionStatus();
+      if ((streamed.pendingResponseDeltas && streamed.pendingResponseDeltas.length)
+        || (streamed.deferredFinalContent !== null && streamed.deferredFinalContent !== undefined)) {
+        scheduleStreamRender();
+        return;
+      }
+      if (streamed.pendingSettlement) {
+        const settlement = streamed.pendingSettlement;
+        streamed.pendingSettlement = null;
+        void finishInteractionTurn(settlement.interactionId, settlement.turnId, settlement.failure);
+      }
     });
   }
 
@@ -1608,6 +1625,7 @@
     state.streamingAssistantMessage = {
       turnId, content: "", status: "PROCESSING", responseSequence: 0,
       responseId: turnId, createdAt: new Date().toISOString(),
+      pendingResponseDeltas: [], deferredFinalContent: null, pendingSettlement: null,
     };
     renderInteraction();
     if (typeof globalThis.EventSource !== "function") {
@@ -1669,13 +1687,32 @@
     };
     source.addEventListener("response.refinement", (event) => appendReconciled(event, "REFINEMENT"));
     source.addEventListener("response.correction", (event) => appendReconciled(event, "CORRECTION"));
+    source.addEventListener("response.stream.started", (event) => {
+      if (!current()) return;
+      const payload = JSON.parse(event.data);
+      if (!acceptResponseEvent(payload)) return;
+      state.streamingAssistantMessage.phase = "REALIZING";
+      state.streamingAssistantMessage.reconciliation = payload.reconciliation || null;
+      scheduleStreamRender();
+    });
+    source.addEventListener("response.delta", (event) => {
+      if (!current()) return;
+      const payload = JSON.parse(event.data);
+      if (!acceptResponseEvent(payload)) return;
+      if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "browserRealizationDeltaReceived");
+      streamed += payload.content || "";
+      state.streamingAssistantMessage.pendingResponseDeltas.push(payload.content || "");
+      state.streamingAssistantMessage.phase = "REALIZING";
+      state.streamingAssistantMessage.reconciliation = payload.reconciliation || null;
+      scheduleStreamRender();
+      observeMeaningfulPaint();
+    });
     source.addEventListener("response.final", (event) => {
       if (!current()) return;
       const payload = JSON.parse(event.data);
       if (!acceptResponseEvent(payload)) return;
       streamed = payload.content || streamed;
-      state.streamingAssistantMessage.content = streamed;
-      state.streamingAssistantMessage.phase = "FINAL";
+      state.streamingAssistantMessage.deferredFinalContent = streamed;
       scheduleStreamRender();
       observeMeaningfulPaint(true);
     });
@@ -1683,14 +1720,22 @@
       if (!current()) return;
       streamed = JSON.parse(event.data).content;
       state.streamingAssistantMessage.content = streamed;
+      state.streamingAssistantMessage.pendingResponseDeltas = [];
+      state.streamingAssistantMessage.deferredFinalContent = null;
       scheduleStreamRender();
     });
     source.addEventListener("message.completed", () => {
       if (typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") globalThis.__WATT_MARK_TURN_TIMING__(turnId, "finalResponseReceived");
-      if (current()) void finishInteractionTurn(interactionId, turnId, null);
+      if (!current()) return;
+      state.streamingAssistantMessage.pendingSettlement = { interactionId, turnId, failure: null };
+      scheduleStreamRender();
     });
     source.addEventListener("turn.failed", (event) => {
-      if (current()) void finishInteractionTurn(interactionId, turnId, JSON.parse(event.data));
+      if (!current()) return;
+      state.streamingAssistantMessage.pendingSettlement = {
+        interactionId, turnId, failure: JSON.parse(event.data),
+      };
+      scheduleStreamRender();
     });
     source.onerror = () => {
       if (!current()) return;

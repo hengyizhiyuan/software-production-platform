@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, Callable, Protocol
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -23,6 +23,8 @@ class WicResponseEventType(StrEnum):
     FAST_SUPPRESSED = "FAST_SUPPRESSED"
     RESPONSE_REFINEMENT = "RESPONSE_REFINEMENT"
     RESPONSE_CORRECTION = "RESPONSE_CORRECTION"
+    RESPONSE_STREAM_STARTED = "RESPONSE_STREAM_STARTED"
+    RESPONSE_DELTA = "RESPONSE_DELTA"
     FINAL_RESPONSE = "FINAL_RESPONSE"
     TURN_COMPLETED = "TURN_COMPLETED"
     TURN_FAILED = "TURN_FAILED"
@@ -42,6 +44,8 @@ class FastSuppressionReason(StrEnum):
     MATERIAL_CONFLICT = "MATERIAL_CONFLICT"
     AUTHORITY_POLICY = "AUTHORITY_POLICY"
     FAST_FAILURE = "FAST_FAILURE"
+    AMBIGUOUS = "AMBIGUOUS"
+    UNRECOGNIZED = "UNRECOGNIZED"
 
 
 class WicResponseEvent(BaseModel):
@@ -60,3 +64,58 @@ class WicResponseEvent(BaseModel):
     reconciliation: ResponseReconciliation | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
+
+
+class GovernedResponseEnvelope(BaseModel):
+    """Read-only expression handoff derived from already governed WIC Reality.
+
+    The envelope is not a new Truth owner. It constrains a replaceable Realizer
+    to wording and pacing after semantic admission has completed.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    governed_content: str = Field(min_length=1)
+    provisional_content: str | None = None
+    reconciliation: ResponseReconciliation
+    working_motive: str | None = None
+    working_desired_outcome: str | None = None
+    facts_to_preserve: tuple[str, ...] = ()
+    constraints_to_preserve: tuple[str, ...] = ()
+    unresolved_human_decisions: tuple[str, ...] = ()
+    explicit_assumptions: tuple[str, ...] = ()
+    selected_question: str | None = None
+    governance_candidate: str
+    forbidden_claims: tuple[str, ...] = ()
+    source_references: tuple[str, ...] = ()
+    semantic_policy_revision: str
+    question_policy_revision: str
+    response_language: str
+
+
+class GovernedResponseRealization(BaseModel):
+    """Provider-neutral expression evidence; never Conversation truth itself."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    content: str = Field(min_length=1)
+    provider_identity: str = Field(min_length=1)
+    model_identity: str | None = None
+    request_id: str | None = None
+    usage: dict[str, Any] | None = None
+    timing: dict[str, Any] | None = None
+
+
+class GovernedResponseRealizer(Protocol):
+    """Express an admitted envelope without owning its semantics."""
+
+    provider_identity: str
+    model_identity: str | None
+
+    def realize_stream(
+        self,
+        envelope: GovernedResponseEnvelope,
+        *,
+        on_response_delta: Callable[[str], None],
+    ) -> GovernedResponseRealization: ...

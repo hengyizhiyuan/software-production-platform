@@ -49,8 +49,12 @@ from spg.domain.interaction import (
 from spg.domain.design_intent import DesignObjectType
 from spg.application.wic_reception import ShadowFastReceptionRuntime
 from spg.application.wic_intelligence import build_progressive_semantics
+from spg.domain.wic_intelligence import GovernanceCandidateKind
 from spg.application.wic_response import (
+    DeterministicGovernedResponseRealizer,
+    GovernedDeltaGate,
     corrected_continuation,
+    governed_response_envelope,
     policy_governed_response,
     reconcile_fast_and_deep,
     reconcile_provisional_intent,
@@ -59,6 +63,8 @@ from spg.domain.product import ProductionCycleBindingCondition
 from spg.domain.wic_reception import FastReceptionVisibility
 from spg.domain.wic_response import (
     FastSuppressionReason,
+    GovernedResponseRealization,
+    GovernedResponseRealizer,
     ResponseReconciliation,
     WicResponseEvent,
     WicResponseEventType,
@@ -348,6 +354,7 @@ _TURN_TIMING_MILESTONES = (
     "semantic_result_completed", "validation_completed", "provider_returned",
     "admission_started", "candidate_validated", "assessment_persisted",
     "final_persistence_started", "persistence_completed", "completed", "failed",
+    "realization_started", "first_realization_delta", "realization_completed",
     "response_stream_completed",
 )
 
@@ -369,11 +376,17 @@ class WorkInteractionService:
         capability: WorkInteractionCapability,
         fast_reception: ShadowFastReceptionRuntime | None = None,
         runtime_mode: WicRuntimeMode = WicRuntimeMode.LEGACY_WIC,
+        response_realizer: GovernedResponseRealizer | None = None,
     ) -> None:
         self.database = database
         self.capability = capability
         self.fast_reception = fast_reception
         self.runtime_mode = runtime_mode
+        self.response_realizer = (
+            response_realizer
+            or getattr(capability, "governed_response_realizer", None)
+            or DeterministicGovernedResponseRealizer()
+        )
         self._turn_executor = ThreadPoolExecutor(
             max_workers=1,
             thread_name_prefix="watt-interaction",
@@ -382,6 +395,7 @@ class WorkInteractionService:
         self._turn_response_streams: OrderedDict[UUID, str] = OrderedDict()
         self._turn_timings: OrderedDict[UUID, _TurnTiming] = OrderedDict()
         self._turn_fast_candidates: OrderedDict[UUID, object] = OrderedDict()
+        self._turn_realization_started: set[UUID] = set()
         self._turn_lock = RLock()
 
     def create_interaction(self, *, human_identity: str) -> Interaction:
@@ -618,6 +632,7 @@ class WorkInteractionService:
             self._turn_response_streams.clear()
             self._turn_timings.clear()
             self._turn_fast_candidates.clear()
+            self._turn_realization_started.clear()
 
     def turn_timing(self, turn_id: UUID) -> dict[str, object] | None:
         """Observe monotonic latency; absent/restarted observations remain unknown.
@@ -647,6 +662,89 @@ class WorkInteractionService:
                     None if milestone is None
                     else round(1000 * (milestone[1] - timing.received_clock), 3)
                 )
+            with self.database.unit_of_work() as uow:
+                response_events = InteractionStore(uow.session).response_events(
+                    turn_id
+                )
+            deltas = [
+                event
+                for event in response_events
+                if event.event_type is WicResponseEventType.RESPONSE_DELTA
+            ]
+            provisional = next(
+                (
+                    event
+                    for event in response_events
+                    if event.event_type is WicResponseEventType.PROVISIONAL_RESPONSE
+                ),
+                None,
+            )
+            final = next(
+                (
+                    event
+                    for event in response_events
+                    if event.event_type is WicResponseEventType.FINAL_RESPONSE
+                ),
+                None,
+            )
+            first_meaningful = provisional or (deltas[0] if deltas else None)
+            intervals = [
+                round(
+                    1000
+                    * (current.created_at - previous.created_at).total_seconds(),
+                    3,
+                )
+                for previous, current in zip(deltas, deltas[1:])
+            ]
+            sorted_intervals = sorted(intervals)
+            middle = len(sorted_intervals) // 2
+            median_interval = (
+                None
+                if not sorted_intervals
+                else sorted_intervals[middle]
+                if len(sorted_intervals) % 2
+                else round(
+                    (sorted_intervals[middle - 1] + sorted_intervals[middle]) / 2,
+                    3,
+                )
+            )
+            elapsed = lambda event: (
+                None
+                if event is None
+                else round(
+                    1000 * (event.created_at - timing.received_at).total_seconds(),
+                    3,
+                )
+            )
+            realization_started = timing.milestones.get("realization_started")
+            realization_elapsed = lambda event: (
+                None
+                if event is None or realization_started is None
+                else round(
+                    1000
+                    * (event.created_at - realization_started[0]).total_seconds(),
+                    3,
+                )
+            )
+            result.update(
+                ttfms_ms=elapsed(first_meaningful),
+                ttfsr_ms=realization_elapsed(deltas[0] if deltas else None),
+                ttcr_ms=elapsed(final),
+                response_delta_count=len(deltas),
+                first_response_delta_at=(
+                    None if not deltas else deltas[0].created_at.isoformat()
+                ),
+                last_response_delta_at=(
+                    None if not deltas else deltas[-1].created_at.isoformat()
+                ),
+                response_delta_intervals_ms=intervals,
+                response_delta_average_interval_ms=(
+                    None
+                    if not intervals
+                    else round(sum(intervals) / len(intervals), 3)
+                ),
+                response_delta_median_interval_ms=median_interval,
+            )
             return result
 
     def record_turn_stream_event(self, turn_id: UUID) -> None:
@@ -727,6 +825,7 @@ class WorkInteractionService:
     def _forget_turn(self, turn_id: UUID) -> None:
         with self._turn_lock:
             self._turn_futures.pop(turn_id, None)
+            self._turn_realization_started.discard(turn_id)
 
     def turn_response_delta(self, turn_id: UUID, offset: int) -> tuple[str, int]:
         """Read ephemeral UX output; persisted messages remain conversation truth."""
@@ -757,6 +856,146 @@ class WorkInteractionService:
             self._turn_response_streams.move_to_end(turn_id)
             while len(self._turn_response_streams) > 32:
                 self._turn_response_streams.popitem(last=False)
+
+    def _realize_controlled_response(
+        self,
+        turn_id: UUID,
+        assessment: InteractionAssessment,
+    ) -> tuple[str, GovernedResponseRealization, ResponseReconciliation, int]:
+        """Stream expression only after semantic/policy governance has settled."""
+
+        with self._turn_lock:
+            self._turn_realization_started.add(turn_id)
+        deep_content = self._human_facing_response(assessment.natural_response)
+        events = self.response_events(turn_id)
+        provisional_event = next(
+            (
+                event
+                for event in events
+                if event.event_type is WicResponseEventType.PROVISIONAL_RESPONSE
+            ),
+            None,
+        )
+        provisional = None if provisional_event is None else provisional_event.content
+        with self._turn_lock:
+            fast = self._turn_fast_candidates.get(turn_id)
+        semantics = assessment.progressive_semantics
+        reconciliation = (
+            ResponseReconciliation.REFINE
+            if semantics is None
+            else reconcile_fast_and_deep(fast, semantics)
+            if fast is not None
+            else reconcile_provisional_intent(
+                str(provisional_event.metadata.get("eligibility")), semantics
+            )
+            if provisional_event is not None
+            else ResponseReconciliation.REFINE
+        )
+        if provisional:
+            if reconciliation is ResponseReconciliation.MATERIAL_CORRECTION:
+                continuation = "\n\n" + corrected_continuation(
+                    deep_content,
+                    chinese=bool(re.search(r"[\u4e00-\u9fff]", deep_content)),
+                )
+            elif deep_content.startswith(provisional):
+                continuation = deep_content[len(provisional) :]
+            else:
+                continuation = "\n\n" + deep_content
+        else:
+            continuation = deep_content
+        envelope = governed_response_envelope(
+            assessment,
+            governed_content=continuation,
+            provisional_content=provisional,
+            reconciliation=reconciliation,
+        )
+        response_realizer = self.response_realizer
+        if (
+            envelope.governance_candidate
+            == GovernanceCandidateKind.HUMAN_DECISION_REQUIRED.value
+        ):
+            # A replaceable language model may phrase admitted semantics, but it
+            # must not invent a concrete value for a decision that still belongs
+            # to the Human.  Stream the governed wording itself for this narrow
+            # authority-sensitive case instead of asking a model to paraphrase it.
+            response_realizer = DeterministicGovernedResponseRealizer()
+        phase_type = (
+            WicResponseEventType.RESPONSE_CORRECTION
+            if reconciliation is ResponseReconciliation.MATERIAL_CORRECTION
+            else WicResponseEventType.RESPONSE_REFINEMENT
+        )
+        realizer_identity = getattr(
+            response_realizer, "provider_identity", "unknown-realizer"
+        )
+        realizer_model = getattr(response_realizer, "model_identity", None)
+        self._record_response_event(
+            turn_id,
+            phase_type,
+            basis_fingerprint=assessment.basis_fingerprint,
+            reconciliation=reconciliation,
+            metadata={"policy_governed": True, "content_streamed_separately": True},
+            only_while_processing=True,
+        )
+        self._record_response_event(
+            turn_id,
+            WicResponseEventType.RESPONSE_STREAM_STARTED,
+            basis_fingerprint=assessment.basis_fingerprint,
+            reconciliation=reconciliation,
+            metadata={
+                "provider": realizer_identity,
+                "model": realizer_model,
+                "provisional_present": provisional is not None,
+            },
+            only_while_processing=True,
+        )
+        self._mark_turn_timing(turn_id, "realization_started")
+        delta_count = 0
+        raw_parts: list[str] = []
+
+        def emit_admitted(delta: str) -> None:
+            nonlocal delta_count
+            delta_count += 1
+            self._mark_turn_timing(turn_id, "first_realization_delta")
+            event = self._record_response_event(
+                turn_id,
+                WicResponseEventType.RESPONSE_DELTA,
+                content=delta,
+                basis_fingerprint=assessment.basis_fingerprint,
+                reconciliation=reconciliation,
+                metadata={"delta_index": delta_count},
+                only_while_processing=True,
+            )
+            if event is None:
+                raise InteractionInvariantViolation(
+                    "Governed response Turn stopped before delta persistence"
+                )
+            self._publish_turn_response_delta(turn_id, delta)
+
+        gate = GovernedDeltaGate(envelope, emit_admitted)
+
+        def receive_raw(delta: str) -> None:
+            raw_parts.append(delta)
+            gate.feed(delta)
+
+        realization = response_realizer.realize_stream(
+            envelope,
+            on_response_delta=receive_raw,
+        )
+        raw_content = "".join(raw_parts)
+        if realization.content.startswith(raw_content):
+            gate.feed(realization.content[len(raw_content) :])
+        elif realization.content != raw_content:
+            raise InteractionInvariantViolation(
+                "Governed response stream and settled realization diverged"
+            )
+        admitted_content = gate.finish()
+        if admitted_content != realization.content:
+            raise InteractionInvariantViolation(
+                "Governed response delta sequence does not reconstruct the result"
+            )
+        self._mark_turn_timing(turn_id, "realization_completed")
+        response_content = (provisional or "") + admitted_content
+        return response_content, realization, reconciliation, delta_count
 
     def _process_turn(self, turn_id: UUID) -> None:
         now = datetime.now(UTC)
@@ -815,18 +1054,23 @@ class WorkInteractionService:
                         candidate = result.candidate.model_copy(
                             update={"visibility_disposition": FastReceptionVisibility.SAFE_TO_EMIT}
                         )
-                        event = self._record_response_event(
-                            turn_id, WicResponseEventType.PROVISIONAL_RESPONSE,
-                            content=candidate.meaningful_sentence,
-                            basis_fingerprint=candidate.basis_fingerprint,
-                            metadata={
-                                "eligibility": candidate.provisional_turn_intent,
-                                "profile": candidate.profile,
-                                "authority": candidate.authority,
-                                "fast_context_fingerprint": candidate.fast_context_fingerprint,
-                            },
-                            only_while_processing=True,
-                        )
+                        with self._turn_lock:
+                            realization_started = (
+                                turn_id in self._turn_realization_started
+                            )
+                            event = None if realization_started else self._record_response_event(
+                                turn_id, WicResponseEventType.PROVISIONAL_RESPONSE,
+                                content=candidate.meaningful_sentence,
+                                basis_fingerprint=candidate.basis_fingerprint,
+                                metadata={
+                                    "disposition": "FAST_VISIBLE",
+                                    "eligibility": candidate.provisional_turn_intent,
+                                    "profile": candidate.profile,
+                                    "authority": candidate.authority,
+                                    "fast_context_fingerprint": candidate.fast_context_fingerprint,
+                                },
+                                only_while_processing=True,
+                            )
                         if event is not None:
                             with self._turn_lock:
                                 self._turn_fast_candidates[turn_id] = candidate
@@ -835,16 +1079,30 @@ class WorkInteractionService:
                             self._publish_turn_response_delta(
                                 turn_id, candidate.meaningful_sentence
                             )
+                        elif realization_started:
+                            self._record_response_event(
+                                turn_id, WicResponseEventType.FAST_SUPPRESSED,
+                                basis_fingerprint=candidate.basis_fingerprint,
+                                metadata={
+                                    "disposition": "FAST_SUPPRESSED",
+                                    "reason": FastSuppressionReason.STALE_CONTEXT.value,
+                                    "status": "CANDIDATE_AFTER_REALIZATION_STARTED",
+                                },
+                                only_while_processing=True,
+                            )
                     else:
                         reason = (
                             FastSuppressionReason.FAST_FAILURE
                             if result is None or result.status in {"FAILED", "TIMED_OUT"}
-                            else FastSuppressionReason.NO_EXPLICIT_MEANING
+                            else FastSuppressionReason.INSUFFICIENT_GROUNDING
+                            if result.candidate is not None
+                            else FastSuppressionReason.UNRECOGNIZED
                         )
                         self._record_response_event(
                             turn_id, WicResponseEventType.FAST_SUPPRESSED,
                             basis_fingerprint=basis.basis_fingerprint,
                             metadata={
+                                "disposition": "FAST_SUPPRESSED",
                                 "reason": reason.value,
                                 "status": "FAILED" if result is None else result.status,
                             },
@@ -865,6 +1123,19 @@ class WorkInteractionService:
                 on_basis_ready=start_fast_reception,
                 policy_governed=controlled,
             )
+            realization: GovernedResponseRealization | None = None
+            reconciliation: ResponseReconciliation | None = None
+            delta_count = 0
+            response_content = self._human_facing_response(
+                assessment.natural_response
+            )
+            if controlled:
+                (
+                    response_content,
+                    realization,
+                    reconciliation,
+                    delta_count,
+                ) = self._realize_controlled_response(turn_id, assessment)
             self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
             with self.database.unit_of_work() as uow:
@@ -886,66 +1157,24 @@ class WorkInteractionService:
                             f"{interaction.selected_design_schema_version}",
                         )
                     )
-                    deep_content = self._human_facing_response(assessment.natural_response)
-                    response_content = deep_content
                     if controlled:
-                        events = store.response_events(turn_id)
-                        provisional_event = next(
-                            (event for event in events if event.event_type is WicResponseEventType.PROVISIONAL_RESPONSE),
-                            None,
-                        )
-                        provisional = None if provisional_event is None else provisional_event.content
-                        fast = self._turn_fast_candidates.get(turn_id)
-                        semantics = assessment.progressive_semantics
-                        reconciliation = (
-                            ResponseReconciliation.REFINE
-                            if semantics is None
-                            else reconcile_fast_and_deep(fast, semantics)
-                            if fast is not None
-                            else reconcile_provisional_intent(
-                                str(provisional_event.metadata.get("eligibility")),
-                                semantics,
-                            )
-                            if provisional_event is not None
-                            else ResponseReconciliation.REFINE
-                        )
-                        if provisional:
-                            if reconciliation is ResponseReconciliation.MATERIAL_CORRECTION:
-                                continuation = "\n\n" + corrected_continuation(
-                                    deep_content,
-                                    chinese=bool(re.search(r"[\u4e00-\u9fff]", deep_content)),
-                                )
-                            elif deep_content.startswith(provisional):
-                                continuation = deep_content[len(provisional):]
-                            else:
-                                continuation = "\n\n" + deep_content
-                            response_content = provisional + continuation
-                        else:
-                            continuation = deep_content
-                        event_type = (
-                            WicResponseEventType.RESPONSE_CORRECTION
-                            if reconciliation is ResponseReconciliation.MATERIAL_CORRECTION
-                            else WicResponseEventType.RESPONSE_REFINEMENT
-                        )
-                        sequence = store.next_response_event_sequence(turn_id)
                         store.insert_response_event({
                             "id": uuid4(), "interaction_id": turn.interaction_id,
                             "turn_id": turn_id, "response_id": turn_id,
-                            "sequence": sequence, "event_type": event_type.value,
-                            "content": continuation, "basis_fingerprint": assessment.basis_fingerprint,
-                            "reconciliation": reconciliation.value,
-                            "event_metadata": {"policy_governed": True},
-                            "created_at": completed_at,
-                        })
-                        store.insert_response_event({
-                            "id": uuid4(), "interaction_id": turn.interaction_id,
-                            "turn_id": turn_id, "response_id": turn_id,
-                            "sequence": sequence + 1,
+                            "sequence": store.next_response_event_sequence(turn_id),
                             "event_type": WicResponseEventType.FINAL_RESPONSE.value,
                             "content": response_content,
                             "basis_fingerprint": assessment.basis_fingerprint,
-                            "reconciliation": reconciliation.value,
-                            "event_metadata": {"conversation_truth_pending": True},
+                            "reconciliation": None if reconciliation is None else reconciliation.value,
+                            "event_metadata": {
+                                "conversation_truth_pending": True,
+                                "delta_count": delta_count,
+                                "realizer_provider": None if realization is None else realization.provider_identity,
+                                "realizer_model": None if realization is None else realization.model_identity,
+                                "realizer_request_id": None if realization is None else realization.request_id,
+                                "realizer_usage": None if realization is None else realization.usage,
+                                "realizer_timing": None if realization is None else realization.timing,
+                            },
                             "created_at": completed_at,
                         })
                     self._reconcile_turn_response(turn_id, response_content)

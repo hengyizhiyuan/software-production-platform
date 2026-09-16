@@ -685,7 +685,32 @@ function conversationHarness(request) {
     renderInteraction() {}, renderComposer() {}, setSurface() {}, announce() {}, hideNotice() {},
     setBusy(value) { state.busy = value; },
     showNotice(error) { notices.push(error); },
-    scheduleStreamRender() { frames.push("scheduled"); },
+    scheduleStreamRender() {
+      if (state.streamFrame !== null) return;
+      state.streamFrame = frames.length + 1;
+      frames.push(() => {
+        state.streamFrame = null;
+        const streamed = state.streamingAssistantMessage;
+        if (!streamed) return;
+        if (streamed.pendingResponseDeltas && streamed.pendingResponseDeltas.length) {
+          streamed.content += streamed.pendingResponseDeltas.shift();
+        } else if (streamed.deferredFinalContent !== null && streamed.deferredFinalContent !== undefined) {
+          streamed.content = streamed.deferredFinalContent;
+          streamed.deferredFinalContent = null;
+          streamed.phase = "FINAL";
+        }
+        if ((streamed.pendingResponseDeltas && streamed.pendingResponseDeltas.length)
+          || (streamed.deferredFinalContent !== null && streamed.deferredFinalContent !== undefined)) {
+          harness.scheduleStreamRender();
+          return;
+        }
+        if (streamed.pendingSettlement) {
+          const settlement = streamed.pendingSettlement;
+          streamed.pendingSettlement = null;
+          void harness.finishInteractionTurn(settlement.interactionId, settlement.turnId, settlement.failure);
+        }
+      });
+    },
     persistComposer() { saved = JSON.parse(JSON.stringify(state.outbox)); },
     saveDraft() { state.drafts[state.selectedInteractionId || "new"] = harness.elements.workRequirement.value; harness.persistComposer(); },
     apiRequest: request,
@@ -696,6 +721,7 @@ function conversationHarness(request) {
     harness.elements.workRequirement.value = content;
     await harness.continueInteraction({ preventDefault() {} });
   };
+  harness.flushFrames = () => { while (frames.length) frames.shift()(); };
   harness.saved = () => saved;
   return harness;
 }
@@ -752,6 +778,7 @@ test("messages queued while POST is in flight wait for persisted COMPLETED, exac
   assert.equal(posts, 1, "status or end of displayed text is insufficient to drain");
   projection = { turns: [{ turn_id: "turn-1", status: "COMPLETED" }], conversation_messages: [] };
   harness.sources[0].emit("message.completed");
+  harness.flushFrames();
   await settle();
   assert.equal(posts, 2);
   harness.sources[0].emit("message.completed");
@@ -784,6 +811,7 @@ test("failed replies pause later messages, keeping exact content for explicit re
   await harness.submit("Continue after the first reply");
   projection = { turns: [{ turn_id: "turn-1", status: "FAILED" }] };
   harness.sources[0].emit("turn.failed", { code: "TEST_FAILURE", message: "Fixture failure" });
+  harness.flushFrames();
   await settle();
   assert.equal(posts, 1);
   assert.equal(harness.state.outbox[0].status, "paused");
@@ -821,18 +849,33 @@ test("controlled WIC response events evolve one bubble and suppress duplicate re
   assert.equal(harness.state.streamingAssistantMessage.content, provisional.content);
   source.emit("response.refinement", {
     sequence: 4, response_id: "turn-1", reconciliation: "REFINE",
-    content: "\n\n这不会改变现有鉴权协议。",
+    content: null,
   });
+  source.emit("response.stream.started", {
+    sequence: 5, response_id: "turn-1", reconciliation: "REFINE",
+  });
+  const firstDelta = {
+    sequence: 6, response_id: "turn-1", reconciliation: "REFINE",
+    content: "\n\n这不会改变",
+  };
+  source.emit("response.delta", firstDelta);
+  source.emit("response.delta", firstDelta);
+  source.emit("response.delta", {
+    sequence: 7, response_id: "turn-1", reconciliation: "REFINE",
+    content: "现有鉴权协议。",
+  });
+  harness.flushFrames();
   assert.equal(
     harness.state.streamingAssistantMessage.content,
     provisional.content + "\n\n这不会改变现有鉴权协议。",
   );
   source.emit("response.final", {
-    sequence: 5, response_id: "turn-1",
+    sequence: 8, response_id: "turn-1",
     content: provisional.content + "\n\n这不会改变现有鉴权协议。",
   });
+  harness.flushFrames();
   assert.equal(harness.state.streamingAssistantMessage.phase, "FINAL");
-  assert.equal(harness.state.streamingAssistantMessage.responseSequence, 5);
+  assert.equal(harness.state.streamingAssistantMessage.responseSequence, 8);
   assert.equal(harness.state.streamingAssistantMessage.turnId, "turn-1");
 });
 
@@ -849,8 +892,20 @@ test("refresh during Deep WIC rebuilds provisional text without duplication", ()
   });
   harness.sources[1].emit("response.refinement", {
     sequence: 4, response_id: "turn-1", reconciliation: "REFINE",
-    content: "\n\n原有范围保持不变。",
+    content: null,
   });
+  harness.sources[1].emit("response.stream.started", {
+    sequence: 5, response_id: "turn-1", reconciliation: "REFINE",
+  });
+  harness.sources[1].emit("response.delta", {
+    sequence: 6, response_id: "turn-1", reconciliation: "REFINE",
+    content: "\n\n原有范围",
+  });
+  harness.sources[1].emit("response.delta", {
+    sequence: 7, response_id: "turn-1", reconciliation: "REFINE",
+    content: "保持不变。",
+  });
+  harness.flushFrames();
   assert.equal(
     harness.state.streamingAssistantMessage.content,
     "已记录这个明确约束。\n\n原有范围保持不变。",
@@ -939,6 +994,52 @@ test("stream bursts repaint one message per frame and preserve historical DOM no
   assert.equal(harness.elements.interactionHistory.children[1], assistant);
 });
 
+test("governed response deltas paint one received chunk per frame", () => {
+  class Node {
+    constructor(className = "", text = "") {
+      this.className = className; this.dataset = {}; this.children = []; this._text = text;
+      this.classList = { toggle() {} };
+    }
+    get textContent() { return this._text; }
+    set textContent(value) { this._text = value; }
+    append(child) { child.parent = this; this.children.push(child); }
+    insertBefore(child, next) {
+      if (child.parent) child.remove();
+      child.parent = this;
+      const position = next ? this.children.indexOf(next) : this.children.length;
+      this.children.splice(position, 0, child);
+    }
+    remove() { this.parent.children.splice(this.parent.children.indexOf(this), 1); this.parent = null; }
+    setAttribute() {}
+    querySelector(selector) { return this.children.find((child) => child.className === selector.slice(1)); }
+  }
+  const frames = [];
+  const state = {
+    selectedInteractionId: "a", streamFrame: null,
+    sharedUnderstanding: { conversation_messages: [{ actor: "HUMAN", turn_id: "t", content: "Question" }] },
+    streamingAssistantMessage: {
+      turnId: "t", content: "Receipt", status: "PROCESSING",
+      pendingResponseDeltas: [" first", " second"], deferredFinalContent: null,
+      pendingSettlement: null,
+    },
+  };
+  const harness = {
+    state, viewModel, elements: { interactionHistory: new Node(), interactionProcessingStatus: new Node() },
+    createElement: (_tag, className, text) => new Node(className, text),
+    requestAnimationFrame: (callback) => { frames.push(callback); return frames.length; },
+  };
+  harness.globalThis = harness;
+  vm.runInNewContext(appSource.slice(appSource.indexOf("  function messageKey("), appSource.indexOf("  function persistComposer(")), harness);
+  harness.renderConversation();
+  harness.scheduleStreamRender();
+  assert.equal(frames.length, 1);
+  frames.shift()();
+  assert.equal(harness.elements.interactionHistory.children[1].children[1].textContent, "Receipt first");
+  assert.equal(frames.length, 1);
+  frames.shift()();
+  assert.equal(harness.elements.interactionHistory.children[1].children[1].textContent, "Receipt first second");
+});
+
 test("queue capacity leaves the unsent draft intact", async () => {
   const harness = conversationHarness(async () => { throw new Error("must not submit"); });
   harness.state.activeInteractionTurnId = "active";
@@ -978,6 +1079,7 @@ test("a reply completing during Refresh drains its queued message when busy clea
   const refreshing = harness.reloadWorkspace();
   assert.equal(harness.state.busy, true);
   harness.sources[0].emit("message.completed");
+  harness.flushFrames();
   await settle();
   assert.equal(harness.state.activeInteractionTurnId, "");
   assert.equal(harness.state.outbox[0].status, "queued");

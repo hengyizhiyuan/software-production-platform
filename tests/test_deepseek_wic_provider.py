@@ -22,6 +22,7 @@ from spg.domain.model_runtime import (
     StructuredModelResult,
     WattModelRuntime,
 )
+from spg.domain.wic_response import GovernedResponseEnvelope, ResponseReconciliation
 from spg.providers.deepseek_interaction import DeepSeekWorkInteractionCapability
 
 
@@ -77,7 +78,14 @@ class _Adapter:
 
     def generate(self, **options):
         self.calls += 1
-        output = _envelope()
+        output = (
+            json.dumps(
+                {"natural_response": "先确认目标，再说明下一步。"},
+                ensure_ascii=False,
+            )
+            if options.get("input_text", "").startswith("Realize this governed")
+            else _envelope()
+        )
         callback = options.get("on_output_delta")
         stage = options.get("on_stage")
         if stage:
@@ -147,3 +155,37 @@ def test_profiles_are_role_specific_and_control_pre_work_coalescing() -> None:
     assert capability.pipeline_selection(_basis()) == (
         "staged", "provider_profiles_differ"
     )
+
+
+def test_governed_realizer_uses_configured_conversation_profile_and_streams() -> None:
+    runtime, adapter = _runtime()
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    envelope = GovernedResponseEnvelope(
+        basis_fingerprint="b" * 64,
+        governed_content="先确认目标，再说明下一步。",
+        reconciliation=ResponseReconciliation.REFINE,
+        governance_candidate="CONVERSATION_ONLY",
+        semantic_policy_revision="policy-v1",
+        question_policy_revision="question-v1",
+        response_language="zh-CN",
+    )
+    deltas: list[str] = []
+
+    result = capability.governed_response_realizer.realize_stream(
+        envelope,
+        on_response_delta=deltas.append,
+    )
+
+    assert adapter.calls == 1
+    assert "".join(deltas) == result.content
+    assert result.content == "先确认目标，再说明下一步。"
+    assert result.model_identity == "deepseek-flash"
+    assert result.request_id == "response-1"
+    assert result.usage == {
+        "input_tokens": None,
+        "output_tokens": None,
+        "cached_tokens": None,
+        "reasoning_tokens": None,
+        "total_tokens": 50,
+        "unknown": False,
+    }

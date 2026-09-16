@@ -6,9 +6,16 @@ from pathlib import Path
 import json
 from uuid import NAMESPACE_URL, UUID, uuid5
 
+import pytest
+
 from spg.application.interaction import WorkInteractionService, interaction_basis_fingerprint
 from spg.application.wic_intelligence import build_progressive_semantics
-from spg.application.wic_response import policy_governed_response, reconcile_fast_and_deep
+from spg.application.wic_response import (
+    GovernedDeltaGate,
+    GovernedResponsePolicyViolation,
+    policy_governed_response,
+    reconcile_fast_and_deep,
+)
 from spg.application.wic_context import build_fast_context_card
 from spg.application.wic_reception import DeterministicFastReceptionCapability
 from spg.domain.interaction import (
@@ -22,7 +29,7 @@ from spg.domain.wic_intelligence import (
     QuestionDisposition, ReadinessTarget, SemanticAuthority,
     SemanticDeltaOperation, TransitionReadinessStatus,
 )
-from spg.domain.wic_response import ResponseReconciliation
+from spg.domain.wic_response import GovernedResponseEnvelope, ResponseReconciliation
 from spg.evaluation.open_wic_baseline import _active_context, load_corpus
 
 
@@ -209,6 +216,46 @@ def test_fast_and_deep_share_basis_and_reconcile_as_one_response() -> None:
     semantics = _build("OW-D")
     assert fast.basis_fingerprint == semantics.basis_fingerprint
     assert reconcile_fast_and_deep(fast, semantics) is ResponseReconciliation.REFINE
+
+
+def test_human_owned_fast_candidate_confirms_without_changing_authority() -> None:
+    record, active, fingerprint = _inputs("OW-F")
+    interaction = Interaction(
+        id=record.interaction_id, condition=InteractionCondition.OPEN,
+        current_work_id=None,
+        created_by="test", updated_by="test", created_at=record.created_at,
+        updated_at=record.created_at,
+    )
+    basis = InteractionInterpretationInput(
+        interaction=interaction, records=(record,), active_work_context=active,
+        basis_fingerprint=fingerprint,
+    )
+    fast = DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=813)
+    )
+    assert fast is not None
+    semantics = _build("OW-F")
+    assert reconcile_fast_and_deep(fast, semantics) is ResponseReconciliation.CONFIRM
+
+
+def test_governed_delta_gate_rejects_forbidden_claim_split_across_raw_deltas() -> None:
+    envelope = GovernedResponseEnvelope(
+        basis_fingerprint="b" * 64,
+        governed_content="权限与保留期必须由 Human 决定。",
+        reconciliation=ResponseReconciliation.CONFIRM,
+        governance_candidate="HUMAN_DECISION_REQUIRED",
+        forbidden_claims=("保留 90 天",),
+        semantic_policy_revision="policy-v1",
+        question_policy_revision="question-v1",
+        response_language="zh-CN",
+    )
+    emitted: list[str] = []
+    gate = GovernedDeltaGate(envelope, emitted.append)
+
+    gate.feed("我建议保留 ")
+    with pytest.raises(GovernedResponsePolicyViolation):
+        gate.feed("90 天。")
+    assert emitted == []
 
 
 def test_ow_e_is_new_motive_candidate_and_cannot_expand_current_work() -> None:

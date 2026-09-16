@@ -49,6 +49,10 @@ from spg.domain.interaction import (
     WorkFocusClassification,
     WorkImpactDisposition,
 )
+from spg.domain.wic_response import (
+    GovernedResponseEnvelope,
+    GovernedResponseRealization,
+)
 
 
 CodexFactory = Callable[[], AbstractContextManager[Any]]
@@ -876,6 +880,99 @@ class CodexSdkConversationProvider:
         )
 
 
+class CodexSdkGovernedResponseRealizer:
+    """Codex transport for expression-only realization of governed WIC semantics."""
+
+    provider_identity = "codex-sdk:governed-realizer"
+
+    def __init__(
+        self,
+        *,
+        repository_location: str,
+        codex_factory: CodexFactory,
+        model: str | None,
+        reasoning_effort: str | None,
+        timeout_seconds: float | None,
+    ) -> None:
+        self.repository_location = repository_location
+        self.codex_factory = codex_factory
+        self.model_identity = model
+        self.reasoning_effort = reasoning_effort
+        self.timeout_seconds = timeout_seconds
+        self.last_thread_id: str | None = None
+        self.last_turn_id: str | None = None
+
+    def realize_stream(
+        self,
+        envelope: GovernedResponseEnvelope,
+        *,
+        on_response_delta: Callable[[str], None],
+    ) -> GovernedResponseRealization:
+        instruction = (
+            "You are Watt's Governed Response Realizer. The supplied envelope is "
+            "already governed. Express it naturally without changing intent, facts, "
+            "constraints, Work boundaries, readiness, authority, corrections, or its "
+            "single selected question. Never emit forbidden_claims and never add a "
+            "production decision. Return JSON only with natural_response.\n\n"
+            + json.dumps(
+                envelope.model_dump(mode="json"),
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+        )
+        ApprovalMode, Sandbox = _codex_controls()
+        with self.codex_factory() as codex:
+            thread = codex.thread_start(
+                approval_mode=ApprovalMode.deny_all,
+                cwd=self.repository_location,
+                ephemeral=True,
+                model=self.model_identity,
+                sandbox=Sandbox.read_only,
+            )
+            turn = thread.turn(
+                instruction,
+                approval_mode=ApprovalMode.deny_all,
+                cwd=self.repository_location,
+                effort=self.reasoning_effort,
+                model=self.model_identity,
+                output_schema=CodexSdkConversationProvider.output_schema(),
+                sandbox=Sandbox.read_only,
+            )
+            terminal = _wait_for_streaming_terminal(
+                turn,
+                timeout_seconds=self.timeout_seconds,
+                on_response_delta=on_response_delta,
+                response_field="natural_response",
+            )
+        if terminal.timed_out or terminal.result is None:
+            raise InteractionInvariantViolation(
+                "Governed Response Realizer did not complete in its bounded Turn"
+            )
+        result = terminal.result
+        if _enum_value(result.status) != "completed" or result.error is not None:
+            raise InteractionInvariantViolation(
+                "Governed Response Realizer did not return a completed result"
+            )
+        try:
+            payload = _ConversationProviderPayload.model_validate_json(
+                result.final_response.strip()
+            )
+        except (ValueError, TypeError) as error:
+            raise InteractionInvariantViolation(
+                "Governed Response Realizer returned an invalid result"
+            ) from error
+        self.last_thread_id = str(thread.id)
+        self.last_turn_id = str(turn.id)
+        return GovernedResponseRealization(
+            content=payload.natural_response,
+            provider_identity=(
+                f"codex-sdk:governed-realizer-thread:{thread.id}:turn:{turn.id}"
+            ),
+            model_identity=self.model_identity,
+        )
+
+
 class CodexSdkWorkInteractionCapability:
     """Keep semantic/expression ownership while coalescing eligible pre-Work transport."""
 
@@ -917,6 +1014,13 @@ class CodexSdkWorkInteractionCapability:
         self.coalesce_pre_work = coalesce_pre_work
         self.response_composer = ConversationResponseComposer(
             self.conversation_provider
+        )
+        self.governed_response_realizer = CodexSdkGovernedResponseRealizer(
+            repository_location=repository_location,
+            codex_factory=self.codex_factory,
+            model=conversation_model or model,
+            reasoning_effort=conversation_reasoning_effort,
+            timeout_seconds=timeout_seconds,
         )
         self.last_pipeline_evidence: ConversationPipelineEvidence | None = None
         self.last_collaboration_result: StructuredCollaborationResult | None = None

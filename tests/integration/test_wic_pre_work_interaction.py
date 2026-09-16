@@ -43,7 +43,12 @@ from spg.domain.interaction import (
     WorkAdmissionReadinessStatus,
 )
 from spg.domain.runtime_activation import RuntimeActivationProjection, RuntimeActivationState
-from spg.domain.wic_response import WicResponseEventType, WicRuntimeMode
+from spg.domain.wic_response import (
+    GovernedResponseEnvelope,
+    GovernedResponseRealization,
+    WicResponseEventType,
+    WicRuntimeMode,
+)
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_schema import (
     interaction_assessments,
@@ -818,8 +823,27 @@ def test_controlled_vnext_exposes_fast_and_settles_one_policy_governed_response(
     )
     assert all(item.response_id == submitted.id for item in settled_events)
     assert any(item.event_type is WicResponseEventType.RESPONSE_REFINEMENT for item in settled_events)
+    stream_started = next(
+        item
+        for item in settled_events
+        if item.event_type is WicResponseEventType.RESPONSE_STREAM_STARTED
+    )
+    assert stream_started.reconciliation.value == "REFINE"
+    deltas = [
+        item.content or ""
+        for item in settled_events
+        if item.event_type is WicResponseEventType.RESPONSE_DELTA
+    ]
+    assert len(deltas) >= 2
+    assert watt_messages[0].content == (provisional.content or "") + "".join(deltas)
     assert settled_events[-2].event_type is WicResponseEventType.FINAL_RESPONSE
     assert settled_events[-1].event_type is WicResponseEventType.TURN_COMPLETED
+    timing = service.turn_timing(submitted.id)
+    assert timing is not None
+    assert timing["ttfsr_ms"] is not None
+    assert timing["ttcr_ms"] is not None
+    assert 0 <= timing["ttfsr_ms"] < timing["ttcr_ms"]
+    assert timing["response_delta_count"] == len(deltas)
     assert _count(postgres_database, interaction_messages) == 2
     service.shutdown()
 
@@ -837,9 +861,34 @@ def test_controlled_vnext_blocks_unsafe_provider_prose_in_actual_response_path(
                 provider_identity="test:unsafe-raw-prose",
             )
 
+    class AuthorityDriftingRealizer:
+        provider_identity = "test:authority-drifting-realizer"
+        model_identity = "test-model"
+
+        def __init__(self) -> None:
+            self.called = False
+
+        def realize_stream(
+            self,
+            envelope: GovernedResponseEnvelope,
+            *,
+            on_response_delta,
+        ) -> GovernedResponseRealization:
+            self.called = True
+            content = "建议外部模型不留存数据，内部审计元数据保留 30 天。"
+            on_response_delta(content)
+            return GovernedResponseRealization(
+                content=content,
+                provider_identity=self.provider_identity,
+                model_identity=self.model_identity,
+            )
+
+    drifting_realizer = AuthorityDriftingRealizer()
+
     service = WorkInteractionService(
         postgres_database,
         capability=UnsafeAuthorityCapability(),
+        response_realizer=drifting_realizer,
         runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
         fast_reception=ShadowFastReceptionRuntime(
             DeterministicFastReceptionCapability()
@@ -858,7 +907,21 @@ def test_controlled_vnext_blocks_unsafe_provider_prose_in_actual_response_path(
     assert "不会替你设定" in visible
     assert "默认开放全部" not in visible
     assert "90 天" not in visible
+    assert "30 天" not in visible
+    assert drifting_realizer.called is False
     assert projection.latest_assessment.natural_response in visible
+    assert all(
+        "默认开放全部" not in (event.content or "")
+        and "90 天" not in (event.content or "")
+        for event in service.response_events(submitted.id)
+    )
+    stream_started = next(
+        event
+        for event in service.response_events(submitted.id)
+        if event.event_type is WicResponseEventType.RESPONSE_STREAM_STARTED
+    )
+    assert stream_started.reconciliation.value == "CONFIRM"
+    assert stream_started.metadata["provider"] == "watt:governed-response-realizer"
     service.shutdown()
 
 
@@ -927,6 +990,50 @@ def test_controlled_vnext_corrects_brownfield_premise_in_actual_response_path(
     assert projection.governed_revision.context_facts == (
         "Current persistence uses PostgreSQL.",
     )
+    assert all(
+        "当前系统使用 MySQL" not in (event.content or "")
+        and "直接修改 MySQL" not in (event.content or "")
+        for event in service.response_events(submitted.id)
+    )
+    service.shutdown()
+
+
+def test_controlled_realizer_failure_keeps_partial_evidence_without_false_final(
+    postgres_database: Database,
+) -> None:
+    class FailingRealizer:
+        provider_identity = "test:failing-realizer"
+        model_identity = "test-model"
+
+        def realize_stream(
+            self,
+            envelope: GovernedResponseEnvelope,
+            *,
+            on_response_delta,
+        ) -> GovernedResponseRealization:
+            on_response_delta("我先确认当前目标，")
+            raise RuntimeError("realizer interrupted after one governed clause")
+
+    service = WorkInteractionService(
+        postgres_database,
+        capability=DeterministicWorkInteractionCapability(),
+        response_realizer=FailingRealizer(),
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    submitted = service.submit_turn(
+        interaction.id,
+        "I want to improve the operations portal.",
+        human_identity="human:test",
+    )
+    assert _wait_for_turn(service, submitted.id).status is InteractionTurnStatus.FAILED
+    events = service.response_events(submitted.id)
+    assert any(item.event_type is WicResponseEventType.RESPONSE_DELTA for item in events)
+    assert not any(item.event_type is WicResponseEventType.FINAL_RESPONSE for item in events)
+    assert events[-1].event_type is WicResponseEventType.TURN_FAILED
+    projection = service.get_shared_understanding(interaction.id)
+    assert not any(item.actor.value == "WATT" for item in projection.conversation_messages)
+    assert _count(postgres_database, product_works) == 0
     service.shutdown()
 
 
@@ -1131,6 +1238,8 @@ def test_controlled_http_stream_replays_one_response_without_duplicate_identity(
         assert streamed.status_code == 200
         assert "event: response.provisional" in streamed.text
         assert "event: response.refinement" in streamed.text
+        assert "event: response.stream.started" in streamed.text
+        assert "event: response.delta" in streamed.text
         assert "event: response.final" in streamed.text
         assert "event: message.completed" in streamed.text
         event_ids = [
@@ -1138,6 +1247,17 @@ def test_controlled_http_stream_replays_one_response_without_duplicate_identity(
             for line in streamed.text.splitlines() if line.startswith("id: ")
         ]
         assert event_ids == sorted(set(event_ids))
+        response_payloads = [
+            json.loads(line.removeprefix("data: "))
+            for line in streamed.text.splitlines()
+            if line.startswith("data: ")
+        ]
+        response_deltas = [
+            payload["content"]
+            for payload in response_payloads
+            if payload.get("event_type") == "RESPONSE_DELTA"
+        ]
+        assert len(response_deltas) >= 2
         replay = client.get(
             f"/api/interactions/{created['interaction_id']}/turns/{turn_id}/events",
             params={"after_sequence": event_ids[1]},

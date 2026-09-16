@@ -1,0 +1,34 @@
+services:
+  postgres:
+    ports: !reset []
+
+  app:
+    image: watt-wic-governed-streaming-app:latest
+    build: !reset null
+    command: ["python", "/acceptance/start.py"]
+    environment:
+      SPG_APPLICATION_NAME: Watt WIC Governed Streaming Acceptance
+      SPG_WIC_PROVIDER_MODEL: gpt-5.6-sol
+      SPG_CONVERSATION_PROVIDER_MODEL: gpt-5.6-sol
+      SPG_WIC_RUNTIME_MODE: WIC_VNEXT_CONTROLLED
+      SPG_WIC_FAST_RECEPTION_SHADOW_ENABLED: "true"
+      SPG_WIC_COALESCE_PRE_WORK: "true"
+    ports: !override
+      - "127.0.0.1:8046:8000"
+    volumes:
+      - type: bind
+        source: ./src
+        target: /acceptance-source
+        read_only: true
+      - type: bind
+        source: ./docker/start_human_acceptance.py
+        target: /acceptance/start.py
+        read_only: true
+      - type: bind
+        source: ./migrations
+        target: /app/migrations
+        read_only: true
+      - type: bind
+        source: ./alembic.ini
+        target: /app/alembic.ini
+        read_only: true

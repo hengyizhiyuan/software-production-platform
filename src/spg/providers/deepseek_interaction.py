@@ -21,6 +21,10 @@ from spg.domain.interaction import (
     InteractionSemanticCandidate,
 )
 from spg.domain.model_runtime import ModelPurpose, StructuredModelResult, WattModelRuntime
+from spg.domain.wic_response import (
+    GovernedResponseEnvelope,
+    GovernedResponseRealization,
+)
 from spg.providers.codex_interaction import (
     CodexSdkConversationProvider,
     CodexSdkInteractionSemanticCapability,
@@ -176,6 +180,75 @@ class DeepSeekConversationProvider:
         self.last_retry_count = result.retry_count
 
 
+class DeepSeekGovernedResponseRealizer:
+    """Expression-only realization of an already governed response envelope."""
+
+    provider_identity = "deepseek-responses:governed-realizer"
+
+    def __init__(self, runtime: WattModelRuntime) -> None:
+        self.runtime = runtime
+        profile = runtime.profile(ModelPurpose.CONVERSATION_RESPONSE)
+        self.model_identity = profile.model
+        self.reasoning_effort = profile.reasoning_effort
+        self.last_result: StructuredModelResult | None = None
+
+    def realize_stream(
+        self,
+        envelope: GovernedResponseEnvelope,
+        *,
+        on_response_delta: Callable[[str], None],
+    ) -> GovernedResponseRealization:
+        extractor = _JsonStringFieldStream("natural_response")
+
+        def receive(delta: str) -> None:
+            useful = extractor.feed(delta)
+            if useful:
+                on_response_delta(useful)
+
+        instruction = (
+            "You are Watt's Governed Response Realizer. The supplied envelope was "
+            "already admitted by WIC policy. You own only clear, natural wording and "
+            "pacing. Do not reinterpret intent, change Work boundaries, invent facts, "
+            "make Human-owned decisions, change readiness, or add production authority. "
+            "Preserve every fact, constraint, correction, question, and authority "
+            "boundary. Never emit any forbidden_claim. Return JSON only with one "
+            "natural_response string.\n\nGoverned Response Envelope:\n"
+            + json.dumps(
+                envelope.model_dump(mode="json"),
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+        )
+        result = self.runtime.generate(
+            purpose=ModelPurpose.CONVERSATION_RESPONSE,
+            instructions=instruction,
+            input_text="Realize this governed response without changing its semantics.",
+            output_schema=CodexSdkConversationProvider.output_schema(),
+            on_output_delta=receive,
+        )
+        try:
+            payload = _ConversationProviderPayload.model_validate_json(
+                result.output_text.strip()
+            )
+        except (ValidationError, ValueError, TypeError) as error:
+            raise InteractionInvariantViolation(
+                "Governed Response Realizer returned an invalid result"
+            ) from error
+        self.last_result = result
+        return GovernedResponseRealization(
+            content=payload.natural_response,
+            provider_identity=(
+                "deepseek-responses:governed-realizer:request:"
+                f"{result.request_id or 'unknown'}"
+            ),
+            model_identity=result.effective_model or result.requested_model,
+            request_id=result.request_id,
+            usage=_usage(result),
+            timing=asdict(result.timing),
+        )
+
+
 class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
     """Preserve WIC ownership and coalescing over DeepSeek Responses transport."""
 
@@ -195,6 +268,7 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
         )
         self.runtime = runtime
         self.response_composer = ConversationResponseComposer(conversation)
+        self.governed_response_realizer = DeepSeekGovernedResponseRealizer(runtime)
 
     def close(self) -> None:
         self.runtime.close()
