@@ -236,7 +236,35 @@ candidate material. Adding more input before the facilitation and Authority
 boundaries are reliable would increase ambiguity rather than create trustworthy
 Design Reality.
 
-## 8. Current Status
+## 8. Formal UX/UI reference-asset dogfood requirement
+
+Formal UX/UI Phase 1 established a concrete future dogfood set for this
+capability. Six exact Human-approved Workspace visual references remain in the
+[Workspace Skin asset manifest](../assets/ui-skins/README.md). Industrial Cyan
+is the only current manually reconstructed production skin. The other five are
+preserved as `FUTURE_EXTERNAL_ASSET_DOGFOOD` rather than manually approximated
+or exposed as unfinished product options.
+
+The future capability should be able to consume sources such as Figma,
+structured UI assets, external design packages, design systems, design tokens,
+or component libraries through a governed loop:
+
+```text
+External Design Source
+    → Design Reality / Versioned Baseline
+    → Structured Design Context
+    → Watt Production
+    → Browser Render
+    → Visual Comparison
+    → Iterative Correction
+    → Human Acceptance
+```
+
+This is a high-value product and internal dogfood requirement, not current
+implementation authorization. The preserved references are evidence inputs;
+they do not become executable Truth or bypass Human acceptance.
+
+## 9. Current Status
 
 ```text
 External Design Intake Capability

@@ -8,7 +8,6 @@ from copy import deepcopy
 import json
 from typing import Any, Literal
 
-from openai_codex import ApprovalMode, Codex, Sandbox
 from pydantic import BaseModel, ConfigDict, Field
 
 from spg.domain.planning import ProductionPlanArtifactTarget
@@ -22,9 +21,6 @@ from spg.domain.steering import (
     SteeringInvariantViolation,
     SteeringStepType,
 )
-from spg.providers.codex_sdk_executor import _enum_value, _wait_for_terminal
-
-
 CodexFactory = Callable[[], AbstractContextManager[Any]]
 
 
@@ -97,10 +93,7 @@ class _SemanticProviderUnresolvedDisposition(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     state: Literal["UNRESOLVED"]
-    authority_assessment: Literal[
-        SteeringAuthorityAssessment.WITHIN_AUTHORITY,
-        SteeringAuthorityAssessment.UNCERTAIN,
-    ]
+    authority_assessment: Literal[SteeringAuthorityAssessment.UNCERTAIN]
     unresolved_questions: tuple[str, ...] = Field(min_length=1)
     human_attention_recommendation: str = Field(min_length=1)
     completion_claimed: Literal[False]
@@ -115,7 +108,7 @@ class _SemanticProviderAuthorityExpansionDisposition(BaseModel):
     authority_assessment: Literal[
         SteeringAuthorityAssessment.EXPANDS_AUTHORITY
     ]
-    unresolved_questions: tuple[str, ...]
+    unresolved_questions: tuple[str, ...] = Field(min_length=1)
     human_attention_recommendation: str = Field(min_length=1)
     completion_claimed: Literal[False]
 
@@ -160,6 +153,20 @@ class _SemanticProviderPayload(BaseModel):
         return self.proposed_production.to_domain()
 
 
+def _admitted_derived_constraints(
+    payload: _SemanticProviderPayload,
+    input: SemanticStepInput,
+) -> tuple[str, ...]:
+    """Keep Provider inference from becoming Human-approved constraint truth."""
+
+    admitted = set(input.constraints)
+    return tuple(
+        constraint
+        for constraint in payload.derived_constraints
+        if constraint in admitted
+    )
+
+
 class CodexSdkSemanticStepCapability:
     """Execute one semantic Step in an ephemeral read-only provider Turn."""
 
@@ -172,11 +179,19 @@ class CodexSdkSemanticStepCapability:
     ) -> None:
         if timeout_seconds is not None and timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive when provided")
-        self.codex_factory = codex_factory or Codex
+        if codex_factory is None:
+            from openai_codex import Codex
+
+            codex_factory = Codex
+        self.codex_factory = codex_factory
         self.model = model
         self.timeout_seconds = timeout_seconds
 
     def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+        from openai_codex import ApprovalMode, Sandbox
+
+        from spg.providers.codex_sdk_executor import _enum_value, _wait_for_terminal
+
         with self.codex_factory() as codex:
             thread = codex.thread_start(
                 approval_mode=ApprovalMode.deny_all,
@@ -218,7 +233,7 @@ class CodexSdkSemanticStepCapability:
             result_kind=kind,
             bounded_summary=payload.bounded_summary,
             decisions=payload.decisions,
-            derived_constraints=payload.derived_constraints,
+            derived_constraints=_admitted_derived_constraints(payload, input),
             evidence_refs=input.reality_refs,
             unresolved_questions=payload.unresolved_questions,
             authority_assessment=payload.authority_assessment,
@@ -258,6 +273,54 @@ class CodexSdkSemanticStepCapability:
             ) from error
 
     @staticmethod
+    def _parse_payload_ignoring_annotations(raw: str) -> _SemanticProviderPayload:
+        """Ignore transport-only prose keys while preserving strict semantic validation."""
+
+        value = raw.strip()
+        if value.startswith("```"):
+            lines = value.splitlines()
+            if lines and lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            value = "\n".join(lines).strip()
+        try:
+            decoded = json.loads(value)
+            if not isinstance(decoded, dict):
+                raise TypeError("semantic payload must be an object")
+            decoded = {
+                key: item
+                for key, item in decoded.items()
+                if key in _SemanticProviderPayload.model_fields
+            }
+            proposal = decoded.get("proposed_production")
+            if isinstance(proposal, dict):
+                decoded["proposed_production"] = {
+                    key: item
+                    for key, item in proposal.items()
+                    if key in _SemanticProviderProductionProposal.model_fields
+                }
+            disposition = decoded.get("disposition")
+            if isinstance(disposition, dict):
+                decoded["disposition"] = {
+                    key: item
+                    for key, item in disposition.items()
+                    if key
+                    in {
+                        "state",
+                        "authority_assessment",
+                        "unresolved_questions",
+                        "human_attention_recommendation",
+                        "completion_claimed",
+                    }
+                }
+            return _SemanticProviderPayload.model_validate(decoded)
+        except (ValueError, TypeError) as error:
+            raise SteeringInvariantViolation(
+                "Semantic reasoning Provider returned an invalid structured result"
+            ) from error
+
+    @staticmethod
     def _instruction(input: SemanticStepInput) -> str:
         governed = input.model_dump(
             mode="json",
@@ -282,12 +345,19 @@ class CodexSdkSemanticStepCapability:
             "included; missing full contents alone is not a Human decision. Never "
             "claim that a path absent from that inventory already exists. A CREATE proposal "
             "may specify a new bounded path supported by the admitted Work request; absence "
-            "from the tree is expected for CREATE, not missing evidence. Select an unresolved "
-            "disposition when the bounded supplied Reality still leaves material "
-            "uncertainty. Ground the result in the supplied Work, authority, exact baseline, "
+            "from the tree is expected for CREATE, not missing evidence. Evaluate sufficiency "
+            "for this current governed Step, not for every question that may eventually matter "
+            "to the whole Work. Missing information blocks only when (1) Watt lacks authority "
+            "to choose it and (2) different choices materially change the current artifact, "
+            "scope, cost, risk, irreversible effect, execution constraint, or acceptance result. "
+            "Both conditions are required. Broader product discovery that does not affect this "
+            "bounded Step is non-blocking and must not be placed in unresolved_questions. "
+            "Resolve routine analysis autonomously. Ground the result in the supplied Work, "
+            "authority, exact baseline, "
             "repository tree, and bounded context. Return JSON only, with exactly these "
             "fields: bounded_summary (string); decisions (non-empty string array); "
-            "derived_constraints (array containing only already admitted constraints); "
+            "derived_constraints (array containing only constraints copied verbatim from "
+            "the supplied constraints; put inferred implementation choices in decisions); "
             "proposed_production "
             "(null, or a typed object with target_kind, objective, artifact_targets, "
             "code_targets, allowed_areas, forbidden_areas, verification_expectation); "
@@ -295,19 +365,23 @@ class CodexSdkSemanticStepCapability:
             "requires authority_assessment WITHIN_AUTHORITY, unresolved_questions [], "
             "human_attention_recommendation null, and completion_claimed true. Completion here "
             "means this current issue only, not the whole design agenda or Human product acceptance. "
-            "disposition UNRESOLVED requires authority_assessment WITHIN_AUTHORITY or "
-            "UNCERTAIN, at least one unresolved question, a non-empty Human "
+            "disposition UNRESOLVED requires authority_assessment UNCERTAIN, at least one "
+            "material current-Step unresolved question that Watt lacks authority to answer, a non-empty Human "
             "recommendation, and completion_claimed false. disposition "
-            "AUTHORITY_EXPANSION requires authority_assessment EXPANDS_AUTHORITY, a "
-            "non-empty Human recommendation, and completion_claimed false. For REFINE, "
+            "AUTHORITY_EXPANSION requires authority_assessment EXPANDS_AUTHORITY, at least "
+            "one material current-Step unresolved question, a non-empty Human recommendation, "
+            "and completion_claimed false. For REFINE, "
             "proposed_production must be null. "
             "When design_context is present, address only its current_issue and preserve "
             "that governed focus. Earlier admitted results are context, not permission to "
             "collapse the remaining agenda. When production_transition_issue is false, "
             "proposed_production must be null. Only the production-transition issue may "
             "form a reviewable production proposal, and it must do so to claim completion. "
-            "Request Human Attention only for a material product, scope, risk, or authority "
-            "decision; routine analysis and synthesis remain automatic. "
+            "Request Human Attention only when the decision is both outside Watt's admitted "
+            "authority and material to the current governed Step; routine analysis and "
+            "synthesis remain automatic. A bounded, reversible, low-risk artifact with a "
+            "known observable outcome and verification basis must not be blocked merely for "
+            "missing persona, market, commercial rationale, or broad journey information. "
             "For proposed production, target_kind must be exactly DOCUMENTATION_WORK or "
             "CODE_WORK. When the admitted outcome requires working software, choose CODE_WORK "
             "and include implementation plus executable test paths in the bounded proposal; "
@@ -329,8 +403,8 @@ class CodexSdkSemanticStepCapability:
             "propose production but never authorizes it. If an exact target or bounded area "
             "is not supported by the supplied Reality, record the uncertainty instead of "
             "fabricating a path. "
-            "Select UNRESOLVED or AUTHORITY_EXPANSION whenever uncertainty or authority "
-            "expansion exists; never encode an incoherent cross-field combination. Do not "
+            "Select UNRESOLVED or AUTHORITY_EXPANSION only for a material current-Step choice "
+            "that Watt lacks authority to make; never encode an incoherent cross-field combination. Do not "
             "treat your prose as authority.\n\n"
             "Governed SemanticStepInput:\n"
             + json.dumps(governed, ensure_ascii=False, sort_keys=True)

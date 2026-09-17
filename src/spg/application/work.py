@@ -130,6 +130,49 @@ WORK_REALITY_SCHEMA_VERSION = "wic-work-reality-v1"
 WORK_EVOLUTION_SCHEMA_VERSION = "wic-work-reality-v2"
 
 
+_HUMAN_ACTION_COPY: dict[
+    SteeringAttentionReason,
+    tuple[str, str, str, str],
+] = {
+    SteeringAttentionReason.MOTIVE_OR_OUTCOME_AMBIGUITY: (
+        "Clarify a material Work outcome",
+        "A Human-owned choice would materially change the current governed step.",
+        "Choose the intended outcome or narrow the current step.",
+        "Steering will continue from the recorded choice.",
+    ),
+    SteeringAttentionReason.MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION: (
+        "Choose a material product or architecture direction",
+        "The available directions materially change the current result or its acceptance basis.",
+        "Select the direction that should govern this Work.",
+        "The decision will govern subsequent design and production.",
+    ),
+    SteeringAttentionReason.SCOPE_OR_AUTHORITY_EXPANSION: (
+        "Authorize or reject a scope change",
+        "Continuing as proposed would exceed the authority currently admitted for this Work.",
+        "Authorize the bounded expansion or keep the existing scope.",
+        "No out-of-scope production will occur before the decision.",
+    ),
+    SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION: (
+        "Choose how to handle a material risk or cost",
+        "The choice materially changes risk, cost, or an irreversible effect for this step.",
+        "Select the acceptable bounded trade-off.",
+        "The selected risk or cost boundary will constrain continuation.",
+    ),
+    SteeringAttentionReason.PRODUCT_ACCEPTANCE_REQUIRED: (
+        "Accept or continue the current Work outcome",
+        "Only the Human can decide whether the current outcome satisfies the Motive.",
+        "Accept the outcome or state what still needs to change.",
+        "The Work will close or continue according to the acceptance decision.",
+    ),
+    SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED: (
+        "Review the bounded production proposal",
+        "Production requires explicit Human admission of its scope and verification basis.",
+        "Approve the proposal or request a bounded refinement.",
+        "No production authority is created until this review is resolved.",
+    ),
+}
+
+
 class WorkApplicationService:
     """Public Python product API; Runtime services retain transition authority."""
 
@@ -2194,6 +2237,9 @@ class WorkApplicationService:
                 and decision.attention_reason is not None
                 and not proposal_review_resolved
             ):
+                action_title, action_reason, action_recommendation, action_impact = (
+                    _HUMAN_ACTION_COPY[decision.attention_reason]
+                )
                 items.append(
                     AttentionItem(
                         id=uuid5(
@@ -2207,8 +2253,8 @@ class WorkApplicationService:
                             is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
                             else AttentionKind.STEERING_DECISION_REQUIRED
                         ),
-                        decision=decision.objective,
-                        reason=decision.reason,
+                        decision=action_title,
+                        reason=action_reason,
                         available_actions=(
                             (
                                 AttentionAction.APPROVE,
@@ -2226,10 +2272,10 @@ class WorkApplicationService:
                         ),
                         governed_subject_ref=f"steering-decision:{decision.id}",
                         steering_reason=decision.attention_reason,
-                        recommendation=decision.recommendation,
-                        alternatives=decision.alternatives,
-                        trade_offs=decision.trade_offs,
-                        expected_impact=decision.expected_impact,
+                        recommendation=action_recommendation,
+                        alternatives=(),
+                        trade_offs=(),
+                        expected_impact=action_impact,
                         reality_refs=decision.reality_refs,
                         steering_plan_revision_id=(
                             decision.steering_plan_revision_id

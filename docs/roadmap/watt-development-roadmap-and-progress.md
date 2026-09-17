@@ -45,6 +45,20 @@ See [AI-native Development Execution Principles](../architecture/ai-native-devel
 
 ## 2. Current Overall Status
 
+### First Human-validated end-to-end software production loop
+
+**2026-09-17 — FORMAL UX/UI + REAL PRODUCTION + PREVIEW/DELIVERY E2E PHASE
+CLOSED / PASS.** The Human Governor accepted the representative “hello Watt”
+software-production journey through WIC, governed Work and Steering, native
+execution, Verification, sealed Candidate, Preview, Human Authorization,
+Trusted Baseline advancement, exact artifact Download, Delivery Context, and
+Human inspection. Full target-environment regression and final repository
+guards passed. See the [canonical closure evidence](../evidence/first-human-validated-end-to-end-production-loop.md).
+
+The next phase is **Work Control Room content optimization**. It is
+`NOT_STARTED` and requires separate Human/Architecture discussion; this
+roadmap entry does not authorize implementation.
+
 ### Watt-native Executor Runtime technical closure
 
 **2026-09-13 — IMPLEMENTATION COMPLETE / TECHNICALLY QUALIFIED / CONTINUITY
@@ -78,9 +92,9 @@ voice, rich response forms, product-level perceived latency, and TNGA naming
 cleanup remain explicit future findings. See the
 [closure evidence](../evidence/wic-interaction-intelligence-phase-closure.md).
 
-The next major first-release sequence is **Formal UX/UI implementation**, then
-real production/Reality integration and Human Journey dogfood/Acceptance. Each
-requires separate authorization; this roadmap update starts none of them.
+That separately authorized **Formal UX/UI + real production/Reality + Human
+Journey** sequence subsequently closed as recorded in the current milestone
+above. No additional WIC intelligence optimization round is active.
 
 ### Historical collaboration checkpoint
 

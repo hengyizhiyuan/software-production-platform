@@ -454,12 +454,57 @@ class Application:
         """Compose bounded Steering progression over existing governed seams."""
 
         selected_semantic = semantic_capability
-        if selected_semantic is None and self.settings.executor_adapter == "codex-sdk":
+        semantic_adapter = (
+            self.settings.wic_provider_adapter or self.settings.executor_adapter
+        )
+        if selected_semantic is None and semantic_adapter == "codex-sdk":
             from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
 
             selected_semantic = CodexSdkSemanticStepCapability(
                 timeout_seconds=self.settings.executor_timeout_seconds,
             )
+        elif selected_semantic is None and semantic_adapter == "deepseek":
+            from spg.domain.model_runtime import (
+                ModelProfile,
+                ModelProvider,
+                ModelProviderRegistry,
+                ModelPurpose,
+                PurposeProfileRouter,
+                WattModelRuntime,
+            )
+            from spg.infrastructure.model_runtime import DeepSeekResponsesModelAdapter
+            from spg.providers.deepseek_semantic import DeepSeekSemanticStepCapability
+
+            credential = self.settings.deepseek_api_key
+            registry = ModelProviderRegistry()
+            registry.register(
+                DeepSeekResponsesModelAdapter(
+                    api_key=lambda: (
+                        "" if credential is None else credential.get_secret_value()
+                    ),
+                    base_url=self.settings.deepseek_base_url,
+                )
+            )
+            runtime = WattModelRuntime(
+                registry,
+                PurposeProfileRouter(
+                    profiles={
+                        ModelPurpose.STEERING_SEMANTIC: ModelProfile(
+                            purpose=ModelPurpose.STEERING_SEMANTIC,
+                            provider=ModelProvider.DEEPSEEK,
+                            model=self.settings.wic_provider_model or "deepseek-flash",
+                            reasoning_effort=self.settings.wic_provider_reasoning_effort,
+                            timeout_seconds=(
+                                self.settings.collaboration_provider_timeout_seconds
+                            ),
+                            max_output_tokens=(
+                                self.settings.collaboration_provider_max_output_tokens
+                            ),
+                        )
+                    }
+                ),
+            )
+            selected_semantic = DeepSeekSemanticStepCapability(runtime)
 
         return PlanSteeringDriver(
             database,

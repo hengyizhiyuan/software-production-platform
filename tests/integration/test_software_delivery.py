@@ -50,7 +50,8 @@ class SoftwareDesign(_GuidedDesignSemanticCapability):
                 code_targets=tuple(SOURCE), verification_expectation='Node tests independently prove threshold boundary behavior')})
         return result
 
-def produce(database, tmp_path, *, failing=False, user_repository=True):
+def produce(database, tmp_path, *, failing=False, user_repository=True,
+            authorize_candidate=True, set_delivery_target=True):
     interaction = WorkInteractionService(database, capability=SoftwareIntent())
     item = interaction.create_interaction(human_identity='human:test')
     understanding = interaction.append_and_assess(item.id, 'Build an inventory application', human_identity='human:test')
@@ -78,15 +79,37 @@ def produce(database, tmp_path, *, failing=False, user_repository=True):
     for _ in range(20):
         service.advance_work(work.work_id)
         for a in service.list_attention(work_id=work.work_id):
-            if a.kind is AttentionKind.CANDIDATE_AUTHORIZATION:
+            if a.kind is AttentionKind.CANDIDATE_AUTHORIZATION and authorize_candidate:
                 service.resolve_attention(a.id, AttentionResolutionRequest(action=AttentionAction.AUTHORIZE, authority_identity='human:test'))
-        if service.get_work_result(work.work_id).trusted_result or service.get_work(work.work_id).status.value == 'BLOCKED':
+        result = service.get_work_result(work.work_id)
+        if (result.trusted_result or (not authorize_candidate and result.repository_state == 'SEALED_CANDIDATE')
+                or service.get_work(work.work_id).status.value == 'BLOCKED'):
             break
     driver.shutdown()
     delivery = DeliveryApplicationService(database)
-    delivery.set_target(work.work_id, DeliveryTargetRequest(kind='SOFTWARE_ARTIFACT', title='Inventory', acceptance_criteria=('Low-stock boundary works',),
-        authority_identity='human:test', software_form='WEB_APPLICATION', runtime_recipe={'adapter':'STATIC_WEB', 'entrypoint':'index.html'}))
+    if set_delivery_target:
+        delivery.set_target(work.work_id, DeliveryTargetRequest(kind='SOFTWARE_ARTIFACT', title='Inventory', acceptance_criteria=('Low-stock boundary works',),
+            authority_identity='human:test', software_form='WEB_APPLICATION', runtime_recipe={'adapter':'STATIC_WEB', 'entrypoint':'index.html'}))
     return service, work.work_id, delivery, assets
+
+def test_exact_candidate_is_previewable_before_repository_authorization(postgres_database, tmp_path):
+    service, work_id, delivery, _ = produce(
+        postgres_database, tmp_path, authorize_candidate=False, set_delivery_target=False)
+    result = service.get_work_result(work_id)
+    assert result.repository_state == 'SEALED_CANDIDATE'
+    assert not result.trusted_result
+    context = delivery.candidate_context(work_id)
+    assert context is not None and context['authorization_pending']
+    assert context['entrypoint'] == 'index.html'
+    assert context['verification'] and all(item.endswith(': PASS') for item in context['verification'])
+    before = service.get_work_result(work_id)
+    assert delivery.candidate_artifact(work_id, context['candidate_fingerprint'], 'index.html') == SOURCE['index.html'].encode()
+    assert delivery.candidate_download(work_id, context['candidate_fingerprint'], 'index.html') == SOURCE['index.html'].encode()
+    assert service.get_work_result(work_id) == before
+    with pytest.raises(ProductInvariantViolation, match='stale'):
+        delivery.candidate_artifact(work_id, '0' * 64, 'index.html')
+    with pytest.raises(ProductInvariantViolation, match='stale'):
+        delivery.candidate_download(work_id, '0' * 64, 'index.html')
 
 def free_port():
     with socket.socket() as sock:
@@ -141,7 +164,7 @@ def test_work_without_user_repository_uses_managed_workspace_and_delivers(postgr
     service, work_id, delivery, _ = produce(
         postgres_database,
         tmp_path,
-        user_repository=False,
+        user_repository=False, set_delivery_target=False,
     )
 
     assert service.get_work_result(work_id).trusted_result
@@ -158,8 +181,16 @@ def test_work_without_user_repository_uses_managed_workspace_and_delivers(postgr
         assert revision.change_set == ("execution-workspace:ALLOCATED",)
         assert revision.admitted_by == "system:watt-managed-execution-workspace"
 
+    context = delivery.context(work_id)
+    assert context['target_source'] == 'GOVERNED_REALITY'
+    assert context['target']['runtime_recipe']['entrypoint'] == 'index.html'
+    assert context['target']['acceptance_criteria'][0] == service.get_work(work_id).desired_outcome
+    assert 'browser-runnable' in context['target']['acceptance_criteria'][-2]
+    assert 'governed verification obligations' in context['target']['acceptance_criteria'][-1]
+    assert context['verification'] and context['artifacts']
     manifest = delivery.publish(work_id)
     assert manifest.software is not None
+    assert delivery.context(work_id)['target_source'] == 'GOVERNED_REALITY'
     assert {item.path for item in manifest.artifacts} >= set(SOURCE)
     with ZipFile(BytesIO(delivery.package(work_id, manifest.id))) as archive:
         assert archive.read("source/index.html") == SOURCE["index.html"].encode()
@@ -174,6 +205,7 @@ def test_work_without_user_repository_uses_managed_workspace_and_delivers(postgr
         assert ready["status"] == "READY"
         with urlopen(ready["url"]) as response:
             assert response.read() == SOURCE["index.html"].encode()
+            assert "script-src 'self' 'unsafe-inline'" in response.headers["Content-Security-Policy"]
     finally:
         runtime.shutdown()
 

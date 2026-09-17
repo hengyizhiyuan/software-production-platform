@@ -59,6 +59,7 @@ class SteeringDriverStopReason(StrEnum):
     COMPLETE = "COMPLETE"
     PRODUCTION_RUNNING = "PRODUCTION_RUNNING"
     BLOCKED = "BLOCKED"
+    CAPABILITY_UNAVAILABLE = "CAPABILITY_UNAVAILABLE"
     NO_PROGRESS = "NO_PROGRESS"
     TRANSITION_BOUND = "TRANSITION_BOUND"
     SHUTDOWN = "SHUTDOWN"
@@ -327,13 +328,22 @@ class SemanticStepResultCandidate(BaseModel):
             raise ValueError("semantic result kind must match DESIGN or REFINE")
         if self.step_type is SteeringStepType.REFINE and self.proposed_production:
             raise ValueError("REFINE cannot directly propose production")
-        attention_required = bool(
-            self.unresolved_questions
-            or self.authority_assessment is not SteeringAuthorityAssessment.WITHIN_AUTHORITY
+        lacks_watt_authority = (
+            self.authority_assessment
+            is not SteeringAuthorityAssessment.WITHIN_AUTHORITY
+        )
+        materially_changes_current_step = bool(self.unresolved_questions)
+        if lacks_watt_authority != materially_changes_current_step:
+            raise ValueError(
+                "blocking Human Attention requires both missing Watt authority and "
+                "a material unresolved current-Step decision"
+            )
+        attention_required = (
+            lacks_watt_authority and materially_changes_current_step
         )
         if attention_required != bool(self.human_attention_recommendation):
             raise ValueError(
-                "semantic uncertainty or authority expansion requires Human Attention"
+                "a material Human-owned current-Step decision requires Human Attention"
             )
         if self.completion_claimed and attention_required:
             raise ValueError("an unresolved semantic result cannot claim completion")

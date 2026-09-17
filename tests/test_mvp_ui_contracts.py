@@ -79,6 +79,9 @@ def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
 
         for asset_name, content_marker in (
             ("styles.css", ".control-room"),
+            ("appearance.css", ".formal-workspace-grid"),
+            ("appearance.js", "WattAppearance"),
+            ("response-presentation.js", "WattResponsePresentation"),
             ("state.js", "SPGViewModel"),
             ("app.js", "startControlRoom"),
             ("delivery.js", "showDelivery"),
@@ -150,6 +153,8 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert 'id="design-readiness"' in html
     assert "renderGuidedDesign" in javascript
     assert "readiness_blockers" in javascript
+    assert "attention.governed_subject_ref" not in javascript
+    assert "attention.recommendation" in javascript
     assert 'id="work-transition-summary"' in html
     assert 'id="work-transition-decision"' in html
     assert 'id="continue-current-work"' in html
@@ -215,6 +220,13 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
         assert governed_endpoint in javascript
 
     assert "attention.available_actions.forEach" in javascript
+    assert 'attention.kind === "CANDIDATE_AUTHORIZATION"' in javascript
+    assert 'preview.dataset.affordance = "PREVIEW_RESULT"' in javascript
+    assert javascript.index('preview.dataset.affordance = "PREVIEW_RESULT"') < javascript.index("attention.available_actions.forEach")
+    assert 'id="candidate-artifact-actions"' in html
+    assert 'download.dataset.affordance = "DOWNLOAD_ARTIFACT"' in javascript
+    assert "(candidate.downloads || []).find" in javascript
+    assert "/candidate-download/" in (WEB_ROOT.parent / "api" / "http.py").read_text(encoding="utf-8")
     assert "setInterval" not in javascript
     assert "POLL_INTERVAL_MS = 2000" in javascript
     assert "scheduleObservationPolling" in javascript
@@ -247,6 +259,39 @@ def test_planb_composer_has_explicit_bounded_collapse_control() -> None:
     assert "elements.workForm.hidden = !expanded" in javascript
     assert '"Expand composer"' in javascript
     assert '"Collapse composer"' in javascript
+
+
+def test_formal_workspace_has_stable_spatial_slots_collapse_and_overlay_focus() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+    appearance = (WEB_ROOT / "appearance.js").read_text(encoding="utf-8")
+    css = (WEB_ROOT / "appearance.css").read_text(encoding="utf-8")
+    surface_ids = (
+        "reality-surface",
+        "agenda-surface",
+        "production-surface",
+        "actions-surface",
+    )
+
+    assert [html.index(f'id="{surface_id}"') for surface_id in surface_ids] == sorted(
+        html.index(f'id="{surface_id}"') for surface_id in surface_ids
+    )
+    for surface_id in surface_ids:
+        assert f'data-collapse-surface="{surface_id}"' in html
+        assert f'data-focus-surface="{surface_id}"' in html
+    assert "WORKSPACE_SURFACE_ORDER" in appearance
+    assert "setSurfaceCollapsed" in appearance
+    assert "setFocusedSurface" in appearance
+    assert ".workspace-surface-reality { grid-column: 1; grid-row: 1; }" in css
+    assert ".workspace-surface-actions { grid-column: 2; grid-row: 2; }" in css
+    assert ".workspace-surface.is-focused {\n  position: fixed;" in css
+    focus_rule = css[css.index(".workspace-surface.is-focused {") : css.index(
+        "}", css.index(".workspace-surface.is-focused {")
+    )]
+    assert "grid-column" not in focus_rule
+    assert 'event.key !== "Escape"' in javascript
+    assert "production-intent-handoff" in javascript
+    assert "Authorize Work formation and start Steering" in html
 
 
 def test_control_room_slice_1_is_a_read_only_projection_over_existing_reality() -> None:
@@ -390,5 +435,59 @@ def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None
     assert "https://" not in html
     assert "http://" not in html
     assert 'src="/assets/state.js"' in html
-    assert 'src="/assets/app.js?v=wic-vnext-slice3-3"' in html
+    assert 'src="/assets/appearance.js?v=formal-ui-phase1"' in html
+    assert 'src="/assets/app.js?v=formal-ui-phase1"' in html
     assert 'href="/assets/styles.css"' in html
+
+
+def test_formal_ui_phase_1_preserves_stable_workspace_and_appearance_boundaries() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    delivery_html = (WEB_ROOT / "delivery.html").read_text(encoding="utf-8")
+    appearance = (WEB_ROOT / "appearance.js").read_text(encoding="utf-8")
+
+    for surface in ("reality", "agenda", "production", "actions"):
+        assert f'id="{surface}-surface"' in html
+        assert f'data-focus-surface="{surface}-surface"' in html
+    assert html.index('id="reality-surface"') < html.index('id="agenda-surface"')
+    assert html.index('id="agenda-surface"') < html.index('id="production-surface"')
+    assert html.index('id="production-surface"') < html.index('id="actions-surface"')
+    assert 'id="global-theme-control"' in html
+    assert 'id="workspace-skin-control"' in html
+    assert 'id="current-interaction-live"' in html
+    assert 'class="conversation-history-panel"' in html
+    assert 'class="workspace-evidence-details"' in html
+    assert html.index('id="work-surface"') < html.index('class="composer"') < html.rindex("</main>")
+
+    for skin_id in (
+        "INDUSTRIAL_CYAN",
+        "EXECUTIVE_AMBER",
+        "PRECISION_SILVER",
+        "WARM_PROFESSIONAL",
+        "TECHNICAL_GRAPHITE",
+        "FUTURISTIC_STUDIO",
+    ):
+        assert skin_id in appearance
+    assert appearance.count('status: "IMPLEMENTED"') == 1
+    assert appearance.count('status: "FUTURE_EXTERNAL_ASSET_DOGFOOD"') == 5
+    assert "workspace-skin-control" not in delivery_html
+    assert "data-workspace-skin" not in delivery_html
+
+
+def test_formal_ui_phase_1_removes_current_tnga_product_branding() -> None:
+    for name in ("index.html", "delivery.html", "app.js", "state.js"):
+        assert "TNGA" not in (WEB_ROOT / name).read_text(encoding="utf-8")
+
+
+def test_delivery_preview_and_context_assembly_are_human_visible() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+    delivery_html = (WEB_ROOT / "delivery.html").read_text(encoding="utf-8")
+    delivery_javascript = (WEB_ROOT / "delivery.js").read_text(encoding="utf-8")
+    assert 'id="open-candidate-preview"' in html
+    assert 'id="candidate-preview-status"' in html
+    assert "/candidate-preview" in javascript
+    assert "Inspect the exact verified Candidate before authorizing repository integration." in javascript
+    assert 'id="delivery-context"' in delivery_html
+    assert "/delivery-context" in delivery_javascript
+    assert "GOVERNED_REALITY" in delivery_javascript
+    assert "无需重新填写" in delivery_javascript

@@ -76,6 +76,12 @@ test("UI-08 through UI-13 use safe DOM rendering and observational polling", () 
   assert.doesNotMatch(appSource, /setInterval|runUntilDone/);
   assert.match(appSource, /node\.textContent = String\(text\)/);
   assert.match(appSource, /attention\.available_actions\.forEach/);
+  assert.match(appSource, /preview\.dataset\.affordance = "PREVIEW_RESULT"/);
+  assert.match(appSource, /download\.dataset\.affordance = "DOWNLOAD_ARTIFACT"/);
+  assert.ok(
+    appSource.indexOf('preview.dataset.affordance = "PREVIEW_RESULT"')
+      < appSource.indexOf("attention.available_actions.forEach"),
+  );
   assert.equal((appSource.match(/\$\{workPath\}\/advance/g) || []).length, 1);
   assert.match(appSource, /POLL_INTERVAL_MS = 2000/);
   assert.match(appSource, /scheduleObservationPolling/);
@@ -992,6 +998,43 @@ test("stream bursts repaint one message per frame and preserve historical DOM no
   harness.renderConversation();
   assert.equal(harness.elements.interactionHistory.children[0], human);
   assert.equal(harness.elements.interactionHistory.children[1], assistant);
+});
+
+test("Production projection reports truthful Steering capability and native queue states", () => {
+  const work = {
+    work_id: "work-production",
+    title: "Produce a runnable page",
+    status: "READY",
+    current_production_step: "DESIGN",
+    human_attention_required: false,
+  };
+  const unavailable = viewModel.controlRoomProjection(
+    work,
+    [],
+    [],
+    {
+      work_id: "work-production",
+      automatic_progression_state: "STOPPED",
+      last_stop_reason: "CAPABILITY_UNAVAILABLE",
+    },
+    [],
+  );
+  assert.equal(
+    unavailable.status.condition,
+    "Plan Steering cannot progress because the required semantic capability is unavailable.",
+  );
+
+  const executing = viewModel.controlRoomProjection(
+    work,
+    [],
+    [],
+    { work_id: "work-production", automatic_progression_state: "RUNNING" },
+    [{ condition: "EXECUTING", attempt_id: "attempt-1" }],
+  );
+  assert.equal(
+    executing.status.activity,
+    "The native Executor is running the admitted production unit.",
+  );
 });
 
 test("governed response deltas paint one received chunk per frame", () => {

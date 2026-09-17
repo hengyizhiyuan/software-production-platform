@@ -2,6 +2,8 @@
   "use strict";
 
   const viewModel = globalThis.SPGViewModel;
+  const appearance = globalThis.WattAppearance;
+  const responsePresentation = globalThis.WattResponsePresentation;
   if (!viewModel) {
     return;
   }
@@ -65,6 +67,32 @@
     healthControl: document.getElementById("health-control"),
     healthDot: document.getElementById("health-dot"),
     healthLabel: document.getElementById("health-label"),
+    globalThemeControl: document.getElementById("global-theme-control"),
+    workspaceSkinControl: document.getElementById("workspace-skin-control"),
+    workspaceSkinCurrent: document.getElementById("workspace-skin-current"),
+    workSurface: document.getElementById("work-surface"),
+    formalWorkspaceGrid: document.getElementById("formal-workspace-grid"),
+    workspaceRealitySummary: document.getElementById("workspace-reality-summary"),
+    workspaceRealityMotive: document.getElementById("workspace-reality-motive"),
+    workspaceRealityOutcome: document.getElementById("workspace-reality-outcome"),
+    workspaceRealityStatus: document.getElementById("workspace-reality-status"),
+    workspaceRealitySatisfaction: document.getElementById("workspace-reality-satisfaction"),
+    workspaceAgendaSummary: document.getElementById("workspace-agenda-summary"),
+    workspaceAgendaCurrent: document.getElementById("workspace-agenda-current"),
+    workspaceAgendaNext: document.getElementById("workspace-agenda-next"),
+    workspaceAgendaRevision: document.getElementById("workspace-agenda-revision"),
+    workspaceAgendaBasis: document.getElementById("workspace-agenda-basis"),
+    workspaceProductionSummary: document.getElementById("workspace-production-summary"),
+    workspaceProductionActivity: document.getElementById("workspace-production-activity"),
+    workspaceProductionQueue: document.getElementById("workspace-production-queue"),
+    workspaceProductionVerification: document.getElementById("workspace-production-verification"),
+    workspaceProductionTrust: document.getElementById("workspace-production-trust"),
+    workspaceActionsSummary: document.getElementById("workspace-actions-summary"),
+    workspaceActionsAttention: document.getElementById("workspace-actions-attention"),
+    workspaceActionsAvailable: document.getElementById("workspace-actions-available"),
+    workspaceActionsBlocker: document.getElementById("workspace-actions-blocker"),
+    workspaceActionsDirection: document.getElementById("workspace-actions-direction"),
+    currentInteractionLive: document.getElementById("current-interaction-live"),
     showGoalForm: document.getElementById("show-goal-form"),
     goalForm: document.getElementById("goal-form"),
     goalTitle: document.getElementById("goal-title"),
@@ -249,6 +277,12 @@
     verificationSummary: document.getElementById("verification-summary"),
     repositoryState: document.getElementById("repository-state"),
     remainingRisk: document.getElementById("remaining-risk"),
+    candidatePreviewPanel: document.getElementById("candidate-preview-panel"),
+    openCandidatePreview: document.getElementById("open-candidate-preview"),
+    candidatePreviewLink: document.getElementById("candidate-preview-link"),
+    candidateArtifactActions: document.getElementById("candidate-artifact-actions"),
+    candidateDeliveryLink: document.getElementById("candidate-delivery-link"),
+    candidatePreviewStatus: document.getElementById("candidate-preview-status"),
     workForm: document.getElementById("work-form"),
     composerToggle: document.getElementById("composer-toggle"),
     workRequirement: document.getElementById("work-requirement"),
@@ -439,13 +473,55 @@
     });
     Array.from(container.children).forEach((node) => { if (!retained.has(node)) node.remove(); });
     if (!history.length) container.append(createElement("p", "empty-copy", "No messages yet."));
+    renderCurrentInteraction(history);
+  }
+
+  function renderCurrentInteraction(history) {
+    const current = elements.currentInteractionLive;
+    if (!current) return;
+    const active = history.slice(-2);
+    const keys = active.map((record, index) => messageKey(record, history.length - active.length + index));
+    const existing = new Map(Array.from(current.children).map((node) => [node.dataset.messageKey, node]));
+    const retained = new Set();
+    active.forEach((record, index) => {
+      const key = keys[index];
+      let message = existing.get(key);
+      if (!message) {
+        message = createElement("article", `interaction-message actor-${record.actor.toLowerCase()}`);
+        message.dataset.messageKey = key;
+        message.append(createElement("p", "speaker-label", record.actor === "HUMAN" ? "You" : "Watt"));
+        const content = createElement("div", "message-content");
+        content.dataset.responseRegion = "composable";
+        message.append(content);
+        message.append(createElement("p", "message-meta"));
+        message.append(createElement("p", "message-references"));
+      }
+      retained.add(message);
+      updateMessageNode(message, record);
+      if (current.children[index] !== message) current.insertBefore(message, current.children[index] || null);
+    });
+    Array.from(current.children).forEach((node) => { if (!retained.has(node)) node.remove(); });
+    if (!active.length) current.append(createElement("p", "empty-copy", "The current exchange will appear here."));
+    Array.from(containerChildren(elements.interactionHistory)).forEach((node) => {
+      node.classList.toggle("is-current", keys.includes(node.dataset.messageKey));
+    });
+  }
+
+  function containerChildren(container) {
+    return container ? container.children : [];
   }
 
   function updateMessageNode(message, record) {
     message.classList.toggle("is-streaming", Boolean(record.streaming));
     message.setAttribute("aria-busy", String(Boolean(record.streaming)));
     const content = message.querySelector(".message-content");
-    if (content.textContent !== record.content) content.textContent = record.content;
+    if (record.actor === "WATT" && !record.streaming
+      && content.dataset && content.dataset.responseRegion === "composable"
+      && responsePresentation) {
+      responsePresentation.render(content, record.content);
+    } else if (content.textContent !== record.content) {
+      content.textContent = record.content;
+    }
     const timestamp = record.created_at ? new Date(record.created_at).toLocaleTimeString() : "";
     const meta = `${timestamp}${record.processing_status ? ` · ${record.processing_status}` : ""}`;
     if (message.children[2].textContent !== meta) message.children[2].textContent = meta;
@@ -478,10 +554,16 @@
       const key = messageKey({ actor: "WATT", turn_id: streamed.turnId }, 0);
       const node = Array.from(elements.interactionHistory.children).find((item) => item.dataset.messageKey === key);
       if (node) {
-        updateMessageNode(node, {
-          content: streamed.content || "正在处理…", streaming: true,
+        const streamingRecord = {
+          actor: "WATT", content: streamed.content || "正在处理…", streaming: true,
           processing_status: streamed.status, created_at: streamed.createdAt,
-        });
+        };
+        updateMessageNode(node, streamingRecord);
+        if (elements.currentInteractionLive) {
+          const currentNode = Array.from(elements.currentInteractionLive.children)
+            .find((item) => item.dataset.messageKey === key);
+          if (currentNode) updateMessageNode(currentNode, streamingRecord);
+        }
         if (streamed.content && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") {
           globalThis.__WATT_MARK_TURN_TIMING__(streamed.turnId, "browserFirstTextPainted");
         }
@@ -618,6 +700,7 @@
       elements.interactionDesignStrategy.textContent = "Not established";
       elements.interactionDesignProgress.textContent = "No design process selected.";
       elements.readinessAffordance.textContent = "Not ready to form Work.";
+      elements.readinessAffordance.classList.remove("production-intent-handoff");
       elements.interactionAdmission.hidden = true;
       elements.workRevisionAdmission.hidden = true;
       elements.workTransitionDecision.hidden = true;
@@ -693,6 +776,11 @@
       || "Not established";
     elements.interactionDesignProgress.textContent = projection.design_progress_narrative
       || "No design process selected.";
+    const turnIntent = assessment
+      && assessment.progressive_semantics
+      && assessment.progressive_semantics.turn_intent;
+    const productionIntent = ["BUILD", "ACTION_REQUEST", "MODIFY", "DEPLOY"].includes(turnIntent);
+    elements.readinessAffordance.classList.toggle("production-intent-handoff", productionIntent && !governed);
     elements.readinessAffordance.textContent = projection.new_work_formation_pending
       ? "New Work formation context is open. Continue the Interaction; no Work exists until Human admission."
       : projection.work_satisfaction_state === "CURRENTLY_SATISFIED"
@@ -700,7 +788,9 @@
       : governed
         ? "Governed Work admitted. This Interaction remains open and focused on that Work."
       : status === "READY"
-        ? "Ready to form Work. Review the candidate understanding, Resource, scope, and constraints before admitting."
+        ? productionIntent
+          ? "Production intent recognized. Review the candidate Work, then authorize Work formation so Plan Steering can begin; conversation output is not a produced artifact."
+          : "Ready to form Work. Review the candidate understanding, Resource, scope, and constraints before admitting."
         : "Not ready to form Work.";
     elements.interactionAdmission.hidden = status !== "READY" || Boolean(governed);
     elements.workRevisionAdmission.hidden = !(
@@ -872,10 +962,21 @@
       const card = createElement("article", "attention-card");
       card.append(createElement("h4", "", attention.decision));
       card.append(createElement("p", "", attention.reason));
-      card.append(
-        createElement("p", "subject-ref", attention.governed_subject_ref),
-      );
+      if (attention.recommendation) {
+        card.append(createElement("p", "", attention.recommendation));
+      }
       const actions = createElement("div", "action-row");
+      const previewBeforeAuthorization = attention.kind === "CANDIDATE_AUTHORIZATION"
+        && attention.available_actions.includes("AUTHORIZE")
+        && state.result
+        && state.result.repository_state === "SEALED_CANDIDATE";
+      if (previewBeforeAuthorization) {
+        const preview = createElement("button", "action-button", "Preview result");
+        preview.type = "button";
+        preview.dataset.affordance = "PREVIEW_RESULT";
+        preview.addEventListener("click", openCandidatePreview);
+        actions.append(preview);
+      }
       attention.available_actions.forEach((action) => {
         const recommended = attention.recommended_action === action;
         const label = recommended ? `${actionLabel(action)} · Recommended` : actionLabel(action);
@@ -899,6 +1000,8 @@
       work,
       state.interactions,
       state.attention,
+      state.steering,
+      state.nativeQueue,
     );
     elements.controlObjectiveMotive.textContent = projection.objective.motive;
     elements.controlObjectiveWork.textContent = projection.objective.currentWork;
@@ -1101,6 +1204,8 @@
       elements.verificationSummary.textContent = "No verification evidence available.";
       elements.repositoryState.textContent = "No repository result yet.";
       elements.remainingRisk.textContent = "This Work has not completed.";
+      elements.candidatePreviewPanel.hidden = true;
+      elements.candidateArtifactActions.replaceChildren();
       return;
     }
     const activation = result.runtime_activation;
@@ -1122,6 +1227,60 @@
         ? activation.reason
         : result.remaining_blocker_or_risk
     ) || "No remaining blocker reported.";
+    const previewable = result.repository_state === "SEALED_CANDIDATE"
+      || result.repository_state === "TRUSTED_BASELINE_ADVANCED";
+    elements.candidatePreviewPanel.hidden = !previewable;
+    elements.openCandidatePreview.hidden = !previewable;
+    elements.candidatePreviewLink.hidden = true;
+    elements.candidateArtifactActions.replaceChildren();
+    if (previewable && Array.isArray(result.produced_artifacts)) {
+      result.produced_artifacts.forEach((path) => {
+        const download = createElement("button", "action-button", `Download ${path}`);
+        download.type = "button";
+        download.dataset.affordance = "DOWNLOAD_ARTIFACT";
+        download.addEventListener("click", () => downloadCandidateArtifact(path));
+        elements.candidateArtifactActions.append(download);
+      });
+    }
+    elements.candidateDeliveryLink.hidden = !result.trusted_result;
+    elements.candidateDeliveryLink.href = `/delivery?work=${state.selectedWorkId}`;
+    elements.candidatePreviewStatus.textContent = previewable
+      ? result.trusted_result
+        ? "Technical verification is complete. Human product acceptance remains separate."
+        : "Inspect the exact verified Candidate before authorizing repository integration."
+      : "";
+  }
+
+  async function openCandidatePreview() {
+    if (state.busy || !state.selectedWorkId) return;
+    hideNotice(); setBusy(true);
+    try {
+      const preview = await apiRequest(`/api/works/${state.selectedWorkId}/candidate-preview`, { method: "POST" });
+      if (preview.status !== "READY") throw new ApiError(409, "PREVIEW_NOT_READY", preview.reason || "Preview is not ready.");
+      elements.candidatePreviewLink.href = preview.url;
+      elements.candidatePreviewLink.hidden = false;
+      elements.candidatePreviewStatus.textContent = `Exact Candidate ${preview.repository_revision.slice(0, 12)} · Human authorization ${preview.authorization_pending ? "pending" : "recorded"}.`;
+      window.open(preview.url, "_blank", "noopener");
+    } catch (error) { showNotice(error); }
+    finally { setBusy(false); renderAttention(); }
+  }
+
+  async function downloadCandidateArtifact(path) {
+    if (state.busy || !state.selectedWorkId) return;
+    hideNotice(); setBusy(true);
+    try {
+      const candidate = await apiRequest(`/api/works/${state.selectedWorkId}/candidate-preview`, { method: "POST" });
+      const artifact = (candidate.downloads || []).find((item) => item.path === path);
+      if (!artifact) throw new ApiError(404, "ARTIFACT_NOT_FOUND", "The artifact is not part of the exact current Candidate.");
+      const link = document.createElement("a");
+      link.href = artifact.url;
+      link.download = path.split("/").pop() || "artifact";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      elements.candidatePreviewStatus.textContent = `Downloading ${path} from exact Candidate ${candidate.repository_revision.slice(0, 12)}.`;
+    } catch (error) { showNotice(error); }
+    finally { setBusy(false); renderAttention(); }
   }
 
   function renderSelectedWork() {
@@ -1191,7 +1350,103 @@
     renderWorkActions(work);
     renderAttention();
     renderResult();
+    renderFormalWorkspace(work);
     scheduleObservationPolling();
+  }
+
+  function renderFormalWorkspace(work) {
+    const foundation = viewModel.controlRoomProjection(
+      work,
+      state.interactions,
+      state.attention,
+      state.steering,
+      state.nativeQueue,
+    );
+    const direction = viewModel.currentDirectionProjection(work, state.steering, state.attention);
+    const trust = viewModel.trustSummaryProjection(work, state.result);
+    const objective = foundation.objective;
+    const status = foundation.status;
+    const attention = foundation.attention;
+
+    elements.workspaceRealitySummary.textContent = objective.currentWork;
+    elements.workspaceRealityMotive.textContent = objective.motive;
+    elements.workspaceRealityOutcome.textContent = objective.desiredOutcome;
+    elements.workspaceRealityStatus.textContent = status.workStatus;
+    elements.workspaceRealitySatisfaction.textContent = objective.satisfaction;
+
+    elements.workspaceAgendaSummary.textContent = direction.direction || "No direction established yet.";
+    elements.workspaceAgendaCurrent.textContent = direction.currentStep;
+    elements.workspaceAgendaNext.textContent = direction.nextStep;
+    elements.workspaceAgendaRevision.textContent = direction.revision;
+    elements.workspaceAgendaBasis.textContent = Array.isArray(direction.realityBasis)
+      ? direction.realityBasis.join(" · ") || "No referenced Reality basis exposed."
+      : direction.realityBasis;
+
+    elements.workspaceProductionSummary.textContent = status.activity;
+    elements.workspaceProductionActivity.textContent = status.lifecyclePhase;
+    elements.workspaceProductionQueue.textContent = elements.executionQueueState.textContent;
+    elements.workspaceProductionVerification.textContent = trust.verification;
+    elements.workspaceProductionTrust.textContent = trust.state;
+
+    elements.workspaceActionsSummary.textContent = attention.summary;
+    elements.workspaceActionsAttention.textContent = attention.state;
+    const attentionActions = state.attention.flatMap((item) => item.available_actions || []);
+    const previewRequired = state.attention.some((item) => item.kind === "CANDIDATE_AUTHORIZATION"
+      && (item.available_actions || []).includes("AUTHORIZE"))
+      && state.result && state.result.repository_state === "SEALED_CANDIDATE";
+    const availableActions = [
+      ...(previewRequired ? ["Preview result"] : []),
+      ...attentionActions.map(actionLabel),
+    ];
+    elements.workspaceActionsAvailable.textContent = availableActions.join(" · ")
+      || Array.from(elements.workActions.children).map((button) => button.textContent).join(" · ")
+      || "No governed action available now.";
+    elements.workspaceActionsBlocker.textContent = status.condition;
+    elements.workspaceActionsDirection.textContent = attention.emergingDirection;
+    document.getElementById("actions-surface").classList.toggle("requires-attention", attention.required);
+  }
+
+  function initializeAppearanceControls() {
+    if (!appearance || !elements.globalThemeControl || !elements.workspaceSkinControl) return;
+    const current = appearance.initialize({ workspace: elements.workSurface });
+    elements.globalThemeControl.value = current.globalTheme.id;
+    elements.workspaceSkinControl.replaceChildren();
+    appearance.WORKSPACE_SKINS.filter((skin) => skin.enabled).forEach((skin) => {
+      const option = createElement("option", "", skin.displayName);
+      option.value = skin.skinId;
+      elements.workspaceSkinControl.append(option);
+    });
+    elements.workspaceSkinControl.value = current.workspaceSkin.skinId;
+    elements.workspaceSkinCurrent.textContent = `${current.workspaceSkin.displayName} · ${current.workspaceSkin.baseAppearance}`;
+    elements.globalThemeControl.addEventListener("change", () => {
+      appearance.selectGlobalTheme(elements.globalThemeControl.value);
+    });
+    elements.workspaceSkinControl.addEventListener("change", () => {
+      const selected = appearance.selectWorkspaceSkin(elements.workspaceSkinControl.value, { workspace: elements.workSurface });
+      elements.workspaceSkinControl.value = selected.skinId;
+      elements.workspaceSkinCurrent.textContent = `${selected.displayName} · ${selected.baseAppearance}`;
+    });
+    elements.formalWorkspaceGrid.addEventListener("click", (event) => {
+      const collapseButton = event.target.closest("[data-collapse-surface]");
+      if (collapseButton) {
+        const surface = document.getElementById(collapseButton.dataset.collapseSurface);
+        appearance.setSurfaceCollapsed(surface, !surface.classList.contains("is-collapsed"));
+        return;
+      }
+      const focusButton = event.target.closest("[data-focus-surface]");
+      if (!focusButton) return;
+      const focused = elements.formalWorkspaceGrid.querySelector(".workspace-surface.is-focused");
+      const next = focused && focused.id === focusButton.dataset.focusSurface
+        ? null
+        : focusButton.dataset.focusSurface;
+      appearance.setFocusedSurface(elements.formalWorkspaceGrid, next);
+      document.body.classList.toggle("workspace-focus-active", Boolean(next));
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !elements.formalWorkspaceGrid.classList.contains("has-focus")) return;
+      appearance.setFocusedSurface(elements.formalWorkspaceGrid, null);
+      document.body.classList.remove("workspace-focus-active");
+    });
   }
 
   function authorityIdentity() {
@@ -1201,6 +1456,8 @@
     }
     return identity;
   }
+
+  elements.openCandidatePreview.addEventListener("click", openCandidatePreview);
 
   async function performWorkAction(action) {
     if (state.busy || !state.selectedWorkId) {
@@ -2122,6 +2379,7 @@
   elements.healthControl.addEventListener("click", loadHealth);
   elements.dismissNotice.addEventListener("click", hideNotice);
 
+  initializeAppearanceControls();
   restoreComposer();
   restoreComposerExpanded();
   consumeNewWorkEntry();

@@ -374,7 +374,10 @@ def test_sem_02_06_13_refine_requires_governed_result(
     unavailable = PlanSteeringDriver(postgres_database, works, orchestrator)
     try:
         no_progress = unavailable.iterate(admitted.work_id)
-        assert no_progress.stop_reason is SteeringDriverStopReason.NO_PROGRESS
+        assert (
+            no_progress.stop_reason
+            is SteeringDriverStopReason.CAPABILITY_UNAVAILABLE
+        )
         assert not SteeringApplicationService(postgres_database).reconstruct(
             admitted.work_id
         ).semantic_results

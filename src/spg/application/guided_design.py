@@ -54,11 +54,23 @@ def general_product_system_design_issues() -> tuple[DesignIssue, ...]:
         DesignIssue(
             key="motive-users-problem",
             title="Motive, users, and problem",
-            objective="Clarify why this product or system should exist and for whom.",
-            why_it_matters="A solution direction is unsafe until the beneficiary and problem are explicit.",
-            applicability="Applicable to every product or system design Work.",
-            completion_condition="Governed Reality identifies the Motive, target actors, and problem boundary.",
-            authority_relevance=DesignAuthorityRelevance.MATERIAL_HUMAN_DECISION,
+            objective=(
+                "Establish the Motive, relevant actors, and problem boundary needed "
+                "for the current governed step."
+            ),
+            why_it_matters=(
+                "These dimensions matter only to the extent that they change the "
+                "current artifact, risk, authority, or acceptance basis."
+            ),
+            applicability=(
+                "Applicable when missing Motive, actor, or problem information "
+                "materially changes the current governed step."
+            ),
+            completion_condition=(
+                "Governed Reality is sufficient for the current step; broader product "
+                "discovery may remain explicitly non-blocking."
+            ),
+            authority_relevance=DesignAuthorityRelevance.ROUTINE,
             required_output=DesignOutputClass.SHARED_UNDERSTANDING,
         ),
         DesignIssue(
@@ -687,6 +699,26 @@ class GuidedDesignApplicationService:
                 issue.required_output
                 is DesignOutputClass.REVIEWABLE_PRODUCTION_PROPOSAL
             ),
+            "step_scoped_sufficiency": {
+                "question": "Do we know enough to safely and correctly perform this current governed step?",
+                "evaluate": [
+                    "artifact_or_object",
+                    "observable_outcome",
+                    "explicit_constraints",
+                    "relevant_current_reality",
+                    "verification_obligation",
+                    "human_owned_material_decisions",
+                    "material_risk_or_irreversible_effect",
+                ],
+                "human_attention_requires_both": [
+                    "watt_lacks_authority_to_choose",
+                    "choice_materially_changes_current_step",
+                ],
+                "non_blocking_rule": (
+                    "Do not manufacture a blocker from missing discovery dimensions "
+                    "that do not materially affect this current step."
+                ),
+            },
         }
 
     def get_optional(self, work_id: UUID) -> GuidedDesignProjection | None:

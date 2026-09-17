@@ -9,29 +9,45 @@
     >
     <meta
       name="description"
-      content="TNGA Software Production Control Room for governed Goal and Work operations."
+      content="Watt / 工律 Software Production Workspace for governed Goal and Work operations."
     >
-    <title>TNGA · Software Production</title>
+    <title>Watt / 工律 · Software Production</title>
     <link rel="stylesheet" href="/assets/styles.css">
+    <link rel="stylesheet" href="/assets/appearance.css?v=formal-ui-phase1">
     <script src="/assets/state.js" defer></script>
-    <script src="/assets/app.js?v=wic-vnext-slice3-3" defer></script>
+    <script src="/assets/appearance.js?v=formal-ui-phase1" defer></script>
+    <script src="/assets/response-presentation.js?v=formal-ui-phase1" defer></script>
+    <script src="/assets/app.js?v=formal-ui-phase1" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#work-surface">Skip to selected Work</a>
 
     <header class="topbar">
-      <a href="/delivery" class="text-button">Work 资产与交付</a>
-      <div class="brand-lockup" aria-label="TNGA Software Production">
-        <span class="brand-mark" aria-hidden="true">T</span>
+      <div class="brand-lockup" aria-label="Watt Software Production">
+        <span class="brand-mark" aria-hidden="true">W</span>
         <div>
-          <p class="eyebrow">TNGA</p>
-          <h1>Software Production</h1>
+          <h1>Watt / 工律</h1>
+          <p class="brand-tagline">From intent to production.</p>
         </div>
+      </div>
+      <a href="/delivery" class="text-button topbar-delivery-link">Deliveries</a>
+      <p class="topbar-environment"><span aria-hidden="true"></span> Production Environment</p>
+      <div class="appearance-controls" aria-label="Appearance preferences">
+        <label class="appearance-control" for="global-theme-control">Global appearance
+          <select id="global-theme-control">
+            <option value="LIGHT">Light</option>
+            <option value="DARK">Dark</option>
+          </select>
+        </label>
+        <label class="appearance-control" for="workspace-skin-control">Work Workspace skin
+          <select id="workspace-skin-control"></select>
+        </label>
       </div>
       <button id="health-control" class="health-chip" type="button" aria-label="Refresh service health">
         <span id="health-dot" class="health-dot health-unknown" aria-hidden="true"></span>
         <span id="health-label">Checking</span>
       </button>
+      <p class="system-signature">System online<br><span>Build a more capable team</span></p>
     </header>
 
     <main class="control-room">
@@ -83,7 +99,7 @@
         </section>
       </aside>
 
-      <section id="work-surface" class="work-surface" aria-label="Selected Work">
+      <section id="work-surface" class="work-surface work-workspace" data-workspace-skin="INDUSTRIAL_CYAN" aria-label="Selected Work">
         <div id="loading-state" class="surface-state">
           <span class="spinner" aria-hidden="true"></span>
           <p>Loading the production view…</p>
@@ -104,17 +120,19 @@
         </div>
 
           <section id="interaction-surface" class="interaction-surface" aria-labelledby="interaction-heading">
+            <div class="interaction-layout">
+            <section class="current-interaction-panel" aria-label="Current Interaction">
             <div class="panel-title-row">
               <div>
-                <p class="eyebrow">Human said</p>
-                <h3 id="interaction-heading">Interaction</h3>
+                <p class="eyebrow">Active Work communication</p>
+                <h3 id="interaction-heading">Current Interaction</h3>
               </div>
               <div class="interaction-heading-actions">
                 <span id="interaction-processing-status" class="status-badge status-draft">IDLE</span>
                 <button id="new-interaction-control" class="text-button" type="button">New Work</button>
               </div>
             </div>
-            <div id="interaction-history" class="interaction-history" aria-live="polite"></div>
+            <div id="current-interaction-live" class="current-interaction-live" data-response-region="composable" aria-live="polite"></div>
 
             <section id="shared-understanding" class="shared-understanding" aria-labelledby="understanding-heading">
               <div class="panel-title-row">
@@ -163,7 +181,7 @@
                 </div>
                 <label for="admission-resource">Repository Asset（可稍后绑定）</label>
                 <select id="admission-resource"><option value="">尚无仓库，先开始 Work 与设计</option></select>
-                <button id="admit-work-control" class="primary-button" type="button">Admit governed Work</button>
+                <button id="admit-work-control" class="primary-button" type="button" aria-label="Admit governed Work">Authorize Work formation and start Steering</button>
               </div>
               <div id="work-revision-admission" class="operator-panel compact-admission" hidden>
                 <div class="operator-identity">
@@ -185,6 +203,17 @@
                 <button id="dismiss-work-transition" class="text-button" type="button">Dismiss</button>
               </div>
             </section>
+            </section>
+            <aside class="conversation-history-panel" aria-labelledby="conversation-history-heading">
+              <div class="panel-title-row">
+                <div>
+                  <p class="eyebrow">Provenance</p>
+                  <h3 id="conversation-history-heading">Conversation History</h3>
+                </div>
+              </div>
+              <div id="interaction-history" class="interaction-history" aria-live="polite"></div>
+            </aside>
+            </div>
           </section>
 
         <article id="selected-work" class="selected-work" hidden>
@@ -209,9 +238,146 @@
                 <p id="execution-blocked" class="execution-blocked" hidden></p>
               </section>
             </div>
-            <button id="work-refresh-control" class="secondary-button compact" type="button">Refresh</button>
+            <div class="work-header-actions">
+              <div>
+                <p class="field-label">Workspace presentation</p>
+                <p id="workspace-skin-current" class="planned-skins">Industrial Cyan · DARK</p>
+                <p id="workspace-skins-planned" class="planned-skins">Single production skin · Human fidelity review pending</p>
+              </div>
+              <button id="work-refresh-control" class="secondary-button compact" type="button">Refresh</button>
+            </div>
           </header>
 
+          <section id="formal-workspace-grid" class="formal-workspace-grid" aria-label="Stable Work Workspace">
+            <section id="reality-surface" class="workspace-surface workspace-surface-reality" aria-labelledby="reality-surface-heading">
+              <header class="workspace-surface-header">
+                <div class="workspace-surface-identity">
+                  <span class="workspace-surface-index">01</span>
+                  <div><h3 id="reality-surface-heading">Reality</h3><p class="workspace-surface-subtitle">What is true now</p></div>
+                </div>
+                <div class="workspace-surface-controls">
+                  <button class="surface-focus-control" type="button" data-collapse-surface="reality-surface" aria-expanded="true">Collapse</button>
+                  <button class="surface-focus-control" type="button" data-focus-surface="reality-surface" aria-expanded="false">Focus</button>
+                </div>
+              </header>
+              <p id="workspace-reality-summary" class="workspace-surface-summary">Loading governed Reality…</p>
+              <dl class="workspace-surface-facts">
+                <div><dt>Motive</dt><dd id="workspace-reality-motive"></dd></div>
+                <div><dt>Desired Outcome</dt><dd id="workspace-reality-outcome"></dd></div>
+                <div><dt>Work Status</dt><dd id="workspace-reality-status"></dd></div>
+                <div><dt>Satisfaction</dt><dd id="workspace-reality-satisfaction"></dd></div>
+              </dl>
+            </section>
+
+            <section id="agenda-surface" class="workspace-surface workspace-surface-agenda" aria-labelledby="agenda-surface-heading">
+              <header class="workspace-surface-header">
+                <div class="workspace-surface-identity">
+                  <span class="workspace-surface-index">02</span>
+                  <div><h3 id="agenda-surface-heading">Agenda</h3><p class="workspace-surface-subtitle">What should happen next</p></div>
+                </div>
+                <div class="workspace-surface-controls">
+                  <button class="surface-focus-control" type="button" data-collapse-surface="agenda-surface" aria-expanded="true">Collapse</button>
+                  <button class="surface-focus-control" type="button" data-focus-surface="agenda-surface" aria-expanded="false">Focus</button>
+                </div>
+              </header>
+              <p id="workspace-agenda-summary" class="workspace-surface-summary">Loading current direction…</p>
+              <dl class="workspace-surface-facts">
+                <div><dt>Current Step</dt><dd id="workspace-agenda-current"></dd></div>
+                <div><dt>Known Next</dt><dd id="workspace-agenda-next"></dd></div>
+                <div><dt>Plan Revision</dt><dd id="workspace-agenda-revision"></dd></div>
+                <div><dt>Reality Basis</dt><dd id="workspace-agenda-basis"></dd></div>
+              </dl>
+            </section>
+
+            <section id="production-surface" class="workspace-surface workspace-surface-production" aria-labelledby="production-surface-heading">
+              <header class="workspace-surface-header">
+                <div class="workspace-surface-identity">
+                  <span class="workspace-surface-index">03</span>
+                  <div><h3 id="production-surface-heading">Production</h3><p class="workspace-surface-subtitle">Execution, evidence, and trust</p></div>
+                </div>
+                <div class="workspace-surface-controls">
+                  <button class="surface-focus-control" type="button" data-collapse-surface="production-surface" aria-expanded="true">Collapse</button>
+                  <button class="surface-focus-control" type="button" data-focus-surface="production-surface" aria-expanded="false">Focus</button>
+                </div>
+              </header>
+              <p id="workspace-production-summary" class="workspace-surface-summary">Loading production activity…</p>
+              <dl class="workspace-surface-facts">
+                <div><dt>Activity</dt><dd id="workspace-production-activity"></dd></div>
+                <div><dt>Queue / Capacity</dt><dd id="workspace-production-queue"></dd></div>
+                <div><dt>Verification</dt><dd id="workspace-production-verification"></dd></div>
+                <div><dt>Trust</dt><dd id="workspace-production-trust"></dd></div>
+              </dl>
+              <section class="result-panel workspace-embedded-panel" aria-labelledby="result-heading">
+                <div class="panel-title-row">
+                  <div>
+                    <p class="eyebrow">Observed outcome</p>
+                    <h3 id="result-heading">Work result</h3>
+                  </div>
+                  <span id="trusted-result" class="trust-label">Not trusted yet</span>
+                </div>
+                  <dl class="result-grid">
+                    <div><dt>Artifacts</dt><dd id="artifact-summary">No artifacts observed.</dd></div>
+                  <div><dt>Verification</dt><dd id="verification-summary">No verification evidence available.</dd></div>
+                  <div><dt>Repository state</dt><dd id="repository-state">No repository result yet.</dd></div>
+                  <div><dt>Remaining blocker or risk</dt><dd id="remaining-risk">This Work has not completed.</dd></div>
+                  </dl>
+                  <div id="candidate-preview-panel" class="work-actions" hidden>
+                    <button id="open-candidate-preview" type="button">Preview result</button>
+                    <a id="candidate-preview-link" class="text-button" target="_blank" rel="noopener" hidden>Open exact preview</a>
+                    <div id="candidate-artifact-actions" class="action-row" aria-label="Produced artifact downloads"></div>
+                    <a id="candidate-delivery-link" class="text-button" hidden>Review delivery context</a>
+                    <p id="candidate-preview-status" class="empty-copy"></p>
+                  </div>
+                </section>
+            </section>
+
+            <section id="actions-surface" class="workspace-surface workspace-surface-actions" aria-labelledby="actions-surface-heading">
+              <header class="workspace-surface-header">
+                <div class="workspace-surface-identity">
+                  <span class="workspace-surface-index">04</span>
+                  <div><h3 id="actions-surface-heading">Actions</h3><p class="workspace-surface-subtitle">Human decisions and bounded controls</p></div>
+                </div>
+                <div class="workspace-surface-controls">
+                  <button class="surface-focus-control" type="button" data-collapse-surface="actions-surface" aria-expanded="true">Collapse</button>
+                  <button class="surface-focus-control" type="button" data-focus-surface="actions-surface" aria-expanded="false">Focus</button>
+                </div>
+              </header>
+              <p id="workspace-actions-summary" class="workspace-surface-summary">Loading Human Attention…</p>
+              <dl class="workspace-surface-facts">
+                <div><dt>Attention</dt><dd id="workspace-actions-attention"></dd></div>
+                <div><dt>Available Actions</dt><dd id="workspace-actions-available"></dd></div>
+                <div><dt>Blocking / Waiting</dt><dd id="workspace-actions-blocker"></dd></div>
+                <div><dt>Emerging Direction</dt><dd id="workspace-actions-direction"></dd></div>
+              </dl>
+              <section class="operator-panel workspace-embedded-panel" aria-labelledby="actions-heading">
+                <div class="operator-identity">
+                  <label for="authority-identity">Human authority</label>
+                  <input id="authority-identity" value="human:local-operator" autocomplete="off">
+                </div>
+                <div>
+                  <p class="eyebrow" id="actions-heading">Available now</p>
+                  <div id="work-actions" class="action-row"></div>
+                </div>
+              </section>
+
+              <section id="attention-section" class="attention-section workspace-embedded-panel" aria-labelledby="attention-heading" hidden>
+                <div class="panel-title-row">
+                  <div>
+                    <p class="eyebrow">Human governance</p>
+                    <h3 id="attention-heading">Attention required</h3>
+                  </div>
+                </div>
+                <div id="attention-list" class="attention-list"></div>
+              </section>
+            </section>
+          </section>
+
+          <details class="workspace-evidence-details">
+            <summary>
+              <span>Governed evidence and production detail</span>
+              <small>Understanding, direction, trust, plan, and technical evidence</small>
+            </summary>
+            <div class="workspace-evidence-content">
           <section id="control-room-foundation" class="control-room-foundation" aria-label="Production control foundation">
             <section class="control-room-card" aria-labelledby="control-objective-heading">
               <p class="eyebrow">Production Objective</p>
@@ -524,56 +690,10 @@
             </details>
           </section>
 
-          <section class="operator-panel" aria-labelledby="actions-heading">
-            <div class="operator-identity">
-              <label for="authority-identity">Human authority</label>
-              <input id="authority-identity" value="human:local-operator" autocomplete="off">
             </div>
-            <div>
-              <p class="eyebrow" id="actions-heading">Available now</p>
-              <div id="work-actions" class="action-row"></div>
-            </div>
-          </section>
+          </details>
 
-          <section id="attention-section" class="attention-section" aria-labelledby="attention-heading" hidden>
-            <div class="panel-title-row">
-              <div>
-                <p class="eyebrow">Human governance</p>
-                <h3 id="attention-heading">Attention required</h3>
-              </div>
-            </div>
-            <div id="attention-list" class="attention-list"></div>
-          </section>
-
-          <section class="result-panel" aria-labelledby="result-heading">
-            <div class="panel-title-row">
-              <div>
-                <p class="eyebrow">Observed outcome</p>
-                <h3 id="result-heading">Work result</h3>
-              </div>
-              <span id="trusted-result" class="trust-label">Not trusted yet</span>
-            </div>
-            <dl class="result-grid">
-              <div>
-                <dt>Artifacts</dt>
-                <dd id="artifact-summary">No artifacts observed.</dd>
-              </div>
-              <div>
-                <dt>Verification</dt>
-                <dd id="verification-summary">No verification evidence available.</dd>
-              </div>
-              <div>
-                <dt>Repository state</dt>
-                <dd id="repository-state">No repository result yet.</dd>
-              </div>
-              <div>
-                <dt>Remaining blocker or risk</dt>
-                <dd id="remaining-risk">This Work has not completed.</dd>
-              </div>
-            </dl>
-          </section>
         </article>
-      </section>
 
       <section class="composer" aria-labelledby="composer-heading">
         <div class="composer-toggle-row">
@@ -603,6 +723,7 @@
           </div>
         </form>
         <div id="interaction-outbox" class="interaction-outbox" aria-label="Messages waiting to send" hidden></div>
+      </section>
       </section>
     </main>
 

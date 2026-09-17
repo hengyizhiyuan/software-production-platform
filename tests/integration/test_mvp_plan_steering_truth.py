@@ -705,9 +705,12 @@ def test_steer_dec_10_through_14_human_attention_is_typed_and_projected(
         else AttentionKind.STEERING_DECISION_REQUIRED
     )
     assert attention[0].steering_reason is attention_reason
-    assert attention[0].decision == candidate.objective
-    assert attention[0].recommendation == candidate.recommendation
-    assert attention[0].expected_impact == candidate.expected_impact
+    assert attention[0].decision != candidate.objective
+    assert attention[0].reason != candidate.reason
+    assert attention[0].recommendation != candidate.recommendation
+    assert attention[0].expected_impact != candidate.expected_impact
+    assert decision.reason == candidate.reason
+    assert decision.recommendation == candidate.recommendation
     assert attention[0].governed_subject_ref == f"steering-decision:{decision.id}"
     assert attention[0].kind is not AttentionKind.CANDIDATE_AUTHORIZATION
 

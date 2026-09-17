@@ -10,6 +10,7 @@ from spg.application.guided_design import (
     match_design_schema_text,
 )
 from spg.domain.guided_design import (
+    DesignAuthorityRelevance,
     DesignIssueState,
     DesignOutputClass,
 )
@@ -28,6 +29,10 @@ def test_guided_design_schema_is_general_adaptive_and_steering_linked() -> None:
     assert "verification-staged-readiness" in keys
     assert all("运营管理平台" not in issue.objective for issue in issues)
     assert all(set(issue.prerequisite_keys) <= keys for issue in issues)
+    first = issues[0]
+    assert first.authority_relevance is DesignAuthorityRelevance.ROUTINE
+    assert "current governed step" in first.objective
+    assert "Applicable to every" not in first.applicability
 
     steps = guided_design_step_specs(issues)
     design_steps = tuple(step for step in steps if step.type is SteeringStepType.DESIGN)

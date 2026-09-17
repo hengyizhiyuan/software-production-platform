@@ -4,8 +4,9 @@ from contextlib import asynccontextmanager
 import asyncio
 from importlib.resources import files
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Annotated
+from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import FastAPI, Query, Request
@@ -53,7 +54,7 @@ from spg.application.work import WorkApplicationService
 from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.application.native_vector import NativeCandidateVectorService
 from spg.application.assets import RepositoryAssetService
-from spg.application.delivery import DeliveryApplicationService
+from spg.application.delivery import DeliveryApplicationService, artifact_media_type
 from spg.application.software_runtime import SoftwareRuntimeService
 from spg.domain.assets import RepositoryIntakeRequest, AssetScopeAdmissionRequest
 from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
@@ -1103,6 +1104,45 @@ def create_http_application(
     @api.get("/api/works/{work_id}/delivery")
     def delivery_view(work_id: UUID):
         return delivery_service.view(work_id)
+
+    @api.get("/api/works/{work_id}/delivery-context")
+    def delivery_context(work_id: UUID):
+        return delivery_service.context(work_id)
+
+    @api.post("/api/works/{work_id}/candidate-preview")
+    def candidate_preview(work_id: UUID):
+        context = delivery_service.candidate_context(work_id)
+        if context is None:
+            return {"status": "NOT_READY", "reason": "No current verified Candidate is available", "downloads": []}
+        public = {key: context[key] for key in ("candidate_id", "candidate_fingerprint",
+            "repository_revision", "tree", "entrypoint", "artifacts", "verification", "authorization_pending")}
+        prefix = f"/api/works/{work_id}"
+        fingerprint = context["candidate_fingerprint"]
+        entrypoint = context["entrypoint"]
+        return {**public, "status": "READY" if entrypoint else "NOT_READY",
+            "reason": None if entrypoint else "No current static-Web Candidate is available",
+            "url": None if entrypoint is None else (
+                f"{prefix}/candidate-preview/{fingerprint}/{quote(entrypoint, safe='/')}"),
+            "downloads": [{"path": path, "url": (
+                f"{prefix}/candidate-download/{fingerprint}/{quote(path, safe='/')}")}
+                for path in context["artifacts"]]}
+
+    @api.get("/api/works/{work_id}/candidate-preview/{candidate_fingerprint}/{path:path}")
+    def candidate_preview_artifact(work_id: UUID, candidate_fingerprint: str, path: str):
+        return Response(delivery_service.candidate_artifact(work_id, candidate_fingerprint, path),
+            media_type=artifact_media_type(path), headers={"X-Content-Type-Options": "nosniff",
+                "Cache-Control": "no-store", "Content-Security-Policy":
+                "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+                "connect-src 'none'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"})
+
+    @api.get("/api/works/{work_id}/candidate-download/{candidate_fingerprint}/{path:path}")
+    def candidate_download_artifact(work_id: UUID, candidate_fingerprint: str, path: str):
+        filename = quote(PurePosixPath(path).name)
+        return Response(delivery_service.candidate_download(work_id, candidate_fingerprint, path),
+            media_type=artifact_media_type(path), headers={"X-Content-Type-Options": "nosniff",
+                "Cache-Control": "no-store",
+                "Content-Disposition": f"attachment; filename*=UTF-8''{filename}",
+                "Content-Security-Policy": "default-src 'none'; sandbox"})
 
     @api.post("/api/works/{work_id}/delivery-target")
     def delivery_target(work_id: UUID, request: DeliveryTargetRequest):

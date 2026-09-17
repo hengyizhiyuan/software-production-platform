@@ -323,6 +323,9 @@ class PlanSteeringDriver:
             if remaining <= 0:
                 break
             thread.join(remaining)
+        close_semantic = getattr(self.semantic.capability, "close", None)
+        if callable(close_semantic):
+            close_semantic()
 
     def reality_fingerprint(self, work_id: UUID) -> str:
         """Hash only freshly reconstructed persisted Work/Plan/Runtime Reality."""
@@ -548,7 +551,7 @@ class PlanSteeringDriver:
                 frame.work_id,
                 before,
                 action=None,
-                stop=SteeringDriverStopReason.NO_PROGRESS,
+                stop=SteeringDriverStopReason.CAPABILITY_UNAVAILABLE,
             )
         else:
             result = stored_result

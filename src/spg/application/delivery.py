@@ -98,6 +98,114 @@ class DeliveryApplicationService:
         payload = session.execute(select(work_delivery_targets.c.payload).where(work_delivery_targets.c.work_id == work_id)).scalar_one_or_none()
         return None if payload is None else DeliveryTarget.model_validate(payload)
 
+    def candidate_context(self, work_id: UUID) -> dict | None:
+        """Read the current sealed, verified result without granting integration authority."""
+        with self.database.unit_of_work() as uow:
+            product, runtime = ProductStore(uow.session), RuntimeStore(uow.session)
+            work = product.work(work_id)
+            if work is None:
+                raise ProductRecordNotFound(f"Work not found: {work_id}")
+            binding = product.runtime_binding(work_id)
+            if binding is None or binding.work_reality_revision_id != work.current_work_reality_revision_id:
+                return None
+            summary = product.runtime_summary(binding)
+            if summary.candidate_id is None:
+                return None
+            candidate = runtime.baseline_candidate(summary.candidate_id)
+            if (candidate is None or binding.work_unit_id not in candidate.satisfied_work_unit_ids
+                    or candidate.proposed_snapshot_id != summary.proposed_snapshot_id
+                    or not candidate.verification_record_ids or
+                    any(result != "PASS" for result in summary.verification_results)):
+                raise ProductInvariantViolation("Current Candidate lacks exact passing Verification")
+            snapshot = runtime.proposed_snapshot(candidate.proposed_snapshot_id)
+            observation = None if snapshot is None else runtime.repository_observation_by_id(snapshot.repository_observation_id)
+            dispatch = None if observation is None else runtime.execution_dispatch(observation.dispatch_id)
+            if dispatch is None:
+                raise ProductInvariantViolation("Current Candidate has no exact repository workspace")
+            repository = dispatch.workspace.repository_path
+            tree = git_bytes(repository, "rev-parse", candidate.proposed_commit_identity + "^{tree}").decode().strip()
+            if tree != candidate.proposed_tree_identity:
+                raise ProductInvariantViolation("Candidate preview tree differs from sealed Reality")
+            paths = git_bytes(repository, "ls-tree", "-r", "--name-only", "-z", candidate.proposed_commit_identity).decode().split("\0")[:-1]
+            if len(paths) > 500:
+                raise ProductInvariantViolation("Candidate preview exceeds the bounded file inventory")
+            entrypoint = "index.html" if "index.html" in paths else next(
+                (path for path in summary.artifact_paths if path.endswith(".html") and path in paths), None)
+            return {"candidate_id": str(candidate.id), "candidate_fingerprint": candidate.fingerprint,
+                    "repository_revision": candidate.proposed_commit_identity, "tree": tree,
+                    "repository_path": repository, "paths": paths, "entrypoint": entrypoint,
+                    "artifacts": list(summary.artifact_paths),
+                    "verification": [f"{name}: {result}" for name, result in zip(
+                        summary.verification_obligations, summary.verification_results, strict=True)],
+                    "authorization_pending": summary.authorization_id is None}
+
+    @staticmethod
+    def _derived_target(work, summary) -> DeliveryTargetRequest | None:
+        """Only one unambiguous current artifact form is defaultable."""
+        paths = set(summary.artifact_paths)
+        html = [path for path in paths if path.endswith(".html")]
+        if (work.production_plan is not None
+                and work.production_plan.target_kind.value == "CODE_WORK" and len(html) == 1):
+            criteria = (work.desired_outcome, *work.constraints,
+                f"{html[0]} opens as a browser-runnable static Web result.",
+                "All governed verification obligations for the current repository revision pass.")
+            return DeliveryTargetRequest(kind=DeliveryTargetKind.SOFTWARE_ARTIFACT,
+                title=work.refined_title or work.desired_outcome[:255],
+                acceptance_criteria=tuple(dict.fromkeys(criteria)),
+                authority_identity="system:governed-delivery-context",
+                software_form=DeliveryTargetKind.WEB_APPLICATION,
+                runtime_recipe={"adapter": "STATIC_WEB", "entrypoint": html[0]})
+        return None
+
+    def context(self, work_id: UUID) -> dict:
+        """Explain known delivery facts before any Human input or publication."""
+        with self.database.unit_of_work() as uow:
+            work = ProductStore(uow.session).work(work_id)
+            if work is None:
+                raise ProductRecordNotFound(f"Work not found: {work_id}")
+            target = self._target(uow.session, work_id)
+            binding = ProductStore(uow.session).runtime_binding(work_id)
+            summary = None if binding is None or binding.work_reality_revision_id != work.current_work_reality_revision_id else ProductStore(uow.session).runtime_summary(binding)
+            commit = None if summary is None or summary.runtime_commit_id is None else RuntimeStore(uow.session).runtime_commit(summary.runtime_commit_id)
+            derived = None if target or commit is None else self._derived_target(work, summary)
+            chosen = target or derived
+            target_source = (
+                "GOVERNED_REALITY"
+                if chosen is not None and chosen.authority_identity == "system:governed-delivery-context"
+                else "HUMAN"
+                if target is not None
+                else "GOVERNED_REALITY"
+                if derived is not None
+                else None
+            )
+            return {"work_id": str(work_id), "desired_outcome": work.desired_outcome,
+                "target": None if chosen is None else chosen.model_dump(mode="json"),
+                "target_source": target_source,
+                "artifacts": [] if summary is None else list(summary.artifact_paths),
+                "verification": [] if summary is None else [f"{name}: {result}" for name, result in zip(
+                    summary.verification_obligations, summary.verification_results, strict=True)],
+                "repository_revision": None if commit is None else commit.repository_revision,
+                "trusted": commit is not None,
+                "blocker": None if chosen is not None else "No single supported current delivery target can be derived; choose the missing target."}
+
+    def candidate_artifact(self, work_id: UUID, candidate_fingerprint: str, path: str) -> bytes:
+        """Read one current sealed-Candidate blob; preview never grants integration authority."""
+        context = self.candidate_context(work_id)
+        if context is None or context["candidate_fingerprint"] != candidate_fingerprint:
+            raise ProductInvariantViolation("Candidate preview is stale against current Work Reality")
+        if path not in context["paths"] or not path.endswith((".html", ".js", ".mjs", ".css", ".json", ".svg", ".png", ".ico")):
+            raise ProductRecordNotFound("Candidate artifact is not previewable")
+        return read_artifact(context["repository_path"], context["repository_revision"], path, software=True)
+
+    def candidate_download(self, work_id: UUID, candidate_fingerprint: str, path: str) -> bytes:
+        """Download a declared produced artifact from the same immutable Candidate binding."""
+        context = self.candidate_context(work_id)
+        if context is None or context["candidate_fingerprint"] != candidate_fingerprint:
+            raise ProductInvariantViolation("Candidate download is stale against current Work Reality")
+        if path not in context["artifacts"] or path not in context["paths"]:
+            raise ProductRecordNotFound("Artifact is not included in the current produced result")
+        return read_artifact(context["repository_path"], context["repository_revision"], path, software=True)
+
     @staticmethod
     def _manifest(session, work_id: UUID, manifest_id: UUID):
         payload = session.execute(select(work_delivery_manifests.c.payload).where(
@@ -159,21 +267,23 @@ class DeliveryApplicationService:
                 or record.proposed_commit_identity != commit.repository_revision
                 or record.work_unit_id != binding.work_unit_id for record in records):
             raise ProductInvariantViolation("Software delivery requires exact-commit passing Verification")
-        tests = [record for record in records if record.obligation.startswith(("NODE_TEST_TARGET:", "PYTEST_TARGET:"))]
-        if not tests:
-            raise ProductInvariantViolation("Software delivery requires an independently passing executable test obligation")
+        # A minimal static page may have only PATH_SCOPE/GIT_DIFF_CHECK evidence.
+        # Report that exact coverage; never imply its browser behavior was tested.
         paths = git_bytes(resource.location_ref, "ls-tree", "-r", "--name-only", "-z", commit.repository_revision).decode("utf-8").split("\0")[:-1]
         if len(paths) > 500:
             raise ProductInvariantViolation("Software package exceeds the 500-file limit")
-        if target.runtime_recipe.entrypoint not in paths or "README.md" not in paths:
-            raise ProductInvariantViolation("Software package requires its declared entrypoint and README.md")
-        if not any(path.endswith((".js", ".mjs", ".cjs")) and not path.startswith("tests/") for path in paths):
-            raise ProductInvariantViolation("Static Web delivery requires implementation code, not documents alone")
+        if target.runtime_recipe.entrypoint not in paths:
+            raise ProductInvariantViolation("Software package requires its declared entrypoint")
         changes_raw = git_bytes(resource.location_ref, "diff-tree", "--no-commit-id", "--no-renames", "--name-status", "-z", "-r", contract.source_revision, commit.repository_revision).decode("utf-8").split("\0")[:-1]
         changes = tuple({"status": changes_raw[i], "path": changes_raw[i + 1]} for i in range(0, len(changes_raw), 2))
         if not any(item["path"].endswith((".js", ".mjs", ".cjs", ".html", ".css")) for item in changes):
             raise ProductInvariantViolation("Software delivery requires a software change in this production cycle")
-        test_commands = tuple(("node --test " if record.obligation.startswith("NODE_TEST_TARGET:") else "python -m pytest -q ") + record.obligation.split(":", 1)[1] for record in tests)
+        test_commands = tuple(
+            ("node --test " if record.obligation.startswith("NODE_TEST_TARGET:") else "python -m pytest -q ")
+            + record.obligation.split(":", 1)[1]
+            for record in records
+            if record.obligation.startswith(("NODE_TEST_TARGET:", "PYTEST_TARGET:"))
+        )
         return SoftwareDeliveryDetails(
             form=target.software_form, runtime_recipe=target.runtime_recipe,
             repository_ref=resource.authoritative_ref, source_revision=contract.source_revision,
@@ -181,16 +291,21 @@ class DeliveryApplicationService:
             changed_files=changes, verification=tuple(record.model_dump(mode="json") for record in records),
             reproduction=("Extract the package and open a terminal in source/.", "Prerequisites: Node.js 18+ for JavaScript tests; Python 3 for the optional local HTTP server.", *test_commands,
                 "python -m http.server 8080 --bind 127.0.0.1", "Open http://127.0.0.1:8080/" + target.runtime_recipe.entrypoint,
-                "Use the delivered README for behavior and acceptance instructions. No build or dependency download is required by STATIC_WEB."),
+                "Review delivery-target.json and verification.json for the exact acceptance and evidence basis. No build or dependency download is required by STATIC_WEB."),
         ), sorted(paths)
 
     def publish(self, work_id: UUID) -> DeliveryManifest:
         with self.database.unit_of_work() as uow:
             self._work(uow.session, work_id)
             target = self._target(uow.session, work_id)
-            if target is None:
-                raise ProductInvariantViolation("Choose the Work delivery target and acceptance criteria first")
             work, binding, summary, commit, resource = self._trusted_basis(uow.session, work_id)
+            if target is None:
+                request = self._derived_target(work, summary)
+                if request is None:
+                    raise ProductInvariantViolation("No single supported current delivery target can be derived")
+                target = DeliveryTarget(**request.model_dump(), id=uuid4(), work_id=work_id, created_at=datetime.now(UTC))
+                uow.session.execute(insert(work_delivery_targets).values(
+                    id=target.id, work_id=work_id, payload=target.model_dump(mode="json"), created_at=target.created_at))
             artifacts = []
             total_size = 0
             software = None

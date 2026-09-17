@@ -9,6 +9,7 @@ from spg.domain.planning import PlannedArtifactOperation
 from spg.domain.steering import SemanticProductionProposal, SteeringInvariantViolation
 from spg.providers.codex_semantic import (
     CodexSdkSemanticStepCapability,
+    _admitted_derived_constraints,
     _provider_strict_output_schema,
 )
 
@@ -149,6 +150,55 @@ def test_sem_wire_03_04_06_no_production_round_trip_uses_explicit_values() -> No
     assert wire.domain_production_proposal() is None
 
 
+def test_provider_inference_cannot_become_unadmitted_constraint_truth() -> None:
+    payload = _payload()
+    payload["derived_constraints"] = [
+        "Preserve data",
+        "Use the model's preferred framework",
+    ]
+    wire = CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))
+    semantic_input = type(
+        "ConstraintInput",
+        (),
+        {"constraints": ("Preserve data",)},
+    )()
+
+    assert _admitted_derived_constraints(wire, semantic_input) == (
+        "Preserve data",
+    )
+
+
+def test_deepseek_annotation_tolerance_preserves_strict_semantic_fields() -> None:
+    payload = _payload(
+        {
+            "target_kind": "CODE_WORK",
+            "objective": "Create the bounded browser page",
+            "artifact_targets": [],
+            "code_targets": ["index.html", "verify/click-alert.mjs"],
+            "code_targets_note": "Provider explanation, not semantic contract data.",
+            "allowed_areas": [],
+            "forbidden_areas": [],
+            "verification_expectation": "Verify the click alert behavior",
+        }
+    )
+    payload["provider_note"] = "Transport-only prose."
+
+    parsed = CodexSdkSemanticStepCapability._parse_payload_ignoring_annotations(
+        json.dumps(payload)
+    )
+
+    assert parsed.domain_production_proposal().code_targets == (
+        "index.html",
+        "verify/click-alert.mjs",
+    )
+
+    del payload["proposed_production"]["verification_expectation"]
+    with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
+        CodexSdkSemanticStepCapability._parse_payload_ignoring_annotations(
+            json.dumps(payload)
+        )
+
+
 @pytest.mark.parametrize(
     "disposition",
     (
@@ -162,7 +212,7 @@ def test_sem_wire_03_04_06_no_production_round_trip_uses_explicit_values() -> No
         {
             "state": "UNRESOLVED",
             "authority_assessment": "WITHIN_AUTHORITY",
-            "unresolved_questions": [],
+            "unresolved_questions": ["Which option should govern this current step?"],
             "human_attention_recommendation": "Choose a bounded direction.",
             "completion_claimed": False,
         },
@@ -382,3 +432,37 @@ def test_resolved_issue_cannot_silently_claim_incomplete_without_a_question():
     payload["disposition"]["completion_claimed"] = False
     with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
         CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))
+
+
+def test_human_attention_wire_requires_missing_authority_and_material_step_question():
+    unresolved = _payload()
+    unresolved["disposition"] = {
+        "state": "UNRESOLVED",
+        "authority_assessment": "UNCERTAIN",
+        "unresolved_questions": [
+            "Should all users receive administrator access or only accountable owners?"
+        ],
+        "human_attention_recommendation": "Choose the authorized access boundary.",
+        "completion_claimed": False,
+    }
+    parsed = CodexSdkSemanticStepCapability._parse_payload(json.dumps(unresolved))
+    assert parsed.authority_assessment.value == "UNCERTAIN"
+    assert parsed.unresolved_questions
+
+    for authority, questions in (
+        ("WITHIN_AUTHORITY", ["Which routine implementation should Watt choose?"]),
+        ("UNCERTAIN", []),
+    ):
+        invalid = _payload()
+        invalid["disposition"] = {
+            "state": "UNRESOLVED",
+            "authority_assessment": authority,
+            "unresolved_questions": questions,
+            "human_attention_recommendation": "Ask the Human.",
+            "completion_claimed": False,
+        }
+        with pytest.raises(
+            SteeringInvariantViolation,
+            match="invalid structured result",
+        ):
+            CodexSdkSemanticStepCapability._parse_payload(json.dumps(invalid))

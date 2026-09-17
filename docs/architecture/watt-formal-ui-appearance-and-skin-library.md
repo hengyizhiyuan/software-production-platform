@@ -13,19 +13,29 @@ WORKSPACE_SKINS_REGISTERED
     6
 
 FORMAL_UX_UI_IMPLEMENTATION
-    NOT STARTED / NOT AUTHORIZED BY THIS DOCUMENT
+    PHASE 1 CLOSED / PASS
+
+CURRENT_PRODUCTION_WORKSPACE_SKIN
+    INDUSTRIAL_CYAN ONLY
+
+VISUAL_FIDELITY_TARGET
+    APPROX_90_PERCENT_HUMAN_PERCEIVED
+
+VISUAL_FIDELITY_RESULT
+    HUMAN_ACCEPTED
 
 REFERENCE_IMAGES
     6 IMPORTED / 0 PENDING_REFERENCE_IMPORT
 ```
 
 This document is the canonical appearance architecture and first-generation
-Workspace Skin registry for Watt Formal UX/UI. It refines the visual-expression
+Workspace Skin registry for Watt Formal UX/UI. It also records the current
+Human-approved Phase 1 implementation scope. It refines the visual-expression
 boundary recorded in [Core Workspace Experience Calibration](../product/watt-core-workspace-experience-calibration-notes.md)
 without changing its accepted interaction semantics.
 
-It does not implement Formal UX/UI, modify WIC, or change Work, Steering, PWU,
-Executor, Scheduler, Guardian, ECF, lifecycle, navigation, or Runtime behavior.
+It does not modify WIC or change Work, Steering, PWU, Executor, Scheduler,
+Guardian, ECF, lifecycle, navigation, or Runtime behavior.
 
 ## 1. Repository Reality and design basis
 
@@ -49,6 +59,11 @@ This document turns those facts into one bounded appearance architecture. The
 six exact visual references selected by the Human are preserved in the
 [Workspace Skin asset manifest](../assets/ui-skins/README.md). No substitute
 imagery has been created.
+
+Phase 1 implements only `INDUSTRIAL_CYAN`. The remaining five references are
+preserved as `FUTURE_EXTERNAL_ASSET_DOGFOOD`, not exposed as selectable product
+options. This scope correction reflects real implementation cost; it does not
+reject the two-scope architecture or remove future extensibility.
 
 ## 2. Governing invariant: visual evolution must be cheap
 
@@ -226,6 +241,7 @@ The bounded lifecycle vocabulary is:
 - `IMPLEMENTED`
 - `POLISHING`
 - `DEPRECATED`
+- `FUTURE_EXTERNAL_ASSET_DOGFOOD`
 
 The registry and lifecycle are an architecture direction only. This document
 does not add runtime persistence, a user preference, a selector, or production
@@ -235,16 +251,18 @@ configuration.
 
 | ID | Stable `skin_id` | Display name | Base | Current registration | First batch | Reference asset |
 |---|---|---|---|---|---|---|
-| 01 | `INDUSTRIAL_CYAN` | Industrial Cyan / 青蓝工业控制台 | DARK | `PLANNED` | yes | [01-industrial-cyan.png](../assets/ui-skins/01-industrial-cyan.png) |
-| 02 | `EXECUTIVE_AMBER` | Executive Amber / 橙标执行控制室 | DARK | `PLANNED` | yes | [02-executive-amber.png](../assets/ui-skins/02-executive-amber.png) |
-| 03 | `TECHNICAL_GRAPHITE` | Technical Graphite / 技术石墨 | DARK | `PLANNED`, initially disabled | no | [03-technical-graphite.png](../assets/ui-skins/03-technical-graphite.png) |
-| 04 | `PRECISION_SILVER` | Precision Silver / 银灰工业精密 | LIGHT | `PLANNED` | yes | [04-precision-silver.png](../assets/ui-skins/04-precision-silver.png) |
-| 05 | `WARM_PROFESSIONAL` | Warm Professional / 温和专业 | LIGHT | `PLANNED` | yes | [05-warm-professional.png](../assets/ui-skins/05-warm-professional.png) |
-| 06 | `FUTURISTIC_STUDIO` | Futuristic Studio / 未来技术工作室 | DARK | `PLANNED`, initially disabled | no | [06-futuristic-studio.png](../assets/ui-skins/06-futuristic-studio.png) |
+| 01 | `INDUSTRIAL_CYAN` | Industrial Cyan / 青蓝工业控制台 | DARK | `IMPLEMENTED`, Human accepted | yes | [01-industrial-cyan.png](../assets/ui-skins/01-industrial-cyan.png) |
+| 02 | `EXECUTIVE_AMBER` | Executive Amber / 橙标执行控制室 | DARK | `FUTURE_EXTERNAL_ASSET_DOGFOOD` | no | [02-executive-amber.png](../assets/ui-skins/02-executive-amber.png) |
+| 03 | `TECHNICAL_GRAPHITE` | Technical Graphite / 技术石墨 | DARK | `FUTURE_EXTERNAL_ASSET_DOGFOOD` | no | [03-technical-graphite.png](../assets/ui-skins/03-technical-graphite.png) |
+| 04 | `PRECISION_SILVER` | Precision Silver / 银灰工业精密 | LIGHT | `FUTURE_EXTERNAL_ASSET_DOGFOOD` | no | [04-precision-silver.png](../assets/ui-skins/04-precision-silver.png) |
+| 05 | `WARM_PROFESSIONAL` | Warm Professional / 温和专业 | LIGHT | `FUTURE_EXTERNAL_ASSET_DOGFOOD` | no | [05-warm-professional.png](../assets/ui-skins/05-warm-professional.png) |
+| 06 | `FUTURISTIC_STUDIO` | Futuristic Studio / 未来技术工作室 | DARK | `FUTURE_EXTERNAL_ASSET_DOGFOOD` | no | [06-futuristic-studio.png](../assets/ui-skins/06-futuristic-studio.png) |
 
-All six identities are durable even though implementation has not started.
-Later implementation or activation of Technical Graphite and Futuristic Studio
-must be additive, not an appearance-architecture redesign.
+All six identities and exact reference assets remain durable. Only Industrial
+Cyan is a current product implementation. Later implementation of any deferred
+reference must be separately authorized and should use the future governed
+External Design / Asset Ingestion path rather than another round of manual
+approximation.
 
 ### 5.2 `INDUSTRIAL_CYAN`
 
@@ -314,24 +332,35 @@ presentation.
 
 ![Futuristic Studio Workspace Skin reference](../assets/ui-skins/06-futuristic-studio.png)
 
-## 6. First implementation batch
+## 6. Current implementation scope and dogfood decision
 
-The first authorized implementation mission, when separately issued, should
-begin with:
+Real implementation showed that high-fidelity reconstruction from image
+references is not cheap enough to justify manually implementing all six skins
+now. The current Formal UX/UI Phase 1 implementation therefore includes only:
 
 1. `INDUSTRIAL_CYAN`
-2. `EXECUTIVE_AMBER`
-3. `PRECISION_SILVER`
-4. `WARM_PROFESSIONAL`
 
-Registered but initially planned/disabled:
+The exact `01-industrial-cyan.png` asset is the authoritative visual target,
+not merely a color inspiration. The acceptance target is approximately 90%
+Human-perceived fidelity: Human comparison should recognize the same design,
+while no fabricated pixel score is claimed.
 
-- `TECHNICAL_GRAPHITE`
-- `FUTURISTIC_STUDIO`
+The other five approved references are retained as future internal dogfood for
+External Design / Asset Ingestion. The intended future production loop is:
 
-The architecture must assume that all six will probably be implemented. The
-first batch is an implementation sequence, not a reduction of the registered
-library.
+```text
+External Design Source
+    → Design Reality / Versioned Baseline
+    → Structured Design Context
+    → Watt Production
+    → Browser Render
+    → Visual Comparison
+    → Iterative Correction
+    → Human Acceptance
+```
+
+That capability is not designed or implemented by Phase 1. See
+[External Design Intake Capability Direction](external-design-intake-capability-direction.md).
 
 ## 7. Bounded skin capability levels
 
@@ -436,11 +465,12 @@ This architecture does not freeze:
 - implementation technology or component-library choice;
 - runtime storage or API contracts;
 - final accessibility certification criteria;
-- the exact contents of the pending Human-approved reference images.
+- the future production treatment of the five deferred external reference
+  assets.
 
-Those decisions belong to separately authorized Formal UX/UI implementation
-and Human visual review. None may weaken the two-scope invariant or accepted
-Workspace semantics.
+Any future changes require separately authorized Formal UX/UI or External
+Design work and Human visual review. None may weaken the two-scope invariant
+or accepted Workspace semantics.
 
 ## 11. Architecture smell checks
 

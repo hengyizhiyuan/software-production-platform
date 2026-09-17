@@ -299,6 +299,12 @@ class _GuidedDesignSemanticCapability:
         assert input.design_context is not None
         issue = input.design_context["current_issue"]
         assert isinstance(issue, dict)
+        sufficiency = input.design_context["step_scoped_sufficiency"]
+        assert isinstance(sufficiency, dict)
+        assert sufficiency["human_attention_requires_both"] == [
+            "watt_lacks_authority_to_choose",
+            "choice_materially_changes_current_step",
+        ]
         final = bool(input.design_context["production_transition_issue"])
         proposal = (
             SemanticProductionProposal(

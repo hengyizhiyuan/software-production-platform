@@ -37,6 +37,7 @@ from spg.domain.verification import (
     VerificationResultValue,
 )
 from spg.infrastructure.git_integration import GitRepositoryIntegrationAdapter
+from spg.infrastructure.git_checkout import GitTrustedCheckoutSynchronizer
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 
@@ -62,9 +63,17 @@ class RuntimeCommitService:
         self,
         database: Database,
         git: GitRepositoryIntegrationAdapter | None = None,
+        checkout_synchronizer: GitTrustedCheckoutSynchronizer | None = None,
     ) -> None:
         self.database = database
         self.git = git or GitRepositoryIntegrationAdapter()
+        self.checkout_synchronizer = (
+            checkout_synchronizer
+            if checkout_synchronizer is not None
+            else GitTrustedCheckoutSynchronizer()
+            if git is None
+            else None
+        )
 
     def commit_runtime_candidate(
         self,
@@ -105,12 +114,15 @@ class RuntimeCommitService:
                 basis.commit_fingerprint
             )
             if existing is not None:
-                return self._existing_result(
+                result = self._existing_result(
                     store,
                     existing,
                     basis.pointer,
                     observed_revision,
                 )
+                unit_of_work.commit()
+                self._synchronize_checkout(basis, result)
+                return result
             if store.runtime_commit_for_candidate(basis.candidate.id) is not None:
                 raise RuntimeInvariantViolation(
                     "Candidate already belongs to a different Runtime Commit basis"
@@ -218,7 +230,25 @@ class RuntimeCommitService:
                 idempotent_recognition=False,
             )
             unit_of_work.commit()
-            return result
+        self._synchronize_checkout(basis, result)
+        return result
+
+    def _synchronize_checkout(
+        self,
+        basis: _CommitBasis,
+        result: RuntimeCommitResult,
+    ) -> None:
+        """Materialize the exact admitted baseline; a failed sync stays retryable."""
+
+        if self.checkout_synchronizer is None:
+            return
+        self.checkout_synchronizer.synchronize(
+            repository_path=basis.repository_path,
+            authoritative_ref=basis.candidate.target_authoritative_ref,
+            source_revision=basis.source_baseline.repository_revision,
+            trusted_revision=result.trusted_baseline.repository_revision,
+            trusted_tree_identity=result.runtime_commit.repository_tree_identity,
+        )
 
     def runtime_commit(self, commit_id: UUID) -> RuntimeCommitRecord:
         with self.database.unit_of_work() as unit_of_work:

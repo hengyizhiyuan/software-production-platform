@@ -96,7 +96,7 @@
     )) || null;
   }
 
-  function controlRoomProjection(work, understandings, attentionItems) {
+  function controlRoomProjection(work, understandings, attentionItems, steering, nativeQueue) {
     if (!work) {
       return null;
     }
@@ -110,6 +110,28 @@
       ? attentionItems.filter((item) => sameIdentity(item && item.work_id, work.work_id))
       : [];
     const progress = executionProgress(work);
+    const currentSteering = steering && sameIdentity(steering.work_id, work.work_id)
+      ? steering
+      : null;
+    const queue = Array.isArray(nativeQueue) ? nativeQueue : [];
+    const currentQueue = queue.length ? queue[queue.length - 1] : null;
+    const queueLabels = {
+      QUEUED: "Production entered the execution queue and is waiting for capacity.",
+      WAITING_RESOURCE: "Production is waiting for an eligible execution resource.",
+      ALLOCATED: "Execution capacity is allocated.",
+      EXECUTING: "The native Executor is running the admitted production unit.",
+      CHECKPOINTED: "The Executor completed a recoverable checkpoint.",
+      RETURNED_TO_QUEUE: "Execution returned to the queue after a bounded slice.",
+      COMPLETED: "Native execution completed.",
+    };
+    let steeringCondition = null;
+    if (currentSteering && currentSteering.last_stop_reason === "CAPABILITY_UNAVAILABLE") {
+      steeringCondition = "Plan Steering cannot progress because the required semantic capability is unavailable.";
+    } else if (currentSteering && currentSteering.last_stop_reason === "NO_PROGRESS") {
+      steeringCondition = "Plan Steering stopped because governed Reality did not support a truthful next transition.";
+    } else if (currentSteering && currentSteering.last_stop_reason) {
+      steeringCondition = `Plan Steering stopped: ${currentSteering.last_stop_reason}`;
+    }
     const attentionRequired = work.human_attention_required === true || attention.length > 0;
     const attentionCount = attention.length || (attentionRequired ? 1 : 0);
     const attentionSummary = attention.length
@@ -138,14 +160,18 @@
         lifecyclePhase: work.current_production_step || "Not reported by Work Reality.",
         activity: progress
           ? progress.activity
-          : "No active production activity reported.",
+          : currentQueue
+            ? queueLabels[currentQueue.condition] || `Native execution state: ${currentQueue.condition}`
+            : currentSteering && currentSteering.automatic_progression_state === "RUNNING"
+              ? "Plan Steering is determining the next governed transition."
+              : "No active production activity reported.",
         condition: progress && progress.blockedReason
           ? progress.blockedReason
           : attention.length
             ? attention.map((item) => item.reason).join(" | ")
             : attentionRequired
               ? "Work Reality reports that Human attention is required."
-              : "No blocking or waiting condition reported.",
+              : steeringCondition || "No blocking or waiting condition reported.",
       },
       attention: {
         required: attentionRequired,
