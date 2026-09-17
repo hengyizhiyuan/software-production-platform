@@ -13,11 +13,12 @@
     >
     <title>Watt / 工律 · Software Production</title>
     <link rel="stylesheet" href="/assets/styles.css">
-    <link rel="stylesheet" href="/assets/appearance.css?v=formal-ui-phase1">
+    <link rel="stylesheet" href="/assets/appearance.css?v=human-review-v3">
     <script src="/assets/state.js" defer></script>
     <script src="/assets/appearance.js?v=formal-ui-phase1" defer></script>
     <script src="/assets/response-presentation.js?v=formal-ui-phase1" defer></script>
-    <script src="/assets/app.js?v=formal-ui-phase1" defer></script>
+    <script src="/assets/control-room.js?v=human-review-v3" defer></script>
+    <script src="/assets/app.js?v=human-review-v3" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#work-surface">Skip to selected Work</a>
@@ -225,18 +226,6 @@
                 <span id="work-status" class="status-badge">Draft</span>
                 <span id="attention-marker" class="attention-marker" hidden>Needs your attention</span>
               </div>
-              <section id="execution-progress" class="execution-progress" aria-live="polite" hidden>
-                <div class="execution-progress-heading">
-                  <span class="activity-pulse" aria-hidden="true"></span>
-                  <strong id="execution-phase">Production</strong>
-                  <span id="execution-signal" class="execution-signal">Not running</span>
-                  <span id="execution-elapsed">0s elapsed</span>
-                </div>
-                <p id="execution-activity">Observing current production reality</p>
-                <p id="execution-count" class="execution-progress-meta">Progress total unknown</p>
-                <p id="execution-updated" class="execution-progress-meta">Last activity time unavailable</p>
-                <p id="execution-blocked" class="execution-blocked" hidden></p>
-              </section>
             </div>
             <div class="work-header-actions">
               <div>
@@ -253,7 +242,7 @@
               <header class="workspace-surface-header">
                 <div class="workspace-surface-identity">
                   <span class="workspace-surface-index">01</span>
-                  <div><h3 id="reality-surface-heading">Reality</h3><p class="workspace-surface-subtitle">What is true now</p></div>
+                  <div><h3 id="reality-surface-heading">Reality</h3><p class="workspace-surface-subtitle">Engineering sources for this Work</p></div>
                 </div>
                 <div class="workspace-surface-controls">
                   <button class="surface-focus-control" type="button" data-collapse-surface="reality-surface" aria-expanded="true">Collapse</button>
@@ -261,7 +250,8 @@
                 </div>
               </header>
               <p id="workspace-reality-summary" class="workspace-surface-summary">Loading governed Reality…</p>
-              <dl class="workspace-surface-facts">
+              <div id="work-source-tree" class="work-source-tree" aria-label="Work-relevant engineering sources"></div>
+              <dl class="workspace-surface-facts" hidden>
                 <div><dt>Motive</dt><dd id="workspace-reality-motive"></dd></div>
                 <div><dt>Desired Outcome</dt><dd id="workspace-reality-outcome"></dd></div>
                 <div><dt>Work Status</dt><dd id="workspace-reality-status"></dd></div>
@@ -273,7 +263,7 @@
               <header class="workspace-surface-header">
                 <div class="workspace-surface-identity">
                   <span class="workspace-surface-index">02</span>
-                  <div><h3 id="agenda-surface-heading">Agenda</h3><p class="workspace-surface-subtitle">What should happen next</p></div>
+                  <div><h3 id="agenda-surface-heading">Agenda</h3><p class="workspace-surface-subtitle">Governed path and working agreements</p></div>
                 </div>
                 <div class="workspace-surface-controls">
                   <button class="surface-focus-control" type="button" data-collapse-surface="agenda-surface" aria-expanded="true">Collapse</button>
@@ -281,7 +271,19 @@
                 </div>
               </header>
               <p id="workspace-agenda-summary" class="workspace-surface-summary">Loading current direction…</p>
-              <dl class="workspace-surface-facts">
+              <ol id="work-execution-path" class="work-execution-path" aria-label="Governed execution path"></ol>
+              <div class="working-agreements-heading"><h4>Working Agreements</h4><span id="working-agreement-count"></span></div>
+              <div id="working-agreement-list" class="working-agreement-list"></div>
+              <details id="working-agreement-history"><summary>Past agreements</summary><div id="working-agreement-past"></div></details>
+              <details class="agreement-entry"><summary>Record an agreement</summary>
+                <form id="working-agreement-form">
+                  <label for="agreement-type">Agreement type</label>
+                  <select id="agreement-type"><option value="DECISION">Decision</option><option value="CONSTRAINT">Constraint</option><option value="REMINDER">Reminder</option><option value="DEFERRED">Deferred</option><option value="CANDIDATE">Candidate</option></select>
+                  <textarea id="agreement-content" rows="2" maxlength="500" placeholder="Something worth keeping in this Work"></textarea>
+                  <button type="submit" class="secondary-button compact">Record agreement</button>
+                </form>
+              </details>
+              <dl class="workspace-surface-facts" hidden>
                 <div><dt>Current Step</dt><dd id="workspace-agenda-current"></dd></div>
                 <div><dt>Known Next</dt><dd id="workspace-agenda-next"></dd></div>
                 <div><dt>Plan Revision</dt><dd id="workspace-agenda-revision"></dd></div>
@@ -293,7 +295,7 @@
               <header class="workspace-surface-header">
                 <div class="workspace-surface-identity">
                   <span class="workspace-surface-index">03</span>
-                  <div><h3 id="production-surface-heading">Production</h3><p class="workspace-surface-subtitle">Execution, evidence, and trust</p></div>
+                  <div><h3 id="production-surface-heading">Production</h3><p class="workspace-surface-subtitle">What Watt is doing now</p></div>
                 </div>
                 <div class="workspace-surface-controls">
                   <button class="surface-focus-control" type="button" data-collapse-surface="production-surface" aria-expanded="true">Collapse</button>
@@ -301,7 +303,10 @@
                 </div>
               </header>
               <p id="workspace-production-summary" class="workspace-surface-summary">Loading production activity…</p>
-              <dl class="workspace-surface-facts">
+              <p id="production-human-state" class="production-human-state"><span id="production-state-signal" class="production-state-signal" aria-hidden="true"></span><span id="production-state-label"></span></p>
+              <p id="production-human-activity" class="production-human-activity"></p>
+              <p id="production-human-detail" class="production-human-detail"></p>
+              <dl class="workspace-surface-facts" hidden>
                 <div><dt>Activity</dt><dd id="workspace-production-activity"></dd></div>
                 <div><dt>Queue / Capacity</dt><dd id="workspace-production-queue"></dd></div>
                 <div><dt>Verification</dt><dd id="workspace-production-verification"></dd></div>
@@ -310,7 +315,7 @@
               <section class="result-panel workspace-embedded-panel" aria-labelledby="result-heading">
                 <div class="panel-title-row">
                   <div>
-                    <p class="eyebrow">Observed outcome</p>
+                    <p class="eyebrow">Production result</p>
                     <h3 id="result-heading">Work result</h3>
                   </div>
                   <span id="trusted-result" class="trust-label">Not trusted yet</span>
@@ -335,7 +340,7 @@
               <header class="workspace-surface-header">
                 <div class="workspace-surface-identity">
                   <span class="workspace-surface-index">04</span>
-                  <div><h3 id="actions-surface-heading">Actions</h3><p class="workspace-surface-subtitle">Human decisions and bounded controls</p></div>
+                  <div><h3 id="actions-surface-heading">Actions</h3><p class="workspace-surface-subtitle">Human control plane</p></div>
                 </div>
                 <div class="workspace-surface-controls">
                   <button class="surface-focus-control" type="button" data-collapse-surface="actions-surface" aria-expanded="true">Collapse</button>
@@ -343,20 +348,19 @@
                 </div>
               </header>
               <p id="workspace-actions-summary" class="workspace-surface-summary">Loading Human Attention…</p>
-              <dl class="workspace-surface-facts">
+              <dl class="workspace-surface-facts" hidden>
                 <div><dt>Attention</dt><dd id="workspace-actions-attention"></dd></div>
                 <div><dt>Available Actions</dt><dd id="workspace-actions-available"></dd></div>
                 <div><dt>Blocking / Waiting</dt><dd id="workspace-actions-blocker"></dd></div>
                 <div><dt>Emerging Direction</dt><dd id="workspace-actions-direction"></dd></div>
               </dl>
-              <section class="operator-panel workspace-embedded-panel" aria-labelledby="actions-heading">
-                <div class="operator-identity">
-                  <label for="authority-identity">Human authority</label>
-                  <input id="authority-identity" value="human:local-operator" autocomplete="off">
-                </div>
-                <div>
-                  <p class="eyebrow" id="actions-heading">Available now</p>
-                  <div id="work-actions" class="action-row"></div>
+              <div id="work-actions" class="action-row"></div>
+
+              <section id="agreement-action-panel" class="agreement-action-panel" aria-label="Working Agreement controls" hidden>
+                <p id="agreement-selected-note">Select an active agreement in Agenda to keep or abandon it.</p>
+                <div id="agreement-selection-actions" class="action-row" hidden>
+                  <button id="abandon-agreement" type="button" class="action-button danger">Abandon agreement</button>
+                  <button id="keep-agreement" type="button" class="action-button">Keep agreement</button>
                 </div>
               </section>
 
@@ -378,6 +382,10 @@
               <small>Understanding, direction, trust, plan, and technical evidence</small>
             </summary>
             <div class="workspace-evidence-content">
+          <div class="operator-identity">
+            <label for="authority-identity">Human authority</label>
+            <input id="authority-identity" value="human:local-operator" autocomplete="off">
+          </div>
           <section id="control-room-foundation" class="control-room-foundation" aria-label="Production control foundation">
             <section class="control-room-card" aria-labelledby="control-objective-heading">
               <p class="eyebrow">Production Objective</p>
@@ -728,6 +736,23 @@
     </main>
 
     <div id="live-region" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="inspection-window" class="inspection-window" role="dialog" aria-modal="false" aria-label="Read-only file inspection" hidden>
+      <div class="inspection-toolbar">
+        <strong>File inspection · Read only</strong>
+        <div class="inspection-toolbar-actions">
+          <button id="inspection-opacity" type="button">Semi-transparent</button>
+          <button id="inspection-expand" type="button">Enlarge</button>
+          <button id="inspection-close" type="button" aria-label="Close file inspection">Close</button>
+        </div>
+      </div>
+      <div id="inspection-tabs" class="inspection-tabs" role="tablist" aria-label="Open files"></div>
+      <div class="inspection-file-tools">
+        <span id="inspection-path"></span>
+        <label>Find in file <input id="inspection-search" type="search" autocomplete="off"></label>
+        <button id="inspection-view" type="button">Source view</button>
+      </div>
+      <div id="inspection-content" class="inspection-content"></div>
+    </div>
     <div id="notice" class="notice" role="alert" hidden>
       <span id="notice-message"></span>
       <button id="dismiss-notice" type="button" aria-label="Dismiss message">×</button>

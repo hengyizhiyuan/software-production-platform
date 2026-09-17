@@ -14,13 +14,17 @@ from spg.domain.conversation import (
     InteractionStrategy,
 )
 from spg.domain.interaction import (
+    ActiveWorkInterpretationContext,
     Interaction,
     InteractionActor,
     InteractionCondition,
     InteractionInterpretationInput,
     InteractionInvariantViolation,
     InteractionRecord,
+    WorkRealityRevision,
 )
+from spg.domain.conversation import ConversationTurnIntent, StructuredCollaborationResult
+from spg.domain.interaction import InteractionSemanticCandidate
 from spg.domain.model_runtime import (
     ModelProfile,
     ModelProvider,
@@ -217,6 +221,54 @@ def test_controlled_pre_work_stops_after_one_failed_json_repair() -> None:
         )
 
     assert adapter.calls == 2
+
+
+def test_controlled_active_work_question_skips_discarded_conversation_call() -> None:
+    basis = _basis()
+    revision = WorkRealityRevision(
+        id=UUID(int=10), work_id=UUID(int=11), revision_number=1,
+        basis_fingerprint="a" * 64, revision_fingerprint="c" * 64,
+        source_interaction_id=basis.interaction.id, source_assessment_id=UUID(int=12),
+        source_record_ids=(basis.records[0].id,), motive="开发三栏页面",
+        desired_outcome="可使用的三栏页面", context_facts=(), constraints=(), requests=(),
+        engineering_scope_id=UUID(int=13), engineering_resource_id=None,
+        scope_basis_fingerprint="d" * 64, source_baseline_id=None,
+        governance_record_id=UUID(int=16), supporting_references=(),
+        change_set=("initial",), rationale="Admitted Work", admitted_by="human",
+        schema_version="v1", created_at=basis.interaction.created_at,
+    )
+    basis = basis.model_copy(update={
+        "active_work_context": ActiveWorkInterpretationContext(
+            work_revision=revision, engineering_scope_fingerprint="e" * 64,
+        ),
+        "records": (basis.records[0].model_copy(update={"content": "有淡入淡出了吗"}),),
+    })
+    semantics = InteractionSemanticCandidate(
+        interpreted_motive=revision.motive,
+        desired_outcome=revision.desired_outcome,
+        collaboration=StructuredCollaborationResult(
+            turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
+            direct_answer="当前资料无法确认是否已有淡入淡出效果。",
+            response_language="zh-CN",
+        ),
+        provider_identity="test",
+    ).model_dump_json(exclude={"provider_identity", "model_identity"})
+    adapter = _Adapter([semantics, "invalid unused response"])
+    runtime, adapter = _runtime(adapter)
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    visible: list[str] = []
+
+    candidate = capability.interpret_controlled_stream_observed(
+        basis, on_response_delta=visible.append, on_pipeline_stage=lambda _stage: None,
+    )
+
+    assert candidate.turn_intent is ConversationTurnIntent.DIRECT_QUESTION
+    assert candidate.natural_response == "当前资料无法确认是否已有淡入淡出效果。"
+    assert visible == []
+    assert adapter.calls == 1
+    assert capability.last_pipeline_evidence.provider_call_count == 1
+    assert capability.last_pipeline_evidence.conversation_request_id is None
+    assert adapter.outputs == ["invalid unused response"]
 
 
 def test_profiles_are_role_specific_and_control_pre_work_coalescing() -> None:

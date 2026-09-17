@@ -1,0 +1,255 @@
+(function () {
+  "use strict";
+
+  const STEP_NAMES = {
+    DESIGN: "Design", PRODUCTION: "Produce", PRODUCE: "Produce",
+    VERIFICATION: "Verify", VERIFY: "Verify", DELIVERY: "Deliver", DELIVER: "Deliver",
+    UNDERSTANDING: "Understand", WORK_ADMISSION: "Understand",
+  };
+  function stepName(step) {
+    if (!step) return "";
+    return step.objective || STEP_NAMES[step.type] || String(step.type || "Step").replaceAll("_", " ");
+  }
+  function agendaSteps(steering) {
+    if (!steering) return [];
+    return [
+      ...(steering.completed_steps || []).map((step) => ({ label: stepName(step), state: "DONE", key: step.step_id })),
+      ...(steering.current_step ? [{ label: stepName(steering.current_step), state: "CURRENT", key: steering.current_step.step_id }] : []),
+      ...(steering.known_next_steps || []).map((step) => ({ label: stepName(step), state: "NEXT", key: step.step_id })),
+    ];
+  }
+  const MILESTONE_TYPES = {
+    REFINE: ["Understand", "understand"],
+    HUMAN_DECISION: ["Shape direction", "direction"],
+    DESIGN: ["Shape solution", "design"],
+    PRODUCE: ["Produce", "production"],
+    VERIFY_ACCEPT: ["Verify", "verification"],
+    COMPLETE: ["Deliver", "delivery"],
+  };
+  function agendaMilestones(steering) {
+    if (!steering) return [];
+    const source = [
+      ...(steering.completed_steps || []).map((step) => ({ step, state: "DONE" })),
+      ...(steering.current_step ? [{ step: steering.current_step, state: "CURRENT" }] : []),
+      ...(steering.known_next_steps || []).map((step) => ({ step, state: "NEXT" })),
+    ];
+    const milestones = [];
+    source.forEach(({ step, state }) => {
+      const type = String(step.type || "").toUpperCase();
+      const [label, category] = MILESTONE_TYPES[type] || [stepName(step), `step:${step.step_id || type}`];
+      let current = milestones[milestones.length - 1];
+      if (!current || current.category !== category) {
+        current = { label, category, state: "NEXT", steps: [] };
+        milestones.push(current);
+      }
+      current.steps.push({ label: stepName(step), state, key: step.step_id });
+      const states = current.steps.map((item) => item.state);
+      current.state = states.every((item) => item === "DONE") ? "DONE"
+        : states.every((item) => item === "NEXT") ? "NEXT" : "CURRENT";
+    });
+    return milestones;
+  }
+  function productionState(work, queue, attempt) {
+    const entry = queue && queue.length ? queue[queue.length - 1] : null;
+    const mode = attempt?.state?.runtime_mode;
+    if (mode === "RECOVERING" || mode === "RESUME_REQUESTED") return { state: "RECOVERING", detail: "Restoring execution from retained state." };
+    if (mode === "FAILED") return { state: "FAILED", detail: "Execution stopped with a failure." };
+    if (mode === "PAUSED") return { state: "BLOCKED", detail: "Execution is paused." };
+    if (entry) {
+      const map = {
+        QUEUED: ["QUEUED", "Waiting for execution capacity."],
+        WAITING_RESOURCE: ["WAITING FOR CAPACITY", entry.wait_reason || "Waiting for a suitable worker."],
+        WAITING_HUMAN: ["WAITING FOR HUMAN", entry.wait_reason || "A Human decision is needed."],
+        ALLOCATED: ["PREPARING", "Capacity allocated; execution is starting."],
+        EXECUTING: ["RUNNING", "The executor is working on the current task."],
+        CHECKPOINTED: ["RUNNING", "Progress was saved at a checkpoint."],
+        RETURNED_TO_QUEUE: ["QUEUED", "Execution will continue in a later slice."],
+        COMPLETED: ["FINISHED", "The execution attempt completed."],
+        CANCELLED: ["BLOCKED", "The execution attempt was cancelled."],
+      };
+      if (map[entry.condition]) return { state: map[entry.condition][0], detail: map[entry.condition][1] };
+    }
+    if (work?.execution_progress?.blocked_reason) return { state: "BLOCKED", detail: work.execution_progress.blocked_reason };
+    if (work?.execution_progress?.still_working) return { state: "RUNNING", detail: work.execution_progress.activity || "Production is active." };
+    if (work?.work_complete || work?.status === "COMPLETED") return { state: "FINISHED", detail: "Current production is complete." };
+    if (work?.status === "NEEDS_ATTENTION") return { state: "WAITING FOR HUMAN", detail: work.what_happens_next || "A Human decision is needed before production can continue." };
+    if (work?.status === "BLOCKED" || work?.status === "FAILED") return { state: work.status, detail: work.most_recent_meaningful_event || "Production needs attention." };
+    return { state: "IDLE", detail: "No execution is active." };
+  }
+
+  function createViewer({ document, loadFile }) {
+    const root = document.getElementById("inspection-window");
+    const tabs = document.getElementById("inspection-tabs");
+    const content = document.getElementById("inspection-content");
+    const pathLabel = document.getElementById("inspection-path");
+    const search = document.getElementById("inspection-search");
+    const viewButton = document.getElementById("inspection-view");
+    const files = new Map();
+    let active = null;
+    let sourceMode = false;
+    function node(tag, text, className) {
+      const item = document.createElement(tag);
+      if (text != null) item.textContent = text;
+      if (className) item.className = className;
+      return item;
+    }
+    function appendCodeLine(parent, line, number) {
+      const row = node("div", null, "inspection-code-line");
+      row.append(node("span", String(number), "inspection-line-number"));
+      const code = node("span", null, "inspection-line-text");
+      const pattern = /\b(class|def|return|const|let|function|if|else|for|while|import|from|async|await|SELECT|CREATE|TABLE)\b/g;
+      let cursor = 0;
+      for (const match of line.matchAll(pattern)) {
+        code.append(document.createTextNode(line.slice(cursor, match.index)));
+        code.append(node("span", match[0], "inspection-token"));
+        cursor = match.index + match[0].length;
+      }
+      code.append(document.createTextNode(line.slice(cursor)));
+      row.append(code);
+      parent.append(row);
+    }
+    function renderSource(text, lineNumbers) {
+      const block = node("div", null, "inspection-code");
+      text.split("\n").forEach((line, index) => {
+        if (lineNumbers) appendCodeLine(block, line, index + 1);
+        else block.append(node("div", line || "\u00a0", "inspection-source-line"));
+      });
+      content.append(block);
+    }
+    function appendInline(parent, text) {
+      const token = /(\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`|\[([^\]]+)\]\(([^)]+)\))/g;
+      let cursor = 0;
+      for (const match of text.matchAll(token)) {
+        parent.append(document.createTextNode(text.slice(cursor, match.index)));
+        if (match[2]) parent.append(node("strong", match[2]));
+        else if (match[3]) parent.append(node("em", match[3]));
+        else if (match[4]) parent.append(node("code", match[4]));
+        else {
+          const label = match[5];
+          const target = match[6];
+          if (/^https?:\/\//i.test(target)) {
+            const link = node("a", label);
+            link.href = target;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            parent.append(link);
+          } else parent.append(node("span", label, "inspection-relative-link"));
+        }
+        cursor = match.index + match[0].length;
+      }
+      parent.append(document.createTextNode(text.slice(cursor)));
+    }
+    function renderMarkdown(text) {
+      const lines = text.split("\n");
+      let index = 0;
+      while (index < lines.length) {
+        const line = lines[index];
+        if (!line.trim()) { index += 1; continue; }
+        if (/^```/.test(line)) {
+          const block = node("pre", null, "inspection-markdown-code");
+          index += 1;
+          const code = [];
+          while (index < lines.length && !/^```/.test(lines[index])) code.push(lines[index++]);
+          block.append(node("code", code.join("\n")));
+          content.append(block);
+          index += 1;
+          continue;
+        }
+        const heading = /^(#{1,6})\s+(.+)$/.exec(line);
+        if (heading) { const title = node(`h${heading[1].length}`); appendInline(title, heading[2]); content.append(title); index += 1; continue; }
+        if (/^\s*[-*+]\s+/.test(line) || /^\s*\d+\.\s+/.test(line)) {
+          const ordered = /^\s*\d+\./.test(line);
+          const list = node(ordered ? "ol" : "ul");
+          while (index < lines.length && (ordered ? /^\s*\d+\.\s+/.test(lines[index]) : /^\s*[-*+]\s+/.test(lines[index]))) {
+            const item = node("li");
+            appendInline(item, lines[index++].replace(/^\s*(?:[-*+]|\d+\.)\s+/, ""));
+            list.append(item);
+          }
+          content.append(list);
+          continue;
+        }
+        if (/^\|.+\|\s*$/.test(line) && /^\|?[\s:|-]+\|\s*$/.test(lines[index + 1] || "")) {
+          const table = node("table");
+          const header = node("tr");
+          line.split("|").slice(1, -1).forEach((cell) => { const item = node("th"); appendInline(item, cell.trim()); header.append(item); });
+          table.append(header); index += 2;
+          while (index < lines.length && /^\|.+\|\s*$/.test(lines[index])) {
+            const row = node("tr");
+            lines[index++].split("|").slice(1, -1).forEach((cell) => { const item = node("td"); appendInline(item, cell.trim()); row.append(item); });
+            table.append(row);
+          }
+          content.append(table);
+          continue;
+        }
+        const paragraph = [];
+        while (index < lines.length && lines[index].trim() && !/^(#{1,6}\s|```|\s*[-*+]\s|\s*\d+\.\s)/.test(lines[index])) paragraph.push(lines[index++]);
+        if (paragraph.length) { const item = node("p"); appendInline(item, paragraph.join(" ")); content.append(item); }
+        else index += 1;
+      }
+    }
+    function render() {
+      tabs.replaceChildren(); content.replaceChildren();
+      for (const [key, file] of files) {
+        const tab = node("div", null, "inspection-tab");
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-selected", String(key === active));
+        const select = node("button", file.path.split("/").pop());
+        select.type = "button"; select.addEventListener("click", () => { active = key; search.value = ""; render(); });
+        const close = node("button", "×");
+        close.type = "button"; close.setAttribute("aria-label", `Close ${file.path}`);
+        close.addEventListener("click", () => {
+          files.delete(key);
+          if (active === key) active = files.size ? [...files.keys()].at(-1) : null;
+          if (!files.size) root.hidden = true;
+          render();
+        });
+        tab.append(select, close); tabs.append(tab);
+      }
+      const file = files.get(active);
+      if (!file) return;
+      pathLabel.textContent = `${file.path} · ${file.revision.slice(0, 12)} · read only`;
+      const renderableDocument = file.kind === "DOCUMENTATION" && /\.(?:md|markdown|rst|txt|adoc)$/i.test(file.path);
+      viewButton.hidden = !renderableDocument;
+      viewButton.textContent = sourceMode ? "Rendered view" : "Source view";
+      if (renderableDocument && !sourceMode) renderMarkdown(file.content);
+      else renderSource(file.content, file.kind === "CODE" || !renderableDocument);
+      const query = search.value.trim().toLowerCase();
+      if (query) {
+        for (const element of content.querySelectorAll(".inspection-code-line, .inspection-source-line, p, li, td")) {
+          if (element.textContent.toLowerCase().includes(query)) element.classList.add("inspection-search-hit");
+        }
+        content.querySelector(".inspection-search-hit")?.scrollIntoView({ block: "center" });
+      }
+    }
+    async function open(workId, path, revision) {
+      const key = `${workId}:${revision}:${path}`;
+      if (!files.has(key)) files.set(key, await loadFile(workId, path, revision));
+      active = key; sourceMode = false; search.value = ""; root.hidden = false; render();
+    }
+    document.getElementById("inspection-close").addEventListener("click", () => { root.hidden = true; });
+    document.getElementById("inspection-expand").addEventListener("click", (event) => {
+      root.classList.toggle("is-expanded");
+      event.currentTarget.textContent = root.classList.contains("is-expanded") ? "Restore" : "Enlarge";
+    });
+    document.getElementById("inspection-opacity").addEventListener("click", (event) => {
+      root.classList.toggle("is-translucent");
+      event.currentTarget.textContent = root.classList.contains("is-translucent") ? "Opaque" : "Semi-transparent";
+    });
+    viewButton.addEventListener("click", () => { sourceMode = !sourceMode; render(); });
+    search.addEventListener("input", render);
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !root.hidden) root.hidden = true; });
+    return { open, count: () => files.size };
+  }
+
+  function conversationOwnership(messages, handedOffTurnId = "") {
+    const records = Array.isArray(messages) ? messages : [];
+    const latest = records.at(-1)?.turn_id;
+    if (!latest || latest === handedOffTurnId) return { history: records, current: [] };
+    return {
+      history: records.filter((record) => record.turn_id !== latest),
+      current: records.filter((record) => record.turn_id === latest),
+    };
+  }
+
+  globalThis.WattControlRoom = Object.freeze({ agendaSteps, agendaMilestones, productionState, conversationOwnership, createViewer });
+})();

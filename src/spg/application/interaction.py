@@ -20,7 +20,7 @@ from spg.application.guided_design import (
 )
 from spg.application.design_intent import frame_design_intent_text
 
-from spg.domain.conversation import ConversationContextMessage
+from spg.domain.conversation import ConversationContextMessage, ConversationTurnIntent
 from spg.domain.interaction import (
     ActiveWorkInterpretationContext,
     Interaction,
@@ -110,6 +110,7 @@ _NEW_OBJECT_PATTERNS = (
         r"(?:我想|我要|希望)(?:做|开发|创建|搭建|建设|设计)"
         r"(?:一个|一套|新的?)?(?P<object>.+)"
     ),
+    re.compile(r"(?:再给我|再)(?:做|开发|创建|搭建|设计)(?:一个|一套)?(?P<object>.+)"),
 )
 _GENERIC_OBJECT_WORDS = {
     "a",
@@ -174,6 +175,25 @@ def _new_work_confirmation(latest_human_input: str) -> str:
         "This appears to be a new Work. Would you like to create a new Work? "
         "The current Work will not be changed automatically."
     )
+
+
+def _nonmutating_question(value: str) -> bool:
+    text = value.strip()
+    question = text.endswith(("?", "？", "吗", "么", "呢"))
+    change = re.search(r"(?:请|帮我|给我|把|将).*(?:改|调整|新增|删除|做成)|(?:改成|修改为|换成)", text)
+    return question and change is None
+
+
+def _provider_supplied_human_wording(evidence: object) -> bool:
+    """Semantic-only admission still needs the governed Conversation realizer."""
+
+    if isinstance(evidence, dict):
+        mode = evidence.get("pipeline_mode")
+        conversation_request = evidence.get("conversation_request_id")
+    else:
+        mode = getattr(evidence, "pipeline_mode", None)
+        conversation_request = getattr(evidence, "conversation_request_id", None)
+    return mode == "coalesced_pre_work" or bool(conversation_request)
 
 
 def interaction_basis_fingerprint(
@@ -247,7 +267,7 @@ class DeterministicWorkInteractionCapability:
             ):
                 focus = WorkFocusClassification.RELEVANT_EXPLORATION
                 impact = WorkImpactDisposition.NO_GOVERNED_CHANGE
-            elif value.rstrip().endswith(("?", "？")) and not (
+            elif _nonmutating_question(value) and not (
                 active.satisfaction_state
                 is WorkSatisfactionState.CURRENTLY_SATISFIED
                 and any(
@@ -953,10 +973,7 @@ class WorkInteractionService:
         )
         response_realizer = self.response_realizer
         pipeline_evidence = getattr(self.capability, "last_pipeline_evidence", None)
-        provider_call_count = getattr(pipeline_evidence, "provider_call_count", None)
-        if isinstance(pipeline_evidence, dict):
-            provider_call_count = pipeline_evidence.get("provider_call_count")
-        if isinstance(provider_call_count, int) and provider_call_count >= 1:
+        if _provider_supplied_human_wording(pipeline_evidence):
             # The dedicated/coalesced Conversation provider already supplied
             # natural wording. After semantic policy and Interaction Strategy
             # admission, another external wording call adds latency and can only
@@ -1484,6 +1501,22 @@ class WorkInteractionService:
                 prior_assessment=prior_assessment,
                 latest_human_input=latest_human_input,
             )
+            if (
+                active_context is not None
+                and candidate.turn_intent in {
+                    ConversationTurnIntent.DIRECT_QUESTION,
+                    ConversationTurnIntent.HOW_TO,
+                }
+                and _nonmutating_question(latest_human_input)
+                and candidate.focus_classification not in {
+                    WorkFocusClassification.UNRELATED_NEW_DEMAND,
+                    WorkFocusClassification.MATERIAL_BRANCH,
+                }
+            ):
+                candidate = candidate.model_copy(update={
+                    "focus_classification": WorkFocusClassification.SIDE_QUESTION,
+                    "impact_disposition": WorkImpactDisposition.NO_GOVERNED_CHANGE,
+                })
             focus, impact, candidate_change = self._normalize_active_candidate(
                 candidate,
                 active_context,

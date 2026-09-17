@@ -80,6 +80,24 @@ def git_bytes(repository: str, *args: str) -> bytes:
         raise ProductInvariantViolation("Exact software repository evidence is unavailable") from exc
 
 
+def candidate_file_inventory(repository: str, revision: str, artifacts: tuple[str, ...]) -> tuple[list[str], str | None]:
+    """Expose exact document artifacts without treating a large source tree as a Web preview."""
+    html_artifacts = [path for path in artifacts if path.endswith(".html")]
+    if html_artifacts:
+        paths = git_bytes(repository, "ls-tree", "-r", "--name-only", "-z", revision).decode().split("\0")[:-1]
+        if len(paths) > 500:
+            raise ProductInvariantViolation("Candidate preview exceeds the bounded file inventory")
+        entrypoint = next((path for path in html_artifacts if path in paths), None)
+        return paths, entrypoint
+    paths = []
+    for path in artifacts:
+        row = git_bytes(repository, "ls-tree", "-z", revision, "--", ":(literal)" + path)
+        if not row.startswith((b"100644 blob ", b"100755 blob ")) or not row.endswith(b"\t" + path.encode() + b"\0"):
+            raise ProductInvariantViolation("Candidate artifact is absent from the sealed revision")
+        paths.append(path)
+    return paths, None
+
+
 class DeliveryApplicationService:
     """Product acceptance never authorizes a Candidate or advances a PWU."""
     def __init__(self, database: Database):
@@ -126,11 +144,9 @@ class DeliveryApplicationService:
             tree = git_bytes(repository, "rev-parse", candidate.proposed_commit_identity + "^{tree}").decode().strip()
             if tree != candidate.proposed_tree_identity:
                 raise ProductInvariantViolation("Candidate preview tree differs from sealed Reality")
-            paths = git_bytes(repository, "ls-tree", "-r", "--name-only", "-z", candidate.proposed_commit_identity).decode().split("\0")[:-1]
-            if len(paths) > 500:
-                raise ProductInvariantViolation("Candidate preview exceeds the bounded file inventory")
-            entrypoint = "index.html" if "index.html" in paths else next(
-                (path for path in summary.artifact_paths if path.endswith(".html") and path in paths), None)
+            paths, entrypoint = candidate_file_inventory(
+                repository, candidate.proposed_commit_identity, summary.artifact_paths,
+            )
             return {"candidate_id": str(candidate.id), "candidate_fingerprint": candidate.fingerprint,
                     "repository_revision": candidate.proposed_commit_identity, "tree": tree,
                     "repository_path": repository, "paths": paths, "entrypoint": entrypoint,

@@ -4,6 +4,7 @@
   const viewModel = globalThis.SPGViewModel;
   const appearance = globalThis.WattAppearance;
   const responsePresentation = globalThis.WattResponsePresentation;
+  const controlRoom = globalThis.WattControlRoom;
   if (!viewModel) {
     return;
   }
@@ -27,6 +28,9 @@
     steering: null,
     nativeQueue: [],
     nativeAttempt: null,
+    sources: null,
+    agreements: [],
+    selectedAgreementId: null,
     statusFilter: "",
     busy: false,
     pollTimer: null,
@@ -41,6 +45,8 @@
     freshInteraction: false,
     storageAvailable: true,
     turnTimings: {},
+    handoffTurnId: "",
+    handoffTimer: null,
   };
   // Reviewer/browser instrumentation only. It is not product or governance truth.
   globalThis.__WATT_TURN_TIMINGS__ = state.turnTimings;
@@ -72,6 +78,23 @@
     workspaceSkinCurrent: document.getElementById("workspace-skin-current"),
     workSurface: document.getElementById("work-surface"),
     formalWorkspaceGrid: document.getElementById("formal-workspace-grid"),
+    workSourceTree: document.getElementById("work-source-tree"),
+    workExecutionPath: document.getElementById("work-execution-path"),
+    workingAgreementList: document.getElementById("working-agreement-list"),
+    workingAgreementPast: document.getElementById("working-agreement-past"),
+    workingAgreementHistory: document.getElementById("working-agreement-history"),
+    workingAgreementCount: document.getElementById("working-agreement-count"),
+    agreementActionPanel: document.getElementById("agreement-action-panel"),
+    agreementForm: document.getElementById("working-agreement-form"),
+    agreementType: document.getElementById("agreement-type"),
+    agreementContent: document.getElementById("agreement-content"),
+    agreementSelectedNote: document.getElementById("agreement-selected-note"),
+    agreementSelectionActions: document.getElementById("agreement-selection-actions"),
+    abandonAgreement: document.getElementById("abandon-agreement"),
+    keepAgreement: document.getElementById("keep-agreement"),
+    productionHumanState: document.getElementById("production-human-state"),
+    productionHumanActivity: document.getElementById("production-human-activity"),
+    productionHumanDetail: document.getElementById("production-human-detail"),
     workspaceRealitySummary: document.getElementById("workspace-reality-summary"),
     workspaceRealityMotive: document.getElementById("workspace-reality-motive"),
     workspaceRealityOutcome: document.getElementById("workspace-reality-outcome"),
@@ -156,14 +179,7 @@
     selectedWork: document.getElementById("selected-work"),
     workTitle: document.getElementById("work-title"),
     workStatus: document.getElementById("work-status"),
-    executionProgress: document.getElementById("execution-progress"),
-    executionPhase: document.getElementById("execution-phase"),
-    executionActivity: document.getElementById("execution-activity"),
-    executionCount: document.getElementById("execution-count"),
-    executionElapsed: document.getElementById("execution-elapsed"),
-    executionSignal: document.getElementById("execution-signal"),
-    executionUpdated: document.getElementById("execution-updated"),
-    executionBlocked: document.getElementById("execution-blocked"),
+    productionStateLabel: document.getElementById("production-state-label"),
     attentionMarker: document.getElementById("attention-marker"),
     controlObjectiveMotive: document.getElementById("control-objective-motive"),
     controlObjectiveWork: document.getElementById("control-objective-work"),
@@ -326,6 +342,13 @@
     return payload;
   }
 
+  const fileViewer = controlRoom ? controlRoom.createViewer({
+    document,
+    loadFile: (workId, path, revision) => apiRequest(
+      `/api/works/${workId}/control-room/file?path=${encodeURIComponent(path)}&revision=${encodeURIComponent(revision)}`,
+    ),
+  }) : null;
+
   function createElement(tagName, className, text) {
     const node = document.createElement(tagName);
     if (className) {
@@ -438,7 +461,10 @@
           work.most_recent_meaningful_event || "No production event yet",
         ),
       );
-      button.addEventListener("click", () => selectWork(work.work_id));
+      button.addEventListener("click", (event) => {
+        if (event.detail > 0) button.blur();
+        selectWork(work.work_id);
+      });
       elements.workList.append(button);
     });
   }
@@ -452,9 +478,12 @@
   }
 
   function renderConversation() {
-    const history = viewModel.interactionConversationMessages(state.sharedUnderstanding, state.streamingAssistantMessage);
+    const messages = viewModel.interactionConversationMessages(state.sharedUnderstanding, state.streamingAssistantMessage);
+    const ownership = controlRoom.conversationOwnership(messages, state.handoffTurnId);
+    const history = ownership.history;
     const container = elements.interactionHistory;
     const existing = new Map(Array.from(container.children).map((node) => [node.dataset.messageKey, node]));
+    const initialized = container.dataset.initialized === "true";
     const retained = new Set();
     history.forEach((record, index) => {
       const key = messageKey(record, index);
@@ -466,22 +495,30 @@
         message.append(createElement("p", "message-content"));
         message.append(createElement("p", "message-meta"));
         message.append(createElement("p", "message-references"));
+        if (initialized) message.classList.add("is-entering");
       }
+      message.classList.remove("is-leaving");
       retained.add(message);
       updateMessageNode(message, record);
       if (container.children[index] !== message) container.insertBefore(message, container.children[index] || null);
     });
-    Array.from(container.children).forEach((node) => { if (!retained.has(node)) node.remove(); });
+    Array.from(container.children).forEach((node) => {
+      if (retained.has(node)) return;
+      if (!node.dataset.messageKey || !initialized || state.handoffTurnId) { node.remove(); return; }
+      node.classList.add("is-leaving");
+      globalThis.setTimeout(() => { if (node.classList.contains("is-leaving")) node.remove(); }, 160);
+    });
     if (!history.length) container.append(createElement("p", "empty-copy", "No messages yet."));
-    renderCurrentInteraction(history);
+    container.dataset.initialized = "true";
+    renderCurrentInteraction(ownership.current, messages.length - ownership.current.length);
   }
 
-  function renderCurrentInteraction(history) {
+  function renderCurrentInteraction(active, offset = 0) {
     const current = elements.currentInteractionLive;
     if (!current) return;
-    const active = history.slice(-2);
-    const keys = active.map((record, index) => messageKey(record, history.length - active.length + index));
+    const keys = active.map((record, index) => messageKey(record, offset + index));
     const existing = new Map(Array.from(current.children).map((node) => [node.dataset.messageKey, node]));
+    const initialized = current.dataset.initialized === "true";
     const retained = new Set();
     active.forEach((record, index) => {
       const key = keys[index];
@@ -495,24 +532,60 @@
         message.append(content);
         message.append(createElement("p", "message-meta"));
         message.append(createElement("p", "message-references"));
+        if (initialized) message.classList.add("is-entering");
       }
       retained.add(message);
       updateMessageNode(message, record);
       if (current.children[index] !== message) current.insertBefore(message, current.children[index] || null);
     });
-    Array.from(current.children).forEach((node) => { if (!retained.has(node)) node.remove(); });
-    if (!active.length) current.append(createElement("p", "empty-copy", "The current exchange will appear here."));
-    Array.from(containerChildren(elements.interactionHistory)).forEach((node) => {
-      node.classList.toggle("is-current", keys.includes(node.dataset.messageKey));
+    Array.from(current.children).forEach((node) => {
+      if (retained.has(node)) return;
+      if (!node.dataset.messageKey || !initialized || state.handoffTurnId) { node.remove(); return; }
+      node.classList.add("is-leaving");
+      globalThis.setTimeout(() => { if (node.classList.contains("is-leaving")) node.remove(); }, 160);
     });
+    if (!active.length) current.append(createElement("p", "empty-copy", "The current exchange will appear here."));
+    current.dataset.initialized = "true";
   }
 
-  function containerChildren(container) {
-    return container ? container.children : [];
+  function handoffCurrentInteraction(immediate = false) {
+    const messages = viewModel.interactionConversationMessages(state.sharedUnderstanding, state.streamingAssistantMessage);
+    const latest = messages.at(-1);
+    if (!latest?.turn_id || state.activeInteractionTurnId || state.finishingTurn || state.streamingAssistantMessage) return;
+    const turn = (state.sharedUnderstanding?.turns || []).find((item) => item.turn_id === latest.turn_id);
+    if (turn && !["COMPLETED", "FAILED", "CANCELLED"].includes(turn.status)) return;
+    if (!turn && latest.actor !== "WATT") return;
+    if (state.handoffTurnId === latest.turn_id) return;
+    if (state.handoffTimer) {
+      if (!immediate) return;
+      globalThis.clearTimeout(state.handoffTimer);
+      state.handoffTimer = null;
+      elements.currentInteractionLive.classList.remove("is-handing-off");
+    }
+    const interactionId = state.selectedInteractionId;
+    const turnId = latest.turn_id;
+    const complete = () => {
+      state.handoffTimer = null;
+      if (state.selectedInteractionId !== interactionId) return;
+      state.handoffTurnId = turnId;
+      renderConversation();
+    };
+    if (immediate || globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { complete(); return; }
+    elements.currentInteractionLive.classList.add("is-handing-off");
+    state.handoffTimer = globalThis.setTimeout(() => {
+      elements.currentInteractionLive.classList.remove("is-handing-off");
+      complete();
+    }, 220);
   }
 
   function updateMessageNode(message, record) {
+    const wasStreaming = message.classList.contains("is-streaming");
     message.classList.toggle("is-streaming", Boolean(record.streaming));
+    if (wasStreaming && !record.streaming) {
+      message.classList.remove("is-settling");
+      void message.offsetWidth;
+      message.classList.add("is-settling");
+    }
     message.setAttribute("aria-busy", String(Boolean(record.streaming)));
     const content = message.querySelector(".message-content");
     if (record.actor === "WATT" && !record.streaming
@@ -552,18 +625,14 @@
         streamed.phase = "FINAL";
       }
       const key = messageKey({ actor: "WATT", turn_id: streamed.turnId }, 0);
-      const node = Array.from(elements.interactionHistory.children).find((item) => item.dataset.messageKey === key);
+      const node = Array.from(elements.currentInteractionLive.children)
+        .find((item) => item.dataset.messageKey === key);
       if (node) {
         const streamingRecord = {
           actor: "WATT", content: streamed.content || "正在处理…", streaming: true,
           processing_status: streamed.status, created_at: streamed.createdAt,
         };
         updateMessageNode(node, streamingRecord);
-        if (elements.currentInteractionLive) {
-          const currentNode = Array.from(elements.currentInteractionLive.children)
-            .find((item) => item.dataset.messageKey === key);
-          if (currentNode) updateMessageNode(currentNode, streamingRecord);
-        }
         if (streamed.content && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") {
           globalThis.__WATT_MARK_TURN_TIMING__(streamed.turnId, "browserFirstTextPainted");
         }
@@ -934,6 +1003,7 @@
   function renderWorkActions(work) {
     elements.workActions.replaceChildren();
     viewModel.workActions(work.status).forEach((action) => {
+      if (state.attention.some((item) => item.available_actions.includes(action))) return;
       const classes = ["action-button"];
       if (action === "APPROVE") {
         classes.push("emphasis");
@@ -947,12 +1017,8 @@
       button.addEventListener("click", () => performWorkAction(action));
       elements.workActions.append(button);
     });
-    if (elements.workActions.childElementCount === 0) {
-      elements.workActions.append(
-        createElement("span", "empty-copy", "No direct action is available in this state."),
-      );
-    }
     elements.manualAdvanceControl.hidden = !viewModel.shouldPoll(work.status);
+    elements.manualAdvanceControl.closest(".manual-controls").hidden = elements.manualAdvanceControl.hidden;
   }
 
   function renderAttention() {
@@ -960,23 +1026,12 @@
     elements.attentionSection.hidden = state.attention.length === 0;
     state.attention.forEach((attention) => {
       const card = createElement("article", "attention-card");
-      card.append(createElement("h4", "", attention.decision));
-      card.append(createElement("p", "", attention.reason));
-      if (attention.recommendation) {
-        card.append(createElement("p", "", attention.recommendation));
-      }
+      const candidateDecision = attention.kind === "CANDIDATE_AUTHORIZATION";
+      card.append(createElement("h4", "", candidateDecision ? "Review the result" : attention.decision));
+      card.append(createElement("p", "", candidateDecision
+        ? "Preview or download the candidate, then decide whether to authorize it."
+        : "Choose how you want Watt to continue."));
       const actions = createElement("div", "action-row");
-      const previewBeforeAuthorization = attention.kind === "CANDIDATE_AUTHORIZATION"
-        && attention.available_actions.includes("AUTHORIZE")
-        && state.result
-        && state.result.repository_state === "SEALED_CANDIDATE";
-      if (previewBeforeAuthorization) {
-        const preview = createElement("button", "action-button", "Preview result");
-        preview.type = "button";
-        preview.dataset.affordance = "PREVIEW_RESULT";
-        preview.addEventListener("click", openCandidatePreview);
-        actions.append(preview);
-      }
       attention.available_actions.forEach((action) => {
         const recommended = attention.recommended_action === action;
         const label = recommended ? `${actionLabel(action)} · Recommended` : actionLabel(action);
@@ -1048,14 +1103,21 @@
         createElement("li", "", labels[entry.condition] || entry.condition),
       );
     });
-    elements.executionQueueControls.hidden = false;
     const runtimeMode = state.nativeAttempt?.state?.runtime_mode || "";
     elements.nativePauseControl.disabled = ![
       "QUEUED", "RUNNING", "WAITING_RESOURCE", "RESUME_REQUESTED"
     ].includes(runtimeMode);
     elements.nativeResumeControl.disabled = runtimeMode !== "PAUSED";
-    elements.nativeStopControl.disabled = runtimeMode === "FINISHED";
-    elements.nativeCancelControl.disabled = runtimeMode === "FINISHED";
+    elements.nativeStopControl.disabled = ![
+      "QUEUED", "RECONCILING", "RUNNING", "WAITING_RESOURCE", "PAUSED", "RESUME_REQUESTED"
+    ].includes(runtimeMode);
+    elements.nativeCancelControl.disabled = elements.nativeStopControl.disabled;
+    const machineActions = [
+      elements.nativePauseControl, elements.nativeResumeControl,
+      elements.nativeStopControl, elements.nativeCancelControl,
+    ];
+    machineActions.forEach((button) => { button.hidden = button.disabled; });
+    elements.executionQueueControls.hidden = machineActions.every((button) => button.disabled);
     elements.nativeExecutionDetails.hidden = !state.nativeAttempt;
     elements.nativeExecutionEvidence.textContent = state.nativeAttempt
       ? JSON.stringify({
@@ -1229,8 +1291,10 @@
     ) || "No remaining blocker reported.";
     const previewable = result.repository_state === "SEALED_CANDIDATE"
       || result.repository_state === "TRUSTED_BASELINE_ADVANCED";
+    const webPreviewable = previewable && Array.isArray(result.produced_artifacts)
+      && result.produced_artifacts.some((path) => path.endsWith(".html"));
     elements.candidatePreviewPanel.hidden = !previewable;
-    elements.openCandidatePreview.hidden = !previewable;
+    elements.openCandidatePreview.hidden = !webPreviewable;
     elements.candidatePreviewLink.hidden = true;
     elements.candidateArtifactActions.replaceChildren();
     if (previewable && Array.isArray(result.produced_artifacts)) {
@@ -1246,8 +1310,10 @@
     elements.candidateDeliveryLink.href = `/delivery?work=${state.selectedWorkId}`;
     elements.candidatePreviewStatus.textContent = previewable
       ? result.trusted_result
-        ? "Technical verification is complete. Human product acceptance remains separate."
-        : "Inspect the exact verified Candidate before authorizing repository integration."
+        ? "The result is ready to review."
+        : webPreviewable
+          ? "Preview the result before deciding."
+          : "Download the result before deciding."
       : "";
   }
 
@@ -1259,7 +1325,8 @@
       if (preview.status !== "READY") throw new ApiError(409, "PREVIEW_NOT_READY", preview.reason || "Preview is not ready.");
       elements.candidatePreviewLink.href = preview.url;
       elements.candidatePreviewLink.hidden = false;
-      elements.candidatePreviewStatus.textContent = `Exact Candidate ${preview.repository_revision.slice(0, 12)} · Human authorization ${preview.authorization_pending ? "pending" : "recorded"}.`;
+      elements.candidatePreviewStatus.textContent = preview.authorization_pending
+        ? "Preview ready. Your decision is still pending." : "Preview ready.";
       window.open(preview.url, "_blank", "noopener");
     } catch (error) { showNotice(error); }
     finally { setBusy(false); renderAttention(); }
@@ -1278,7 +1345,7 @@
       document.body.append(link);
       link.click();
       link.remove();
-      elements.candidatePreviewStatus.textContent = `Downloading ${path} from exact Candidate ${candidate.repository_revision.slice(0, 12)}.`;
+      elements.candidatePreviewStatus.textContent = `Downloading ${path}.`;
     } catch (error) { showNotice(error); }
     finally { setBusy(false); renderAttention(); }
   }
@@ -1293,22 +1360,6 @@
     elements.workTitle.textContent = viewModel.workTitle(work);
     elements.workStatus.textContent = viewModel.statusLabel(work.status);
     elements.workStatus.className = `status-badge ${viewModel.statusTone(work.status)}`;
-    const progress = viewModel.executionProgress(work);
-    elements.executionProgress.hidden = !progress;
-    if (progress) {
-      elements.executionProgress.classList.toggle("is-active", progress.stillWorking);
-      elements.executionProgress.classList.toggle("is-blocked", Boolean(progress.blockedReason));
-      elements.executionPhase.textContent = progress.phase;
-      elements.executionActivity.textContent = progress.activity;
-      elements.executionCount.textContent = progress.progressText;
-      elements.executionElapsed.textContent = progress.elapsedText;
-      elements.executionSignal.textContent = progress.activitySignal;
-      elements.executionUpdated.textContent = progress.updatedAt
-        ? `Last activity ${new Date(progress.updatedAt).toLocaleTimeString()}`
-        : "Last activity time unavailable";
-      elements.executionBlocked.hidden = !progress.blockedReason;
-      elements.executionBlocked.textContent = progress.blockedReason || "";
-    }
     elements.attentionMarker.hidden = !work.human_attention_required;
     renderControlRoomFoundation(work);
     renderUnderstandingAlignment(work);
@@ -1388,7 +1439,11 @@
     elements.workspaceProductionVerification.textContent = trust.verification;
     elements.workspaceProductionTrust.textContent = trust.state;
 
-    elements.workspaceActionsSummary.textContent = attention.summary;
+    elements.workspaceActionsSummary.textContent = state.attention.length
+      ? "Your decision is needed."
+      : state.selectedAgreementId ? "Decide whether to keep this agreement."
+        : elements.workActions.childElementCount ? "Choose how to proceed."
+          : "No action required.";
     elements.workspaceActionsAttention.textContent = attention.state;
     const attentionActions = state.attention.flatMap((item) => item.available_actions || []);
     const previewRequired = state.attention.some((item) => item.kind === "CANDIDATE_AUTHORIZATION"
@@ -1404,6 +1459,177 @@
     elements.workspaceActionsBlocker.textContent = status.condition;
     elements.workspaceActionsDirection.textContent = attention.emergingDirection;
     document.getElementById("actions-surface").classList.toggle("requires-attention", attention.required);
+    renderWorkSources();
+    renderExecutionPath();
+    renderWorkingAgreements();
+    renderHumanProduction(work);
+  }
+
+  function renderWorkSources() {
+    const tree = elements.workSourceTree;
+    const source = state.sources;
+    if (!source) {
+      tree.replaceChildren();
+      delete tree.dataset.sourceSignature;
+      elements.workspaceRealitySummary.textContent = "No bound repository source is available for this Work.";
+      return;
+    }
+    const sources = source.sources || [];
+    elements.workspaceRealitySummary.textContent = "Repository files at the current revision · read only";
+    const signature = `${state.selectedWorkId}:${source.revision}:${sources.map((item) => item.path).join("|")}`;
+    if (tree.dataset.sourceSignature === signature) return;
+    tree.replaceChildren();
+    tree.dataset.sourceSignature = signature;
+    for (const kind of ["DOCUMENTATION", "CODE"]) {
+      const group = createElement("details", "work-source-group");
+      group.open = true;
+      const heading = createElement("summary", "", kind === "CODE" ? "Code" : "Documentation");
+      group.append(heading);
+      const matching = sources.filter((item) => item.kind === kind);
+      if (!matching.length) group.append(createElement("p", "empty-copy", "No relevant files available."));
+      const folders = new Map([["", group]]);
+      matching.forEach((item) => {
+        const parts = item.path.split("/");
+        let parent = group;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const key = parts.slice(0, index + 1).join("/");
+          if (!folders.has(key)) {
+            const folder = createElement("details", "work-source-folder");
+            folder.append(createElement("summary", "", `${parts[index]}/`));
+            parent.append(folder);
+            folders.set(key, folder);
+          }
+          parent = folders.get(key);
+        }
+        const button = createElement("button", "work-source-file", parts.at(-1));
+        button.type = "button";
+        button.title = item.path;
+        if (item.relevant) button.classList.add("is-relevant");
+        button.addEventListener("click", () => {
+          if (!fileViewer) return;
+          fileViewer.open(state.selectedWorkId, item.path, source.revision).catch(showNotice);
+        });
+        parent.append(button);
+      });
+      tree.append(group);
+    }
+  }
+
+  function renderExecutionPath() {
+    const list = elements.workExecutionPath;
+    list.replaceChildren();
+    const milestones = controlRoom ? controlRoom.agendaMilestones(state.steering) : [];
+    if (!milestones.length) {
+      list.append(createElement("li", "empty-copy", "No governed execution path has been recorded yet."));
+      elements.workspaceAgendaSummary.textContent = "Execution path will appear when a governed plan exists.";
+      return;
+    }
+    elements.workspaceAgendaSummary.textContent = state.steering.current_step
+      ? "Current governed step"
+      : "Governed plan · no step is currently active";
+    milestones.forEach((milestone) => {
+      const row = createElement("li", `work-path-step state-${milestone.state.toLowerCase()}`);
+      const trigger = createElement("button", "work-path-trigger");
+      trigger.type = "button";
+      trigger.setAttribute("aria-label", `${milestone.label}: inspect governed steps`);
+      trigger.append(createElement("span", "work-path-marker", milestone.state === "DONE" ? "✓" : milestone.state === "CURRENT" ? "●" : "○"));
+      trigger.append(createElement("span", "", milestone.label));
+      const popover = createElement("div", "work-path-popover");
+      popover.setAttribute("role", "note");
+      milestone.steps.forEach((step) => popover.append(createElement("p", "", `${step.state === "DONE" ? "✓" : step.state === "CURRENT" ? "●" : "○"} ${step.label}`)));
+      trigger.addEventListener("click", () => row.classList.toggle("is-inspecting"));
+      trigger.addEventListener("blur", () => row.classList.remove("is-inspecting"));
+      row.append(trigger, popover);
+      list.append(row);
+    });
+  }
+
+  function renderWorkingAgreements() {
+    const active = state.agreements.filter((item) => item.state === "ACTIVE");
+    const past = state.agreements.filter((item) => item.state !== "ACTIVE");
+    elements.workingAgreementCount.textContent = `${active.length} active`;
+    elements.workingAgreementList.replaceChildren();
+    elements.workingAgreementPast.replaceChildren();
+    if (!active.length) elements.workingAgreementList.append(createElement("p", "empty-copy", "No active Working Agreements."));
+    active.forEach((agreement) => {
+      const button = createElement("button", "working-agreement", agreement.content);
+      button.type = "button";
+      button.classList.toggle("is-selected", state.selectedAgreementId === agreement.agreement_id);
+      button.prepend(createElement("span", "agreement-type", agreement.type));
+      button.append(createElement("small", "", agreement.persistence_state === "PERSISTED"
+        ? `Persisted → ${agreement.persistence_path}` : "Not persisted as a document"));
+      button.addEventListener("click", () => {
+        state.selectedAgreementId = agreement.agreement_id;
+        renderWorkingAgreements();
+      });
+      elements.workingAgreementList.append(button);
+    });
+    past.forEach((agreement) => {
+      const item = createElement("div", "working-agreement is-past", `${agreement.type} · ${agreement.content}`);
+      item.append(createElement("small", "", `Abandoned · ${agreement.history.at(-1)?.created_at || "history retained"}`));
+      elements.workingAgreementPast.append(item);
+    });
+    elements.workingAgreementHistory.hidden = !past.length;
+    const selected = active.find((item) => item.agreement_id === state.selectedAgreementId);
+    if (!selected) state.selectedAgreementId = null;
+    elements.agreementActionPanel.hidden = !selected;
+    elements.workspaceActionsSummary.textContent = selected
+      ? "Decide whether to keep this agreement."
+      : state.attention.length ? "Your decision is needed."
+        : elements.workActions.childElementCount ? "Choose how to proceed." : "No action required.";
+    elements.agreementSelectionActions.hidden = !selected;
+    elements.agreementSelectedNote.textContent = selected
+      ? `${selected.type}: ${selected.content}`
+      : "Select an active agreement in Agenda to keep or abandon it.";
+  }
+
+  function renderHumanProduction(work) {
+    const projection = controlRoom ? controlRoom.productionState(work, state.nativeQueue, state.nativeAttempt)
+      : { state: "IDLE", detail: "No execution state available." };
+    elements.productionStateLabel.textContent = projection.state;
+    document.getElementById("production-surface").dataset.machineState = projection.state.toLowerCase().replaceAll(" ", "-");
+    elements.productionHumanActivity.textContent = work.most_recent_meaningful_event
+      && projection.state === "RUNNING" ? work.most_recent_meaningful_event : projection.detail;
+    const progress = work.execution_progress;
+    const detail = progress?.still_working && Number.isFinite(progress.elapsed_seconds)
+      ? `Elapsed ${Math.round(progress.elapsed_seconds)} seconds${progress.updated_at ? ` · Last activity ${new Date(progress.updated_at).toLocaleTimeString()}` : ""}`
+      : progress?.updated_at ? `Last activity ${new Date(progress.updated_at).toLocaleTimeString()}` : "";
+    elements.productionHumanDetail.textContent = detail;
+    elements.workspaceProductionSummary.textContent = "Current execution status";
+  }
+
+  async function recordWorkingAgreement(event) {
+    event.preventDefault();
+    if (!state.selectedWorkId || state.busy) return;
+    const content = elements.agreementContent.value.trim();
+    if (!content) return;
+    setBusy(true);
+    try {
+      await apiRequest(`/api/works/${state.selectedWorkId}/working-agreements`, {
+        method: "POST", body: {
+          content, agreement_type: elements.agreementType.value,
+          actor_identity: elements.authorityIdentity.value.trim() || "human:local-operator",
+        },
+      });
+      elements.agreementContent.value = "";
+      state.agreements = await apiRequest(`/api/works/${state.selectedWorkId}/working-agreements`);
+      renderWorkingAgreements();
+    } catch (error) { showNotice(error); }
+    finally { setBusy(false); }
+  }
+
+  async function abandonWorkingAgreement() {
+    if (!state.selectedWorkId || !state.selectedAgreementId || state.busy) return;
+    setBusy(true);
+    try {
+      await apiRequest(`/api/works/${state.selectedWorkId}/working-agreements/${state.selectedAgreementId}/abandon`, {
+        method: "POST", body: { actor_identity: elements.authorityIdentity.value.trim() || "human:local-operator" },
+      });
+      state.selectedAgreementId = null;
+      state.agreements = await apiRequest(`/api/works/${state.selectedWorkId}/working-agreements`);
+      renderWorkingAgreements();
+    } catch (error) { showNotice(error); }
+    finally { setBusy(false); }
   }
 
   function initializeAppearanceControls() {
@@ -1633,6 +1859,9 @@
         (item) => item.interaction_id === state.selectedInteractionId,
       ) || null;
     }
+    if (!state.selectedWorkId && state.sharedUnderstanding?.governed_work_id) {
+      state.selectedWorkId = state.sharedUnderstanding.governed_work_id;
+    }
     if (state.selectedInteractionId !== previousInteractionId) {
       elements.workRequirement.value = state.drafts[state.selectedInteractionId || "new"] || "";
     }
@@ -1663,17 +1892,25 @@
       state.steering = null;
       state.nativeQueue = [];
       state.nativeAttempt = null;
+      state.sources = null;
+      state.agreements = [];
+      state.selectedAgreementId = null;
       renderSelectedWork();
       return;
     }
     const workId = state.selectedWorkId;
     const interactionId = state.selectedInteractionId;
-    const [work, attention, result, steering, nativeQueue] = await Promise.all([
+    const [work, attention, result, steering, nativeQueue, sources, agreements] = await Promise.all([
       apiRequest(`/api/works/${workId}`),
       apiRequest(`/api/attention?work_id=${encodeURIComponent(workId)}`),
       apiRequest(`/api/works/${workId}/result`),
       loadSteeringProjection(workId),
       apiRequest(`/api/native-execution/queue?work_id=${encodeURIComponent(workId)}`),
+      apiRequest(`/api/works/${workId}/control-room/sources`).catch((error) => {
+        if (error instanceof ApiError && error.status === 409) return null;
+        throw error;
+      }),
+      apiRequest(`/api/works/${workId}/working-agreements`),
     ]);
     if (state.selectedWorkId !== workId || state.selectedInteractionId !== interactionId) return;
     state.selectedWork = work;
@@ -1683,6 +1920,8 @@
     state.result = result;
     state.steering = steering;
     state.nativeQueue = nativeQueue;
+    state.sources = sources;
+    state.agreements = agreements;
     state.nativeAttempt = nativeQueue.length
       ? await apiRequest(`/api/native-execution/attempts/${nativeQueue[nativeQueue.length - 1].attempt_id}`)
       : null;
@@ -1723,6 +1962,23 @@
   async function selectWork(workId) {
     if (state.busy) {
       return;
+    }
+    const associated = state.interactions.find((item) => item.governed_work_id === workId);
+    if (associated && associated.interaction_id !== state.selectedInteractionId) {
+      saveDraft();
+      pauseOutbox(state.selectedInteractionId);
+      stopTurnObservation();
+      state.selectedInteractionId = associated.interaction_id;
+      state.sharedUnderstanding = associated;
+      state.freshInteraction = false;
+      state.handoffTurnId = "";
+      if (state.handoffTimer) globalThis.clearTimeout(state.handoffTimer);
+      state.handoffTimer = null;
+      elements.workRequirement.value = state.drafts[associated.interaction_id] || "";
+      try { localStorage.setItem(INTERACTION_STORAGE_KEY, associated.interaction_id); } catch (_error) { /* optional preference */ }
+      const active = (associated.turns || []).find((turn) => turn.status !== "COMPLETED" && turn.status !== "FAILED");
+      if (active) observeInteractionTurn(associated.interaction_id, active.turn_id);
+      renderInteraction();
     }
     state.selectedWorkId = workId;
     renderWorkList();
@@ -2056,6 +2312,7 @@
     if (state.busy) return;
     const content = elements.workRequirement.value.trim();
     if (!content) return;
+    handoffCurrentInteraction(true);
     if (state.outbox.filter((item) => item.interactionId === state.selectedInteractionId).length >= 3 || state.outbox.length >= 12) {
       showNotice(new ApiError(409, "OUTBOX_FULL", "Up to three messages can wait per conversation. Cancel or send a waiting message first. Your draft is kept."));
       return;
@@ -2268,6 +2525,9 @@
     saveDraft();
     pauseOutbox(state.selectedInteractionId);
     stopTurnObservation();
+    state.handoffTurnId = "";
+    if (state.handoffTimer) globalThis.clearTimeout(state.handoffTimer);
+    state.handoffTimer = null;
     state.selectedInteractionId = "";
     state.freshInteraction = true;
     state.sharedUnderstanding = null;
@@ -2289,14 +2549,13 @@
     }
     await apiRequest(`/api/native-execution/attempts/${current.attempt_id}/control`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      body: {
         command_id: globalThis.crypto.randomUUID(),
         action,
         expected_control_version: currentVersion,
         actor_identity: "human:local-operator",
         reason: `Human requested ${action.toLowerCase()} from the execution queue`,
-      }),
+      },
     });
     await refreshSelected();
   }
@@ -2313,6 +2572,24 @@
     globalThis.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
   }
 
+  function concentrateWorkMutations() {
+    const actions = document.getElementById("actions-surface");
+    const production = document.getElementById("production-surface");
+    const result = production.querySelector(".result-panel");
+    const evidence = document.querySelector(".workspace-evidence-content");
+    const preview = document.getElementById("candidate-preview-panel");
+    if (preview) actions.append(preview);
+    const manual = elements.manualAdvanceControl.closest(".manual-controls");
+    const machineControls = document.getElementById("execution-queue-controls");
+    if (machineControls) production.insertBefore(machineControls, result);
+    if (manual) production.insertBefore(manual, result);
+    if (result) evidence.append(result);
+    for (const id of ["artifact-target-panel", "code-change-contract-panel"]) {
+      const item = document.getElementById(id);
+      if (item) evidence.append(item);
+    }
+  }
+
   elements.showGoalForm.addEventListener("click", () => {
     elements.goalForm.hidden = !elements.goalForm.hidden;
     if (!elements.goalForm.hidden) {
@@ -2321,7 +2598,20 @@
   });
   elements.goalForm.addEventListener("submit", createGoal);
   elements.workForm.addEventListener("submit", continueInteraction);
+  elements.agreementForm.addEventListener("submit", recordWorkingAgreement);
+  elements.abandonAgreement.addEventListener("click", abandonWorkingAgreement);
+  elements.keepAgreement.addEventListener("click", () => {
+    state.selectedAgreementId = null;
+    renderWorkingAgreements();
+  });
   elements.workRequirement.addEventListener("input", saveDraft);
+  elements.workRequirement.addEventListener("focus", () => {
+    elements.workForm.closest(".composer").classList.add("is-composing");
+    handoffCurrentInteraction();
+  });
+  elements.workRequirement.addEventListener("blur", () => {
+    if (!elements.workRequirement.value.trim()) elements.workForm.closest(".composer").classList.remove("is-composing");
+  });
   globalThis.addEventListener("beforeunload", (event) => {
     if (!state.storageAvailable && (state.outbox.length || elements.workRequirement.value)) {
       event.preventDefault();
@@ -2379,6 +2669,7 @@
   elements.healthControl.addEventListener("click", loadHealth);
   elements.dismissNotice.addEventListener("click", hideNotice);
 
+  concentrateWorkMutations();
   initializeAppearanceControls();
   restoreComposer();
   restoreComposerExpanded();

@@ -243,6 +243,9 @@ class DeepSeekGovernedResponseRealizer:
             "actual object before any question. Treat governed_content as semantic material, not "
             "wording to repeat. Demonstrate understanding by advancing the thinking; "
             "avoid paraphrasing the Human, workflow narration, and questionnaire behavior. "
+            "Translate internal terms such as Basis, governed constraints, Work revision, "
+            "and admission into plain user-facing language. Distinguish an effect not "
+            "requested from an effect proven absent in an artifact. "
             "For MODIFY, start with the proposed delta or its consequence, never with "
             "'I understand' or a restatement of the request. If question_allowed is false, "
             "ask no question and do not reproduce a question from governed_content; otherwise "
@@ -337,6 +340,7 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
                 basis,
                 on_response_delta=observe_only,
                 on_pipeline_stage=on_pipeline_stage,
+                controlled_semantic_only=True,
             )
         except InteractionInvariantViolation as first_error:
             if not (
@@ -353,6 +357,7 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
                 basis,
                 on_response_delta=observe_only,
                 on_pipeline_stage=on_pipeline_stage,
+                controlled_semantic_only=True,
             )
         except InteractionInvariantViolation as second_error:
             if _is_root_json_invalid(second_error):
@@ -372,6 +377,63 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
             )
         on_pipeline_stage("structured_json_repair_completed")
         return candidate
+
+    def _interpret(
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_response_delta: Callable[[str], None] | None,
+        on_pipeline_stage: Callable[[str], None] | None = None,
+        controlled_semantic_only: bool = False,
+    ) -> InteractionAssessmentCandidate:
+        mode, _reason = self.pipeline_selection(basis)
+        if not controlled_semantic_only or mode != "staged":
+            return super()._interpret(
+                basis, on_response_delta=on_response_delta,
+                on_pipeline_stage=on_pipeline_stage,
+            )
+        # Controlled admission replaces candidate prose and realizes visible language
+        # after governance. A second, discarded Conversation response cannot gate it.
+        self.last_pipeline_evidence = None
+        self.last_collaboration_result = None
+        started_at = monotonic()
+        semantic = self.semantic_capability.interpret_semantics(basis)
+        self.last_collaboration_result = semantic.collaboration
+        self.last_pipeline_evidence = ConversationPipelineEvidence(
+            pipeline_mode="staged",
+            pipeline_reason="controlled_semantics_before_governed_realization",
+            provider_call_count=1,
+            semantic_request_id=self.semantic_capability.last_request_id,
+            semantic_provider=self.semantic_capability.provider_identity,
+            semantic_usage=self.semantic_capability.last_usage,
+            semantic_retry_count=self.semantic_capability.last_retry_count,
+            semantic_seconds=monotonic() - started_at,
+            semantic_prompt_characters=self.semantic_capability.last_prompt_characters,
+            semantic_model=self.semantic_capability.model,
+            semantic_reasoning_effort=self.semantic_capability.reasoning_effort,
+        )
+        collaboration = semantic.collaboration
+        # Policy may preserve the candidate's text when no special reconciliation
+        # applies, so this semantic handoff must itself be safe to show.
+        content = (
+            collaboration.direct_answer
+            or collaboration.recommended_next_action
+            or collaboration.concise_basis
+            or collaboration.current_collaboration_focus
+            or semantic.interpreted_motive
+        )
+        if not content:
+            raise InteractionInvariantViolation(
+                "Controlled semantic result lacks material for a Human-facing response"
+            )
+        return self._assessment_candidate(
+            semantic,
+            ConversationResponseCandidate(
+                content=content,
+                provider_identity=semantic.provider_identity,
+                model_identity=semantic.model_identity,
+            ),
+        )
 
     def pipeline_selection(self, basis: InteractionInterpretationInput) -> tuple[str, str]:
         if not self.coalesce_pre_work:

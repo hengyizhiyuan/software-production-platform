@@ -76,12 +76,9 @@ test("UI-08 through UI-13 use safe DOM rendering and observational polling", () 
   assert.doesNotMatch(appSource, /setInterval|runUntilDone/);
   assert.match(appSource, /node\.textContent = String\(text\)/);
   assert.match(appSource, /attention\.available_actions\.forEach/);
-  assert.match(appSource, /preview\.dataset\.affordance = "PREVIEW_RESULT"/);
+  assert.match(appSource, /openCandidatePreview\.addEventListener|openCandidatePreview\)/);
   assert.match(appSource, /download\.dataset\.affordance = "DOWNLOAD_ARTIFACT"/);
-  assert.ok(
-    appSource.indexOf('preview.dataset.affordance = "PREVIEW_RESULT"')
-      < appSource.indexOf("attention.available_actions.forEach"),
-  );
+  assert.match(appSource, /attention\.available_actions\.forEach/);
   assert.equal((appSource.match(/\$\{workPath\}\/advance/g) || []).length, 1);
   assert.match(appSource, /POLL_INTERVAL_MS = 2000/);
   assert.match(appSource, /scheduleObservationPolling/);
@@ -683,6 +680,7 @@ function conversationHarness(request) {
   }
   const harness = {
     state, viewModel, ApiError, EventSource, sources, frames, notices,
+    handoffCurrentInteraction() {},
     crypto: { randomUUID: () => `pending-${++nextId}` },
     elements: { workRequirement: { value: "" } },
     localStorage: { setItem() {} }, INTERACTION_STORAGE_KEY: "selection",
@@ -951,7 +949,12 @@ test("stream bursts repaint one message per frame and preserve historical DOM no
   class Node {
     constructor(className = "", text = "") {
       this.className = className; this.dataset = {}; this.children = []; this._text = text; this.writes = 0;
-      this.classList = { toggle() {} };
+      const classes = new Set();
+      this.classList = { add: (name) => classes.add(name), remove: (name) => classes.delete(name),
+        contains: (name) => classes.has(name), toggle: (name, force) => {
+          if (force === undefined ? !classes.has(name) : force) classes.add(name);
+          else classes.delete(name);
+        } };
     }
     get textContent() { return this._text; }
     set textContent(value) { this._text = value; this.writes += 1; }
@@ -973,14 +976,22 @@ test("stream bursts repaint one message per frame and preserve historical DOM no
     streamingAssistantMessage: { turnId: "t", content: "Answer", status: "PROCESSING" },
   };
   const harness = {
-    state, viewModel, elements: { interactionHistory: new Node(), interactionProcessingStatus: new Node() },
+    state, viewModel,
+    responsePresentation: { render(node, value) { node.textContent = value; } },
+    setTimeout() {},
+    controlRoom: { conversationOwnership(messages, handedOff = "") {
+      const latest = messages.at(-1)?.turn_id;
+      return { history: messages.filter((record) => record.turn_id !== latest || latest === handedOff),
+        current: messages.filter((record) => record.turn_id === latest && latest !== handedOff) };
+    } },
+    elements: { interactionHistory: new Node(), currentInteractionLive: new Node(), interactionProcessingStatus: new Node() },
     createElement: (_tag, className, text) => new Node(className, text),
     requestAnimationFrame: (callback) => { frames.push(callback); return frames.length; },
   };
   harness.globalThis = harness;
   vm.runInNewContext(appSource.slice(appSource.indexOf("  function messageKey("), appSource.indexOf("  function persistComposer(")), harness);
   harness.renderConversation();
-  const [human, assistant] = harness.elements.interactionHistory.children;
+  const [human, assistant] = harness.elements.currentInteractionLive.children;
   const humanContent = human.children[1];
   const assistantContent = assistant.children[1];
   const priorWrites = assistantContent.writes;
@@ -996,8 +1007,15 @@ test("stream bursts repaint one message per frame and preserve historical DOM no
   state.sharedUnderstanding.conversation_messages.push({ actor: "WATT", turn_id: "t", content: assistantContent.textContent, processing_status: "COMPLETED" });
   state.streamingAssistantMessage = null;
   harness.renderConversation();
-  assert.equal(harness.elements.interactionHistory.children[0], human);
-  assert.equal(harness.elements.interactionHistory.children[1], assistant);
+  assert.equal(harness.elements.currentInteractionLive.children[0], human);
+  assert.equal(harness.elements.currentInteractionLive.children[1], assistant);
+  assert.equal(assistant.classList.contains("is-settling"), true);
+  state.sharedUnderstanding.conversation_messages.push({ actor: "HUMAN", turn_id: "next", content: "Next question" });
+  harness.renderConversation();
+  assert.equal(human.classList.contains("is-entering"), false);
+  assert.equal(harness.elements.interactionHistory.children[0].classList.contains("is-entering"), true);
+  harness.renderConversation();
+  assert.equal(harness.elements.interactionHistory.children[0].classList.contains("is-entering"), true);
 });
 
 test("Production projection reports truthful Steering capability and native queue states", () => {
@@ -1041,7 +1059,12 @@ test("governed response deltas paint one received chunk per frame", () => {
   class Node {
     constructor(className = "", text = "") {
       this.className = className; this.dataset = {}; this.children = []; this._text = text;
-      this.classList = { toggle() {} };
+      const classes = new Set();
+      this.classList = { add: (name) => classes.add(name), remove: (name) => classes.delete(name),
+        contains: (name) => classes.has(name), toggle: (name, force) => {
+          if (force === undefined ? !classes.has(name) : force) classes.add(name);
+          else classes.delete(name);
+        } };
     }
     get textContent() { return this._text; }
     set textContent(value) { this._text = value; }
@@ -1067,7 +1090,9 @@ test("governed response deltas paint one received chunk per frame", () => {
     },
   };
   const harness = {
-    state, viewModel, elements: { interactionHistory: new Node(), interactionProcessingStatus: new Node() },
+    state, viewModel,
+    controlRoom: { conversationOwnership(messages) { return { history: [], current: messages }; } },
+    elements: { interactionHistory: new Node(), currentInteractionLive: new Node(), interactionProcessingStatus: new Node() },
     createElement: (_tag, className, text) => new Node(className, text),
     requestAnimationFrame: (callback) => { frames.push(callback); return frames.length; },
   };
@@ -1077,10 +1102,10 @@ test("governed response deltas paint one received chunk per frame", () => {
   harness.scheduleStreamRender();
   assert.equal(frames.length, 1);
   frames.shift()();
-  assert.equal(harness.elements.interactionHistory.children[1].children[1].textContent, "Receipt first");
+  assert.equal(harness.elements.currentInteractionLive.children[1].children[1].textContent, "Receipt first");
   assert.equal(frames.length, 1);
   frames.shift()();
-  assert.equal(harness.elements.interactionHistory.children[1].children[1].textContent, "Receipt first second");
+  assert.equal(harness.elements.currentInteractionLive.children[1].children[1].textContent, "Receipt first second");
 });
 
 test("queue capacity leaves the unsent draft intact", async () => {

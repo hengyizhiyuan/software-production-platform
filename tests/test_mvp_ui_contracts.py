@@ -82,6 +82,7 @@ def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
             ("appearance.css", ".formal-workspace-grid"),
             ("appearance.js", "WattAppearance"),
             ("response-presentation.js", "WattResponsePresentation"),
+            ("control-room.js", "WattControlRoom"),
             ("state.js", "SPGViewModel"),
             ("app.js", "startControlRoom"),
             ("delivery.js", "showDelivery"),
@@ -154,7 +155,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "renderGuidedDesign" in javascript
     assert "readiness_blockers" in javascript
     assert "attention.governed_subject_ref" not in javascript
-    assert "attention.recommendation" in javascript
+    assert 'candidateDecision ? "Review the result"' in javascript
     assert 'id="work-transition-summary"' in html
     assert 'id="work-transition-decision"' in html
     assert 'id="continue-current-work"' in html
@@ -188,9 +189,9 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert 'work.target_kind === "CODE_WORK"' in javascript
     assert "no artifacts observed" in combined
     assert "no verification evidence available" in combined
-    assert 'id="execution-progress"' in html
-    assert 'id="execution-signal"' in html
-    assert 'id="execution-updated"' in html
+    assert 'id="execution-progress"' not in html
+    assert 'id="production-state-signal"' in html
+    assert 'id="production-human-detail"' in html
     assert 'aria-live="polite"' in html
     assert "transitions completed · total unknown" in state_javascript
     assert "progress.percentComplete" not in javascript
@@ -221,8 +222,9 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
 
     assert "attention.available_actions.forEach" in javascript
     assert 'attention.kind === "CANDIDATE_AUTHORIZATION"' in javascript
-    assert 'preview.dataset.affordance = "PREVIEW_RESULT"' in javascript
-    assert javascript.index('preview.dataset.affordance = "PREVIEW_RESULT"') < javascript.index("attention.available_actions.forEach")
+    assert 'id="open-candidate-preview"' in html
+    assert "openCandidatePreview" in javascript
+    assert javascript.index('actions.append(preview)') > javascript.index("attention.available_actions.forEach")
     assert 'id="candidate-artifact-actions"' in html
     assert 'download.dataset.affordance = "DOWNLOAD_ARTIFACT"' in javascript
     assert "(candidate.downloads || []).find" in javascript
@@ -436,7 +438,7 @@ def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None
     assert "http://" not in html
     assert 'src="/assets/state.js"' in html
     assert 'src="/assets/appearance.js?v=formal-ui-phase1"' in html
-    assert 'src="/assets/app.js?v=formal-ui-phase1"' in html
+    assert 'src="/assets/app.js?v=human-review-v3"' in html
     assert 'href="/assets/styles.css"' in html
 
 
@@ -486,7 +488,7 @@ def test_delivery_preview_and_context_assembly_are_human_visible() -> None:
     assert 'id="open-candidate-preview"' in html
     assert 'id="candidate-preview-status"' in html
     assert "/candidate-preview" in javascript
-    assert "Inspect the exact verified Candidate before authorizing repository integration." in javascript
+    assert "Preview the result before deciding." in javascript
     assert 'id="delivery-context"' in delivery_html
     assert "/delivery-context" in delivery_javascript
     assert "GOVERNED_REALITY" in delivery_javascript

@@ -38,6 +38,16 @@ class ApiDto(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class WorkingAgreementCreateRequest(ApiDto):
+    content: str = Field(min_length=3, max_length=500)
+    agreement_type: str
+    actor_identity: str = Field(default="human:local-operator", min_length=1, max_length=255)
+
+
+class WorkingAgreementAbandonRequest(ApiDto):
+    actor_identity: str = Field(default="human:local-operator", min_length=1, max_length=255)
+
+
 class GoalCreateRequest(ApiDto):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = None

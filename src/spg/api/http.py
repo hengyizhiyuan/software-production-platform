@@ -41,6 +41,8 @@ from spg.api.dto import (
     WorkResponse,
     WorkResultResponse,
     WorkSubmitRequest,
+    WorkingAgreementCreateRequest,
+    WorkingAgreementAbandonRequest,
 )
 from spg.application.bootstrap import Application, bootstrap
 from spg.application.orchestration import ProductionOrchestrator
@@ -55,6 +57,7 @@ from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.application.native_vector import NativeCandidateVectorService
 from spg.application.assets import RepositoryAssetService
 from spg.application.delivery import DeliveryApplicationService, artifact_media_type
+from spg.application.control_room import ControlRoomError, ControlRoomService
 from spg.application.software_runtime import SoftwareRuntimeService
 from spg.domain.assets import RepositoryIntakeRequest, AssetScopeAdmissionRequest
 from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
@@ -177,6 +180,7 @@ def create_http_application(
         else NativeExecutorRuntimeService(selected_database)
     )
     selected_native_vectors = NativeCandidateVectorService(selected_database)
+    control_room = ControlRoomService(selected_database, work_service)
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
@@ -323,6 +327,10 @@ def create_http_application(
         error: InteractionInvariantViolation,
     ) -> JSONResponse:
         return _error(409, "INTERACTION_INVARIANT", str(error))
+
+    @api.exception_handler(ControlRoomError)
+    async def control_room_error_handler(_request: Request, error: ControlRoomError) -> JSONResponse:
+        return _error(409, "CONTROL_ROOM_CONFLICT", str(error))
 
     @api.exception_handler(ProductHttpError)
     async def product_http_handler(
@@ -766,6 +774,31 @@ def create_http_application(
     @api.get("/api/works/{work_id}", response_model=WorkResponse)
     def get_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.get_work(work_id))
+
+    @api.get("/api/works/{work_id}/control-room/sources")
+    def work_sources(work_id: UUID):
+        return control_room.sources(work_id)
+
+    @api.get("/api/works/{work_id}/control-room/file")
+    def work_source_file(work_id: UUID, path: str, revision: str):
+        return control_room.file(work_id, path, revision)
+
+    @api.get("/api/works/{work_id}/working-agreements")
+    def work_agreements(work_id: UUID):
+        return control_room.agreements(work_id)
+
+    @api.post("/api/works/{work_id}/working-agreements", status_code=201)
+    def create_work_agreement(work_id: UUID, request: WorkingAgreementCreateRequest):
+        return control_room.create_agreement(
+            work_id, content=request.content, agreement_type=request.agreement_type,
+            actor_identity=request.actor_identity,
+        )
+
+    @api.post("/api/works/{work_id}/working-agreements/{agreement_id}/abandon")
+    def abandon_work_agreement(work_id: UUID, agreement_id: UUID, request: WorkingAgreementAbandonRequest):
+        return control_room.abandon_agreement(
+            work_id, agreement_id, actor_identity=request.actor_identity,
+        )
 
     @api.get(
         "/api/native-execution/queue",
