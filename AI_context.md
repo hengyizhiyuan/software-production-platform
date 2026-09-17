@@ -1009,6 +1009,7 @@ The current system-level architecture baseline is:
 - [Design Intent Framing Layer](docs/architecture/design-intent-framing-layer.md)
 - [Design Intent Framing Focused Validation](docs/evidence/design-intent-framing-focused-validation.md)
 - [External Design Intake Capability Direction](docs/architecture/external-design-intake-capability-direction.md)
+- [Repository Acquisition, Execution/Preview Sandbox, and Remote Integration Direction](docs/architecture/repository-acquisition-sandbox-and-remote-integration-direction.md)
 - [External Engineering Intelligence Direction — RECORDED / DEFERRED; future Human-visible capability](docs/architecture/external-engineering-intelligence-direction.md)
 - [WIC Intelligence Architecture Closure](docs/architecture/watt-wic-intelligence-architecture-closure.md)
 - [OPEN_WIC Baseline Evidence](docs/evidence/open-wic-baseline.md)
