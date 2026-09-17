@@ -62,6 +62,9 @@ class GovernedDeltaGate:
         self.emit = emit
         self.pending = ""
         self.emitted: list[str] = []
+        self.suppressed: list[str] = []
+        self.question_count = 0
+        self.suppress_remainder = False
 
     def feed(self, delta: str) -> None:
         self.pending += delta
@@ -87,6 +90,31 @@ class GovernedDeltaGate:
         return content
 
     def _admit(self, clause: str) -> None:
+        if self.suppress_remainder:
+            self.suppressed.append(clause)
+            return
+        strategy = self.envelope.interaction_strategy
+        stripped = clause.strip()
+        if not stripped:
+            self.suppressed.append(clause)
+            return
+        if (
+            not self.emitted
+            and strategy.demonstrate_understanding_without_restating
+            and re.match(r"^(?:我理解(?:这次|你|您)|I understand\b)", stripped, re.I)
+        ):
+            self.suppressed.append(clause)
+            return
+        question_marks = clause.count("?") + clause.count("？")
+        if question_marks and (
+            not strategy.question_allowed
+            or self.question_count >= strategy.max_questions
+        ):
+            self.suppressed.append(clause)
+            self.suppress_remainder = True
+            return
+        if question_marks:
+            self.question_count += 1
         normalized = clause.casefold()
         forbidden = next(
             (

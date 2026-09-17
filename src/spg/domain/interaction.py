@@ -9,7 +9,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from spg.domain.conversation import ConversationContextMessage, StructuredCollaborationResult
+from spg.domain.conversation import (
+    ConversationContextMessage,
+    ConversationTurnIntent,
+    StructuredCollaborationResult,
+)
 from spg.domain.design_intent import DesignIntentFrame
 from spg.domain.wic_intelligence import ProgressiveSemanticStructure
 from spg.domain.wic_response import WicRuntimeMode
@@ -247,6 +251,7 @@ class InteractionAssessmentCandidate(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    turn_intent: ConversationTurnIntent = ConversationTurnIntent.EXPLORE
     interpreted_motive: str | None = None
     desired_outcome: str | None = None
     design_intent_frame: DesignIntentFrame | None = None

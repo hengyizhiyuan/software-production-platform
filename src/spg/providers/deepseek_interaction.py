@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import json
+import re
 from time import monotonic
 from typing import Callable
 
@@ -16,6 +17,7 @@ from spg.domain.conversation import (
     StructuredCollaborationResult,
 )
 from spg.domain.interaction import (
+    InteractionAssessmentCandidate,
     InteractionInterpretationInput,
     InteractionInvariantViolation,
     InteractionSemanticCandidate,
@@ -34,11 +36,35 @@ from spg.providers.codex_interaction import (
     _ConversationProviderPayload,
     _InteractionSemanticProviderPayload,
     _JsonStringFieldStream,
+    _safe_validation_summary,
 )
 
 
 def _usage(result: StructuredModelResult) -> dict[str, object]:
     return asdict(result.usage)
+
+
+_JSON_FENCE = re.compile(r"\A```(?:json)?\s*(.*?)\s*```\Z", re.IGNORECASE | re.DOTALL)
+
+
+def _structured_json_text(value: str) -> str:
+    """Normalize only one complete JSON fence; never salvage arbitrary prose."""
+
+    stripped = value.strip()
+    match = _JSON_FENCE.fullmatch(stripped)
+    return (match.group(1) if match is not None else stripped).strip()
+
+
+def _is_root_json_invalid(error: InteractionInvariantViolation) -> bool:
+    """Identify syntax-invalid JSON without treating schema rejection as retryable."""
+
+    cause = error.__cause__
+    if not isinstance(cause, ValidationError):
+        return False
+    issues = cause.errors(include_input=False, include_url=False)
+    return len(issues) == 1 and issues[0].get("loc") == () and (
+        issues[0].get("type") == "json_invalid"
+    )
 
 
 class DeepSeekInteractionSemanticCapability:
@@ -72,7 +98,7 @@ class DeepSeekInteractionSemanticCapability:
         )
         try:
             payload = _InteractionSemanticProviderPayload.model_validate_json(
-                result.output_text.strip()
+                _structured_json_text(result.output_text)
             )
         except (ValidationError, ValueError, TypeError) as error:
             raise InteractionInvariantViolation(
@@ -158,7 +184,7 @@ class DeepSeekConversationProvider:
         )
         try:
             payload = _ConversationProviderPayload.model_validate_json(
-                result.output_text.strip()
+                _structured_json_text(result.output_text)
             )
         except (ValidationError, ValueError, TypeError) as error:
             raise InteractionInvariantViolation(
@@ -211,11 +237,19 @@ class DeepSeekGovernedResponseRealizer:
             "pacing. Do not reinterpret intent, change Work boundaries, invent facts, "
             "make Human-owned decisions, change readiness, or add production authority. "
             "Preserve every fact, constraint, correction, and authority boundary. "
-            "Follow interaction_strategy for the primary conversational move, altitude, "
-            "and question allowance. Treat governed_content as semantic material, not "
+            "Follow interaction_strategy for the turn intent, primary conversational move, "
+            "altitude, and question allowance. When answer_first is true, answer immediately. "
+            "When candidate_first is true, offer a concrete, reversible candidate for the "
+            "actual object before any question. Treat governed_content as semantic material, not "
             "wording to repeat. Demonstrate understanding by advancing the thinking; "
             "avoid paraphrasing the Human, workflow narration, and questionnaire behavior. "
-            "If question_allowed is false, ask none; otherwise ask at most max_questions. "
+            "For MODIFY, start with the proposed delta or its consequence, never with "
+            "'I understand' or a restatement of the request. If question_allowed is false, "
+            "ask no question and do not reproduce a question from governed_content; otherwise "
+            "ask at most max_questions after the useful answer or candidate. Treat the "
+            "question-mark count as a hard expression constraint: use none when questions are "
+            "disallowed and at most one when one question is allowed; fold any answer choices "
+            "into that single sentence. "
             "Never emit any forbidden_claim. Return JSON only with one natural_response "
             "string.\n\nGoverned Response Envelope:\n"
             + json.dumps(
@@ -234,7 +268,7 @@ class DeepSeekGovernedResponseRealizer:
         )
         try:
             payload = _ConversationProviderPayload.model_validate_json(
-                result.output_text.strip()
+                _structured_json_text(result.output_text)
             )
         except (ValidationError, ValueError, TypeError) as error:
             raise InteractionInvariantViolation(
@@ -277,6 +311,67 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
 
     def close(self) -> None:
         self.runtime.close()
+
+    def interpret_controlled_stream_observed(
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_response_delta: Callable[[str], None],
+        on_pipeline_stage: Callable[[str], None],
+    ) -> InteractionAssessmentCandidate:
+        """Retry one syntax-invalid coalesced envelope before any Human visibility.
+
+        Controlled WIC deliberately discards semantic-provider prose and realizes
+        Human-visible wording only after semantic admission.  That boundary makes
+        one bounded repair attempt safe: neither attempt can append a response
+        delta, Assessment, Conversation message, or governed Work fact.
+        """
+
+        del on_response_delta
+
+        def observe_only(_delta: str) -> None:
+            return None
+
+        try:
+            return self._interpret(
+                basis,
+                on_response_delta=observe_only,
+                on_pipeline_stage=on_pipeline_stage,
+            )
+        except InteractionInvariantViolation as first_error:
+            if not (
+                str(first_error).startswith(
+                    "Coalesced collaboration Provider returned an invalid structured result"
+                )
+                and _is_root_json_invalid(first_error)
+            ):
+                raise
+            on_pipeline_stage("structured_json_repair_started")
+
+        try:
+            candidate = self._interpret(
+                basis,
+                on_response_delta=observe_only,
+                on_pipeline_stage=on_pipeline_stage,
+            )
+        except InteractionInvariantViolation as second_error:
+            if _is_root_json_invalid(second_error):
+                raise InteractionInvariantViolation(
+                    "Coalesced collaboration Provider returned invalid JSON after "
+                    "one bounded structured repair attempt (root:json_invalid; "
+                    "bounded_repair_exhausted)"
+                ) from second_error
+            raise
+
+        evidence = self.last_pipeline_evidence
+        if evidence is not None:
+            self.last_pipeline_evidence = replace(
+                evidence,
+                provider_call_count=evidence.provider_call_count + 1,
+                coalesced_retry_count=(evidence.coalesced_retry_count or 0) + 1,
+            )
+        on_pipeline_stage("structured_json_repair_completed")
+        return candidate
 
     def pipeline_selection(self, basis: InteractionInterpretationInput) -> tuple[str, str]:
         if not self.coalesce_pre_work:
@@ -340,11 +435,12 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
         stage("payload_validation_started")
         try:
             payload = _CoalescedInteractionProviderPayload.model_validate_json(
-                result.output_text.strip()
+                _structured_json_text(result.output_text)
             )
         except (ValidationError, ValueError, TypeError) as error:
             raise InteractionInvariantViolation(
-                "Coalesced collaboration Provider returned an invalid structured result"
+                "Coalesced collaboration Provider returned an invalid structured result "
+                f"({_safe_validation_summary(error)})"
             ) from error
         content = payload.natural_response.strip()
         if not content:

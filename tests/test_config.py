@@ -7,6 +7,7 @@ def test_default_wic_uses_deepseek_with_logically_separate_role_profiles() -> No
     settings = Settings()
     assert settings.wic_provider_adapter == "deepseek"
     assert settings.wic_provider_model == "deepseek-flash"
+    assert settings.collaboration_provider_max_output_tokens == 8192
     assert settings.conversation_provider_adapter is None
     assert settings.conversation_provider_model is None
     assert settings.wic_provider_reasoning_effort == "low"

@@ -130,11 +130,13 @@ and implementation remain deferred. See the
 
 **HUMAN–WATT COLLABORATION EXPERIENCE V2.2 RESPONSE QUALITY — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER V2.2 PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
 
-**HUMAN–WATT CONVERSATION INTELLIGENCE — IMPLEMENTED / FOCUSED VALIDATION PASS / REAL PROVIDER PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
+**HUMAN–WATT CONVERSATION INTELLIGENCE — CURRENT PHASE CLOSED / PASS WITH PRESERVED HUMAN FINDINGS — HUMAN RETEST COMPLETED**
 
 **DESIGN INTENT FRAMING LAYER — IMPLEMENTED / FOCUSED DETERMINISTIC VALIDATION PASS / REAL PROVIDER PROOF PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
 
 **HUMAN COLLABORATION PIPELINE REVIEW / OPTIMIZATION — IMPLEMENTED / FOCUSED AND REAL PROVIDER VALIDATION PASS — HUMAN PRODUCT ACCEPTANCE PENDING**
+
+**WIC INTERACTION INTELLIGENCE PHASE — CLOSED / PASS WITH PRESERVED HUMAN FINDINGS.** The 2026-09-17 Human Retest found materially better focus and perceived response speed and judged the current direction sufficient to move the program forward. One observed `root:json_invalid` reliability blocker is resolved by a controlled, syntax-only, single repair attempt before any Human-visible or governed truth admission. Professional guided-development confidence, proactive AI role voice, richer response forms, product-level perceived-latency treatment, and TNGA naming cleanup remain explicit deferred findings. See the [phase closure evidence](docs/evidence/wic-interaction-intelligence-phase-closure.md). The next major sequence is Formal UX/UI implementation under separate authorization; no additional WIC intelligence optimization round is active.
 
 The [pipeline review and validation report](docs/evidence/human-collaboration-pipeline-optimization.md)
 records the original two serial model Turns, a low-effort trial that did not
@@ -1143,6 +1145,12 @@ local Human dogfood runtime is isolated at `http://127.0.0.1:8045/app` on exact
 code revision `c8455651024b7f7e98a457709e1676fb7feef921`. Technical Slice 3 is
 `PASS_WITH_FINDINGS`; the next step is Human WIC dogfood and Product Acceptance.
 No Human acceptance is inferred.
+
+The later 2026-09-17 Human Retest closes the current WIC interaction-intelligence
+phase as **PASS WITH PRESERVED HUMAN FINDINGS**. This supersedes the pending
+Retest statement above without rewriting the historical Slice 3 qualification.
+The bounded syntax-only Provider repair and complete Human record are preserved
+in [WIC Interaction Intelligence Phase Closure](docs/evidence/wic-interaction-intelligence-phase-closure.md).
 
 ## Current Major Components
 

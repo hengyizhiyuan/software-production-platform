@@ -78,7 +78,7 @@ from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 
 
-ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v4"
+ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v5"
 READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
 
@@ -1042,9 +1042,11 @@ class WorkInteractionService:
             )
         admitted_content = gate.finish()
         if admitted_content != realization.content:
-            raise InteractionInvariantViolation(
-                "Governed response delta sequence does not reconstruct the result"
-            )
+            if not gate.suppressed:
+                raise InteractionInvariantViolation(
+                    "Governed response delta sequence does not reconstruct the result"
+                )
+            realization = realization.model_copy(update={"content": admitted_content})
         self._mark_turn_timing(turn_id, "realization_completed")
         response_content = (provisional or "") + admitted_content
         return (
@@ -1370,9 +1372,23 @@ class WorkInteractionService:
             return existing
         streaming_interpret = getattr(self.capability, "interpret_stream", None)
         observed_interpret = getattr(self.capability, "interpret_stream_observed", None)
+        controlled_observed_interpret = getattr(
+            self.capability, "interpret_controlled_stream_observed", None
+        )
         if on_pipeline_stage is not None:
             on_pipeline_stage("provider_started")
         if (
+            policy_governed
+            and on_response_delta is not None
+            and on_pipeline_stage is not None
+            and callable(controlled_observed_interpret)
+        ):
+            candidate = controlled_observed_interpret(
+                basis,
+                on_response_delta=on_response_delta,
+                on_pipeline_stage=on_pipeline_stage,
+            )
+        elif (
             on_response_delta is not None
             and on_pipeline_stage is not None
             and callable(observed_interpret)

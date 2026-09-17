@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 import json
 from uuid import UUID
 
+import pytest
+
 from spg.domain.conversation import (
     CognitiveMaturity,
     ConversationalMove,
@@ -16,6 +18,7 @@ from spg.domain.interaction import (
     InteractionActor,
     InteractionCondition,
     InteractionInterpretationInput,
+    InteractionInvariantViolation,
     InteractionRecord,
 )
 from spg.domain.model_runtime import (
@@ -30,7 +33,10 @@ from spg.domain.model_runtime import (
     WattModelRuntime,
 )
 from spg.domain.wic_response import GovernedResponseEnvelope, ResponseReconciliation
-from spg.providers.deepseek_interaction import DeepSeekWorkInteractionCapability
+from spg.providers.deepseek_interaction import (
+    DeepSeekWorkInteractionCapability,
+    _structured_json_text,
+)
 
 
 def _basis() -> InteractionInterpretationInput:
@@ -50,6 +56,11 @@ def _basis() -> InteractionInterpretationInput:
     )
 
 
+def test_deepseek_accepts_only_a_complete_json_code_fence() -> None:
+    assert _structured_json_text('```json\n{"ok":true}\n```') == '{"ok":true}'
+    assert _structured_json_text('prefix {"ok":true}') == 'prefix {"ok":true}'
+
+
 def _envelope() -> str:
     return json.dumps({
         "natural_response": "可以。先把它理解为帮助 Watt 推广工作的运营后台。",
@@ -65,7 +76,7 @@ def _envelope() -> str:
             "impact_disposition": None,
             "supporting_references": [],
             "collaboration": {
-                "turn_intent": "NEW_GOAL",
+                "turn_intent": "BUILD",
                 "direct_answer": None,
                 "design_intent_frame": None,
                 "recommended_next_action": "先定义一期业务闭环",
@@ -83,9 +94,12 @@ class _Adapter:
     provider = ModelProvider.DEEPSEEK
     calls = 0
 
+    def __init__(self, outputs: list[str] | None = None) -> None:
+        self.outputs = list(outputs or ())
+
     def generate(self, **options):
         self.calls += 1
-        output = (
+        output = self.outputs.pop(0) if self.outputs else (
             json.dumps(
                 {"natural_response": "先确认目标，再说明下一步。"},
                 ensure_ascii=False,
@@ -113,8 +127,8 @@ class _Adapter:
         )
 
 
-def _runtime() -> tuple[WattModelRuntime, _Adapter]:
-    adapter = _Adapter()
+def _runtime(adapter: _Adapter | None = None) -> tuple[WattModelRuntime, _Adapter]:
+    adapter = adapter or _Adapter()
     registry = ModelProviderRegistry()
     registry.register(adapter)
     profiles = {
@@ -141,11 +155,68 @@ def test_pre_work_coalesces_to_one_request_and_streams_only_human_text() -> None
     assert "".join(deltas) == result.natural_response
     assert "semantics" not in "".join(deltas)
     assert result.interpreted_motive == "开发 Watt 运营管理后台"
+    assert result.turn_intent.value == "BUILD"
     assert capability.last_pipeline_evidence.provider_call_count == 1
     assert capability.last_pipeline_evidence.coalesced_request_id == "response-1"
     assert capability.last_pipeline_evidence.coalesced_retry_count == 0
     assert "provider_first_token" in stages
     assert "validation_completed" in stages
+
+
+def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta() -> None:
+    adapter = _Adapter(['{"natural_response":"partial', _envelope()])
+    runtime, adapter = _runtime(adapter)
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    visible_deltas: list[str] = []
+    stages: list[str] = []
+
+    result = capability.interpret_controlled_stream_observed(
+        _basis(),
+        on_response_delta=visible_deltas.append,
+        on_pipeline_stage=stages.append,
+    )
+
+    assert result.natural_response.startswith("可以。")
+    assert visible_deltas == []
+    assert adapter.calls == 2
+    assert capability.last_pipeline_evidence is not None
+    assert capability.last_pipeline_evidence.provider_call_count == 2
+    assert capability.last_pipeline_evidence.coalesced_retry_count == 1
+    assert "structured_json_repair_started" in stages
+    assert "structured_json_repair_completed" in stages
+
+
+def test_controlled_pre_work_does_not_retry_valid_json_with_schema_errors() -> None:
+    adapter = _Adapter(['{"natural_response":"缺少 semantics"}'])
+    runtime, adapter = _runtime(adapter)
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+
+    with pytest.raises(InteractionInvariantViolation, match="semantics:missing"):
+        capability.interpret_controlled_stream_observed(
+            _basis(),
+            on_response_delta=lambda _delta: None,
+            on_pipeline_stage=lambda _stage: None,
+        )
+
+    assert adapter.calls == 1
+
+
+def test_controlled_pre_work_stops_after_one_failed_json_repair() -> None:
+    adapter = _Adapter(["{", "{"])
+    runtime, adapter = _runtime(adapter)
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+
+    with pytest.raises(
+        InteractionInvariantViolation,
+        match="root:json_invalid; bounded_repair_exhausted",
+    ):
+        capability.interpret_controlled_stream_observed(
+            _basis(),
+            on_response_delta=lambda _delta: None,
+            on_pipeline_stage=lambda _stage: None,
+        )
+
+    assert adapter.calls == 2
 
 
 def test_profiles_are_role_specific_and_control_pre_work_coalescing() -> None:

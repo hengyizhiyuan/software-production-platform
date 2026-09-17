@@ -8,6 +8,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from spg.domain.conversation import ConversationTurnIntent
+
 
 SEMANTIC_POLICY_REVISION = "wic-semantic-policy-v1"
 QUESTION_POLICY_REVISION = "wic-question-value-v1"
@@ -149,6 +151,7 @@ class ProgressiveSemanticStructure(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    turn_intent: ConversationTurnIntent = ConversationTurnIntent.EXPLORE
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     source_record_ids: tuple[UUID, ...] = Field(min_length=1)
     reception_meanings: tuple[str, ...]

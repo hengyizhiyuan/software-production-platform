@@ -74,6 +74,11 @@ def test_structured_collaboration_result_guards_intent_specific_requirements() -
             turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
             response_language="Chinese",
         )
+    with pytest.raises(ValidationError, match="HOW_TO requires"):
+        StructuredCollaborationResult(
+            turn_intent=ConversationTurnIntent.HOW_TO,
+            response_language="Chinese",
+        )
     with pytest.raises(ValidationError, match="REQUEST_DETAIL requires"):
         StructuredCollaborationResult(
             turn_intent=ConversationTurnIntent.REQUEST_DETAIL,

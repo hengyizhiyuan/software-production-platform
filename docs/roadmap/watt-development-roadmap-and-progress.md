@@ -67,23 +67,37 @@ requires its own admitted mission.
 
 **2026-09-10 — Work-to-Delivery first slice: IMPLEMENTED / AUTOMATED VALIDATION PASS / RUNTIME READY / HUMAN PRODUCT ACCEPTANCE PENDING.** Human confirmed multiple repositories in one runtime and clarified that implementation should continue. The [as-built design](../architecture/work-to-delivery-multi-repository-spg-proposal.md) covers repository-scoped baseline/recovery, Work before asset binding, Document Package delivery and explicit Human acceptance. See the [implementation and acceptance report](../validation/work-to-delivery-first-slice.md) for actual evidence and runtime access. Existing closed foundations retain their original scope.
 
-### Existing collaboration checkpoint
+### WIC interaction-intelligence phase closure
+
+**2026-09-17 — CLOSED / PASS WITH PRESERVED HUMAN FINDINGS.** Human Retest
+confirmed materially better focus and perceived response speed and judged this
+phase useful enough to stop further conversational-intelligence optimization.
+One observed syntax-invalid coalesced Provider response is repaired through a
+bounded pre-admission attempt. Professional guidance confidence, proactive AI
+voice, rich response forms, product-level perceived latency, and TNGA naming
+cleanup remain explicit future findings. See the
+[closure evidence](../evidence/wic-interaction-intelligence-phase-closure.md).
+
+The next major first-release sequence is **Formal UX/UI implementation**, then
+real production/Reality integration and Human Journey dogfood/Acceptance. Each
+requires separate authorization; this roadmap update starts none of them.
+
+### Historical collaboration checkpoint
 
 
 ```text
-Current Phase:
+Checkpoint Phase:
     Human–Watt Collaboration Layer Validation
 
 Status:
     IMPLEMENTED
     REAL PROVIDER PROOF PASS
-    HUMAN PRODUCT ACCEPTANCE IN PROGRESS
+    HUMAN PRODUCT ACCEPTANCE WAS IN PROGRESS
 ```
 
-The current implementation checkpoint proves the product and engineering path
-through a real Provider. Human Product Acceptance remains the authority for the
-quality and usefulness of the collaboration experience; it must not be inferred
-from deterministic or Provider evidence.
+This earlier implementation checkpoint proved the product and engineering path
+through a real Provider. It is preserved as historical context; the later Human
+Retest and current phase result are recorded in the closure section above.
 
 ### Completed capability foundations
 
@@ -98,7 +112,7 @@ from deterministic or Provider evidence.
 | Design Intent Framing Layer | A persisted advisory frame separates the object being designed from business context before Guided Design schema selection; focused deterministic validation and the bounded real `gpt-5.6-sol` correction proof passed; Human Product Acceptance remains pending. |
 | Async Interaction Processing | Bounded asynchronous Turn processing and durable terminal outcome projection are implemented. |
 | Conversation history | Human and Watt messages remain reconstructable without turning conversation into governed Work Truth. |
-| Conversation Intelligence | WIC/domain semantics are separated from bounded context assembly and a dedicated configurable Human-facing Provider; 30-case benchmark and six mandatory real Provider modes pass; Human Product Acceptance remains pending. |
+| Conversation Intelligence | Current phase CLOSED / PASS WITH PRESERVED HUMAN FINDINGS; WIC/domain semantics, bounded context, governed realization, DeepSeek transport, reusable probe, and Human Retest evidence are preserved without claiming final experience perfection. |
 | Real Provider validation | The mandatory Chinese product-design scenario completed with `gpt-5.6-sol`; schema matching and Guided Design facilitation were reached with sanitized evidence. |
 
 Detailed evidence is recorded in
@@ -180,15 +194,13 @@ convenience.
 
 ### Priority 1 — WIC Intelligence Architecture vNext Reconstruction
 
-**Recommended next program step.** The external WIC/SDD study and architecture
-synthesis are complete. The approved direction is progressive structuring,
-tentative/reroutable Pattern guidance, semantic next-step readiness,
-consumer-bound artifacts, delta/revision semantics, and Fast Semantic
-Reception. Capture a bounded `OPEN_WIC_BASELINE` before destructive
-replacement, then perform reconstruction, bounded replay/dogfood/evaluation,
-and governed production activation. See the
-[WIC Intelligence Architecture Closure](../architecture/watt-wic-intelligence-architecture-closure.md).
-This roadmap records sequence only and does not authorize implementation.
+**Current Reality: CLOSED / PASS WITH PRESERVED HUMAN FINDINGS.** The external
+study, architecture synthesis, bounded `OPEN_WIC_BASELINE`, reconstruction,
+controlled activation, automated probe, and Human Retest are complete for this
+phase. See the
+[WIC Intelligence Architecture Closure](../architecture/watt-wic-intelligence-architecture-closure.md)
+and [phase closure evidence](../evidence/wic-interaction-intelligence-phase-closure.md).
+No further WIC interaction-quality optimization is active in this phase.
 
 ### Priority 2 — External Design Intake Capability
 
@@ -207,9 +219,10 @@ authorized by this roadmap.
 
 ### Priority 3 — Human–Watt Collaboration Experience Improvement
 
-Current Reality: response-quality refinement v2.2 is implemented with focused
-validation and four-scenario real `gpt-5.6-sol` proof. Human Product Acceptance
-remains pending.
+Current Reality: the current interaction-intelligence phase is **CLOSED / PASS
+WITH PRESERVED HUMAN FINDINGS** after Human Retest and full regression. The
+items below are deferred inputs to Formal UX/UI and Conversation Rendering, not
+an active additional WIC optimization round.
 
 Focus:
 
@@ -221,7 +234,8 @@ Focus:
 
 ### Priority 4 — UX/UI Reconstruction
 
-Goal: transform the current interface into a Human-facing AI collaboration
+**Next major phase after WIC closure; separate authorization required.** Goal:
+transform the current interface into a Human-facing AI collaboration
 workspace, not merely restyle the existing screens.
 
 Focus:

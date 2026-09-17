@@ -8,6 +8,7 @@ from spg.application.interaction_strategy import select_interaction_strategy
 from spg.application.wic_response import _content_at_strategy_granularity
 from spg.domain.conversation import (
     CognitiveMaturity,
+    ConversationTurnIntent,
     ConversationalMove,
     HumanAbstractionLevel,
     HumanConversationMode,
@@ -18,36 +19,41 @@ from spg.domain.wic_intelligence import GovernanceCandidateKind, PatternSignal
 def _assessment(
     *signals: PatternSignal,
     governance: GovernanceCandidateKind = GovernanceCandidateKind.CONVERSATION_ONLY,
+    intent: ConversationTurnIntent = ConversationTurnIntent.EXPLORE,
 ):
     return SimpleNamespace(
         progressive_semantics=SimpleNamespace(
             pattern_signals=signals,
             governance_candidate=governance,
+            turn_intent=intent,
         )
     )
 
 
 @pytest.mark.parametrize(
-    ("text", "signals", "move", "altitude", "maturity", "mode"),
+    ("text", "intent", "signals", "move", "altitude", "maturity", "mode"),
     (
         (
             "我想做一个企业官网。",
+            ConversationTurnIntent.BUILD,
             (),
-            ConversationalMove.ORIENT,
+            ConversationalMove.PROPOSE,
             HumanAbstractionLevel.VISION,
             CognitiveMaturity.EXPLORING,
             HumanConversationMode.EXPLORING,
         ),
         (
             "我想做一个面向C端用户的决策助手类小程序。",
+            ConversationTurnIntent.BUILD,
             (),
-            ConversationalMove.ORIENT,
+            ConversationalMove.PROPOSE,
             HumanAbstractionLevel.SOLUTION,
             CognitiveMaturity.FRAMING,
             HumanConversationMode.EXPLORING,
         ),
         (
             "我们的客户男女比例是3:7，你觉得官网风格应该怎么设计？",
+            ConversationTurnIntent.RECOMMEND,
             (PatternSignal.DIRECT_QUESTION,),
             ConversationalMove.PROPOSE,
             HumanAbstractionLevel.SOLUTION,
@@ -56,6 +62,7 @@ def _assessment(
         ),
         (
             "企业官网一般都需要哪些页面？",
+            ConversationTurnIntent.DIRECT_QUESTION,
             (PatternSignal.DIRECT_QUESTION,),
             ConversationalMove.ANSWER,
             HumanAbstractionLevel.SOLUTION,
@@ -64,14 +71,16 @@ def _assessment(
         ),
         (
             "为什么企业官网需要案例页面？",
+            ConversationTurnIntent.DIRECT_QUESTION,
             (PatternSignal.DIRECT_QUESTION,),
-            ConversationalMove.EXPLAIN,
+            ConversationalMove.ANSWER,
             HumanAbstractionLevel.SOLUTION,
             CognitiveMaturity.FRAMING,
             HumanConversationMode.ASKING,
         ),
         (
             "我其实也不知道该做成什么样。",
+            ConversationTurnIntent.EXPLORE,
             (),
             ConversationalMove.PROPOSE,
             HumanAbstractionLevel.VISION,
@@ -80,6 +89,7 @@ def _assessment(
         ),
         (
             "不对，我是要做后台系统。",
+            ConversationTurnIntent.CORRECTION,
             (PatternSignal.EXPLICIT_CORRECTION,),
             ConversationalMove.CONFIRM,
             HumanAbstractionLevel.SOLUTION,
@@ -89,10 +99,10 @@ def _assessment(
     ),
 )
 def test_strategy_meets_the_human_at_their_current_altitude(
-    text, signals, move, altitude, maturity, mode
+    text, intent, signals, move, altitude, maturity, mode
 ) -> None:
     strategy = select_interaction_strategy(
-        _assessment(*signals), latest_human_input=text
+        _assessment(*signals, intent=intent), latest_human_input=text
     )
     assert strategy.primary_move is move
     assert strategy.human_abstraction_level is altitude
@@ -101,22 +111,23 @@ def test_strategy_meets_the_human_at_their_current_altitude(
     assert strategy.max_questions <= 1
 
 
-def test_broad_motive_allows_one_object_specific_question_after_orientation() -> None:
+def test_broad_build_offers_a_candidate_before_one_optional_question() -> None:
     strategy = select_interaction_strategy(
-        _assessment(), latest_human_input="我想做一个企业官网。"
+        _assessment(intent=ConversationTurnIntent.BUILD),
+        latest_human_input="我想做一个企业官网。",
     )
-    assert strategy.primary_move is ConversationalMove.ORIENT
+    assert strategy.primary_move is ConversationalMove.PROPOSE
+    assert strategy.candidate_first
     assert strategy.question_allowed
     assert strategy.max_questions == 1
-    assert "actual object" in strategy.question_guidance
-    assert "highest-value unresolved concept" in strategy.question_guidance
-    assert "fixed discovery sequence" in strategy.question_guidance
-    assert "organization or business" not in strategy.question_guidance
+    assert "exact object" in strategy.question_guidance
+    assert "Human invent the starting point" in strategy.question_guidance
 
 
 def test_human_uncertainty_gets_a_proposal_instead_of_a_questionnaire() -> None:
     strategy = select_interaction_strategy(
-        _assessment(), latest_human_input="我其实也不知道该做成什么样。"
+        _assessment(intent=ConversationTurnIntent.EXPLORE),
+        latest_human_input="我其实也不知道该做成什么样。",
     )
     assert strategy.primary_move is ConversationalMove.PROPOSE
     assert not strategy.question_allowed
@@ -146,7 +157,7 @@ def test_strategy_preserves_model_selected_object_specific_next_move(
     human_input: str, content: str
 ) -> None:
     strategy = select_interaction_strategy(
-        _assessment(), latest_human_input=human_input
+        _assessment(intent=ConversationTurnIntent.BUILD), latest_human_input=human_input
     )
     assert strategy.question_allowed
     assert _content_at_strategy_granularity(content, strategy) == content
@@ -154,10 +165,49 @@ def test_strategy_preserves_model_selected_object_specific_next_move(
 
 def test_strategy_suppresses_but_never_replaces_a_disallowed_question() -> None:
     strategy = select_interaction_strategy(
-        _assessment(), latest_human_input="我其实也不知道该做成什么样。"
+        _assessment(intent=ConversationTurnIntent.EXPLORE),
+        latest_human_input="我其实也不知道该做成什么样。",
     )
     content = "可以先比较两种有明确取舍的方向。你更喜欢哪一种？"
     assert not strategy.question_allowed
     assert _content_at_strategy_granularity(content, strategy) == (
         "可以先比较两种有明确取舍的方向。"
     )
+
+
+@pytest.mark.parametrize(
+    ("intent", "move", "answer_first", "candidate_first"),
+    (
+        (ConversationTurnIntent.HOW_TO, ConversationalMove.ANSWER, True, False),
+        (ConversationTurnIntent.DIRECT_QUESTION, ConversationalMove.ANSWER, True, False),
+        (ConversationTurnIntent.REQUEST_DETAIL, ConversationalMove.EXPLAIN, True, False),
+        (ConversationTurnIntent.COMPARE, ConversationalMove.COMPARE, False, False),
+        (ConversationTurnIntent.RECOMMEND, ConversationalMove.PROPOSE, False, True),
+        (ConversationTurnIntent.MODIFY, ConversationalMove.PROPOSE, False, True),
+        (ConversationTurnIntent.DEPLOY, ConversationalMove.PROPOSE, False, True),
+    ),
+)
+def test_turn_intent_not_keyword_shape_selects_the_primary_move(
+    intent, move, answer_first, candidate_first
+) -> None:
+    strategy = select_interaction_strategy(
+        _assessment(intent=intent), latest_human_input="同一个对象，同一句不带路由关键词的表达"
+    )
+    assert strategy.turn_intent is intent
+    assert strategy.primary_move is move
+    assert strategy.answer_first is answer_first
+    assert strategy.candidate_first is candidate_first
+
+
+def test_recommend_compare_and_modify_allow_only_one_material_follow_up() -> None:
+    for intent in (
+        ConversationTurnIntent.RECOMMEND,
+        ConversationTurnIntent.COMPARE,
+        ConversationTurnIntent.MODIFY,
+    ):
+        strategy = select_interaction_strategy(
+            _assessment(intent=intent), latest_human_input="给我一个具体方向"
+        )
+        assert strategy.question_allowed
+        assert strategy.max_questions == 1
+        assert strategy.question_guidance is not None

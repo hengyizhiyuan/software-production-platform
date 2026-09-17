@@ -239,6 +239,7 @@ def build_progressive_semantics(
         "DEEP_WIC_WORKING_UNDERSTANDING",
     )
     return ProgressiveSemanticStructure(
+        turn_intent=candidate.turn_intent,
         basis_fingerprint=basis_fingerprint,
         source_record_ids=tuple(record.id for record in records),
         reception_meanings=meanings, working_motive=working_motive,

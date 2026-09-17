@@ -552,7 +552,7 @@ def test_design_intent_correction_reframes_schema_and_reconstructs_history(
     )
     assert corrected.design_stage == "Motive, users, and problem"
     assert corrected.latest_assessment is not None
-    assert corrected.latest_assessment.schema_version == "wic-assessment-v4"
+    assert corrected.latest_assessment.schema_version == "wic-assessment-v5"
 
     history = service.assessment_history(interaction.id)
     assert tuple(item.design_intent_frame.object_type for item in history) == (

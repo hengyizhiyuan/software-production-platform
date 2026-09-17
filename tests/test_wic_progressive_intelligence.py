@@ -10,6 +10,7 @@ import pytest
 
 from spg.domain.conversation import (
     CognitiveMaturity,
+    ConversationTurnIntent,
     ConversationalMove,
     HumanAbstractionLevel,
     HumanConversationMode,
@@ -120,6 +121,14 @@ def test_ow_c_correction_supersedes_prior_motive_without_deleting_history() -> N
     assert delta.prior_value == prior.interpreted_motive
     assert "运营后台" in result.working_motive
     assert PatternSignal.EXPLICIT_CORRECTION in result.pattern_signals
+
+
+def test_provider_turn_intent_survives_deterministic_semantic_admission() -> None:
+    result = _build(
+        "OW-A",
+        candidate=_candidate("OW-A", turn_intent=ConversationTurnIntent.BUILD),
+    )
+    assert result.turn_intent is ConversationTurnIntent.BUILD
 
 
 def test_reversing_correction_creates_a_new_supersession_edge() -> None:
@@ -273,6 +282,60 @@ def test_governed_delta_gate_rejects_forbidden_claim_split_across_raw_deltas() -
     with pytest.raises(GovernedResponsePolicyViolation):
         gate.feed("90 天。")
     assert emitted == []
+
+
+def test_governed_delta_gate_suppresses_disallowed_question_without_replacement() -> None:
+    envelope = GovernedResponseEnvelope(
+        basis_fingerprint="b" * 64,
+        governed_content="先给出可执行路径。",
+        reconciliation=ResponseReconciliation.REFINE,
+        governance_candidate="CONVERSATION_ONLY",
+        semantic_policy_revision="policy-v1",
+        question_policy_revision="question-v1",
+        response_language="zh-CN",
+        interaction_strategy=InteractionStrategy(
+            human_abstraction_level=HumanAbstractionLevel.SOLUTION,
+            cognitive_maturity=CognitiveMaturity.FRAMING,
+            human_mode=HumanConversationMode.ASKING,
+            primary_move=ConversationalMove.ANSWER,
+            next_conversational_granularity="Answer directly.",
+            answer_first=True,
+        ),
+    )
+    emitted: list[str] = []
+    gate = GovernedDeltaGate(envelope, emitted.append)
+
+    gate.feed("先给出可执行路径。还要继续讨论吗？这句话也应被抑制。")
+
+    assert gate.finish() == "先给出可执行路径。"
+    assert gate.suppressed
+
+
+def test_governed_delta_gate_suppresses_stock_echo_before_useful_proposal() -> None:
+    envelope = GovernedResponseEnvelope(
+        basis_fingerprint="b" * 64,
+        governed_content="把导航改为固定顶部。",
+        reconciliation=ResponseReconciliation.REFINE,
+        governance_candidate="CONVERSATION_ONLY",
+        semantic_policy_revision="policy-v1",
+        question_policy_revision="question-v1",
+        response_language="zh-CN",
+        interaction_strategy=InteractionStrategy(
+            human_abstraction_level=HumanAbstractionLevel.SOLUTION,
+            cognitive_maturity=CognitiveMaturity.SPECIFYING,
+            human_mode=HumanConversationMode.SPECIFYING,
+            primary_move=ConversationalMove.PROPOSE,
+            next_conversational_granularity="Propose the bounded change.",
+            candidate_first=True,
+        ),
+    )
+    emitted: list[str] = []
+    gate = GovernedDeltaGate(envelope, emitted.append)
+
+    gate.feed("我理解这次只处理：把导航改为固定顶部。\n把导航固定后保留原有层级。")
+
+    assert gate.finish() == "把导航固定后保留原有层级。"
+    assert gate.suppressed
 
 
 def test_ow_e_is_new_motive_candidate_and_cannot_expand_current_work() -> None:

@@ -16,6 +16,29 @@ internal-metadata leakage, and conversation continuity. Structural assertions
 protect hard boundaries; representative samples remain available for Human
 review because subjective quality cannot be reduced to one boolean.
 
+## Interaction-intelligence probe
+
+`interaction_intelligence_probe.py` runs 19 independent real-Provider turns
+through the public HTTP/SSE surface. Its corpus varies intent for the same
+website object and covers BUILD across unrelated domains, uncertainty,
+recommendation/comparison, correction, deployment, bounded action, and an
+existing-Work change expression. The evaluator checks semantic properties
+rather than expected prose: intent/move alignment, candidate-first BUILD,
+answer-first HOW_TO, semantic echo, unsupported premises, cross-domain leakage,
+template reuse, repeated ORIENT, question allowance, one response identity,
+progressive SSE growth, and projection/replay consistency.
+
+Run it only against an explicitly authorized isolated DeepSeek runtime. It
+creates pre-Work Interaction facts but never admits Work or starts production:
+
+```text
+python benchmarks/conversation_quality/interaction_intelligence_probe.py --run-real-provider --base-url http://127.0.0.1:8047 --expected-provider deepseek --expected-model deepseek-flash --output .spg/validation-evidence/wic-interaction-intelligence.json
+```
+
+The adjacent Markdown report includes complete Human-facing outputs for manual
+review. A mechanically clean probe is focused evidence, not Human Product
+Acceptance.
+
 ## Pipeline latency probe
 
 `pipeline_probe.py` runs the five architecture-review scenarios through real

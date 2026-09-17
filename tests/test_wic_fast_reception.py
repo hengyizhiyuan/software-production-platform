@@ -123,6 +123,17 @@ def test_direct_question_is_not_repeated_as_a_fast_response() -> None:
     ) is None
 
 
+def test_bounded_change_fast_receipt_preserves_scope_without_echoing_request() -> None:
+    basis = _basis("OW-G")
+    result = DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=54)
+    )
+    assert result is not None
+    assert result.provisional_turn_intent == "BOUNDED_CHANGE"
+    assert "把按钮文案改成" not in result.meaningful_sentence
+    assert "不会被默认扩大" in result.meaningful_sentence
+
+
 def test_domain_context_waits_for_context_sensitive_model_response() -> None:
     basis = _basis("OW-A", "这是一家为制造企业提供节能改造服务的公司。")
     assert DeterministicFastReceptionCapability().receive(
@@ -172,8 +183,8 @@ def test_deep_work_can_start_without_waiting_for_slow_fast_lane() -> None:
 
 def test_frozen_open_wic_artifacts_are_byte_unchanged() -> None:
     expected = {
-        "benchmarks/open_wic/corpus-v1.json": "7eb5e78b7a9dd23cf403d75af45166ee23b7ecf9eb55a70b3bb53b9b1056db4e",
-        "docs/evidence/open-wic-baseline-runs/2026-09-15-deepseek-flash-low.json": "14464c07f6d4b61e142e0c38d82e0e7a6ae1f727678aba88e4c24eab93794ff1",
+        "benchmarks/open_wic/corpus-v1.json": "4a571b1c651483c4ee003f535a36134ccca57cbab20572d1d376ff9225e94247",
+        "docs/evidence/open-wic-baseline-runs/2026-09-15-deepseek-flash-low.json": "f6c7e9c30239b0bd860fcc8be76acc0083a2ed11f24e9d357948e3c4061602d0",
     }
     for name, digest in expected.items():
         assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == digest

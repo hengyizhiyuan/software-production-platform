@@ -6,6 +6,7 @@ import re
 
 from spg.domain.conversation import (
     CognitiveMaturity,
+    ConversationTurnIntent,
     ConversationalMove,
     HumanAbstractionLevel,
     HumanConversationMode,
@@ -19,12 +20,6 @@ from spg.domain.wic_intelligence import (
 
 
 _UNCERTAIN = re.compile(r"(不知道|没想好|不确定|拿不准|没有概念|not sure|don't know|do not know)", re.I)
-_COMPARE = re.compile(r"(对比|比较|还是|区别|取舍|哪个好|which|compare|versus|\bvs\b)", re.I)
-_RECOMMEND = re.compile(r"(建议|应该|怎么设计|如何设计|怎么做|how should|recommend)", re.I)
-_EXPLANATION = re.compile(
-    r"(为什么|是什么(?:意思)?|怎么理解|解释|原理|\bwhy\b|\bexplain\b|what does .+ mean)",
-    re.I,
-)
 _IMPLEMENTATION = re.compile(
     r"(API|接口|数据库|PostgreSQL|MySQL|表结构|字段|迁移|部署|容器|代码|组件|CSS|SDK|schema|endpoint)",
     re.I,
@@ -73,18 +68,59 @@ def select_interaction_strategy(
         raise ValueError("Interaction Strategy requires progressive semantics")
     text = latest_human_input.strip()
     signals = set(semantics.pattern_signals)
+    intent = getattr(
+        semantics, "turn_intent", ConversationTurnIntent.EXPLORE
+    )
     altitude = _altitude(text)
     uncertain = bool(_UNCERTAIN.search(text))
-    correcting = PatternSignal.EXPLICIT_CORRECTION in signals or bool(_CORRECTION.search(text))
-    asking = PatternSignal.DIRECT_QUESTION in signals or text.endswith(("?", "？"))
-    specifying = bool(_SPECIFIC.search(text)) or altitude is HumanAbstractionLevel.IMPLEMENTATION
+    correcting = (
+        intent in {
+            ConversationTurnIntent.CORRECTION,
+            ConversationTurnIntent.DISAGREEMENT,
+        }
+        or PatternSignal.EXPLICIT_CORRECTION in signals
+    )
+    answer_intents = {
+        ConversationTurnIntent.DIRECT_QUESTION,
+        ConversationTurnIntent.HOW_TO,
+        ConversationTurnIntent.SIDE_QUESTION,
+    }
+    explain_intents = {ConversationTurnIntent.REQUEST_DETAIL}
+    build_intents = {
+        ConversationTurnIntent.BUILD,
+        ConversationTurnIntent.NEW_GOAL,
+    }
+    recommend_intents = {
+        ConversationTurnIntent.RECOMMEND,
+        ConversationTurnIntent.REQUEST_RECOMMENDATION,
+    }
+    compare_intents = {
+        ConversationTurnIntent.COMPARE,
+        ConversationTurnIntent.REQUEST_DECISION_SUPPORT,
+    }
+    action_intents = {
+        ConversationTurnIntent.MODIFY,
+        ConversationTurnIntent.DEPLOY,
+        ConversationTurnIntent.ACTION_REQUEST,
+        ConversationTurnIntent.CONTINUE_CURRENT_WORK,
+        ConversationTurnIntent.MATERIAL_BRANCH,
+    }
+    specifying = (
+        intent in action_intents
+        or bool(_SPECIFIC.search(text))
+        or altitude is HumanAbstractionLevel.IMPLEMENTATION
+    )
 
     if correcting:
         mode = HumanConversationMode.CORRECTING
         maturity = CognitiveMaturity.SPECIFYING
-    elif asking:
+    elif intent in answer_intents | explain_intents | recommend_intents | compare_intents:
         mode = HumanConversationMode.ASKING
-        maturity = CognitiveMaturity.EVALUATING if (_COMPARE.search(text) or _RECOMMEND.search(text)) else CognitiveMaturity.FRAMING
+        maturity = (
+            CognitiveMaturity.EVALUATING
+            if intent in recommend_intents | compare_intents
+            else CognitiveMaturity.FRAMING
+        )
     elif uncertain:
         mode = HumanConversationMode.EXPLORING
         maturity = CognitiveMaturity.EXPLORING
@@ -98,6 +134,8 @@ def select_interaction_strategy(
     question_allowed = False
     question_guidance = None
     max_questions = 0
+    candidate_first = False
+    answer_first = False
     if semantics.governance_candidate is GovernanceCandidateKind.HUMAN_DECISION_REQUIRED:
         move = ConversationalMove.ESCALATE_HUMAN_DECISION
         question_allowed = True
@@ -107,17 +145,58 @@ def select_interaction_strategy(
         move = ConversationalMove.CORRECT
     elif correcting:
         move = ConversationalMove.CONFIRM
-    elif asking and _COMPARE.search(text):
+    elif intent in compare_intents:
         move = ConversationalMove.COMPARE
-    elif asking and _RECOMMEND.search(text):
+        question_allowed = True
+        max_questions = 1
+        question_guidance = (
+            "Compare the available directions first. Ask one question only when its answer "
+            "would materially change the trade-off or recommendation."
+        )
+    elif intent in recommend_intents:
         move = ConversationalMove.PROPOSE
-    elif asking and _EXPLANATION.search(text):
-        move = ConversationalMove.EXPLAIN
-    elif asking:
+        candidate_first = True
+        question_allowed = True
+        max_questions = 1
+        question_guidance = (
+            "Give the recommendation and its material trade-off first. Ask one question only "
+            "when its answer would materially change the recommendation."
+        )
+    elif intent in answer_intents:
         move = ConversationalMove.ANSWER
+        answer_first = True
+    elif intent in explain_intents:
+        move = ConversationalMove.EXPLAIN
+        answer_first = True
+    elif intent in build_intents:
+        move = ConversationalMove.PROPOSE
+        candidate_first = True
+        question_allowed = True
+        max_questions = 1
+        question_guidance = (
+            "Offer a concrete, low-commitment candidate for this exact object first. "
+            "Only then ask one question if its answer would materially change that candidate. "
+            "Do not make the Human invent the starting point or answer a discovery checklist."
+        )
     elif uncertain:
         move = ConversationalMove.PROPOSE
-    elif maturity in {CognitiveMaturity.EXPLORING, CognitiveMaturity.FRAMING}:
+        candidate_first = True
+    elif intent in action_intents:
+        move = ConversationalMove.PROPOSE
+        candidate_first = True
+        question_allowed = True
+        max_questions = 1
+        question_guidance = (
+            "Propose the bounded change first. Ask one question only for a missing fact that "
+            "materially changes the proposed delta or its governed boundary."
+        )
+    elif intent is ConversationTurnIntent.HUMAN_DECISION:
+        move = ConversationalMove.CONFIRM
+    elif intent in {
+        ConversationTurnIntent.EXPLORE,
+        ConversationTurnIntent.CONTEXT_ADDITION,
+        ConversationTurnIntent.FEEDBACK,
+    }:
         move = ConversationalMove.ORIENT
         question_allowed = True
         max_questions = 1
@@ -129,8 +208,6 @@ def select_interaction_strategy(
             "a domain premise the Human did not supply, repeat known information, or follow a fixed "
             "discovery sequence."
         )
-    elif specifying:
-        move = ConversationalMove.PROPOSE
     else:
         move = ConversationalMove.ORIENT
 
@@ -141,6 +218,7 @@ def select_interaction_strategy(
         HumanAbstractionLevel.IMPLEMENTATION: "Respond at implementation level with relevant consequences and trade-offs.",
     }[altitude]
     return InteractionStrategy(
+        turn_intent=intent,
         human_abstraction_level=altitude,
         cognitive_maturity=maturity,
         human_mode=mode,
@@ -149,4 +227,6 @@ def select_interaction_strategy(
         question_allowed=question_allowed,
         max_questions=max_questions,
         question_guidance=question_guidance,
+        candidate_first=candidate_first,
+        answer_first=answer_first,
     )

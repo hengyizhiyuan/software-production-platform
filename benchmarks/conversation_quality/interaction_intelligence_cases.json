@@ -1,0 +1,136 @@
+[
+  {
+    "id": "website-build",
+    "input": "我想做一个企业官网。",
+    "expected_intents": ["BUILD"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["官网", "企业", "客户", "访客", "信任", "案例"]
+  },
+  {
+    "id": "website-how-to",
+    "input": "企业官网从零开始应该怎么做？",
+    "expected_intents": ["HOW_TO"],
+    "expected_moves": ["ANSWER"],
+    "domain_terms": ["官网", "目标", "用户", "内容", "页面", "上线"]
+  },
+  {
+    "id": "website-direct-question",
+    "input": "企业官网一般需要哪些核心页面？",
+    "expected_intents": ["DIRECT_QUESTION"],
+    "expected_moves": ["ANSWER"],
+    "domain_terms": ["官网", "首页", "产品", "服务", "案例", "联系"]
+  },
+  {
+    "id": "website-recommend",
+    "input": "你建议企业官网第一版优先突出什么？",
+    "expected_intents": ["RECOMMEND", "REQUEST_RECOMMENDATION"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["官网", "价值", "客户", "案例", "转化", "信任"]
+  },
+  {
+    "id": "website-compare",
+    "input": "企业官网第一版应该先做品牌展示，还是先做获客转化？请比较一下。",
+    "expected_intents": ["COMPARE", "REQUEST_DECISION_SUPPORT"],
+    "expected_moves": ["COMPARE"],
+    "domain_terms": ["官网", "品牌", "获客", "转化", "展示"]
+  },
+  {
+    "id": "website-technology-compare",
+    "input": "企业官网用 React 还是 Vue 更合适？",
+    "expected_intents": ["COMPARE", "REQUEST_DECISION_SUPPORT", "RECOMMEND", "REQUEST_RECOMMENDATION"],
+    "expected_moves": ["COMPARE", "PROPOSE"],
+    "domain_terms": ["官网", "React", "Vue", "团队", "生态", "维护"]
+  },
+  {
+    "id": "website-modify",
+    "input": "把现有企业官网改成更适合移动端访问的版本。",
+    "expected_intents": ["MODIFY"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["官网", "移动端", "页面", "导航", "性能", "触控"]
+  },
+  {
+    "id": "consumer-mini-program-build",
+    "input": "我想做一个面向 C 端用户的决策助手小程序。",
+    "expected_intents": ["BUILD"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["小程序", "决策", "用户", "选择", "建议", "场景"]
+  },
+  {
+    "id": "mobile-app-build",
+    "input": "我想做一个帮助独居老人联系家人的手机应用。",
+    "expected_intents": ["BUILD"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["老人", "家人", "联系", "应用", "紧急", "安全"]
+  },
+  {
+    "id": "leave-approval-build",
+    "input": "我想做一个员工请假审批系统。",
+    "expected_intents": ["BUILD"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["请假", "审批", "员工", "主管", "流程", "记录"]
+  },
+  {
+    "id": "logs-cli-build",
+    "input": "我想做一个帮助开发者排查线上问题的日志分析 CLI。",
+    "expected_intents": ["BUILD"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["日志", "CLI", "排查", "错误", "开发者", "命令"]
+  },
+  {
+    "id": "engineering-context-build",
+    "input": "我想设计一个能跨工具保持工程事实一致的上下文基础设施。",
+    "expected_intents": ["BUILD"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["上下文", "工程", "事实", "工具", "一致", "来源"]
+  },
+  {
+    "id": "content-site-build",
+    "input": "我想做一个专门整理城市徒步路线的内容网站。",
+    "expected_intents": ["BUILD"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["徒步", "路线", "城市", "内容", "地图", "网站"]
+  },
+  {
+    "id": "human-uncertainty",
+    "input": "我想做一个面向小团队的工具，但我其实也不知道该做成什么样。",
+    "expected_intents": ["BUILD", "EXPLORE"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["团队", "工具", "场景", "协作", "问题", "方向"]
+  },
+  {
+    "id": "mini-program-uncertainty",
+    "input": "我想做个小程序，但还没想好具体做什么。",
+    "expected_intents": ["BUILD", "EXPLORE"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["小程序", "用户", "场景", "需求", "方向", "验证"]
+  },
+  {
+    "id": "ratio-style-recommendation",
+    "input": "我们的客户男女比例是 3:7，你觉得官网风格应该怎么设计？",
+    "expected_intents": ["RECOMMEND", "REQUEST_RECOMMENDATION"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["官网", "风格", "客户", "视觉", "品牌", "性别"],
+    "forbidden_terms": ["女性天然喜欢粉色", "男性天然喜欢蓝色"]
+  },
+  {
+    "id": "explicit-correction",
+    "input": "不对，我不是要做营销活动，我要开发一个运营后台系统。",
+    "expected_intents": ["CORRECTION"],
+    "expected_moves": ["CONFIRM"],
+    "domain_terms": ["后台", "系统", "运营", "开发"]
+  },
+  {
+    "id": "deployment-request",
+    "input": "把已经完成的 Web 应用部署到我授权的测试服务器。",
+    "expected_intents": ["DEPLOY", "ACTION_REQUEST"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["部署", "应用", "服务器", "授权", "验证", "环境"]
+  },
+  {
+    "id": "existing-work-change",
+    "input": "在现有库存管理系统这个 Work 里，把审批规则改成金额超过一万元时需要两级审批。",
+    "expected_intents": ["MODIFY", "CONTINUE_CURRENT_WORK"],
+    "expected_moves": ["PROPOSE"],
+    "domain_terms": ["库存", "审批", "金额", "两级", "规则", "系统"]
+  }
+]

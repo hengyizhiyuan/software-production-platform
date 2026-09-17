@@ -64,6 +64,18 @@ def _enum_value(value: object) -> str:
     return str(candidate).lower()
 
 
+def _safe_validation_summary(error: BaseException) -> str:
+    """Expose schema locations/types without echoing Provider input or secrets."""
+
+    if not isinstance(error, ValidationError):
+        return type(error).__name__
+    issues = []
+    for issue in error.errors(include_url=False, include_input=False)[:5]:
+        location = ".".join(str(part) for part in issue.get("loc", ())) or "root"
+        issues.append(f"{location}:{issue.get('type', 'validation_error')}")
+    return ", ".join(issues) or "ValidationError"
+
+
 def _provider_strict_output_schema(schema: dict[str, Any]) -> dict[str, Any]:
     normalized = deepcopy(schema)
 
@@ -696,15 +708,32 @@ class CodexSdkInteractionSemanticCapability:
             + "Keep the system's users/operators distinct from the audience of the "
             "business it supports: a promotion audience is not automatically the "
             "platform's operators. Keep an unknown operator provisional. "
-            "\n\nSelect the most specific collaboration.turn_intent for the latest input. "
-            "CONTEXT_ADDITION adds facts; CORRECTION replaces prior understanding; "
-            "DISAGREEMENT rejects a direction; HUMAN_DECISION owns a choice. "
+            "\n\nSelect the most specific collaboration.turn_intent for the latest input "
+            "from the full bounded context, independently from how mature or detailed "
+            "the Human's thinking is. Prefer the concise vocabulary for new results: "
+            "BUILD asks Watt to make or shape a new object; HOW_TO asks how to do "
+            "something; DIRECT_QUESTION asks for a factual or explanatory answer; "
+            "RECOMMEND asks for a judgment; COMPARE asks for trade-offs; EXPLORE "
+            "develops possibilities; MODIFY changes an existing object; CORRECTION "
+            "replaces prior understanding; DEPLOY requests deployment; ACTION_REQUEST "
+            "asks Watt to perform another bounded action. CONTEXT_ADDITION adds facts; "
+            "DISAGREEMENT rejects a direction; HUMAN_DECISION owns a choice. Do not "
+            "classify every early or vague statement as EXPLORE: a vague request to "
+            "build a product is still BUILD. "
+            "Use exactly one turn_intent enum value from the output schema; never invent "
+            "a synonym such as CREATE, QUESTION or REQUEST_INFORMATION. "
             "WIC owns these advisory interpretations. "
-            "A DIRECT_QUESTION must include a concrete direct_answer. "
+            "A DIRECT_QUESTION or HOW_TO result must include a concrete, non-empty "
+            "direct_answer containing the core answer, even when natural_response already "
+            "contains that answer. Never return null for direct_answer on those intents. "
             + document_location_instruction
             + "REQUEST_DETAIL must set detailed_explanation_requested true. "
             + collaboration_instruction
-            + "Set response language to the Human's language. For a new goal, continuation "
+            + "Set response language to the Human's language. For BUILD, do not return only "
+            "methodology or a clarification question. Supply a concrete, reversible first "
+            "candidate grounded in the actual object, then at most one question only if its "
+            "answer materially changes that candidate. When the Human is uncertain, propose "
+            "a useful starting point rather than making them invent the answer. For a new goal, continuation "
             "or recommendation, supply one useful priority in recommended_next_action "
             "and its context-specific reason in concise_basis. Prefer a product decision "
             "or concrete workflow over naming the next design document. Rank the choice "
@@ -919,7 +948,9 @@ class CodexSdkGovernedResponseRealizer:
             "governed_content as semantic material rather than wording to echo. Show "
             "understanding by advancing the thinking, not by paraphrasing the Human. "
             "Lead with the answer, judgment, useful frame, comparison, or proposal named "
-            "by primary_move. Stay at next_conversational_granularity. If question_allowed "
+            "by primary_move. When answer_first is true, answer before framing or asking. "
+            "When candidate_first is true, contribute a concrete, low-commitment candidate "
+            "before any question. Stay at next_conversational_granularity. If question_allowed "
             "is false, ask no question. If true, ask at most max_questions and follow "
             "question_guidance. A selected_question is governed input but Interaction "
             "Strategy decides whether it should be visible this turn. Never emit "
@@ -1215,6 +1246,7 @@ class CodexSdkWorkInteractionCapability:
         response: ConversationResponseCandidate,
     ) -> InteractionAssessmentCandidate:
         return InteractionAssessmentCandidate(
+            turn_intent=semantic.collaboration.turn_intent,
             interpreted_motive=semantic.interpreted_motive,
             desired_outcome=semantic.desired_outcome,
             design_intent_frame=semantic.collaboration.design_intent_frame,
@@ -1306,7 +1338,8 @@ class CodexSdkWorkInteractionCapability:
             )
         except (ValueError, TypeError) as error:
             raise InteractionInvariantViolation(
-                "Coalesced collaboration Provider returned an invalid structured result"
+                "Coalesced collaboration Provider returned an invalid structured result "
+                f"({_safe_validation_summary(error)})"
             ) from error
         content = payload.natural_response.strip()
         if not content:
@@ -1422,7 +1455,8 @@ class CodexSdkWorkInteractionCapability:
             )
         except ValidationError as error:
             raise InteractionInvariantViolation(
-                "Coalesced collaboration Provider returned an invalid structured result"
+                "Coalesced collaboration Provider returned an invalid structured result "
+                f"({_safe_validation_summary(error)})"
             ) from error
 
     @staticmethod

@@ -16,6 +16,21 @@ from spg.domain.design_intent import DesignIntentFrame
 
 
 class ConversationTurnIntent(StrEnum):
+    """The Human's purpose for this turn, independent of cognitive maturity.
+
+    The older collaboration intents remain valid for persisted history and
+    compatibility.  The concise intents below are the preferred vocabulary for
+    new interaction-intelligence results.
+    """
+
+    BUILD = "BUILD"
+    HOW_TO = "HOW_TO"
+    RECOMMEND = "RECOMMEND"
+    COMPARE = "COMPARE"
+    EXPLORE = "EXPLORE"
+    MODIFY = "MODIFY"
+    DEPLOY = "DEPLOY"
+    ACTION_REQUEST = "ACTION_REQUEST"
     DIRECT_QUESTION = "DIRECT_QUESTION"
     NEW_GOAL = "NEW_GOAL"
     CONTEXT_ADDITION = "CONTEXT_ADDITION"
@@ -90,6 +105,7 @@ class InteractionStrategy(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    turn_intent: ConversationTurnIntent = ConversationTurnIntent.EXPLORE
     human_abstraction_level: HumanAbstractionLevel
     cognitive_maturity: CognitiveMaturity
     human_mode: HumanConversationMode
@@ -98,6 +114,8 @@ class InteractionStrategy(BaseModel):
     question_allowed: bool = False
     max_questions: int = Field(default=0, ge=0, le=1)
     question_guidance: str | None = None
+    candidate_first: bool = False
+    answer_first: bool = False
     demonstrate_understanding_without_restating: bool = True
 
     @model_validator(mode="after")
@@ -171,10 +189,15 @@ class StructuredCollaborationResult(BaseModel):
 
     @model_validator(mode="after")
     def direct_questions_have_an_answer(self) -> "StructuredCollaborationResult":
-        if self.turn_intent is ConversationTurnIntent.DIRECT_QUESTION and not (
+        if self.turn_intent in {
+            ConversationTurnIntent.DIRECT_QUESTION,
+            ConversationTurnIntent.HOW_TO,
+        } and not (
             self.direct_answer and self.direct_answer.strip()
         ):
-            raise ValueError("DIRECT_QUESTION requires direct_answer content")
+            raise ValueError(
+                f"{self.turn_intent.value} requires direct_answer content"
+            )
         if self.turn_intent is ConversationTurnIntent.REQUEST_DETAIL and not (
             self.detailed_explanation_requested
         ):

@@ -82,7 +82,7 @@ class DeterministicFastReceptionCapability:
             sentence = f"我已捕捉到新增约束：{value}。"
         elif match := _NARROW_CHANGE.search(text):
             intent = "BOUNDED_CHANGE"; captured = match.group(1).strip()
-            sentence = f"我理解这次只处理：{captured}。"
+            sentence = "这会作为现有对象的局部变更继续评估；当前范围不会被默认扩大。"
         elif match := _NEW_OBJECT.search(text):
             intent = "POSSIBLE_NEW_OBJECT"; captured = match.group(3).strip("。 ")
             sentence = f"你提出了另一个对象：{captured}；是否形成新 Work 仍由你决定。"

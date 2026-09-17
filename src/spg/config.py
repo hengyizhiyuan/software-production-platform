@@ -72,7 +72,7 @@ class Settings(BaseSettings):
         "none", "minimal", "low", "medium", "high", "xhigh"
     ] | None = "low"
     collaboration_provider_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
-    collaboration_provider_max_output_tokens: int = Field(default=4096, ge=512, le=32768)
+    collaboration_provider_max_output_tokens: int = Field(default=8192, ge=512, le=32768)
     executor_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
     executor_max_internal_turns: int = Field(default=3, ge=1)
     executor_sandbox_mode: Literal["workspace-write", "full-access"] = (
