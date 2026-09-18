@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from types import SimpleNamespace
 import subprocess
+from time import monotonic, sleep
 
 from alembic import command
 from alembic.config import Config
@@ -40,6 +41,7 @@ from spg.domain.steering import (
     SemanticStepResultCandidate,
     StaleSemanticStepCandidate,
     SteeringActionType,
+    SteeringAutomaticProgressionState,
     SteeringAuthorityAssessment,
     SteeringDriverStopReason,
     SteeringInvariantViolation,
@@ -55,6 +57,7 @@ from spg.infrastructure.persistence.runtime_schema import (
     runtime_commits,
 )
 from spg.infrastructure.persistence.steering_schema import semantic_step_results
+from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
 from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
 
 
@@ -136,6 +139,24 @@ class _SemanticCapability:
             reasoning_provider_identity=self.provider,
             completion_claimed=not self.expansion,
         )
+
+
+class _TransientProviderFailureCapability(_SemanticCapability):
+    def __init__(self, *, step_type: SteeringStepType) -> None:
+        super().__init__(step_type=step_type)
+        self.calls = 0
+
+    def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+        self.calls += 1
+        if self.calls == 1:
+            raise ModelProviderError(
+                ModelFailureKind.TIMEOUT_OR_NETWORK,
+                "test Provider transport failed",
+                request_sent=True,
+                usage_unknown=True,
+                retryable=True,
+            )
+        return super().execute(input)
 
 
 def _migration_config(database: Database) -> Config:
@@ -402,6 +423,65 @@ def test_sem_02_06_13_refine_requires_governed_result(
         )
         assert reconstructed.current_step is not None
         assert reconstructed.current_step.type is SteeringStepType.DESIGN
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
+
+
+def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
+    postgres_database: Database,
+    product,
+) -> None:
+    works, _repository = product
+    admitted, plan = _admitted_plan(works)
+    assert plan.current_step is not None
+    capability = _TransientProviderFailureCapability(
+        step_type=SteeringStepType.DESIGN
+    )
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(
+        postgres_database,
+        works,
+        orchestrator,
+        semantic_capability=capability,
+        max_automatic_transitions=1,
+        provider_retry_base_delay_seconds=0.2,
+        provider_retry_max_delay_seconds=0.2,
+    )
+    try:
+        assert driver.schedule(admitted.work_id) is True
+        deadline = monotonic() + 3
+        waiting = None
+        while monotonic() < deadline:
+            waiting = driver.project(admitted.work_id)
+            if (
+                waiting.automatic_progression_state
+                is SteeringAutomaticProgressionState.WAITING_RESOURCE
+            ):
+                break
+            sleep(0.01)
+        assert waiting is not None
+        assert (
+            waiting.automatic_progression_state
+            is SteeringAutomaticProgressionState.WAITING_RESOURCE
+        )
+        assert waiting.last_stop_reason is SteeringDriverStopReason.CAPABILITY_UNAVAILABLE
+
+        while monotonic() < deadline:
+            if (
+                capability.calls == 2
+                and SteeringApplicationService(postgres_database)
+                .reconstruct(admitted.work_id)
+                .semantic_results
+            ):
+                break
+            sleep(0.01)
+        assert capability.calls == 2
+        assert driver.wait_until_idle(admitted.work_id, 2)
+        result = driver.last_outcome(admitted.work_id)
+        assert result is not None
+        assert result.last_action is SteeringActionType.SEMANTIC_RESULT_ADMISSION
+        assert result.stop_reason is SteeringDriverStopReason.TRANSITION_BOUND
     finally:
         driver.shutdown()
         orchestrator.shutdown()

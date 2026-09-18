@@ -27,7 +27,7 @@ test("UI-07 maps every admitted Work status to clear product language", () => {
     AWAITING_APPROVAL: "Awaiting approval",
     READY: "Watt is preparing",
     RUNNING: "Watt is working",
-    NEEDS_ATTENTION: "Needs your attention",
+    NEEDS_ATTENTION: "Production paused",
     BLOCKED: "Blocked",
     COMPLETED: "Completed",
   };
@@ -167,6 +167,7 @@ test("Control Room Slice 1 projects only existing Work, WIC, Runtime, and Attent
     decision: "Review candidate",
     reason: "Human review is required",
     recommendation: "Authorize the admitted candidate",
+    available_actions: ["AUTHORIZE"],
   }];
 
   const projection = viewModel.controlRoomProjection(work, understandings, attention);
@@ -199,7 +200,7 @@ test("Control Room Slice 1 does not infer missing or cross-Work Reality", () => 
     {
       work_id: "work-2",
       raw_user_requirement: "A conversational statement is not governed Motive truth",
-      status: "DRAFT",
+      status: "RUNNING",
       human_attention_required: false,
     },
     [{
@@ -223,7 +224,7 @@ test("Control Room Slice 1 does not infer missing or cross-Work Reality", () => 
   assert.equal(projection.attention.state, "No Human attention required");
   assert.equal(
     projection.attention.summary,
-    "No blockers, reviews, or transitions require Human action.",
+    "No action required.",
   );
   assert.equal(projection.attention.emergingDirection, "No emerging direction reported.");
 });
@@ -438,7 +439,7 @@ test("Control Room Slice 3 preserves blockers and missing Plan Reality", () => {
       human_attention_required: true,
       last_stop_reason: "HUMAN_ATTENTION",
     },
-    [{ work_id: "work-blocked", reason: "Architecture authority is required." }],
+    [{ work_id: "work-blocked", reason: "Architecture authority is required.", available_actions: ["APPROVE"] }],
   );
   assert.equal(blocked.nextStep, "No known next step available.");
   assert.equal(blocked.rationale, "No admitted Plan rationale available.");
@@ -446,6 +447,14 @@ test("Control Room Slice 3 preserves blockers and missing Plan Reality", () => {
     blocked.condition,
     "Human decision required: Architecture authority is required.",
   );
+
+  const capabilityBlocked = viewModel.currentDirectionProjection(
+    { work_id: "work-blocked", what_happens_next: "Configure an Executor capability" },
+    { work_id: "work-blocked", active_revision_number: 2, human_attention_required: true,
+      automatic_progression_state: "STOPPED", last_stop_reason: "HUMAN_ATTENTION" },
+    [],
+  );
+  assert.equal(capabilityBlocked.condition, "Production paused: Configure an Executor capability");
 
   const missing = viewModel.currentDirectionProjection(
     { work_id: "work-current" },
@@ -518,6 +527,25 @@ test("Control Room Slice 3 does not hide trusted baseline and Active Runtime div
   );
 });
 
+test("Human Review application identity never becomes trusted application activation", () => {
+  const projection = viewModel.trustSummaryProjection(
+    { status: "COMPLETED", work_complete: true },
+    {
+      trusted_result: true,
+      runtime_activation: {
+        state: "ACTIVE_HUMAN_REVIEW",
+        activation_mode: "HUMAN_REVIEW",
+        human_review_version_id: "a".repeat(64),
+        current_trusted_baseline_revision: "work-baseline",
+        reason: "Exact review build observed; no application trust claim.",
+      },
+    },
+  );
+  assert.equal(projection.state, "Trusted repository result; Human Review application");
+  assert.equal(projection.trustedRepository, true);
+  assert.equal(projection.activeAtTrusted, false);
+});
+
 test("Control Room Slice 3 keeps incomplete and unverified Reality explicit", () => {
   const projection = viewModel.trustSummaryProjection(
     { status: "RUNNING", work_complete: false },
@@ -539,26 +567,13 @@ test("Control Room Slice 3 keeps incomplete and unverified Reality explicit", ()
   assert.equal(projection.basis, "Verification has not completed.");
 });
 
-test("Work Composer preserves the user's expanded state across reloads", () => {
+test("Work Composer restores drafts without persisting a stale expanded UI state", () => {
+  assert.doesNotMatch(appSource, /COMPOSER_EXPANDED_STORAGE_KEY/);
+  assert.match(appSource, /transitionComposer\("OUTSIDE"\)/);
+  assert.match(appSource, /state\.drafts\[state\.selectedInteractionId \|\| "new"\] = elements\.workRequirement\.value/);
   assert.match(
     appSource,
-    /const COMPOSER_EXPANDED_STORAGE_KEY = "spg\.workComposer\.expanded"/,
-  );
-  assert.match(
-    appSource,
-    /localStorage\.getItem\(COMPOSER_EXPANDED_STORAGE_KEY\)/,
-  );
-  assert.match(
-    appSource,
-    /if \(stored === "true" \|\| stored === "false"\) \{\s*setComposerExpanded\(stored === "true"\)/,
-  );
-  assert.match(
-    appSource,
-    /setComposerExpanded\(nextExpanded\);\s*try \{\s*localStorage\.setItem\(COMPOSER_EXPANDED_STORAGE_KEY, String\(nextExpanded\)\)/,
-  );
-  assert.match(
-    appSource,
-    /restoreComposerExpanded\(\);\s*consumeNewWorkEntry\(\);\s*reloadWorkspace\(\)/,
+    /restoreComposer\(\);\s*transitionComposer\("OUTSIDE"\);\s*consumeNewWorkEntry\(\);\s*reloadWorkspace\(\)/,
   );
   assert.ok((appSource.match(/catch \(_error\)/g) || []).length >= 2);
 });
@@ -655,6 +670,8 @@ test("streaming assistant output occupies one message lifecycle until persisted 
   assert.equal(after[1].streaming, undefined);
   assert.match(appSource, /streamingAssistantMessage\.content = streamed/);
   assert.doesNotMatch(appSource, /elements\.wattResponse\.textContent = streamed/);
+  assert.match(appSource, /duplicateReplacement/);
+  assert.match(appSource, /if \(duplicateReplacement\) \{ node\.remove\(\); return; \}/);
 });
 
 
@@ -681,12 +698,13 @@ function conversationHarness(request) {
   const harness = {
     state, viewModel, ApiError, EventSource, sources, frames, notices,
     handoffCurrentInteraction() {},
+    transitionComposer() {},
     crypto: { randomUUID: () => `pending-${++nextId}` },
     elements: { workRequirement: { value: "" } },
     localStorage: { setItem() {} }, INTERACTION_STORAGE_KEY: "selection",
     setTimeout: (callback) => setTimeout(callback, 0),
     cancelAnimationFrame() {},
-    renderInteraction() {}, renderComposer() {}, setSurface() {}, announce() {}, hideNotice() {},
+    renderInteraction() {}, renderConversation() {}, renderComposer() {}, renderProspectiveWorkspace() {}, setSurface() {}, announce() {}, hideNotice() {},
     setBusy(value) { state.busy = value; },
     showNotice(error) { notices.push(error); },
     scheduleStreamRender() {
@@ -984,7 +1002,7 @@ test("stream bursts repaint one message per frame and preserve historical DOM no
       return { history: messages.filter((record) => record.turn_id !== latest || latest === handedOff),
         current: messages.filter((record) => record.turn_id === latest && latest !== handedOff) };
     } },
-    elements: { interactionHistory: new Node(), currentInteractionLive: new Node(), interactionProcessingStatus: new Node() },
+    elements: { interactionHistory: new Node(), currentInteractionLive: new Node(), currentInteractionPanel: { hidden: true }, interactionProcessingStatus: new Node() },
     createElement: (_tag, className, text) => new Node(className, text),
     requestAnimationFrame: (callback) => { frames.push(callback); return frames.length; },
   };
@@ -1042,6 +1060,26 @@ test("Production projection reports truthful Steering capability and native queu
     "Plan Steering cannot progress because the required semantic capability is unavailable.",
   );
 
+  const retrying = viewModel.controlRoomProjection(
+    work,
+    [],
+    [],
+    {
+      work_id: "work-production",
+      automatic_progression_state: "WAITING_RESOURCE",
+      last_stop_reason: "CAPABILITY_UNAVAILABLE",
+    },
+    [],
+  );
+  assert.equal(
+    retrying.status.activity,
+    "Watt is waiting for semantic Provider availability and will retry automatically.",
+  );
+  assert.equal(
+    retrying.status.condition,
+    "The semantic Provider is temporarily unavailable; Watt owns the retry.",
+  );
+
   const executing = viewModel.controlRoomProjection(
     work,
     [],
@@ -1092,7 +1130,7 @@ test("governed response deltas paint one received chunk per frame", () => {
   const harness = {
     state, viewModel,
     controlRoom: { conversationOwnership(messages) { return { history: [], current: messages }; } },
-    elements: { interactionHistory: new Node(), currentInteractionLive: new Node(), interactionProcessingStatus: new Node() },
+    elements: { interactionHistory: new Node(), currentInteractionLive: new Node(), currentInteractionPanel: { hidden: true }, interactionProcessingStatus: new Node() },
     createElement: (_tag, className, text) => new Node(className, text),
     requestAnimationFrame: (callback) => { frames.push(callback); return frames.length; },
   };

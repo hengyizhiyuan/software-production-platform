@@ -1,6 +1,8 @@
 import json
+from dataclasses import replace
 from types import SimpleNamespace
 from uuid import UUID
+import pytest
 
 from spg.domain.model_runtime import (
     ModelProfile,
@@ -15,6 +17,7 @@ from spg.domain.steering import (
     RealityReferenceKind,
     SemanticResultKind,
     SteeringStepType,
+    SteeringInvariantViolation,
 )
 from spg.providers.deepseek_semantic import DeepSeekSemanticStepCapability
 
@@ -94,3 +97,71 @@ def test_deepseek_semantic_executes_the_governed_steering_purpose() -> None:
                                      "total_tokens": 42, "unknown": False}
     capability.close()
     assert runtime.closed is True
+
+
+def test_missing_disposition_gets_one_typed_repair_without_loose_admission() -> None:
+    class Runtime(_Runtime):
+        def generate(self, **options):
+            result = super().generate(**options)
+            if len(self.calls) == 1:
+                candidate = json.loads(result.output_text)
+                del candidate["disposition"]
+                return replace(result, output_text=json.dumps(candidate))
+            return result
+
+    runtime = Runtime()
+    value = SimpleNamespace(
+        work_id=UUID(int=1), steering_plan_revision_id=UUID(int=2),
+        step=SimpleNamespace(id=UUID(int=3), type=SteeringStepType.DESIGN),
+        basis_fingerprint="a" * 64, constraints=(),
+        reality_refs=(RealityReference(kind=RealityReferenceKind.WORK, identity=UUID(int=1)),),
+        model_dump=lambda **_options: {"step": {"type": "DESIGN"}},
+    )
+    result = DeepSeekSemanticStepCapability(runtime).execute(value)
+    assert result.completion_claimed is True
+    assert len(runtime.calls) == 2
+    assert "prior result omitted" in runtime.calls[1]["input_text"].lower()
+
+    class StillMalformed(Runtime):
+        def generate(self, **options):
+            result = _Runtime.generate(self, **options)
+            candidate = json.loads(result.output_text)
+            del candidate["disposition"]
+            return replace(result, output_text=json.dumps(candidate))
+
+    broken = StillMalformed()
+    with pytest.raises(SteeringInvariantViolation):
+        DeepSeekSemanticStepCapability(broken).execute(value)
+    assert len(broken.calls) == 2
+
+
+def test_invalid_json_gets_exactly_one_strict_repair() -> None:
+    class Runtime(_Runtime):
+        def generate(self, **options):
+            result = super().generate(**options)
+            if len(self.calls) == 1:
+                return replace(result, output_text=result.output_text + " trailing")
+            return result
+
+    value = SimpleNamespace(
+        work_id=UUID(int=1), steering_plan_revision_id=UUID(int=2),
+        step=SimpleNamespace(id=UUID(int=3), type=SteeringStepType.DESIGN),
+        basis_fingerprint="a" * 64, constraints=(),
+        reality_refs=(RealityReference(kind=RealityReferenceKind.WORK, identity=UUID(int=1)),),
+        model_dump=lambda **_options: {"step": {"type": "DESIGN"}},
+    )
+    runtime = Runtime()
+    result = DeepSeekSemanticStepCapability(runtime).execute(value)
+    assert result.completion_claimed is True
+    assert len(runtime.calls) == 2
+    assert "not one valid complete json value" in runtime.calls[1]["input_text"].lower()
+
+    class StillMalformed(_Runtime):
+        def generate(self, **options):
+            result = super().generate(**options)
+            return replace(result, output_text=result.output_text + " trailing")
+
+    broken = StillMalformed()
+    with pytest.raises(SteeringInvariantViolation):
+        DeepSeekSemanticStepCapability(broken).execute(value)
+    assert len(broken.calls) == 2

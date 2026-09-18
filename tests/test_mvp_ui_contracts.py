@@ -254,11 +254,14 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
 def test_planb_composer_has_explicit_bounded_collapse_control() -> None:
     html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
     javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
+    css = (WEB_ROOT / "appearance.css").read_text(encoding="utf-8")
 
     assert 'id="composer-toggle"' in html
     assert 'aria-controls="work-form"' in html
     assert 'aria-expanded="true"' in html
-    assert "elements.workForm.hidden = !expanded" in javascript
+    assert 'composer.classList.toggle("is-composing", expanded)' in javascript
+    assert '.composer.is-composing .composer-form {' in css
+    assert 'elements.composerToggle.setAttribute("aria-expanded", String(expanded))' in javascript
     assert '"Expand composer"' in javascript
     assert '"Collapse composer"' in javascript
 
@@ -293,7 +296,8 @@ def test_formal_workspace_has_stable_spatial_slots_collapse_and_overlay_focus() 
     assert "grid-column" not in focus_rule
     assert 'event.key !== "Escape"' in javascript
     assert "production-intent-handoff" in javascript
-    assert "Authorize Work formation and start Steering" in html
+    assert 'id="admit-work-control"' in html
+    assert 'aria-label="Admit governed Work"' in html
 
 
 def test_control_room_slice_1_is_a_read_only_projection_over_existing_reality() -> None:
@@ -436,9 +440,9 @@ def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None
     html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
     assert "https://" not in html
     assert "http://" not in html
-    assert 'src="/assets/state.js"' in html
+    assert 'src="/assets/state.js?' in html
     assert 'src="/assets/appearance.js?v=formal-ui-phase1"' in html
-    assert 'src="/assets/app.js?v=human-review-v3"' in html
+    assert 'src="/assets/app.js?' in html
     assert 'href="/assets/styles.css"' in html
 
 

@@ -857,7 +857,8 @@ def test_tool_host_process_environment_filters_secrets_case_insensitively(
     (tmp_path / "check_env.py").write_text(
         "import os\n"
         "print(any('DATABASE_URL' in k.upper() or 'API_KEY' in k.upper() for k in os.environ))\n"
-        "print(os.environ.get('PYTHONPATH'))\n",
+        "print(os.environ.get('PYTHONPATH'))\n"
+        "print(os.environ.get('PYTHONDONTWRITEBYTECODE'))\n",
         encoding="utf-8",
     )
     binding, _ = _binding()
@@ -875,7 +876,7 @@ def test_tool_host_process_environment_filters_secrets_case_insensitively(
         proposal_index=0,
         tool_identity="process.run",
         arguments={
-            "argv": ["python3", "check_env.py"]
+            "argv": [sys.executable, "check_env.py"]
         },
     )
     request = ToolExecutionRequest(
@@ -887,12 +888,17 @@ def test_tool_host_process_environment_filters_secrets_case_insensitively(
         capability_grants=(CapabilityGrant(identity="process.run", version="1"),),
         workspace=workspace,
     )
-    result = asyncio.run(LocalNativeToolHost(tmp_path).registry().execute(request))
+    result = asyncio.run(LocalNativeToolHost(
+        tmp_path,
+        process_allowlist=(Path(sys.executable).name,),
+    ).registry().execute(request))
     assert result.condition is EffectCondition.SETTLED
     assert result.output["stdout"].splitlines() == [
         "False",
         str(tmp_path / "src"),
+        "1",
     ]
+    assert not (tmp_path / "__pycache__").exists()
     assert "must-not-cross" not in str(result.output)
 
 

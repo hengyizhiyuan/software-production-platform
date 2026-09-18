@@ -1002,6 +1002,9 @@ class WorkResponse(ApiDto):
     last_stop_reason: str | None = None
     execution_progress: ExecutionProgressResponse | None = None
     guided_design: GuidedDesignResponse | None = None
+    next_owner: str | None = None
+    control_state_valid: bool | None = None
+    control_state_violations: tuple[str, ...] = ()
 
     @classmethod
     def from_projection(cls, work: WorkProjection) -> Self:
@@ -1306,6 +1309,7 @@ class RuntimeActivationResponse(ApiDto):
     current_trusted_baseline_revision: str | None
     current_trusted_baseline_tree_identity: str | None
     activation_mode: str | None
+    human_review_version_id: str | None
     reason: str
     image_rebuild_paths: tuple[str, ...]
 

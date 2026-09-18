@@ -19,6 +19,7 @@ from spg.domain.conversation import (
 from spg.application.interaction import (
     WorkInteractionService,
     _normalize_table_dimension_constraints,
+    _work_reality_status_question,
     interaction_basis_fingerprint,
 )
 from spg.application.wic_intelligence import build_progressive_semantics
@@ -140,6 +141,16 @@ def test_table_dimensions_remain_explicit_in_governed_candidate_fields(
     normalized = _normalize_table_dimension_constraints(candidate, human_input)
 
     assert normalized.candidate_constraints == ("简单 HTML 页面", expected)
+
+
+@pytest.mark.parametrize("question", (
+    "目前执行到什么状态了？",
+    "现在做到哪了？",
+    "为什么还在等待？",
+    "现在有没有在执行？",
+))
+def test_active_work_operational_questions_use_the_read_only_route(question: str) -> None:
+    assert _work_reality_status_question(question)
 
 
 def test_ow_c_correction_supersedes_prior_motive_without_deleting_history() -> None:
@@ -395,6 +406,27 @@ def test_safe_reversible_detail_is_inferred_without_questionnaire() -> None:
     assert result.selected_question is None
     assert all(q.disposition is QuestionDisposition.INFER_REVERSIBLY for q in result.questions)
 
+    readiness = WorkInteractionService._evaluate_readiness(
+        candidate, result.basis_fingerprint,
+        governance_candidate=result.governance_candidate,
+        progressive_semantics=result,
+    )
+    assert readiness.status is WorkAdmissionReadinessStatus.READY
+    assert readiness.unresolved_material_questions == ()
+    assert candidate.unresolved_material_questions == ("按钮圆角是多少？", "是否换颜色？")
+
+
+def test_human_owned_decision_blocks_progressive_work_admission() -> None:
+    candidate = _candidate("OW-G", unresolved_material_questions=("选择客户数据外发范围？",))
+    result = _build("OW-G", candidate=candidate, text="客户数据能否外发还没决定")
+    readiness = WorkInteractionService._evaluate_readiness(
+        candidate, result.basis_fingerprint,
+        governance_candidate=result.governance_candidate,
+        progressive_semantics=result,
+    )
+    assert readiness.status is WorkAdmissionReadinessStatus.NOT_READY
+    assert readiness.unresolved_material_questions
+
 
 def test_ow_h_reconciles_fact_but_preserves_human_motive() -> None:
     result = _build("OW-H")
@@ -469,7 +501,9 @@ def test_selected_material_question_prevents_early_formation_readiness() -> None
 
 
 def test_slice2_adversarial_corpus_is_bounded_and_high_signal() -> None:
-    payload = json.loads(Path("benchmarks/open_wic/slice2-corpus-v1.json").read_text())
+    payload = json.loads(
+        Path("benchmarks/open_wic/slice2-corpus-v1.json").read_text(encoding="utf-8")
+    )
     assert payload["schema_version"] == "wic-slice2-corpus-v1"
     assert len(payload["cases"]) == 12
     assert len({case["id"] for case in payload["cases"]}) == 12
@@ -484,7 +518,9 @@ def test_slice2_adversarial_corpus_is_bounded_and_high_signal() -> None:
 
 
 def test_slice2_adversarial_corpus_runs_through_visible_policy_path() -> None:
-    payload = json.loads(Path("benchmarks/open_wic/slice2-corpus-v1.json").read_text())
+    payload = json.loads(
+        Path("benchmarks/open_wic/slice2-corpus-v1.json").read_text(encoding="utf-8")
+    )
     mapping = {
         "multiple_corrections": "OW-C",
         "correction_reversal": "OW-C",

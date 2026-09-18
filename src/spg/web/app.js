@@ -10,7 +10,6 @@
   }
 
   const POLL_INTERVAL_MS = 2000;
-  const COMPOSER_EXPANDED_STORAGE_KEY = "spg.workComposer.expanded";
   const INTERACTION_STORAGE_KEY = "spg.currentInteraction.id";
   const OUTBOX_STORAGE_KEY = "spg.interaction.outbox.v1";
   const DRAFT_STORAGE_KEY = "spg.interaction.drafts.v1";
@@ -47,6 +46,10 @@
     turnTimings: {},
     handoffTurnId: "",
     handoffTimer: null,
+    composerMode: "COMPACT_IDLE",
+    provisionalWorkspace: false,
+    workspaceEngaged: false,
+    workAdmissionPending: false,
   };
   // Reviewer/browser instrumentation only. It is not product or governance truth.
   globalThis.__WATT_TURN_TIMINGS__ = state.turnTimings;
@@ -116,6 +119,8 @@
     workspaceActionsBlocker: document.getElementById("workspace-actions-blocker"),
     workspaceActionsDirection: document.getElementById("workspace-actions-direction"),
     currentInteractionLive: document.getElementById("current-interaction-live"),
+    currentInteractionPanel: document.getElementById("current-interaction-panel"),
+    workingAgreementsSection: document.getElementById("working-agreements-section"),
     showGoalForm: document.getElementById("show-goal-form"),
     goalForm: document.getElementById("goal-form"),
     goalTitle: document.getElementById("goal-title"),
@@ -166,6 +171,10 @@
     interactionAdmission: document.getElementById("interaction-admission"),
     interactionAuthorityIdentity: document.getElementById("interaction-authority-identity"),
     admitWorkControl: document.getElementById("admit-work-control"),
+    prospectiveActions: document.getElementById("prospective-actions"),
+    prospectiveDecision: document.getElementById("prospective-decision"),
+    prospectiveStart: document.getElementById("prospective-start"),
+    prospectiveRefine: document.getElementById("prospective-refine"),
     workRevisionAdmission: document.getElementById("work-revision-admission"),
     workRevisionAuthorityIdentity: document.getElementById("work-revision-authority-identity"),
     approveWorkRevision: document.getElementById("approve-work-revision"),
@@ -399,7 +408,7 @@
     elements.loadingState.hidden = name !== "loading";
     elements.globalError.hidden = name !== "error";
     elements.noSelection.hidden = name !== "empty";
-    elements.selectedWork.hidden = name !== "selected";
+    elements.selectedWork.hidden = name !== "selected" && name !== "prospective";
   }
 
   function goalTitle(goalId) {
@@ -449,9 +458,6 @@
       button.append(createElement("span", "work-list-title", viewModel.workTitle(work)));
       const meta = createElement("span", "work-list-meta");
       const status = createElement("span", "", viewModel.statusLabel(work.status));
-      if (work.human_attention_required) {
-        status.prepend(createElement("span", "attention-pip"));
-      }
       meta.append(status, createElement("span", "", goalTitle(work.goal_id)));
       button.append(meta);
       button.append(
@@ -478,7 +484,15 @@
   }
 
   function renderConversation() {
-    const messages = viewModel.interactionConversationMessages(state.sharedUnderstanding, state.streamingAssistantMessage);
+    const messages = [...viewModel.interactionConversationMessages(state.sharedUnderstanding, state.streamingAssistantMessage)];
+    const sending = !state.activeInteractionTurnId && !state.finishingTurn
+      ? (state.outbox || []).find((item) => item.interactionId === state.selectedInteractionId
+        && ["queued", "sending"].includes(item.status))
+      : null;
+    if (sending && (sending.status === "queued" || !messages.some((record) =>
+      record.actor === "HUMAN" && record.content === sending.content))) {
+      messages.push({ actor: "HUMAN", turn_id: `local:${sending.id}`, content: sending.content });
+    }
     const ownership = controlRoom.conversationOwnership(messages, state.handoffTurnId);
     const history = ownership.history;
     const container = elements.interactionHistory;
@@ -516,6 +530,7 @@
   function renderCurrentInteraction(active, offset = 0) {
     const current = elements.currentInteractionLive;
     if (!current) return;
+    elements.currentInteractionPanel.hidden = active.length === 0;
     const keys = active.map((record, index) => messageKey(record, offset + index));
     const existing = new Map(Array.from(current.children).map((node) => [node.dataset.messageKey, node]));
     const initialized = current.dataset.initialized === "true";
@@ -530,8 +545,6 @@
         const content = createElement("div", "message-content");
         content.dataset.responseRegion = "composable";
         message.append(content);
-        message.append(createElement("p", "message-meta"));
-        message.append(createElement("p", "message-references"));
         if (initialized) message.classList.add("is-entering");
       }
       retained.add(message);
@@ -540,11 +553,17 @@
     });
     Array.from(current.children).forEach((node) => {
       if (retained.has(node)) return;
+      const speaker = node.querySelector(".speaker-label")?.textContent;
+      const content = node.querySelector(".message-content")?.textContent;
+      const duplicateReplacement = active.some((record) => (
+        speaker === (record.actor === "HUMAN" ? "You" : "Watt")
+        && content === record.content
+      ));
+      if (duplicateReplacement) { node.remove(); return; }
       if (!node.dataset.messageKey || !initialized || state.handoffTurnId) { node.remove(); return; }
       node.classList.add("is-leaving");
       globalThis.setTimeout(() => { if (node.classList.contains("is-leaving")) node.remove(); }, 160);
     });
-    if (!active.length) current.append(createElement("p", "empty-copy", "The current exchange will appear here."));
     current.dataset.initialized = "true";
   }
 
@@ -595,6 +614,7 @@
     } else if (content.textContent !== record.content) {
       content.textContent = record.content;
     }
+    if (message.children.length < 3) return;
     const timestamp = record.created_at ? new Date(record.created_at).toLocaleTimeString() : "";
     const meta = `${timestamp}${record.processing_status ? ` · ${record.processing_status}` : ""}`;
     if (message.children[2].textContent !== meta) message.children[2].textContent = meta;
@@ -773,6 +793,7 @@
       elements.interactionAdmission.hidden = true;
       elements.workRevisionAdmission.hidden = true;
       elements.workTransitionDecision.hidden = true;
+      renderProspectiveWorkspace();
       return;
     }
     renderInteractionStatus();
@@ -797,10 +818,13 @@
     elements.interpretedContext.textContent = joined(projection.candidate_context, "None yet");
     elements.interpretedRequests.textContent = joined(projection.current_requests, "None yet");
     elements.interpretedConstraints.textContent = joined(projection.candidate_constraints, "None yet");
-    elements.interpretedQuestions.textContent = joined(
-      projection.unresolved_material_questions,
-      status === "READY" ? "None" : "Assessment pending",
-    );
+    const currentBlockers = readiness?.unresolved_material_questions || [];
+    const deferred = (projection.unresolved_material_questions || [])
+      .filter((question) => !currentBlockers.includes(question));
+    elements.interpretedQuestions.textContent = [
+      ...(currentBlockers.length ? [`Current blocker: ${currentBlockers.join(" · ")}`] : []),
+      ...(deferred.length ? [`Deferred detail (not Human-approved): ${deferred.join(" · ")}`] : []),
+    ].join(" | ") || (status === "READY" ? "None" : "Assessment pending");
     const governed = projection.governed_revision;
     const repositoryIdentity = governed
       ? governed.repository_identity
@@ -868,6 +892,59 @@
     elements.workTransitionDecision.hidden = !(
       transition && transition.choice === "PENDING_HUMAN"
     );
+    renderProspectiveWorkspace();
+  }
+
+  function renderProspectiveWorkspace() {
+    const projection = state.sharedUnderstanding;
+    const assessment = projection?.latest_assessment;
+    const candidate = controlRoom.prospectiveWorkspaceProjection(projection, state.selectedWorkId);
+    if (candidate.visible) state.workspaceEngaged = true;
+    if (assessment && projection?.latest_assessment_current) state.provisionalWorkspace = false;
+    const provisional = state.provisionalWorkspace && !assessment;
+    const prospective = state.workAdmissionPending
+      || (!state.selectedWorkId && (candidate.visible || state.workspaceEngaged || provisional));
+    elements.selectedWork.dataset.prospective = String(prospective);
+    elements.prospectiveActions.hidden = !prospective;
+    elements.interactionAdmission.hidden = true;
+    if (!prospective) {
+      if (!state.selectedWork) setSurface("empty");
+      return;
+    }
+    setSurface("prospective");
+    const ready = candidate.canStart && !state.workAdmissionPending;
+    const blocker = candidate.blocker;
+    const blockerText = ({ MOTIVE: "Tell Watt what you want to make happen.",
+      DESIRED_OUTCOME: "Clarify what the first useful outcome should be.",
+      WORK_MOTIVE: "Describe a Work objective rather than an informational question." })[blocker] || blocker;
+    elements.workTitle.textContent = provisional ? "Understanding request…"
+      : projection?.interpreted_motive || assessment?.interpreted_motive || "Understanding request…";
+    elements.workStatus.textContent = "Understanding in progress · no Work admitted";
+    elements.workStatus.className = "status-badge status-draft";
+    elements.attentionMarker.hidden = true;
+    elements.workspaceRealitySummary.textContent = "No bound engineering source yet. No governed Work exists.";
+    elements.workSourceTree.replaceChildren(createElement("p", "empty-copy", "No repository bound. Watt-managed workspace may be available after admission."));
+    elements.workspaceAgendaSummary.textContent = projection?.design_next_focus || "Understanding request…";
+    elements.workExecutionPath.replaceChildren();
+    ["Understand", "Shape", "Produce", "Verify", "Deliver"].forEach((step, index) => {
+      elements.workExecutionPath.append(createElement("li", index === 0 ? "work-path-step state-current" : "work-path-step", step));
+    });
+    elements.workspaceProductionSummary.textContent = "IDLE · Production has not started.";
+    elements.productionHumanState.hidden = false;
+    elements.productionStateLabel.textContent = "IDLE";
+    elements.productionHumanActivity.textContent = "No PWU or Executor is running.";
+    elements.productionHumanDetail.textContent = "Work admission is a separate Human decision.";
+    elements.workspaceActionsSummary.textContent = state.workAdmissionPending ? "Starting…"
+      : provisional ? "No action yet." : ready ? "You can start with the current understanding or keep refining." : "Refine the current understanding before starting.";
+    elements.prospectiveDecision.textContent = ready
+      ? "The next governed step is sufficiently understood; remaining reversible details can be refined later."
+      : state.workAdmissionPending ? "Human admission is being recorded; formal Work facts are not projected until it succeeds."
+        : provisional ? "Waiting for interpretation; no Work or production has started."
+        : blockerText ? `Before starting: ${blockerText}` : "Watt is still establishing the Motive and desired outcome.";
+    elements.prospectiveStart.hidden = !ready;
+    elements.prospectiveRefine.hidden = provisional || state.workAdmissionPending;
+    elements.prospectiveRefine.textContent = ready ? "继续完善" : "回应当前问题";
+    document.getElementById("actions-surface").classList.toggle("requires-attention", Boolean(blocker));
   }
 
   function renderChips(container, values, emptyLabel) {
@@ -897,23 +974,18 @@
     });
   }
 
-  function setComposerExpanded(expanded) {
-    elements.workForm.hidden = !expanded;
+  function transitionComposer(event) {
+    state.composerMode = controlRoom.nextComposerMode(
+      state.composerMode, event, Boolean(elements.workRequirement.value.trim()),
+    );
+    const expanded = state.composerMode === "EXPANDED_COMPOSING";
+    const composer = elements.workForm.closest(".composer");
+    composer.dataset.composerState = state.composerMode;
+    composer.classList.toggle("is-composing", expanded);
     elements.composerToggle.setAttribute("aria-expanded", String(expanded));
     elements.composerToggle.textContent = expanded
       ? "Collapse composer"
       : "Expand composer";
-  }
-
-  function restoreComposerExpanded() {
-    try {
-      const stored = localStorage.getItem(COMPOSER_EXPANDED_STORAGE_KEY);
-      if (stored === "true" || stored === "false") {
-        setComposerExpanded(stored === "true");
-      }
-    } catch (_error) {
-      // Keep the markup default when browser storage is unavailable.
-    }
   }
 
   function renderProductionPlan(work) {
@@ -1023,14 +1095,17 @@
 
   function renderAttention() {
     elements.attentionList.replaceChildren();
-    elements.attentionSection.hidden = state.attention.length === 0;
-    state.attention.forEach((attention) => {
+    const actionable = controlRoom.humanActionProjection(state.selectedWork, state.attention, state.selectedAgreementId);
+    const shown = [...actionable.actionableAttention];
+    if (actionable.conversationalDecision) shown.push(actionable.conversationalDecision);
+    elements.attentionSection.hidden = shown.length === 0;
+    shown.forEach((attention) => {
       const card = createElement("article", "attention-card");
       const candidateDecision = attention.kind === "CANDIDATE_AUTHORIZATION";
       card.append(createElement("h4", "", candidateDecision ? "Review the result" : attention.decision));
       card.append(createElement("p", "", candidateDecision
         ? "Preview or download the candidate, then decide whether to authorize it."
-        : "Choose how you want Watt to continue."));
+        : attention.reason || "Choose how you want Watt to continue."));
       const actions = createElement("div", "action-row");
       attention.available_actions.forEach((action) => {
         const recommended = attention.recommended_action === action;
@@ -1045,6 +1120,12 @@
         button.addEventListener("click", () => resolveAttention(attention.attention_id, action));
         actions.append(button);
       });
+      if (attention === actionable.conversationalDecision) {
+        const respond = createElement("button", "action-button emphasis", "Respond in conversation");
+        respond.type = "button";
+        respond.addEventListener("click", () => elements.workRequirement.focus());
+        actions.append(respond);
+      }
       card.append(actions);
       elements.attentionList.append(card);
     });
@@ -1273,10 +1354,14 @@
     const activation = result.runtime_activation;
     const activeAtTrusted = activation
       && activation.state === "ACTIVE_AT_TRUSTED_BASELINE";
+    const activeReview = activation
+      && activation.state === "ACTIVE_HUMAN_REVIEW";
     elements.trustedResult.textContent = result.trusted_result
       ? activeAtTrusted
         ? "Trusted result · Active at trusted baseline"
-        : "Trusted repository result · Runtime activation required"
+        : activeReview
+          ? "Trusted repository result · Human Review application"
+          : "Trusted repository result · Runtime activation required"
       : "Not trusted yet";
     elements.trustedResult.classList.toggle("trusted", result.trusted_result);
     elements.artifactSummary.textContent = viewModel.artifactSummary(result);
@@ -1353,14 +1438,15 @@
   function renderSelectedWork() {
     const work = state.selectedWork;
     if (!work) {
-      setSurface("empty");
+      renderProspectiveWorkspace();
       return;
     }
+    elements.selectedWork.dataset.prospective = "false";
+    elements.prospectiveActions.hidden = true;
     setSurface("selected");
     elements.workTitle.textContent = viewModel.workTitle(work);
     elements.workStatus.textContent = viewModel.statusLabel(work.status);
     elements.workStatus.className = `status-badge ${viewModel.statusTone(work.status)}`;
-    elements.attentionMarker.hidden = !work.human_attention_required;
     renderControlRoomFoundation(work);
     renderUnderstandingAlignment(work);
     renderGuidedDesign(work);
@@ -1402,6 +1488,9 @@
     renderAttention();
     renderResult();
     renderFormalWorkspace(work);
+    elements.attentionMarker.hidden = !controlRoom.humanActionProjection(
+      work, state.attention, state.selectedAgreementId,
+    ).required;
     scheduleObservationPolling();
   }
 
@@ -1439,26 +1528,30 @@
     elements.workspaceProductionVerification.textContent = trust.verification;
     elements.workspaceProductionTrust.textContent = trust.state;
 
-    elements.workspaceActionsSummary.textContent = state.attention.length
-      ? "Your decision is needed."
-      : state.selectedAgreementId ? "Decide whether to keep this agreement."
-        : elements.workActions.childElementCount ? "Choose how to proceed."
-          : "No action required.";
-    elements.workspaceActionsAttention.textContent = attention.state;
-    const attentionActions = state.attention.flatMap((item) => item.available_actions || []);
+    const humanActions = controlRoom.humanActionProjection(work, state.attention, state.selectedAgreementId);
+    elements.workspaceActionsSummary.textContent = humanActions.summary;
+    elements.workspaceActionsAttention.textContent = humanActions.required
+      ? `${humanActions.count} actionable Human intervention${humanActions.count === 1 ? "" : "s"}`
+      : "No Human action required";
+    const attentionActions = humanActions.actionableAttention.flatMap((item) => item.available_actions || []);
     const previewRequired = state.attention.some((item) => item.kind === "CANDIDATE_AUTHORIZATION"
       && (item.available_actions || []).includes("AUTHORIZE"))
       && state.result && state.result.repository_state === "SEALED_CANDIDATE";
     const availableActions = [
       ...(previewRequired ? ["Preview result"] : []),
       ...attentionActions.map(actionLabel),
+      ...(humanActions.conversationalDecision ? ["Respond in conversation"] : []),
     ];
     elements.workspaceActionsAvailable.textContent = availableActions.join(" · ")
       || Array.from(elements.workActions.children).map((button) => button.textContent).join(" · ")
       || "No governed action available now.";
     elements.workspaceActionsBlocker.textContent = status.condition;
-    elements.workspaceActionsDirection.textContent = attention.emergingDirection;
-    document.getElementById("actions-surface").classList.toggle("requires-attention", attention.required);
+    const owner = work.next_owner ? `Next owner: ${work.next_owner.replaceAll("_", " ")}.` : "";
+    const invalid = work.control_state_valid === false
+      ? " Watt control-state recovery is required."
+      : "";
+    elements.workspaceActionsDirection.textContent = `${owner} ${attention.emergingDirection || ""}${invalid}`.trim();
+    document.getElementById("actions-surface").classList.toggle("requires-attention", humanActions.required);
     renderWorkSources();
     renderExecutionPath();
     renderWorkingAgreements();
@@ -1547,17 +1640,15 @@
   function renderWorkingAgreements() {
     const active = state.agreements.filter((item) => item.state === "ACTIVE");
     const past = state.agreements.filter((item) => item.state !== "ACTIVE");
-    elements.workingAgreementCount.textContent = `${active.length} active`;
+    elements.workingAgreementsSection.hidden = active.length === 0 && past.length === 0;
+    elements.workingAgreementCount.textContent = active.length ? `${active.length} active` : "";
     elements.workingAgreementList.replaceChildren();
     elements.workingAgreementPast.replaceChildren();
-    if (!active.length) elements.workingAgreementList.append(createElement("p", "empty-copy", "No active Working Agreements."));
     active.forEach((agreement) => {
       const button = createElement("button", "working-agreement", agreement.content);
       button.type = "button";
       button.classList.toggle("is-selected", state.selectedAgreementId === agreement.agreement_id);
       button.prepend(createElement("span", "agreement-type", agreement.type));
-      button.append(createElement("small", "", agreement.persistence_state === "PERSISTED"
-        ? `Persisted → ${agreement.persistence_path}` : "Not persisted as a document"));
       button.addEventListener("click", () => {
         state.selectedAgreementId = agreement.agreement_id;
         renderWorkingAgreements();
@@ -1573,10 +1664,9 @@
     const selected = active.find((item) => item.agreement_id === state.selectedAgreementId);
     if (!selected) state.selectedAgreementId = null;
     elements.agreementActionPanel.hidden = !selected;
-    elements.workspaceActionsSummary.textContent = selected
-      ? "Decide whether to keep this agreement."
-      : state.attention.length ? "Your decision is needed."
-        : elements.workActions.childElementCount ? "Choose how to proceed." : "No action required.";
+    elements.workspaceActionsSummary.textContent = controlRoom.humanActionProjection(
+      state.selectedWork, state.attention, state.selectedAgreementId,
+    ).summary;
     elements.agreementSelectionActions.hidden = !selected;
     elements.agreementSelectedNote.textContent = selected
       ? `${selected.type}: ${selected.content}`
@@ -1584,7 +1674,7 @@
   }
 
   function renderHumanProduction(work) {
-    const projection = controlRoom ? controlRoom.productionState(work, state.nativeQueue, state.nativeAttempt)
+    const projection = controlRoom ? controlRoom.productionState(work, state.nativeQueue, state.nativeAttempt, state.attention)
       : { state: "IDLE", detail: "No execution state available." };
     elements.productionStateLabel.textContent = projection.state;
     document.getElementById("production-surface").dataset.machineState = projection.state.toLowerCase().replaceAll(" ", "-");
@@ -1971,6 +2061,8 @@
       state.selectedInteractionId = associated.interaction_id;
       state.sharedUnderstanding = associated;
       state.freshInteraction = false;
+      state.workspaceEngaged = false;
+      state.provisionalWorkspace = false;
       state.handoffTurnId = "";
       if (state.handoffTimer) globalThis.clearTimeout(state.handoffTimer);
       state.handoffTimer = null;
@@ -2091,8 +2183,10 @@
         throw new ApiError(409, "TURN_SYNC_PENDING", "The saved reply is not available yet. Refresh to check again; waiting messages remain paused.");
       }
       state.sharedUnderstanding = projection;
+      if (projection.latest_assessment_current) state.provisionalWorkspace = false;
       state.interactions = state.interactions.map((item) => item.interaction_id === interactionId ? projection : item);
       stopTurnObservation();
+      transitionComposer("SETTLED");
       if (failure || savedTurn.status === "FAILED") {
         pauseOutbox(interactionId);
         showNotice(new ApiError(409, (failure && failure.code) || savedTurn.failure_code || "TURN_FAILED", (failure && failure.message) || savedTurn.failure_message || "Watt could not complete this reply. Waiting messages are paused."));
@@ -2106,7 +2200,7 @@
         void refreshSelected().catch(showNotice);
       } else {
         state.selectedWork = null;
-        setSurface("empty");
+        // renderInteraction already projected the prospective Workspace.
       }
       if (!failure && savedTurn.status === "COMPLETED") void drainOutbox();
     } catch (error) {
@@ -2284,6 +2378,10 @@
       stopTurnObservation();
       state.selectedInteractionId = item.interactionId;
       state.freshInteraction = !item.interactionId;
+      if (previousId !== item.interactionId) {
+        state.workspaceEngaged = false;
+        state.provisionalWorkspace = false;
+      }
       state.sharedUnderstanding = projection;
       elements.workRequirement.value = state.drafts[item.interactionId || "new"] || "";
       const active = ((projection && projection.turns) || []).find((turn) => turn.status !== "COMPLETED" && turn.status !== "FAILED");
@@ -2295,9 +2393,9 @@
       try { localStorage.setItem(INTERACTION_STORAGE_KEY, item.interactionId); } catch (_error) { /* optional preference */ }
       persistComposer();
       if (active) observeInteractionTurn(item.interactionId, active.turn_id);
-      renderInteraction();
       state.selectedWorkId = (projection && projection.governed_work_id) || "";
-      setSurface(state.selectedWorkId ? "selected" : "empty");
+      renderInteraction();
+      if (!state.selectedWorkId) renderProspectiveWorkspace();
       if (state.selectedWorkId) void refreshSelected().catch(showNotice);
     } catch (error) {
       showNotice(error);
@@ -2319,10 +2417,16 @@
     }
     const id = globalThis.crypto.randomUUID();
     state.outbox.push({ id, interactionId: state.selectedInteractionId, content, status: "queued", waitForTurnId: state.activeInteractionTurnId, humanSendMark: globalThis.performance?.now?.() ?? Date.now() });
+    if (!state.selectedWorkId && !state.workspaceEngaged && !state.sharedUnderstanding?.latest_assessment) {
+      state.provisionalWorkspace = true;
+    }
     elements.workRequirement.value = "";
     saveDraft();
+    transitionComposer("SEND");
     hideNotice();
     renderComposer();
+    renderConversation();
+    renderProspectiveWorkspace();
     if (state.activeInteractionTurnId || state.sendInFlight || state.finishingTurn) announce("Message queued in this browser. Watt has not received it yet.");
     void drainOutbox();
   }
@@ -2370,6 +2474,7 @@
         ],
       };
       observeInteractionTurn(interactionId, turn.turn_id);
+      transitionComposer("ACCEPTED");
       announce("Message received. No Work was created; Watt is preparing the reply.");
       const receivedProjection = await apiRequest(`/api/interactions/${interactionId}`);
       if (observationIsCurrent(interactionId, turn.turn_id) && !state.finishingTurn) state.sharedUnderstanding = receivedProjection;
@@ -2394,12 +2499,15 @@
     if (state.busy || !projection || !assessment || !projection.readiness) {
       return;
     }
-    const identity = elements.interactionAuthorityIdentity.value.trim();
+    const identity = elements.interactionAuthorityIdentity.value.trim()
+      || "human:local-operator";
     if (!identity) {
       showNotice(new ApiError(422, "INVALID_REQUEST", "Human authority identity is required."));
       return;
     }
     hideNotice();
+    state.workAdmissionPending = true;
+    renderProspectiveWorkspace();
     setBusy(true);
     try {
       state.sharedUnderstanding = await apiRequest(
@@ -2417,10 +2525,12 @@
       state.selectedWorkId = state.sharedUnderstanding.governed_work_id;
       await loadCollections();
       await refreshSelected();
+      state.workAdmissionPending = false;
       setSurface("selected");
       renderInteraction();
       announce("Governed long-lived Work admitted. Automatic Steering activation started.");
     } catch (error) {
+      state.workAdmissionPending = false;
       showNotice(error);
     } finally {
       setBusy(false);
@@ -2532,6 +2642,8 @@
     state.freshInteraction = true;
     state.sharedUnderstanding = null;
     state.selectedWorkId = "";
+    state.provisionalWorkspace = false;
+    state.workspaceEngaged = false;
     elements.workRequirement.value = state.drafts.new || "";
     try { localStorage.removeItem(INTERACTION_STORAGE_KEY); } catch (_error) { /* optional preference */ }
     setSurface("empty");
@@ -2585,8 +2697,12 @@
     if (transitionDecision) actions.append(transitionDecision);
     const manual = elements.manualAdvanceControl.closest(".manual-controls");
     const machineControls = document.getElementById("execution-queue-controls");
+    const sharedUnderstanding = document.getElementById("shared-understanding");
+    const agreementEntry = document.querySelector(".agreement-entry");
     if (machineControls) production.insertBefore(machineControls, result);
-    if (manual) production.insertBefore(manual, result);
+    if (manual) evidence.append(manual);
+    if (sharedUnderstanding) evidence.prepend(sharedUnderstanding);
+    if (agreementEntry) evidence.append(agreementEntry);
     if (result) evidence.append(result);
     for (const id of ["artifact-target-panel", "code-change-contract-panel"]) {
       const item = document.getElementById(id);
@@ -2610,11 +2726,11 @@
   });
   elements.workRequirement.addEventListener("input", saveDraft);
   elements.workRequirement.addEventListener("focus", () => {
-    elements.workForm.closest(".composer").classList.add("is-composing");
+    transitionComposer("FOCUS");
     handoffCurrentInteraction();
   });
-  elements.workRequirement.addEventListener("blur", () => {
-    if (!elements.workRequirement.value.trim()) elements.workForm.closest(".composer").classList.remove("is-composing");
+  document.addEventListener("pointerdown", (event) => {
+    if (!elements.workForm.closest(".composer").contains(event.target)) transitionComposer("OUTSIDE");
   });
   globalThis.addEventListener("beforeunload", (event) => {
     if (!state.storageAvailable && (state.outbox.length || elements.workRequirement.value)) {
@@ -2623,6 +2739,8 @@
     }
   });
   elements.admitWorkControl.addEventListener("click", admitInteractionWork);
+  elements.prospectiveStart.addEventListener("click", admitInteractionWork);
+  elements.prospectiveRefine.addEventListener("click", () => elements.workRequirement.focus());
   elements.approveWorkRevision.addEventListener("click", () => decideWorkRevision("APPROVE"));
   elements.rejectWorkRevision.addEventListener("click", () => decideWorkRevision("REJECT"));
   elements.refineWorkRevision.addEventListener("click", () => decideWorkRevision("REQUEST_REFINEMENT"));
@@ -2631,14 +2749,8 @@
   elements.dismissWorkTransition.addEventListener("click", () => decideWorkTransition("DISMISSED"));
   elements.newInteractionControl.addEventListener("click", beginNewInteraction);
   elements.composerToggle.addEventListener("click", () => {
-    const expanded = elements.composerToggle.getAttribute("aria-expanded") === "true";
-    const nextExpanded = !expanded;
-    setComposerExpanded(nextExpanded);
-    try {
-      localStorage.setItem(COMPOSER_EXPANDED_STORAGE_KEY, String(nextExpanded));
-    } catch (_error) {
-      // The in-page toggle still works when browser storage is unavailable.
-    }
+    transitionComposer(state.composerMode === "EXPANDED_COMPOSING" ? "COLLAPSE" : "EXPAND");
+    if (state.composerMode === "EXPANDED_COMPOSING") elements.workRequirement.focus();
   });
   elements.statusFilter.addEventListener("change", () => {
     state.statusFilter = elements.statusFilter.value;
@@ -2676,7 +2788,7 @@
   concentrateWorkMutations();
   initializeAppearanceControls();
   restoreComposer();
-  restoreComposerExpanded();
+  transitionComposer("OUTSIDE");
   consumeNewWorkEntry();
   reloadWorkspace();
 })();

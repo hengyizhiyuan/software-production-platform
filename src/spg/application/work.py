@@ -1112,7 +1112,9 @@ class WorkApplicationService:
                 "authority_identity": request.authority_identity, "subject_type": "PRODUCT_WORK", "subject_identity": str(work_id),
                 "scope": {"previous_work_revision_id": str(previous.id), "work_reality_revision_id": str(revision.id),
                     "resource_id": str(resource.id), "observation_fingerprint": request.observation_fingerprint,
-                    "source_baseline_id": str(baseline.id), "scope_fingerprint": scope_fingerprint,
+                    "source_baseline_id": str(baseline.id),
+                    "source_revision": baseline.repository_revision,
+                    "scope_fingerprint": scope_fingerprint,
                     "binding_kind": binding_kind},
                 "rationale": request.rationale, "created_at": timestamp})
             values = revision.model_dump(mode="python")
@@ -2316,22 +2318,8 @@ class WorkApplicationService:
                         governed_subject_ref=f"baseline-candidate:{summary.candidate_id}",
                     )
                 )
-            elif projection.status is WorkStatus.BLOCKED:
-                items.append(
-                    AttentionItem(
-                        id=uuid5(
-                            NAMESPACE_URL,
-                            f"spg:blocked-work-attention:{projection.work_id}",
-                        ),
-                        work_id=projection.work_id,
-                        kind=AttentionKind.PRODUCTION_BLOCKED,
-                        decision="Review the truthful production blocker.",
-                        reason=projection.what_happens_next,
-                        available_actions=(),
-                        recommended_action=None,
-                        governed_subject_ref=f"work:{projection.work_id}",
-                    )
-                )
+            # A technical blocker with no executable Human choice belongs to a
+            # Watt recovery/operator path, not the Human Attention surface.
         return tuple(items)
 
     def resolve_attention(
@@ -2514,6 +2502,10 @@ class WorkApplicationService:
 
     def get_work_result(self, work_id: UUID) -> WorkResultProjection:
         projection = self.get_work(work_id)
+        actionable_attention = any(
+            item.available_actions
+            for item in self.list_attention(work_id=work_id)
+        )
         with self.database.unit_of_work() as unit_of_work:
             store = ProductStore(unit_of_work.session)
             binding = store.runtime_binding(work_id)
@@ -2551,7 +2543,9 @@ class WorkApplicationService:
             repository_state=repository_state,
             trusted_result=summary.runtime_commit_id is not None,
             remaining_blocker_or_risk=blocker,
-            human_attention_required=projection.human_attention_required,
+            human_attention_required=(
+                projection.human_attention_required or actionable_attention
+            ),
         )
 
     @staticmethod
@@ -2722,8 +2716,8 @@ class WorkApplicationService:
                 WorkStatus.NEEDS_REFINEMENT,
                 WorkStatus.AWAITING_APPROVAL,
                 WorkStatus.NEEDS_ATTENTION,
-                WorkStatus.BLOCKED,
-            },
+            }
+            or steering_attention,
             result_summary=result_summary,
             current_work_reality_revision_id=work.current_work_reality_revision_id,
             steering_enabled=steering_plan is not None,

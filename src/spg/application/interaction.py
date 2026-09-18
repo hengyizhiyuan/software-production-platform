@@ -258,6 +258,17 @@ def _nonmutating_question(value: str) -> bool:
     return question and change is None
 
 
+def _work_reality_status_question(value: str) -> bool:
+    """Narrow read-only operational question, not a new intent taxonomy."""
+
+    text = value.strip().casefold()
+    return bool(_nonmutating_question(text) and re.search(
+        r"(?:目前|现在|当前|执行|进度|等待|状态|running|progress|status)"
+        r".*(?:状态|进度|做到|执行|等待|卡住|哪里|哪了|了吗|什么|how|why|running|progress|status)"
+        r"|(?:为什么|怎么|why|how).*(?:等待|执行|进度|卡住|waiting|running|progress)", text,
+    ))
+
+
 def _provider_supplied_human_wording(evidence: object) -> bool:
     """Semantic-only admission still needs the governed Conversation realizer."""
 
@@ -1047,7 +1058,8 @@ class WorkInteractionService:
         )
         response_realizer = self.response_realizer
         pipeline_evidence = getattr(self.capability, "last_pipeline_evidence", None)
-        if _provider_supplied_human_wording(pipeline_evidence):
+        if (_provider_supplied_human_wording(pipeline_evidence)
+                or assessment.provider_identity == "watt-native:work-reality-query"):
             # The dedicated/coalesced Conversation provider already supplied
             # natural wording. After semantic policy and Interaction Strategy
             # admission, another external wording call adds latency and can only
@@ -1461,6 +1473,17 @@ class WorkInteractionService:
             if on_pipeline_stage is not None:
                 on_pipeline_stage("assessment_cache_hit")
             return existing
+        if basis.active_work_context is not None and _work_reality_status_question(
+            basis.records[-1].content
+        ):
+            candidate = self._work_reality_status_candidate(basis)
+            if on_pipeline_stage is not None:
+                on_pipeline_stage("work_reality_query_assembled")
+            return self.admit_candidate(
+                interaction_id, basis_fingerprint=basis.basis_fingerprint,
+                candidate=candidate, on_pipeline_stage=on_pipeline_stage,
+                policy_governed=policy_governed,
+            )
         streaming_interpret = getattr(self.capability, "interpret_stream", None)
         observed_interpret = getattr(self.capability, "interpret_stream_observed", None)
         controlled_observed_interpret = getattr(
@@ -1608,7 +1631,7 @@ class WorkInteractionService:
                 focus=focus,
                 impact=impact,
             )
-            if policy_governed:
+            if policy_governed and candidate.provider_identity != "watt-native:work-reality-query":
                 candidate = candidate.model_copy(
                     update={
                         "natural_response": policy_governed_response(
@@ -1640,6 +1663,7 @@ class WorkInteractionService:
                 candidate,
                 current_basis,
                 governance_candidate=progressive_semantics.governance_candidate,
+                progressive_semantics=progressive_semantics,
             )
             if on_pipeline_stage is not None:
                 on_pipeline_stage("candidate_validated")
@@ -2382,6 +2406,7 @@ class WorkInteractionService:
         basis_fingerprint: str,
         *,
         governance_candidate: GovernanceCandidateKind | None = None,
+        progressive_semantics: ProgressiveSemanticStructure | None = None,
     ) -> WorkAdmissionReadiness:
         if governance_candidate is GovernanceCandidateKind.CONVERSATION_ONLY:
             return WorkAdmissionReadiness(
@@ -2411,6 +2436,20 @@ class WorkInteractionService:
             for value in candidate.unresolved_material_questions
             if value.strip()
         )
+
+        if progressive_semantics is not None:
+            # Admission concerns the next governed step, not every detail of the
+            # eventual artifact. Keep deferred questions in the assessment and
+            # progressive evidence; only current-step blockers prevent admission.
+            blocking = {
+                evaluation.question for evaluation in progressive_semantics.questions
+                if evaluation.blocks_next_governed_step
+            }
+            questions = tuple(dict.fromkeys((
+                *(question for question in questions if question in blocking),
+                *(evaluation.question for evaluation in progressive_semantics.questions
+                  if evaluation.blocks_next_governed_step and evaluation.question not in questions),
+            )))
         ready = not missing and not questions
         reasons = (
             ("Motive and desired outcome are clear enough to form governed Work.",)
@@ -2430,4 +2469,61 @@ class WorkInteractionService:
             unresolved_material_questions=questions,
             reasons=reasons,
             basis_fingerprint=basis_fingerprint,
+        )
+
+    def _work_reality_status_candidate(
+        self, basis: InteractionInterpretationInput
+    ) -> InteractionAssessmentCandidate:
+        active = basis.active_work_context
+        assert active is not None
+        revision = active.work_revision
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            steering = SteeringStore(uow.session)
+            plan = steering.plan_for_work(revision.work_id)
+            plan_revision = None if plan is None else steering.active_revision(plan.id)
+            current = next((step for step in steering.steps(plan_revision.id)
+                            if step.state.value == "CURRENT"), None) if plan_revision else None
+            binding = product.runtime_binding(revision.work_id)
+            summary = None if binding is None else product.runtime_summary(binding)
+            decision = None if plan_revision is None else steering.latest_decision(plan_revision.id)
+        phase = {"DESIGN": "整理解决方案", "REFINE": "澄清当前步骤", "PRODUCE": "生产", "VERIFY_ACCEPT": "验证与验收", "COMPLETE": "完成"}.get(
+            None if current is None else current.type.value, "等待下一步")
+        if summary is not None and summary.runtime_commit_id is not None:
+            activity = "已有 Runtime Commit；正在评估后续步骤。"
+        elif binding is not None:
+            activity = "生产周期已接纳；请在 Production 区查看执行、队列和验证状态。"
+        else:
+            activity = "尚未创建生产周期或 PWU，生产执行还未开始。"
+        if (
+            summary is not None
+            and summary.candidate_id is not None
+            and summary.authorization_id is None
+        ):
+            attention = "当前需要你审阅并授权精确 Candidate；授权前不会集成。"
+        elif (
+            decision is not None
+            and decision.human_required
+            and current is not None
+            and decision.current_step_id == current.id
+        ):
+            attention = "当前需要你审阅下一步提案。"
+        else:
+            attention = "当前没有需要你执行的决定。"
+        answer = (
+            f"当前目标：{revision.desired_outcome}。"
+            f"目前处于「{phase}」：{current.objective if current else '尚无当前步骤'}。"
+            f"{activity}{attention}"
+        )
+        return InteractionAssessmentCandidate(
+            turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
+            interpreted_motive=revision.motive,
+            desired_outcome=revision.desired_outcome,
+            candidate_context=revision.context_facts,
+            candidate_constraints=revision.constraints,
+            current_requests=revision.requests,
+            focus_classification=WorkFocusClassification.SIDE_QUESTION,
+            impact_disposition=WorkImpactDisposition.NO_GOVERNED_CHANGE,
+            natural_response=answer,
+            provider_identity="watt-native:work-reality-query",
         )

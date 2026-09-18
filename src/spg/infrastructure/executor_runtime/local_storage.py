@@ -15,6 +15,8 @@ from threading import Lock
 from typing import Any
 from uuid import UUID
 
+from spg.infrastructure.content_identity import tree_fingerprint
+
 
 class ContentAddressedStorage:
     """Write immutable UTF-8 JSON blobs atomically under a bounded root."""
@@ -391,17 +393,4 @@ class DirtyInputOverlayStore:
 
     @staticmethod
     def _tree_fingerprint(source: Path) -> str:
-        entries = []
-        for path in sorted(source.rglob("*"), key=lambda value: value.as_posix()):
-            if ".git" in path.relative_to(source).parts or not path.is_file():
-                continue
-            details = path.lstat()
-            entries.append({
-                "path": path.relative_to(source).as_posix(),
-                "digest": sha256(path.read_bytes()).hexdigest(),
-                "size": details.st_size,
-                "mode": stat.S_IMODE(details.st_mode),
-            })
-        return sha256(
-            json.dumps(entries, sort_keys=True, separators=(",", ":")).encode()
-        ).hexdigest()
+        return tree_fingerprint(source)

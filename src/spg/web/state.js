@@ -7,7 +7,7 @@
     AWAITING_APPROVAL: "Awaiting approval",
     READY: "Watt is preparing",
     RUNNING: "Watt is working",
-    NEEDS_ATTENTION: "Needs your attention",
+    NEEDS_ATTENTION: "Production paused",
     BLOCKED: "Blocked",
     COMPLETED: "Completed",
   });
@@ -18,7 +18,7 @@
     AWAITING_APPROVAL: "status-approval",
     READY: "status-ready",
     RUNNING: "status-running",
-    NEEDS_ATTENTION: "status-attention",
+    NEEDS_ATTENTION: "status-blocked",
     BLOCKED: "status-blocked",
     COMPLETED: "status-completed",
   });
@@ -125,20 +125,24 @@
       COMPLETED: "Native execution completed.",
     };
     let steeringCondition = null;
-    if (currentSteering && currentSteering.last_stop_reason === "CAPABILITY_UNAVAILABLE") {
+    if (currentSteering
+      && currentSteering.automatic_progression_state === "WAITING_RESOURCE"
+      && currentSteering.last_stop_reason === "CAPABILITY_UNAVAILABLE") {
+      steeringCondition = "The semantic Provider is temporarily unavailable; Watt owns the retry.";
+    } else if (currentSteering && currentSteering.last_stop_reason === "CAPABILITY_UNAVAILABLE") {
       steeringCondition = "Plan Steering cannot progress because the required semantic capability is unavailable.";
     } else if (currentSteering && currentSteering.last_stop_reason === "NO_PROGRESS") {
       steeringCondition = "Plan Steering stopped because governed Reality did not support a truthful next transition.";
     } else if (currentSteering && currentSteering.last_stop_reason) {
       steeringCondition = `Plan Steering stopped: ${currentSteering.last_stop_reason}`;
     }
-    const attentionRequired = work.human_attention_required === true || attention.length > 0;
-    const attentionCount = attention.length || (attentionRequired ? 1 : 0);
-    const attentionSummary = attention.length
-      ? attention.map((item) => `${item.decision}: ${item.reason}`).join(" | ")
-      : attentionRequired
-        ? "Work Reality reports that Human attention is required."
-        : "No blockers, reviews, or transitions require Human action.";
+    const actionableAttention = attention.filter((item) => (item.available_actions || []).length
+      || item.kind === "STEERING_DECISION_REQUIRED");
+    const attentionRequired = workActions(work.status).length > 0 || actionableAttention.length > 0;
+    const attentionCount = actionableAttention.length || (attentionRequired ? 1 : 0);
+    const attentionSummary = actionableAttention.length
+      ? actionableAttention.map((item) => `${item.decision}: ${item.reason}`).join(" | ")
+      : attentionRequired ? "Refine or decide this Work before it can continue." : "No action required.";
     const emergingDirection = attention.find((item) => item.recommendation)
       || attention.find((item) => item.expected_impact);
 
@@ -162,16 +166,16 @@
           ? progress.activity
           : currentQueue
             ? queueLabels[currentQueue.condition] || `Native execution state: ${currentQueue.condition}`
-            : currentSteering && currentSteering.automatic_progression_state === "RUNNING"
+            : currentSteering && currentSteering.automatic_progression_state === "ACTIVE"
               ? "Plan Steering is determining the next governed transition."
+              : currentSteering && currentSteering.automatic_progression_state === "WAITING_RESOURCE"
+                ? "Watt is waiting for semantic Provider availability and will retry automatically."
               : "No active production activity reported.",
         condition: progress && progress.blockedReason
           ? progress.blockedReason
           : attention.length
             ? attention.map((item) => item.reason).join(" | ")
-            : attentionRequired
-              ? "Work Reality reports that Human attention is required."
-              : steeringCondition || "No blocking or waiting condition reported.",
+            : steeringCondition || "No blocking or waiting condition reported.",
       },
       attention: {
         required: attentionRequired,
@@ -329,10 +333,14 @@
     let condition = current.automatic_progression_state
       ? `Automatic progression: ${current.automatic_progression_state}`
       : "Automatic progression state is not reported.";
-    if (current.human_attention_required) {
+    if (current.human_attention_required && workAttention
+      && ((workAttention.available_actions || []).length
+        || workAttention.kind === "STEERING_DECISION_REQUIRED")) {
       condition = workAttention && workAttention.reason
         ? `Human decision required: ${workAttention.reason}`
         : "Human decision required by existing Plan Steering Reality.";
+    } else if (current.human_attention_required) {
+      condition = `Production paused: ${work.what_happens_next || "No actionable Human decision is available."}`;
     } else if (current.last_stop_reason) {
       condition = `Steering stopped: ${current.last_stop_reason}`;
     } else if (current.steering_outcome) {
@@ -372,6 +380,9 @@
     const activeAtTrusted = Boolean(
       activation && activation.state === "ACTIVE_AT_TRUSTED_BASELINE",
     );
+    const activeReview = Boolean(
+      activation && activation.state === "ACTIVE_HUMAN_REVIEW",
+    );
     const verification = result && Array.isArray(result.verification_summary)
       ? result.verification_summary.filter((item) => String(item || "").trim())
       : [];
@@ -381,6 +392,9 @@
     if (trustedRepository && activeAtTrusted) {
       trustState = "Trusted and active";
       trustBasis = "Existing Runtime Reality reports a trusted result active at the Current Trusted Baseline.";
+    } else if (trustedRepository && activeReview) {
+      trustState = "Trusted repository result; Human Review application";
+      trustBasis = "Work trust is governed separately; this Watt application is an exact, untrusted Human Review build.";
     } else if (trustedRepository) {
       trustState = "Trusted repository result; activation pending";
       trustBasis = activation && activation.reason

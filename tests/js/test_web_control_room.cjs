@@ -10,10 +10,53 @@ const webRoot = path.resolve(__dirname, "../../src/spg/web");
 const source = fs.readFileSync(path.join(webRoot, "control-room.js"), "utf8");
 const app = fs.readFileSync(path.join(webRoot, "app.js"), "utf8");
 const html = fs.readFileSync(path.join(webRoot, "index.html"), "utf8");
+const appearance = fs.readFileSync(path.join(webRoot, "appearance.css"), "utf8");
 const context = {};
 context.globalThis = context;
 vm.runInNewContext(source, context, { filename: "control-room.js" });
 const controlRoom = context.WattControlRoom;
+
+test("early Workspace projects a candidate without fabricating Work or production", () => {
+  const projection = {
+    interpreted_motive: "做一个五年级课程表网页",
+    selected_design_schema_identity: "PRODUCT_SYSTEM",
+    readiness: { status: "READY", unresolved_material_questions: [] },
+    latest_assessment: { progressive_semantics: {
+      turn_intent: "BUILD", governance_candidate: "WORK_FORMATION_PROPOSAL",
+    } },
+  };
+  assert.deepEqual({ ...controlRoom.prospectiveWorkspaceProjection(projection) }, {
+    visible: true, canStart: true, blocker: null,
+  });
+  assert.equal(controlRoom.prospectiveWorkspaceProjection(projection, "real-work").visible, false);
+  assert.equal(controlRoom.prospectiveWorkspaceProjection({ ...projection,
+    latest_assessment: { progressive_semantics: { turn_intent: "DIRECT_QUESTION", governance_candidate: "CONVERSATION_ONLY" } },
+  }).visible, false);
+  assert.equal(controlRoom.prospectiveWorkspaceProjection({ ...projection,
+    latest_assessment: { progressive_semantics: { turn_intent: "DIRECT_QUESTION", governance_candidate: "WORK_FORMATION_PROPOSAL" } },
+  }).visible, false, "a schema and conflicting proposal must not turn a direct question into Work");
+  assert.deepEqual({ ...controlRoom.prospectiveWorkspaceProjection({ ...projection,
+    readiness: { status: "NOT_READY", unresolved_material_questions: ["Which external repository may be mutated?"] },
+  }) }, { visible: true, canStart: false, blocker: "Which external repository may be mutated?" });
+  assert.match(app, /prospectiveStart\.addEventListener\("click", admitInteractionWork\)/);
+  assert.match(app, /assessment_id: assessment\.assessment_id/);
+  assert.match(app, /basis_fingerprint: assessment\.basis_fingerprint/);
+  assert.match(html, /id="formal-workspace-grid"/);
+  assert.match(html, /id="prospective-start"[^>]*>按当前理解开始/);
+  assert.match(app, /IDLE · Production has not started/);
+});
+
+test("first Send opens provisional Workspace and a confirmed Motive latches it", () => {
+  assert.match(app, /provisionalWorkspace: false/);
+  assert.match(app, /workspaceEngaged: false/);
+  assert.match(app, /state\.provisionalWorkspace = true;[\s\S]*?renderProspectiveWorkspace\(\);[\s\S]*?void drainOutbox\(\)/);
+  assert.match(app, /if \(candidate\.visible\) state\.workspaceEngaged = true/);
+  assert.match(app, /candidate\.visible \|\| state\.workspaceEngaged \|\| provisional/);
+  assert.match(app, /if \(projection\.latest_assessment_current\) state\.provisionalWorkspace = false/);
+  assert.match(app, /state\.workspaceEngaged = false;[\s\S]*?setSurface\("empty"\)/);
+  assert.match(app, /Waiting for interpretation; no Work or production has started/);
+  assert.match(app, /sending\.status === "queued" \|\| !messages\.some/);
+});
 
 test("Agenda follows the governed Steering path, including its actual step labels", () => {
   const steps = controlRoom.agendaSteps({
@@ -50,6 +93,9 @@ test("Production state maps observed queue and attempt facts without invented pr
   assert.equal(controlRoom.productionState({}, [], { state: { runtime_mode: "RECOVERING" } }).state, "RECOVERING");
   assert.equal(controlRoom.productionState({ status: "COMPLETED" }, [], null).state, "FINISHED");
   assert.equal(controlRoom.productionState({ status: "NEEDS_ATTENTION", what_happens_next: "Choose a recovery path" }, [], null).detail, "Choose a recovery path");
+  assert.equal(controlRoom.productionState({ status: "NEEDS_ATTENTION", what_happens_next: "Configure an Executor capability" }, [], null).state, "BLOCKED");
+  assert.equal(controlRoom.productionState({ work_id: "one", status: "NEEDS_ATTENTION" }, [], null,
+    [{ work_id: "one", kind: "PRODUCTION_PROPOSAL_REVIEW", available_actions: ["APPROVE"] }]).state, "WAITING FOR HUMAN");
   assert.doesNotMatch(source, /\d+%|percent_complete/);
 });
 
@@ -70,14 +116,24 @@ test("machine controls belong to Production and Human authority actions belong t
   assert.match(app, /actions\.append\(preview\)/);
   assert.match(app, /actions\.append\(revisionAdmission\)/);
   assert.match(app, /actions\.append\(transitionDecision\)/);
-  assert.match(app, /production\.insertBefore\(manual, result\)/);
+  assert.match(app, /evidence\.append\(manual\)/);
   assert.match(app, /production\.insertBefore\(machineControls, result\)/);
+  assert.match(app, /evidence\.append\(agreementEntry\)/);
+  assert.match(app, /evidence\.prepend\(sharedUnderstanding\)/);
   assert.match(app, /evidence\.append\(result\)/);
   assert.doesNotMatch(app, /reality\.append\(result\)/);
   assert.match(html, /<section id="actions-surface"/);
   assert.match(html, /id="agreement-action-panel"/);
   assert.match(app, /candidate-preview-panel/);
   assert.match(app, /agreementSelectionActions\.hidden = !selected/);
+});
+
+test("conversation sidebar does not retain governed revision controls", () => {
+  assert.match(app, /actions\.append\(revisionAdmission\)/);
+  assert.match(app, /actions\.append\(transitionDecision\)/);
+  const currentPanel = html.match(/<section id="current-interaction-panel"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(currentPanel);
+  assert.doesNotMatch(currentPanel, /work-revision-admission|work-transition-decision/);
 });
 
 test("latest turn has exactly one surface owner through stream, handoff, and next turn", () => {
@@ -98,11 +154,85 @@ test("latest turn has exactly one surface owner through stream, handoff, and nex
   assert.match(app, /state\.activeInteractionTurnId \|\| state\.finishingTurn/);
 });
 
+test("V4 Current Interaction is on-demand, floating, and conversation-only", () => {
+  assert.match(html, /id="current-interaction-panel"[^>]*hidden/);
+  assert.match(app, /currentInteractionPanel\.hidden = active\.length === 0/);
+  assert.doesNotMatch(app, /The current exchange will appear here/);
+  assert.match(appearance, /body:has\(\.work-workspace\) \.current-interaction-panel \{\s*position: absolute;/);
+  assert.match(appearance, /max-height: min\(35vh, 270px\)/);
+  assert.match(app, /evidence\.prepend\(sharedUnderstanding\)/);
+  assert.match(app, /if \(message\.children\.length < 3\) return/);
+  assert.match(appearance, /prefers-reduced-motion: reduce/);
+});
+
+test("V4.1 anchors the message-only Current Interaction above the composer", () => {
+  const panel = html.match(/<section id="current-interaction-panel"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(panel);
+  assert.match(panel, /id="current-interaction-live"/);
+  assert.doesNotMatch(panel, /interaction-admission|shared-understanding|DESIGN_SCHEMA|interaction-readiness/);
+  assert.match(html, /<section class="composer"[^>]*>[\s\S]*?<section id="current-interaction-panel"/);
+  assert.match(appearance, /\.current-interaction-panel \{\s*position: absolute;[\s\S]*?bottom: calc\(100% \+ 9px\)/);
+  // The browser qualification also asserts actual getBoundingClientRect values.
+  assert.match(app, /currentInteractionPanel\.hidden = active\.length === 0/);
+});
+
+test("V4.1 exposes one governed pre-Work admission action outside the message body", () => {
+  const panel = html.match(/<section id="current-interaction-panel"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(panel);
+  assert.doesNotMatch(panel, /admit-work-control|interaction-admission/);
+  assert.equal((html.match(/id="admit-work-control"/g) || []).length, 1);
+  assert.match(html, /id="interaction-admission"[^>]*hidden/);
+  assert.match(html, /id="admit-work-control"[^>]*>Start Work<\/button>/);
+  assert.match(app, /interactionAdmission\.hidden = status !== "READY" \|\| Boolean\(governed\)/);
+  assert.match(app, /\/api\/interactions\/\$\{projection\.interaction_id\}\/admit-work/);
+  assert.match(app, /assessment_id: assessment\.assessment_id/);
+  assert.match(app, /basis_fingerprint: assessment\.basis_fingerprint/);
+  assert.match(app, /state\.selectedWorkId = state\.sharedUnderstanding\.governed_work_id/);
+  assert.doesNotMatch(panel, /manual-advance-control|DESIGN_SCHEMA/);
+});
+
+test("V4 composer state keeps a draft but collapses after either send", () => {
+  const step = controlRoom.nextComposerMode;
+  assert.equal(step("COMPACT_IDLE", "FOCUS"), "EXPANDED_COMPOSING");
+  assert.equal(step("EXPANDED_COMPOSING", "OUTSIDE", false), "COMPACT_IDLE");
+  assert.equal(step("EXPANDED_COMPOSING", "OUTSIDE", true), "EXPANDED_COMPOSING");
+  let mode = step("EXPANDED_COMPOSING", "SEND", false);
+  assert.equal(mode, "SUBMITTING");
+  mode = step(mode, "ACCEPTED");
+  assert.equal(mode, "WAITING_RESPONSE");
+  mode = step(mode, "SETTLED");
+  assert.equal(mode, "RESPONSE_SETTLED");
+  mode = step(mode, "FOCUS");
+  assert.equal(step(mode, "SEND", false), "SUBMITTING");
+  assert.match(app, /renderConversation\(\);\s*renderProspectiveWorkspace\(\);\s*if \(state\.activeInteractionTurnId/);
+});
+
+test("V4 attention badge and Actions derive from the same executable Human operations", () => {
+  const project = controlRoom.humanActionProjection;
+  const quiet = project({ work_id: "one", status: "NEEDS_ATTENTION" }, [], null);
+  assert.equal(quiet.required, false);
+  assert.equal(quiet.summary, "No action required.");
+  const approval = project({ work_id: "one", status: "AWAITING_APPROVAL" }, [], null);
+  assert.equal(approval.required, true);
+  assert.deepEqual(Array.from(approval.workActions), ["APPROVE", "REQUEST_REFINEMENT", "REJECT"]);
+  const review = project({ work_id: "one", status: "NEEDS_ATTENTION" }, [
+    { work_id: "one", kind: "PRODUCTION_PROPOSAL_REVIEW", available_actions: ["APPROVE"] },
+  ]);
+  assert.equal(review.required, true);
+  assert.equal(review.actionableAttention.length, 1);
+  const unrelated = project({ work_id: "one", status: "RUNNING" }, [
+    { work_id: "two", kind: "CANDIDATE_AUTHORIZATION", available_actions: ["AUTHORIZE"] },
+  ]);
+  assert.equal(unrelated.required, false);
+  assert.match(app, /attentionMarker\.hidden = !controlRoom\.humanActionProjection/);
+  assert.match(app, /workspaceActionsSummary\.textContent = humanActions\.summary/);
+});
+
 test("Production details are disclosed, while Actions contain only contextual controls", () => {
   assert.match(app, /evidence\.append\(result\)/);
   assert.match(html, /<section id="agreement-action-panel"[^>]+hidden>/);
   assert.match(html, /<details class="agreement-entry">/);
   assert.match(app, /agreementActionPanel\.hidden = !selected/);
-  assert.match(app, /No action required\./);
+  assert.match(source, /No action required\./);
   assert.doesNotMatch(app, /Exact Candidate \$\{preview\.repository_revision/);
 });

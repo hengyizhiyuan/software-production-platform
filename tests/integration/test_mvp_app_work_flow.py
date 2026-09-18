@@ -597,6 +597,7 @@ def test_code_01_02_07_08_09_10_11_13_15_17_18_20_21_happy_path(
     assert set(summary.verification_results) == {VerificationResultValue.PASS.value}
     assert summary.candidate_id is not None
     assert executor.dispatch_count == 1
+    assert service.get_work_result(draft.work_id).human_attention_required is True
 
     service.resolve_attention(
         attention[0].id,
@@ -1137,7 +1138,7 @@ def test_work_14_15_18_24_provider_report_is_not_completion(
     assert executor.dispatch_count == 1
 
 
-def test_stopped_unknown_none_reality_projects_governed_attention(
+def test_stopped_unknown_none_reality_remains_system_owned_without_false_attention(
     app_facts: AppFacts,
 ) -> None:
     draft = _draft(app_facts)
@@ -1164,13 +1165,10 @@ def test_stopped_unknown_none_reality_projects_governed_attention(
 
     assert stopped.status is WorkStatus.BLOCKED
     assert stopped.current_production_step == "EXECUTION_STOPPED"
-    assert stopped.human_attention_required is True
+    assert stopped.human_attention_required is False
     assert "Evaluate Completion" not in stopped.what_happens_next
     attention = service.list_attention(work_id=draft.work_id)
-    assert len(attention) == 1
-    assert attention[0].kind is AttentionKind.PRODUCTION_BLOCKED
-    assert attention[0].available_actions == ()
-    assert attention[0].recommended_action is None
+    assert attention == ()
     assert service.get_work_result(draft.work_id).trusted_result is False
     assert executor.dispatch_count == 1
 

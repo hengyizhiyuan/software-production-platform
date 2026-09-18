@@ -19,6 +19,7 @@ from spg.application.interaction import (
     WorkInteractionService,
 )
 from spg.application.guided_design import GuidedDesignApplicationService
+from spg.application.assets import RepositoryAssetService
 from spg.application.orchestration import OrchestrationStopReason, ProductionOrchestrator
 from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.steering_driver import PlanSteeringDriver
@@ -33,6 +34,7 @@ from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.steering_production import SteeringProductionService
 from spg.application.work import WorkApplicationService
 from spg.domain.change import ProductionTargetKind
+from spg.domain.conversation import ConversationTurnIntent
 from spg.domain.guided_design import DesignIssueState, DesignReadinessState
 from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.interaction import (
@@ -397,11 +399,20 @@ class _SchedulingOrchestrator:
 
 
 class _RuntimeActivation:
+    def __init__(self, state: RuntimeActivationState = RuntimeActivationState.ACTIVE_AT_TRUSTED_BASELINE) -> None:
+        self.state = state
+
     def project(self) -> RuntimeActivationProjection:
         return RuntimeActivationProjection(
-            state=RuntimeActivationState.ACTIVE_AT_TRUSTED_BASELINE,
-            active_application_revision="test",
+            state=self.state,
+            active_application_revision=(
+                "test" if self.state is RuntimeActivationState.ACTIVE_AT_TRUSTED_BASELINE else None
+            ),
             current_trusted_baseline_revision="test",
+            activation_mode=(
+                "HUMAN_REVIEW" if self.state is RuntimeActivationState.ACTIVE_HUMAN_REVIEW
+                else "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE"
+            ),
             reason="test",
         )
 
@@ -439,6 +450,12 @@ def services(
     postgres_database: Database,
     tmp_path: Path,
 ) -> tuple[WorkApplicationService, WorkInteractionService]:
+    return _services_for_resource(postgres_database, tmp_path, "test://wic-admission")
+
+
+def _services_for_resource(
+    postgres_database: Database, tmp_path: Path, identity: str,
+) -> tuple[WorkApplicationService, WorkInteractionService]:
     repository = tmp_path / "wic-admission-repository"
     repository.mkdir()
     _git(repository, "init", "-b", "main")
@@ -451,7 +468,7 @@ def services(
     RuntimeService(postgres_database).bootstrap_trusted_baseline(
         BootstrapRequest(
             repository_path=repository,
-            repository_identity="test://wic-admission",
+            repository_identity=identity,
             repository_ref="refs/heads/main",
             authority_identity="architecture-lead:test",
             scope={"slice": "WIC-2"},
@@ -462,7 +479,7 @@ def services(
         workspace_root=tmp_path / "workspaces",
     )
     work.register_engineering_resource(
-        repository_identity="test://wic-admission",
+        repository_identity=identity,
         location_ref=str(repository),
         authoritative_ref="refs/heads/main",
         context_references=(
@@ -614,6 +631,49 @@ def test_not_ready_and_stale_ready_cannot_create_work(
     assert _count(postgres_database, work_reality_revisions) == 0
 
 
+def test_reversible_detail_does_not_create_work_until_exact_human_admission(
+    postgres_database: Database, services,
+) -> None:
+    work, _ = services
+
+    class _CourseTableCapability:
+        def interpret(self, basis: InteractionInterpretationInput) -> InteractionAssessmentCandidate:
+            return InteractionAssessmentCandidate(
+                turn_intent=ConversationTurnIntent.BUILD,
+                interpreted_motive="制作小学五年级课程表网页",
+                desired_outcome="交付带 8×5 表格和示例数据的 HTML 页面",
+                candidate_context=("具体文件名尚未确定。",),
+                unresolved_material_questions=("沿用哪种页面样式？",),
+                natural_response="可以先按当前理解制作可逆的首版。",
+                provider_identity="test:progressive-admission",
+            )
+
+    interactions = WorkInteractionService(postgres_database, capability=_CourseTableCapability())
+    interaction = interactions.create_interaction(human_identity="human:test")
+    candidate = interactions.append_and_assess(
+        interaction.id,
+        "做一个五年级课程表网页，沿用现有样式，8×5，数据自己编",
+        human_identity="human:test",
+    )
+    assert candidate.readiness.status is WorkAdmissionReadinessStatus.READY
+    assert candidate.latest_assessment.unresolved_material_questions == ("沿用哪种页面样式？",)
+    assert _count(postgres_database, product_works) == 0
+    with pytest.raises(ProductInvariantViolation, match="Human authority"):
+        work.admit_interaction_work(
+            interaction.id,
+            assessment_id=candidate.latest_assessment.id,
+            basis_fingerprint=candidate.latest_assessment.basis_fingerprint,
+            authority_identity="",
+        )
+    admitted = _admit(work, candidate)
+    assert admitted.raw_user_requirement == candidate.interpreted_motive
+    assert admitted.desired_outcome == candidate.desired_outcome
+    shared = interactions.get_shared_understanding(interaction.id)
+    assert shared.governed_work_id == admitted.work_id
+    assert shared.governed_revision.context_facts == ("具体文件名尚未确定。",)
+    assert shared.governed_revision.source_assessment_id == candidate.latest_assessment.id
+
+
 def test_exact_ready_admission_is_atomic_idempotent_and_continuous(
     postgres_database: Database,
     services,
@@ -711,6 +771,35 @@ def test_admission_bootstraps_revision_bound_steering_without_production(
     )
     assert reconstructed.steering_plan_id == plan.steering_plan_id
     assert _count(postgres_database, steering_plans) == 1
+
+
+def test_work_status_question_is_read_only_and_independent_of_provider(
+    postgres_database: Database, services,
+) -> None:
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+
+    class BrokenProvider:
+        def interpret(self, _basis):
+            raise AssertionError("Work Reality status must not call Provider")
+
+    service = WorkInteractionService(postgres_database, capability=BrokenProvider())
+    before_revision = _count(postgres_database, work_reality_revisions)
+    before_runs = _count(postgres_database, production_runs)
+    before_steps = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
+    service.append_human_input(
+        ready.interaction.id, "目前执行到什么状态了？", human_identity="human:test",
+    )
+    assessment = service.assess_current(ready.interaction.id)
+    assert assessment.provider_identity == "watt-native:work-reality-query"
+    assert "尚未创建生产周期或 PWU" in assessment.natural_response
+    assert assessment.focus_classification is WorkFocusClassification.SIDE_QUESTION
+    assert assessment.impact_disposition is WorkImpactDisposition.NO_GOVERNED_CHANGE
+    assert _count(postgres_database, work_reality_revisions) == before_revision
+    assert _count(postgres_database, production_runs) == before_runs
+    assert SteeringApplicationService(postgres_database).reconstruct(admitted.work_id) == before_steps
 
 
 def test_guided_design_progresses_governed_issues_and_reconstructs_after_restart(
@@ -832,6 +921,130 @@ def test_guided_design_reaches_reviewable_proposal_and_stops_for_human_authority
     assert _count(postgres_database, production_work_units) == 1
 
 
+def test_bounded_managed_code_proposal_continues_without_ceremonial_review(
+    postgres_database: Database, tmp_path: Path,
+) -> None:
+    work, interactions = _services_for_resource(
+        postgres_database, tmp_path, "watt://repositories/course-table-test",
+    )
+    admitted = _admit(work, _ready(interactions))
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+
+    class ManagedCodeSemantic(_GuidedDesignSemanticCapability):
+        def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+            candidate = super().execute(input)
+            if not input.design_context["production_transition_issue"]:
+                return candidate
+            return candidate.model_copy(update={"proposed_production": SemanticProductionProposal(
+                target_kind=ProductionTargetKind.CODE_WORK,
+                objective="Implement and verify the admitted bounded page",
+                code_targets=("index.html", "tests/js/test_page.cjs"),
+                verification_expectation="Run the exact page test and inspect the artifact",
+            )})
+
+    production = _SchedulingOrchestrator()
+    driver = PlanSteeringDriver(
+        postgres_database, work, production,
+        semantic_capability=ManagedCodeSemantic(), max_automatic_transitions=32,
+    )
+    try:
+        outcome = driver.activate(admitted.work_id)
+    finally:
+        driver.shutdown()
+    assert outcome.stop_reason.value == "PRODUCTION_RUNNING"
+    assert production.scheduled == [admitted.work_id]
+    assert _count(postgres_database, production_runs) == 1
+    assert _count(postgres_database, production_work_units) == 1
+    assert not any(item.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
+                   for item in work.list_attention(work_id=admitted.work_id))
+    with postgres_database.unit_of_work() as uow:
+        decisions = RuntimeStore(uow.session).governance_for_subject(str(admitted.work_id))
+    assert any(item.decision_type == "AUTO_ADMIT_BOUNDED_MANAGED_PROPOSAL"
+               for item in decisions)
+
+
+def test_repositoryless_work_uses_allocated_managed_workspace_without_second_review(
+    postgres_database: Database, tmp_path: Path,
+) -> None:
+    work, interactions = _services_for_resource(
+        postgres_database, tmp_path, "test://repositoryless-work",
+    )
+    ready = _ready(interactions)
+    admitted = work.admit_interaction_work(
+        ready.interaction.id,
+        assessment_id=ready.latest_assessment.id,
+        basis_fingerprint=ready.latest_assessment.basis_fingerprint,
+        authority_identity="human:governor",
+        rationale="Admit Work without requiring a Human repository.",
+        use_default_resource=False,
+    )
+    assets = RepositoryAssetService(
+        postgres_database,
+        asset_root=tmp_path / "managed-assets",
+        import_root=tmp_path,
+    )
+    allocated = assets.ensure_managed_execution_workspace(work, admitted.work_id)
+    assert allocated.engineering_scope is not None
+    assert allocated.engineering_scope.bindings
+    managed_repository = next((tmp_path / "managed-assets").iterdir())
+    (managed_repository / "tests" / "__pycache__").mkdir(parents=True)
+    (managed_repository / "tests" / "__pycache__" / "test_page.cpython-313.pyc").write_bytes(
+        b"executor validation cache"
+    )
+    untracked = subprocess.run(
+        ["git", "-C", str(managed_repository), "ls-files", "--others", "--exclude-standard"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    assert "tests/__pycache__/test_page.cpython-313.pyc" not in untracked
+
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+
+    class ManagedCodeSemantic(_GuidedDesignSemanticCapability):
+        def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+            candidate = super().execute(input)
+            if not input.design_context["production_transition_issue"]:
+                return candidate
+            return candidate.model_copy(update={"proposed_production": SemanticProductionProposal(
+                target_kind=ProductionTargetKind.CODE_WORK,
+                objective="Implement and verify the admitted bounded page",
+                code_targets=("index.html", "tests/js/test_page.cjs"),
+                verification_expectation="Run the exact page test and inspect the artifact",
+            )})
+
+    production = _SchedulingOrchestrator()
+    driver = PlanSteeringDriver(
+        postgres_database, work, production,
+        semantic_capability=ManagedCodeSemantic(), max_automatic_transitions=32,
+    )
+    try:
+        outcome = driver.activate(admitted.work_id)
+    finally:
+        driver.shutdown()
+
+    assert outcome.stop_reason.value == "PRODUCTION_RUNNING"
+    assert production.scheduled == [admitted.work_id]
+    assert not any(
+        item.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
+        for item in work.list_attention(work_id=admitted.work_id)
+    )
+    with postgres_database.unit_of_work() as uow:
+        decisions = RuntimeStore(uow.session).governance_for_subject(
+            str(admitted.work_id)
+        )
+    workspace_admission = next(
+        item
+        for item in decisions
+        if item.decision_type == "ALLOCATE_MANAGED_EXECUTION_WORKSPACE"
+    )
+    assert workspace_admission.scope["source_revision"]
+    assert any(
+        item.decision_type == "AUTO_ADMIT_BOUNDED_MANAGED_PROPOSAL"
+        for item in decisions
+    )
+
+
 def test_production_feedback_can_reopen_issue_and_revise_plan_without_rewriting_history(
     postgres_database: Database,
     services,
@@ -929,9 +1142,14 @@ def test_guided_design_reexecutes_current_issue_after_governed_work_reality_chan
     assert len(reconstructed.semantic_results) == 2
 
 
+@pytest.mark.parametrize("activation_state", (
+    RuntimeActivationState.ACTIVE_AT_TRUSTED_BASELINE,
+    RuntimeActivationState.ACTIVE_HUMAN_REVIEW,
+))
 def test_admission_api_requires_human_action_and_preserves_same_interaction(
     postgres_database: Database,
     services,
+    activation_state: RuntimeActivationState,
 ) -> None:
     work, interactions = services
     ready = _ready(interactions)
@@ -943,7 +1161,7 @@ def test_admission_api_requires_human_action_and_preserves_same_interaction(
             work_service=work,
             orchestrator=_NoopOrchestrator(),
             steering_driver=driver,
-            runtime_activation=_RuntimeActivation(),
+            runtime_activation=_RuntimeActivation(activation_state),
             interaction_service=interactions,
         ),
         raise_server_exceptions=False,
@@ -970,6 +1188,11 @@ def test_admission_api_requires_human_action_and_preserves_same_interaction(
             ready.latest_assessment.id
         )
         assert driver.scheduled == [UUID(payload["governed_work_id"])]
+        activation = client.get("/api/runtime-activation").json()
+        assert activation["state"] == activation_state.value
+        if activation_state is RuntimeActivationState.ACTIVE_HUMAN_REVIEW:
+            assert activation["activation_mode"] == "HUMAN_REVIEW"
+            assert activation["active_application_revision"] is None
         assert _count(postgres_database, product_works) == 1
         assert _count(postgres_database, steering_plans) == 1
         work_payload = client.get(

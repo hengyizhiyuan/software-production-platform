@@ -852,12 +852,16 @@ def test_controlled_vnext_reuses_admitted_conversation_text_without_second_provi
     postgres_database: Database,
 ) -> None:
     class Evidence:
+        # One coalesced request supplied both semantics and Human-facing wording.
+        pipeline_mode = "coalesced_pre_work"
         provider_call_count = 1
 
     class CompleteConversationCapability:
         last_pipeline_evidence = Evidence()
+        calls = 0
 
         def interpret(self, basis: InteractionInterpretationInput):
+            self.calls += 1
             return InteractionAssessmentCandidate(
                 interpreted_motive="设计企业官网",
                 desired_outcome="形成可信的官网方向",
@@ -879,9 +883,10 @@ def test_controlled_vnext_reuses_admitted_conversation_text_without_second_provi
             raise AssertionError("a second Provider request is unnecessary")
 
     second = UnexpectedSecondProvider()
+    capability = CompleteConversationCapability()
     service = WorkInteractionService(
         postgres_database,
-        capability=CompleteConversationCapability(),
+        capability=capability,
         response_realizer=second,
         runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
     )
@@ -902,6 +907,25 @@ def test_controlled_vnext_reuses_admitted_conversation_text_without_second_provi
         if event.event_type is WicResponseEventType.RESPONSE_STREAM_STARTED
     )
     assert stream_started.metadata["provider"] == "watt:governed-response-realizer"
+    assert capability.calls == 1
+    client = TestClient(
+        create_http_application(
+            application=object(), database=postgres_database,
+            work_service=_NeverCalledWorkService(postgres_database),
+            orchestrator=_NoopOrchestrator(), steering_driver=_NoopDriver(),
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=service,
+        ),
+        raise_server_exceptions=False,
+    )
+    with client:
+        for _ in range(2):
+            rebuilt = client.get(f"/api/interactions/{interaction.id}")
+            assert rebuilt.status_code == 200
+            assert rebuilt.json()["conversation_messages"][-1]["content"] == visible
+    assert capability.calls == 1
+    assert not second.called
+    assert _count(postgres_database, interaction_turns) == 1
     service.shutdown()
 
 

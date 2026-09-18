@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, replace
 import json
+import logging
 import re
 from time import monotonic
 from typing import Callable
@@ -38,6 +39,19 @@ from spg.providers.codex_interaction import (
     _JsonStringFieldStream,
     _safe_validation_summary,
 )
+
+
+LOGGER = logging.getLogger(__name__)
+
+
+def _safe_result_shape(value: str) -> str:
+    """Log field names and size, never model prose, prompts, or credentials."""
+    try:
+        parsed = json.loads(_structured_json_text(value))
+        fields = sorted(parsed) if isinstance(parsed, dict) else [type(parsed).__name__]
+    except ValueError:
+        fields = ["invalid_json"]
+    return f"fields={fields} length={len(value)}"
 
 
 def _usage(result: StructuredModelResult) -> dict[str, object]:
@@ -187,9 +201,31 @@ class DeepSeekConversationProvider:
                 _structured_json_text(result.output_text)
             )
         except (ValidationError, ValueError, TypeError) as error:
-            raise InteractionInvariantViolation(
-                "Conversation Provider returned an invalid Human-facing result"
-            ) from error
+            LOGGER.warning(
+                "Conversation expression validation failed request=%s model=%s status=completed stage=human_facing_validation issue=%s %s fallback=semantic",
+                result.request_id, result.effective_model or result.requested_model,
+                _safe_validation_summary(error), _safe_result_shape(result.output_text),
+            )
+            # Expression is replaceable; the already validated semantic handoff
+            # remains the only source of claims. Do not fail the Work turn for
+            # malformed wording, and do not invent an answer in the fallback.
+            self._observe(result)
+            content = next((value.strip() for value in (
+                collaboration.direct_answer,
+                collaboration.recommended_next_action,
+                collaboration.concise_basis,
+                collaboration.current_collaboration_focus,
+            ) if value and value.strip()), None)
+            if content is None:
+                raise InteractionInvariantViolation(
+                    "Conversation Provider returned an invalid Human-facing result"
+                ) from error
+            return ConversationResponseCandidate(
+                content=content,
+                provider_identity=("deepseek-responses:conversation-semantic-fallback:request:"
+                                   f"{result.request_id or 'unknown'}"),
+                model_identity=result.effective_model or result.requested_model,
+            )
         self._observe(result)
         return ConversationResponseCandidate(
             content=payload.natural_response,
@@ -314,6 +350,49 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
 
     def close(self) -> None:
         self.runtime.close()
+
+    def interpret_stream_observed(
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_response_delta: Callable[[str], None],
+        on_pipeline_stage: Callable[[str], None],
+    ) -> InteractionAssessmentCandidate:
+        """One syntax-only coalesced repair for the shadow-mode pipeline too."""
+        try:
+            return super().interpret_stream_observed(
+                basis, on_response_delta=on_response_delta,
+                on_pipeline_stage=on_pipeline_stage,
+            )
+        except InteractionInvariantViolation as first_error:
+            if not (self.pipeline_selection(basis)[0] == "coalesced_pre_work"
+                    and _is_root_json_invalid(first_error)):
+                raise
+            on_pipeline_stage("structured_json_repair_started")
+        try:
+            # The first response may have streamed provisional text. No second
+            # provisional stream is emitted; the settled message replaces it.
+            candidate = super().interpret_stream_observed(
+                basis, on_response_delta=lambda _delta: None,
+                on_pipeline_stage=on_pipeline_stage,
+            )
+        except InteractionInvariantViolation as second_error:
+            if _is_root_json_invalid(second_error):
+                raise InteractionInvariantViolation(
+                    "Coalesced collaboration Provider returned invalid JSON after "
+                    "one bounded structured repair attempt (root:json_invalid; "
+                    "bounded_repair_exhausted)"
+                ) from second_error
+            raise
+        evidence = self.last_pipeline_evidence
+        if evidence is not None:
+            self.last_pipeline_evidence = replace(
+                evidence,
+                provider_call_count=evidence.provider_call_count + 1,
+                coalesced_retry_count=(evidence.coalesced_retry_count or 0) + 1,
+            )
+        on_pipeline_stage("structured_json_repair_completed")
+        return candidate
 
     def interpret_controlled_stream_observed(
         self,
@@ -500,6 +579,11 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
                 _structured_json_text(result.output_text)
             )
         except (ValidationError, ValueError, TypeError) as error:
+            LOGGER.warning(
+                "Coalesced collaboration validation failed request=%s model=%s status=completed stage=payload_validation issue=%s %s",
+                result.request_id, result.effective_model or result.requested_model,
+                _safe_validation_summary(error), _safe_result_shape(result.output_text),
+            )
             raise InteractionInvariantViolation(
                 "Coalesced collaboration Provider returned an invalid structured result "
                 f"({_safe_validation_summary(error)})"

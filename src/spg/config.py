@@ -85,6 +85,9 @@ class Settings(BaseSettings):
     active_runtime_package_fingerprint: str | None = None
     active_runtime_static_asset_fingerprint: str | None = None
     active_runtime_source_root: Path | None = None
+    runtime_activation_mode: Literal["NORMAL", "HUMAN_REVIEW"] = "NORMAL"
+    human_review_version_file: Path | None = None
+    human_review_version_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
 
     @property
     def native_executor_provider_profile(self) -> str:

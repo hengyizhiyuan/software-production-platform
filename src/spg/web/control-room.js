@@ -49,7 +49,7 @@
     });
     return milestones;
   }
-  function productionState(work, queue, attempt) {
+  function productionState(work, queue, attempt, attentionItems = []) {
     const entry = queue && queue.length ? queue[queue.length - 1] : null;
     const mode = attempt?.state?.runtime_mode;
     if (mode === "RECOVERING" || mode === "RESUME_REQUESTED") return { state: "RECOVERING", detail: "Restoring execution from retained state." };
@@ -72,7 +72,12 @@
     if (work?.execution_progress?.blocked_reason) return { state: "BLOCKED", detail: work.execution_progress.blocked_reason };
     if (work?.execution_progress?.still_working) return { state: "RUNNING", detail: work.execution_progress.activity || "Production is active." };
     if (work?.work_complete || work?.status === "COMPLETED") return { state: "FINISHED", detail: "Current production is complete." };
-    if (work?.status === "NEEDS_ATTENTION") return { state: "WAITING FOR HUMAN", detail: work.what_happens_next || "A Human decision is needed before production can continue." };
+    if (work?.status === "NEEDS_ATTENTION") {
+      const actionable = humanActionProjection(work, attentionItems).required;
+      return actionable
+        ? { state: "WAITING FOR HUMAN", detail: work.what_happens_next || "A Human decision is needed before production can continue." }
+        : { state: "BLOCKED", detail: work.what_happens_next || "Production cannot progress; no Human action is available in this Work." };
+    }
     if (work?.status === "BLOCKED" || work?.status === "FAILED") return { state: work.status, detail: work.most_recent_meaningful_event || "Production needs attention." };
     return { state: "IDLE", detail: "No execution is active." };
   }
@@ -251,5 +256,71 @@
     };
   }
 
-  globalThis.WattControlRoom = Object.freeze({ agendaSteps, agendaMilestones, productionState, conversationOwnership, createViewer });
+  const COMPOSER_MODES = Object.freeze({
+    COMPACT_IDLE: "COMPACT_IDLE",
+    EXPANDED_COMPOSING: "EXPANDED_COMPOSING",
+    SUBMITTING: "SUBMITTING",
+    WAITING_RESPONSE: "WAITING_RESPONSE",
+    RESPONSE_SETTLED: "RESPONSE_SETTLED",
+  });
+
+  function nextComposerMode(current, event, hasDraft = false) {
+    if (event === "FOCUS" || event === "EXPAND") return COMPOSER_MODES.EXPANDED_COMPOSING;
+    if (event === "SEND") return COMPOSER_MODES.SUBMITTING;
+    if (event === "ACCEPTED") return COMPOSER_MODES.WAITING_RESPONSE;
+    if (event === "SETTLED") return COMPOSER_MODES.RESPONSE_SETTLED;
+    if (event === "OUTSIDE" || event === "COLLAPSE") {
+      return hasDraft ? COMPOSER_MODES.EXPANDED_COMPOSING : COMPOSER_MODES.COMPACT_IDLE;
+    }
+    return current;
+  }
+
+  function humanActionProjection(work, attentionItems, selectedAgreementId = null) {
+    const workStatus = work?.status;
+    const workActions = workStatus === "DRAFT" || workStatus === "NEEDS_REFINEMENT"
+      ? ["REFINE"]
+      : workStatus === "AWAITING_APPROVAL"
+        ? ["APPROVE", "REQUEST_REFINEMENT", "REJECT"] : [];
+    const items = Array.isArray(attentionItems) ? attentionItems : [];
+    const attention = items.filter((item) => !item.work_id || item.work_id === work?.work_id);
+    const explicit = attention.filter((item) => Array.isArray(item.available_actions)
+      && item.available_actions.length
+      && !(workActions.length && item.kind === "WORK_DRAFT_APPROVAL"));
+    const conversationalDecision = attention.find((item) => item.kind === "STEERING_DECISION_REQUIRED"
+      && (!item.available_actions || item.available_actions.length === 0));
+    const required = Boolean(workActions.length || explicit.length || selectedAgreementId || conversationalDecision);
+    return {
+      required,
+      count: (workActions.length ? 1 : 0) + explicit.length
+        + (selectedAgreementId ? 1 : 0) + (conversationalDecision ? 1 : 0),
+      workActions,
+      actionableAttention: explicit,
+      conversationalDecision: conversationalDecision || null,
+      summary: selectedAgreementId ? "Decide whether to keep this agreement."
+        : explicit.length || workActions.length ? "Your decision is needed."
+          : conversationalDecision ? "Respond to the material decision in conversation."
+            : "No action required.",
+    };
+  }
+
+  function prospectiveWorkspaceProjection(projection, selectedWorkId = "") {
+    const assessment = projection?.latest_assessment;
+    const semantics = assessment?.progressive_semantics;
+    const intent = semantics?.turn_intent;
+    const productionIntent = ["BUILD", "ACTION_REQUEST", "MODIFY", "DEPLOY"].includes(intent);
+    const visible = !selectedWorkId && !projection?.governed_work_id
+      && Boolean(assessment && (assessment.interpreted_motive || projection?.interpreted_motive))
+      && intent !== "DIRECT_QUESTION"
+      && (productionIntent || Boolean(projection?.selected_design_schema_identity))
+      && semantics?.governance_candidate !== "CONVERSATION_ONLY";
+    const readiness = projection?.readiness;
+    return {
+      visible,
+      canStart: visible && readiness?.status === "READY",
+      blocker: visible ? readiness?.unresolved_material_questions?.[0]
+        || readiness?.missing_information?.[0] || null : null,
+    };
+  }
+
+  globalThis.WattControlRoom = Object.freeze({ agendaSteps, agendaMilestones, productionState, conversationOwnership, nextComposerMode, humanActionProjection, prospectiveWorkspaceProjection, createViewer });
 })();

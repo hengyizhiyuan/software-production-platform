@@ -77,6 +77,7 @@ class SteeringActionType(StrEnum):
 class SteeringAutomaticProgressionState(StrEnum):
     ACTIVE = "ACTIVE"
     WAITING_PRODUCTION = "WAITING_PRODUCTION"
+    WAITING_RESOURCE = "WAITING_RESOURCE"
     STOPPED = "STOPPED"
 
 

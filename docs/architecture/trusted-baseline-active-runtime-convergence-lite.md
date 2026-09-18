@@ -81,6 +81,36 @@ includes it in Work Result. The existing UI uses that projection to distinguish
 `Trusted repository result` from `Active at trusted baseline` without adding a
 new workflow or authority action.
 
+## Explicit Human Review application version (pre-closure)
+
+An uncommitted Human Review build cannot honestly use the normal exact-Git
+application activation evidence. A caller must explicitly select
+`SPG_RUNTIME_ACTIVATION_MODE=HUMAN_REVIEW`; missing normal evidence never
+silently selects this mode. The review launcher first establishes the normal
+clean Engineering Resource / initial Trusted Baseline for Work production, then
+captures a separate `HumanReviewRuntimeVersion` for the **Watt application**.
+
+The version ID is a SHA-256 canonical digest of its base Git revision/tree,
+source and configuration roots, the complete review `src` content digest,
+package and static-asset digests, dependency-lock digest, and a digest of
+mounted build/startup/Compose/migration inputs plus non-secret runtime/provider
+configuration. Paths, bytes, sizes and modes participate; caches are excluded,
+and links are rejected. The source and configuration mounts are read-only in
+the container. A process-pinned version ID and a retained content-addressed manifest in the isolated
+Runtime volume are checked on each activation projection; changes to mounted
+source, static assets, lock, or configuration invalidate the old identity.
+The next startup computes a new identity. Credentials are not serialized.
+
+`ACTIVE_HUMAN_REVIEW` with `activation_mode=HUMAN_REVIEW` and an exact
+`human_review_version_id` means only that the currently mounted review bytes
+match their registered identity. It does **not** mean
+`ACTIVE_AT_TRUSTED_BASELINE`, release, Runtime Commit, Verification, or Human
+Product Acceptance. The independent Work engineering Source Baseline,
+Candidate, Verification, authorization and Delivery rules remain unchanged.
+Human Review evidence can be attributed to this build identity; final closure
+still requires normal committed-version evidence and its applicable regression
+gate. Review identity cannot be promoted to trusted application identity.
+
 ## Checkout and Image Boundary
 
 The existing guarded Trusted-checkout synchronizer remains authoritative for

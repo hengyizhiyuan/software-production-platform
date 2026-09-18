@@ -904,7 +904,7 @@ body:has(.work-workspace) .work-surface {
   min-height: calc(100vh - 62px);
   grid-column: 2;
   grid-template-columns: minmax(0, 1fr) minmax(250px, 285px);
-  grid-template-rows: auto auto auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: 9px;
   align-content: start;
   padding: 10px 12px 12px;
@@ -1195,12 +1195,13 @@ body:has(.work-workspace) .interaction-layout {
 }
 
 body:has(.work-workspace) .current-interaction-panel {
-  position: relative;
-  z-index: 2;
-  height: 138px;
+  position: absolute;
+  z-index: 6;
+  bottom: calc(100% + 9px);
+  left: 0;
+  width: 100%;
+  max-height: min(35vh, 270px);
   min-width: 0;
-  grid-column: 1;
-  grid-row: 2;
   padding: 10px 14px;
   overflow: auto;
   background: linear-gradient(145deg, #102a33, #081b22);
@@ -1277,7 +1278,7 @@ body:has(.work-workspace) .conversation-history-panel {
   max-height: none;
   min-width: 0;
   grid-column: 2;
-  grid-row: 1 / 4;
+  grid-row: 1 / 3;
   padding: 12px;
   overflow: auto;
   background:
@@ -1354,13 +1355,45 @@ body:has(.work-workspace) .conversation-history-panel .interaction-message.is-cu
 
 body:has(.work-workspace) .composer {
   position: relative;
-  z-index: 2;
+  z-index: 5;
   bottom: auto;
   grid-column: 1;
-  grid-row: 3;
+  grid-row: 2;
+  min-height: 160px;
   padding: 0;
   background: transparent;
 }
+
+.selected-work[data-prospective="true"] > .workspace-evidence-details,
+.selected-work[data-prospective="true"] .work-header-actions,
+.selected-work[data-prospective="true"] #agreement-action-panel,
+.selected-work[data-prospective="true"] #attention-section {
+  display: none;
+}
+
+.prospective-actions {
+  padding: 8px 0;
+}
+
+.prospective-actions .action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+body:has(.work-workspace) .pre-work-admission:not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: #102a33;
+  border: 1px solid #28ded7;
+}
+
+body:has(.work-workspace) .pre-work-admission p { margin: 0; }
+body:has(.work-workspace) .pre-work-resource { margin-left: auto; }
+body:has(.work-workspace) .pre-work-resource select { display: block; max-width: 230px; }
 
 body:has(.work-workspace) .composer.is-composing .composer-form {
   position: absolute;
@@ -1382,7 +1415,15 @@ body:has(.work-workspace) .composer.is-composing .composer-main textarea {
 }
 
 body:has(.work-workspace) .composer-toggle-row {
-  display: none;
+  display: flex;
+  margin-bottom: 3px;
+  font-size: 9px;
+}
+
+body:has(.work-workspace) .composer-toggle-row .text-button {
+  min-height: 23px;
+  padding: 2px 7px;
+  font-size: 9px;
 }
 
 body:has(.work-workspace) .composer-form {
@@ -1480,9 +1521,14 @@ body:has(.work-workspace) .chip {
     grid-column: 1;
     grid-template-columns: 1fr;
   }
-  body:has(.work-workspace) :is(.selected-work, .current-interaction-panel, .conversation-history-panel, .composer) {
+  body:has(.work-workspace) :is(.selected-work, .conversation-history-panel, .composer) {
     grid-column: 1;
     grid-row: auto;
+  }
+  body:has(.work-workspace) .current-interaction-panel {
+    right: 0;
+    left: 0;
+    width: auto;
   }
   body:has(.work-workspace) .conversation-history-panel {
     position: relative;

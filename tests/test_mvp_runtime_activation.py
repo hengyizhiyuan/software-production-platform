@@ -6,6 +6,7 @@ import subprocess
 import pytest
 
 from spg.domain.runtime_activation import ActiveRuntimeEvidence, RuntimeActivationState
+from spg.config import Settings
 from spg.infrastructure.git_checkout import GitTrustedCheckoutSynchronizer
 from spg.infrastructure.runtime_activation import (
     GitLocalRuntimeActivation,
@@ -196,8 +197,8 @@ def test_act_13_14_16_activation_is_not_authority_or_product_acceptance() -> Non
     startup = (PROJECT_ROOT / "docker/start_app.py").read_text(encoding="utf-8")
     http = (PROJECT_ROOT / "src/spg/api/http.py").read_text(encoding="utf-8")
 
-    assert "Human" not in domain
-    assert "Acceptance" not in domain
+    assert "HUMAN_ACCEPTANCE" not in domain
+    assert "Runtime Commit" not in domain
     assert "Provider" not in domain
     assert "prepare_local_runtime_activation(repository)" in startup
     assert startup.index("synchronize_repository_checkout(repository)") < startup.index(
@@ -207,3 +208,74 @@ def test_act_13_14_16_activation_is_not_authority_or_product_acceptance() -> Non
     assert 'environment["PYTHONPATH"]' in startup
     assert 'environment["SPG_ACTIVE_RUNTIME_REVISION"]' in startup
     assert '"/api/runtime-activation"' in http
+
+
+def test_explicit_review_version_is_exact_and_never_trusted(tmp_path: Path) -> None:
+    repository, _, base, tree, next_baseline, next_tree = _repository(tmp_path)
+    _git(repository, "update-ref", "refs/heads/main", base)
+    source = tmp_path / "review-source"
+    web = source / "spg" / "web"
+    web.mkdir(parents=True)
+    (source / "spg" / "__init__.py").write_text("# review\n", encoding="utf-8")
+    (web / "app.js").write_text("const review = 1;\n", encoding="utf-8")
+    config = tmp_path / "review-config"
+    config.mkdir()
+    (config / "uv.lock").write_text("lock one\n", encoding="utf-8")
+    (config / "compose.yaml").write_text("review: true\n", encoding="utf-8")
+    settings = Settings(repository_path=repository, runtime_profile="review-test")
+    inspector = GitLocalRuntimeActivation()
+
+    assert inspector.inspect(
+        repository_path=repository, active=None,
+        trusted_revision=base, trusted_tree_identity=tree,
+    ).state is RuntimeActivationState.ACTIVATION_BLOCKED
+    assert inspector.inspect_review(
+        repository_path=repository, version=None,
+        trusted_revision=base, trusted_tree_identity=tree, settings=settings,
+    ).state is RuntimeActivationState.ACTIVATION_BLOCKED
+
+    version_a = inspector.prepare_review(
+        repository_path=repository, trusted_revision=base, trusted_tree_identity=tree,
+        source_root=source, configuration_root=config, settings=settings,
+    )
+
+    def state(version, *, configuration=settings):
+        return inspector.inspect_review(
+            repository_path=repository, version=version,
+            trusted_revision=base, trusted_tree_identity=tree, settings=configuration,
+        ).state
+
+    assert state(version_a) is RuntimeActivationState.ACTIVE_HUMAN_REVIEW
+    assert inspector.inspect_review(
+        repository_path=repository, version=version_a,
+        trusted_revision=next_baseline, trusted_tree_identity=next_tree,
+        settings=settings,
+    ).state is RuntimeActivationState.ACTIVE_HUMAN_REVIEW
+    assert inspector.inspect_review(
+        repository_path=repository, version=version_a,
+        trusted_revision=base, trusted_tree_identity=tree, settings=settings,
+    ).active_application_revision is None
+    assert state(version_a, configuration=Settings(
+        repository_path=repository, runtime_profile="changed-review-config"
+    )) is RuntimeActivationState.ACTIVATION_BLOCKED
+
+    for target, changed in (
+        (web / "app.js", "const review = 2;\n"),
+        (source / "spg" / "__init__.py", "# changed package\n"),
+        (config / "uv.lock", "lock two\n"),
+        (config / "compose.yaml", "review: changed\n"),
+    ):
+        before = target.read_text(encoding="utf-8")
+        target.write_text(changed, encoding="utf-8")
+        assert state(version_a) is RuntimeActivationState.ACTIVATION_BLOCKED
+        target.write_text(before, encoding="utf-8")
+        assert state(version_a) is RuntimeActivationState.ACTIVE_HUMAN_REVIEW
+
+    (web / "app.js").write_text("const review = 3;\n", encoding="utf-8")
+    assert state(version_a) is RuntimeActivationState.ACTIVATION_BLOCKED
+    version_b = inspector.prepare_review(
+        repository_path=repository, trusted_revision=base, trusted_tree_identity=tree,
+        source_root=source, configuration_root=config, settings=settings,
+    )
+    assert version_b.version_id != version_a.version_id
+    assert state(version_b) is RuntimeActivationState.ACTIVE_HUMAN_REVIEW

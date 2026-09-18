@@ -5,9 +5,10 @@ from __future__ import annotations
 from hashlib import sha256
 import json
 import logging
-from threading import Condition, Event, RLock, Thread
+from datetime import UTC, datetime
+from threading import Condition, Event, RLock, Thread, Timer
 from time import monotonic
-from uuid import UUID
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from spg.application.orchestration import (
     OrchestrationOutcome,
@@ -31,6 +32,8 @@ from spg.domain.product import (
     WorkStatus,
 )
 from spg.domain.guided_design import DesignReadinessState
+from spg.domain.change import ProductionTargetKind
+from spg.domain.planning import OnePwuFitClassification
 from spg.domain.steering import (
     NextStepCandidate,
     PlanFrame,
@@ -55,10 +58,13 @@ from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.infrastructure.model_runtime import ModelProviderError
 
 
 LOGGER = logging.getLogger(__name__)
 DEFAULT_MAX_STEERING_TRANSITIONS = 32
+DEFAULT_PROVIDER_RETRY_BASE_DELAY_SECONDS = 1.0
+DEFAULT_PROVIDER_RETRY_MAX_DELAY_SECONDS = 30.0
 
 
 class PlanSteeringDriver:
@@ -73,13 +79,21 @@ class PlanSteeringDriver:
         capability: PlanSteeringCapability | None = None,
         semantic_capability: SemanticStepCapability | None = None,
         max_automatic_transitions: int = DEFAULT_MAX_STEERING_TRANSITIONS,
+        provider_retry_base_delay_seconds: float = DEFAULT_PROVIDER_RETRY_BASE_DELAY_SECONDS,
+        provider_retry_max_delay_seconds: float = DEFAULT_PROVIDER_RETRY_MAX_DELAY_SECONDS,
     ) -> None:
         if max_automatic_transitions < 1:
             raise ValueError("Steering transition bound must be positive")
+        if provider_retry_base_delay_seconds <= 0:
+            raise ValueError("Provider retry base delay must be positive")
+        if provider_retry_max_delay_seconds < provider_retry_base_delay_seconds:
+            raise ValueError("Provider retry max delay must not be less than base delay")
         self.database = database
         self.work_service = work_service
         self.production_orchestrator = production_orchestrator
         self.max_automatic_transitions = max_automatic_transitions
+        self.provider_retry_base_delay_seconds = provider_retry_base_delay_seconds
+        self.provider_retry_max_delay_seconds = provider_retry_max_delay_seconds
         self.steering = SteeringApplicationService(database)
         self.frames = PlanFrameAssembler(database)
         self.decisions = SteeringDecisionApplicationService(
@@ -104,6 +118,10 @@ class PlanSteeringDriver:
         self._pending_work_ids: set[UUID] = set()
         self._threads: dict[UUID, Thread] = {}
         self._last_outcomes: dict[UUID, SteeringActivationResult] = {}
+        self._provider_retry_attempts: dict[UUID, int] = {}
+        self._provider_retry_timers: dict[UUID, Timer] = {}
+        self._retryable_provider_failures: set[UUID] = set()
+        self._last_provider_errors: dict[UUID, str] = {}
         self._stopping = Event()
         listener = getattr(production_orchestrator, "add_outcome_listener", None)
         if callable(listener):
@@ -175,6 +193,23 @@ class PlanSteeringDriver:
                     stop_reason=SteeringDriverStopReason.BLOCKED,
                     last_action=last_action,
                 )
+            except ModelProviderError as error:
+                self._record_provider_failure(work_id, error)
+                LOGGER.warning(
+                    "Steering waits for Provider recovery Work=%s kind=%s retryable=%s request_sent=%s usage_unknown=%s",
+                    work_id,
+                    error.kind.value,
+                    error.retryable,
+                    error.request_sent,
+                    error.usage_unknown,
+                )
+                return SteeringActivationResult(
+                    work_id=work_id,
+                    iterations_executed=iterations,
+                    stop_reason=SteeringDriverStopReason.CAPABILITY_UNAVAILABLE,
+                    last_action=last_action,
+                )
+            self._clear_provider_failure(work_id)
             if result.action is not None:
                 iterations += 1
                 last_action = result.action
@@ -205,6 +240,9 @@ class PlanSteeringDriver:
         with self._condition:
             if self._stopping.is_set():
                 return False
+            waiting = self._provider_retry_timers.pop(work_id, None)
+            if waiting is not None:
+                waiting.cancel()
             if work_id in self._active_work_ids:
                 self._pending_work_ids.add(work_id)
                 return False
@@ -252,11 +290,14 @@ class PlanSteeringDriver:
             decision = None
         with self._condition:
             active = work_id in self._active_work_ids
+            waiting_resource = work_id in self._provider_retry_timers
             last = self._last_outcomes.get(work_id)
         production_active = self.production_orchestrator.is_active(work_id)
         state = (
             SteeringAutomaticProgressionState.ACTIVE
             if active
+            else SteeringAutomaticProgressionState.WAITING_RESOURCE
+            if waiting_resource
             else SteeringAutomaticProgressionState.WAITING_PRODUCTION
             if production_active
             else SteeringAutomaticProgressionState.STOPPED
@@ -318,6 +359,10 @@ class PlanSteeringDriver:
         deadline = monotonic() + max(timeout, 0.0)
         with self._condition:
             threads = tuple(self._threads.values())
+            retry_timers = tuple(self._provider_retry_timers.values())
+            self._provider_retry_timers.clear()
+        for timer in retry_timers:
+            timer.cancel()
         for thread in threads:
             remaining = deadline - monotonic()
             if remaining <= 0:
@@ -585,6 +630,8 @@ class PlanSteeringDriver:
             and result.proposed_production is not None
             and not self._production_proposal_reviewed(frame.work_id, result.id)
         ):
+            if self._admit_bounded_managed_proposal(frame.work_id, result):
+                return self._decision_iteration(self.frames.assemble(frame.work_id), before)
             existing = fresh.reconstruction.latest_decision
             if not (
                 existing is not None
@@ -636,10 +683,87 @@ class PlanSteeringDriver:
                 str(work_id)
             )
         return any(
-            record.decision_type == "APPROVE_GUIDED_PRODUCTION_PROPOSAL"
+            record.decision_type in {
+                "APPROVE_GUIDED_PRODUCTION_PROPOSAL",
+                "AUTO_ADMIT_BOUNDED_MANAGED_PROPOSAL",
+            }
             and record.scope.get("semantic_result_id") == str(result_id)
             for record in records
         )
+
+    def _admit_bounded_managed_proposal(
+        self, work_id: UUID, result: SemanticStepResultRecord
+    ) -> bool:
+        """Use admitted Work authority only for reversible managed code production.
+
+        External resources, broad area-only changes, subsequent cycles and
+        material Human decisions retain exact proposal review.
+        """
+        proposal = result.proposed_production
+        if (proposal is None or proposal.target_kind is not ProductionTargetKind.CODE_WORK
+                or not result.completion_satisfied
+                or result.human_attention_recommendation is not None
+                or not 1 <= len(proposal.code_targets) <= 4):
+            return False
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            runtime = RuntimeStore(uow.session)
+            work = product.work(work_id)
+            resource = product.resource_for_work(work_id)
+            if (work is None or resource is None
+                    or not resource.repository_identity.startswith("watt://repositories/")
+                    or work.production_plan is None
+                    or work.production_plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT
+                    or product.runtime_bindings(work_id)):
+                return False
+            admitted = runtime.governance_for_subject(str(work_id))
+            work_admitted = any(
+                record.decision_type == "ADMIT_LONG_LIVED_WORK"
+                for record in admitted
+            )
+            source_admitted = any(
+                record.decision_type == "ADMIT_LONG_LIVED_WORK"
+                and record.scope.get("source_revision")
+                == work.production_plan.source_revision
+                for record in admitted
+            )
+            managed_workspace_admitted = any(
+                record.decision_type == "ALLOCATE_MANAGED_EXECUTION_WORKSPACE"
+                and record.scope.get("resource_id") == str(resource.id)
+                and record.scope.get("source_baseline_id")
+                == str(work.production_plan.source_baseline_id)
+                and record.scope.get("source_revision")
+                == work.production_plan.source_revision
+                for record in admitted
+            )
+            if not work_admitted or not (
+                source_admitted or managed_workspace_admitted
+            ):
+                return False
+            identity = uuid5(NAMESPACE_URL, f"spg:auto-managed-proposal:{result.id}")
+            if not any(record.id == identity for record in admitted):
+                runtime.insert_governance({
+                    "id": identity,
+                    "decision_type": "AUTO_ADMIT_BOUNDED_MANAGED_PROPOSAL",
+                    "authority_identity": "steering:auto-within-work-authority",
+                    "subject_type": "GUIDED_PRODUCTION_PROPOSAL",
+                    "subject_identity": str(work_id),
+                    "scope": {
+                        "work_id": str(work_id),
+                        "work_reality_revision_id": str(work.current_work_reality_revision_id),
+                        "semantic_result_id": str(result.id),
+                        "source_revision": work.production_plan.source_revision,
+                        "code_targets": list(proposal.code_targets),
+                    },
+                    "rationale": (
+                        "The exact bounded, reversible proposal uses only the "
+                        "Watt-managed repository admitted by this Work; no external "
+                        "authority or new Human decision is required."
+                    ),
+                    "created_at": datetime.now(UTC),
+                })
+                uow.commit()
+        return True
 
     def _admit_semantic_attention(
         self,
@@ -818,5 +942,60 @@ class PlanSteeringDriver:
             rerun = work_id in self._pending_work_ids and not self._stopping.is_set()
             self._pending_work_ids.discard(work_id)
             self._condition.notify_all()
-        if rerun:
+        if (
+            outcome.stop_reason is SteeringDriverStopReason.CAPABILITY_UNAVAILABLE
+            and self._provider_failure_is_retryable(work_id)
+        ):
+            self._schedule_provider_retry(work_id)
+        elif rerun:
             self.schedule(work_id)
+
+    def _record_provider_failure(
+        self, work_id: UUID, error: ModelProviderError
+    ) -> None:
+        with self._condition:
+            self._last_provider_errors[work_id] = str(error)
+            if error.retryable:
+                self._retryable_provider_failures.add(work_id)
+                self._provider_retry_attempts[work_id] = (
+                    self._provider_retry_attempts.get(work_id, 0) + 1
+                )
+            else:
+                self._retryable_provider_failures.discard(work_id)
+
+    def _clear_provider_failure(self, work_id: UUID) -> None:
+        with self._condition:
+            self._retryable_provider_failures.discard(work_id)
+            self._provider_retry_attempts.pop(work_id, None)
+            self._last_provider_errors.pop(work_id, None)
+
+    def _provider_failure_is_retryable(self, work_id: UUID) -> bool:
+        with self._condition:
+            return work_id in self._retryable_provider_failures
+
+    def _schedule_provider_retry(self, work_id: UUID) -> None:
+        with self._condition:
+            if self._stopping.is_set() or work_id in self._provider_retry_timers:
+                return
+            attempt = self._provider_retry_attempts.get(work_id, 1)
+            delay = min(
+                self.provider_retry_base_delay_seconds * (2 ** min(attempt - 1, 10)),
+                self.provider_retry_max_delay_seconds,
+            )
+            timer = Timer(delay, self._resume_after_provider_wait, args=(work_id,))
+            timer.daemon = True
+            self._provider_retry_timers[work_id] = timer
+        LOGGER.info(
+            "Steering Provider retry scheduled Work=%s attempt=%s delay_seconds=%s",
+            work_id,
+            attempt,
+            delay,
+        )
+        timer.start()
+
+    def _resume_after_provider_wait(self, work_id: UUID) -> None:
+        with self._condition:
+            self._provider_retry_timers.pop(work_id, None)
+            if self._stopping.is_set():
+                return
+        self.schedule(work_id)

@@ -56,6 +56,11 @@ from spg.application.work import WorkApplicationService
 from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.application.native_vector import NativeCandidateVectorService
 from spg.application.assets import RepositoryAssetService
+from spg.application.control_state import (
+    ControlStateSnapshot,
+    project_next_owner,
+    validate_control_state,
+)
 from spg.application.delivery import DeliveryApplicationService, artifact_media_type
 from spg.application.control_room import ControlRoomError, ControlRoomService
 from spg.application.software_runtime import SoftwareRuntimeService
@@ -225,6 +230,57 @@ def create_http_application(
 
     def work_response(projection: WorkProjection) -> WorkResponse:
         response = WorkResponse.from_projection(projection)
+
+        def with_control_state(candidate: WorkResponse) -> WorkResponse:
+            attention = work_service.list_attention(work_id=projection.work_id)
+            action_count = sum(len(item.available_actions) for item in attention)
+            progress = candidate.execution_progress
+            active_subject = bool(
+                candidate.current_production_run_id
+                or (progress is not None and progress.still_working)
+            )
+            next_owner = project_next_owner(
+                work_status=candidate.status.value,
+                human_attention_required=(
+                    candidate.human_attention_required or action_count > 0
+                ),
+                automatic_progression_state=candidate.automatic_progression_state,
+                active_execution_subject=active_subject,
+                external_wait_reason=(
+                    candidate.what_happens_next
+                    if candidate.automatic_progression_state == "WAITING_RESOURCE"
+                    else None
+                ),
+            )
+            snapshot = ControlStateSnapshot(
+                work_status=candidate.status.value,
+                next_owner=next_owner,
+                human_attention_required=(
+                    candidate.human_attention_required or action_count > 0
+                ),
+                actionable_human_actions=action_count,
+                automatic_progression_state=candidate.automatic_progression_state,
+                active_execution_subject=active_subject,
+                external_wait_reason=(
+                    candidate.what_happens_next
+                    if candidate.automatic_progression_state == "WAITING_RESOURCE"
+                    else None
+                ),
+                human_attention_badges=(
+                    1
+                    if candidate.human_attention_required or action_count > 0
+                    else 0
+                ),
+            )
+            violations = validate_control_state(snapshot)
+            return candidate.model_copy(update={
+                "next_owner": next_owner or None,
+                "human_attention_required": (
+                    candidate.human_attention_required or action_count > 0
+                ),
+                "control_state_valid": not violations,
+                "control_state_violations": violations,
+            })
         progress_reader = getattr(selected_orchestrator, "progress", None)
         if callable(progress_reader):
             progress = progress_reader(projection.work_id)
@@ -255,7 +311,7 @@ def create_http_application(
                 })
         if not projection.steering_enabled:
             guided = selected_guided_design.get_optional(projection.work_id)
-            return response.model_copy(
+            return with_control_state(response.model_copy(
                 update={
                     "guided_design": (
                         None
@@ -263,12 +319,12 @@ def create_http_application(
                         else GuidedDesignResponse.from_projection(guided)
                     )
                 }
-            )
+            ))
         try:
             steering = selected_steering_driver.project(projection.work_id)
         except SteeringRecordNotFound:
             guided = selected_guided_design.get_optional(projection.work_id)
-            return response.model_copy(
+            return with_control_state(response.model_copy(
                 update={
                     "guided_design": (
                         None
@@ -276,7 +332,7 @@ def create_http_application(
                         else GuidedDesignResponse.from_projection(guided)
                     )
                 }
-            )
+            ))
         state = steering.automatic_progression_state.value
         stop_reason = (
             None
@@ -297,13 +353,22 @@ def create_http_application(
                     ),
                 }
             )
+        elif state == "WAITING_RESOURCE" and stop_reason == "CAPABILITY_UNAVAILABLE":
+            updates.update(
+                {
+                    "most_recent_meaningful_event": "STEERING_WAITING_PROVIDER",
+                    "what_happens_next": (
+                        "Watt is waiting for semantic Provider availability and will retry automatically"
+                    ),
+                }
+            )
         guided = selected_guided_design.get_optional(projection.work_id)
         updates["guided_design"] = (
             None
             if guided is None
             else GuidedDesignResponse.from_projection(guided)
         )
-        return response.model_copy(update=updates)
+        return with_control_state(response.model_copy(update=updates))
 
     @api.exception_handler(ProductRecordNotFound)
     @api.exception_handler(SteeringRecordNotFound)

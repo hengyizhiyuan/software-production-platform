@@ -274,6 +274,11 @@ class LocalNativeToolHost:
             and not any(marker in key.upper() for marker in _SECRET_MARKERS)
         }
         environment["PYTHONPATH"] = str(self.workspace_root / "src")
+        # Executor-owned validation commands must not create undeclared repository
+        # artifacts as a side effect.  Python otherwise writes __pycache__ beside
+        # admitted source files, which can turn a successful bounded production
+        # attempt into a PATH_SCOPE failure after the attempt has finished.
+        environment["PYTHONDONTWRITEBYTECODE"] = "1"
         launched_argv = argv
         scratch = None
         if self.process_sandbox is not None:

@@ -26,6 +26,12 @@ def canonical_fingerprint(value):
 
 
 class RepositoryAssetService:
+    _MANAGED_REPOSITORY_EXCLUDES = (
+        "__pycache__/",
+        "*.py[cod]",
+        ".pytest_cache/",
+    )
+
     def __init__(self, database, asset_root: Path, import_root: Path):
         self.database = database
         self.asset_root = asset_root.resolve()
@@ -86,6 +92,21 @@ class RepositoryAssetService:
                 if source is None:
                     repository.mkdir()
                     self._git(repository, "init", "-b", "main")
+                    exclude = repository / ".git" / "info" / "exclude"
+                    existing_excludes = exclude.read_text(encoding="utf-8")
+                    additions = tuple(
+                        pattern
+                        for pattern in self._MANAGED_REPOSITORY_EXCLUDES
+                        if pattern not in existing_excludes.splitlines()
+                    )
+                    if additions:
+                        exclude.write_text(
+                            existing_excludes.rstrip("\n")
+                            + "\n"
+                            + "\n".join(additions)
+                            + "\n",
+                            encoding="utf-8",
+                        )
                     # Only initialization facts; design is produced later through SPG.
                     (repository / "README.md").write_text("# Work Repository\n\nInitialized for governed Work production.\n", encoding="utf-8")
                     self._git(repository, "add", "--", "README.md")

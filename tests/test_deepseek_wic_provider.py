@@ -223,6 +223,37 @@ def test_controlled_pre_work_stops_after_one_failed_json_repair() -> None:
     assert adapter.calls == 2
 
 
+def test_shadow_pre_work_repairs_one_root_json_failure_without_second_stream() -> None:
+    runtime, adapter = _runtime(_Adapter(['{"natural_response":"partial', _envelope()]))
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    visible: list[str] = []
+    candidate = capability.interpret_stream_observed(
+        _basis(), on_response_delta=visible.append,
+        on_pipeline_stage=lambda _stage: None,
+    )
+    assert adapter.calls == 2
+    assert candidate.turn_intent is ConversationTurnIntent.BUILD
+    assert capability.last_pipeline_evidence.coalesced_retry_count == 1
+    assert "".join(visible) == "partial"
+
+
+def test_shadow_pre_work_does_not_retry_schema_error_or_retry_thrice() -> None:
+    runtime, adapter = _runtime(_Adapter(['{"natural_response":"missing semantics"}']))
+    with pytest.raises(InteractionInvariantViolation, match="semantics:missing"):
+        DeepSeekWorkInteractionCapability(runtime=runtime).interpret_stream_observed(
+            _basis(), on_response_delta=lambda _delta: None,
+            on_pipeline_stage=lambda _stage: None,
+        )
+    assert adapter.calls == 1
+    runtime, adapter = _runtime(_Adapter(["{", "{"]))
+    with pytest.raises(InteractionInvariantViolation, match="bounded_repair_exhausted"):
+        DeepSeekWorkInteractionCapability(runtime=runtime).interpret_stream_observed(
+            _basis(), on_response_delta=lambda _delta: None,
+            on_pipeline_stage=lambda _stage: None,
+        )
+    assert adapter.calls == 2
+
+
 def test_controlled_active_work_question_skips_discarded_conversation_call() -> None:
     basis = _basis()
     revision = WorkRealityRevision(
@@ -269,6 +300,39 @@ def test_controlled_active_work_question_skips_discarded_conversation_call() -> 
     assert capability.last_pipeline_evidence.provider_call_count == 1
     assert capability.last_pipeline_evidence.conversation_request_id is None
     assert adapter.outputs == ["invalid unused response"]
+
+
+def test_shadow_active_work_bad_expression_uses_validated_semantic_answer() -> None:
+    basis = _basis()
+    revision = WorkRealityRevision(
+        id=UUID(int=10), work_id=UUID(int=11), revision_number=1,
+        basis_fingerprint="a" * 64, revision_fingerprint="c" * 64,
+        source_interaction_id=basis.interaction.id, source_assessment_id=UUID(int=12),
+        source_record_ids=(basis.records[0].id,), motive="开发课程表",
+        desired_outcome="可使用的页面", context_facts=(), constraints=(), requests=(),
+        engineering_scope_id=UUID(int=13), engineering_resource_id=None,
+        scope_basis_fingerprint="d" * 64, source_baseline_id=None,
+        governance_record_id=UUID(int=16), supporting_references=(),
+        change_set=("initial",), rationale="Admitted Work", admitted_by="human",
+        schema_version="v1", created_at=basis.interaction.created_at,
+    )
+    basis = basis.model_copy(update={"active_work_context": ActiveWorkInterpretationContext(
+        work_revision=revision, engineering_scope_fingerprint="e" * 64,
+    )})
+    semantic = InteractionSemanticCandidate(
+        interpreted_motive=revision.motive, desired_outcome=revision.desired_outcome,
+        collaboration=StructuredCollaborationResult(
+            turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
+            direct_answer="当前还没有开始执行。", response_language="zh-CN",
+        ), provider_identity="test",
+    ).model_dump_json(exclude={"provider_identity", "model_identity"})
+    runtime, adapter = _runtime(_Adapter([semantic, "not valid JSON"]))
+    result = DeepSeekWorkInteractionCapability(runtime=runtime).interpret_stream_observed(
+        basis, on_response_delta=lambda _delta: None,
+        on_pipeline_stage=lambda _stage: None,
+    )
+    assert result.natural_response == "当前还没有开始执行。"
+    assert adapter.calls == 2
 
 
 def test_profiles_are_role_specific_and_control_pre_work_coalescing() -> None:

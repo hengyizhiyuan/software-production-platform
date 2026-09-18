@@ -13,12 +13,12 @@
     >
     <title>Watt / 工律 · Software Production</title>
     <link rel="stylesheet" href="/assets/styles.css">
-    <link rel="stylesheet" href="/assets/appearance.css?v=human-review-v3">
-    <script src="/assets/state.js" defer></script>
+    <link rel="stylesheet" href="/assets/appearance.css?v=early-workspace-v12">
+    <script src="/assets/state.js?v=early-workspace-v12" defer></script>
     <script src="/assets/appearance.js?v=formal-ui-phase1" defer></script>
     <script src="/assets/response-presentation.js?v=formal-ui-phase1" defer></script>
-    <script src="/assets/control-room.js?v=human-review-v3" defer></script>
-    <script src="/assets/app.js?v=human-review-v3" defer></script>
+    <script src="/assets/control-room.js?v=main-journey-stability" defer></script>
+    <script src="/assets/app.js?v=main-journey-stability-3" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#work-surface">Skip to selected Work</a>
@@ -90,7 +90,7 @@
             <option value="AWAITING_APPROVAL">Awaiting approval</option>
             <option value="READY">Ready</option>
             <option value="RUNNING">Running</option>
-            <option value="NEEDS_ATTENTION">Needs your attention</option>
+            <option value="NEEDS_ATTENTION">Production paused</option>
             <option value="BLOCKED">Blocked</option>
             <option value="COMPLETED">Completed</option>
           </select>
@@ -120,21 +120,16 @@
           <p>Explore or clarify naturally. No governed Work exists until a later Human admission.</p>
         </div>
 
-          <section id="interaction-surface" class="interaction-surface" aria-labelledby="interaction-heading">
+          <section id="interaction-surface" class="interaction-surface" aria-label="Conversation workspace">
             <div class="interaction-layout">
-            <section class="current-interaction-panel" aria-label="Current Interaction">
-            <div class="panel-title-row">
-              <div>
-                <p class="eyebrow">Active Work communication</p>
-                <h3 id="interaction-heading">Current Interaction</h3>
+            <aside class="conversation-history-panel" aria-labelledby="conversation-history-heading">
+              <div class="panel-title-row">
+                <div>
+                  <p class="eyebrow">Provenance</p>
+                  <h3 id="conversation-history-heading">Conversation History</h3>
+                </div>
               </div>
-              <div class="interaction-heading-actions">
-                <span id="interaction-processing-status" class="status-badge status-draft">IDLE</span>
-                <button id="new-interaction-control" class="text-button" type="button">New Work</button>
-              </div>
-            </div>
-            <div id="current-interaction-live" class="current-interaction-live" data-response-region="composable" aria-live="polite"></div>
-
+              <div id="interaction-history" class="interaction-history" aria-live="polite"></div>
             <section id="shared-understanding" class="shared-understanding" aria-labelledby="understanding-heading">
               <div class="panel-title-row">
                 <div>
@@ -152,7 +147,7 @@
                 <div><dt>Context / facts</dt><dd id="interpreted-context">None yet</dd></div>
                 <div><dt>Current requests</dt><dd id="interpreted-requests">None yet</dd></div>
                 <div><dt>Candidate constraints</dt><dd id="interpreted-constraints">None yet</dd></div>
-                <div><dt>Unresolved material questions</dt><dd id="interpreted-questions">Tell Watt what you want to explore.</dd></div>
+                <div><dt>Open questions / current blockers</dt><dd id="interpreted-questions">Tell Watt what you want to explore.</dd></div>
                 <div><dt>Engineering resource</dt><dd id="interaction-resource">Not bound yet</dd></div>
                 <div><dt>Authority envelope</dt><dd id="interaction-scope">Not bound yet</dd></div>
                 <div><dt>Governed / admitted</dt><dd id="governed-understanding">None — no Work exists</dd></div>
@@ -175,15 +170,7 @@
                 </dl>
               </details>
               <p id="readiness-affordance" class="empty-copy">Not ready to form Work.</p>
-              <div id="interaction-admission" class="operator-panel compact-admission" hidden>
-                <div class="operator-identity">
-                  <label for="interaction-authority-identity">Human authority</label>
-                  <input id="interaction-authority-identity" value="human:local-operator" autocomplete="off">
-                </div>
-                <label for="admission-resource">Repository Asset（可稍后绑定）</label>
-                <select id="admission-resource"><option value="">尚无仓库，先开始 Work 与设计</option></select>
-                <button id="admit-work-control" class="primary-button" type="button" aria-label="Admit governed Work">Authorize Work formation and start Steering</button>
-              </div>
+            </section>
               <div id="work-revision-admission" class="operator-panel compact-admission" hidden>
                 <div class="operator-identity">
                   <label for="work-revision-authority-identity">Human authority</label>
@@ -203,16 +190,6 @@
                 <button id="start-new-work" class="primary-button compact" type="button">Start new Work formation</button>
                 <button id="dismiss-work-transition" class="text-button" type="button">Dismiss</button>
               </div>
-            </section>
-            </section>
-            <aside class="conversation-history-panel" aria-labelledby="conversation-history-heading">
-              <div class="panel-title-row">
-                <div>
-                  <p class="eyebrow">Provenance</p>
-                  <h3 id="conversation-history-heading">Conversation History</h3>
-                </div>
-              </div>
-              <div id="interaction-history" class="interaction-history" aria-live="polite"></div>
             </aside>
             </div>
           </section>
@@ -272,9 +249,11 @@
               </header>
               <p id="workspace-agenda-summary" class="workspace-surface-summary">Loading current direction…</p>
               <ol id="work-execution-path" class="work-execution-path" aria-label="Governed execution path"></ol>
-              <div class="working-agreements-heading"><h4>Working Agreements</h4><span id="working-agreement-count"></span></div>
-              <div id="working-agreement-list" class="working-agreement-list"></div>
-              <details id="working-agreement-history"><summary>Past agreements</summary><div id="working-agreement-past"></div></details>
+              <div id="working-agreements-section" hidden>
+                <div class="working-agreements-heading"><h4>Working Agreements</h4><span id="working-agreement-count"></span></div>
+                <div id="working-agreement-list" class="working-agreement-list"></div>
+                <details id="working-agreement-history"><summary>Past agreements</summary><div id="working-agreement-past"></div></details>
+              </div>
               <details class="agreement-entry"><summary>Record an agreement</summary>
                 <form id="working-agreement-form">
                   <label for="agreement-type">Agreement type</label>
@@ -355,6 +334,13 @@
                 <div><dt>Emerging Direction</dt><dd id="workspace-actions-direction"></dd></div>
               </dl>
               <div id="work-actions" class="action-row"></div>
+              <div id="prospective-actions" class="prospective-actions" hidden>
+                <p id="prospective-decision" class="empty-copy"></p>
+                <div class="action-row">
+                  <button id="prospective-start" class="primary-button compact" type="button">按当前理解开始</button>
+                  <button id="prospective-refine" class="secondary-button compact" type="button">继续完善</button>
+                </div>
+              </div>
 
               <section id="agreement-action-panel" class="agreement-action-panel" aria-label="Working Agreement controls" hidden>
                 <p id="agreement-selected-note">Select an active agreement in Agenda to keep or abandon it.</p>
@@ -386,6 +372,7 @@
             <label for="authority-identity">Human authority</label>
             <input id="authority-identity" value="human:local-operator" autocomplete="off">
           </div>
+          <span id="interaction-processing-status" class="status-badge status-draft">IDLE</span>
           <section id="control-room-foundation" class="control-room-foundation" aria-label="Production control foundation">
             <section class="control-room-card" aria-labelledby="control-objective-heading">
               <p class="eyebrow">Production Objective</p>
@@ -704,8 +691,28 @@
         </article>
 
       <section class="composer" aria-labelledby="composer-heading">
+        <section id="current-interaction-panel" class="current-interaction-panel" aria-label="Current Interaction" hidden>
+          <div class="panel-title-row">
+            <div>
+              <p class="eyebrow">Active Work communication</p>
+              <h3 id="interaction-heading">Current Interaction</h3>
+            </div>
+          </div>
+          <div id="current-interaction-live" class="current-interaction-live" data-response-region="composable" aria-live="polite"></div>
+        </section>
+        <div id="interaction-admission" class="pre-work-admission" hidden>
+          <p>Ready to start production</p>
+          <input id="interaction-authority-identity" type="hidden" value="human:local-operator">
+          <details class="pre-work-resource">
+            <summary>Optional repository asset</summary>
+            <label for="admission-resource">Repository Asset（可稍后绑定）</label>
+            <select id="admission-resource"><option value="">尚无仓库，先开始 Work 与设计</option></select>
+          </details>
+          <button id="admit-work-control" class="primary-button" type="button" aria-label="Admit governed Work">Start Work</button>
+        </div>
         <div class="composer-toggle-row">
           <span class="field-label">Continuing Interaction</span>
+          <button id="new-interaction-control" class="text-button" type="button">New Work</button>
           <button
             id="composer-toggle"
             class="text-button"

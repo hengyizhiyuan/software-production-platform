@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+import logging
+import json
+from json import JSONDecodeError
+from pydantic import ValidationError
 
 from spg.domain.model_runtime import ModelPurpose, StructuredModelResult, WattModelRuntime
 from spg.domain.steering import (
@@ -10,11 +14,14 @@ from spg.domain.steering import (
     SemanticStepInput,
     SemanticStepResultCandidate,
     SteeringStepType,
+    SteeringInvariantViolation,
 )
 from spg.providers.codex_semantic import (
     CodexSdkSemanticStepCapability,
     _admitted_derived_constraints,
 )
+
+LOGGER = logging.getLogger(__name__)
 
 
 class DeepSeekSemanticStepCapability:
@@ -29,17 +36,60 @@ class DeepSeekSemanticStepCapability:
         self.last_usage: dict[str, object] | None = None
 
     def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+        instruction = CodexSdkSemanticStepCapability._instruction(input)
+        schema = CodexSdkSemanticStepCapability.output_schema()
         result = self.runtime.generate(
             purpose=ModelPurpose.STEERING_SEMANTIC,
-            instructions=CodexSdkSemanticStepCapability._instruction(input),
+            instructions=instruction,
             input_text="Return the governed semantic Steering result for this exact Step.",
-            output_schema=CodexSdkSemanticStepCapability.output_schema(),
+            output_schema=schema,
         )
-        payload = (
-            CodexSdkSemanticStepCapability._parse_payload_ignoring_annotations(
+        try:
+            payload = CodexSdkSemanticStepCapability._parse_payload_ignoring_annotations(
                 result.output_text
             )
-        )
+        except SteeringInvariantViolation as error:
+            cause = error.__cause__
+            # Repair only a missing wire envelope, not conflicting authority or
+            # an invalid proposal. The repaired output still passes the exact
+            # same typed parser and subsequent governed semantic admission.
+            missing_disposition = (
+                isinstance(cause, ValidationError)
+                and len(cause.errors()) == 1
+                and cause.errors()[0].get("loc") == ("disposition",)
+                and cause.errors()[0].get("type") == "missing"
+            )
+            invalid_json = isinstance(cause, JSONDecodeError)
+            if not (missing_disposition or invalid_json):
+                raise
+            try:
+                shape = sorted(json.loads(result.output_text))
+            except (ValueError, TypeError):
+                shape = ["invalid_json"]
+            LOGGER.warning(
+                "Steering semantic wire repair request=%s model=%s stage=%s fields=%s output_length=%s attempts=1",
+                result.request_id, result.effective_model or result.requested_model,
+                "root:json_invalid" if invalid_json else "payload_validation:missing_disposition",
+                shape, len(result.output_text),
+            )
+            result = self.runtime.generate(
+                purpose=ModelPurpose.STEERING_SEMANTIC,
+                instructions=instruction,
+                input_text=(
+                    "The prior result was not one valid complete JSON value. "
+                    if invalid_json else
+                    "The prior result omitted the required disposition envelope. "
+                ) + (
+                    "Return one complete result for the SAME governed Step, including "
+                    "a disposition that truthfully matches the supported evidence. "
+                    "Do not infer Human authority or loosen the proposal contract. "
+                    "Prior candidate:\n" + result.output_text
+                ),
+                output_schema=schema,
+            )
+            payload = CodexSdkSemanticStepCapability._parse_payload_ignoring_annotations(
+                result.output_text
+            )
         self.last_result = result
         self.last_usage = asdict(result.usage)
         kind = (
