@@ -20,6 +20,7 @@ from spg.application.interaction import (
 )
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.orchestration import OrchestrationStopReason, ProductionOrchestrator
+from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.runtime import RuntimeService
 from spg.application.steering import SteeringApplicationService
@@ -1515,6 +1516,7 @@ def test_wic3_active_cycle_remains_bound_to_old_revision_and_input_is_not_inject
 def test_wic3_revision_api_triggers_existing_steering_driver_only_after_approval(
     postgres_database: Database,
     services,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     work, interactions = services
     ready = _ready(interactions)
@@ -1536,6 +1538,13 @@ def test_wic3_revision_api_triggers_existing_steering_driver_only_after_approval
     assessment = pending.latest_assessment
     assert assessment is not None
     assert assessment.basis_work_revision_id is not None
+    monkeypatch.setattr(
+        WorkPostAdmissionService,
+        "activate",
+        lambda *_args, **_kwargs: pytest.fail(
+            "A Work revision must not re-enter first-admission activation"
+        ),
+    )
     driver = _RecordingDriver()
     client = TestClient(
         create_http_application(
@@ -1787,9 +1796,18 @@ def test_wic4_completed_work_continuation_reopens_satisfaction_without_rewriting
     assert driver.scheduled == [admitted.work_id]
 
     evolved = completed_work.get_work(admitted.work_id)
-    assert evolved.status is WorkStatus.RUNNING
+    assert evolved.status is WorkStatus.READY
     assert evolved.work_complete is False
     assert evolved.latest_trusted_runtime_commit_id == trusted_commit_id
+    assert evolved.current_production_run_id is None
+    assert evolved.what_happens_next == (
+        "Reassess the governed Plan against the latest Work Reality revision"
+    )
+    current_result = completed_work.get_work_result(admitted.work_id)
+    assert current_result.produced_artifacts == ()
+    assert current_result.verification_summary == ()
+    assert current_result.repository_state is None
+    assert current_result.trusted_result is False
     with postgres_database.unit_of_work() as unit_of_work:
         history = ProductStore(unit_of_work.session).work_reality_revisions(
             admitted.work_id

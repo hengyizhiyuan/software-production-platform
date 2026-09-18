@@ -68,6 +68,8 @@ test("inspection stays a single read-only floating workspace with multi-file con
 test("machine controls belong to Production and Human authority actions belong to Actions", () => {
   assert.match(app, /function concentrateWorkMutations\(\)/);
   assert.match(app, /actions\.append\(preview\)/);
+  assert.match(app, /actions\.append\(revisionAdmission\)/);
+  assert.match(app, /actions\.append\(transitionDecision\)/);
   assert.match(app, /production\.insertBefore\(manual, result\)/);
   assert.match(app, /production\.insertBefore\(machineControls, result\)/);
   assert.match(app, /evidence\.append\(result\)/);

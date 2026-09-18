@@ -83,6 +83,80 @@ READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
 
 
+_TABLE_CONTEXT_PATTERN = re.compile(r"(?:\btable\b|表格|课程表)", re.IGNORECASE)
+_DIMENSION_PAIR_PATTERN = re.compile(
+    r"(?P<first>\d{1,4})\s*[x×＊*]\s*(?P<second>\d{1,4})",
+    re.IGNORECASE,
+)
+_ROW_COLUMN_PATTERNS = (
+    re.compile(
+        r"(?P<rows>\d{1,4})\s*(?:行|rows?)\D{0,16}"
+        r"(?P<columns>\d{1,4})\s*(?:列|columns?|cols?)",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"(?P<columns>\d{1,4})\s*(?:列|columns?|cols?)\D{0,16}"
+        r"(?P<rows>\d{1,4})\s*(?:行|rows?)",
+        re.IGNORECASE,
+    ),
+)
+
+
+def _normalize_table_dimension_constraints(
+    candidate: InteractionAssessmentCandidate,
+    latest_human_input: str,
+) -> InteractionAssessmentCandidate:
+    """Keep table row/column direction explicit in governed candidate fields."""
+
+    context = "\n".join(
+        (
+            latest_human_input,
+            candidate.interpreted_motive or "",
+            candidate.desired_outcome or "",
+            *candidate.candidate_constraints,
+            *candidate.current_requests,
+        )
+    )
+    if _TABLE_CONTEXT_PATTERN.search(context) is None:
+        return candidate
+
+    dimensions: tuple[int, int] | None = None
+    for source in (latest_human_input, *candidate.candidate_constraints):
+        for pattern in _ROW_COLUMN_PATTERNS:
+            match = pattern.search(source)
+            if match is not None:
+                dimensions = (int(match.group("rows")), int(match.group("columns")))
+                break
+        if dimensions is not None:
+            break
+    if dimensions is None:
+        match = _DIMENSION_PAIR_PATTERN.search(latest_human_input)
+        if match is None:
+            return candidate
+        # Matrix/table dimensions conventionally mean rows x columns unless the
+        # Human explicitly states the reverse order above.
+        dimensions = (int(match.group("first")), int(match.group("second")))
+
+    rows, columns = dimensions
+    canonical = f"表格尺寸 {rows} 行 × {columns} 列"
+    normalized: list[str] = []
+    replaced = False
+    for constraint in candidate.candidate_constraints:
+        if _DIMENSION_PAIR_PATTERN.search(constraint) or any(
+            pattern.search(constraint) for pattern in _ROW_COLUMN_PATTERNS
+        ):
+            if canonical not in normalized:
+                normalized.append(canonical)
+            replaced = True
+        else:
+            normalized.append(constraint)
+    if not replaced:
+        normalized.append(canonical)
+    return candidate.model_copy(
+        update={"candidate_constraints": tuple(dict.fromkeys(normalized))}
+    )
+
+
 _LONG_LIVED_OBJECT_TERMS = (
     "system",
     "platform",
@@ -1500,6 +1574,10 @@ class WorkInteractionService:
                 candidate,
                 prior_assessment=prior_assessment,
                 latest_human_input=latest_human_input,
+            )
+            candidate = _normalize_table_dimension_constraints(
+                candidate,
+                latest_human_input,
             )
             if (
                 active_context is not None

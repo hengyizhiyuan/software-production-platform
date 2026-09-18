@@ -2289,6 +2289,12 @@ class WorkApplicationService:
                 binding = self._runtime_binding_for_current_context(
                     store, projection.work_id
                 )
+                if (
+                    binding is not None
+                    and binding.work_reality_revision_id
+                    != projection.current_work_reality_revision_id
+                ):
+                    binding = None
                 summary = (
                     RuntimeFactSummary()
                     if binding is None
@@ -2511,6 +2517,12 @@ class WorkApplicationService:
         with self.database.unit_of_work() as unit_of_work:
             store = ProductStore(unit_of_work.session)
             binding = store.runtime_binding(work_id)
+            if (
+                binding is not None
+                and binding.work_reality_revision_id
+                != projection.current_work_reality_revision_id
+            ):
+                binding = None
             summary = RuntimeFactSummary() if binding is None else store.runtime_summary(binding)
         verification = tuple(
             f"{obligation}: {result}"
@@ -2583,6 +2595,17 @@ class WorkApplicationService:
             and current_steering_step.type.value == "COMPLETE"
         ):
             binding = latest_binding
+        revision_reassessment_pending = bool(
+            binding is not None
+            and work.current_work_reality_revision_id is not None
+            and binding.work_reality_revision_id
+            != work.current_work_reality_revision_id
+        )
+        if revision_reassessment_pending:
+            # The older cycle remains immutable history, but it must not keep
+            # projecting its Candidate, verification, or Human action as if it
+            # belonged to the newly admitted Work Reality revision.
+            binding = None
         summary = RuntimeFactSummary() if binding is None else store.runtime_summary(binding)
         latest_summary = (
             RuntimeFactSummary()
@@ -2641,6 +2664,12 @@ class WorkApplicationService:
             steering_complete=steering_complete,
             steering_attention=steering_attention,
         )
+        if revision_reassessment_pending and not steering_attention:
+            status = WorkStatus.READY
+            event = "WORK_REALITY_REVISION_ADMITTED"
+            next_action = (
+                "Reassess the governed Plan against the latest Work Reality revision"
+            )
         if current_steering_step is not None:
             step = current_steering_step.type.value
         bindings = store.runtime_bindings(work.id)
@@ -2708,16 +2737,17 @@ class WorkApplicationService:
             ),
             current_production_cycle_number=(
                 None
-                if current_cycle_binding is None
+                if current_cycle_binding is None or revision_reassessment_pending
                 else current_cycle_binding.cycle_number
             ),
             current_production_run_id=(
                 None
-                if current_cycle_binding is None
+                if current_cycle_binding is None or revision_reassessment_pending
                 else current_cycle_binding.production_run_id
             ),
             current_production_cycle_trusted=bool(
                 current_cycle_binding is not None
+                and not revision_reassessment_pending
                 and summary.runtime_commit_id is not None
             ),
             latest_trusted_runtime_commit_id=latest_trusted_commit_id,

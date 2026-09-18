@@ -2578,7 +2578,11 @@
     const result = production.querySelector(".result-panel");
     const evidence = document.querySelector(".workspace-evidence-content");
     const preview = document.getElementById("candidate-preview-panel");
+    const revisionAdmission = elements.workRevisionAdmission;
+    const transitionDecision = elements.workTransitionDecision;
     if (preview) actions.append(preview);
+    if (revisionAdmission) actions.append(revisionAdmission);
+    if (transitionDecision) actions.append(transitionDecision);
     const manual = elements.manualAdvanceControl.closest(".manual-controls");
     const machineControls = document.getElementById("execution-queue-controls");
     if (machineControls) production.insertBefore(machineControls, result);

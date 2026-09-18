@@ -16,7 +16,11 @@ from spg.domain.conversation import (
     HumanConversationMode,
     InteractionStrategy,
 )
-from spg.application.interaction import WorkInteractionService, interaction_basis_fingerprint
+from spg.application.interaction import (
+    WorkInteractionService,
+    _normalize_table_dimension_constraints,
+    interaction_basis_fingerprint,
+)
 from spg.application.wic_intelligence import build_progressive_semantics
 from spg.application.wic_response import (
     GovernedDeltaGate,
@@ -111,6 +115,31 @@ def _build(case_id: str, candidate=None, prior=None, text=None):
         focus=WorkFocusClassification.UNRELATED_NEW_DEMAND if case_id == "OW-E" else WorkFocusClassification.ON_TOPIC,
         impact=WorkImpactDisposition.NEW_WORK_RECOMMENDED if case_id == "OW-E" else WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
     )
+
+
+@pytest.mark.parametrize(
+    ("human_input", "expected"),
+    (
+        ("做一个 table，8*5 的课程表", "表格尺寸 8 行 × 5 列"),
+        ("做一个课程表，明确是 8 列、5 行", "表格尺寸 5 行 × 8 列"),
+    ),
+)
+def test_table_dimensions_remain_explicit_in_governed_candidate_fields(
+    human_input: str,
+    expected: str,
+) -> None:
+    candidate = InteractionAssessmentCandidate(
+        interpreted_motive="制作课程表 HTML 页面",
+        desired_outcome="得到一个 8×5 表格",
+        candidate_constraints=("简单 HTML 页面", "表格尺寸 8×5"),
+        current_requests=("使用 table 元素",),
+        natural_response="按 8 行 × 5 列制作。",
+        provider_identity="test",
+    )
+
+    normalized = _normalize_table_dimension_constraints(candidate, human_input)
+
+    assert normalized.candidate_constraints == ("简单 HTML 页面", expected)
 
 
 def test_ow_c_correction_supersedes_prior_motive_without_deleting_history() -> None:

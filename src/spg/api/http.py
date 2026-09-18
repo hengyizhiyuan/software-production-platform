@@ -708,7 +708,10 @@ def create_http_application(
             rationale=request.rationale,
         )
         if request.action is AttentionAction.APPROVE:
-            selected_post_admission.activate(work.work_id)
+            # A revision evolves an already admitted Work. Reassess it through
+            # the existing Steering lifecycle instead of re-entering the
+            # first-admission status gate after the revision has committed.
+            selected_steering_driver.schedule(work.work_id)
         return SharedUnderstandingResponse.from_projection(
             service.get_shared_understanding(interaction_id)
         )
