@@ -10,6 +10,7 @@ from alembic.config import Config
 import pytest
 from sqlalchemy import func, inspect, select
 
+from spg.application.control_state import project_next_owner
 from spg.application.runtime import RuntimeService
 from spg.application.materialization import ExecutionInputMaterializationService
 from spg.application.orchestration import OrchestrationProgress
@@ -825,18 +826,26 @@ def test_node_07_08_09_10_12_node_result_aggregates_without_changing_completion(
 
     if candidate_expected:
         assert projection.status is WorkStatus.NEEDS_ATTENTION
+        assert projection.human_attention_required is True
         assert len(attention) == 1
         assert attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION
+        assert attention[0].available_actions == (AttentionAction.AUTHORIZE,)
         assert summary.candidate_id is not None
     else:
         assert projection.status is WorkStatus.BLOCKED
-        assert attention
-        assert all(
-            item.kind is not AttentionKind.CANDIDATE_AUTHORIZATION
-            for item in attention
-        )
+        assert projection.human_attention_required is False
+        assert attention == ()
         assert summary.candidate_id is None
-        assert service.get_work_result(draft.work_id).trusted_result is False
+        result = service.get_work_result(draft.work_id)
+        assert result.trusted_result is False
+        assert result.human_attention_required is False
+        assert result.remaining_blocker_or_risk == "Review Verification evidence"
+        assert project_next_owner(
+            work_status=projection.status.value,
+            human_attention_required=result.human_attention_required,
+            automatic_progression_state=None,
+            active_execution_subject=False,
+        ) == "WATT_RECOVERY"
 
 
 def test_refcode_03_04_15_16_17_human_edits_proposal_then_admits_contract(

@@ -143,7 +143,7 @@ class _SemanticCapability:
 
 class _TransientProviderFailureCapability(_SemanticCapability):
     def __init__(self, *, step_type: SteeringStepType) -> None:
-        super().__init__(step_type=step_type)
+        super().__init__(step_type=step_type, proposed_production=True)
         self.calls = 0
 
     def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
@@ -482,6 +482,31 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
         assert result is not None
         assert result.last_action is SteeringActionType.SEMANTIC_RESULT_ADMISSION
         assert result.stop_reason is SteeringDriverStopReason.TRANSITION_BOUND
+
+        reconstructed = SteeringApplicationService(postgres_database).reconstruct(
+            admitted.work_id
+        )
+        assert len(reconstructed.semantic_results) == 1
+        semantic_result = reconstructed.semantic_results[0]
+        assert semantic_result.completion_satisfied is True
+        assert semantic_result.proposed_production is not None
+        assert reconstructed.current_step is not None
+        assert reconstructed.current_step.type is SteeringStepType.DESIGN
+
+        assert driver.schedule(admitted.work_id) is True
+        assert driver.wait_until_idle(admitted.work_id, 2)
+        transitioned = driver.last_outcome(admitted.work_id)
+        assert transitioned is not None
+        assert transitioned.last_action is SteeringActionType.STEP_TRANSITION
+        assert transitioned.stop_reason is SteeringDriverStopReason.TRANSITION_BOUND
+
+        advanced = SteeringApplicationService(postgres_database).reconstruct(
+            admitted.work_id
+        )
+        assert advanced.current_step is not None
+        assert advanced.current_step.type is SteeringStepType.PRODUCE
+        assert len(advanced.semantic_results) == 1
+        assert capability.calls == 2
     finally:
         driver.shutdown()
         orchestrator.shutdown()
@@ -656,7 +681,15 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
                 ),
                 "decisions": ["Reuse the current Work and Steering projections."],
                 "derived_constraints": list(semantic_input.constraints),
-                "proposed_production": None,
+                "proposed_production": {
+                    "target_kind": "CODE_WORK",
+                    "objective": "Expose bounded execution progress observability",
+                    "artifact_targets": [],
+                    "code_targets": ["src/spg/web/app.js"],
+                    "allowed_areas": [],
+                    "forbidden_areas": [],
+                    "verification_expectation": "PATH_SCOPE and GIT_DIFF_CHECK",
+                },
                 "disposition": {
                     "state": "RESOLVED",
                     "authority_assessment": "WITHIN_AUTHORITY",
@@ -675,6 +708,8 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
     assert candidate.step_id == semantic_input.step.id
     assert candidate.basis_fingerprint == semantic_input.basis_fingerprint
     assert candidate.evidence_refs == semantic_input.reality_refs
+    assert candidate.proposed_production is not None
+    assert candidate.proposed_production.code_targets == ("src/spg/web/app.js",)
     assert candidate.reasoning_provider_identity == (
         "codex-sdk:thread:thread-semantic-test:turn:turn-semantic-test"
     )
@@ -712,6 +747,7 @@ def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
     assert admitted_result.step_id == semantic_input.step.id
     assert admitted_result.basis_fingerprint == semantic_input.basis_fingerprint
     assert admitted_result.completion_satisfied is True
+    assert admitted_result.proposed_production is not None
     assert admitted_result.reasoning_provider_identity == (
         "codex-sdk:thread:thread-semantic-test:turn:turn-semantic-test"
     )
