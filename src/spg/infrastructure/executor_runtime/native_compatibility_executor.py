@@ -74,10 +74,7 @@ class NativeQueuedExecutorCapability:
             )
             if observation.runtime_mode is ExecutionMode.FINISHED:
                 return self._result(request, observation.terminal_outcome, started)
-            if observation.runtime_mode in {
-                ExecutionMode.RECONCILING,
-                ExecutionMode.STOPPED,
-            }:
+            if observation.runtime_mode is ExecutionMode.STOPPED:
                 return self._result(request, observation.terminal_outcome, started)
             time.sleep(self.poll_seconds)
         return ExecutorDispatchResult(
@@ -163,19 +160,25 @@ class NativeQueuedExecutorCapability:
             "context_package_id": str(package.id),
             "context_package_fingerprint": package.content_fingerprint,
         }
-        contract_id = uuid5(
-            NAMESPACE_URL,
-            f"watt-native:contract:{execution.work_unit_id}:{execution.generation}",
-        )
-        contract = PWUContractVersionRecord(
-            id=contract_id,
-            pwu_id=execution.work_unit_id,
-            revision=execution.generation,
-            objective=work_unit.objective,
-            contract_payload=contract_payload,
-            contract_digest=canonical_digest(contract_payload),
-            created_at=started_at(request),
-        )
+        contract_digest = canonical_digest(contract_payload)
+        with self.database.unit_of_work() as uow:
+            contract = NativeExecutionStore(uow.session).contract_for_pwu_digest(
+                execution.work_unit_id,
+                contract_digest,
+            )
+        if contract is None:
+            contract = PWUContractVersionRecord(
+                id=uuid5(
+                    NAMESPACE_URL,
+                    f"watt-native:contract:{execution.work_unit_id}:{contract_digest}",
+                ),
+                pwu_id=execution.work_unit_id,
+                revision=execution.generation,
+                objective=work_unit.objective,
+                contract_payload=contract_payload,
+                contract_digest=contract_digest,
+                created_at=started_at(request),
+            )
         session_id = uuid5(NAMESPACE_URL, f"watt-native:session:{execution.work_unit_id}")
         workspace_id = uuid5(NAMESPACE_URL, f"watt-native:workspace:{execution.attempt_id}")
         envelope = ResourceEnvelope(
@@ -243,7 +246,13 @@ class NativeQueuedExecutorCapability:
             resource_envelope=envelope,
             stop_conditions=tuple(work_unit.completion_contract.blocking_conditions),
             obligation_references=tuple(
-                work_unit.completion_contract.verification_obligations
+                (
+                    *work_unit.completion_contract.verification_obligations,
+                    *(
+                        f"semantic-fact:{item.fact_id}"
+                        for item in work_unit.completion_contract.semantic_fact_obligations
+                    ),
+                )
             ),
         )
         return NativeExecutionAdmission(

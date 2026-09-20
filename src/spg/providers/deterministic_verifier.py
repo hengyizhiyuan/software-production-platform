@@ -47,6 +47,13 @@ class DeterministicVerificationProvider:
                 subject_tree_identity=request.tree_identity,
                 expected="verification obligation returns PASS",
                 observed=result.value,
-                metadata={"mode": "deterministic", "score": None},
+                metadata={
+                    "mode": "deterministic",
+                    "score": None,
+                    "semantic_fact_ids": [
+                        str(item.fact_id)
+                        for item in request.semantic_fact_obligations
+                    ],
+                },
             ),
         )

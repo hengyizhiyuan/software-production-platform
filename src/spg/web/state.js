@@ -2,6 +2,7 @@
   "use strict";
 
   const STATUS_LABELS = Object.freeze({
+    PRE_WORK: "PRE-WORK / 未开工",
     DRAFT: "Draft",
     NEEDS_REFINEMENT: "Needs refinement",
     AWAITING_APPROVAL: "Awaiting approval",
@@ -13,6 +14,7 @@
   });
 
   const STATUS_TONES = Object.freeze({
+    PRE_WORK: "status-draft",
     DRAFT: "status-draft",
     NEEDS_REFINEMENT: "status-refinement",
     AWAITING_APPROVAL: "status-approval",

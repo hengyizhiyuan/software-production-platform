@@ -23,6 +23,7 @@ DEFAULT_MAX_AUTOMATIC_TRANSITIONS = 12
 _AUTOMATIC_STATUSES = frozenset({WorkStatus.READY, WorkStatus.RUNNING})
 _STOP_STATUSES = frozenset(
     {
+        WorkStatus.PRE_WORK,
         WorkStatus.DRAFT,
         WorkStatus.NEEDS_REFINEMENT,
         WorkStatus.AWAITING_APPROVAL,

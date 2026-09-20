@@ -15,6 +15,11 @@ from spg.domain.conversation import (
     StructuredCollaborationResult,
 )
 from spg.domain.design_intent import DesignIntentFrame
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFact,
+    EngineeringSemanticFactCandidate,
+    NeutralSemanticExtractionCandidate,
+)
 from spg.domain.wic_intelligence import ProgressiveSemanticStructure
 from spg.domain.wic_response import WicRuntimeMode
 
@@ -243,6 +248,7 @@ class WorkEvolutionCandidateChange(BaseModel):
     context_facts: tuple[str, ...]
     constraints: tuple[str, ...]
     requests: tuple[str, ...]
+    semantic_facts: tuple[EngineeringSemanticFact, ...] = ()
     scope_change_required: bool = False
 
 
@@ -259,6 +265,8 @@ class InteractionAssessmentCandidate(BaseModel):
     candidate_constraints: tuple[str, ...] = ()
     current_requests: tuple[str, ...] = ()
     unresolved_material_questions: tuple[str, ...] = ()
+    neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
+    semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[InterpretationMeaning, ...] = ()
     focus_classification: WorkFocusClassification | None = None
     impact_disposition: WorkImpactDisposition | None = None
@@ -279,6 +287,8 @@ class InteractionSemanticCandidate(BaseModel):
     candidate_constraints: tuple[str, ...] = ()
     current_requests: tuple[str, ...] = ()
     unresolved_material_questions: tuple[str, ...] = ()
+    neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
+    semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[InterpretationMeaning, ...] = ()
     focus_classification: WorkFocusClassification | None = None
     impact_disposition: WorkImpactDisposition | None = None
@@ -302,6 +312,8 @@ class InteractionAssessment(BaseModel):
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
+    neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
+    engineering_semantic_facts: tuple[EngineeringSemanticFact, ...] = ()
     meanings: tuple[InterpretationMeaning, ...]
     focus_classification: WorkFocusClassification | None = None
     impact_disposition: WorkImpactDisposition | None = None
@@ -340,6 +352,7 @@ class WorkRealityRevision(BaseModel):
     context_facts: tuple[str, ...]
     constraints: tuple[str, ...]
     requests: tuple[str, ...]
+    engineering_semantic_facts: tuple[EngineeringSemanticFact, ...] = ()
     engineering_scope_id: UUID
     engineering_resource_id: UUID | None
     scope_basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")

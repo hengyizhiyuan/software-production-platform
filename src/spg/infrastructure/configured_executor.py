@@ -4,6 +4,7 @@ from spg.application.materialization import ExecutionInputMaterializationService
 from spg.domain.execution import ExecutorDispatchRequest, ExecutorDispatchResult
 from spg.domain.preparation import PreparedExecutionRequest
 from spg.domain.runtime import CompletionContract, RuntimeInvariantViolation
+from spg.domain.engineering_semantics import semantic_fact_statement
 from spg.infrastructure.codex_executor_binding import CODEX_REAL_BINDING
 from spg.infrastructure.executor_boundary import (
     DedicatedExecutorClient,
@@ -121,6 +122,10 @@ def render_governed_instruction(
     generic_verifications = "\n".join(
         f"- {item}" for item in completion_contract.verification_obligations
     )
+    semantic_obligations = "\n".join(
+        f"- [{item.fact_id}] {semantic_fact_statement(item)}"
+        for item in completion_contract.semantic_fact_obligations
+    )
     authority = (
         completion_contract.change_contract
         or completion_contract.artifact_contract
@@ -218,6 +223,9 @@ def render_governed_instruction(
         f"Forbidden changes:\n{forbidden_changes or '- None beyond the admitted target/scope contracts.'}\n\n"
         f"Blocking conditions:\n{blocking_conditions or '- None.'}\n\n"
         f"Verification obligations:\n{generic_verifications or '- None beyond the admitted target/change contracts.'}\n\n"
+        "Governed Engineering Semantic Facts (Product semantics; do not reinterpret "
+        "their source text or reduce them to a particular implementation shape):\n"
+        f"{semantic_obligations or '- None structured for this Work.'}\n\n"
         f"{execution_policy}"
         "Do not modify any other repository path outside the exact targets or "
         "bounded areas admitted above. Never widen the Change Contract yourself. "

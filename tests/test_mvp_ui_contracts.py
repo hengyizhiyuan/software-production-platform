@@ -242,11 +242,12 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "SPG_DATABASE_URL" not in javascript
     assert "OPENAI_API_KEY" not in javascript
     assert 'apiRequest("/api/works", { method: "POST"' not in javascript
-    assert "No Work was created" in javascript
+    assert "No production authority was created" in javascript
     assert "assessment_id: assessment.assessment_id" in javascript
     assert "basis_fingerprint: assessment.basis_fingerprint" in javascript
     assert 'elements.admitWorkControl.addEventListener("click", admitInteractionWork)' in javascript
-    assert "No Work or production authority was created." in javascript
+    assert "New PRE-WORK created." in javascript
+    assert "no production authority was created." in javascript
     assert "setTimeout" in javascript
     assert "countdown" not in combined
 

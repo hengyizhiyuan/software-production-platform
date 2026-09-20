@@ -17,6 +17,10 @@ from spg.application.steering_decision import (
 )
 from spg.application.work import WorkApplicationService
 from spg.domain.change import ChangeOperation, CodeChangeTarget, ProductionTargetKind
+from spg.domain.engineering_semantics import (
+    current_semantic_facts,
+    semantic_fact_reference,
+)
 from spg.domain.planning import (
     OnePwuFitClassification,
     PlannedArtifactOperation,
@@ -99,9 +103,27 @@ class SteeringProductionService:
         with self.database.unit_of_work() as unit_of_work:
             product = ProductStore(unit_of_work.session)
             work = product.work(work_id)
+            work_revision = product.current_work_reality_revision(work_id)
             scope = product.scope_for_work(work_id)
             if work is None or scope is None:
                 raise ProductInvariantViolation("Work authority envelope is incomplete")
+            if (
+                work_revision is not None
+                and work.current_work_reality_revision_id != work_revision.id
+            ):
+                raise ProductInvariantViolation(
+                    "Steering production requires the exact current Work Reality revision"
+                )
+            semantic_facts = (
+                ()
+                if work_revision is None
+                else tuple(
+                    semantic_fact_reference(fact, work_revision_id=work_revision.id)
+                    for fact in current_semantic_facts(
+                        work_revision.engineering_semantic_facts
+                    )
+                )
+            )
             if (
                 scope.condition is not EngineeringScopeCondition.ADMITTED
                 or not scope.bindings
@@ -195,6 +217,7 @@ class SteeringProductionService:
                 artifact_targets=artifact_targets,
                 change_contract=change_contract,
                 constraints=work.constraints,
+                engineering_semantic_facts=semantic_facts,
                 verification_expectation=work.verification_expectation or "",
             )
 
@@ -366,6 +389,7 @@ class SteeringProductionService:
                 artifact_targets=request.artifact_targets,
                 change_contract=request.change_contract,
                 constraints=request.constraints,
+                engineering_semantic_facts=request.engineering_semantic_facts,
                 verification_expectation=request.verification_expectation,
                 engineering_scope_summary=scope.summary,
                 engineering_resource_id=resource.id,
@@ -398,6 +422,7 @@ class SteeringProductionService:
                 required_outputs=(target.path,),
                 required_changes=(target.path,),
                 verification_obligations=(request.verification_expectation,),
+                semantic_fact_obligations=request.engineering_semantic_facts,
                 artifact_contract=artifact,
                 production_plan=plan,
             )
@@ -414,6 +439,7 @@ class SteeringProductionService:
             required_outputs=paths,
             required_changes=paths,
             verification_obligations=contract.verification_identities,
+            semantic_fact_obligations=request.engineering_semantic_facts,
             change_contract=contract,
             production_plan=plan,
         )

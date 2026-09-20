@@ -192,6 +192,9 @@ class VerificationService:
         request = VerificationCapabilityRequest(
             verification_identity=verification_id,
             obligation=obligation,
+            semantic_fact_obligations=(
+                snapshot_basis.basis.work_unit.completion_contract.semantic_fact_obligations
+            ),
             snapshot_id=snapshot_basis.proposed_snapshot.id,
             proposed_commit_identity=snapshot_basis.proposed_snapshot.proposed_commit_identity,
             tree_identity=snapshot_basis.proposed_snapshot.tree_identity,

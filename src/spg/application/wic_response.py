@@ -10,6 +10,11 @@ from spg.domain.interaction import (
     InteractionAssessment,
     InteractionAssessmentCandidate,
 )
+from spg.domain.engineering_semantics import (
+    SemanticEpistemicStatus,
+    current_semantic_facts,
+    semantic_fact_statement,
+)
 from spg.domain.wic_intelligence import (
     GovernanceCandidateKind,
     PatternSignal,
@@ -196,6 +201,18 @@ def governed_response_envelope(
                 "current system uses MySQL",
             )
         )
+    governed_semantic_claims = tuple(
+        semantic_fact_statement(fact)
+        for fact in current_semantic_facts(assessment.engineering_semantic_facts)
+    )
+    governed_semantic_claim_set = set(governed_semantic_claims)
+    forbidden.extend(
+        statement
+        for fact in assessment.engineering_semantic_facts
+        if fact.epistemic_status is SemanticEpistemicStatus.SUPERSEDED
+        and (statement := semantic_fact_statement(fact))
+        not in governed_semantic_claim_set
+    )
     strategy = select_interaction_strategy(
         assessment, latest_human_input=latest_human_input
     )
@@ -212,7 +229,9 @@ def governed_response_envelope(
         reconciliation=reconciliation,
         working_motive=semantics.working_motive,
         working_desired_outcome=semantics.working_desired_outcome,
-        facts_to_preserve=semantics.working_facts,
+        facts_to_preserve=tuple(
+            dict.fromkeys((*semantics.working_facts, *governed_semantic_claims))
+        ),
         constraints_to_preserve=semantics.working_constraints,
         unresolved_human_decisions=semantics.unresolved_human_decisions,
         explicit_assumptions=semantics.explicit_assumptions,

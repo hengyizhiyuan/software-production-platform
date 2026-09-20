@@ -19,8 +19,14 @@ from spg.application.guided_design import (
     match_design_schema_frame,
 )
 from spg.application.design_intent import frame_design_intent_text
+from spg.application.engineering_semantics import bind_engineering_semantic_facts
 
 from spg.domain.conversation import ConversationContextMessage, ConversationTurnIntent
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFact,
+    SemanticRelation,
+    current_semantic_facts,
+)
 from spg.domain.interaction import (
     ActiveWorkInterpretationContext,
     Interaction,
@@ -47,7 +53,10 @@ from spg.domain.interaction import (
     WorkInteractionCapability,
 )
 from spg.domain.design_intent import DesignObjectType
-from spg.application.wic_reception import ShadowFastReceptionRuntime
+from spg.application.wic_reception import (
+    ShadowFastReceptionRuntime,
+    neutral_fast_provisional_message,
+)
 from spg.application.wic_intelligence import build_progressive_semantics
 from spg.domain.wic_intelligence import GovernanceCandidateKind
 from spg.application.wic_response import (
@@ -59,7 +68,11 @@ from spg.application.wic_response import (
     reconcile_fast_and_deep,
     reconcile_provisional_intent,
 )
-from spg.domain.product import ProductionCycleBindingCondition
+from spg.domain.product import (
+    ProductionCycleBindingCondition,
+    WorkCondition,
+    WorkMode,
+)
 from spg.domain.wic_reception import FastReceptionVisibility
 from spg.domain.wic_response import (
     FastSuppressionReason,
@@ -78,83 +91,9 @@ from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 
 
-ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v5"
+ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v6"
 READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
-
-
-_TABLE_CONTEXT_PATTERN = re.compile(r"(?:\btable\b|表格|课程表)", re.IGNORECASE)
-_DIMENSION_PAIR_PATTERN = re.compile(
-    r"(?P<first>\d{1,4})\s*[x×＊*]\s*(?P<second>\d{1,4})",
-    re.IGNORECASE,
-)
-_ROW_COLUMN_PATTERNS = (
-    re.compile(
-        r"(?P<rows>\d{1,4})\s*(?:行|rows?)\D{0,16}"
-        r"(?P<columns>\d{1,4})\s*(?:列|columns?|cols?)",
-        re.IGNORECASE,
-    ),
-    re.compile(
-        r"(?P<columns>\d{1,4})\s*(?:列|columns?|cols?)\D{0,16}"
-        r"(?P<rows>\d{1,4})\s*(?:行|rows?)",
-        re.IGNORECASE,
-    ),
-)
-
-
-def _normalize_table_dimension_constraints(
-    candidate: InteractionAssessmentCandidate,
-    latest_human_input: str,
-) -> InteractionAssessmentCandidate:
-    """Keep table row/column direction explicit in governed candidate fields."""
-
-    context = "\n".join(
-        (
-            latest_human_input,
-            candidate.interpreted_motive or "",
-            candidate.desired_outcome or "",
-            *candidate.candidate_constraints,
-            *candidate.current_requests,
-        )
-    )
-    if _TABLE_CONTEXT_PATTERN.search(context) is None:
-        return candidate
-
-    dimensions: tuple[int, int] | None = None
-    for source in (latest_human_input, *candidate.candidate_constraints):
-        for pattern in _ROW_COLUMN_PATTERNS:
-            match = pattern.search(source)
-            if match is not None:
-                dimensions = (int(match.group("rows")), int(match.group("columns")))
-                break
-        if dimensions is not None:
-            break
-    if dimensions is None:
-        match = _DIMENSION_PAIR_PATTERN.search(latest_human_input)
-        if match is None:
-            return candidate
-        # Matrix/table dimensions conventionally mean rows x columns unless the
-        # Human explicitly states the reverse order above.
-        dimensions = (int(match.group("first")), int(match.group("second")))
-
-    rows, columns = dimensions
-    canonical = f"表格尺寸 {rows} 行 × {columns} 列"
-    normalized: list[str] = []
-    replaced = False
-    for constraint in candidate.candidate_constraints:
-        if _DIMENSION_PAIR_PATTERN.search(constraint) or any(
-            pattern.search(constraint) for pattern in _ROW_COLUMN_PATTERNS
-        ):
-            if canonical not in normalized:
-                normalized.append(canonical)
-            replaced = True
-        else:
-            normalized.append(constraint)
-    if not replaced:
-        normalized.append(canonical)
-    return candidate.model_copy(
-        update={"candidate_constraints": tuple(dict.fromkeys(normalized))}
-    )
 
 
 _LONG_LIVED_OBJECT_TERMS = (
@@ -456,10 +395,10 @@ _TURN_TIMING_MILESTONES = (
     "fast_path_started", "fast_candidate_ready", "fast_no_emission", "fast_failed",
     "first_sse_event", "natural_response_completed", "semantic_envelope_completed",
     "provider_teardown_completed", "payload_validation_started", "payload_validated",
-    "semantic_result_completed", "validation_completed", "provider_returned",
+    "semantic_result_completed", "semantic_payload_validated", "validation_completed", "provider_returned",
     "admission_started", "candidate_validated", "assessment_persisted",
     "final_persistence_started", "persistence_completed", "completed", "failed",
-    "realization_started", "first_realization_delta", "realization_completed",
+    "realization_started", "first_realizer_output_chunk", "first_realization_delta", "realization_completed",
     "response_stream_completed",
 )
 
@@ -503,19 +442,31 @@ class WorkInteractionService:
         self._turn_realization_started: set[UUID] = set()
         self._turn_lock = RLock()
 
-    def create_interaction(self, *, human_identity: str) -> Interaction:
+    def create_interaction(
+        self,
+        *,
+        human_identity: str,
+        start_work_context: bool = False,
+    ) -> Interaction:
         identity = human_identity.strip()
         if not identity:
             raise InteractionInvariantViolation("Human identity is required")
         now = datetime.now(UTC)
         interaction_id = uuid4()
+        work_id = uuid4() if start_work_context else None
         with self.database.unit_of_work() as uow:
             store = InteractionStore(uow.session)
+            if work_id is not None:
+                self._insert_pre_work(
+                    ProductStore(uow.session),
+                    work_id=work_id,
+                    timestamp=now,
+                )
             store.insert_interaction(
                 {
                     "id": interaction_id,
                     "condition": InteractionCondition.OPEN.value,
-                    "current_work_id": None,
+                    "current_work_id": work_id,
                     "created_by": identity,
                     "updated_by": identity,
                     "created_at": now,
@@ -524,6 +475,42 @@ class WorkInteractionService:
             )
             uow.commit()
         return self.get_interaction(interaction_id)
+
+    @staticmethod
+    def _insert_pre_work(
+        product: ProductStore,
+        *,
+        work_id: UUID,
+        timestamp: datetime,
+    ) -> None:
+        product.insert_work(
+            {
+                "id": work_id,
+                "goal_id": None,
+                "work_mode": WorkMode.LONG_LIVED_STEERING.value,
+                "raw_user_requirement": "",
+                "refined_title": "New Work",
+                "desired_outcome": None,
+                "constraints": [],
+                "tags": [],
+                "condition": WorkCondition.PRE_WORK.value,
+                "scope_summary": None,
+                "production_objective": None,
+                "expected_artifact_path": None,
+                "artifact_operation": None,
+                "artifact_placement_rationale": None,
+                "artifact_target_confidence": None,
+                "artifact_source_baseline_id": None,
+                "artifact_source_revision": None,
+                "verification_expectation": None,
+                "code_change_proposal": None,
+                "production_plan_proposal": None,
+                "current_work_reality_revision_id": None,
+                "current_engineering_scope_id": None,
+                "created_at": timestamp,
+                "updated_at": timestamp,
+            }
+        )
 
     def list_interactions(self) -> tuple[SharedUnderstanding, ...]:
         with self.database.unit_of_work() as uow:
@@ -574,6 +561,12 @@ class WorkInteractionService:
                     "supporting_references": list(references),
                     "created_at": now,
                 }
+            )
+            self._capture_pre_work_requirement(
+                uow.session,
+                work_id=interaction.current_work_id,
+                content=value,
+                timestamp=now,
             )
             store.touch_interaction(
                 interaction_id,
@@ -681,6 +674,12 @@ class WorkInteractionService:
                     "updated_at": now,
                 }
             )
+            self._capture_pre_work_requirement(
+                uow.session,
+                work_id=interaction.current_work_id,
+                content=value,
+                timestamp=now,
+            )
             if self.runtime_mode is not WicRuntimeMode.LEGACY_WIC:
                 store.insert_response_event(
                     {
@@ -703,6 +702,35 @@ class WorkInteractionService:
         self._mark_turn_timing(turn_id, "acknowledged")
         self.schedule_turn(turn_id)
         return turn
+
+    @staticmethod
+    def _capture_pre_work_requirement(
+        session,
+        *,
+        work_id: UUID | None,
+        content: str,
+        timestamp: datetime,
+    ) -> None:
+        if work_id is None:
+            return
+        product = ProductStore(session)
+        work = product.work(work_id, for_update=True)
+        if (
+            work is None
+            or work.condition is not WorkCondition.PRE_WORK
+            or work.raw_user_requirement
+        ):
+            return
+        compact = " ".join(content.split())
+        title = compact if len(compact) <= 72 else compact[:69].rstrip() + "..."
+        product.update_work(
+            work_id,
+            {
+                "raw_user_requirement": content,
+                "refined_title": title or "New Work",
+                "updated_at": timestamp,
+            },
+        )
 
     def get_turn(self, turn_id: UUID) -> InteractionTurn:
         with self.database.unit_of_work() as uow:
@@ -1129,6 +1157,7 @@ class WorkInteractionService:
         gate = GovernedDeltaGate(envelope, emit_admitted)
 
         def receive_raw(delta: str) -> None:
+            self._mark_turn_timing(turn_id, "first_realizer_output_chunk")
             raw_parts.append(delta)
             gate.feed(delta)
 
@@ -1220,7 +1249,14 @@ class WorkInteractionService:
                         return
                     if result is not None and result.status == "CANDIDATE" and result.candidate is not None:
                         candidate = result.candidate.model_copy(
-                            update={"visibility_disposition": FastReceptionVisibility.SAFE_TO_EMIT}
+                            update={
+                                "visibility_disposition": FastReceptionVisibility.SAFE_TO_EMIT,
+                                # Enforce the visibility invariant even when a custom
+                                # Fast capability supplied the candidate.
+                                "meaningful_sentence": neutral_fast_provisional_message(
+                                    basis.records[-1].content
+                                ),
+                            }
                         )
                         with self._turn_lock:
                             realization_started = (
@@ -1598,9 +1634,21 @@ class WorkInteractionService:
                 prior_assessment=prior_assessment,
                 latest_human_input=latest_human_input,
             )
-            candidate = _normalize_table_dimension_constraints(
-                candidate,
-                latest_human_input,
+            prior_facts = (
+                active_context.work_revision.engineering_semantic_facts
+                if active_context is not None
+                else (
+                    ()
+                    if prior_assessment is None
+                    else prior_assessment.engineering_semantic_facts
+                )
+            )
+            engineering_semantic_facts = bind_engineering_semantic_facts(
+                basis_fingerprint=current_basis,
+                records=records,
+                extractions=candidate.neutral_semantic_extractions,
+                candidates=candidate.semantic_fact_candidates,
+                prior_facts=prior_facts,
             )
             if (
                 active_context is not None
@@ -1621,6 +1669,7 @@ class WorkInteractionService:
             focus, impact, candidate_change = self._normalize_active_candidate(
                 candidate,
                 active_context,
+                engineering_semantic_facts,
             )
             progressive_semantics = build_progressive_semantics(
                 candidate=candidate,
@@ -1704,6 +1753,14 @@ class WorkInteractionService:
                     "unresolved_material_questions": list(
                         candidate.unresolved_material_questions
                     ),
+                    "neutral_semantic_extractions": [
+                        item.model_dump(mode="json")
+                        for item in candidate.neutral_semantic_extractions
+                    ],
+                    "engineering_semantic_facts": [
+                        item.model_dump(mode="json")
+                        for item in engineering_semantic_facts
+                    ],
                     "meanings": [
                         meaning.model_dump(mode="json") for meaning in candidate.meanings
                     ],
@@ -1797,6 +1854,7 @@ class WorkInteractionService:
         if not identity:
             raise InteractionInvariantViolation("Human authority identity is required")
         now = datetime.now(UTC)
+        new_work_id: UUID | None = None
         with self.database.unit_of_work() as uow:
             store = InteractionStore(uow.session)
             interaction = store.interaction(interaction_id, for_update=True)
@@ -1834,9 +1892,16 @@ class WorkInteractionService:
                 else f"Human selected {choice.value} for the Work transition."
             )
             if choice is WorkTransitionChoice.START_NEW_WORK:
-                store.clear_current_work(
+                new_work_id = uuid4()
+                self._insert_pre_work(
+                    ProductStore(uow.session),
+                    work_id=new_work_id,
+                    timestamp=now,
+                )
+                store.replace_current_work(
                     interaction_id,
                     expected_work_id=transition.originating_work_id,
+                    new_work_id=new_work_id,
                     updated_by=identity,
                     updated_at=now,
                 )
@@ -1853,6 +1918,11 @@ class WorkInteractionService:
                 decision_rationale=decision_rationale,
                 decided_at=now,
             )
+            if new_work_id is not None:
+                store.bind_transition_target(
+                    transition.id,
+                    target_work_id=new_work_id,
+                )
             uow.commit()
         return self.get_shared_understanding(interaction_id)
 
@@ -1884,6 +1954,11 @@ class WorkInteractionService:
             messages = store.messages(interaction_id)
             turns = store.turns(interaction_id)
             latest = store.latest_assessment(interaction_id)
+            current_work = (
+                None
+                if interaction.current_work_id is None
+                else product.work(interaction.current_work_id)
+            )
             resource = None if interaction.current_work_id is None else product.resource_for_work(interaction.current_work_id)
             governed_revision = (
                 None
@@ -1984,7 +2059,9 @@ class WorkInteractionService:
                     f"{resource.repository_identity} at {resource.authoritative_ref}"
                 )
             ),
-            governed_work_id=interaction.current_work_id,
+            governed_work_id=(
+                interaction.current_work_id if governed_revision is not None else None
+            ),
             governed_revision=governed_revision,
             current_work_focus=(
                 None
@@ -2016,10 +2093,8 @@ class WorkInteractionService:
             work_focus_history=tuple(work_focus_history),
             latest_work_transition=latest_transition,
             new_work_formation_pending=bool(
-                interaction.current_work_id is None
-                and latest_transition is not None
-                and latest_transition.choice is WorkTransitionChoice.START_NEW_WORK
-                and latest_transition.target_work_id is None
+                current_work is not None
+                and current_work.condition is WorkCondition.PRE_WORK
             ),
             selected_design_schema_identity=(
                 interaction.selected_design_schema_identity
@@ -2112,6 +2187,11 @@ class WorkInteractionService:
         if interaction.current_work_id is None:
             return None
         product = ProductStore(session)
+        work = product.work(interaction.current_work_id)
+        if work is None:
+            raise InteractionInvariantViolation("Focused Work does not exist")
+        if work.condition is WorkCondition.PRE_WORK:
+            return None
         runtime = RuntimeStore(session)
         revision = product.current_work_reality_revision(interaction.current_work_id)
         scope = product.scope_for_work(interaction.current_work_id)
@@ -2280,6 +2360,7 @@ class WorkInteractionService:
     def _normalize_active_candidate(
         candidate: InteractionAssessmentCandidate,
         active: ActiveWorkInterpretationContext | None,
+        engineering_semantic_facts: tuple[EngineeringSemanticFact, ...] = (),
     ) -> tuple[
         WorkFocusClassification | None,
         WorkImpactDisposition | None,
@@ -2311,6 +2392,7 @@ class WorkInteractionService:
             "context_facts": tuple(context),
             "constraints": tuple(constraints),
             "requests": tuple(requests),
+            "semantic_facts": tuple(engineering_semantic_facts),
         }
         changed = tuple(
             name
@@ -2320,6 +2402,10 @@ class WorkInteractionService:
                 ("context_facts", current.context_facts),
                 ("constraints", current.constraints),
                 ("requests", current.requests),
+                (
+                    "semantic_facts",
+                    getattr(current, "engineering_semantic_facts", ()),
+                ),
             )
             if values[name] != before
         )
@@ -2328,6 +2414,12 @@ class WorkInteractionService:
         scope_change = "constraints" in changed or any(
             meaning.kind is InterpretationMeaningKind.OBJECTIVE_OR_SCOPE_CHANGE
             for meaning in candidate.meanings
+        ) or (
+            "semantic_facts" in changed
+            and any(
+                fact.relation is SemanticRelation.SCOPE
+                for fact in current_semantic_facts(engineering_semantic_facts)
+            )
         )
         impact = candidate.impact_disposition
         if impact in {
@@ -2354,6 +2446,7 @@ class WorkInteractionService:
                 context_facts=tuple(context),
                 constraints=tuple(constraints),
                 requests=tuple(requests),
+                semantic_facts=tuple(engineering_semantic_facts),
                 scope_change_required=scope_change,
             ),
         )

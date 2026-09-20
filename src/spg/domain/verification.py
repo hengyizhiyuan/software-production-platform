@@ -8,6 +8,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from spg.domain.runtime import WorkUnitRecord
+from spg.domain.engineering_semantics import SemanticFactReference
 
 
 class VerificationResultValue(StrEnum):
@@ -75,6 +76,7 @@ class VerificationCapabilityRequest(BaseModel):
 
     verification_identity: UUID
     obligation: str = Field(min_length=1)
+    semantic_fact_obligations: tuple[SemanticFactReference, ...] = ()
     snapshot_id: UUID
     proposed_commit_identity: str
     tree_identity: str

@@ -46,6 +46,7 @@ from spg.api.dto import (
 )
 from spg.application.bootstrap import Application, bootstrap
 from spg.application.orchestration import ProductionOrchestrator
+from spg.application.preview_security import PREVIEW_CONTENT_SECURITY_POLICY
 from spg.application.interaction import WorkInteractionService
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.post_admission import WorkPostAdmissionService
@@ -92,6 +93,7 @@ from spg.domain.native_vector import (
 )
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.persistence import Database, DatabaseConfigurationError
+from spg.infrastructure.persistence.product_store import ProductStore
 
 
 class ProductHttpError(RuntimeError):
@@ -476,7 +478,10 @@ def create_http_application(
         request: InteractionCreateRequest,
     ) -> SharedUnderstandingResponse:
         service = required_interaction_service()
-        interaction = service.create_interaction(human_identity=request.human_identity)
+        interaction = service.create_interaction(
+            human_identity=request.human_identity,
+            start_work_context=request.start_work_context,
+        )
         return SharedUnderstandingResponse.from_projection(
             service.get_shared_understanding(interaction.id)
         )
@@ -843,6 +848,14 @@ def create_http_application(
     def get_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.get_work(work_id))
 
+    @api.post("/api/works/{work_id}/discard-pre-work", status_code=204)
+    def discard_pre_work(work_id: UUID, request: HumanDecisionRequest) -> Response:
+        work_service.discard_pre_work(
+            work_id,
+            authority_identity=request.authority_identity,
+        )
+        return Response(status_code=204)
+
     @api.get("/api/works/{work_id}/control-room/sources")
     def work_sources(work_id: UUID):
         return control_room.sources(work_id)
@@ -873,9 +886,30 @@ def create_http_application(
         response_model=list[NativeQueueEntryResponse],
     )
     def native_execution_queue(work_id: UUID | None = None) -> list[NativeQueueEntryResponse]:
+        reality = selected_native_executor.list_queue_reality(work_id=work_id)
         with selected_database.unit_of_work() as uow:
-            records = NativeExecutionStore(uow.session).list_queue(work_id=work_id)
-        return [NativeQueueEntryResponse.from_record(record) for record in records]
+            product = ProductStore(uow.session)
+            bindings = {
+                record.pwu_id: product.runtime_binding_for_work_unit(record.pwu_id)
+                for record, _observation in reality
+            }
+        return [
+            NativeQueueEntryResponse.from_record(
+                record,
+                observation,
+                production_cycle_number=(
+                    None
+                    if bindings[record.pwu_id] is None
+                    else bindings[record.pwu_id].cycle_number
+                ),
+                work_reality_revision_id=(
+                    None
+                    if bindings[record.pwu_id] is None
+                    else bindings[record.pwu_id].work_reality_revision_id
+                ),
+            )
+            for record, observation in reality
+        ]
 
     @api.post(
         "/api/native-execution/admissions",
@@ -1156,6 +1190,47 @@ def create_http_application(
     def advance_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.advance_work(work_id))
 
+    @api.post("/api/works/{work_id}/retry-production", response_model=WorkResponse)
+    def retry_failed_production(
+        work_id: UUID,
+        request: HumanDecisionRequest,
+    ) -> WorkResponse:
+        projection = work_service.retry_failed_production(
+            work_id,
+            authority_identity=request.authority_identity,
+        )
+        if projection.steering_enabled:
+            selected_steering_driver.schedule(work_id)
+        else:
+            selected_orchestrator.schedule(work_id)
+        return work_response(projection)
+
+    @api.post("/api/works/{work_id}/retry-steering", response_model=WorkResponse)
+    def retry_stopped_steering(
+        work_id: UUID,
+        request: HumanDecisionRequest,
+    ) -> WorkResponse:
+        projection = work_service.get_work(work_id)
+        if not projection.steering_enabled:
+            raise ProductHttpError(
+                409,
+                "STEERING_NOT_ENABLED",
+                "This Work does not use automatic Plan Steering",
+            )
+        steering = selected_steering_driver.project(work_id)
+        if not (
+            steering.automatic_progression_state.value == "STOPPED"
+            and steering.last_stop_reason is not None
+            and steering.last_stop_reason.value == "BLOCKED"
+        ):
+            raise ProductHttpError(
+                409,
+                "STEERING_RETRY_NOT_AVAILABLE",
+                "Plan Steering is not stopped on a recoverable governed invariant",
+            )
+        selected_steering_driver.schedule(work_id)
+        return work_response(work_service.get_work(work_id))
+
     @api.get("/api/attention", response_model=list[AttentionResponse])
     def list_attention(work_id: UUID | None = None) -> list[AttentionResponse]:
         return [
@@ -1232,9 +1307,8 @@ def create_http_application(
     def candidate_preview_artifact(work_id: UUID, candidate_fingerprint: str, path: str):
         return Response(delivery_service.candidate_artifact(work_id, candidate_fingerprint, path),
             media_type=artifact_media_type(path), headers={"X-Content-Type-Options": "nosniff",
-                "Cache-Control": "no-store", "Content-Security-Policy":
-                "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
-                "connect-src 'none'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"})
+                "Cache-Control": "no-store",
+                "Content-Security-Policy": PREVIEW_CONTENT_SECURITY_POLICY})
 
     @api.get("/api/works/{work_id}/candidate-download/{candidate_fingerprint}/{path:path}")
     def candidate_download_artifact(work_id: UUID, candidate_fingerprint: str, path: str):

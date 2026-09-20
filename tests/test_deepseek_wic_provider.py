@@ -94,21 +94,40 @@ def _envelope() -> str:
     }, ensure_ascii=False)
 
 
+def _semantics() -> str:
+    return InteractionSemanticCandidate(
+        interpreted_motive="开发 Watt 运营管理后台",
+        desired_outcome="支持 Watt 推广工作",
+        current_requests=("设计运营管理平台",),
+        collaboration=StructuredCollaborationResult(
+            turn_intent=ConversationTurnIntent.BUILD,
+            recommended_next_action="先定义一期业务闭环",
+            concise_basis="当前信息足以形成可修正的初步理解",
+            response_language="zh-CN",
+        ),
+        provider_identity="test",
+    ).model_dump_json(exclude={"provider_identity", "model_identity"})
+
+
 class _Adapter:
     provider = ModelProvider.DEEPSEEK
     calls = 0
 
     def __init__(self, outputs: list[str] | None = None) -> None:
         self.outputs = list(outputs or ())
+        self.requests: list[dict[str, object]] = []
 
     def generate(self, **options):
         self.calls += 1
+        self.requests.append(options)
         output = self.outputs.pop(0) if self.outputs else (
             json.dumps(
                 {"natural_response": "先确认目标，再说明下一步。"},
                 ensure_ascii=False,
             )
             if options.get("input_text", "").startswith("Realize this governed")
+            else _semantics()
+            if options.get("input_text", "").startswith("Return the WIC semantic")
             else _envelope()
         )
         callback = options.get("on_output_delta")
@@ -168,7 +187,7 @@ def test_pre_work_coalesces_to_one_request_and_streams_only_human_text() -> None
 
 
 def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta() -> None:
-    adapter = _Adapter(['{"natural_response":"partial', _envelope()])
+    adapter = _Adapter(['{"interpreted_motive":"partial', _semantics()])
     runtime, adapter = _runtime(adapter)
     capability = DeepSeekWorkInteractionCapability(runtime=runtime)
     visible_deltas: list[str] = []
@@ -180,29 +199,78 @@ def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta
         on_pipeline_stage=stages.append,
     )
 
-    assert result.natural_response.startswith("可以。")
+    assert result.natural_response == "先定义一期业务闭环"
     assert visible_deltas == []
     assert adapter.calls == 2
     assert capability.last_pipeline_evidence is not None
     assert capability.last_pipeline_evidence.provider_call_count == 2
-    assert capability.last_pipeline_evidence.coalesced_retry_count == 1
-    assert "structured_json_repair_started" in stages
-    assert "structured_json_repair_completed" in stages
+    assert capability.last_pipeline_evidence.semantic_retry_count == 1
+    assert "structured_output_repair_started" in stages
+    assert "structured_output_repair_completed" in stages
 
 
-def test_controlled_pre_work_does_not_retry_valid_json_with_schema_errors() -> None:
-    adapter = _Adapter(['{"natural_response":"缺少 semantics"}'])
+def test_controlled_pre_work_uses_semantics_then_governed_realizer_stream() -> None:
+    runtime, adapter = _runtime()
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    semantic_deltas: list[str] = []
+
+    stages: list[str] = []
+    candidate = capability.interpret_controlled_stream_observed(
+        _basis(),
+        on_response_delta=semantic_deltas.append,
+        on_pipeline_stage=stages.append,
+    )
+
+    assert adapter.calls == 1
+    assert semantic_deltas == []
+    assert candidate.natural_response == "先定义一期业务闭环"
+    assert capability.last_pipeline_evidence is not None
+    assert capability.last_pipeline_evidence.pipeline_mode == "governed_pre_work_semantic"
+    assert capability.last_pipeline_evidence.conversation_request_id is None
+    assert adapter.requests[0]["input_text"] == (
+        "Return the WIC semantic result for the exact supplied basis."
+    )
+    assert "provider_first_response_event" in stages
+    assert "semantic_payload_validated" in stages
+
+    envelope = GovernedResponseEnvelope(
+        basis_fingerprint="b" * 64,
+        governed_content=candidate.natural_response,
+        reconciliation=ResponseReconciliation.REFINE,
+        governance_candidate="CONVERSATION_ONLY",
+        semantic_policy_revision="policy-v1",
+        question_policy_revision="question-v1",
+        response_language="zh-CN",
+        interaction_strategy=InteractionStrategy(
+            human_abstraction_level=HumanAbstractionLevel.SOLUTION,
+            cognitive_maturity=CognitiveMaturity.FRAMING,
+            human_mode=HumanConversationMode.EXPLORING,
+            primary_move=ConversationalMove.ORIENT,
+            next_conversational_granularity="Stay at product direction level.",
+        ),
+    )
+    realized_deltas: list[str] = []
+    realization = capability.governed_response_realizer.realize_stream(
+        envelope, on_response_delta=realized_deltas.append,
+    )
+    assert adapter.calls == 2
+    assert "".join(realized_deltas) == realization.content
+    assert adapter.requests[1]["input_text"].startswith("Realize this governed")
+
+
+def test_controlled_pre_work_repairs_valid_json_with_schema_errors() -> None:
+    adapter = _Adapter(['{"interpreted_motive":"缺少其余字段"}', _semantics()])
     runtime, adapter = _runtime(adapter)
     capability = DeepSeekWorkInteractionCapability(runtime=runtime)
 
-    with pytest.raises(InteractionInvariantViolation, match="semantics:missing"):
-        capability.interpret_controlled_stream_observed(
-            _basis(),
-            on_response_delta=lambda _delta: None,
-            on_pipeline_stage=lambda _stage: None,
-        )
+    result = capability.interpret_controlled_stream_observed(
+        _basis(),
+        on_response_delta=lambda _delta: None,
+        on_pipeline_stage=lambda _stage: None,
+    )
 
-    assert adapter.calls == 1
+    assert result.interpreted_motive == "开发 Watt 运营管理后台"
+    assert adapter.calls == 2
 
 
 def test_controlled_pre_work_stops_after_one_failed_json_repair() -> None:
@@ -300,6 +368,55 @@ def test_controlled_active_work_question_skips_discarded_conversation_call() -> 
     assert capability.last_pipeline_evidence.provider_call_count == 1
     assert capability.last_pipeline_evidence.conversation_request_id is None
     assert adapter.outputs == ["invalid unused response"]
+
+
+def test_controlled_active_work_repairs_one_semantic_schema_failure() -> None:
+    basis = _basis()
+    revision = WorkRealityRevision(
+        id=UUID(int=20), work_id=UUID(int=21), revision_number=1,
+        basis_fingerprint="a" * 64, revision_fingerprint="c" * 64,
+        source_interaction_id=basis.interaction.id, source_assessment_id=UUID(int=22),
+        source_record_ids=(basis.records[0].id,), motive="开发瀑布流页面",
+        desired_outcome="图片可正常显示", context_facts=(), constraints=(), requests=(),
+        engineering_scope_id=UUID(int=23), engineering_resource_id=None,
+        scope_basis_fingerprint="d" * 64, source_baseline_id=None,
+        governance_record_id=UUID(int=24), supporting_references=(),
+        change_set=("initial",), rationale="Admitted Work", admitted_by="human",
+        schema_version="v1", created_at=basis.interaction.created_at,
+    )
+    basis = basis.model_copy(update={
+        "active_work_context": ActiveWorkInterpretationContext(
+            work_revision=revision, engineering_scope_fingerprint="e" * 64,
+        ),
+    })
+    valid = InteractionSemanticCandidate(
+        interpreted_motive=revision.motive,
+        desired_outcome=revision.desired_outcome,
+        collaboration=StructuredCollaborationResult(
+            turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
+            direct_answer="会检查图片地址并继续当前工作。",
+            response_language="zh-CN",
+        ),
+        provider_identity="test",
+    ).model_dump_json(exclude={"provider_identity", "model_identity"})
+    runtime, adapter = _runtime(_Adapter([
+        '{"collaboration":{"turn_intent":"DIRECT_QUESTION"}}',
+        valid,
+    ]))
+    stages: list[str] = []
+
+    candidate = DeepSeekWorkInteractionCapability(
+        runtime=runtime
+    ).interpret_controlled_stream_observed(
+        basis,
+        on_response_delta=lambda _delta: None,
+        on_pipeline_stage=stages.append,
+    )
+
+    assert candidate.natural_response == "会检查图片地址并继续当前工作。"
+    assert adapter.calls == 2
+    assert "structured_output_repair_started" in stages
+    assert "structured_output_repair_completed" in stages
 
 
 def test_shadow_active_work_bad_expression_uses_validated_semantic_answer() -> None:

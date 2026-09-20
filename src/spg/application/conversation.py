@@ -17,6 +17,7 @@ from spg.domain.interaction import (
     InteractionInterpretationInput,
     InteractionSemanticCandidate,
 )
+from spg.domain.engineering_semantics import current_semantic_facts
 
 
 def conversation_response_policy() -> str:
@@ -28,6 +29,12 @@ def conversation_response_policy() -> str:
         "own wording and turn-taking; you do not decide or modify Work, Design, Plan, Authority "
         "or other governed truth. Never invent user/product/file facts, capabilities, "
         "approval or completion. No tools or hidden memory; never reveal private reasoning.\n\n"
+        "Treat governed_engineering_semantic_facts as the authoritative meaning of "
+        "production-critical claims. Do not reinterpret their source wording. Candidate "
+        "engineering semantic facts remain advisory and must preserve their authority "
+        "and epistemic labels. Never present SYSTEM_INFERRED or WORKING_ASSUMPTION as "
+        "explicit Human truth. If natural wording would contradict a governed fact, use "
+        "the governed fact or omit the conflicting claim.\n\n"
         "Turn intent and cognitive maturity are separate: intent says what the Human "
         "wants from this turn, while maturity says how formed the thinking currently is. "
         "Lead with the useful answer or supplied judgment, without a standalone "
@@ -181,6 +188,13 @@ class WattNativeConversationContextAssembler:
             known_relevant_facts=known_facts,
             governing_constraints=constraints,
             current_requests=requests,
+            governed_engineering_semantic_facts=(
+                ()
+                if active is None
+                else current_semantic_facts(
+                    getattr(active.work_revision, "engineering_semantic_facts", ())
+                )
+            ),
             current_objective=(
                 collaboration.current_objective
                 or (
@@ -297,6 +311,16 @@ class ConversationResponseComposer:
                 "governed_work_requests": bounds._unique(
                     () if revision is None else revision.requests,
                     bounds.max_requests,
+                ),
+                "governed_engineering_semantic_facts": (
+                    ()
+                    if revision is None
+                    else current_semantic_facts(
+                        getattr(revision, "engineering_semantic_facts", ())
+                    )
+                ),
+                "candidate_engineering_semantic_facts": (
+                    semantic.semantic_fact_candidates
                 ),
                 "current_objective": (
                     semantic.collaboration.current_objective

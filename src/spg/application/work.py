@@ -10,6 +10,7 @@ from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.completion import CompletionService
 from spg.application.execution import ExecutionService
+from spg.application.engineering_semantics import admit_semantic_facts
 from spg.application.governance import CandidateGovernanceService
 from spg.application.integration import RepositoryIntegrationService
 from spg.application.interaction import interaction_basis_fingerprint
@@ -126,8 +127,8 @@ DEFAULT_BINDING = ExecutorBinding(
     capability_identity="capability:executor",
     profile_identity="profile:local-mvp",
 )
-WORK_REALITY_SCHEMA_VERSION = "wic-work-reality-v1"
-WORK_EVOLUTION_SCHEMA_VERSION = "wic-work-reality-v2"
+WORK_REALITY_SCHEMA_VERSION = "wic-work-reality-v3"
+WORK_EVOLUTION_SCHEMA_VERSION = "wic-work-reality-v3"
 
 
 _HUMAN_ACTION_COPY: dict[
@@ -373,26 +374,46 @@ class WorkApplicationService:
                 raise InteractionRecordNotFound(
                     f"Interaction assessment not found: {assessment_id}"
                 )
-            work_id = uuid5(
-                NAMESPACE_URL,
-                f"spg:wic-work:{interaction_id}:{assessment.id}:{basis_fingerprint}",
+            pre_work = (
+                None
+                if interaction.current_work_id is None
+                else product.work(interaction.current_work_id, for_update=True)
+            )
+            work_id = (
+                interaction.current_work_id
+                if interaction.current_work_id is not None
+                else uuid5(
+                    NAMESPACE_URL,
+                    f"spg:wic-work:{interaction_id}:{assessment.id}:{basis_fingerprint}",
+                )
             )
             if interaction.current_work_id is not None:
-                if interaction.current_work_id != work_id:
+                if pre_work is None:
+                    raise ProductInvariantViolation(
+                        "Interaction Work focus no longer exists"
+                    )
+                if pre_work.condition is WorkCondition.DISCARDED:
+                    raise InteractionInvariantViolation(
+                        "Discarded PRE_WORK cannot be admitted"
+                    )
+                if pre_work.condition is WorkCondition.PRE_WORK:
+                    pass
+                elif interaction.current_work_id != work_id:
                     raise InteractionInvariantViolation(
                         "Interaction already focuses a different governed Work"
                     )
-                revision = product.current_work_reality_revision(work_id)
-                if (
-                    revision is None
-                    or revision.source_assessment_id != assessment.id
-                    or revision.basis_fingerprint != basis_fingerprint
-                ):
-                    raise ProductInvariantViolation(
-                        "Interaction focus and governed Work revision diverged"
-                    )
-                unit_of_work.rollback()
-                return self.get_work(work_id)
+                else:
+                    revision = product.current_work_reality_revision(work_id)
+                    if (
+                        revision is None
+                        or revision.source_assessment_id != assessment.id
+                        or revision.basis_fingerprint != basis_fingerprint
+                    ):
+                        raise ProductInvariantViolation(
+                            "Interaction focus and governed Work revision diverged"
+                        )
+                    unit_of_work.rollback()
+                    return self.get_work(work_id)
 
             current_basis = interaction_basis_fingerprint(interaction, records)
             if current_basis != basis_fingerprint:
@@ -440,6 +461,10 @@ class WorkApplicationService:
             scope_id = uuid5(NAMESPACE_URL, f"spg:wic-scope:{work_id}")
             governance_id = uuid5(NAMESPACE_URL, f"spg:wic-governance:{work_id}")
             revision_id = uuid5(NAMESPACE_URL, f"spg:wic-work-revision:1:{work_id}")
+            admitted_semantic_facts = admit_semantic_facts(
+                assessment.engineering_semantic_facts,
+                work_revision_id=revision_id,
+            )
             scope_summary = (
                 "Long-lived Work authority envelope for "
                 + (f"{(resource.repository_identity if resource else None)} at {(resource.authoritative_ref if resource else None)}" if resource else "design before repository binding")
@@ -484,6 +509,9 @@ class WorkApplicationService:
                 "context_facts": list(assessment.candidate_context),
                 "constraints": list(assessment.candidate_constraints),
                 "requests": list(assessment.current_requests),
+                "engineering_semantic_facts": [
+                    item.model_dump(mode="json") for item in admitted_semantic_facts
+                ],
                 "engineering_scope_id": str(scope_id),
                 "engineering_resource_id": (str(resource.id) if resource else None),
                 "scope_basis_fingerprint": scope_fingerprint,
@@ -501,9 +529,7 @@ class WorkApplicationService:
             revision_fingerprint = self._fingerprint(revision_payload)
 
             existing = product.work(work_id)
-            if existing is None:
-                product.insert_work(
-                    {
+            admitted_values = {
                         "id": work_id,
                         "goal_id": None,
                         "work_mode": WorkMode.LONG_LIVED_STEERING.value,
@@ -531,7 +557,18 @@ class WorkApplicationService:
                         "created_at": timestamp,
                         "updated_at": timestamp,
                     }
+            if existing is None:
+                product.insert_work(admitted_values)
+            elif existing.condition is WorkCondition.PRE_WORK:
+                product.update_work(
+                    work_id,
+                    {
+                        key: value
+                        for key, value in admitted_values.items()
+                        if key not in {"id", "created_at"}
+                    },
                 )
+            if existing is None or existing.condition is WorkCondition.PRE_WORK:
                 product.insert_scope(
                     scope_values={
                         "id": scope_id,
@@ -604,6 +641,10 @@ class WorkApplicationService:
                         "context_facts": list(assessment.candidate_context),
                         "constraints": list(assessment.candidate_constraints),
                         "requests": list(assessment.current_requests),
+                        "engineering_semantic_facts": [
+                            item.model_dump(mode="json")
+                            for item in admitted_semantic_facts
+                        ],
                         "engineering_scope_id": scope_id,
                         "engineering_resource_id": (resource.id if resource else None),
                         "scope_basis_fingerprint": scope_fingerprint,
@@ -871,6 +912,10 @@ class WorkApplicationService:
                 NAMESPACE_URL,
                 f"spg:wic-work-revision:{work.id}:{revision_number}:{assessment.id}",
             )
+            admitted_semantic_facts = admit_semantic_facts(
+                candidate.semantic_facts,
+                work_revision_id=revision_id,
+            )
             scope = current_scope
             if candidate.scope_change_required:
                 scope_id = uuid5(
@@ -937,6 +982,9 @@ class WorkApplicationService:
                 "context_facts": list(candidate.context_facts),
                 "constraints": list(candidate.constraints),
                 "requests": list(candidate.requests),
+                "engineering_semantic_facts": [
+                    item.model_dump(mode="json") for item in admitted_semantic_facts
+                ],
                 "engineering_scope_id": str(scope.id),
                 "engineering_resource_id": (str(resource.id) if resource else None),
                 "scope_basis_fingerprint": scope.fingerprint,
@@ -1100,7 +1148,7 @@ class WorkApplicationService:
                     ("MANAGED_EXECUTION_WORKSPACE:" if managed_execution_workspace else "REPOSITORY_OBSERVATION:")
                     + request.observation_fingerprint,
                 ],
-                rationale=request.rationale, admitted_by=request.authority_identity, schema_version="work-reality-v2", created_at=timestamp.isoformat())
+                rationale=request.rationale, admitted_by=request.authority_identity, schema_version="wic-work-reality-v3", created_at=timestamp.isoformat())
             payload.pop("revision_fingerprint")
             payload["revision_fingerprint"] = self._fingerprint(payload)
             revision = WorkRealityRevision.model_validate(payload)
@@ -1120,6 +1168,10 @@ class WorkApplicationService:
             values = revision.model_dump(mode="python")
             for field in ("source_record_ids", "supporting_references", "change_set", "context_facts", "constraints", "requests"):
                 values[field] = [str(item) for item in values[field]]
+            values["engineering_semantic_facts"] = [
+                item.model_dump(mode="json")
+                for item in revision.engineering_semantic_facts
+            ]
             product.insert_work_reality_revision(values)
             product.update_work(work_id, {"current_work_reality_revision_id": revision.id,
                 "current_engineering_scope_id": scope_id, "scope_summary": scope_summary,
@@ -1879,6 +1931,56 @@ class WorkApplicationService:
             work = self._required_work(store, work_id)
             return self._projection(store, work)
 
+    def retry_failed_production(
+        self,
+        work_id: UUID,
+        *,
+        authority_identity: str,
+    ) -> WorkProjection:
+        """Create a successor Attempt for a failed Provider execution."""
+
+        if not authority_identity.strip():
+            raise ProductInvariantViolation(
+                "production retry requires a Human authority identity"
+            )
+        with self.database.unit_of_work() as unit_of_work:
+            product = ProductStore(unit_of_work.session)
+            runtime = RuntimeStore(unit_of_work.session)
+            work = self._required_work(product, work_id)
+            binding = self._runtime_binding_for_current_context(product, work_id)
+            if binding is None:
+                raise ProductInvariantViolation(
+                    "production retry requires a current Runtime binding"
+                )
+            facts = product.runtime_summary(binding)
+            if facts.attempt_id is None or facts.dispatch_id is None:
+                raise ProductInvariantViolation(
+                    "production retry requires a completed failed dispatch"
+                )
+            dispatch = runtime.execution_dispatch(facts.dispatch_id)
+            report = runtime.provider_execution_report(facts.dispatch_id)
+            attempt = runtime.attempt(facts.attempt_id)
+            if dispatch is None or report is None or attempt is None:
+                raise ProductInvariantViolation(
+                    "production retry lineage is incomplete"
+                )
+            if (
+                report.outcome.value not in {"FAILURE", "UNKNOWN"}
+                or facts.artifact_paths
+                or facts.runtime_commit_id is not None
+            ):
+                raise ProductInvariantViolation(
+                    "production retry is allowed only after a failed dispatch "
+                    "without observed artifacts"
+                )
+            if attempt.generation > 3:
+                raise ProductInvariantViolation(
+                    "production retry recovery budget is exhausted"
+                )
+
+        self.runtime.retry_attempt(facts.attempt_id)
+        return self.get_work(work.id)
+
     def orchestration_reality_fingerprint(self, work_id: UUID) -> str:
         """Fingerprint persisted facts used only to detect actual step progress."""
 
@@ -1916,6 +2018,46 @@ class WorkApplicationService:
                 self._projection(store, work)
                 for work in store.list_works(goal_id=goal_id)
             )
+
+    def discard_pre_work(
+        self,
+        work_id: UUID,
+        *,
+        authority_identity: str,
+    ) -> None:
+        identity = authority_identity.strip()
+        if not identity:
+            raise ProductInvariantViolation("Human authority identity is required")
+        timestamp = datetime.now(UTC)
+        with self.database.unit_of_work() as unit_of_work:
+            product = ProductStore(unit_of_work.session)
+            interactions = InteractionStore(unit_of_work.session)
+            work = product.work(work_id, for_update=True)
+            if work is None:
+                raise ProductRecordNotFound(f"Work not found: {work_id}")
+            if work.condition is not WorkCondition.PRE_WORK:
+                raise ProductInvariantViolation(
+                    "Only PRE_WORK may be discarded"
+                )
+            interaction = interactions.interaction_for_work(work_id)
+            if interaction is None:
+                raise ProductInvariantViolation(
+                    "PRE_WORK has no durable Interaction context"
+                )
+            interactions.archive_interaction(
+                interaction.id,
+                expected_work_id=work_id,
+                updated_by=identity,
+                updated_at=timestamp,
+            )
+            product.update_work(
+                work_id,
+                {
+                    "condition": WorkCondition.DISCARDED.value,
+                    "updated_at": timestamp,
+                },
+            )
+            unit_of_work.commit()
 
     def get_goal_projection(self, goal_id: UUID) -> GoalProjection:
         goal = self.get_goal(goal_id)
@@ -2757,6 +2899,15 @@ class WorkApplicationService:
         steering_complete: bool = False,
         steering_attention: bool = False,
     ) -> tuple[WorkStatus, str, str, str]:
+        if work.condition is WorkCondition.PRE_WORK:
+            return (
+                WorkStatus.PRE_WORK,
+                "PRE_WORK",
+                "CONVERSATION_DURABLE",
+                "Continue the conversation or discard this unadmitted Work",
+            )
+        if work.condition is WorkCondition.DISCARDED:
+            raise ProductRecordNotFound(f"Work not found: {work.id}")
         if work.condition is WorkCondition.DRAFT:
             return WorkStatus.DRAFT, "WORK_INTAKE", "WORK_SUBMITTED", "Refine Work draft"
         if work.condition is WorkCondition.NEEDS_REFINEMENT:

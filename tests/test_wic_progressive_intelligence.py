@@ -18,9 +18,18 @@ from spg.domain.conversation import (
 )
 from spg.application.interaction import (
     WorkInteractionService,
-    _normalize_table_dimension_constraints,
     _work_reality_status_question,
     interaction_basis_fingerprint,
+)
+from spg.application.engineering_semantics import bind_engineering_semantic_facts
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFactCandidate,
+    NeutralExtractionKind,
+    NeutralSemanticExtractionCandidate,
+    SemanticEpistemicStatus,
+    SemanticFactAuthority,
+    SemanticRelation,
+    SemanticRoleOrigin,
 )
 from spg.application.wic_intelligence import build_progressive_semantics
 from spg.application.wic_response import (
@@ -118,29 +127,50 @@ def _build(case_id: str, candidate=None, prior=None, text=None):
     )
 
 
-@pytest.mark.parametrize(
-    ("human_input", "expected"),
-    (
-        ("做一个 table，8*5 的课程表", "表格尺寸 8 行 × 5 列"),
-        ("做一个课程表，明确是 8 列、5 行", "表格尺寸 5 行 × 8 列"),
-    ),
-)
-def test_table_dimensions_remain_explicit_in_governed_candidate_fields(
-    human_input: str,
-    expected: str,
-) -> None:
-    candidate = InteractionAssessmentCandidate(
-        interpreted_motive="制作课程表 HTML 页面",
-        desired_outcome="得到一个 8×5 表格",
-        candidate_constraints=("简单 HTML 页面", "表格尺寸 8×5"),
-        current_requests=("使用 table 元素",),
-        natural_response="按 8 行 × 5 列制作。",
-        provider_identity="test",
+def test_ordered_values_are_bound_through_generic_semantic_facts() -> None:
+    text = "做一个 8×5 的小学五年级课程表。"
+    record, _, fingerprint = _inputs("OW-A", text=text)
+    extraction = NeutralSemanticExtractionCandidate(
+        extraction_id="n1",
+        kind=NeutralExtractionKind.ORDERED_VALUES,
+        values=(8, 5),
+        source_record_id=record.id,
+        source_text="8×5",
+        explicit_roles=(None, None),
+    )
+    candidates = tuple(
+        EngineeringSemanticFactCandidate(
+            candidate_id=f"f{index}",
+            subject=subject,
+            relation=SemanticRelation.CARDINALITY,
+            value=value,
+            authority=SemanticFactAuthority.SYSTEM_INFERRED,
+            epistemic_status=SemanticEpistemicStatus.WORKING_ASSUMPTION,
+            source_record_ids=(record.id,),
+            source_text="8×5",
+            source_extraction_ids=("n1",),
+            role_origin=SemanticRoleOrigin.INFERRED,
+        )
+        for index, (subject, value) in enumerate(
+            (("schedule.period", 8), ("schedule.weekday", 5)), start=1
+        )
     )
 
-    normalized = _normalize_table_dimension_constraints(candidate, human_input)
+    facts = bind_engineering_semantic_facts(
+        basis_fingerprint=fingerprint,
+        records=(record,),
+        extractions=(extraction,),
+        candidates=candidates,
+    )
 
-    assert normalized.candidate_constraints == ("简单 HTML 页面", expected)
+    assert {(fact.subject, fact.value) for fact in facts} == {
+        ("schedule.period", 8),
+        ("schedule.weekday", 5),
+    }
+    assert all(
+        fact.epistemic_status is SemanticEpistemicStatus.WORKING_ASSUMPTION
+        for fact in facts
+    )
 
 
 @pytest.mark.parametrize("question", (

@@ -28,6 +28,10 @@ from spg.domain.interaction import (
     WorkTransitionChoice,
     WorkTransitionRecord,
 )
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFact,
+    NeutralSemanticExtractionCandidate,
+)
 from spg.domain.wic_intelligence import ProgressiveSemanticStructure
 from spg.domain.wic_response import (
     ResponseReconciliation,
@@ -64,7 +68,9 @@ class InteractionStore:
 
     def list_interactions(self) -> tuple[Interaction, ...]:
         rows = self.session.execute(
-            select(product_interactions).order_by(
+            select(product_interactions).where(
+                product_interactions.c.condition == InteractionCondition.OPEN.value
+            ).order_by(
                 product_interactions.c.updated_at.desc(),
                 product_interactions.c.id,
             )
@@ -349,6 +355,58 @@ class InteractionStore:
                 "Interaction Work focus changed before transition admission"
             )
 
+    def replace_current_work(
+        self,
+        interaction_id: UUID,
+        *,
+        expected_work_id: UUID,
+        new_work_id: UUID,
+        updated_by: str,
+        updated_at,
+    ) -> None:
+        result = self.session.execute(
+            update(product_interactions)
+            .where(
+                (product_interactions.c.id == interaction_id)
+                & (product_interactions.c.current_work_id == expected_work_id)
+            )
+            .values(
+                current_work_id=new_work_id,
+                updated_by=updated_by,
+                updated_at=updated_at,
+            )
+        )
+        if result.rowcount != 1:
+            raise InteractionInvariantViolation(
+                "Interaction Work focus changed before PRE_WORK creation"
+            )
+
+    def archive_interaction(
+        self,
+        interaction_id: UUID,
+        *,
+        expected_work_id: UUID,
+        updated_by: str,
+        updated_at,
+    ) -> None:
+        result = self.session.execute(
+            update(product_interactions)
+            .where(
+                (product_interactions.c.id == interaction_id)
+                & (product_interactions.c.current_work_id == expected_work_id)
+                & (product_interactions.c.condition == InteractionCondition.OPEN.value)
+            )
+            .values(
+                condition=InteractionCondition.ARCHIVED.value,
+                updated_by=updated_by,
+                updated_at=updated_at,
+            )
+        )
+        if result.rowcount != 1:
+            raise InteractionInvariantViolation(
+                "Interaction is no longer an open PRE_WORK context"
+            )
+
     def records(self, interaction_id: UUID) -> tuple[InteractionRecord, ...]:
         rows = self.session.execute(
             select(interaction_records)
@@ -551,6 +609,14 @@ class InteractionStore:
             candidate_constraints=tuple(row["candidate_constraints"]),
             current_requests=tuple(row["current_requests"]),
             unresolved_material_questions=tuple(row["unresolved_material_questions"]),
+            neutral_semantic_extractions=tuple(
+                NeutralSemanticExtractionCandidate.model_validate(item)
+                for item in row["neutral_semantic_extractions"]
+            ),
+            engineering_semantic_facts=tuple(
+                EngineeringSemanticFact.model_validate(item)
+                for item in row["engineering_semantic_facts"]
+            ),
             meanings=tuple(
                 InterpretationMeaning.model_validate(item) for item in row["meanings"]
             ),

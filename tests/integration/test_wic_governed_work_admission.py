@@ -24,6 +24,7 @@ from spg.application.orchestration import OrchestrationStopReason, ProductionOrc
 from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.runtime import RuntimeService
+from spg.application.semantic_steps import SemanticStepApplicationService
 from spg.application.steering import SteeringApplicationService
 from spg.application.steering_decision import (
     DeterministicPlanSteeringCapability,
@@ -37,6 +38,16 @@ from spg.domain.change import ProductionTargetKind
 from spg.domain.conversation import ConversationTurnIntent
 from spg.domain.guided_design import DesignIssueState, DesignReadinessState
 from spg.domain.execution import ProviderReportedOutcome
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFactCandidate,
+    NeutralExtractionKind,
+    NeutralSemanticExtractionCandidate,
+    SemanticEpistemicStatus,
+    SemanticFactAuthority,
+    SemanticRelation,
+    SemanticRoleOrigin,
+    current_semantic_facts,
+)
 from spg.domain.interaction import (
     InteractionAssessmentCandidate,
     InteractionInterpretationInput,
@@ -93,6 +104,7 @@ from spg.domain.steering import (
     SemanticStepInput,
     SemanticStepResultCandidate,
     SteeringAuthorityAssessment,
+    SteeringActionType,
 )
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_schema import (
@@ -174,6 +186,112 @@ class _ReadyCapability:
             current_requests=(basis.records[-1].content,),
             natural_response="The understanding is ready for Human Work admission.",
             provider_identity="test:wic-slice-2",
+        )
+
+
+class _CourseScheduleSemanticCapability:
+    def __init__(self, *, correction: bool = False) -> None:
+        self.correction = correction
+
+    def interpret(
+        self, basis: InteractionInterpretationInput
+    ) -> InteractionAssessmentCandidate:
+        latest = basis.records[-1]
+        active = basis.active_work_context
+        if self.correction:
+            assert active is not None
+            revision = active.work_revision
+            source_text = "8 means columns, 5 means rows"
+            return InteractionAssessmentCandidate(
+                interpreted_motive=revision.motive,
+                desired_outcome=revision.desired_outcome,
+                candidate_context=revision.context_facts,
+                candidate_constraints=revision.constraints,
+                current_requests=revision.requests,
+                neutral_semantic_extractions=(
+                    NeutralSemanticExtractionCandidate(
+                        extraction_id="dimensions-explicit",
+                        kind=NeutralExtractionKind.ORDERED_VALUES,
+                        values=(8, 5),
+                        source_record_id=latest.id,
+                        source_text=source_text,
+                        explicit_roles=("columns", "rows"),
+                    ),
+                ),
+                semantic_fact_candidates=(
+                    EngineeringSemanticFactCandidate(
+                        candidate_id="rows-explicit",
+                        subject="course_schedule.rows",
+                        relation=SemanticRelation.CARDINALITY,
+                        value=5,
+                        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                        source_record_ids=(latest.id,),
+                        source_text=source_text,
+                        source_extraction_ids=("dimensions-explicit",),
+                        role_origin=SemanticRoleOrigin.EXPLICIT,
+                    ),
+                    EngineeringSemanticFactCandidate(
+                        candidate_id="columns-explicit",
+                        subject="course_schedule.columns",
+                        relation=SemanticRelation.CARDINALITY,
+                        value=8,
+                        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                        source_record_ids=(latest.id,),
+                        source_text=source_text,
+                        source_extraction_ids=("dimensions-explicit",),
+                        role_origin=SemanticRoleOrigin.EXPLICIT,
+                    ),
+                ),
+                focus_classification=WorkFocusClassification.ON_TOPIC,
+                impact_disposition=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
+                natural_response="The explicit row and column meanings are ready for governance.",
+                provider_identity="test:engineering-semantic-truth",
+            )
+
+        source_text = "8×5"
+        return InteractionAssessmentCandidate(
+            interpreted_motive="Build a course schedule",
+            desired_outcome="Deliver a schedule whose dimensions preserve the intended meaning.",
+            neutral_semantic_extractions=(
+                NeutralSemanticExtractionCandidate(
+                    extraction_id="dimensions-neutral",
+                    kind=NeutralExtractionKind.ORDERED_VALUES,
+                    values=(8, 5),
+                    source_record_id=latest.id,
+                    source_text=source_text,
+                    explicit_roles=(None, None),
+                ),
+            ),
+            semantic_fact_candidates=(
+                EngineeringSemanticFactCandidate(
+                    candidate_id="rows-inferred",
+                    subject="course_schedule.rows",
+                    relation=SemanticRelation.CARDINALITY,
+                    value=8,
+                    authority=SemanticFactAuthority.SYSTEM_INFERRED,
+                    epistemic_status=SemanticEpistemicStatus.WORKING_ASSUMPTION,
+                    source_record_ids=(latest.id,),
+                    source_text=source_text,
+                    source_extraction_ids=("dimensions-neutral",),
+                    role_origin=SemanticRoleOrigin.INFERRED,
+                ),
+                EngineeringSemanticFactCandidate(
+                    candidate_id="columns-inferred",
+                    subject="course_schedule.columns",
+                    relation=SemanticRelation.CARDINALITY,
+                    value=5,
+                    authority=SemanticFactAuthority.SYSTEM_INFERRED,
+                    epistemic_status=SemanticEpistemicStatus.WORKING_ASSUMPTION,
+                    source_record_ids=(latest.id,),
+                    source_text=source_text,
+                    source_extraction_ids=("dimensions-neutral",),
+                    role_origin=SemanticRoleOrigin.INFERRED,
+                ),
+            ),
+            natural_response="The inferred dimensions are visible as reversible assumptions.",
+            provider_identity="test:engineering-semantic-truth",
         )
 
 
@@ -335,6 +453,43 @@ class _GuidedDesignSemanticCapability:
                 f"Resolved guided design issue {issue['key']} from governed Reality."
             ),
             decisions=(f"Admit the bounded result for {issue['key']}.",),
+            derived_constraints=input.constraints,
+            evidence_refs=input.reality_refs,
+            unresolved_questions=(),
+            authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+            proposed_production=proposal,
+            reasoning_provider_identity=self.identity,
+            completion_claimed=True,
+        )
+
+
+class _UnguidedSemanticCapability:
+    identity = "test:unguided-semantic"
+
+    def __init__(self) -> None:
+        self.inputs: list[SemanticStepInput] = []
+
+    def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+        self.inputs.append(input)
+        proposal = (
+            SemanticProductionProposal(
+                target_kind=ProductionTargetKind.CODE_WORK,
+                objective="Implement the bounded continuation for the latest Work Reality",
+                code_targets=("index.html", "tests/js/test_page.cjs"),
+                verification_expectation="Run the exact page test and inspect the artifact",
+            )
+            if input.production_proposal_required
+            else None
+        )
+        return SemanticStepResultCandidate(
+            work_id=input.work_id,
+            steering_plan_revision_id=input.steering_plan_revision_id,
+            step_id=input.step.id,
+            step_type=input.step.type,
+            basis_fingerprint=input.basis_fingerprint,
+            result_kind=SemanticResultKind.DESIGN_DIRECTION,
+            bounded_summary="Reassessed the latest admitted Work revision.",
+            decisions=("Proceed from the current governed Work Reality.",),
             derived_constraints=input.constraints,
             evidence_refs=input.reality_refs,
             unresolved_questions=(),
@@ -708,7 +863,7 @@ def test_exact_ready_admission_is_atomic_idempotent_and_continuous(
     assert revision.context_facts == ready.candidate_context
     assert revision.constraints == ready.candidate_constraints
     assert revision.engineering_scope_id == admitted.engineering_scope.id
-    assert revision.schema_version == "wic-work-reality-v1"
+    assert revision.schema_version == "wic-work-reality-v3"
     with postgres_database.unit_of_work() as unit_of_work:
         compatibility = ProductStore(unit_of_work.session).work(admitted.work_id)
     assert compatibility is not None
@@ -737,6 +892,211 @@ def test_exact_ready_admission_is_atomic_idempotent_and_continuous(
     continued = interactions.get_shared_understanding(ready.interaction.id)
     assert continued.records[-1].work_focus_id == admitted.work_id
     assert continued.governed_revision == revision
+
+
+def test_engineering_semantic_truth_persists_and_explicit_correction_versions_work(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    work, _ = _services_for_resource(
+        postgres_database,
+        tmp_path,
+        "test://engineering-semantic-truth",
+    )
+    interactions = WorkInteractionService(
+        postgres_database,
+        capability=_CourseScheduleSemanticCapability(),
+    )
+    interaction = interactions.create_interaction(human_identity="human:test")
+    ready = interactions.append_and_assess(
+        interaction.id,
+        "Build a course schedule with 8×5 slots.",
+        human_identity="human:test",
+    )
+    assessment = ready.latest_assessment
+    assert assessment is not None
+    assert len(assessment.neutral_semantic_extractions) == 1
+    assert {
+        (fact.subject, fact.value, fact.authority, fact.epistemic_status)
+        for fact in current_semantic_facts(assessment.engineering_semantic_facts)
+    } == {
+        (
+            "course_schedule.rows",
+            8,
+            SemanticFactAuthority.SYSTEM_INFERRED,
+            SemanticEpistemicStatus.WORKING_ASSUMPTION,
+        ),
+        (
+            "course_schedule.columns",
+            5,
+            SemanticFactAuthority.SYSTEM_INFERRED,
+            SemanticEpistemicStatus.WORKING_ASSUMPTION,
+        ),
+    }
+
+    admitted = _admit(work, ready)
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    initial = interactions.get_shared_understanding(interaction.id).governed_revision
+    assert initial is not None
+    assert initial.id == admitted.current_work_reality_revision_id
+    assert all(
+        fact.admitted_work_revision_id == initial.id
+        for fact in initial.engineering_semantic_facts
+    )
+    initial_current = current_semantic_facts(initial.engineering_semantic_facts)
+    initial_ids = {fact.id for fact in initial_current}
+    assert len(initial_ids) == 2
+
+    correction_service = WorkInteractionService(
+        postgres_database,
+        capability=_CourseScheduleSemanticCapability(correction=True),
+    )
+    pending = correction_service.append_and_assess(
+        interaction.id,
+        "Correction: 8 means columns, 5 means rows.",
+        human_identity="human:test",
+    )
+    correction = pending.latest_assessment
+    assert correction is not None
+    assert correction.candidate_change is not None
+    assert "semantic_facts" in correction.candidate_change.changed_fields
+    corrected_current = current_semantic_facts(
+        correction.engineering_semantic_facts
+    )
+    assert {
+        (fact.subject, fact.value, fact.authority, fact.epistemic_status)
+        for fact in corrected_current
+    } == {
+        (
+            "course_schedule.rows",
+            5,
+            SemanticFactAuthority.HUMAN_EXPLICIT,
+            SemanticEpistemicStatus.CONFIRMED,
+        ),
+        (
+            "course_schedule.columns",
+            8,
+            SemanticFactAuthority.HUMAN_EXPLICIT,
+            SemanticEpistemicStatus.CONFIRMED,
+        ),
+    }
+    superseded = {
+        fact.id
+        for fact in correction.engineering_semantic_facts
+        if fact.epistemic_status is SemanticEpistemicStatus.SUPERSEDED
+    }
+    assert superseded == initial_ids
+    assert {
+        superseded_id
+        for fact in corrected_current
+        for superseded_id in fact.supersedes_fact_ids
+    } == initial_ids
+
+    evolved = work.decide_interaction_work_revision(
+        interaction.id,
+        assessment_id=correction.id,
+        basis_fingerprint=correction.basis_fingerprint,
+        expected_previous_revision_id=initial.id,
+        action=AttentionAction.APPROVE,
+        authority_identity="human:governor",
+        rationale="Admit the Human's explicit dimension correction.",
+    )
+    assert evolved.current_work_reality_revision_id != initial.id
+    with postgres_database.unit_of_work() as unit_of_work:
+        history = ProductStore(unit_of_work.session).work_reality_revisions(
+            admitted.work_id
+        )
+    assert len(history) == 2
+    corrected_revision = history[-1]
+    assert corrected_revision.previous_revision_id == initial.id
+    admitted_current = current_semantic_facts(
+        corrected_revision.engineering_semantic_facts
+    )
+    assert all(
+        fact.admitted_work_revision_id == corrected_revision.id
+        for fact in admitted_current
+    )
+    assert admitted_current == corrected_revision.engineering_semantic_facts[-2:]
+
+    frame = PlanFrameAssembler(postgres_database).assemble(admitted.work_id)
+    assert frame.work_reality_revision_id == corrected_revision.id
+    assert {
+        reference.fact_id for reference in frame.engineering_semantic_facts
+    } == {
+        fact.id for fact in admitted_current
+    }
+    assert all(
+        reference.source_work_revision_id == corrected_revision.id
+        for reference in frame.engineering_semantic_facts
+    )
+
+    class _SemanticProductionCapability(_GuidedDesignSemanticCapability):
+        def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+            candidate = super().execute(input)
+            if not input.design_context["production_transition_issue"]:
+                return candidate
+            return candidate.model_copy(
+                update={
+                    "proposed_production": SemanticProductionProposal(
+                        target_kind=ProductionTargetKind.CODE_WORK,
+                        objective="Implement the governed course schedule semantics",
+                        code_targets=("index.html", "tests/js/test_schedule.cjs"),
+                        verification_expectation=(
+                            "Verify the candidate against the governed schedule facts"
+                        ),
+                    )
+                }
+            )
+
+    production = _SchedulingOrchestrator()
+    driver = PlanSteeringDriver(
+        postgres_database,
+        work,
+        production,
+        semantic_capability=_SemanticProductionCapability(),
+        max_automatic_transitions=32,
+    )
+    try:
+        outcome = driver.activate(admitted.work_id)
+    finally:
+        driver.shutdown()
+    if outcome.stop_reason.value == "HUMAN_ATTENTION":
+        attention = work.list_attention(work_id=admitted.work_id)
+        assert len(attention) == 1
+        assert attention[0].kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
+        work.resolve_attention(
+            attention[0].id,
+            AttentionResolutionRequest(
+                action=AttentionAction.APPROVE,
+                authority_identity="human:governor",
+                rationale="Admit the fact-bound production proposal.",
+            ),
+        )
+        continuation = PlanSteeringDriver(
+            postgres_database,
+            work,
+            production,
+            semantic_capability=_SemanticProductionCapability(),
+            max_automatic_transitions=8,
+        )
+        try:
+            outcome = continuation.activate(admitted.work_id)
+        finally:
+            continuation.shutdown()
+    assert outcome.stop_reason.value == "PRODUCTION_RUNNING"
+    with postgres_database.unit_of_work() as unit_of_work:
+        binding = ProductStore(unit_of_work.session).runtime_binding(admitted.work_id)
+        assert binding is not None
+        work_unit = RuntimeStore(unit_of_work.session).work_unit(binding.work_unit_id)
+    assert work_unit is not None
+    assert {
+        reference.fact_id
+        for reference in work_unit.completion_contract.semantic_fact_obligations
+    } == {fact.id for fact in admitted_current}
+    assert all(
+        reference.source_work_revision_id == corrected_revision.id
+        for reference in work_unit.completion_contract.semantic_fact_obligations
+    )
 
 
 def test_admission_bootstraps_revision_bound_steering_without_production(
@@ -1662,9 +2022,17 @@ def test_wic3_interrupted_assessment_recovers_without_provider_invented_evidence
     assert recovered.pending_assessment_interactions() == ()
 
 
+@pytest.mark.parametrize(
+    "impact",
+    (
+        WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT,
+        WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
+    ),
+)
 def test_wic3_active_cycle_remains_bound_to_old_revision_and_input_is_not_injected(
     postgres_database: Database,
     services,
+    impact: WorkImpactDisposition,
 ) -> None:
     work, interactions = services
     ready = _ready(interactions)
@@ -1680,7 +2048,7 @@ def test_wic3_active_cycle_remains_bound_to_old_revision_and_input_is_not_inject
         postgres_database,
         capability=_ActiveCapability(
             focus=WorkFocusClassification.ON_TOPIC,
-            impact=WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT,
+            impact=impact,
             context_fact="Runtime feedback says the active result may be insufficient.",
             meaning=InterpretationMeaningKind.FEEDBACK,
         ),
@@ -1696,9 +2064,7 @@ def test_wic3_active_cycle_remains_bound_to_old_revision_and_input_is_not_inject
     assert assessment.basis_work_revision_id == old_revision_id
     assert assessment.basis_active_runtime_binding_id == binding.id
     assert pending.active_cycle_work_revision_id == old_revision_id
-    assert pending.active_cycle_impact_disposition is (
-        WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT
-    )
+    assert pending.active_cycle_impact_disposition is impact
 
     evolved = work.decide_interaction_work_revision(
         ready.interaction.id,
@@ -1963,7 +2329,7 @@ def test_wic4_completed_work_continuation_reopens_satisfaction_without_rewriting
         capability=_ActiveCapability(
             focus=WorkFocusClassification.ON_TOPIC,
             impact=WorkImpactDisposition.CURRENT_RESULT_MAY_BE_INSUFFICIENT,
-            context_fact="Elapsed time should be clearer in the same Work experience.",
+            constraint="Elapsed time must be clearer in the same Work experience.",
         ),
     )
     before = active.get_shared_understanding(ready.interaction.id)
@@ -2049,6 +2415,92 @@ def test_wic4_completed_work_continuation_reopens_satisfaction_without_rewriting
         blocker.kind.value == "CURRENT_RESULT_MAY_BE_INSUFFICIENT"
         for blocker in frame.open_blocking_reality
     )
+
+    orchestrator = _SchedulingOrchestrator()
+    steering_driver = PlanSteeringDriver(
+        postgres_database,
+        completed_work,
+        orchestrator,
+    )
+    try:
+        assert steering_driver._restart_eligible(admitted.work_id) is True
+        iteration = steering_driver.iterate(admitted.work_id)
+        assert iteration.action is SteeringActionType.PLAN_REVISION
+        assert iteration.progressed is True
+        reassessed = SteeringApplicationService(postgres_database).reconstruct(
+            admitted.work_id
+        )
+        assert reassessed.active_revision.revision.revision_number == 2
+        assert reassessed.current_step is not None
+        assert reassessed.current_step.type is SteeringStepType.DESIGN
+        assert [step.type for step in reassessed.known_future_steps] == [
+            SteeringStepType.PRODUCE,
+            SteeringStepType.VERIFY_ACCEPT,
+            SteeringStepType.COMPLETE,
+        ]
+        assert RealityReference(
+            kind=RealityReferenceKind.WORK_REALITY_REVISION,
+            identity=history[1].id,
+        ) in reassessed.active_revision.revision.reality_refs
+        assert not PlanFrameAssembler(postgres_database).assemble(
+            admitted.work_id
+        ).open_blocking_reality
+
+        capability = _UnguidedSemanticCapability()
+        semantics = SemanticStepApplicationService(
+            postgres_database,
+            capability,
+            work_service=completed_work,
+        )
+        first_result = semantics.execute(admitted.work_id)
+        second_result = semantics.execute(admitted.work_id)
+        assert second_result.id == first_result.id
+        assert len(capability.inputs) == 1
+        assert capability.inputs[0].production_proposal_required is True
+        assert first_result.proposed_production is not None
+        assert completed_work.get_work(admitted.work_id).production_plan is not None
+        decision_frame = PlanFrameAssembler(postgres_database).assemble(
+            admitted.work_id
+        )
+        assert RealityReference(
+            kind=RealityReferenceKind.SEMANTIC_RESULT,
+            identity=first_result.id,
+        ) in tuple(
+            item.reference for item in decision_frame.basis.resolved_reality
+        )
+        continued = steering_driver.iterate(admitted.work_id)
+        assert continued.action is SteeringActionType.STEP_TRANSITION
+        assert (
+            SteeringApplicationService(postgres_database)
+            .reconstruct(admitted.work_id)
+            .current_step.type
+            is SteeringStepType.PRODUCE
+        )
+        with postgres_database.unit_of_work() as unit_of_work:
+            ProductStore(unit_of_work.session).update_work(
+                admitted.work_id,
+                {
+                    "production_plan_proposal": None,
+                    "updated_at": datetime.now(UTC),
+                },
+            )
+            unit_of_work.commit()
+        recovered = steering_driver.iterate(admitted.work_id)
+        assert recovered.action is SteeringActionType.PLAN_REVISION
+        recovery_plan = SteeringApplicationService(postgres_database).reconstruct(
+            admitted.work_id
+        )
+        assert recovery_plan.active_revision.revision.revision_number == 3
+        assert recovery_plan.current_step is not None
+        assert recovery_plan.current_step.type is SteeringStepType.DESIGN
+        recovery_input = SemanticStepApplicationService(
+            postgres_database,
+            _UnguidedSemanticCapability(),
+            work_service=completed_work,
+        ).assemble_input(admitted.work_id)
+        assert recovery_input.production_proposal_required is True
+    finally:
+        steering_driver.shutdown()
 
 
 @pytest.mark.parametrize(
@@ -2191,6 +2643,9 @@ def test_wic4_new_work_transition_survives_restart_and_forms_independent_work(
     assert switched.governed_work_id is None
     assert switched.governed_revision is None
     assert switched.new_work_formation_pending is True
+    pre_work_id = switched.interaction.current_work_id
+    assert pre_work_id is not None
+    assert switched.latest_work_transition.target_work_id == pre_work_id
     assert switched.work_satisfaction_state is WorkSatisfactionState.NO_FOCUSED_WORK
     assert old_work.work_id in switched.work_focus_history
     repeated = restarted.decide_work_transition(
@@ -2201,7 +2656,7 @@ def test_wic4_new_work_transition_survives_restart_and_forms_independent_work(
         authority_identity="human:governor",
     )
     assert repeated.new_work_formation_pending is True
-    assert _count(postgres_database, product_works) == 1
+    assert _count(postgres_database, product_works) == 2
     assert _count(postgres_database, work_reality_revisions) == 1
 
     candidate = restarted.append_and_assess(
@@ -2219,6 +2674,7 @@ def test_wic4_new_work_transition_survives_restart_and_forms_independent_work(
         rationale="Independently admit the new Work formation.",
     )
     assert new_work.work_id != old_work.work_id
+    assert new_work.work_id == pre_work_id
     final = restarted.get_shared_understanding(ready.interaction.id)
     assert final.governed_work_id == new_work.work_id
     assert final.latest_work_transition.target_work_id == new_work.work_id
@@ -2296,6 +2752,7 @@ def test_wic_admission_migration_downgrade_and_reupgrade(
         "scope_basis_fingerprint",
         "source_baseline_id",
         "governance_record_id",
+        "engineering_semantic_facts",
         "schema_version",
     } <= columns
 

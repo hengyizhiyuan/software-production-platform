@@ -356,6 +356,8 @@ interaction_assessments = Table(
     Column("candidate_constraints", JSONB, nullable=False),
     Column("current_requests", JSONB, nullable=False),
     Column("unresolved_material_questions", JSONB, nullable=False),
+    Column("neutral_semantic_extractions", JSONB, nullable=False),
+    Column("engineering_semantic_facts", JSONB, nullable=False),
     Column("meanings", JSONB, nullable=False),
     Column("focus_classification", String(32), nullable=True),
     Column("impact_disposition", String(48), nullable=True),
@@ -470,6 +472,7 @@ work_reality_revisions = Table(
     Column("context_facts", JSONB, nullable=False),
     Column("constraints", JSONB, nullable=False),
     Column("requests", JSONB, nullable=False),
+    Column("engineering_semantic_facts", JSONB, nullable=False),
     Column(
         "engineering_scope_id",
         Uuid(as_uuid=True),

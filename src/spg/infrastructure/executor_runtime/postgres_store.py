@@ -40,6 +40,8 @@ from spg.domain.native_execution import (
     ToolExecutionResult,
     UsageCertainty,
     WorkerLeaseRecord,
+    WorkerOffer,
+    WorkerRegistrationRecord,
     WorkspaceManifest,
     canonical_digest,
 )
@@ -64,6 +66,7 @@ from spg.infrastructure.persistence.native_execution_schema import (
     executor_leases,
     executor_queue,
     executor_scheduler_state,
+    executor_worker_registrations,
     native_attempt_bindings,
     native_attempt_states,
     pwu_contract_versions,
@@ -251,7 +254,10 @@ class NativeExecutionStore:
                     ]
                 ),
                 executor_queue.c.available_at <= now,
-                executor_queue.c.resume_count < 3,
+                # resume_count is incremented when a retry is scheduled.  A
+                # value of 3 therefore represents the third (and final)
+                # automatic retry, which must remain runnable.
+                executor_queue.c.resume_count <= 3,
             )
             .order_by(executor_queue.c.enqueued_at, executor_queue.c.id)
             .limit(limit)
@@ -324,6 +330,58 @@ class NativeExecutionStore:
             expected_version=expected_version,
             values={"last_fairness_group": fairness_group, "updated_at": _utcnow()},
         )
+
+    def register_worker(
+        self,
+        offer: WorkerOffer,
+        *,
+        heartbeat_at: datetime,
+        expires_at: datetime,
+    ) -> WorkerRegistrationRecord:
+        values = {
+            "worker_id": offer.worker_id,
+            "worker_profile": offer.worker_profile,
+            "provider_profiles": list(offer.provider_profiles),
+            "resource_profiles": list(offer.resource_profiles),
+            "capability_identities": list(offer.capability_identities),
+            "heartbeat_at": heartbeat_at,
+            "expires_at": expires_at,
+        }
+        self.session.execute(
+            pg_insert(executor_worker_registrations)
+            .values(**values, version=1)
+            .on_conflict_do_update(
+                index_elements=[executor_worker_registrations.c.worker_id],
+                set_={
+                    **values,
+                    "version": executor_worker_registrations.c.version + 1,
+                },
+            )
+        )
+        row = self.session.execute(
+            select(executor_worker_registrations).where(
+                executor_worker_registrations.c.worker_id == offer.worker_id
+            )
+        ).mappings().one()
+        return WorkerRegistrationRecord.model_validate(dict(row))
+
+    def live_worker_registrations(self, now: datetime) -> list[WorkerRegistrationRecord]:
+        rows = self.session.execute(
+            select(executor_worker_registrations)
+            .where(executor_worker_registrations.c.expires_at > now)
+            .order_by(executor_worker_registrations.c.worker_id)
+        ).mappings()
+        return [WorkerRegistrationRecord.model_validate(dict(row)) for row in rows]
+
+    def active_allocation_worker_ids(self) -> set[str]:
+        rows = self.session.scalars(
+            select(execution_allocations.c.worker_id).where(
+                execution_allocations.c.condition.in_(
+                    [AllocationCondition.ISSUED.value, AllocationCondition.ACTIVE.value]
+                )
+            )
+        )
+        return set(rows)
 
     def insert_allocation(self, record: ExecutionAllocationRecord) -> None:
         self.session.execute(
@@ -872,6 +930,25 @@ class NativeExecutionStore:
         if row is None:
             raise NativeExecutionNotFound(f"PWU contract not found: {contract_id}")
         return PWUContractVersionRecord.model_validate(dict(row))
+
+    def contract_for_pwu_digest(
+        self,
+        pwu_id: UUID,
+        contract_digest: str,
+    ) -> PWUContractVersionRecord | None:
+        """Return the immutable contract version already naming this content."""
+
+        row = self.session.execute(
+            select(pwu_contract_versions).where(
+                pwu_contract_versions.c.pwu_id == pwu_id,
+                pwu_contract_versions.c.contract_digest == contract_digest,
+            )
+        ).mappings().one_or_none()
+        return (
+            None
+            if row is None
+            else PWUContractVersionRecord.model_validate(dict(row))
+        )
 
     def queue_for_attempt(self, attempt_id: UUID) -> ExecutionQueueEntryRecord | None:
         row = self.session.execute(

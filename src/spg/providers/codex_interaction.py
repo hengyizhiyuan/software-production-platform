@@ -39,6 +39,10 @@ from spg.domain.design_intent import (
     DesignObjectType,
     DesignScopeLevel,
 )
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFactCandidate,
+    NeutralSemanticExtractionCandidate,
+)
 from spg.domain.interaction import (
     InteractionAssessmentCandidate,
     InteractionInterpretationInput,
@@ -86,6 +90,8 @@ def _provider_strict_output_schema(schema: dict[str, Any]) -> dict[str, Any]:
                 value.clear()
                 value["$ref"] = reference
                 return
+            if "properties" in value:
+                value["required"] = list(value["properties"])
             for nested in value.values():
                 normalize(nested)
         elif isinstance(value, list):
@@ -161,6 +167,8 @@ class _InteractionSemanticProviderPayload(BaseModel):
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
+    neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
+    semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[_InteractionProviderMeaning, ...]
     focus_classification: WorkFocusClassification | None
     impact_disposition: WorkImpactDisposition | None
@@ -706,6 +714,26 @@ class CodexSdkInteractionSemanticCapability:
             "in context/requests and do not put repository selection in unresolved_material_questions. "
             "Preserve explicit facts, constraints, requests, corrections, and "
             "Human decisions. "
+            "For software-production meaning whose repeated reinterpretation could "
+            "materially change Production or Verification, populate the two-stage "
+            "engineering semantic fields. neutral_semantic_extractions records only "
+            "observable syntax such as ordered values, quantities, bounds, references, "
+            "behavior, state change, or scope; it must not assign contextual roles that "
+            "the Human did not explicitly name. Return exactly one explicit_roles entry "
+            "for each values entry, using null when the Human named no role. "
+            "semantic_fact_candidates then binds "
+            "those observations to small reusable product-semantic relations and "
+            "Work-scoped subjects. Use contextual subjects such as image.width or "
+            "api.response_time; do not invent domain parser types. Keep product meaning "
+            "distinct from HTML/DOM or other implementation shape. HUMAN_EXPLICIT means "
+            "the Human explicitly supplied the semantic role; inferred contextual roles "
+            "must be SYSTEM_INFERRED with WORKING_ASSUMPTION or UNRESOLVED. A later explicit "
+            "correction identifies the current fact UUIDs it supersedes. Preserve current "
+            "facts unless the Human changes or removes them. Use empty arrays when no fact "
+            "earns structured representation. Every neutral extraction and semantic fact "
+            "source_text must be an exact verbatim non-empty substring of the cited Human "
+            "source record; do not normalize spacing, punctuation, casing, or wording, and "
+            "cite the record that actually contains that exact text. "
             + active_work_instruction
             + "supporting_references may only repeat exact values from the source records supporting_references arrays. "
             "Allowed kinds are VERIFICATION, RUNTIME_FACT, COMPLETION and ENGINEERING_FINDING, each with a UUID. "
@@ -1274,6 +1302,8 @@ class CodexSdkWorkInteractionCapability:
             candidate_constraints=semantic.candidate_constraints,
             current_requests=semantic.current_requests,
             unresolved_material_questions=semantic.unresolved_material_questions,
+            neutral_semantic_extractions=semantic.neutral_semantic_extractions,
+            semantic_fact_candidates=semantic.semantic_fact_candidates,
             meanings=semantic.meanings,
             focus_classification=semantic.focus_classification,
             impact_disposition=semantic.impact_disposition,

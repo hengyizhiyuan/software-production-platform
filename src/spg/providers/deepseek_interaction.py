@@ -81,6 +81,12 @@ def _is_root_json_invalid(error: InteractionInvariantViolation) -> bool:
     )
 
 
+def _is_structured_payload_invalid(error: InteractionInvariantViolation) -> bool:
+    """Limit bounded repair to Provider wire/schema validation failures."""
+
+    return isinstance(error.__cause__, ValidationError)
+
+
 class DeepSeekInteractionSemanticCapability:
     """WIC semantic port implemented through the shared model runtime."""
 
@@ -100,7 +106,10 @@ class DeepSeekInteractionSemanticCapability:
         self.last_result: StructuredModelResult | None = None
 
     def interpret_semantics(
-        self, basis: InteractionInterpretationInput
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_stage: Callable[[str], None] | None = None,
     ) -> InteractionSemanticCandidate:
         instruction = CodexSdkInteractionSemanticCapability.instruction(basis)
         self.last_prompt_characters = len(instruction)
@@ -109,6 +118,7 @@ class DeepSeekInteractionSemanticCapability:
             instructions=instruction,
             input_text="Return the WIC semantic result for the exact supplied basis.",
             output_schema=CodexSdkInteractionSemanticCapability.output_schema(),
+            on_stage=on_stage,
         )
         try:
             payload = _InteractionSemanticProviderPayload.model_validate_json(
@@ -118,6 +128,8 @@ class DeepSeekInteractionSemanticCapability:
             raise InteractionInvariantViolation(
                 "WIC semantic Provider returned an invalid structured result"
             ) from error
+        if on_stage is not None:
+            on_stage("semantic_payload_validated")
         self._observe(result)
         return InteractionSemanticCandidate(
             **payload.model_dump(),
@@ -401,7 +413,7 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
         on_response_delta: Callable[[str], None],
         on_pipeline_stage: Callable[[str], None],
     ) -> InteractionAssessmentCandidate:
-        """Retry one syntax-invalid coalesced envelope before any Human visibility.
+        """Repair one invalid Provider envelope before any Human visibility.
 
         Controlled WIC deliberately discards semantic-provider prose and realizes
         Human-visible wording only after semantic admission.  That boundary makes
@@ -422,14 +434,9 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
                 controlled_semantic_only=True,
             )
         except InteractionInvariantViolation as first_error:
-            if not (
-                str(first_error).startswith(
-                    "Coalesced collaboration Provider returned an invalid structured result"
-                )
-                and _is_root_json_invalid(first_error)
-            ):
+            if not _is_structured_payload_invalid(first_error):
                 raise
-            on_pipeline_stage("structured_json_repair_started")
+            on_pipeline_stage("structured_output_repair_started")
 
         try:
             candidate = self._interpret(
@@ -441,9 +448,14 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
         except InteractionInvariantViolation as second_error:
             if _is_root_json_invalid(second_error):
                 raise InteractionInvariantViolation(
-                    "Coalesced collaboration Provider returned invalid JSON after "
+                    "WIC semantic Provider returned invalid JSON after "
                     "one bounded structured repair attempt (root:json_invalid; "
                     "bounded_repair_exhausted)"
+                ) from second_error
+            if _is_structured_payload_invalid(second_error):
+                raise InteractionInvariantViolation(
+                    "WIC Provider returned an invalid structured result after one "
+                    "bounded repair attempt (schema_invalid; bounded_repair_exhausted)"
                 ) from second_error
             raise
 
@@ -452,9 +464,9 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
             self.last_pipeline_evidence = replace(
                 evidence,
                 provider_call_count=evidence.provider_call_count + 1,
-                coalesced_retry_count=(evidence.coalesced_retry_count or 0) + 1,
+                semantic_retry_count=(evidence.semantic_retry_count or 0) + 1,
             )
-        on_pipeline_stage("structured_json_repair_completed")
+        on_pipeline_stage("structured_output_repair_completed")
         return candidate
 
     def _interpret(
@@ -466,21 +478,34 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
         controlled_semantic_only: bool = False,
     ) -> InteractionAssessmentCandidate:
         mode, _reason = self.pipeline_selection(basis)
-        if not controlled_semantic_only or mode != "staged":
+        if not controlled_semantic_only:
             return super()._interpret(
                 basis, on_response_delta=on_response_delta,
                 on_pipeline_stage=on_pipeline_stage,
             )
-        # Controlled admission replaces candidate prose and realizes visible language
-        # after governance. A second, discarded Conversation response cannot gate it.
+        # Controlled admission always requests semantics only.  PRE_WORK used to
+        # reuse the coalesced natural_response and synchronously slice that settled
+        # string after governance, which looked like streaming but could not expose
+        # progressive Conversation generation.  The governed Realizer now owns the
+        # only Human-facing Provider stream for both PRE_WORK and active Work.
         self.last_pipeline_evidence = None
         self.last_collaboration_result = None
         started_at = monotonic()
-        semantic = self.semantic_capability.interpret_semantics(basis)
+        semantic = self.semantic_capability.interpret_semantics(
+            basis, on_stage=on_pipeline_stage
+        )
         self.last_collaboration_result = semantic.collaboration
         self.last_pipeline_evidence = ConversationPipelineEvidence(
-            pipeline_mode="staged",
-            pipeline_reason="controlled_semantics_before_governed_realization",
+            pipeline_mode=(
+                "governed_pre_work_semantic"
+                if mode == "coalesced_pre_work"
+                else "staged"
+            ),
+            pipeline_reason=(
+                "controlled_pre_work_semantics_before_governed_realization"
+                if mode == "coalesced_pre_work"
+                else "controlled_semantics_before_governed_realization"
+            ),
             provider_call_count=1,
             semantic_request_id=self.semantic_capability.last_request_id,
             semantic_provider=self.semantic_capability.provider_identity,

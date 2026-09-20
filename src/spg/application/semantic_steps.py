@@ -87,7 +87,13 @@ class SemanticStepApplicationService:
         self.repository_assets = repository_assets
 
     def assemble_input(self, work_id: UUID) -> SemanticStepInput:
-        frame = self.frames.assemble(work_id)
+        # A Step result is evidence for the following decision, not an input to
+        # recompute that same Step. Excluding results emitted by the CURRENT
+        # Step keeps its provider basis stable after the first admission.
+        frame = self.frames.assemble(
+            work_id,
+            exclude_current_step_semantic_results=True,
+        )
         step = frame.reconstruction.current_step
         if step is None or step.type not in {
             SteeringStepType.DESIGN,
@@ -134,6 +140,7 @@ class SemanticStepApplicationService:
             materials = self._context_materials(repository, baseline.repository_revision,
                 tuple(item.repository_relative_path for item in resource.context_references))
         refs = tuple(item.reference for item in frame.basis.resolved_reality)
+        next_step = frame.reconstruction.next_step
         return SemanticStepInput(
             work_id=work.id,
             desired_outcome=work.desired_outcome or work.raw_user_requirement,
@@ -162,6 +169,12 @@ class SemanticStepApplicationService:
             repository_tree_paths=paths,
             context_materials=materials,
             design_context=self.guided_design.semantic_context(work.id, step.id),
+            production_proposal_required=bool(
+                step.type is SteeringStepType.DESIGN
+                and next_step is not None
+                and next_step.type is SteeringStepType.PRODUCE
+                and work.production_plan is None
+            ),
         )
 
     def execute(self, work_id: UUID) -> SemanticStepResultRecord:
@@ -179,27 +192,11 @@ class SemanticStepApplicationService:
             )
             semantic_input = self.assemble_input(work_id)
         existing = self.result_for_step(semantic_input.step.id)
-        guided = self.guided_design.get_optional(work_id)
-        guided_issue = (
-            None
-            if guided is None
-            else next(
-                (
-                    issue
-                    for issue in guided.issues
-                    if issue.steering_step_id == semantic_input.step.id
-                ),
-                None,
-            )
-        )
         if (
             existing is not None
             and (
                 existing.basis_fingerprint == semantic_input.basis_fingerprint
-                or (
-                    guided_issue is not None
-                    and self._guided_result_still_current(existing, semantic_input)
-                )
+                or self._result_still_current(existing, semantic_input)
             )
         ):
             return existing
@@ -211,7 +208,7 @@ class SemanticStepApplicationService:
         return self.admit(semantic_input, candidate)
 
     @staticmethod
-    def _guided_result_still_current(
+    def _result_still_current(
         result: SemanticStepResultRecord,
         semantic_input: SemanticStepInput,
     ) -> bool:
@@ -279,6 +276,14 @@ class SemanticStepApplicationService:
                 raise SteeringInvariantViolation(
                     "Implementation-readiness design requires a reviewable production proposal"
                 )
+        if (
+            fresh.production_proposal_required
+            and candidate.completion_claimed
+            and candidate.proposed_production is None
+        ):
+            raise SteeringInvariantViolation(
+                "DESIGN cannot close toward PRODUCE without a current production proposal"
+            )
         if fresh.design_context is not None and candidate.proposed_production is not None:
             with self.database.unit_of_work() as design_uow:
                 design_store = SteeringStore(design_uow.session)

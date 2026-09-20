@@ -13,6 +13,7 @@ from spg.domain.change import (
     ProductionTargetKind,
 )
 from spg.domain.preparation import ContextSemanticRole
+from spg.domain.engineering_semantics import SemanticFactReference
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.planning import ProductionPlanArtifactTarget
 from spg.domain.refinement import RepositoryChangeProposal
@@ -24,11 +25,13 @@ class GoalCondition(StrEnum):
 
 
 class WorkCondition(StrEnum):
+    PRE_WORK = "PRE_WORK"
     DRAFT = "DRAFT"
     NEEDS_REFINEMENT = "NEEDS_REFINEMENT"
     AWAITING_APPROVAL = "AWAITING_APPROVAL"
     READY = "READY"
     REJECTED = "REJECTED"
+    DISCARDED = "DISCARDED"
 
 
 class WorkMode(StrEnum):
@@ -39,6 +42,7 @@ class WorkMode(StrEnum):
 
 
 class WorkStatus(StrEnum):
+    PRE_WORK = "PRE_WORK"
     DRAFT = "DRAFT"
     NEEDS_REFINEMENT = "NEEDS_REFINEMENT"
     AWAITING_APPROVAL = "AWAITING_APPROVAL"
@@ -242,6 +246,7 @@ class SteeringProductionRequest(BaseModel):
     artifact_targets: tuple[ProductionPlanArtifactTarget, ...] = ()
     change_contract: CodeChangeContract | None = None
     constraints: tuple[str, ...] = ()
+    engineering_semantic_facts: tuple[SemanticFactReference, ...] = ()
     verification_expectation: str = Field(min_length=1)
 
 

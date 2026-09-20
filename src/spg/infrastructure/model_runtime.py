@@ -7,7 +7,7 @@ from copy import deepcopy
 from enum import StrEnum
 import json
 from threading import Lock
-from time import monotonic
+from time import monotonic, sleep
 from typing import Any
 
 import httpx2
@@ -75,7 +75,12 @@ class ResponsesModelAdapter:
             raise ValueError("Provider base URL is required")
         self._api_key = api_key
         self.base_url = base_url.rstrip("/")
-        self._client = client or httpx2.Client(
+        self._client = client or self._new_client()
+        self._owns_client = client is None
+        self._request_lock = Lock()
+
+    def _new_client(self) -> httpx2.Client:
+        return httpx2.Client(
             base_url=self.base_url,
             timeout=120,
             limits=httpx2.Limits(
@@ -84,8 +89,15 @@ class ResponsesModelAdapter:
                 keepalive_expiry=60,
             ),
         )
-        self._owns_client = client is None
-        self._request_lock = Lock()
+
+    def _renew_owned_client(self) -> None:
+        """Drop a poisoned keep-alive pool before one bounded replay."""
+
+        if not self._owns_client:
+            return
+        previous = self._client
+        self._client = self._new_client()
+        previous.close()
 
     def readiness(self, profile: ModelProfile) -> dict[str, object]:
         key = self._api_key()
@@ -141,6 +153,7 @@ class ResponsesModelAdapter:
         first_token_at: float | None = None
         output_parts: list[str] = []
         final_payload: dict[str, Any] | None = None
+        retry_count = 0
         payload = self._payload(
             profile=profile,
             instructions=instructions,
@@ -157,58 +170,74 @@ class ResponsesModelAdapter:
             # The role-level WIC worker is sequential today. This lock also keeps
             # a shared HTTP/1.1 connection from interleaving future consumers.
             with self._request_lock:
-                sent_at = monotonic()
-                stage("provider_request_sent")
-                with self._client.stream(
-                    "POST",
-                    "/responses",
-                    headers={
-                        "Authorization": f"Bearer {key}",
-                        "Content-Type": "application/json",
-                    },
-                    json=payload,
-                    timeout=profile.timeout_seconds,
-                ) as response:
-                    if response.status_code >= 400:
-                        self._raise_http_error(response, key)
-                    stage("provider_response_accepted")
-                    for line in response.iter_lines():
-                        if not line.startswith("data:"):
-                            continue
-                        data = line[5:].strip()
-                        if not data:
-                            continue
-                        try:
-                            event = json.loads(data)
-                        except json.JSONDecodeError as error:
-                            raise ModelProviderError(
-                                ModelFailureKind.MALFORMED_RESPONSE,
-                                f"{self.provider.value} stream contained invalid JSON",
-                                request_sent=True,
-                                usage_unknown=True,
-                                retryable=False,
-                            ) from error
-                        if first_event_at is None:
-                            first_event_at = monotonic()
-                            stage("provider_first_response_event")
-                        event_type = event.get("type")
-                        if event_type == "response.output_text.delta":
-                            delta = event.get("delta")
-                            if isinstance(delta, str) and delta:
-                                if first_token_at is None:
-                                    first_token_at = monotonic()
-                                    stage("provider_first_token")
-                                output_parts.append(delta)
-                                if on_output_delta is not None:
-                                    on_output_delta(delta)
-                        elif event_type in {
-                            "response.completed",
-                            "response.incomplete",
-                            "response.failed",
-                        }:
-                            candidate = event.get("response")
-                            if isinstance(candidate, dict):
-                                final_payload = candidate
+                while True:
+                    try:
+                        if sent_at is None:
+                            sent_at = monotonic()
+                        stage("provider_request_sent")
+                        with self._client.stream(
+                            "POST",
+                            "/responses",
+                            headers={
+                                "Authorization": f"Bearer {key}",
+                                "Content-Type": "application/json",
+                            },
+                            json=payload,
+                            timeout=profile.timeout_seconds,
+                        ) as response:
+                            if response.status_code >= 400:
+                                self._raise_http_error(response, key)
+                            stage("provider_response_accepted")
+                            for line in response.iter_lines():
+                                if not line.startswith("data:"):
+                                    continue
+                                data = line[5:].strip()
+                                if not data:
+                                    continue
+                                try:
+                                    event = json.loads(data)
+                                except json.JSONDecodeError as error:
+                                    raise ModelProviderError(
+                                        ModelFailureKind.MALFORMED_RESPONSE,
+                                        f"{self.provider.value} stream contained invalid JSON",
+                                        request_sent=True,
+                                        usage_unknown=True,
+                                        retryable=False,
+                                    ) from error
+                                if first_event_at is None:
+                                    first_event_at = monotonic()
+                                    stage("provider_first_response_event")
+                                event_type = event.get("type")
+                                if event_type == "response.output_text.delta":
+                                    delta = event.get("delta")
+                                    if isinstance(delta, str) and delta:
+                                        if first_token_at is None:
+                                            first_token_at = monotonic()
+                                            stage("provider_first_token")
+                                        output_parts.append(delta)
+                                        if on_output_delta is not None:
+                                            on_output_delta(delta)
+                                elif event_type in {
+                                    "response.completed",
+                                    "response.incomplete",
+                                    "response.failed",
+                                }:
+                                    candidate = event.get("response")
+                                    if isinstance(candidate, dict):
+                                        final_payload = candidate
+                        break
+                    except httpx2.RemoteProtocolError:
+                        # A stale keep-alive or an upstream disconnect before the
+                        # first event cannot have reached the Human stream. The
+                        # request is inference-only, so one fresh-connection
+                        # replay is safe and avoids turning a transient transport
+                        # fault into a failed Human Turn.
+                        if retry_count or first_event_at is not None or output_parts:
+                            raise
+                        retry_count = 1
+                        stage("provider_transport_recovery")
+                        self._renew_owned_client()
+                        sleep(0.2)
         except ModelProviderError:
             raise
         except httpx2.TimeoutException as error:
@@ -282,7 +311,7 @@ class ResponsesModelAdapter:
                 ),
                 completed_seconds=completed_at - started,
             ),
-            retry_count=0,
+            retry_count=retry_count,
         )
 
     def _payload(

@@ -1069,6 +1069,17 @@ def test_sem_schema_12_13_blocked_driver_is_truthful_in_work_api(
         assert body["last_stop_reason"] == "BLOCKED"
         assert body["most_recent_meaningful_event"] == "STEERING_STOPPED_BLOCKED"
         assert "stopped on a governed invariant" in body["what_happens_next"]
+        assert body["next_owner"] == "WATT_RECOVERY"
+        assert body["human_attention_required"] is False
+        assert body["control_state_valid"] is True
+        assert body["control_state_violations"] == []
+
+        retry = TestClient(api).post(
+            f"/api/works/{admitted.work_id}/retry-steering",
+            json={"authority_identity": "test-operator"},
+        )
+        assert retry.status_code == 200
+        assert driver.wait_until_idle(admitted.work_id, 5)
     finally:
         driver.shutdown()
         orchestrator.shutdown()

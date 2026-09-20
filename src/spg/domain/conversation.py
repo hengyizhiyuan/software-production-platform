@@ -13,6 +13,10 @@ from typing import Any, Callable, Protocol
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from spg.domain.design_intent import DesignIntentFrame
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFact,
+    EngineeringSemanticFactCandidate,
+)
 
 
 class ConversationTurnIntent(StrEnum):
@@ -148,6 +152,10 @@ class ConversationContext(BaseModel):
     candidate_constraints: tuple[str, ...] = ()
     current_requests: tuple[str, ...] = ()
     governed_work_requests: tuple[str, ...] = ()
+    governed_engineering_semantic_facts: tuple[EngineeringSemanticFact, ...] = ()
+    candidate_engineering_semantic_facts: tuple[
+        EngineeringSemanticFactCandidate, ...
+    ] = ()
     current_objective: str | None = None
     current_collaboration_focus: str | None = None
     current_work_reference: str | None = None

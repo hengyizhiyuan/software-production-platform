@@ -49,13 +49,84 @@
     });
     return milestones;
   }
+  function currentProductionQueue(work, queue) {
+    const entries = Array.isArray(queue) ? queue : [];
+    const revisionId = work?.current_work_reality_revision_id;
+    if (!revisionId || !entries.some((entry) => entry.work_reality_revision_id)) {
+      return entries;
+    }
+    return entries.filter(
+      (entry) => entry.work_reality_revision_id === revisionId,
+    );
+  }
   function productionState(work, queue, attempt, attentionItems = []) {
-    const entry = queue && queue.length ? queue[queue.length - 1] : null;
-    const mode = attempt?.state?.runtime_mode;
+    const currentQueue = currentProductionQueue(work, queue);
+    const entry = currentQueue.length ? currentQueue[currentQueue.length - 1] : null;
+    const revisionScopedQueue = Array.isArray(queue)
+      && queue.some((item) => item.work_reality_revision_id);
+    const attemptIsCurrent = Boolean(entry) || !revisionScopedQueue;
+    const mode = attemptIsCurrent ? attempt?.state?.runtime_mode : null;
+    const terminalOutcome = attemptIsCurrent ? attempt?.state?.terminal_outcome : null;
+    const candidateReady = Array.isArray(attentionItems) && attentionItems.some(
+      (item) => (!item.work_id || item.work_id === work?.work_id)
+        && item.kind === "CANDIDATE_AUTHORIZATION"
+        && Array.isArray(item.available_actions)
+        && item.available_actions.includes("AUTHORIZE"),
+    );
+    // Completion owns whether production yielded a reviewable Candidate.  Keep
+    // the Executor's terminal outcome in evidence, but do not let it overwrite
+    // the later, authoritative completion/attention state shown to the Human.
+    if (candidateReady) {
+      return { state: "FINISHED", detail: "Candidate ready for preview and authorization." };
+    }
     if (mode === "RECOVERING" || mode === "RESUME_REQUESTED") return { state: "RECOVERING", detail: "Restoring execution from retained state." };
     if (mode === "FAILED") return { state: "FAILED", detail: "Execution stopped with a failure." };
+    if (mode === "FINISHED" && terminalOutcome === "UNABLE_TO_COMPLETE") {
+      const transportFailures = (attempt?.steps || []).filter(
+        (step) => step?.result_payload?.error_type === "InferenceTransportUnknown",
+      ).length;
+      const providerDecision = [...(attempt?.steps || [])].reverse().find(
+        (step) => step?.result_payload?.action === "UNABLE_TO_COMPLETE",
+      );
+      return {
+        state: "FAILED",
+        detail: transportFailures > 1
+          ? `Provider response failed after ${transportFailures - 1} automatic retries.`
+          : providerDecision
+            ? "Execution finished with unresolved obligations. Review the recorded evidence before retrying."
+            : "Provider did not return a usable completion decision.",
+      };
+    }
     if (mode === "PAUSED") return { state: "BLOCKED", detail: "Execution is paused." };
     if (entry) {
+      if (entry.progression_state === "INFRASTRUCTURE_UNAVAILABLE") {
+        return {
+          state: "RECOVERING",
+          detail: entry.progression_reason || "Execution infrastructure is unavailable. Watt will recover automatically.",
+        };
+      }
+      if (entry.progression_state === "SCHEDULING" && ["QUEUED", "RETURNED_TO_QUEUE"].includes(entry.condition)) {
+        return {
+          state: "PREPARING",
+          detail: entry.progression_reason || "Watt is assigning available execution capacity.",
+        };
+      }
+      if (entry.progression_state === "CAPACITY_WAIT") {
+        return {
+          state: "QUEUED",
+          detail: "Waiting for execution capacity.",
+        };
+      }
+      if (
+        entry.condition === "WAITING_RESOURCE"
+        && /provider_transport|transport failed|incompleteread|remotedisconnected|timed? ?out/i.test(entry.wait_reason || "")
+      ) {
+        const retry = Math.min(Number(entry.resume_count || 1), 3);
+        return {
+          state: "RETRYING PROVIDER",
+          detail: `Provider response was interrupted. Retrying automatically from the last checkpoint (${retry}/3).`,
+        };
+      }
       const map = {
         QUEUED: ["QUEUED", "Waiting for execution capacity."],
         WAITING_RESOURCE: ["WAITING FOR CAPACITY", entry.wait_reason || "Waiting for a suitable worker."],
@@ -68,6 +139,18 @@
         CANCELLED: ["BLOCKED", "The execution attempt was cancelled."],
       };
       if (map[entry.condition]) return { state: map[entry.condition][0], detail: map[entry.condition][1] };
+    }
+    if (["ACTIVE", "WAITING_PRODUCTION"].includes(work?.automatic_progression_state)) {
+      return {
+        state: "PREPARING",
+        detail: work.what_happens_next || "Watt is preparing the next production cycle.",
+      };
+    }
+    if (work?.automatic_progression_state === "STOPPED" && work?.last_stop_reason === "BLOCKED") {
+      return {
+        state: "STOPPED",
+        detail: work.what_happens_next || "The current production cycle could not be prepared.",
+      };
     }
     if (work?.execution_progress?.blocked_reason) return { state: "BLOCKED", detail: work.execution_progress.blocked_reason };
     if (work?.execution_progress?.still_working) return { state: "RUNNING", detail: work.execution_progress.activity || "Production is active." };
@@ -308,11 +391,18 @@
     const semantics = assessment?.progressive_semantics;
     const intent = semantics?.turn_intent;
     const productionIntent = ["BUILD", "ACTION_REQUEST", "MODIFY", "DEPLOY"].includes(intent);
-    const visible = !selectedWorkId && !projection?.governed_work_id
-      && Boolean(assessment && (assessment.interpreted_motive || projection?.interpreted_motive))
+    const durablePreWork = Boolean(
+      projection?.current_work_id && !projection?.governed_work_id,
+    );
+    const semanticWorkCandidate = Boolean(
+      assessment
+      && (assessment.interpreted_motive || projection?.interpreted_motive)
       && intent !== "DIRECT_QUESTION"
-      && (productionIntent || Boolean(projection?.selected_design_schema_identity))
-      && semantics?.governance_candidate !== "CONVERSATION_ONLY";
+      && (productionIntent || projection?.selected_design_schema_identity)
+      && semantics?.governance_candidate !== "CONVERSATION_ONLY",
+    );
+    const visible = !selectedWorkId && !projection?.governed_work_id
+      && (durablePreWork || semanticWorkCandidate);
     const readiness = projection?.readiness;
     return {
       visible,
@@ -322,5 +412,5 @@
     };
   }
 
-  globalThis.WattControlRoom = Object.freeze({ agendaSteps, agendaMilestones, productionState, conversationOwnership, nextComposerMode, humanActionProjection, prospectiveWorkspaceProjection, createViewer });
+  globalThis.WattControlRoom = Object.freeze({ agendaSteps, agendaMilestones, currentProductionQueue, productionState, conversationOwnership, nextComposerMode, humanActionProjection, prospectiveWorkspaceProjection, createViewer });
 })();

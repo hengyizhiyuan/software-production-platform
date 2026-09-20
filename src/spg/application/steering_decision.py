@@ -6,6 +6,10 @@ from uuid import UUID
 
 from spg.application.steering import SteeringApplicationService
 from spg.domain.product import EngineeringScopeCondition, WorkCondition
+from spg.domain.engineering_semantics import (
+    current_semantic_facts,
+    semantic_fact_reference,
+)
 from spg.domain.steering import (
     AdmitSteeringDecisionRequest,
     NextStepCandidate,
@@ -37,7 +41,12 @@ class PlanFrameAssembler:
         self.database = database
         self.steering = SteeringApplicationService(database)
 
-    def assemble(self, work_id: UUID) -> PlanFrame:
+    def assemble(
+        self,
+        work_id: UUID,
+        *,
+        exclude_current_step_semantic_results: bool = False,
+    ) -> PlanFrame:
         reconstruction = self.steering.reconstruct(work_id)
         current = reconstruction.current_step
         if current is None:
@@ -91,6 +100,10 @@ class PlanFrameAssembler:
                 for result in reconstruction.semantic_results
                 if result.steering_plan_revision_id
                 == reconstruction.active_revision.revision.id
+                and not (
+                    exclude_current_step_semantic_results
+                    and result.step_id == current.id
+                )
             )
 
             guided = GuidedDesignStore(unit_of_work.session)
@@ -221,14 +234,21 @@ class PlanFrameAssembler:
                     work_reality_revision is not None
                     and binding.work_reality_revision_id
                     != work_reality_revision.id
-                    and (
-                        "impact:CURRENT_RESULT_MAY_BE_INSUFFICIENT"
-                        in work_reality_revision.change_set
-                        or "satisfaction:REOPENED"
-                        in work_reality_revision.change_set
+                )
+                reassessment_revision_ref = (
+                    None
+                    if work_reality_revision is None
+                    else RealityReference(
+                        kind=RealityReferenceKind.WORK_REALITY_REVISION,
+                        identity=work_reality_revision.id,
                     )
                 )
-                if current_result_may_be_insufficient:
+                reassessment_admitted = (
+                    reassessment_revision_ref is not None
+                    and reassessment_revision_ref
+                    in reconstruction.active_revision.revision.reality_refs
+                )
+                if current_result_may_be_insufficient and not reassessment_admitted:
                     blockers.append(
                         PlanFrameBlocker(
                             kind=(
@@ -240,10 +260,7 @@ class PlanFrameAssembler:
                                 "satisfy the latest revision without governed reassessment"
                             ),
                             reality_refs=(
-                                RealityReference(
-                                    kind=RealityReferenceKind.WORK_REALITY_REVISION,
-                                    identity=work_reality_revision.id,
-                                ),
+                                reassessment_revision_ref,
                             ),
                         )
                     )
@@ -275,6 +292,18 @@ class PlanFrameAssembler:
             ),
             work_condition=work.condition.value,
             constraints=work.constraints,
+            engineering_semantic_facts=(
+                ()
+                if work_reality_revision is None
+                else tuple(
+                    semantic_fact_reference(
+                        fact, work_revision_id=work_reality_revision.id
+                    )
+                    for fact in current_semantic_facts(
+                        work_reality_revision.engineering_semantic_facts
+                    )
+                )
+            ),
             engineering_scope_id=scope.id,
             engineering_scope_condition=scope.condition.value,
             engineering_scope_fingerprint=scope.fingerprint,

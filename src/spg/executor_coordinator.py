@@ -16,6 +16,7 @@ def main() -> None:
     try:
         while True:
             runtime.reconcile_expired_leases()
+            runtime.reconcile_queue_ownership()
             time.sleep(application.settings.native_executor_poll_seconds)
     finally:
         database.dispose()

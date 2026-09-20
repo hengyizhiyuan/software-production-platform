@@ -76,6 +76,7 @@ def test_deterministic_correction_and_constraint_are_grounded_shadow_candidates(
     assert result.policy_disposition is FastReceptionVisibility.SAFE_TO_EMIT
     assert result.visibility_disposition is FastReceptionVisibility.SHADOW
     assert result.authority == "PROVISIONAL_READ_ONLY"
+    assert result.meaningful_sentence == "收到，我正在结合当前上下文核对这条输入。"
 
     constraint = _basis("OW-D")
     result = capability.receive(constraint, build_fast_context_card(constraint), UUID(int=2))
@@ -89,8 +90,7 @@ def test_ow_f_keeps_privacy_and_retention_with_human_authority() -> None:
         basis, build_fast_context_card(basis), UUID(int=3)
     )
     assert result.detected_human_owned_decision
-    assert "需要由你决定" in result.meaningful_sentence
-    assert "不会先替你" in result.meaningful_sentence
+    assert result.meaningful_sentence == "收到，我正在结合当前上下文核对这条输入。"
     assert result.policy_disposition is FastReceptionVisibility.SAFE_TO_EMIT
 
 
@@ -131,7 +131,18 @@ def test_bounded_change_fast_receipt_preserves_scope_without_echoing_request() -
     assert result is not None
     assert result.provisional_turn_intent == "BOUNDED_CHANGE"
     assert "把按钮文案改成" not in result.meaningful_sentence
-    assert "不会被默认扩大" in result.meaningful_sentence
+    assert result.meaningful_sentence == "收到，我正在结合当前上下文核对这条输入。"
+
+
+def test_negative_instruction_fast_text_never_asserts_reversed_meaning() -> None:
+    basis = _basis("OW-A", "不要开始执行，我只是想先确认方案。")
+    result = DeterministicFastReceptionCapability().receive(
+        basis, build_fast_context_card(basis), UUID(int=55)
+    )
+    assert result is not None
+    assert result.provisional_turn_intent == "CONSTRAINT_ADDITION"
+    assert "开始执行" not in result.meaningful_sentence
+    assert result.meaningful_sentence == "收到，我正在结合当前上下文核对这条输入。"
 
 
 def test_domain_context_waits_for_context_sensitive_model_response() -> None:

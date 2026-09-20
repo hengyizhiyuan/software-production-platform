@@ -59,8 +59,18 @@ class DeepSeekSemanticStepCapability:
                 and cause.errors()[0].get("loc") == ("disposition",)
                 and cause.errors()[0].get("type") == "missing"
             )
+            missing_proposal_fields = (
+                isinstance(cause, ValidationError)
+                and bool(cause.errors())
+                and all(
+                    issue.get("type") == "missing"
+                    and tuple(issue.get("loc", ()))[:1]
+                    == ("proposed_production",)
+                    for issue in cause.errors()
+                )
+            )
             invalid_json = isinstance(cause, JSONDecodeError)
-            if not (missing_disposition or invalid_json):
+            if not (missing_disposition or missing_proposal_fields or invalid_json):
                 raise
             try:
                 shape = sorted(json.loads(result.output_text))
@@ -69,7 +79,11 @@ class DeepSeekSemanticStepCapability:
             LOGGER.warning(
                 "Steering semantic wire repair request=%s model=%s stage=%s fields=%s output_length=%s attempts=1",
                 result.request_id, result.effective_model or result.requested_model,
-                "root:json_invalid" if invalid_json else "payload_validation:missing_disposition",
+                "root:json_invalid"
+                if invalid_json
+                else "payload_validation:missing_proposal_fields"
+                if missing_proposal_fields
+                else "payload_validation:missing_disposition",
                 shape, len(result.output_text),
             )
             result = self.runtime.generate(
@@ -78,10 +92,13 @@ class DeepSeekSemanticStepCapability:
                 input_text=(
                     "The prior result was not one valid complete JSON value. "
                     if invalid_json else
+                    "The prior proposed_production omitted one or more required fields. "
+                    if missing_proposal_fields else
                     "The prior result omitted the required disposition envelope. "
                 ) + (
                     "Return one complete result for the SAME governed Step, including "
-                    "a disposition that truthfully matches the supported evidence. "
+                    "all proposed_production fields and a disposition that truthfully "
+                    "matches the supported evidence. "
                     "Do not infer Human authority or loosen the proposal contract. "
                     "Prior candidate:\n" + result.output_text
                 ),

@@ -35,10 +35,20 @@ test("early Workspace projects a candidate without fabricating Work or productio
   assert.equal(controlRoom.prospectiveWorkspaceProjection({ ...projection,
     latest_assessment: { progressive_semantics: { turn_intent: "DIRECT_QUESTION", governance_candidate: "WORK_FORMATION_PROPOSAL" } },
   }).visible, false, "a schema and conflicting proposal must not turn a direct question into Work");
+  assert.deepEqual({ ...controlRoom.prospectiveWorkspaceProjection({
+    ...projection,
+    current_work_id: "pre-work-1",
+    latest_assessment: { progressive_semantics: {
+      turn_intent: "DIRECT_QUESTION", governance_candidate: "CONVERSATION_ONLY",
+    } },
+  }) }, {
+    visible: true, canStart: true, blocker: null,
+  }, "a durable PRE_WORK keeps its panel when the latest turn is a direct question");
   assert.deepEqual({ ...controlRoom.prospectiveWorkspaceProjection({ ...projection,
     readiness: { status: "NOT_READY", unresolved_material_questions: ["Which external repository may be mutated?"] },
   }) }, { visible: true, canStart: false, blocker: "Which external repository may be mutated?" });
   assert.match(app, /prospectiveStart\.addEventListener\("click", admitInteractionWork\)/);
+  assert.match(app, /start_work_context: true/);
   assert.match(app, /assessment_id: assessment\.assessment_id/);
   assert.match(app, /basis_fingerprint: assessment\.basis_fingerprint/);
   assert.match(html, /id="formal-workspace-grid"/);
@@ -56,6 +66,24 @@ test("first Send opens provisional Workspace and a confirmed Motive latches it",
   assert.match(app, /state\.workspaceEngaged = false;[\s\S]*?setSurface\("empty"\)/);
   assert.match(app, /Waiting for interpretation; no Work or production has started/);
   assert.match(app, /sending\.status === "queued" \|\| !messages\.some/);
+});
+
+test("New Work clears every selected-Work projection and hides stale result actions", () => {
+  assert.match(app, /function clearSelectedWorkState\(\)/);
+  for (const assignment of [
+    'state.selectedWork = null',
+    'state.attention = []',
+    'state.result = null',
+    'state.nativeQueue = []',
+    'state.nativeAttempt = null',
+    'state.sources = null',
+    'state.agreements = []',
+  ]) {
+    assert.match(app, new RegExp(assignment.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  assert.match(app, /setSurface\("prospective"\);\s*renderResult\(\);\s*renderAttention\(\);\s*elements\.workActions\.replaceChildren\(\)/);
+  assert.match(app, /function beginNewInteraction\(\)[\s\S]*?clearSelectedWorkState\(\)/);
+  assert.match(app, /function consumeNewWorkEntry\(\)[\s\S]*?clearSelectedWorkState\(\)/);
 });
 
 test("Agenda follows the governed Steering path, including its actual step labels", () => {
@@ -88,7 +116,53 @@ test("Agenda groups consecutive governed steps without losing their detail or cu
 });
 
 test("Production state maps observed queue and attempt facts without invented progress", () => {
+  const unavailable = controlRoom.productionState({}, [{
+    condition: "WAITING_RESOURCE",
+    progression_state: "INFRASTRUCTURE_UNAVAILABLE",
+    progression_reason: "No live compatible worker. Watt will recover automatically.",
+  }], null);
+  assert.equal(unavailable.state, "RECOVERING");
+  assert.match(unavailable.detail, /recover automatically/);
+  const scheduling = controlRoom.productionState({}, [{
+    condition: "QUEUED",
+    progression_state: "SCHEDULING",
+    progression_reason: "Compatible execution capacity is available and Watt is assigning it.",
+  }], null);
+  assert.equal(scheduling.state, "PREPARING");
+  const actualCapacityWait = controlRoom.productionState({}, [{
+    condition: "QUEUED",
+    progression_state: "CAPACITY_WAIT",
+  }], null);
+  assert.equal(actualCapacityWait.state, "QUEUED");
+  assert.equal(actualCapacityWait.detail, "Waiting for execution capacity.");
   assert.equal(controlRoom.productionState({}, [{ condition: "WAITING_RESOURCE", wait_reason: "GPU unavailable" }], null).detail, "GPU unavailable");
+  const transportRecovery = controlRoom.productionState({}, [{
+    condition: "WAITING_RESOURCE",
+    wait_reason: "PROVIDER_TRANSPORT INCOMPLETE_RESPONSE: stream ended before completion",
+    resume_count: 1,
+  }], null);
+  assert.equal(transportRecovery.state, "RETRYING PROVIDER");
+  assert.match(transportRecovery.detail, /Retrying automatically.*\(1\/3\)/);
+  const exhaustedRecovery = controlRoom.productionState({}, [{ condition: "COMPLETED" }], {
+    state: { runtime_mode: "FINISHED", terminal_outcome: "UNABLE_TO_COMPLETE" },
+    steps: Array.from({ length: 4 }, () => ({
+      result_payload: { error_type: "InferenceTransportUnknown" },
+    })),
+  });
+  assert.equal(exhaustedRecovery.state, "FAILED");
+  assert.equal(exhaustedRecovery.detail, "Provider response failed after 3 automatic retries.");
+  const truthfulUnable = controlRoom.productionState({}, [{ condition: "COMPLETED" }], {
+    state: { runtime_mode: "FINISHED", terminal_outcome: "UNABLE_TO_COMPLETE" },
+    steps: [{ result_payload: { action: "UNABLE_TO_COMPLETE", summary: "Verification remains." } }],
+  });
+  assert.equal(truthfulUnable.state, "FAILED");
+  assert.equal(truthfulUnable.detail, "Execution finished with unresolved obligations. Review the recorded evidence before retrying.");
+  const reviewableCandidate = controlRoom.productionState({ work_id: "one" }, [{ condition: "COMPLETED" }], {
+    state: { runtime_mode: "FINISHED", terminal_outcome: "UNABLE_TO_COMPLETE" },
+    steps: [{ result_payload: { action: "UNABLE_TO_COMPLETE" } }],
+  }, [{ work_id: "one", kind: "CANDIDATE_AUTHORIZATION", available_actions: ["AUTHORIZE"] }]);
+  assert.equal(reviewableCandidate.state, "FINISHED");
+  assert.equal(reviewableCandidate.detail, "Candidate ready for preview and authorization.");
   assert.equal(controlRoom.productionState({}, [{ condition: "EXECUTING" }], null).state, "RUNNING");
   assert.equal(controlRoom.productionState({}, [], { state: { runtime_mode: "RECOVERING" } }).state, "RECOVERING");
   assert.equal(controlRoom.productionState({ status: "COMPLETED" }, [], null).state, "FINISHED");
@@ -115,6 +189,8 @@ test("machine controls belong to Production and Human authority actions belong t
   assert.match(app, /function concentrateWorkMutations\(\)/);
   assert.match(app, /actions\.append\(preview\)/);
   assert.match(app, /actions\.append\(revisionAdmission\)/);
+  assert.match(app, /RETRY_PRODUCTION: "Retry production"/);
+  assert.match(app, /\/retry-production/);
   assert.match(app, /actions\.append\(transitionDecision\)/);
   assert.match(app, /evidence\.append\(manual\)/);
   assert.match(app, /production\.insertBefore\(machineControls, result\)/);
@@ -224,8 +300,53 @@ test("V4 attention badge and Actions derive from the same executable Human opera
     { work_id: "two", kind: "CANDIDATE_AUTHORIZATION", available_actions: ["AUTHORIZE"] },
   ]);
   assert.equal(unrelated.required, false);
+  const stopped = project({
+    work_id: "one",
+    status: "READY",
+    steering_enabled: true,
+    automatic_progression_state: "STOPPED",
+    last_stop_reason: "BLOCKED",
+  }, [], null);
+  assert.equal(stopped.required, false);
+  assert.deepEqual(Array.from(stopped.workActions), []);
+  assert.equal(stopped.summary, "No action required.");
   assert.match(app, /attentionMarker\.hidden = !controlRoom\.humanActionProjection/);
   assert.match(app, /workspaceActionsSummary\.textContent = humanActions\.summary/);
+  assert.match(app, /\/retry-steering/);
+});
+
+test("Production follows the current Work revision instead of a completed prior cycle", () => {
+  const work = {
+    current_work_reality_revision_id: "revision-3",
+    automatic_progression_state: "ACTIVE",
+    what_happens_next: "Reassessing the admitted change",
+  };
+  const prior = [{
+    condition: "COMPLETED",
+    attempt_id: "old-attempt",
+    work_reality_revision_id: "revision-2",
+    production_cycle_number: 1,
+  }];
+  assert.equal(controlRoom.currentProductionQueue(work, prior).length, 0);
+  const preparing = controlRoom.productionState(work, prior, {
+    state: { runtime_mode: "FINISHED", terminal_outcome: "RESULT_READY" },
+  });
+  assert.equal(preparing.state, "PREPARING");
+  assert.equal(preparing.detail, "Reassessing the admitted change");
+
+  const current = [...prior, {
+    condition: "EXECUTING",
+    attempt_id: "current-attempt",
+    work_reality_revision_id: "revision-3",
+    production_cycle_number: 2,
+  }];
+  assert.deepEqual(
+    Array.from(controlRoom.currentProductionQueue(work, current), (entry) => entry.attempt_id),
+    ["current-attempt"],
+  );
+  assert.equal(controlRoom.productionState(work, current, {
+    state: { runtime_mode: "RUNNING" },
+  }).state, "RUNNING");
 });
 
 test("Production details are disclosed, while Actions contain only contextual controls", () => {

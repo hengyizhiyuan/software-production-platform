@@ -22,6 +22,7 @@ const viewModel = context.SPGViewModel;
 
 test("UI-07 maps every admitted Work status to clear product language", () => {
   const expected = {
+    PRE_WORK: "PRE-WORK / 未开工",
     DRAFT: "Draft",
     NEEDS_REFINEMENT: "Needs refinement",
     AWAITING_APPROVAL: "Awaiting approval",
@@ -580,6 +581,7 @@ test("Work Composer restores drafts without persisting a stale expanded UI state
 
 test("pre-Work composer keeps messaging separate from explicit governed admission", () => {
   assert.match(appSource, /apiRequest\("\/api\/interactions"/);
+  assert.match(appSource, /start_work_context: true/);
   assert.match(appSource, /\/api\/interactions\/\$\{state\.selectedInteractionId\}\/turns/);
   assert.match(appSource, /new globalThis\.EventSource\(/);
   assert.match(appSource, /message\.delta/);
@@ -587,7 +589,7 @@ test("pre-Work composer keeps messaging separate from explicit governed admissio
   assert.match(appSource, /message\.completed/);
   assert.match(appSource, /latestWattMessage/);
   assert.doesNotMatch(appSource, /apiRequest\("\/api\/works", \{ method: "POST"/);
-  assert.match(appSource, /No Work was created/);
+  assert.match(appSource, /No production authority was created/);
   assert.match(appSource, /\/api\/interactions\/\$\{projection\.interaction_id\}\/admit-work/);
   assert.match(appSource, /assessment_id: assessment\.assessment_id/);
   assert.match(appSource, /basis_fingerprint: assessment\.basis_fingerprint/);
@@ -600,7 +602,8 @@ test("WIC Slice 4 exposes Human-governed Work transition controls only", () => {
   assert.match(appSource, /CONTINUE_CURRENT_WORK/);
   assert.match(appSource, /START_NEW_WORK/);
   assert.match(appSource, /DISMISSED/);
-  assert.match(appSource, /No Work or production authority was created/);
+  assert.match(appSource, /New PRE-WORK created/);
+  assert.match(appSource, /no production authority was created/);
   assert.doesNotMatch(
     appSource,
     /apiRequest\("\/api\/works",\s*\{\s*method:\s*"POST"/,

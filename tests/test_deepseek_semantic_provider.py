@@ -165,3 +165,41 @@ def test_invalid_json_gets_exactly_one_strict_repair() -> None:
     with pytest.raises(SteeringInvariantViolation):
         DeepSeekSemanticStepCapability(broken).execute(value)
     assert len(broken.calls) == 2
+
+
+def test_missing_production_field_gets_one_strict_repair() -> None:
+    proposal = {
+        "target_kind": "CODE_WORK",
+        "objective": "Build the bounded countdown page",
+        "artifact_targets": [],
+        "code_targets": ["index.html"],
+        "allowed_areas": [],
+        "forbidden_areas": [],
+        "verification_expectation": "Verify the countdown interaction",
+    }
+
+    class Runtime(_Runtime):
+        def generate(self, **options):
+            result = super().generate(**options)
+            candidate = json.loads(result.output_text)
+            candidate["proposed_production"] = dict(proposal)
+            if len(self.calls) == 1:
+                del candidate["proposed_production"]["verification_expectation"]
+            return replace(result, output_text=json.dumps(candidate))
+
+    value = SimpleNamespace(
+        work_id=UUID(int=1), steering_plan_revision_id=UUID(int=2),
+        step=SimpleNamespace(id=UUID(int=3), type=SteeringStepType.DESIGN),
+        basis_fingerprint="a" * 64, constraints=(),
+        reality_refs=(RealityReference(kind=RealityReferenceKind.WORK, identity=UUID(int=1)),),
+        model_dump=lambda **_options: {"step": {"type": "DESIGN"}},
+    )
+    runtime = Runtime()
+    result = DeepSeekSemanticStepCapability(runtime).execute(value)
+
+    assert result.proposed_production is not None
+    assert result.proposed_production.verification_expectation == (
+        "Verify the countdown interaction"
+    )
+    assert len(runtime.calls) == 2
+    assert "omitted one or more required fields" in runtime.calls[1]["input_text"]

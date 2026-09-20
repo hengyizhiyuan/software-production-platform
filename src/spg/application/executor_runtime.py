@@ -36,6 +36,8 @@ from spg.domain.native_execution import (
     NativeExecutionNotFound,
     NativeExecutionNotRunnable,
     QueueCondition,
+    QueueCapacityObservation,
+    QueueProgressionState,
     RecoveryClassification,
     ResultReadyClaimRecord,
     SchedulingDecision,
@@ -119,6 +121,7 @@ class NativeExecutorRuntimeService:
     """Coordinate durable native execution commands over existing Attempt authority."""
 
     scheduler_identity = "watt-native-executor"
+    infrastructure_wait_prefix = "Execution infrastructure unavailable:"
 
     def __init__(
         self,
@@ -313,6 +316,11 @@ class NativeExecutorRuntimeService:
         now = self._now()
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
+            store.register_worker(
+                offer,
+                heartbeat_at=now,
+                expires_at=now + timedelta(seconds=offer.lease_seconds),
+            )
             entries = store.runnable_queue_locked(now)
             cursor, cursor_version = store.scheduler_cursor_locked(
                 self.scheduler_identity, self.scheduler.policy_version
@@ -324,6 +332,7 @@ class NativeExecutorRuntimeService:
                 last_fairness_group=cursor,
             )
             if decision.selected_queue_entry_id is None:
+                uow.commit()
                 return None
             selected = next(
                 item for item in entries if item.id == decision.selected_queue_entry_id
@@ -405,15 +414,190 @@ class NativeExecutorRuntimeService:
                 lease_token=token,
             )
 
+    @staticmethod
+    def _registration_matches(entry, registration) -> bool:
+        return (
+            entry.required_provider_profile in registration.provider_profiles
+            and entry.required_resource_profile in registration.resource_profiles
+            and set(entry.required_capabilities).issubset(
+                registration.capability_identities
+            )
+        )
+
+    def _capacity_observation(
+        self,
+        entry: ExecutionQueueEntryRecord,
+        registrations,
+        occupied_worker_ids: set[str],
+        *,
+        now: datetime,
+        unavailable_after: timedelta,
+    ) -> QueueCapacityObservation:
+        compatible = tuple(
+            registration
+            for registration in registrations
+            if self._registration_matches(entry, registration)
+        )
+        occupied = sum(
+            registration.worker_id in occupied_worker_ids
+            for registration in compatible
+        )
+        pending_conditions = {
+            QueueCondition.QUEUED,
+            QueueCondition.RETURNED_TO_QUEUE,
+        }
+        infrastructure_wait = (
+            entry.condition is QueueCondition.WAITING_RESOURCE
+            and (entry.wait_reason or "").startswith(self.infrastructure_wait_prefix)
+        )
+        if entry.condition not in pending_conditions and not infrastructure_wait:
+            return QueueCapacityObservation(
+                progression_state=QueueProgressionState.NOT_APPLICABLE,
+                reason=entry.wait_reason or "Queue allocation is not currently pending.",
+                scheduler_alive=bool(compatible),
+                compatible_worker_count=len(compatible),
+                occupied_worker_count=occupied,
+                observed_at=now,
+            )
+        if not compatible:
+            within_startup_grace = now - entry.enqueued_at < unavailable_after
+            return QueueCapacityObservation(
+                progression_state=(
+                    QueueProgressionState.SCHEDULING
+                    if within_startup_grace
+                    else QueueProgressionState.INFRASTRUCTURE_UNAVAILABLE
+                ),
+                reason=(
+                    "Waiting for the execution scheduler to observe compatible capacity."
+                    if within_startup_grace
+                    else "No live compatible execution worker is available. Watt will recover automatically when one returns."
+                ),
+                scheduler_alive=False,
+                compatible_worker_count=0,
+                occupied_worker_count=0,
+                observed_at=now,
+            )
+        if occupied >= len(compatible):
+            return QueueCapacityObservation(
+                progression_state=QueueProgressionState.CAPACITY_WAIT,
+                reason="All compatible execution slots are currently occupied.",
+                scheduler_alive=True,
+                compatible_worker_count=len(compatible),
+                occupied_worker_count=occupied,
+                observed_at=now,
+            )
+        return QueueCapacityObservation(
+            progression_state=QueueProgressionState.SCHEDULING,
+            reason="Compatible execution capacity is available and Watt is assigning it.",
+            scheduler_alive=True,
+            compatible_worker_count=len(compatible),
+            occupied_worker_count=occupied,
+            observed_at=now,
+        )
+
+    def list_queue_reality(
+        self,
+        *,
+        work_id: UUID | None = None,
+        unavailable_after: timedelta = timedelta(seconds=5),
+    ) -> tuple[tuple[ExecutionQueueEntryRecord, QueueCapacityObservation], ...]:
+        now = self._now()
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            records = store.list_queue(work_id=work_id)
+            registrations = store.live_worker_registrations(now)
+            occupied = store.active_allocation_worker_ids()
+            return tuple(
+                (
+                    record,
+                    self._capacity_observation(
+                        record,
+                        registrations,
+                        occupied,
+                        now=now,
+                        unavailable_after=unavailable_after,
+                    ),
+                )
+                for record in records
+            )
+
+    def reconcile_queue_ownership(
+        self,
+        *,
+        unavailable_after: timedelta = timedelta(seconds=5),
+    ) -> tuple[UUID, ...]:
+        """Expose absent scheduler ownership while keeping recovery automatic."""
+
+        now = self._now()
+        changed: list[UUID] = []
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            entries = store.runnable_queue_locked(now)
+            registrations = store.live_worker_registrations(now)
+            occupied = store.active_allocation_worker_ids()
+            for entry in entries:
+                infrastructure_wait = (
+                    entry.condition is QueueCondition.WAITING_RESOURCE
+                    and (entry.wait_reason or "").startswith(
+                        self.infrastructure_wait_prefix
+                    )
+                )
+                if (
+                    entry.condition is QueueCondition.WAITING_RESOURCE
+                    and not infrastructure_wait
+                ):
+                    continue
+                observation = self._capacity_observation(
+                    entry,
+                    registrations,
+                    occupied,
+                    now=now,
+                    unavailable_after=unavailable_after,
+                )
+                if (
+                    observation.progression_state
+                    is QueueProgressionState.INFRASTRUCTURE_UNAVAILABLE
+                    and not infrastructure_wait
+                ):
+                    store.set_queue_condition(
+                        entry.id,
+                        expected_version=entry.version,
+                        condition=QueueCondition.WAITING_RESOURCE,
+                        wait_reason=(
+                            f"{self.infrastructure_wait_prefix} no live compatible worker; "
+                            "automatic recovery remains armed"
+                        ),
+                        available_at=now,
+                    )
+                    changed.append(entry.id)
+                elif infrastructure_wait and observation.compatible_worker_count > 0:
+                    store.set_queue_condition(
+                        entry.id,
+                        expected_version=entry.version,
+                        condition=QueueCondition.QUEUED,
+                        wait_reason=None,
+                        available_at=now,
+                    )
+                    changed.append(entry.id)
+            uow.commit()
+        return tuple(changed)
+
     def heartbeat(
         self,
         grant: ExecutionAllocationGrant,
         *,
         lease_seconds: int = 30,
+        offer: WorkerOffer | None = None,
     ) -> None:
         now = self._now()
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
+            if offer is not None:
+                store.register_worker(
+                    offer,
+                    heartbeat_at=now,
+                    expires_at=now + timedelta(seconds=lease_seconds),
+                )
             valid = store.heartbeat_lease(
                 grant.allocation.attempt_id,
                 worker_id=grant.allocation.worker_id,
@@ -483,11 +667,21 @@ class NativeExecutorRuntimeService:
             queue = store.queue_entry(allocation.queue_entry_id)
             if state.worker_epoch != allocation.lease_epoch:
                 raise NativeExecutionConflict("worker epoch was fenced before completion")
+            retry_exhausted = (
+                result.runtime_mode is ExecutionMode.WAITING_RESOURCE
+                and result.resource_retryable
+                and queue.resume_count >= 3
+            )
             if result.runtime_mode is ExecutionMode.PAUSED:
                 next_queue = QueueCondition.CHECKPOINTED
                 next_mode = ExecutionMode.PAUSED
                 grant_state = AttemptGrantState.GRANTED
                 terminal = None
+            elif retry_exhausted:
+                next_queue = QueueCondition.COMPLETED
+                next_mode = ExecutionMode.FINISHED
+                grant_state = AttemptGrantState.RELEASED
+                terminal = AttemptTerminalOutcome.UNABLE_TO_COMPLETE
             elif result.runtime_mode is ExecutionMode.WAITING_RESOURCE:
                 next_queue = QueueCondition.WAITING_RESOURCE
                 next_mode = ExecutionMode.WAITING_RESOURCE
@@ -511,14 +705,18 @@ class NativeExecutorRuntimeService:
                 condition=next_queue,
                 wait_reason=result.summary if next_queue is QueueCondition.WAITING_RESOURCE else None,
                 available_at=(
-                    self._now() + timedelta(seconds=30)
+                    self._now()
+                    + timedelta(seconds=min(30, 2 ** queue.resume_count))
                     if next_queue is QueueCondition.WAITING_RESOURCE
                     and result.resource_retryable
                     else self._now() + timedelta(days=36500)
                     if next_queue is QueueCondition.WAITING_RESOURCE
                     else None
                 ),
-                increment_resume=next_queue is QueueCondition.WAITING_RESOURCE,
+                increment_resume=(
+                    next_queue is QueueCondition.WAITING_RESOURCE
+                    and result.resource_retryable
+                ),
             )
             store.update_attempt_state(
                 allocation.attempt_id,
@@ -580,9 +778,10 @@ class NativeExecutorRuntimeService:
                 attempt_id=allocation.attempt_id,
                 event_type="NativeExecutionWorkerReturned",
                 payload={
-                    "runtime_mode": result.runtime_mode.value,
+                    "runtime_mode": next_mode.value,
                     "terminal_outcome": terminal.value if terminal else None,
                     "checkpoint_id": str(result.final_checkpoint_id) if result.final_checkpoint_id else None,
+                    "automatic_retry_exhausted": retry_exhausted,
                 },
             )
             uow.commit()

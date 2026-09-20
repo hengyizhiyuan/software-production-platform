@@ -209,6 +209,11 @@ class LocalNativeToolHost:
         allowed = (
             argv[0] == "pytest"
             or argv[:2] == ["node", "--test"]
+            or (
+                argv[0] == "node"
+                and len(argv) >= 2
+                and not argv[1].startswith("-")
+            )
             or argv[:3] in (["python", "-m", "pytest"], ["python3", "-m", "pytest"])
             or argv[:2] == ["npm", "test"]
             or argv[:3] == ["npm", "run", "test"]

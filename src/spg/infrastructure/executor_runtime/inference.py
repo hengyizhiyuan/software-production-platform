@@ -5,9 +5,12 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import StrEnum
 from http.client import IncompleteRead, RemoteDisconnected
 import json
+from socket import timeout as SocketTimeout
+from time import monotonic
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -20,13 +23,35 @@ from spg.domain.native_execution import (
     InferenceProviderObservation,
     InferenceRequest,
     InferenceResponse,
+    InferenceTransportObservation,
     InferenceUsage,
     ToolCallProposal,
 )
 
 
+class InferenceFailureCode(StrEnum):
+    CONNECT_FAILURE = "CONNECT_FAILURE"
+    TIMEOUT = "TIMEOUT"
+    UPSTREAM_DISCONNECT = "UPSTREAM_DISCONNECT"
+    INCOMPLETE_RESPONSE = "INCOMPLETE_RESPONSE"
+    EMPTY_RESPONSE = "EMPTY_RESPONSE"
+    PROVIDER_ERROR = "PROVIDER_ERROR"
+    INVALID_MODEL_RESPONSE = "INVALID_MODEL_RESPONSE"
+
+
 class InferenceAdapterError(RuntimeError):
     """Sanitized provider failure that never includes credentials."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        failure_code: InferenceFailureCode = InferenceFailureCode.INVALID_MODEL_RESPONSE,
+        transport_diagnostics: dict[str, object] | None = None,
+    ) -> None:
+        RuntimeError.__init__(self, message)
+        self.failure_code = failure_code.value
+        self.transport_diagnostics = dict(transport_diagnostics or {})
 
 
 class InferenceAdapterDecisionRejected(InferenceAdapterError, InferenceDecisionRejected):
@@ -39,7 +64,11 @@ class InferenceAdapterDecisionRejected(InferenceAdapterError, InferenceDecisionR
         *,
         validation_issues: tuple[dict[str, object], ...] = (),
     ) -> None:
-        InferenceAdapterError.__init__(self, message)
+        InferenceAdapterError.__init__(
+            self,
+            message,
+            failure_code=InferenceFailureCode.INVALID_MODEL_RESPONSE,
+        )
         self.reason_code = reason_code
         self.validation_issues = validation_issues
 
@@ -53,8 +82,13 @@ class InferenceResourceUnavailable(InferenceAdapterError):
         *,
         retryable: bool,
         request_sent: bool | None = True,
+        transport_diagnostics: dict[str, object] | None = None,
     ) -> None:
-        super().__init__(message)
+        super().__init__(
+            message,
+            failure_code=InferenceFailureCode.PROVIDER_ERROR,
+            transport_diagnostics=transport_diagnostics,
+        )
         self.retryable = retryable
         self.request_sent = request_sent
 
@@ -62,8 +96,87 @@ class InferenceResourceUnavailable(InferenceAdapterError):
 class InferenceTransportUnknown(InferenceAdapterError):
     """A request may have reached the Provider, but no complete response was observed."""
 
-    request_sent = True
     response_unknown = True
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        failure_code: InferenceFailureCode = InferenceFailureCode.UPSTREAM_DISCONNECT,
+        transport_diagnostics: dict[str, object] | None = None,
+        request_sent: bool | None = True,
+        retryable: bool = True,
+    ) -> None:
+        diagnostics = transport_diagnostics or {
+            "mode": "unknown",
+            "response_headers_received": False,
+            "response_status_code": None,
+            "headers_elapsed_ms": None,
+            "first_byte_elapsed_ms": None,
+            "elapsed_ms": 0,
+            "received_bytes": 0,
+            "received_events": 0,
+            "terminal_received": False,
+            "syntactically_complete": False,
+            "failure_code": failure_code.value,
+        }
+        super().__init__(
+            message,
+            failure_code=failure_code,
+            transport_diagnostics=diagnostics,
+        )
+        self.request_sent = request_sent
+        self.retryable = retryable
+
+
+@dataclass(slots=True)
+class _TransportTracker:
+    mode: str
+    started_at: float = field(default_factory=monotonic)
+    response_headers_received: bool = False
+    response_status_code: int | None = None
+    headers_elapsed_ms: int | None = None
+    first_byte_elapsed_ms: int | None = None
+    received_bytes: int = 0
+    received_events: int = 0
+    terminal_received: bool = False
+    syntactically_complete: bool = False
+
+    def observe_headers(self, status: int | None) -> None:
+        self.response_headers_received = True
+        self.response_status_code = status
+        self.headers_elapsed_ms = self._elapsed_ms()
+
+    def observe_bytes(self, count: int) -> None:
+        if count <= 0:
+            return
+        if self.first_byte_elapsed_ms is None:
+            self.first_byte_elapsed_ms = self._elapsed_ms()
+        self.received_bytes += count
+
+    def diagnostics(
+        self,
+        failure_code: InferenceFailureCode | None = None,
+    ) -> dict[str, object]:
+        return {
+            "mode": self.mode,
+            "response_headers_received": self.response_headers_received,
+            "response_status_code": self.response_status_code,
+            "headers_elapsed_ms": self.headers_elapsed_ms,
+            "first_byte_elapsed_ms": self.first_byte_elapsed_ms,
+            "elapsed_ms": self._elapsed_ms(),
+            "received_bytes": self.received_bytes,
+            "received_events": self.received_events,
+            "terminal_received": self.terminal_received,
+            "syntactically_complete": self.syntactically_complete,
+            "failure_code": failure_code.value if failure_code is not None else None,
+        }
+
+    def observation(self) -> InferenceTransportObservation:
+        return InferenceTransportObservation.model_validate(self.diagnostics())
+
+    def _elapsed_ms(self) -> int:
+        return max(0, round((monotonic() - self.started_at) * 1000))
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +213,7 @@ class ResponsesInferenceAdapter:
     provider_identity = "responses-compatible"
     provider_profile = "responses-compatible"
     uses_provider_tools = False
+    uses_streaming = False
     includes_store_flag = False
     includes_non_strict_schema_flag = False
 
@@ -150,6 +264,11 @@ class ResponsesInferenceAdapter:
                 f"{self.provider_identity} API credential is unavailable"
             )
         payload, provider_tool_names = self._request_payload(inference_request)
+        if self.uses_streaming:
+            payload["stream"] = True
+        tracker = _TransportTracker(
+            mode="stream" if self.uses_streaming else "non_stream"
+        )
         request = Request(
             f"{self.base_url}/responses",
             data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -157,13 +276,21 @@ class ResponsesInferenceAdapter:
             headers={
                 "Authorization": f"Bearer {key}",
                 "Content-Type": "application/json",
+                "Accept": (
+                    "text/event-stream" if self.uses_streaming else "application/json"
+                ),
             },
         )
         try:
             with urlopen(request, timeout=self.timeout_seconds) as response:
-                raw_payload = response.read().decode("utf-8").strip()
-                provider_payload = json.loads(raw_payload)
+                tracker.observe_headers(getattr(response, "status", None))
+                provider_payload = (
+                    self._read_streamed_payload(response, tracker)
+                    if self.uses_streaming
+                    else self._read_json_payload(response, tracker)
+                )
         except HTTPError as error:
+            tracker.observe_headers(error.code)
             detail = error.read().decode("utf-8", errors="replace")[:1000]
             detail = detail.replace(key, "<redacted>")
             if error.code in {402, 429, 500, 503}:
@@ -171,27 +298,84 @@ class ResponsesInferenceAdapter:
                     f"{self.provider_identity} Responses resource is unavailable "
                     f"(HTTP {error.code}): {detail}",
                     retryable=error.code in {429, 500, 503},
+                    transport_diagnostics=tracker.diagnostics(
+                        InferenceFailureCode.PROVIDER_ERROR
+                    ),
                 ) from None
             raise InferenceAdapterError(
                 f"{self.provider_identity} Responses request failed with HTTP "
-                f"{error.code}: {detail}"
+                f"{error.code}: {detail}",
+                failure_code=InferenceFailureCode.PROVIDER_ERROR,
+                transport_diagnostics=tracker.diagnostics(
+                    InferenceFailureCode.PROVIDER_ERROR
+                ),
             ) from None
-        except (URLError, TimeoutError, IncompleteRead, RemoteDisconnected) as error:
+        except IncompleteRead as error:
+            received_bytes = len(error.partial or b"")
+            tracker.observe_bytes(received_bytes)
+            expected_more = error.expected
+            expected_detail = (
+                "unknown"
+                if expected_more is None
+                else str(expected_more)
+            )
             raise InferenceTransportUnknown(
                 f"{self.provider_identity} Responses transport failed: "
-                f"{type(error).__name__}"
+                f"IncompleteRead (received_bytes={received_bytes}, "
+                f"expected_more_bytes={expected_detail})",
+                failure_code=InferenceFailureCode.INCOMPLETE_RESPONSE,
+                transport_diagnostics=tracker.diagnostics(
+                    InferenceFailureCode.INCOMPLETE_RESPONSE
+                ),
+                request_sent=True,
             ) from None
-        except (UnicodeDecodeError, json.JSONDecodeError) as error:
-            raise InferenceAdapterError(
-                f"{self.provider_identity} Responses result was not valid JSON: "
-                f"{type(error).__name__}"
+        except (TimeoutError, SocketTimeout) as error:
+            raise InferenceTransportUnknown(
+                f"{self.provider_identity} Responses transport failed: "
+                f"{type(error).__name__}",
+                failure_code=InferenceFailureCode.TIMEOUT,
+                transport_diagnostics=tracker.diagnostics(
+                    InferenceFailureCode.TIMEOUT
+                ),
+                request_sent=tracker.response_headers_received or None,
             ) from None
+        except RemoteDisconnected as error:
+            raise InferenceTransportUnknown(
+                f"{self.provider_identity} Responses transport failed: "
+                f"{type(error).__name__}",
+                failure_code=InferenceFailureCode.UPSTREAM_DISCONNECT,
+                transport_diagnostics=tracker.diagnostics(
+                    InferenceFailureCode.UPSTREAM_DISCONNECT
+                ),
+                request_sent=True,
+            ) from None
+        except URLError as error:
+            failure_code = (
+                InferenceFailureCode.TIMEOUT
+                if isinstance(error.reason, (TimeoutError, SocketTimeout))
+                else InferenceFailureCode.CONNECT_FAILURE
+            )
+            raise InferenceTransportUnknown(
+                f"{self.provider_identity} Responses transport failed: "
+                f"{failure_code.value}",
+                failure_code=failure_code,
+                transport_diagnostics=tracker.diagnostics(failure_code),
+                request_sent=False if failure_code is InferenceFailureCode.CONNECT_FAILURE else None,
+            ) from None
+        except InferenceAdapterError:
+            raise
 
         if not isinstance(provider_payload, dict):
             raise InferenceAdapterError(
-                f"{self.provider_identity} Responses result was not an object"
+                f"{self.provider_identity} Responses result was not an object",
+                failure_code=InferenceFailureCode.INVALID_MODEL_RESPONSE,
+                transport_diagnostics=tracker.diagnostics(
+                    InferenceFailureCode.INVALID_MODEL_RESPONSE
+                ),
             )
-        observation = self._observation(provider_payload)
+        observation = self._observation(provider_payload).model_copy(
+            update={"transport": tracker.observation()}
+        )
         self.last_observation = observation
         status = provider_payload.get("status")
         if isinstance(status, str) and status != "completed":
@@ -228,6 +412,143 @@ class ResponsesInferenceAdapter:
                     validation_issues=self._safe_validation_issues(error),
                 ) from None
         return decision.model_copy(update={"provider_observation": observation})
+
+    def _read_json_payload(
+        self,
+        response: object,
+        tracker: _TransportTracker,
+    ) -> dict[str, object]:
+        raw_payload = response.read()
+        tracker.observe_bytes(len(raw_payload))
+        if not raw_payload:
+            raise InferenceTransportUnknown(
+                f"{self.provider_identity} Responses transport returned an empty body",
+                failure_code=InferenceFailureCode.EMPTY_RESPONSE,
+                transport_diagnostics=tracker.diagnostics(
+                    InferenceFailureCode.EMPTY_RESPONSE
+                ),
+                request_sent=True,
+            )
+        try:
+            provider_payload = json.loads(raw_payload.decode("utf-8").strip())
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise InferenceAdapterError(
+                f"{self.provider_identity} Responses result was not valid JSON: "
+                f"{type(error).__name__}",
+                failure_code=InferenceFailureCode.INVALID_MODEL_RESPONSE,
+                transport_diagnostics=tracker.diagnostics(
+                    InferenceFailureCode.INVALID_MODEL_RESPONSE
+                ),
+            ) from None
+        tracker.terminal_received = True
+        tracker.syntactically_complete = True
+        return provider_payload
+
+    def _read_streamed_payload(
+        self,
+        response: object,
+        tracker: _TransportTracker,
+    ) -> dict[str, object]:
+        event_name: str | None = None
+        data_lines: list[str] = []
+
+        def consume() -> dict[str, object] | None:
+            nonlocal event_name, data_lines
+            if not data_lines:
+                event_name = None
+                return None
+            data = "\n".join(data_lines)
+            data_lines = []
+            selected_event = event_name
+            event_name = None
+            tracker.received_events += 1
+            if data == "[DONE]":
+                return None
+            try:
+                event_payload = json.loads(data)
+            except json.JSONDecodeError:
+                raise InferenceTransportUnknown(
+                    f"{self.provider_identity} Responses stream contained invalid JSON",
+                    failure_code=InferenceFailureCode.INCOMPLETE_RESPONSE,
+                    transport_diagnostics=tracker.diagnostics(
+                        InferenceFailureCode.INCOMPLETE_RESPONSE
+                    ),
+                    request_sent=True,
+                ) from None
+            if not isinstance(event_payload, dict):
+                return None
+            event_type = event_payload.get("type") or selected_event
+            if event_type == "response.completed":
+                completed = event_payload.get("response")
+                if not isinstance(completed, dict):
+                    raise InferenceAdapterError(
+                        f"{self.provider_identity} completed stream had no response object",
+                        failure_code=InferenceFailureCode.INVALID_MODEL_RESPONSE,
+                        transport_diagnostics=tracker.diagnostics(
+                            InferenceFailureCode.INVALID_MODEL_RESPONSE
+                        ),
+                    )
+                tracker.terminal_received = True
+                tracker.syntactically_complete = True
+                return completed
+            if event_type in {"response.failed", "error"}:
+                tracker.terminal_received = True
+                raise InferenceAdapterError(
+                    f"{self.provider_identity} Responses stream declared Provider failure",
+                    failure_code=InferenceFailureCode.PROVIDER_ERROR,
+                    transport_diagnostics=tracker.diagnostics(
+                        InferenceFailureCode.PROVIDER_ERROR
+                    ),
+                )
+            if event_type == "response.incomplete":
+                tracker.terminal_received = True
+                raise InferenceTransportUnknown(
+                    f"{self.provider_identity} Responses stream declared an incomplete result",
+                    failure_code=InferenceFailureCode.INCOMPLETE_RESPONSE,
+                    transport_diagnostics=tracker.diagnostics(
+                        InferenceFailureCode.INCOMPLETE_RESPONSE
+                    ),
+                    request_sent=True,
+                )
+            return None
+
+        for raw_line in response:
+            tracker.observe_bytes(len(raw_line))
+            try:
+                line = raw_line.decode("utf-8").rstrip("\r\n")
+            except UnicodeDecodeError:
+                raise InferenceTransportUnknown(
+                    f"{self.provider_identity} Responses stream contained invalid UTF-8",
+                    failure_code=InferenceFailureCode.INCOMPLETE_RESPONSE,
+                    transport_diagnostics=tracker.diagnostics(
+                        InferenceFailureCode.INCOMPLETE_RESPONSE
+                    ),
+                    request_sent=True,
+                ) from None
+            if not line:
+                completed = consume()
+                if completed is not None:
+                    return completed
+            elif line.startswith(":"):
+                continue
+            elif line.startswith("event:"):
+                event_name = line[6:].strip()
+            elif line.startswith("data:"):
+                data_lines.append(line[5:].lstrip())
+        completed = consume()
+        if completed is not None:
+            return completed
+        failure_code = (
+            InferenceFailureCode.EMPTY_RESPONSE
+            if tracker.received_events == 0
+            else InferenceFailureCode.INCOMPLETE_RESPONSE
+        )
+        raise InferenceTransportUnknown(
+            f"{self.provider_identity} Responses stream ended before completion",
+            failure_code=failure_code,
+            transport_diagnostics=tracker.diagnostics(failure_code),
+            request_sent=True,
+        )
 
     def _request_payload(
         self,
@@ -461,6 +782,7 @@ class DeepSeekResponsesInferenceAdapter(ResponsesInferenceAdapter):
     provider_identity = "deepseek"
     provider_profile = "deepseek-responses"
     uses_provider_tools = True
+    uses_streaming = True
 
     def __init__(
         self,

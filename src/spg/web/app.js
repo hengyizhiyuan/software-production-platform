@@ -67,8 +67,11 @@
   globalThis.__WATT_MARK_TURN_TIMING__ = markTurnTiming;
 
   function containsMeaningfulSentence(text) {
+    const normalized = text.trim();
+    const receiptOnly = /^(?:收到，我正在结合当前上下文核对这条输入。|Received\. I’m checking this input against the current context\.)$/;
     return /[。！？.!?](?:["'”’）)]|\s|$)/.test(text) && text.replace(/\s/g, "").length >= 8
-      && !/^(收到|明白了|好的|我来看看)[。.!]?$/.test(text.trim());
+      && !/^(收到|明白了|好的|我来看看)[。.!]?$/.test(normalized)
+      && !receiptOnly.test(normalized);
   }
   globalThis.__WATT_CONTAINS_MEANINGFUL_SENTENCE__ = containsMeaningfulSentence;
 
@@ -377,9 +380,16 @@
   }
 
   function showNotice(error) {
-    const message = error instanceof ApiError
+    let message = error instanceof ApiError
       ? `${error.code}: ${error.message}`
       : "The service is unavailable. Refresh and try again.";
+    if (error instanceof ApiError
+      && error.code === "ModelProviderError"
+      && /transport failed|remoteprotocolerror|timed out/i.test(error.message)) {
+      message = "模型服务连接中断，本轮输入已经保存，但回复未能完成。请重新发送或继续输入。";
+    } else if (error instanceof ApiError && error.code === "InteractionInvariantViolation") {
+      message = "Watt 在理解这条补充时遇到格式问题。本轮输入已经保存，请继续输入或重新发送。";
+    }
     elements.noticeMessage.textContent = message;
     elements.notice.hidden = false;
     announce(message);
@@ -409,6 +419,21 @@
     elements.globalError.hidden = name !== "error";
     elements.noSelection.hidden = name !== "empty";
     elements.selectedWork.hidden = name !== "selected" && name !== "prospective";
+  }
+
+  function clearSelectedWorkState() {
+    state.selectedWorkId = "";
+    state.selectedWork = null;
+    state.attention = [];
+    state.result = null;
+    state.steering = null;
+    state.nativeQueue = [];
+    state.nativeAttempt = null;
+    state.sources = null;
+    state.agreements = [];
+    state.selectedAgreementId = null;
+    if (state.pollTimer) globalThis.clearTimeout(state.pollTimer);
+    state.pollTimer = null;
   }
 
   function goalTitle(goalId) {
@@ -450,6 +475,7 @@
     const works = filteredWorks();
     elements.workListEmpty.hidden = works.length !== 0;
     works.forEach((work) => {
+      const row = createElement("div", "work-list-row");
       const button = createElement("button", "work-list-button");
       button.type = "button";
       button.classList.toggle("selected", state.selectedWorkId === work.work_id);
@@ -471,7 +497,15 @@
         if (event.detail > 0) button.blur();
         selectWork(work.work_id);
       });
-      elements.workList.append(button);
+      row.append(button);
+      if (work.status === "PRE_WORK") {
+        const discard = createElement("button", "work-list-discard", "Discard");
+        discard.type = "button";
+        discard.setAttribute("aria-label", `Discard PRE-WORK: ${viewModel.workTitle(work)}`);
+        discard.addEventListener("click", () => discardPreWork(work));
+        row.append(discard);
+      }
+      elements.workList.append(row);
     });
   }
 
@@ -771,7 +805,7 @@
       elements.interpretedQuestions.textContent = "Tell Watt what you want to explore.";
       elements.interactionResource.textContent = "Not bound yet";
       elements.interactionScope.textContent = "Not bound yet";
-      elements.governedUnderstanding.textContent = "None — no Work exists";
+      elements.governedUnderstanding.textContent = "None — PRE-WORK is not admitted";
       elements.currentWorkFocus.textContent = "No governed Work focus";
       elements.interactionFocusClassification.textContent = "Not assessed";
       elements.interactionImpactDisposition.textContent = "No governed impact";
@@ -840,7 +874,9 @@
       : projection.candidate_scope_summary || "Not bound yet";
     elements.governedUnderstanding.textContent = governed
       ? `Work ${governed.work_id} · Reality revision ${governed.revision_number} · Motive: ${governed.motive} · Outcome: ${governed.desired_outcome} · Constraints: ${joined(governed.constraints, "none")}`
-      : "None — no Work exists";
+      : projection.current_work_id
+        ? `PRE-WORK ${projection.current_work_id} · durable conversation only`
+        : "None — no admitted Work Reality";
     elements.currentWorkFocus.textContent = projection.current_work_focus || "No governed Work focus";
     elements.interactionFocusClassification.textContent = projection.focus_classification || "Not assessed";
     elements.interactionImpactDisposition.textContent = projection.impact_disposition || "No governed impact";
@@ -875,7 +911,7 @@
     const productionIntent = ["BUILD", "ACTION_REQUEST", "MODIFY", "DEPLOY"].includes(turnIntent);
     elements.readinessAffordance.classList.toggle("production-intent-handoff", productionIntent && !governed);
     elements.readinessAffordance.textContent = projection.new_work_formation_pending
-      ? "New Work formation context is open. Continue the Interaction; no Work exists until Human admission."
+      ? "PRE-WORK is saved. Continue naturally; production begins only after Human admission."
       : projection.work_satisfaction_state === "CURRENTLY_SATISFIED"
         ? "This Work achieved its current objective. The Interaction remains open."
       : governed
@@ -912,6 +948,10 @@
       return;
     }
     setSurface("prospective");
+    renderResult();
+    renderAttention();
+    elements.workActions.replaceChildren();
+    elements.executionQueueControls.hidden = true;
     const ready = candidate.canStart && !state.workAdmissionPending;
     const blocker = candidate.blocker;
     const blockerText = ({ MOTIVE: "Tell Watt what you want to make happen.",
@@ -922,7 +962,7 @@
     elements.workStatus.textContent = "Understanding in progress · no Work admitted";
     elements.workStatus.className = "status-badge status-draft";
     elements.attentionMarker.hidden = true;
-    elements.workspaceRealitySummary.textContent = "No bound engineering source yet. No governed Work exists.";
+    elements.workspaceRealitySummary.textContent = "PRE-WORK conversation is durable. No engineering source or production authority is bound yet.";
     elements.workSourceTree.replaceChildren(createElement("p", "empty-copy", "No repository bound. Watt-managed workspace may be available after admission."));
     elements.workspaceAgendaSummary.textContent = projection?.design_next_focus || "Understanding request…";
     elements.workExecutionPath.replaceChildren();
@@ -1068,13 +1108,27 @@
       REQUEST_REFINEMENT: "Request Refinement",
       ADVANCE: "Advance One Step",
       AUTHORIZE: "Authorize",
+      RETRY_PRODUCTION: "Retry production",
+      RETRY_STEERING: "Retry design",
     };
     return labels[action] || action.replaceAll("_", " ");
   }
 
   function renderWorkActions(work) {
     elements.workActions.replaceChildren();
-    viewModel.workActions(work.status).forEach((action) => {
+    const actions = [...controlRoom.humanActionProjection(
+      work,
+      state.attention,
+      state.selectedAgreementId,
+    ).workActions];
+    if (
+      state.nativeAttempt?.state?.runtime_mode === "FINISHED"
+      && state.nativeAttempt?.state?.terminal_outcome === "UNABLE_TO_COMPLETE"
+      && !(state.result?.produced_artifacts || []).length
+    ) {
+      actions.push("RETRY_PRODUCTION");
+    }
+    actions.forEach((action) => {
       if (state.attention.some((item) => item.available_actions.includes(action))) return;
       const classes = ["action-button"];
       if (action === "APPROVE") {
@@ -1158,14 +1212,24 @@
 
   function renderExecutionQueue() {
     elements.executionQueueHistory.replaceChildren();
-    if (!state.nativeQueue.length) {
-      elements.executionQueueState.textContent = "No native execution is queued.";
-      elements.executionQueueSummary.textContent = "Waiting for Human input or other non-runnable Reality does not occupy a worker.";
+    const currentQueue = controlRoom.currentProductionQueue(
+      state.selectedWork,
+      state.nativeQueue,
+    );
+    if (!currentQueue.length) {
+      elements.executionQueueState.textContent = "No execution cycle exists for the current change yet.";
+      elements.executionQueueSummary.textContent = state.selectedWork?.what_happens_next
+        || "Watt is preparing the current Work revision.";
       elements.executionQueueControls.hidden = true;
       elements.nativeExecutionDetails.hidden = true;
+      state.nativeQueue.forEach((entry) => {
+        elements.executionQueueHistory.append(
+          createElement("li", "", `Previous cycle ${entry.production_cycle_number || ""} · ${entry.condition}`),
+        );
+      });
       return;
     }
-    const current = state.nativeQueue[state.nativeQueue.length - 1];
+    const current = currentQueue[currentQueue.length - 1];
     const labels = {
       QUEUED: "Entered queue · waiting for resource",
       WAITING_RESOURCE: "Waiting for an eligible resource",
@@ -1179,7 +1243,7 @@
     };
     elements.executionQueueState.textContent = labels[current.condition] || current.condition;
     elements.executionQueueSummary.textContent = current.wait_reason || `Attempt ${current.attempt_id}`;
-    state.nativeQueue.forEach((entry) => {
+    currentQueue.forEach((entry) => {
       elements.executionQueueHistory.append(
         createElement("li", "", labels[entry.condition] || entry.condition),
       );
@@ -1788,6 +1852,16 @@
         response = await apiRequest(`${workPath}/refine`, { method: "POST", body: {} });
       } else if (action === "ADVANCE") {
         response = await apiRequest(`${workPath}/advance`, { method: "POST" });
+      } else if (action === "RETRY_PRODUCTION") {
+        response = await apiRequest(`${workPath}/retry-production`, {
+          method: "POST",
+          body: { authority_identity: authorityIdentity() },
+        });
+      } else if (action === "RETRY_STEERING") {
+        response = await apiRequest(`${workPath}/retry-steering`, {
+          method: "POST",
+          body: { authority_identity: authorityIdentity() },
+        });
       } else {
         const endpoint = {
           APPROVE: "approve",
@@ -2012,8 +2086,9 @@
     state.nativeQueue = nativeQueue;
     state.sources = sources;
     state.agreements = agreements;
-    state.nativeAttempt = nativeQueue.length
-      ? await apiRequest(`/api/native-execution/attempts/${nativeQueue[nativeQueue.length - 1].attempt_id}`)
+    const currentQueue = controlRoom.currentProductionQueue(work, nativeQueue);
+    state.nativeAttempt = currentQueue.length
+      ? await apiRequest(`/api/native-execution/attempts/${currentQueue[currentQueue.length - 1].attempt_id}`)
       : null;
     if (state.selectedWorkId !== workId || state.selectedInteractionId !== interactionId) return;
     renderSelectedWork();
@@ -2053,7 +2128,8 @@
     if (state.busy) {
       return;
     }
-    const associated = state.interactions.find((item) => item.governed_work_id === workId);
+    const selected = state.works.find((item) => item.work_id === workId);
+    const associated = state.interactions.find((item) => item.current_work_id === workId);
     if (associated && associated.interaction_id !== state.selectedInteractionId) {
       saveDraft();
       pauseOutbox(state.selectedInteractionId);
@@ -2072,6 +2148,13 @@
       if (active) observeInteractionTurn(associated.interaction_id, active.turn_id);
       renderInteraction();
     }
+    if (selected?.status === "PRE_WORK") {
+      state.selectedWorkId = "";
+      state.selectedWork = null;
+      renderWorkList();
+      renderInteraction();
+      return;
+    }
     state.selectedWorkId = workId;
     renderWorkList();
     setSurface("loading");
@@ -2081,6 +2164,33 @@
       showNotice(error);
       setSurface("error");
       elements.globalErrorMessage.textContent = "The selected Work could not be loaded.";
+    }
+  }
+
+  async function discardPreWork(work) {
+    if (state.busy || work.status !== "PRE_WORK") return;
+    if (!globalThis.confirm(`Discard “${viewModel.workTitle(work)}”? This PRE-WORK conversation will leave the active Work list.`)) return;
+    setBusy(true);
+    hideNotice();
+    try {
+      await apiRequest(`/api/works/${work.work_id}/discard-pre-work`, {
+        method: "POST",
+        body: { authority_identity: "human:local-operator" },
+      });
+      if (state.sharedUnderstanding?.current_work_id === work.work_id) {
+        state.selectedInteractionId = "";
+        state.sharedUnderstanding = null;
+        state.freshInteraction = false;
+        clearSelectedWorkState();
+        try { localStorage.removeItem(INTERACTION_STORAGE_KEY); } catch (_error) { /* optional preference */ }
+      }
+      await loadCollections();
+      if (state.selectedWorkId) await refreshSelected();
+      announce("PRE-WORK discarded.");
+    } catch (error) {
+      showNotice(error);
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -2443,7 +2553,15 @@
     let accepted = false;
     try {
       if (!item.interactionId) {
-        const created = await apiRequest("/api/interactions", { method: "POST", body: { human_identity: "human:local-operator" } });
+        const created = await apiRequest("/api/interactions", {
+          method: "POST",
+          body: {
+            human_identity: "human:local-operator",
+            // This composer is the explicit Work-creation surface. API callers
+            // outside it still default to an ordinary Interaction.
+            start_work_context: true,
+          },
+        });
         state.selectedInteractionId = created.interaction_id;
         state.freshInteraction = false;
         state.sharedUnderstanding = created;
@@ -2475,7 +2593,7 @@
       };
       observeInteractionTurn(interactionId, turn.turn_id);
       transitionComposer("ACCEPTED");
-      announce("Message received. No Work was created; Watt is preparing the reply.");
+      announce("Message received. No production authority was created; Watt is preparing the reply.");
       const receivedProjection = await apiRequest(`/api/interactions/${interactionId}`);
       if (observationIsCurrent(interactionId, turn.turn_id) && !state.finishingTurn) state.sharedUnderstanding = receivedProjection;
     } catch (error) {
@@ -2614,12 +2732,12 @@
         await refreshSelected();
         setSurface("selected");
       } else {
-        state.selectedWork = null;
+        clearSelectedWorkState();
         setSurface("empty");
       }
       renderInteraction();
       announce(choice === "START_NEW_WORK"
-        ? "New Work formation context started. No Work or production authority was created."
+        ? "New PRE-WORK created. Its conversation is durable; no production authority was created."
         : "Work transition choice recorded. Existing governed Work remains unchanged.");
     } catch (error) {
       showNotice(error);
@@ -2641,7 +2759,7 @@
     state.selectedInteractionId = "";
     state.freshInteraction = true;
     state.sharedUnderstanding = null;
-    state.selectedWorkId = "";
+    clearSelectedWorkState();
     state.provisionalWorkspace = false;
     state.workspaceEngaged = false;
     elements.workRequirement.value = state.drafts.new || "";
@@ -2652,7 +2770,11 @@
   }
 
   async function controlNativeExecution(action) {
-    const current = state.nativeQueue[state.nativeQueue.length - 1];
+    const currentQueue = controlRoom.currentProductionQueue(
+      state.selectedWork,
+      state.nativeQueue,
+    );
+    const current = currentQueue[currentQueue.length - 1];
     if (!current) return;
     const currentVersion = state.nativeAttempt?.state?.control_version;
     if (!Number.isInteger(currentVersion)) {
@@ -2678,7 +2800,7 @@
     state.selectedInteractionId = "";
     state.freshInteraction = true;
     state.sharedUnderstanding = null;
-    state.selectedWorkId = "";
+    clearSelectedWorkState();
     try { localStorage.removeItem(INTERACTION_STORAGE_KEY); } catch (_error) { /* optional preference */ }
     url.searchParams.delete("new");
     globalThis.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);

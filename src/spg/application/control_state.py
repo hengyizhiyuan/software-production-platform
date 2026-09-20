@@ -49,6 +49,15 @@ def validate_control_state(snapshot: ControlStateSnapshot) -> tuple[str, ...]:
         or snapshot.automatic_progression_state in {"ACTIVE", "RUNNING", "RECOVERING"}
     ):
         violations.append("BLOCKED_WITHOUT_PROGRESS_OWNER")
+    if (
+        not terminal
+        and snapshot.automatic_progression_state == "STOPPED"
+        and not snapshot.actionable_human_actions
+        and not snapshot.external_wait_reason
+        and not snapshot.active_execution_subject
+        and snapshot.next_owner != "WATT_RECOVERY"
+    ):
+        violations.append("STOPPED_AUTOMATION_WITHOUT_RECOVERY_ACTION")
     if snapshot.attempt_finished_pending_transition and snapshot.next_owner not in {
         "VERIFICATION",
         "STEERING",
@@ -86,6 +95,8 @@ def project_next_owner(
         "WAITING_RESOURCE",
     }:
         return "STEERING"
+    if automatic_progression_state == "STOPPED":
+        return "WATT_RECOVERY"
     if work_status == "BLOCKED":
         return "WATT_RECOVERY"
     return "STEERING"

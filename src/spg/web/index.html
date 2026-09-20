@@ -17,8 +17,8 @@
     <script src="/assets/state.js?v=early-workspace-v12" defer></script>
     <script src="/assets/appearance.js?v=formal-ui-phase1" defer></script>
     <script src="/assets/response-presentation.js?v=formal-ui-phase1" defer></script>
-    <script src="/assets/control-room.js?v=main-journey-stability" defer></script>
-    <script src="/assets/app.js?v=main-journey-stability-3" defer></script>
+    <script src="/assets/control-room.js?v=revision-aware-production-1" defer></script>
+    <script src="/assets/app.js?v=revision-aware-production-1" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#work-surface">Skip to selected Work</a>
@@ -85,6 +85,7 @@
           <label class="filter-label" for="status-filter">Status</label>
           <select id="status-filter" class="status-filter">
             <option value="">All statuses</option>
+            <option value="PRE_WORK">PRE-WORK / 未开工</option>
             <option value="DRAFT">Draft</option>
             <option value="NEEDS_REFINEMENT">Needs refinement</option>
             <option value="AWAITING_APPROVAL">Awaiting approval</option>
@@ -117,7 +118,7 @@
           <div class="empty-symbol" aria-hidden="true">W</div>
           <p class="eyebrow">Pre-Work Interaction</p>
           <h2>Tell Watt what is on your mind.</h2>
-          <p>Explore or clarify naturally. No governed Work exists until a later Human admission.</p>
+          <p>Explore or clarify naturally. PRE-WORK is saved without granting production authority.</p>
         </div>
 
           <section id="interaction-surface" class="interaction-surface" aria-label="Conversation workspace">
@@ -150,7 +151,7 @@
                 <div><dt>Open questions / current blockers</dt><dd id="interpreted-questions">Tell Watt what you want to explore.</dd></div>
                 <div><dt>Engineering resource</dt><dd id="interaction-resource">Not bound yet</dd></div>
                 <div><dt>Authority envelope</dt><dd id="interaction-scope">Not bound yet</dd></div>
-                <div><dt>Governed / admitted</dt><dd id="governed-understanding">None — no Work exists</dd></div>
+                <div><dt>Governed / admitted</dt><dd id="governed-understanding">None — PRE-WORK is not admitted</dd></div>
                 <div><dt>Current Work focus</dt><dd id="current-work-focus">No governed Work focus</dd></div>
                 <div><dt>Input relevance</dt><dd id="interaction-focus-classification">Not assessed</dd></div>
                 <div><dt>Governed impact</dt><dd id="interaction-impact-disposition">No governed impact</dd></div>
@@ -185,7 +186,7 @@
                   <label for="work-transition-authority-identity">Human authority</label>
                   <input id="work-transition-authority-identity" value="human:local-operator" autocomplete="off">
                 </div>
-                <p class="empty-copy">This appears to be a new Work direction. No Work will be created by this choice.</p>
+                <p class="empty-copy">This appears to be a new Work direction. Choosing it creates a durable PRE-WORK without production authority.</p>
                 <button id="continue-current-work" class="secondary-button compact" type="button">Continue current Work</button>
                 <button id="start-new-work" class="primary-button compact" type="button">Start new Work formation</button>
                 <button id="dismiss-work-transition" class="text-button" type="button">Dismiss</button>

@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from spg.domain.change import CodeChangeContract
+from spg.domain.engineering_semantics import SemanticFactReference
 from spg.domain.planning import ProductionPlanProposal
 
 
@@ -85,6 +86,7 @@ class CompletionContract(BaseModel):
     required_markers: tuple[str, ...] = ()
     forbidden_changes: tuple[str, ...] = ()
     verification_obligations: tuple[str, ...] = ()
+    semantic_fact_obligations: tuple[SemanticFactReference, ...] = ()
     blocking_conditions: tuple[str, ...] = ()
     artifact_contract: ArtifactContract | None = None
     change_contract: CodeChangeContract | None = None
@@ -99,6 +101,7 @@ class CompletionContract(BaseModel):
                 self.required_markers,
                 self.forbidden_changes,
                 self.verification_obligations,
+                self.semantic_fact_obligations,
                 self.blocking_conditions,
                 self.artifact_contract,
                 self.change_contract,

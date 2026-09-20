@@ -118,3 +118,50 @@ def test_readiness_is_no_request_and_http_failure_is_not_retried() -> None:
     assert failure.value.kind is ModelFailureKind.CAPACITY_OR_RATE_LIMIT
     assert calls == 1
     assert "test-secret" not in str(failure.value)
+
+
+def test_remote_protocol_failure_before_first_event_gets_one_fresh_replay() -> None:
+    calls = 0
+    terminal = {
+        "id": "response-after-recovery",
+        "status": "completed",
+        "model": "deepseek-flash",
+        "usage": {"input_tokens": 3, "output_tokens": 2, "total_tokens": 5},
+    }
+
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise httpx2.RemoteProtocolError("server disconnected")
+        return httpx2.Response(
+            200,
+            text="\n".join((
+                'data: {"type":"response.output_text.delta","delta":"{\\"ok\\":true}"}',
+                "data: " + json.dumps({"type": "response.completed", "response": terminal}),
+                "",
+            )),
+        )
+
+    adapter = DeepSeekResponsesModelAdapter(
+        api_key=lambda: "test-secret",
+        base_url="https://api.deepseek.com",
+        client=httpx2.Client(
+            base_url="https://api.deepseek.com",
+            transport=httpx2.MockTransport(handler),
+        ),
+    )
+    stages = []
+    result = adapter.generate(
+        profile=_profile(),
+        instructions="x",
+        input_text="y",
+        output_schema={"type": "object"},
+        on_stage=stages.append,
+    )
+
+    assert calls == 2
+    assert result.output_text == '{"ok":true}'
+    assert result.retry_count == 1
+    assert stages.count("provider_request_sent") == 2
+    assert stages.count("provider_transport_recovery") == 1

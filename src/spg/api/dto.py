@@ -24,7 +24,11 @@ from spg.domain.product import (
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
 from spg.domain.runtime_activation import RuntimeActivationProjection
-from spg.domain.native_execution import ControlAction, ExecutionQueueEntryRecord
+from spg.domain.native_execution import (
+    ControlAction,
+    ExecutionQueueEntryRecord,
+    QueueCapacityObservation,
+)
 from spg.domain.steering import (
     RealityReference,
     SteeringAttentionReason,
@@ -55,6 +59,7 @@ class GoalCreateRequest(ApiDto):
 
 class InteractionCreateRequest(ApiDto):
     human_identity: str = Field(default="human:local-operator", min_length=1, max_length=255)
+    start_work_context: bool = False
 
 
 class InteractionMessageRequest(ApiDto):
@@ -196,6 +201,8 @@ class InteractionAssessmentResponse(ApiDto):
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
+    neutral_semantic_extractions: tuple[dict[str, object], ...]
+    engineering_semantic_facts: tuple[dict[str, object], ...]
     meanings: tuple[InteractionMeaningResponse, ...]
     focus_classification: str | None
     impact_disposition: str | None
@@ -230,6 +237,7 @@ class WorkRealityRevisionResponse(ApiDto):
     context_facts: tuple[str, ...]
     constraints: tuple[str, ...]
     requests: tuple[str, ...]
+    engineering_semantic_facts: tuple[dict[str, object], ...]
     engineering_scope_id: UUID
     engineering_resource_id: UUID | None
     scope_basis_fingerprint: str
@@ -386,6 +394,14 @@ class SharedUnderstandingResponse(ApiDto):
                     candidate_constraints=assessment.candidate_constraints,
                     current_requests=assessment.current_requests,
                     unresolved_material_questions=assessment.unresolved_material_questions,
+                    neutral_semantic_extractions=tuple(
+                        item.model_dump(mode="json")
+                        for item in assessment.neutral_semantic_extractions
+                    ),
+                    engineering_semantic_facts=tuple(
+                        item.model_dump(mode="json")
+                        for item in assessment.engineering_semantic_facts
+                    ),
                     meanings=tuple(
                         InteractionMeaningResponse(
                             kind=item.kind.value,
@@ -509,6 +525,10 @@ class SharedUnderstandingResponse(ApiDto):
                     context_facts=projection.governed_revision.context_facts,
                     constraints=projection.governed_revision.constraints,
                     requests=projection.governed_revision.requests,
+                    engineering_semantic_facts=tuple(
+                        item.model_dump(mode="json")
+                        for item in projection.governed_revision.engineering_semantic_facts
+                    ),
                     engineering_scope_id=projection.governed_revision.engineering_scope_id,
                     engineering_resource_id=projection.governed_revision.engineering_resource_id,
                     scope_basis_fingerprint=projection.governed_revision.scope_basis_fingerprint,
@@ -1364,9 +1384,24 @@ class NativeQueueEntryResponse(ApiDto):
     enqueued_at: datetime
     available_at: datetime
     resume_count: int
+    progression_state: str | None = None
+    progression_reason: str | None = None
+    scheduler_alive: bool | None = None
+    compatible_worker_count: int | None = None
+    occupied_worker_count: int | None = None
+    capacity_observed_at: datetime | None = None
+    production_cycle_number: int | None = None
+    work_reality_revision_id: UUID | None = None
 
     @classmethod
-    def from_record(cls, record: ExecutionQueueEntryRecord) -> Self:
+    def from_record(
+        cls,
+        record: ExecutionQueueEntryRecord,
+        observation: QueueCapacityObservation | None = None,
+        *,
+        production_cycle_number: int | None = None,
+        work_reality_revision_id: UUID | None = None,
+    ) -> Self:
         return cls(
             queue_entry_id=record.id,
             work_id=record.work_id,
@@ -1378,6 +1413,20 @@ class NativeQueueEntryResponse(ApiDto):
             enqueued_at=record.enqueued_at,
             available_at=record.available_at,
             resume_count=record.resume_count,
+            progression_state=(
+                observation.progression_state.value if observation else None
+            ),
+            progression_reason=observation.reason if observation else None,
+            scheduler_alive=observation.scheduler_alive if observation else None,
+            compatible_worker_count=(
+                observation.compatible_worker_count if observation else None
+            ),
+            occupied_worker_count=(
+                observation.occupied_worker_count if observation else None
+            ),
+            capacity_observed_at=observation.observed_at if observation else None,
+            production_cycle_number=production_cycle_number,
+            work_reality_revision_id=work_reality_revision_id,
         )
 
 

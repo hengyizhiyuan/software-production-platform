@@ -106,6 +106,12 @@ class DurableKernelAudit:
             request_sent = getattr(error, "request_sent", None)
             if isinstance(request_sent, bool):
                 payload["request_sent"] = request_sent
+            failure_code = getattr(error, "failure_code", None)
+            if isinstance(failure_code, str) and failure_code:
+                payload["failure_code"] = failure_code
+            transport_diagnostics = getattr(error, "transport_diagnostics", None)
+            if isinstance(transport_diagnostics, dict) and transport_diagnostics:
+                payload["transport_diagnostics"] = transport_diagnostics
             condition = StepCondition.FAILED
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)

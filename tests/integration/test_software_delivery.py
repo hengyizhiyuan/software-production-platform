@@ -9,10 +9,12 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from uuid import UUID
 from zipfile import ZipFile
+from fastapi.testclient import TestClient
 import pytest
 
 from test_work_delivery import (clean_schema, create_asset, bind, _GuidedDesignSemanticCapability,
     _SchedulingOrchestrator, _GeneralProductDesignCapability)
+from spg.api import create_http_application
 from spg.application.assets import RepositoryAssetService
 from spg.application.delivery import DeliveryApplicationService, read_artifact
 from spg.application.software_runtime import SoftwareRuntimeService
@@ -110,6 +112,20 @@ def test_exact_candidate_is_previewable_before_repository_authorization(postgres
         delivery.candidate_artifact(work_id, '0' * 64, 'index.html')
     with pytest.raises(ProductInvariantViolation, match='stale'):
         delivery.candidate_download(work_id, '0' * 64, 'index.html')
+    application = create_http_application(
+        database=postgres_database,
+        work_service=service,
+    )
+    with TestClient(application) as client:
+        preview = client.post(f'/api/works/{work_id}/candidate-preview').json()
+        response = client.get(preview['url'])
+        assert response.status_code == 200
+        policy = response.headers['Content-Security-Policy']
+        assert "img-src 'self' data: blob: https:" in policy
+        assert "script-src 'self' 'unsafe-inline'" in policy
+        assert "connect-src 'none'" in policy
+        assert "default-src *" not in policy
+        assert "script-src *" not in policy
 
 def free_port():
     with socket.socket() as sock:
@@ -145,7 +161,10 @@ def test_code_to_package_runtime_restore_and_explicit_acceptance(postgres_databa
         assert ready['status']=='READY'
         with urlopen(ready['url']) as response:
             assert response.read() == SOURCE['index.html'].encode()
-            assert "connect-src 'none'" in response.headers['Content-Security-Policy']
+            policy = response.headers['Content-Security-Policy']
+            assert "img-src 'self' data: blob: https:" in policy
+            assert "connect-src 'none'" in policy
+            assert "script-src *" not in policy
         with pytest.raises(HTTPError):
             urlopen(ready['url'].replace('index.html','../.git/config'))
         with pytest.raises(HTTPError):

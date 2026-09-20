@@ -43,6 +43,7 @@ from spg.domain.interaction import (
     WorkAdmissionReadinessStatus,
 )
 from spg.domain.runtime_activation import RuntimeActivationProjection, RuntimeActivationState
+from spg.domain.product import ProductInvariantViolation, WorkCondition, WorkStatus
 from spg.domain.wic_response import (
     GovernedResponseEnvelope,
     GovernedResponseRealization,
@@ -552,7 +553,7 @@ def test_design_intent_correction_reframes_schema_and_reconstructs_history(
     )
     assert corrected.design_stage == "Motive, users, and problem"
     assert corrected.latest_assessment is not None
-    assert corrected.latest_assessment.schema_version == "wic-assessment-v5"
+    assert corrected.latest_assessment.schema_version == "wic-assessment-v6"
 
     history = service.assessment_history(interaction.id)
     assert tuple(item.design_intent_frame.object_type for item in history) == (
@@ -848,12 +849,11 @@ def test_controlled_vnext_exposes_fast_and_settles_one_policy_governed_response(
     service.shutdown()
 
 
-def test_controlled_vnext_reuses_admitted_conversation_text_without_second_provider(
+def test_controlled_pre_work_progresses_through_governed_realizer_before_final(
     postgres_database: Database,
 ) -> None:
     class Evidence:
-        # One coalesced request supplied both semantics and Human-facing wording.
-        pipeline_mode = "coalesced_pre_work"
+        pipeline_mode = "governed_pre_work_semantic"
         provider_call_count = 1
 
     class CompleteConversationCapability:
@@ -873,16 +873,28 @@ def test_controlled_vnext_reuses_admitted_conversation_text_without_second_provi
                 provider_identity="test:complete-conversation",
             )
 
-    class UnexpectedSecondProvider:
-        provider_identity = "test:unexpected-second-provider"
+    class ProgressiveGovernedRealizer:
+        provider_identity = "test:progressive-governed-realizer"
         model_identity = "test-model"
         called = False
+        first_emitted = Event()
+        release = Event()
 
         def realize_stream(self, envelope, *, on_response_delta):
             self.called = True
-            raise AssertionError("a second Provider request is unnecessary")
+            first = "建议先把官网定位为企业的可信入口。"
+            second = "下一步先明确首页要促成的核心动作。"
+            on_response_delta(first)
+            self.first_emitted.set()
+            assert self.release.wait(timeout=2)
+            on_response_delta(second)
+            return GovernedResponseRealization(
+                content=first + second,
+                provider_identity=self.provider_identity,
+                model_identity=self.model_identity,
+            )
 
-    second = UnexpectedSecondProvider()
+    second = ProgressiveGovernedRealizer()
     capability = CompleteConversationCapability()
     service = WorkInteractionService(
         postgres_database,
@@ -896,17 +908,41 @@ def test_controlled_vnext_reuses_admitted_conversation_text_without_second_provi
         "我想做一个企业官网。",
         human_identity="human:test",
     )
+    assert second.first_emitted.wait(timeout=2)
+    in_flight = service.response_events(submitted.id)
+    in_flight_deltas = [
+        event.content or ""
+        for event in in_flight
+        if event.event_type is WicResponseEventType.RESPONSE_DELTA
+    ]
+    assert in_flight_deltas == ["建议先把官网定位为企业的可信入口。"]
+    assert not any(
+        event.event_type is WicResponseEventType.FINAL_RESPONSE
+        for event in in_flight
+    )
+    assert service.get_turn(submitted.id).status is InteractionTurnStatus.PROCESSING
+
+    second.release.set()
     assert _wait_for_turn(service, submitted.id).status is InteractionTurnStatus.COMPLETED
+    timing = service.turn_timing(submitted.id)
+    assert timing is not None
+    assert timing["first_realizer_output_chunk_ms"] is not None
+    assert timing["first_realization_delta_ms"] is not None
+    assert (
+        timing["first_realizer_output_chunk_ms"]
+        <= timing["first_realization_delta_ms"]
+        < timing["completed_ms"]
+    )
     visible = service.get_shared_understanding(interaction.id).conversation_messages[-1].content
-    assert not second.called
+    assert second.called
     assert "企业的可信入口" in visible
-    assert "访客最希望" in visible
+    assert "首页要促成的核心动作" in visible
     assert "主要提供什么产品或服务" not in visible
     stream_started = next(
         event for event in service.response_events(submitted.id)
         if event.event_type is WicResponseEventType.RESPONSE_STREAM_STARTED
     )
-    assert stream_started.metadata["provider"] == "watt:governed-response-realizer"
+    assert stream_started.metadata["provider"] == second.provider_identity
     assert capability.calls == 1
     client = TestClient(
         create_http_application(
@@ -924,7 +960,7 @@ def test_controlled_vnext_reuses_admitted_conversation_text_without_second_provi
             assert rebuilt.status_code == 200
             assert rebuilt.json()["conversation_messages"][-1]["content"] == visible
     assert capability.calls == 1
-    assert not second.called
+    assert second.called
     assert _count(postgres_database, interaction_turns) == 1
     service.shutdown()
 
@@ -2014,3 +2050,153 @@ def test_real_provider_advances_multi_turn_readiness_without_work_or_production(
     assert _count(postgres_database, work_reality_revisions) == 0
     for table in runtime_tables:
         assert _count(postgres_database, table) == 0, table.name
+
+
+def test_pre_work_is_durable_visible_and_production_inert(
+    postgres_database: Database,
+) -> None:
+    service = WorkInteractionService(
+        postgres_database,
+        capability=_ProgressiveCapability(),
+    )
+    interaction = service.create_interaction(
+        human_identity="human:test",
+        start_work_context=True,
+    )
+    before = service.get_shared_understanding(interaction.id)
+    assert before.interaction.current_work_id is not None
+    assert before.governed_work_id is None
+
+    first_turn = service.submit_turn(
+        interaction.id,
+        "Improve execution visibility.",
+        human_identity="human:test",
+    )
+    assert _wait_for_turn(service, first_turn.id).status is InteractionTurnStatus.COMPLETED
+    first = service.get_shared_understanding(interaction.id)
+    work_id = first.interaction.current_work_id
+    assert work_id is not None
+    assert [item.actor.value for item in first.conversation_messages] == [
+        "HUMAN",
+        "WATT",
+    ]
+
+    second_turn = service.submit_turn(
+        interaction.id,
+        "Developers should see current phase, progress, and blockers.",
+        human_identity="human:test",
+    )
+    assert _wait_for_turn(service, second_turn.id).status is InteractionTurnStatus.COMPLETED
+    complete = service.get_shared_understanding(interaction.id)
+    assert [item.actor.value for item in complete.conversation_messages] == [
+        "HUMAN",
+        "WATT",
+        "HUMAN",
+        "WATT",
+    ]
+
+    restarted = WorkInteractionService(
+        postgres_database,
+        capability=_ProgressiveCapability(),
+    )
+    restored = restarted.get_shared_understanding(interaction.id)
+    assert restored.interaction.current_work_id == work_id
+    assert restored.records == complete.records
+    assert restored.conversation_messages == complete.conversation_messages
+    assert restored.latest_assessment == complete.latest_assessment
+
+    works = WorkApplicationService(postgres_database).list_works()
+    assert len(works) == 1
+    assert works[0].work_id == work_id
+    assert works[0].status is WorkStatus.PRE_WORK
+    assert works[0].raw_user_requirement == "Improve execution visibility."
+    for table in runtime_tables:
+        assert _count(postgres_database, table) == 0, table.name
+
+
+def test_pre_work_admission_reuses_identity_and_discard_is_bounded(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    service = WorkInteractionService(
+        postgres_database,
+        capability=_ProgressiveCapability(),
+    )
+    first = service.create_interaction(
+        human_identity="human:test",
+        start_work_context=True,
+    )
+    second = service.create_interaction(
+        human_identity="human:test",
+        start_work_context=True,
+    )
+    assert first.current_work_id is not None
+    assert second.current_work_id is not None
+    assert first.current_work_id != second.current_work_id
+
+    service.append_and_assess(
+        first.id,
+        "Improve execution visibility.",
+        human_identity="human:test",
+    )
+    ready = service.append_and_assess(
+        first.id,
+        "Developers should see current phase, progress, and blockers.",
+        human_identity="human:test",
+    )
+    assert ready.latest_assessment is not None
+    works = WorkApplicationService(
+        postgres_database,
+        workspace_root=tmp_path / "workspaces",
+    )
+    admitted = works.admit_interaction_work(
+        first.id,
+        assessment_id=ready.latest_assessment.id,
+        basis_fingerprint=ready.latest_assessment.basis_fingerprint,
+        authority_identity="human:test",
+        use_default_resource=False,
+    )
+    assert admitted.work_id == first.current_work_id
+    assert admitted.status is WorkStatus.READY
+    repeated = works.admit_interaction_work(
+        first.id,
+        assessment_id=ready.latest_assessment.id,
+        basis_fingerprint=ready.latest_assessment.basis_fingerprint,
+        authority_identity="human:test",
+        use_default_resource=False,
+    )
+    assert repeated.work_id == admitted.work_id
+    assert len(works.list_works()) == 2
+
+    with pytest.raises(ProductInvariantViolation, match="Only PRE_WORK"):
+        works.discard_pre_work(
+            admitted.work_id,
+            authority_identity="human:test",
+        )
+
+    works.discard_pre_work(
+        second.current_work_id,
+        authority_identity="human:test",
+    )
+    assert tuple(item.work_id for item in works.list_works()) == (admitted.work_id,)
+    with postgres_database.unit_of_work() as unit_of_work:
+        discarded = unit_of_work.session.execute(
+            select(product_works.c.condition).where(
+                product_works.c.id == second.current_work_id
+            )
+        ).scalar_one()
+    assert discarded == WorkCondition.DISCARDED.value
+    assert all(
+        item.interaction.id != second.id for item in service.list_interactions()
+    )
+
+
+def test_plain_interaction_does_not_create_pre_work(
+    postgres_database: Database,
+) -> None:
+    interaction = WorkInteractionService(
+        postgres_database,
+        capability=_ProgressiveCapability(),
+    ).create_interaction(human_identity="human:test")
+    assert interaction.current_work_id is None
+    assert _count(postgres_database, product_works) == 0

@@ -25,6 +25,7 @@ from spg.domain.change import (
     safe_repository_scope,
 )
 from spg.domain.planning import ProductionPlanArtifactTarget
+from spg.domain.engineering_semantics import SemanticFactReference
 
 
 class SteeringPlanRevisionCondition(StrEnum):
@@ -66,6 +67,7 @@ class SteeringDriverStopReason(StrEnum):
 
 
 class SteeringActionType(StrEnum):
+    PLAN_REVISION = "PLAN_REVISION"
     SEMANTIC_RESULT_ADMISSION = "SEMANTIC_RESULT_ADMISSION"
     STEP_TRANSITION = "STEP_TRANSITION"
     PRODUCTION_CYCLE_ADMISSION = "PRODUCTION_CYCLE_ADMISSION"
@@ -284,6 +286,7 @@ class SemanticStepInput(BaseModel):
     repository_tree_paths: tuple[str, ...]
     context_materials: tuple[SemanticContextMaterial, ...]
     design_context: dict[str, object] | None = None
+    production_proposal_required: bool = False
 
     @model_validator(mode="after")
     def require_semantic_step(self) -> Self:
@@ -736,6 +739,7 @@ class PlanFrame(BaseModel):
     work_objective: str = Field(min_length=1)
     work_condition: str = Field(min_length=1)
     constraints: tuple[str, ...]
+    engineering_semantic_facts: tuple[SemanticFactReference, ...] = ()
     engineering_scope_id: UUID | None
     engineering_scope_condition: str | None
     engineering_scope_fingerprint: str | None

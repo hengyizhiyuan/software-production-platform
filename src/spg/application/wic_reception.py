@@ -28,6 +28,16 @@ _CORRECTION = re.compile(r"(?:不对|不是|纠正|改口)[，,:：\s]*(.+)")
 _CONSTRAINT = re.compile(r"(?:新增约束|约束是|必须|不得|不要)[：,:，\s]*(.+)")
 _NARROW_CHANGE = re.compile(r"(把.+?(?:改成|改为).+?)(?:[。；;]|$)")
 _NEW_OBJECT = re.compile(r"(?:另外|还有).*(我想|我要).*(开发|做|创建)(.+?(?:系统|平台|网站|应用))")
+
+
+def neutral_fast_provisional_message(human_input: str) -> str:
+    """Acknowledge reception without asserting ungoverned meaning."""
+
+    if re.search(r"[\u4e00-\u9fff]", human_input):
+        return "收到，我正在结合当前上下文核对这条输入。"
+    return "Received. I’m checking this input against the current context."
+
+
 def _correction_target(value: str) -> str:
     reversed_object = re.search(r"不是.+?[，,]是(.+)", value)
     if reversed_object:
@@ -58,7 +68,12 @@ def apply_fast_grounding_policy(candidate: FastReceptionCandidate, basis: Intera
     if sentence.strip() in {"收到。", "明白了。", "好的。", "我来看看。"}:
         blocked = True
     disposition = FastReceptionVisibility.BLOCKED if blocked else FastReceptionVisibility.SAFE_TO_EMIT
-    return candidate.model_copy(update={"policy_disposition": disposition})
+    return candidate.model_copy(update={
+        "policy_disposition": disposition,
+        # Fast semantic fields remain available for later reconciliation, but text
+        # visible before Deep WIC governance may only report reception/progress.
+        "meaningful_sentence": neutral_fast_provisional_message(latest.content),
+    })
 
 
 class DeterministicFastReceptionCapability:

@@ -730,6 +730,35 @@ class WorkerOffer(NativeRecord):
     lease_seconds: int = Field(default=30, ge=5, le=3600)
 
 
+class WorkerRegistrationRecord(NativeRecord):
+    """Durable, expiring evidence that one worker owns scheduler progression."""
+
+    worker_id: str = Field(min_length=1)
+    worker_profile: str = Field(min_length=1)
+    provider_profiles: tuple[str, ...]
+    resource_profiles: tuple[str, ...]
+    capability_identities: tuple[str, ...]
+    heartbeat_at: datetime
+    expires_at: datetime
+    version: int = Field(default=1, ge=1)
+
+
+class QueueProgressionState(StrEnum):
+    SCHEDULING = "SCHEDULING"
+    CAPACITY_WAIT = "CAPACITY_WAIT"
+    INFRASTRUCTURE_UNAVAILABLE = "INFRASTRUCTURE_UNAVAILABLE"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+
+
+class QueueCapacityObservation(NativeRecord):
+    progression_state: QueueProgressionState
+    reason: str
+    scheduler_alive: bool
+    compatible_worker_count: int = Field(ge=0)
+    occupied_worker_count: int = Field(ge=0)
+    observed_at: datetime
+
+
 class ExecutionAllocationGrant(NativeRecord):
     """Allocation returned to a worker; the plaintext lease token is not persisted."""
 
@@ -790,6 +819,22 @@ class InferenceUsage(NativeRecord):
     reasoning_tokens: int | None = Field(default=None, ge=0)
 
 
+class InferenceTransportObservation(NativeRecord):
+    """Secret-free timing and completeness facts for one Provider response."""
+
+    mode: str = Field(min_length=1)
+    response_headers_received: bool
+    response_status_code: int | None = Field(default=None, ge=100, le=599)
+    headers_elapsed_ms: int | None = Field(default=None, ge=0)
+    first_byte_elapsed_ms: int | None = Field(default=None, ge=0)
+    elapsed_ms: int = Field(ge=0)
+    received_bytes: int = Field(ge=0)
+    received_events: int = Field(ge=0)
+    terminal_received: bool
+    syntactically_complete: bool
+    failure_code: str | None = Field(default=None, min_length=1)
+
+
 class InferenceProviderObservation(NativeRecord):
     provider_identity: str = Field(min_length=1)
     requested_model: str = Field(min_length=1)
@@ -797,6 +842,7 @@ class InferenceProviderObservation(NativeRecord):
     provider_request_id: str | None = Field(default=None, min_length=1)
     response_status: str = Field(min_length=1)
     usage: InferenceUsage | None = None
+    transport: InferenceTransportObservation | None = None
 
 
 class InferenceResponse(NativeRecord):

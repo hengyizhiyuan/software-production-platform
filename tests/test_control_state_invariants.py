@@ -1,4 +1,8 @@
-from spg.application.control_state import ControlStateSnapshot, validate_control_state
+from spg.application.control_state import (
+    ControlStateSnapshot,
+    project_next_owner,
+    validate_control_state,
+)
 
 
 def test_control_state_rejects_human_attention_without_action() -> None:
@@ -56,3 +60,20 @@ def test_control_state_detects_duplicate_attention_and_workspace_collapse() -> N
         workspace_visible=False,
     ))
     assert violations == ("DUPLICATE_HUMAN_ATTENTION", "LATCHED_WORKSPACE_ABSENT")
+
+
+def test_stopped_steering_is_system_owned_without_fabricating_human_attention() -> None:
+    next_owner = project_next_owner(
+        work_status="READY",
+        human_attention_required=False,
+        automatic_progression_state="STOPPED",
+        active_execution_subject=False,
+    )
+    violations = validate_control_state(ControlStateSnapshot(
+        work_status="READY",
+        next_owner=next_owner,
+        automatic_progression_state="STOPPED",
+    ))
+
+    assert next_owner == "WATT_RECOVERY"
+    assert violations == ()

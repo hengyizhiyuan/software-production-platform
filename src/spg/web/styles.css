@@ -502,6 +502,10 @@ textarea {
   gap: 8px;
 }
 
+.work-list-row {
+  position: relative;
+}
+
 .work-list-button {
   width: 100%;
   padding: 12px;
@@ -510,6 +514,27 @@ textarea {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   text-align: left;
+}
+
+.work-list-row:has(.work-list-discard) .work-list-button {
+  padding-right: 70px;
+}
+
+.work-list-discard {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 7px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--ink-soft);
+  background: transparent;
+  font-size: 11px;
+}
+
+.work-list-discard:hover {
+  color: var(--danger, #9f3131);
+  border-color: currentColor;
 }
 
 .work-list-button:hover,

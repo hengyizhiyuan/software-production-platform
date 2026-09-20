@@ -102,7 +102,7 @@ class NativeExecutionWorker:
             )
         )
         stop_heartbeat = asyncio.Event()
-        heartbeat_task = asyncio.create_task(self._heartbeat(grant, stop_heartbeat))
+        heartbeat_task = asyncio.create_task(self._heartbeat(grant, stop_heartbeat, offer))
         try:
             try:
                 result = await self.kernel_factory(grant).run(
@@ -159,9 +159,11 @@ class NativeExecutionWorker:
                     step_count=latest.step_sequence if latest else 0,
                     inference_submissions=0,
                     tool_effects=0,
-                    summary=str(error),
+                    summary=(
+                        f"PROVIDER_TRANSPORT {error.failure_code}: {error}"
+                    ),
                     residual_obligations=residual,
-                    resource_retryable=False,
+                    resource_retryable=error.retryable,
                 )
             except NativeContextCapacityError as error:
                 latest = await asyncio.to_thread(
@@ -222,6 +224,7 @@ class NativeExecutionWorker:
         self,
         grant: ExecutionAllocationGrant,
         stop: asyncio.Event,
+        offer: WorkerOffer | None = None,
     ) -> None:
         while True:
             try:
@@ -229,10 +232,15 @@ class NativeExecutionWorker:
                 return
             except TimeoutError:
                 try:
+                    keyword_arguments = {
+                        "lease_seconds": max(self.heartbeat_seconds * 3, 5)
+                    }
+                    if offer is not None:
+                        keyword_arguments["offer"] = offer
                     await asyncio.to_thread(
                         self.runtime.heartbeat,
                         grant,
-                        lease_seconds=max(self.heartbeat_seconds * 3, 5),
+                        **keyword_arguments,
                     )
                 except NativeExecutionConflict:
                     # A kernel failure can race with coordinator fencing. Once
@@ -248,10 +256,6 @@ class NativeExecutionWorker:
             binding = store.attempt_binding(grant.allocation.attempt_id)
             contract = store.contract(binding.pwu_contract_version_id)
             checkpoint = store.latest_checkpoint(grant.allocation.attempt_id)
-            if checkpoint is None:
-                session = store.execution_session(binding.session_id)
-                if session is not None and session.current_checkpoint_id is not None:
-                    checkpoint = store.checkpoint(session.current_checkpoint_id)
             session_step_frontier = store.latest_step_sequence_for_session(
                 binding.session_id
             )

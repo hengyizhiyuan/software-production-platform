@@ -1,6 +1,8 @@
 services:
   app:
     command: ["python", "/acceptance/start.py"]
+    environment:
+      SPG_RUNTIME_ACTIVATION_MODE: HUMAN_REVIEW
     ports: !override
       - "127.0.0.1:8042:8000"
     volumes:
@@ -19,6 +21,42 @@ services:
       - type: bind
         source: ./alembic.ini
         target: /app/alembic.ini
+        read_only: true
+      - type: bind
+        source: ./uv.lock
+        target: /review-config/uv.lock
+        read_only: true
+      - type: bind
+        source: ./pyproject.toml
+        target: /review-config/pyproject.toml
+        read_only: true
+      - type: bind
+        source: ./Dockerfile
+        target: /review-config/Dockerfile
+        read_only: true
+      - type: bind
+        source: ./.dockerignore
+        target: /review-config/.dockerignore
+        read_only: true
+      - type: bind
+        source: ./alembic.ini
+        target: /review-config/alembic.ini
+        read_only: true
+      - type: bind
+        source: ./compose.native-executor.yaml
+        target: /review-config/compose.native-executor.yaml
+        read_only: true
+      - type: bind
+        source: ./compose.native-executor.human-acceptance.yaml
+        target: /review-config/compose.native-executor.human-acceptance.yaml
+        read_only: true
+      - type: bind
+        source: ./docker
+        target: /review-config/docker
+        read_only: true
+      - type: bind
+        source: ./migrations
+        target: /review-config/migrations
         read_only: true
   native-coordinator:
     environment:

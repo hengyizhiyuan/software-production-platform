@@ -70,6 +70,9 @@ from spg.infrastructure.executor_runtime.local_storage import (
     DirtyInputOverlayStore,
     WorkspaceArchiveStore,
 )
+from spg.infrastructure.executor_runtime.native_compatibility_executor import (
+    NativeQueuedExecutorCapability,
+)
 from spg.infrastructure.executor_runtime.runtime_ports import DurableCheckpointPort
 from spg.infrastructure.executor_runtime.tool_host import LocalNativeToolHost
 from spg.infrastructure.executor_runtime.worker import NativeExecutionWorker
@@ -77,6 +80,46 @@ from spg.tool_host_api import create_tool_host_application
 
 
 NOW = datetime(2026, 9, 11, 8, 0, tzinfo=timezone.utc)
+
+
+def test_native_compatibility_waits_through_reconciliation() -> None:
+    attempt_id = uuid4()
+    queue_id = uuid4()
+
+    class Runtime:
+        observations = iter(
+            (
+                (ExecutionMode.RECONCILING, AttemptTerminalOutcome.UNKNOWN),
+                (ExecutionMode.FINISHED, AttemptTerminalOutcome.RESULT_READY),
+            )
+        )
+
+        def admit(self, admission):
+            del admission
+            return SimpleNamespace(id=queue_id)
+
+        def observe(self, handle):
+            runtime_mode, terminal_outcome = next(self.observations)
+            return SimpleNamespace(
+                handle=handle,
+                runtime_mode=runtime_mode,
+                terminal_outcome=terminal_outcome,
+            )
+
+    capability = object.__new__(NativeQueuedExecutorCapability)
+    capability.runtime = Runtime()
+    capability.poll_seconds = 0
+    capability.wait_seconds = 1
+    capability._admission = lambda request: object()
+    request = SimpleNamespace(
+        dispatch_id=uuid4(),
+        execution=SimpleNamespace(attempt_id=attempt_id, generation=1),
+    )
+
+    result = capability.dispatch(request)
+
+    assert result.outcome.value == "SUCCESS"
+    assert result.metadata["terminal_outcome"] == "RESULT_READY"
 
 
 def test_workspace_archive_rejects_links_and_detects_tampering(tmp_path: Path) -> None:
@@ -995,6 +1038,55 @@ def test_tool_host_accepts_python3_pytest_recipe(
     ]
 
 
+def test_tool_host_accepts_plain_node_verification_script(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    binding, _ = _binding()
+    workspace = binding.workspace.model_copy(
+        update={
+            "host_storage_id": str(tmp_path),
+            "mounts": (
+                binding.workspace.mounts[0].model_copy(
+                    update={"host_path": str(tmp_path)}
+                ),
+            ),
+        }
+    )
+    request = ToolExecutionRequest(
+        delivery_id=uuid4(),
+        attempt_id=binding.attempt_id,
+        worker_epoch=1,
+        step_id=uuid4(),
+        proposal=ToolCallProposal(
+            proposal_index=0,
+            tool_identity="test.run",
+            arguments={
+                "argv": ["node", "tests/verify_timetable.mjs"],
+                "cwd": ".",
+            },
+        ),
+        capability_grants=(CapabilityGrant(identity="test.run", version="1"),),
+        workspace=workspace,
+    )
+    host = LocalNativeToolHost(tmp_path)
+
+    async def accepted(tool_request, identity, *, argv=None, cwd_value=None):
+        return ToolExecutionResult(
+            delivery_id=tool_request.delivery_id,
+            tool_identity=identity,
+            condition=EffectCondition.SETTLED,
+            output={"argv": argv},
+            output_digest=canonical_digest({"argv": argv}),
+        )
+
+    monkeypatch.setattr(host, "_run_argv", accepted)
+
+    result = asyncio.run(host.registry().execute(request))
+
+    assert result.condition is EffectCondition.SETTLED
+    assert result.output["argv"] == ["node", "tests/verify_timetable.mjs"]
+
+
 def test_tool_host_rejects_direct_git_metadata_access(tmp_path: Path) -> None:
     (tmp_path / ".git").mkdir()
     (tmp_path / ".git" / "config").write_text("secret", encoding="utf-8")
@@ -1690,7 +1782,7 @@ def test_worker_releases_lease_when_provider_decision_is_not_admissible() -> Non
     assert "no admissible native execution decision" in runtime.result.summary
 
 
-def test_worker_parks_response_unknown_without_retrying_or_discarding_checkpoint() -> None:
+def test_worker_retries_response_unknown_without_discarding_checkpoint() -> None:
     binding, contract = _binding()
     grant = SimpleNamespace(
         allocation=SimpleNamespace(attempt_id=binding.attempt_id, lease_epoch=1)
@@ -1738,7 +1830,7 @@ def test_worker_parks_response_unknown_without_retrying_or_discarding_checkpoint
     assert asyncio.run(worker.run_once(object())) is True
     assert runtime.result.runtime_mode is ExecutionMode.WAITING_RESOURCE
     assert runtime.result.terminal_outcome is None
-    assert runtime.result.resource_retryable is False
+    assert runtime.result.resource_retryable is True
     assert runtime.result.final_checkpoint_id == checkpoint.id
     assert runtime.result.residual_obligations == ("repair failing lowercase case",)
 

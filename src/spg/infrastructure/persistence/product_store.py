@@ -27,6 +27,7 @@ from spg.domain.product import (
     WorkRuntimeBindingRecord,
 )
 from spg.domain.runtime import CompletionContract
+from spg.domain.engineering_semantics import EngineeringSemanticFact
 from spg.domain.interaction import WorkRealityRevision
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
@@ -106,7 +107,9 @@ class ProductStore:
         return None if row is None else self._work(row)
 
     def list_works(self, goal_id: UUID | None = None) -> tuple[WorkRecord, ...]:
-        statement = select(product_works)
+        statement = select(product_works).where(
+            product_works.c.condition != WorkCondition.DISCARDED.value
+        )
         if goal_id is not None:
             statement = statement.where(product_works.c.goal_id == goal_id)
         rows = self.session.execute(
@@ -669,6 +672,10 @@ class ProductStore:
             context_facts=tuple(row["context_facts"]),
             constraints=tuple(row["constraints"]),
             requests=tuple(row["requests"]),
+            engineering_semantic_facts=tuple(
+                EngineeringSemanticFact.model_validate(item)
+                for item in row["engineering_semantic_facts"]
+            ),
             engineering_scope_id=row["engineering_scope_id"],
             engineering_resource_id=row["engineering_resource_id"],
             scope_basis_fingerprint=row["scope_basis_fingerprint"],

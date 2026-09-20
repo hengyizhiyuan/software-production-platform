@@ -655,6 +655,21 @@ executor_scheduler_state = Table(
     Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 
+executor_worker_registrations = Table(
+    "executor_worker_registrations",
+    metadata,
+    Column("worker_id", String(255), primary_key=True),
+    Column("worker_profile", String(255), nullable=False),
+    Column("provider_profiles", JSONB, nullable=False),
+    Column("resource_profiles", JSONB, nullable=False),
+    Column("capability_identities", JSONB, nullable=False),
+    Column("heartbeat_at", DateTime(timezone=True), nullable=False),
+    Column("expires_at", DateTime(timezone=True), nullable=False),
+    Column("version", Integer, nullable=False, server_default="1"),
+)
+
+Index("ix_executor_worker_registrations_expires", executor_worker_registrations.c.expires_at)
+
 native_candidate_vectors = Table(
     "native_candidate_vectors",
     metadata,
@@ -836,6 +851,7 @@ native_execution_tables = (
     execution_events,
     event_outbox,
     executor_scheduler_state,
+    executor_worker_registrations,
     native_candidate_vectors,
     native_vector_verifications,
     native_candidate_vector_targets,

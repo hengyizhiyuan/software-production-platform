@@ -37,7 +37,10 @@ from spg.domain.planning import OnePwuFitClassification
 from spg.domain.steering import (
     NextStepCandidate,
     PlanFrame,
+    PlanFrameBlockerKind,
     PlanSteeringCapability,
+    RealityReferenceKind,
+    ReviseSteeringPlanRequest,
     SemanticStepCapability,
     SemanticStepResultRecord,
     SteeringActionType,
@@ -51,6 +54,8 @@ from spg.domain.steering import (
     SteeringIterationResult,
     SteeringOutcome,
     SteeringPlanProjection,
+    SteeringStepSpec,
+    SteeringStepState,
     SteeringStepType,
     TransitionSteeringStepRequest,
 )
@@ -149,7 +154,26 @@ class PlanSteeringDriver:
                 stop=SteeringDriverStopReason.NO_PROGRESS,
             )
         frame = self.frames.assemble(work_id)
-        if work.status is WorkStatus.BLOCKED or frame.open_blocking_reality:
+        revision_blocked = any(
+            blocker.kind is PlanFrameBlockerKind.CURRENT_RESULT_MAY_BE_INSUFFICIENT
+            for blocker in frame.open_blocking_reality
+        )
+        revision_acknowledged = bool(
+            frame.work_reality_revision_id is not None
+            and any(
+                reference.kind is RealityReferenceKind.WORK_REALITY_REVISION
+                and reference.identity == frame.work_reality_revision_id
+                for reference in frame.reconstruction.active_revision.revision.reality_refs
+            )
+        )
+        other_blockers = tuple(
+            blocker
+            for blocker in frame.open_blocking_reality
+            if blocker.kind is not PlanFrameBlockerKind.CURRENT_RESULT_MAY_BE_INSUFFICIENT
+        )
+        if revision_blocked and not revision_acknowledged:
+            return self._revise_for_current_work_reality(frame, before)
+        if work.status is WorkStatus.BLOCKED or other_blockers:
             return self._result(
                 work_id,
                 before,
@@ -165,10 +189,156 @@ class PlanSteeringDriver:
             )
 
         if current.type is SteeringStepType.PRODUCE:
+            if work.production_plan is None:
+                return self._revise_for_missing_production_plan(frame, before)
             return self._produce_iteration(frame, before)
         if current.type in {SteeringStepType.DESIGN, SteeringStepType.REFINE}:
             return self._semantic_iteration(frame, before)
         return self._decision_iteration(frame, before)
+
+    def _revise_for_current_work_reality(
+        self,
+        frame: PlanFrame,
+        before: str,
+    ) -> SteeringIterationResult:
+        revision_id = frame.work_reality_revision_id
+        if revision_id is None:
+            return self._result(
+                frame.work_id,
+                before,
+                action=None,
+                stop=SteeringDriverStopReason.BLOCKED,
+            )
+        references = tuple(
+            item.reference for item in frame.basis.resolved_reality
+        )
+        self.steering.revise_plan(
+            ReviseSteeringPlanRequest(
+                steering_plan_id=frame.reconstruction.steering_plan_id,
+                superseded_revision_id=(
+                    frame.reconstruction.active_revision.revision.id
+                ),
+                rationale=(
+                    "Reassess the admitted Work Reality revision without treating "
+                    "the prior production cycle as the current result."
+                ),
+                reality_refs=references,
+                steps=(
+                    SteeringStepSpec(
+                        type=SteeringStepType.DESIGN,
+                        objective=(
+                            "Reassess the latest admitted change against existing "
+                            "design and production Reality"
+                        ),
+                        completion_condition=(
+                            "The latest Work Reality has a bounded production direction"
+                        ),
+                        state=SteeringStepState.CURRENT,
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.PRODUCE,
+                        objective=(
+                            "Produce the next exact change admitted from the latest "
+                            "Work Reality"
+                        ),
+                        completion_condition=(
+                            "The new bounded production cycle reaches trusted Runtime Commit"
+                        ),
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.VERIFY_ACCEPT,
+                        objective=(
+                            "Assess the new production evidence against the latest "
+                            "Work outcome"
+                        ),
+                        completion_condition=(
+                            "Governed evidence supports acceptance or further reassessment"
+                        ),
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.COMPLETE,
+                        objective="Complete the latest admitted Work outcome",
+                        completion_condition=(
+                            "The latest admitted Work Reality is truthfully satisfied"
+                        ),
+                    ),
+                ),
+            )
+        )
+        return self._result(
+            frame.work_id,
+            before,
+            action=SteeringActionType.PLAN_REVISION,
+            stop=None,
+        )
+
+    def _revise_for_missing_production_plan(
+        self,
+        frame: PlanFrame,
+        before: str,
+    ) -> SteeringIterationResult:
+        """Recover a legacy/impossible PRODUCE frontier without rewriting history."""
+
+        references = tuple(item.reference for item in frame.basis.resolved_reality)
+        self.steering.revise_plan(
+            ReviseSteeringPlanRequest(
+                steering_plan_id=frame.reconstruction.steering_plan_id,
+                superseded_revision_id=(
+                    frame.reconstruction.active_revision.revision.id
+                ),
+                rationale=(
+                    "Recover the admitted Work Reality by rebuilding the missing "
+                    "current Production Plan before any production cycle is admitted."
+                ),
+                reality_refs=references,
+                steps=(
+                    SteeringStepSpec(
+                        type=SteeringStepType.DESIGN,
+                        objective=(
+                            "Rebuild the exact bounded production direction for the "
+                            "latest admitted Work Reality"
+                        ),
+                        completion_condition=(
+                            "A current reviewable Production Plan is materialized"
+                        ),
+                        state=SteeringStepState.CURRENT,
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.PRODUCE,
+                        objective=(
+                            "Produce the next exact change admitted from the latest "
+                            "Work Reality"
+                        ),
+                        completion_condition=(
+                            "The new bounded production cycle reaches trusted Runtime Commit"
+                        ),
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.VERIFY_ACCEPT,
+                        objective=(
+                            "Assess the new production evidence against the latest "
+                            "Work outcome"
+                        ),
+                        completion_condition=(
+                            "Governed evidence supports acceptance or further reassessment"
+                        ),
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.COMPLETE,
+                        objective="Complete the latest admitted Work outcome",
+                        completion_condition=(
+                            "The latest admitted Work Reality is truthfully satisfied"
+                        ),
+                    ),
+                ),
+            )
+        )
+        return self._result(
+            frame.work_id,
+            before,
+            action=SteeringActionType.PLAN_REVISION,
+            stop=None,
+        )
 
     def activate(self, work_id: UUID) -> SteeringActivationResult:
         """Continue bounded stepwise actions until a typed stop is reached."""
@@ -622,7 +792,14 @@ class PlanSteeringDriver:
                 action=None,
                 stop=SteeringDriverStopReason.NO_PROGRESS,
             )
-        design = self.guided_design.record_semantic_result(frame.work_id, result)
+        guided_step_linked = guided is not None and any(
+            issue.steering_step_id == current.id for issue in guided.issues
+        )
+        design = (
+            self.guided_design.record_semantic_result(frame.work_id, result)
+            if guided_step_linked
+            else guided
+        )
         fresh = self.frames.assemble(frame.work_id)
         if (
             design is not None
@@ -922,7 +1099,10 @@ class PlanSteeringDriver:
             frame = self.frames.assemble(work_id)
         except (SteeringInvariantViolation, ProductInvariantViolation):
             return False
-        return not frame.open_blocking_reality
+        return not any(
+            blocker.kind is not PlanFrameBlockerKind.CURRENT_RESULT_MAY_BE_INSUFFICIENT
+            for blocker in frame.open_blocking_reality
+        )
 
     def _run_scheduled(self, work_id: UUID) -> None:
         try:

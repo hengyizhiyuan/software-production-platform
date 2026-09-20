@@ -11,6 +11,7 @@ from uuid import UUID
 from sqlalchemy import insert, select
 
 from spg.application.delivery import DeliveryApplicationService, artifact_media_type
+from spg.application.preview_security import PREVIEW_CONTENT_SECURITY_POLICY
 from spg.domain.product import ProductInvariantViolation
 from spg.infrastructure.persistence.delivery_schema import work_delivery_runtimes
 
@@ -68,7 +69,10 @@ class SoftwareRuntimeService:
                 self.send_header("Content-Length", str(len(data)))
                 self.send_header("X-Content-Type-Options", "nosniff")
                 self.send_header("Cache-Control", "no-store")
-                self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
+                self.send_header(
+                    "Content-Security-Policy",
+                    PREVIEW_CONTENT_SECURITY_POLICY,
+                )
                 self.send_header("X-Watt-Delivery", str(manifest.id))
                 self.end_headers()
                 self.wfile.write(data)

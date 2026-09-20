@@ -8,6 +8,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from spg.domain.change import CodeChangeContract, ProductionTargetKind
+from spg.domain.engineering_semantics import SemanticFactReference
 from spg.domain.refinement import RepositoryChangeProposal
 
 
@@ -118,6 +119,7 @@ class ProductionPlanningRequest(BaseModel):
     change_proposal: RepositoryChangeProposal | None = None
     change_contract: CodeChangeContract | None = None
     constraints: tuple[str, ...] = ()
+    engineering_semantic_facts: tuple[SemanticFactReference, ...] = ()
     verification_expectation: str = Field(min_length=1)
     engineering_scope_summary: str = Field(min_length=1)
     engineering_resource_id: UUID

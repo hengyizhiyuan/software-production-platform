@@ -39,6 +39,7 @@ from spg.domain.native_execution import (
     NativeExecutionConflict,
     PWUContractVersionRecord,
     QueueCondition,
+    QueueProgressionState,
     ResourceEnvelope,
     ResourceReservationCondition,
     ResourceUsageEntryRecord,
@@ -80,8 +81,13 @@ from spg.infrastructure.executor_runtime.backends import (
     PinnedExecutionBackendRouter,
 )
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.infrastructure.executor_runtime.inference import (
+    InferenceFailureCode,
+    InferenceTransportUnknown,
+)
 from spg.infrastructure.executor_runtime.runtime_ports import DurableCheckpointPort
 from spg.infrastructure.executor_runtime.runtime_ports import DurableKernelAudit
+from spg.infrastructure.executor_runtime.worker import NativeExecutionWorker
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.native_execution_schema import (
@@ -250,6 +256,22 @@ def test_native_migration_is_additive_and_at_head(postgres_database: Database) -
     assert {"execution_attempts", "production_work_units", "provider_execution_reports"} <= tables
 
 
+def test_contract_content_lookup_reuses_the_existing_pwu_version(
+    postgres_database: Database,
+    git_repository: Path,
+) -> None:
+    admission = _admission(postgres_database, git_repository)
+    NativeExecutorRuntimeService(postgres_database).admit(admission)
+
+    with postgres_database.unit_of_work() as unit_of_work:
+        stored = NativeExecutionStore(unit_of_work.session).contract_for_pwu_digest(
+            admission.contract.pwu_id,
+            admission.contract.contract_digest,
+        )
+
+    assert stored == admission.contract
+
+
 def test_checkpoint_schema_migration_round_trip_preserves_existing_bundle(
     postgres_database: Database, git_repository: Path, tmp_path: Path
 ) -> None:
@@ -296,6 +318,88 @@ def test_checkpoint_schema_migration_round_trip_preserves_existing_bundle(
         ).mappings().one()
     assert restored["id"] == checkpoint.id
     assert restored["schema_version"] == 1
+
+
+def test_successor_attempt_does_not_inherit_previous_attempt_checkpoint(
+    postgres_database: Database, git_repository: Path, tmp_path: Path
+) -> None:
+    service = NativeExecutorRuntimeService(postgres_database)
+    first = _admission(postgres_database, git_repository)
+    service.admit(first)
+    first_grant = service.allocate(_offer())
+    assert first_grant is not None
+    service.activate_allocation(first_grant)
+    first_checkpoint = asyncio.run(
+        DurableCheckpointPort(
+            postgres_database,
+            ContentAddressedStorage(tmp_path / "successor-checkpoints"),
+            attempt_id=first.binding.attempt_id,
+            session_id=first.binding.session_id,
+            worker_epoch=first_grant.allocation.lease_epoch,
+        ).commit(
+            KernelCheckpoint(
+                step_sequence=1,
+                working_plan=WorkingPlan(
+                    version=1,
+                    objective_reference=str(first.contract.id),
+                    chosen_approach="first attempt output",
+                    approach_rationale="prove checkpoint isolation",
+                ),
+                tool_results=(),
+                source_vector_digest=first.binding.source_vector.digest or "",
+                result_claim={"output_vector": {"files": ["README.md"]}},
+                residual_obligations=(),
+            )
+        )
+    )
+    service.finish_allocation(
+        first_grant,
+        KernelRunResult(
+            runtime_mode=ExecutionMode.FINISHED,
+            terminal_outcome=AttemptTerminalOutcome.RESULT_READY,
+            final_checkpoint_id=first_checkpoint.id,
+            step_count=1,
+            inference_submissions=1,
+            tool_effects=0,
+            summary="first attempt completed",
+            result_claim={"output_vector": {"files": ["README.md"]}},
+        ),
+    )
+
+    successor_attempt = RuntimeService(postgres_database).retry_attempt(
+        first.binding.attempt_id
+    )
+    successor_workspace = first.binding.workspace.model_copy(
+        update={"workspace_id": uuid4(), "attempt_id": successor_attempt.id}
+    )
+    successor_binding = first.binding.model_copy(
+        update={
+            "attempt_id": successor_attempt.id,
+            "generation": successor_attempt.generation,
+            "workspace": successor_workspace,
+            "resource_envelope": first.binding.resource_envelope.model_copy(
+                update={"envelope_id": uuid4()}
+            ),
+        }
+    )
+    successor = first.model_copy(
+        update={
+            "command_id": uuid4(),
+            "binding": successor_binding,
+            "available_at": datetime.now(timezone.utc),
+        }
+    )
+    service.admit(successor)
+    successor_grant = service.allocate(_offer())
+    assert successor_grant is not None
+
+    worker = NativeExecutionWorker(service, lambda grant: None)
+    _, _, loaded_checkpoint, session_frontier = worker._load_execution_reality(
+        successor_grant
+    )
+
+    assert loaded_checkpoint is None
+    assert session_frontier == 0
 
 
 def test_admission_allocation_checkpoint_and_result_ready_are_durable(
@@ -1170,6 +1274,125 @@ def test_provider_capacity_wait_releases_worker_and_requeues_after_backoff(
     assert service.allocate(_offer()) is not None
 
 
+def test_queue_without_live_compatible_worker_becomes_truthful_and_recovers(
+    postgres_database: Database, git_repository: Path
+) -> None:
+    clock = [datetime.now(timezone.utc)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]}
+    )
+    queued = service.admit(admission)
+
+    initial = service.list_queue_reality(
+        work_id=admission.binding.work_id,
+        unavailable_after=timedelta(seconds=5),
+    )[0][1]
+    assert initial.progression_state is QueueProgressionState.SCHEDULING
+    assert initial.scheduler_alive is False
+
+    clock[0] += timedelta(seconds=6)
+    assert service.reconcile_queue_ownership(
+        unavailable_after=timedelta(seconds=5)
+    ) == (queued.id,)
+    unavailable = service.list_queue_reality(
+        work_id=admission.binding.work_id,
+        unavailable_after=timedelta(seconds=5),
+    )[0]
+    assert unavailable[0].condition is QueueCondition.WAITING_RESOURCE
+    assert unavailable[1].progression_state is QueueProgressionState.INFRASTRUCTURE_UNAVAILABLE
+    assert "recover automatically" in unavailable[1].reason
+
+    restarted_service = NativeExecutorRuntimeService(
+        postgres_database, now=lambda: clock[0]
+    )
+    recovered = restarted_service.allocate(_offer())
+    assert recovered is not None
+    assert recovered.queue_entry.id == queued.id
+
+
+def test_live_busy_worker_is_real_capacity_wait_and_release_advances_next_item(
+    postgres_database: Database, git_repository: Path
+) -> None:
+    clock = [datetime.now(timezone.utc)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    first = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]}
+    )
+    second = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]}
+    )
+    service.admit(first)
+    second_queue = service.admit(second)
+    first_grant = service.allocate(_offer())
+    assert first_grant is not None
+    service.activate_allocation(first_grant)
+
+    second_reality = service.list_queue_reality(
+        work_id=second.binding.work_id
+    )[0][1]
+    assert second_reality.progression_state is QueueProgressionState.CAPACITY_WAIT
+    assert second_reality.compatible_worker_count == 1
+    assert second_reality.occupied_worker_count == 1
+
+    service.finish_allocation(
+        first_grant,
+        KernelRunResult(
+            runtime_mode=ExecutionMode.FINISHED,
+            terminal_outcome=AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
+            final_checkpoint_id=None,
+            step_count=0,
+            inference_submissions=0,
+            tool_effects=0,
+            summary="bounded capacity test finished",
+        ),
+    )
+    next_grant = service.allocate(_offer())
+    assert next_grant is not None
+    assert next_grant.queue_entry.id == second_queue.id
+
+
+def test_retryable_provider_failure_stops_after_three_automatic_retries(
+    postgres_database: Database, git_repository: Path
+) -> None:
+    clock = [datetime.now(timezone.utc)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]}
+    )
+    service.admit(admission)
+
+    for retry_number in range(4):
+        grant = service.allocate(_offer())
+        assert grant is not None
+        service.activate_allocation(grant)
+        service.finish_allocation(
+            grant,
+            KernelRunResult(
+                runtime_mode=ExecutionMode.WAITING_RESOURCE,
+                final_checkpoint_id=None,
+                step_count=0,
+                inference_submissions=0,
+                tool_effects=0,
+                summary="provider response transport was interrupted",
+                resource_retryable=True,
+            ),
+        )
+        if retry_number < 3:
+            clock[0] += timedelta(seconds=31)
+
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        queue = store.queue_for_attempt(admission.binding.attempt_id)
+        state = store.attempt_state(admission.binding.attempt_id)
+        assert queue is not None
+        assert queue.condition is QueueCondition.COMPLETED
+        assert queue.resume_count == 3
+        assert state.runtime_mode is ExecutionMode.FINISHED
+        assert state.terminal_outcome is AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+    assert service.allocate(_offer()) is None
+
+
 def test_event_replay_uses_monotonic_pwu_sequence(
     postgres_database: Database, git_repository: Path
 ) -> None:
@@ -1300,6 +1523,70 @@ def test_inference_resource_reservation_is_settled_with_durable_evidence(
         assert row["certainty"] == "ACTUAL"
         assert row["condition"] == "CONSUMED"
         assert row["evidence"]["response_observed"] is True
+
+
+def test_inference_transport_failure_persists_safe_structured_diagnostics(
+    postgres_database: Database, git_repository: Path
+) -> None:
+    admission = _admission(postgres_database, git_repository)
+    NativeExecutorRuntimeService(postgres_database).admit(admission)
+    audit = DurableKernelAudit(
+        postgres_database,
+        attempt_id=admission.binding.attempt_id,
+        session_id=admission.binding.session_id,
+        pwu_id=admission.binding.pwu_id,
+        envelope_id=admission.binding.resource_envelope.envelope_id,
+    )
+    request = InferenceRequest(
+        attempt_id=admission.binding.attempt_id,
+        session_id=admission.binding.session_id,
+        step_sequence=1,
+        objective=admission.contract.objective,
+        working_plan=WorkingPlan(
+            version=1,
+            objective_reference=str(admission.contract.id),
+            chosen_approach="observe provider transport",
+            approach_rationale="retain a safe failure fingerprint",
+        ),
+        context_facts=(),
+        available_tools=(),
+        residual_obligations=("provider response",),
+    )
+    step_id = asyncio.run(audit.begin_inference(request))
+    diagnostics = {
+        "mode": "stream",
+        "response_headers_received": True,
+        "response_status_code": 200,
+        "headers_elapsed_ms": 1200,
+        "first_byte_elapsed_ms": None,
+        "elapsed_ms": 60660,
+        "received_bytes": 0,
+        "received_events": 0,
+        "terminal_received": False,
+        "syntactically_complete": False,
+        "failure_code": InferenceFailureCode.INCOMPLETE_RESPONSE.value,
+    }
+    error = InferenceTransportUnknown(
+        "deepseek response was incomplete",
+        failure_code=InferenceFailureCode.INCOMPLETE_RESPONSE,
+        transport_diagnostics=diagnostics,
+        request_sent=True,
+    )
+    asyncio.run(audit.finish_inference(step_id, None, error))
+
+    with postgres_database.unit_of_work() as uow:
+        step = NativeExecutionStore(uow.session).steps_for_attempt(
+            admission.binding.attempt_id
+        )[0]
+
+    assert step.condition.value == "FAILED"
+    assert step.result_payload == {
+        "error_type": "InferenceTransportUnknown",
+        "request_sent": True,
+        "failure_code": "INCOMPLETE_RESPONSE",
+        "transport_diagnostics": diagnostics,
+    }
+    assert "authorization" not in str(step.result_payload).lower()
 
 
 def test_pwu_resource_pool_does_not_reset_or_double_debit(

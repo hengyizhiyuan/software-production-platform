@@ -101,6 +101,9 @@ class RepositoryCodeVerifier:
                 "target": target,
                 "failure_type": type(error).__name__,
             }
+        metadata["semantic_fact_ids"] = [
+            str(item.fact_id) for item in request.semantic_fact_obligations
+        ]
         return VerificationCapabilityResult(
             result=result,
             evidence=VerificationEvidence(

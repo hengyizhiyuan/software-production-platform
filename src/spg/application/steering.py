@@ -275,6 +275,16 @@ class SteeringApplicationService:
                     raise SteeringInvariantViolation(
                         "Semantic Step cannot close without exact governed result evidence"
                     )
+                if next_step.type is SteeringStepType.PRODUCE:
+                    work = product.work(revision.work_id)
+                    if work is None:
+                        raise SteeringRecordNotFound(
+                            f"Work not found: {revision.work_id}"
+                        )
+                    if work.production_plan is None:
+                        raise SteeringInvariantViolation(
+                            "PRODUCE transition requires a current Production Plan"
+                        )
             elif current.type is SteeringStepType.PRODUCE:
                 binding = product.runtime_binding_for_step(current.id)
                 if binding is None:
