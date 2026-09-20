@@ -28,9 +28,15 @@
   };
   function agendaMilestones(steering) {
     if (!steering) return [];
+    const workCompleted = steering.last_stop_reason === "COMPLETE";
     const source = [
       ...(steering.completed_steps || []).map((step) => ({ step, state: "DONE" })),
-      ...(steering.current_step ? [{ step: steering.current_step, state: "CURRENT" }] : []),
+      ...(steering.current_step ? [{
+        step: steering.current_step,
+        state: workCompleted && String(steering.current_step.type || "").toUpperCase() === "COMPLETE"
+          ? "DONE"
+          : "CURRENT",
+      }] : []),
       ...(steering.known_next_steps || []).map((step) => ({ step, state: "NEXT" })),
     ];
     const milestones = [];

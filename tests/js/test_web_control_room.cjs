@@ -115,6 +115,22 @@ test("Agenda groups consecutive governed steps without losing their detail or cu
   assert.deepEqual(Array.from(milestones[1].steps, (step) => step.label), ["Choose approach", "Review design"]);
 });
 
+test("Agenda closes Deliver when the authoritative Work projection is complete", () => {
+  const milestones = controlRoom.agendaMilestones({
+    completed_steps: [
+      { step_id: "p", type: "PRODUCE", objective: "Produce trusted result" },
+      { step_id: "v", type: "VERIFY_ACCEPT", objective: "Verify trusted result" },
+    ],
+    current_step: { step_id: "c", type: "COMPLETE", objective: "Complete the admitted Work" },
+    known_next_steps: [],
+    automatic_progression_state: "STOPPED",
+    last_stop_reason: "COMPLETE",
+  });
+  assert.deepEqual(Array.from(milestones, (item) => item.label), ["Produce", "Verify", "Deliver"]);
+  assert.deepEqual(Array.from(milestones, (item) => item.state), ["DONE", "DONE", "DONE"]);
+  assert.equal(milestones[2].steps[0].state, "DONE");
+});
+
 test("Production state maps observed queue and attempt facts without invented progress", () => {
   const unavailable = controlRoom.productionState({}, [{
     condition: "WAITING_RESOURCE",

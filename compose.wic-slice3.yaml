@@ -27,6 +27,8 @@ services:
       SPG_REPOSITORY_PATH: /var/lib/spg/repository
       SPG_RUNTIME_PROFILE: watt-wic-slice3-dogfood
       SPG_WORKSPACE_ROOT: /var/lib/spg/workspaces
+      SPG_DELIVERY_RUNTIME_ENABLED: "true"
+      SPG_DELIVERY_RUNTIME_BIND_HOST: "0.0.0.0"
       SPG_DEEPSEEK_API_KEY: ${SPG_DEEPSEEK_API_KEY:?SPG_DEEPSEEK_API_KEY must be configured in the ignored .env file}
       SPG_DEEPSEEK_BASE_URL: ${SPG_DEEPSEEK_BASE_URL:-https://api.deepseek.com}
       SPG_WIC_PROVIDER_ADAPTER: deepseek
@@ -41,6 +43,7 @@ services:
     init: true
     ports:
       - "127.0.0.1:8045:8000"
+      - "127.0.0.1:8010-8019:8010-8019"
     healthcheck:
       test:
         - CMD

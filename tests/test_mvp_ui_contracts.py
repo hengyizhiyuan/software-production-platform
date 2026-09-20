@@ -13,6 +13,7 @@ from spg.domain.runtime_activation import (
 
 
 WEB_ROOT = Path(str(files("spg.web")))
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class _StaticOnlyDatabase:
@@ -108,6 +109,23 @@ def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
         activation = client.get("/api/runtime-activation")
         assert activation.status_code == 200
         assert activation.json()["state"] == "ACTIVE_AT_TRUSTED_BASELINE"
+
+
+def test_human_review_runtime_supports_the_software_acceptance_path_it_displays() -> None:
+    compose = (PROJECT_ROOT / "compose.wic-slice3.yaml").read_text(encoding="utf-8")
+    delivery_javascript = (WEB_ROOT / "delivery.js").read_text(encoding="utf-8")
+
+    assert 'SPG_DELIVERY_RUNTIME_ENABLED: "true"' in compose
+    assert 'SPG_DELIVERY_RUNTIME_BIND_HOST: "0.0.0.0"' in compose
+    assert '"127.0.0.1:8010-8019:8010-8019"' in compose
+    assert "entry.runtime.status===\"READY\"" in delivery_javascript
+    assert "运行入口核对成功后，才可记录接受或修改决定" in delivery_javascript
+    assert 'if(!busy)$("notice").textContent=""' in delivery_javascript
+
+
+def test_completed_delivery_milestone_uses_a_fresh_control_room_asset() -> None:
+    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    assert "/assets/control-room.js?v=completed-delivery-milestone-2" in html
 
 
 def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:

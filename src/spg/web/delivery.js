@@ -41,13 +41,15 @@
     }
     const download=node("a",manifest.software?"下载源码、说明与验证证据":"下载文档包与验证清单","download");download.href=`/api/works/${work.work_id}/deliveries/${manifest.id}/download`;card.append(download);
     if(decision)card.append(node("p",decision.authority_identity+"："+decision.rationale));
-    if(entry.current&&!decision){const form=node("form"),label=node("label"),checked=document.createElement("input");checked.type="checkbox";checked.required=true;label.append(checked,document.createTextNode("我已检查这个版本的产物和验收标准（软件产物已实际操作）"));
+    const acceptanceReady=!manifest.software||(entry.runtime&&entry.runtime.status==="READY");
+    if(entry.current&&!decision&&!acceptanceReady)card.append(node("p","请先启动并打开这个精确版本的软件；运行入口核对成功后，才可记录接受或修改决定。","meta"));
+    if(entry.current&&!decision&&acceptanceReady){const form=node("form"),label=node("label"),checked=document.createElement("input");checked.type="checkbox";checked.required=true;label.append(checked,document.createTextNode("我已检查这个版本的产物和验收标准（软件产物已实际操作）"));
       const rationale=document.createElement("textarea");rationale.required=true;rationale.maxLength=4000;rationale.placeholder="接受理由或需要修改的具体内容";rationale.setAttribute("aria-label","Human 验收意见");form.append(label,rationale);
       for(const [value,text] of [["ACCEPT","接受此交付"],["REQUEST_CHANGES","请求修改"]]){const button=node("button",text);button.type="submit";button.value=value;form.append(button);}
       form.addEventListener("submit",event=>{event.preventDefault();const value=event.submitter.value;action(()=>api(`/api/works/${requireWork()}/deliveries/${manifest.id}/acceptance`,{manifest_fingerprint:manifest.fingerprint,decision:value,authority_identity:"human:local-operator",rationale:rationale.value}));});card.append(form);}
     $("deliveries").append(card);
   }
-  async function refresh(){const currentGeneration=++generation;const works=await api("/api/works");const list=Array.isArray(works)?works:works.works||[];if(currentGeneration!==generation)return;
+  async function refresh(){const currentGeneration=++generation;if(!busy)$("notice").textContent="";const works=await api("/api/works");const list=Array.isArray(works)?works:works.works||[];if(currentGeneration!==generation)return;
     $("work").replaceChildren(node("option","选择 Work（或先返回对话进行准入）"));$("work").firstChild.value="";
     list.forEach(item=>{const option=node("option",item.title||item.desired_outcome||item.work_id);option.value=item.work_id;$("work").append(option);});$("work").value=selected;
     const [current,assets,delivery,context,attention]=await Promise.all([selected?api(`/api/works/${selected}`):null,api("/api/repository-assets"+(selected?`?work_id=${selected}`:"")),selected?api(`/api/works/${selected}/delivery`):null,selected?api(`/api/works/${selected}/delivery-context`):null,selected?api(`/api/attention?work_id=${selected}`):[]]);if(currentGeneration!==generation)return;
