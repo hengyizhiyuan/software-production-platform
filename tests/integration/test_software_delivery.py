@@ -75,9 +75,19 @@ def produce(database, tmp_path, *, failing=False, user_repository=True,
     SteeringBootstrapService(database).bootstrap(work.work_id)
     driver = PlanSteeringDriver(database, service, _SchedulingOrchestrator(), semantic_capability=SoftwareDesign())
     driver.activate(work.work_id)
-    attention = next(a for a in service.list_attention(work_id=work.work_id) if a.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW)
-    service.resolve_attention(attention.id, AttentionResolutionRequest(action=AttentionAction.APPROVE, authority_identity='human:test'))
-    driver.activate(work.work_id)
+    production_reviews = tuple(
+        item for item in service.list_attention(work_id=work.work_id)
+        if item.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
+    )
+    if production_reviews:
+        service.resolve_attention(
+            production_reviews[0].id,
+            AttentionResolutionRequest(
+                action=AttentionAction.APPROVE,
+                authority_identity='human:test',
+            ),
+        )
+        driver.activate(work.work_id)
     for _ in range(20):
         service.advance_work(work.work_id)
         for a in service.list_attention(work_id=work.work_id):

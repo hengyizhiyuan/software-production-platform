@@ -150,7 +150,10 @@ from spg.providers.deterministic_executor import (
 )
 from spg.providers.deterministic_verifier import DeterministicVerificationProvider
 from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
-from spg.domain.verification import VerificationResultValue
+from spg.domain.verification import (
+    VerificationCapabilityRequest,
+    VerificationResultValue,
+)
 
 
 pytestmark = pytest.mark.postgresql
@@ -201,7 +204,13 @@ class _CourseScheduleSemanticCapability:
         if self.correction:
             assert active is not None
             revision = active.work_revision
-            source_text = "8 means columns, 5 means rows"
+            source_text = "不是，我刚才的意思改一下，要 8 列 5 行。"
+            superseded_fact_ids = tuple(
+                fact.id
+                for fact in current_semantic_facts(
+                    revision.engineering_semantic_facts
+                )
+            )
             return InteractionAssessmentCandidate(
                 interpreted_motive=revision.motive,
                 desired_outcome=revision.desired_outcome,
@@ -220,22 +229,23 @@ class _CourseScheduleSemanticCapability:
                 ),
                 semantic_fact_candidates=(
                     EngineeringSemanticFactCandidate(
-                        candidate_id="rows-explicit",
-                        subject="course_schedule.rows",
+                        candidate_id="columns-explicit",
+                        subject="layout.column",
                         relation=SemanticRelation.CARDINALITY,
-                        value=5,
+                        value=8,
                         authority=SemanticFactAuthority.HUMAN_EXPLICIT,
                         epistemic_status=SemanticEpistemicStatus.CONFIRMED,
                         source_record_ids=(latest.id,),
                         source_text=source_text,
                         source_extraction_ids=("dimensions-explicit",),
                         role_origin=SemanticRoleOrigin.EXPLICIT,
+                        supersedes_fact_ids=superseded_fact_ids,
                     ),
                     EngineeringSemanticFactCandidate(
-                        candidate_id="columns-explicit",
-                        subject="course_schedule.columns",
+                        candidate_id="rows-explicit",
+                        subject="layout.row",
                         relation=SemanticRelation.CARDINALITY,
-                        value=8,
+                        value=5,
                         authority=SemanticFactAuthority.HUMAN_EXPLICIT,
                         epistemic_status=SemanticEpistemicStatus.CONFIRMED,
                         source_record_ids=(latest.id,),
@@ -246,7 +256,10 @@ class _CourseScheduleSemanticCapability:
                 ),
                 focus_classification=WorkFocusClassification.ON_TOPIC,
                 impact_disposition=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
-                natural_response="The explicit row and column meanings are ready for governance.",
+                natural_response=(
+                    "已将当前含义更新为 8 列 5 行；此前的 8 节课、"
+                    "5 个工作日假设不再作为当前事实。"
+                ),
                 provider_identity="test:engineering-semantic-truth",
             )
 
@@ -266,8 +279,8 @@ class _CourseScheduleSemanticCapability:
             ),
             semantic_fact_candidates=(
                 EngineeringSemanticFactCandidate(
-                    candidate_id="rows-inferred",
-                    subject="course_schedule.rows",
+                    candidate_id="periods-inferred",
+                    subject="schedule.period",
                     relation=SemanticRelation.CARDINALITY,
                     value=8,
                     authority=SemanticFactAuthority.SYSTEM_INFERRED,
@@ -278,8 +291,8 @@ class _CourseScheduleSemanticCapability:
                     role_origin=SemanticRoleOrigin.INFERRED,
                 ),
                 EngineeringSemanticFactCandidate(
-                    candidate_id="columns-inferred",
-                    subject="course_schedule.columns",
+                    candidate_id="weekdays-inferred",
+                    subject="schedule.weekday",
                     relation=SemanticRelation.CARDINALITY,
                     value=5,
                     authority=SemanticFactAuthority.SYSTEM_INFERRED,
@@ -290,7 +303,9 @@ class _CourseScheduleSemanticCapability:
                     role_origin=SemanticRoleOrigin.INFERRED,
                 ),
             ),
-            natural_response="The inferred dimensions are visible as reversible assumptions.",
+            natural_response=(
+                "我会把 8×5 作为可修正的工作假设：8 节课、5 个工作日。"
+            ),
             provider_identity="test:engineering-semantic-truth",
         )
 
@@ -910,7 +925,7 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
     interaction = interactions.create_interaction(human_identity="human:test")
     ready = interactions.append_and_assess(
         interaction.id,
-        "Build a course schedule with 8×5 slots.",
+        "想要一个可直接打开查看的小学五年级课程表示例页面，表格尺寸为 8×5",
         human_identity="human:test",
     )
     assessment = ready.latest_assessment
@@ -921,13 +936,13 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
         for fact in current_semantic_facts(assessment.engineering_semantic_facts)
     } == {
         (
-            "course_schedule.rows",
+            "schedule.period",
             8,
             SemanticFactAuthority.SYSTEM_INFERRED,
             SemanticEpistemicStatus.WORKING_ASSUMPTION,
         ),
         (
-            "course_schedule.columns",
+            "schedule.weekday",
             5,
             SemanticFactAuthority.SYSTEM_INFERRED,
             SemanticEpistemicStatus.WORKING_ASSUMPTION,
@@ -946,6 +961,13 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
     initial_current = current_semantic_facts(initial.engineering_semantic_facts)
     initial_ids = {fact.id for fact in initial_current}
     assert len(initial_ids) == 2
+    assert all(
+        fact.provenance.source_record_ids == (ready.records[-1].id,)
+        and fact.provenance.source_text == "8×5"
+        and fact.provenance.source_extraction_ids == ("dimensions-neutral",)
+        and fact.provenance.role_origin is SemanticRoleOrigin.INFERRED
+        for fact in initial_current
+    )
 
     correction_service = WorkInteractionService(
         postgres_database,
@@ -953,7 +975,7 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
     )
     pending = correction_service.append_and_assess(
         interaction.id,
-        "Correction: 8 means columns, 5 means rows.",
+        "不是，我刚才的意思改一下，要 8 列 5 行。",
         human_identity="human:test",
     )
     correction = pending.latest_assessment
@@ -963,19 +985,26 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
     corrected_current = current_semantic_facts(
         correction.engineering_semantic_facts
     )
+    assert all(
+        fact.provenance.source_record_ids == (pending.records[-1].id,)
+        and fact.provenance.source_text == "不是，我刚才的意思改一下，要 8 列 5 行。"
+        and fact.provenance.source_extraction_ids == ("dimensions-explicit",)
+        and fact.provenance.role_origin is SemanticRoleOrigin.EXPLICIT
+        for fact in corrected_current
+    )
     assert {
         (fact.subject, fact.value, fact.authority, fact.epistemic_status)
         for fact in corrected_current
     } == {
         (
-            "course_schedule.rows",
-            5,
+            "layout.column",
+            8,
             SemanticFactAuthority.HUMAN_EXPLICIT,
             SemanticEpistemicStatus.CONFIRMED,
         ),
         (
-            "course_schedule.columns",
-            8,
+            "layout.row",
+            5,
             SemanticFactAuthority.HUMAN_EXPLICIT,
             SemanticEpistemicStatus.CONFIRMED,
         ),
@@ -1097,6 +1126,28 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
         reference.source_work_revision_id == corrected_revision.id
         for reference in work_unit.completion_contract.semantic_fact_obligations
     )
+    verification_obligation = "Verify the governed course schedule semantics"
+    verification = DeterministicVerificationProvider(
+        {verification_obligation: VerificationResultValue.PASS}
+    ).verify(
+        VerificationCapabilityRequest(
+            verification_identity=uuid4(),
+            obligation=verification_obligation,
+            semantic_fact_obligations=(
+                work_unit.completion_contract.semantic_fact_obligations
+            ),
+            snapshot_id=uuid4(),
+            proposed_commit_identity="semantic-course-schedule-commit",
+            tree_identity="semantic-course-schedule-tree",
+            completion_evaluation_id=uuid4(),
+            plan_revision_id=uuid4(),
+            source_baseline_id=uuid4(),
+        )
+    )
+    assert verification.evidence.metadata["semantic_fact_ids"] == [
+        str(reference.fact_id)
+        for reference in work_unit.completion_contract.semantic_fact_obligations
+    ]
 
 
 def test_admission_bootstraps_revision_bound_steering_without_production(

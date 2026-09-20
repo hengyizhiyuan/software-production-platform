@@ -1322,14 +1322,20 @@ def test_live_busy_worker_is_real_capacity_wait_and_release_advances_next_item(
     second = _admission(postgres_database, git_repository).model_copy(
         update={"available_at": clock[0]}
     )
-    service.admit(first)
+    first_queue = service.admit(first)
     second_queue = service.admit(second)
     first_grant = service.allocate(_offer())
     assert first_grant is not None
     service.activate_allocation(first_grant)
 
+    pending_work_id, pending_queue = (
+        (second.binding.work_id, second_queue)
+        if first_grant.queue_entry.id == first_queue.id
+        else (first.binding.work_id, first_queue)
+    )
+
     second_reality = service.list_queue_reality(
-        work_id=second.binding.work_id
+        work_id=pending_work_id
     )[0][1]
     assert second_reality.progression_state is QueueProgressionState.CAPACITY_WAIT
     assert second_reality.compatible_worker_count == 1
@@ -1349,7 +1355,7 @@ def test_live_busy_worker_is_real_capacity_wait_and_release_advances_next_item(
     )
     next_grant = service.allocate(_offer())
     assert next_grant is not None
-    assert next_grant.queue_entry.id == second_queue.id
+    assert next_grant.queue_entry.id == pending_queue.id
 
 
 def test_retryable_provider_failure_stops_after_three_automatic_retries(
