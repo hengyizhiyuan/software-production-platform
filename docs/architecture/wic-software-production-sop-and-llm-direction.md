@@ -123,8 +123,8 @@ meaning.
 
 ## 6. Relationship to Engineering Semantic Truth
 
-Engineering Semantic Truth is a separate near-term architecture task. Its
-approximate responsibility is:
+Engineering Semantic Truth was implemented, qualified, and Human-accepted in
+the 2026-09-20 milestone. Its responsibility is:
 
 > What does Watt currently know or believe about the Human's
 > software-production intent?
@@ -146,9 +146,10 @@ LLM realization
     -> HOW SHOULD WATT COMMUNICATE / CONTRIBUTE NATURALLY?
 ```
 
-Future WIC SOP logic should consume Engineering Semantic Truth wherever
-possible instead of independently reinterpreting the original Human text for
-each decision. This document neither designs nor starts that implementation.
+Future WIC SOP logic should consume the implemented Engineering Semantic Truth
+wherever possible instead of independently reinterpreting the original Human
+text for each decision. This document neither designs nor starts that future
+implementation.
 
 ## 7. Relationship to Progressive Admission
 
@@ -196,9 +197,9 @@ This work is not started now. The intended order is:
 
 1. Stabilize the current Work / Production / Control Room Human journey.
 2. Implement and validate Engineering Semantic Truth for software-production
-   semantics as a separate task.
-3. Close the current Human-experience / production phase.
-4. Reopen WIC as a dedicated architecture topic.
+   semantics as a separate task. **Completed in the 2026-09-20 milestone.**
+3. Close the current Human-experience / production phase. **Completed.**
+4. Reopen WIC as a separately authorized architecture topic.
 5. Study and design `Software Production SOP × LLM` from Dogfood evidence.
 
 ## 10. Status
@@ -206,7 +207,7 @@ This work is not started now. The intended order is:
 ```text
 WIC_SOFTWARE_PRODUCTION_SOP_REDESIGN = NOT_STARTED
 
-ENGINEERING_SEMANTIC_TRUTH = SEPARATE_NEAR_TERM_TASK
+ENGINEERING_SEMANTIC_TRUTH = IMPLEMENTED / QUALIFIED / HUMAN_ACCEPTED
 
 CURRENT_WIC = PRESERVED
 

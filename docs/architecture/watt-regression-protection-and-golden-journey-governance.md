@@ -145,6 +145,32 @@ Full Regression is not required for every implementation task. Focused verificat
 remains the normal development tool, while Closure and Release retain the broadest
 assurance obligations.
 
+## 2026-09-20 milestone application
+
+The current Watt milestone applied this governance rather than treating every
+late Human finding as a reason to repeat the entire regression suite. Before the
+final narrow UI and Delivery repairs, the closure Full Regression reached 1,264
+Python outcomes: 1,254 passed, 10 intentionally skipped real-Provider probes,
+and zero failed. The Web/UI suite passed 65 cases, Native/Linux qualification
+passed, and lock, compile/import, migration-head, and Runtime-health integrity
+checks passed.
+
+Human review then found three narrow post-regression defects: the terminal
+Deliver milestone projection remained visually current after Work completion;
+the Human Review profile displayed software acceptance while its exact delivery
+Runtime was disabled and left a stale error after recovery; and the unchanged
+frontend asset URL allowed an ordinary browser refresh to retain the old
+projection code. These changes were qualified with the lowest-cost reliable
+evidence: UI-state and configuration contracts, the Control Room Node suite, a
+single PostgreSQL software-delivery acceptance integration case, live exact
+Runtime/hash evidence, and Human re-verification.
+
+The earlier Full Regression remains immutable historical evidence and is not
+claimed to cover those later fixes. The decision not to rerun it is an explicit
+application of `Risk -> Required Evidence`: the changes were narrow, their
+affected invariants were directly observable, and focused evidence plus Human
+re-verification covered the changed boundaries.
+
 The expected scalable shape is:
 
 ```text

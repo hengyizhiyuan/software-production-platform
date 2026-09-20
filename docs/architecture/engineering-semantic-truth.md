@@ -2,7 +2,8 @@
 
 Date: 2026-09-18
 
-Status: focused qualification passed; ready for Human Review.
+Status: implemented, qualified, and accepted as part of the 2026-09-20 Watt
+milestone Human Acceptance.
 
 Engineering Semantic Truth is the governed, software-production-specific
 meaning Watt currently knows or believes about Human intent. It prevents
@@ -13,6 +14,13 @@ This architecture does not define what Watt should do next. Steering retains
 `WHAT NEXT`; the future
 [WIC Software Production SOP × LLM direction](wic-software-production-sop-and-llm-direction.md)
 remains separate and not started.
+
+The accepted milestone evidence covers durable fact admission, `8×5`
+interpretation, explicit correction and supersession, downstream Production and
+Verification lineage, and Human correction through re-Steering and
+re-Production. This status closes Engineering Semantic Truth as a milestone
+capability; it does not claim universal software-domain knowledge or start the
+future WIC SOP redesign.
 
 ## Boundary and flow
 
