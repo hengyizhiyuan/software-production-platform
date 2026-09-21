@@ -193,6 +193,25 @@ def test_ow_c_correction_supersedes_prior_motive_without_deleting_history() -> N
     assert PatternSignal.EXPLICIT_CORRECTION in result.pattern_signals
 
 
+@pytest.mark.parametrize("text", [
+    "我觉得你这个判断不对。",
+    "I disagree with your architecture recommendation.",
+])
+def test_judgment_disagreement_does_not_supersede_the_human_motive(text: str) -> None:
+    prior = _prior("开发用于推广 Watt 的运营后台")
+    result = _build(
+        "OW-C", prior=prior, text=text,
+        candidate=_candidate(
+            "OW-C", turn_intent=ConversationTurnIntent.DISAGREEMENT,
+            interpreted_motive="重新审视当前架构判断",
+        ),
+    )
+    assert result.working_motive == prior.interpreted_motive
+    assert PatternSignal.EXPLICIT_CORRECTION not in result.pattern_signals
+    assert not any(delta.category.value == "MOTIVE" for delta in result.deltas)
+    assert result.turn_intent is ConversationTurnIntent.DISAGREEMENT
+
+
 def test_provider_turn_intent_survives_deterministic_semantic_admission() -> None:
     result = _build(
         "OW-A",

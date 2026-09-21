@@ -24,6 +24,11 @@ from spg.application.guided_design import (
     design_schema_by_identity,
     design_schema_registry,
 )
+from spg.domain.response_contract import ResponseIntent
+from spg.application.response_contract_expression import (
+    governed_contract_realizer_instruction,
+    response_contract_expression_guidance,
+)
 from spg.domain.conversation import (
     CollaborationAlternative,
     ConversationAttentionLevel,
@@ -161,6 +166,7 @@ class _InteractionSemanticProviderPayload(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    response_intent: ResponseIntent | None = None
     interpreted_motive: str | None
     desired_outcome: str | None
     candidate_context: tuple[str, ...]
@@ -794,7 +800,43 @@ class CodexSdkInteractionSemanticCapability:
             "advisory values concise, never private reasoning or chain of thought. "
             "Distinguish suggestions from Human facts and admitted decisions. Ask only "
             "when an unresolved fact changes the next material choice. After a correction "
-            "or rejected recommendation, use the revised direction without reopening it. "
+            "use corrected facts without reopening them. Unsupported disagreement is not "
+            "a correction of fact and must not reverse a judgment by itself. "
+            "Populate response_intent for THIS turn, independently of the Work lifecycle: "
+            "EXPLORE contributes relevant possibilities; ANALYZE assesses a claim or architecture; "
+            "DESIGN shapes a solution; DECIDE chooses with decisive tradeoffs; ANSWER answers a "
+            "bounded question; DIAGNOSE investigates an observed symptom; EXECUTE requests action "
+            "on sufficiently clear intent; CORRECT replaces a mistaken understanding; STATUS "
+            "reports actual progress. A topic does not determine mode: discussion of an existing "
+            "plan differs from a command to carry it out. Use executable_context only when the "
+            "current request and context sufficiently specify a bounded next action; this grants "
+            "no authority. For exploration/discussion/status use SIDE_QUESTION and "
+            "NO_GOVERNED_CHANGE on active Work; do not turn conversational ideas into changes. "
+            "Use minimal sufficient semantic answer material: no tutorial unless requested. "
+            "Questions have cost: unresolved_material_questions is empty unless a missing answer "
+            "materially blocks result, authority, safety, cost, scope or acceptance and cannot be "
+            "handled by a reversible assumption. Missing diagnostic evidence is not itself "
+            "an authority blocker. Do not invent a permission/consent question because logs "
+            "might hypothetically contain sensitive data; ask only for a concrete missing "
+            "fact after available ordinary checks are exhausted. A request to fix a defect "
+            "asks Watt to own the checks and repair, not return a debugging questionnaire. "
+            "EXECUTE needs a brief acknowledgment and "
+            "governed next action, not a replay of settled design. EXPLORE needs useful ideas, "
+            "not a questionnaire or one-line acknowledgment. "
+            "In response_intent keep FACT, INFERENCE, RECOMMENDATION, WORKING_ASSUMPTION, "
+            "PREFERENCE and UNCERTAINTY distinct. Record a concise judgment_proposition and "
+            "judgment_basis as exact existing reference IDs or exact supplied evidence/constraints; "
+            "set judgment_subject to the stable decision topic, retaining it for objections and "
+            "changing it for unrelated questions. "
+            "never invent evidence. The previous_response_contract is advisory turn history, "
+            "not engineering truth. Unsupported disagreement must inspect and preserve its "
+            "judgment unless actual new facts, disproven evidence, changed goals/priorities or "
+            "a demonstrated inference error changes the basis. Explain a proposed change in "
+            "judgment_change_reason and cite its basis; mere disagreement is not new evidence. "
+            "When the Human reports an attempted strategy failed, set prior_strategy_failed, "
+            "with a stable repeated_failure_signature describing the symptom (reuse it across "
+            "the same failure); change diagnostic strategy, do not repeat prior repair advice. "
+            "These fields are short interaction evidence, not private reasoning. "
             "Return JSON only matching the schema, "
             "including every key and [] for empty arrays. Keep structured values concise "
             "without omitting explicit facts or requested explanation. Schema applicability "
@@ -1005,6 +1047,7 @@ class CodexSdkGovernedResponseRealizer:
             "forbidden_claims, narrate internal workflow, or add a production decision. "
             "Use concise, natural language unless depth is needed. Return JSON only with "
             "natural_response.\n\n"
+            + response_contract_expression_guidance(envelope.response_contract)
             + json.dumps(
                 envelope.model_dump(mode="json"),
                 ensure_ascii=False,
@@ -1012,6 +1055,8 @@ class CodexSdkGovernedResponseRealizer:
                 separators=(",", ":"),
             )
         )
+        if envelope.response_contract is not None:
+            instruction = governed_contract_realizer_instruction(envelope)
         ApprovalMode, Sandbox = _codex_controls()
         started_at = monotonic()
         first_delta_seconds: float | None = None
@@ -1295,6 +1340,7 @@ class CodexSdkWorkInteractionCapability:
     ) -> InteractionAssessmentCandidate:
         return InteractionAssessmentCandidate(
             turn_intent=semantic.collaboration.turn_intent,
+            response_intent=semantic.response_intent,
             interpreted_motive=semantic.interpreted_motive,
             desired_outcome=semantic.desired_outcome,
             design_intent_frame=semantic.collaboration.design_intent_frame,

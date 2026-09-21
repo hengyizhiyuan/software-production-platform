@@ -20,6 +20,9 @@ from spg.application.guided_design import (
 )
 from spg.application.design_intent import frame_design_intent_text
 from spg.application.engineering_semantics import bind_engineering_semantic_facts
+from spg.application.response_contract import build_response_contract
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.domain.response_contract import InteractionMode, JudgmentStance, ResponseIntent
 
 from spg.domain.conversation import ConversationContextMessage, ConversationTurnIntent
 from spg.domain.engineering_semantics import (
@@ -66,6 +69,7 @@ from spg.application.wic_response import (
     governed_response_envelope,
     policy_governed_response,
     reconcile_fast_and_deep,
+    reconcile_contract_response,
     reconcile_provisional_intent,
 )
 from spg.domain.product import (
@@ -204,7 +208,7 @@ def _work_reality_status_question(value: str) -> bool:
     return bool(_nonmutating_question(text) and re.search(
         r"(?:目前|现在|当前|执行|进度|等待|状态|running|progress|status)"
         r".*(?:状态|进度|做到|执行|等待|卡住|哪里|哪了|了吗|什么|how|why|running|progress|status)"
-        r"|(?:为什么|怎么|why|how).*(?:等待|执行|进度|卡住|waiting|running|progress)", text,
+        r"|(?:为什么|怎么|why|how).*(?:等待|执行|进度|卡住|卡在|queued|waiting|running|progress)", text,
     ))
 
 
@@ -867,7 +871,10 @@ class WorkInteractionService:
                     3,
                 )
             )
+            contract_event = next((event for event in response_events
+                                   if event.event_type is WicResponseEventType.RESPONSE_CONTRACT_READY), None)
             result.update(
+                response_contract=None if contract_event is None else contract_event.metadata.get("response_contract"),
                 ttfms_ms=elapsed(first_meaningful),
                 ttfsr_ms=realization_elapsed(deltas[0] if deltas else None),
                 ttcr_ms=elapsed(final),
@@ -1054,6 +1061,19 @@ class WorkInteractionService:
         with self._turn_lock:
             fast = self._turn_fast_candidates.get(turn_id)
         semantics = assessment.progressive_semantics
+        with self.database.unit_of_work() as uow:
+            store = InteractionStore(uow.session)
+            contract = store.latest_response_contract(
+                assessment.interaction_id, basis_fingerprint=assessment.basis_fingerprint,
+            )
+            previous_contract = store.latest_response_contract(
+                assessment.interaction_id, completed_only=True,
+            )
+            recent_messages = tuple(
+                ConversationContextMessage(actor=message.actor.value, content=message.content)
+                for message in store.messages(assessment.interaction_id, limit=8)
+                if message.processing_status is InteractionTurnStatus.COMPLETED
+            )
         reconciliation = (
             ResponseReconciliation.REFINE
             if semantics is None
@@ -1065,6 +1085,7 @@ class WorkInteractionService:
             if provisional_event is not None
             else ResponseReconciliation.REFINE
         )
+        reconciliation = reconcile_contract_response(contract, reconciliation, semantics)
         if provisional:
             if reconciliation is ResponseReconciliation.MATERIAL_CORRECTION:
                 continuation = "\n\n" + corrected_continuation(
@@ -1083,6 +1104,9 @@ class WorkInteractionService:
             provisional_content=provisional,
             reconciliation=reconciliation,
             latest_human_input=latest_human_input,
+            response_contract=contract,
+            previous_response_contract=previous_contract,
+            recent_relevant_messages=recent_messages,
         )
         response_realizer = self.response_realizer
         pipeline_evidence = getattr(self.capability, "last_pipeline_evidence", None)
@@ -1831,6 +1855,31 @@ class WorkInteractionService:
                         "created_at": now,
                     }
                 )
+            if policy_governed:
+                turn = store.unfinished_turn(interaction_id)
+                if turn is not None:
+                    # Match the asynchronous Fast Reception event writer lock.
+                    turn = store.turn(turn.id, for_update=True)
+                    assert turn is not None
+                    assessment = store.assessment(assessment_id)
+                    assert assessment is not None
+                    contract = build_response_contract(
+                        assessment, interpretation=candidate.response_intent,
+                        source_records=records,
+                        previous_contract=store.latest_response_contract(
+                            interaction_id, completed_only=True,
+                        ),
+                    )
+                    store.insert_response_event({
+                        "id": uuid4(), "interaction_id": interaction_id,
+                        "turn_id": turn.id, "response_id": turn.id,
+                        "sequence": store.next_response_event_sequence(turn.id),
+                        "event_type": WicResponseEventType.RESPONSE_CONTRACT_READY.value,
+                        "content": None, "basis_fingerprint": current_basis,
+                        "reconciliation": None,
+                        "event_metadata": {"response_contract": contract.model_dump(mode="json")},
+                        "created_at": now,
+                    })
             uow.commit()
         if on_pipeline_stage is not None:
             on_pipeline_stage("assessment_persisted")
@@ -2163,6 +2212,7 @@ class WorkInteractionService:
                 or message.processing_status is InteractionTurnStatus.COMPLETED
             )
             prior = store.latest_assessment(interaction_id)
+            previous_contract = store.latest_response_contract(interaction_id, completed_only=True)
             active_context = self._active_work_context(uow.session, interaction)
         if not records:
             raise InteractionInvariantViolation("Interaction has no assessment basis")
@@ -2180,6 +2230,7 @@ class WorkInteractionService:
             active_work_context=active_context,
             basis_fingerprint=fingerprint,
             recent_conversation_messages=messages,
+            previous_response_contract=previous_contract,
         )
 
     @staticmethod
@@ -2368,6 +2419,15 @@ class WorkInteractionService:
     ]:
         if active is None:
             return None, None, None
+        if candidate.turn_intent is ConversationTurnIntent.DISAGREEMENT:
+            # An objection requests assessment of a judgment. It cannot become a
+            # Work change because a provider mislabeled its expression CORRECT.
+            return WorkFocusClassification.SIDE_QUESTION, WorkImpactDisposition.NO_GOVERNED_CHANGE, None
+        if candidate.response_intent is not None and candidate.response_intent.interaction_mode in {
+            InteractionMode.EXPLORE, InteractionMode.ANALYZE, InteractionMode.DESIGN,
+            InteractionMode.DECIDE, InteractionMode.ANSWER, InteractionMode.STATUS,
+        }:
+            return WorkFocusClassification.SIDE_QUESTION, WorkImpactDisposition.NO_GOVERNED_CHANGE, None
         focus = candidate.focus_classification or WorkFocusClassification.ON_TOPIC
         if focus in {
             WorkFocusClassification.MATERIAL_BRANCH,
@@ -2580,6 +2640,7 @@ class WorkInteractionService:
             binding = product.runtime_binding(revision.work_id)
             summary = None if binding is None else product.runtime_summary(binding)
             decision = None if plan_revision is None else steering.latest_decision(plan_revision.id)
+            queue_entries = NativeExecutionStore(uow.session).list_queue(work_id=revision.work_id)
         phase = {"DESIGN": "整理解决方案", "REFINE": "澄清当前步骤", "PRODUCE": "生产", "VERIFY_ACCEPT": "验证与验收", "COMPLETE": "完成"}.get(
             None if current is None else current.type.value, "等待下一步")
         if summary is not None and summary.runtime_commit_id is not None:
@@ -2608,6 +2669,27 @@ class WorkInteractionService:
             f"目前处于「{phase}」：{current.objective if current else '尚无当前步骤'}。"
             f"{activity}{attention}"
         )
+        diagnose = bool(re.search(
+            r"为什么|怎么.*(?:卡|等待)|why|stuck", basis.records[-1].content, re.I,
+        ))
+        current_queue = tuple(item for item in queue_entries
+                              if binding is not None and item.pwu_id == binding.work_unit_id
+                              and (summary is None or summary.attempt_id is None
+                                   or item.attempt_id == summary.attempt_id))
+        latest_queue = max(current_queue, key=lambda item: item.enqueued_at, default=None)
+        if latest_queue is not None:
+            label = ("最近一次执行状态" if latest_queue.condition.value in {
+                "COMPLETED", "FAILED", "CANCELLED", "SUPERSEDED",
+            } else "当前执行状态")
+            queue_fact = f"{label}是 {latest_queue.condition.value}。"
+            reason = latest_queue.wait_reason
+            if reason:
+                queue_fact += f"系统记录的原因：{reason}。"
+            elif diagnose:
+                queue_fact += "现有记录没有说明等待原因，暂时不能确定根因；下一步需要核对调度器和可用执行容量。"
+            answer = queue_fact + (attention if diagnose else answer)
+        elif diagnose:
+            answer = "当前生产周期没有对应的执行队列记录，现有证据不足以确认你描述的原因。" + activity + attention
         return InteractionAssessmentCandidate(
             turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
             interpreted_motive=revision.motive,
@@ -2618,5 +2700,11 @@ class WorkInteractionService:
             focus_classification=WorkFocusClassification.SIDE_QUESTION,
             impact_disposition=WorkImpactDisposition.NO_GOVERNED_CHANGE,
             natural_response=answer,
+            response_intent=ResponseIntent(
+                interaction_mode=InteractionMode.DIAGNOSE if diagnose else InteractionMode.STATUS,
+                rationale="Watt-owned read-only Work/Runtime projection.",
+                judgment_stance=JudgmentStance.FACT,
+                judgment_basis=active.relevant_reality_references,
+            ),
             provider_identity="watt-native:work-reality-query",
         )

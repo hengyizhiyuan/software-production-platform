@@ -10,6 +10,7 @@ from sqlalchemy import func, insert, select, update
 from sqlalchemy.orm import Session
 
 from spg.domain.design_intent import DesignIntentFrame
+from spg.domain.response_contract import ResponseContract
 from spg.domain.interaction import (
     ConversationMessage,
     Interaction,
@@ -218,6 +219,30 @@ class InteractionStore:
             .order_by(interaction_response_events.c.sequence)
         ).mappings()
         return tuple(self._response_event(row) for row in rows)
+
+    def latest_response_contract(
+        self, interaction_id: UUID, *, basis_fingerprint: str | None = None,
+        completed_only: bool = False,
+    ) -> ResponseContract | None:
+        """Read advisory turn evidence; never project it into engineering truth."""
+        statement = select(interaction_response_events.c.event_metadata).where(
+            interaction_response_events.c.interaction_id == interaction_id,
+            interaction_response_events.c.event_type == "RESPONSE_CONTRACT_READY",
+        )
+        if basis_fingerprint is not None:
+            statement = statement.where(
+                interaction_response_events.c.basis_fingerprint == basis_fingerprint
+            )
+        if completed_only:
+            statement = statement.join(
+                interaction_turns,
+                interaction_turns.c.id == interaction_response_events.c.turn_id,
+            ).where(interaction_turns.c.status == InteractionTurnStatus.COMPLETED.value)
+        value = self.session.execute(statement.order_by(
+            interaction_response_events.c.created_at.desc(),
+            interaction_response_events.c.sequence.desc(),
+        ).limit(1)).scalar_one_or_none()
+        return None if value is None else ResponseContract.model_validate(value["response_contract"])
 
     def update_turn_messages_status(
         self,

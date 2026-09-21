@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from uuid import NAMESPACE_URL, uuid5
 
+from spg.domain.conversation import ConversationTurnIntent
 from spg.domain.interaction import (
     ActiveWorkInterpretationContext, InteractionAssessment,
     InteractionAssessmentCandidate, InteractionRecord,
@@ -81,11 +82,15 @@ def build_progressive_semantics(
     base_motive = active_context.work_revision.motive if active_context else (prior_assessment.interpreted_motive if prior_assessment else None)
     base_constraints = active_context.work_revision.constraints if active_context else (prior_assessment.candidate_constraints if prior_assessment else ())
     base_facts = active_context.work_revision.context_facts if active_context else (prior_assessment.candidate_context if prior_assessment else ())
-    working_motive = candidate.interpreted_motive
-    correction = _CORRECTION.search(text)
-    if correction:
+    # Challenging Watt's judgment is not a correction of the Human's Motive.
+    # Preserve the semantic distinction before the legacy lexical fallback;
+    # e.g. a trailing "不对。" must not manufacture an empty Motive supersession.
+    disagreement = candidate.turn_intent is ConversationTurnIntent.DISAGREEMENT
+    working_motive = base_motive if disagreement and base_motive else candidate.interpreted_motive
+    correction = None if disagreement else _CORRECTION.search(text)
+    explicit = correction.group(1).strip("。 ") if correction else None
+    if explicit:
         signals.append(PatternSignal.EXPLICIT_CORRECTION)
-        explicit = correction.group(1).strip("。 ")
         working_motive = _correction_target(explicit)
         deltas.append(_delta(
             SemanticCategory.MOTIVE, SemanticDeltaOperation.SUPERSEDED,

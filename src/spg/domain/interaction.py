@@ -9,6 +9,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from spg.domain.response_contract import ResponseContract, ResponseIntent
 from spg.domain.conversation import (
     ConversationContextMessage,
     ConversationTurnIntent,
@@ -217,6 +218,7 @@ class InteractionInterpretationInput(BaseModel):
     active_work_context: "ActiveWorkInterpretationContext | None" = None
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     recent_conversation_messages: tuple[ConversationContextMessage, ...] = ()
+    previous_response_contract: ResponseContract | None = None
 
 
 class ActiveWorkInterpretationContext(BaseModel):
@@ -258,6 +260,7 @@ class InteractionAssessmentCandidate(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     turn_intent: ConversationTurnIntent = ConversationTurnIntent.EXPLORE
+    response_intent: ResponseIntent | None = None
     interpreted_motive: str | None = None
     desired_outcome: str | None = None
     design_intent_frame: DesignIntentFrame | None = None
@@ -281,6 +284,7 @@ class InteractionSemanticCandidate(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    response_intent: ResponseIntent | None = None
     interpreted_motive: str | None = None
     desired_outcome: str | None = None
     candidate_context: tuple[str, ...] = ()

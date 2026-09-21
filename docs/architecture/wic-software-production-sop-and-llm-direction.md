@@ -2,10 +2,15 @@
 
 Date: 2026-09-18
 
+Updated: 2026-09-21 for the separately authorized WIC Response Contract task.
+
 This document records a future architecture direction discovered through recent
-Watt Human Dogfood. It is not an implementation specification, does not reopen
-the current WIC architecture, and authorizes no change to prompts, runtime
-behavior, Work Admission, Steering, Production, Conversation, or UI.
+Watt Human Dogfood. Software Domain Grounding and Software Production SOP remain
+future work; this document does not authorize their implementation. The
+separately authorized [WIC Response Contract](wic-response-contract.md) task now
+establishes the turn-scoped collaboration foundation those later layers may
+consume. It preserves the closed Work Admission, Engineering Semantic Truth,
+Steering, Production, and delivery boundaries.
 
 Repository Reality remains authoritative.
 
@@ -41,15 +46,19 @@ control semantics should not remain mostly implicit inside LLM output.
 > Human expression may remain free. Production semantics should become
 > increasingly structured. LLM expression may remain natural.
 
-The future WIC direction should study this cooperation:
+The current Response Contract layer and the future WIC direction fit together as
+follows:
 
 ```text
 Human free-form expression
     -> LLM semantic interpretation
-    -> governed structured semantic state
-    -> deterministic SOP / sufficiency / policy / transition logic
-    -> selected interaction or production move
-    -> LLM natural realization
+       + current Semantic / Work / Runtime Reality
+       + conversation trajectory
+    -> turn-scoped Response Contract: what this answer owes the Human
+    -> existing governed semantic / authority / progression boundaries
+       [future: Software Domain Grounding and Software Production SOP]
+    -> Safe Response Envelope
+    -> natural, progressive Conversation realization
 ```
 
 The structured state and deterministic decisions belong inside Watt. They
@@ -121,7 +130,7 @@ routing; new-Motive detection; Human Authority; production readiness;
 next-owner selection; clarification necessity; safe defaults; and acceptance
 meaning.
 
-## 6. Relationship to Engineering Semantic Truth
+## 6. Relationship to Engineering Semantic Truth and Response Contract
 
 Engineering Semantic Truth was implemented, qualified, and Human-accepted in
 the 2026-09-20 milestone. Its responsibility is:
@@ -139,17 +148,35 @@ The intended separation is:
 Engineering Semantic Truth
     -> WHAT DO WE KNOW / BELIEVE?
 
+WIC Response Contract
+    -> WHAT KIND OF ANSWER / COLLABORATION DOES THIS TURN REQUIRE?
+
 WIC Software Production SOP
-    -> WHAT SHOULD HAPPEN NEXT GIVEN WHAT WE KNOW?
+    -> FUTURE POLICY INPUTS FOR RELIABLE PROGRESSION / SUFFICIENCY
+
+Steering
+    -> FORMAL WHAT NEXT FOR THIS WORK
 
 LLM realization
-    -> HOW SHOULD WATT COMMUNICATE / CONTRIBUTE NATURALLY?
+    -> HOW SHOULD WATT EXPRESS THE GOVERNED TURN NATURALLY?
 ```
 
 Future WIC SOP logic should consume the implemented Engineering Semantic Truth
 wherever possible instead of independently reinterpreting the original Human
-text for each decision. This document neither designs nor starts that future
-implementation.
+text for each decision. Neither Response Contract nor a future SOP replaces
+Steering as the owner of formal Work progression.
+
+Response Contract decides turn-scoped interaction form: explore, analyze,
+design, decide, answer, diagnose, execute, correct, or report current status. It
+sets the primary answer obligation, opening, information and question budgets,
+judgment basis, and requested advancement posture. It is interaction evidence,
+not a new source of Engineering Semantic Truth or authority to execute. A
+request to proceed still uses existing admission and governance mechanisms.
+
+Software Domain Grounding is the next independent layer: richer software-domain
+concepts and constraints may inform interpretation and judgment, but must retain
+their source and epistemic status. A domain library, SOP library, or Guardian
+escalation engine is not implemented by the Response Contract task.
 
 ## 7. Relationship to Progressive Admission
 
@@ -193,14 +220,18 @@ alone.
 
 ## 9. Sequence
 
-This work is not started now. The intended order is:
+The revised sequence is:
 
 1. Stabilize the current Work / Production / Control Room Human journey.
 2. Implement and validate Engineering Semantic Truth for software-production
    semantics as a separate task. **Completed in the 2026-09-20 milestone.**
 3. Close the current Human-experience / production phase. **Completed.**
-4. Reopen WIC as a separately authorized architecture topic.
-5. Study and design `Software Production SOP × LLM` from Dogfood evidence.
+4. Establish WIC Response Contract under its separate authorization.
+   **Implemented and ready for Human Review under focused qualification;
+   Human Acceptance remains pending.**
+5. Study Software Domain Grounding as the next independently scoped capability.
+6. Study and design `Software Production SOP × LLM` from Dogfood evidence,
+   consuming Semantic Truth and Response Contract while preserving Steering.
 
 ## 10. Status
 
@@ -209,11 +240,21 @@ WIC_SOFTWARE_PRODUCTION_SOP_REDESIGN = NOT_STARTED
 
 ENGINEERING_SEMANTIC_TRUTH = IMPLEMENTED / QUALIFIED / HUMAN_ACCEPTED
 
-CURRENT_WIC = PRESERVED
+RESPONSE_CONTRACT = IMPLEMENTED
+
+RESPONSE_CONTRACT_HUMAN_REVIEW = READY / PENDING_HUMAN
+
+SOFTWARE_DOMAIN_GROUNDING = NEXT
+
+SOFTWARE_PRODUCTION_SOP = NEXT
+
+CLOSED_MILESTONE_BOUNDARIES = PRESERVED
 
 ORIGINAL_FREE_EXPRESSION_PRINCIPLE = PRESERVED
 
 DETERMINISTIC_SKELETON_PLUS_PROBABILISTIC_INTELLIGENCE = FUTURE_ARCHITECTURE_DIRECTION
 
-IMPLEMENTATION_AUTHORIZED = NO
+RESPONSE_CONTRACT_IMPLEMENTATION = SEPARATELY_AUTHORIZED
+
+DOMAIN_GROUNDING_AND_SOP_IMPLEMENTATION_AUTHORIZED = NO
 ```

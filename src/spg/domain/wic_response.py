@@ -9,7 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from spg.domain.conversation import InteractionStrategy
+from spg.domain.conversation import ConversationContextMessage, InteractionStrategy
+from spg.domain.response_contract import ResponseContract
 
 
 class WicRuntimeMode(StrEnum):
@@ -23,6 +24,7 @@ class WicResponseEventType(StrEnum):
     FAST_RECEPTION_STARTED = "FAST_RECEPTION_STARTED"
     PROVISIONAL_RESPONSE = "PROVISIONAL_RESPONSE"
     FAST_SUPPRESSED = "FAST_SUPPRESSED"
+    RESPONSE_CONTRACT_READY = "RESPONSE_CONTRACT_READY"
     RESPONSE_REFINEMENT = "RESPONSE_REFINEMENT"
     RESPONSE_CORRECTION = "RESPONSE_CORRECTION"
     RESPONSE_STREAM_STARTED = "RESPONSE_STREAM_STARTED"
@@ -95,6 +97,12 @@ class GovernedResponseEnvelope(BaseModel):
     question_policy_revision: str
     response_language: str
     interaction_strategy: InteractionStrategy
+    # Optional only for already persisted/legacy callers. Controlled WIC supplies
+    # an admitted turn contract before expression; it does not confer authority.
+    response_contract: ResponseContract | None = None
+    previous_response_contract: ResponseContract | None = None
+    latest_human_input: str | None = None
+    recent_relevant_messages: tuple[ConversationContextMessage, ...] = ()
 
 
 class GovernedResponseRealization(BaseModel):

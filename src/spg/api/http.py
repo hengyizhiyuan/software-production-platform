@@ -621,6 +621,9 @@ def create_http_application(
                     )
                     for response_event in response_events:
                         cursor = response_event.sequence
+                        if response_event.event_type.value == "RESPONSE_CONTRACT_READY":
+                            # Internal turn decision evidence is not a Human response event.
+                            continue
                         payload = response_event.model_dump(mode="json")
                         payload["response_id"] = str(response_event.response_id)
                         if response_event.event_type.value == "TURN_FAILED":

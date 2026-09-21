@@ -1,0 +1,3688 @@
+{
+  "scope": "Response Contract focused qualification; not Human Acceptance",
+  "start_head": "964f7b6c88cb9e3d216a2674713c1096753d510a",
+  "runtime": {
+    "config": {
+      "SPG_WIC_PROVIDER_ADAPTER": "deepseek",
+      "SPG_WIC_PROVIDER_MODEL": "deepseek-flash",
+      "SPG_WIC_PROVIDER_REASONING_EFFORT": "low",
+      "SPG_CONVERSATION_PROVIDER_ADAPTER": "deepseek",
+      "SPG_CONVERSATION_PROVIDER_MODEL": "deepseek-flash",
+      "SPG_CONVERSATION_PROVIDER_REASONING_EFFORT": "low",
+      "SPG_WIC_RUNTIME_MODE": "WIC_VNEXT_CONTROLLED",
+      "SPG_RUNTIME_ACTIVATION_MODE": "HUMAN_REVIEW"
+    },
+    "auth_available": true,
+    "runtime_version": {
+      "version_id": "39aeb50adf156aaf3e27887f47b9b7ab46b3887eb8ac79999d79252afdf2534e",
+      "base_revision": "964f7b6c88cb9e3d216a2674713c1096753d510a",
+      "base_tree_identity": "3432dec39e7db255904a9c5e658d95faa7fc6854",
+      "source_root": "/acceptance-source",
+      "configuration_root": "/review-config",
+      "source_digest": "950859dcc270597f069a48176c00b74d098e8f6fa05a9c36b819a4acd447f829",
+      "package_digest": "93aa6f446e78ae2d1b15201f5ba34475304674701d403ef5a4123d40ab5bfcff",
+      "static_asset_digest": "b0e281ad2f367067de57da665e943adf133f6894bcad7b9cc57c4e9e6d219637",
+      "dependency_lock_digest": "97a7ba494102ee7859bbd76b43829f84efe9f27392fa8c0ebed9f787cd83ff73",
+      "configuration_digest": "05f8aea0184a4451592d48995a25a1349aedb3832cde0df03239ba7a534b6c22"
+    },
+    "health": {
+      "service": "available",
+      "database": "available",
+      "application_initialized": true
+    },
+    "import_path": "/acceptance-source/spg/application/response_contract.py",
+    "app_pythonpath": "/acceptance-source",
+    "source_overlay_match": true,
+    "verified_source_files": 164,
+    "alembic_current": "20260919_44",
+    "alembic_head": "20260919_44",
+    "compose_project": "watt-response-contract-review",
+    "compose_config": "/tmp/watt-response-contract.compose.json",
+    "app_url": "http://127.0.0.1:8048/app",
+    "delivery_ports": "127.0.0.1:8010-8019 mapped to identical container ports"
+  },
+  "real_provider_observations": [
+    {
+      "case": "B-initial",
+      "input": "Git 仓库可以只拉一个分支吗？",
+      "interaction_id": "3a9e4b6a-6abb-47a6-ac70-5a0f9ab7e5f0",
+      "turn_id": "0cfc876e-3b17-45ab-91f8-a8e66ce55be3",
+      "status": "COMPLETED",
+      "content": "可以。克隆时用 --single-branch 就只拉一个分支，例如：\ngit clone --single-branch --branch <分支名> <仓库地址>\n不加 --branch 时只拉默认分支。之后要用别的分支，再单独取回：\ngit fetch origin <分支名>\n默认拉取的是该分支的完整历史；如果也想减少历史深度，可以再加 --depth 1 做浅克隆。",
+      "contract_recovery": "read-only persisted response event after process restart",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ANSWER_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: 用户询问 Git 是否能只拉取一个分支，属于事实性问题，直接给出可行做法即可，不涉及任何产品、设计或仓库结构变更。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "DIRECT_ANSWER",
+          "OPTIONAL_ADJACENT_INSIGHT"
+        ],
+        "judgment_stance": "UNCERTAINTY",
+        "question_budget": 0,
+        "interaction_mode": "ANSWER",
+        "judgment_subject": "Git 单分支克隆能力",
+        "basis_fingerprint": "5c41ce0412ee38c4073cba0910399aee49ea816a6184abe9da84ef525b264e3f",
+        "selected_question": null,
+        "source_record_ids": [
+          "29f9ada0-2a2e-4323-b5f1-83187c74cf76"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMUM_SUFFICIENT",
+        "primary_obligation": "ANSWER",
+        "judgment_proposition": "Git 支持只拉取一个分支，克隆时使用 --single-branch（可配合 --branch 指定分支），后续需要时再按需 fetch 其他分支。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 1,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:DESIRED_OUTCOME:得到可行的单分支拉取做法",
+          "semantic:FACT:用户在本地使用 Git 管理代码仓库",
+          "semantic:MOTIVE:确认 Git 是否支持只拉取单个分支，以及对应的操作方式"
+        ]
+      },
+      "timing_ms": {},
+      "stream_event_times": []
+    },
+    {
+      "case": "I",
+      "input": "我们先脑暴一下登录功能还能怎么玩。",
+      "interaction_id": "b06b6b67-2961-4492-8126-369bda31cff1",
+      "turn_id": "896c67ce-8b2a-415a-996a-8bc2243343f1",
+      "status": "COMPLETED",
+      "content": "先给出一组可逆的探索方向，供后续收敛时挑拣。身份凭据这条线，可以试通行密钥或设备内置的生物识别作为主路径，把密码降为备用；也可以做一次性链接，让用户从邮箱或短信点一下直接进入；还可以引入设备信任，常用设备上把登录简化成一次确认。信任与风险这条线，自适应登录可以根据设备、位置、时间段给不同强度的验证；异常行为时不是直接拒绝，而是触发一次轻量的二次确认，比如推送一条带上下文的确认；还可以把风险信号变成用户可见的“安全状态”，让用户自己决定是否加固。流程体验这条线，登录即偏好设置，在验证通过的同时把语言、时区、通知方式一并带出来，减少后续设置页；渐进式注册，先让用户以最小信息进入，等碰到需要身份的动作再补全；也可以把登录做成可跳过的引导，用游客态先跑一段，再在关键节点邀请绑定。与后续旅程衔接这条线，登录后直达上次现场，恢复未完成的草稿、购物车或阅读位置；也可以按角色或意图分流，登录后直接落到对应的工作台或内容流；还可以把登录动作本身变成一次选择，让用户告诉系统这次来的目的，系统据此组装首屏。这些方向的差别不在功能多少，而在它们各自改变的东西不同：凭据线主要动的是入口摩擦与安全边界，信任与风险线动的是验证过程中的动态判断，流程体验线动的是用户对登录这件事的感知，旅程衔接线动的是登录后的连续感。有些方向可以叠加，比如通行密钥加设备信任；有些则互相拉扯，比如无密码体验与部分用户对密码的心理依赖。这些目前都只是可逆的探索假设，不是已经定下的方案。",
+      "contract_recovery": "read-only persisted response event after process restart",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "CONTRIBUTION_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 明确要求先就登录功能进行脑暴，属于开放式可能性探索，尚无收敛或落地意图。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "POSSIBILITIES",
+          "USEFUL_DISTINCTIONS"
+        ],
+        "judgment_stance": "WORKING_ASSUMPTION",
+        "question_budget": 0,
+        "interaction_mode": "EXPLORE",
+        "judgment_subject": "登录功能的可拓展方向",
+        "basis_fingerprint": "ae833e4ccda9a90bd12fc5ec2d0ff666e2ad85cbc3aa4eb54402c8336abce015",
+        "selected_question": null,
+        "source_record_ids": [
+          "caf050cf-0570-4171-9d03-c5b31a1d4b7d"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "RELEVANT_DIVERGENCE",
+        "primary_obligation": "PROPOSE",
+        "judgment_proposition": "登录功能可以在身份方式、信任与安全、流程体验、登录后衔接等维度上扩展出多种可玩方向。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:DESIRED_OUTCOME:得到一组值得进一步评估的登录功能设计方向，供后续收敛与设计。",
+          "semantic:FACT:auth.login scope existing_login_feature within brainstorm",
+          "semantic:FACT:当前处于先发散、后收敛的早期构思阶段。",
+          "semantic:FACT:讨论对象是一个既有的登录功能。",
+          "semantic:MOTIVE:在正式设计之前，先广泛探索登录功能还有哪些新的玩法方向。"
+        ]
+      },
+      "timing_ms": {},
+      "stream_event_times": []
+    },
+    {
+      "case": "L-design",
+      "input": "我们做一个两人团队内部用的登录演示页，暂不接真实账号、不存密码，只演示邮箱输入、校验提示和登录成功。先讨论界面和交互设计，不实现。",
+      "interaction_id": "b06b6b67-2961-4492-8126-369bda31cff1",
+      "turn_id": "f22955ab-8f4c-401d-9bfa-b965ab097d1e",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "我建议把演示页收敛为一屏内的三态闭环：上方邮箱输入，紧接其下一行即时校验提示，再下方是登录按钮；提交后同一块区域整体切换为登录成功，并带一个“返回重试”把状态复位，以便连续演示。理由是演示目标只有三件事——邮箱输入、校验提示、成功态——它们天然是顺序组件，放在同一视觉区域里能让观看者不离开页面就看到状态流转，两人内部演示时也容易反复走。把成功态放在原区域而不是跳走，还避免了为演示引入额外的路由或页面骨架，和暂不接真实账号、不存密码的边界一致。代价是这种一屏收敛会牺牲对多步登录旅程的表达力，比如分步验证、重定向回来的场景在这个结构里没有位置；如果后续想演示多步流程，就得把状态区扩展成可堆叠的步骤容器，而不是现在的一屏单区。当前这只是一个可逆的设计假设，用来把界面和交互讨论落在一个可评审的具体形状上，不是定稿。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "RECOMMENDATION_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 明确要求做一个登录演示页，并指定先讨论界面与交互设计、暂不实现，因此本轮应答是设计成形而非执行或答疑。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "New judgment concerns a different semantic subject; no prior judgment was reversed."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "RECOMMENDATION",
+          "REASONING",
+          "TRADEOFF"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "DESIGN",
+        "judgment_subject": "两人团队内部登录演示页的界面与交互设计方向",
+        "basis_fingerprint": "f0a1b8214cad6fde903780889110d307d0187fb71980c6059b4851ff8e409914",
+        "selected_question": null,
+        "source_record_ids": [
+          "caf050cf-0570-4171-9d03-c5b31a1d4b7d",
+          "14bd82eb-a2e4-4ca9-b36f-688f93448f0c"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "REASONED_TRADEOFFS",
+        "primary_obligation": "PROPOSE",
+        "judgment_proposition": "把演示页收敛为一屏内的邮箱输入—即时校验提示—登录成功三态闭环，最符合“只演示、不接真实账号、不存密码”的意图。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "PROPOSE_AND_WAIT",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:不存密码",
+          "semantic:CONSTRAINT:两人团队内部使用",
+          "semantic:CONSTRAINT:先讨论界面和交互设计，不实现",
+          "semantic:CONSTRAINT:只演示邮箱输入、校验提示和登录成功",
+          "semantic:CONSTRAINT:暂不接真实账号",
+          "semantic:DESIRED_OUTCOME:得到一套可评审的登录演示页界面与交互设计：邮箱输入、校验提示、登录成功三态的表征与流转方式。",
+          "semantic:FACT:auth.login scope existing_login_feature within brainstorm",
+          "semantic:FACT:login_demo.account_backend behavior not_connected_no_credential_storage within demo",
+          "semantic:FACT:login_demo.audience scope two_person_internal_team within demo",
+          "semantic:FACT:login_demo.demonstrated_states ordered_component email_input × validation_message × login_success within demo",
+          "semantic:FACT:login_demo.work_sequence precedence design_discussion × implementation within current_turn",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，本轮转入一个具体的小型演示页面。",
+          "semantic:FACT:当前处于先发散、后收敛的早期构思阶段。",
+          "semantic:FACT:当前处于先讨论设计、暂不实现的阶段。",
+          "semantic:FACT:用途是两人团队内部演示，不是面向外部用户的产品需求。",
+          "semantic:FACT:讨论对象是一个既有的登录功能。",
+          "semantic:MOTIVE:为两人团队内部做一个只演示邮箱输入、校验提示与登录成功的登录演示页，先把界面与交互设计讨论清楚。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 23493.41,
+        "ttfsr_ms": 5451.626,
+        "ttcr_ms": 24225.938,
+        "completed_ms": 24225.884,
+        "first_realization_delta_ms": 23475.684,
+        "response_delta_count": 21
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 23499.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23553.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23553.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23607.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23661.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23661.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23769.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23769.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23823.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23823.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23877.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23933.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23933.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24041.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24041.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24095.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24149.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24149.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24203.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24204.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24204.3
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 24261.2
+        }
+      ]
+    },
+    {
+      "case": "J-initial",
+      "input": "就按刚才方案实现登录功能。",
+      "interaction_id": "b06b6b67-2961-4492-8126-369bda31cff1",
+      "turn_id": "f6918a69-7755-4b98-a231-9495888d757c",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "按已确认的一屏三态方案落地：邮箱输入框、紧邻的内联校验提示、登录按钮，提交后在同一区域切到成功态并可返回重试；邮箱校验先用宽松规则（需含 @ 与域名点），失败与成功各一条固定文案，仅在两人内部演示、不接真实账号也不存密码。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ACK_AND_EXECUTE",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 明确指示“就按刚才方案实现登录功能”，是把已讨论的一屏三态设计转入落地执行，而不是继续发散或答疑。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "New judgment concerns a different semantic subject; no prior judgment was reversed."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE",
+          "PROCEED"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "EXECUTE",
+        "judgment_subject": "两人团队内部登录演示页从设计讨论转入实现的下一步",
+        "basis_fingerprint": "dcad1b6f768edbf354fde2afa61ab3bfef9bcd7a9b06d5bbbee4638f79f99e48",
+        "selected_question": null,
+        "source_record_ids": [
+          "caf050cf-0570-4171-9d03-c5b31a1d4b7d",
+          "14bd82eb-a2e4-4ca9-b36f-688f93448f0c",
+          "0518b8fe-8682-4e87-bace-b29c68f6e67f"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMAL_ACKNOWLEDGEMENT",
+        "primary_obligation": "EXECUTE",
+        "judgment_proposition": "按已确认的一屏三态方案先落地一个可运行的单页演示（邮箱输入、即时校验提示、成功态切换），并把邮箱校验规则定为宽松格式，是当前最贴合“内部演示、不接真实账号、不存密码”的下一步。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ACK_AND_EXECUTE",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:不存密码",
+          "semantic:CONSTRAINT:两人团队内部使用",
+          "semantic:CONSTRAINT:先讨论界面和交互设计，不实现",
+          "semantic:CONSTRAINT:只演示邮箱输入、校验提示和登录成功",
+          "semantic:CONSTRAINT:按已讨论的界面与交互方案实现（原先“先讨论界面和交互设计，不实现”的顺序约束已被撤销）",
+          "semantic:CONSTRAINT:暂不接真实账号",
+          "semantic:DESIRED_OUTCOME:得到按已确认一屏三态方案实现的登录演示页：邮箱输入、即时校验提示、登录成功三态的呈现与流转。",
+          "semantic:FACT:auth.login scope existing_login_feature within brainstorm",
+          "semantic:FACT:login_demo.account_backend behavior not_connected_no_credential_storage within demo",
+          "semantic:FACT:login_demo.audience scope two_person_internal_team within demo",
+          "semantic:FACT:login_demo.demonstrated_states ordered_component email_input × validation_message × login_success within demo",
+          "semantic:FACT:login_demo.implementation_basis reference prior_proposed_single_screen_three_state_design within demo",
+          "semantic:FACT:login_demo.work_sequence precedence implementation within current_turn",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，本轮转入一个具体的小型演示页面。",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，随后转入一个具体的小型演示页面。",
+          "semantic:FACT:当前处于先讨论设计、暂不实现的阶段。",
+          "semantic:FACT:本轮 Human 撤销了“不实现”的顺序约束，转入按讨论方案实现。",
+          "semantic:FACT:用途是两人团队内部演示，不是面向外部用户的产品需求。",
+          "semantic:MOTIVE:为两人团队内部做一个只演示邮箱输入、校验提示与登录成功的登录演示页，并按已讨论的方案把它实现出来。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 29325.353,
+        "ttfsr_ms": 2317.366,
+        "ttcr_ms": 29550.7,
+        "completed_ms": 29560.133,
+        "first_realization_delta_ms": 29321.225,
+        "response_delta_count": 6
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 29360.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 29360.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 29415.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 29470.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 29470.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 29579.5
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 29579.8
+        }
+      ]
+    },
+    {
+      "case": "F-initial",
+      "input": "继续做吧。",
+      "interaction_id": "b06b6b67-2961-4492-8126-369bda31cff1",
+      "turn_id": "40d5946c-432c-410a-b283-927cc90ba3d1",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "好，按已确认的单屏三态方案推进：邮箱输入框、紧邻的内联校验提示、登录按钮，提交后在同一区域切到成功态并可返回重试；邮箱校验先用宽松规则，失败与成功各一条固定文案，文件名、标题与样式先取可随时调整的占位默认。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ACK_AND_EXECUTE",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 只说“继续做吧”，是对已下达实现指令的承接，不是新问题或新目标；应给出简短确认并推进已定的一屏三态演示页落地，而不是重述设计。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Prior judgment retained: no newly cited material evidence established a changed basis."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE",
+          "PROCEED"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "EXECUTE",
+        "judgment_subject": "两人团队内部登录演示页从设计讨论转入实现的下一步",
+        "basis_fingerprint": "a3934f31c51e7c6c83b89526a581935c844e3c4ba6f90e79cf7aa17a6726f6f1",
+        "selected_question": null,
+        "source_record_ids": [
+          "caf050cf-0570-4171-9d03-c5b31a1d4b7d",
+          "14bd82eb-a2e4-4ca9-b36f-688f93448f0c",
+          "0518b8fe-8682-4e87-bace-b29c68f6e67f",
+          "8b1bc19a-6449-4aab-a1f2-2527a86f0a06"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMAL_ACKNOWLEDGEMENT",
+        "primary_obligation": "EXECUTE",
+        "judgment_proposition": "按已确认的一屏三态方案先落地一个可运行的单页演示（邮箱输入、即时校验提示、成功态切换），并把邮箱校验规则定为宽松格式，是当前最贴合“内部演示、不接真实账号、不存密码”的下一步。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ACK_AND_EXECUTE",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:不存密码",
+          "semantic:CONSTRAINT:两人团队内部使用",
+          "semantic:CONSTRAINT:先讨论界面和交互设计，不实现",
+          "semantic:CONSTRAINT:只演示邮箱输入、校验提示和登录成功",
+          "semantic:CONSTRAINT:按已讨论的界面与交互方案实现（原先“先讨论界面和交互设计，不实现”的顺序约束已被撤销）",
+          "semantic:CONSTRAINT:暂不接真实账号",
+          "semantic:DESIRED_OUTCOME:得到按已确认一屏三态方案实现的登录演示页：邮箱输入、即时校验提示、登录成功三态的呈现与流转。",
+          "semantic:FACT:auth.login scope existing_login_feature within brainstorm",
+          "semantic:FACT:login_demo.account_backend behavior not_connected_no_credential_storage within demo",
+          "semantic:FACT:login_demo.audience scope two_person_internal_team within demo",
+          "semantic:FACT:login_demo.demonstrated_states ordered_component email_input × validation_message × login_success within demo",
+          "semantic:FACT:login_demo.implementation_basis reference prior_proposed_single_screen_three_state_design within demo",
+          "semantic:FACT:login_demo.work_sequence precedence implementation within current_turn",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，本轮转入一个具体的小型演示页面。",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，随后转入一个具体的小型演示页面。",
+          "semantic:FACT:当前处于先讨论设计、暂不实现的阶段。",
+          "semantic:FACT:本轮 Human 撤销了“不实现”的顺序约束，转入按讨论方案实现。",
+          "semantic:FACT:用途是两人团队内部演示，不是面向外部用户的产品需求。",
+          "semantic:MOTIVE:为两人团队内部做一个只演示邮箱输入、校验提示与登录成功的登录演示页，并按已讨论的方案把它实现出来。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 13092.708,
+        "ttfsr_ms": 1262.997,
+        "ttcr_ms": 13567.523,
+        "completed_ms": 13582.89,
+        "first_realization_delta_ms": 13092.703,
+        "response_delta_count": 7
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 13120.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 13230.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 13231.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 13288.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 13342.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 13342.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 13397.9
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 13617.2
+        }
+      ]
+    },
+    {
+      "case": "C-initial",
+      "input": "我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？",
+      "interaction_id": "2a69ed6e-1cd4-44aa-94d9-9afff6008be7",
+      "turn_id": "36d4581e-2052-4db5-9c9c-1d8acd377e99",
+      "status": "FAILED",
+      "failure": "Governed Response Realizer returned an invalid result",
+      "content": null,
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "JUDGMENT_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 描述了已有架构取向并直接询问是否合理，属于对既有方案的评估判断，而非要求新建或修改。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "CONCLUSION",
+          "REASONING",
+          "TRADEOFF"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "ANALYZE",
+        "judgment_subject": "面向两人团队的运营后台采用单体应用内按业务分模块、PostgreSQL、暂不拆微服务的架构",
+        "basis_fingerprint": "dbcce2ab295ac8d3e9097d44bafec198cf6e1efcd0dea758c048f85bdf13ab6f",
+        "selected_question": null,
+        "source_record_ids": [
+          "ab024c81-8565-4ce6-b967-e98157086ca9"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "REASONED_TRADEOFFS",
+        "primary_obligation": "ASSESS",
+        "judgment_proposition": "对两人开发团队和中小规模运营场景而言，这个方向是合理的：模块化单体在部署、调试和认知成本上最省，PostgreSQL 足以支撑这类业务的数据需求，微服务拆分可以推迟到出现明确的独立伸缩或团队边界需求时再做。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:使用 PostgreSQL",
+          "semantic:CONSTRAINT:先不拆微服务",
+          "semantic:CONSTRAINT:开发团队只有两人",
+          "semantic:DESIRED_OUTCOME:一个被评估为可行（或经调整后可行）的运营后台架构方向，支撑后续开发落地。",
+          "semantic:FACT:architecture.microservice_split scope 暂不拆分 within 运营后台",
+          "semantic:FACT:architecture.style equality 单体应用内按业务分模块 within 运营后台",
+          "semantic:FACT:persistence.database equality PostgreSQL within 运营后台",
+          "semantic:FACT:product.target_users scope 小团队 within 运营后台",
+          "semantic:FACT:team.developers cardinality 2 人 within 运营后台开发团队",
+          "semantic:FACT:当前方案是一个应用里按业务分模块",
+          "semantic:FACT:面向小团队的运营后台",
+          "semantic:MOTIVE:确认当前面向小团队的运营后台架构方案是否合理，以便决定是否按此方向投入开发。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": null,
+        "ttfsr_ms": null,
+        "ttcr_ms": null,
+        "completed_ms": null,
+        "first_realization_delta_ms": null,
+        "response_delta_count": 0
+      },
+      "stream_event_times": [
+        {
+          "name": "turn.failed",
+          "at_ms": 29488.6
+        }
+      ]
+    },
+    {
+      "case": "J-before-context-projection",
+      "input": "就按刚才方案实现登录功能。",
+      "interaction_id": "b06b6b67-2961-4492-8126-369bda31cff1",
+      "turn_id": "e319f8ce-323a-4048-a55b-39363f760398",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "好，就按已确认的一屏三态方案出首个可运行版本：邮箱输入框、紧邻的内联校验提示、登录按钮，提交后同一区域切到成功态并带“返回重试”；邮箱校验先用宽松规则，失败与成功各一条固定文案，文件名和样式先取可随时调整的占位默认。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ACK_AND_EXECUTE",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 重复下达“就按刚才方案实现登录功能”，承接已完成的设计讨论与既有实现指令，本轮应简短确认并继续落地单屏三态演示页，而非重述设计或提问。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Prior judgment retained: no newly cited material evidence established a changed basis."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE",
+          "PROCEED"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "EXECUTE",
+        "judgment_subject": "两人团队内部登录演示页从设计讨论转入实现的下一步",
+        "basis_fingerprint": "53e889299fdd7cceb26ca4c00d28bf5d3786cb7d5305cc6b708daf9c97dadb62",
+        "selected_question": null,
+        "source_record_ids": [
+          "caf050cf-0570-4171-9d03-c5b31a1d4b7d",
+          "14bd82eb-a2e4-4ca9-b36f-688f93448f0c",
+          "0518b8fe-8682-4e87-bace-b29c68f6e67f",
+          "8b1bc19a-6449-4aab-a1f2-2527a86f0a06",
+          "d796c7f8-21cd-418c-9ff6-aa13c89e0c16"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMAL_ACKNOWLEDGEMENT",
+        "primary_obligation": "EXECUTE",
+        "judgment_proposition": "按已确认的一屏三态方案先落地一个可运行的单页演示（邮箱输入、即时校验提示、成功态切换），并把邮箱校验规则定为宽松格式，是当前最贴合“内部演示、不接真实账号、不存密码”的下一步。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ACK_AND_EXECUTE",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:不存密码",
+          "semantic:CONSTRAINT:两人团队内部使用",
+          "semantic:CONSTRAINT:先讨论界面和交互设计，不实现",
+          "semantic:CONSTRAINT:只演示邮箱输入、校验提示和登录成功",
+          "semantic:CONSTRAINT:按已讨论的界面与交互方案实现（原先“先讨论界面和交互设计，不实现”的顺序约束已被撤销）",
+          "semantic:CONSTRAINT:暂不接真实账号",
+          "semantic:DESIRED_OUTCOME:得到按已确认一屏三态方案实现的登录演示页：邮箱输入、即时校验提示、登录成功三态的呈现与流转。",
+          "semantic:FACT:auth.login scope existing_login_feature within brainstorm",
+          "semantic:FACT:login_demo.account_backend behavior not_connected_no_credential_storage within demo",
+          "semantic:FACT:login_demo.audience scope two_person_internal_team within demo",
+          "semantic:FACT:login_demo.demonstrated_states ordered_component email_input × validation_message × login_success within demo",
+          "semantic:FACT:login_demo.implementation_basis reference prior_proposed_single_screen_three_state_design within demo",
+          "semantic:FACT:login_demo.work_sequence precedence implementation within current_turn",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，本轮转入一个具体的小型演示页面。",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，随后转入一个具体的小型演示页面。",
+          "semantic:FACT:当前处于先讨论设计、暂不实现的阶段。",
+          "semantic:FACT:本轮 Human 撤销了“不实现”的顺序约束，转入按讨论方案实现。",
+          "semantic:FACT:用途是两人团队内部演示，不是面向外部用户的产品需求。",
+          "semantic:MOTIVE:为两人团队内部做一个只演示邮箱输入、校验提示与登录成功的登录演示页，并按已讨论的方案把它实现出来。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 16526.944,
+        "ttfsr_ms": 1758.317,
+        "ttcr_ms": 16820.069,
+        "completed_ms": 16838.13,
+        "first_realization_delta_ms": 16526.941,
+        "response_delta_count": 7
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 16571.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16680.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16680.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16736.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16736.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16790.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16790.7
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 16846.3
+        }
+      ]
+    },
+    {
+      "case": "F-before-context-projection",
+      "input": "继续做吧。",
+      "interaction_id": "b06b6b67-2961-4492-8126-369bda31cff1",
+      "turn_id": "3926e519-4dd2-4b30-a365-152712053242",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "好，就按已确认的一屏三态方案出这版可运行演示页：邮箱输入框、紧邻的内联校验提示、登录按钮，提交后同一区域切到成功态并带“返回重试”；邮箱走宽松校验，失败与成功各一条固定文案，不接真实账号、不存密码。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ACK_AND_EXECUTE",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 再次说“继续做吧”，延续已确认的一屏三态登录演示页实现，无需重述设计或提问。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Prior judgment retained: no newly cited material evidence established a changed basis."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE",
+          "PROCEED"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "EXECUTE",
+        "judgment_subject": "两人团队内部登录演示页从设计讨论转入实现的下一步",
+        "basis_fingerprint": "340d919f20f08d2241a75b5ce21844b0f0ddaddd6e0df0500f4ca5a9a27390d8",
+        "selected_question": null,
+        "source_record_ids": [
+          "caf050cf-0570-4171-9d03-c5b31a1d4b7d",
+          "14bd82eb-a2e4-4ca9-b36f-688f93448f0c",
+          "0518b8fe-8682-4e87-bace-b29c68f6e67f",
+          "8b1bc19a-6449-4aab-a1f2-2527a86f0a06",
+          "d796c7f8-21cd-418c-9ff6-aa13c89e0c16",
+          "3cad09df-75b9-4fae-a47d-58c7a98b62ae"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMAL_ACKNOWLEDGEMENT",
+        "primary_obligation": "EXECUTE",
+        "judgment_proposition": "按已确认的一屏三态方案先落地一个可运行的单页演示（邮箱输入、即时校验提示、成功态切换），并把邮箱校验规则定为宽松格式，是当前最贴合“内部演示、不接真实账号、不存密码”的下一步。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ACK_AND_EXECUTE",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:不存密码",
+          "semantic:CONSTRAINT:两人团队内部使用",
+          "semantic:CONSTRAINT:先讨论界面和交互设计，不实现",
+          "semantic:CONSTRAINT:只演示邮箱输入、校验提示和登录成功",
+          "semantic:CONSTRAINT:按已讨论的界面与交互方案实现（原先“先讨论界面和交互设计，不实现”的顺序约束已被撤销）",
+          "semantic:CONSTRAINT:暂不接真实账号",
+          "semantic:DESIRED_OUTCOME:得到按已确认一屏三态方案实现的登录演示页：邮箱输入、即时校验提示、登录成功三态的呈现与流转。",
+          "semantic:FACT:auth.login scope existing_login_feature within brainstorm",
+          "semantic:FACT:login_demo.account_backend behavior not_connected_no_credential_storage within demo",
+          "semantic:FACT:login_demo.audience scope two_person_internal_team within demo",
+          "semantic:FACT:login_demo.demonstrated_states ordered_component email_input × validation_message × login_success within demo",
+          "semantic:FACT:login_demo.implementation_basis reference prior_proposed_single_screen_three_state_design within demo",
+          "semantic:FACT:login_demo.work_sequence precedence implementation within current_turn",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，本轮转入一个具体的小型演示页面。",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，随后转入一个具体的小型演示页面。",
+          "semantic:FACT:当前处于先讨论设计、暂不实现的阶段。",
+          "semantic:FACT:本轮 Human 撤销了“不实现”的顺序约束，转入按讨论方案实现。",
+          "semantic:FACT:用途是两人团队内部演示，不是面向外部用户的产品需求。",
+          "semantic:MOTIVE:为两人团队内部做一个只演示邮箱输入、校验提示与登录成功的登录演示页，并按已讨论的方案把它实现出来。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 10625.557,
+        "ttfsr_ms": 1439.651,
+        "ttcr_ms": 10918.583,
+        "completed_ms": 10935.216,
+        "first_realization_delta_ms": 10625.555,
+        "response_delta_count": 7
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 10662.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 10771.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 10771.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 10825.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 10825.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 10879.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 10879.3
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 10990.3
+        }
+      ]
+    },
+    {
+      "case": "C",
+      "input": "我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？",
+      "interaction_id": "b97d4fcb-f640-4c64-9917-1ad0e15aae26",
+      "turn_id": "22e6f17e-0c6a-4544-a678-64c6b28d0c0a",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "合理。对两人团队做面向小团队的运营后台，单应用内按业务分模块加上 PostgreSQL、暂不拆微服务，是当前阶段最务实的起点——它能让你把有限的精力放在业务功能上，而不是花在服务发现、链路追踪、分布式事务这些运维成本上。\n\n判断的理由很直接：两人的开发和运维预算决定了分布式复杂度是净负担而不是收益。微服务真正划算的前提是多个团队各自独立演进、部署节奏互不干扰，你现在没有这个前提，拆开只会把一次本地调用变成一次需要处理的网络失败。PostgreSQL 也足以支撑这个体量的运营后台，单库还能让事务和查询保持简单。\n\n真正的风险不在技术选型，而在模块边界会不会随开发推进而烂掉。同一个进程、同一个数据库里，跨模块直接查对方的表、随手调对方的内部方法几乎零成本，所以边界靠约定而不是靠架构强制。建议在动手前把模块清单和边界写成你能维持的形式：模块名、职责、对外接口、哪张表归谁。关键纪律是——表只被归属模块直接读写，跨模块一律走接口；跨模块事务尽量收敛到一个模块内完成。\n\n代价也要接受：单库单进程意味着一次部署全体上线，某个模块的内存泄漏或慢查询会拖累整个后台，扩容只能整体扩。这在早期可接受，但要为此留出后路——模块之间不要共享可变状态，不要建立跨模块的外键和深层联表，接口保持粗粒度、围绕业务能力而不是围绕表。这样未来最可能独立拆出去的模块（通常是通知、报表统计、对接外部系统这类边界清晰、负载特征不同的）才有干净的切口。\n\n结论是：按这个方案走，把力气花在守住模块边界和预留拆分切口中，而不是提前换成微服务。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "JUDGMENT_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human presents a concrete architecture plan and asks for a judgment on whether it is reasonable for a two-person team; this is assessment of a proposed design rather than a new artifact request.",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [
+          "开发团队只有两人"
+        ],
+        "response_moves": [
+          "CONCLUSION",
+          "REASONING",
+          "TRADEOFF"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "ANALYZE",
+        "judgment_subject": "两人团队运营后台采用单应用模块化 + PostgreSQL、暂不拆微服务的架构合理性",
+        "basis_fingerprint": "3bf79c5c2577fbbbc67c1d0c91d9c07fb219f1206d79c1fdd2e20db6de90c9d6",
+        "selected_question": null,
+        "source_record_ids": [
+          "976eae9e-6120-4829-af0e-a49ea13b3feb"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "REASONED_TRADEOFFS",
+        "primary_obligation": "ASSESS",
+        "judgment_proposition": "对于两人团队、面向小团队的运营后台，单应用按业务分模块 + PostgreSQL、暂不拆微服务是合理且务实的起点，风险主要在模块边界的纪律维护和未来拆分路径的前置准备，而非技术选型本身。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:一个应用里按业务分模块",
+          "semantic:CONSTRAINT:使用 PostgreSQL",
+          "semantic:CONSTRAINT:先不拆微服务",
+          "semantic:CONSTRAINT:开发团队只有两人",
+          "semantic:DESIRED_OUTCOME:一个两人团队可独立开发、部署和维护的运营后台，能按业务模块持续扩展而不过早承担分布式复杂度。",
+          "semantic:FACT:system.database reference PostgreSQL within 运营后台",
+          "semantic:FACT:system.deployment_unit equality 单应用内按业务分模块 within 运营后台",
+          "semantic:FACT:system.service_decomposition scope 暂不拆微服务 within 运营后台当前阶段",
+          "semantic:FACT:team.developer_count equality 2 人 within 运营后台项目开发团队",
+          "semantic:FACT:尚未投产，处于架构选型阶段",
+          "semantic:FACT:开发团队规模很小，运维与人力预算有限",
+          "semantic:FACT:面向小团队的运营后台",
+          "semantic:MOTIVE:为面向小团队的运营后台确定一套两人开发团队能长期维护的系统架构。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 22465.576,
+        "ttfsr_ms": 2532.423,
+        "ttcr_ms": 25193.951,
+        "completed_ms": 25214.151,
+        "first_realization_delta_ms": 22466.063,
+        "response_delta_count": 42
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 22500.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22554.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22608.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22716.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22825.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22825.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22825.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22990.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23045.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23153.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23207.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23319.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23373.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23484.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23484.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23484.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23484.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23594.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23650.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23758.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23870.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23979.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23979.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24087.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24087.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24141.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24196.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24196.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24306.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24361.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24417.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24471.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24579.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24633.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24742.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24960.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24961.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24961.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24961.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 25016.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 25126.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 25235.3
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 25235.5
+        }
+      ]
+    },
+    {
+      "case": "G-before-context-projection",
+      "input": "我觉得你这个判断不对。",
+      "interaction_id": "b97d4fcb-f640-4c64-9917-1ad0e15aae26",
+      "turn_id": "f6a417fc-78e1-414b-bf83-387dc7e08e71",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "收到，我正在结合当前上下文核对这条输入。我的结论目前不变：否定本身没有带来新的技术事实、新的约束，也没有指出哪一步推理被证伪，所以仅仅不同意不足以让我改判——如果只因为你说不对我就改口，那这个判断从一开始就不值得你参考。\n\n真正能推翻它的只有三个具体环节，你可以对照看是哪一个：一是两人能否守住模块边界。这个判断的前提是边界靠纪律和自动化约束维持；如果实际推进中已经出现跨模块直接读写对方的表、内部方法被随手调用且没人拦得住，那单应用模块化的地基就松了，但这时该补的是约束（表归属明确到模块、跨模块一律走接口、用检查工具卡住直连），而不是拆服务。二是 PostgreSQL 在这个体量不够用。这需要具体证据——写入量、并发、单表规模或某类查询模式已经超出单库可控范围；现在的业务量描述里没有这类信号，所以我不认为它成立。三是未来的拆分切口留不住。如果最可能独立出去的部分（通知、报表、外部对接这类）已经和主库深度耦合、接口只能围绕表而不能围绕业务能力，那确实要提前调整，这是我上一轮已经点出的风险，不是新情况。\n\n所以我不认同“判断不对”这个结论，但我认同它有可能是对的——前提是上面某一条被现实触发。哪一条被触发，改判方向也是清楚的：边界失守先加约束，数据库吃紧先做读写分离或分区，切口留不住才提前重排接口和表归属。这三条目前都没有新的事实支撑。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "JUDGMENT_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 否定了上一轮架构合理性的判断，但没有给出新的技术事实、约束或被推翻的推理步骤，因此需要核对该判断的依据是否仍成立，而不是直接改判。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Prior judgment retained: no newly cited material evidence established a changed basis."
+        ],
+        "judgment_basis": [
+          "开发团队只有两人"
+        ],
+        "response_moves": [
+          "CONCLUSION",
+          "ASSESS_OBJECTION",
+          "EVIDENCE"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "ANALYZE",
+        "judgment_subject": "两人团队运营后台采用单应用模块化 + PostgreSQL、暂不拆微服务的架构合理性",
+        "basis_fingerprint": "40cfdd9c9201c5c5da10431f6ab1475f1c55b03e4e24c070ffea6b9b780e627b",
+        "selected_question": null,
+        "source_record_ids": [
+          "976eae9e-6120-4829-af0e-a49ea13b3feb",
+          "67a3062e-d706-46f3-8680-761cf10efb84"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "REASONED_TRADEOFFS",
+        "primary_obligation": "ASSESS",
+        "judgment_proposition": "对于两人团队、面向小团队的运营后台，单应用按业务分模块 + PostgreSQL、暂不拆微服务是合理且务实的起点，风险主要在模块边界的纪律维护和未来拆分路径的前置准备，而非技术选型本身。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:一个应用里按业务分模块",
+          "semantic:CONSTRAINT:使用 PostgreSQL",
+          "semantic:CONSTRAINT:先不拆微服务",
+          "semantic:CONSTRAINT:开发团队只有两人",
+          "semantic:DESIRED_OUTCOME:一个两人团队可独立开发、部署和维护的运营后台，能按业务模块持续扩展而不过早承担分布式复杂度。",
+          "semantic:FACT:system.database reference PostgreSQL within 运营后台",
+          "semantic:FACT:system.deployment_unit equality 单应用内按业务分模块 within 运营后台",
+          "semantic:FACT:system.service_decomposition scope 暂不拆微服务 within 运营后台当前阶段",
+          "semantic:FACT:team.developer_count equality 2 人 within 运营后台项目开发团队",
+          "semantic:FACT:尚未投产，处于架构选型阶段",
+          "semantic:FACT:开发团队规模很小，运维与人力预算有限",
+          "semantic:FACT:面向小团队的运营后台",
+          "semantic:MOTIVE:为面向小团队的运营后台确定一套两人开发团队能长期维护的系统架构。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 44.735,
+        "ttfsr_ms": 4697.104,
+        "ttcr_ms": 19556.5,
+        "completed_ms": 19571.241,
+        "first_realization_delta_ms": 17629.656,
+        "response_delta_count": 35
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 17666.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17721.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17831.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17887.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17887.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17942.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17942.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18103.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18103.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18268.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18268.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18322.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18488.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18488.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18542.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18542.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18711.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18711.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18711.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18766.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18821.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18986.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18986.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18986.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19040.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19093.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19094.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19094.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19201.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19311.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19367.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19422.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19478.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19533.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19589.8
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 19590.0
+        }
+      ]
+    },
+    {
+      "case": "D-before-context-projection",
+      "input": "方案 A 是模块化单体，方案 B 是每个业务独立微服务。A 和 B 哪个更适合？",
+      "interaction_id": "b97d4fcb-f640-4c64-9917-1ad0e15aae26",
+      "turn_id": "bf7b79a9-2e49-4e1c-ac99-374671505b99",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "选 A（模块化单体）。在两人团队、面向小团队、尚未投产的当下，这个选择不需要犹豫。\n\n理由在成本结构上。A 把模块边界留在代码和数据归属层面，你要付的代价是多守几条纪律；B 把每个业务变成独立服务，你要付的代价是服务发现、链路追踪、跨服务一致性、分布式事务——而这些都是按服务数量重复计费的运维成本，业务越分越多，重复得越多。两个人的时间是一份固定预算，花在这里就花不到业务上。\n\nB 的收益是真实的，但兑现条件现在不成立。独立部署、独立扩容的价值，要在有多支团队各自按自己的节奏演进时才体现出来；一个业务改一行代码要协调一整套发布流程，只有在发布节奏确实互相冲突时才是问题。你这里没有这个冲突，所以 B 当下主要把一次本地调用换成一次可能失败的远程调用，把一次数据库事务换成跨服务的一致性设计，把一次单进程排障换成跨服务追链路。\n\n真正决定成败的是边界能不能守住，而不是选哪个。同一个进程、同一个库里，绕过接口直接查别人的表几乎零成本，所以 A 的纪律必须是能维持的硬约束：模块间只走接口、每张表只由归属模块读写、不建跨模块外键和深层联表。把这些写下来并且卡住，A 就站得住；守不住，A 会烂成一个大泥球，但那时该补的是约束，不是换成 B。\n\n代价也说清楚：单库单进程意味着一次部署全体上线，一个模块的慢查询或内存泄漏会拖累整个后台，扩容只能整体扩。这在早期可以接受，前提是给未来留切口——通知、报表统计、外部对接这类边界清晰、负载特征不同的模块，不要和主库深度耦合，接口围绕业务能力而不是围绕表来设计。这样等到真的需要拆时，拆的是一个已经干净的部分，而不是先花几个月解耦再拆。\n\n所以结论是：走 A，把力气花在守住边界和预留切口上。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "JUDGMENT_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 要求在既有架构议题内比较两个候选方案并给出适用性判断，属于对当前设计主张的评估，不构成对现有约束的修改。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "New judgment concerns a different semantic subject; no prior judgment was reversed."
+        ],
+        "judgment_basis": [
+          "开发团队只有两人",
+          "面向小团队的运营后台",
+          "尚未投产，处于架构选型阶段",
+          "一个应用里按业务分模块",
+          "先不拆微服务"
+        ],
+        "response_moves": [
+          "CONCLUSION",
+          "REASONING",
+          "TRADEOFF"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "ANALYZE",
+        "judgment_subject": "两人团队运营后台在模块化单体与每业务独立微服务之间的架构选型",
+        "basis_fingerprint": "c93c8c385a2622f5f8c6dcb9aa26302a08cc158781f5b6c63d12106f2448c211",
+        "selected_question": null,
+        "source_record_ids": [
+          "976eae9e-6120-4829-af0e-a49ea13b3feb",
+          "67a3062e-d706-46f3-8680-761cf10efb84",
+          "598e70f5-c6d0-4587-b431-6998f7289032"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "REASONED_TRADEOFFS",
+        "primary_obligation": "ASSESS",
+        "judgment_proposition": "以两人团队、面向小团队、尚未投产的背景看，方案 A（模块化单体）比方案 B（每业务独立微服务）更适合作为起点。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:一个应用里按业务分模块",
+          "semantic:CONSTRAINT:使用 PostgreSQL",
+          "semantic:CONSTRAINT:先不拆微服务",
+          "semantic:CONSTRAINT:开发团队只有两人",
+          "semantic:DESIRED_OUTCOME:一个两人团队可独立开发、部署和维护的运营后台，能按业务模块持续扩展而不过早承担分布式复杂度。",
+          "semantic:FACT:architecture.option_a reference 模块化单体 within 运营后台架构候选方案",
+          "semantic:FACT:architecture.option_b reference 每个业务独立微服务 within 运营后台架构候选方案",
+          "semantic:FACT:system.database reference PostgreSQL within 运营后台",
+          "semantic:FACT:system.deployment_unit equality 单应用内按业务分模块 within 运营后台",
+          "semantic:FACT:system.service_decomposition scope 暂不拆微服务 within 运营后台当前阶段",
+          "semantic:FACT:team.developer_count equality 2 人 within 运营后台项目开发团队",
+          "semantic:FACT:尚未投产，处于架构选型阶段",
+          "semantic:FACT:开发团队规模很小，运维与人力预算有限",
+          "semantic:FACT:面向小团队的运营后台",
+          "semantic:MOTIVE:为面向小团队的运营后台确定一套两人开发团队能长期维护的系统架构。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 19535.867,
+        "ttfsr_ms": 1861.873,
+        "ttcr_ms": 22059.248,
+        "completed_ms": 22074.782,
+        "first_realization_delta_ms": 19536.816,
+        "response_delta_count": 58
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 19558.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19669.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19669.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19724.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19724.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19724.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19779.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19836.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19891.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20058.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20058.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20058.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20113.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20169.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20223.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20223.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20223.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20278.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20333.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20333.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20442.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20553.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20609.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20665.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20719.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20774.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20885.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20885.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20885.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20941.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20997.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20997.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21051.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21325.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21325.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21379.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21491.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21491.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21548.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21549.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21551.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21551.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21552.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21552.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21607.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21607.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21607.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21714.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21714.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21715.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21769.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21824.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21878.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21935.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21935.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21935.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 21989.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22044.1
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 22099.0
+        }
+      ]
+    },
+    {
+      "case": "H-first-before-context-projection",
+      "input": "登录演示页打不开。此前已经尝试清缓存和重启服务，问题仍然存在；还没取得控制台和网络日志。这个页面怎么还是打不开？",
+      "interaction_id": "aa83bdb5-28cc-4d53-8074-742bee7731bc",
+      "turn_id": "0ef9e692-c54c-43d4-b452-56d8b22a1582",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "清缓存和重启服务都没能让页面恢复，这说明原因多半不在浏览器缓存或服务进程本身。之前沿着这两条路排查，方向可能已经走偏。现在更值得怀疑的是构建产物、路由入口、依赖加载或部署环境这几个层面。但要判断具体是哪一层，现有的信息不够——需要先拿到浏览器控制台的报错和网络请求的失败情况（失败的 URL 与状态码），这比再试一次清缓存或重启更能区分问题。不过这些日志可能包含敏感信息，所以我想先确认一下：演示环境的控制台与网络日志由谁提供、是否允许共享？拿到之后才能继续往下定位。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "REALITY_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: 用户报告一个已存在的登录演示页打不开，且常规手段无效，询问为何仍然打不开，属于对已观察症状的原因诊断。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "One existing admitted question materially blocks progress and has no available answer or reversible assumption.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references.",
+          "The previous route failed: independently challenge its premise and request a changed diagnostic route; do not repeat the failed local repair."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE_FAILED_STRATEGY",
+          "CHALLENGE_ASSUMPTIONS",
+          "INDEPENDENT_EVIDENCE",
+          "CHANGE_DIAGNOSTIC_ROUTE",
+          "VERIFY",
+          "CLARIFY_BLOCKER"
+        ],
+        "judgment_stance": "INFERENCE",
+        "question_budget": 1,
+        "interaction_mode": "DIAGNOSE",
+        "judgment_subject": "登录演示页无法打开的原因",
+        "basis_fingerprint": "9b974f1fb001c4172749191f1b66b60203b8922b290fb544b4c8fb31053b5e1f",
+        "selected_question": "演示环境的控制台与网络日志由谁提供、是否允许共享（可能含敏感信息）",
+        "source_record_ids": [
+          "466fb73d-a7f8-4197-b863-edc5e60658fe"
+        ],
+        "strategy_revision": 1,
+        "information_budget": "FOCUSED_DIAGNOSIS",
+        "primary_obligation": "DIAGNOSE",
+        "judgment_proposition": "清缓存与重启服务均无效，说明原因大概率不在浏览器缓存或服务进程本身，更可能在构建产物、路由入口、依赖或部署环境层，需要运行时日志才能区分。",
+        "prior_strategy_failed": true,
+        "advancement_obligation": "ASK_ONE_BLOCKING_QUESTION",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": "登录演示页在清缓存与重启服务后仍打不开",
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:清缓存与重启服务这两类常规手段已尝试且无效",
+          "semantic:DESIRED_OUTCOME:登录演示页能正常打开",
+          "semantic:FACT:login_demo_page.diagnostic_evidence reference 控制台日志 × 网络日志 within 登录演示页故障排查",
+          "semantic:FACT:login_demo_page.remediation_attempt behavior 清缓存 × 重启服务 within 登录演示页",
+          "semantic:FACT:login_demo_page.state state_transition 打不开 within 登录演示页",
+          "semantic:FACT:尚未取得控制台和网络日志",
+          "semantic:FACT:此前已经尝试清缓存和重启服务",
+          "semantic:FACT:登录演示页打不开",
+          "semantic:FACT:问题仍然存在",
+          "semantic:MOTIVE:查明登录演示页为何仍然打不开，并使其恢复可访问"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 27771.349,
+        "ttfsr_ms": 6160.955,
+        "ttcr_ms": 28131.159,
+        "completed_ms": 28145.295,
+        "first_realization_delta_ms": 27771.536,
+        "response_delta_count": 14
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 27832.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 27832.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 27943.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 27943.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28001.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28055.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28055.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28056.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28056.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28056.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28056.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28111.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28111.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 28165.8
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 28167.0
+        }
+      ]
+    },
+    {
+      "case": "H-before-context-projection",
+      "input": "又照旧清缓存、重启了一次，还是打不开。这个页面怎么还是打不开？",
+      "interaction_id": "aa83bdb5-28cc-4d53-8074-742bee7731bc",
+      "turn_id": "f9dafa50-ed99-4bf3-837f-a4797b671e8f",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "又清缓存、又重启，还是打不开，这两条路基本可以排除了——原因大概率不在浏览器缓存或服务进程，而在构建产物、路由入口、依赖加载或部署环境这几层。要继续往下定位，得换一种证据：浏览器控制台里的报错，以及网络请求中失败的 URL 和状态码，它们才能区分到底是哪一层出的问题，光再试一次同样的操作不会有新信息。这些日志里可能含敏感信息，所以想先确认一下：演示环境的控制台和网络日志由谁提供、是否允许共享？拿到之后就能继续排查。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "REALITY_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: 用户在清缓存与重启重复尝试后再报同一症状并追问原因，属于对已观察故障的原因诊断，且需更换诊断路径而非重复原修复。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "One existing admitted question materially blocks progress and has no available answer or reversible assumption.",
+          "Prior judgment retained: no newly cited material evidence established a changed basis.",
+          "The previous route failed: independently challenge its premise and request a changed diagnostic route; do not repeat the failed local repair."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE_FAILED_STRATEGY",
+          "STOP_UNPRODUCTIVE_ROUTE",
+          "INDEPENDENT_EVIDENCE",
+          "CHANGE_DIAGNOSTIC_ROUTE",
+          "VERIFY",
+          "CLARIFY_BLOCKER"
+        ],
+        "judgment_stance": "INFERENCE",
+        "question_budget": 1,
+        "interaction_mode": "DIAGNOSE",
+        "judgment_subject": "登录演示页无法打开的原因",
+        "basis_fingerprint": "c537ae69cf90e067495e912df6e5ce4905d96bbf7b48f7fc0a779264e61d51b1",
+        "selected_question": "演示环境的控制台与网络日志由谁提供、是否允许共享（可能含敏感信息）",
+        "source_record_ids": [
+          "466fb73d-a7f8-4197-b863-edc5e60658fe",
+          "06b94ba6-efdf-4527-8c4d-5ed8b96087f4"
+        ],
+        "strategy_revision": 2,
+        "information_budget": "FOCUSED_DIAGNOSIS",
+        "primary_obligation": "DIAGNOSE",
+        "judgment_proposition": "清缓存与重启服务均无效，说明原因大概率不在浏览器缓存或服务进程本身，更可能在构建产物、路由入口、依赖或部署环境层，需要运行时日志才能区分。",
+        "prior_strategy_failed": true,
+        "advancement_obligation": "ASK_ONE_BLOCKING_QUESTION",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": "登录演示页在清缓存与重启服务后仍打不开",
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:清缓存与重启服务这两类常规手段已尝试且无效",
+          "semantic:DESIRED_OUTCOME:登录演示页能正常打开",
+          "semantic:FACT:login_demo_page.diagnostic_evidence reference 控制台日志 × 网络日志 within 登录演示页故障排查",
+          "semantic:FACT:login_demo_page.remediation_attempt behavior 清缓存 × 重启服务 within 登录演示页",
+          "semantic:FACT:login_demo_page.state state_transition 打不开 within 登录演示页",
+          "semantic:FACT:尚未取得控制台和网络日志",
+          "semantic:FACT:此前已经尝试清缓存和重启服务",
+          "semantic:FACT:登录演示页打不开",
+          "semantic:FACT:问题仍然存在",
+          "semantic:MOTIVE:查明登录演示页为何仍然打不开，并使其恢复可访问"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 22771.768,
+        "ttfsr_ms": 1858.237,
+        "ttcr_ms": 23337.881,
+        "completed_ms": 23355.746,
+        "first_realization_delta_ms": 22771.764,
+        "response_delta_count": 13
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 22785.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22839.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 22893.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23012.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23012.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23067.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23067.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23178.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23233.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23233.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23288.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23288.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23343.7
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 23399.6
+        }
+      ]
+    },
+    {
+      "case": "K-before-context-projection",
+      "input": "这个登录演示页的按钮点了没反应，直接修掉。",
+      "interaction_id": "cf306891-04e7-43f4-9b64-7537e7ab3c13",
+      "turn_id": "d25ca9f6-c1bd-44ee-af81-c2a7c8523555",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "目前成因还没确定：按钮点击无反应，可能是点击事件从未绑定、脚本在执行时先报错中断，或脚本用的选择器与按钮实际的 id/class 不一致。先在浏览器控制台点一下按钮，看点击时有没有进入事件处理函数、页面加载时有无脚本报错，并核对选择器与按钮标识是否对得上。如果确认是事件没绑上，就把缺失的监听挂到该按钮上，作为第一版可回退的最小修复，不顺手改其他结构。改完再点一次，确认按钮确实有响应，且控制台没有新的报错。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "CAUSE_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human reports an observed symptom (buttons on the login demo page do nothing when clicked) and asks for a direct fix; the cause is not yet established, so the next step is locating the cause before changing code.",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "CAUSE",
+          "EVIDENCE",
+          "FIX",
+          "VERIFY"
+        ],
+        "judgment_stance": "UNCERTAINTY",
+        "question_budget": 0,
+        "interaction_mode": "DIAGNOSE",
+        "judgment_subject": "login_demo_page_button_unresponsive_cause",
+        "basis_fingerprint": "32010921179b0733994daf2f62ed3fae31fb560901d84f9be8b77d84b2ed50a5",
+        "selected_question": null,
+        "source_record_ids": [
+          "39ae3367-927b-49f5-9757-914546840fb8"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "FOCUSED_DIAGNOSIS",
+        "primary_obligation": "DIAGNOSE",
+        "judgment_proposition": "按钮点击无反应的具体成因尚未确定，需要先确认点击事件是否绑定、脚本是否执行报错以及选择器是否匹配，再作最小改动。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:直接修掉，不做额外改造或扩展",
+          "semantic:DESIRED_OUTCOME:登录演示页的按钮点击后正常生效并给出预期响应。",
+          "semantic:FACT:login_demo_page.button behavior 点击后无响应 within 登录演示页",
+          "semantic:FACT:login_demo_page.button.click acceptance_assertion 点击后有响应 within 登录演示页",
+          "semantic:FACT:存在一个用于演示的登录页面",
+          "semantic:FACT:该页面上的按钮目前点击后没有任何反应",
+          "semantic:MOTIVE:让登录演示页的按钮点击后能正常响应，消除当前无反应的缺陷。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 34556.466,
+        "ttfsr_ms": 1434.253,
+        "ttcr_ms": 35336.339,
+        "completed_ms": 35353.229,
+        "first_realization_delta_ms": 34557.363,
+        "response_delta_count": 13
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 34576.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 34685.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 34741.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 34741.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 34849.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 34902.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35012.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35012.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35067.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35122.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35122.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35231.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35231.8
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 35400.6
+        }
+      ]
+    },
+    {
+      "case": "B",
+      "input": "Git 仓库可以只拉一个分支吗？",
+      "interaction_id": "a2ee2ad8-d321-48c2-b357-3d92b3a87004",
+      "turn_id": "5c538ad3-4a6f-4b1b-b78f-799939866130",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "可以。Git 支持只获取一个分支，比如用 `git clone --single-branch --branch <分支名> <仓库地址>`；如果再加上 `--depth 1`，就变成单分支浅克隆，下载量会更小。对已经存在的仓库，也可以只更新指定分支：`git fetch origin <分支名>`。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ANSWER_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: 人类提出一个关于 Git 能力的普通是非问句,不涉及对当前 Work 的修改或新目标,只需给出事实性回答。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "DIRECT_ANSWER",
+          "OPTIONAL_ADJACENT_INSIGHT"
+        ],
+        "judgment_stance": "UNCERTAINTY",
+        "question_budget": 0,
+        "interaction_mode": "ANSWER",
+        "judgment_subject": "Git 是否支持只拉取单个分支",
+        "basis_fingerprint": "9807c13dbe735ed6c2b828f08c90d6ef5e79e884ac44e27d9c6f4fc2d448e40b",
+        "selected_question": null,
+        "source_record_ids": [
+          "16fdcdf5-aa2a-46b7-86f4-d23a7eb09f55"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMUM_SUFFICIENT",
+        "primary_obligation": "ANSWER",
+        "judgment_proposition": "Git 支持只获取单个分支,可通过限定分支的克隆或拉取命令实现。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 1,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": []
+      },
+      "timing_ms": {
+        "ttfms_ms": 8620.819,
+        "ttfsr_ms": 1716.28,
+        "ttcr_ms": 8923.192,
+        "completed_ms": 8937.75,
+        "first_realization_delta_ms": 8620.818,
+        "response_delta_count": 10
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 8651.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 8706.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 8763.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 8764.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 8819.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 8819.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 8819.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 8874.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 8931.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 8932.0
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 8988.3
+        }
+      ]
+    },
+    {
+      "case": "J",
+      "input": "就按刚才方案实现登录功能。",
+      "interaction_id": "b06b6b67-2961-4492-8126-369bda31cff1",
+      "turn_id": "322f896d-94ab-4185-a8b2-83192e98abd3",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "好，按已定方案继续推进登录功能的实现。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ACK_AND_EXECUTE",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 又一次以“就按刚才方案实现登录功能”重申实现动作，未提出新目标、未改动任何约束，属于对已确认一屏三态演示页的继续推进。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Prior judgment retained: no newly cited material evidence established a changed basis."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE",
+          "PROCEED"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "EXECUTE",
+        "judgment_subject": "两人团队内部登录演示页从设计讨论转入实现的下一步",
+        "basis_fingerprint": "9c7ed52f04eb98cb55dcab63bc0225011aabfb862f13209857c811d04c684a35",
+        "selected_question": null,
+        "source_record_ids": [
+          "caf050cf-0570-4171-9d03-c5b31a1d4b7d",
+          "14bd82eb-a2e4-4ca9-b36f-688f93448f0c",
+          "0518b8fe-8682-4e87-bace-b29c68f6e67f",
+          "8b1bc19a-6449-4aab-a1f2-2527a86f0a06",
+          "d796c7f8-21cd-418c-9ff6-aa13c89e0c16",
+          "3cad09df-75b9-4fae-a47d-58c7a98b62ae",
+          "4a83d9f9-97a0-4546-a32c-41e295370919"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMAL_ACKNOWLEDGEMENT",
+        "primary_obligation": "EXECUTE",
+        "judgment_proposition": "按已确认的一屏三态方案先落地一个可运行的单页演示（邮箱输入、即时校验提示、成功态切换），并把邮箱校验规则定为宽松格式，是当前最贴合“内部演示、不接真实账号、不存密码”的下一步。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ACK_AND_EXECUTE",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:不存密码",
+          "semantic:CONSTRAINT:两人团队内部使用",
+          "semantic:CONSTRAINT:先讨论界面和交互设计，不实现",
+          "semantic:CONSTRAINT:只演示邮箱输入、校验提示和登录成功",
+          "semantic:CONSTRAINT:按已讨论的界面与交互方案实现（原先“先讨论界面和交互设计，不实现”的顺序约束已被撤销）",
+          "semantic:CONSTRAINT:暂不接真实账号",
+          "semantic:DESIRED_OUTCOME:得到按已确认一屏三态方案实现的登录演示页：邮箱输入、即时校验提示、登录成功三态的呈现与流转。",
+          "semantic:FACT:auth.login scope existing_login_feature within brainstorm",
+          "semantic:FACT:login_demo.account_backend behavior not_connected_no_credential_storage within demo",
+          "semantic:FACT:login_demo.audience scope two_person_internal_team within demo",
+          "semantic:FACT:login_demo.demonstrated_states ordered_component email_input × validation_message × login_success within demo",
+          "semantic:FACT:login_demo.implementation_basis reference prior_proposed_single_screen_three_state_design within demo",
+          "semantic:FACT:login_demo.work_sequence precedence implementation within current_turn",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，本轮转入一个具体的小型演示页面。",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，随后转入一个具体的小型演示页面。",
+          "semantic:FACT:当前处于先讨论设计、暂不实现的阶段。",
+          "semantic:FACT:本轮 Human 撤销了“不实现”的顺序约束，转入按讨论方案实现。",
+          "semantic:FACT:用途是两人团队内部演示，不是面向外部用户的产品需求。",
+          "semantic:MOTIVE:为两人团队内部做一个只演示邮箱输入、校验提示与登录成功的登录演示页，并按已讨论的方案把它实现出来。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 15406.35,
+        "ttfsr_ms": 1221.603,
+        "ttcr_ms": 15514.096,
+        "completed_ms": 15529.767,
+        "first_realization_delta_ms": 15406.342,
+        "response_delta_count": 2
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 15445.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15555.7
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 15556.0
+        }
+      ]
+    },
+    {
+      "case": "F",
+      "input": "继续做吧。",
+      "interaction_id": "b06b6b67-2961-4492-8126-369bda31cff1",
+      "turn_id": "a8d53c26-e8d3-4492-a02d-f0f9611f3e16",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "好，按已定的界面与交互方案动手：先做邮箱输入与校验提示，再走通登录成功这一段。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ACK_AND_EXECUTE",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 以“继续做吧。”重申对已确认一屏三态登录演示页的实现推进，未新增、撤销或修正任何约束，也未提出新目标，属对当前 Work 的续做执行。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Prior judgment retained: no newly cited material evidence established a changed basis."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE",
+          "PROCEED"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "EXECUTE",
+        "judgment_subject": "两人团队内部登录演示页从设计讨论转入实现的下一步",
+        "basis_fingerprint": "e76b6efdb2bd2cbe4989db6f8f5656535d93778b0c6bf0a12df1c486f153e17e",
+        "selected_question": null,
+        "source_record_ids": [
+          "caf050cf-0570-4171-9d03-c5b31a1d4b7d",
+          "14bd82eb-a2e4-4ca9-b36f-688f93448f0c",
+          "0518b8fe-8682-4e87-bace-b29c68f6e67f",
+          "8b1bc19a-6449-4aab-a1f2-2527a86f0a06",
+          "d796c7f8-21cd-418c-9ff6-aa13c89e0c16",
+          "3cad09df-75b9-4fae-a47d-58c7a98b62ae",
+          "4a83d9f9-97a0-4546-a32c-41e295370919",
+          "97a021a2-9a4f-4cbf-896f-22b619fe2d6c"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMAL_ACKNOWLEDGEMENT",
+        "primary_obligation": "EXECUTE",
+        "judgment_proposition": "按已确认的一屏三态方案先落地一个可运行的单页演示（邮箱输入、即时校验提示、成功态切换），并把邮箱校验规则定为宽松格式，是当前最贴合“内部演示、不接真实账号、不存密码”的下一步。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ACK_AND_EXECUTE",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:不存密码",
+          "semantic:CONSTRAINT:两人团队内部使用",
+          "semantic:CONSTRAINT:先讨论界面和交互设计，不实现",
+          "semantic:CONSTRAINT:只演示邮箱输入、校验提示和登录成功",
+          "semantic:CONSTRAINT:按已讨论的界面与交互方案实现（原先“先讨论界面和交互设计，不实现”的顺序约束已被撤销）",
+          "semantic:CONSTRAINT:暂不接真实账号",
+          "semantic:DESIRED_OUTCOME:得到按已确认一屏三态方案实现的登录演示页：邮箱输入、即时校验提示、登录成功三态的呈现与流转。",
+          "semantic:FACT:auth.login scope existing_login_feature within brainstorm",
+          "semantic:FACT:login_demo.account_backend behavior not_connected_no_credential_storage within demo",
+          "semantic:FACT:login_demo.audience scope two_person_internal_team within demo",
+          "semantic:FACT:login_demo.demonstrated_states ordered_component email_input × validation_message × login_success within demo",
+          "semantic:FACT:login_demo.implementation_basis reference prior_proposed_single_screen_three_state_design within demo",
+          "semantic:FACT:login_demo.work_sequence precedence implementation within current_turn",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，本轮转入一个具体的小型演示页面。",
+          "semantic:FACT:上一轮是对既有登录功能可玩方向的发散脑暴，随后转入一个具体的小型演示页面。",
+          "semantic:FACT:当前处于先讨论设计、暂不实现的阶段。",
+          "semantic:FACT:本轮 Human 撤销了“不实现”的顺序约束，转入按讨论方案实现。",
+          "semantic:FACT:用途是两人团队内部演示，不是面向外部用户的产品需求。",
+          "semantic:MOTIVE:为两人团队内部做一个只演示邮箱输入、校验提示与登录成功的登录演示页，并按已讨论的方案把它实现出来。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 11910.554,
+        "ttfsr_ms": 1261.282,
+        "ttcr_ms": 12039.471,
+        "completed_ms": 12079.294,
+        "first_realization_delta_ms": 11936.032,
+        "response_delta_count": 3
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 11981.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 12035.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 12089.7
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 12090.0
+        }
+      ]
+    },
+    {
+      "case": "G",
+      "input": "我觉得你这个判断不对。",
+      "interaction_id": "b97d4fcb-f640-4c64-9917-1ad0e15aae26",
+      "turn_id": "457d65d2-29b6-4dd5-be62-affe61baf10f",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "收到，我正在结合当前上下文核对这条输入。结论不变：方案 A 仍是更合适的起点。你这条否决没有落到三环中的任何一环上，所以它不构成改判依据——真正能改判的，是其中某一环被现实触发。\n\n逐条看：模块边界靠两人守不守得住，是纪律问题，失守时该补的是硬约束（表只由归属模块读写、跨模块只走接口），而不是换成 B；PostgreSQL 够不够用，要的是写入量、并发、单表规模或某类查询模式已经吃紧这类信号，目前没有；未来切口留不留得住，本来就要在设计时预留（通知、报表、外部对接这类不与主库深耦合），这一点已经包含在 A 的做法里。\n\n如果其中一条真被触发，改判方向也很清楚：边界失守先加约束，数据库吃紧先做读写分离或分区，切口留不住才提前重排接口和表归属。现在没有新的事实支撑任何一条，所以我维持 A 作为起点这个判断。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "JUDGMENT_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 再次否定既有架构选型判断，但未提供新的技术事实、未被证伪的推理环节，也未修改任何约束，属于对当前设计主张的评估与质疑。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [
+          "开发团队只有两人",
+          "面向小团队的运营后台",
+          "尚未投产，处于架构选型阶段",
+          "一个应用里按业务分模块",
+          "使用 PostgreSQL",
+          "先不拆微服务"
+        ],
+        "response_moves": [
+          "CONCLUSION",
+          "ASSESS_OBJECTION",
+          "EVIDENCE"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "ANALYZE",
+        "judgment_subject": "两人团队运营后台在模块化单体与每业务独立微服务之间的架构选型",
+        "basis_fingerprint": "b27665e9fea5452c3d3fdb6ef733f64c3228ee85ed5d4b04511eb0faf12661e9",
+        "selected_question": null,
+        "source_record_ids": [
+          "976eae9e-6120-4829-af0e-a49ea13b3feb",
+          "67a3062e-d706-46f3-8680-761cf10efb84",
+          "598e70f5-c6d0-4587-b431-6998f7289032",
+          "92c9c64e-db6a-49d5-b892-5303abbf9cae"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "REASONED_TRADEOFFS",
+        "primary_obligation": "ASSESS",
+        "judgment_proposition": "以两人团队、面向小团队、尚未投产的背景看，方案 A（模块化单体）比方案 B（每业务独立微服务）更适合作为起点。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:一个应用里按业务分模块",
+          "semantic:CONSTRAINT:使用 PostgreSQL",
+          "semantic:CONSTRAINT:先不拆微服务",
+          "semantic:CONSTRAINT:开发团队只有两人",
+          "semantic:DESIRED_OUTCOME:一个两人团队可独立开发、部署和维护的运营后台，能按业务模块持续扩展而不过早承担分布式复杂度。",
+          "semantic:FACT:architecture.option_a reference 模块化单体 within 运营后台架构候选方案",
+          "semantic:FACT:architecture.option_b reference 每个业务独立微服务 within 运营后台架构候选方案",
+          "semantic:FACT:system.database reference PostgreSQL within 运营后台",
+          "semantic:FACT:system.deployment_unit equality 单应用内按业务分模块 within 运营后台",
+          "semantic:FACT:system.service_decomposition scope 暂不拆微服务 within 运营后台当前阶段",
+          "semantic:FACT:team.developer_count equality 2 人 within 运营后台项目开发团队",
+          "semantic:FACT:尚未投产，处于架构选型阶段",
+          "semantic:FACT:开发团队规模很小，运维与人力预算有限",
+          "semantic:FACT:面向小团队的运营后台",
+          "semantic:MOTIVE:为面向小团队的运营后台确定一套两人开发团队能长期维护的系统架构。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 45.502,
+        "ttfsr_ms": 5121.179,
+        "ttcr_ms": 19077.358,
+        "completed_ms": 19092.003,
+        "first_realization_delta_ms": 18095.968,
+        "response_delta_count": 24
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 18143.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18305.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18305.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18305.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18306.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18306.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18361.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18361.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18470.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18470.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18525.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18635.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18690.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18690.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18802.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18802.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18802.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18802.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18857.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18911.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18965.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18965.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19020.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19074.4
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 19129.9
+        }
+      ]
+    },
+    {
+      "case": "D",
+      "input": "方案 A 是模块化单体，方案 B 是每个业务独立微服务。A 和 B 哪个更适合？",
+      "interaction_id": "b97d4fcb-f640-4c64-9917-1ad0e15aae26",
+      "turn_id": "6876ddb2-91a4-4576-9b6d-2f6bcc1e7396",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "仍然选 A（模块化单体）——在两人团队、面向小团队、尚未投产的前提下，B 还没有能兑现收益的条件。\n\n两者真正的差别在代价结构，而不是功能强弱。A 的代价是几条模块纪律：模块之间只走接口、表只由归属模块读写、不建跨模块外键和深层联表，这些守住一次就长期有效。B 的代价是服务发现、链路追踪、跨服务一致性、独立发布流程，它们按服务数量重复发生，业务越拆越多，重复得越多；而两个人的时间是一份固定预算，投在这上面就投不到业务上。\n\nB 的好处是独立部署和独立扩容，但它要在多支团队各自演进、发布节奏确实互相冲突时才兑现。你这里只有一个团队、一套节奏，没有这个前提，所以当下换到 B，主要是把一次本地调用换成一次可能失败的远程调用，把一次数据库事务换成跨服务的一致性设计。\n\n决定成败的是边界守不守得住，不是选哪套名词。边界失守时该补的是约束（表归属明确到模块、跨模块一律走接口、用检查卡住直连），换成 B 只是把同一个边界问题搬到网络上，还多了运维负担。代价也要接受：一次部署全体上线、扩容只能整体扩，所以给通知、报表统计、外部对接这类边界清晰、负载特征不同的部分预留干净切口。\n\n结论：走 A，把力气花在守住边界和预留切口上。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "JUDGMENT_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 重新给出方案 A / 方案 B 的定义并直接询问哪个更适合，属于在两个明确选项间要一个取舍结论。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "COMPARISON",
+          "DECISIVE_FACTORS",
+          "RECOMMENDATION"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "DECIDE",
+        "judgment_subject": "两人团队运营后台在模块化单体与每业务独立微服务之间的架构选型",
+        "basis_fingerprint": "ac7b2050f633fd4b6adec730f2798d952834c1aea167eb0298cc2242a959e807",
+        "selected_question": null,
+        "source_record_ids": [
+          "976eae9e-6120-4829-af0e-a49ea13b3feb",
+          "67a3062e-d706-46f3-8680-761cf10efb84",
+          "598e70f5-c6d0-4587-b431-6998f7289032",
+          "92c9c64e-db6a-49d5-b892-5303abbf9cae",
+          "72ecafb9-92c4-497f-848e-74b8f4d9fbf1"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "DECISIVE_FACTORS",
+        "primary_obligation": "COMPARE",
+        "judgment_proposition": "以两人团队、面向小团队、尚未投产的背景看，方案 A（模块化单体）比方案 B（每业务独立微服务）更适合作为起点。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "PROPOSE_AND_WAIT",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:一个应用里按业务分模块",
+          "semantic:CONSTRAINT:使用 PostgreSQL",
+          "semantic:CONSTRAINT:先不拆微服务",
+          "semantic:CONSTRAINT:开发团队只有两人",
+          "semantic:DESIRED_OUTCOME:一个两人团队可独立开发、部署和维护的运营后台，能按业务模块持续扩展而不过早承担分布式复杂度。",
+          "semantic:FACT:architecture.option_a reference 模块化单体 within 运营后台架构候选方案",
+          "semantic:FACT:architecture.option_b reference 每个业务独立微服务 within 运营后台架构候选方案",
+          "semantic:FACT:system.database reference PostgreSQL within 运营后台",
+          "semantic:FACT:system.deployment_unit equality 单应用内按业务分模块 within 运营后台",
+          "semantic:FACT:system.service_decomposition scope 暂不拆微服务 within 运营后台当前阶段",
+          "semantic:FACT:team.developer_count equality 2 人 within 运营后台项目开发团队",
+          "semantic:FACT:尚未投产，处于架构选型阶段",
+          "semantic:FACT:开发团队规模很小，运维与人力预算有限",
+          "semantic:FACT:面向小团队的运营后台",
+          "semantic:MOTIVE:为面向小团队的运营后台确定一套两人开发团队能长期维护的系统架构。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 16659.857,
+        "ttfsr_ms": 1979.067,
+        "ttcr_ms": 18104.582,
+        "completed_ms": 18126.907,
+        "first_realization_delta_ms": 16665.785,
+        "response_delta_count": 40
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 16707.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16707.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16761.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16761.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16761.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16871.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16871.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 16982.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17037.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17037.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17094.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17151.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17151.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17151.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17206.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17259.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17260.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17260.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17314.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17426.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17535.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17535.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17535.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17535.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17589.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17589.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17590.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17646.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17701.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17812.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17812.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17867.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 17922.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18037.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18037.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18038.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18038.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18038.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18092.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 18092.4
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 18147.6
+        }
+      ]
+    },
+    {
+      "case": "H-first",
+      "input": "登录演示页打不开。此前已经尝试清缓存和重启服务，问题仍然存在；还没取得控制台和网络日志。这个页面怎么还是打不开？",
+      "interaction_id": "98162006-809e-46f5-b122-0d22a46b458b",
+      "turn_id": "fc7bff0d-917c-41fe-be52-77dbd5c0d0bf",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "清缓存和重启服务都没能让页面恢复，这说明这两步只排除了两类原因——浏览器本地缓存，以及服务进程本身的状态。它们隐含的假设是故障出在本地或进程侧，而页面打不开并不支持这个假设已经成立，所以沿着同一方向再试一次不会有新信息。\n\n目前控制台和网络日志都还没拿到，因此具体属于哪一种原因无法确定。剩下比较常见的几类：服务实际没有在预期端口监听，或者进程起来后立刻退出；反向代理、HTTPS 证书或域名解析有问题；前端构建产物路径错误、静态资源 404；后端接口返回 500、被跨域策略拦截或被网关挡住。这几类在现象上很接近，靠猜分不出来。\n\n换一条能区分它们的检查路线：在出问题的那个浏览器里打开开发者工具，先看 Network 面板中最上面那个失败请求的状态码和报错类型，同时看 Console 里的红色报错；再确认服务端口是否真的在监听。这两步通常几分钟内就能把范围收窄到一两类原因，之后才谈得上针对性修复。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "REALITY_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: 人类报告一个具体症状（登录演示页打不开），并说明两种常见修复已失败，询问为何仍打不开；没有请求新的设计或改动，属于故障定位。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references.",
+          "The previous route failed: independently challenge its premise and request a changed diagnostic route; do not repeat the failed local repair."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE_FAILED_STRATEGY",
+          "CHALLENGE_ASSUMPTIONS",
+          "INDEPENDENT_EVIDENCE",
+          "CHANGE_DIAGNOSTIC_ROUTE",
+          "VERIFY"
+        ],
+        "judgment_stance": "UNCERTAINTY",
+        "question_budget": 0,
+        "interaction_mode": "DIAGNOSE",
+        "judgment_subject": "login_demo_page_open_failure",
+        "basis_fingerprint": "37095288e7550f7c9b3b62aa20fdd14aa3d5aed41cf2b4cbc548c44c739f379e",
+        "selected_question": null,
+        "source_record_ids": [
+          "5e331d5a-d7a2-46ba-a8ca-a4840671874c"
+        ],
+        "strategy_revision": 1,
+        "information_budget": "FOCUSED_DIAGNOSIS",
+        "primary_obligation": "DIAGNOSE",
+        "judgment_proposition": "登录演示页打不开的根因尚未确定；清缓存与重启服务只能排除浏览器缓存和服务进程状态两类原因，控制台与网络日志尚未取得。",
+        "prior_strategy_failed": true,
+        "advancement_obligation": "REPLAN_REQUEST",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": "login_demo_page_unreachable_after_cache_clear_and_service_restart",
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:在拿到控制台与网络信息前无法确定根因",
+          "semantic:DESIRED_OUTCOME:登录演示页能正常打开。",
+          "semantic:FACT:login_demo_page.diagnostic_logs equality not_collected within 登录演示页故障排查",
+          "semantic:FACT:login_demo_page.load_status behavior 打开失败 within 登录演示页故障排查",
+          "semantic:FACT:login_demo_page.remediation_attempts ordered_component 清缓存 × 重启服务 within 登录演示页故障排查",
+          "semantic:FACT:尚未取得控制台日志和网络日志",
+          "semantic:FACT:此前已尝试清缓存与重启服务，问题仍然存在",
+          "semantic:FACT:登录演示页打不开",
+          "semantic:MOTIVE:让登录演示页恢复可访问；当前阶段是先弄清打不开的原因。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 23399.693,
+        "ttfsr_ms": 2890.206,
+        "ttcr_ms": 24397.843,
+        "completed_ms": 24418.207,
+        "first_realization_delta_ms": 23401.189,
+        "response_delta_count": 27
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 23433.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23488.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23488.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23542.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23597.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23706.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23706.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23706.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23761.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23815.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23872.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23927.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23927.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 23984.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24042.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24097.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24097.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24097.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24097.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24207.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24207.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24265.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24265.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24265.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24322.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24379.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 24435.1
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 24435.7
+        }
+      ]
+    },
+    {
+      "case": "H",
+      "input": "又照旧清缓存、重启了一次，还是打不开。这个页面怎么还是打不开？",
+      "interaction_id": "98162006-809e-46f5-b122-0d22a46b458b",
+      "turn_id": "62e737f2-eb94-431a-b437-351b817d8b07",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "又清了一次缓存、重启了一次服务，结果还是打不开，这不意外：这两步仍在同一条思路上——清掉本地状态、把进程重起一遍。重复执行不会带来新信息，最多只能说明故障大概率不在浏览器缓存或服务进程状态上。根因目前仍未确定，控制台和网络日志也还没拿到，所以现在下不了具体结论。\n\n接下来该换的是排查路线，不是再重试修复。先把修复动作停住，把问题按层切开，用几个互不重叠的证据点去区分那几类很像的原因：\n\n- 在本机绕开浏览器和反向代理，直接请求服务实际监听的端口和一个健康检查地址。有响应说明进程和端口在；没响应，就指向服务没有真正监听，或起来后立刻退出。\n- 再用 curl 带域名走代理或 HTTPS 访问同一路径，看状态码、响应头和证书报错。这一步能把 DNS、证书、反向代理从服务本身里分出来。\n- 在打不开的那个浏览器里打开开发者工具，看 Network 最上面那个失败请求的类型和状态码：文档请求返回 404、502、503，静态资源 404，还是接口 500、被跨域拦截，指向的原因完全不同。\n- 对照 Console 的红色报错，确认是证书、跨域还是脚本加载问题。\n\n把这四步结果放在一起，通常几分钟内就能把范围收窄到一到两类原因，再决定修哪里。在拿到这些证据前，任何具体修复都只是猜。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "REALITY_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: 人类再次报告同一症状，并说明同一修复路径（清缓存、重启）又重复执行一次后仍无效；没有提出设计、改动或权限请求，需要的是对打不开原因的定位与下一步能区分原因的证据。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Prior judgment retained: no newly cited material evidence established a changed basis.",
+          "The previous route failed: independently challenge its premise and request a changed diagnostic route; do not repeat the failed local repair."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE_FAILED_STRATEGY",
+          "STOP_UNPRODUCTIVE_ROUTE",
+          "INDEPENDENT_EVIDENCE",
+          "CHANGE_DIAGNOSTIC_ROUTE",
+          "VERIFY"
+        ],
+        "judgment_stance": "UNCERTAINTY",
+        "question_budget": 0,
+        "interaction_mode": "DIAGNOSE",
+        "judgment_subject": "login_demo_page_open_failure",
+        "basis_fingerprint": "afc90d541d5dccdcc40a656df7bc3cbfb311b71e1c458fa9eab8e2a8ad8338ec",
+        "selected_question": null,
+        "source_record_ids": [
+          "5e331d5a-d7a2-46ba-a8ca-a4840671874c",
+          "294fd77a-2ce4-4155-8ea1-9733d4ef581f"
+        ],
+        "strategy_revision": 2,
+        "information_budget": "FOCUSED_DIAGNOSIS",
+        "primary_obligation": "DIAGNOSE",
+        "judgment_proposition": "登录演示页打不开的根因尚未确定；清缓存与重启服务只能排除浏览器缓存和服务进程状态两类原因，控制台与网络日志尚未取得。",
+        "prior_strategy_failed": true,
+        "advancement_obligation": "REPLAN_REQUEST",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": "login_demo_page_unreachable_after_cache_clear_and_service_restart",
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:在拿到控制台与网络信息前无法确定根因",
+          "semantic:DESIRED_OUTCOME:登录演示页能正常打开。",
+          "semantic:FACT:login_demo_page.diagnostic_logs equality not_collected within 登录演示页故障排查",
+          "semantic:FACT:login_demo_page.load_status behavior 打开失败 within 登录演示页故障排查",
+          "semantic:FACT:login_demo_page.remediation_attempts ordered_component 清缓存 × 重启服务 within 登录演示页故障排查",
+          "semantic:FACT:尚未取得控制台日志和网络日志",
+          "semantic:FACT:此前已尝试清缓存与重启服务，问题仍然存在",
+          "semantic:FACT:登录演示页打不开",
+          "semantic:MOTIVE:让登录演示页恢复可访问；当前阶段是先弄清打不开的原因。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 35591.549,
+        "ttfsr_ms": 6880.8,
+        "ttcr_ms": 36826.176,
+        "completed_ms": 36842.186,
+        "first_realization_delta_ms": 35592.023,
+        "response_delta_count": 44
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 35619.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35673.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35730.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35784.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35784.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35896.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35896.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 35896.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36005.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36005.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36005.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36005.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36005.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36115.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36115.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36115.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36115.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36172.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36230.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36231.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36231.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36286.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36286.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36286.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36342.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36396.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36450.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36450.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36450.8
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36563.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36564.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36564.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36621.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36621.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36621.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36677.4
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36677.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36677.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36677.6
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36732.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36732.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36788.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36788.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 36843.3
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 36899.1
+        }
+      ]
+    },
+    {
+      "case": "K",
+      "input": "这个登录演示页的按钮点了没反应，直接修掉。",
+      "interaction_id": "d8928fa3-2592-4a1e-b840-effe883aee56",
+      "turn_id": "2e758381-b7b6-4d2b-bef5-37a642d7cb79",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "好，我按已有的修复方案继续处理登录演示页按钮无响应的问题，接下来推进该修复动作。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ACK_AND_EXECUTE",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 报告既有页面上的可观察缺陷并要求直接修掉，属于范围明确的修复动作，诊断与修复由 Watt 承担。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE",
+          "PROCEED"
+        ],
+        "judgment_stance": "UNCERTAINTY",
+        "question_budget": 0,
+        "interaction_mode": "EXECUTE",
+        "judgment_subject": "登录演示页按钮点击无响应",
+        "basis_fingerprint": "ebe3cf26ce3eb2946a0d7a414108712f2c0f53d16aacde59133013a8b9708d89",
+        "selected_question": null,
+        "source_record_ids": [
+          "5bc09037-4dba-4f57-9244-13c1ace0b9a7"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMAL_ACKNOWLEDGEMENT",
+        "primary_obligation": "EXECUTE",
+        "judgment_proposition": "登录演示页的按钮被点击后没有产生可观察的响应。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ACK_AND_EXECUTE",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:Human 要求直接修复，不做额外确认",
+          "semantic:DESIRED_OUTCOME:点击登录按钮后出现可观察的行为或反馈（校验、提示或进入下一步）。",
+          "semantic:FACT:login_demo.button_click acceptance_assertion True within 登录演示页",
+          "semantic:FACT:login_demo.button_click behavior 点击后无可观察响应 within 登录演示页",
+          "semantic:FACT:对象是一个登录演示页",
+          "semantic:FACT:该按钮当前点击无任何响应",
+          "semantic:FACT:该页面存在一个作为登录入口的按钮",
+          "semantic:MOTIVE:让登录演示页的按钮在点击后产生可用响应，恢复演示页的可操作性。"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 20619.79,
+        "ttfsr_ms": 1220.306,
+        "ttcr_ms": 20789.925,
+        "completed_ms": 20805.285,
+        "first_realization_delta_ms": 20620.468,
+        "response_delta_count": 3
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 20658.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20766.3
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20820.4
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 20820.6
+        }
+      ]
+    },
+    {
+      "case": "C-final",
+      "input": "我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？",
+      "interaction_id": "e097d080-cd78-4f1b-9cfd-8ece9caeb0ec",
+      "turn_id": "a5a9ad39-f2e0-40d5-91d8-df55daf2972e",
+      "status": "COMPLETED",
+      "content": "合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。\n\n理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，省掉了早期就引入多套存储的运维负担。\n\n需要留意的是这套方案成不成立，取决于边界有没有真的被划出来。先确认首批要落地的业务模块与关键数据流，再据此判断当前分法够不够用；模块之间保留清晰的接口，互相只通过明确的入口调用，不直接读写对方的表。做到这一点，将来要拆某个模块时只是搬动，而不是重写。反过来，如果模块之间共享表、跨模块直接查数据，单应用最后会退化成一团，那时再拆的成本比一开始拆还高。另一个需要接受的取舍是伸缩：单应用只能整体扩容，如果某个模块出现极端负载，就要靠读写分离或缓存顶一阵，而不是单独放大——对运营后台这类内部系统，这种情况通常不会早出现。\n\n所以这套架构值得按现在的方式推进，前提是把模块接口当成纪律来维护，而不是当成可以随时绕开的约定。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "JUDGMENT_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 提出具体架构方案并直接询问其合理性，需要评估现有方案而非构建或变更。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "CONCLUSION",
+          "REASONING",
+          "TRADEOFF"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "ANALYZE",
+        "judgment_subject": "面向小团队的运营后台架构：单应用按业务分模块 + PostgreSQL，暂不拆微服务",
+        "basis_fingerprint": "2ff465c3d7414eca86a8ceada280949d75361dddc64323199704747b3c661d71",
+        "selected_question": null,
+        "source_record_ids": [
+          "55797f83-6192-4351-86e8-e8a85189ad47"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "REASONED_TRADEOFFS",
+        "primary_obligation": "ASSESS",
+        "judgment_proposition": "对两人开发团队而言，单应用按业务分模块、使用 PostgreSQL 且暂不拆微服务，是合理的起步架构，可先建立清晰模块边界与演进路径，而非过早引入微服务复杂度。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:一个应用里按业务分模块",
+          "semantic:CONSTRAINT:使用 PostgreSQL",
+          "semantic:CONSTRAINT:先不拆微服务",
+          "semantic:CONSTRAINT:开发团队只有两人",
+          "semantic:FACT:system.database.engine reference PostgreSQL within 运营后台",
+          "semantic:FACT:system.module_organization scope single_application_business_modules within 运营后台",
+          "semantic:FACT:system.service_split behavior not_split_microservices within 运营后台",
+          "semantic:FACT:team.size cardinality 2 人 within 运营后台开发团队",
+          "semantic:FACT:使用 PostgreSQL",
+          "semantic:FACT:先不拆微服务",
+          "semantic:FACT:开发团队只有两人",
+          "semantic:FACT:当前方案是一个应用里按业务分模块",
+          "semantic:FACT:面向小团队的运营后台"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 20637.825,
+        "ttfsr_ms": 2303.325,
+        "ttcr_ms": 22766.802,
+        "completed_ms": 22786.683,
+        "first_realization_delta_ms": 20638.586,
+        "response_delta_count": 47
+      },
+      "stream_event_times": []
+    },
+    {
+      "case": "G-final",
+      "input": "我觉得你这个判断不对。",
+      "interaction_id": "e097d080-cd78-4f1b-9cfd-8ece9caeb0ec",
+      "turn_id": "f03b9395-8d4d-4449-8e21-da844864b72f",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "收到，我正在结合当前上下文核对这条输入。这个判断我暂时维持——目前没有出现能推翻它的新事实或新证据。依据是两人团队的维护带宽有限：单应用内按业务分模块加上 PostgreSQL，足以支撑运营后台起步和清晰的模块边界，而微服务会先带来部署、监控、跨服务排查这些固定开销，收益要等团队规模和业务量上来才体现。如果有具体事实变化，例如某个模块确实需要独立伸缩或独立发布、团队扩到能承担运维分工、或数据库成为实际瓶颈，我会据此重新评估。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "JUDGMENT_FIRST",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Human 明确否定上一轮架构合理性判断，但未给出新的架构事实、被推翻的证据或新的目标与优先级，因此需要重新审视并说明该判断的基础，而不是直接改写它。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Prior judgment retained: no newly cited material evidence established a changed basis."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "CONCLUSION",
+          "ASSESS_OBJECTION",
+          "EVIDENCE"
+        ],
+        "judgment_stance": "RECOMMENDATION",
+        "question_budget": 0,
+        "interaction_mode": "ANALYZE",
+        "judgment_subject": "面向小团队的运营后台架构：单应用按业务分模块 + PostgreSQL，暂不拆微服务",
+        "basis_fingerprint": "c8223f7e1a3127cd8bbb6bcbca47d3ca429c403a8b7d8ed477c8c37936b8eb2b",
+        "selected_question": null,
+        "source_record_ids": [
+          "55797f83-6192-4351-86e8-e8a85189ad47",
+          "c964a5a5-ba95-4813-a0ce-54eeec568139"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "DECISIVE_FACTORS",
+        "primary_obligation": "ASSESS",
+        "judgment_proposition": "对两人开发团队而言，单应用按业务分模块、使用 PostgreSQL 且暂不拆微服务，是合理的起步架构，可先建立清晰模块边界与演进路径，而非过早引入微服务复杂度。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:CONSTRAINT:一个应用里按业务分模块",
+          "semantic:CONSTRAINT:使用 PostgreSQL",
+          "semantic:CONSTRAINT:先不拆微服务",
+          "semantic:CONSTRAINT:开发团队只有两人",
+          "semantic:FACT:system.database.engine reference PostgreSQL within 运营后台",
+          "semantic:FACT:system.module_organization scope single_application_business_modules within 运营后台",
+          "semantic:FACT:system.service_split behavior not_split_microservices within 运营后台",
+          "semantic:FACT:team.size cardinality 2 人 within 运营后台开发团队",
+          "semantic:FACT:使用 PostgreSQL",
+          "semantic:FACT:先不拆微服务",
+          "semantic:FACT:开发团队只有两人",
+          "semantic:FACT:当前方案是一个应用里按业务分模块",
+          "semantic:FACT:面向小团队的运营后台"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 47.25,
+        "ttfsr_ms": 2393.885,
+        "ttcr_ms": 15384.077,
+        "completed_ms": 15399.798,
+        "first_realization_delta_ms": 15005.704,
+        "response_delta_count": 10
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 15078.5
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15133.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15133.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15133.1
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15245.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15245.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15300.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15413.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15413.0
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 15413.2
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 15469.7
+        }
+      ]
+    },
+    {
+      "case": "K-final",
+      "input": "这个登录演示页的按钮点了没反应，直接修掉。",
+      "interaction_id": "6cd8141b-862e-4b98-ab95-3c4551d87d44",
+      "turn_id": "7b4fd7bf-3480-4b70-a2df-e3eba3e59782",
+      "status": "COMPLETED",
+      "failure": null,
+      "content": "好的，我直接修这个登录演示页的按钮点击无响应问题，从页面的事件绑定和触发链路开始排查并修复，不再来回确认。",
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "opening_move": "ACK_AND_EXECUTE",
+        "decision_basis": [
+          "Mode comes from semantic interpretation: 人类明确要求直接修复登录演示页按钮点击无响应的问题，属于对现有产物的缺陷修复指令，应承接检查与修复责任而非反问。",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "Judgment is advisory; its cited basis was checked against current admitted semantics and Reality references."
+        ],
+        "judgment_basis": [],
+        "response_moves": [
+          "ACKNOWLEDGE",
+          "PROCEED"
+        ],
+        "judgment_stance": "UNCERTAINTY",
+        "question_budget": 0,
+        "interaction_mode": "EXECUTE",
+        "judgment_subject": "登录演示页按钮点击无响应",
+        "basis_fingerprint": "889786be65965a27bbf03bfc95f44d95d6b67df3ede3efcaae5af243cabcfa70",
+        "selected_question": null,
+        "source_record_ids": [
+          "f763eb1d-0554-4361-aa2a-4afc1f29959f"
+        ],
+        "strategy_revision": 0,
+        "information_budget": "MINIMAL_ACKNOWLEDGEMENT",
+        "primary_obligation": "EXECUTE",
+        "judgment_proposition": "登录演示页的按钮点击后没有任何响应，需要定位点击绑定/处理逻辑并修复。",
+        "prior_strategy_failed": false,
+        "advancement_obligation": "ACK_AND_EXECUTE",
+        "adjacent_insight_budget": 0,
+        "judgment_change_accepted": false,
+        "repeated_failure_signature": null,
+        "material_grounding_snapshot": [
+          "semantic:FACT:login_demo_page.button.click acceptance_assertion click_triggers_expected_login_response",
+          "semantic:FACT:login_demo_page.button.click behavior no_visible_response"
+        ]
+      },
+      "timing_ms": {
+        "ttfms_ms": 19891.53,
+        "ttfsr_ms": 1171.145,
+        "ttcr_ms": 20049.841,
+        "completed_ms": 20064.217,
+        "first_realization_delta_ms": 19891.995,
+        "response_delta_count": 4
+      },
+      "stream_event_times": [
+        {
+          "name": "response.delta",
+          "at_ms": 19914.9
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 19968.7
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20077.2
+        },
+        {
+          "name": "response.delta",
+          "at_ms": 20077.3
+        },
+        {
+          "name": "message.completed",
+          "at_ms": 20077.7
+        }
+      ]
+    }
+  ],
+  "deterministic_reality_observations": [
+    {
+      "case": "E",
+      "evidence_class": "DETERMINISTIC_WORK_REALITY_REAL_POSTGRESQL",
+      "input": "现在做到哪了？",
+      "turn_id": "821bfa62-4205-4310-9325-a7badc828142",
+      "provider_identity": "watt-native:work-reality-query",
+      "external_provider_requests_for_status_turn": 0,
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "basis_fingerprint": "df2ea837029c2a43ddc9a99003439a6b346a7d0c2b3f14312a9bd47fcf3bbe5f",
+        "source_record_ids": [
+          "d46e3fe9-b72e-4791-9baf-759a2162e7e7",
+          "0b238cf3-65e8-44d0-92ad-9e3edc3755b1"
+        ],
+        "interaction_mode": "STATUS",
+        "primary_obligation": "REPORT_REALITY",
+        "opening_move": "REALITY_FIRST",
+        "response_moves": [
+          "CURRENT_REALITY",
+          "GAP",
+          "NEXT_STEP"
+        ],
+        "information_budget": "CONCISE_REALITY",
+        "question_budget": 0,
+        "selected_question": null,
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": null,
+        "judgment_proposition": null,
+        "judgment_basis": [],
+        "judgment_change_accepted": false,
+        "material_grounding_snapshot": [
+          "semantic:DESIRED_OUTCOME:A working sign-in form shows validation and submission feedback.",
+          "semantic:MOTIVE:Make account access straightforward"
+        ],
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "strategy_revision": 0,
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Watt-owned read-only Work/Runtime projection.",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "No professional proposition was established on this turn."
+        ]
+      },
+      "human_facing_content": "当前目标：A working sign-in form shows validation and submission feedback.。目前处于「等待下一步」：尚无当前步骤。尚未创建生产周期或 PWU，生产执行还未开始。当前没有需要你执行的决定。",
+      "work_projection_unchanged": true,
+      "runtime_table_counts_unchanged": true,
+      "fixture_reality": "Admitted Work; no production cycle, PWU or queue entry."
+    },
+    {
+      "case": "A",
+      "evidence_class": "DETERMINISTIC_WORK_REALITY_REAL_POSTGRESQL",
+      "input": "为什么一直卡在 QUEUED？",
+      "turn_id": "4ffeb085-98fb-42a5-9f9b-fa1c02aaf748",
+      "provider_identity": "watt-native:work-reality-query",
+      "external_provider_requests_for_status_turn": 0,
+      "response_contract": {
+        "revision": "wic-response-contract-v1",
+        "authority": "ADVISORY_ONLY",
+        "basis_fingerprint": "6a6f81a6fc45a765e8cd81b5157ba70d0476d615a3e87b0940f2f7b8cb9515bb",
+        "source_record_ids": [
+          "d57e53fd-7485-4db1-8288-8cb79590f341",
+          "f01ac2b2-5acd-4871-b2cf-b7caf8adcfd7"
+        ],
+        "interaction_mode": "DIAGNOSE",
+        "primary_obligation": "DIAGNOSE",
+        "opening_move": "CAUSE_FIRST",
+        "response_moves": [
+          "CAUSE",
+          "EVIDENCE",
+          "FIX",
+          "VERIFY"
+        ],
+        "information_budget": "FOCUSED_DIAGNOSIS",
+        "question_budget": 0,
+        "selected_question": null,
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": null,
+        "judgment_proposition": null,
+        "judgment_basis": [],
+        "judgment_change_accepted": false,
+        "material_grounding_snapshot": [
+          "semantic:DESIRED_OUTCOME:A working sign-in form shows validation and submission feedback.",
+          "semantic:MOTIVE:Make account access straightforward"
+        ],
+        "advancement_obligation": "ANSWER_ONLY",
+        "adjacent_insight_budget": 0,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "strategy_revision": 0,
+        "decision_basis": [
+          "Mode comes from semantic interpretation: Watt-owned read-only Work/Runtime projection.",
+          "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
+          "No professional proposition was established on this turn."
+        ]
+      },
+      "human_facing_content": "当前生产周期没有对应的执行队列记录，现有证据不足以确认你描述的原因。尚未创建生产周期或 PWU，生产执行还未开始。当前没有需要你执行的决定。",
+      "work_projection_unchanged": true,
+      "runtime_table_counts_unchanged": true,
+      "fixture_reality": "Admitted Work; no production cycle, PWU or queue entry."
+    }
+  ],
+  "browser_initial": {
+    "exploreObservations": [
+      {
+        "ms": 295,
+        "characters": 83
+      },
+      {
+        "ms": 17255,
+        "characters": 91
+      },
+      {
+        "ms": 17420,
+        "characters": 108
+      },
+      {
+        "ms": 17585,
+        "characters": 166
+      },
+      {
+        "ms": 17750,
+        "characters": 192
+      },
+      {
+        "ms": 17916,
+        "characters": 228
+      },
+      {
+        "ms": 18081,
+        "characters": 290
+      },
+      {
+        "ms": 18245,
+        "characters": 318
+      },
+      {
+        "ms": 18410,
+        "characters": 369
+      },
+      {
+        "ms": 18578,
+        "characters": 398
+      },
+      {
+        "ms": 18747,
+        "characters": 439
+      },
+      {
+        "ms": 18913,
+        "characters": 487
+      },
+      {
+        "ms": 19080,
+        "characters": 527
+      },
+      {
+        "ms": 19247,
+        "characters": 541
+      },
+      {
+        "ms": 19415,
+        "characters": 613
+      },
+      {
+        "ms": 19583,
+        "characters": 638
+      },
+      {
+        "ms": 19750,
+        "characters": 679
+      },
+      {
+        "ms": 19917,
+        "characters": 704
+      }
+    ],
+    "final": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我们先脑暴一下登录功能还能怎么玩。\n\nWATT\n\n先给出一组可逆的探索方向，供后续收敛时挑拣。身份凭据这条线，可以试通行密钥或设备内置的生物识别作为主路径，把密码降为备用；也可以做一次性链接，让用户从邮箱或短信点一下直接进入；还可以引入设备信任，常用设备上把登录简化成一次确认。信任与风险这条线，自适应登录可以根据设备、位置、时间段给不同强度的验证；异常行为时不是直接拒绝，而是触发一次轻量的二次确认，比如推送一条带上下文的确认；还可以把风险信号变成用户可见的“安全状态”，让用户自己决定是否加固。流程体验这条线，登录即偏好设置，在验证通过的同时把语言、时区、通知方式一并带出来，减少后续设置页；渐进式注册，先让用户以最小信息进入，等碰到需要身份的动作再补全；也可以把登录做成可跳过的引导，用游客态先跑一段，再在关键节点邀请绑定。与后续旅程衔接这条线，登录后直达上次现场，恢复未完成的草稿、购物车或阅读位置；也可以按角色或意图分流，登录后直接落到对应的工作台或内容流；还可以把登录动作本身变成一次选择，让用户告诉系统这次来的目的，系统据此组装首屏。这些方向的差别不在功能多少，而在它们各自改变的东西不同：凭据线主要动的是入口摩擦与安全边界，信任与风险线动的是验证过程中的动态判断，流程体验线动的是用户对登录这件事的感知，旅程衔接线动的是登录后的连续感。有些方向可以叠加，比如通行密钥加设备信任；有些则互相拉扯，比如无密码体验与部分用户对密码的心理依赖。这些目前都只是可逆的探索假设，不是已经定下的方案。"
+  },
+  "browser_final": {
+    "observation": "Final source architecture assessment visible DOM growth",
+    "sampling_started_late": true,
+    "samples": [
+      {
+        "ms": 15220,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n正在处理…"
+      },
+      {
+        "ms": 20837,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。"
+      },
+      {
+        "ms": 20997,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，"
+      },
+      {
+        "ms": 21159,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，"
+      },
+      {
+        "ms": 21320,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，"
+      },
+      {
+        "ms": 21479,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。"
+      },
+      {
+        "ms": 21640,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，"
+      },
+      {
+        "ms": 21802,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，省掉了早期就引入多套存储的运维负担。 需要留意的是这套方案成不成立，"
+      },
+      {
+        "ms": 21963,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，省掉了早期就引入多套存储的运维负担。 需要留意的是这套方案成不成立，取决于边界有没有真的被划出来。先确认首批要落地的业务模块与关键数据流，再据此判断当前分法够不够用；模块之间保留清晰的接口，"
+      },
+      {
+        "ms": 22285,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，省掉了早期就引入多套存储的运维负担。 需要留意的是这套方案成不成立，取决于边界有没有真的被划出来。先确认首批要落地的业务模块与关键数据流，再据此判断当前分法够不够用；模块之间保留清晰的接口，互相只通过明确的入口调用，不直接读写对方的表。"
+      },
+      {
+        "ms": 22444,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，省掉了早期就引入多套存储的运维负担。 需要留意的是这套方案成不成立，取决于边界有没有真的被划出来。先确认首批要落地的业务模块与关键数据流，再据此判断当前分法够不够用；模块之间保留清晰的接口，互相只通过明确的入口调用，不直接读写对方的表。做到这一点，将来要拆某个模块时只是搬动，而不是重写。反过来，如果模块之间共享表、跨模块直接查数据，单应用最后会退化成一团，那时再拆的成本比一开始拆还高。"
+      },
+      {
+        "ms": 22607,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，省掉了早期就引入多套存储的运维负担。 需要留意的是这套方案成不成立，取决于边界有没有真的被划出来。先确认首批要落地的业务模块与关键数据流，再据此判断当前分法够不够用；模块之间保留清晰的接口，互相只通过明确的入口调用，不直接读写对方的表。做到这一点，将来要拆某个模块时只是搬动，而不是重写。反过来，如果模块之间共享表、跨模块直接查数据，单应用最后会退化成一团，那时再拆的成本比一开始拆还高。另一个需要接受的取舍是伸缩：单应用只能整体扩容，如果某个模块出现极端负载，就要靠读写分离或缓存顶一阵，"
+      },
+      {
+        "ms": 22770,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，省掉了早期就引入多套存储的运维负担。 需要留意的是这套方案成不成立，取决于边界有没有真的被划出来。先确认首批要落地的业务模块与关键数据流，再据此判断当前分法够不够用；模块之间保留清晰的接口，互相只通过明确的入口调用，不直接读写对方的表。做到这一点，将来要拆某个模块时只是搬动，而不是重写。反过来，如果模块之间共享表、跨模块直接查数据，单应用最后会退化成一团，那时再拆的成本比一开始拆还高。另一个需要接受的取舍是伸缩：单应用只能整体扩容，如果某个模块出现极端负载，就要靠读写分离或缓存顶一阵，而不是单独放大——对运营后台这类内部系统，这种情况通常不会早出现。"
+      },
+      {
+        "ms": 22929,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。 理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，省掉了早期就引入多套存储的运维负担。 需要留意的是这套方案成不成立，取决于边界有没有真的被划出来。先确认首批要落地的业务模块与关键数据流，再据此判断当前分法够不够用；模块之间保留清晰的接口，互相只通过明确的入口调用，不直接读写对方的表。做到这一点，将来要拆某个模块时只是搬动，而不是重写。反过来，如果模块之间共享表、跨模块直接查数据，单应用最后会退化成一团，那时再拆的成本比一开始拆还高。另一个需要接受的取舍是伸缩：单应用只能整体扩容，如果某个模块出现极端负载，就要靠读写分离或缓存顶一阵，而不是单独放大——对运营后台这类内部系统，这种情况通常不会早出现。 所以这套架构值得按现在的方式推进，前提是把模块接口当成纪律来维护，而不是当成可以随时绕开的约定。"
+      },
+      {
+        "ms": 23094,
+        "text": "ACTIVE WORK COMMUNICATION\n\nCURRENT INTERACTION\n\nYOU\n\n我准备做一个面向小团队的运营后台，开发团队只有两人。当前方案是一个应用里按业务分模块，使用 PostgreSQL，先不拆微服务。你觉得这个架构合理吗？\n\nWATT\n\n合理。对两个人的团队来说，单应用按业务分模块、用 PostgreSQL、暂不拆微服务，是这个阶段比较稳妥的起点；主要风险不在架构选型本身，而在模块边界是否守得住。\n\n理由很直接：微服务的收益来自独立部署、独立扩缩容和团队自治，而这些恰恰是两人团队现在最不需要的东西。真正的成本却会立刻到来——服务拆分、跨服务事务、分布式调试、多套部署与监控，这些开销会按服务数量增长，而不是按人数缩减。单应用加模块化把边界先放在代码里，等到边界被业务反复验证清楚，再决定要不要物理拆开，代价要低得多。PostgreSQL 同样是合适的默认选择：事务、约束、JSON 字段、全文检索基本能覆盖运营后台的绝大多数需求，省掉了早期就引入多套存储的运维负担。\n\n需要留意的是这套方案成不成立，取决于边界有没有真的被划出来。先确认首批要落地的业务模块与关键数据流，再据此判断当前分法够不够用；模块之间保留清晰的接口，互相只通过明确的入口调用，不直接读写对方的表。做到这一点，将来要拆某个模块时只是搬动，而不是重写。反过来，如果模块之间共享表、跨模块直接查数据，单应用最后会退化成一团，那时再拆的成本比一开始拆还高。另一个需要接受的取舍是伸缩：单应用只能整体扩容，如果某个模块出现极端负载，就要靠读写分离或缓存顶一阵，而不是单独放大——对运营后台这类内部系统，这种情况通常不会早出现。\n\n所以这套架构值得按现在的方式推进，前提是把模块接口当成纪律来维护，而不是当成可以随时绕开的约定。"
+      }
+    ]
+  },
+  "final_focused_tests": {
+    "unit": {
+      "tests": "185",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.180"
+    },
+    "postgres": {
+      "tests": "9",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "11.529"
+    },
+    "related_postgres": {
+      "tests": "65",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "7",
+      "time": "159.897"
+    }
+  }
+}

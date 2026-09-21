@@ -25,7 +25,15 @@ from spg.domain.wic_intelligence import (
 )
 from spg.domain.wic_reception import FastReceptionCandidate
 from spg.application.interaction_strategy import select_interaction_strategy
-from spg.domain.conversation import ConversationalMove, InteractionStrategy
+from spg.application.response_contract import build_response_contract
+from spg.domain.conversation import (
+    CognitiveMaturity,
+    ConversationContextMessage,
+    ConversationalMove,
+    HumanConversationMode,
+    InteractionStrategy,
+)
+from spg.domain.response_contract import ResponseContract, ResponseMove
 from spg.domain.wic_response import (
     GovernedResponseEnvelope,
     GovernedResponseRealization,
@@ -34,6 +42,73 @@ from spg.domain.wic_response import (
 
 
 _CLAUSE_BOUNDARIES = frozenset("，,；;。！？!?\n")
+_INTERNAL_CONTRACT_ASSIGNMENT = re.compile(
+    r"\b(?:response_contract|interaction_mode|primary_obligation|opening_move|"
+    r"response_moves|information_budget|question_budget|judgment_stance|judgment_basis|"
+    r"advancement_obligation|adjacent_insight_budget|decision_basis)\b[\"']?\s*[:=]",
+    re.I,
+)
+_INFORMATION_REQUEST = re.compile(
+    r"^(?:"
+    r"(?:请(?:你|您)?|麻烦(?:你|您)?)(?:先|再|帮忙|帮我|进一步)?"
+    r"(?:告诉|确认|说明|选择|补充|提供|告知|回答|指明|说一下|给出)"
+    r"|(?:你|您)(?:更)?(?:希望|想要|想|倾向|偏向|选择|打算|需要).*(?:哪|什么|多少|如何|怎么|是否)"
+    r"|(?:请问|能否|可否|可不可以|能不能|是否)"
+    r"|(?:please\s+)?tell\s+(?:me|us)\b"
+    r"|(?:please\s+)?let\s+(?:me|us)\s+know\b"
+    r"|please\s+(?:confirm|specify|clarify|choose|provide|share)\b"
+    r"|(?:can|could|would|will)\s+you\b"
+    r"|(?:what|which|where|when|who|how|why)\s+"
+    r"(?:is|are|do|does|did|can|could|would|should|will|have|has)\b"
+    r")",
+    re.I,
+)
+_QUESTION_PARTICLE = re.compile(r"(?:吗|么|呢)\s*[。.!！；;，,\n]*$")
+_URL = re.compile(r"\b(?:https?://|www\.)[^\s<>\"'`]+", re.I)
+
+
+def _unquoted_expression(text: str) -> str:
+    """Mask quoted/code/URL literals while retaining original character offsets.
+
+    A question mark in an example, an inline program, or a URL query is not an
+    information request to the Human. Full prefix context handles literals split
+    across streamed clauses without waiting for the complete response.
+    """
+
+    masked = list(text)
+    quote: str | None = None
+    code_width = 0
+    closing = {'"': '"', "'": "'", "“": "”", "‘": "’", "「": "」", "『": "』"}
+    index = 0
+    while index < len(text):
+        character = text[index]
+        if character == "`" and quote is None:
+            end = index + 1
+            while end < len(text) and text[end] == "`":
+                end += 1
+            width = end - index
+            if code_width == 0:
+                code_width = width
+            elif width == code_width:
+                code_width = 0
+            masked[index:end] = " " * width
+            index = end
+            continue
+        if code_width:
+            masked[index] = " "
+        elif quote is not None:
+            masked[index] = " "
+            if character == quote:
+                quote = None
+        elif character in closing and not (
+            character == "'" and index > 0 and text[index - 1].isalnum()
+        ):
+            quote = closing[character]
+            masked[index] = " "
+        index += 1
+    for match in _URL.finditer(text):
+        masked[match.start():match.end()] = " " * len(match.group())
+    return "".join(masked)
 
 
 def bounded_response_chunks(content: str, *, max_chars: int = 96) -> Iterable[str]:
@@ -70,13 +145,24 @@ class GovernedDeltaGate:
         self.suppressed: list[str] = []
         self.question_count = 0
         self.suppress_remainder = False
+        self.suppress_question_sentence = False
+        self.question_sentence_counted = False
+        self.processed_raw = ""
 
     def feed(self, delta: str) -> None:
         self.pending += delta
         complete: list[str] = []
         start = 0
         for index, character in enumerate(self.pending):
-            if character in _CLAUSE_BOUNDARIES:
+            # English sentence endings become visible as soon as the following
+            # separator arrives. A dot inside a token remains part of that token.
+            period_boundary = bool(
+                self.envelope.response_contract is not None
+                and character == "."
+                and index + 1 < len(self.pending)
+                and self.pending[index + 1].isspace()
+            )
+            if character in _CLAUSE_BOUNDARIES or period_boundary:
                 complete.append(self.pending[start : index + 1])
                 start = index + 1
         self.pending = self.pending[start:]
@@ -99,10 +185,37 @@ class GovernedDeltaGate:
             self.suppressed.append(clause)
             return
         strategy = self.envelope.interaction_strategy
+        contract = self.envelope.response_contract
+        prior_length = len(self.processed_raw)
+        self.processed_raw += clause
+        expression = (
+            _unquoted_expression(self.processed_raw)[prior_length:]
+            if contract is not None else clause
+        )
+        sentence_ended = clause.endswith("\n") or clause.rstrip().endswith(
+            ("。", ".", "!", "！", "?", "？", ";", "；")
+        )
+        continuing_question = self.question_sentence_counted
+        if sentence_ended:
+            self.question_sentence_counted = False
+        if self.suppress_question_sentence:
+            self.suppressed.append(clause)
+            self.suppress_question_sentence = not sentence_ended
+            return
         stripped = clause.strip()
         if not stripped:
+            if contract is not None and self.emitted:
+                # Separators belong to the admitted prose. Removing them turns
+                # exploration and design paragraphs into an unreadable block.
+                self.emitted.append(clause)
+                self.emit(clause)
+                return
             self.suppressed.append(clause)
             return
+        if contract is not None and _INTERNAL_CONTRACT_ASSIGNMENT.search(clause):
+            raise GovernedResponsePolicyViolation(
+                "Realizer exposed internal Response Contract metadata"
+            )
         if (
             not self.emitted
             and strategy.demonstrate_understanding_without_restating
@@ -110,16 +223,30 @@ class GovernedDeltaGate:
         ):
             self.suppressed.append(clause)
             return
-        question_marks = clause.count("?") + clause.count("？")
-        if question_marks and (
-            not strategy.question_allowed
-            or self.question_count >= strategy.max_questions
-        ):
+        question_marks = expression.count("?") + expression.count("？")
+        question_act = bool(
+            question_marks
+            or contract is not None and (
+                _INFORMATION_REQUEST.search(expression.strip())
+                or _QUESTION_PARTICLE.search(expression.strip())
+            )
+        )
+        question_budget = (
+            contract.question_budget
+            if contract is not None
+            else strategy.max_questions if strategy.question_allowed else 0
+        )
+        if question_act and not continuing_question and self.question_count >= question_budget:
             self.suppressed.append(clause)
-            self.suppress_remainder = True
+            # A disallowed question must not erase a following cause, answer or
+            # repair. Retain the historical terminal suppression only for old
+            # envelopes that carry no turn contract.
+            self.suppress_remainder = contract is None
+            self.suppress_question_sentence = contract is not None and not sentence_ended
             return
-        if question_marks:
+        if question_act and not continuing_question:
             self.question_count += 1
+            self.question_sentence_counted = not sentence_ended
         normalized = clause.casefold()
         forbidden = next(
             (
@@ -168,6 +295,9 @@ def governed_response_envelope(
     provisional_content: str | None,
     reconciliation: ResponseReconciliation,
     latest_human_input: str,
+    response_contract: ResponseContract | None = None,
+    previous_response_contract: ResponseContract | None = None,
+    recent_relevant_messages: tuple[ConversationContextMessage, ...] = (),
 ) -> GovernedResponseEnvelope:
     """Build the expression handoff exclusively from admitted WIC semantics."""
 
@@ -216,12 +346,12 @@ def governed_response_envelope(
     strategy = select_interaction_strategy(
         assessment, latest_human_input=latest_human_input
     )
+    contract = response_contract or build_response_contract(assessment)
+    if contract.basis_fingerprint != assessment.basis_fingerprint:
+        raise ValueError("Response Contract must match the admitted turn basis")
+    strategy = _strategy_for_response_contract(strategy, contract)
     governed_content = _content_at_strategy_granularity(governed_content, strategy)
-    selected_question = (
-        semantics.selected_question
-        if strategy.primary_move is ConversationalMove.ESCALATE_HUMAN_DECISION
-        else None
-    )
+    selected_question = contract.selected_question if contract.question_budget else None
     return GovernedResponseEnvelope(
         basis_fingerprint=assessment.basis_fingerprint,
         governed_content=governed_content,
@@ -245,7 +375,104 @@ def governed_response_envelope(
             "zh-CN" if re.search(r"[\u4e00-\u9fff]", governed_content) else "en"
         ),
         interaction_strategy=strategy,
+        response_contract=contract,
+        previous_response_contract=previous_response_contract,
+        latest_human_input=latest_human_input,
+        recent_relevant_messages=recent_relevant_messages,
     )
+
+
+def _strategy_for_response_contract(
+    strategy: InteractionStrategy,
+    contract: ResponseContract,
+) -> InteractionStrategy:
+    """Make legacy expression advice a projection of the turn contract.
+
+    Cognitive altitude remains useful. Question allowance and the response move
+    cannot compete with the first-class contract supplied to the same Realizer.
+    """
+
+    move = {
+        "EXPLAIN": ConversationalMove.EXPLAIN,
+        "DIAGNOSE": ConversationalMove.EXPLAIN,
+        "ANSWER": ConversationalMove.ANSWER,
+        "RECOMMEND": ConversationalMove.PROPOSE,
+        "COMPARE": ConversationalMove.COMPARE,
+        "ASSESS": ConversationalMove.EXPLAIN,
+        "REPORT_REALITY": ConversationalMove.ANSWER,
+        "PROPOSE": ConversationalMove.PROPOSE,
+        "EXECUTE": ConversationalMove.CONFIRM,
+        "CORRECT": ConversationalMove.CORRECT,
+        "CLARIFY_BLOCKER": ConversationalMove.ESCALATE_HUMAN_DECISION,
+    }[contract.primary_obligation.value]
+    mode = contract.interaction_mode.value
+    values = strategy.model_dump()
+    values.update(
+        primary_move=move,
+        question_allowed=bool(contract.question_budget),
+        max_questions=contract.question_budget,
+        question_guidance=(
+            contract.selected_question
+            or "Ask only for the material blocker established by the Response Contract."
+        ) if contract.question_budget else None,
+        candidate_first=mode in {"EXPLORE", "DESIGN", "DECIDE"},
+        answer_first=mode in {"ANSWER", "STATUS", "ANALYZE", "DIAGNOSE", "DECIDE"},
+        next_conversational_granularity=(
+            "Use response_contract opening_move and response_moves at its "
+            "information_budget; stop once the current obligation is satisfied."
+        ),
+    )
+    if mode == "EXPLORE":
+        values.update(
+            human_mode=HumanConversationMode.EXPLORING,
+            cognitive_maturity=CognitiveMaturity.EXPLORING,
+        )
+    elif mode == "EXECUTE":
+        values.update(
+            human_mode=HumanConversationMode.SPECIFYING,
+            cognitive_maturity=CognitiveMaturity.SPECIFYING,
+        )
+    elif mode == "DECIDE":
+        values.update(
+            human_mode=HumanConversationMode.DECIDING,
+            cognitive_maturity=CognitiveMaturity.EVALUATING,
+        )
+    elif mode == "ANALYZE":
+        values.update(
+            human_mode=HumanConversationMode.ASKING,
+            cognitive_maturity=CognitiveMaturity.EVALUATING,
+        )
+    elif mode == "CORRECT":
+        values.update(human_mode=HumanConversationMode.CORRECTING)
+    return InteractionStrategy.model_validate(values)
+
+
+def reconcile_contract_response(
+    contract: ResponseContract | None,
+    reconciliation: ResponseReconciliation,
+    semantics: ProgressiveSemanticStructure | None,
+) -> ResponseReconciliation:
+    """Do not present an unsupported objection as an accepted correction.
+
+    Fast reception can label a disagreement as a correction before Deep WIC
+    resolves its meaning. That classification mismatch is not a changed fact or
+    judgment. Actual admitted corrections and Reality conflicts still reconcile
+    through the existing correction path.
+    """
+
+    if (
+        reconciliation is ResponseReconciliation.MATERIAL_CORRECTION
+        and contract is not None
+        and ResponseMove.ASSESS_OBJECTION in contract.response_moves
+        and not contract.judgment_change_accepted
+        and semantics is not None
+        and not {
+            PatternSignal.EXPLICIT_CORRECTION,
+            PatternSignal.BROWNFIELD_REALITY_CONFLICT,
+        }.intersection(semantics.pattern_signals)
+    ):
+        return ResponseReconciliation.REFINE
+    return reconciliation
 
 
 def _content_at_strategy_granularity(

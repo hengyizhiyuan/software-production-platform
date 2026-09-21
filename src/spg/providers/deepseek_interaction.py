@@ -11,6 +11,10 @@ from typing import Callable
 
 from pydantic import ValidationError
 
+from spg.application.response_contract_expression import (
+    governed_contract_realizer_instruction,
+    response_contract_expression_guidance,
+)
 from spg.application.conversation import ConversationResponseComposer
 from spg.domain.conversation import (
     ConversationContext,
@@ -303,6 +307,7 @@ class DeepSeekGovernedResponseRealizer:
             "into that single sentence. "
             "Never emit any forbidden_claim. Return JSON only with one natural_response "
             "string.\n\nGoverned Response Envelope:\n"
+            + response_contract_expression_guidance(envelope.response_contract)
             + json.dumps(
                 envelope.model_dump(mode="json"),
                 ensure_ascii=False,
@@ -310,6 +315,8 @@ class DeepSeekGovernedResponseRealizer:
                 separators=(",", ":"),
             )
         )
+        if envelope.response_contract is not None:
+            instruction = governed_contract_realizer_instruction(envelope)
         result = self.runtime.generate(
             purpose=ModelPurpose.CONVERSATION_RESPONSE,
             instructions=instruction,
@@ -322,6 +329,11 @@ class DeepSeekGovernedResponseRealizer:
                 _structured_json_text(result.output_text)
             )
         except (ValidationError, ValueError, TypeError) as error:
+            LOGGER.warning(
+                "Governed Realizer validation failed request=%s issue=%s %s",
+                result.request_id, _safe_validation_summary(error),
+                _safe_result_shape(result.output_text),
+            )
             raise InteractionInvariantViolation(
                 "Governed Response Realizer returned an invalid result"
             ) from error
