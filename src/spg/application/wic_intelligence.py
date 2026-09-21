@@ -36,6 +36,8 @@ _WORK_INTENT = re.compile(
     re.IGNORECASE,
 )
 
+_QUESTION_COST_RANK = {"LOW": 2, "MEDIUM": 1, "HIGH": 0}
+
 
 def _correction_target(value: str) -> str:
     reversed_object = re.search(r"不是.+?[，,]是(.+)", value)
@@ -157,14 +159,10 @@ def build_progressive_semantics(
             answer_already_available=False, safe_reversible_assumption_available=False,
             watt_authorized_to_choose=False, blocks_next_governed_step=True,
             cognitive_cost="MEDIUM", decision_value=100,
-            disposition=QuestionDisposition.ASK_HUMAN_NOW,
+            disposition=QuestionDisposition.DEFER_UNTIL_RELEVANT,
             rationale="The answer changes a Human-owned high-impact boundary.",
         ))
     for question in candidate.unresolved_material_questions:
-        if any(item.disposition is QuestionDisposition.ASK_HUMAN_NOW for item in questions):
-            disposition = QuestionDisposition.DEFER_UNTIL_RELEVANT
-        elif safe_inference: disposition = QuestionDisposition.INFER_REVERSIBLY
-        else: disposition = QuestionDisposition.ASK_HUMAN_NOW
         questions.append(QuestionEvaluation(
             question=question, affected_dimensions=("SCOPE",),
             answer_already_available=False,
@@ -172,10 +170,41 @@ def build_progressive_semantics(
             watt_authorized_to_choose=safe_inference,
             blocks_next_governed_step=not safe_inference,
             cognitive_cost="LOW", decision_value=20 if safe_inference else 70,
-            disposition=disposition,
-            rationale="v1 selects only the highest-value unresolved decision and carries lower-value detail.",
+            disposition=(
+                QuestionDisposition.INFER_REVERSIBLY
+                if safe_inference
+                else QuestionDisposition.DEFER_UNTIL_RELEVANT
+            ),
+            rationale="Question policy ranks unresolved decisions by decision impact and cognitive cost.",
         ))
-    selected = next((q.question for q in questions if q.disposition is QuestionDisposition.ASK_HUMAN_NOW), None)
+    askable = [
+        (index, item)
+        for index, item in enumerate(questions)
+        if not item.answer_already_available
+        and not item.safe_reversible_assumption_available
+        and not item.watt_authorized_to_choose
+        and item.blocks_next_governed_step
+    ]
+    if askable:
+        winner, _ = max(
+            askable,
+            key=lambda pair: (
+                pair[1].decision_value,
+                _QUESTION_COST_RANK[pair[1].cognitive_cost],
+                -pair[0],
+            ),
+        )
+        questions[winner] = questions[winner].model_copy(
+            update={"disposition": QuestionDisposition.ASK_HUMAN_NOW}
+        )
+    selected = next(
+        (
+            item.question
+            for item in questions
+            if item.disposition is QuestionDisposition.ASK_HUMAN_NOW
+        ),
+        None,
+    )
     unresolved = tuple(dict.fromkeys((*decisions, *((selected,) if selected else ()))))
 
     conversation_only = (

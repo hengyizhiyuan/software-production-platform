@@ -708,6 +708,7 @@ class SteeringPlanProjection(BaseModel):
     completed_steps: tuple[SteeringStepRecord, ...]
     current_step: SteeringStepRecord | None
     known_next_steps: tuple[SteeringStepRecord, ...]
+    plan_change_history: tuple[SteeringHistoryEventRecord, ...] = ()
     latest_decision: SteeringDecisionRecord | None
     selection_rationale: str | None
     steering_outcome: SteeringOutcome | None

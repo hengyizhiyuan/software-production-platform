@@ -185,6 +185,25 @@ class InteractionStore:
         if result.rowcount != 1:
             raise InteractionInvariantViolation(f"Interaction Turn not found: {turn_id}")
 
+    def reset_turn_for_retry(self, turn_id: UUID, *, updated_at) -> None:
+        """Reset current Turn state while response events retain prior-attempt evidence."""
+
+        result = self.session.execute(
+            update(interaction_turns)
+            .where(interaction_turns.c.id == turn_id)
+            .values(
+                status=InteractionTurnStatus.RECEIVED.value,
+                assessment_id=None,
+                failure_code=None,
+                failure_message=None,
+                started_at=None,
+                completed_at=None,
+                updated_at=updated_at,
+            )
+        )
+        if result.rowcount != 1:
+            raise InteractionInvariantViolation(f"Interaction Turn not found: {turn_id}")
+
     def next_message_sequence(self, interaction_id: UUID) -> int:
         value = self.session.execute(
             select(func.max(interaction_messages.c.sequence)).where(

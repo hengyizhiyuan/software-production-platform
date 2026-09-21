@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, replace
+from dataclasses import asdict
 import json
 import logging
 import re
@@ -26,6 +26,7 @@ from spg.domain.interaction import (
     InteractionInterpretationInput,
     InteractionInvariantViolation,
     InteractionSemanticCandidate,
+    StructuredResponseSchemaViolation,
 )
 from spg.domain.model_runtime import ModelPurpose, StructuredModelResult, WattModelRuntime
 from spg.domain.wic_response import (
@@ -73,22 +74,37 @@ def _structured_json_text(value: str) -> str:
     return (match.group(1) if match is not None else stripped).strip()
 
 
-def _is_root_json_invalid(error: InteractionInvariantViolation) -> bool:
-    """Identify syntax-invalid JSON without treating schema rejection as retryable."""
+def _repair_structured_result(
+    runtime: WattModelRuntime,
+    *,
+    purpose: ModelPurpose,
+    invalid_output: str,
+    output_schema: dict[str, object],
+    on_stage: Callable[[str], None] | None,
+    contract_name: str,
+) -> StructuredModelResult:
+    """Run one structure-only repair without exposing a second provisional stream."""
 
-    cause = error.__cause__
-    if not isinstance(cause, ValidationError):
-        return False
-    issues = cause.errors(include_input=False, include_url=False)
-    return len(issues) == 1 and issues[0].get("loc") == () and (
-        issues[0].get("type") == "json_invalid"
+    if on_stage is not None:
+        on_stage("structured_output_repair_started")
+    result = runtime.generate(
+        purpose=purpose,
+        instructions=(
+            f"Repair one completed {contract_name} JSON result to the supplied exact "
+            "schema. This is structural repair only. Preserve every existing business "
+            "meaning and Human-facing statement exactly unless a change is strictly "
+            "required to satisfy the schema. Remove forbidden extra fields. Do not infer "
+            "new facts, add recommendations, change authority, or create Semantic Truth. "
+            "Return only the repaired JSON object."
+        ),
+        input_text=invalid_output,
+        output_schema=output_schema,
+        on_output_delta=None,
+        on_stage=on_stage,
     )
-
-
-def _is_structured_payload_invalid(error: InteractionInvariantViolation) -> bool:
-    """Limit bounded repair to Provider wire/schema validation failures."""
-
-    return isinstance(error.__cause__, ValidationError)
+    if on_stage is not None:
+        on_stage("structured_output_repair_completed")
+    return result
 
 
 class DeepSeekInteractionSemanticCapability:
@@ -107,6 +123,7 @@ class DeepSeekInteractionSemanticCapability:
         self.last_prompt_characters: int | None = None
         self.last_usage: dict[str, object] | None = None
         self.last_retry_count: int | None = None
+        self.last_structured_repair_count = 0
         self.last_result: StructuredModelResult | None = None
 
     def interpret_semantics(
@@ -124,14 +141,42 @@ class DeepSeekInteractionSemanticCapability:
             output_schema=CodexSdkInteractionSemanticCapability.output_schema(),
             on_stage=on_stage,
         )
+        self.last_structured_repair_count = 0
+        schema = CodexSdkInteractionSemanticCapability.output_schema()
         try:
             payload = _InteractionSemanticProviderPayload.model_validate_json(
                 _structured_json_text(result.output_text)
             )
-        except (ValidationError, ValueError, TypeError) as error:
-            raise InteractionInvariantViolation(
-                "WIC semantic Provider returned an invalid structured result"
-            ) from error
+        except (ValidationError, ValueError, TypeError) as first_error:
+            first_issue = _safe_validation_summary(first_error)
+            LOGGER.warning(
+                "WIC semantic validation failed request=%s model=%s status=completed "
+                "stage=payload_validation issue=%s %s repair=started",
+                result.request_id, result.effective_model or result.requested_model,
+                first_issue, _safe_result_shape(result.output_text),
+            )
+            result = _repair_structured_result(
+                self.runtime,
+                purpose=ModelPurpose.WIC_SEMANTIC,
+                invalid_output=result.output_text,
+                output_schema=schema,
+                on_stage=on_stage,
+                contract_name="WIC semantic",
+            )
+            self.last_structured_repair_count = 1
+            try:
+                payload = _InteractionSemanticProviderPayload.model_validate_json(
+                    _structured_json_text(result.output_text)
+                )
+            except (ValidationError, ValueError, TypeError) as second_error:
+                issue = _safe_validation_summary(second_error)
+                raise StructuredResponseSchemaViolation(
+                    "WIC semantic Provider returned an invalid structured result after "
+                    f"one bounded repair attempt ({issue}; bounded_repair_exhausted)",
+                    request_id=result.request_id,
+                    validation_issue=issue,
+                    repair_attempted=True,
+                ) from second_error
         if on_stage is not None:
             on_stage("semantic_payload_validated")
         self._observe(result)
@@ -382,41 +427,12 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
         on_response_delta: Callable[[str], None],
         on_pipeline_stage: Callable[[str], None],
     ) -> InteractionAssessmentCandidate:
-        """One syntax-only coalesced repair for the shadow-mode pipeline too."""
-        try:
-            return super().interpret_stream_observed(
-                basis, on_response_delta=on_response_delta,
-                on_pipeline_stage=on_pipeline_stage,
-            )
-        except InteractionInvariantViolation as first_error:
-            if not (self.pipeline_selection(basis)[0] == "coalesced_pre_work"
-                    and _is_root_json_invalid(first_error)):
-                raise
-            on_pipeline_stage("structured_json_repair_started")
-        try:
-            # The first response may have streamed provisional text. No second
-            # provisional stream is emitted; the settled message replaces it.
-            candidate = super().interpret_stream_observed(
-                basis, on_response_delta=lambda _delta: None,
-                on_pipeline_stage=on_pipeline_stage,
-            )
-        except InteractionInvariantViolation as second_error:
-            if _is_root_json_invalid(second_error):
-                raise InteractionInvariantViolation(
-                    "Coalesced collaboration Provider returned invalid JSON after "
-                    "one bounded structured repair attempt (root:json_invalid; "
-                    "bounded_repair_exhausted)"
-                ) from second_error
-            raise
-        evidence = self.last_pipeline_evidence
-        if evidence is not None:
-            self.last_pipeline_evidence = replace(
-                evidence,
-                provider_call_count=evidence.provider_call_count + 1,
-                coalesced_retry_count=(evidence.coalesced_retry_count or 0) + 1,
-            )
-        on_pipeline_stage("structured_json_repair_completed")
-        return candidate
+        """Interpret with repair owned by the exact structured Provider boundary."""
+        return super().interpret_stream_observed(
+            basis,
+            on_response_delta=on_response_delta,
+            on_pipeline_stage=on_pipeline_stage,
+        )
 
     def interpret_controlled_stream_observed(
         self,
@@ -438,48 +454,12 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
         def observe_only(_delta: str) -> None:
             return None
 
-        try:
-            return self._interpret(
-                basis,
-                on_response_delta=observe_only,
-                on_pipeline_stage=on_pipeline_stage,
-                controlled_semantic_only=True,
-            )
-        except InteractionInvariantViolation as first_error:
-            if not _is_structured_payload_invalid(first_error):
-                raise
-            on_pipeline_stage("structured_output_repair_started")
-
-        try:
-            candidate = self._interpret(
-                basis,
-                on_response_delta=observe_only,
-                on_pipeline_stage=on_pipeline_stage,
-                controlled_semantic_only=True,
-            )
-        except InteractionInvariantViolation as second_error:
-            if _is_root_json_invalid(second_error):
-                raise InteractionInvariantViolation(
-                    "WIC semantic Provider returned invalid JSON after "
-                    "one bounded structured repair attempt (root:json_invalid; "
-                    "bounded_repair_exhausted)"
-                ) from second_error
-            if _is_structured_payload_invalid(second_error):
-                raise InteractionInvariantViolation(
-                    "WIC Provider returned an invalid structured result after one "
-                    "bounded repair attempt (schema_invalid; bounded_repair_exhausted)"
-                ) from second_error
-            raise
-
-        evidence = self.last_pipeline_evidence
-        if evidence is not None:
-            self.last_pipeline_evidence = replace(
-                evidence,
-                provider_call_count=evidence.provider_call_count + 1,
-                semantic_retry_count=(evidence.semantic_retry_count or 0) + 1,
-            )
-        on_pipeline_stage("structured_output_repair_completed")
-        return candidate
+        return self._interpret(
+            basis,
+            on_response_delta=observe_only,
+            on_pipeline_stage=on_pipeline_stage,
+            controlled_semantic_only=True,
+        )
 
     def _interpret(
         self,
@@ -518,11 +498,12 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
                 if mode == "coalesced_pre_work"
                 else "controlled_semantics_before_governed_realization"
             ),
-            provider_call_count=1,
+            provider_call_count=1 + self.semantic_capability.last_structured_repair_count,
             semantic_request_id=self.semantic_capability.last_request_id,
             semantic_provider=self.semantic_capability.provider_identity,
             semantic_usage=self.semantic_capability.last_usage,
-            semantic_retry_count=self.semantic_capability.last_retry_count,
+            semantic_retry_count=(self.semantic_capability.last_retry_count or 0)
+            + self.semantic_capability.last_structured_repair_count,
             semantic_seconds=monotonic() - started_at,
             semantic_prompt_characters=self.semantic_capability.last_prompt_characters,
             semantic_model=self.semantic_capability.model,
@@ -611,20 +592,41 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
         stage("semantic_envelope_completed")
         stage("provider_teardown_completed")
         stage("payload_validation_started")
+        repair_count = 0
         try:
             payload = _CoalescedInteractionProviderPayload.model_validate_json(
                 _structured_json_text(result.output_text)
             )
-        except (ValidationError, ValueError, TypeError) as error:
+        except (ValidationError, ValueError, TypeError) as first_error:
             LOGGER.warning(
-                "Coalesced collaboration validation failed request=%s model=%s status=completed stage=payload_validation issue=%s %s",
+                "Coalesced collaboration validation failed request=%s model=%s "
+                "status=completed stage=payload_validation issue=%s %s repair=started",
                 result.request_id, result.effective_model or result.requested_model,
-                _safe_validation_summary(error), _safe_result_shape(result.output_text),
+                _safe_validation_summary(first_error), _safe_result_shape(result.output_text),
             )
-            raise InteractionInvariantViolation(
-                "Coalesced collaboration Provider returned an invalid structured result "
-                f"({_safe_validation_summary(error)})"
-            ) from error
+            result = _repair_structured_result(
+                self.runtime,
+                purpose=ModelPurpose.WIC_SEMANTIC,
+                invalid_output=result.output_text,
+                output_schema=self.coalesced_output_schema(),
+                on_stage=stage,
+                contract_name="coalesced collaboration",
+            )
+            repair_count = 1
+            try:
+                payload = _CoalescedInteractionProviderPayload.model_validate_json(
+                    _structured_json_text(result.output_text)
+                )
+            except (ValidationError, ValueError, TypeError) as second_error:
+                issue = _safe_validation_summary(second_error)
+                raise StructuredResponseSchemaViolation(
+                    "Coalesced collaboration Provider returned an invalid structured "
+                    f"result after one bounded repair attempt ({issue}; "
+                    "bounded_repair_exhausted)",
+                    request_id=result.request_id,
+                    validation_issue=issue,
+                    repair_attempted=True,
+                ) from second_error
         content = payload.natural_response.strip()
         if not content:
             raise InteractionInvariantViolation(
@@ -666,7 +668,7 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
         self.last_pipeline_evidence = ConversationPipelineEvidence(
             pipeline_mode="coalesced_pre_work",
             pipeline_reason="native_pre_work_shared_configuration",
-            provider_call_count=1,
+            provider_call_count=1 + repair_count,
             coalesced_request_id=result.request_id,
             coalesced_provider=result.provider.value,
             coalesced_seconds=monotonic() - started_at,
@@ -689,6 +691,6 @@ class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
             ),
             provider_stage_seconds=dict(stages),
             coalesced_usage=_usage(result),
-            coalesced_retry_count=result.retry_count,
+            coalesced_retry_count=result.retry_count + repair_count,
         )
         return candidate

@@ -14,6 +14,16 @@ from spg.domain.engineering_semantics import (
     SemanticEpistemicStatus,
     current_semantic_facts,
     semantic_fact_statement,
+    semantic_fact_reference,
+)
+from spg.domain.production_intelligence import ContextCandidate, ContextSource
+from spg.application.production_intelligence import (
+    ContextAssemblyRequest,
+    activity_for_response_contract,
+    budget_for_response_contract,
+    default_context_orchestrator,
+    is_system_capability_question,
+    system_capability_context_candidate,
 )
 from spg.domain.wic_intelligence import (
     GovernanceCandidateKind,
@@ -33,7 +43,11 @@ from spg.domain.conversation import (
     HumanConversationMode,
     InteractionStrategy,
 )
-from spg.domain.response_contract import ResponseContract, ResponseMove
+from spg.domain.response_contract import (
+    CapabilityAlignmentMode,
+    ResponseContract,
+    ResponseMove,
+)
 from spg.domain.wic_response import (
     GovernedResponseEnvelope,
     GovernedResponseRealization,
@@ -352,6 +366,81 @@ def governed_response_envelope(
     strategy = _strategy_for_response_contract(strategy, contract)
     governed_content = _content_at_strategy_granularity(governed_content, strategy)
     selected_question = contract.selected_question if contract.question_budget else None
+    current_facts = current_semantic_facts(assessment.engineering_semantic_facts)
+    semantic_references = tuple(
+        semantic_fact_reference(fact, work_revision_id=fact.admitted_work_revision_id)
+        for fact in current_facts
+        if fact.admitted_work_revision_id is not None
+    )
+    context_candidates = [
+        ContextCandidate(
+            candidate_id="response-contract",
+            source=ContextSource.RESPONSE_CONTRACT,
+            content=(
+                f"{contract.interaction_mode.value}; {contract.primary_obligation.value}; "
+                f"information={contract.information_budget.value}; "
+                f"questions={contract.question_budget}"
+            ),
+            source_reference=f"response-contract:{contract.basis_fingerprint}",
+            authority=contract.authority,
+            provenance=tuple(str(item) for item in contract.source_record_ids)
+            or (f"interaction-basis:{contract.basis_fingerprint}",),
+            priority=95,
+            required=True,
+        )
+    ]
+    context_candidates.append(
+        system_capability_context_candidate(
+            required=(
+                is_system_capability_question(latest_human_input)
+                or contract.capability_alignment.response_mode
+                is not CapabilityAlignmentMode.KNOWLEDGE
+            )
+        )
+    )
+    if current_facts:
+        context_candidates.append(
+            ContextCandidate(
+                candidate_id="current-semantic-truth",
+                source=ContextSource.SEMANTIC_TRUTH,
+                content="; ".join(semantic_fact_statement(fact) for fact in current_facts),
+                source_reference=(
+                    "semantic-facts:" + ",".join(str(fact.id) for fact in current_facts)
+                ),
+                authority="ENGINEERING_SEMANTIC_TRUTH",
+                provenance=tuple(
+                    f"work-reality-revision:{fact.admitted_work_revision_id}"
+                    for fact in current_facts
+                    if fact.admitted_work_revision_id is not None
+                )
+                or (f"interaction-basis:{assessment.basis_fingerprint}",),
+                priority=100,
+                authoritative=True,
+                required=True,
+            )
+        )
+    context_candidates.extend(
+        ContextCandidate(
+            candidate_id=f"source-reference:{index}",
+            source=ContextSource.ECF_REALITY,
+            content=reference,
+            source_reference=reference,
+            authority="SOURCE_OWNED_REFERENCE",
+            provenance=(reference,),
+            priority=70,
+        )
+        for index, reference in enumerate(assessment.supporting_references, start=1)
+    )
+    cognitive_context = default_context_orchestrator().assemble(
+        ContextAssemblyRequest(
+            basis_fingerprint=assessment.basis_fingerprint,
+            purpose="Governed Human-facing response",
+            activity=activity_for_response_contract(contract),
+            candidates=tuple(context_candidates),
+            semantic_facts=semantic_references,
+            budget=budget_for_response_contract(contract),
+        )
+    )
     return GovernedResponseEnvelope(
         basis_fingerprint=assessment.basis_fingerprint,
         governed_content=governed_content,
@@ -362,6 +451,7 @@ def governed_response_envelope(
         facts_to_preserve=tuple(
             dict.fromkeys((*semantics.working_facts, *governed_semantic_claims))
         ),
+        semantic_truth_to_preserve=governed_semantic_claims,
         constraints_to_preserve=semantics.working_constraints,
         unresolved_human_decisions=semantics.unresolved_human_decisions,
         explicit_assumptions=semantics.explicit_assumptions,
@@ -375,6 +465,7 @@ def governed_response_envelope(
             "zh-CN" if re.search(r"[\u4e00-\u9fff]", governed_content) else "en"
         ),
         interaction_strategy=strategy,
+        cognitive_context_package=cognitive_context,
         response_contract=contract,
         previous_response_contract=previous_response_contract,
         latest_human_input=latest_human_input,

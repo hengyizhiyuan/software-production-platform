@@ -10,6 +10,9 @@ import json
 
 from spg.domain.response_contract import (
     AdvancementObligation,
+    CapabilityAlignmentMode,
+    DesignCollaborationMode,
+    ExploreInteractionStrategy,
     InteractionMode,
     PrimaryObligation,
     ResponseContract,
@@ -112,11 +115,20 @@ def response_contract_expression_guidance(contract: ResponseContract | None) -> 
         + " → ".join(move.value for move in contract.response_moves)
         + ". Realize them naturally; do not use their identifiers as headings or "
         "mechanically give every move its own paragraph.",
+        "Reasoning presentation sequence: "
+        + " → ".join(step.value for step in contract.reasoning_sequence)
+        + ". This controls which useful cognition reaches the Human first; it is not "
+        "a prose template, a request to reveal private chain of thought, or permission "
+        "to add content beyond the information budget.",
         information_guidance,
         "The supplied latest Human input identifies the current question. Recent "
         "messages provide trajectory, not fresh commands. Governed content and facts "
         "are semantic material, not a script or a checklist to recite: never contradict "
         "them, but mention only what is relevant to the current obligation.",
+        "Any supplied semantic_truth_to_preserve is current governed meaning. Consume it "
+        "as settled input: do not reinterpret the original Human phrase, reopen the "
+        "decision, or replace it with a convenient implementation assumption. It need "
+        "not be recited unless the current answer requires it.",
         f"Judgment stance is {contract.judgment_stance.value}. Distinguish observed fact "
         "from inference, recommendation, reversible working assumption, preference and "
         "uncertainty in ordinary language. Use the supplied judgment basis and cited "
@@ -133,6 +145,61 @@ def response_contract_expression_guidance(contract: ResponseContract | None) -> 
         "Never expose contract field names, enum labels, budget numbers, policy revisions, "
         "or decision metadata in Human-facing text.",
     ]
+    alignment = contract.capability_alignment
+    if alignment.response_mode is CapabilityAlignmentMode.KNOWLEDGE:
+        rules.append(
+            "This is Knowledge Mode. Give the normal domain explanation and do not redirect "
+            "the Human into Watt production or mention Watt's capabilities merely because "
+            "the topic is technical. If the Human explicitly asks who Watt is or what Watt "
+            "can do, answer that capability question factually from System Capability Reality."
+        )
+    elif alignment.response_mode is CapabilityAlignmentMode.PRODUCTION_ADVISORY:
+        rules.append(
+            "This is Production Advisory Mode. Answer the domain/how-to question first. "
+            "Then make at most one brief, natural and factual connection: Watt can help carry "
+            "the described software work through its governed production workflow. Do not use "
+            "promotional adjectives, repeat the offer, imply work has started, or replace the "
+            "domain answer with a capability pitch."
+        )
+    else:
+        rules.append(
+            "This is Production Mode. Treat the request as a software-production goal and "
+            "route the response into the existing governed preparation/admission path instead "
+            "of falling back to a generic tutorial, external-tool redirect, or large copy-paste "
+            "implementation. This alignment grants no Work, Steering or Executor authority and "
+            "must not imply execution has started."
+        )
+    if contract.explore_strategy is ExploreInteractionStrategy.INTENT_REFINEMENT:
+        rules.append(
+            "This EXPLORE turn uses Intent Refinement. Briefly preserve what is already "
+            "clear about the goal and relevant constraints, then ask only the admitted "
+            "selected question. Explain in natural language which product or engineering "
+            "decision its answer changes. Prefer goal, target user, constraint, success "
+            "criterion, or another important open decision over premature implementation "
+            "detail. Do not add a questionnaire, ask a second question, or imply the "
+            "answer has already become governed Semantic Truth."
+        )
+    elif contract.explore_strategy is ExploreInteractionStrategy.OPEN_EXPLORATION:
+        rules.append(
+            "This EXPLORE turn uses Open Exploration. Contribute useful possibilities "
+            "and distinctions from the current intent without manufacturing a clarification "
+            "gate. Do not ask questions merely to keep the conversation going."
+        )
+    if contract.design_collaboration_mode is DesignCollaborationMode.DESIGN_EXPLORE:
+        rules.append(
+            "The Human is exploring design space. Contribute useful possibilities and "
+            "comparisons before risks; do not open with warnings or prematurely converge."
+        )
+    elif contract.design_collaboration_mode is DesignCollaborationMode.DESIGN_REVIEW:
+        rules.append(
+            "The Human is reviewing an existing design. Give the judgment first, then "
+            "test assumptions, weak points and material tradeoffs before any recommendation."
+        )
+    elif contract.design_collaboration_mode is DesignCollaborationMode.DESIGN_DECIDE:
+        rules.append(
+            "The Human needs convergence. Compare only decisive options under current "
+            "constraints and finish with a clear recommendation and its tradeoff."
+        )
     if contract.question_budget == 0:
         rules.append(
             "Question budget is zero: ask no question, including rhetorical questions "
@@ -145,13 +212,17 @@ def response_contract_expression_guidance(contract: ResponseContract | None) -> 
             "Ask at most one question, only for the material blocker selected by this "
             "contract. A question is a cost, not a required ending. Briefly identify "
             "what is clear, the remaining material issue, and what resolving it enables "
-            "when that helps. Do not turn this into a discovery questionnaire."
+            "when that helps. Prefer a high-information formulation: state the bounded "
+            "assumption you can currently make and how the answer would change the next "
+            "decision, rather than asking a vague 'what do you mean?'. Do not turn this "
+            "into a discovery questionnaire."
         )
     if contract.adjacent_insight_budget:
         rules.append(
             "Only after fully satisfying the asked obligation, optionally add at most "
             "one small, highly relevant adjacent insight if it materially helps the "
-            "next decision. It is not mandatory and must not become a new section or lecture."
+            "next decision. It is not mandatory, must stay at most half a step ahead, "
+            "and must not become a new section or lecture."
         )
     else:
         rules.append(
@@ -213,6 +284,12 @@ def _expression_payload(envelope: GovernedResponseEnvelope) -> dict[str, object]
                 "authority": previous.authority,
             },
             "facts_to_preserve": envelope.facts_to_preserve,
+            "semantic_truth_to_preserve": envelope.semantic_truth_to_preserve,
+            "cognitive_context_package": (
+                None
+                if envelope.cognitive_context_package is None
+                else envelope.cognitive_context_package.model_dump(mode="json")
+            ),
             "constraints_to_preserve": envelope.constraints_to_preserve,
             "explicit_assumptions": envelope.explicit_assumptions,
             "source_references": envelope.source_references,
@@ -257,6 +334,12 @@ def _expression_payload(envelope: GovernedResponseEnvelope) -> dict[str, object]
         "governance_candidate": envelope.governance_candidate,
         "selected_question": envelope.selected_question,
         "unresolved_human_decisions": envelope.unresolved_human_decisions,
+        "semantic_truth_to_preserve": envelope.semantic_truth_to_preserve,
+        "cognitive_context_package": (
+            None
+            if envelope.cognitive_context_package is None
+            else envelope.cognitive_context_package.model_dump(mode="json")
+        ),
         "constraints_to_preserve": envelope.constraints_to_preserve,
         "forbidden_claims": envelope.forbidden_claims,
         "provisional_content": envelope.provisional_content,
@@ -268,7 +351,10 @@ def _expression_payload(envelope: GovernedResponseEnvelope) -> dict[str, object]
             "to such a plan only when the current Human input or supplied evidence "
             "actually establishes it; otherwise name only the requested action. "
             "This view contains no evidence that execution has started or succeeded, "
-            "and grants no permission to mutate Work or replace an authority decision."
+            "and grants no permission to mutate Work or replace an authority decision. "
+            "Use semantic_truth_to_preserve as settled governed input; do not derive a "
+            "new meaning from the original phrase or silently substitute layout, scope, "
+            "cardinality, or other implementation assumptions."
         ),
     }
 

@@ -1505,6 +1505,7 @@ def test_steer_loop_auto_continues_two_cycles_across_restart_and_projects_api(
         assert body["work_objective"] == "Establish the first bounded artifact"
         assert body["steering_enabled"] is True
         assert body["active_revision_number"] == 1
+        assert body["plan_changes"] == []
         assert body["current_step"]["type"] == "COMPLETE"
         assert body["known_next_steps"] == []
         assert body["latest_decision"]["outcome"] == "COMPLETE"
@@ -1596,6 +1597,12 @@ def test_steer_loop_human_attention_stops_then_plan_revision_reenables(
                 ),
             )
         )
+        revised_projection = driver.project(work.work_id)
+        assert len(revised_projection.plan_change_history) == 1
+        assert revised_projection.plan_change_history[0].rationale == (
+            "Human Authority resolved the material direction"
+        )
+        assert revised_projection.plan_change_history[0].reality_refs == (work_ref,)
         assert works.get_work(work.work_id).status is WorkStatus.READY
         restarted = PlanSteeringDriver(
             postgres_database,

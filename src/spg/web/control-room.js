@@ -55,6 +55,40 @@
     });
     return milestones;
   }
+  function workPlanProjection(steering) {
+    const stages = agendaMilestones(steering);
+    if (!steering || !stages.length) {
+      return {
+        available: false,
+        goal: null,
+        stages: [],
+        currentStage: null,
+        remainingStages: [],
+        revision: null,
+        latestChange: null,
+      };
+    }
+    const current = stages.find((stage) => stage.state === "CURRENT") || null;
+    const remaining = stages.filter((stage) => stage.state === "NEXT");
+    const changes = Array.isArray(steering.plan_changes) ? steering.plan_changes : [];
+    const latestChange = changes.length ? changes[changes.length - 1] : null;
+    return {
+      available: true,
+      goal: steering.work_objective || "Current admitted Work",
+      stages,
+      currentStage: current ? current.label
+        : stages.every((stage) => stage.state === "DONE") ? "Complete" : null,
+      remainingStages: remaining.map((stage) => stage.label),
+      revision: steering.active_revision_number || null,
+      latestChange: latestChange ? {
+        reason: latestChange.reason,
+        affectedWorkState: Array.isArray(latestChange.affected_reality_refs)
+          ? latestChange.affected_reality_refs.map((reference) => reference.kind)
+          : [],
+        changedAt: latestChange.changed_at || null,
+      } : null,
+    };
+  }
   function currentProductionQueue(work, queue) {
     const entries = Array.isArray(queue) ? queue : [];
     const revisionId = work?.current_work_reality_revision_id;
@@ -418,5 +452,5 @@
     };
   }
 
-  globalThis.WattControlRoom = Object.freeze({ agendaSteps, agendaMilestones, currentProductionQueue, productionState, conversationOwnership, nextComposerMode, humanActionProjection, prospectiveWorkspaceProjection, createViewer });
+  globalThis.WattControlRoom = Object.freeze({ agendaSteps, agendaMilestones, workPlanProjection, currentProductionQueue, productionState, conversationOwnership, nextComposerMode, humanActionProjection, prospectiveWorkspaceProjection, createViewer });
 })();

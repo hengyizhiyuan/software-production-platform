@@ -43,6 +43,7 @@ from spg.domain.interaction import (
     InteractionRecordNotFound,
     InteractionTurn,
     InteractionTurnStatus,
+    StructuredResponseSchemaViolation,
     InterpretationMeaningKind,
     SharedUnderstanding,
     WorkEvolutionCandidateChange,
@@ -83,11 +84,13 @@ from spg.domain.wic_response import (
     GovernedResponseRealization,
     GovernedResponseRealizer,
     ResponseReconciliation,
+    ResponseTrustStage,
     WicResponseEvent,
     WicResponseEventType,
     WicRuntimeMode,
 )
 from spg.domain.steering import RealityReferenceKind, SteeringOutcome, SteeringStepType
+from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.product_store import ProductStore
@@ -414,6 +417,65 @@ class _TurnTiming:
     received_at: datetime
     received_clock: float
     milestones: dict[str, tuple[datetime, float]] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class _TurnFailure:
+    code: str
+    message: str
+    metadata: dict[str, object]
+
+
+def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailure:
+    if (
+        isinstance(error, ModelProviderError)
+        and error.kind is ModelFailureKind.INCOMPLETE_RESPONSE
+    ):
+        return _TurnFailure(
+            code="INCOMPLETE_RESPONSE",
+            message=(
+                "The model response was incomplete. Your message was saved and this "
+                "Turn can be retried."
+            ),
+            metadata={
+                "failure_class": "INCOMPLETE_RESPONSE",
+                "provider_status": error.provider_status,
+                "termination_reason": error.termination_reason,
+                "request_id": error.request_id,
+                "timestamp": error.occurred_at.isoformat(),
+                "retryable": error.retryable,
+                "provisional_is_not_final": True,
+            },
+        )
+    if isinstance(error, StructuredResponseSchemaViolation):
+        return _TurnFailure(
+            code="SCHEMA_VIOLATION",
+            message=(
+                "The model result did not satisfy Watt's governed response contract "
+                "after one bounded repair attempt. Your message was saved and this Turn "
+                "can be retried."
+            ),
+            metadata={
+                "failure_class": "SCHEMA_VIOLATION",
+                "provider_status": "completed",
+                "validation_issue": error.validation_issue,
+                "request_id": error.request_id,
+                "repair_attempted": error.repair_attempted,
+                "timestamp": failed_at.isoformat(),
+                "retryable": True,
+                "provisional_is_not_final": True,
+            },
+        )
+    return _TurnFailure(
+        code=type(error).__name__,
+        message=str(error),
+        metadata={
+            "failure_class": type(error).__name__,
+            "timestamp": failed_at.isoformat(),
+            "retryable": False,
+            "provisional_is_not_final": True,
+        },
+    )
 
 
 class WorkInteractionService:
@@ -743,6 +805,81 @@ class WorkInteractionService:
             raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
         return turn
 
+    def retry_turn(self, interaction_id: UUID, turn_id: UUID) -> InteractionTurn:
+        """Retry one preserved failed Human Turn without creating duplicate input."""
+
+        now = datetime.now(UTC)
+        with self.database.unit_of_work() as uow:
+            store = InteractionStore(uow.session)
+            turn = store.turn(turn_id, for_update=True)
+            if turn is None or turn.interaction_id != interaction_id:
+                raise InteractionRecordNotFound(
+                    f"Interaction Turn not found: {turn_id}"
+                )
+            if turn.status is not InteractionTurnStatus.FAILED:
+                raise InteractionInvariantViolation(
+                    "Only a failed Interaction Turn can be retried"
+                )
+            records = store.records(interaction_id)
+            if not records or records[-1].id != turn.request_record_id:
+                raise InteractionInvariantViolation(
+                    "A failed Turn cannot be retried after newer Human input"
+                )
+            if store.message_for_turn(turn_id, InteractionActor.WATT) is not None:
+                raise InteractionInvariantViolation(
+                    "A Turn with a settled Watt response cannot be retried"
+                )
+            events = store.response_events(turn_id)
+            recovery_attempt = 1 + sum(
+                event.event_type is WicResponseEventType.TURN_RECOVERY_STARTED
+                for event in events
+            )
+            previous_failure_code = turn.failure_code
+            store.reset_turn_for_retry(turn_id, updated_at=now)
+            store.update_turn_messages_status(
+                turn_id,
+                status=InteractionTurnStatus.RECEIVED,
+                updated_at=now,
+            )
+            if turn.wic_mode is not WicRuntimeMode.LEGACY_WIC:
+                store.insert_response_event(
+                    {
+                        "id": uuid4(),
+                        "interaction_id": interaction_id,
+                        "turn_id": turn_id,
+                        "response_id": turn_id,
+                        "sequence": store.next_response_event_sequence(turn_id),
+                        "event_type": WicResponseEventType.TURN_RECOVERY_STARTED.value,
+                        "content": None,
+                        "basis_fingerprint": None,
+                        "reconciliation": None,
+                        "event_metadata": {
+                            "attempt": recovery_attempt,
+                            "previous_failure_class": previous_failure_code,
+                            "human_input_reused": True,
+                        },
+                        "created_at": now,
+                    }
+                )
+            uow.commit()
+        with self._turn_lock:
+            self._turn_response_streams.pop(turn_id, None)
+            self._turn_fast_candidates.pop(turn_id, None)
+            self._turn_realization_started.discard(turn_id)
+            self._turn_timings[turn_id] = _TurnTiming(now, monotonic())
+        if not self.schedule_turn(turn_id):
+            # The failed processor can still be unwinding after its durable FAILED
+            # transition. Re-enter only after that exact attempt releases ownership.
+            with self._turn_lock:
+                current = self._turn_futures.get(turn_id)
+                if current is not None and not current.done():
+                    current.add_done_callback(
+                        lambda _completed: self.schedule_turn(turn_id)
+                    )
+                else:
+                    self.schedule_turn(turn_id)
+        return self.get_turn(turn_id)
+
     def schedule_turn(self, turn_id: UUID) -> bool:
         with self._turn_lock:
             current = self._turn_futures.get(turn_id)
@@ -750,7 +887,9 @@ class WorkInteractionService:
                 return False
             future = self._turn_executor.submit(self._process_turn, turn_id)
             self._turn_futures[turn_id] = future
-            future.add_done_callback(lambda _future: self._forget_turn(turn_id))
+            future.add_done_callback(
+                lambda completed: self._forget_turn(turn_id, completed)
+            )
         return True
 
     def resume_pending_turns(self) -> tuple[UUID, ...]:
@@ -995,10 +1134,11 @@ class WorkInteractionService:
             if timing is not None and event not in timing.milestones:
                 timing.milestones[event] = (datetime.now(UTC), monotonic())
 
-    def _forget_turn(self, turn_id: UUID) -> None:
+    def _forget_turn(self, turn_id: UUID, completed: Future[None]) -> None:
         with self._turn_lock:
-            self._turn_futures.pop(turn_id, None)
-            self._turn_realization_started.discard(turn_id)
+            if self._turn_futures.get(turn_id) is completed:
+                self._turn_futures.pop(turn_id, None)
+                self._turn_realization_started.discard(turn_id)
 
     def turn_response_delta(self, turn_id: UUID, offset: int) -> tuple[str, int]:
         """Read ephemeral UX output; persisted messages remain conversation truth."""
@@ -1140,7 +1280,11 @@ class WorkInteractionService:
             phase_type,
             basis_fingerprint=assessment.basis_fingerprint,
             reconciliation=reconciliation,
-            metadata={"policy_governed": True, "content_streamed_separately": True},
+            metadata={
+                "policy_governed": True,
+                "content_streamed_separately": True,
+                "trust_stage": ResponseTrustStage.GOVERNED.value,
+            },
             only_while_processing=True,
         )
         self._record_response_event(
@@ -1152,6 +1296,7 @@ class WorkInteractionService:
                 "provider": realizer_identity,
                 "model": realizer_model,
                 "provisional_present": provisional is not None,
+                "trust_stage": ResponseTrustStage.GOVERNED.value,
             },
             only_while_processing=True,
         )
@@ -1169,7 +1314,10 @@ class WorkInteractionService:
                 content=delta,
                 basis_fingerprint=assessment.basis_fingerprint,
                 reconciliation=reconciliation,
-                metadata={"delta_index": delta_count},
+                metadata={
+                    "delta_index": delta_count,
+                    "trust_stage": ResponseTrustStage.GOVERNED.value,
+                },
                 only_while_processing=True,
             )
             if event is None:
@@ -1292,6 +1440,7 @@ class WorkInteractionService:
                                 basis_fingerprint=candidate.basis_fingerprint,
                                 metadata={
                                     "disposition": "FAST_VISIBLE",
+                                    "trust_stage": ResponseTrustStage.PROVISIONAL.value,
                                     "eligibility": candidate.provisional_turn_intent,
                                     "profile": candidate.profile,
                                     "authority": candidate.authority,
@@ -1410,6 +1559,7 @@ class WorkInteractionService:
                             "basis_fingerprint": assessment.basis_fingerprint,
                             "reconciliation": None if reconciliation is None else reconciliation.value,
                             "event_metadata": {
+                                "trust_stage": ResponseTrustStage.FINAL.value,
                                 "conversation_truth_pending": True,
                                 "delta_count": delta_count,
                                 "realizer_provider": None if realization is None else realization.provider_identity,
@@ -1472,14 +1622,15 @@ class WorkInteractionService:
             self._mark_turn_timing(turn_id, "completed")
         except Exception as error:  # persisted failure is the product-facing truth
             failed_at = datetime.now(UTC)
+            failure = _classify_turn_failure(error, failed_at)
             with self.database.unit_of_work() as uow:
                 store = InteractionStore(uow.session)
                 store.update_turn(
                     turn_id,
                     status=InteractionTurnStatus.FAILED,
                     updated_at=failed_at,
-                    failure_code=type(error).__name__,
-                    failure_message=str(error),
+                    failure_code=failure.code,
+                    failure_message=failure.message,
                     completed_at=failed_at,
                 )
                 store.update_turn_messages_status(
@@ -1487,7 +1638,7 @@ class WorkInteractionService:
                     status=InteractionTurnStatus.FAILED,
                     updated_at=failed_at,
                 )
-                if turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED:
+                if turn.wic_mode is not WicRuntimeMode.LEGACY_WIC:
                     store.insert_response_event({
                         "id": uuid4(), "interaction_id": turn.interaction_id,
                         "turn_id": turn_id, "response_id": turn_id,
@@ -1495,7 +1646,7 @@ class WorkInteractionService:
                         "event_type": WicResponseEventType.TURN_FAILED.value,
                         "content": None, "basis_fingerprint": None,
                         "reconciliation": None,
-                        "event_metadata": {"code": type(error).__name__, "provisional_is_not_final": True},
+                        "event_metadata": failure.metadata,
                         "created_at": failed_at,
                     })
                 uow.commit()
@@ -2644,31 +2795,38 @@ class WorkInteractionService:
         phase = {"DESIGN": "整理解决方案", "REFINE": "澄清当前步骤", "PRODUCE": "生产", "VERIFY_ACCEPT": "验证与验收", "COMPLETE": "完成"}.get(
             None if current is None else current.type.value, "等待下一步")
         if summary is not None and summary.runtime_commit_id is not None:
-            activity = "已有 Runtime Commit；正在评估后续步骤。"
+            conclusion = "当前 Work 已形成受信任的运行结果，正在评估后续步骤。"
+            limitation = ""
         elif binding is not None:
-            activity = "生产周期已接纳；请在 Production 区查看执行、队列和验证状态。"
+            conclusion = "当前 Work 已进入生产周期。"
+            limitation = ""
         else:
-            activity = "尚未创建生产周期或 PWU，生产执行还未开始。"
+            conclusion = "当前 Work 尚未进入生产执行。"
+            limitation = "重要限制：目前还没有可报告的生产或验证结果。"
+        progress = (
+            f"关键进展：目前处于「{phase}」；"
+            f"{current.objective if current else '尚未形成当前执行步骤'}。"
+        )
         if (
             summary is not None
             and summary.candidate_id is not None
             and summary.authorization_id is None
         ):
-            attention = "当前需要你审阅并授权精确 Candidate；授权前不会集成。"
+            next_step = "下一步由你审阅并授权候选结果；授权前不会集成。"
         elif (
             decision is not None
             and decision.human_required
             and current is not None
             and decision.current_step_id == current.id
         ):
-            attention = "当前需要你审阅下一步提案。"
+            next_step = "下一步由你审阅当前提案。"
         else:
-            attention = "当前没有需要你执行的决定。"
-        answer = (
-            f"当前目标：{revision.desired_outcome}。"
-            f"目前处于「{phase}」：{current.objective if current else '尚无当前步骤'}。"
-            f"{activity}{attention}"
-        )
+            next_step = (
+                "当前没有需要你处理的事项；下一步由 Watt 按当前步骤继续推进。"
+                if current is not None
+                else "当前没有需要你处理的事项；下一步由 Watt 形成可执行步骤。"
+            )
+        answer = conclusion + progress + next_step + limitation
         diagnose = bool(re.search(
             r"为什么|怎么.*(?:卡|等待)|why|stuck", basis.records[-1].content, re.I,
         ))
@@ -2678,18 +2836,36 @@ class WorkInteractionService:
                                    or item.attempt_id == summary.attempt_id))
         latest_queue = max(current_queue, key=lambda item: item.enqueued_at, default=None)
         if latest_queue is not None:
-            label = ("最近一次执行状态" if latest_queue.condition.value in {
-                "COMPLETED", "FAILED", "CANCELLED", "SUPERSEDED",
-            } else "当前执行状态")
-            queue_fact = f"{label}是 {latest_queue.condition.value}。"
+            queue_fact = {
+                "QUEUED": "当前执行已进入队列。",
+                "WAITING_RESOURCE": "当前执行正在等待可用资源。",
+                "WAITING_HUMAN": "当前执行正在等待你的决定。",
+                "ALLOCATED": "当前执行已分配资源，正在准备启动。",
+                "EXECUTING": "当前执行正在进行。",
+                "CHECKPOINTED": "当前执行已保存进度，正在等待继续。",
+                "RETURNED_TO_QUEUE": "当前执行已返回队列，正在等待再次调度。",
+                "COMPLETED": "最近一次执行已经完成。",
+                "CANCELLED": "最近一次执行已经取消。",
+            }.get(latest_queue.condition.value, "当前执行状态已经更新。")
             reason = latest_queue.wait_reason
             if reason:
-                queue_fact += f"系统记录的原因：{reason}。"
+                queue_fact += f"关键证据：系统记录的原因是“{reason}”。"
             elif diagnose:
-                queue_fact += "现有记录没有说明等待原因，暂时不能确定根因；下一步需要核对调度器和可用执行容量。"
-            answer = queue_fact + (attention if diagnose else answer)
+                queue_fact += (
+                    "重要限制：现有记录没有说明原因，暂时不能确定根因。"
+                    "下一步由 Watt 核对调度和执行容量。"
+                )
+            answer = (
+                f"当前结论：{queue_fact}{next_step}"
+                if diagnose
+                else f"当前结论：{queue_fact}{progress}{next_step}{limitation}"
+            )
         elif diagnose:
-            answer = "当前生产周期没有对应的执行队列记录，现有证据不足以确认你描述的原因。" + activity + attention
+            answer = (
+                "当前结论：当前生产周期没有对应的执行队列记录。"
+                "重要限制：现有证据不足以确认你描述的原因。"
+                + next_step
+            )
         return InteractionAssessmentCandidate(
             turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
             interpreted_motive=revision.motive,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from copy import deepcopy
+from datetime import UTC, datetime
 from enum import StrEnum
 import json
 from threading import Lock
@@ -31,6 +32,7 @@ class ModelFailureKind(StrEnum):
     PROTOCOL_OR_SCHEMA = "PROTOCOL_OR_SCHEMA"
     TIMEOUT_OR_NETWORK = "TIMEOUT_OR_NETWORK"
     MALFORMED_RESPONSE = "MALFORMED_RESPONSE"
+    INCOMPLETE_RESPONSE = "INCOMPLETE_RESPONSE"
 
 
 class ModelProviderError(RuntimeError):
@@ -44,12 +46,20 @@ class ModelProviderError(RuntimeError):
         request_sent: bool | None,
         usage_unknown: bool,
         retryable: bool,
+        provider_status: str | None = None,
+        termination_reason: str | None = None,
+        request_id: str | None = None,
+        occurred_at: datetime | None = None,
     ) -> None:
         super().__init__(message)
         self.kind = kind
         self.request_sent = request_sent
         self.usage_unknown = usage_unknown
         self.retryable = retryable
+        self.provider_status = provider_status
+        self.termination_reason = termination_reason
+        self.request_id = request_id
+        self.occurred_at = occurred_at or datetime.now(UTC)
 
 
 class ResponsesModelAdapter:
@@ -268,12 +278,34 @@ class ResponsesModelAdapter:
             )
         status = final_payload.get("status")
         if status != "completed":
+            normalized_status = status if isinstance(status, str) else "unknown"
+            details = final_payload.get("incomplete_details")
+            termination_reason = None
+            if isinstance(details, dict) and isinstance(details.get("reason"), str):
+                # Preserve only the stable machine reason, never Provider prose.
+                candidate_reason = details["reason"].strip()
+                if candidate_reason and len(candidate_reason) <= 120:
+                    termination_reason = candidate_reason
+            request_id = (
+                str(final_payload["id"])
+                if isinstance(final_payload.get("id"), str)
+                else None
+            )
+            incomplete = normalized_status == "incomplete"
             raise ModelProviderError(
-                ModelFailureKind.PROTOCOL_OR_SCHEMA,
-                f"{self.provider.value} response status was {status or 'unknown'}",
+                (
+                    ModelFailureKind.INCOMPLETE_RESPONSE
+                    if incomplete
+                    else ModelFailureKind.PROTOCOL_OR_SCHEMA
+                ),
+                f"{self.provider.value} response status was {normalized_status}",
                 request_sent=True,
                 usage_unknown=self._usage(final_payload).unknown,
-                retryable=False,
+                retryable=incomplete,
+                provider_status=normalized_status,
+                termination_reason=termination_reason,
+                request_id=request_id,
+                occurred_at=datetime.now(UTC),
             )
         output_text = "".join(output_parts) or self._output_text(final_payload)
         if not output_text.strip():

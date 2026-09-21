@@ -13,12 +13,12 @@
     >
     <title>Watt / 工律 · Software Production</title>
     <link rel="stylesheet" href="/assets/styles.css">
-    <link rel="stylesheet" href="/assets/appearance.css?v=early-workspace-v12">
+    <link rel="stylesheet" href="/assets/appearance.css?v=work-plan-projection-1">
     <script src="/assets/state.js?v=early-workspace-v12" defer></script>
     <script src="/assets/appearance.js?v=formal-ui-phase1" defer></script>
     <script src="/assets/response-presentation.js?v=formal-ui-phase1" defer></script>
-    <script src="/assets/control-room.js?v=completed-delivery-milestone-2" defer></script>
-    <script src="/assets/app.js?v=revision-aware-production-1" defer></script>
+    <script src="/assets/control-room.js?v=work-plan-projection-1" defer></script>
+    <script src="/assets/app.js?v=work-plan-projection-1" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#work-surface">Skip to selected Work</a>
@@ -250,6 +250,7 @@
               </header>
               <p id="workspace-agenda-summary" class="workspace-surface-summary">Loading current direction…</p>
               <ol id="work-execution-path" class="work-execution-path" aria-label="Governed execution path"></ol>
+              <p id="workspace-plan-change" class="workspace-plan-change" hidden></p>
               <div id="working-agreements-section" hidden>
                 <div class="working-agreements-heading"><h4>Working Agreements</h4><span id="working-agreement-count"></span></div>
                 <div id="working-agreement-list" class="working-agreement-list"></div>
@@ -763,7 +764,10 @@
     </div>
     <div id="notice" class="notice" role="alert" hidden>
       <span id="notice-message"></span>
-      <button id="dismiss-notice" type="button" aria-label="Dismiss message">×</button>
+      <span class="notice-actions">
+        <button id="retry-turn-notice" class="notice-retry" type="button" hidden>重试本轮</button>
+        <button id="dismiss-notice" type="button" aria-label="Dismiss message">×</button>
+      </span>
     </div>
   </body>
 </html>

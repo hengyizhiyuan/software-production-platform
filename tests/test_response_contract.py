@@ -8,7 +8,14 @@ import pytest
 from pydantic import ValidationError
 
 from spg.application.response_contract import build_response_contract
+from spg.application.response_contract_expression import response_contract_expression_guidance
 from spg.domain.conversation import ConversationTurnIntent as Intent
+from spg.domain.design_intent import (
+    DesignCollaborationMode as FrameCollaborationMode,
+    DesignIntentFrame,
+    DesignObjectType,
+    DesignScopeLevel,
+)
 from spg.domain.engineering_semantics import (
     EngineeringSemanticFact,
     SemanticEpistemicStatus,
@@ -27,14 +34,20 @@ from spg.domain.interaction import (
 )
 from spg.domain.response_contract import (
     AdvancementObligation as Advance,
+    CapabilityAlignmentContext,
+    CapabilityAlignmentMode,
+    DesignCollaborationMode as DesignMode,
+    ExploreInteractionStrategy,
     InformationBudget as Budget,
     InteractionMode as Mode,
     JudgmentStance,
     OpeningMove as Opening,
     PrimaryObligation as Obligation,
+    ProductionRelevance,
     ResponseContract,
     ResponseIntent,
     ResponseMove as Move,
+    ReasoningStep as Reason,
 )
 from spg.domain.wic_intelligence import (
     GovernanceCandidateKind,
@@ -106,6 +119,115 @@ def _question(**updates):
     return QuestionEvaluation(**values)
 
 
+def _software_frame(subject: str) -> DesignIntentFrame:
+    return DesignIntentFrame(
+        design_subject=subject,
+        object_type=DesignObjectType.PRODUCT_SYSTEM,
+        desired_outcome=None,
+        scope_level=DesignScopeLevel.PRODUCT,
+        collaboration_mode=FrameCollaborationMode.EXPLORATION,
+        ambiguities=(),
+        confidence=0.9,
+    )
+
+
+def test_capability_alignment_keeps_general_technical_knowledge_non_promotional():
+    contract = build_response_contract(
+        _assessment(
+            Intent.DIRECT_QUESTION,
+            basis_work_revision_id=UUID(int=41),
+        ),
+        source_records=(_record("什么是 Docker 镜像？"),),
+        interpretation=_intent(Mode.ANSWER),
+    )
+
+    assert contract.capability_alignment.response_mode is CapabilityAlignmentMode.KNOWLEDGE
+    assert contract.capability_alignment.production_relevance is ProductionRelevance.GENERAL_KNOWLEDGE
+    assert contract.capability_alignment.current_work_context is True
+    assert Move.ALIGN_WITH_PRODUCTION_CAPABILITY not in contract.response_moves
+    assert "do not redirect" in response_contract_expression_guidance(contract)
+
+
+def test_current_work_context_alone_does_not_turn_an_unmatched_how_to_into_promotion():
+    contract = build_response_contract(
+        _assessment(
+            Intent.HOW_TO,
+            basis_work_revision_id=UUID(int=42),
+            design_intent_frame=None,
+        ),
+        source_records=(_record("如何整理一次线下会议？"),),
+        interpretation=_intent(Mode.ANSWER),
+    )
+
+    assert contract.capability_alignment.current_work_context is True
+    assert contract.capability_alignment.response_mode is CapabilityAlignmentMode.KNOWLEDGE
+    assert Move.ALIGN_WITH_PRODUCTION_CAPABILITY not in contract.response_moves
+
+
+def test_capability_alignment_answers_software_how_to_then_connects_production_once():
+    contract = build_response_contract(
+        _assessment(
+            Intent.HOW_TO,
+            design_intent_frame=_software_frame("微信小程序"),
+        ),
+        source_records=(_record("如何开发一个微信小程序？"),),
+        interpretation=_intent(Mode.DESIGN),
+    )
+
+    alignment = contract.capability_alignment
+    assert alignment.response_mode is CapabilityAlignmentMode.PRODUCTION_ADVISORY
+    assert alignment.production_relevance is ProductionRelevance.POTENTIAL_PRODUCTION_GOAL
+    assert alignment.watt_capability_match is True
+    assert alignment.capability_reality_reference == "system-capability-reality:1"
+    assert contract.interaction_mode is Mode.ANSWER
+    assert contract.response_moves == (
+        Move.DIRECT_ANSWER,
+        Move.ALIGN_WITH_PRODUCTION_CAPABILITY,
+    )
+    assert contract.reasoning_sequence == (
+        Reason.DIRECT_ANSWER,
+        Reason.CAPABILITY_ALIGNMENT,
+    )
+    assert contract.adjacent_insight_budget == 0
+    guidance = response_contract_expression_guidance(contract)
+    assert "Answer the domain/how-to question first" in guidance
+    assert "Do not use promotional adjectives" in guidance
+
+
+def test_capability_alignment_routes_direct_build_into_governed_production_preparation():
+    contract = build_response_contract(
+        _assessment(
+            Intent.BUILD,
+            design_intent_frame=_software_frame("微信小程序商城"),
+        ),
+        source_records=(_record("帮我开发一个微信小程序商城"),),
+        interpretation=_intent(Mode.ANSWER),
+    )
+
+    alignment = contract.capability_alignment
+    assert alignment.response_mode is CapabilityAlignmentMode.PRODUCTION
+    assert alignment.production_relevance is ProductionRelevance.DIRECT_PRODUCTION_GOAL
+    assert alignment.watt_capability_match is True
+    assert contract.interaction_mode is Mode.DESIGN
+    assert contract.advancement_obligation is Advance.PROPOSE_AND_WAIT
+    assert Move.ALIGN_WITH_PRODUCTION_CAPABILITY not in contract.response_moves
+    guidance = response_contract_expression_guidance(contract)
+    assert "existing governed preparation/admission path" in guidance
+    assert "grants no Work, Steering or Executor authority" in guidance
+
+
+def test_capability_alignment_cannot_claim_production_without_a_capability_match():
+    with pytest.raises(ValidationError, match="requires an evidenced Watt capability match"):
+        CapabilityAlignmentContext(
+            user_intent=Intent.HOW_TO,
+            production_relevance=ProductionRelevance.POTENTIAL_PRODUCTION_GOAL,
+            watt_capability_match=False,
+            response_mode=CapabilityAlignmentMode.PRODUCTION_ADVISORY,
+            capability_reality_reference="system-capability-reality:1",
+            rationale="Invalid fixture",
+        )
+
+
 @pytest.mark.parametrize("case,mode,intent,obligation,opening,budget", [
     ("A", Mode.DIAGNOSE, Intent.DIRECT_QUESTION, Obligation.DIAGNOSE, Opening.CAUSE_FIRST, Budget.FOCUSED_DIAGNOSIS),
     ("B", Mode.ANSWER, Intent.DIRECT_QUESTION, Obligation.ANSWER, Opening.ANSWER_FIRST, Budget.MINIMUM_SUFFICIENT),
@@ -128,6 +250,7 @@ def test_semantic_mode_matrix(case, mode, intent, obligation, opening, budget):
     assert contract.question_budget == 0
     assert contract.selected_question is None
     assert contract.authority == "ADVISORY_ONLY"
+    assert contract.reasoning_sequence
 
 
 def test_same_login_topic_has_distinct_explore_design_execute_obligations():
@@ -139,6 +262,145 @@ def test_same_login_topic_has_distinct_explore_design_execute_obligations():
     assert contracts[1].advancement_obligation is Advance.PROPOSE_AND_WAIT
     assert contracts[2].advancement_obligation is Advance.ACK_AND_EXECUTE
     assert contracts[2].response_moves == (Move.ACKNOWLEDGE, Move.PROCEED)
+    assert len({contract.reasoning_sequence for contract in contracts}) == 3
+
+
+def test_design_explore_opens_option_space_before_risk_or_decision_pressure():
+    contract = build_response_contract(
+        _assessment(Intent.EXPLORE),
+        interpretation=_intent(
+            Mode.EXPLORE,
+            design_collaboration_mode=DesignMode.DESIGN_EXPLORE,
+        ),
+    )
+    assert contract.design_collaboration_mode is DesignMode.DESIGN_EXPLORE
+    assert contract.reasoning_sequence == (
+        Reason.CONTEXT_MAP,
+        Reason.OPTION_SPACE,
+        Reason.COMPARISON,
+        Reason.RISKS_AND_CONSTRAINTS,
+        Reason.DECISION_POINT,
+    )
+    assert contract.reasoning_sequence.index(Reason.OPTION_SPACE) < (
+        contract.reasoning_sequence.index(Reason.RISKS_AND_CONSTRAINTS)
+    )
+
+
+def test_ambiguous_explore_uses_one_governed_high_value_intent_refinement_question():
+    question = _question(
+        question=(
+            "What problem should the AI accounting app solve first: personal expense "
+            "tracking or business financial management?"
+        ),
+        affected_dimensions=("SCOPE", "ACCEPTANCE"),
+        decision_value=95,
+        rationale="The answer changes product boundary and architecture direction.",
+    )
+    contract = build_response_contract(
+        _assessment(
+            Intent.EXPLORE,
+            questions=(question,),
+            selected=question.question,
+            unresolved_material_questions=(question.question,),
+        ),
+        interpretation=_intent(Mode.EXPLORE),
+    )
+
+    assert contract.explore_strategy is ExploreInteractionStrategy.INTENT_REFINEMENT
+    assert contract.question_budget == 1
+    assert contract.selected_question == question.question
+    guidance = response_contract_expression_guidance(contract)
+    assert "single highest-value unresolved decision" in " ".join(contract.decision_basis)
+    assert "goal, target user, constraint, success criterion" in guidance
+    assert "Do not add a questionnaire" in guidance
+
+
+def test_open_exploration_does_not_manufacture_a_clarification_gate():
+    contract = build_response_contract(
+        _assessment(Intent.EXPLORE),
+        interpretation=_intent(Mode.EXPLORE),
+    )
+
+    assert contract.explore_strategy is ExploreInteractionStrategy.OPEN_EXPLORATION
+    assert contract.question_budget == 0
+    assert "Do not ask questions merely" in response_contract_expression_guidance(contract)
+
+
+def test_settled_login_execution_does_not_reopen_intent_refinement():
+    contract = build_response_contract(
+        _assessment(
+            Intent.CONTINUE_CURRENT_WORK,
+            current_requests=("Implement the login plan we decided.",),
+            basis_work_revision_id=UUID(int=52),
+        ),
+        interpretation=_intent(Mode.EXECUTE, executable_context=True),
+    )
+
+    assert contract.interaction_mode is Mode.EXECUTE
+    assert contract.explore_strategy is None
+    assert contract.question_budget == 0
+    assert contract.advancement_obligation is Advance.ACK_AND_EXECUTE
+
+
+def test_design_review_starts_with_judgment_and_surfaces_tradeoffs():
+    contract = build_response_contract(
+        _assessment(Intent.FEEDBACK),
+        interpretation=_intent(
+            Mode.ANALYZE,
+            design_collaboration_mode=DesignMode.DESIGN_REVIEW,
+            judgment_stance=JudgmentStance.RECOMMENDATION,
+            judgment_subject="login architecture",
+            judgment_proposition="The proposed boundary is reasonable with one material risk.",
+        ),
+    )
+    assert contract.design_collaboration_mode is DesignMode.DESIGN_REVIEW
+    assert contract.reasoning_sequence[0] is Reason.JUDGMENT
+    assert Reason.TRADE_OFFS in contract.reasoning_sequence
+    assert contract.opening_move is Opening.JUDGMENT_FIRST
+
+
+def test_execute_collapses_conversation_without_reopening_design():
+    contract = build_response_contract(
+        _assessment(Intent.CONTINUE_CURRENT_WORK),
+        interpretation=_intent(
+            Mode.EXECUTE,
+            executable_context=True,
+        ),
+    )
+    assert contract.design_collaboration_mode is None
+    assert contract.information_budget is Budget.MINIMAL_ACKNOWLEDGEMENT
+    assert contract.reasoning_sequence == (
+        Reason.ACKNOWLEDGE,
+        Reason.PROCEED,
+        Reason.REPORT_RESULT,
+    )
+    assert Move.COMPARISON not in contract.response_moves
+    assert Move.RECOMMENDATION not in contract.response_moves
+
+
+def test_status_sequence_is_reality_first_and_human_oriented():
+    contract = build_response_contract(
+        _assessment(Intent.DIRECT_QUESTION),
+        interpretation=_intent(Mode.STATUS),
+    )
+    assert contract.reasoning_sequence == (
+        Reason.CURRENT_CONCLUSION,
+        Reason.KEY_PROGRESS,
+        Reason.CURRENT_OWNER_OR_NEXT_STEP,
+        Reason.IMPORTANT_LIMITATION,
+    )
+
+
+def test_design_refinement_cannot_be_attached_to_non_design_execution():
+    contract = build_response_contract(
+        _assessment(Intent.ACTION_REQUEST),
+        interpretation=_intent(Mode.EXECUTE, executable_context=True),
+    )
+    with pytest.raises(ValidationError, match="design-capable mode"):
+        ResponseContract.model_validate({
+            **contract.model_dump(),
+            "design_collaboration_mode": DesignMode.DESIGN_REVIEW,
+        })
 
 
 def test_turn_wording_does_not_control_semantic_mode_or_budget():

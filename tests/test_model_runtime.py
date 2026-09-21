@@ -165,3 +165,43 @@ def test_remote_protocol_failure_before_first_event_gets_one_fresh_replay() -> N
     assert result.retry_count == 1
     assert stages.count("provider_request_sent") == 2
     assert stages.count("provider_transport_recovery") == 1
+
+
+def test_incomplete_response_preserves_safe_recovery_diagnostics() -> None:
+    terminal = {
+        "id": "response-incomplete-1",
+        "status": "incomplete",
+        "model": "deepseek-flash",
+        "incomplete_details": {"reason": "max_output_tokens"},
+        "usage": {"input_tokens": 10, "output_tokens": 4096, "total_tokens": 4106},
+    }
+    body = "\n".join((
+        'data: {"type":"response.output_text.delta","delta":"{\\"ok\\":"}',
+        "data: " + json.dumps({"type": "response.incomplete", "response": terminal}),
+        "",
+    ))
+    adapter = DeepSeekResponsesModelAdapter(
+        api_key=lambda: "test-secret",
+        base_url="https://api.deepseek.com",
+        client=httpx2.Client(
+            base_url="https://api.deepseek.com",
+            transport=httpx2.MockTransport(
+                lambda _request: httpx2.Response(200, text=body)
+            ),
+        ),
+    )
+
+    with pytest.raises(ModelProviderError) as failure:
+        adapter.generate(
+            profile=_profile(),
+            instructions="x",
+            input_text="y",
+            output_schema={"type": "object"},
+        )
+
+    assert failure.value.kind is ModelFailureKind.INCOMPLETE_RESPONSE
+    assert failure.value.retryable is True
+    assert failure.value.provider_status == "incomplete"
+    assert failure.value.termination_reason == "max_output_tokens"
+    assert failure.value.request_id == "response-incomplete-1"
+    assert failure.value.occurred_at is not None

@@ -50,6 +50,7 @@
     provisionalWorkspace: false,
     workspaceEngaged: false,
     workAdmissionPending: false,
+    recoverableTurn: null,
   };
   // Reviewer/browser instrumentation only. It is not product or governance truth.
   globalThis.__WATT_TURN_TIMINGS__ = state.turnTimings;
@@ -86,6 +87,7 @@
     formalWorkspaceGrid: document.getElementById("formal-workspace-grid"),
     workSourceTree: document.getElementById("work-source-tree"),
     workExecutionPath: document.getElementById("work-execution-path"),
+    workspacePlanChange: document.getElementById("workspace-plan-change"),
     workingAgreementList: document.getElementById("working-agreement-list"),
     workingAgreementPast: document.getElementById("working-agreement-past"),
     workingAgreementHistory: document.getElementById("working-agreement-history"),
@@ -319,6 +321,7 @@
     notice: document.getElementById("notice"),
     noticeMessage: document.getElementById("notice-message"),
     dismissNotice: document.getElementById("dismiss-notice"),
+    retryTurnNotice: document.getElementById("retry-turn-notice"),
   };
 
   class ApiError extends Error {
@@ -379,18 +382,27 @@
     });
   }
 
-  function showNotice(error) {
+  function showNotice(error, recovery = null) {
     let message = error instanceof ApiError
       ? `${error.code}: ${error.message}`
       : "The service is unavailable. Refresh and try again.";
-    if (error instanceof ApiError
+    if (error instanceof ApiError && error.code === "INCOMPLETE_RESPONSE") {
+      message = "模型回复没有完整结束。本轮输入已经保存，你可以直接重试本轮，无需重新输入。";
+    } else if (error instanceof ApiError && error.code === "SCHEMA_VIOLATION") {
+      message = "模型回复在严格结构修复后仍未通过校验。本轮输入已经保存，你可以直接重试本轮。";
+    } else if (error instanceof ApiError
       && error.code === "ModelProviderError"
-      && /transport failed|remoteprotocolerror|timed out/i.test(error.message)) {
+      && /transport failed|remoteprotocolerror|timed out|response status was incomplete/i.test(error.message)) {
       message = "模型服务连接中断，本轮输入已经保存，但回复未能完成。请重新发送或继续输入。";
     } else if (error instanceof ApiError && error.code === "InteractionInvariantViolation") {
       message = "Watt 在理解这条补充时遇到格式问题。本轮输入已经保存，请继续输入或重新发送。";
     }
     elements.noticeMessage.textContent = message;
+    const recoverable = error instanceof ApiError
+      && ["INCOMPLETE_RESPONSE", "SCHEMA_VIOLATION"].includes(error.code)
+      && recovery && recovery.interactionId && recovery.turnId;
+    state.recoverableTurn = recoverable ? recovery : null;
+    elements.retryTurnNotice.hidden = !state.recoverableTurn;
     elements.notice.hidden = false;
     announce(message);
   }
@@ -398,13 +410,15 @@
   function hideNotice() {
     elements.notice.hidden = true;
     elements.noticeMessage.textContent = "";
+    elements.retryTurnNotice.hidden = true;
+    state.recoverableTurn = null;
   }
 
   function setBusy(value) {
     state.busy = value;
     const controls = document.querySelectorAll("button, input, select, textarea");
     controls.forEach((control) => {
-      if (control !== elements.dismissNotice) {
+      if (control !== elements.dismissNotice && control !== elements.retryTurnNotice) {
         control.disabled = value;
       }
     });
@@ -650,7 +664,9 @@
     }
     if (message.children.length < 3) return;
     const timestamp = record.created_at ? new Date(record.created_at).toLocaleTimeString() : "";
-    const meta = `${timestamp}${record.processing_status ? ` · ${record.processing_status}` : ""}`;
+    const trustStage = record.streaming && record.trust_stage
+      ? ` · ${record.trust_stage}` : "";
+    const meta = `${timestamp}${record.processing_status ? ` · ${record.processing_status}` : ""}${trustStage}`;
     if (message.children[2].textContent !== meta) message.children[2].textContent = meta;
     const references = [...(record.supporting_references || []), ...(record.design_result_references || []), ...(record.governance_event_references || [])].join(" · ");
     if (message.children[3].textContent !== references) message.children[3].textContent = references;
@@ -685,6 +701,7 @@
         const streamingRecord = {
           actor: "WATT", content: streamed.content || "正在处理…", streaming: true,
           processing_status: streamed.status, created_at: streamed.createdAt,
+          trust_stage: streamed.phase || "PROVISIONAL",
         };
         updateMessageNode(node, streamingRecord);
         if (streamed.content && typeof globalThis.__WATT_MARK_TURN_TIMING__ === "function") {
@@ -965,6 +982,8 @@
     elements.workspaceRealitySummary.textContent = "PRE-WORK conversation is durable. No engineering source or production authority is bound yet.";
     elements.workSourceTree.replaceChildren(createElement("p", "empty-copy", "No repository bound. Watt-managed workspace may be available after admission."));
     elements.workspaceAgendaSummary.textContent = projection?.design_next_focus || "Understanding request…";
+    elements.workspacePlanChange.hidden = true;
+    elements.workspacePlanChange.textContent = "";
     elements.workExecutionPath.replaceChildren();
     ["Understand", "Shape", "Produce", "Verify", "Deliver"].forEach((step, index) => {
       elements.workExecutionPath.append(createElement("li", index === 0 ? "work-path-step state-current" : "work-path-step", step));
@@ -1675,15 +1694,25 @@
   function renderExecutionPath() {
     const list = elements.workExecutionPath;
     list.replaceChildren();
-    const milestones = controlRoom ? controlRoom.agendaMilestones(state.steering) : [];
-    if (!milestones.length) {
+    const plan = controlRoom ? controlRoom.workPlanProjection(state.steering) : null;
+    const milestones = plan?.stages || [];
+    if (!plan?.available) {
       list.append(createElement("li", "empty-copy", "No governed execution path has been recorded yet."));
       elements.workspaceAgendaSummary.textContent = "Execution path will appear when a governed plan exists.";
+      elements.workspacePlanChange.hidden = true;
+      elements.workspacePlanChange.textContent = "";
       return;
     }
-    elements.workspaceAgendaSummary.textContent = state.steering.current_step
-      ? "Current governed step"
-      : "Governed plan · no step is currently active";
+    const remaining = plan.remainingStages.length
+      ? plan.remainingStages.join(" → ")
+      : "none";
+    elements.workspaceAgendaSummary.textContent = (
+      `Goal: ${plan.goal} · Current: ${plan.currentStage || "no active stage"} · Remaining: ${remaining}`
+    );
+    elements.workspacePlanChange.hidden = !plan.latestChange;
+    elements.workspacePlanChange.textContent = plan.latestChange
+      ? `Plan updated: ${plan.latestChange.reason}`
+      : "";
     milestones.forEach((milestone) => {
       const row = createElement("li", `work-path-step state-${milestone.state.toLowerCase()}`);
       const trigger = createElement("button", "work-path-trigger");
@@ -2299,7 +2328,10 @@
       transitionComposer("SETTLED");
       if (failure || savedTurn.status === "FAILED") {
         pauseOutbox(interactionId);
-        showNotice(new ApiError(409, (failure && failure.code) || savedTurn.failure_code || "TURN_FAILED", (failure && failure.message) || savedTurn.failure_message || "Watt could not complete this reply. Waiting messages are paused."));
+        showNotice(
+          new ApiError(409, (failure && failure.code) || savedTurn.failure_code || "TURN_FAILED", (failure && failure.message) || savedTurn.failure_message || "Watt could not complete this reply. Waiting messages are paused."),
+          { interactionId, turnId },
+        );
       } else {
         announce("Watt completed the reply. You can continue the conversation.");
       }
@@ -2356,7 +2388,7 @@
     if (state.interactionEventSource) state.interactionEventSource.close();
     state.activeInteractionTurnId = turnId;
     state.streamingAssistantMessage = {
-      turnId, content: "", status: "PROCESSING", responseSequence: 0,
+      turnId, content: "", status: "PROCESSING", phase: "PROVISIONAL", responseSequence: 0,
       responseId: turnId, createdAt: new Date().toISOString(),
       pendingResponseDeltas: [], deferredFinalContent: null, pendingSettlement: null,
     };
@@ -2391,8 +2423,10 @@
     source.addEventListener("message.delta", (event) => {
       if (!current()) return;
       markBrowserEvent("browserEventReceived");
-      streamed += JSON.parse(event.data).delta;
+      const payload = JSON.parse(event.data);
+      streamed += payload.delta;
       state.streamingAssistantMessage.content = streamed;
+      state.streamingAssistantMessage.phase = payload.trust_stage || "PROVISIONAL";
       scheduleStreamRender();
     });
     source.addEventListener("response.provisional", (event) => {
@@ -2412,7 +2446,7 @@
       markBrowserEvent(`browser${phase}Received`);
       streamed += payload.content || "";
       state.streamingAssistantMessage.content = streamed;
-      state.streamingAssistantMessage.phase = phase;
+      state.streamingAssistantMessage.phase = "GOVERNED";
       state.streamingAssistantMessage.reconciliation = payload.reconciliation || null;
       scheduleStreamRender();
     };
@@ -2423,7 +2457,7 @@
       const payload = JSON.parse(event.data);
       if (!acceptResponseEvent(payload)) return;
       markBrowserEvent("browserRealizationStartedReceived");
-      state.streamingAssistantMessage.phase = "REALIZING";
+      state.streamingAssistantMessage.phase = "GOVERNED";
       state.streamingAssistantMessage.reconciliation = payload.reconciliation || null;
       scheduleStreamRender();
     });
@@ -2434,7 +2468,7 @@
       markBrowserEvent("browserRealizationDeltaReceived");
       streamed += payload.content || "";
       state.streamingAssistantMessage.pendingResponseDeltas.push(payload.content || "");
-      state.streamingAssistantMessage.phase = "REALIZING";
+      state.streamingAssistantMessage.phase = "GOVERNED";
       state.streamingAssistantMessage.reconciliation = payload.reconciliation || null;
       scheduleStreamRender();
     });
@@ -2449,15 +2483,19 @@
     });
     source.addEventListener("message.reset", (event) => {
       if (!current()) return;
-      streamed = JSON.parse(event.data).content;
+      const payload = JSON.parse(event.data);
+      streamed = payload.content;
       state.streamingAssistantMessage.content = streamed;
+      state.streamingAssistantMessage.phase = payload.trust_stage || "FINAL";
       state.streamingAssistantMessage.pendingResponseDeltas = [];
       state.streamingAssistantMessage.deferredFinalContent = null;
       scheduleStreamRender();
     });
-    source.addEventListener("message.completed", () => {
+    source.addEventListener("message.completed", (event) => {
       markBrowserEvent("finalResponseReceived");
       if (!current()) return;
+      const payload = event.data ? JSON.parse(event.data) : {};
+      state.streamingAssistantMessage.phase = payload.trust_stage || "FINAL";
       state.streamingAssistantMessage.pendingSettlement = { interactionId, turnId, failure: null };
       scheduleStreamRender();
     });
@@ -2474,6 +2512,26 @@
       state.interactionEventSource = null;
       void pollInteractionTurn(interactionId, turnId);
     };
+  }
+
+  async function retryFailedInteractionTurn() {
+    const recovery = state.recoverableTurn;
+    if (!recovery || state.busy || state.sendInFlight || state.activeInteractionTurnId) return;
+    setBusy(true);
+    hideNotice();
+    try {
+      const turn = await apiRequest(
+        `/api/interactions/${recovery.interactionId}/turns/${recovery.turnId}/retry`,
+        { method: "POST" },
+      );
+      if (state.selectedInteractionId !== recovery.interactionId) return;
+      observeInteractionTurn(recovery.interactionId, turn.turn_id);
+      announce("已使用保存的输入重试本轮。无需重新发送消息。");
+    } catch (error) {
+      showNotice(error, recovery);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function resumeOutbox(id) {
@@ -2904,6 +2962,7 @@
   elements.saveArtifactTarget.addEventListener("click", updateArtifactTarget);
   elements.saveCodeChangeContract.addEventListener("click", updateCodeChangeContract);
   elements.retryControl.addEventListener("click", reloadWorkspace);
+  elements.retryTurnNotice.addEventListener("click", retryFailedInteractionTurn);
   elements.healthControl.addEventListener("click", loadHealth);
   elements.dismissNotice.addEventListener("click", hideNotice);
 

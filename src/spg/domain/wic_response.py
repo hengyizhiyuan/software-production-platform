@@ -10,6 +10,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from spg.domain.conversation import ConversationContextMessage, InteractionStrategy
+from spg.domain.production_intelligence import CognitiveContextPackage
 from spg.domain.response_contract import ResponseContract
 
 
@@ -32,6 +33,15 @@ class WicResponseEventType(StrEnum):
     FINAL_RESPONSE = "FINAL_RESPONSE"
     TURN_COMPLETED = "TURN_COMPLETED"
     TURN_FAILED = "TURN_FAILED"
+    TURN_RECOVERY_STARTED = "TURN_RECOVERY_STARTED"
+
+
+class ResponseTrustStage(StrEnum):
+    """Human-visible response maturity; only FINAL is settled Conversation truth."""
+
+    PROVISIONAL = "PROVISIONAL"
+    GOVERNED = "GOVERNED"
+    FINAL = "FINAL"
 
 
 class ResponseReconciliation(StrEnum):
@@ -86,6 +96,7 @@ class GovernedResponseEnvelope(BaseModel):
     working_motive: str | None = None
     working_desired_outcome: str | None = None
     facts_to_preserve: tuple[str, ...] = ()
+    semantic_truth_to_preserve: tuple[str, ...] = ()
     constraints_to_preserve: tuple[str, ...] = ()
     unresolved_human_decisions: tuple[str, ...] = ()
     explicit_assumptions: tuple[str, ...] = ()
@@ -97,6 +108,7 @@ class GovernedResponseEnvelope(BaseModel):
     question_policy_revision: str
     response_language: str
     interaction_strategy: InteractionStrategy
+    cognitive_context_package: CognitiveContextPackage | None = None
     # Optional only for already persisted/legacy callers. Controlled WIC supplies
     # an admitted turn contract before expression; it does not confer authority.
     response_contract: ResponseContract | None = None

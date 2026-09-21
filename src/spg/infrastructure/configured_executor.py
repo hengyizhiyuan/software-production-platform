@@ -126,6 +126,33 @@ def render_governed_instruction(
         f"- [{item.fact_id}] {semantic_fact_statement(item)}"
         for item in completion_contract.semantic_fact_obligations
     )
+    task_contract = completion_contract.task_contract
+    task_contract_section = ""
+    if task_contract is not None:
+        task_scope = "\n".join(f"- {item}" for item in task_contract.scope)
+        task_acceptance = "\n".join(
+            f"- {item}" for item in task_contract.acceptance_meaning
+        )
+        task_evidence = "\n".join(
+            f"- [{item.category.value}] {item.statement}"
+            for item in task_contract.evidence_requirements
+        )
+        task_out_of_scope = "\n".join(
+            f"- {item}" for item in task_contract.out_of_scope
+        )
+        task_contract_section = (
+            "Task Contract projection:\n"
+            f"- Identity: {task_contract.task_contract_id}\n"
+            f"- Engineering activity: {task_contract.activity.value}\n"
+            f"- Objective: {task_contract.objective}\n"
+            f"- SOP lineage: {task_contract.sop_reference or 'None'}\n"
+            f"Scope:\n{task_scope}\n"
+            f"Acceptance meaning:\n{task_acceptance}\n"
+            f"Required evidence direction:\n{task_evidence}\n"
+            f"Out of scope:\n{task_out_of_scope}\n"
+            "This projection preserves already admitted intent and lineage. It does "
+            "not widen execution authority; the target contracts below remain decisive.\n\n"
+        )
     authority = (
         completion_contract.change_contract
         or completion_contract.artifact_contract
@@ -214,6 +241,7 @@ def render_governed_instruction(
         "Complete exactly the admitted software-production objective below.\n\n"
         f"Objective:\n{objective.strip()}\n\n"
         f"{governed_basis}"
+        f"{task_contract_section}"
         f"{plan_section}"
         f"{artifact_authority}"
         f"{change_authority}"

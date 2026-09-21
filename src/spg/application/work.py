@@ -15,6 +15,10 @@ from spg.application.governance import CandidateGovernanceService
 from spg.application.integration import RepositoryIntegrationService
 from spg.application.interaction import interaction_basis_fingerprint
 from spg.application.planning import ProductionPlanningService
+from spg.application.production_intelligence import (
+    TaskContractRequest,
+    default_task_contract_builder,
+)
 from spg.application.preparation import PreparationService
 from spg.application.runtime import RuntimeService
 from spg.application.runtime_commit import RuntimeCommitService
@@ -30,6 +34,10 @@ from spg.domain.change import (
     ProductionTargetKind,
 )
 from spg.domain.executor import ExecutorCapabilityContract
+from spg.domain.engineering_semantics import (
+    current_semantic_facts,
+    semantic_fact_reference,
+)
 from spg.domain.governance import (
     CandidateAuthorizationScope,
     CandidateSealRequest,
@@ -99,6 +107,7 @@ from spg.domain.runtime import (
     InitialRunRequest,
     ProductionHorizon,
 )
+from spg.domain.production_intelligence import EngineeringActivity
 from spg.domain.runtime_commit import RuntimeCommitRequest
 from spg.domain.verification import (
     ProductionAdmissibilityOutcome,
@@ -1458,6 +1467,7 @@ class WorkApplicationService:
         with self.database.unit_of_work() as unit_of_work:
             store = ProductStore(unit_of_work.session)
             work = self._required_work(store, work_id)
+            work_revision = store.current_work_reality_revision(work_id)
             existing = store.runtime_binding(work_id)
             if existing is not None:
                 return self._projection(store, work)
@@ -1481,6 +1491,22 @@ class WorkApplicationService:
             artifact = self._artifact_target(work)
             change_proposal = work.code_change_proposal
             change_contract = plan.change_contract
+
+        semantic_facts = (
+            ()
+            if work_revision is None
+            else tuple(
+                semantic_fact_reference(fact, work_revision_id=work_revision.id)
+                for fact in current_semantic_facts(
+                    work_revision.engineering_semantic_facts
+                )
+            )
+        )
+        work_reality_references = [f"work:{work.id}"]
+        if work_revision is not None:
+            work_reality_references.append(
+                f"work-reality-revision:{work_revision.id}"
+            )
 
         baseline = self.runtime.current_baseline(repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
         if (
@@ -1603,6 +1629,20 @@ class WorkApplicationService:
             raise ProductInvariantViolation(
                 "Production Plan no longer matches the admitted Work authority envelope"
             )
+        authority_lineage = tuple(
+            (
+                *work_reality_references,
+                f"engineering-scope:{scope.id}",
+                f"engineering-resource:{resource.id}",
+                f"human-authority:{authority_identity}",
+            )
+        )
+        ecf_references = (
+            f"engineering-resource:{resource.id}",
+            f"repository:{resource.repository_identity}",
+            f"source-baseline:{baseline.id}@{baseline.repository_revision}",
+        )
+        decision_reference = f"work-admission:{work.id}:{authority_identity}"
         if artifact is not None:
             verification_obligation = (
                 work.verification_expectation
@@ -1621,10 +1661,29 @@ class WorkApplicationService:
             )
             objective = self._artifact_objective(artifact_contract)
             horizon = ProductionHorizon.DOCUMENTATION
+            task_contract = default_task_contract_builder().build(
+                TaskContractRequest(
+                    activity=EngineeringActivity.FEATURE_DELIVERY,
+                    objective=objective,
+                    scope=(f"{artifact.operation.value}:{artifact.path}",),
+                    constraints=work.constraints,
+                    acceptance_meaning=(verification_obligation,),
+                    out_of_scope=(
+                        f"Any repository path other than {artifact.path}",
+                    ),
+                    authority_lineage=authority_lineage,
+                    work_reality_references=tuple(work_reality_references),
+                    ecf_references=ecf_references,
+                    semantic_facts=semantic_facts,
+                    decision_reference=decision_reference,
+                )
+            )
             completion_contract = CompletionContract(
                 required_outputs=(artifact.path,),
                 required_changes=(artifact.path,),
                 verification_obligations=(verification_obligation,),
+                semantic_fact_obligations=semantic_facts,
+                task_contract=task_contract,
                 artifact_contract=artifact_contract,
                 production_plan=plan,
             )
@@ -1633,10 +1692,36 @@ class WorkApplicationService:
             objective = self._code_change_objective(change_contract)
             horizon = ProductionHorizon.CODE
             exact_paths = tuple(target.path for target in change_contract.exact_targets)
+            scope_entries = tuple(
+                f"{target.operation.value}:{target.path}"
+                for target in change_contract.exact_targets
+            ) + tuple(
+                f"BOUNDED_AREA:{area}" for area in change_contract.allowed_areas
+            )
+            task_contract = default_task_contract_builder().build(
+                TaskContractRequest(
+                    activity=EngineeringActivity.FEATURE_DELIVERY,
+                    objective=objective,
+                    scope=scope_entries,
+                    constraints=work.constraints,
+                    acceptance_meaning=change_contract.verification_identities,
+                    out_of_scope=tuple(change_contract.forbidden_areas)
+                    + (
+                        "Any repository path outside the admitted exact targets or bounded areas",
+                    ),
+                    authority_lineage=authority_lineage,
+                    work_reality_references=tuple(work_reality_references),
+                    ecf_references=ecf_references,
+                    semantic_facts=semantic_facts,
+                    decision_reference=decision_reference,
+                )
+            )
             completion_contract = CompletionContract(
                 required_outputs=exact_paths,
                 required_changes=exact_paths,
                 verification_obligations=change_contract.verification_identities,
+                semantic_fact_obligations=semantic_facts,
+                task_contract=task_contract,
                 change_contract=change_contract,
                 production_plan=plan,
             )

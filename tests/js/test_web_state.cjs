@@ -844,6 +844,24 @@ test("failed replies pause later messages, keeping exact content for explicit re
   assert.equal(harness.notices[0].code, "TEST_FAILURE");
 });
 
+test("a recoverable failed turn retries the saved turn without resubmitting Human input", async () => {
+  const calls = [];
+  const harness = conversationHarness(async (url, options) => {
+    calls.push({ url, options });
+    return { turn_id: "turn-1", status: "RECEIVED" };
+  });
+  harness.state.recoverableTurn = { interactionId: "interaction-1", turnId: "turn-1" };
+
+  await harness.retryFailedInteractionTurn();
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, "/api/interactions/interaction-1/turns/turn-1/retry");
+  assert.equal(calls[0].options.method, "POST");
+  assert.equal(harness.state.activeInteractionTurnId, "turn-1");
+  assert.equal(harness.sources.length, 1);
+  assert.equal(harness.state.outbox.length, 0, "retry must not enqueue or resend Human input");
+});
+
 test("switching conversations ignores stale deltas and leaves the prior queue isolated", async () => {
   const harness = conversationHarness(async () => ({ turns: [] }));
   harness.state.outbox = [{ id: "pending", interactionId: "interaction-1", content: "Only for one", status: "queued", waitForTurnId: "turn-1" }];
@@ -872,6 +890,7 @@ test("controlled WIC response events evolve one bubble and suppress duplicate re
   source.emit("response.provisional", provisional);
   source.emit("response.provisional", provisional);
   assert.equal(harness.state.streamingAssistantMessage.content, provisional.content);
+  assert.equal(harness.state.streamingAssistantMessage.phase, "PROVISIONAL");
   source.emit("response.refinement", {
     sequence: 4, response_id: "turn-1", reconciliation: "REFINE",
     content: null,
@@ -890,6 +909,7 @@ test("controlled WIC response events evolve one bubble and suppress duplicate re
     content: "现有鉴权协议。",
   });
   harness.flushFrames();
+  assert.equal(harness.state.streamingAssistantMessage.phase, "GOVERNED");
   assert.equal(
     harness.state.streamingAssistantMessage.content,
     provisional.content + "\n\n这不会改变现有鉴权协议。",

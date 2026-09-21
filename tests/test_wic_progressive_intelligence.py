@@ -448,6 +448,32 @@ def test_ow_f_blocks_unsafe_inference_asks_one_high_value_question_and_allows_de
     assert design.useful_work_may_continue
 
 
+def test_question_policy_ranks_high_impact_boundary_above_lower_value_scope_detail() -> None:
+    candidate = _candidate(
+        "OW-F",
+        unresolved_material_questions=("首页先用卡片还是表格？",),
+    )
+    result = _build(
+        "OW-F",
+        candidate=candidate,
+        text="客户数据能否外发还没决定",
+    )
+
+    assert result.selected_question == "哪些数据可以外发，以及权限和保留期分别由谁批准？"
+    assert len(
+        [
+            question
+            for question in result.questions
+            if question.disposition is QuestionDisposition.ASK_HUMAN_NOW
+        ]
+    ) == 1
+    assert next(
+        question
+        for question in result.questions
+        if question.question == "首页先用卡片还是表格？"
+    ).disposition is QuestionDisposition.DEFER_UNTIL_RELEVANT
+
+
 def test_safe_reversible_detail_is_inferred_without_questionnaire() -> None:
     candidate = _candidate("OW-G", unresolved_material_questions=("按钮圆角是多少？", "是否换颜色？"))
     result = _build("OW-G", candidate=candidate)

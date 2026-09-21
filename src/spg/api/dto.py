@@ -33,6 +33,7 @@ from spg.domain.steering import (
     RealityReference,
     SteeringAttentionReason,
     SteeringDecisionRecord,
+    SteeringHistoryEventRecord,
     SteeringPlanProjection,
     SteeringStepRecord,
 )
@@ -1144,6 +1145,28 @@ class SteeringDecisionResponse(ApiDto):
         )
 
 
+class SteeringPlanChangeResponse(ApiDto):
+    change_id: UUID
+    from_revision_id: UUID | None
+    to_revision_id: UUID | None
+    reason: str
+    affected_step_ids: tuple[UUID, ...]
+    affected_reality_refs: tuple[RealityReference, ...]
+    changed_at: datetime
+
+    @classmethod
+    def from_record(cls, event: SteeringHistoryEventRecord) -> Self:
+        return cls(
+            change_id=event.id,
+            from_revision_id=event.from_revision_id,
+            to_revision_id=event.to_revision_id,
+            reason=event.rationale,
+            affected_step_ids=event.related_step_ids,
+            affected_reality_refs=event.reality_refs,
+            changed_at=event.created_at,
+        )
+
+
 class SteeringPlanResponse(ApiDto):
     work_id: UUID
     work_objective: str
@@ -1154,6 +1177,7 @@ class SteeringPlanResponse(ApiDto):
     completed_steps: tuple[SteeringStepResponse, ...]
     current_step: SteeringStepResponse | None
     known_next_steps: tuple[SteeringStepResponse, ...]
+    plan_changes: tuple[SteeringPlanChangeResponse, ...]
     latest_decision: SteeringDecisionResponse | None
     selection_rationale: str | None
     steering_outcome: str | None
@@ -1185,6 +1209,10 @@ class SteeringPlanResponse(ApiDto):
             known_next_steps=tuple(
                 SteeringStepResponse.from_record(step)
                 for step in projection.known_next_steps
+            ),
+            plan_changes=tuple(
+                SteeringPlanChangeResponse.from_record(event)
+                for event in projection.plan_change_history
             ),
             latest_decision=(
                 None

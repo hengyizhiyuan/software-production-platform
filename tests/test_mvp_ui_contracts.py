@@ -123,9 +123,11 @@ def test_human_review_runtime_supports_the_software_acceptance_path_it_displays(
     assert 'if(!busy)$("notice").textContent=""' in delivery_javascript
 
 
-def test_completed_delivery_milestone_uses_a_fresh_control_room_asset() -> None:
+def test_work_plan_projection_uses_fresh_control_room_assets() -> None:
     html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
-    assert "/assets/control-room.js?v=completed-delivery-milestone-2" in html
+    assert "/assets/appearance.css?v=work-plan-projection-1" in html
+    assert "/assets/control-room.js?v=work-plan-projection-1" in html
+    assert "/assets/app.js?v=work-plan-projection-1" in html
 
 
 def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
@@ -143,6 +145,13 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert "artifact target" in combined
     assert "artifact operation" in combined
     assert 'id="interaction-history"' in html
+    assert 'id="retry-turn-notice"' in html
+    assert "重试本轮" in html
+    assert "/turns/${recovery.turnId}/retry" in javascript
+    assert '"INCOMPLETE_RESPONSE", "SCHEMA_VIOLATION"' in javascript
+    assert 'phase: "PROVISIONAL"' in javascript
+    assert 'phase = "GOVERNED"' in javascript
+    assert 'payload.trust_stage || "FINAL"' in javascript
     assert 'id="new-interaction-control"' in html
     assert ">New Work</button>" in html
     assert 'id="shared-understanding"' in html

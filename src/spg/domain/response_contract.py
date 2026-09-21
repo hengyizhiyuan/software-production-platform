@@ -8,8 +8,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from spg.domain.conversation import ConversationTurnIntent
 
-RESPONSE_CONTRACT_REVISION = "wic-response-contract-v1"
+
+RESPONSE_CONTRACT_REVISION = "wic-response-contract-v4"
 
 
 class InteractionMode(StrEnum):
@@ -22,6 +24,99 @@ class InteractionMode(StrEnum):
     EXECUTE = "EXECUTE"
     CORRECT = "CORRECT"
     STATUS = "STATUS"
+
+
+class ExploreInteractionStrategy(StrEnum):
+    """Turn-local EXPLORE posture; never a separate capability or lifecycle."""
+
+    OPEN_EXPLORATION = "OPEN_EXPLORATION"
+    INTENT_REFINEMENT = "INTENT_REFINEMENT"
+
+
+class CapabilityAlignmentMode(StrEnum):
+    KNOWLEDGE = "KNOWLEDGE"
+    PRODUCTION_ADVISORY = "PRODUCTION_ADVISORY"
+    PRODUCTION = "PRODUCTION"
+
+
+class ProductionRelevance(StrEnum):
+    GENERAL_KNOWLEDGE = "GENERAL_KNOWLEDGE"
+    POTENTIAL_PRODUCTION_GOAL = "POTENTIAL_PRODUCTION_GOAL"
+    DIRECT_PRODUCTION_GOAL = "DIRECT_PRODUCTION_GOAL"
+
+
+class CapabilityAlignmentContext(BaseModel):
+    """Turn-scoped capability match; advisory only and never production authority."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    user_intent: ConversationTurnIntent | None = None
+    production_relevance: ProductionRelevance = ProductionRelevance.GENERAL_KNOWLEDGE
+    current_work_context: bool = False
+    watt_capability_match: bool = False
+    response_mode: CapabilityAlignmentMode = CapabilityAlignmentMode.KNOWLEDGE
+    explicit_capability_question: bool = False
+    capability_reality_reference: str = "system-capability-reality:legacy"
+    rationale: str = "Historical Response Contract has no capability-alignment evidence."
+    authority: Literal["ADVISORY_ONLY"] = "ADVISORY_ONLY"
+
+    @model_validator(mode="after")
+    def coherent_alignment(self) -> "CapabilityAlignmentContext":
+        expected = {
+            CapabilityAlignmentMode.KNOWLEDGE: ProductionRelevance.GENERAL_KNOWLEDGE,
+            CapabilityAlignmentMode.PRODUCTION_ADVISORY: (
+                ProductionRelevance.POTENTIAL_PRODUCTION_GOAL
+            ),
+            CapabilityAlignmentMode.PRODUCTION: ProductionRelevance.DIRECT_PRODUCTION_GOAL,
+        }[self.response_mode]
+        if self.production_relevance is not expected:
+            raise ValueError("Capability alignment mode and production relevance disagree")
+        if (
+            self.response_mode is not CapabilityAlignmentMode.KNOWLEDGE
+            and not self.watt_capability_match
+        ):
+            raise ValueError("Production alignment requires an evidenced Watt capability match")
+        return self
+
+
+class DesignCollaborationMode(StrEnum):
+    """Composable design posture; it refines rather than replaces InteractionMode."""
+
+    DESIGN_EXPLORE = "DESIGN_EXPLORE"
+    DESIGN_REVIEW = "DESIGN_REVIEW"
+    DESIGN_DECIDE = "DESIGN_DECIDE"
+
+
+class ReasoningStep(StrEnum):
+    """Order of useful cognition to expose, never fixed prose or private chain of thought."""
+
+    CONTEXT_MAP = "CONTEXT_MAP"
+    OPTION_SPACE = "OPTION_SPACE"
+    COMPARISON = "COMPARISON"
+    RISKS_AND_CONSTRAINTS = "RISKS_AND_CONSTRAINTS"
+    DECISION_POINT = "DECISION_POINT"
+    GOAL = "GOAL"
+    CONSTRAINTS = "CONSTRAINTS"
+    ARCHITECTURE_OPTIONS = "ARCHITECTURE_OPTIONS"
+    TRADE_OFFS = "TRADE_OFFS"
+    RECOMMENDATION = "RECOMMENDATION"
+    JUDGMENT = "JUDGMENT"
+    DIRECT_ANSWER = "DIRECT_ANSWER"
+    OBSERVED_SYMPTOM = "OBSERVED_SYMPTOM"
+    EVIDENCE = "EVIDENCE"
+    HYPOTHESIS = "HYPOTHESIS"
+    ROOT_CAUSE = "ROOT_CAUSE"
+    FIX = "FIX"
+    ACKNOWLEDGE = "ACKNOWLEDGE"
+    PROCEED = "PROCEED"
+    REPORT_RESULT = "REPORT_RESULT"
+    CURRENT_CONCLUSION = "CURRENT_CONCLUSION"
+    KEY_PROGRESS = "KEY_PROGRESS"
+    CURRENT_OWNER_OR_NEXT_STEP = "CURRENT_OWNER_OR_NEXT_STEP"
+    IMPORTANT_LIMITATION = "IMPORTANT_LIMITATION"
+    CORRECTED_TRUTH = "CORRECTED_TRUTH"
+    CONTINUE = "CONTINUE"
+    CAPABILITY_ALIGNMENT = "CAPABILITY_ALIGNMENT"
 
 
 class PrimaryObligation(StrEnum):
@@ -78,6 +173,7 @@ class ResponseMove(StrEnum):
     INDEPENDENT_EVIDENCE = "INDEPENDENT_EVIDENCE"
     CHANGE_DIAGNOSTIC_ROUTE = "CHANGE_DIAGNOSTIC_ROUTE"
     STOP_UNPRODUCTIVE_ROUTE = "STOP_UNPRODUCTIVE_ROUTE"
+    ALIGN_WITH_PRODUCTION_CAPABILITY = "ALIGN_WITH_PRODUCTION_CAPABILITY"
 
 
 class InformationBudget(StrEnum):
@@ -121,6 +217,7 @@ class ResponseIntent(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     interaction_mode: InteractionMode
+    design_collaboration_mode: DesignCollaborationMode | None = None
     rationale: str = Field(min_length=1)
     judgment_stance: JudgmentStance = JudgmentStance.UNCERTAINTY
     judgment_subject: str | None = Field(default=None, min_length=1, max_length=255)
@@ -146,10 +243,14 @@ class ResponseContract(BaseModel):
     authority: Literal["ADVISORY_ONLY"] = "ADVISORY_ONLY"
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     source_record_ids: tuple[UUID, ...] = ()
+    capability_alignment: CapabilityAlignmentContext = CapabilityAlignmentContext()
     interaction_mode: InteractionMode
+    explore_strategy: ExploreInteractionStrategy | None = None
+    design_collaboration_mode: DesignCollaborationMode | None = None
     primary_obligation: PrimaryObligation
     opening_move: OpeningMove
     response_moves: tuple[ResponseMove, ...] = Field(min_length=1)
+    reasoning_sequence: tuple[ReasoningStep, ...] = ()
     information_budget: InformationBudget
     question_budget: int = Field(default=0, ge=0, le=1)
     selected_question: str | None = Field(default=None, min_length=1)
@@ -168,6 +269,40 @@ class ResponseContract(BaseModel):
 
     @model_validator(mode="after")
     def coherent_response_boundary(self) -> "ResponseContract":
+        if self.revision == RESPONSE_CONTRACT_REVISION and not self.reasoning_sequence:
+            raise ValueError("Current Response Contracts require a reasoning sequence")
+        if self.revision == RESPONSE_CONTRACT_REVISION:
+            if (
+                self.interaction_mode is InteractionMode.EXPLORE
+                and self.explore_strategy is None
+            ):
+                raise ValueError("Current EXPLORE contracts require an interaction strategy")
+            if (
+                self.interaction_mode is not InteractionMode.EXPLORE
+                and self.explore_strategy is not None
+            ):
+                raise ValueError("EXPLORE strategy is only valid for EXPLORE mode")
+            if (
+                self.explore_strategy is ExploreInteractionStrategy.INTENT_REFINEMENT
+                and (self.question_budget != 1 or self.selected_question is None)
+            ):
+                raise ValueError(
+                    "Intent refinement requires exactly one admitted high-value question"
+                )
+            if (
+                self.explore_strategy is ExploreInteractionStrategy.OPEN_EXPLORATION
+                and self.question_budget != 0
+            ):
+                raise ValueError(
+                    "Open exploration cannot carry an intent-refinement question"
+                )
+        if self.design_collaboration_mode is not None and self.interaction_mode not in {
+            InteractionMode.EXPLORE,
+            InteractionMode.ANALYZE,
+            InteractionMode.DESIGN,
+            InteractionMode.DECIDE,
+        }:
+            raise ValueError("Design collaboration refinement requires a design-capable mode")
         if (self.selected_question is not None) != (self.question_budget == 1):
             raise ValueError("One admitted blocking question is required for a question budget")
         if self.judgment_stance is JudgmentStance.FACT and (
@@ -190,4 +325,17 @@ class ResponseContract(BaseModel):
             raise ValueError("An authority pause cannot also instruct the Realizer to proceed")
         if self.advancement_obligation is AdvancementObligation.ASK_ONE_BLOCKING_QUESTION and self.question_budget != 1:
             raise ValueError("A blocking-question advancement needs an admitted question")
+        if (
+            self.capability_alignment.response_mode
+            is CapabilityAlignmentMode.PRODUCTION_ADVISORY
+        ) != (ResponseMove.ALIGN_WITH_PRODUCTION_CAPABILITY in self.response_moves):
+            raise ValueError(
+                "Only production-advisory responses carry a capability-alignment move"
+            )
+        if (
+            self.capability_alignment.response_mode
+            is CapabilityAlignmentMode.PRODUCTION_ADVISORY
+            and self.interaction_mode is not InteractionMode.ANSWER
+        ):
+            raise ValueError("Production advisory must answer before offering a production path")
         return self

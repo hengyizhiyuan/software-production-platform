@@ -77,6 +77,7 @@ class VerificationCapabilityRequest(BaseModel):
     verification_identity: UUID
     obligation: str = Field(min_length=1)
     semantic_fact_obligations: tuple[SemanticFactReference, ...] = ()
+    task_contract_id: UUID | None = None
     snapshot_id: UUID
     proposed_commit_identity: str
     tree_identity: str

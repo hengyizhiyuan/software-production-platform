@@ -562,6 +562,18 @@ def create_http_application(
             raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
         return InteractionTurnResponse.from_turn(turn)
 
+    @api.post(
+        "/api/interactions/{interaction_id}/turns/{turn_id}/retry",
+        response_model=InteractionTurnResponse,
+        status_code=202,
+    )
+    def retry_interaction_turn(
+        interaction_id: UUID,
+        turn_id: UUID,
+    ) -> InteractionTurnResponse:
+        turn = required_interaction_service().retry_turn(interaction_id, turn_id)
+        return InteractionTurnResponse.from_turn(turn)
+
     @api.get("/api/interactions/{interaction_id}/turns/{turn_id}/timing")
     def get_interaction_turn_timing(
         interaction_id: UUID,
@@ -598,6 +610,23 @@ def create_http_application(
                 header_cursor = request.headers.get("last-event-id")
                 if header_cursor and header_cursor.isdigit():
                     cursor = max(cursor, int(header_cursor))
+                existing_events = await asyncio.to_thread(
+                    service.response_events,
+                    turn_id,
+                    after_sequence=0,
+                )
+                latest_recovery = next(
+                    (
+                        event
+                        for event in reversed(existing_events)
+                        if event.event_type.value == "TURN_RECOVERY_STARTED"
+                    ),
+                    None,
+                )
+                if latest_recovery is not None:
+                    # A retry reuses the Human Turn identity. Replay only the latest
+                    # attempt while retaining prior failure evidence in storage.
+                    cursor = max(cursor, latest_recovery.sequence - 1)
                 event_names = {
                     "TURN_ACCEPTED": "turn.accepted",
                     "FAST_RECEPTION_STARTED": "fast.started",
@@ -610,6 +639,7 @@ def create_http_application(
                     "FINAL_RESPONSE": "response.final",
                     "TURN_COMPLETED": "message.completed",
                     "TURN_FAILED": "turn.failed",
+                    "TURN_RECOVERY_STARTED": "turn.recovery.started",
                 }
                 while True:
                     if await request.is_disconnected():
@@ -667,7 +697,10 @@ def create_http_application(
                     streamed_response += delta
                     yield (
                         "event: message.delta\ndata: "
-                        + json.dumps({"delta": delta}, ensure_ascii=False)
+                        + json.dumps(
+                            {"delta": delta, "trust_stage": "PROVISIONAL"},
+                            ensure_ascii=False,
+                        )
                         + "\n\n"
                     )
                 if turn.status.value == "COMPLETED":
@@ -697,7 +730,10 @@ def create_http_application(
                             yield (
                                 "event: message.reset\ndata: "
                                 + json.dumps(
-                                    {"content": response.content},
+                                    {
+                                        "content": response.content,
+                                        "trust_stage": "FINAL",
+                                    },
                                     ensure_ascii=False,
                                 )
                                 + "\n\n"
@@ -708,6 +744,7 @@ def create_http_application(
                                 {
                                     "message_id": str(response.id),
                                     "assessment_id": str(turn.assessment_id),
+                                    "trust_stage": "FINAL",
                                 }
                             )
                             + "\n\n"

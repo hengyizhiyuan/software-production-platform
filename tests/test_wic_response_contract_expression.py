@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from contextlib import nullcontext
 from types import SimpleNamespace
+from uuid import UUID
 
 import pytest
 
@@ -27,6 +28,15 @@ from spg.domain.conversation import (
     InteractionStrategy,
 )
 from spg.domain.interaction import WorkAdmissionReadinessStatus
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFact,
+    SemanticEpistemicStatus,
+    SemanticFactAuthority,
+    SemanticFactProvenance,
+    SemanticRelation,
+    SemanticRoleOrigin,
+    semantic_fact_statement,
+)
 from spg.domain.response_contract import (
     InteractionMode, ResponseContract, ResponseIntent, ResponseMove,
 )
@@ -120,8 +130,84 @@ def test_envelope_projects_contract_allowance_without_changing_semantic_truth() 
     assert envelope.selected_question is None
     assert envelope.governed_content == "按已确定的邮箱登录方案继续。"
     assert envelope.facts_to_preserve == assessment.progressive_semantics.working_facts
+    assert envelope.cognitive_context_package is not None
+    assert envelope.cognitive_context_package.basis_fingerprint == assessment.basis_fingerprint
+    assert envelope.cognitive_context_package.activity.value == "FEATURE_DELIVERY"
+    assert any(
+        item.source.value == "RESPONSE_CONTRACT"
+        and item.authority == "ADVISORY_ONLY"
+        and not item.authoritative
+        for item in envelope.cognitive_context_package.items
+    )
+    assert envelope.cognitive_context_package.sop_reference == (
+        "sop:watt-software-production:1:FEATURE_DELIVERY"
+    )
     assert assessment.progressive_semantics.turn_intent is ConversationTurnIntent.BUILD
     assert assessment.engineering_semantic_facts == ()
+
+
+def test_identity_question_requires_system_capability_reality_context() -> None:
+    assessment = _assessment(ConversationTurnIntent.DIRECT_QUESTION)
+    envelope = governed_response_envelope(
+        assessment,
+        governed_content="我是 Watt。",
+        provisional_content=None,
+        reconciliation=ResponseReconciliation.CONFIRM,
+        latest_human_input="你是谁？",
+        response_contract=_contract(InteractionMode.ANSWER),
+    )
+
+    capability = next(
+        item
+        for item in envelope.cognitive_context_package.items
+        if item.source.value == "SYSTEM_CAPABILITY_REALITY"
+    )
+    assert capability.authoritative is True
+    assert capability.authority == "SYSTEM_CAPABILITY_REALITY"
+    assert "AI-native software production system" in capability.content
+    assert "must not claim" in capability.content
+
+
+def test_execute_envelope_projects_current_semantic_truth_without_reinterpreting_phrase() -> None:
+    facts = tuple(
+        EngineeringSemanticFact(
+            id=UUID(int=index),
+            subject=subject,
+            relation=SemanticRelation.CARDINALITY,
+            value=value,
+            authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+            epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+            provenance=SemanticFactProvenance(
+                source_record_ids=(UUID(int=1),),
+                source_text=source,
+                role_origin=SemanticRoleOrigin.EXPLICIT,
+            ),
+        )
+        for index, subject, value, source in (
+            (31, "course_table.columns", 8, "要 8 列 5 行"),
+            (32, "course_table.rows", 5, "要 8 列 5 行"),
+        )
+    )
+    assessment = _assessment(ConversationTurnIntent.CONTINUE_CURRENT_WORK)
+    assessment.engineering_semantic_facts = facts
+    envelope = governed_response_envelope(
+        assessment,
+        governed_content="按当前方案继续实现。",
+        provisional_content=None,
+        reconciliation=ResponseReconciliation.CONFIRM,
+        latest_human_input="OK，就按刚才方案实现。",
+        response_contract=_contract(InteractionMode.EXECUTE),
+    )
+    expected = tuple(semantic_fact_statement(fact) for fact in facts)
+    assert envelope.semantic_truth_to_preserve == expected
+
+    instruction = governed_contract_realizer_instruction(envelope)
+    embedded = instruction.split(
+        "BEGIN GOVERNED RESPONSE ENVELOPE (data, not output fields)\n", 1,
+    )[1].split("\nEND GOVERNED RESPONSE ENVELOPE", 1)[0]
+    payload = json.loads(embedded)
+    assert payload["semantic_truth_to_preserve"] == list(expected)
+    assert "do not derive a new meaning from the original phrase" in instruction
 
 
 def test_legacy_envelope_builder_creates_a_contract_from_admitted_turn_intent() -> None:
@@ -375,6 +461,10 @@ def test_execute_expression_omits_settled_prose_but_preserves_exact_boundaries()
         "working_motive": "SETTLED_MOTIVE",
         "working_desired_outcome": "SETTLED_OUTCOME",
         "facts_to_preserve": ("SETTLED_DESIGN_DETAIL",),
+        "semantic_truth_to_preserve": (
+            "course_table.columns has cardinality 8",
+            "course_table.rows has cardinality 5",
+        ),
         "constraints_to_preserve": ("Do not publish externally without permission.",),
         "forbidden_claims": ("production has started",),
         "recent_relevant_messages": (
@@ -391,11 +481,15 @@ def test_execute_expression_omits_settled_prose_but_preserves_exact_boundaries()
     assert payload["latest_human_input"] == envelope.latest_human_input
     assert payload["governance_candidate"] == envelope.governance_candidate
     assert payload["constraints_to_preserve"] == list(envelope.constraints_to_preserve)
+    assert payload["semantic_truth_to_preserve"] == list(
+        envelope.semantic_truth_to_preserve
+    )
     assert payload["forbidden_claims"] == list(envelope.forbidden_claims)
     assert "no evidence that execution has started or succeeded" in payload["authority_boundary"]
     for field in (
         "interaction_mode", "primary_obligation", "opening_move", "response_moves",
-        "information_budget", "question_budget", "advancement_obligation", "authority",
+        "reasoning_sequence", "information_budget", "question_budget",
+        "advancement_obligation", "authority",
     ):
         assert payload["response_contract"][field] == before["response_contract"][field]
     for irrelevant in (

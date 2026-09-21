@@ -50,6 +50,7 @@ from spg.domain.steering import (
     SteeringAutomaticProgressionState,
     SteeringDecisionRecord,
     SteeringDriverStopReason,
+    SteeringHistoryEventType,
     SteeringInvariantViolation,
     SteeringIterationResult,
     SteeringOutcome,
@@ -493,6 +494,11 @@ class PlanSteeringDriver:
             completed_steps=reconstruction.completed_steps,
             current_step=current,
             known_next_steps=reconstruction.known_future_steps,
+            plan_change_history=tuple(
+                event
+                for event in reconstruction.history
+                if event.event_type is SteeringHistoryEventType.PLAN_REVISION
+            ),
             latest_decision=decision,
             selection_rationale=None if decision is None else decision.reason,
             steering_outcome=(

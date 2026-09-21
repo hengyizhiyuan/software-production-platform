@@ -1,16 +1,22 @@
-# WIC Software Production SOP × LLM — Future Architecture Direction
+# WIC Software Production SOP × LLM — Architecture and Foundation
 
 Date: 2026-09-18
 
-Updated: 2026-09-21 for the separately authorized WIC Response Contract task.
+Updated: 2026-09-21 for the WIC Response Contract Phase 1 refinement.
 
-This document records a future architecture direction discovered through recent
-Watt Human Dogfood. Software Domain Grounding and Software Production SOP remain
-future work; this document does not authorize their implementation. The
-separately authorized [WIC Response Contract](wic-response-contract.md) task now
-establishes the turn-scoped collaboration foundation those later layers may
-consume. It preserves the closed Work Admission, Engineering Semantic Truth,
-Steering, Production, and delivery boundaries.
+This document records the architecture direction discovered through recent Watt
+Human Dogfood. The bounded Software Domain Grounding, Context Orchestrator, SOP,
+Task Contract, and Decision/Evidence foundations are now implemented under
+separate authorization. Full adaptive SOP runtime, management tooling, Pattern
+evolution, and evaluation infrastructure remain future work. The
+[WIC Response Contract](wic-response-contract.md) supplies the turn-scoped
+collaboration input consumed by these foundations while preserving the closed
+Work Admission, Engineering Semantic Truth, Steering, Production, and delivery
+boundaries.
+
+The consolidated layer relationships, SOP guidance principles, Task Contract
+direction, and implementation sequence are recorded in the
+[Watt AI-Native Software Production Architecture](watt-ai-native-software-production-architecture.md).
 
 Repository Reality remains authoritative.
 
@@ -175,8 +181,14 @@ request to proceed still uses existing admission and governance mechanisms.
 
 Software Domain Grounding is the next independent layer: richer software-domain
 concepts and constraints may inform interpretation and judgment, but must retain
-their source and epistemic status. A domain library, SOP library, or Guardian
-escalation engine is not implemented by the Response Contract task.
+their source and epistemic status. Its architecture direction is captured in
+[WIC Software Domain Grounding](wic-software-domain-grounding.md). The related
+[Context Orchestration](wic-context-orchestration.md) direction selects what is
+needed now without absorbing ECF, while
+[Decision and Evidence Architecture](wic-decision-evidence-architecture.md)
+keeps rationale, decisions, and evidence distinct. These documents implement no
+domain library, Context Orchestrator, Decision Memory service, SOP library, or
+Guardian escalation engine.
 
 ## 7. Relationship to Progressive Admission
 
@@ -229,24 +241,34 @@ The revised sequence is:
 4. Establish WIC Response Contract under its separate authorization.
    **Implemented and ready for Human Review under focused qualification;
    Human Acceptance remains pending.**
-5. Study Software Domain Grounding as the next independently scoped capability.
-6. Study and design `Software Production SOP × LLM` from Dogfood evidence,
-   consuming Semantic Truth and Response Contract while preserving Steering.
+5. Implement the bounded Software Domain Grounding foundation while preserving
+   Pattern as advisory cognitive structure. **Foundation implemented.**
+6. Implement the bounded `Software Production SOP × LLM` foundation, consuming
+   Semantic Truth and Response Contract while preserving Steering. **Activity,
+   checkpoint, evidence-expectation, Context, and Task Contract foundations
+   implemented; full adaptive SOP runtime remains future work.**
+7. Establish a WIC Evaluation Corpus as a future supporting capability after
+   the architecture it evaluates is sufficiently stable. Candidate sources are
+   Watt Dogfood cases, adapted public software benchmarks, and expert-designed
+   scenarios. This records direction only; no benchmark infrastructure is
+   implemented by the Response Contract phase.
 
 ## 10. Status
 
 ```text
-WIC_SOFTWARE_PRODUCTION_SOP_REDESIGN = NOT_STARTED
+WIC_SOFTWARE_PRODUCTION_SOP_REDESIGN = ARCHITECTURE_BASELINE / FOUNDATION_IMPLEMENTED
 
 ENGINEERING_SEMANTIC_TRUTH = IMPLEMENTED / QUALIFIED / HUMAN_ACCEPTED
 
-RESPONSE_CONTRACT = IMPLEMENTED
+RESPONSE_CONTRACT = IMPLEMENTED / REFINING
 
 RESPONSE_CONTRACT_HUMAN_REVIEW = READY / PENDING_HUMAN
 
-SOFTWARE_DOMAIN_GROUNDING = NEXT
+SOFTWARE_DOMAIN_GROUNDING = FOUNDATION_IMPLEMENTED
 
-SOFTWARE_PRODUCTION_SOP = NEXT
+SOFTWARE_PRODUCTION_SOP = FOUNDATION_IMPLEMENTED / FULL_RUNTIME_PENDING
+
+WIC_EVALUATION_CORPUS = FUTURE_SUPPORTING_CAPABILITY
 
 CLOSED_MILESTONE_BOUNDARIES = PRESERVED
 
@@ -257,4 +279,10 @@ DETERMINISTIC_SKELETON_PLUS_PROBABILISTIC_INTELLIGENCE = FUTURE_ARCHITECTURE_DIR
 RESPONSE_CONTRACT_IMPLEMENTATION = SEPARATELY_AUTHORIZED
 
 DOMAIN_GROUNDING_AND_SOP_IMPLEMENTATION_AUTHORIZED = NO
+
+NOT_IMPLEMENTED = PATTERN_STUDIO / PATTERN_MANAGEMENT_UI / PATTERN_EVOLUTION_ENGINE
+
+NOT_IMPLEMENTED = BENCHMARK_OR_EVALUATION_CORPUS / AUTOMATED_KNOWLEDGE_MINING
+
+NOT_IMPLEMENTED = FULL_SOFTWARE_PRODUCTION_SOP
 ```

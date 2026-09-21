@@ -8,6 +8,10 @@ import subprocess
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.planning import ProductionPlanningService
+from spg.application.production_intelligence import (
+    TaskContractRequest,
+    default_task_contract_builder,
+)
 from spg.application.runtime import RuntimeService
 from spg.application.steering import SteeringApplicationService
 from spg.application.steering_decision import (
@@ -41,6 +45,7 @@ from spg.domain.runtime import (
     InitialRunRequest,
     ProductionHorizon,
 )
+from spg.domain.production_intelligence import EngineeringActivity, TaskContract
 from spg.domain.steering import (
     NextStepCandidate,
     SteeringAttentionReason,
@@ -405,6 +410,7 @@ class SteeringProductionService:
             raise ProductInvariantViolation(
                 "Individual Steering PRODUCE Step is not ONE_PWU_FIT"
             )
+        task_contract = self._task_contract(request)
         if request.target_kind is ProductionTargetKind.DOCUMENTATION_WORK:
             target = request.artifact_targets[0]
             artifact = ArtifactContract(
@@ -423,6 +429,7 @@ class SteeringProductionService:
                 required_changes=(target.path,),
                 verification_obligations=(request.verification_expectation,),
                 semantic_fact_obligations=request.engineering_semantic_facts,
+                task_contract=task_contract,
                 artifact_contract=artifact,
                 production_plan=plan,
             )
@@ -440,6 +447,7 @@ class SteeringProductionService:
             required_changes=paths,
             verification_obligations=contract.verification_identities,
             semantic_fact_obligations=request.engineering_semantic_facts,
+            task_contract=task_contract,
             change_contract=contract,
             production_plan=plan,
         )
@@ -448,6 +456,67 @@ class SteeringProductionService:
             completion,
             ProductionHorizon.CODE,
             WorkApplicationService._code_change_objective(contract),
+        )
+
+    @staticmethod
+    def _task_contract(request: SteeringProductionRequest) -> TaskContract:
+        if request.target_kind is ProductionTargetKind.DOCUMENTATION_WORK:
+            scope = tuple(
+                f"{target.operation.value}:{target.path}"
+                for target in request.artifact_targets
+            )
+            out_of_scope = tuple(
+                f"Any repository path other than {target.path}"
+                for target in request.artifact_targets
+            )
+        else:
+            contract = request.change_contract
+            assert contract is not None
+            scope = tuple(
+                f"{target.operation.value}:{target.path}"
+                for target in contract.exact_targets
+            ) + tuple(f"BOUNDED_AREA:{area}" for area in contract.allowed_areas)
+            out_of_scope = tuple(contract.forbidden_areas) + (
+                "Any repository path outside the admitted exact targets or bounded areas",
+            )
+        work_references = [f"work:{request.work_id}"]
+        if request.work_reality_revision_id is not None:
+            work_references.append(
+                f"work-reality-revision:{request.work_reality_revision_id}"
+            )
+        authority_lineage = [
+            *work_references,
+            f"steering-step:{request.steering_step_id}",
+            f"engineering-scope:{request.engineering_scope_id}",
+            f"engineering-resource:{request.engineering_resource_id}",
+        ]
+        if request.steering_decision_id is not None:
+            authority_lineage.append(
+                f"steering-decision:{request.steering_decision_id}"
+            )
+        decision_reference = (
+            f"steering-decision:{request.steering_decision_id}"
+            if request.steering_decision_id is not None
+            else f"steering-step:{request.steering_step_id}"
+        )
+        return default_task_contract_builder().build(
+            TaskContractRequest(
+                activity=EngineeringActivity.FEATURE_DELIVERY,
+                objective=request.production_objective,
+                scope=scope,
+                constraints=request.constraints,
+                acceptance_meaning=(request.verification_expectation,),
+                out_of_scope=out_of_scope,
+                authority_lineage=tuple(authority_lineage),
+                work_reality_references=tuple(work_references),
+                ecf_references=(
+                    f"engineering-resource:{request.engineering_resource_id}",
+                    f"repository:{request.repository_identity}",
+                    f"source-baseline:{request.source_baseline_id}@{request.source_revision}",
+                ),
+                semantic_facts=request.engineering_semantic_facts,
+                decision_reference=decision_reference,
+            )
         )
 
     @staticmethod

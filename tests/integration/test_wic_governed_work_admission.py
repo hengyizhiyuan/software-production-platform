@@ -1126,6 +1126,28 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
         reference.source_work_revision_id == corrected_revision.id
         for reference in work_unit.completion_contract.semantic_fact_obligations
     )
+    task_contract = work_unit.completion_contract.task_contract
+    assert task_contract is not None
+    assert task_contract.semantic_fact_references == (
+        work_unit.completion_contract.semantic_fact_obligations
+    )
+    assert f"work-reality-revision:{corrected_revision.id}" in (
+        task_contract.authority_lineage
+    )
+    assert any(
+        item.source.value == "DOMAIN_PATTERN"
+        and item.authority == "ADVISORY_ONLY"
+        for item in task_contract.relevant_context
+    )
+    assert all(
+        str(reference.fact_id)
+        in {
+            evidence.subject_reference.removeprefix("semantic-fact:")
+            for evidence in task_contract.evidence_lineage
+            if evidence.subject_reference.startswith("semantic-fact:")
+        }
+        for reference in work_unit.completion_contract.semantic_fact_obligations
+    )
     verification_obligation = "Verify the governed course schedule semantics"
     verification = DeterministicVerificationProvider(
         {verification_obligation: VerificationResultValue.PASS}
@@ -1136,6 +1158,7 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
             semantic_fact_obligations=(
                 work_unit.completion_contract.semantic_fact_obligations
             ),
+            task_contract_id=task_contract.task_contract_id,
             snapshot_id=uuid4(),
             proposed_commit_identity="semantic-course-schedule-commit",
             tree_identity="semantic-course-schedule-tree",
@@ -1205,7 +1228,10 @@ def test_work_status_question_is_read_only_and_independent_of_provider(
     )
     assessment = service.assess_current(ready.interaction.id)
     assert assessment.provider_identity == "watt-native:work-reality-query"
-    assert "尚未创建生产周期或 PWU" in assessment.natural_response
+    assert "当前 Work 尚未进入生产执行" in assessment.natural_response
+    assert "下一步由 Watt 按当前步骤继续推进" in assessment.natural_response
+    assert "PWU" not in assessment.natural_response
+    assert "QUEUED" not in assessment.natural_response
     assert assessment.focus_classification is WorkFocusClassification.SIDE_QUESTION
     assert assessment.impact_disposition is WorkImpactDisposition.NO_GOVERNED_CHANGE
     assert _count(postgres_database, work_reality_revisions) == before_revision

@@ -247,6 +247,14 @@ class NativeQueuedExecutorCapability:
             stop_conditions=tuple(work_unit.completion_contract.blocking_conditions),
             obligation_references=tuple(
                 (
+                    *(
+                        ()
+                        if work_unit.completion_contract.task_contract is None
+                        else (
+                            "task-contract:"
+                            f"{work_unit.completion_contract.task_contract.task_contract_id}",
+                        )
+                    ),
                     *work_unit.completion_contract.verification_obligations,
                     *(
                         f"semantic-fact:{item.fact_id}"

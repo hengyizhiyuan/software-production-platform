@@ -9,19 +9,29 @@ from __future__ import annotations
 
 import unicodedata
 
+from spg.application.production_intelligence import (
+    default_system_capability_reality,
+    is_system_capability_question,
+)
 from spg.domain.conversation import ConversationTurnIntent
 from spg.domain.engineering_semantics import current_semantic_facts, semantic_fact_statement
 from spg.domain.interaction import InteractionActor, InteractionAssessment, InteractionRecord, WorkAdmissionReadinessStatus
 from spg.domain.response_contract import (
     AdvancementObligation as Advance,
+    CapabilityAlignmentContext,
+    CapabilityAlignmentMode,
+    DesignCollaborationMode as DesignMode,
+    ExploreInteractionStrategy,
     InformationBudget as Budget,
     InteractionMode as Mode,
     JudgmentStance,
     OpeningMove as Opening,
     PrimaryObligation as Obligation,
+    ProductionRelevance,
     ResponseContract,
     ResponseIntent,
     ResponseMove as Move,
+    ReasoningStep as Reason,
 )
 from spg.domain.wic_intelligence import (
     GovernanceCandidateKind,
@@ -74,6 +84,192 @@ _MATERIAL_CATEGORIES = frozenset({
     SemanticCategory.FACT, SemanticCategory.CONSTRAINT, SemanticCategory.MOTIVE,
     SemanticCategory.DESIRED_OUTCOME, SemanticCategory.HUMAN_DECISION,
 })
+
+_DIRECT_PRODUCTION_INTENTS = frozenset({
+    ConversationTurnIntent.BUILD,
+    ConversationTurnIntent.NEW_GOAL,
+    ConversationTurnIntent.MODIFY,
+    ConversationTurnIntent.DEPLOY,
+    ConversationTurnIntent.ACTION_REQUEST,
+    ConversationTurnIntent.CONTINUE_CURRENT_WORK,
+    ConversationTurnIntent.MATERIAL_BRANCH,
+})
+_PRODUCTION_ADVISORY_INTENTS = frozenset({
+    ConversationTurnIntent.HOW_TO,
+    ConversationTurnIntent.RECOMMEND,
+    ConversationTurnIntent.REQUEST_RECOMMENDATION,
+    ConversationTurnIntent.COMPARE,
+    ConversationTurnIntent.REQUEST_DECISION_SUPPORT,
+})
+
+
+def _capability_alignment(
+    assessment: InteractionAssessment,
+    intent: ConversationTurnIntent,
+    source_records: tuple[InteractionRecord, ...],
+) -> CapabilityAlignmentContext:
+    """Match this turn to Watt capability without granting production authority."""
+
+    reality = default_system_capability_reality()
+    current_work = any((
+        assessment.basis_work_revision_id is not None,
+        assessment.basis_steering_plan_revision_id is not None,
+        assessment.basis_active_runtime_binding_id is not None,
+    ))
+    design_frame = getattr(assessment, "design_intent_frame", None)
+    object_type = None if design_frame is None else design_frame.object_type
+    object_match = object_type in set(reality.production_object_types)
+    explicit_capability_question = bool(
+        source_records
+        and is_system_capability_question(source_records[-1].content)
+    )
+    direct_goal = intent in _DIRECT_PRODUCTION_INTENTS
+    advisory_goal = intent in _PRODUCTION_ADVISORY_INTENTS and object_match
+    capability_match = (
+        direct_goal or advisory_goal or current_work or explicit_capability_question
+    )
+    if direct_goal and capability_match:
+        response_mode = CapabilityAlignmentMode.PRODUCTION
+        relevance = ProductionRelevance.DIRECT_PRODUCTION_GOAL
+        rationale = (
+            "The admitted turn intent requests software-production progression; "
+            "existing Work authority and admission rules remain controlling."
+        )
+    elif advisory_goal and capability_match:
+        response_mode = CapabilityAlignmentMode.PRODUCTION_ADVISORY
+        relevance = ProductionRelevance.POTENTIAL_PRODUCTION_GOAL
+        rationale = (
+            "The Human asks how to approach a software-production object that matches "
+            "Watt's governed production capability."
+        )
+    else:
+        response_mode = CapabilityAlignmentMode.KNOWLEDGE
+        relevance = ProductionRelevance.GENERAL_KNOWLEDGE
+        rationale = (
+            "The current obligation is a knowledge response; software topic alone does "
+            "not justify a production handoff."
+        )
+    return CapabilityAlignmentContext(
+        user_intent=intent,
+        production_relevance=relevance,
+        current_work_context=current_work,
+        watt_capability_match=capability_match,
+        response_mode=response_mode,
+        explicit_capability_question=explicit_capability_question,
+        capability_reality_reference=f"system-capability-reality:{reality.version}",
+        rationale=rationale,
+    )
+
+
+def _design_collaboration_mode(
+    mode: Mode,
+    interpretation: ResponseIntent | None,
+) -> DesignMode | None:
+    """Refine design collaboration without multiplying top-level interaction modes."""
+
+    requested = (
+        None if interpretation is None else interpretation.design_collaboration_mode
+    )
+    if requested is not None and mode in {
+        Mode.EXPLORE, Mode.ANALYZE, Mode.DESIGN, Mode.DECIDE,
+    }:
+        return requested
+    return None
+
+
+def _reasoning_sequence(
+    *,
+    mode: Mode,
+    capability_mode: CapabilityAlignmentMode,
+    design_mode: DesignMode | None,
+    obligation: Obligation,
+    adjacent_insight_budget: int,
+    moves: tuple[Move, ...],
+) -> tuple[Reason, ...]:
+    """Select presentation order, not private reasoning steps or prose templates."""
+
+    if design_mode is DesignMode.DESIGN_EXPLORE:
+        return (
+            Reason.CONTEXT_MAP,
+            Reason.OPTION_SPACE,
+            Reason.COMPARISON,
+            Reason.RISKS_AND_CONSTRAINTS,
+            Reason.DECISION_POINT,
+        )
+    if mode is Mode.EXPLORE:
+        return (
+            Reason.CONTEXT_MAP,
+            Reason.OPTION_SPACE,
+            Reason.COMPARISON,
+            Reason.RISKS_AND_CONSTRAINTS,
+            Reason.DECISION_POINT,
+        )
+    if design_mode is DesignMode.DESIGN_REVIEW:
+        return (
+            Reason.JUDGMENT,
+            Reason.EVIDENCE,
+            Reason.RISKS_AND_CONSTRAINTS,
+            Reason.TRADE_OFFS,
+            Reason.RECOMMENDATION,
+        )
+    if design_mode is DesignMode.DESIGN_DECIDE:
+        return (
+            Reason.GOAL,
+            Reason.CONSTRAINTS,
+            Reason.COMPARISON,
+            Reason.TRADE_OFFS,
+            Reason.RECOMMENDATION,
+        )
+    if mode is Mode.DESIGN:
+        return (
+            Reason.GOAL,
+            Reason.CONSTRAINTS,
+            Reason.ARCHITECTURE_OPTIONS,
+            Reason.TRADE_OFFS,
+            Reason.RECOMMENDATION,
+        )
+    if mode in {Mode.ANALYZE, Mode.DECIDE}:
+        return (Reason.JUDGMENT, Reason.EVIDENCE, Reason.TRADE_OFFS, Reason.RECOMMENDATION)
+    if mode is Mode.DIAGNOSE:
+        return (
+            Reason.OBSERVED_SYMPTOM,
+            Reason.EVIDENCE,
+            Reason.HYPOTHESIS,
+            Reason.ROOT_CAUSE,
+            Reason.FIX,
+        )
+    if mode is Mode.EXECUTE and Move.PROCEED in moves:
+        return (Reason.ACKNOWLEDGE, Reason.PROCEED, Reason.REPORT_RESULT)
+    if mode is Mode.STATUS or obligation is Obligation.REPORT_REALITY:
+        return (
+            Reason.CURRENT_CONCLUSION,
+            Reason.KEY_PROGRESS,
+            Reason.CURRENT_OWNER_OR_NEXT_STEP,
+            Reason.IMPORTANT_LIMITATION,
+        )
+    if obligation is Obligation.CLARIFY_BLOCKER:
+        return (
+            Reason.CURRENT_CONCLUSION,
+            Reason.IMPORTANT_LIMITATION,
+            Reason.CURRENT_OWNER_OR_NEXT_STEP,
+        )
+    if mode is Mode.EXECUTE and Move.RECOMMENDATION in moves:
+        return (Reason.GOAL, Reason.CONSTRAINTS, Reason.RECOMMENDATION)
+    if mode is Mode.CORRECT:
+        return (Reason.ACKNOWLEDGE, Reason.CORRECTED_TRUTH, Reason.CONTINUE)
+    if (
+        mode is Mode.ANSWER
+        and capability_mode is CapabilityAlignmentMode.PRODUCTION_ADVISORY
+    ):
+        return (Reason.DIRECT_ANSWER, Reason.CAPABILITY_ALIGNMENT)
+    if mode is Mode.ANSWER:
+        sequence = (Reason.DIRECT_ANSWER,)
+        return (
+            (*sequence, Reason.DECISION_POINT)
+            if adjacent_insight_budget
+            else sequence
+        )
+    return (Reason.DIRECT_ANSWER,)
 
 
 def _source_grounded(value: str, records: tuple[InteractionRecord, ...], *, cited_ids=()) -> bool:
@@ -184,21 +380,49 @@ def build_response_contract(
         raise ValueError("Response Contract requires the assessment's exact semantic basis")
     _, grounding_snapshot = _judgment_sources(assessment, source_records)
     intent = semantics.turn_intent if semantics else ConversationTurnIntent.EXPLORE
+    capability_alignment = _capability_alignment(assessment, intent, source_records)
     mode = interpretation.interaction_mode if interpretation else _LEGACY_MODES[intent]
+    if capability_alignment.response_mode is CapabilityAlignmentMode.PRODUCTION_ADVISORY:
+        mode = Mode.ANSWER
+    elif capability_alignment.response_mode is CapabilityAlignmentMode.PRODUCTION:
+        if intent in {
+            ConversationTurnIntent.BUILD,
+            ConversationTurnIntent.NEW_GOAL,
+            ConversationTurnIntent.MATERIAL_BRANCH,
+        } and mode in {Mode.EXPLORE, Mode.ANALYZE, Mode.ANSWER}:
+            mode = Mode.DESIGN
+        elif intent in {
+            ConversationTurnIntent.MODIFY,
+            ConversationTurnIntent.DEPLOY,
+            ConversationTurnIntent.ACTION_REQUEST,
+            ConversationTurnIntent.CONTINUE_CURRENT_WORK,
+        } and mode in {Mode.EXPLORE, Mode.ANALYZE, Mode.DESIGN, Mode.ANSWER}:
+            mode = Mode.EXECUTE
     if intent is ConversationTurnIntent.DISAGREEMENT:
         mode = Mode.ANALYZE
     elif intent in {ConversationTurnIntent.COMPARE, ConversationTurnIntent.REQUEST_DECISION_SUPPORT} and mode in {Mode.ANALYZE, Mode.ANSWER}:
         # An admitted choice obligation is more specific than generic analysis.
         # Explicit exploration remains exploratory even when comparing ideas.
         mode = Mode.DECIDE
+    design_mode = _design_collaboration_mode(mode, interpretation)
     obligation, opening, moves, budget, advancement = _MODE_SHAPES[mode]
     reasons = [
         f"Mode comes from semantic interpretation: {interpretation.rationale}" if interpretation
         else f"Legacy compatibility mode comes from admitted TurnIntent {intent.value}.",
+        (
+            "Capability alignment evaluated admitted intent, production relevance, "
+            "current Work context and System Capability Reality: "
+            f"{capability_alignment.response_mode.value}."
+        ),
         "Minimum sufficient answer: satisfy the current obligation, then stop; no automatic tutorial or recap.",
     ]
     if interpretation and mode is not interpretation.interaction_mode:
         reasons.append(f"Admitted TurnIntent {intent.value} reconciles the advisory mode to {mode.value}.")
+    if design_mode is not None:
+        reasons.append(
+            f"Design collaboration is refined compositionally as {design_mode.value}; "
+            "this is a turn posture, not Product Truth."
+        )
     if mode is Mode.DECIDE and intent in {ConversationTurnIntent.COMPARE, ConversationTurnIntent.REQUEST_DECISION_SUPPORT}:
         obligation, opening = Obligation.COMPARE, Opening.JUDGMENT_FIRST
         moves = (Move.COMPARISON, Move.DECISIVE_FACTORS, Move.RECOMMENDATION)
@@ -208,6 +432,14 @@ def build_response_contract(
         # Disagreement is an objection to inspect, not automatically a correction.
         opening, moves = Opening.JUDGMENT_FIRST, (Move.CONCLUSION, Move.ASSESS_OBJECTION, Move.EVIDENCE)
         obligation = Obligation.ASSESS
+    if capability_alignment.response_mode is CapabilityAlignmentMode.PRODUCTION_ADVISORY:
+        obligation, opening = Obligation.ANSWER, Opening.ANSWER_FIRST
+        moves = (Move.DIRECT_ANSWER, Move.ALIGN_WITH_PRODUCTION_CAPABILITY)
+        budget, advancement = Budget.MINIMUM_SUFFICIENT, Advance.ANSWER_ONLY
+        reasons.append(
+            "Capability alignment requires the domain answer first and one factual, "
+            "non-promotional production-path connection."
+        )
 
     question = None
     if semantics and semantics.selected_question and mode not in {Mode.STATUS, Mode.ANSWER}:
@@ -258,6 +490,25 @@ def build_response_contract(
             advancement = Advance.PROPOSE_AND_WAIT
             reasons.append("The Human requested repair or action; frame preparation through the existing governed path instead of handing debugging back to the Human or claiming execution has started.")
 
+    explore_strategy = None
+    if mode is Mode.EXPLORE:
+        explore_strategy = (
+            ExploreInteractionStrategy.INTENT_REFINEMENT
+            if question is not None
+            else ExploreInteractionStrategy.OPEN_EXPLORATION
+        )
+        if explore_strategy is ExploreInteractionStrategy.INTENT_REFINEMENT:
+            reasons.append(
+                "EXPLORE uses Intent Refinement because the admitted semantic question "
+                "is the single highest-value unresolved decision that blocks the next "
+                "governed step."
+            )
+        else:
+            reasons.append(
+                "EXPLORE remains open exploration because no admitted high-value "
+                "question is needed to advance useful understanding."
+            )
+
     stance, subject, proposition, basis, changed, judgment_reason = _judgment(assessment, interpretation, previous_contract, source_records)
     if intent is ConversationTurnIntent.DISAGREEMENT and not changed:
         budget = Budget.DECISIVE_FACTORS
@@ -277,6 +528,7 @@ def build_response_contract(
         repeated = bool(previous_contract and previous_contract.repeated_failure_signature == signature)
         strategy_revision = previous_contract.strategy_revision + 1 if repeated else 1
         mode, obligation, budget = Mode.DIAGNOSE, Obligation.DIAGNOSE, Budget.FOCUSED_DIAGNOSIS
+        design_mode = None
         opening = Opening.REALITY_FIRST
         moves = (
             (Move.ACKNOWLEDGE_FAILED_STRATEGY, Move.CHALLENGE_ASSUMPTIONS, Move.INDEPENDENT_EVIDENCE, Move.CHANGE_DIAGNOSTIC_ROUTE, Move.VERIFY)
@@ -293,13 +545,32 @@ def build_response_contract(
         signature = previous_contract.repeated_failure_signature
         strategy_revision = previous_contract.strategy_revision
 
+    adjacent_insight_budget = (
+        1
+        if mode is Mode.ANSWER
+        and capability_alignment.response_mode is not CapabilityAlignmentMode.PRODUCTION_ADVISORY
+        else 0
+    )
+    reasoning_sequence = _reasoning_sequence(
+        mode=mode,
+        capability_mode=capability_alignment.response_mode,
+        design_mode=design_mode,
+        obligation=obligation,
+        adjacent_insight_budget=adjacent_insight_budget,
+        moves=moves,
+    )
+
     return ResponseContract(
         basis_fingerprint=assessment.basis_fingerprint,
         source_record_ids=semantics.source_record_ids if semantics else (),
+        capability_alignment=capability_alignment,
         interaction_mode=mode,
+        explore_strategy=explore_strategy,
+        design_collaboration_mode=design_mode,
         primary_obligation=obligation,
         opening_move=opening,
         response_moves=moves,
+        reasoning_sequence=reasoning_sequence,
         information_budget=budget,
         question_budget=1 if question else 0,
         selected_question=question,
@@ -310,7 +581,7 @@ def build_response_contract(
         judgment_change_accepted=changed,
         material_grounding_snapshot=tuple(sorted(grounding_snapshot)),
         advancement_obligation=advancement,
-        adjacent_insight_budget=1 if mode is Mode.ANSWER else 0,
+        adjacent_insight_budget=adjacent_insight_budget,
         repeated_failure_signature=signature,
         prior_strategy_failed=failed,
         strategy_revision=strategy_revision,

@@ -25,6 +25,7 @@ from spg.application.guided_design import (
     design_schema_registry,
 )
 from spg.domain.response_contract import ResponseIntent
+from spg.application.production_intelligence import default_system_capability_reality
 from spg.application.response_contract_expression import (
     governed_contract_realizer_instruction,
     response_contract_expression_guidance,
@@ -611,6 +612,7 @@ class CodexSdkInteractionSemanticCapability:
         basis: InteractionInterpretationInput, *, coalesced: bool = False
     ) -> str:
         payload = _compact_interaction_basis(basis, coalesced=coalesced)
+        capability_reality = default_system_capability_reality()
         selected_schema = (
             design_schema_by_identity(
                 basis.interaction.selected_design_schema_identity,
@@ -701,6 +703,16 @@ class CodexSdkInteractionSemanticCapability:
         return (
             "Interpret one Human–Watt interaction from the exact persisted basis. "
             + output_contract
+            + "System Capability Reality: Watt is an AI-native software production "
+            "system. It can understand intent and constraints, reason about software "
+            "products and architecture, create or modify software artifacts through "
+            "governed Work, execute bounded engineering tasks, and verify results using "
+            "attributable evidence. It must not claim external submission, deployment, "
+            "publication, account action, or another real-world effect without actual "
+            "integration, authority, and evidence. This is capability truth, not marketing "
+            "copy or permission to start Work. Capability Reality version: "
+            + capability_reality.version
+            + ". "
             + "Do not use tools, hidden conversation memory, or repository inspection. Provider "
             "output is advisory and creates no Work, Design, Plan, Authority, Evidence, "
             "or Runtime truth. Distinguish idle context from an actionable Motive. A "
@@ -810,19 +822,36 @@ class CodexSdkInteractionSemanticCapability:
             "reports actual progress. A topic does not determine mode: discussion of an existing "
             "plan differs from a command to carry it out. Use executable_context only when the "
             "current request and context sufficiently specify a bounded next action; this grants "
-            "no authority. For exploration/discussion/status use SIDE_QUESTION and "
+            "no authority. Distinguish a bounded knowledge question from a how-to request about "
+            "a software-production object, and both from an explicit request that Watt create or "
+            "modify software. A technical topic alone is not a production goal; HOW_TO should "
+            "preserve the domain answer, while BUILD or ACTION_REQUEST must not be reduced to a "
+            "generic tutorial. Refine design collaboration compositionally with "
+            "design_collaboration_mode: DESIGN_EXPLORE when the Human wants divergence or "
+            "brainstorming, DESIGN_REVIEW when inspecting an existing proposal or challenging "
+            "its assumptions, DESIGN_DECIDE when comparing and converging on a recommendation, "
+            "and null when the turn is not design collaboration. This refinement does not "
+            "replace interaction_mode or create Product Truth. For exploration/discussion/status use SIDE_QUESTION and "
             "NO_GOVERNED_CHANGE on active Work; do not turn conversational ideas into changes. "
             "Use minimal sufficient semantic answer material: no tutorial unless requested. "
             "Questions have cost: unresolved_material_questions is empty unless a missing answer "
             "materially blocks result, authority, safety, cost, scope or acceptance and cannot be "
             "handled by a reversible assumption. Missing diagnostic evidence is not itself "
-            "an authority blocker. Do not invent a permission/consent question because logs "
+            "an authority blocker. For ambiguous EXPLORE intent, rank open decisions by how much "
+            "they change the next product or engineering decision. Surface only the single "
+            "highest-value question, favoring goal, target user, material constraint, success "
+            "criterion or product boundary over premature implementation detail. Stop refining "
+            "when the next useful decision is sufficiently clear; do not build a questionnaire. "
+            "Do not invent a permission/consent question because logs "
             "might hypothetically contain sensitive data; ask only for a concrete missing "
             "fact after available ordinary checks are exhausted. A request to fix a defect "
             "asks Watt to own the checks and repair, not return a debugging questionnaire. "
             "EXECUTE needs a brief acknowledgment and "
             "governed next action, not a replay of settled design. EXPLORE needs useful ideas, "
-            "not a questionnaire or one-line acknowledgment. "
+            "not a questionnaire or one-line acknowledgment. When EXECUTE follows settled "
+            "design, consume current Engineering Semantic Truth and Work Reality exactly; do "
+            "not reinterpret the original phrase, reopen decisions, or silently replace an "
+            "unspecified implementation detail with a conflicting assumption. "
             "In response_intent keep FACT, INFERENCE, RECOMMENDATION, WORKING_ASSUMPTION, "
             "PREFERENCE and UNCERTAINTY distinct. Record a concise judgment_proposition and "
             "judgment_basis as exact existing reference IDs or exact supplied evidence/constraints; "

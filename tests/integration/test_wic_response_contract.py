@@ -37,8 +37,10 @@ from spg.domain.product import WorkStatus
 from spg.domain.runtime_activation import RuntimeActivationProjection, RuntimeActivationState
 from spg.domain.response_contract import (
     AdvancementObligation,
+    DesignCollaborationMode as ResponseDesignMode,
     InformationBudget,
     InteractionMode,
+    ReasoningStep,
     ResponseContract,
     ResponseIntent,
 )
@@ -128,6 +130,11 @@ def _candidate(
         natural_response=text,
         response_intent=ResponseIntent(
             interaction_mode=mode,
+            design_collaboration_mode=(
+                ResponseDesignMode.DESIGN_EXPLORE
+                if mode is InteractionMode.EXPLORE
+                else None
+            ),
             rationale="Interpret the current collaboration request against supplied context.",
             executable_context=mode is InteractionMode.EXECUTE,
         ),
@@ -231,6 +238,14 @@ def test_pre_work_contract_replays_after_reload_without_becoming_semantic_truth(
         turn = _turn(first, interaction.id, "Let's explore possible sign-in experiences.")
         contract = _contract(first, turn.id)
         assert contract.interaction_mode is InteractionMode.EXPLORE
+        assert contract.design_collaboration_mode is ResponseDesignMode.DESIGN_EXPLORE
+        assert contract.reasoning_sequence == (
+            ReasoningStep.CONTEXT_MAP,
+            ReasoningStep.OPTION_SPACE,
+            ReasoningStep.COMPARISON,
+            ReasoningStep.RISKS_AND_CONSTRAINTS,
+            ReasoningStep.DECISION_POINT,
+        )
         assert realizer.envelopes[0].response_contract == contract
         assert contract.authority == "ADVISORY_ONLY"
         persisted_events = first.response_events(turn.id)
@@ -293,13 +308,13 @@ def test_active_exploration_does_not_promote_proposed_design_to_work_truth(
         service.shutdown()
 
 
-@pytest.mark.parametrize(("question", "expected_mode"), [
-    ("现在做到哪了？", InteractionMode.STATUS),
-    ("为什么一直卡在 QUEUED？", InteractionMode.DIAGNOSE),
+@pytest.mark.parametrize(("question", "expected_mode", "expected_fact"), [
+    ("现在做到哪了？", InteractionMode.STATUS, "当前 Work 尚未进入生产执行"),
+    ("为什么一直卡在 QUEUED？", InteractionMode.DIAGNOSE, "当前生产周期没有对应的执行队列记录"),
 ])
 def test_active_reality_questions_are_provider_free_and_do_not_mutate_work(
     postgres_database: Database, tmp_path: Path, question: str,
-    expected_mode: InteractionMode,
+    expected_mode: InteractionMode, expected_fact: str,
 ) -> None:
     capability = _SequenceCapability(_candidate(InteractionMode.DESIGN))
     realizer = _RecordingRealizer()
@@ -318,7 +333,10 @@ def test_active_reality_questions_are_provider_free_and_do_not_mutate_work(
         assert contract.advancement_obligation is AdvancementObligation.ANSWER_ONLY
         assert projection.latest_assessment.provider_identity == "watt-native:work-reality-query"
         assert len(capability.bases) == len(realizer.envelopes) == 1
-        assert "尚未创建生产周期" in projection.conversation_messages[-1].content
+        human_status = projection.conversation_messages[-1].content
+        assert expected_fact in human_status
+        assert "当前没有需要你处理的事项" in human_status
+        assert "QUEUED" not in human_status
         assert WorkApplicationService(postgres_database).get_work(admitted.work_id) == before
         assert _runtime_counts(postgres_database) == runtime_before
         evidence_path = os.environ.get("SPG_RESPONSE_CONTRACT_REALITY_EVIDENCE_PATH")

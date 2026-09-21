@@ -195,6 +195,11 @@ class VerificationService:
             semantic_fact_obligations=(
                 snapshot_basis.basis.work_unit.completion_contract.semantic_fact_obligations
             ),
+            task_contract_id=(
+                None
+                if snapshot_basis.basis.work_unit.completion_contract.task_contract is None
+                else snapshot_basis.basis.work_unit.completion_contract.task_contract.task_contract_id
+            ),
             snapshot_id=snapshot_basis.proposed_snapshot.id,
             proposed_commit_identity=snapshot_basis.proposed_snapshot.proposed_commit_identity,
             tree_identity=snapshot_basis.proposed_snapshot.tree_identity,

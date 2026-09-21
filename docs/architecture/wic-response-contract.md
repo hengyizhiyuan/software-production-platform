@@ -21,9 +21,10 @@ instead of proceeding, or prematurely executes an exploration. This layer
 selects the collaboration posture, information order, and minimum sufficient
 depth for the current turn. Conversation still chooses the natural wording.
 
-Two principles govern the layer:
+Three principles govern the layer:
 
-> Explore when the Human is exploring. Execute when the Human is executing.
+> Explore when the Human is exploring. Design when the Human is designing.
+> Execute when the Human is executing.
 
 > Once intent is sufficiently executable, conversational overhead should
 > collapse.
@@ -95,7 +96,7 @@ The first implementation lives in `src/spg/domain/response_contract.py`:
 response intent, source Human records, and previous turn contract. It does not open a database
 transaction or call a production mutator.
 
-`ResponseContract` carries revision `wic-response-contract-v1`, literal
+`ResponseContract` carries revision `wic-response-contract-v4`, literal
 `authority=ADVISORY_ONLY`, the exact `basis_fingerprint`, and source-record
 references. Existing `TurnIntent` provides compatibility selection when an older
 candidate has no `ResponseIntent`; current interpretation supplies explicit
@@ -104,9 +105,12 @@ mode and rationale. The builder contains no Human phrase-matching registry.
 | Dimension | Meaning |
 |---|---|
 | Interaction mode | Kind of collaboration expected now |
+| EXPLORE interaction strategy | `OPEN_EXPLORATION` or `INTENT_REFINEMENT`; a turn-local collaboration posture, not a subsystem |
+| Design collaboration mode | Optional refinement for divergent exploration, critical review, or convergent decision |
 | Primary obligation | The answer or action the turn owes the Human |
 | Opening move | Kind of useful information that must come first |
 | Response moves | Ordered communication duties, not section headings or fixed sentences |
+| Reasoning sequence | Ordered intent for presenting cognition to the Human, not private chain-of-thought or a prose template |
 | Information budget | Depth and breadth justified by this turn |
 | Question budget | Zero by default; at most one material unresolved decision |
 | Judgment stance and basis | Fact, inference, recommendation, assumption, preference, or uncertainty, with the supporting basis |
@@ -114,8 +118,9 @@ mode and rationale. The builder contains no Human phrase-matching registry.
 | Adjacent-insight budget | Optional small extension after the primary obligation is met |
 | Provenance and failure signal | Source basis and evidence for selection, prior judgment, or changed diagnostic strategy |
 
-The fields are `interaction_mode`, `primary_obligation`, `opening_move`,
-`response_moves`, `information_budget`, `question_budget`, `selected_question`,
+The fields are `interaction_mode`, `explore_strategy`, `design_collaboration_mode`,
+`primary_obligation`, `opening_move`, `response_moves`, `reasoning_sequence`,
+`information_budget`, `question_budget`, `selected_question`,
 `judgment_stance`, `judgment_subject`, `judgment_proposition`, `judgment_basis`,
 `judgment_change_accepted`, `material_grounding_snapshot`, `advancement_obligation`,
 `adjacent_insight_budget`, `repeated_failure_signature`,
@@ -134,6 +139,26 @@ sequence say how to order it. They do not determine the engineering facts.
 
 ## Interaction modes and proportional information
 
+### Capability alignment
+
+Before final response strategy selection, the contract records an advisory
+Capability Alignment Context derived from the admitted turn intent, production
+relevance, current Work context, and the versioned System Capability Reality.
+It has three response modes:
+
+- **KNOWLEDGE** — answer the question normally. A technical subject alone does
+  not justify mentioning Watt or redirecting the Human into production;
+- **PRODUCTION_ADVISORY** — answer the software-domain question first, then make
+  one brief factual connection to Watt's governed production workflow when the
+  object matches Watt's capability; and
+- **PRODUCTION** — route an explicit create/modify/execute goal into the existing
+  governed preparation and admission path instead of substituting a generic
+  tutorial or large copy-paste implementation.
+
+Capability alignment is expression and routing context only. It cannot admit
+Work, change Semantic Truth, select a Steering transition, widen Executor
+permissions, or claim execution. It must not become promotional language.
+
 | Mode | Expected contribution | Information budget |
 |---|---|---|
 | `EXPLORE` | Offer useful possibilities and help structure an open search | Relevant divergence; enough alternatives to advance thinking |
@@ -151,6 +176,45 @@ architecture discussion can require several material trade-offs; an execution
 instruction usually needs a short acknowledgement and the actual next step.
 Conversely, exploration cannot be reduced to “OK” simply to appear fast.
 
+### EXPLORE interaction strategies
+
+`EXPLORE` supports two explicit, extensible interaction strategies:
+
+| Strategy | Use | Behavior |
+|---|---|---|
+| `OPEN_EXPLORATION` | The Human benefits from useful divergence and no material decision currently blocks progress | Contribute concrete possibilities and distinctions without manufacturing a clarification gate |
+| `INTENT_REFINEMENT` | One admitted unresolved decision materially changes the next product or engineering choice | Preserve what is already clear, explain the decision impact, and ask only the single highest-value question |
+
+Intent Refinement is a Response Contract collaboration strategy, not an
+`Intent Refinement Engine`, Agent, Skill, workflow, or new source of truth. The
+existing progressive semantic policy ranks admitted question candidates by
+decision value and cognitive cost. It selects at most one question and stops
+when a safe reversible assumption is available or the next useful decision is
+sufficiently clear.
+
+Refinement may clarify the goal, target user, material constraints, success
+criteria, and important open decisions. Those concepts remain in the existing
+structured understanding, Design Intent Frame, and Semantic Truth governance;
+the Response Contract neither duplicates nor promotes them into governed Work
+facts. Implementation details are not requested early unless they materially
+change the next decision. A settled execution request has no EXPLORE strategy
+and therefore cannot reopen discovery through this mechanism.
+
+### Design collaboration refinement
+
+`DESIGN` remains the top-level interaction mode. An optional composable
+refinement expresses which kind of design collaboration the turn requires:
+
+| Refinement | Human intent | Response behavior |
+|---|---|---|
+| `DESIGN_EXPLORE` | Brainstorm or widen possibilities before convergence | Map context, expand the option space, compare, then surface risks and a decision point |
+| `DESIGN_REVIEW` | Review an existing proposal or challenge assumptions | State the judgment first, show evidence and weak points, then trade-offs and recommendation |
+| `DESIGN_DECIDE` | Compare viable choices and converge | Restate the goal and constraints, compare decisive options, then recommend |
+
+The refinement is not a parallel lifecycle or a replacement taxonomy. It may
+be paired with an `EXPLORE`, `ANALYZE`, `DESIGN`, or `DECIDE` top-level mode and
+is absent where design collaboration is not relevant.
+
 ### Minimum Sufficient Answer
 
 Provide enough information for the Human to understand the issue, make the
@@ -160,19 +224,24 @@ automatically better.
 Do not append routine tutorials, background, summaries, or extensive option
 lists. An adjacent insight is optional and comes only after the current
 obligation is satisfied. It must materially help the nearby decision; a small
-budget is not a requirement to add a section to every answer.
+budget is not a requirement to add a section to every answer. When admitted,
+it may advance at most half a step beyond the completed answer.
 
-### Opening and response moves
+### Reasoning sequence, opening, and response moves
 
-Open with the information the turn requests. Typical moves include:
+`reasoning_sequence` governs the order in which useful cognition is presented
+to the Human. It does not request hidden chain-of-thought, prescribe headings,
+or select canned prose. The Realizer may phrase and compress naturally while
+preserving the admitted order. Typical sequences include:
 
-- diagnosis: current cause or evidenced uncertainty → evidence → fix or next
-  diagnostic check;
-- assessment: judgment → decisive rationale/trade-off → recommendation;
-- status: current Reality → material gap → next owner/action;
-- bounded question: direct answer → optional adjacent insight;
-- comparison: decisive difference → recommendation under the known constraints;
-- executable instruction: acknowledgement → governed progression.
+- design exploration: context map → option space → comparison → risks and
+  constraints → decision point;
+- design: goal → constraints → architecture options → trade-offs →
+  recommendation;
+- diagnosis: observed symptom → evidence → hypothesis → root cause → fix;
+- status: current conclusion → key progress → current owner or next step →
+  important limitation;
+- executable instruction: acknowledgement → governed progression → result.
 
 These are communication obligations, not wording templates. The Realizer must
 preserve natural language and must not display contract field names or enum
@@ -189,7 +258,10 @@ Where current policy permits a reversible assumption, proceed on that explicit
 basis and accept later corrections. Do not demand full specification before the
 next governed step. When a material question is necessary, explain its bounded
 purpose: what is already clear, what decision remains, and what can happen once
-it is resolved. Avoid internal state-machine language or bundled questionnaires.
+it is resolved. Prefer a high-information formulation: state the bounded
+assumption and explain how the answer would change the next decision, rather
+than asking a vague “what do you mean?”. Avoid internal state-machine language
+or bundled questionnaires.
 
 The contract's question budget overrides weaker legacy conversational advice.
 It does not override Human-owned authority. A zero-question execution posture
@@ -268,6 +340,22 @@ The contract can frame or constrain the interaction request; it cannot bypass
 the authoritative mechanism that accepts the actual transition. Existing
 production is not stopped merely because the Human asks a side question.
 
+### Execute consumes current governed meaning
+
+An `EXECUTE` contract consumes the current Engineering Semantic Truth and Work
+Reality. It does not independently reinterpret the original Human phrase,
+reopen a settled constraint, or silently replace governed cardinality, scope,
+or layout meaning with a convenient implementation assumption. The Safe
+Response Envelope therefore projects current semantic facts separately as
+`semantic_truth_to_preserve`; the compact execution Realizer input retains
+them even when settled design conversation is omitted.
+
+An unspecified implementation detail may use a bounded, reversible default.
+That default must not contradict governed meaning and does not become Product
+Truth merely because it was convenient during realization. Corrections and
+supersession continue through Engineering Semantic Truth and Work Reality,
+never through the Response Contract.
+
 ## Reality-first status and diagnosis
 
 The existing Watt-owned Work Reality query path remains the preferred path for
@@ -275,6 +363,11 @@ current status where deterministic facts are available. It reports persisted
 Plan/production/attention state without speculative model reasoning or Work
 mutation. A status answer must not claim execution began because a conversation
 acknowledged a command.
+
+The Human-facing projection is ordered as current conclusion, key progress,
+current owner or next step, and an important limitation only when one matters.
+Internal queue states, table names, revision records, and enum labels are not a
+substitute for that answer and remain hidden unless the Human requests them.
 
 Diagnosis must similarly separate observed Reality from hypotheses. “Why is
 this queued?” calls for the actual waiting condition or an explicit gap in the
@@ -325,19 +418,55 @@ gets the current question and relevant trajectory so it can satisfy the
 obligation naturally. Contract-aware expression applies to PRE_WORK and active
 Work.
 
-The existing governed streaming boundary remains:
+The governed response trust boundary is explicit:
+
+- **PROVISIONAL** — provider text may be visible for responsiveness, but it is
+  unadmitted, replaceable, and must not be treated as Conversation or Product
+  Truth;
+- **GOVERNED** — structured semantics and emitted clauses have passed their
+  applicable validation and policy gates, but the response is not yet the
+  persisted final Conversation record; and
+- **FINAL** — the settled response has been persisted for the exact turn and is
+  replayable as governed Conversation evidence.
+
+The normal governed streaming sequence remains:
 
 1. Interpret and validate structured semantics against the exact turn basis.
 2. Reconcile policy and authority before final Human-facing realization.
 3. Validate bounded realization clauses and emit accepted deltas progressively.
 4. Persist/replay response events and render progressive browser text.
 
-Raw Deep WIC prose is not streamed directly to the Human to reduce latency.
-Conversely, adding the contract must not introduce a new whole-response buffer
-after governed realization begins. The clause gate can enforce question
-allowance and prevent internal contract-label leakage without waiting for the
-complete final answer. Suppressing a disallowed question must not discard a
-later substantive clause.
+In the controlled path, raw Deep WIC prose is not streamed directly to the
+Human; accepted Realizer clauses are streamed after governance. A qualified
+shadow path may expose text marked `PROVISIONAL` for latency, but it cannot be
+promoted to final truth until strict structured validation, reconciliation, and
+settlement complete. Adding the contract must not introduce a new
+whole-response buffer after governed realization begins. The clause gate can
+enforce question allowance and prevent internal contract-label leakage without
+waiting for the complete final answer. Suppressing a disallowed question must
+not discard a later substantive clause.
+
+### Failure recovery
+
+Provider `response.incomplete` is a failed response, not an empty or successful
+answer. The runtime preserves a stable failure class and safe diagnostic
+metadata, including provider status, a bounded termination reason, provider
+request identity when available, occurrence time, and retryability. Raw
+provider payloads and internal exception text are not exposed as Human-facing
+Conversation truth.
+
+If a provider completed but violates the strict structured response schema, the
+structured boundary permits one bounded repair attempt. That repair may only
+restore schema conformance: it must preserve the original business meaning,
+must not add facts or authority, must not bypass Semantic Truth or Production
+Proposal validation, and must still pass the same strict schema. Exhaustion is
+recorded as a schema-violation failure; the invalid payload is never admitted.
+
+A recoverable failed turn retains the Human input and its append-only failure
+evidence. The UI may retry that exact turn without asking the Human to resend
+the message. Recovery creates a new recovery event and re-enters the normal
+governed path; it does not rewrite history, duplicate the Human turn, or convert
+provisional text into settled truth.
 
 The shared `response_contract_expression_guidance` function in
 `src/spg/application/response_contract_expression.py` supplies the same
@@ -402,6 +531,12 @@ without reinterpreting its communication preferences as product facts. The
 [future WIC direction](wic-software-production-sop-and-llm-direction.md) records
 both layers as next work, not completed capabilities.
 
+WIC Evaluation Corpus is a future supporting capability, not part of this
+implementation. Its intended purpose is long-term evaluation of interaction
+quality, regression, and Human collaboration behavior using Watt Dogfood cases,
+adapted public software benchmarks, and expert-designed scenarios. No benchmark
+framework, corpus storage, or evaluation pipeline is introduced here.
+
 This task does not implement a full domain library, production SOP library,
 Guardian engine, ECF, replacement lifecycle, new scheduler, or revised Executor,
 DeepSeek transport, Preview, or Delivery architecture. It neither reopens the
@@ -409,9 +544,11 @@ closed prior milestone nor declares Human Acceptance for this new one.
 
 ```text
 RESPONSE_CONTRACT = IMPLEMENTED
+RESPONSE_CONTRACT_REFINEMENT = IMPLEMENTED
 READY_FOR_HUMAN_REVIEW = YES
 SOFTWARE_DOMAIN_GROUNDING = NEXT
 SOFTWARE_PRODUCTION_SOP = NEXT
+WIC_EVALUATION_CORPUS = FUTURE_SUPPORTING_CAPABILITY
 ENGINEERING_SEMANTIC_TRUTH_BOUNDARY = PRESERVED
 STEERING_AUTHORITY = PRESERVED
 HUMAN_ACCEPTANCE = PENDING_HUMAN

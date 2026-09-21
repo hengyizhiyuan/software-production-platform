@@ -35,7 +35,13 @@ PREPARATION_ACTOR = "spg-runtime:preparation"
 def completion_contract_fingerprint(contract: CompletionContract) -> str:
     """Return a stable identity for the exact typed Completion Contract."""
 
-    return _fingerprint(contract.model_dump(mode="json"))
+    payload = contract.model_dump(mode="json")
+    # Backward compatibility: before the Task Contract foundation the field did
+    # not exist at all.  A legacy contract with no projection must keep its exact
+    # persisted fingerprint, while a new Task Contract becomes part of identity.
+    if payload.get("task_contract") is None:
+        payload.pop("task_contract", None)
+    return _fingerprint(payload)
 
 
 class PreparationService:

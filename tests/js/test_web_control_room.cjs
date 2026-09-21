@@ -131,6 +131,48 @@ test("Agenda closes Deliver when the authoritative Work projection is complete",
   assert.equal(milestones[2].steps[0].state, "DONE");
 });
 
+test("Work Plan Projection shows goal, current stage, remaining path, and latest governed change", () => {
+  const projection = controlRoom.workPlanProjection({
+    work_objective: "Build authentication capability",
+    active_revision_number: 2,
+    completed_steps: [
+      { step_id: "d", type: "DESIGN", objective: "Decide architecture" },
+    ],
+    current_step: {
+      step_id: "p", type: "PRODUCE", objective: "Implement backend",
+    },
+    known_next_steps: [
+      { step_id: "v", type: "VERIFY_ACCEPT", objective: "Verify behavior" },
+      { step_id: "c", type: "COMPLETE", objective: "Deliver result" },
+    ],
+    plan_changes: [{
+      reason: "Runtime discovery requires frontend integration before verification.",
+      affected_reality_refs: [{ kind: "WORK_REALITY_REVISION", identity: "revision-2" }],
+      changed_at: "2026-09-21T10:00:00Z",
+    }],
+  });
+
+  assert.equal(projection.goal, "Build authentication capability");
+  assert.equal(projection.currentStage, "Produce");
+  assert.deepEqual(Array.from(projection.remainingStages), ["Verify", "Deliver"]);
+  assert.equal(projection.revision, 2);
+  assert.equal(
+    projection.latestChange.reason,
+    "Runtime discovery requires frontend integration before verification.",
+  );
+  assert.deepEqual(Array.from(projection.latestChange.affectedWorkState), [
+    "WORK_REALITY_REVISION",
+  ]);
+});
+
+test("Work Plan Projection never invents stages without Steering Reality", () => {
+  const projection = controlRoom.workPlanProjection(null);
+  assert.equal(projection.available, false);
+  assert.equal(projection.goal, null);
+  assert.deepEqual(Array.from(projection.stages), []);
+  assert.equal(projection.latestChange, null);
+});
+
 test("Production state maps observed queue and attempt facts without invented progress", () => {
   const unavailable = controlRoom.productionState({}, [{
     condition: "WAITING_RESOURCE",

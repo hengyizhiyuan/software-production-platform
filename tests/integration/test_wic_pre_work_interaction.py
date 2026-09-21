@@ -37,6 +37,7 @@ from spg.domain.interaction import (
     InteractionAssessmentCandidate,
     InteractionInterpretationInput,
     InteractionInvariantViolation,
+    StructuredResponseSchemaViolation,
     InteractionTurnStatus,
     InterpretationMeaning,
     InterpretationMeaningKind,
@@ -50,6 +51,7 @@ from spg.domain.wic_response import (
     WicResponseEventType,
     WicRuntimeMode,
 )
+from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_schema import (
     interaction_assessments,
@@ -200,6 +202,54 @@ class _NeverCalledWorkService:
 class _FailingCapability:
     def interpret(self, _basis: InteractionInterpretationInput):
         raise InteractionInvariantViolation("provider unavailable for focused test")
+
+
+class _SchemaFailsOnceCapability:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def interpret(self, basis: InteractionInterpretationInput):
+        self.calls += 1
+        if self.calls == 1:
+            raise StructuredResponseSchemaViolation(
+                "strict response remained invalid after bounded repair",
+                request_id="request-schema-1",
+                validation_issue="design_intent_frame.confidence_note:extra_forbidden",
+                repair_attempted=True,
+            )
+        return InteractionAssessmentCandidate(
+            interpreted_motive="Develop a small program",
+            desired_outcome="Produce a reviewable small-program implementation",
+            current_requests=(basis.records[-1].content,),
+            natural_response="Watt can help design, implement, and verify this small program.",
+            provider_identity="test:recovered-schema",
+        )
+
+
+class _IncompleteOnceCapability:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def interpret(self, basis: InteractionInterpretationInput):
+        self.calls += 1
+        if self.calls == 1:
+            raise ModelProviderError(
+                ModelFailureKind.INCOMPLETE_RESPONSE,
+                "provider details must not reach the Human",
+                request_sent=True,
+                usage_unknown=False,
+                retryable=True,
+                provider_status="incomplete",
+                termination_reason="max_output_tokens",
+                request_id="response-incomplete-1",
+            )
+        return InteractionAssessmentCandidate(
+            interpreted_motive="Understand Watt",
+            desired_outcome="Receive an accurate capability explanation",
+            current_requests=(basis.records[-1].content,),
+            natural_response="Watt is an AI-native software production system.",
+            provider_identity="test:recovered-incomplete",
+        )
 
 
 class _NoopDriver:
@@ -1213,6 +1263,101 @@ def test_async_turn_failure_is_persisted_without_work(
     )
     assert projection.latest_assessment is None
     assert _count(postgres_database, product_works) == 0
+    service.shutdown()
+
+
+def test_failed_turn_retries_preserved_input_and_retains_diagnostic_evidence(
+    postgres_database: Database,
+) -> None:
+    capability = _SchemaFailsOnceCapability()
+    service = WorkInteractionService(
+        postgres_database,
+        capability=capability,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_SHADOW,
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    submitted = service.submit_turn(
+        interaction.id,
+        "如何开发微信小程序？",
+        human_identity="human:test",
+    )
+    failed = _wait_for_turn(service, submitted.id)
+    assert failed.status is InteractionTurnStatus.FAILED
+    assert failed.failure_code == "SCHEMA_VIOLATION"
+    failure_event = service.response_events(submitted.id)[-1]
+    assert failure_event.event_type is WicResponseEventType.TURN_FAILED
+    assert failure_event.metadata == {
+        "failure_class": "SCHEMA_VIOLATION",
+        "provider_status": "completed",
+        "validation_issue": "design_intent_frame.confidence_note:extra_forbidden",
+        "request_id": "request-schema-1",
+        "repair_attempted": True,
+        "timestamp": failure_event.metadata["timestamp"],
+        "retryable": True,
+        "provisional_is_not_final": True,
+    }
+
+    retried = service.retry_turn(interaction.id, submitted.id)
+    assert retried.id == submitted.id
+    completed = _wait_for_turn(service, submitted.id)
+    assert completed.status is InteractionTurnStatus.COMPLETED
+    projection = service.get_shared_understanding(interaction.id)
+    assert projection.human_said == ("如何开发微信小程序？",)
+    assert len(projection.records) == 1
+    assert [message.actor.value for message in projection.conversation_messages] == [
+        "HUMAN",
+        "WATT",
+    ]
+    assert projection.conversation_messages[-1].content.startswith(
+        "Watt can help design, implement, and verify"
+    )
+    events = service.response_events(submitted.id)
+    assert any(
+        event.event_type is WicResponseEventType.TURN_RECOVERY_STARTED
+        and event.metadata["human_input_reused"] is True
+        for event in events
+    )
+    assert any(event.event_type is WicResponseEventType.TURN_FAILED for event in events)
+    service.shutdown()
+
+
+def test_incomplete_turn_is_recoverable_without_admitting_invalid_reality(
+    postgres_database: Database,
+) -> None:
+    capability = _IncompleteOnceCapability()
+    service = WorkInteractionService(
+        postgres_database,
+        capability=capability,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_SHADOW,
+    )
+    interaction = service.create_interaction(human_identity="human:test")
+    submitted = service.submit_turn(
+        interaction.id,
+        "你是谁？",
+        human_identity="human:test",
+    )
+    failed = _wait_for_turn(service, submitted.id)
+    assert failed.status is InteractionTurnStatus.FAILED
+    assert failed.failure_code == "INCOMPLETE_RESPONSE"
+    assert "provider details" not in (failed.failure_message or "")
+    failed_projection = service.get_shared_understanding(interaction.id)
+    assert failed_projection.latest_assessment is None
+    assert failed_projection.human_said == ("你是谁？",)
+    failure_event = service.response_events(submitted.id)[-1]
+    assert failure_event.event_type is WicResponseEventType.TURN_FAILED
+    assert failure_event.metadata["provider_status"] == "incomplete"
+    assert failure_event.metadata["termination_reason"] == "max_output_tokens"
+    assert failure_event.metadata["request_id"] == "response-incomplete-1"
+    assert failure_event.metadata["retryable"] is True
+
+    service.retry_turn(interaction.id, submitted.id)
+    assert _wait_for_turn(service, submitted.id).status is InteractionTurnStatus.COMPLETED
+    recovered = service.get_shared_understanding(interaction.id)
+    assert recovered.human_said == ("你是谁？",)
+    assert len(recovered.records) == 1
+    assert recovered.conversation_messages[-1].content == (
+        "Watt is an AI-native software production system."
+    )
     service.shutdown()
 
 

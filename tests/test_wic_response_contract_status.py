@@ -94,18 +94,28 @@ def test_newer_stale_pwu_and_attempt_cannot_replace_current_runtime_status(proje
               reason="old-attempt-capacity-reason"),
     ]
     candidate = project()
-    assert candidate.natural_response.startswith("当前执行状态是 EXECUTING。")
+    assert candidate.natural_response.startswith("当前结论：当前执行正在进行。")
+    assert "关键进展：" in candidate.natural_response
+    assert "下一步" in candidate.natural_response
+    assert "EXECUTING" not in candidate.natural_response
     assert "COMPLETED" not in candidate.natural_response
     assert "old-attempt-capacity-reason" not in candidate.natural_response
     assert candidate.response_intent.interaction_mode is InteractionMode.STATUS
     assert candidate.impact_disposition is WorkImpactDisposition.NO_GOVERNED_CHANGE
 
 
-@pytest.mark.parametrize("condition", [QueueCondition.COMPLETED, QueueCondition.CANCELLED])
-def test_terminal_queue_entry_is_labelled_as_last_attempt_not_current_execution(projection, condition):
+@pytest.mark.parametrize("condition,expected", [
+    (QueueCondition.COMPLETED, "最近一次执行已经完成"),
+    (QueueCondition.CANCELLED, "最近一次执行已经取消"),
+])
+def test_terminal_queue_entry_is_labelled_as_last_attempt_not_current_execution(
+    projection, condition, expected,
+):
     state, entry, project = projection
     state.queue = [entry(condition=condition)]
-    assert project().natural_response.startswith(f"最近一次执行状态是 {condition.value}。")
+    response = project().natural_response
+    assert response.startswith(f"当前结论：{expected}。")
+    assert condition.value not in response
 
 
 def test_diagnosis_reports_missing_current_queue_instead_of_reusing_old_cause(projection):
@@ -124,5 +134,6 @@ def test_without_current_binding_historical_queue_does_not_imply_running(project
     state.binding = None
     state.queue = [entry(condition=QueueCondition.EXECUTING)]
     candidate = project()
-    assert "尚未创建生产周期" in candidate.natural_response
+    assert "当前 Work 尚未进入生产执行" in candidate.natural_response
+    assert "重要限制：目前还没有可报告的生产或验证结果" in candidate.natural_response
     assert "EXECUTING" not in candidate.natural_response

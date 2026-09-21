@@ -184,6 +184,10 @@ def test_pre_work_coalesces_to_one_request_and_streams_only_human_text() -> None
     assert capability.last_pipeline_evidence.coalesced_retry_count == 0
     assert "provider_first_token" in stages
     assert "validation_completed" in stages
+    assert "Watt is an AI-native software production system" in adapter.requests[0]["instructions"]
+    assert "must not claim external submission" in adapter.requests[0]["instructions"]
+    assert "A technical topic alone is not a production goal" in adapter.requests[0]["instructions"]
+    assert "BUILD or ACTION_REQUEST must not be reduced" in adapter.requests[0]["instructions"]
 
 
 def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta() -> None:
@@ -305,14 +309,44 @@ def test_shadow_pre_work_repairs_one_root_json_failure_without_second_stream() -
     assert "".join(visible) == "partial"
 
 
-def test_shadow_pre_work_does_not_retry_schema_error_or_retry_thrice() -> None:
-    runtime, adapter = _runtime(_Adapter(['{"natural_response":"missing semantics"}']))
-    with pytest.raises(InteractionInvariantViolation, match="semantics:missing"):
-        DeepSeekWorkInteractionCapability(runtime=runtime).interpret_stream_observed(
-            _basis(), on_response_delta=lambda _delta: None,
-            on_pipeline_stage=lambda _stage: None,
-        )
-    assert adapter.calls == 1
+def test_shadow_pre_work_repairs_schema_error_once_without_weakening_contract() -> None:
+    invalid = json.loads(_envelope())
+    invalid["semantics"]["collaboration"]["design_intent_frame"] = {
+        "design_subject": "微信小程序",
+        "object_type": "PRODUCT_SYSTEM",
+        "business_context": None,
+        "desired_outcome": None,
+        "scope_level": "product",
+        "collaboration_mode": "exploration",
+        "candidate_assumptions": [],
+        "ambiguities": ["目标用户尚未明确"],
+        "confidence": 0.4,
+        "confidence_note": "forbidden extra field",
+    }
+    repaired = json.loads(_envelope())
+    repaired["semantics"]["collaboration"]["design_intent_frame"] = {
+        key: value
+        for key, value in invalid["semantics"]["collaboration"]["design_intent_frame"].items()
+        if key != "confidence_note"
+    }
+    runtime, adapter = _runtime(_Adapter([
+        json.dumps(invalid, ensure_ascii=False),
+        json.dumps(repaired, ensure_ascii=False),
+    ]))
+    visible: list[str] = []
+    result = DeepSeekWorkInteractionCapability(runtime=runtime).interpret_stream_observed(
+        _basis(), on_response_delta=visible.append,
+        on_pipeline_stage=lambda _stage: None,
+    )
+    assert result.design_intent_frame is not None
+    assert result.design_intent_frame.design_subject == "微信小程序"
+    assert adapter.calls == 2
+    assert adapter.requests[1]["on_output_delta"] is None
+    assert "structural repair only" in adapter.requests[1]["instructions"]
+    assert "".join(visible) == invalid["natural_response"]
+
+
+def test_shadow_pre_work_stops_after_one_failed_structured_repair() -> None:
     runtime, adapter = _runtime(_Adapter(["{", "{"]))
     with pytest.raises(InteractionInvariantViolation, match="bounded_repair_exhausted"):
         DeepSeekWorkInteractionCapability(runtime=runtime).interpret_stream_observed(

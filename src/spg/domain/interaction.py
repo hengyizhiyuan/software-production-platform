@@ -474,5 +474,22 @@ class InteractionInvariantViolation(RuntimeError):
     """Raised when persisted interaction Reality does not permit an operation."""
 
 
+class StructuredResponseSchemaViolation(InteractionInvariantViolation):
+    """A completed Provider result failed the strict governed wire contract."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        request_id: str | None = None,
+        validation_issue: str | None = None,
+        repair_attempted: bool = False,
+    ) -> None:
+        super().__init__(message)
+        self.request_id = request_id
+        self.validation_issue = validation_issue
+        self.repair_attempted = repair_attempted
+
+
 class InteractionRecordNotFound(LookupError):
     """Raised when an Interaction identity is absent."""

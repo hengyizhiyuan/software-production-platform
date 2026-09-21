@@ -1361,6 +1361,21 @@ dd {
   font-size: 20px;
 }
 
+.notice .notice-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.notice button.notice-retry {
+  padding: 5px 9px;
+  border: 1px solid rgb(255 255 255 / 65%);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
 [hidden] {
   display: none !important;
 }
