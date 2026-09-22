@@ -4,11 +4,14 @@ Date: 2026-09-21
 
 Historical status on 2026-09-21: **IMPLEMENTED / READY_FOR_HUMAN_REVIEW**.
 
-Final disposition on 2026-09-22: **HUMAN_ACCEPTED** as part of the bounded WIC
-optimization milestone. The repository and qualification blocks below preserve
-the exact pre-acceptance state rather than rewriting historical evidence. See
-[WIC Optimization Milestone Closure](wic-interaction-intelligence-phase-closure.md)
-for final Full Regression, acceptance, and closure status.
+Final disposition on 2026-09-22:
+**WIC_INTERACTION_INTELLIGENCE_HUMAN_ACCEPTANCE = PASS** for the sampled
+interaction scope. **END_TO_END_PRODUCTION_HUMAN_ACCEPTANCE = NOT_EVALUATED**.
+The repository and qualification blocks below preserve the exact pre-acceptance
+state rather than rewriting historical evidence. See [WIC Interaction
+Intelligence Optimization Milestone
+Closure](wic-interaction-intelligence-phase-closure.md) for final automated Full
+Regression, scoped Human acceptance, and closure status.
 
 This document records the separately authorized Response Contract task after the
 closed Watt milestone. It distinguishes domain/integration proof, actual

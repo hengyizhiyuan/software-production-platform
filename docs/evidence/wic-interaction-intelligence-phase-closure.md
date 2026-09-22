@@ -1,4 +1,4 @@
-# WIC Optimization Milestone Closure
+# WIC Interaction Intelligence Optimization Milestone Closure
 
 Initial phase closure: 2026-09-17
 
@@ -12,13 +12,16 @@ Branch: `feature/spg-first-vertical-slice`
 
 ```text
 MILESTONE
-    WIC_OPTIMIZATION
+    WIC_INTERACTION_INTELLIGENCE_OPTIMIZATION
 
 WIC_INTERACTION_INTELLIGENCE_PHASE
     CLOSED / PASS
 
-HUMAN_ACCEPTANCE
+WIC_INTERACTION_INTELLIGENCE_HUMAN_ACCEPTANCE
     PASS
+
+END_TO_END_PRODUCTION_HUMAN_ACCEPTANCE
+    NOT_EVALUATED
 
 FULL_REGRESSION
     PASS
@@ -28,8 +31,10 @@ CLOSURE
 ```
 
 This is a milestone closure, not a claim that WIC is finished or that Human
-experience is perfect. Human acceptance has been granted for the current entry
-interaction quality. No further WIC optimization is required in this milestone.
+experience is perfect. Human acceptance has been granted for the sampled WIC
+Interaction Intelligence and entry-interaction scope described below. No
+further WIC optimization is required in this milestone. End-to-end production
+Human acceptance was not evaluated in this milestone.
 The 2026-09-17 Retest and its verbatim record remain below as historical
 evidence; the final acceptance in this section supersedes its then-open
 product-quality disposition without erasing the observations.
@@ -64,7 +69,8 @@ Semantic Truth, Steering, PWU, Executor, Verification, Guardian, Preview, and
 Delivery ownership. The current documentation was reconciled as follows:
 
 - [WIC Response Contract](../architecture/wic-response-contract.md) now records
-  bounded Human Acceptance and implemented Domain/SOP foundations;
+  bounded WIC Interaction Intelligence Human Acceptance and implemented
+  Domain/SOP foundations;
 - [WIC Software Production SOP × LLM](../architecture/wic-software-production-sop-and-llm-direction.md)
   no longer contradicts the implemented Context, Task, and Decision/Evidence
   foundations;
@@ -79,20 +85,34 @@ redesign was introduced by closure reconciliation.
 
 ## Final Human acceptance evidence
 
-The Human Governor accepts the current WIC usability level and requires no
-further WIC optimization in this milestone. The accepted observations are:
+The Human Governor accepts the current WIC Interaction Intelligence usability
+level and requires no further WIC optimization in this milestone. The accepted
+observations, within the sampled interaction scope, are:
 
+- intent understanding better matches the Human's current goal and interaction
+  stage;
+- response form and answer shape are more appropriate to the current turn;
 - product exploration is materially more focused and pragmatic;
-- Watt asks fewer, higher-value clarification questions;
-- responses better match current Human intent and interaction stage;
+- Watt asks fewer, higher-value clarification questions, consistent with the
+  Question Budget;
 - tested exploration avoids premature over-expansion;
-- Capability Alignment preserves Watt's software-production identity while
-  keeping ordinary knowledge answers non-promotional; and
+- sampled judgment behavior is materially more consistent;
+- sampled Capability Alignment behavior preserves Watt's software-production
+  identity while keeping ordinary knowledge answers non-promotional; and
 - entry interaction quality is usable and sufficiently mature for closure.
 
 ```text
-HUMAN_ACCEPTANCE = PASS
+WIC_INTERACTION_INTELLIGENCE_HUMAN_ACCEPTANCE = PASS
+END_TO_END_PRODUCTION_HUMAN_ACCEPTANCE = NOT_EVALUATED
 ```
+
+The Human did not deeply evaluate Steering plan quality, Work Plan usefulness
+during real production, Task Contract quality in real production, PWU
+decomposition quality, Executor execution quality, execution recovery or
+replanning behavior, the Verification/Assurance Human experience, end-to-end
+production continuity, or the Delivery workflow. Each of those areas is
+`NOT_EVALUATED` for Human acceptance in this milestone. This status records the
+scope boundary; it is not a failure finding.
 
 ## Known non-blocking findings
 
@@ -136,6 +156,11 @@ The ten skips are explicitly authorization/environment-gated real-Provider
 probes. They do not conceal a deterministic failure; provider boundaries also
 retain their prior bounded real-provider evidence.
 
+These are automated regression results over the covered system surface. In
+particular, the PASS results for Work/Steering, Production, Verification,
+Executor, continuity, recovery, and Delivery-related seams are automated
+evidence only. They do not imply end-to-end production Human acceptance.
+
 The first command invocation stopped during collection because the documented
 `uv run pytest` entry did not add the repository root to Python's import path,
 so repository-owned `benchmarks` and `docker` modules could not be collected.
@@ -152,8 +177,9 @@ Full Regression on the repaired tree passed with 1,401 tests.
 ## Explicit closure decision
 
 ```text
-MILESTONE = WIC_OPTIMIZATION
-HUMAN_ACCEPTANCE = PASS
+MILESTONE = WIC_INTERACTION_INTELLIGENCE_OPTIMIZATION
+WIC_INTERACTION_INTELLIGENCE_HUMAN_ACCEPTANCE = PASS
+END_TO_END_PRODUCTION_HUMAN_ACCEPTANCE = NOT_EVALUATED
 FULL_REGRESSION = PASS
 CLOSURE = PASS
 READY_FOR_NEXT_MAJOR_INITIATIVE = YES
@@ -167,7 +193,7 @@ direction was better than the prior questionnaire/generic-`ORIENT` experience.
 The same Retest also exposed the reliability blocker and the non-blocking
 experience findings recorded below.
 
-### Verbatim Human Acceptance record
+### Verbatim Human WIC Retest record
 
 ```text
 “偶尔会报错。

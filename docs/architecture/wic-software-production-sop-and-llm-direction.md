@@ -240,8 +240,9 @@ The revised sequence is:
    semantics as a separate task. **Completed in the 2026-09-20 milestone.**
 3. Close the current Human-experience / production phase. **Completed.**
 4. Establish WIC Response Contract under its separate authorization.
-   **Implemented and Human-accepted for the bounded WIC optimization
-   milestone.**
+   **Implemented and Human-accepted within the sampled WIC Interaction
+   Intelligence scope. End-to-end production Human acceptance was not
+   evaluated in this milestone.**
 5. Implement the bounded Software Domain Grounding foundation while preserving
    Pattern as advisory cognitive structure. **Foundation implemented.**
 6. Implement the bounded `Software Production SOP × LLM` foundation, consuming
@@ -261,9 +262,11 @@ WIC_SOFTWARE_PRODUCTION_SOP_REDESIGN = ARCHITECTURE_BASELINE / FOUNDATION_IMPLEM
 
 ENGINEERING_SEMANTIC_TRUTH = IMPLEMENTED / QUALIFIED / HUMAN_ACCEPTED
 
-RESPONSE_CONTRACT = IMPLEMENTED / HUMAN_ACCEPTED
+RESPONSE_CONTRACT = IMPLEMENTED
 
-RESPONSE_CONTRACT_HUMAN_REVIEW = PASS
+WIC_INTERACTION_INTELLIGENCE_HUMAN_ACCEPTANCE = PASS
+
+END_TO_END_PRODUCTION_HUMAN_ACCEPTANCE = NOT_EVALUATED
 
 SOFTWARE_DOMAIN_GROUNDING = FOUNDATION_IMPLEMENTED
 

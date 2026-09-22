@@ -2,10 +2,13 @@
 
 Date: 2026-09-21
 
-Status: **IMPLEMENTED / HUMAN_ACCEPTED** for the bounded WIC optimization
-milestone closed on 2026-09-22. The acceptance applies to the current entry
-interaction quality and preserved authority boundaries; it does not claim that
-WIC, rich response rendering, or long-horizon evaluation is complete.
+Status: **IMPLEMENTED / HUMAN_ACCEPTED_WITHIN_WIC_INTERACTION_SCOPE** for the
+bounded WIC Interaction Intelligence optimization milestone closed on
+2026-09-22. The acceptance applies to sampled intent understanding, response
+form, exploration, clarification, Question Budget, judgment, Capability
+Alignment, and entry usability. End-to-end production Human acceptance was not
+evaluated; the status does not claim that WIC, rich response rendering,
+long-horizon evaluation, or production experience is complete.
 
 Current qualification observations and their limits are recorded in
 [Response Contract Human Review evidence](../evidence/wic-response-contract-review-20260921.md).
@@ -553,5 +556,6 @@ SOFTWARE_PRODUCTION_SOP = FOUNDATION_IMPLEMENTED / FULL_RUNTIME_PENDING
 WIC_EVALUATION_CORPUS = FUTURE_SUPPORTING_CAPABILITY
 ENGINEERING_SEMANTIC_TRUTH_BOUNDARY = PRESERVED
 STEERING_AUTHORITY = PRESERVED
-HUMAN_ACCEPTANCE = PASS
+WIC_INTERACTION_INTELLIGENCE_HUMAN_ACCEPTANCE = PASS
+END_TO_END_PRODUCTION_HUMAN_ACCEPTANCE = NOT_EVALUATED
 ```

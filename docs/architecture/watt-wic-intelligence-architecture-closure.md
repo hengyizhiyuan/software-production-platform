@@ -9,8 +9,9 @@ Implementation reconciliation: 2026-09-22
 The architecture decision below remains the historical vNext synthesis. Its
 original `NOT_STARTED` implementation markers describe the 2026-09-15 closure
 point and are not current Repository Reality. The bounded reconstruction is now
-implemented and Human-accepted for the WIC optimization milestone. Current
-implementation status and remaining limits are canonical in
+implemented and Human-accepted within the sampled WIC Interaction Intelligence
+scope. End-to-end production Human acceptance was not evaluated in this
+milestone. Current implementation status and remaining limits are canonical in
 [Watt AI-Native Software Production Architecture](watt-ai-native-software-production-architecture.md),
 [WIC Response Contract](wic-response-contract.md), and the
 [WIC optimization closure evidence](../evidence/wic-interaction-intelligence-phase-closure.md).
