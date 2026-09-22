@@ -220,6 +220,82 @@ def test_provider_turn_intent_survives_deterministic_semantic_admission() -> Non
     assert result.turn_intent is ConversationTurnIntent.BUILD
 
 
+def test_repository_production_request_is_admission_ready_before_feature_refinement() -> None:
+    text = (
+        "Please pull https://github.com/acme/shop and add new features; "
+        "the exact feature can be refined after repository discovery."
+    )
+    record, active, fingerprint = _inputs("OW-A", text=text)
+    provider_candidate = _candidate(
+        "OW-A",
+        turn_intent=ConversationTurnIntent.HOW_TO,
+        desired_outcome=None,
+        unresolved_material_questions=("Which exact feature should be added?",),
+    )
+    candidate = WorkInteractionService._with_production_request_evidence(
+        provider_candidate,
+        latest_human_input=text,
+    )
+    semantics = build_progressive_semantics(
+        candidate=candidate,
+        records=(record,),
+        basis_fingerprint=fingerprint,
+        prior_assessment=None,
+        active_context=active,
+        focus=None,
+        impact=None,
+    )
+    readiness = WorkInteractionService._evaluate_readiness(
+        candidate,
+        fingerprint,
+        governance_candidate=semantics.governance_candidate,
+        progressive_semantics=semantics,
+    )
+
+    assert candidate.turn_intent is ConversationTurnIntent.ACTION_REQUEST
+    assert PatternSignal.PRODUCTION_REQUEST in semantics.pattern_signals
+    assert PatternSignal.REPOSITORY_SOURCE in semantics.pattern_signals
+    assert semantics.governance_candidate is GovernanceCandidateKind.WORK_FORMATION_PROPOSAL
+    assert semantics.questions[0].blocks_next_governed_step is False
+    assert semantics.questions[0].disposition is QuestionDisposition.DEFER_UNTIL_RELEVANT
+    assert readiness.status is WorkAdmissionReadinessStatus.READY
+
+
+def test_repository_production_request_does_not_defer_authority_blocker() -> None:
+    text = "Please pull https://github.com/acme/shop and fix the bug."
+    record, active, fingerprint = _inputs("OW-A", text=text)
+    provider_candidate = _candidate(
+        "OW-A",
+        turn_intent=ConversationTurnIntent.HOW_TO,
+        unresolved_material_questions=(
+            "Who authorizes access to this private repository?",
+        ),
+    )
+    candidate = WorkInteractionService._with_production_request_evidence(
+        provider_candidate,
+        latest_human_input=text,
+    )
+    semantics = build_progressive_semantics(
+        candidate=candidate,
+        records=(record,),
+        basis_fingerprint=fingerprint,
+        prior_assessment=None,
+        active_context=active,
+        focus=None,
+        impact=None,
+    )
+    readiness = WorkInteractionService._evaluate_readiness(
+        candidate,
+        fingerprint,
+        governance_candidate=semantics.governance_candidate,
+        progressive_semantics=semantics,
+    )
+
+    assert semantics.questions[0].blocks_next_governed_step is True
+    assert semantics.questions[0].disposition is QuestionDisposition.ASK_HUMAN_NOW
+    assert readiness.status is WorkAdmissionReadinessStatus.NOT_READY
+
+
 def test_reversing_correction_creates_a_new_supersession_edge() -> None:
     prior = _prior("开发推广工作的运营后台")
     result = _build("OW-C", prior=prior, text="纠正：还是策划一次推广活动，不开发后台。")

@@ -28,6 +28,7 @@ from spg.domain.response_contract import (
     OpeningMove as Opening,
     PrimaryObligation as Obligation,
     ProductionRelevance,
+    production_intent_evidence,
     ResponseContract,
     ResponseIntent,
     ResponseMove as Move,
@@ -123,13 +124,24 @@ def _capability_alignment(
         source_records
         and is_system_capability_question(source_records[-1].content)
     )
-    direct_goal = intent in _DIRECT_PRODUCTION_INTENTS
+    latest_input = source_records[-1].content if source_records else ""
+    production_evidence = production_intent_evidence(latest_input)
+    direct_goal = (
+        production_evidence.production_request
+        or (
+            intent in _DIRECT_PRODUCTION_INTENTS
+            and intent not in {
+                ConversationTurnIntent.BUILD,
+                ConversationTurnIntent.NEW_GOAL,
+            }
+        )
+    )
     advisory_goal = intent in _PRODUCTION_ADVISORY_INTENTS and object_match
     capability_match = (
         direct_goal or advisory_goal or current_work or explicit_capability_question
     )
     if direct_goal and capability_match:
-        response_mode = CapabilityAlignmentMode.PRODUCTION
+        response_mode = CapabilityAlignmentMode.PRODUCTION_REQUEST
         relevance = ProductionRelevance.DIRECT_PRODUCTION_GOAL
         rationale = (
             "The admitted turn intent requests software-production progression; "
@@ -382,10 +394,21 @@ def build_response_contract(
     intent = semantics.turn_intent if semantics else ConversationTurnIntent.EXPLORE
     capability_alignment = _capability_alignment(assessment, intent, source_records)
     mode = interpretation.interaction_mode if interpretation else _LEGACY_MODES[intent]
+    production_evidence = production_intent_evidence(
+        source_records[-1].content if source_records else ""
+    )
     if capability_alignment.response_mode is CapabilityAlignmentMode.PRODUCTION_ADVISORY:
         mode = Mode.ANSWER
-    elif capability_alignment.response_mode is CapabilityAlignmentMode.PRODUCTION:
-        if intent in {
+    elif capability_alignment.response_mode in {
+        CapabilityAlignmentMode.PRODUCTION_REQUEST,
+        CapabilityAlignmentMode.PRODUCTION,
+    }:
+        if (
+            production_evidence.production_request
+            and production_evidence.repository_relevant
+        ):
+            mode = Mode.EXECUTE
+        elif intent in {
             ConversationTurnIntent.BUILD,
             ConversationTurnIntent.NEW_GOAL,
             ConversationTurnIntent.MATERIAL_BRANCH,
@@ -489,6 +512,24 @@ def build_response_contract(
         }:
             advancement = Advance.PROPOSE_AND_WAIT
             reasons.append("The Human requested repair or action; frame preparation through the existing governed path instead of handing debugging back to the Human or claiming execution has started.")
+
+    if (
+        capability_alignment.response_mode
+        is CapabilityAlignmentMode.PRODUCTION_REQUEST
+        and production_evidence.repository_relevant
+        and assessment.basis_work_revision_id is None
+    ):
+        # The explicit Human command is itself authority for Work formation and
+        # read-only repository acquisition. Later private-access, delivery and
+        # acceptance boundaries remain separately governed.
+        advancement = Advance.ACK_AND_EXECUTE
+        if Move.PROCEED not in moves:
+            moves = (*moves, Move.PROCEED)
+        reasons.append(
+            "The explicit repository action request authorizes governed Work "
+            "admission and read-only baseline acquisition without another "
+            "ceremonial confirmation."
+        )
 
     explore_strategy = None
     if mode is Mode.EXPLORE:

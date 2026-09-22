@@ -148,20 +148,39 @@ sequence say how to order it. They do not determine the engineering facts.
 Before final response strategy selection, the contract records an advisory
 Capability Alignment Context derived from the admitted turn intent, production
 relevance, current Work context, and the versioned System Capability Reality.
-It has three response modes:
+It has three current response modes (historical persisted contracts may still
+contain the former `PRODUCTION` label):
 
 - **KNOWLEDGE** — answer the question normally. A technical subject alone does
   not justify mentioning Watt or redirecting the Human into production;
 - **PRODUCTION_ADVISORY** — answer the software-domain question first, then make
   one brief factual connection to Watt's governed production workflow when the
   object matches Watt's capability; and
-- **PRODUCTION** — route an explicit create/modify/execute goal into the existing
+- **PRODUCTION_REQUEST** — route an explicit create/modify/execute goal into the existing
   governed preparation and admission path instead of substituting a generic
-  tutorial or large copy-paste implementation.
+  tutorial or large copy-paste implementation. Repository evidence plus a
+  direct change request is admitted as a PRE_WORK production candidate even if
+  a Provider described the turn as HOW_TO. When the same Human turn supplies a
+  repository source or reference and explicitly requests pull/analyze/modify
+  action, that command is also the Work-formation authorization: the server
+  advances `READY_FOR_ADMISSION` through `ADMISSION_RUNNING` to `WORK_CREATED`
+  and starts read-only repository acquisition without asking “should I proceed?”
+  again. The UI separately exposes repository acquisition state.
 
-Capability alignment is expression and routing context only. It cannot admit
-Work, change Semantic Truth, select a Steering transition, widen Executor
-permissions, or claim execution. It must not become promotional language.
+Missing feature detail may be retained for refinement when repository discovery
+can safely proceed. Repository access, credentials, destructive scope, and other
+Human-owned authority questions remain blockers rather than being deferred.
+An unreadable or private repository therefore leaves the created Work waiting
+for repository authorization; it does not manufacture a successful acquisition.
+Delivery authorization and final Human acceptance remain separate gates.
+
+Capability alignment remains expression and routing context only. A separate
+server-side admission trigger consumes the explicit Human command and invokes
+the existing `WorkApplicationService`, `RepositoryAssetService`, and
+`WorkPostAdmissionService`; WIC does not acquire repositories or create a
+parallel execution path. The trigger cannot change Semantic Truth, widen
+Executor permissions, authorize delivery, or claim acceptance. Capability
+alignment must not become promotional language.
 
 | Mode | Expected contribution | Information budget |
 |---|---|---|

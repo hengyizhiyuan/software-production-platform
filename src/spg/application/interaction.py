@@ -22,7 +22,12 @@ from spg.application.design_intent import frame_design_intent_text
 from spg.application.engineering_semantics import bind_engineering_semantic_facts
 from spg.application.response_contract import build_response_contract
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
-from spg.domain.response_contract import InteractionMode, JudgmentStance, ResponseIntent
+from spg.domain.response_contract import (
+    InteractionMode,
+    JudgmentStance,
+    ResponseIntent,
+    production_intent_evidence,
+)
 
 from spg.domain.conversation import ConversationContextMessage, ConversationTurnIntent
 from spg.domain.engineering_semantics import (
@@ -43,6 +48,8 @@ from spg.domain.interaction import (
     InteractionRecordNotFound,
     InteractionTurn,
     InteractionTurnStatus,
+    ProductionAdmissionExecutionState,
+    RepositoryAcquisitionState,
     StructuredResponseSchemaViolation,
     InterpretationMeaningKind,
     SharedUnderstanding,
@@ -506,7 +513,139 @@ class WorkInteractionService:
         self._turn_timings: OrderedDict[UUID, _TurnTiming] = OrderedDict()
         self._turn_fast_candidates: OrderedDict[UUID, object] = OrderedDict()
         self._turn_realization_started: set[UUID] = set()
+        self._production_admission_handler: Callable[
+            [UUID, InteractionAssessment, InteractionRecord], None
+        ] | None = None
+        self._production_admission_progress: OrderedDict[
+            UUID,
+            tuple[
+                ProductionAdmissionExecutionState,
+                RepositoryAcquisitionState | None,
+                str | None,
+            ],
+        ] = OrderedDict()
         self._turn_lock = RLock()
+
+    def configure_production_admission(
+        self,
+        handler: Callable[
+            [UUID, InteractionAssessment, InteractionRecord], None
+        ] | None,
+    ) -> None:
+        """Attach the existing governed admission path to completed WIC Turns."""
+
+        with self._turn_lock:
+            self._production_admission_handler = handler
+
+    def record_production_admission_progress(
+        self,
+        interaction_id: UUID,
+        *,
+        admission_state: ProductionAdmissionExecutionState,
+        repository_state: RepositoryAcquisitionState | None = None,
+        next_step: str | None = None,
+    ) -> None:
+        """Expose bounded in-flight admission truth between durable transitions."""
+
+        with self._turn_lock:
+            self._production_admission_progress[interaction_id] = (
+                admission_state,
+                repository_state,
+                next_step,
+            )
+            while len(self._production_admission_progress) > 128:
+                self._production_admission_progress.popitem(last=False)
+
+    def clear_production_admission_progress(self, interaction_id: UUID) -> None:
+        with self._turn_lock:
+            self._production_admission_progress.pop(interaction_id, None)
+
+    def _trigger_production_admission_if_ready(
+        self,
+        interaction_id: UUID,
+        assessment: InteractionAssessment,
+        request_record: InteractionRecord,
+    ) -> bool:
+        evidence = production_intent_evidence(request_record.content)
+        with self._turn_lock:
+            admission_handler = self._production_admission_handler
+        if (
+            admission_handler is None
+            or not evidence.production_request
+            or not evidence.repository_relevant
+            or not evidence.action_requested
+            or assessment.readiness.status
+            is not WorkAdmissionReadinessStatus.READY
+        ):
+            return False
+        self.record_production_admission_progress(
+            interaction_id,
+            admission_state=ProductionAdmissionExecutionState.ADMISSION_RUNNING,
+            repository_state=(
+                RepositoryAcquisitionState.READY_TO_ACQUIRE
+                if evidence.repository_source
+                else RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
+            ),
+            next_step=(
+                "Acquire the Human-supplied repository baseline."
+                if evidence.repository_source
+                else "Bind the referenced repository source."
+            ),
+        )
+        try:
+            admission_handler(interaction_id, assessment, request_record)
+        except Exception:
+            # Conversation truth has already settled successfully. Keep
+            # admission retryable and visible without rewriting that Turn into
+            # a model/response failure. Startup reconciliation may retry it.
+            self.record_production_admission_progress(
+                interaction_id,
+                admission_state=(
+                    ProductionAdmissionExecutionState.ADMISSION_RETRY_REQUIRED
+                ),
+                repository_state=(
+                    RepositoryAcquisitionState.ACQUISITION_RETRY_REQUIRED
+                    if evidence.repository_source
+                    else RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
+                ),
+                next_step=(
+                    "Retry governed Work admission from the preserved request."
+                ),
+            )
+        return True
+
+    def resume_ready_production_admissions(self) -> tuple[UUID, ...]:
+        """Reconcile completed explicit requests left before Work formation."""
+
+        resumed: list[UUID] = []
+        for projection in self.list_interactions():
+            assessment = projection.latest_assessment
+            request_record = next(
+                (
+                    record
+                    for record in reversed(projection.records)
+                    if record.actor is InteractionActor.HUMAN
+                ),
+                None,
+            )
+            if (
+                projection.governed_work_id is None
+                and projection.latest_assessment_current
+                and assessment is not None
+                and request_record is not None
+                and self._trigger_production_admission_if_ready(
+                    projection.interaction.id,
+                    assessment,
+                    request_record,
+                )
+            ):
+                resumed.append(projection.interaction.id)
+        return tuple(resumed)
+
+    def schedule_ready_production_admission_recovery(self) -> None:
+        """Reconcile admission gaps without blocking application startup."""
+
+        self._turn_executor.submit(self.resume_ready_production_admissions)
 
     def create_interaction(
         self,
@@ -652,13 +791,18 @@ class WorkInteractionService:
     ) -> SharedUnderstanding:
         # The Human record commits first. A failed Provider call therefore leaves an
         # honest, recoverable unassessed basis rather than losing communication.
-        self.append_human_input(
+        request_record = self.append_human_input(
             interaction_id,
             content,
             human_identity=human_identity,
             supporting_references=supporting_references,
         )
-        self.assess_current(interaction_id)
+        assessment = self.assess_current(interaction_id)
+        self._trigger_production_admission_if_ready(
+            interaction_id,
+            assessment,
+            request_record,
+        )
         return self.get_shared_understanding(interaction_id)
 
     def submit_turn(
@@ -909,6 +1053,7 @@ class WorkInteractionService:
             self._turn_timings.clear()
             self._turn_fast_candidates.clear()
             self._turn_realization_started.clear()
+            self._production_admission_progress.clear()
 
     def turn_timing(self, turn_id: UUID) -> dict[str, object] | None:
         """Observe monotonic latency; absent/restarted observations remain unknown.
@@ -1620,6 +1765,11 @@ class WorkInteractionService:
                 uow.commit()
             self._mark_turn_timing(turn_id, "persistence_completed")
             self._mark_turn_timing(turn_id, "completed")
+            self._trigger_production_admission_if_ready(
+                turn.interaction_id,
+                assessment,
+                request_record,
+            )
         except Exception as error:  # persisted failure is the product-facing truth
             failed_at = datetime.now(UTC)
             failure = _classify_turn_failure(error, failed_at)
@@ -1804,6 +1954,10 @@ class WorkInteractionService:
                     }
                 )
             prior_assessment = store.latest_assessment(interaction_id)
+            candidate = self._with_production_request_evidence(
+                candidate,
+                latest_human_input=latest_human_input,
+            )
             candidate = self._with_design_intent_frame(
                 candidate,
                 prior_assessment=prior_assessment,
@@ -2200,6 +2354,67 @@ class WorkInteractionService:
             admitted_from_latest is not None,
             tuple(record.decision_type for record in evolution_decisions),
         )
+        latest_human_input = next(
+            (
+                record.content
+                for record in reversed(records)
+                if record.actor is InteractionActor.HUMAN
+            ),
+            "",
+        )
+        production_evidence = production_intent_evidence(latest_human_input)
+        production_admission_state = None
+        repository_acquisition_state = None
+        production_next_step = None
+        if production_evidence.production_request:
+            with self._turn_lock:
+                admission_progress = self._production_admission_progress.get(
+                    interaction_id
+                )
+            if admission_progress is not None:
+                (
+                    production_admission_state,
+                    repository_acquisition_state,
+                    production_next_step,
+                ) = admission_progress
+            elif governed_revision is not None:
+                production_admission_state = (
+                    ProductionAdmissionExecutionState.WORK_CREATED
+                )
+                if governed_revision.repository_identity is not None:
+                    repository_acquisition_state = (
+                        RepositoryAcquisitionState.REPOSITORY_REALITY_BOUND
+                    )
+                    production_next_step = (
+                        "Continue Steering against the acquired repository Reality."
+                    )
+                elif production_evidence.repository_source:
+                    repository_acquisition_state = (
+                        RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_AUTHORIZATION
+                    )
+                    production_next_step = (
+                        "Authorize read access to the referenced repository; delivery "
+                        "authority remains separate."
+                    )
+                else:
+                    repository_acquisition_state = (
+                        RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
+                    )
+                    production_next_step = (
+                        "Provide or bind the referenced repository source."
+                    )
+            else:
+                production_admission_state = (
+                    ProductionAdmissionExecutionState.READY_FOR_ADMISSION
+                )
+                repository_acquisition_state = (
+                    RepositoryAcquisitionState.READY_TO_ACQUIRE
+                    if production_evidence.repository_source
+                    else RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
+                    if production_evidence.repository_relevant
+                    else None
+                )
+                production_next_step = "Execute governed Work admission."
         work_focus_history: list[UUID] = []
         for work_id in (
             *(record.work_focus_id for record in records),
@@ -2296,6 +2511,11 @@ class WorkInteractionService:
                 current_work is not None
                 and current_work.condition is WorkCondition.PRE_WORK
             ),
+            production_request_detected=production_evidence.production_request,
+            repository_source=production_evidence.repository_source,
+            production_admission_state=production_admission_state,
+            repository_acquisition_state=repository_acquisition_state,
+            production_next_step=production_next_step,
             selected_design_schema_identity=(
                 interaction.selected_design_schema_identity
             ),
@@ -2522,6 +2742,41 @@ class WorkInteractionService:
                 if currently_satisfied
                 else WorkSatisfactionState.IN_PROGRESS
             ),
+        )
+
+    @staticmethod
+    def _with_production_request_evidence(
+        candidate: InteractionAssessmentCandidate,
+        *,
+        latest_human_input: str,
+    ) -> InteractionAssessmentCandidate:
+        """Bind explicit production evidence before semantic governance runs.
+
+        Provider interpretation remains evidence, but an explicit Human request
+        to change software cannot be downgraded into HOW_TO advisory wording.
+        Missing feature detail is retained for later refinement; it is not
+        manufactured here and does not erase any Human-owned blocker.
+        """
+
+        evidence = production_intent_evidence(latest_human_input)
+        if not evidence.production_request:
+            return candidate
+        motive = candidate.interpreted_motive or latest_human_input.strip()
+        desired_outcome = candidate.desired_outcome or (
+            "Prepare the identified software baseline for the Human-requested "
+            "change; unresolved feature detail remains pending refinement."
+        )
+        return candidate.model_copy(
+            update={
+                "turn_intent": ConversationTurnIntent.ACTION_REQUEST,
+                "interpreted_motive": motive,
+                "desired_outcome": desired_outcome,
+                "current_requests": tuple(
+                    dict.fromkeys(
+                        (*candidate.current_requests, latest_human_input.strip())
+                    )
+                ),
+            }
         )
 
     @staticmethod

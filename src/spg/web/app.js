@@ -885,6 +885,8 @@
       : projection.candidate_repository_ref;
     elements.interactionResource.textContent = repositoryIdentity
       ? `${repositoryIdentity} · ${repositoryRef}`
+      : projection.repository_source
+        ? `Repository source identified: ${projection.repository_source} · Reality pending`
       : "Not bound yet";
     elements.interactionScope.textContent = governed
       ? `Admitted scope ${governed.engineering_scope_id} · basis ${governed.scope_basis_fingerprint}`
@@ -925,10 +927,13 @@
     const turnIntent = assessment
       && assessment.progressive_semantics
       && assessment.progressive_semantics.turn_intent;
-    const productionIntent = ["BUILD", "ACTION_REQUEST", "MODIFY", "DEPLOY"].includes(turnIntent);
+    const productionIntent = Boolean(projection.production_request_detected)
+      || ["BUILD", "ACTION_REQUEST", "MODIFY", "DEPLOY"].includes(turnIntent);
     elements.readinessAffordance.classList.toggle("production-intent-handoff", productionIntent && !governed);
     elements.readinessAffordance.textContent = projection.new_work_formation_pending
-      ? "PRE-WORK is saved. Continue naturally; production begins only after Human admission."
+      ? projection.production_request_detected
+        ? `Production request recognized · ${projection.production_admission_state || "READY_FOR_ADMISSION"} · Repository: ${projection.repository_acquisition_state || "NOT_BOUND"} · Next: ${projection.production_next_step || "execute governed Work admission"}`
+        : "PRE-WORK is saved. Continue naturally; production begins only after Human admission."
       : projection.work_satisfaction_state === "CURRENTLY_SATISFIED"
         ? "This Work achieved its current objective. The Interaction remains open."
       : governed
@@ -938,7 +943,9 @@
           ? "Production intent recognized. Review the candidate Work, then authorize Work formation so Plan Steering can begin; conversation output is not a produced artifact."
           : "Ready to form Work. Review the candidate understanding, Resource, scope, and constraints before admitting."
         : "Not ready to form Work.";
-    elements.interactionAdmission.hidden = status !== "READY" || Boolean(governed);
+    const automaticAdmission = projection.production_request_detected
+      && projection.production_admission_state !== "ADMISSION_RETRY_REQUIRED";
+    elements.interactionAdmission.hidden = status !== "READY" || Boolean(governed) || automaticAdmission;
     elements.workRevisionAdmission.hidden = !(
       governed && projection.work_revision_admission_status === "PENDING_HUMAN"
     );
@@ -992,7 +999,9 @@
     elements.productionHumanState.hidden = false;
     elements.productionStateLabel.textContent = "IDLE";
     elements.productionHumanActivity.textContent = "No PWU or Executor is running.";
-    elements.productionHumanDetail.textContent = "Work admission is a separate Human decision.";
+    elements.productionHumanDetail.textContent = projection?.production_request_detected
+      ? "The explicit production request authorizes Work admission and read-only repository acquisition; private access and delivery remain gated."
+      : "Work admission is a separate Human decision.";
     elements.workspaceActionsSummary.textContent = state.workAdmissionPending ? "Starting…"
       : provisional ? "No action yet." : ready ? "You can start with the current understanding or keep refining." : "Refine the current understanding before starting.";
     elements.prospectiveDecision.textContent = ready
@@ -1000,7 +1009,10 @@
       : state.workAdmissionPending ? "Human admission is being recorded; formal Work facts are not projected until it succeeds."
         : provisional ? "Waiting for interpretation; no Work or production has started."
         : blockerText ? `Before starting: ${blockerText}` : "Watt is still establishing the Motive and desired outcome.";
-    elements.prospectiveStart.hidden = !ready;
+    elements.prospectiveStart.hidden = !ready || (
+      Boolean(projection?.production_request_detected)
+      && projection?.production_admission_state !== "ADMISSION_RETRY_REQUIRED"
+    );
     elements.prospectiveRefine.hidden = provisional || state.workAdmissionPending;
     elements.prospectiveRefine.textContent = ready ? "继续完善" : "回应当前问题";
     document.getElementById("actions-surface").classList.toggle("requires-attention", Boolean(blocker));

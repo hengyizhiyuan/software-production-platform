@@ -162,13 +162,25 @@ def response_contract_expression_guidance(contract: ResponseContract | None) -> 
             "domain answer with a capability pitch."
         )
     else:
-        rules.append(
-            "This is Production Mode. Treat the request as a software-production goal and "
-            "route the response into the existing governed preparation/admission path instead "
-            "of falling back to a generic tutorial, external-tool redirect, or large copy-paste "
-            "implementation. This alignment grants no Work, Steering or Executor authority and "
-            "must not imply execution has started."
-        )
+        if contract.advancement_obligation is AdvancementObligation.ACK_AND_EXECUTE:
+            rules.append(
+                "This is Production Request Mode. Treat the explicit repository action as "
+                "authority to start the existing governed Work admission and read-only "
+                "repository acquisition path. Acknowledge the supplied source and current next "
+                "step; do not ask whether to proceed again. Missing feature detail may remain "
+                "pending when repository discovery can proceed. Do not imply private access, "
+                "delivery authorization, final acceptance, or a code change has already been "
+                "granted or completed."
+            )
+        else:
+            rules.append(
+                "This is Production Request Mode. Treat the request as a software-production "
+                "goal and route the response into the existing governed preparation/admission "
+                "path instead of falling back to a generic tutorial, external-tool redirect, or "
+                "large copy-paste implementation. Report the current preparation state and next "
+                "step. This alignment grants no Work, Steering or Executor authority and must "
+                "not imply execution has started before Human admission."
+            )
     if contract.explore_strategy is ExploreInteractionStrategy.INTENT_REFINEMENT:
         rules.append(
             "This EXPLORE turn uses Intent Refinement. Briefly preserve what is already "

@@ -11,6 +11,7 @@ from spg.domain.interaction import (
     InteractionAssessmentCandidate, InteractionRecord,
     WorkFocusClassification, WorkImpactDisposition,
 )
+from spg.domain.response_contract import production_intent_evidence
 from spg.domain.wic_intelligence import (
     GovernanceCandidateKind, InferenceDisposition, PatternSignal,
     ProgressiveSemanticStructure, QuestionDisposition, QuestionEvaluation,
@@ -33,6 +34,11 @@ _GENERAL_INFORMATION_QUESTION = re.compile(
 _WORK_INTENT = re.compile(
     r"(?:我想|我要|我们想|我们要|请帮|帮我|开发|创建|搭建|建设|改造|实现|"
     r"\bi want\b|\bwe want\b|\bhelp me\b|\bbuild\b|\bcreate\b|\bimplement\b)",
+    re.IGNORECASE,
+)
+_DEFERABLE_FEATURE_REFINEMENT = re.compile(
+    r"(?:feature|functionality|scope|requirement|what.+(?:add|change|implement)|"
+    r"功能|需求|范围|改什么|实现什么)",
     re.IGNORECASE,
 )
 
@@ -125,6 +131,11 @@ def build_progressive_semantics(
     if text.endswith(("?", "？")): signals.append(PatternSignal.DIRECT_QUESTION)
     if "建议" in text: signals.append(PatternSignal.RECOMMENDATION_REQUEST)
     if _NEW_OBJECT.search(text): signals.append(PatternSignal.NEW_LONG_LIVED_OBJECT)
+    production_evidence = production_intent_evidence(text)
+    if production_evidence.production_request:
+        signals.append(PatternSignal.PRODUCTION_REQUEST)
+    if production_evidence.repository_relevant:
+        signals.append(PatternSignal.REPOSITORY_SOURCE)
 
     human_owned = bool(_HUMAN_AUTHORITY.search(text))
     safe_inference = bool(_SAFE_REVERSIBLE.search(text)) and not human_owned
@@ -163,19 +174,32 @@ def build_progressive_semantics(
             rationale="The answer changes a Human-owned high-impact boundary.",
         ))
     for question in candidate.unresolved_material_questions:
+        defer_for_repository_preparation = bool(
+            production_evidence.production_request
+            and production_evidence.repository_relevant
+            and not human_owned
+            and _DEFERABLE_FEATURE_REFINEMENT.search(question)
+        )
         questions.append(QuestionEvaluation(
             question=question, affected_dimensions=("SCOPE",),
             answer_already_available=False,
             safe_reversible_assumption_available=safe_inference,
             watt_authorized_to_choose=safe_inference,
-            blocks_next_governed_step=not safe_inference,
+            blocks_next_governed_step=(
+                not safe_inference and not defer_for_repository_preparation
+            ),
             cognitive_cost="LOW", decision_value=20 if safe_inference else 70,
             disposition=(
                 QuestionDisposition.INFER_REVERSIBLY
                 if safe_inference
                 else QuestionDisposition.DEFER_UNTIL_RELEVANT
             ),
-            rationale="Question policy ranks unresolved decisions by decision impact and cognitive cost.",
+            rationale=(
+                "Repository discovery can proceed before feature refinement; the "
+                "question remains explicit but does not block Work formation."
+                if defer_for_repository_preparation
+                else "Question policy ranks unresolved decisions by decision impact and cognitive cost."
+            ),
         ))
     askable = [
         (index, item)

@@ -113,7 +113,19 @@ class RepositoryAssetService:
                     self._git(repository, "-c", "user.name=Watt", "-c", "user.email=watt@localhost", "commit", "-m", "Initialize repository asset")
                 else:
                     try:
-                        self._git(self.asset_root, "clone", "--no-local", "--", source, str(repository))
+                        # Repository intake preserves complete history for the
+                        # selected default branch without fetching unrelated
+                        # remote branches. Production Environment remains the
+                        # owner of the eventual execution Workspace.
+                        self._git(
+                            self.asset_root,
+                            "clone",
+                            "--no-local",
+                            "--single-branch",
+                            "--",
+                            source,
+                            str(repository),
+                        )
                     except ProductInvariantViolation:
                         candidate = {
                             "resource_id": None,

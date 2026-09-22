@@ -119,9 +119,11 @@ def test_unconfirmed_remote_repository_remains_nonblocking_asset_candidate(
         tmp_path / "imports",
     )
     original_git = assets._git
+    clone_arguments = []
 
     def inaccessible(path, *args):
         if args and args[0] == "clone":
+            clone_arguments.append(args)
             raise ProductInvariantViolation("synthetic access denial")
         return original_git(path, *args)
 
@@ -138,6 +140,14 @@ def test_unconfirmed_remote_repository_remains_nonblocking_asset_candidate(
 
     assert assets.intake(request) == candidate
     assert candidate["condition"] == "UNRESOLVED"
+    assert clone_arguments == [(
+        "clone",
+        "--no-local",
+        "--single-branch",
+        "--",
+        request.source,
+        str(tmp_path / "assets" / str(request.request_id)),
+    )]
     assert candidate["resource_id"] is None
     assert set(candidate["authorization"].values()) == {"UNKNOWN"}
     assert "Work may continue" in candidate["message"]

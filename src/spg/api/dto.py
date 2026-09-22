@@ -309,6 +309,11 @@ class SharedUnderstandingResponse(ApiDto):
     work_focus_history: tuple[UUID, ...]
     latest_work_transition: InteractionWorkTransitionResponse | None
     new_work_formation_pending: bool
+    production_request_detected: bool
+    repository_source: str | None
+    production_admission_state: str | None
+    repository_acquisition_state: str | None
+    production_next_step: str | None
     selected_design_schema_identity: str | None
     selected_design_schema_version: str | None
     design_schema_selection_rationale: str | None
@@ -608,6 +613,11 @@ class SharedUnderstandingResponse(ApiDto):
                 )
             ),
             new_work_formation_pending=projection.new_work_formation_pending,
+            production_request_detected=projection.production_request_detected,
+            repository_source=projection.repository_source,
+            production_admission_state=projection.production_admission_state,
+            repository_acquisition_state=projection.repository_acquisition_state,
+            production_next_step=projection.production_next_step,
             selected_design_schema_identity=(
                 projection.selected_design_schema_identity
             ),

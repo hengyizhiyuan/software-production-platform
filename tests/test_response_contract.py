@@ -205,7 +205,7 @@ def test_capability_alignment_routes_direct_build_into_governed_production_prepa
     )
 
     alignment = contract.capability_alignment
-    assert alignment.response_mode is CapabilityAlignmentMode.PRODUCTION
+    assert alignment.response_mode is CapabilityAlignmentMode.PRODUCTION_REQUEST
     assert alignment.production_relevance is ProductionRelevance.DIRECT_PRODUCTION_GOAL
     assert alignment.watt_capability_match is True
     assert contract.interaction_mode is Mode.DESIGN
@@ -214,6 +214,78 @@ def test_capability_alignment_routes_direct_build_into_governed_production_prepa
     guidance = response_contract_expression_guidance(contract)
     assert "existing governed preparation/admission path" in guidance
     assert "grants no Work, Steering or Executor authority" in guidance
+
+
+def test_repository_change_request_overrides_provider_how_to_downgrade():
+    contract = build_response_contract(
+        _assessment(
+            Intent.HOW_TO,
+            design_intent_frame=_software_frame("existing repository"),
+        ),
+        source_records=(
+            _record("Please use https://github.com/acme/shop and add a login feature."),
+        ),
+        interpretation=_intent(Mode.ANSWER),
+    )
+
+    assert (
+        contract.capability_alignment.response_mode
+        is CapabilityAlignmentMode.PRODUCTION_REQUEST
+    )
+    assert contract.interaction_mode is Mode.EXECUTE
+    assert contract.advancement_obligation is Advance.ACK_AND_EXECUTE
+    assert Move.PROCEED in contract.response_moves
+    guidance = response_contract_expression_guidance(contract)
+    assert "do not ask whether to proceed again" in guidance
+    assert "delivery authorization" in guidance
+
+
+def test_repository_how_to_question_remains_advisory():
+    contract = build_response_contract(
+        _assessment(
+            Intent.HOW_TO,
+            design_intent_frame=_software_frame("GitHub project"),
+        ),
+        source_records=(_record("How do I add login to GitHub projects?"),),
+        interpretation=_intent(Mode.ANSWER),
+    )
+
+    assert (
+        contract.capability_alignment.response_mode
+        is CapabilityAlignmentMode.PRODUCTION_ADVISORY
+    )
+    assert contract.interaction_mode is Mode.ANSWER
+
+
+def test_uncommitted_product_idea_does_not_start_production():
+    contract = build_response_contract(
+        _assessment(
+            Intent.BUILD,
+            design_intent_frame=_software_frame("Airbnb-like application"),
+        ),
+        source_records=(_record("I want to build an app like Airbnb."),),
+        interpretation=_intent(Mode.EXPLORE),
+    )
+
+    assert contract.capability_alignment.response_mode is CapabilityAlignmentMode.KNOWLEDGE
+    assert contract.interaction_mode is Mode.EXPLORE
+
+
+def test_imperative_repo_bug_fix_is_a_production_request():
+    contract = build_response_contract(
+        _assessment(
+            Intent.HOW_TO,
+            design_intent_frame=_software_frame("existing repository"),
+        ),
+        source_records=(_record("Fix this bug in my repo."),),
+        interpretation=_intent(Mode.ANSWER),
+    )
+
+    assert (
+        contract.capability_alignment.response_mode
+        is CapabilityAlignmentMode.PRODUCTION_REQUEST
+    )
+    assert contract.interaction_mode is Mode.EXECUTE
 
 
 def test_capability_alignment_cannot_claim_production_without_a_capability_match():

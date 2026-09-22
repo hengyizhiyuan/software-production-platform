@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 import os
 from pathlib import Path
 import subprocess
+import time
 from uuid import UUID, uuid4
 
 from alembic import command
@@ -1647,6 +1648,217 @@ def test_admission_api_requires_human_action_and_preserves_same_interaction(
         ).json() == guided_payload
         for table in PRODUCTION_TABLES:
             assert _count(postgres_database, table) == 0, table.name
+
+
+def test_explicit_repository_action_automatically_executes_governed_admission(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    source = "https://github.com/acme/automatic-admission"
+    work, interactions = _services_for_resource(
+        postgres_database,
+        tmp_path,
+        source,
+    )
+    with postgres_database.unit_of_work() as uow:
+        resource = ProductStore(uow.session).default_resource()
+    assert resource is not None
+
+    class ExistingRepositoryIntake:
+        def __init__(self) -> None:
+            self.requests = []
+
+        def intake(self, request):
+            self.requests.append(request)
+            return {"resource_id": str(resource.id)}
+
+    assets = ExistingRepositoryIntake()
+    driver = _RecordingDriver()
+    client = TestClient(
+        create_http_application(
+            application=object(),
+            database=postgres_database,
+            work_service=work,
+            orchestrator=_NoopOrchestrator(),
+            steering_driver=driver,
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=interactions,
+            repository_asset_service=assets,
+        ),
+        raise_server_exceptions=False,
+    )
+    interaction = interactions.create_interaction(
+        human_identity="human:requester",
+        start_work_context=True,
+    )
+    with client:
+        submitted = client.post(
+            f"/api/interactions/{interaction.id}/turns",
+            json={
+                "content": f"Please pull {source} and add a login feature.",
+                "human_identity": "human:requester",
+            },
+        )
+        assert submitted.status_code == 202, submitted.text
+        deadline = time.monotonic() + 5
+        payload = None
+        while time.monotonic() < deadline:
+            candidate = client.get(
+                f"/api/interactions/{interaction.id}/shared-understanding"
+            ).json()
+            if (
+                candidate["governed_work_id"] is not None
+                and candidate["production_admission_state"] == "WORK_CREATED"
+            ):
+                payload = candidate
+                break
+            time.sleep(0.01)
+
+    assert payload is not None
+    assert payload["production_admission_state"] == "WORK_CREATED"
+    assert payload["repository_acquisition_state"] == "REPOSITORY_REALITY_BOUND"
+    assert payload["governed_revision"]["repository_identity"] == source
+    assert len(assets.requests) == 1
+    assert assets.requests[0].authority_identity == "human:requester"
+    assert driver.scheduled == [UUID(payload["governed_work_id"])]
+
+
+@pytest.mark.parametrize(
+    "content,expected_repository_state,expected_intakes",
+    (
+        ("Fix this bug in my repo.", "WAITING_FOR_REPOSITORY_SOURCE", 0),
+        (
+            "Pull https://github.com/acme/private-repository and fix this bug.",
+            "WAITING_FOR_REPOSITORY_AUTHORIZATION",
+            1,
+        ),
+    ),
+)
+def test_unbound_repository_request_creates_work_without_bypassing_access(
+    postgres_database: Database,
+    tmp_path: Path,
+    content: str,
+    expected_repository_state: str,
+    expected_intakes: int,
+) -> None:
+    work, interactions = _services_for_resource(
+        postgres_database,
+        tmp_path,
+        "test://repository-reference-only",
+    )
+
+    class UnresolvedRepositoryIntake:
+        def __init__(self) -> None:
+            self.requests = []
+
+        def intake(self, request):
+            self.requests.append(request)
+            return {"resource_id": None, "condition": "UNRESOLVED"}
+
+    driver = _RecordingDriver()
+    assets = UnresolvedRepositoryIntake()
+    client = TestClient(
+        create_http_application(
+            application=object(),
+            database=postgres_database,
+            work_service=work,
+            orchestrator=_NoopOrchestrator(),
+            steering_driver=driver,
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=interactions,
+            repository_asset_service=assets,
+        ),
+        raise_server_exceptions=False,
+    )
+    interaction = interactions.create_interaction(
+        human_identity="human:requester",
+        start_work_context=True,
+    )
+    with client:
+        response = client.post(
+            f"/api/interactions/{interaction.id}/turns",
+            json={
+                "content": content,
+                "human_identity": "human:requester",
+            },
+        )
+        assert response.status_code == 202, response.text
+        deadline = time.monotonic() + 5
+        payload = None
+        while time.monotonic() < deadline:
+            candidate = client.get(
+                f"/api/interactions/{interaction.id}/shared-understanding"
+            ).json()
+            if (
+                candidate["governed_work_id"] is not None
+                and candidate["production_admission_state"] == "WORK_CREATED"
+            ):
+                payload = candidate
+                break
+            time.sleep(0.01)
+
+    assert payload is not None
+    assert payload["production_admission_state"] == "WORK_CREATED"
+    assert payload["repository_acquisition_state"] == expected_repository_state
+    assert payload["governed_revision"]["repository_identity"] is None
+    assert len(assets.requests) == expected_intakes
+    assert driver.scheduled == []
+
+
+@pytest.mark.parametrize(
+    "content",
+    (
+        "How do I add a feature to GitHub projects?",
+        "I want to build something like Airbnb.",
+    ),
+)
+def test_advisory_and_exploration_turns_do_not_auto_admit_work(
+    postgres_database: Database,
+    tmp_path: Path,
+    content: str,
+) -> None:
+    work, interactions = _services_for_resource(
+        postgres_database,
+        tmp_path,
+        "test://non-production-turn",
+    )
+    client = TestClient(
+        create_http_application(
+            application=object(),
+            database=postgres_database,
+            work_service=work,
+            orchestrator=_NoopOrchestrator(),
+            steering_driver=_RecordingDriver(),
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=interactions,
+        ),
+        raise_server_exceptions=False,
+    )
+    interaction = interactions.create_interaction(
+        human_identity="human:requester",
+        start_work_context=True,
+    )
+    with client:
+        response = client.post(
+            f"/api/interactions/{interaction.id}/turns",
+            json={"content": content, "human_identity": "human:requester"},
+        )
+        assert response.status_code == 202, response.text
+        turn_id = response.json()["turn_id"]
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            turn = client.get(
+                f"/api/interactions/{interaction.id}/turns/{turn_id}"
+            ).json()
+            if turn["status"] in {"COMPLETED", "FAILED"}:
+                break
+            time.sleep(0.01)
+        payload = client.get(
+            f"/api/interactions/{interaction.id}/shared-understanding"
+        ).json()
+
+    assert turn["status"] == "COMPLETED"
+    assert payload["governed_work_id"] is None
 
 
 @pytest.mark.real_codex

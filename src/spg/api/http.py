@@ -7,7 +7,7 @@ import json
 from pathlib import Path, PurePosixPath
 from typing import Annotated
 from urllib.parse import quote
-from uuid import UUID
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
@@ -50,6 +50,7 @@ from spg.application.preview_security import PREVIEW_CONTENT_SECURITY_POLICY
 from spg.application.interaction import WorkInteractionService
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.post_admission import WorkPostAdmissionService
+from spg.application.production_admission import ProductionAdmissionTrigger
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.runtime_activation import RuntimeActivationService
@@ -131,6 +132,7 @@ def create_http_application(
     interaction_service: WorkInteractionService | None = None,
     guided_design_service: GuidedDesignApplicationService | None = None,
     native_executor_runtime: NativeExecutorRuntimeService | None = None,
+    repository_asset_service: RepositoryAssetService | None = None,
 ) -> FastAPI:
     """Compose one ASGI application over the existing application bootstrap path."""
 
@@ -143,7 +145,11 @@ def create_http_application(
         selected_database = selected_database or work_service.database
 
     configured_workspace = getattr(getattr(container, "settings", None), "workspace_root", Path(".spg/workspaces"))
-    asset_service = RepositoryAssetService(selected_database, configured_workspace.parent / "repository-assets", configured_workspace.parent / "repository-imports")
+    asset_service = repository_asset_service or RepositoryAssetService(
+        selected_database,
+        configured_workspace.parent / "repository-assets",
+        configured_workspace.parent / "repository-imports",
+    )
     delivery_service = DeliveryApplicationService(selected_database)
     settings = getattr(container, "settings", None)
     software_runtime = SoftwareRuntimeService(delivery_service,
@@ -188,6 +194,16 @@ def create_http_application(
     )
     selected_native_vectors = NativeCandidateVectorService(selected_database)
     control_room = ControlRoomService(selected_database, work_service)
+    if selected_interaction is not None:
+        production_admission_trigger = ProductionAdmissionTrigger(
+            selected_interaction,
+            work_service,
+            asset_service,
+            selected_post_admission,
+        )
+        selected_interaction.configure_production_admission(
+            production_admission_trigger.execute
+        )
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
@@ -196,6 +212,13 @@ def create_http_application(
             resume_turns = getattr(selected_interaction, "resume_pending_turns", None)
             if callable(resume_turns):
                 resume_turns()
+            resume_admissions = getattr(
+                selected_interaction,
+                "schedule_ready_production_admission_recovery",
+                None,
+            )
+            if callable(resume_admissions):
+                resume_admissions()
         selected_post_admission.bootstrap_incomplete_ready_long_lived()
         selected_steering_driver.resume_safely_eligible_works()
         selected_orchestrator.resume_safely_eligible_works()
@@ -227,6 +250,7 @@ def create_http_application(
     api.state.interaction_service = selected_interaction
     api.state.native_executor_runtime = selected_native_executor
     api.state.native_candidate_vectors = selected_native_vectors
+    api.state.repository_asset_service = asset_service
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
@@ -785,9 +809,42 @@ def create_http_application(
         request: InteractionWorkAdmissionRequest,
     ) -> SharedUnderstandingResponse:
         service = required_interaction_service()
+        selected_resource_id = request.engineering_resource_id
+        projection = service.get_shared_understanding(interaction_id)
+        assessment = projection.latest_assessment
+        if (
+            assessment is None
+            or not projection.latest_assessment_current
+            or assessment.id != request.assessment_id
+            or assessment.basis_fingerprint != request.basis_fingerprint
+            or projection.readiness is None
+            or projection.readiness.status.value != "READY"
+        ):
+            raise InteractionInvariantViolation(
+                "Only the exact current READY assessment may prepare repository Reality"
+            )
+        if selected_resource_id is None and projection.repository_source:
+            intake = asset_service.intake(
+                RepositoryIntakeRequest(
+                    request_id=uuid5(
+                        NAMESPACE_URL,
+                        "watt:interaction-repository:"
+                        f"{interaction_id}:{assessment.id}:{projection.repository_source}",
+                    ),
+                    source=projection.repository_source,
+                    title=(projection.interpreted_motive or "Repository production Work")[:200],
+                    description=(
+                        projection.desired_outcome
+                        or "Discover repository Reality for the admitted production request."
+                    )[:4000],
+                    authority_identity=request.authority_identity,
+                )
+            )
+            if intake.get("resource_id") is not None:
+                selected_resource_id = UUID(intake["resource_id"])
         work = work_service.admit_interaction_work(
             interaction_id,
-            engineering_resource_id=request.engineering_resource_id,
+            engineering_resource_id=selected_resource_id,
             use_default_resource=False,
             assessment_id=request.assessment_id,
             basis_fingerprint=request.basis_fingerprint,

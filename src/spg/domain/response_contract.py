@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
+import re
 from typing import Literal
 from uuid import UUID
 
@@ -36,6 +37,9 @@ class ExploreInteractionStrategy(StrEnum):
 class CapabilityAlignmentMode(StrEnum):
     KNOWLEDGE = "KNOWLEDGE"
     PRODUCTION_ADVISORY = "PRODUCTION_ADVISORY"
+    PRODUCTION_REQUEST = "PRODUCTION_REQUEST"
+    # Historical contracts used PRODUCTION. Keep it readable while new
+    # decisions use the more precise request/admission vocabulary.
     PRODUCTION = "PRODUCTION"
 
 
@@ -67,6 +71,9 @@ class CapabilityAlignmentContext(BaseModel):
             CapabilityAlignmentMode.PRODUCTION_ADVISORY: (
                 ProductionRelevance.POTENTIAL_PRODUCTION_GOAL
             ),
+            CapabilityAlignmentMode.PRODUCTION_REQUEST: (
+                ProductionRelevance.DIRECT_PRODUCTION_GOAL
+            ),
             CapabilityAlignmentMode.PRODUCTION: ProductionRelevance.DIRECT_PRODUCTION_GOAL,
         }[self.response_mode]
         if self.production_relevance is not expected:
@@ -77,6 +84,97 @@ class CapabilityAlignmentContext(BaseModel):
         ):
             raise ValueError("Production alignment requires an evidenced Watt capability match")
         return self
+
+
+class ProductionIntentEvidence(BaseModel):
+    """Turn evidence used by Response Contract and governed admission projection.
+
+    This does not grant Work authority. It makes an explicit Human production
+    request stable across Provider classifications and records the repository
+    source that the existing admission path may bind after Human authorization.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    production_request: bool = False
+    repository_relevant: bool = False
+    repository_source: str | None = None
+    action_requested: bool = False
+    advisory_question: bool = False
+    evidence: tuple[str, ...] = ()
+
+
+_HTTPS_REPOSITORY = re.compile(
+    r"https://(?:github\.com|gitlab\.com|bitbucket\.org)/[^\s<>'\"，。]+",
+    re.IGNORECASE,
+)
+_REPOSITORY_SIGNAL = re.compile(
+    r"(?:github\s+(?:repo(?:sitory)?|project)|git\s+repo(?:sitory)?|"
+    r"(?:my|this|the|our)\s+repo(?:sitory)?|code\s+archive|source\s+archive|"
+    r"代码仓库|源码仓库|项目仓库|这个仓库|我的仓库|代码包|源码包)",
+    re.IGNORECASE,
+)
+_PRODUCTION_ACTION = re.compile(
+    r"(?:拉取|克隆|开发|修改|修复|新增|添加|实现|改造|接入|升级|重构|"
+    r"\b(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b)",
+    re.IGNORECASE,
+)
+_DIRECT_REQUEST = re.compile(
+    r"(?:请|帮我|帮忙|需要你|给我|直接|"
+    r"\b(?:please|help\s+me|can\s+you|could\s+you)\b)",
+    re.IGNORECASE,
+)
+_ACTION_OPENING = re.compile(
+    r"^\s*(?:请\s*)?(?:拉取|克隆|开发|修改|修复|新增|添加|实现|改造|接入|升级|重构|"
+    r"(?:please\s+)?(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b)",
+    re.IGNORECASE,
+)
+_ADVISORY_OPENING = re.compile(
+    r"^\s*(?:如何|怎么|怎样|有什么办法|how\s+(?:do|can|should)\s+i\b)",
+    re.IGNORECASE,
+)
+
+
+def production_intent_evidence(text: str) -> ProductionIntentEvidence:
+    """Extract bounded, source-backed production-routing evidence from one Turn."""
+
+    value = text.strip()
+    url_match = _HTTPS_REPOSITORY.search(value)
+    repository_source = (
+        None
+        if url_match is None
+        else url_match.group(0).rstrip(".,;:!?)]}，。；：！？")
+    )
+    repository_relevant = bool(repository_source or _REPOSITORY_SIGNAL.search(value))
+    action_requested = bool(_PRODUCTION_ACTION.search(value))
+    advisory_question = bool(_ADVISORY_OPENING.search(value))
+    explicit_request = bool(
+        _DIRECT_REQUEST.search(value) or _ACTION_OPENING.search(value)
+    )
+    production_request = bool(
+        action_requested
+        and (explicit_request or repository_relevant)
+        and not advisory_question
+    )
+    evidence: list[str] = []
+    if repository_source:
+        evidence.append("HUMAN_SUPPLIED_REPOSITORY_URL")
+    elif repository_relevant:
+        evidence.append("HUMAN_REFERENCED_REPOSITORY")
+    if action_requested:
+        evidence.append("HUMAN_REQUESTED_SOFTWARE_CHANGE")
+    if explicit_request:
+        evidence.append("DIRECT_EXECUTION_LANGUAGE")
+    if advisory_question:
+        evidence.append("ADVISORY_QUESTION_FORM")
+    return ProductionIntentEvidence(
+        production_request=production_request,
+        repository_relevant=repository_relevant,
+        repository_source=repository_source,
+        action_requested=action_requested,
+        advisory_question=advisory_question,
+        evidence=tuple(evidence),
+    )
 
 
 class DesignCollaborationMode(StrEnum):

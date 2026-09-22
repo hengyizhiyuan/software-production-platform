@@ -107,6 +107,22 @@ class WorkAdmissionReadinessStatus(StrEnum):
     BLOCKED = "BLOCKED"
 
 
+class ProductionAdmissionExecutionState(StrEnum):
+    READY_FOR_ADMISSION = "READY_FOR_ADMISSION"
+    ADMISSION_RUNNING = "ADMISSION_RUNNING"
+    WORK_CREATED = "WORK_CREATED"
+    ADMISSION_RETRY_REQUIRED = "ADMISSION_RETRY_REQUIRED"
+
+
+class RepositoryAcquisitionState(StrEnum):
+    READY_TO_ACQUIRE = "READY_TO_ACQUIRE"
+    REPOSITORY_ACQUISITION_RUNNING = "REPOSITORY_ACQUISITION_RUNNING"
+    REPOSITORY_REALITY_BOUND = "REPOSITORY_REALITY_BOUND"
+    WAITING_FOR_REPOSITORY_SOURCE = "WAITING_FOR_REPOSITORY_SOURCE"
+    WAITING_FOR_REPOSITORY_AUTHORIZATION = "WAITING_FOR_REPOSITORY_AUTHORIZATION"
+    ACQUISITION_RETRY_REQUIRED = "ACQUISITION_RETRY_REQUIRED"
+
+
 class InteractionRecord(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -446,6 +462,11 @@ class SharedUnderstanding(BaseModel):
     work_focus_history: tuple[UUID, ...] = ()
     latest_work_transition: WorkTransitionRecord | None = None
     new_work_formation_pending: bool = False
+    production_request_detected: bool = False
+    repository_source: str | None = None
+    production_admission_state: ProductionAdmissionExecutionState | None = None
+    repository_acquisition_state: RepositoryAcquisitionState | None = None
+    production_next_step: str | None = None
     selected_design_schema_identity: str | None = None
     selected_design_schema_version: str | None = None
     design_schema_selection_rationale: str | None = None
