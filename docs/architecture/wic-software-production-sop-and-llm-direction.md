@@ -179,16 +179,17 @@ judgment basis, and requested advancement posture. It is interaction evidence,
 not a new source of Engineering Semantic Truth or authority to execute. A
 request to proceed still uses existing admission and governance mechanisms.
 
-Software Domain Grounding is the next independent layer: richer software-domain
-concepts and constraints may inform interpretation and judgment, but must retain
-their source and epistemic status. Its architecture direction is captured in
+Software Domain Grounding is a bounded implemented foundation: richer
+software-domain concepts and constraints may inform interpretation and judgment,
+but retain their source and epistemic status. Its architecture is captured in
 [WIC Software Domain Grounding](wic-software-domain-grounding.md). The related
-[Context Orchestration](wic-context-orchestration.md) direction selects what is
+[Context Orchestration](wic-context-orchestration.md) foundation selects what is
 needed now without absorbing ECF, while
 [Decision and Evidence Architecture](wic-decision-evidence-architecture.md)
-keeps rationale, decisions, and evidence distinct. These documents implement no
-domain library, Context Orchestrator, Decision Memory service, SOP library, or
-Guardian escalation engine.
+keeps rationale, decisions, and evidence distinct. The foundations implement
+immutable contracts, bounded selection, and Task Contract lineage. They do not
+implement a general Context Orchestrator platform, Decision Memory service,
+complete domain/SOP library, or Guardian escalation engine.
 
 ## 7. Relationship to Progressive Admission
 
@@ -239,8 +240,8 @@ The revised sequence is:
    semantics as a separate task. **Completed in the 2026-09-20 milestone.**
 3. Close the current Human-experience / production phase. **Completed.**
 4. Establish WIC Response Contract under its separate authorization.
-   **Implemented and ready for Human Review under focused qualification;
-   Human Acceptance remains pending.**
+   **Implemented and Human-accepted for the bounded WIC optimization
+   milestone.**
 5. Implement the bounded Software Domain Grounding foundation while preserving
    Pattern as advisory cognitive structure. **Foundation implemented.**
 6. Implement the bounded `Software Production SOP × LLM` foundation, consuming
@@ -260,9 +261,9 @@ WIC_SOFTWARE_PRODUCTION_SOP_REDESIGN = ARCHITECTURE_BASELINE / FOUNDATION_IMPLEM
 
 ENGINEERING_SEMANTIC_TRUTH = IMPLEMENTED / QUALIFIED / HUMAN_ACCEPTED
 
-RESPONSE_CONTRACT = IMPLEMENTED / REFINING
+RESPONSE_CONTRACT = IMPLEMENTED / HUMAN_ACCEPTED
 
-RESPONSE_CONTRACT_HUMAN_REVIEW = READY / PENDING_HUMAN
+RESPONSE_CONTRACT_HUMAN_REVIEW = PASS
 
 SOFTWARE_DOMAIN_GROUNDING = FOUNDATION_IMPLEMENTED
 
@@ -276,9 +277,9 @@ ORIGINAL_FREE_EXPRESSION_PRINCIPLE = PRESERVED
 
 DETERMINISTIC_SKELETON_PLUS_PROBABILISTIC_INTELLIGENCE = FUTURE_ARCHITECTURE_DIRECTION
 
-RESPONSE_CONTRACT_IMPLEMENTATION = SEPARATELY_AUTHORIZED
+RESPONSE_CONTRACT_IMPLEMENTATION = COMPLETE_WITHIN_CURRENT_MILESTONE
 
-DOMAIN_GROUNDING_AND_SOP_IMPLEMENTATION_AUTHORIZED = NO
+DOMAIN_GROUNDING_AND_SOP_FOUNDATIONS = IMPLEMENTED
 
 NOT_IMPLEMENTED = PATTERN_STUDIO / PATTERN_MANAGEMENT_UI / PATTERN_EVOLUTION_ENGINE
 

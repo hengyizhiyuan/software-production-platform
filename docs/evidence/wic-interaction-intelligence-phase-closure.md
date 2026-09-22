@@ -1,32 +1,165 @@
-# WIC Interaction Intelligence Phase Closure
+# WIC Optimization Milestone Closure
 
-Date: 2026-09-17
+Initial phase closure: 2026-09-17
+
+Final milestone closure: 2026-09-22
 
 Starting revision: `33daa29c356eafefd28d8bbfae72571d0b585e2a`
 
+Final implementation baseline: `624c06cdddfc9b6dbd05b4de2f0645b197ae023c`
+
+Branch: `feature/spg-first-vertical-slice`
+
 ```text
+MILESTONE
+    WIC_OPTIMIZATION
+
 WIC_INTERACTION_INTELLIGENCE_PHASE
-    CLOSED / PASS WITH PRESERVED HUMAN FINDINGS
+    CLOSED / PASS
 
-HUMAN_RETEST
-    COMPLETED
-    MATERIALLY_IMPROVED
-    SUFFICIENT_TO_MOVE_PROGRAM_FORWARD
+HUMAN_ACCEPTANCE
+    PASS
 
-JSON_INVALID_RELIABILITY_BLOCKER
-    RESOLVED
+FULL_REGRESSION
+    PASS
 
-HUMAN_EXPERIENCE_FINDINGS
-    OPEN / EXPLICITLY_DEFERRED
+CLOSURE
+    PASS
 ```
 
-This is a phase closure, not a claim that WIC is finished or that Human
-experience is perfect. The current interaction architecture and experience are
-useful enough to stop this optimization loop and return to the main Watt
-engineering roadmap. The remaining findings below are retained as future
-product/UX obligations.
+This is a milestone closure, not a claim that WIC is finished or that Human
+experience is perfect. Human acceptance has been granted for the current entry
+interaction quality. No further WIC optimization is required in this milestone.
+The 2026-09-17 Retest and its verbatim record remain below as historical
+evidence; the final acceptance in this section supersedes its then-open
+product-quality disposition without erasing the observations.
 
-## Human Retest evidence
+The implementation baseline is the exact repository revision inspected before
+this closure-only documentation and test-entry repair. The final closure commit
+is reported by Git after commit and push because a commit cannot contain its own
+SHA.
+
+## Final implemented Repository Reality
+
+| Capability | Implemented reality and preserved boundary |
+|---|---|
+| Response Contract | Provider-neutral immutable `wic-response-contract-v4` selects the turn-scoped obligation, opening, response moves, reasoning sequence, information/question budgets, judgment basis, and advancement posture. It remains `ADVISORY_ONLY`. |
+| Interaction modes and strategies | `EXPLORE`, `ANALYZE`, `DESIGN`, `DECIDE`, `ANSWER`, `DIAGNOSE`, `EXECUTE`, `CORRECT`, and `STATUS` are implemented. EXPLORE composes `OPEN_EXPLORATION` or `INTENT_REFINEMENT`; design collaboration composes explore/review/decide postures without adding a lifecycle. |
+| Intent Refinement | The bounded EXPLORE strategy spends at most one question on an admitted high-impact unresolved decision and does not reopen settled execution intent. |
+| System Capability Reality | A versioned, fingerprinted `SystemCapabilityReality` describes Watt's evidenced software-production role and boundaries. It is capability truth, not marketing or execution authority. |
+| Capability Alignment | `KNOWLEDGE`, `PRODUCTION_ADVISORY`, and `PRODUCTION` distinguish ordinary answers, bounded software-production guidance, and explicit governed build/change intent. Alignment cannot admit Work or claim effects. |
+| Response recovery and trust | Human-visible response maturity is explicit as `PROVISIONAL`, `GOVERNED`, and `FINAL`. Incomplete transport and strict structured-output failures retain safe evidence, use bounded recovery where admitted, and never promote invalid output. Exact-turn retry preserves history rather than requiring message re-entry. |
+| Engineering Semantic Truth | Governed semantic facts preserve source, authority, epistemic status, supersession, and exact identity. Current facts flow into Response realization, Task Contracts, Completion Contracts, and Executor instructions without being rewritten by conversational form. |
+| Domain Grounding | Immutable Engineering Pattern contracts, structured applicability metadata, dimensions/options, evidence direction, and a bounded catalog are implemented as advisory foundations. There is no Pattern Studio, evolution engine, or complete library. |
+| Context Orchestration | A bounded `ContextOrchestrator` selects source-owned candidates under item, character, and per-source budgets while keeping Semantic/Work Reality authoritative and Pattern/SOP guidance optional. It is not the complete ECF or a general retrieval platform. |
+| SOP foundation | Engineering Activity, SOP guidance, evidence expectations, and non-authorizing checkpoints are implemented. Full adaptive SOP runtime and administration remain future work. |
+| Task Contract | Immutable Task Contracts project objective, scope, constraints, acceptance meaning, evidence requirements, out-of-scope limits, authority, semantic facts, SOP, decision, and evidence lineage into PWU Completion Contracts and Executor instructions. The proposed full lifecycle is not implemented. |
+| Decision and Evidence | Bounded Reasoning Summary, Decision Trace, and Human/Engineering/Assurance Evidence Reference contracts preserve lineage without raw chain-of-thought or a new authority owner. There is no general Decision/Evidence store. |
+| Work Plan / Steering projection | The API projects completed/current/known-next steps plus persisted Plan revision history, change reason, affected steps, and Reality references. Steering still owns formal `WHAT NEXT`; the projection is Human visibility, not a workflow engine. |
+
+## Architecture and documentation reconciliation
+
+The implementation preserves Work Admission, Human Authority, Engineering
+Semantic Truth, Steering, PWU, Executor, Verification, Guardian, Preview, and
+Delivery ownership. The current documentation was reconciled as follows:
+
+- [WIC Response Contract](../architecture/wic-response-contract.md) now records
+  bounded Human Acceptance and implemented Domain/SOP foundations;
+- [WIC Software Production SOP × LLM](../architecture/wic-software-production-sop-and-llm-direction.md)
+  no longer contradicts the implemented Context, Task, and Decision/Evidence
+  foundations;
+- [WIC Intelligence Architecture Closure](../architecture/watt-wic-intelligence-architecture-closure.md)
+  explicitly marks its original `NOT_STARTED` values as the historical
+  2026-09-15 state; and
+- [Watt AI-Native Software Production Architecture](../architecture/watt-ai-native-software-production-architecture.md)
+  remains the consolidated current status map.
+
+No product capability, architecture subsystem, authority transfer, or WIC
+redesign was introduced by closure reconciliation.
+
+## Final Human acceptance evidence
+
+The Human Governor accepts the current WIC usability level and requires no
+further WIC optimization in this milestone. The accepted observations are:
+
+- product exploration is materially more focused and pragmatic;
+- Watt asks fewer, higher-value clarification questions;
+- responses better match current Human intent and interaction stage;
+- tested exploration avoids premature over-expansion;
+- Capability Alignment preserves Watt's software-production identity while
+  keeping ordinary knowledge answers non-promotional; and
+- entry interaction quality is usable and sufficiently mature for closure.
+
+```text
+HUMAN_ACCEPTANCE = PASS
+```
+
+## Known non-blocking findings
+
+- Long-horizon multi-turn stability still needs continued real-world
+  validation across varied projects and failure histories.
+- The AI Software Production Evaluation Framework is an architecture baseline;
+  its evaluation platform, corpus, automation, and leaderboard are not
+  implemented.
+- ECF is not the complete Engineering Reality infrastructure; current Context
+  Orchestration uses bounded source-owned projections.
+- Guardian is not the complete Assurance System; existing verification and
+  integration seams do not imply complete Guardian capability.
+- Domain Pattern, SOP, Task Contract lifecycle, and Decision/Evidence storage
+  remain bounded foundations rather than complete management platforms.
+- Future WIC evolution should remain evidence- and scenario-driven rather than
+  restarting broad optimization from preference alone.
+
+These findings do not block the accepted WIC optimization milestone.
+
+## Final verification
+
+The final repository tree was verified once after resolving the real
+closure-blocking test-entry and frozen-evidence portability defects found by the
+initial run.
+
+| Surface | Final result |
+|---|---|
+| Full Python regression with isolated PostgreSQL `spg_test` | 1,401 passed; 10 protected real-Provider cases skipped; 0 failed; 4 existing Pydantic deprecation warnings |
+| WIC / Response Contract / recovery / trust | PASS as part of Full Regression |
+| Engineering Semantic Truth | PASS as part of Full Regression |
+| Work Reality / Steering / Plan projection | PASS as part of Full Regression |
+| Production flow and Verification | PASS as part of Full Regression |
+| Watt-native Executor, continuity, recovery, and evidence | PASS as part of Full Regression |
+| Web/UI Node suite | 69 passed; 0 failed |
+| Alembic schema | head/current both `20260919_44` |
+| Python compile/import | PASS |
+| `uv lock --check` | PASS |
+| `git diff --check` and frozen-artifact EOL policy | PASS |
+
+The ten skips are explicitly authorization/environment-gated real-Provider
+probes. They do not conceal a deterministic failure; provider boundaries also
+retain their prior bounded real-provider evidence.
+
+The first command invocation stopped during collection because the documented
+`uv run pytest` entry did not add the repository root to Python's import path,
+so repository-owned `benchmarks` and `docker` modules could not be collected.
+The minimal closure fix adds `pythonpath = ["."]` to the pytest configuration.
+
+The first complete run then produced `1,400 passed, 10 skipped, 1 failed`. The
+only failure was the frozen Open WIC byte-integrity test: its expected hashes
+had been changed on a Windows checkout to CRLF-transformed bytes even though the
+Git blobs had never changed. The closure fix restores the SHA-256 values of the
+canonical LF Git blobs and pins both frozen artifacts to `eol=lf` in
+`.gitattributes`. The focused integrity test passed, and the permitted final
+Full Regression on the repaired tree passed with 1,401 tests.
+
+## Explicit closure decision
+
+```text
+MILESTONE = WIC_OPTIMIZATION
+HUMAN_ACCEPTANCE = PASS
+FULL_REGRESSION = PASS
+CLOSURE = PASS
+READY_FOR_NEXT_MAJOR_INITIATIVE = YES
+```
+
+## Historical 2026-09-17 Human Retest evidence
 
 The Human Governor observed that interaction was materially more focused than
 earlier WIC behavior, response speed felt materially improved, and the current
@@ -150,7 +283,7 @@ It is an internal reusable evaluation tool for finding obvious conversational
 regressions before Human testing. It is not exposed as a Human-facing UI and
 this closure does not create a Conversation Lab.
 
-## Verification
+## Historical 2026-09-17 verification
 
 Final closure evidence is recorded after the bounded repair in this same
 checkpoint:
@@ -192,7 +325,7 @@ name also proved the `DB-01` guard by failing because it was not exactly
 the required database name. Neither setup finding is represented as a product
 failure or hidden as a successful first attempt.
 
-## Closure and next phase
+## Historical 2026-09-17 phase conclusion
 
 Turn Intent, Cognitive State, candidate-first `BUILD`, answer-first `HOW_TO`,
 Interaction Strategy, DeepSeek selection, and Fast Reception are not reopened.

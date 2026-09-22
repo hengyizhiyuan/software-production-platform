@@ -43,7 +43,7 @@ separate services, databases, agents, or user-interface surfaces.
 
 | Layer | Conceptual owner | Primary question | Current status |
 |---|---|---|---|
-| Interaction Intelligence | Response Contract | How should Watt collaborate with the Human now? | v3 implemented; refining |
+| Interaction Intelligence | Response Contract | How should Watt collaborate with the Human now? | v4 implemented; Human-accepted for the WIC optimization milestone |
 | Context Intelligence | Context Orchestrator | What governed information is needed now? | Bounded selection foundation implemented |
 | Engineering Reality | ECF | What context exists, with what source and freshness? | Foundation/seams established; full capability pending |
 | Domain Intelligence | Software Domain Grounding | What should an engineer consider? | Pattern representation and structured activation foundation implemented |
@@ -454,7 +454,7 @@ Platform remains future work.
 ## Implementation status
 
 ```text
-RESPONSE_CONTRACT = V4 IMPLEMENTED / REFINING
+RESPONSE_CONTRACT = V4 IMPLEMENTED / HUMAN_ACCEPTED
 INTENT_REFINEMENT_STRATEGY = IMPLEMENTED
 SYSTEM_CAPABILITY_REALITY = FOUNDATION_IMPLEMENTED
 GOVERNED_RESPONSE_RECOVERY = FOUNDATION_IMPLEMENTED

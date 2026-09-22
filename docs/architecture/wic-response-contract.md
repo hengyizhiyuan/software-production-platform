@@ -2,9 +2,10 @@
 
 Date: 2026-09-21
 
-Status: **IMPLEMENTED / READY_FOR_HUMAN_REVIEW** under the current focused
-qualification and sampled real observations. Human Review remains a separate
-gate; this document does not claim Human Acceptance or milestone closure.
+Status: **IMPLEMENTED / HUMAN_ACCEPTED** for the bounded WIC optimization
+milestone closed on 2026-09-22. The acceptance applies to the current entry
+interaction quality and preserved authority boundaries; it does not claim that
+WIC, rich response rendering, or long-horizon evaluation is complete.
 
 Current qualification observations and their limits are recorded in
 [Response Contract Human Review evidence](../evidence/wic-response-contract-review-20260921.md).
@@ -520,16 +521,18 @@ alone.
 Follow the [regression and Golden Journey policy](watt-regression-protection-and-golden-journey-governance.md):
 protect the invariant at the cheapest sufficient layer, then use bounded
 integration/browser evidence for cross-layer behavior. Full Regression and
-milestone closure are outside this task.
+the final milestone decision are recorded in the
+[WIC optimization closure evidence](../evidence/wic-interaction-intelligence-phase-closure.md).
 
 ## Future layers and non-goals
 
-Software Domain Grounding may later improve the concepts and evidence consumed
-by WIC; Software Production SOP may later supply reusable sufficiency and
-escalation policy. They should consume the contract's explicit obligations
-without reinterpreting its communication preferences as product facts. The
-[future WIC direction](wic-software-production-sop-and-llm-direction.md) records
-both layers as next work, not completed capabilities.
+The bounded Software Domain Grounding and Software Production SOP foundations
+now supply provider-neutral Pattern, activity, checkpoint, and evidence
+contracts consumed through Context Orchestration and Task Contract projection.
+They consume the contract's explicit obligations without reinterpreting its
+communication preferences as product facts. Full adaptive Pattern/SOP runtime,
+management, and evaluation infrastructure remain future work; see
+[WIC Software Production SOP × LLM](wic-software-production-sop-and-llm-direction.md).
 
 WIC Evaluation Corpus is a future supporting capability, not part of this
 implementation. Its intended purpose is long-term evaluation of interaction
@@ -537,19 +540,18 @@ quality, regression, and Human collaboration behavior using Watt Dogfood cases,
 adapted public software benchmarks, and expert-designed scenarios. No benchmark
 framework, corpus storage, or evaluation pipeline is introduced here.
 
-This task does not implement a full domain library, production SOP library,
+This milestone does not implement a full domain library, production SOP library,
 Guardian engine, ECF, replacement lifecycle, new scheduler, or revised Executor,
-DeepSeek transport, Preview, or Delivery architecture. It neither reopens the
-closed prior milestone nor declares Human Acceptance for this new one.
+Preview, or Delivery architecture. It preserves those existing boundaries.
 
 ```text
 RESPONSE_CONTRACT = IMPLEMENTED
 RESPONSE_CONTRACT_REFINEMENT = IMPLEMENTED
-READY_FOR_HUMAN_REVIEW = YES
-SOFTWARE_DOMAIN_GROUNDING = NEXT
-SOFTWARE_PRODUCTION_SOP = NEXT
+READY_FOR_HUMAN_REVIEW = COMPLETE
+SOFTWARE_DOMAIN_GROUNDING = FOUNDATION_IMPLEMENTED
+SOFTWARE_PRODUCTION_SOP = FOUNDATION_IMPLEMENTED / FULL_RUNTIME_PENDING
 WIC_EVALUATION_CORPUS = FUTURE_SUPPORTING_CAPABILITY
 ENGINEERING_SEMANTIC_TRUTH_BOUNDARY = PRESERVED
 STEERING_AUTHORITY = PRESERVED
-HUMAN_ACCEPTANCE = PENDING_HUMAN
+HUMAN_ACCEPTANCE = PASS
 ```

@@ -34,6 +34,7 @@ spg = "spg.cli:main"
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+pythonpath = ["."]
 markers = [
     "postgresql: requires the explicitly configured real PostgreSQL test database",
     "real_codex: requires explicit authorization for one real Codex SDK execution",
