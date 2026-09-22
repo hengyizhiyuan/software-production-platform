@@ -21,6 +21,20 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 ## Current Stage
 
+**2026-09-22 — Production Environment Foundation v1 — IMPLEMENTED / FOCUSED
+VERIFICATION PASS.** Work-bound environment and multi-repository Workspace
+contracts, policy-driven lifecycle transitions, container-provider boundary,
+Preview projection, Git continuity, explicit Human Delivery authorization,
+resource references, Production Record v1, ECF Reality payloads and Guardian
+Intake payloads are implemented without changing Executor authority or building
+general Runtime orchestration, managed Git, GC, or Full Production Passport.
+The Brownfield completion slice now connects the existing admitted Work, Task
+Contract, PWU, Native Queue/Worker/Executor, Production Environment Provider,
+isolated Workspace, independent Verification, Preview, Human Authorization,
+Runtime Commit, Production Record, ECF refresh, and Guardian Intake lineage.
+Focused real-runtime qualification uses PostgreSQL, a real Docker container, and
+the existing Native Executor kernel; Human Acceptance remains pending.
+
 **2026-09-10 — Repository-independent Work production — IMPLEMENTED / FOCUSED VALIDATION PASS / READY_FOR_HUMAN_ACCEPTANCE.** A user-provided repository is now an optional Work Asset rather than a production prerequisite. Work and Guided Design can begin with no repository; at production readiness Watt allocates a deterministic local managed execution workspace and preserves the existing proposal review, SPG, Verification, Candidate, integration, Runtime Commit, Trusted Baseline, and Delivery boundaries. An inaccessible remote URL remains an `UNRESOLVED` Asset candidate with unknown capabilities and cannot be used for production. No OAuth, SSH-key, remote push, Project, lifecycle, Runtime Manager, or port-model capability was introduced. See [Repository Asset and Managed Execution Workspace](docs/architecture/repository-asset-and-managed-execution-workspace.md) and the [focused validation record](docs/validation/repository-optional-production-flow.md).
 
 **2026-09-10 — Human Acceptance Blocker Resolution — READY_FOR_HUMAN_ACCEPTANCE.** Adds an explicit independent New Work entry and conservatively detects a clearly different long-lived product/system objective inside active Work conversation. Existing WIC transition authority remains Human-governed; no Work is created automatically. Focused validation passed and the `watt-delivery-acceptance` app is serving the corrected source at `http://127.0.0.1:8009/app`. Human product acceptance remains pending. See the [blocker-resolution record](docs/validation/human-acceptance-blocker-resolution.md).

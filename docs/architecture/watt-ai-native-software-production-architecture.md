@@ -49,6 +49,7 @@ separate services, databases, agents, or user-interface surfaces.
 | Domain Intelligence | Software Domain Grounding | What should an engineer consider? | Pattern representation and structured activation foundation implemented |
 | Production Intelligence | Software Production SOP | How should this engineering activity progress? | Activity/checkpoint/evidence foundation implemented |
 | Governance | Steering and existing authority boundaries | What governed action is allowed and next? | Steering implemented within current scope |
+| Production Environment | Watt production orchestration | What Work-bound workspace, toolchain, runtime/preview, and delivery resources are prepared? | Foundation v1 contracts and provider seams implemented; integrated orchestration pending |
 | Execution | Task Contract, PWU, Executor | What bounded work is executed, and how? | Task Contract foundation integrated into PWU/Executor |
 | Assurance | Guardian | Is the result sufficiently supported and trustworthy? | Foundation/integration boundary established; full capability pending |
 
@@ -334,6 +335,28 @@ PWU owns the governed execution lifecycle. Executor owns how admitted work is
 performed inside its envelope. Neither SOP nor Task Contract grants authority
 beyond admitted Work and current governance.
 
+### Production Environment foundation
+
+The [Watt Production Environment Architecture](watt-production-environment-architecture.md)
+freezes a Work-centric execution-environment direction:
+
+```text
+Work
+  → Production Environment
+  → Workspace
+  → Runtime / Preview
+  → Delivery
+  → Production Passport
+```
+
+Production Environment prepares and governs the minimum sufficient production
+resources for admitted Work. It consumes ECF-owned Engineering Reality, provides
+attributable environment evidence to Guardian, preserves Git continuity, and
+does not replace Work, ECF, Executor, Verification, Delivery, or Human
+authority. Its lifecycle, Resource Reference Graph, managed Git direction, and
+Production Passport remain architecture only; no Runtime implementation is
+authorized by this baseline.
+
 ### Task Contract lifecycle direction
 
 The candidate lifecycle is:
@@ -437,6 +460,7 @@ Core Architecture
   Domain Grounding
   Software Production SOP
   Task Contract
+  Production Environment
   Guardian
 
 Cross-cutting Capability
@@ -473,6 +497,7 @@ CONTEXT_ORCHESTRATOR = FOUNDATION_IMPLEMENTED / GENERAL_PLATFORM_PENDING
 SOFTWARE_DOMAIN_GROUNDING = FOUNDATION_IMPLEMENTED
 SOFTWARE_PRODUCTION_SOP = FOUNDATION_IMPLEMENTED
 TASK_CONTRACT = FOUNDATION_IMPLEMENTED / PWU_INTEGRATED
+PRODUCTION_ENVIRONMENT = FOUNDATION_V1_IMPLEMENTED / INTEGRATED_ORCHESTRATION_PENDING
 DECISION_EVIDENCE = FOUNDATION_IMPLEMENTED / EMBEDDED_LINEAGE
 TASK_CONTRACT_LIFECYCLE = ARCHITECTURE_DIRECTION / IMPLEMENTATION_PENDING
 AI_SOFTWARE_PRODUCTION_EVALUATION_FRAMEWORK = ARCHITECTURE_BASELINE / PLATFORM_PENDING
@@ -490,6 +515,10 @@ NOT_IMPLEMENTED:
 - Evaluation Platform
 - Leaderboard or public ranking
 - Automated evaluation infrastructure
+- Production Environment Runtime or Lifecycle Policy Engine
+- Resource Reference Graph storage or garbage collection
+- Managed Git hosting
+- Full Production Passport
 - Full adaptive Software Production SOP runtime and administration
 - Automated knowledge mining
 - General retrieval/index/caching Context Orchestrator platform

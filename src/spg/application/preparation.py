@@ -205,6 +205,7 @@ class PreparationService:
             attempt_id=attempt.id,
             repository_identity=snapshot.repository_identity,
             source_revision=snapshot.repository_revision,
+            repository_ref=snapshot.repository_ref,
         )
 
         with self.database.unit_of_work() as unit_of_work:

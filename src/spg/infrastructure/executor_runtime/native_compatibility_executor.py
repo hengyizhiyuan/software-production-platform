@@ -9,6 +9,9 @@ import time
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 from spg.application.executor_runtime import NativeExecutorRuntimeService
+from spg.application.native_production_environment import (
+    NativeProductionEnvironmentRuntime,
+)
 from spg.domain.execution import (
     ExecutorDispatchRequest,
     ExecutorDispatchResult,
@@ -54,6 +57,7 @@ class NativeQueuedExecutorCapability:
         environment_profile: str,
         poll_seconds: float = 1.0,
         wait_seconds: float = 3600.0,
+        production_environment: NativeProductionEnvironmentRuntime | None = None,
     ) -> None:
         self.database = database
         self.runtime = runtime
@@ -62,6 +66,7 @@ class NativeQueuedExecutorCapability:
         self.environment_profile = environment_profile
         self.poll_seconds = poll_seconds
         self.wait_seconds = wait_seconds
+        self.production_environment = production_environment
 
     def dispatch(self, request: ExecutorDispatchRequest) -> ExecutorDispatchResult:
         started = datetime.now(UTC)
@@ -73,9 +78,19 @@ class NativeQueuedExecutorCapability:
                 self._handle(request, entry.id)
             )
             if observation.runtime_mode is ExecutionMode.FINISHED:
-                return self._result(request, observation.terminal_outcome, started)
+                return self._terminal_result(
+                    request,
+                    observation.terminal_outcome,
+                    started,
+                    getattr(observation, "final_checkpoint_id", None),
+                )
             if observation.runtime_mode is ExecutionMode.STOPPED:
-                return self._result(request, observation.terminal_outcome, started)
+                return self._terminal_result(
+                    request,
+                    observation.terminal_outcome,
+                    started,
+                    getattr(observation, "final_checkpoint_id", None),
+                )
             time.sleep(self.poll_seconds)
         return ExecutorDispatchResult(
             provider_reference=f"watt-native:{request.execution.attempt_id}",
@@ -106,11 +121,22 @@ class NativeQueuedExecutorCapability:
             dispatch = RuntimeStore(uow.session).execution_dispatch_for_attempt(attempt_id)
         if dispatch is None:
             return None
-        return self._result_for_attempt(
+        result = self._result_for_attempt(
             attempt_id,
             state.terminal_outcome,
             dispatch.dispatched_at,
         )
+        production_environment = getattr(self, "production_environment", None)
+        if production_environment is not None:
+            environment = production_environment.suspend(
+                attempt_id,
+                evidence_references=self._environment_evidence_references(
+                    attempt_id,
+                    state.current_checkpoint_id,
+                ),
+            )
+            result = self._with_environment_metadata(result, environment)
+        return result
 
     def _admission(self, request: ExecutorDispatchRequest) -> NativeExecutionAdmission:
         execution = request.execution
@@ -189,6 +215,21 @@ class NativeQueuedExecutorCapability:
             max_active_seconds=int(self.wait_seconds),
             provider_profile=self.provider_profile,
         )
+        environment_binding = None
+        production_environment = getattr(self, "production_environment", None)
+        if production_environment is not None:
+            task_contract = work_unit.completion_contract.task_contract
+            task_contract_reference = (
+                f"task-contract:{task_contract.task_contract_id}"
+                if task_contract is not None
+                else f"pwu-contract:{contract.id}"
+            )
+            environment_binding = production_environment.ensure(
+                execution,
+                work_id=work_id,
+                task_contract_reference=task_contract_reference,
+                selected_branch=snapshot.repository_ref.removeprefix("refs/heads/"),
+            )
         workspace_manifest = WorkspaceManifest(
             workspace_id=workspace_id,
             work_id=work_id,
@@ -208,6 +249,13 @@ class NativeQueuedExecutorCapability:
                     write_scope=write_paths,
                     forbidden_paths=forbidden_paths,
                 ),
+            ),
+            service_resources=(
+                ()
+                if environment_binding is None
+                else production_environment.service_resources(
+                    environment_binding
+                )
             ),
             evidence_namespace=f"native:{execution.attempt_id}",
             retention_policy="native-hot-30d",
@@ -272,6 +320,59 @@ class NativeQueuedExecutorCapability:
             materialization_path=str(workspace),
             required_resource_profile=self.resource_profile,
             available_at=datetime.now(UTC),
+        )
+
+    def _terminal_result(
+        self,
+        request: ExecutorDispatchRequest,
+        outcome: AttemptTerminalOutcome | None,
+        started: datetime,
+        checkpoint_id: UUID | None,
+    ) -> ExecutorDispatchResult:
+        result = self._result(request, outcome, started)
+        production_environment = getattr(self, "production_environment", None)
+        if production_environment is None:
+            return result
+        environment = production_environment.suspend(
+            request.execution.attempt_id,
+            evidence_references=self._environment_evidence_references(
+                request.execution.attempt_id,
+                checkpoint_id,
+            ),
+        )
+        return self._with_environment_metadata(result, environment)
+
+    def _environment_evidence_references(
+        self,
+        attempt_id: UUID,
+        checkpoint_id: UUID | None,
+    ) -> tuple[str, ...]:
+        with self.database.unit_of_work() as uow:
+            evidence = NativeExecutionStore(uow.session).evidence_for_attempt(attempt_id)
+        return (
+            f"native-attempt:{attempt_id}",
+            *((f"native-checkpoint:{checkpoint_id}",) if checkpoint_id else ()),
+            *(
+                f"native-evidence:{item.id}:{item.content_digest}"
+                for item in evidence
+            ),
+        )
+
+    @staticmethod
+    def _with_environment_metadata(result, environment):
+        return result.model_copy(
+            update={
+                "metadata": {
+                    **result.metadata,
+                    "production_environment_id": str(environment.id),
+                    "production_workspace_id": str(environment.workspace_id),
+                    "environment_reference": f"production-environment:{environment.id}",
+                    "environment_lifecycle_state": environment.lifecycle_state.value,
+                    "environment_evidence_references": list(
+                        environment.evidence_references
+                    ),
+                }
+            }
         )
 
     @staticmethod

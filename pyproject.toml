@@ -38,6 +38,8 @@ pythonpath = ["."]
 markers = [
     "postgresql: requires the explicitly configured real PostgreSQL test database",
     "real_codex: requires explicit authorization for one real Codex SDK execution",
+    "cross_repository: requires sibling ECF and Guardian repositories",
+    "real_container: requires a local Docker Engine and qualified image",
 ]
 
 [tool.setuptools.packages.find]

@@ -2,6 +2,8 @@
 
 FROM ghcr.io/astral-sh/uv:0.12.5 AS uv
 
+FROM docker:29-cli AS docker-cli
+
 FROM python:3.13-slim-bookworm AS runtime-base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -16,6 +18,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=uv /uv /uvx /usr/local/bin/
+COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
 
 WORKDIR /app
 

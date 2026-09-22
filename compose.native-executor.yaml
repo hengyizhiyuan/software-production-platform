@@ -15,6 +15,7 @@ services:
       - native-postgres-data:/var/lib/postgresql/data
 
   app:
+    image: ${SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_IMAGE:-watt-native-executor-runtime:local}
     build:
       context: .
       dockerfile: Dockerfile
@@ -34,6 +35,9 @@ services:
       SPG_NATIVE_EXECUTOR_BACKEND: watt-native
       SPG_NATIVE_EXECUTOR_WORKER_PROFILE: local-container-v1
       SPG_NATIVE_EXECUTOR_RESOURCE_PROFILE: standard
+      SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_STORE_ROOT: /var/lib/spg/production-environments
+      SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_IMAGE: ${SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_IMAGE:-watt-native-executor-runtime:local}
+      SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_WORKSPACE_VOLUME: watt-native-workspaces
       SPG_NATIVE_EXECUTOR_INFERENCE_PROVIDER: ${SPG_NATIVE_EXECUTOR_INFERENCE_PROVIDER:-deepseek}
       SPG_NATIVE_EXECUTOR_INFERENCE_MODEL: ${SPG_NATIVE_EXECUTOR_INFERENCE_MODEL:-deepseek-flash}
       SPG_NATIVE_EXECUTOR_INFERENCE_REASONING_EFFORT: ${SPG_NATIVE_EXECUTOR_INFERENCE_REASONING_EFFORT:-high}
@@ -55,6 +59,7 @@ services:
       retries: 30
       start_period: 15s
     networks: [control]
+    group_add: ["${DOCKER_GID:-0}"]
     volumes:
       - type: bind
         source: ./.git
@@ -62,6 +67,7 @@ services:
         read_only: true
       - native-app-data:/var/lib/spg
       - native-workspaces:/var/lib/spg/native-workspaces
+      - /var/run/docker.sock:/var/run/docker.sock
 
   native-coordinator:
     build:
@@ -93,6 +99,7 @@ services:
       SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT: /var/lib/spg/native-workspaces
       SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN: ${SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN:?Set a dedicated native Tool Host token}
       SPG_NATIVE_EXECUTOR_CONTAINER_ISOLATION_REQUIRED: "true"
+      SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_WORKSPACE_VOLUME: watt-native-workspaces
       SPG_NATIVE_EXECUTOR_RECEIPT_SPOOL_ROOT: /home/spg/.codex
     init: true
     read_only: true
@@ -105,10 +112,12 @@ services:
       timeout: 4s
       retries: 20
     networks: [executor]
+    group_add: ["${DOCKER_GID:-0}"]
     volumes:
       - native-app-data:/var/lib/spg:ro
       - native-workspaces:/var/lib/spg/native-workspaces
       - native-tool-receipts:/home/spg/.codex
+      - /var/run/docker.sock:/var/run/docker.sock
 
   native-worker:
     profiles: [provider]
@@ -156,5 +165,6 @@ volumes:
   native-postgres-data:
   native-app-data:
   native-workspaces:
+    name: watt-native-workspaces
   native-checkpoints:
   native-tool-receipts:

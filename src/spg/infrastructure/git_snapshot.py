@@ -76,6 +76,11 @@ class GitProposedSnapshotBuilder:
         finally:
             Path(index_name).unlink(missing_ok=True)
 
+        self._ensure_candidate_objects_available(
+            repository,
+            workspace.workspace_path,
+            commit_identity,
+        )
         actual_tree = GitExactReality._git(
             repository,
             "rev-parse",
@@ -101,6 +106,45 @@ class GitProposedSnapshotBuilder:
             proposed_commit_identity=commit_identity,
             tree_identity=tree_identity,
             authoritative_ref_revision=after,
+        )
+
+    @classmethod
+    def _ensure_candidate_objects_available(
+        cls,
+        authoritative_repository: Path,
+        execution_workspace: Path,
+        commit_identity: str,
+    ) -> None:
+        """Import detached candidate objects without advancing an authoritative ref.
+
+        Linked Git worktrees already share their object database with the source
+        repository.  A production-environment workspace may instead be a
+        self-contained clone so that its Git metadata is valid inside an
+        isolated runtime.  In that case only the immutable candidate objects
+        cross this boundary; delivery authorization still owns every ref move.
+        """
+
+        probe = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(authoritative_repository),
+                "cat-file",
+                "-e",
+                f"{commit_identity}^{{commit}}",
+            ],
+            check=False,
+            capture_output=True,
+        )
+        if probe.returncode == 0:
+            return
+        cls._run(
+            authoritative_repository,
+            "fetch",
+            "--no-tags",
+            "--no-write-fetch-head",
+            str(execution_workspace),
+            commit_identity,
         )
 
     def validate(

@@ -26,7 +26,14 @@ from spg.infrastructure.executor_runtime.landlock_sandbox import (
     LandlockUnavailable,
 )
 from spg.infrastructure.executor_runtime.local_storage import DeliveryReceiptSpool
+from spg.infrastructure.executor_runtime.production_environment_tool_host import (
+    ProductionEnvironmentNativeToolHost,
+)
 from spg.infrastructure.executor_runtime.workspace_host import WorkspaceMaterializationError
+from spg.infrastructure.production_environment import (
+    ContainerProductionEnvironmentProvider,
+    DockerCliContainerRuntime,
+)
 
 
 def create_tool_host_application() -> FastAPI:
@@ -48,6 +55,9 @@ def create_tool_host_application() -> FastAPI:
         ),
     )
     process_supervisor = NativeProcessSupervisor()
+    production_workspace_volume = os.environ.get(
+        "SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_WORKSPACE_VOLUME"
+    )
     isolation_required = os.environ.get(
         "SPG_NATIVE_EXECUTOR_CONTAINER_ISOLATION_REQUIRED", "false"
     ).lower() in {"1", "true", "yes", "on"}
@@ -101,11 +111,25 @@ def create_tool_host_application() -> FastAPI:
                 },
             ) from None
         try:
-            result = await LocalNativeToolHost(
-                workspace,
-                process_supervisor=process_supervisor,
-                process_sandbox=process_sandbox,
-            ).registry().execute(request)
+            production_host = ProductionEnvironmentNativeToolHost.from_manifest(
+                request.workspace,
+                provider=ContainerProductionEnvironmentProvider(
+                    DockerCliContainerRuntime(
+                        workspace_volume=production_workspace_volume,
+                        workspace_volume_root=allowed_root,
+                    )
+                ),
+            )
+            registry = (
+                production_host.registry()
+                if production_host is not None
+                else LocalNativeToolHost(
+                    workspace,
+                    process_supervisor=process_supervisor,
+                    process_sandbox=process_sandbox,
+                ).registry()
+            )
+            result = await registry.execute(request)
         except (
             NativeExecutionConflict,
             WorkspaceMaterializationError,

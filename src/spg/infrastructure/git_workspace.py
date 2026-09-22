@@ -101,7 +101,9 @@ class GitAttemptWorkspace:
         attempt_id: UUID,
         repository_identity: str,
         source_revision: str,
+        repository_ref: str | None = None,
     ) -> WorkspaceBinding:
+        del repository_ref
         repository = GitExactReality._repository_root(repository_path)
         root = workspace_root.resolve()
         workspace = root / str(attempt_id)
@@ -194,3 +196,131 @@ class GitAttemptWorkspace:
             elif line.startswith("HEAD ") and current_path is not None:
                 registered[current_path] = line.removeprefix("HEAD ")
         return registered
+
+
+class GitCloneAttemptWorkspace(GitAttemptWorkspace):
+    """Prepare a self-contained exact-revision clone for container mounting."""
+
+    def prepare(
+        self,
+        *,
+        repository_path: Path,
+        workspace_root: Path,
+        attempt_id: UUID,
+        repository_identity: str,
+        source_revision: str,
+        repository_ref: str | None = None,
+    ) -> WorkspaceBinding:
+        repository = GitExactReality._repository_root(repository_path)
+        branch = self._selected_branch(repository, repository_ref, source_revision)
+        root = workspace_root.resolve()
+        workspace = root / str(attempt_id)
+        if workspace.exists():
+            binding = WorkspaceBinding(
+                workspace_identity=f"attempt-clone:{attempt_id}",
+                workspace_path=workspace,
+                repository_identity=repository_identity,
+                repository_path=repository,
+                source_revision=source_revision,
+            )
+            self.validate(binding)
+            self._validate_acquisition(workspace, branch)
+            return binding
+        root.mkdir(parents=True, exist_ok=True)
+        GitExactReality._git(
+            repository,
+            "clone",
+            "--single-branch",
+            "--branch",
+            branch,
+            "--no-checkout",
+            "--no-hardlinks",
+            str(repository),
+            str(workspace),
+        )
+        GitExactReality._git(workspace, "checkout", "--detach", source_revision)
+        binding = WorkspaceBinding(
+            workspace_identity=f"attempt-clone:{attempt_id}",
+            workspace_path=workspace,
+            repository_identity=repository_identity,
+            repository_path=repository,
+            source_revision=source_revision,
+        )
+        self.validate(binding)
+        self._validate_acquisition(workspace, branch)
+        return binding
+
+    @staticmethod
+    def _validate_acquisition(workspace: Path, branch: str) -> None:
+        remote_branches = {
+            item
+            for item in GitExactReality._git(
+                workspace,
+                "for-each-ref",
+                "--format=%(refname:short)",
+                "refs/remotes/origin",
+            ).splitlines()
+            if item and item != "origin/HEAD"
+        }
+        if remote_branches != {f"origin/{branch}"}:
+            raise RepositoryRealityError(
+                "Attempt acquisition fetched branches outside selected Reality"
+            )
+        if GitExactReality._git(
+            workspace, "rev-parse", "--is-shallow-repository"
+        ) != "false":
+            raise RepositoryRealityError("Attempt acquisition lost commit history")
+
+    @staticmethod
+    def _selected_branch(
+        repository: Path,
+        repository_ref: str | None,
+        source_revision: str,
+    ) -> str:
+        selected_ref = repository_ref or GitExactReality._git(
+            repository, "symbolic-ref", "--short", "HEAD"
+        )
+        branch = selected_ref.removeprefix("refs/heads/")
+        check = subprocess.run(
+            ["git", "check-ref-format", "--branch", branch],
+            check=False,
+            capture_output=True,
+        )
+        if check.returncode:
+            raise RepositoryRealityError("Attempt repository branch is invalid")
+        selected = GitExactReality._git(
+            repository,
+            "rev-parse",
+            f"refs/heads/{branch}^{{commit}}",
+        )
+        expected = GitExactReality._git(
+            repository,
+            "rev-parse",
+            f"{source_revision}^{{commit}}",
+        )
+        if selected != expected:
+            raise RepositoryRealityError(
+                "Attempt branch does not resolve to the admitted Source Baseline"
+            )
+        return branch
+
+    def validate(self, binding: WorkspaceBinding) -> None:
+        self.validate_basis(binding)
+        if GitExactReality._git(binding.workspace_path, "status", "--porcelain"):
+            raise RepositoryRealityError(
+                "Attempt clone is no longer clean preparation reality"
+            )
+
+    def validate_basis(self, binding: WorkspaceBinding) -> None:
+        repository = GitExactReality._repository_root(binding.repository_path)
+        workspace = GitExactReality._repository_root(binding.workspace_path)
+        if workspace != binding.workspace_path.resolve() or workspace == repository:
+            raise RepositoryRealityError("Attempt clone identity is invalid")
+        head = GitExactReality._git(workspace, "rev-parse", "HEAD^{commit}")
+        expected = GitExactReality._git(
+            repository,
+            "rev-parse",
+            f"{binding.source_revision}^{{commit}}",
+        )
+        if head != expected:
+            raise RepositoryRealityError("Attempt clone HEAD is not the Source Baseline")

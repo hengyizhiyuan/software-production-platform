@@ -50,6 +50,16 @@ class Settings(BaseSettings):
     native_executor_tool_host_url: str = "http://native-tool-host:8011"
     native_executor_internal_token: SecretStr | None = None
     native_executor_workspace_root: Path = Path(".watt/native-executor/workspaces")
+    native_executor_production_environment_store_root: Path = Path(
+        ".watt/production-environments"
+    )
+    native_executor_production_environment_image: str = (
+        "watt-native-executor-runtime:local"
+    )
+    native_executor_production_environment_workspace_volume: str | None = Field(
+        default=None,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]+$",
+    )
     native_executor_poll_seconds: float = Field(default=1.0, ge=0.1, le=30)
     native_executor_compatibility_wait_seconds: float = Field(
         default=7200.0, ge=30.0, le=86400.0

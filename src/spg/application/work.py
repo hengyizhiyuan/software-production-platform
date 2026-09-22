@@ -6,6 +6,7 @@ import json
 from pathlib import Path, PurePosixPath
 import re
 import subprocess
+from typing import Protocol
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.completion import CompletionService
@@ -183,6 +184,10 @@ _HUMAN_ACTION_COPY: dict[
 }
 
 
+class AuthorizedProductionRecorder(Protocol):
+    def record_authorized_work(self, work_id: UUID) -> object: ...
+
+
 class WorkApplicationService:
     """Public Python product API; Runtime services retain transition authority."""
 
@@ -196,6 +201,8 @@ class WorkApplicationService:
         planner: ProductionPlanner | None = None,
         change_proposal_provider: RepositoryChangeProposalProvider | None = None,
         executor_binding: ExecutorBinding = DEFAULT_BINDING,
+        preparation: PreparationService | None = None,
+        production_recorder: AuthorizedProductionRecorder | None = None,
     ) -> None:
         self.database = database
         self.workspace_root = (workspace_root or Path(".spg/workspaces")).resolve()
@@ -208,8 +215,9 @@ class WorkApplicationService:
             change_proposal_provider or RepositoryAwareChangeProposalProvider()
         )
         self.executor_binding = executor_binding
+        self.production_recorder = production_recorder
         self.runtime = RuntimeService(database)
-        self.preparation = PreparationService(database)
+        self.preparation = preparation or PreparationService(database)
         self.execution = ExecutionService(database, preparation=self.preparation)
         self.completion = CompletionService(database, observer=self.execution.observer)
         self.verification = VerificationService(
@@ -2180,6 +2188,8 @@ class WorkApplicationService:
                 raise ProductInvariantViolation("Bound governed PWU is missing")
 
         if summary.runtime_commit_id is not None:
+            if self.production_recorder is not None:
+                self.production_recorder.record_authorized_work(work_id)
             return self.get_work(work_id)
         if summary.attempt_id is None:
             self.runtime.create_initial_attempt(binding.work_unit_id)
@@ -2301,6 +2311,8 @@ class WorkApplicationService:
                 repository_integration_effect_id=summary.integration_effect_id,
             )
         )
+        if self.production_recorder is not None:
+            self.production_recorder.record_authorized_work(work_id)
         return self.get_work(work_id)
 
     def list_attention(

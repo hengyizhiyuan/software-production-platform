@@ -192,6 +192,7 @@ class Application:
         selected_executor = executor
         selected_verifier = verifier
         selected_binding = executor_binding
+        selected_preparation = None
         if selected_executor is None and self.settings.executor_adapter == "codex-sdk":
             from spg.infrastructure.configured_executor import (
                 GovernedDedicatedExecutor,
@@ -209,8 +210,36 @@ class Application:
                 profile_identity="profile:local-docker-codex-e2e",
             )
         elif selected_executor is None and self.settings.executor_adapter == "watt-native":
+            from spg.application.native_production_environment import (
+                NativeProductionEnvironmentRuntime,
+            )
             from spg.infrastructure.executor_runtime.native_compatibility_executor import (
                 NativeQueuedExecutorCapability,
+            )
+            from spg.infrastructure.git_workspace import GitCloneAttemptWorkspace
+            from spg.infrastructure.production_environment import (
+                ContainerProductionEnvironmentProvider,
+                DockerCliContainerRuntime,
+            )
+            from spg.infrastructure.production_environment_store import (
+                JsonProductionEnvironmentStore,
+            )
+
+            production_environment = NativeProductionEnvironmentRuntime(
+                store=JsonProductionEnvironmentStore(
+                    self.settings.native_executor_production_environment_store_root
+                ),
+                provider=ContainerProductionEnvironmentProvider(
+                    DockerCliContainerRuntime(
+                        workspace_volume=(
+                            self.settings.native_executor_production_environment_workspace_volume
+                        ),
+                        workspace_volume_root=self.settings.workspace_root,
+                    )
+                ),
+                image_reference=(
+                    self.settings.native_executor_production_environment_image
+                ),
             )
 
             selected_executor = NativeQueuedExecutorCapability(
@@ -221,11 +250,16 @@ class Application:
                 environment_profile=self.settings.native_executor_worker_profile,
                 poll_seconds=self.settings.native_executor_poll_seconds,
                 wait_seconds=self.settings.native_executor_compatibility_wait_seconds,
+                production_environment=production_environment,
             )
             selected_binding = ExecutorBinding(
                 binding_ref="binding:watt-native-queue-v2",
                 capability_identity="capability:watt-native-executor",
                 profile_identity=self.settings.native_executor_worker_profile,
+            )
+            selected_preparation = PreparationService(
+                selected_database,
+                workspaces=GitCloneAttemptWorkspace(),
             )
         if (
             selected_verifier is None
@@ -252,6 +286,8 @@ class Application:
             "verifier": selected_verifier,
             "planner": planner,
         }
+        if selected_preparation is not None:
+            options["preparation"] = selected_preparation
         if selected_binding is not None:
             options["executor_binding"] = selected_binding
         return WorkApplicationService(
