@@ -75,11 +75,6 @@ def governed_branch_creation_target(
             and canonical_action
         ):
             return fact.value
-        if (
-            fact.subject == "repository.branch_name"
-            and fact.qualifiers.get("branch_kind") != "new"
-        ):
-            continue
         if _cites_explicit_branch_command(fact, record_for_id):
             return fact.value
     return None

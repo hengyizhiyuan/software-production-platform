@@ -21,6 +21,7 @@ from spg.domain.interaction import (
     RepositoryAcquisitionState,
     WorkAdmissionReadinessStatus,
 )
+from spg.domain.product import AttentionAction
 from spg.domain.response_contract import (
     production_intent_evidence,
     repository_acquisition_recovery_requested,
@@ -319,6 +320,79 @@ class ProductionAdmissionTrigger:
             observation=observation,
             authority_identity=authority_identity,
             rationale="Bind the Human-requested branch to current Work Reality.",
+        )
+
+    def execute_explicit_branch_turn(
+        self,
+        interaction_id: UUID,
+        assessment: InteractionAssessment,
+        request_record: InteractionRecord,
+    ) -> str | None:
+        """Admit and execute a branch-only Work change from its Human command."""
+
+        if assessment.candidate_change is None or assessment.basis_work_revision_id is None:
+            return None
+        candidate = assessment.candidate_change
+        if not set(candidate.changed_fields) <= {
+            "context_facts", "requests", "semantic_facts"
+        }:
+            return None
+        with self.work.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            interactions = InteractionStore(uow.session)
+            focused = interactions.interaction(interaction_id)
+            work_id = None if focused is None else focused.current_work_id
+            revision = (
+                None if work_id is None
+                else product.current_work_reality_revision(work_id)
+            )
+            target = governed_branch_creation_target(
+                assessment.engineering_semantic_facts,
+                record_for_id=interactions.record,
+            )
+            if revision is None or target is None:
+                return None
+            new_facts = tuple(
+                fact for fact in assessment.engineering_semantic_facts
+                if fact.id not in {old.id for old in revision.engineering_semantic_facts}
+            )
+            if (
+                assessment.basis_work_revision_id != revision.id
+                or revision.repository_ref == f"refs/heads/{target}"
+                or not new_facts
+                or any(
+                    fact.subject not in {"repository.branch_name", "repository.branch"}
+                    or fact.value != target
+                    or request_record.id not in fact.provenance.source_record_ids
+                    for fact in new_facts
+                )
+            ):
+                return None
+        self.work.decide_interaction_work_revision(
+            interaction_id,
+            assessment_id=assessment.id,
+            basis_fingerprint=assessment.basis_fingerprint,
+            expected_previous_revision_id=assessment.basis_work_revision_id,
+            action=AttentionAction.APPROVE,
+            authority_identity=request_record.source,
+            rationale="The Human explicitly requested creation of this exact branch.",
+        )
+        self.post_admission.steering_bootstrap.bootstrap(work_id)
+        observation = self.reconcile_governed_branch(
+            work_id,
+            interaction_id=interaction_id,
+            authority_identity=request_record.source,
+        )
+        self.post_admission.steering_driver.schedule(work_id)
+        if observation is not None and observation.get("condition") == "READY":
+            return (
+                f"已从当前仓库基线创建并绑定本地分支 {target}。"
+                "后续开发会在该分支上进行；这不表示分支已推送到远端。"
+            )
+        condition = "未知" if observation is None else observation.get("condition", "未知")
+        return (
+            f"已记录创建本地分支 {target} 的请求，但操作尚未成功"
+            f"（{condition}）。当前 Work 的分支未切换。"
         )
 
     def governed_branch_work_ids(self) -> tuple[UUID, ...]:

@@ -2676,6 +2676,32 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     with postgres_database.unit_of_work() as uow:
         base_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
     assert base_revision is not None
+    if actual_provider_fact:
+        steering_bootstrap = SteeringBootstrapService(postgres_database)
+        orchestrator = ProductionOrchestrator(work_service)
+        steering_driver = PlanSteeringDriver(
+            postgres_database, work_service, orchestrator, repository_assets=service,
+        )
+        post_admission = WorkPostAdmissionService(
+            work_service, steering_bootstrap, steering_driver, orchestrator,
+        )
+        trigger = ProductionAdmissionTrigger(
+            branch_interactions, work_service, service, post_admission,
+        )
+        answer = trigger.execute_explicit_branch_turn(
+            ready.interaction.id, proposal, pending.records[-1],
+        )
+        assert answer is not None and "已从当前仓库基线创建并绑定本地分支 test" in answer, {
+            key: value for key, value in service.latest_attempt_for_work(work_id).items()
+            if key in {"condition", "failure_category", "human_message", "technical_evidence"}
+        }
+        with postgres_database.unit_of_work() as uow:
+            branch_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+        assert branch_revision is not None
+        assert branch_revision.repository_ref == "refs/heads/test"
+        assert branch_revision.source_revision == acquired["revision"]
+        assert service.latest_attempt_for_work(work_id)["condition"] == "READY"
+        return
     governed = work_service.decide_interaction_work_revision(
         ready.interaction.id,
         assessment_id=proposal.id,

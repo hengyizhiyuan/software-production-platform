@@ -135,6 +135,7 @@ def test_branch_status_answer_uses_current_work_revision_not_model_plan() -> Non
     "subject,qualifiers",
     (
         ("repository.branch_name", {"branch_kind": "new"}),
+        ("repository.branch_name", {"branch_state": "new"}),
         ("repository.branch", {}),
     ),
 )

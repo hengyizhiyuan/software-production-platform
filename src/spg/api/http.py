@@ -248,6 +248,9 @@ def create_http_application(
             prepare_handler=production_admission_trigger.prepare,
             reality_provider=production_admission_trigger.projection,
         )
+        selected_interaction.configure_governed_branch_handler(
+            production_admission_trigger.execute_explicit_branch_turn
+        )
 
         def execution_reality(work_id: UUID) -> tuple[str | None, str | None]:
             projection = work_service.get_work(work_id)

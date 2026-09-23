@@ -565,6 +565,9 @@ class WorkInteractionService:
         self._production_admission_handler: Callable[
             [UUID, InteractionAssessment, InteractionRecord], None
         ] | None = None
+        self._governed_branch_handler: Callable[
+            [UUID, InteractionAssessment, InteractionRecord], str | None
+        ] | None = None
         self._production_admission_prepare_handler: Callable[
             [UUID, InteractionAssessment, InteractionRecord], None
         ] | None = None
@@ -626,6 +629,17 @@ class WorkInteractionService:
 
         with self._turn_lock:
             self._work_execution_reality_provider = provider
+
+    def configure_governed_branch_handler(
+        self,
+        handler: Callable[
+            [UUID, InteractionAssessment, InteractionRecord], str | None
+        ] | None,
+    ) -> None:
+        """Attach the bounded branch action authorized by the current Human Turn."""
+
+        with self._turn_lock:
+            self._governed_branch_handler = handler
 
     def record_production_admission_progress(
         self,
@@ -1864,6 +1878,13 @@ class WorkInteractionService:
                 assessment,
                 request_record,
             )
+            with self._turn_lock:
+                branch_handler = self._governed_branch_handler
+            branch_action_answer = (
+                None if branch_handler is None else branch_handler(
+                    turn.interaction_id, assessment, request_record
+                )
+            )
             realization: GovernedResponseRealization | None = None
             reconciliation: ResponseReconciliation | None = None
             delta_count = 0
@@ -1899,6 +1920,8 @@ class WorkInteractionService:
                     assessment,
                     latest_human_input=request_record.content,
                 )
+            if branch_action_answer is not None:
+                response_content = branch_action_answer
             self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
             with self.database.unit_of_work() as uow:
