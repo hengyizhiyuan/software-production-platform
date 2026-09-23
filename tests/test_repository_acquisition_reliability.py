@@ -127,18 +127,28 @@ def test_branch_status_answer_uses_current_work_revision_not_model_plan() -> Non
         ("如何创建分支 test？", None),
         ("不要创建分支 test", None),
         ("切一个新分支：other", None),
+        ("切换到已有分支：test", None),
+        ("切一个新分支：test2", None),
+    ),
+)
+@pytest.mark.parametrize(
+    "subject,qualifiers",
+    (
+        ("repository.branch_name", {"branch_kind": "new"}),
+        ("repository.branch", {}),
     ),
 )
 def test_provider_branch_vocabulary_requires_cited_human_command(
     human_command: str, expected: str | None,
+    subject: str, qualifiers: dict[str, str],
 ) -> None:
     source_id = uuid4()
     branch_fact = SimpleNamespace(
         is_current=True,
-        subject="repository.branch_name",
+        subject=subject,
         value="test",
         authority=SemanticFactAuthority.HUMAN_EXPLICIT,
-        qualifiers={"branch_kind": "new"},
+        qualifiers=qualifiers,
         provenance=SimpleNamespace(source_record_ids=(source_id,)),
     )
     record = SimpleNamespace(actor=InteractionActor.HUMAN, content=human_command)

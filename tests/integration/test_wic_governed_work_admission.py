@@ -339,28 +339,31 @@ class _CourseScheduleSemanticCapability:
 
 
 class _ExplicitBranchSemanticCapability:
-    def __init__(self, *, provider_variant: bool = False) -> None:
+    def __init__(
+        self, *, provider_variant: bool = False, actual_provider_fact: bool = False,
+    ) -> None:
         self.provider_variant = provider_variant
+        self.actual_provider_fact = actual_provider_fact
 
     def interpret(self, basis: InteractionInterpretationInput) -> InteractionAssessmentCandidate:
         revision = basis.active_work_context.work_revision
         latest = basis.records[-1]
         branch_name = EngineeringSemanticFactCandidate(
             candidate_id="explicit-branch-name",
-            subject="repository.branch_name",
+            subject="repository.branch" if self.actual_provider_fact else "repository.branch_name",
             relation=(
-                SemanticRelation.REFERENCE if self.provider_variant
+                SemanticRelation.REFERENCE if self.provider_variant or self.actual_provider_fact
                 else SemanticRelation.EQUALITY
             ),
             value="test",
             qualifiers=(
-                {"branch_kind": "new"} if self.provider_variant
+                {} if self.actual_provider_fact else {"branch_kind": "new"} if self.provider_variant
                 else {"state": "to_be_created"}
             ),
             authority=SemanticFactAuthority.HUMAN_EXPLICIT,
             epistemic_status=SemanticEpistemicStatus.CONFIRMED,
             source_record_ids=(latest.id,),
-            source_text="test" if self.provider_variant else latest.content,
+            source_text="test" if self.provider_variant or self.actual_provider_fact else latest.content,
             role_origin=SemanticRoleOrigin.EXPLICIT,
         )
         action = EngineeringSemanticFactCandidate(
@@ -381,7 +384,8 @@ class _ExplicitBranchSemanticCapability:
             candidate_constraints=revision.constraints,
             current_requests=(*revision.requests, latest.content),
             semantic_fact_candidates=(
-                (branch_name,) if self.provider_variant else (branch_name, action)
+                (branch_name,) if self.provider_variant or self.actual_provider_fact
+                else (branch_name, action)
             ),
             focus_classification=WorkFocusClassification.ON_TOPIC,
             impact_disposition=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
@@ -2573,12 +2577,16 @@ def test_repository_acquisition_unexpected_effect_failure_is_terminalized(
     assert "Traceback" not in observation["human_message"]
 
 
-@pytest.mark.parametrize("provider_variant", (False, True))
+@pytest.mark.parametrize(
+    "provider_variant,actual_provider_fact",
+    ((False, False), (True, False), (False, True)),
+)
 def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     postgres_database: Database,
     tmp_path: Path,
     services,
     provider_variant: bool,
+    actual_provider_fact: bool,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     if subprocess.run(("docker", "image", "inspect", "watt-native-executor-runtime:local"), capture_output=True).returncode:
@@ -2655,7 +2663,10 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
         ))
     branch_interactions = WorkInteractionService(
         postgres_database,
-        capability=_ExplicitBranchSemanticCapability(provider_variant=provider_variant),
+        capability=_ExplicitBranchSemanticCapability(
+            provider_variant=provider_variant,
+            actual_provider_fact=actual_provider_fact,
+        ),
     )
     pending = branch_interactions.append_and_assess(
         ready.interaction.id, "切一个新分支：test", human_identity="human:test",
@@ -2680,8 +2691,8 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     subjects = {
         fact.subject for fact in current_semantic_facts(branch_revision.engineering_semantic_facts)
     }
-    assert "repository.branch_name" in subjects
-    if not provider_variant:
+    assert ("repository.branch" if actual_provider_fact else "repository.branch_name") in subjects
+    if not provider_variant and not actual_provider_fact:
         assert "repository.branch_action" in subjects
     steering_bootstrap = SteeringBootstrapService(postgres_database)
     steering_bootstrap.bootstrap(work_id)
