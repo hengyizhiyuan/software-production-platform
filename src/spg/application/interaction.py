@@ -1847,11 +1847,12 @@ class WorkInteractionService:
                 future.add_done_callback(observed)
 
             controlled = turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED
+            branch_status_query = _repository_branch_status_question(request_record.content)
             assessment = self._assess_current(
                 turn.interaction_id,
                 on_response_delta=(
                     (lambda _delta: None)
-                    if controlled
+                    if controlled or branch_status_query
                     else lambda delta: self._publish_turn_response_delta(turn_id, delta)
                 ),
                 on_pipeline_stage=lambda stage: self._mark_turn_timing(turn_id, stage),
@@ -1879,6 +1880,13 @@ class WorkInteractionService:
             response_content = self._human_facing_response(
                 assessment.natural_response
             )
+            if branch_status_query and not controlled:
+                branch_status_answer = _repository_branch_status_answer(
+                    request_record.content,
+                    self.get_shared_understanding(turn.interaction_id),
+                )
+                if branch_status_answer is not None:
+                    response_content = branch_status_answer
             if controlled:
                 (
                     response_content,

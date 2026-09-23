@@ -17,6 +17,7 @@ from spg.application.orchestration import (
     ProductionOrchestrator,
 )
 from spg.application.assets import RepositoryAssetService
+from spg.application.repository_branch_authority import governed_branch_creation_target
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.steering import SteeringApplicationService
 from spg.application.semantic_steps import SemanticStepApplicationService
@@ -63,6 +64,7 @@ from spg.domain.steering import (
 )
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.model_runtime import ModelProviderError
@@ -216,24 +218,15 @@ class PlanSteeringDriver:
         action = self._governed_repository_action
         if action is None:
             return None
-        facts = frame.engineering_semantic_facts
-        branch = next((
-            str(fact.value) for fact in facts
-            if fact.subject == "repository.branch_name"
-            and fact.qualifiers.get("state") == "to_be_created"
-            and fact.authority.value == "HUMAN_EXPLICIT"
-        ), None)
-        requested = any(
-            fact.subject == "repository.branch_action"
-            and fact.value == "创建新分支"
-            and fact.authority.value == "HUMAN_EXPLICIT"
-            for fact in facts
-        )
-        if not branch or not requested:
-            return None
         with self.database.unit_of_work() as uow:
             revision = ProductStore(uow.session).current_work_reality_revision(frame.work_id)
-        if revision is None or revision.repository_ref == f"refs/heads/{branch}":
+            branch = (
+                None if revision is None else governed_branch_creation_target(
+                    revision.engineering_semantic_facts,
+                    record_for_id=InteractionStore(uow.session).record,
+                )
+            )
+        if not branch or revision is None or revision.repository_ref == f"refs/heads/{branch}":
             return None
         observation = action(frame.work_id, revision.source_interaction_id, revision.admitted_by)
         if observation is None:

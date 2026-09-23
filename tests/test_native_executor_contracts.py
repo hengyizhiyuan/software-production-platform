@@ -419,6 +419,24 @@ def test_scheduler_does_not_allocate_ineligible_capacity() -> None:
     assert decision.selected_queue_entry_id is None
 
 
+def test_inline_worker_offer_cannot_claim_an_older_attempt() -> None:
+    stale = _queue("same-work", 0)
+    current = _queue("same-work", 1)
+    scheduler = FairCapacityScheduler()
+    ordinary = scheduler.choose(
+        [stale, current], _offer(), now=NOW + timedelta(minutes=2),
+        last_fairness_group=None,
+    )
+    targeted = scheduler.choose(
+        [stale, current],
+        _offer().model_copy(update={"requested_attempt_id": current.attempt_id}),
+        now=NOW + timedelta(minutes=2), last_fairness_group=None,
+    )
+
+    assert ordinary.selected_queue_entry_id == stale.id
+    assert targeted.selected_queue_entry_id == current.id
+
+
 def test_content_addressed_storage_is_atomic_and_detects_corruption(tmp_path: Path) -> None:
     storage = ContentAddressedStorage(tmp_path / "evidence")
     digest, path = storage.put_json("attempts/test", {"你好": "Watt", "n": 1})

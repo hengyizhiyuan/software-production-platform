@@ -75,6 +75,7 @@ from spg.domain.interaction import (
     InteractionAssessmentCandidate,
     InteractionInterpretationInput,
     InteractionInvariantViolation,
+    InteractionTurnStatus,
     InterpretationMeaning,
     InterpretationMeaningKind,
     ProductionAdmissionExecutionState,
@@ -113,6 +114,8 @@ from spg.domain.runtime import (
     ProductionHorizon,
 )
 from spg.domain.runtime_activation import RuntimeActivationProjection, RuntimeActivationState
+from spg.domain.native_execution import AttemptTerminalOutcome, QueueCondition
+from spg.domain.wic_response import WicRuntimeMode
 from spg.domain.steering import (
     AdmitSteeringDecisionRequest,
     CreateSteeringPlanRequest,
@@ -336,9 +339,41 @@ class _CourseScheduleSemanticCapability:
 
 
 class _ExplicitBranchSemanticCapability:
+    def __init__(self, *, provider_variant: bool = False) -> None:
+        self.provider_variant = provider_variant
+
     def interpret(self, basis: InteractionInterpretationInput) -> InteractionAssessmentCandidate:
         revision = basis.active_work_context.work_revision
         latest = basis.records[-1]
+        branch_name = EngineeringSemanticFactCandidate(
+            candidate_id="explicit-branch-name",
+            subject="repository.branch_name",
+            relation=(
+                SemanticRelation.REFERENCE if self.provider_variant
+                else SemanticRelation.EQUALITY
+            ),
+            value="test",
+            qualifiers=(
+                {"branch_kind": "new"} if self.provider_variant
+                else {"state": "to_be_created"}
+            ),
+            authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+            epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+            source_record_ids=(latest.id,),
+            source_text="test" if self.provider_variant else latest.content,
+            role_origin=SemanticRoleOrigin.EXPLICIT,
+        )
+        action = EngineeringSemanticFactCandidate(
+            candidate_id="explicit-branch-action",
+            subject="repository.branch_action",
+            relation=SemanticRelation.EQUALITY,
+            value="创建新分支",
+            authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+            epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+            source_record_ids=(latest.id,),
+            source_text=latest.content,
+            role_origin=SemanticRoleOrigin.EXPLICIT,
+        )
         return InteractionAssessmentCandidate(
             interpreted_motive=revision.motive,
             desired_outcome=revision.desired_outcome,
@@ -346,29 +381,7 @@ class _ExplicitBranchSemanticCapability:
             candidate_constraints=revision.constraints,
             current_requests=(*revision.requests, latest.content),
             semantic_fact_candidates=(
-                EngineeringSemanticFactCandidate(
-                    candidate_id="explicit-branch-name",
-                    subject="repository.branch_name",
-                    relation=SemanticRelation.EQUALITY,
-                    value="test",
-                    qualifiers={"state": "to_be_created"},
-                    authority=SemanticFactAuthority.HUMAN_EXPLICIT,
-                    epistemic_status=SemanticEpistemicStatus.CONFIRMED,
-                    source_record_ids=(latest.id,),
-                    source_text=latest.content,
-                    role_origin=SemanticRoleOrigin.EXPLICIT,
-                ),
-                EngineeringSemanticFactCandidate(
-                    candidate_id="explicit-branch-action",
-                    subject="repository.branch_action",
-                    relation=SemanticRelation.EQUALITY,
-                    value="创建新分支",
-                    authority=SemanticFactAuthority.HUMAN_EXPLICIT,
-                    epistemic_status=SemanticEpistemicStatus.CONFIRMED,
-                    source_record_ids=(latest.id,),
-                    source_text=latest.content,
-                    role_origin=SemanticRoleOrigin.EXPLICIT,
-                ),
+                (branch_name,) if self.provider_variant else (branch_name, action)
             ),
             focus_classification=WorkFocusClassification.ON_TOPIC,
             impact_disposition=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
@@ -2560,10 +2573,13 @@ def test_repository_acquisition_unexpected_effect_failure_is_terminalized(
     assert "Traceback" not in observation["human_message"]
 
 
+@pytest.mark.parametrize("provider_variant", (False, True))
 def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     postgres_database: Database,
     tmp_path: Path,
     services,
+    provider_variant: bool,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     if subprocess.run(("docker", "image", "inspect", "watt-native-executor-runtime:local"), capture_output=True).returncode:
         pytest.skip("qualified local Native Executor image is unavailable")
@@ -2638,7 +2654,8 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
             target_branch="test",
         ))
     branch_interactions = WorkInteractionService(
-        postgres_database, capability=_ExplicitBranchSemanticCapability(),
+        postgres_database,
+        capability=_ExplicitBranchSemanticCapability(provider_variant=provider_variant),
     )
     pending = branch_interactions.append_and_assess(
         ready.interaction.id, "切一个新分支：test", human_identity="human:test",
@@ -2660,9 +2677,12 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     with postgres_database.unit_of_work() as uow:
         branch_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
     assert branch_revision is not None
-    assert {fact.subject for fact in current_semantic_facts(branch_revision.engineering_semantic_facts)} >= {
-        "repository.branch_name", "repository.branch_action",
+    subjects = {
+        fact.subject for fact in current_semantic_facts(branch_revision.engineering_semantic_facts)
     }
+    assert "repository.branch_name" in subjects
+    if not provider_variant:
+        assert "repository.branch_action" in subjects
     steering_bootstrap = SteeringBootstrapService(postgres_database)
     steering_bootstrap.bootstrap(work_id)
     orchestrator = ProductionOrchestrator(work_service)
@@ -2682,12 +2702,53 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
             )
     )
     iterations = []
+    if provider_variant:
+        original_run = service.native_git_operations._run_admitted_branch_operation
+
+        def interrupted_after_admission(**_kwargs):
+            raise RuntimeError("Synthetic Native Git setup interruption")
+
+        monkeypatch.setattr(
+            service.native_git_operations,
+            "_run_admitted_branch_operation",
+            interrupted_after_admission,
+        )
+        for _ in range(3):
+            iteration = steering_driver.iterate(work_id)
+            iterations.append(iteration)
+            if iteration.action is SteeringActionType.REPOSITORY_ACTION:
+                break
+        failed = service.latest_attempt_for_work(work_id)
+        assert failed is not None and failed["condition"] == "FAILED_RETRYABLE"
+        with postgres_database.unit_of_work() as uow:
+            run_id = uow.session.execute(
+                select(production_runs.c.id).where(
+                    production_runs.c.intent_ref == f"repository-intake:{failed['intake_request_id']}"
+                )
+            ).scalar_one()
+            unit_id = uow.session.execute(
+                select(production_work_units.c.id).where(
+                    production_work_units.c.production_run_id == run_id
+                )
+            ).scalar_one()
+            failed_attempt = RuntimeStore(uow.session).attempts_for_work_unit(unit_id)[-1]
+            native_store = NativeExecutionStore(uow.session)
+            assert native_store.attempt_state(failed_attempt.id).terminal_outcome is AttemptTerminalOutcome.CANCELLED
+            assert native_store.queue_for_attempt(failed_attempt.id).condition is QueueCondition.CANCELLED
+        monkeypatch.setattr(
+            service.native_git_operations,
+            "_run_admitted_branch_operation",
+            original_run,
+        )
+        retried = trigger.retry_work(work_id, authority_identity=branch_actor)
+        assert retried["condition"] == "READY", retried.get("technical_evidence")
     for _ in range(3):
         iteration = steering_driver.iterate(work_id)
         iterations.append(iteration)
         if iteration.action is SteeringActionType.REPOSITORY_ACTION:
             break
-    assert any(item.action is SteeringActionType.REPOSITORY_ACTION for item in iterations)
+    if not provider_variant:
+        assert any(item.action is SteeringActionType.REPOSITORY_ACTION for item in iterations)
     branch = service.latest_attempt_for_work(work_id)
     assert branch is not None
     assert branch["condition"] == "READY", branch.get("technical_evidence")
@@ -2776,6 +2837,30 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
         "当前项目在哪个分支？", interactions.get_shared_understanding(ready.interaction.id)
     )
     assert answer is not None and "test" in answer and branch["revision"] in answer
+    shadow = WorkInteractionService(
+        postgres_database,
+        capability=_ExplicitBranchSemanticCapability(provider_variant=True),
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_SHADOW,
+    )
+    try:
+        turn = shadow.submit_turn(
+            ready.interaction.id,
+            "已经切好了吗？当前项目分支是啥？",
+            human_identity="human:test",
+        )
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            state = shadow.get_turn(turn.id)
+            if state.status in {InteractionTurnStatus.COMPLETED, InteractionTurnStatus.FAILED}:
+                break
+            time.sleep(0.01)
+        assert state.status is InteractionTurnStatus.COMPLETED, state.failure_message
+        response = shadow.get_shared_understanding(ready.interaction.id).conversation_messages[-1].content
+        assert "本地分支是 test" in response
+        assert branch["revision"] in response
+        assert "推送到远端" in response
+    finally:
+        shadow.shutdown()
 
 
 def test_restart_resumes_persisted_repository_attempt_without_current_assessment() -> None:

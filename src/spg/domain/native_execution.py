@@ -727,6 +727,7 @@ class WorkerOffer(NativeRecord):
     provider_profiles: tuple[str, ...]
     resource_profiles: tuple[str, ...]
     capability_identities: tuple[str, ...]
+    requested_attempt_id: UUID | None = None
     lease_seconds: int = Field(default=30, ge=5, le=3600)
 
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
+from uuid import uuid4
 
 import pytest
 
@@ -10,7 +11,9 @@ from spg.domain.assets import (
 )
 from spg.infrastructure.production_environment import GitRepositoryAcquirer
 from spg.application.interaction import _repository_branch_status_answer
-from spg.domain.interaction import RepositoryAcquisitionState
+from spg.application.repository_branch_authority import governed_branch_creation_target
+from spg.domain.engineering_semantics import SemanticFactAuthority
+from spg.domain.interaction import InteractionActor, RepositoryAcquisitionState
 
 
 @pytest.mark.parametrize(
@@ -115,3 +118,31 @@ def test_branch_status_answer_uses_current_work_revision_not_model_plan() -> Non
     assert "尚未完成" in pending
     assert "本地分支是 test" in ready
     assert "推送到远端" in ready
+
+
+@pytest.mark.parametrize(
+    "human_command,expected",
+    (
+        ("切一个新分支：test", "test"),
+        ("如何创建分支 test？", None),
+        ("不要创建分支 test", None),
+        ("切一个新分支：other", None),
+    ),
+)
+def test_provider_branch_vocabulary_requires_cited_human_command(
+    human_command: str, expected: str | None,
+) -> None:
+    source_id = uuid4()
+    branch_fact = SimpleNamespace(
+        is_current=True,
+        subject="repository.branch_name",
+        value="test",
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        qualifiers={"branch_kind": "new"},
+        provenance=SimpleNamespace(source_record_ids=(source_id,)),
+    )
+    record = SimpleNamespace(actor=InteractionActor.HUMAN, content=human_command)
+
+    assert governed_branch_creation_target(
+        (branch_fact,), record_for_id=lambda record_id: record if record_id == source_id else None,
+    ) == expected

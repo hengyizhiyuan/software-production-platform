@@ -111,7 +111,8 @@ class FairCapacityScheduler:
     @staticmethod
     def _eligible(entry: ExecutionQueueEntryRecord, offer: WorkerOffer) -> bool:
         return (
-            entry.required_provider_profile in offer.provider_profiles
+            (offer.requested_attempt_id is None or entry.attempt_id == offer.requested_attempt_id)
+            and entry.required_provider_profile in offer.provider_profiles
             and entry.required_resource_profile in offer.resource_profiles
             and set(entry.required_capabilities).issubset(offer.capability_identities)
         )

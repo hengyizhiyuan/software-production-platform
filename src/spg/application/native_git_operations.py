@@ -16,8 +16,9 @@ from spg.application.production_intelligence import TaskContractRequest, default
 from spg.application.runtime import RuntimeService
 from spg.domain.runtime import BootstrapRequest, CompletionContract, InitialRunRequest, ProductionHorizon
 from spg.domain.native_execution import (
-    AttemptTerminalOutcome, CapabilityGrant, ExecutionBindingV2, ExecutionHandle,
-    ExecutionMode, NativeExecutionAdmission, PWUContractVersionRecord,
+    AttemptTerminalOutcome, BackendControlCommand, CapabilityGrant, ControlAction,
+    ExecutionBindingV2, ExecutionHandle, ExecutionMode, NativeExecutionAdmission,
+    PWUContractVersionRecord,
     NativeExecutionNotFound,
     ResourceEnvelope, SourceMember, SourceVector, WorkerOffer, WorkspaceManifest,
     WorkspaceMount, canonical_digest,
@@ -287,6 +288,44 @@ class NativeGitOperationRunner:
             required_resource_profile="standard",
             available_at=datetime.now(UTC),
         ))
+        handle = ExecutionHandle(
+            backend_identity="watt-native", dispatch_id=entry.id,
+            attempt_id=attempt_id, generation=attempt.generation,
+            opaque_reference=f"queue:{entry.id}",
+        )
+        try:
+            return self._run_admitted_branch_operation(
+                handle=handle, attempt_id=attempt_id, work_id=work_id,
+                target_branch=target_branch, base_commit=base_commit,
+                workspace=workspace, environment=environment, binding=binding,
+                manifest=manifest, session_id=session_id, pwu_id=pwu_id,
+                task=task, source_identity=source_identity,
+            )
+        except Exception:
+            # Admission already made the Attempt schedulable. A setup/worker
+            # exception must not leave it queued for a later unrelated offer.
+            try:
+                with self.database.unit_of_work() as uow:
+                    state = NativeExecutionStore(uow.session).attempt_state(attempt_id)
+                if state.runtime_mode is not ExecutionMode.FINISHED:
+                    self.runtime.control(BackendControlCommand(
+                        command_id=uuid5(NAMESPACE_URL, f"watt:native-git-cancel:{intake_id}"),
+                        handle=handle, action=ControlAction.CANCEL,
+                        expected_control_version=state.control_version,
+                        actor_identity=authority_identity,
+                        reason="Git operation failed after Native admission",
+                    ))
+            except Exception:
+                # The original failure remains authoritative; lease
+                # reconciliation can still handle a concurrent worker.
+                pass
+            raise
+
+    def _run_admitted_branch_operation(
+        self, *, handle, attempt_id, work_id, target_branch, base_commit, workspace,
+        environment, binding, manifest, session_id, pwu_id, task,
+        source_identity,
+    ) -> dict[str, object]:
         provider = self.production_environment.provider
         storage = ContentAddressedStorage(self.checkpoint_root / "native-git")
 
@@ -319,12 +358,8 @@ class NativeGitOperationRunner:
             provider_profiles=(self.provider_profile,),
             resource_profiles=("standard",),
             capability_identities=("git.operation",),
+            requested_attempt_id=attempt_id,
             lease_seconds=30,
-        )
-        handle = ExecutionHandle(
-            backend_identity="watt-native", dispatch_id=entry.id,
-            attempt_id=attempt_id, generation=attempt.generation,
-            opaque_reference=f"queue:{entry.id}",
         )
         observed = self.runtime.observe(handle)
         if observed.runtime_mode is not ExecutionMode.FINISHED:

@@ -7,15 +7,12 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 from spg.application.assets import RepositoryAssetService
 from spg.application.interaction import WorkInteractionService
 from spg.application.post_admission import WorkPostAdmissionService
+from spg.application.repository_branch_authority import governed_branch_creation_target
 from spg.application.work import WorkApplicationService
 from spg.domain.assets import (
     AssetScopeAdmissionRequest,
     RepositoryAcquisitionFailureCategory,
     RepositoryIntakeRequest,
-)
-from spg.domain.engineering_semantics import (
-    SemanticFactAuthority,
-    current_semantic_facts,
 )
 from spg.domain.interaction import (
     InteractionAssessment,
@@ -29,6 +26,7 @@ from spg.domain.response_contract import (
     repository_acquisition_recovery_requested,
 )
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.interaction_store import InteractionStore
 
 
 class ProductionAdmissionTrigger:
@@ -268,26 +266,15 @@ class ProductionAdmissionTrigger:
             product = ProductStore(uow.session)
             revision = product.current_work_reality_revision(work_id)
             base = product.resource_for_work(work_id)
+            branch_name = (
+                None if revision is None else governed_branch_creation_target(
+                    revision.engineering_semantic_facts,
+                    record_for_id=InteractionStore(uow.session).record,
+                )
+            )
         if revision is None or base is None:
             return None
-        facts = current_semantic_facts(revision.engineering_semantic_facts)
-        branch_name = next(
-            (
-                str(fact.value)
-                for fact in facts
-                if fact.subject == "repository.branch_name"
-                and fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
-                and fact.qualifiers.get("state") == "to_be_created"
-            ),
-            None,
-        )
-        branch_action = any(
-            fact.subject == "repository.branch_action"
-            and fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
-            and fact.value == "创建新分支"
-            for fact in facts
-        )
-        if not branch_name or not branch_action:
+        if not branch_name:
             return None
         if revision.repository_ref == f"refs/heads/{branch_name}":
             return self.assets.latest_attempt_for_work(work_id)
@@ -344,22 +331,15 @@ class ProductionAdmissionTrigger:
                 continue
             with self.work.database.unit_of_work() as uow:
                 revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+                target = (
+                    None if revision is None else governed_branch_creation_target(
+                        revision.engineering_semantic_facts,
+                        record_for_id=InteractionStore(uow.session).record,
+                    )
+                )
             if revision is None:
                 continue
-            facts = current_semantic_facts(revision.engineering_semantic_facts)
-            target = next((
-                str(fact.value) for fact in facts
-                if fact.subject == "repository.branch_name"
-                and fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
-                and fact.qualifiers.get("state") == "to_be_created"
-            ), None)
-            action = any(
-                fact.subject == "repository.branch_action"
-                and fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
-                and fact.value == "创建新分支"
-                for fact in facts
-            )
-            if target and action and revision.repository_ref != f"refs/heads/{target}":
+            if target and revision.repository_ref != f"refs/heads/{target}":
                 pending.append(work_id)
         return tuple(dict.fromkeys(pending))
 

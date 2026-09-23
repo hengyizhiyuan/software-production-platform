@@ -14,6 +14,7 @@ from sqlalchemy import insert, select, text, update
 from spg.application.runtime import RuntimeService
 from spg.application.connectors import ConnectorResolver
 from spg.application.native_git_operations import NativeGitOperationRunner
+from spg.application.repository_branch_authority import governed_branch_creation_target
 from spg.application.work import WorkApplicationService
 from spg.domain.assets import (
     AssetScopeAdmissionRequest,
@@ -22,7 +23,7 @@ from spg.domain.assets import (
     RepositoryIntakeRequest,
 )
 from spg.domain.connectors import CapabilityRequirement
-from spg.domain.engineering_semantics import SemanticFactAuthority, current_semantic_facts
+from spg.domain.engineering_semantics import current_semantic_facts
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import EngineeringContextReference, ProductInvariantViolation, ProductRecordNotFound
 from spg.domain.response_contract import production_intent_evidence
@@ -30,6 +31,7 @@ from spg.domain.runtime import BootstrapRequest
 from spg.infrastructure.persistence.asset_schema import repository_intakes
 from spg.infrastructure.persistence.product_schema import engineering_resources
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.production_environment import GitRepositoryAcquirer
 
 
@@ -184,25 +186,17 @@ class RepositoryAssetService:
             product = ProductStore(uow.session)
             revision = product.current_work_reality_revision(request.work_id)
             base = product.resource_for_work(request.work_id)
+            target = (
+                None if revision is None else governed_branch_creation_target(
+                    revision.engineering_semantic_facts,
+                    record_for_id=InteractionStore(uow.session).record,
+                )
+            )
         if revision is None or base is None or base.id != request.base_resource_id:
             raise ProductInvariantViolation("Branch creation requires the current Work repository")
         if revision.admitted_by != request.authority_identity:
             raise ProductInvariantViolation("Branch creation authority differs from current Work Reality")
-        facts = current_semantic_facts(revision.engineering_semantic_facts)
-        target = any(
-            fact.subject == "repository.branch_name"
-            and fact.value == request.target_branch
-            and fact.qualifiers.get("state") == "to_be_created"
-            and fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
-            for fact in facts
-        )
-        action = any(
-            fact.subject == "repository.branch_action"
-            and fact.value == "创建新分支"
-            and fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
-            for fact in facts
-        )
-        if not target or not action:
+        if target != request.target_branch:
             raise ProductInvariantViolation("Branch creation requires the current Human-admitted branch action")
 
     def intake(self, request: RepositoryIntakeRequest):
