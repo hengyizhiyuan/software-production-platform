@@ -20,6 +20,9 @@ _CREATE_BRANCH = re.compile(
     re.IGNORECASE,
 )
 _NON_COMMAND = re.compile(r"(?:如何|怎么|怎样|为什么|不要|别|不需要|how (?:do|can)|don't|do not)", re.IGNORECASE)
+BRANCH_FACT_SUBJECTS = frozenset({
+    "repository.branch", "repository.branch_name", "repository.branch.name",
+})
 
 
 def _cites_explicit_branch_command(
@@ -64,7 +67,7 @@ def governed_branch_creation_target(
     )
     for fact in current:
         if (
-            fact.subject not in {"repository.branch_name", "repository.branch"}
+            fact.subject not in BRANCH_FACT_SUBJECTS
             or fact.authority is not SemanticFactAuthority.HUMAN_EXPLICIT
             or not isinstance(fact.value, str)
         ):

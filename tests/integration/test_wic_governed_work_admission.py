@@ -350,7 +350,7 @@ class _ExplicitBranchSemanticCapability:
         latest = basis.records[-1]
         branch_name = EngineeringSemanticFactCandidate(
             candidate_id="explicit-branch-name",
-            subject="repository.branch" if self.actual_provider_fact else "repository.branch_name",
+            subject="repository.branch.name" if self.actual_provider_fact else "repository.branch_name",
             relation=(
                 SemanticRelation.REFERENCE if self.provider_variant or self.actual_provider_fact
                 else SemanticRelation.EQUALITY
@@ -379,7 +379,10 @@ class _ExplicitBranchSemanticCapability:
         )
         return InteractionAssessmentCandidate(
             interpreted_motive=revision.motive,
-            desired_outcome=revision.desired_outcome,
+            desired_outcome=(
+                f"{revision.desired_outcome} 创建 test 分支"
+                if self.actual_provider_fact else revision.desired_outcome
+            ),
             candidate_context=revision.context_facts,
             candidate_constraints=revision.constraints,
             current_requests=(*revision.requests, latest.content),
@@ -2717,7 +2720,7 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     subjects = {
         fact.subject for fact in current_semantic_facts(branch_revision.engineering_semantic_facts)
     }
-    assert ("repository.branch" if actual_provider_fact else "repository.branch_name") in subjects
+    assert ("repository.branch.name" if actual_provider_fact else "repository.branch_name") in subjects
     if not provider_variant and not actual_provider_fact:
         assert "repository.branch_action" in subjects
     steering_bootstrap = SteeringBootstrapService(postgres_database)

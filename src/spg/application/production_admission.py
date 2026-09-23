@@ -7,7 +7,10 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 from spg.application.assets import RepositoryAssetService
 from spg.application.interaction import WorkInteractionService
 from spg.application.post_admission import WorkPostAdmissionService
-from spg.application.repository_branch_authority import governed_branch_creation_target
+from spg.application.repository_branch_authority import (
+    BRANCH_FACT_SUBJECTS,
+    governed_branch_creation_target,
+)
 from spg.application.work import WorkApplicationService
 from spg.domain.assets import (
     AssetScopeAdmissionRequest,
@@ -334,7 +337,7 @@ class ProductionAdmissionTrigger:
             return None
         candidate = assessment.candidate_change
         if not set(candidate.changed_fields) <= {
-            "context_facts", "requests", "semantic_facts"
+            "context_facts", "requests", "semantic_facts", "desired_outcome"
         }:
             return None
         with self.work.database.unit_of_work() as uow:
@@ -359,9 +362,13 @@ class ProductionAdmissionTrigger:
             if (
                 assessment.basis_work_revision_id != revision.id
                 or revision.repository_ref == f"refs/heads/{target}"
+                or (
+                    "desired_outcome" in candidate.changed_fields
+                    and target not in candidate.desired_outcome
+                )
                 or not new_facts
                 or any(
-                    fact.subject not in {"repository.branch_name", "repository.branch"}
+                    fact.subject not in BRANCH_FACT_SUBJECTS
                     or fact.value != target
                     or request_record.id not in fact.provenance.source_record_ids
                     for fact in new_facts
