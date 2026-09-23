@@ -20,6 +20,7 @@ from spg.application.guided_design import (
 )
 from spg.application.design_intent import frame_design_intent_text
 from spg.application.engineering_semantics import bind_engineering_semantic_facts
+from spg.application.repository_branch_authority import exact_branch_creation_command
 from spg.application.response_contract import build_response_contract
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.domain.response_contract import (
@@ -33,7 +34,11 @@ from spg.domain.response_contract import (
 from spg.domain.conversation import ConversationContextMessage, ConversationTurnIntent
 from spg.domain.engineering_semantics import (
     EngineeringSemanticFact,
+    EngineeringSemanticFactCandidate,
+    SemanticEpistemicStatus,
+    SemanticFactAuthority,
     SemanticRelation,
+    SemanticRoleOrigin,
     current_semantic_facts,
 )
 from spg.domain.interaction import (
@@ -2095,6 +2100,17 @@ class WorkInteractionService:
                 candidate=candidate, on_pipeline_stage=on_pipeline_stage,
                 policy_governed=policy_governed,
             )
+        branch_name = (
+            exact_branch_creation_command(basis.records[-1].content)
+            if basis.active_work_context is not None else None
+        )
+        if branch_name is not None:
+            return self.admit_candidate(
+                interaction_id, basis_fingerprint=basis.basis_fingerprint,
+                candidate=self._explicit_branch_candidate(basis, branch_name),
+                on_pipeline_stage=on_pipeline_stage,
+                policy_governed=policy_governed,
+            )
         streaming_interpret = getattr(self.capability, "interpret_stream", None)
         observed_interpret = getattr(self.capability, "interpret_stream_observed", None)
         controlled_observed_interpret = getattr(
@@ -3316,6 +3332,41 @@ class WorkInteractionService:
             unresolved_material_questions=questions,
             reasons=reasons,
             basis_fingerprint=basis_fingerprint,
+        )
+
+    @staticmethod
+    def _explicit_branch_candidate(
+        basis: InteractionInterpretationInput, branch_name: str,
+    ) -> InteractionAssessmentCandidate:
+        active = basis.active_work_context
+        assert active is not None
+        revision = active.work_revision
+        latest = basis.records[-1]
+        return InteractionAssessmentCandidate(
+            turn_intent=ConversationTurnIntent.ACTION_REQUEST,
+            interpreted_motive=revision.motive,
+            desired_outcome=revision.desired_outcome,
+            candidate_context=revision.context_facts,
+            candidate_constraints=revision.constraints,
+            current_requests=tuple(dict.fromkeys((
+                *revision.requests, latest.content,
+            ))),
+            semantic_fact_candidates=(EngineeringSemanticFactCandidate(
+                candidate_id="human-new-branch-command",
+                subject="repository.branch_name",
+                relation=SemanticRelation.REFERENCE,
+                value=branch_name,
+                qualifiers={"state": "to_be_created"},
+                authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                source_record_ids=(latest.id,),
+                source_text=latest.content,
+                role_origin=SemanticRoleOrigin.EXPLICIT,
+            ),),
+            focus_classification=WorkFocusClassification.ON_TOPIC,
+            impact_disposition=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
+            natural_response=f"准备创建本地分支 {branch_name}。",
+            provider_identity="watt-native:explicit-branch-command",
         )
 
     def _work_reality_status_candidate(

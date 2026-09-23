@@ -23,6 +23,20 @@ _NON_COMMAND = re.compile(r"(?:如何|怎么|怎样|为什么|不要|别|不需�
 BRANCH_FACT_SUBJECTS = frozenset({
     "repository.branch", "repository.branch_name", "repository.branch.name",
 })
+_EXACT_CREATE_COMMAND = re.compile(
+    r"^\s*(?:请|帮我)?\s*(?:切\s*(?:一个|一条)?\s*新分支"
+    r"|(?:创建|新建)\s*(?:一个|一条)?\s*新?分支)"
+    r"\s*[:：\s]\s*(?P<name>[A-Za-z0-9][A-Za-z0-9._/-]{0,127})"
+    r"\s*[。！!]?\s*$",
+    re.IGNORECASE,
+)
+
+
+def exact_branch_creation_command(content: str) -> str | None:
+    """Read an unambiguous new-branch command directly from the Human record."""
+
+    match = _EXACT_CREATE_COMMAND.fullmatch(content)
+    return None if match is None else match.group("name")
 
 
 def _cites_explicit_branch_command(

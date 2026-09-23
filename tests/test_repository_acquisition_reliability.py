@@ -11,7 +11,10 @@ from spg.domain.assets import (
 )
 from spg.infrastructure.production_environment import GitRepositoryAcquirer
 from spg.application.interaction import _repository_branch_status_answer
-from spg.application.repository_branch_authority import governed_branch_creation_target
+from spg.application.repository_branch_authority import (
+    exact_branch_creation_command,
+    governed_branch_creation_target,
+)
 from spg.domain.engineering_semantics import SemanticFactAuthority
 from spg.domain.interaction import InteractionActor, RepositoryAcquisitionState
 
@@ -158,3 +161,18 @@ def test_provider_branch_vocabulary_requires_cited_human_command(
     assert governed_branch_creation_target(
         (branch_fact,), record_for_id=lambda record_id: record if record_id == source_id else None,
     ) == expected
+
+
+@pytest.mark.parametrize(
+    "content,expected",
+    (
+        ("切一个新分支：test", "test"),
+        ("创建新分支 feature/test", "feature/test"),
+        ("切换到已有分支：test", None),
+        ("如何创建新分支 test？", None),
+        ("不要创建新分支 test", None),
+        ("为了后续开发，请切一个新分支：test", None),
+    ),
+)
+def test_exact_branch_command_is_narrow(content: str, expected: str | None) -> None:
+    assert exact_branch_creation_command(content) == expected

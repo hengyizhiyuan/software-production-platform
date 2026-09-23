@@ -2675,7 +2675,9 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
         ),
     )
     pending = branch_interactions.append_and_assess(
-        ready.interaction.id, "切一个新分支：test", human_identity="human:test",
+        ready.interaction.id,
+        "为了后续开发，请切一个新分支：test",
+        human_identity="human:test",
     )
     proposal = pending.latest_assessment
     assert proposal is not None
@@ -2688,6 +2690,7 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
         steering_driver = PlanSteeringDriver(
             postgres_database, work_service, orchestrator, repository_assets=service,
         )
+        monkeypatch.setattr(steering_driver, "schedule", lambda _work_id: True)
         post_admission = WorkPostAdmissionService(
             work_service, steering_bootstrap, steering_driver, orchestrator,
         )
