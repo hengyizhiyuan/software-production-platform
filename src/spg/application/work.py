@@ -21,6 +21,10 @@ from spg.application.production_intelligence import (
     default_task_contract_builder,
 )
 from spg.application.preparation import PreparationService
+from spg.application.repository_branch_authority import (
+    BRANCH_FACT_SUBJECTS,
+    governed_branch_creation_target,
+)
 from spg.application.runtime import RuntimeService
 from spg.application.runtime_commit import RuntimeCommitService
 from spg.application.verification import VerificationService
@@ -50,6 +54,7 @@ from spg.domain.interaction import (
     InteractionCondition,
     InteractionInvariantViolation,
     InteractionRecordNotFound,
+    WorkEvolutionCandidateChange,
     WorkFocusClassification,
     WorkImpactDisposition,
     WorkTransitionChoice,
@@ -726,6 +731,7 @@ class WorkApplicationService:
         action: AttentionAction,
         authority_identity: str,
         rationale: str | None = None,
+        branch_only: bool = False,
     ) -> WorkProjection:
         """Govern one exact active-Work interpretation without rewriting history."""
 
@@ -867,6 +873,38 @@ class WorkApplicationService:
                 raise ProductInvariantViolation(
                     "Assessment contains no governed Work change candidate"
                 )
+            candidate = assessment.candidate_change
+            if branch_only:
+                target = governed_branch_creation_target(
+                    assessment.engineering_semantic_facts,
+                    record_for_id=interactions.record,
+                )
+                prior_ids = {fact.id for fact in current_revision.engineering_semantic_facts}
+                branch_facts = tuple(
+                    fact for fact in assessment.engineering_semantic_facts
+                    if fact.id not in prior_ids
+                    and fact.subject in BRANCH_FACT_SUBJECTS
+                    and fact.value == target
+                    and records[-1].id in fact.provenance.source_record_ids
+                )
+                if target is None or len(branch_facts) != 1:
+                    raise ProductInvariantViolation(
+                        "Branch-only revision requires one exact Human branch command"
+                    )
+                candidate = WorkEvolutionCandidateChange(
+                    changed_fields=("requests", "semantic_facts"),
+                    motive=current_revision.motive,
+                    desired_outcome=current_revision.desired_outcome,
+                    context_facts=current_revision.context_facts,
+                    constraints=current_revision.constraints,
+                    requests=tuple(dict.fromkeys((
+                        *current_revision.requests, records[-1].content,
+                    ))),
+                    semantic_facts=(
+                        *current_revision.engineering_semantic_facts, *branch_facts,
+                    ),
+                    scope_change_required=False,
+                )
 
             governance_id = uuid5(
                 NAMESPACE_URL,
@@ -891,7 +929,7 @@ class WorkApplicationService:
                         "basis_fingerprint": assessment.basis_fingerprint,
                         "previous_revision_id": str(current_revision.id),
                         "changed_fields": list(
-                            assessment.candidate_change.changed_fields
+                            candidate.changed_fields
                         ),
                         "focus_classification": (
                             None
@@ -915,7 +953,6 @@ class WorkApplicationService:
                 unit_of_work.commit()
                 return self.get_work(work.id)
 
-            candidate = assessment.candidate_change
             current_scope = product.scope(current_revision.engineering_scope_id)
             resource = product.resource_for_work(work.id)
             pointer = None if resource is None else runtime.current_pointer(

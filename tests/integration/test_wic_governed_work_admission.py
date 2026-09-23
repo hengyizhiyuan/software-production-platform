@@ -384,7 +384,10 @@ class _ExplicitBranchSemanticCapability:
                 if self.actual_provider_fact else revision.desired_outcome
             ),
             candidate_context=revision.context_facts,
-            candidate_constraints=revision.constraints,
+            candidate_constraints=(
+                (*revision.constraints, "后续开发基于 test 分支（模型推断）")
+                if self.actual_provider_fact else revision.constraints
+            ),
             current_requests=(*revision.requests, latest.content),
             semantic_fact_candidates=(
                 (branch_name,) if self.provider_variant or self.actual_provider_fact
@@ -2703,6 +2706,8 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
         assert branch_revision is not None
         assert branch_revision.repository_ref == "refs/heads/test"
         assert branch_revision.source_revision == acquired["revision"]
+        assert branch_revision.constraints == base_revision.constraints
+        assert branch_revision.desired_outcome == base_revision.desired_outcome
         assert service.latest_attempt_for_work(work_id)["condition"] == "READY"
         return
     governed = work_service.decide_interaction_work_revision(

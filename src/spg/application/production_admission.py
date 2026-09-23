@@ -335,11 +335,6 @@ class ProductionAdmissionTrigger:
 
         if assessment.candidate_change is None or assessment.basis_work_revision_id is None:
             return None
-        candidate = assessment.candidate_change
-        if not set(candidate.changed_fields) <= {
-            "context_facts", "requests", "semantic_facts", "desired_outcome"
-        }:
-            return None
         with self.work.database.unit_of_work() as uow:
             product = ProductStore(uow.session)
             interactions = InteractionStore(uow.session)
@@ -355,24 +350,18 @@ class ProductionAdmissionTrigger:
             )
             if revision is None or target is None:
                 return None
-            new_facts = tuple(
+            prior_ids = {fact.id for fact in revision.engineering_semantic_facts}
+            branch_facts = tuple(
                 fact for fact in assessment.engineering_semantic_facts
-                if fact.id not in {old.id for old in revision.engineering_semantic_facts}
+                if fact.id not in prior_ids
+                and fact.subject in BRANCH_FACT_SUBJECTS
+                and fact.value == target
+                and request_record.id in fact.provenance.source_record_ids
             )
             if (
                 assessment.basis_work_revision_id != revision.id
                 or revision.repository_ref == f"refs/heads/{target}"
-                or (
-                    "desired_outcome" in candidate.changed_fields
-                    and target not in candidate.desired_outcome
-                )
-                or not new_facts
-                or any(
-                    fact.subject not in BRANCH_FACT_SUBJECTS
-                    or fact.value != target
-                    or request_record.id not in fact.provenance.source_record_ids
-                    for fact in new_facts
-                )
+                or len(branch_facts) != 1
             ):
                 return None
         self.work.decide_interaction_work_revision(
@@ -383,6 +372,7 @@ class ProductionAdmissionTrigger:
             action=AttentionAction.APPROVE,
             authority_identity=request_record.source,
             rationale="The Human explicitly requested creation of this exact branch.",
+            branch_only=True,
         )
         self.post_admission.steering_bootstrap.bootstrap(work_id)
         observation = self.reconcile_governed_branch(
