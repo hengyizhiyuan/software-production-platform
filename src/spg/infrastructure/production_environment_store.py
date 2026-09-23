@@ -24,6 +24,7 @@ from spg.domain.production_environment import (
     ProductionEnvironmentError,
     ProductionEnvironmentV1,
     ProductionRecordV1,
+    GitOperationProductionRecordV1,
     ProductionWorkspaceV1,
     ResourceReferenceV1,
 )
@@ -160,6 +161,16 @@ class JsonProductionEnvironmentStore:
     def save_production_record(self, record: ProductionRecordV1) -> ProductionRecordV1:
         path = self.root / "production-records" / f"{record.id}.json"
         return self._admit_immutable(path, record, ProductionRecordV1)
+
+    def save_git_operation_record(self, record: GitOperationProductionRecordV1) -> GitOperationProductionRecordV1:
+        path = self.root / "production-records" / f"{record.id}.git-operation.json"
+        return self._admit_immutable(path, record, GitOperationProductionRecordV1)
+
+    def get_git_operation_record(self, record_id: UUID) -> GitOperationProductionRecordV1 | None:
+        return self._read(
+            self.root / "production-records" / f"{record_id}.git-operation.json",
+            GitOperationProductionRecordV1,
+        )
 
     def get_production_record(self, record_id: UUID) -> ProductionRecordV1 | None:
         return self._read(

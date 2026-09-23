@@ -8,6 +8,7 @@ import subprocess
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.planning import ProductionPlanningService
+from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.production_intelligence import (
     TaskContractRequest,
     default_task_contract_builder,
@@ -45,7 +46,11 @@ from spg.domain.runtime import (
     InitialRunRequest,
     ProductionHorizon,
 )
-from spg.domain.production_intelligence import EngineeringActivity, TaskContract
+from spg.domain.production_intelligence import (
+    EngineeringActivity,
+    TaskContract,
+    TaskMode,
+)
 from spg.domain.steering import (
     NextStepCandidate,
     SteeringAttentionReason,
@@ -103,6 +108,13 @@ class SteeringProductionService:
             )
         steering_decision_id = (
             None if inbound is None else inbound.steering_decision_id
+        )
+        guided_design = GuidedDesignApplicationService(self.database)
+        guided = guided_design.get_optional(work_id)
+        approved_design_artifacts = (
+            ()
+            if guided is None
+            else guided_design.approved_design_artifact_references(work_id)
         )
 
         with self.database.unit_of_work() as unit_of_work:
@@ -171,6 +183,11 @@ class SteeringProductionService:
                     ),
                 )
             else:
+                if guided is not None and not approved_design_artifacts:
+                    raise ProductInvariantViolation(
+                        "Implementation production requires an approved design artifact "
+                        "from current Work Reality"
+                    )
                 admitted_contract = plan.change_contract
                 if admitted_contract is None and plan.change_proposal is not None:
                     admitted_contract = WorkApplicationService._admit_change_contract(
@@ -224,6 +241,26 @@ class SteeringProductionService:
                 constraints=work.constraints,
                 engineering_semantic_facts=semantic_facts,
                 verification_expectation=work.verification_expectation or "",
+                task_mode=(
+                    TaskMode.DESIGN_ARTIFACT
+                    if guided is not None
+                    and plan.target_kind is ProductionTargetKind.DOCUMENTATION_WORK
+                    else TaskMode.IMPLEMENTATION
+                    if guided is not None
+                    and plan.target_kind is ProductionTargetKind.CODE_WORK
+                    else TaskMode.GENERAL
+                ),
+                required_prerequisites=(
+                    ("APPROVED_DESIGN_ARTIFACT",)
+                    if guided is not None
+                    and plan.target_kind is ProductionTargetKind.CODE_WORK
+                    else ()
+                ),
+                prerequisite_evidence=(
+                    approved_design_artifacts
+                    if plan.target_kind is ProductionTargetKind.CODE_WORK
+                    else ()
+                ),
             )
 
     def admit_cycle(
@@ -502,12 +539,15 @@ class SteeringProductionService:
         return default_task_contract_builder().build(
             TaskContractRequest(
                 activity=EngineeringActivity.FEATURE_DELIVERY,
+                task_mode=request.task_mode,
                 objective=request.production_objective,
                 scope=scope,
                 constraints=request.constraints,
                 acceptance_meaning=(request.verification_expectation,),
                 out_of_scope=out_of_scope,
                 authority_lineage=tuple(authority_lineage),
+                required_prerequisites=request.required_prerequisites,
+                prerequisite_evidence=request.prerequisite_evidence,
                 work_reality_references=tuple(work_references),
                 ecf_references=(
                     f"engineering-resource:{request.engineering_resource_id}",

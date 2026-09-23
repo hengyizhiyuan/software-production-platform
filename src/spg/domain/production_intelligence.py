@@ -15,6 +15,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from spg.domain.design_intent import DesignObjectType
+from spg.domain.connectors import ExecutableCapability
 from spg.domain.engineering_semantics import SemanticFactReference, SemanticRelation
 
 
@@ -29,6 +30,12 @@ class EngineeringActivity(StrEnum):
     MIGRATION = "MIGRATION"
     OPTIMIZATION = "OPTIMIZATION"
     RELEASE = "RELEASE"
+
+
+class TaskMode(StrEnum):
+    GENERAL = "GENERAL"
+    DESIGN_ARTIFACT = "DESIGN_ARTIFACT"
+    IMPLEMENTATION = "IMPLEMENTATION"
 
 
 class EvidenceCategory(StrEnum):
@@ -64,6 +71,7 @@ class SystemCapabilityReality(BaseModel):
     boundaries: tuple[str, ...] = Field(min_length=1)
     authority: Literal["SYSTEM_CAPABILITY_REALITY"] = "SYSTEM_CAPABILITY_REALITY"
     provenance: tuple[str, ...] = Field(min_length=1)
+    executable_capabilities: tuple[ExecutableCapability, ...] = ()
 
     @property
     def content_fingerprint(self) -> str:
@@ -309,14 +317,18 @@ class TaskContract(BaseModel):
 
     task_contract_id: UUID
     activity: EngineeringActivity
+    task_mode: TaskMode = TaskMode.GENERAL
     objective: str = Field(min_length=1)
     relevant_context: tuple[TaskContextReference, ...] = Field(min_length=1)
     scope: tuple[str, ...] = Field(min_length=1)
     constraints: tuple[str, ...] = ()
+    required_capabilities: tuple[str, ...] = ()
     acceptance_meaning: tuple[str, ...] = Field(min_length=1)
     evidence_requirements: tuple[EvidenceExpectation, ...] = Field(min_length=1)
     out_of_scope: tuple[str, ...] = Field(min_length=1)
     authority_lineage: tuple[str, ...] = Field(min_length=1)
+    required_prerequisites: tuple[str, ...] = ()
+    prerequisite_evidence: tuple[str, ...] = ()
     semantic_fact_references: tuple[SemanticFactReference, ...] = ()
     sop_reference: str | None = None
     reasoning_summary: ReasoningSummary
@@ -333,6 +345,10 @@ class TaskContract(BaseModel):
         }
         if fact_ids and not {str(item) for item in fact_ids}.issubset(evidence_fact_ids):
             raise ValueError("Task Contract must preserve evidence lineage for semantic facts")
+        if self.required_prerequisites and not self.prerequisite_evidence:
+            raise ValueError(
+                "Task Contract prerequisites require exact persisted evidence"
+            )
         return self
 
     @property

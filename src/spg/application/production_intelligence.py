@@ -37,6 +37,7 @@ from spg.domain.production_intelligence import (
     SopActivityGuidance,
     SopCheckpoint,
     SystemCapabilityReality,
+    TaskMode,
     TaskContextReference,
     TaskContract,
 )
@@ -58,12 +59,16 @@ class TaskContractRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     activity: EngineeringActivity = EngineeringActivity.FEATURE_DELIVERY
+    task_mode: TaskMode = TaskMode.GENERAL
     objective: str = Field(min_length=1)
     scope: tuple[str, ...] = Field(min_length=1)
     constraints: tuple[str, ...] = ()
+    required_capabilities: tuple[str, ...] = ()
     acceptance_meaning: tuple[str, ...] = Field(min_length=1)
     out_of_scope: tuple[str, ...] = Field(min_length=1)
     authority_lineage: tuple[str, ...] = Field(min_length=1)
+    required_prerequisites: tuple[str, ...] = ()
+    prerequisite_evidence: tuple[str, ...] = ()
     work_reality_references: tuple[str, ...] = Field(min_length=1)
     ecf_references: tuple[str, ...] = Field(min_length=1)
     semantic_facts: tuple[SemanticFactReference, ...] = ()
@@ -326,6 +331,23 @@ class TaskContractBuilder:
                 required=True,
             )
         )
+        candidates.extend(
+            ContextCandidate(
+                candidate_id=f"execution-prerequisite:{index}",
+                source=ContextSource.DECISION_MEMORY,
+                content=reference,
+                source_reference=reference,
+                authority="PERSISTED_EXECUTION_REALITY",
+                provenance=(reference,),
+                priority=95,
+                authoritative=True,
+                required=True,
+            )
+            for index, reference in enumerate(
+                request.prerequisite_evidence,
+                start=1,
+            )
+        )
         package = self.orchestrator.assemble(
             ContextAssemblyRequest(
                 basis_fingerprint=basis,
@@ -390,6 +412,7 @@ class TaskContractBuilder:
         return TaskContract(
             task_contract_id=task_contract_id,
             activity=request.activity,
+            task_mode=request.task_mode,
             objective=request.objective,
             relevant_context=tuple(
                 TaskContextReference(
@@ -401,10 +424,13 @@ class TaskContractBuilder:
             ),
             scope=request.scope,
             constraints=request.constraints,
+            required_capabilities=request.required_capabilities,
             acceptance_meaning=request.acceptance_meaning,
             evidence_requirements=tuple((*sop_expectations, *assurance_expectations)),
             out_of_scope=request.out_of_scope,
             authority_lineage=request.authority_lineage,
+            required_prerequisites=request.required_prerequisites,
+            prerequisite_evidence=request.prerequisite_evidence,
             semantic_fact_references=request.semantic_facts,
             sop_reference=package.sop_reference,
             reasoning_summary=ReasoningSummary(
@@ -495,8 +521,10 @@ def budget_for_response_contract(contract: ResponseContract) -> ContextBudget:
 def default_system_capability_reality() -> SystemCapabilityReality:
     """Repository-owned self-capability truth, not marketing or personality."""
 
+    from spg.application.connector_manifest import built_in_executable_capabilities
+
     return SystemCapabilityReality(
-        version="1",
+        version="2",
         capabilities=(
             "Understand Human goals, constraints, corrections, and governed meaning.",
             "Reason about software products, architecture, engineering trade-offs, and repositories.",
@@ -518,11 +546,22 @@ def default_system_capability_reality() -> SystemCapabilityReality:
             "docs/architecture/watt-ai-native-software-production-architecture.md",
             "docs/architecture/wic-context-orchestration.md",
         ),
+        executable_capabilities=built_in_executable_capabilities(),
     )
 
 
 def system_capability_context_candidate(*, required: bool = False) -> ContextCandidate:
     reality = default_system_capability_reality()
+    from spg.domain.connectors import ConnectorAvailability
+
+    executable_now = ", ".join(
+        item.capability_id for item in reality.executable_capabilities
+        if item.availability is ConnectorAvailability.AVAILABLE
+    )
+    not_connected = ", ".join(
+        item.capability_id for item in reality.executable_capabilities
+        if item.availability is not ConnectorAvailability.AVAILABLE
+    )
     return ContextCandidate(
         candidate_id=f"system-capability-reality:{reality.version}",
         source=ContextSource.SYSTEM_CAPABILITY_REALITY,
@@ -530,6 +569,9 @@ def system_capability_context_candidate(*, required: bool = False) -> ContextCan
             f"Identity: {reality.identity}; type: AI-native software production system. "
             "Capabilities: " + " ".join(reality.capabilities) + " Boundaries: "
             + " ".join(reality.boundaries)
+            + " Installed executable operations: " + executable_now
+            + ". Not currently executable without further connector/authorization: "
+            + not_connected + "."
         ),
         source_reference=f"system-capability-reality:{reality.version}",
         authority=reality.authority,

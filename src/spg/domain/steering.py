@@ -67,6 +67,7 @@ class SteeringDriverStopReason(StrEnum):
 
 
 class SteeringActionType(StrEnum):
+    REPOSITORY_ACTION = "REPOSITORY_ACTION"
     PLAN_REVISION = "PLAN_REVISION"
     SEMANTIC_RESULT_ADMISSION = "SEMANTIC_RESULT_ADMISSION"
     STEP_TRANSITION = "STEP_TRANSITION"
@@ -287,6 +288,10 @@ class SemanticStepInput(BaseModel):
     context_materials: tuple[SemanticContextMaterial, ...]
     design_context: dict[str, object] | None = None
     production_proposal_required: bool = False
+    required_intermediate_artifacts: tuple[str, ...] = ()
+    approved_artifact_references: tuple[str, ...] = ()
+    available_executable_capabilities: tuple[str, ...] = ()
+    unavailable_executable_capabilities: tuple[str, ...] = ()
 
     @model_validator(mode="after")
     def require_semantic_step(self) -> Self:

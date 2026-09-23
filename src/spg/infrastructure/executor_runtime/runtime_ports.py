@@ -146,10 +146,24 @@ class DurableKernelAudit:
             "dependency.sync": EffectClassification.PROCESS,
             "preview.inspect": EffectClassification.READ,
         }.get(request.proposal.tool_identity, EffectClassification.LOCAL_MUTATION)
+        if request.proposal.tool_identity == "git.operation":
+            from spg.executor.git_operations import git_operation_is_read_only
+
+            classification = (
+                EffectClassification.READ
+                if git_operation_is_read_only(str(semantic_input.get("operation")))
+                else EffectClassification.LOCAL_MUTATION
+            )
+        if request.proposal.tool_identity == "filesystem.operation":
+            classification = (
+                EffectClassification.READ
+                if semantic_input.get("operation") in {"search", "stat", "diff"}
+                else EffectClassification.LOCAL_MUTATION
+            )
         conflict_domains = tuple(
             str(value)
             for key, value in semantic_input.items()
-            if key in {"path", "cwd"} and isinstance(value, str)
+              if key in {"path", "destination", "cwd"} and isinstance(value, str)
         )
         with self.database.unit_of_work() as uow:
             NativeExecutionStore(uow.session).insert_effect(

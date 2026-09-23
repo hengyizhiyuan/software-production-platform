@@ -1181,7 +1181,12 @@
   function renderAttention() {
     elements.attentionList.replaceChildren();
     const actionable = controlRoom.humanActionProjection(state.selectedWork, state.attention, state.selectedAgreementId);
-    const shown = [...actionable.actionableAttention];
+    // Work revision admission already has one authoritative panel with the
+    // Human identity and all three governed decisions. Do not project the same
+    // domain operation a second time through generic Attention.
+    const shown = actionable.actionableAttention.filter(
+      (item) => item.kind !== "WORK_REVISION_APPROVAL",
+    );
     if (actionable.conversationalDecision) shown.push(actionable.conversationalDecision);
     elements.attentionSection.hidden = shown.length === 0;
     shown.forEach((attention) => {
@@ -1206,7 +1211,10 @@
         actions.append(button);
       });
       if (attention === actionable.conversationalDecision) {
-        const respond = createElement("button", "action-button emphasis", "Respond in conversation");
+        const respond = createElement(
+          "button", "action-button emphasis",
+          attention.conversation_prompt ? "Answer in conversation" : "Respond in conversation",
+        );
         respond.type = "button";
         respond.addEventListener("click", () => elements.workRequirement.focus());
         actions.append(respond);
@@ -1624,10 +1632,16 @@
     elements.workspaceProductionTrust.textContent = trust.state;
 
     const humanActions = controlRoom.humanActionProjection(work, state.attention, state.selectedAgreementId);
-    elements.workspaceActionsSummary.textContent = humanActions.summary;
-    elements.workspaceActionsAttention.textContent = humanActions.required
-      ? `${humanActions.count} actionable Human intervention${humanActions.count === 1 ? "" : "s"}`
-      : "No Human action required";
+    const acquisition = state.sources?.acquisition;
+    const repositoryAuthorizationRequired = acquisition?.state === "WAITING_FOR_AUTHORIZATION";
+    elements.workspaceActionsSummary.textContent = repositoryAuthorizationRequired
+      ? "Repository access is required before production can continue."
+      : humanActions.summary;
+    elements.workspaceActionsAttention.textContent = repositoryAuthorizationRequired
+      ? "Repository authorization required"
+      : humanActions.required
+        ? `${humanActions.count} actionable Human intervention${humanActions.count === 1 ? "" : "s"}`
+        : "No Human action required";
     const attentionActions = humanActions.actionableAttention.flatMap((item) => item.available_actions || []);
     const previewRequired = state.attention.some((item) => item.kind === "CANDIDATE_AUTHORIZATION"
       && (item.available_actions || []).includes("AUTHORIZE"))
@@ -1637,16 +1651,28 @@
       ...attentionActions.map(actionLabel),
       ...(humanActions.conversationalDecision ? ["Respond in conversation"] : []),
     ];
-    elements.workspaceActionsAvailable.textContent = availableActions.join(" · ")
-      || Array.from(elements.workActions.children).map((button) => button.textContent).join(" · ")
-      || "No governed action available now.";
-    elements.workspaceActionsBlocker.textContent = status.condition;
+    elements.workspaceActionsAvailable.textContent = repositoryAuthorizationRequired
+      ? acquisition.authorization?.integration_available
+        ? "Authorize repository access · Retry repository acquisition"
+        : "Authorization integration unavailable · Retry after external access changes"
+      : availableActions.join(" · ")
+        || Array.from(elements.workActions.children).map((button) => button.textContent).join(" · ")
+        || "No governed action available now.";
+    elements.workspaceActionsBlocker.textContent = repositoryAuthorizationRequired
+      ? acquisition.message || "Repository read authorization is required."
+      : status.condition;
     const owner = work.next_owner ? `Next owner: ${work.next_owner.replaceAll("_", " ")}.` : "";
     const invalid = work.control_state_valid === false
       ? " Watt control-state recovery is required."
       : "";
-    elements.workspaceActionsDirection.textContent = `${owner} ${attention.emergingDirection || ""}${invalid}`.trim();
-    document.getElementById("actions-surface").classList.toggle("requires-attention", humanActions.required);
+    elements.workspaceActionsDirection.textContent = repositoryAuthorizationRequired
+      ? acquisition.authorization?.human_action
+        || "Grant repository access outside Watt, then retry the persisted acquisition."
+      : `${owner} ${attention.emergingDirection || ""}${invalid}`.trim();
+    document.getElementById("actions-surface").classList.toggle(
+      "requires-attention",
+      humanActions.required || repositoryAuthorizationRequired,
+    );
     renderWorkSources();
     renderExecutionPath();
     renderWorkingAgreements();
@@ -1662,12 +1688,95 @@
       elements.workspaceRealitySummary.textContent = "No bound repository source is available for this Work.";
       return;
     }
+    const acquisition = source.acquisition;
+    const capabilityGaps = source.capability_gaps || [];
+    if (acquisition && acquisition.state !== "READY") {
+      tree.replaceChildren();
+      delete tree.dataset.sourceSignature;
+      const copy = {
+        REQUESTED: "Repository acquisition requested…",
+        RUNNING: "Acquiring repository…",
+        WAITING_FOR_AUTHORIZATION: "Waiting for GitHub authorization…",
+        FAILED_RETRYABLE: "Repository acquisition failed — retry available",
+        FAILED_TERMINAL: "Repository acquisition failed — repository details must be corrected",
+        NOT_STARTED: "Repository acquisition has not started.",
+      }[acquisition.state] || "Repository acquisition is waiting.";
+      elements.workspaceRealitySummary.textContent = copy;
+      tree.append(createElement("p", "empty-copy", acquisition.message || copy));
+      capabilityGaps.forEach((gap) => tree.append(createElement(
+        "p", "empty-copy", `${gap.capability_id}: ${gap.reason}`,
+      )));
+      if (acquisition.state === "WAITING_FOR_AUTHORIZATION") {
+        const authorize = createElement(
+          "button",
+          "secondary-action",
+          acquisition.authorization?.integration_available
+            ? "Authorize repository access"
+            : "Authorize repository access · unavailable",
+        );
+        authorize.type = "button";
+        authorize.disabled = !acquisition.authorization?.integration_available;
+        authorize.title = acquisition.authorization?.integration_available
+          ? "Authorize read access for this repository."
+          : "This runtime has no configured GitHub App/OAuth authorization connector.";
+        tree.append(authorize);
+      }
+      if (acquisition.retry_available) {
+        const retry = createElement(
+          "button",
+          "secondary-action",
+          acquisition.state === "WAITING_FOR_AUTHORIZATION"
+            ? "Retry after external access changes"
+            : "Retry repository acquisition",
+        );
+        retry.type = "button";
+        retry.addEventListener("click", async () => {
+          if (!state.selectedWorkId || state.busy) return;
+          setBusy(true);
+          hideNotice();
+          try {
+            await apiRequest(
+              `/api/works/${state.selectedWorkId}/repository-acquisition/retry`,
+              {
+                method: "POST",
+                body: {
+                  authority_identity: "human:local-operator",
+                  rationale: "Human explicitly retried repository acquisition.",
+                },
+              },
+            );
+            await refreshSelected();
+          } catch (error) {
+            showNotice(error);
+          } finally {
+            setBusy(false);
+          }
+        });
+        tree.append(retry);
+      }
+      return;
+    }
     const sources = source.sources || [];
-    elements.workspaceRealitySummary.textContent = "Repository files at the current revision · read only";
+    const branch = acquisition?.branch ? ` · ${acquisition.branch}` : "";
+    elements.workspaceRealitySummary.textContent = `Repository ready${branch} · ${source.revision} · read only`;
     const signature = `${state.selectedWorkId}:${source.revision}:${sources.map((item) => item.path).join("|")}`;
-    if (tree.dataset.sourceSignature === signature) return;
+    const branchOperation = source.branch_operation;
+    const operationSignature = branchOperation
+      ? `${branchOperation.intake_request_id}:${branchOperation.condition}`
+      : "";
+    const gapSignature = capabilityGaps.map((gap) => `${gap.capability_id}:${gap.condition}`).join("|");
+    if (tree.dataset.sourceSignature === `${signature}:${operationSignature}:${gapSignature}`) return;
     tree.replaceChildren();
-    tree.dataset.sourceSignature = signature;
+    tree.dataset.sourceSignature = `${signature}:${operationSignature}:${gapSignature}`;
+    capabilityGaps.forEach((gap) => tree.append(createElement(
+      "p", "empty-copy", `${gap.capability_id}: ${gap.reason}`,
+    )));
+    if (branchOperation && branchOperation.condition !== "READY") {
+      tree.append(createElement(
+        "p", "empty-copy",
+        `Local branch ${branchOperation.target_branch}: ${branchOperation.human_message || branchOperation.condition}`,
+      ));
+    }
     for (const kind of ["DOCUMENTATION", "CODE"]) {
       const group = createElement("details", "work-source-group");
       group.open = true;

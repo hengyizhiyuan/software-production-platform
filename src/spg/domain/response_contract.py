@@ -133,6 +133,17 @@ _ADVISORY_OPENING = re.compile(
     r"^\s*(?:如何|怎么|怎样|有什么办法|how\s+(?:do|can|should)\s+i\b)",
     re.IGNORECASE,
 )
+_REPOSITORY_RECOVERY_ACTION = re.compile(
+    r"(?:重试|再试|继续(?:拉取|克隆|下载|获取)?|拉取|克隆|下载(?:代码|仓库)|获取(?:代码|仓库)|"
+    r"\b(?:retry|continue|resume|pull|clone|download)\b)",
+    re.IGNORECASE,
+)
+
+
+def repository_acquisition_recovery_requested(text: str) -> bool:
+    """Recognize an action on an already-governed acquisition, not new intent."""
+
+    return bool(_REPOSITORY_RECOVERY_ACTION.search(text.strip()))
 
 
 def production_intent_evidence(text: str) -> ProductionIntentEvidence:

@@ -180,6 +180,35 @@ def test_orch_restart_reschedules_only_ordinary_ready_or_running_work() -> None:
     assert orchestrator.scheduled == list(scheduled)
 
 
+def test_orch_restart_respects_persisted_work_prerequisite_guard() -> None:
+    ready_work_id = uuid4()
+    running_work_id = uuid4()
+
+    class MultiWorkService:
+        def list_works(self) -> tuple[WorkProjection, ...]:
+            return (
+                _projection(ready_work_id, WorkStatus.READY),
+                _projection(running_work_id, WorkStatus.RUNNING),
+            )
+
+    class RecordingOrchestrator(ProductionOrchestrator):
+        def __init__(self) -> None:
+            super().__init__(
+                MultiWorkService(),
+                activation_guard=lambda work_id: work_id != ready_work_id,
+            )
+            self.scheduled: list[UUID] = []
+
+        def schedule(self, work_id: UUID) -> bool:
+            self.scheduled.append(work_id)
+            return True
+
+    orchestrator = RecordingOrchestrator()
+
+    assert orchestrator.resume_safely_eligible_works() == (running_work_id,)
+    assert orchestrator.scheduled == [running_work_id]
+
+
 def test_orch_06_07_22_24_driver_has_no_provider_or_recovery_bypass() -> None:
     source = (
         Path(__file__).parents[1]

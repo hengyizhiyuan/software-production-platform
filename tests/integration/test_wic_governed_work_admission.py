@@ -5,7 +5,9 @@ from datetime import UTC, datetime
 import os
 from pathlib import Path
 import subprocess
+from threading import RLock
 import time
+from types import SimpleNamespace
 from uuid import UUID, uuid4
 
 from alembic import command
@@ -18,11 +20,20 @@ from spg.api import create_http_application
 from spg.application.interaction import (
     DeterministicWorkInteractionCapability,
     WorkInteractionService,
+    _repository_branch_status_answer,
 )
 from spg.application.guided_design import GuidedDesignApplicationService
-from spg.application.assets import RepositoryAssetService
+from spg.application.assets import RepositoryAssetService, canonical_fingerprint
+from spg.application.native_git_operations import NativeGitOperationRunner
+from spg.application.connectors import ConnectorResolver
+from spg.application.native_production_environment import NativeProductionEnvironmentRuntime
+from spg.infrastructure.production_environment import ContainerProductionEnvironmentProvider, DockerCliContainerRuntime
+from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.application.orchestration import OrchestrationStopReason, ProductionOrchestrator
 from spg.application.post_admission import WorkPostAdmissionService
+from spg.application.production_admission import ProductionAdmissionTrigger
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.runtime import RuntimeService
 from spg.application.semantic_steps import SemanticStepApplicationService
@@ -36,7 +47,17 @@ from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.steering_production import SteeringProductionService
 from spg.application.work import WorkApplicationService
 from spg.domain.change import ProductionTargetKind
+from spg.domain.assets import (
+    AssetScopeAdmissionRequest,
+    RepositoryAcquisitionFailure,
+    RepositoryAcquisitionFailureCategory,
+    RepositoryIntakeRequest,
+)
 from spg.domain.conversation import ConversationTurnIntent
+from spg.domain.connectors import (
+    CapabilityRequirement, CapabilityScope, ConnectorAvailability,
+    ConnectorMaturity, ExecutableCapability, SideEffectLevel,
+)
 from spg.domain.guided_design import DesignIssueState, DesignReadinessState
 from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.engineering_semantics import (
@@ -50,11 +71,14 @@ from spg.domain.engineering_semantics import (
     current_semantic_facts,
 )
 from spg.domain.interaction import (
+    InteractionActor,
     InteractionAssessmentCandidate,
     InteractionInterpretationInput,
     InteractionInvariantViolation,
     InterpretationMeaning,
     InterpretationMeaningKind,
+    ProductionAdmissionExecutionState,
+    RepositoryAcquisitionState,
     WorkAdmissionReadinessStatus,
     WorkFocusClassification,
     WorkImpactDisposition,
@@ -308,6 +332,48 @@ class _CourseScheduleSemanticCapability:
                 "我会把 8×5 作为可修正的工作假设：8 节课、5 个工作日。"
             ),
             provider_identity="test:engineering-semantic-truth",
+        )
+
+
+class _ExplicitBranchSemanticCapability:
+    def interpret(self, basis: InteractionInterpretationInput) -> InteractionAssessmentCandidate:
+        revision = basis.active_work_context.work_revision
+        latest = basis.records[-1]
+        return InteractionAssessmentCandidate(
+            interpreted_motive=revision.motive,
+            desired_outcome=revision.desired_outcome,
+            candidate_context=revision.context_facts,
+            candidate_constraints=revision.constraints,
+            current_requests=(*revision.requests, latest.content),
+            semantic_fact_candidates=(
+                EngineeringSemanticFactCandidate(
+                    candidate_id="explicit-branch-name",
+                    subject="repository.branch_name",
+                    relation=SemanticRelation.EQUALITY,
+                    value="test",
+                    qualifiers={"state": "to_be_created"},
+                    authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                    epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                    source_record_ids=(latest.id,),
+                    source_text=latest.content,
+                    role_origin=SemanticRoleOrigin.EXPLICIT,
+                ),
+                EngineeringSemanticFactCandidate(
+                    candidate_id="explicit-branch-action",
+                    subject="repository.branch_action",
+                    relation=SemanticRelation.EQUALITY,
+                    value="创建新分支",
+                    authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                    epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                    source_record_ids=(latest.id,),
+                    source_text=latest.content,
+                    role_origin=SemanticRoleOrigin.EXPLICIT,
+                ),
+            ),
+            focus_classification=WorkFocusClassification.ON_TOPIC,
+            impact_disposition=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
+            natural_response="已记录创建 test 分支的明确请求，等待 Work Reality 接纳。",
+            provider_identity="test:explicit-branch-semantic",
         )
 
 
@@ -684,12 +750,12 @@ def _ready(interactions: WorkInteractionService):
     return projection
 
 
-def _admit(work: WorkApplicationService, ready):
+def _admit(work: WorkApplicationService, ready, *, authority_identity: str = "human:governor"):
     return work.admit_interaction_work(
         ready.interaction.id,
         assessment_id=ready.latest_assessment.id,
         basis_fingerprint=ready.latest_assessment.basis_fingerprint,
-        authority_identity="human:governor",
+        authority_identity=authority_identity,
         rationale="Admit the reviewed Shared Understanding.",
     )
 
@@ -1067,13 +1133,18 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
                 return candidate
             return candidate.model_copy(
                 update={
-                    "proposed_production": SemanticProductionProposal(
-                        target_kind=ProductionTargetKind.CODE_WORK,
-                        objective="Implement the governed course schedule semantics",
-                        code_targets=("index.html", "tests/js/test_schedule.cjs"),
-                        verification_expectation=(
-                            "Verify the candidate against the governed schedule facts"
-                        ),
+                        "proposed_production": SemanticProductionProposal(
+                            target_kind=ProductionTargetKind.DOCUMENTATION_WORK,
+                            objective="Materialize the governed course schedule design",
+                            artifact_targets=(
+                                ProductionPlanArtifactTarget(
+                                    path="docs/course-schedule-design.md",
+                                    operation=PlannedArtifactOperation.CREATE,
+                                ),
+                            ),
+                            verification_expectation=(
+                                "Verify the candidate against the governed schedule facts"
+                            ),
                     )
                 }
             )
@@ -1290,7 +1361,7 @@ def test_guided_design_progresses_governed_issues_and_reconstructs_after_restart
         assert _count(postgres_database, table) == 0, table.name
 
 
-def test_guided_design_reaches_reviewable_proposal_and_stops_for_human_authority(
+def test_guided_design_materializes_design_artifact_before_human_review(
     postgres_database: Database,
     services,
 ) -> None:
@@ -1312,54 +1383,37 @@ def test_guided_design_reaches_reviewable_proposal_and_stops_for_human_authority
         orchestrator.shutdown()
         driver.shutdown()
 
-    assert outcome.stop_reason.value == "HUMAN_ATTENTION"
+    assert outcome.stop_reason.value == "PRODUCTION_RUNNING"
     design = GuidedDesignApplicationService(postgres_database).get(admitted.work_id)
     assert design.readiness.state is DesignReadinessState.READY
     assert all(issue.state is DesignIssueState.SATISFIED for issue in design.issues)
     assert work.get_work(admitted.work_id).production_plan is not None
-    attention = work.list_attention(work_id=admitted.work_id)
-    assert len(attention) == 1
-    assert attention[0].kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
-    assert attention[0].available_actions == (
-        AttentionAction.APPROVE,
-        AttentionAction.REQUEST_REFINEMENT,
-    )
-    for table in PRODUCTION_TABLES:
-        assert _count(postgres_database, table) == 0, table.name
-
-    work.resolve_attention(
-        attention[0].id,
-        AttentionResolutionRequest(
-            action=AttentionAction.APPROVE,
-            authority_identity="human:governor",
-            rationale="The bounded proposal is understood and admitted.",
-        ),
-    )
-    production = _SchedulingOrchestrator()
-    continuation = PlanSteeringDriver(
-        postgres_database,
-        work,
-        production,
-        semantic_capability=capability,
-        max_automatic_transitions=8,
-    )
-    try:
-        continued = continuation.activate(admitted.work_id)
-    finally:
-        continuation.shutdown()
-
-    assert continued.stop_reason.value == "PRODUCTION_RUNNING"
-    assert production.scheduled == [admitted.work_id]
     projection = work.get_work(admitted.work_id)
     assert projection.production_plan is not None
+    assert projection.production_plan.target_kind is (
+        ProductionTargetKind.DOCUMENTATION_WORK
+    )
     assert projection.production_plan.fit_classification is (
         OnePwuFitClassification.ONE_PWU_FIT
     )
     assert _count(postgres_database, production_runs) == 1
     assert _count(postgres_database, production_work_units) == 1
+    with postgres_database.unit_of_work() as uow:
+        product = ProductStore(uow.session)
+        binding = product.runtime_binding(admitted.work_id)
+        assert binding is not None
+        assert product.runtime_summary(binding).extra["task_contract_mode"] == (
+            "DESIGN_ARTIFACT"
+        )
+    restarted = WorkApplicationService(
+        postgres_database,
+        workspace_root=work.workspace_root,
+    ).get_work(admitted.work_id)
+    assert restarted.current_production_run_id == binding.production_run_id
+    assert restarted.target_kind is ProductionTargetKind.DOCUMENTATION_WORK
 
 
-def test_bounded_managed_code_proposal_continues_without_ceremonial_review(
+def test_guided_design_rejects_implementation_before_design_artifact_exists(
     postgres_database: Database, tmp_path: Path,
 ) -> None:
     work, interactions = _services_for_resource(
@@ -1389,19 +1443,156 @@ def test_bounded_managed_code_proposal_continues_without_ceremonial_review(
         outcome = driver.activate(admitted.work_id)
     finally:
         driver.shutdown()
+    assert outcome.stop_reason.value == "BLOCKED"
+    assert production.scheduled == []
+    assert _count(postgres_database, production_runs) == 0
+    assert _count(postgres_database, production_work_units) == 0
+
+
+def test_approved_design_artifact_allows_bounded_implementation_contract(
+    postgres_database: Database,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    approved_reference = (
+        "approved-design-artifact:docs/design.md@runtime-commit:approved"
+        "#human-authorization:approved"
+    )
+    monkeypatch.setattr(
+        GuidedDesignApplicationService,
+        "approved_design_artifact_references",
+        lambda self, work_id: (approved_reference,),
+    )
+    work, interactions = _services_for_resource(
+        postgres_database,
+        tmp_path,
+        "watt://repositories/approved-design-test",
+    )
+    admitted = _admit(work, _ready(interactions))
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+
+    class ApprovedImplementationSemantic(_GuidedDesignSemanticCapability):
+        def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+            candidate = super().execute(input)
+            if not input.design_context["production_transition_issue"]:
+                return candidate
+            assert input.required_intermediate_artifacts == ()
+            assert input.approved_artifact_references == (approved_reference,)
+            return candidate.model_copy(
+                update={
+                    "proposed_production": SemanticProductionProposal(
+                        target_kind=ProductionTargetKind.CODE_WORK,
+                        objective="Implement the explicitly approved design",
+                        code_targets=("index.html", "tests/js/test_page.cjs"),
+                        verification_expectation="Verify the approved design implementation",
+                    )
+                }
+            )
+
+    production = _SchedulingOrchestrator()
+    driver = PlanSteeringDriver(
+        postgres_database,
+        work,
+        production,
+        semantic_capability=ApprovedImplementationSemantic(),
+        max_automatic_transitions=32,
+    )
+    try:
+        outcome = driver.activate(admitted.work_id)
+    finally:
+        driver.shutdown()
+
     assert outcome.stop_reason.value == "PRODUCTION_RUNNING"
     assert production.scheduled == [admitted.work_id]
-    assert _count(postgres_database, production_runs) == 1
-    assert _count(postgres_database, production_work_units) == 1
-    assert not any(item.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
-                   for item in work.list_attention(work_id=admitted.work_id))
     with postgres_database.unit_of_work() as uow:
-        decisions = RuntimeStore(uow.session).governance_for_subject(str(admitted.work_id))
-    assert any(item.decision_type == "AUTO_ADMIT_BOUNDED_MANAGED_PROPOSAL"
-               for item in decisions)
+        product = ProductStore(uow.session)
+        binding = product.runtime_binding(admitted.work_id)
+        assert binding is not None
+        summary = product.runtime_summary(binding)
+    assert summary.extra["task_contract_mode"] == "IMPLEMENTATION"
+    with postgres_database.unit_of_work() as uow:
+        raw_contract = uow.session.execute(
+            select(production_work_units.c.completion_contract).where(
+                production_work_units.c.id == binding.work_unit_id
+            )
+        ).scalar_one()
+    task_contract = CompletionContract.model_validate(raw_contract).task_contract
+    assert task_contract is not None
+    assert task_contract.required_prerequisites == ("APPROVED_DESIGN_ARTIFACT",)
+    assert task_contract.prerequisite_evidence == (approved_reference,)
 
 
-def test_repositoryless_work_uses_allocated_managed_workspace_without_second_review(
+def test_action_eligibility_hides_implementation_approval_when_design_evidence_stales(
+    postgres_database: Database,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    approved_reference = (
+        "approved-design-artifact:docs/design.md@runtime-commit:approved"
+        "#human-authorization:approved"
+    )
+    monkeypatch.setattr(
+        GuidedDesignApplicationService,
+        "approved_design_artifact_references",
+        lambda self, work_id: (approved_reference,),
+    )
+    work, interactions = _services_for_resource(
+        postgres_database,
+        tmp_path,
+        "watt://repositories/action-eligibility-test",
+    )
+    admitted = _admit(work, _ready(interactions))
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+
+    class BroadImplementationSemantic(_GuidedDesignSemanticCapability):
+        def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+            candidate = super().execute(input)
+            if not input.design_context["production_transition_issue"]:
+                return candidate
+            return candidate.model_copy(
+                update={
+                    "proposed_production": SemanticProductionProposal(
+                        target_kind=ProductionTargetKind.CODE_WORK,
+                        objective="Review a broad implementation proposal",
+                        code_targets=tuple(f"src/part_{index}.py" for index in range(5)),
+                        verification_expectation="Verify the approved design implementation",
+                    )
+                }
+            )
+
+    driver = PlanSteeringDriver(
+        postgres_database,
+        work,
+        _SchedulingOrchestrator(),
+        semantic_capability=BroadImplementationSemantic(),
+        max_automatic_transitions=32,
+    )
+    try:
+        outcome = driver.activate(admitted.work_id)
+    finally:
+        driver.shutdown()
+    assert outcome.stop_reason.value == "HUMAN_ATTENTION"
+
+    monkeypatch.setattr(
+        GuidedDesignApplicationService,
+        "approved_design_artifact_references",
+        lambda self, work_id: (),
+    )
+    attention = work.list_attention(work_id=admitted.work_id)
+    assert len(attention) == 1
+    assert attention[0].kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
+    assert attention[0].available_actions == (AttentionAction.REQUEST_REFINEMENT,)
+    with pytest.raises(ProductInvariantViolation, match="not allowed"):
+        work.resolve_attention(
+            attention[0].id,
+            AttentionResolutionRequest(
+                action=AttentionAction.APPROVE,
+                authority_identity="human:test",
+            ),
+        )
+
+
+def test_repositoryless_work_still_requires_design_artifact_before_code(
     postgres_database: Database, tmp_path: Path,
 ) -> None:
     work, interactions = _services_for_resource(
@@ -1461,26 +1652,10 @@ def test_repositoryless_work_uses_allocated_managed_workspace_without_second_rev
     finally:
         driver.shutdown()
 
-    assert outcome.stop_reason.value == "PRODUCTION_RUNNING"
-    assert production.scheduled == [admitted.work_id]
-    assert not any(
-        item.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
-        for item in work.list_attention(work_id=admitted.work_id)
-    )
-    with postgres_database.unit_of_work() as uow:
-        decisions = RuntimeStore(uow.session).governance_for_subject(
-            str(admitted.work_id)
-        )
-    workspace_admission = next(
-        item
-        for item in decisions
-        if item.decision_type == "ALLOCATE_MANAGED_EXECUTION_WORKSPACE"
-    )
-    assert workspace_admission.scope["source_revision"]
-    assert any(
-        item.decision_type == "AUTO_ADMIT_BOUNDED_MANAGED_PROPOSAL"
-        for item in decisions
-    )
+    assert outcome.stop_reason.value == "BLOCKED"
+    assert production.scheduled == []
+    assert _count(postgres_database, production_runs) == 0
+    assert _count(postgres_database, production_work_units) == 0
 
 
 def test_production_feedback_can_reopen_issue_and_revise_plan_without_rewriting_history(
@@ -1667,10 +1842,52 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
     class ExistingRepositoryIntake:
         def __init__(self) -> None:
             self.requests = []
+            self.observations = []
 
-        def intake(self, request):
+        def start_intake(self, request):
             self.requests.append(request)
-            return {"resource_id": str(resource.id)}
+            observation = {
+                "resource_id": str(resource.id),
+                "condition": "RUNNING",
+                "source": request.source,
+                "interaction_id": str(request.interaction_id),
+                "work_id": str(request.work_id),
+                "attempt_number": request.attempt_number,
+                "intake_request_id": str(request.request_id),
+            }
+            observation["fingerprint"] = canonical_fingerprint(observation)
+            self.observations.append(observation)
+            return observation
+
+        def execute_intake(self, request_id):
+            observation = {
+                **self.observations[-1],
+                "condition": "READY",
+            }
+            observation["fingerprint"] = canonical_fingerprint(
+                {key: value for key, value in observation.items() if key != "fingerprint"}
+            )
+            self.observations[-1] = observation
+            return observation
+
+        def latest_attempt_for_work(self, work_id):
+            return next(
+                (
+                    item
+                    for item in reversed(self.observations)
+                    if item["work_id"] == str(work_id)
+                ),
+                None,
+            )
+
+        def next_attempt_number(self, work_id):
+            return len(
+                [item for item in self.observations if item["work_id"] == str(work_id)]
+            ) + 1
+
+        def repository_activation_allowed(self, work_id):
+            latest = self.latest_attempt_for_work(work_id)
+            return latest is None or latest["condition"] == "READY"
 
     assets = ExistingRepositoryIntake()
     driver = _RecordingDriver()
@@ -1707,20 +1924,149 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
                 f"/api/interactions/{interaction.id}/shared-understanding"
             ).json()
             if (
-                candidate["governed_work_id"] is not None
-                and candidate["production_admission_state"] == "WORK_CREATED"
+                candidate.get("governed_work_id") is not None
+                and candidate.get("production_admission_state") == "WORK_CREATED"
+                and candidate.get("repository_acquisition_state") == "READY"
             ):
                 payload = candidate
                 break
             time.sleep(0.01)
 
-    assert payload is not None
+    assert payload is not None, candidate
     assert payload["production_admission_state"] == "WORK_CREATED"
-    assert payload["repository_acquisition_state"] == "REPOSITORY_REALITY_BOUND"
+    assert payload["repository_acquisition_state"] == "READY"
     assert payload["governed_revision"]["repository_identity"] == source
     assert len(assets.requests) == 1
     assert assets.requests[0].authority_identity == "human:requester"
     assert driver.scheduled == [UUID(payload["governed_work_id"])]
+
+
+def test_explicit_pull_recovers_admitted_work_that_has_no_prior_acquisition_attempt(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    source = "https://github.com/acme/runtime-upgrade-recovery"
+    work, interactions = _services_for_resource(postgres_database, tmp_path, source)
+    with postgres_database.unit_of_work() as uow:
+        resource = ProductStore(uow.session).default_resource()
+    assert resource is not None
+
+    interaction = interactions.create_interaction(
+        human_identity="human:requester",
+        start_work_context=True,
+    )
+    ready = interactions.append_and_assess(
+        interaction.id,
+        f"Please pull {source} and add a feature.",
+        human_identity="human:requester",
+    )
+    assert ready.latest_assessment is not None
+    admitted = work.admit_interaction_work(
+        interaction.id,
+        engineering_resource_id=None,
+        use_default_resource=False,
+        assessment_id=ready.latest_assessment.id,
+        basis_fingerprint=ready.latest_assessment.basis_fingerprint,
+        authority_identity="human:requester",
+        rationale="Simulate Work admitted before repository attempts were persisted.",
+    )
+
+    class RuntimeUpgradeRecoveryIntake:
+        def __init__(self) -> None:
+            self.requests = []
+            self.observations = []
+
+        def start_intake(self, request):
+            self.requests.append(request)
+            observation = {
+                "resource_id": str(resource.id),
+                "condition": "RUNNING",
+                "source": request.source,
+                "interaction_id": str(request.interaction_id),
+                "work_id": str(request.work_id),
+                "attempt_number": request.attempt_number,
+                "intake_request_id": str(request.request_id),
+            }
+            observation["fingerprint"] = canonical_fingerprint(observation)
+            self.observations.append(observation)
+            return observation
+
+        def execute_intake(self, request_id):
+            observation = {**self.observations[-1], "condition": "READY"}
+            observation["fingerprint"] = canonical_fingerprint(
+                {key: value for key, value in observation.items() if key != "fingerprint"}
+            )
+            self.observations[-1] = observation
+            return observation
+
+        def latest_attempt_for_work(self, work_id):
+            return next(
+                (
+                    item
+                    for item in reversed(self.observations)
+                    if item["work_id"] == str(work_id)
+                ),
+                None,
+            )
+
+        def next_attempt_number(self, work_id):
+            return len(
+                [item for item in self.observations if item["work_id"] == str(work_id)]
+            ) + 1
+
+        def repository_activation_allowed(self, work_id):
+            latest = self.latest_attempt_for_work(work_id)
+            return latest is not None and latest["condition"] == "READY"
+
+    assets = RuntimeUpgradeRecoveryIntake()
+    driver = _RecordingDriver()
+    client = TestClient(
+        create_http_application(
+            application=object(),
+            database=postgres_database,
+            work_service=work,
+            orchestrator=_NoopOrchestrator(),
+            steering_driver=driver,
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=interactions,
+            repository_asset_service=assets,
+        ),
+        raise_server_exceptions=False,
+    )
+
+    with client:
+        response = client.post(
+            f"/api/interactions/{interaction.id}/turns",
+            json={
+                "content": "Pull the code now.",
+                "human_identity": "human:requester",
+            },
+        )
+        assert response.status_code == 202, response.text
+        deadline = time.monotonic() + 5
+        recovered = None
+        while time.monotonic() < deadline:
+            candidate = client.get(
+                f"/api/interactions/{interaction.id}/shared-understanding"
+            ).json()
+            if (
+                candidate.get("repository_acquisition_state") == "READY"
+                and candidate.get("governed_revision", {}).get(
+                    "repository_identity"
+                )
+                == source
+            ):
+                recovered = candidate
+                break
+            time.sleep(0.01)
+
+    assert recovered is not None, candidate
+    assert recovered["governed_work_id"] == str(admitted.work_id)
+    assert recovered["repository_source"] == source
+    assert len(assets.requests) == 1
+    assert assets.requests[0].work_id == admitted.work_id
+    assert assets.requests[0].source == source
+    assert driver.scheduled == [admitted.work_id]
 
 
 @pytest.mark.parametrize(
@@ -1729,7 +2075,7 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
         ("Fix this bug in my repo.", "WAITING_FOR_REPOSITORY_SOURCE", 0),
         (
             "Pull https://github.com/acme/private-repository and fix this bug.",
-            "WAITING_FOR_REPOSITORY_AUTHORIZATION",
+            "WAITING_FOR_AUTHORIZATION",
             1,
         ),
     ),
@@ -1750,10 +2096,50 @@ def test_unbound_repository_request_creates_work_without_bypassing_access(
     class UnresolvedRepositoryIntake:
         def __init__(self) -> None:
             self.requests = []
+            self.observations = []
 
-        def intake(self, request):
+        def start_intake(self, request):
             self.requests.append(request)
-            return {"resource_id": None, "condition": "UNRESOLVED"}
+            observation = {
+                "resource_id": None,
+                "condition": "RUNNING",
+                "source": request.source,
+                "interaction_id": str(request.interaction_id),
+                "work_id": str(request.work_id),
+                "attempt_number": request.attempt_number,
+                "intake_request_id": str(request.request_id),
+            }
+            self.observations.append(observation)
+            return observation
+
+        def execute_intake(self, request_id):
+            observation = {
+                **self.observations[-1],
+                "condition": "WAITING_FOR_AUTHORIZATION",
+                "failure_category": "AUTH_REQUIRED",
+                "human_message": "Repository read authorization is required.",
+            }
+            self.observations[-1] = observation
+            return observation
+
+        def latest_attempt_for_work(self, work_id):
+            return next(
+                (
+                    item
+                    for item in reversed(self.observations)
+                    if item["work_id"] == str(work_id)
+                ),
+                None,
+            )
+
+        def next_attempt_number(self, work_id):
+            return len(
+                [item for item in self.observations if item["work_id"] == str(work_id)]
+            ) + 1
+
+        def repository_activation_allowed(self, work_id):
+            latest = self.latest_attempt_for_work(work_id)
+            return latest is None or latest["condition"] == "READY"
 
     driver = _RecordingDriver()
     assets = UnresolvedRepositoryIntake()
@@ -1792,6 +2178,8 @@ def test_unbound_repository_request_creates_work_without_bypassing_access(
             if (
                 candidate["governed_work_id"] is not None
                 and candidate["production_admission_state"] == "WORK_CREATED"
+                and candidate["repository_acquisition_state"]
+                == expected_repository_state
             ):
                 payload = candidate
                 break
@@ -1803,6 +2191,678 @@ def test_unbound_repository_request_creates_work_without_bypassing_access(
     assert payload["governed_revision"]["repository_identity"] is None
     assert len(assets.requests) == expected_intakes
     assert driver.scheduled == []
+    if expected_intakes:
+        sources = client.get(
+            f"/api/works/{payload['governed_work_id']}/control-room/sources"
+        ).json()
+        assert sources["selection"] == "ACQUISITION_STATE"
+        assert sources["acquisition"]["state"] == expected_repository_state
+        assert sources["acquisition"]["failure_category"] == "AUTH_REQUIRED"
+        assert sources["acquisition"]["retry_available"] is True
+        assert sources["acquisition"]["authorization"] == {
+            "required": True,
+            "integration_available": False,
+            "human_action": (
+                "Grant repository read access outside Watt, then retry this "
+                "persisted acquisition."
+            ),
+        }
+
+
+def test_failed_repository_acquisition_reuses_work_and_retries_with_new_attempt(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    source = "https://github.com/acme/private-repository"
+    work, interactions = _services_for_resource(postgres_database, tmp_path, source)
+    with postgres_database.unit_of_work() as uow:
+        resource = ProductStore(uow.session).default_resource()
+    assert resource is not None
+
+    class RecoveringRepositoryAcquisition:
+        def __init__(self) -> None:
+            self.requests = []
+            self.observations = []
+
+        def start_intake(self, request):
+            self.requests.append(request)
+            observation = {
+                "resource_id": None,
+                "condition": "RUNNING",
+                "source": request.source,
+                "interaction_id": str(request.interaction_id),
+                "work_id": str(request.work_id),
+                "attempt_number": request.attempt_number,
+                "previous_attempt_id": (
+                    None
+                    if request.previous_attempt_id is None
+                    else str(request.previous_attempt_id)
+                ),
+                "intake_request_id": str(request.request_id),
+            }
+            self.observations.append(observation)
+            return observation
+
+        def execute_intake(self, request_id):
+            current = self.observations[-1]
+            if current["attempt_number"] == 1:
+                observation = {
+                    **current,
+                    "condition": "WAITING_FOR_AUTHORIZATION",
+                    "failure_category": "AUTH_REQUIRED",
+                    "human_message": "Repository read authorization is required.",
+                }
+            else:
+                observation = {
+                    **current,
+                    "resource_id": str(resource.id),
+                    "condition": "READY",
+                    "failure_category": None,
+                    "human_message": "Repository is ready.",
+                }
+                observation["fingerprint"] = canonical_fingerprint(observation)
+            self.observations[-1] = observation
+            return observation
+
+        def latest_attempt_for_work(self, work_id):
+            return next(
+                (
+                    item
+                    for item in reversed(self.observations)
+                    if item["work_id"] == str(work_id)
+                ),
+                None,
+            )
+
+        def next_attempt_number(self, work_id):
+            return len(
+                [item for item in self.observations if item["work_id"] == str(work_id)]
+            ) + 1
+
+        def repository_activation_allowed(self, work_id):
+            latest = self.latest_attempt_for_work(work_id)
+            return latest is None or latest["condition"] == "READY"
+
+    assets = RecoveringRepositoryAcquisition()
+    driver = _RecordingDriver()
+    client = TestClient(
+        create_http_application(
+            application=object(),
+            database=postgres_database,
+            work_service=work,
+            orchestrator=_NoopOrchestrator(),
+            steering_driver=driver,
+            runtime_activation=_RuntimeActivation(),
+            interaction_service=interactions,
+            repository_asset_service=assets,
+        ),
+        raise_server_exceptions=False,
+    )
+    interaction = interactions.create_interaction(
+        human_identity="human:requester", start_work_context=True
+    )
+
+    def submit(content: str) -> None:
+        response = client.post(
+            f"/api/interactions/{interaction.id}/turns",
+            json={"content": content, "human_identity": "human:requester"},
+        )
+        assert response.status_code == 202, response.text
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            projection = client.get(
+                f"/api/interactions/{interaction.id}/shared-understanding"
+            ).json()
+            turns = projection.get("turns", [])
+            if turns and turns[-1]["status"] in {"COMPLETED", "FAILED"}:
+                return
+            time.sleep(0.01)
+        raise AssertionError("Interaction turn did not settle")
+
+    with client:
+        submit(f"Pull {source} and add a login feature.")
+        first = client.get(
+            f"/api/interactions/{interaction.id}/shared-understanding"
+        ).json()
+        work_id = first["governed_work_id"]
+        assert first["repository_acquisition_state"] == "WAITING_FOR_AUTHORIZATION"
+        assert driver.scheduled == []
+
+        submit("Is it ready?")
+        status = client.get(
+            f"/api/interactions/{interaction.id}/shared-understanding"
+        ).json()
+        assert status["governed_work_id"] == work_id
+        assert status["repository_source"] == source
+        assert status["repository_acquisition_state"] == "WAITING_FOR_AUTHORIZATION"
+        assert len(assets.requests) == 1
+
+        submit("Retry repository acquisition.")
+        deadline = time.monotonic() + 5
+        recovered = None
+        while time.monotonic() < deadline:
+            candidate = client.get(
+                f"/api/interactions/{interaction.id}/shared-understanding"
+            ).json()
+            if candidate.get("repository_acquisition_state") == "READY":
+                recovered = candidate
+                break
+            time.sleep(0.01)
+
+    assert recovered is not None
+    assert recovered["governed_work_id"] == work_id
+    assert recovered["repository_acquisition_state"] == "READY"
+    assert len(assets.requests) == 2
+    assert assets.requests[1].attempt_number == 2
+    assert assets.requests[1].previous_attempt_id == assets.requests[0].request_id
+    assert driver.scheduled == [UUID(work_id)]
+
+
+def test_repository_attempt_history_preserves_failure_and_new_retry_result(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    import_root = tmp_path / "imports"
+    import_root.mkdir()
+    source_repository = import_root / "source"
+    source_repository.mkdir()
+    _git(source_repository, "init", "-b", "main")
+    _git(source_repository, "config", "user.name", "SPG Test")
+    _git(source_repository, "config", "user.email", "spg-test@example.invalid")
+    (source_repository / "README.md").write_text("# Source\n", encoding="utf-8")
+    _git(source_repository, "add", ".")
+    _git(source_repository, "commit", "-m", "baseline")
+
+    class FailThenAcquire:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def acquire(self, root, source, destination):
+            self.calls += 1
+            if self.calls == 1:
+                raise RepositoryAcquisitionFailure(
+                    RepositoryAcquisitionFailureCategory.AUTH_REQUIRED,
+                    "Repository read authorization is required.",
+                    technical_evidence={
+                        "operation": "git clone --single-branch",
+                        "stderr": "terminal prompts disabled",
+                    },
+                    retryable=True,
+                )
+            result = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "clone",
+                    "--single-branch",
+                    "--",
+                    str(source_repository),
+                    str(destination),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            assert result.returncode == 0, result.stderr
+
+    service = RepositoryAssetService(
+        postgres_database,
+        tmp_path / "assets",
+        import_root,
+        repository_acquirer=FailThenAcquire(),
+    )
+    work_id = uuid4()
+    interaction_id = uuid4()
+    source = "https://github.com/acme/private-repository.git"
+    first_id = uuid4()
+    first = service.intake(
+        RepositoryIntakeRequest(
+            request_id=first_id,
+            source=source,
+            title="Private repository",
+            description="Acquire the repository baseline.",
+            authority_identity="human:test",
+            interaction_id=interaction_id,
+            work_id=work_id,
+            attempt_number=1,
+        )
+    )
+    second = service.intake(
+        RepositoryIntakeRequest(
+            request_id=uuid4(),
+            source=source,
+            title="Private repository",
+            description="Retry the repository baseline acquisition.",
+            authority_identity="human:test",
+            interaction_id=interaction_id,
+            work_id=work_id,
+            attempt_number=2,
+            previous_attempt_id=first_id,
+        )
+    )
+
+    history = service.attempts_for_work(work_id)
+    assert first["condition"] == "WAITING_FOR_AUTHORIZATION"
+    assert first["failure_category"] == "AUTH_REQUIRED"
+    assert first["technical_evidence"]["stderr"] == "terminal prompts disabled"
+    assert second["condition"] == "READY"
+    assert second["resource_id"] is not None
+    assert [item["attempt_number"] for item in history] == [1, 2]
+    assert history[1]["previous_attempt_id"] == str(first_id)
+
+
+def test_repository_acquisition_persists_requested_then_running_before_git_effect(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    import_root = tmp_path / "imports"
+    import_root.mkdir()
+    source_repository = import_root / "source"
+    source_repository.mkdir()
+    _git(source_repository, "init", "-b", "main")
+    _git(source_repository, "config", "user.name", "SPG Test")
+    _git(source_repository, "config", "user.email", "spg-test@example.invalid")
+    (source_repository / "README.md").write_text("# Source\n", encoding="utf-8")
+    _git(source_repository, "add", ".")
+    _git(source_repository, "commit", "-m", "baseline")
+
+    class ObservingAcquirer:
+        service = None
+
+        def __init__(self) -> None:
+            self.states: list[str] = []
+
+        def acquire(self, root, source, destination):
+            assert self.service is not None
+            latest = self.service.latest_attempt_for_work(work_id)
+            self.states.append(latest["condition"])
+            result = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "clone",
+                    "--single-branch",
+                    "--",
+                    str(source_repository),
+                    str(destination),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            assert result.returncode == 0, result.stderr
+
+    work_id = uuid4()
+    acquirer = ObservingAcquirer()
+    service = RepositoryAssetService(
+        postgres_database,
+        tmp_path / "assets",
+        import_root,
+        repository_acquirer=acquirer,
+    )
+    acquirer.service = service
+    request = RepositoryIntakeRequest(
+        request_id=uuid4(),
+        source="https://github.com/acme/repository.git",
+        title="Repository",
+        description="Acquire the repository baseline.",
+        authority_identity="human:test",
+        interaction_id=uuid4(),
+        work_id=work_id,
+        attempt_number=1,
+    )
+
+    requested = service.start_intake(request)
+    completed = service.execute_intake(request.request_id)
+
+    assert requested["condition"] == "REQUESTED"
+    assert acquirer.states == ["RUNNING"]
+    assert completed["condition"] == "READY"
+    assert service.latest_attempt_for_work(work_id)["condition"] == "READY"
+
+
+def test_repository_acquisition_unexpected_effect_failure_is_terminalized(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    import_root = tmp_path / "imports"
+    import_root.mkdir()
+
+    class InvalidCheckoutAcquirer:
+        def acquire(self, root, source, destination):
+            destination.mkdir(parents=True)
+
+    service = RepositoryAssetService(
+        postgres_database,
+        tmp_path / "assets",
+        import_root,
+        repository_acquirer=InvalidCheckoutAcquirer(),
+    )
+    request = RepositoryIntakeRequest(
+        request_id=uuid4(),
+        source="https://github.com/acme/repository.git",
+        title="Repository",
+        description="Acquire the repository baseline.",
+        authority_identity="human:test",
+        interaction_id=uuid4(),
+        work_id=uuid4(),
+        attempt_number=1,
+    )
+
+    observation = service.intake(request)
+
+    assert observation["condition"] == "FAILED_RETRYABLE"
+    assert observation["failure_category"] == "ACQUISITION_FAILED_RETRYABLE"
+    assert observation["technical_evidence"]["phase"] == "REPOSITORY_ACQUISITION"
+    assert observation["technical_evidence"]["error_type"] == "ProductInvariantViolation"
+    assert "Traceback" not in observation["human_message"]
+
+
+def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
+    postgres_database: Database,
+    tmp_path: Path,
+    services,
+) -> None:
+    if subprocess.run(("docker", "image", "inspect", "watt-native-executor-runtime:local"), capture_output=True).returncode:
+        pytest.skip("qualified local Native Executor image is unavailable")
+    work_service, interactions = services
+    ready = _ready(interactions)
+    branch_actor = f"human:branch-{uuid4().hex[:8]}"
+    admitted = _admit(work_service, ready, authority_identity=branch_actor)
+    import_root = tmp_path / "imports"
+    import_root.mkdir()
+    source_repository = import_root / "source"
+    source_repository.mkdir()
+    _git(source_repository, "init", "-b", "main")
+    _git(source_repository, "config", "user.name", "SPG Test")
+    _git(source_repository, "config", "user.email", "spg-test@example.invalid")
+    (source_repository / "README.md").write_text("# Source\n", encoding="utf-8")
+    _git(source_repository, "add", ".")
+    _git(source_repository, "commit", "-m", "baseline")
+    work_id = admitted.work_id
+    interaction_id = uuid4()
+    service = RepositoryAssetService(
+        postgres_database,
+        tmp_path / "assets",
+        import_root,
+        native_git_operations=NativeGitOperationRunner(
+            postgres_database,
+            production_environment=NativeProductionEnvironmentRuntime(
+                store=JsonProductionEnvironmentStore(tmp_path / "native-git-pe"),
+                provider=ContainerProductionEnvironmentProvider(DockerCliContainerRuntime()),
+                image_reference="watt-native-executor-runtime:local",
+            ),
+            workspace_root=tmp_path / "native-git-workspaces",
+            checkpoint_root=tmp_path.parent.parent / f"ng-{uuid4().hex[:8]}",
+        ),
+    )
+    acquired = service.intake(
+        RepositoryIntakeRequest(
+            request_id=uuid4(),
+            source=str(source_repository),
+            title="Source repository",
+            description="Acquire the baseline.",
+            authority_identity="human:test",
+            interaction_id=interaction_id,
+            work_id=work_id,
+        )
+    )
+    assert acquired["operation_evidence"]["capability_id"] == "git.repository.acquire"
+    assert acquired["operation_evidence"]["resulting_branch"] == "refs/heads/main"
+    assert acquired["operation_evidence"]["resulting_revision"] == acquired["revision"]
+    assert acquired["operation_evidence"]["verified"] is True
+    work_service.admit_asset_scope(
+        work_id,
+        AssetScopeAdmissionRequest(
+            resource_id=UUID(acquired["resource_id"]),
+            expected_work_revision_id=admitted.current_work_reality_revision_id,
+            observation_fingerprint=acquired["fingerprint"],
+            authority_identity=branch_actor,
+            rationale="Bind the acquired source repository before branch work.",
+        ),
+        acquired,
+    )
+    with pytest.raises(ProductInvariantViolation, match="Human-admitted branch action"):
+        service.start_intake(RepositoryIntakeRequest(
+            request_id=uuid4(),
+            source=str(source_repository),
+            title="Unadmitted branch",
+            description="Must not execute from API parameters alone.",
+            authority_identity=branch_actor,
+            interaction_id=interaction_id,
+            work_id=work_id,
+            operation_kind="CREATE_BRANCH",
+            base_resource_id=UUID(acquired["resource_id"]),
+            target_branch="test",
+        ))
+    branch_interactions = WorkInteractionService(
+        postgres_database, capability=_ExplicitBranchSemanticCapability(),
+    )
+    pending = branch_interactions.append_and_assess(
+        ready.interaction.id, "切一个新分支：test", human_identity="human:test",
+    )
+    proposal = pending.latest_assessment
+    assert proposal is not None
+    with postgres_database.unit_of_work() as uow:
+        base_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+    assert base_revision is not None
+    governed = work_service.decide_interaction_work_revision(
+        ready.interaction.id,
+        assessment_id=proposal.id,
+        basis_fingerprint=proposal.basis_fingerprint,
+        expected_previous_revision_id=base_revision.id,
+        action=AttentionAction.APPROVE,
+        authority_identity=branch_actor,
+        rationale="Admit the explicit branch request before execution.",
+    )
+    with postgres_database.unit_of_work() as uow:
+        branch_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+    assert branch_revision is not None
+    assert {fact.subject for fact in current_semantic_facts(branch_revision.engineering_semantic_facts)} >= {
+        "repository.branch_name", "repository.branch_action",
+    }
+    steering_bootstrap = SteeringBootstrapService(postgres_database)
+    steering_bootstrap.bootstrap(work_id)
+    orchestrator = ProductionOrchestrator(work_service)
+    steering_driver = PlanSteeringDriver(
+        postgres_database, work_service, orchestrator, repository_assets=service,
+    )
+    post_admission = WorkPostAdmissionService(
+        work_service, steering_bootstrap, steering_driver, orchestrator,
+    )
+    trigger = ProductionAdmissionTrigger(interactions, work_service, service, post_admission)
+    steering_driver.configure_governed_repository_action(
+        lambda selected_work, selected_interaction, authority:
+            trigger.reconcile_governed_branch(
+                selected_work,
+                interaction_id=selected_interaction,
+                authority_identity=authority,
+            )
+    )
+    iterations = []
+    for _ in range(3):
+        iteration = steering_driver.iterate(work_id)
+        iterations.append(iteration)
+        if iteration.action is SteeringActionType.REPOSITORY_ACTION:
+            break
+    assert any(item.action is SteeringActionType.REPOSITORY_ACTION for item in iterations)
+    branch = service.latest_attempt_for_work(work_id)
+    assert branch is not None
+    assert branch["condition"] == "READY", branch.get("technical_evidence")
+    with postgres_database.unit_of_work() as uow:
+        product = ProductStore(uow.session)
+        main_resource = product.resource(UUID(acquired["resource_id"]))
+        branch_resource = product.resource(UUID(branch["resource_id"]))
+
+    assert branch["condition"] == "READY"
+    assert branch["operation_kind"] == "CREATE_BRANCH"
+    assert branch["target_branch"] == "test"
+    assert branch["repository_ref"] == "refs/heads/test"
+    assert branch["revision"] == acquired["revision"]
+    assert branch["operation_evidence"]["capability_id"] == "git.branch.create"
+    assert branch["operation_evidence"]["connector_id"] == "builtin:git"
+    assert branch["operation_evidence"]["resulting_branch"] == "refs/heads/test"
+    assert branch["operation_evidence"]["resulting_revision"] == acquired["revision"]
+    assert branch["operation_evidence"]["verified"] is True
+    assert branch["operation_evidence"]["native_attempt_id"]
+    assert branch["operation_evidence"]["pwu_id"]
+    assert branch["operation_evidence"]["checkpoint_id"]
+    with postgres_database.unit_of_work() as uow:
+        native_binding = NativeExecutionStore(uow.session).attempt_binding(
+            UUID(branch["operation_evidence"]["native_attempt_id"])
+        )
+        branch_pwu = RuntimeStore(uow.session).work_unit(
+            UUID(branch["operation_evidence"]["pwu_id"])
+        )
+        steering_plan = SteeringStore(uow.session).plan_for_work(work_id)
+        active_steering = SteeringStore(uow.session).active_revision(steering_plan.id)
+    assert branch_pwu is not None and branch_pwu.completion_contract.task_contract is not None
+    assert native_binding.binding.steering_decision_id == active_steering.id
+    assert f"steering-plan-revision:{active_steering.id}" in (
+        branch_pwu.completion_contract.task_contract.authority_lineage
+    )
+    resolver = ConnectorResolver(postgres_database)
+    checkpoint_ref = f"native-checkpoint:{branch['operation_evidence']['checkpoint_id']}"
+    resolver.register_learned(ExecutableCapability(
+        capability_id="git.branch.create",
+        connector_id="learned:native-git",
+        capability_family="git",
+        operation="branch.create",
+        scope=CapabilityScope.WORK,
+        owner_id=str(work_id),
+        maturity=ConnectorMaturity.PROVISIONAL,
+        availability=ConnectorAvailability.AVAILABLE,
+        permissions_required=("work.branch.create",),
+        side_effect_level=SideEffectLevel.WORKSPACE_MUTATION,
+        execution_provider="native-tool:git.operation",
+        version=f"1-{branch['intake_request_id'][:8]}",
+        provenance=("qualified-native-git-branch",),
+        created_from_work=work_id,
+        verification_evidence=(checkpoint_ref,),
+    ))
+    retained = resolver.retain_successful_work_capability_for_user(
+        CapabilityRequirement(
+            capability_id="git.branch.create", work_id=work_id,
+            user_id=branch_actor, operation_ref="task-contract:branch-inspect",
+        ),
+        successful_execution_evidence=checkpoint_ref,
+    )
+    assert retained is not None and retained.scope is CapabilityScope.USER
+    assert any(item.scope is CapabilityScope.USER for item in resolver._overlays(CapabilityRequirement(
+        capability_id="git.branch.create", work_id=uuid4(),
+        user_id=branch_actor, operation_ref="task-contract:branch-inspect",
+    )))
+    assert not resolver._overlays(CapabilityRequirement(
+        capability_id="git.branch.create", work_id=uuid4(),
+        user_id="human:other", operation_ref="task-contract:branch-inspect",
+    ))
+    record_id = UUID(branch["operation_evidence"]["production_record_id"])
+    assert service.native_git_operations.production_environment.store.get_git_operation_record(record_id).resulting_branch == "test"
+    repeated = service.execute_intake(UUID(branch["intake_request_id"]))
+    assert repeated["operation_evidence"]["production_record_id"] == str(record_id)
+    assert repeated["operation_evidence"]["native_attempt_id"] == branch["operation_evidence"]["native_attempt_id"]
+    assert branch_resource.repository_identity != main_resource.repository_identity
+    assert _git(Path(main_resource.location_ref), "branch", "--show-current") == "main"
+    assert _git(Path(branch_resource.location_ref), "branch", "--show-current") == "test"
+    assert _git(Path(branch_resource.location_ref), "remote", "get-url", "origin") == str(source_repository)
+    with postgres_database.unit_of_work() as uow:
+        bound_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+    assert bound_revision is not None
+    assert bound_revision.repository_ref == "refs/heads/test"
+    assert bound_revision.source_revision == branch["revision"]
+    answer = _repository_branch_status_answer(
+        "当前项目在哪个分支？", interactions.get_shared_understanding(ready.interaction.id)
+    )
+    assert answer is not None and "test" in answer and branch["revision"] in answer
+
+
+def test_restart_resumes_persisted_repository_attempt_without_current_assessment() -> None:
+    interaction_id = uuid4()
+    work_id = uuid4()
+    assessment = object()
+    request_record = SimpleNamespace(actor=InteractionActor.HUMAN)
+    projection = SimpleNamespace(
+        interaction=SimpleNamespace(id=interaction_id),
+        latest_assessment=assessment,
+        latest_assessment_current=False,
+        records=(request_record,),
+        governed_work_id=work_id,
+    )
+
+    class RecoveryHarness:
+        def __init__(self) -> None:
+            self._turn_lock = RLock()
+            self._production_admission_reality_provider = (
+                lambda selected_interaction_id, selected_work_id: (
+                    ProductionAdmissionExecutionState.WORK_CREATED,
+                    RepositoryAcquisitionState.REQUESTED,
+                    "Start the persisted repository acquisition operation.",
+                    "https://github.com/acme/repository.git",
+                )
+            )
+            self.executed: list[tuple[object, object, object]] = []
+
+        def list_interactions(self):
+            return (projection,)
+
+        def _execute_prepared_production_admission(
+            self, selected_interaction_id, selected_assessment, selected_request
+        ):
+            self.executed.append(
+                (
+                    selected_interaction_id,
+                    selected_assessment,
+                    selected_request,
+                )
+            )
+            return True
+
+    harness = RecoveryHarness()
+
+    resumed = WorkInteractionService.resume_ready_production_admissions(harness)
+
+    assert resumed == (interaction_id,)
+    assert harness.executed == [(interaction_id, assessment, request_record)]
+
+
+def test_repository_acquisition_accepts_extensionless_readme_context(
+    postgres_database: Database,
+    tmp_path: Path,
+) -> None:
+    import_root = tmp_path / "imports"
+    import_root.mkdir()
+    source_repository = import_root / "extensionless-readme"
+    source_repository.mkdir()
+    _git(source_repository, "init", "-b", "main")
+    _git(source_repository, "config", "user.name", "SPG Test")
+    _git(source_repository, "config", "user.email", "spg-test@example.invalid")
+    (source_repository / "README").write_text("Repository overview\n", encoding="utf-8")
+    _git(source_repository, "add", ".")
+    _git(source_repository, "commit", "-m", "baseline")
+
+    service = RepositoryAssetService(
+        postgres_database,
+        tmp_path / "assets",
+        import_root,
+    )
+    observation = service.intake(
+        RepositoryIntakeRequest(
+            request_id=uuid4(),
+            source=str(source_repository),
+            title="Extensionless README repository",
+            description="Acquire a valid repository without requiring Markdown.",
+        authority_identity="human:governor",
+            interaction_id=uuid4(),
+            work_id=uuid4(),
+            attempt_number=1,
+        )
+    )
+
+    assert observation["condition"] == "READY"
+    assert observation["context_path"] == "README"
+    assert observation["paths"] == ["README"]
 
 
 @pytest.mark.parametrize(

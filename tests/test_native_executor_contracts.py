@@ -880,9 +880,11 @@ def test_tool_host_contracts_cover_bounded_engineering_capabilities() -> None:
     assert identities == {
         "file.read",
         "file.write",
+        "filesystem.operation",
         "process.run",
         "git.status",
         "git.diff",
+        "git.operation",
         "test.run",
         "build.run",
         "dependency.sync",

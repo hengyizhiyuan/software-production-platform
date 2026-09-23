@@ -141,6 +141,27 @@ class SemanticStepApplicationService:
                 tuple(item.repository_relative_path for item in resource.context_references))
         refs = tuple(item.reference for item in frame.basis.resolved_reality)
         next_step = frame.reconstruction.next_step
+        design_context = self.guided_design.semantic_context(work.id, step.id)
+        approved_design_artifacts = (
+            self.guided_design.approved_design_artifact_references(work.id)
+            if design_context is not None
+            and design_context.get("production_transition_issue") is True
+            else ()
+        )
+        required_intermediate_artifacts = (
+            ("APPROVED_DESIGN_ARTIFACT",)
+            if design_context is not None
+            and design_context.get("production_transition_issue") is True
+            and not approved_design_artifacts
+            else ()
+        )
+        from spg.application.connectors import ConnectorResolver
+        from spg.domain.connectors import ConnectorAvailability
+
+        executable_reality = ConnectorResolver(self.database).visible_capabilities(
+            work.id,
+            "system" if work_revision is None else work_revision.admitted_by,
+        )
         return SemanticStepInput(
             work_id=work.id,
             desired_outcome=work.desired_outcome or work.raw_user_requirement,
@@ -168,12 +189,22 @@ class SemanticStepApplicationService:
             governance_decisions=governance,
             repository_tree_paths=paths,
             context_materials=materials,
-            design_context=self.guided_design.semantic_context(work.id, step.id),
+            design_context=design_context,
             production_proposal_required=bool(
                 step.type is SteeringStepType.DESIGN
                 and next_step is not None
                 and next_step.type is SteeringStepType.PRODUCE
                 and work.production_plan is None
+            ),
+            required_intermediate_artifacts=required_intermediate_artifacts,
+            approved_artifact_references=approved_design_artifacts,
+            available_executable_capabilities=tuple(
+                item.capability_id for item in executable_reality
+                if item.availability is ConnectorAvailability.AVAILABLE
+            ),
+            unavailable_executable_capabilities=tuple(
+                item.capability_id for item in executable_reality
+                if item.availability is not ConnectorAvailability.AVAILABLE
             ),
         )
 
@@ -285,6 +316,16 @@ class SemanticStepApplicationService:
                 "DESIGN cannot close toward PRODUCE without a current production proposal"
             )
         if fresh.design_context is not None and candidate.proposed_production is not None:
+            if (
+                "APPROVED_DESIGN_ARTIFACT"
+                in fresh.required_intermediate_artifacts
+                and candidate.proposed_production.target_kind
+                is ProductionTargetKind.CODE_WORK
+            ):
+                raise SteeringInvariantViolation(
+                    "Implementation cannot be proposed before a design artifact is "
+                    "produced, reviewed, and committed to current Work Reality"
+                )
             with self.database.unit_of_work() as design_uow:
                 design_store = SteeringStore(design_uow.session)
                 records = [design_store.semantic_result(ref.identity) for ref in fresh.reality_refs

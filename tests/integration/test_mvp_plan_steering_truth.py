@@ -715,6 +715,67 @@ def test_steer_dec_10_through_14_human_attention_is_typed_and_projected(
     assert attention[0].kind is not AttentionKind.CANDIDATE_AUTHORIZATION
 
 
+def test_admitted_semantic_question_is_the_actionable_steering_prompt(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    works, work, _baseline = admitted_work
+    _create_steering_plan(postgres_database, work.work_id)
+    question = "Which observed user problem should the next feature solve?"
+
+    class QuestionCapability:
+        def execute(self, semantic_input: SemanticStepInput) -> SemanticStepResultCandidate:
+            return SemanticStepResultCandidate(
+                work_id=semantic_input.work_id,
+                steering_plan_revision_id=semantic_input.steering_plan_revision_id,
+                step_id=semantic_input.step.id,
+                step_type=semantic_input.step.type,
+                basis_fingerprint=semantic_input.basis_fingerprint,
+                result_kind=SemanticResultKind.DESIGN_DIRECTION,
+                bounded_summary="The feature objective is not yet grounded in observed user feedback.",
+                decisions=("Preserve the acquired repository baseline.",),
+                evidence_refs=semantic_input.reality_refs,
+                unresolved_questions=(question,),
+                authority_assessment=SteeringAuthorityAssessment.UNCERTAIN,
+                human_attention_recommendation="State the feature and the problem it addresses.",
+                completion_claimed=False,
+            )
+
+    result = SemanticStepApplicationService(
+        postgres_database, QuestionCapability()
+    ).execute(work.work_id)
+    frame = PlanFrameAssembler(postgres_database).assemble(work.work_id)
+    refs = tuple(item.reference for item in frame.basis.resolved_reality)
+    SteeringDecisionApplicationService(
+        postgres_database, DeterministicPlanSteeringCapability()
+    ).admit(
+        work.work_id,
+        NextStepCandidate(
+            type=SteeringStepType.HUMAN_DECISION,
+            objective="Resolve the current product question",
+            reason=result.bounded_summary,
+            reality_refs=refs,
+            human_required=True,
+            completion_condition="Human supplies the product direction",
+            proposed_outcome=SteeringOutcome.HUMAN_ATTENTION,
+            basis_fingerprint=frame.basis.fingerprint,
+            authority_assessment=SteeringAuthorityAssessment.UNCERTAIN,
+            proposed_engineering_scope_fingerprint=frame.engineering_scope_fingerprint,
+            attention_reason=SteeringAttentionReason.MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION,
+            recommendation="Ask the Human for the missing product direction.",
+            expected_impact="Production waits for the Human's answer.",
+        ),
+    )
+
+    attention = works.list_attention(work_id=work.work_id)
+    assert len(attention) == 1
+    assert attention[0].kind is AttentionKind.STEERING_DECISION_REQUIRED
+    assert attention[0].reason == question
+    assert attention[0].conversation_prompt == question
+    assert attention[0].recommendation == "State the feature and the problem it addresses."
+    assert attention[0].available_actions == ()
+
+
 def test_steer_dec_09_bounded_defect_does_not_ask_human_to_continue(
     postgres_database: Database,
     admitted_work,

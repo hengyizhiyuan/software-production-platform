@@ -551,7 +551,19 @@ class ProductStore:
             extra={
                 "proposed_commit_identity": (
                     None if proposed is None else proposed["proposed_commit_identity"]
-                )
+                ),
+                "task_contract_mode": (
+                    None
+                    if completion_contract is None
+                    or completion_contract.task_contract is None
+                    else completion_contract.task_contract.task_mode.value
+                ),
+                "artifact_contract_path": (
+                    None
+                    if completion_contract is None
+                    or completion_contract.artifact_contract is None
+                    else completion_contract.artifact_contract.artifact_path
+                ),
             },
         )
 

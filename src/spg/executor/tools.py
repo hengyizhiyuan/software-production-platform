@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 from spg.domain.native_execution import (
     CapabilityGrant,
@@ -15,6 +15,30 @@ from spg.domain.native_execution import (
 
 
 ToolHandler = Callable[[ToolExecutionRequest], Awaitable[ToolExecutionResult]]
+
+
+def validate_generic_git_process(argv: list[str]) -> None:
+    """Generic process grants never authorize Git delivery or ref mutations."""
+
+    if not argv or Path(argv[0]).name.lower().removesuffix(".exe") != "git":
+        return
+    arguments = argv[1:]
+    if any(
+        argument.startswith(("--output", "--ext-diff", "--config-env", "-c", "-C"))
+        for argument in arguments
+    ):
+        raise ValueError("Git mutation or remote delivery requires a governed Git capability")
+    read_only = {
+        "status", "diff", "log", "show", "rev-parse", "ls-files",
+        "ls-tree", "merge-base", "cat-file",
+    }
+    if arguments and arguments[0] in read_only:
+        return
+    if arguments and arguments[0] == "branch" and arguments[1:] in (
+        ["--show-current"], ["--list"], ["--all"],
+    ):
+        return
+    raise ValueError("Git mutation or remote delivery requires a governed Git capability")
 
 
 PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
@@ -31,6 +55,23 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
         "description": "Atomically write one UTF-8 file inside an admitted path scope.",
         "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}}, "required": ["path", "content"], "additionalProperties": False},
         "effect_classification": "LOCAL_MUTATION",
+    },
+    {
+        "identity": "filesystem.operation",
+        "version": "1",
+        "description": "Run one bounded search, stat, mkdir, move, delete, or diff operation inside the admitted Production Environment workspace.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "operation": {"type": "string"},
+                "path": {"type": "string"},
+                "destination": {"type": "string"},
+                "query": {"type": "string"},
+            },
+            "required": ["operation", "path"],
+            "additionalProperties": False,
+        },
+        "effect_classification": "GOVERNED_FILESYSTEM",
     },
     {
         "identity": "process.run",
@@ -57,6 +98,28 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
         "description": "Observe the bounded Git diff for one admitted repository mount.",
         "input_schema": {"type": "object", "properties": {"cwd": {"type": "string"}}, "required": ["cwd"], "additionalProperties": False},
         "effect_classification": "READ",
+    },
+    {
+        "identity": "git.operation",
+        "version": "1",
+        "description": "Execute one explicitly granted bounded Git operation in the isolated Work workspace; never push or publish.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "operation": {"type": "string"},
+                "branch": {"type": "string"},
+                "revision": {"type": "string"},
+                "ancestor": {"type": "string"},
+                "descendant": {"type": "string"},
+                "tag": {"type": "string"},
+                "message": {"type": "string"},
+                "paths": {"type": "array", "items": {"type": "string"}},
+                "cwd": {"type": "string"},
+            },
+            "required": ["operation"],
+            "additionalProperties": False,
+        },
+        "effect_classification": "GOVERNED_GIT",
     },
     {
         "identity": "test.run",
@@ -126,7 +189,52 @@ class NativeToolRegistry:
             raise NativeExecutionConflict(
                 f"tool is not registered: {request.proposal.tool_identity}"
             )
+        if definition.identity in {
+            str(contract["identity"]) for contract in PUBLIC_NATIVE_TOOL_CONTRACTS
+        }:
+            from spg.application.connector_manifest import built_in_executable_capabilities
+            from spg.domain.connectors import ConnectorAvailability, SideEffectLevel
+
+            if definition.identity in {"git.operation", "filesystem.operation"}:
+                from spg.executor.git_operations import git_operation_commands
+
+                operation = request.proposal.arguments.get("operation")
+                if definition.identity == "git.operation":
+                    git_operation_commands(request.proposal.arguments)
+                    capability_id = f"git.{operation}"
+                else:
+                    if operation not in {"search", "stat", "mkdir", "move", "delete", "diff"}:
+                        raise NativeExecutionConflict("filesystem operation is not installed")
+                    capability_id = f"filesystem.{operation}"
+                connector = next(
+                    (
+                        item for item in built_in_executable_capabilities()
+                        if item.capability_id == capability_id
+                        and item.availability is ConnectorAvailability.AVAILABLE
+                    ),
+                    None,
+                )
+            else:
+                connector = next(
+                    (
+                        item for item in built_in_executable_capabilities()
+                        if item.execution_provider == f"native-tool:{definition.identity}"
+                        and item.availability is ConnectorAvailability.AVAILABLE
+                    ),
+                    None,
+                )
+            if connector is None:
+                raise NativeExecutionConflict(
+                    f"executable connector is unavailable for tool: {definition.identity}"
+                )
         grant = self._grant_for(definition.identity, request.capability_grants)
+        if definition.identity in {"git.operation", "filesystem.operation"} and connector.capability_id not in grant.scope.get("capabilities", ()):
+            raise NativeExecutionConflict("Operation is not admitted by the Task Contract")
+        if connector.side_effect_level is SideEffectLevel.DESTRUCTIVE and any(
+            permission not in grant.scope.get("permissions", ())
+            for permission in connector.permissions_required
+        ):
+            raise NativeExecutionConflict("Destructive operation lacks explicit Work permission")
         self._validate_path_scope(request, grant)
         result = await definition.handler(request)
         if result.delivery_id != request.delivery_id:
@@ -152,7 +260,7 @@ class NativeToolRegistry:
     ) -> None:
         allowed = tuple(str(item) for item in grant.scope.get("paths", ()))
         forbidden = tuple(str(item) for item in grant.scope.get("forbidden_paths", ()))
-        for key in ("path", "cwd"):
+        for key in ("path", "destination", "cwd"):
             raw_path = request.proposal.arguments.get(key)
             if not isinstance(raw_path, str):
                 continue

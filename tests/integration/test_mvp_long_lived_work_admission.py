@@ -625,6 +625,38 @@ def test_steer_act_11_12_startup_repairs_interrupted_admission_once(
         assert _counts(admission_facts.database) == (0, 0, 0)
 
 
+def test_repository_acquisition_guard_blocks_activation_and_startup_bootstrap(
+    admission_facts: AdmissionFacts,
+) -> None:
+    draft = _long_lived_draft(admission_facts)
+    pending = admission_facts.service.approve_work(
+        draft.work_id,
+        authority_identity="human:repository-requester",
+    )
+    orchestrator = _RecordingOrchestrator()
+    driver = _RecordingSteeringDriver(
+        admission_facts.database,
+        admission_facts.service,
+        orchestrator,
+    )
+    coordinator = WorkPostAdmissionService(
+        admission_facts.service,
+        SteeringBootstrapService(admission_facts.database),
+        driver,
+        orchestrator,
+        activation_guard=lambda work_id: work_id != pending.work_id,
+    )
+
+    with pytest.raises(
+        ProductInvariantViolation,
+        match="repository Reality is ready",
+    ):
+        coordinator.activate(pending.work_id)
+    assert coordinator.bootstrap_incomplete_ready_long_lived() == ()
+    assert driver.scheduled_work_ids == []
+    assert orchestrator.scheduled_work_ids == []
+    assert _steering_counts(admission_facts.database) == (0, 0, 0, 0, 0)
+
 def test_steer_act_13_activation_failures_never_fall_through_to_orch(
     admission_facts: AdmissionFacts,
 ) -> None:

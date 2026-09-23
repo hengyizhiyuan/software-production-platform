@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from hashlib import sha256
 import json
 import logging
@@ -84,6 +85,7 @@ class PlanSteeringDriver:
         *,
         capability: PlanSteeringCapability | None = None,
         semantic_capability: SemanticStepCapability | None = None,
+        repository_assets: RepositoryAssetService | None = None,
         max_automatic_transitions: int = DEFAULT_MAX_STEERING_TRANSITIONS,
         provider_retry_base_delay_seconds: float = DEFAULT_PROVIDER_RETRY_BASE_DELAY_SECONDS,
         provider_retry_max_delay_seconds: float = DEFAULT_PROVIDER_RETRY_MAX_DELAY_SECONDS,
@@ -107,7 +109,7 @@ class PlanSteeringDriver:
             capability or DeterministicPlanSteeringCapability(),
         )
         self.production = SteeringProductionService(database)
-        repository_assets = RepositoryAssetService(
+        repository_assets = repository_assets or RepositoryAssetService(
             database,
             work_service.workspace_root.parent / "repository-assets",
             work_service.workspace_root.parent / "repository-imports",
@@ -129,6 +131,7 @@ class PlanSteeringDriver:
         self._retryable_provider_failures: set[UUID] = set()
         self._last_provider_errors: dict[UUID, str] = {}
         self._stopping = Event()
+        self._governed_repository_action: Callable[[UUID, UUID, str], dict | None] | None = None
         listener = getattr(production_orchestrator, "add_outcome_listener", None)
         if callable(listener):
             listener(self._production_stopped)
@@ -174,6 +177,9 @@ class PlanSteeringDriver:
         )
         if revision_blocked and not revision_acknowledged:
             return self._revise_for_current_work_reality(frame, before)
+        repository_action = self._repository_action_iteration(frame, before)
+        if repository_action is not None:
+            return repository_action
         if work.status is WorkStatus.BLOCKED or other_blockers:
             return self._result(
                 work_id,
@@ -196,6 +202,56 @@ class PlanSteeringDriver:
         if current.type in {SteeringStepType.DESIGN, SteeringStepType.REFINE}:
             return self._semantic_iteration(frame, before)
         return self._decision_iteration(frame, before)
+
+    def configure_governed_repository_action(
+        self, action: Callable[[UUID, UUID, str], dict | None],
+    ) -> None:
+        """Bind the existing admission executor behind Steering's current Reality."""
+
+        self._governed_repository_action = action
+
+    def _repository_action_iteration(
+        self, frame: PlanFrame, before: str,
+    ) -> SteeringIterationResult | None:
+        action = self._governed_repository_action
+        if action is None:
+            return None
+        facts = frame.engineering_semantic_facts
+        branch = next((
+            str(fact.value) for fact in facts
+            if fact.subject == "repository.branch_name"
+            and fact.qualifiers.get("state") == "to_be_created"
+            and fact.authority.value == "HUMAN_EXPLICIT"
+        ), None)
+        requested = any(
+            fact.subject == "repository.branch_action"
+            and fact.value == "创建新分支"
+            and fact.authority.value == "HUMAN_EXPLICIT"
+            for fact in facts
+        )
+        if not branch or not requested:
+            return None
+        with self.database.unit_of_work() as uow:
+            revision = ProductStore(uow.session).current_work_reality_revision(frame.work_id)
+        if revision is None or revision.repository_ref == f"refs/heads/{branch}":
+            return None
+        observation = action(frame.work_id, revision.source_interaction_id, revision.admitted_by)
+        if observation is None:
+            return None
+        if observation.get("condition") == "READY":
+            return self._result(
+                frame.work_id, before,
+                action=SteeringActionType.REPOSITORY_ACTION, stop=None,
+            )
+        return self._result(
+            frame.work_id, before,
+            action=None,
+            stop=(
+                SteeringDriverStopReason.PRODUCTION_RUNNING
+                if observation.get("condition") in {"REQUESTED", "RUNNING"}
+                else SteeringDriverStopReason.BLOCKED
+            ),
+        )
 
     def _revise_for_current_work_reality(
         self,
@@ -869,6 +925,7 @@ class PlanSteeringDriver:
             record.decision_type in {
                 "APPROVE_GUIDED_PRODUCTION_PROPOSAL",
                 "AUTO_ADMIT_BOUNDED_MANAGED_PROPOSAL",
+                "AUTO_ADMIT_DESIGN_ARTIFACT_PROPOSAL",
             }
             and record.scope.get("semantic_result_id") == str(result_id)
             for record in records
@@ -877,16 +934,32 @@ class PlanSteeringDriver:
     def _admit_bounded_managed_proposal(
         self, work_id: UUID, result: SemanticStepResultRecord
     ) -> bool:
-        """Use admitted Work authority only for reversible managed code production.
+        """Auto-admit only a safe prerequisite artifact or prerequisite-backed code.
 
-        External resources, broad area-only changes, subsequent cycles and
-        material Human decisions retain exact proposal review.
+        Initial Guided Design must materialize a reviewable artifact. Bounded
+        managed code remains eligible only after that artifact is Human-approved
+        and committed. External or broad changes retain exact proposal review.
         """
         proposal = result.proposed_production
-        if (proposal is None or proposal.target_kind is not ProductionTargetKind.CODE_WORK
-                or not result.completion_satisfied
-                or result.human_attention_recommendation is not None
-                or not 1 <= len(proposal.code_targets) <= 4):
+        if (
+            proposal is None
+            or not result.completion_satisfied
+            or result.human_attention_recommendation is not None
+        ):
+            return False
+        design_artifact = (
+            proposal.target_kind is ProductionTargetKind.DOCUMENTATION_WORK
+            and len(proposal.artifact_targets) == 1
+        )
+        approved_design = self.guided_design.approved_design_artifact_references(
+            work_id
+        )
+        bounded_code = (
+            proposal.target_kind is ProductionTargetKind.CODE_WORK
+            and bool(approved_design)
+            and 1 <= len(proposal.code_targets) <= 4
+        )
+        if not design_artifact and not bounded_code:
             return False
         with self.database.unit_of_work() as uow:
             product = ProductStore(uow.session)
@@ -894,10 +967,9 @@ class PlanSteeringDriver:
             work = product.work(work_id)
             resource = product.resource_for_work(work_id)
             if (work is None or resource is None
-                    or not resource.repository_identity.startswith("watt://repositories/")
                     or work.production_plan is None
                     or work.production_plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT
-                    or product.runtime_bindings(work_id)):
+                    or product.runtime_binding_for_step(result.step_id) is not None):
                 return False
             admitted = runtime.governance_for_subject(str(work_id))
             work_admitted = any(
@@ -919,15 +991,18 @@ class PlanSteeringDriver:
                 == work.production_plan.source_revision
                 for record in admitted
             )
-            if not work_admitted or not (
-                source_admitted or managed_workspace_admitted
-            ):
+            if not work_admitted or not (source_admitted or managed_workspace_admitted):
                 return False
             identity = uuid5(NAMESPACE_URL, f"spg:auto-managed-proposal:{result.id}")
             if not any(record.id == identity for record in admitted):
+                decision_type = (
+                    "AUTO_ADMIT_DESIGN_ARTIFACT_PROPOSAL"
+                    if design_artifact
+                    else "AUTO_ADMIT_BOUNDED_MANAGED_PROPOSAL"
+                )
                 runtime.insert_governance({
                     "id": identity,
-                    "decision_type": "AUTO_ADMIT_BOUNDED_MANAGED_PROPOSAL",
+                    "decision_type": decision_type,
                     "authority_identity": "steering:auto-within-work-authority",
                     "subject_type": "GUIDED_PRODUCTION_PROPOSAL",
                     "subject_identity": str(work_id),
@@ -937,11 +1012,18 @@ class PlanSteeringDriver:
                         "semantic_result_id": str(result.id),
                         "source_revision": work.production_plan.source_revision,
                         "code_targets": list(proposal.code_targets),
+                        "artifact_targets": [
+                            item.model_dump(mode="json")
+                            for item in proposal.artifact_targets
+                        ],
+                        "approved_design_artifact_references": list(
+                            approved_design
+                        ),
                     },
                     "rationale": (
-                        "The exact bounded, reversible proposal uses only the "
-                        "Watt-managed repository admitted by this Work; no external "
-                        "authority or new Human decision is required."
+                        "The exact bounded, reversible proposal either materializes "
+                        "the required design-review artifact or implements against "
+                        "an already approved design artifact in admitted Work Reality."
                     ),
                     "created_at": datetime.now(UTC),
                 })

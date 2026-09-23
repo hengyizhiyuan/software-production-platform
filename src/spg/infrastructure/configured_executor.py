@@ -140,15 +140,28 @@ def render_governed_instruction(
         task_out_of_scope = "\n".join(
             f"- {item}" for item in task_contract.out_of_scope
         )
+        task_prerequisites = "\n".join(
+            f"- {item}" for item in task_contract.required_prerequisites
+        ) or "- None"
+        prerequisite_evidence = "\n".join(
+            f"- {item}" for item in task_contract.prerequisite_evidence
+        ) or "- None"
+        task_capabilities = "\n".join(
+            f"- {item}" for item in task_contract.required_capabilities
+        ) or "- None"
         task_contract_section = (
             "Task Contract projection:\n"
             f"- Identity: {task_contract.task_contract_id}\n"
             f"- Engineering activity: {task_contract.activity.value}\n"
+            f"- Task mode: {task_contract.task_mode.value}\n"
             f"- Objective: {task_contract.objective}\n"
             f"- SOP lineage: {task_contract.sop_reference or 'None'}\n"
             f"Scope:\n{task_scope}\n"
             f"Acceptance meaning:\n{task_acceptance}\n"
             f"Required evidence direction:\n{task_evidence}\n"
+            f"Required execution prerequisites:\n{task_prerequisites}\n"
+            f"Required executable capabilities:\n{task_capabilities}\n"
+            f"Persisted prerequisite evidence:\n{prerequisite_evidence}\n"
             f"Out of scope:\n{task_out_of_scope}\n"
             "This projection preserves already admitted intent and lineage. It does "
             "not widen execution authority; the target contracts below remain decisive.\n\n"

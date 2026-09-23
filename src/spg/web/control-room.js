@@ -421,7 +421,9 @@
       conversationalDecision: conversationalDecision || null,
       summary: selectedAgreementId ? "Decide whether to keep this agreement."
         : explicit.length || workActions.length ? "Your decision is needed."
-          : conversationalDecision ? "Respond to the material decision in conversation."
+          : conversationalDecision?.conversation_prompt
+            ? "Answer the current Work question in conversation."
+            : conversationalDecision ? "Respond to the material decision in conversation."
             : "No action required.",
     };
   }

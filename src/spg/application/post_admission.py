@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from uuid import UUID
 
 from spg.application.orchestration import ProductionOrchestrator
@@ -25,16 +26,22 @@ class WorkPostAdmissionService:
         steering_bootstrap: SteeringBootstrapService,
         steering_driver: PlanSteeringDriver,
         production_orchestrator: ProductionOrchestrator,
+        activation_guard: Callable[[UUID], bool] | None = None,
     ) -> None:
         self.work_service = work_service
         self.steering_bootstrap = steering_bootstrap
         self.steering_driver = steering_driver
         self.production_orchestrator = production_orchestrator
+        self.activation_guard = activation_guard or (lambda _work_id: True)
 
     def activate(self, work_id: UUID) -> WorkProjection:
         """Activate exactly the lifecycle selected by persisted Work mode."""
 
         work = self.work_service.get_work(work_id)
+        if not self.activation_guard(work_id):
+            raise ProductInvariantViolation(
+                "Repository Work cannot activate before repository Reality is ready"
+            )
         if work.status not in {WorkStatus.READY, WorkStatus.RUNNING}:
             raise ProductInvariantViolation(
                 "Post-admission activation requires an admitted Work"
@@ -64,6 +71,7 @@ class WorkPostAdmissionService:
                 work.mode is WorkMode.LONG_LIVED_STEERING
                 and work.status is WorkStatus.READY
                 and not work.steering_enabled
+                and self.activation_guard(work.work_id)
             ):
                 reconstruction = self.steering_bootstrap.bootstrap(work.work_id)
                 if reconstruction.current_step is None:

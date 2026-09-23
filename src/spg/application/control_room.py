@@ -10,6 +10,7 @@ from sqlalchemy import insert, select
 from spg.infrastructure.persistence import Database, ProductStore
 from spg.infrastructure.persistence.control_room_schema import work_agreement_events
 from spg.infrastructure.persistence.product_schema import product_works
+from spg.application.connectors import ConnectorResolver
 
 
 class ControlRoomError(ValueError):
@@ -46,9 +47,10 @@ def _kind(path: str) -> str | None:
 
 
 class ControlRoomService:
-    def __init__(self, database: Database, work_service) -> None:
+    def __init__(self, database: Database, work_service, asset_service=None) -> None:
         self.database = database
         self.work_service = work_service
+        self.asset_service = asset_service
 
     def _repository(self, work_id: UUID):
         work = self.work_service.get_work(work_id)
@@ -64,7 +66,60 @@ class ControlRoomService:
         return work, resource, root, revision
 
     def sources(self, work_id: UUID) -> dict:
-        work, resource, root, revision = self._repository(work_id)
+        gaps = [
+            {
+                "capability_id": item["capability_id"],
+                "condition": item["condition"],
+                "reason": item["reason"],
+            }
+            for item in (
+                ConnectorResolver(self.database).gaps_for_work(work_id)
+                if self.database is not None else ()
+            )
+            if item["condition"] == "OPEN"
+        ]
+        try:
+            work, resource, root, revision = self._repository(work_id)
+        except ControlRoomError:
+            latest = (
+                None
+                if self.asset_service is None
+                else self.asset_service.latest_attempt_for_work(work_id)
+            )
+            if latest is None:
+                raise
+            condition = latest.get("condition", "NOT_STARTED")
+            return {
+                "revision": None,
+                "repository_identity": latest.get("repository_identity"),
+                "selection": "ACQUISITION_STATE",
+                "sources": [],
+                "capability_gaps": gaps,
+                "acquisition": {
+                    "state": condition,
+                    "attempt_number": latest.get("attempt_number"),
+                    "failure_category": latest.get("failure_category"),
+                    "message": latest.get("human_message") or latest.get("message"),
+                    "retry_available": condition in {
+                        "WAITING_FOR_AUTHORIZATION",
+                        "FAILED_RETRYABLE",
+                    },
+                    "authorization": {
+                        "required": condition == "WAITING_FOR_AUTHORIZATION",
+                        # No GitHub App/OAuth connector is configured by the
+                        # current runtime. Expose that absence explicitly rather
+                        # than rendering a control that cannot grant access.
+                        "integration_available": False,
+                        "human_action": (
+                            "Grant repository read access outside Watt, then retry "
+                            "this persisted acquisition."
+                            if condition == "WAITING_FOR_AUTHORIZATION"
+                            else None
+                        ),
+                    },
+                    "source": latest.get("source"),
+                },
+            }
         relevance: set[str] = {
             item.repository_relative_path for item in resource.context_references
         }
@@ -97,6 +152,33 @@ class ControlRoomService:
             "revision": revision, "repository_identity": resource.repository_identity,
             "selection": "WORK_RELEVANT" if any(item["relevant"] for item in entries) else "REPOSITORY_OVERVIEW",
             "sources": entries,
+            "capability_gaps": gaps,
+            "branch_operation": (
+                {
+                    "intake_request_id": latest.get("intake_request_id"),
+                    "condition": latest.get("condition"),
+                    "target_branch": latest.get("target_branch"),
+                    "human_message": latest.get("human_message"),
+                }
+                if self.asset_service is not None
+                and (latest := self.asset_service.latest_attempt_for_work(work_id))
+                and latest.get("operation_kind") == "CREATE_BRANCH"
+                else None
+            ),
+            "acquisition": {
+                "state": "READY",
+                "attempt_number": None,
+                "failure_category": None,
+                "message": "Repository is ready.",
+                "retry_available": False,
+                "authorization": {
+                    "required": False,
+                    "integration_available": False,
+                    "human_action": None,
+                },
+                "branch": getattr(resource, "authoritative_ref", None),
+                "revision": revision,
+            },
         }
 
     def file(self, work_id: UUID, path: str, revision: str) -> dict:

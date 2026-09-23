@@ -115,6 +115,11 @@ class GovernedResponseEnvelope(BaseModel):
     previous_response_contract: ResponseContract | None = None
     latest_human_input: str | None = None
     recent_relevant_messages: tuple[ConversationContextMessage, ...] = ()
+    production_admission_state: str | None = None
+    repository_acquisition_state: str | None = None
+    production_next_step: str | None = None
+    execution_operation_kind: str | None = None
+    execution_operation_reference: str | None = None
 
 
 class GovernedResponseRealization(BaseModel):

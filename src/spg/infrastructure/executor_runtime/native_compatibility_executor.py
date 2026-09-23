@@ -9,6 +9,8 @@ import time
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 from spg.application.executor_runtime import NativeExecutorRuntimeService
+from spg.application.connectors import ConnectorResolver
+from spg.application.native_connector_qualification import NativeConnectorQualificationService
 from spg.application.native_production_environment import (
     NativeProductionEnvironmentRuntime,
 )
@@ -33,6 +35,7 @@ from spg.domain.native_execution import (
     WorkspaceMount,
     canonical_digest,
 )
+from spg.domain.connectors import CapabilityRequirement, SideEffectLevel
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
@@ -82,14 +85,14 @@ class NativeQueuedExecutorCapability:
                     request,
                     observation.terminal_outcome,
                     started,
-                    getattr(observation, "final_checkpoint_id", None),
+                    observation.current_checkpoint_id,
                 )
             if observation.runtime_mode is ExecutionMode.STOPPED:
                 return self._terminal_result(
                     request,
                     observation.terminal_outcome,
                     started,
-                    getattr(observation, "final_checkpoint_id", None),
+                    observation.current_checkpoint_id,
                 )
             time.sleep(self.poll_seconds)
         return ExecutorDispatchResult(
@@ -126,6 +129,29 @@ class NativeQueuedExecutorCapability:
             state.terminal_outcome,
             dispatch.dispatched_at,
         )
+        if (
+            state.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+            and state.current_checkpoint_id is not None
+        ):
+            try:
+                with self.database.unit_of_work() as uow:
+                    attempt = RuntimeStore(uow.session).attempt(attempt_id)
+                if attempt is None:
+                    raise RuntimeError("Native retention Attempt lineage is missing")
+                retained = self._retain_successful_capabilities_for_work_unit(
+                    attempt.work_unit_id, state.current_checkpoint_id,
+                )
+            except Exception as error:
+                result = result.model_copy(update={"metadata": {
+                    **result.metadata,
+                    "connector_retention_condition": "RETRY_REQUIRED",
+                    "connector_retention_error_type": type(error).__name__,
+                }})
+            else:
+                if retained:
+                    result = result.model_copy(update={"metadata": {
+                        **result.metadata, "retained_user_capabilities": list(retained),
+                    }})
         production_environment = getattr(self, "production_environment", None)
         if production_environment is not None:
             environment = production_environment.suspend(
@@ -150,12 +176,21 @@ class NativeQueuedExecutorCapability:
             product_binding = product_store.runtime_binding_for_work_unit(
                 execution.work_unit_id
             )
+            work_revision = (
+                None if product_binding is None
+                else product_store.current_work_reality_revision(product_binding.work_id)
+            )
         if any(item is None for item in (work_unit, attempt, snapshot, package)):
             raise RuntimeError("native compatibility admission lineage is incomplete")
         work_id = (
             product_binding.work_id
             if product_binding is not None
             else execution.production_run_id
+        )
+        work_authority = (
+            work_revision.admitted_by if work_revision is not None
+            else product_binding.admitted_by if product_binding is not None
+            else "system"
         )
         repository = Path(execution.workspace.repository_path).resolve()
         workspace = Path(execution.workspace.workspace_path).resolve()
@@ -264,6 +299,74 @@ class NativeQueuedExecutorCapability:
             "file.read", "file.write", "process.run", "git.status", "git.diff",
             "test.run", "build.run", "dependency.sync", "preview.inspect",
         )
+        task_contract = work_unit.completion_contract.task_contract
+        required_capabilities = tuple(
+            () if task_contract is None else task_contract.required_capabilities
+        )
+        git_capabilities = tuple(
+            item for item in (
+                required_capabilities
+            )
+            if item.startswith("git.")
+        )
+        filesystem_capabilities = tuple(
+            item for item in required_capabilities
+            if item.startswith("filesystem.") and item not in {"filesystem.read", "filesystem.write"}
+        )
+        if git_capabilities and environment_binding is None:
+            raise RuntimeError("Governed Git operations require an assigned Production Environment")
+        if filesystem_capabilities and environment_binding is None:
+            raise RuntimeError("Governed filesystem operations require an assigned Production Environment")
+        resolver = ConnectorResolver(self.database)
+        for capability_id in required_capabilities:
+            requirement = CapabilityRequirement(
+                    capability_id=capability_id,
+                    work_id=work_id,
+                    user_id=work_authority,
+                    operation_ref=f"task-contract:{task_contract.task_contract_id}",
+                    resume_point={
+                        "pwu_id": str(execution.work_unit_id),
+                        "attempt_id": str(execution.attempt_id),
+                    },
+                )
+            resolution = resolver.resolve(requirement)
+            if not resolution.executable and environment_binding is not None:
+                candidate = resolver.propose_generic_candidate(requirement)
+                if candidate is not None:
+                    permissions = tuple(
+                        item.removeprefix("permission:")
+                        for item in (() if task_contract is None else task_contract.scope)
+                        if item.startswith("permission:")
+                    )
+                    qualified = NativeConnectorQualificationService(
+                        self.database, self.runtime,
+                        provider=production_environment.provider,
+                        checkpoint_root=production_environment.store.root.parent.parent / "nqc",
+                    ).qualify(
+                        candidate,
+                        source_baseline_id=execution.source_baseline_id,
+                        source_vector=source_vector,
+                        workspace=workspace_manifest,
+                        authority_identity=work_authority,
+                        admitted_permissions=permissions,
+                    )
+                    if qualified:
+                        resolution = resolver.resolve(requirement)
+            if not resolution.executable:
+                raise RuntimeError(
+                    f"Required capability {capability_id} is unavailable; Work gap {resolution.gap_id} is resumable"
+                )
+            if resolution.capability is not None and resolution.capability.side_effect_level is SideEffectLevel.DESTRUCTIVE:
+                required_permissions = resolution.capability.permissions_required
+                if work_revision is None or any(
+                    f"permission:{permission}" not in task_contract.scope
+                    for permission in required_permissions
+                ):
+                    raise RuntimeError("Destructive Connector operation lacks explicit Work permission")
+        if git_capabilities:
+            capability_ids = (*capability_ids, "git.operation")
+        if filesystem_capabilities:
+            capability_ids = (*capability_ids, "filesystem.operation")
         binding = ExecutionBindingV2(
             work_id=work_id,
             steering_decision_id=execution.plan_revision_id,
@@ -287,6 +390,16 @@ class NativeQueuedExecutorCapability:
                     scope={
                         "paths": list(write_paths),
                         "forbidden_paths": list(forbidden_paths),
+                        "capabilities": (
+                            list(git_capabilities) if identity == "git.operation"
+                            else list(filesystem_capabilities) if identity == "filesystem.operation"
+                            else []
+                        ),
+                        "permissions": [
+                            item.removeprefix("permission:")
+                            for item in (() if task_contract is None else task_contract.scope)
+                            if item.startswith("permission:")
+                        ],
                     },
                 )
                 for identity in capability_ids
@@ -330,6 +443,25 @@ class NativeQueuedExecutorCapability:
         checkpoint_id: UUID | None,
     ) -> ExecutorDispatchResult:
         result = self._result(request, outcome, started)
+        if outcome is AttemptTerminalOutcome.RESULT_READY and checkpoint_id is not None:
+            try:
+                retained = self._retain_successful_capabilities(request, checkpoint_id)
+            except Exception as error:
+                result = result.model_copy(update={
+                    "metadata": {
+                        **result.metadata,
+                        "connector_retention_condition": "RETRY_REQUIRED",
+                        "connector_retention_error_type": type(error).__name__,
+                    }
+                })
+            else:
+                if retained:
+                    result = result.model_copy(update={
+                        "metadata": {
+                            **result.metadata,
+                            "retained_user_capabilities": list(retained),
+                        }
+                    })
         production_environment = getattr(self, "production_environment", None)
         if production_environment is None:
             return result
@@ -341,6 +473,50 @@ class NativeQueuedExecutorCapability:
             ),
         )
         return self._with_environment_metadata(result, environment)
+
+    def _retain_successful_capabilities(
+        self,
+        request: ExecutorDispatchRequest,
+        checkpoint_id: UUID,
+    ) -> tuple[str, ...]:
+        return self._retain_successful_capabilities_for_work_unit(
+            request.execution.work_unit_id, checkpoint_id,
+        )
+
+    def _retain_successful_capabilities_for_work_unit(
+        self,
+        work_unit_id: UUID,
+        checkpoint_id: UUID,
+    ) -> tuple[str, ...]:
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            binding = product.runtime_binding_for_work_unit(work_unit_id)
+            work_unit = RuntimeStore(uow.session).work_unit(work_unit_id)
+            revision = (
+                None if binding is None
+                else product.current_work_reality_revision(binding.work_id)
+            )
+        if binding is None or work_unit is None:
+            return ()
+        contract = work_unit.completion_contract.task_contract
+        if contract is None:
+            return ()
+        resolver = ConnectorResolver(self.database)
+        retained = []
+        for capability_id in contract.required_capabilities:
+            requirement = CapabilityRequirement(
+                capability_id=capability_id,
+                work_id=binding.work_id,
+                user_id=(revision.admitted_by if revision is not None else binding.admitted_by),
+                operation_ref=f"task-contract:{contract.task_contract_id}",
+            )
+            result = resolver.retain_successful_work_capability_for_user(
+                requirement,
+                successful_execution_evidence=f"native-checkpoint:{checkpoint_id}",
+            )
+            if result is not None:
+                retained.append(capability_id)
+        return tuple(retained)
 
     def _environment_evidence_references(
         self,

@@ -2481,6 +2481,34 @@ class WorkApplicationService:
                 action_title, action_reason, action_recommendation, action_impact = (
                     _HUMAN_ACTION_COPY[decision.attention_reason]
                 )
+                conversation_prompt = (
+                    semantic_result.unresolved_questions[0]
+                    if decision.attention_reason
+                    is not SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+                    and semantic_result is not None
+                    and semantic_result.unresolved_questions
+                    else None
+                )
+                implementation_prerequisite_missing = False
+                if (
+                    decision.attention_reason
+                    is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
+                    and semantic_result is not None
+                    and semantic_result.proposed_production is not None
+                    and semantic_result.proposed_production.target_kind
+                    is ProductionTargetKind.CODE_WORK
+                ):
+                    from spg.application.guided_design import (
+                        GuidedDesignApplicationService,
+                    )
+
+                    guided = GuidedDesignApplicationService(self.database)
+                    implementation_prerequisite_missing = bool(
+                        guided.get_optional(projection.work_id) is not None
+                        and not guided.approved_design_artifact_references(
+                            projection.work_id
+                        )
+                    )
                 items.append(
                     AttentionItem(
                         id=uuid5(
@@ -2494,10 +2522,18 @@ class WorkApplicationService:
                             is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
                             else AttentionKind.STEERING_DECISION_REQUIRED
                         ),
-                        decision=action_title,
-                        reason=action_reason,
+                        decision=(
+                            "Answer the current Work question"
+                            if conversation_prompt is not None
+                            else action_title
+                        ),
+                        reason=conversation_prompt or action_reason,
                         available_actions=(
                             (
+                                AttentionAction.REQUEST_REFINEMENT,
+                            )
+                            if implementation_prerequisite_missing
+                            else (
                                 AttentionAction.APPROVE,
                                 AttentionAction.REQUEST_REFINEMENT,
                             )
@@ -2506,14 +2542,22 @@ class WorkApplicationService:
                             else ()
                         ),
                         recommended_action=(
-                            AttentionAction.APPROVE
+                            AttentionAction.REQUEST_REFINEMENT
+                            if implementation_prerequisite_missing
+                            else AttentionAction.APPROVE
                             if decision.attention_reason
                             is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
                             else None
                         ),
                         governed_subject_ref=f"steering-decision:{decision.id}",
                         steering_reason=decision.attention_reason,
-                        recommendation=action_recommendation,
+                        recommendation=(
+                            semantic_result.human_attention_recommendation
+                            if conversation_prompt is not None
+                            and semantic_result.human_attention_recommendation
+                            else action_recommendation
+                        ),
+                        conversation_prompt=conversation_prompt,
                         alternatives=(),
                         trade_offs=(),
                         expected_impact=action_impact,

@@ -10,13 +10,15 @@ import subprocess
 import sys
 from threading import Event, Thread
 import time
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from alembic import command
 from alembic.config import Config
 import pytest
+from sqlalchemy import select
 
 from spg.application.delivery import DeliveryApplicationService
+from spg.application.connectors import ConnectorResolver
 from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.application.native_production_environment import NativeProductionEnvironmentRuntime
 from spg.application.native_production_record import NativeProductionRecordService
@@ -24,12 +26,16 @@ from spg.application.preparation import PreparationService
 from spg.application.runtime import RuntimeService
 from spg.application.work import WorkApplicationService
 from spg.domain.native_execution import (
+    AttemptTerminalOutcome,
+    EffectCondition,
+    ExecutionMode,
     InferenceAction,
     InferenceResponse,
     ToolCallProposal,
     WorkerOffer,
     WorkingPlan,
 )
+from spg.domain.connectors import CapabilityRequirement, CapabilityScope
 from spg.domain.preparation import ContextSemanticRole, ExecutorBinding
 from spg.domain.product import (
     AttentionAction,
@@ -59,6 +65,7 @@ from spg.infrastructure.git_workspace import GitCloneAttemptWorkspace
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.infrastructure.persistence.runtime_schema import production_runs, production_work_units
 from spg.infrastructure.production_environment import (
     ContainerProductionEnvironmentProvider,
     DockerCliContainerRuntime,
@@ -132,6 +139,7 @@ def clean_runtime(postgres_database: Database):
 def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
     postgres_database: Database,
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     if subprocess.run(
         ["docker", "image", "inspect", IMAGE],
@@ -139,6 +147,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
         capture_output=True,
     ).returncode:
         pytest.skip(f"qualified local image is unavailable: {IMAGE}")
+    human_actor = f"human:brownfield-{uuid4().hex[:8]}"
     repository = tmp_path / "repository"
     repository.mkdir()
     git(repository, "init", "-b", "main")
@@ -155,10 +164,28 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
             repository_path=repository,
             repository_identity="repo:brownfield-native-pe",
             repository_ref="refs/heads/main",
-            authority_identity="human:test",
+            authority_identity=human_actor,
             scope={"journey": "brownfield-native-production-environment"},
         )
     )
+    import spg.application.work as work_module
+    import spg.application.steering_production as steering_production_module
+
+    original_builder = work_module.default_task_contract_builder
+
+    def builder_with_quality_obligation():
+        builder = original_builder()
+
+        class RequiredQualityBuilder:
+            def build(self, request):
+                return builder.build(request.model_copy(update={
+                    "required_capabilities": (*request.required_capabilities, "quality.run"),
+                }))
+
+        return RequiredQualityBuilder()
+
+    monkeypatch.setattr(work_module, "default_task_contract_builder", builder_with_quality_obligation)
+    monkeypatch.setattr(steering_production_module, "default_task_contract_builder", builder_with_quality_obligation)
     admission = WorkApplicationService(
         postgres_database,
         workspace_root=tmp_path / "workspaces",
@@ -189,7 +216,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
     )
     admitted = admission.approve_work(
         draft.work_id,
-        authority_identity="human:test",
+        authority_identity=human_actor,
     )
     assert admitted.status is WorkStatus.READY
 
@@ -329,9 +356,14 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
             projection = service.advance_work(admitted.work_id)
             if projection.status in {WorkStatus.NEEDS_ATTENTION, WorkStatus.BLOCKED}:
                 break
-        assert (
-            projection.status is WorkStatus.NEEDS_ATTENTION
-        ), projection.model_dump_json(indent=2)
+        with postgres_database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            binding = product.runtime_binding(admitted.work_id)
+            summary = None if binding is None else product.runtime_summary(binding)
+            report = None if summary is None or summary.dispatch_id is None else RuntimeStore(uow.session).provider_execution_report(summary.dispatch_id)
+        assert projection.status is WorkStatus.NEEDS_ATTENTION, (
+            None if report is None else (report.outcome, report.summary, report.metadata)
+        )
         attention = next(
             item
             for item in service.list_attention(work_id=admitted.work_id)
@@ -350,7 +382,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
             attention.id,
             AttentionResolutionRequest(
                 action=AttentionAction.AUTHORIZE,
-                authority_identity="human:test",
+                authority_identity=human_actor,
             ),
         )
         for _ in range(8):
@@ -371,6 +403,47 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
         native_binding = NativeExecutionStore(uow.session).attempt_binding(summary.attempt_id)
         evidence = NativeExecutionStore(uow.session).evidence_for_attempt(summary.attempt_id)
     assert work_unit is not None and work_unit.completion_contract.task_contract is not None
+    assert "quality.run" in work_unit.completion_contract.task_contract.required_capabilities
+    with postgres_database.unit_of_work() as uow:
+        retained_report = RuntimeStore(uow.session).provider_execution_report(summary.dispatch_id)
+    assert retained_report is not None
+    resolver = ConnectorResolver(postgres_database)
+    quality_requirement = CapabilityRequirement(
+        capability_id="quality.run", work_id=admitted.work_id,
+        user_id=human_actor,
+        operation_ref=f"task-contract:{work_unit.completion_contract.task_contract.task_contract_id}",
+    )
+    assert resolver.resolve(quality_requirement).executable
+    assert any(item.scope is CapabilityScope.USER for item in resolver._overlays(quality_requirement)), (
+        retained_report.metadata.get("connector_retention_error_type"),
+        retained_report.metadata.get("retained_user_capabilities"),
+    )
+    quality_gap = next(
+        gap for gap in resolver.gaps_for_work(admitted.work_id)
+        if gap["capability_id"] == "quality.run"
+    )
+    assert quality_gap["condition"] == "RESOLVED"
+    with postgres_database.unit_of_work() as uow:
+        qualification_run = uow.session.execute(select(production_runs.c.id).where(
+            production_runs.c.intent_ref == f"connector-qualification:{quality_gap['id']}"
+        )).scalar_one()
+        qualification_pwu_id = uow.session.execute(select(production_work_units.c.id).where(
+            production_work_units.c.production_run_id == qualification_run
+        )).scalar_one()
+        qualification_pwu = RuntimeStore(uow.session).work_unit(qualification_pwu_id)
+        qualification_attempt = RuntimeStore(uow.session).attempts_for_work_unit(qualification_pwu_id)[-1]
+        native = NativeExecutionStore(uow.session)
+        qualification_binding = native.attempt_binding(qualification_attempt.id)
+        qualification_state = native.attempt_state(qualification_attempt.id)
+        qualification_effects = native.effects_for_attempt(qualification_attempt.id)
+    assert qualification_pwu.completion_contract.task_contract is not None
+    assert qualification_pwu.completion_contract.task_contract.required_capabilities == ("shell.execute",)
+    assert qualification_binding.binding.work_id == admitted.work_id
+    assert qualification_binding.binding.workspace.service_resources
+    assert qualification_state.runtime_mode is ExecutionMode.FINISHED
+    assert qualification_state.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+    assert any(effect.tool_identity == "process.run" and effect.condition is EffectCondition.SETTLED
+               for effect in qualification_effects)
     assert native_binding.binding.work_id == admitted.work_id
     assert native_binding.binding.pwu_id == binding.work_unit_id
     pe_binding = pe_store.get_native_execution_binding(summary.attempt_id)

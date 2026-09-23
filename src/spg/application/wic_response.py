@@ -312,6 +312,11 @@ def governed_response_envelope(
     response_contract: ResponseContract | None = None,
     previous_response_contract: ResponseContract | None = None,
     recent_relevant_messages: tuple[ConversationContextMessage, ...] = (),
+    production_admission_state: str | None = None,
+    repository_acquisition_state: str | None = None,
+    production_next_step: str | None = None,
+    execution_operation_kind: str | None = None,
+    execution_operation_reference: str | None = None,
 ) -> GovernedResponseEnvelope:
     """Build the expression handoff exclusively from admitted WIC semantics."""
 
@@ -372,6 +377,25 @@ def governed_response_envelope(
         for fact in current_facts
         if fact.admitted_work_revision_id is not None
     )
+    if repository_acquisition_state != "RUNNING":
+        forbidden.extend(("正在拉取仓库", "正在获取仓库", "acquiring repository"))
+    if repository_acquisition_state != "READY":
+        forbidden.extend(("仓库已经准备完成", "代码已经拉取完成", "repository ready"))
+    if repository_acquisition_state != "WAITING_FOR_AUTHORIZATION":
+        forbidden.extend(("正在等待仓库授权", "waiting for repository authorization"))
+    if execution_operation_kind != "DESIGN_ARTIFACT":
+        forbidden.extend(("正在写设计文档", "正在生成设计文档", "writing the design document"))
+    if execution_operation_kind != "IMPLEMENTATION":
+        forbidden.extend(("正在编码", "已经开始实现", "implementation is running"))
+    if execution_operation_kind == "IMPLEMENTATION":
+        forbidden.extend(
+            (
+                "接下来先写设计文档",
+                "将先生成设计文档",
+                "design document is next",
+                "will write the design document first",
+            )
+        )
     context_candidates = [
         ContextCandidate(
             candidate_id="response-contract",
@@ -470,6 +494,11 @@ def governed_response_envelope(
         previous_response_contract=previous_response_contract,
         latest_human_input=latest_human_input,
         recent_relevant_messages=recent_relevant_messages,
+        production_admission_state=production_admission_state,
+        repository_acquisition_state=repository_acquisition_state,
+        production_next_step=production_next_step,
+        execution_operation_kind=execution_operation_kind,
+        execution_operation_reference=execution_operation_reference,
     )
 
 

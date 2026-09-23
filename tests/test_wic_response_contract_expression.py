@@ -146,6 +146,62 @@ def test_envelope_projects_contract_allowance_without_changing_semantic_truth() 
     assert assessment.engineering_semantic_facts == ()
 
 
+def test_action_claims_are_bound_to_persisted_execution_operation_kind() -> None:
+    assessment = _assessment(ConversationTurnIntent.BUILD)
+    design = governed_response_envelope(
+        assessment,
+        governed_content="设计文档生产已被当前运行事实支持。",
+        provisional_content=None,
+        reconciliation=ResponseReconciliation.CONFIRM,
+        latest_human_input="现在是在写设计文档还是代码？",
+        response_contract=_contract(InteractionMode.EXECUTE),
+        execution_operation_kind="DESIGN_ARTIFACT",
+        execution_operation_reference="production-run:design-1",
+    )
+    implementation = governed_response_envelope(
+        assessment,
+        governed_content="实现任务已被当前运行事实支持。",
+        provisional_content=None,
+        reconciliation=ResponseReconciliation.CONFIRM,
+        latest_human_input="现在是在写设计文档还是代码？",
+        response_contract=_contract(InteractionMode.EXECUTE),
+        execution_operation_kind="IMPLEMENTATION",
+        execution_operation_reference="production-run:code-1",
+    )
+
+    assert "正在编码" in design.forbidden_claims
+    assert "正在写设计文档" not in design.forbidden_claims
+    assert "正在写设计文档" in implementation.forbidden_claims
+    assert "正在编码" not in implementation.forbidden_claims
+    assert "接下来先写设计文档" in implementation.forbidden_claims
+
+
+def test_repository_action_claims_follow_persisted_acquisition_state() -> None:
+    assessment = _assessment(ConversationTurnIntent.BUILD)
+    requested = governed_response_envelope(
+        assessment,
+        governed_content="仓库拉取请求已经建立。",
+        provisional_content=None,
+        reconciliation=ResponseReconciliation.CONFIRM,
+        latest_human_input="把仓库拉下来。",
+        response_contract=_contract(InteractionMode.EXECUTE),
+        repository_acquisition_state="REQUESTED",
+    )
+    running = governed_response_envelope(
+        assessment,
+        governed_content="正在执行仓库拉取。",
+        provisional_content=None,
+        reconciliation=ResponseReconciliation.CONFIRM,
+        latest_human_input="把仓库拉下来。",
+        response_contract=_contract(InteractionMode.EXECUTE),
+        repository_acquisition_state="RUNNING",
+    )
+
+    assert "正在拉取仓库" in requested.forbidden_claims
+    assert "正在拉取仓库" not in running.forbidden_claims
+    assert "代码已经拉取完成" in running.forbidden_claims
+
+
 def test_identity_question_requires_system_capability_reality_context() -> None:
     assessment = _assessment(ConversationTurnIntent.DIRECT_QUESTION)
     envelope = governed_response_envelope(

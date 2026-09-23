@@ -15,9 +15,13 @@ import subprocess
 import tempfile
 from threading import RLock, Thread
 from typing import Protocol
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from uuid import UUID
 
+from spg.domain.assets import (
+    RepositoryAcquisitionFailure,
+    RepositoryAcquisitionFailureCategory,
+)
 from spg.domain.production_environment import (
     CollectedEnvironmentOutput,
     EnvironmentCommand,
@@ -32,6 +36,250 @@ from spg.domain.production_environment import (
     ProductionWorkspaceV1,
     safe_workspace_path,
 )
+
+
+class GitRepositoryAcquirer:
+    """Production Environment-owned acquisition of one complete branch history."""
+
+    def acquire(self, root: Path, source: str, destination: Path) -> None:
+        command = [
+            "git",
+            "-c",
+            "core.hooksPath=/dev/null",
+            "-C",
+            str(root),
+            "clone",
+            "--no-local",
+            "--single-branch",
+            "--",
+            source,
+            str(destination),
+        ]
+        environment = {
+            "PATH": os.environ.get("PATH", ""),
+            "SYSTEMROOT": os.environ.get("SYSTEMROOT", ""),
+            "GIT_TERMINAL_PROMPT": "0",
+            "LANG": "C.UTF-8",
+        }
+        try:
+            result = subprocess.run(
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=90,
+                env=environment,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise RepositoryAcquisitionFailure(
+                RepositoryAcquisitionFailureCategory.NETWORK_FAILURE,
+                "The repository did not respond before the acquisition timeout. Retry when network access is available.",
+                technical_evidence={
+                    "operation": "git clone --single-branch",
+                    "timeout_seconds": 90,
+                    "stderr": self._bounded(exc.stderr),
+                },
+                retryable=True,
+            ) from exc
+        except OSError as exc:
+            raise RepositoryAcquisitionFailure(
+                RepositoryAcquisitionFailureCategory.FILESYSTEM_FAILURE,
+                "The repository workspace could not be prepared on this runtime.",
+                technical_evidence={
+                    "operation": "git clone --single-branch",
+                    "os_error": str(exc)[:4000],
+                },
+                retryable=True,
+            ) from exc
+        if result.returncode == 0:
+            return
+        raise self._failure(result)
+
+    def fetch_selected_branch(self, repository: Path, branch: str) -> dict[str, object]:
+        """Fetch one branch into an isolated PE Workspace without host credentials."""
+
+        GitIsolatedWorkspacePreparer._validate_branch(branch)
+        repository = repository.resolve()
+        if not repository.is_dir():
+            raise EnvironmentProviderError("Bound repository Workspace is unavailable")
+        origin = subprocess.run(
+            ("git", "-c", f"safe.directory={repository}", "-C", str(repository), "remote", "get-url", "origin"),
+            capture_output=True, text=True, timeout=15,
+        )
+        if origin.returncode:
+            raise EnvironmentProviderError("Workspace has no observed origin remote")
+        source = origin.stdout.strip()
+        parsed = urlsplit(source)
+        if Path(source).is_absolute():
+            pass
+        elif parsed.scheme:
+            if (
+                parsed.scheme != "https" or not parsed.hostname or parsed.username
+                or parsed.password or parsed.query or parsed.fragment
+            ):
+                raise EnvironmentProviderError("Git fetch requires a credential-free HTTPS origin")
+        else:
+            raise EnvironmentProviderError("Git fetch requires an exact local or HTTPS origin")
+        environment = {
+            "PATH": os.environ.get("PATH", ""),
+            "SYSTEMROOT": os.environ.get("SYSTEMROOT", ""),
+            "GIT_TERMINAL_PROMPT": "0",
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_CONFIG_GLOBAL": os.devnull,
+            "LANG": "C.UTF-8",
+        }
+        command = (
+            "git", "-c", f"safe.directory={repository}",
+            "-c", "credential.helper=", "-c", "core.hooksPath=/dev/null",
+            "-C", str(repository), "fetch", "--no-tags",
+            "--no-recurse-submodules", "origin", branch,
+        )
+        try:
+            result = subprocess.run(
+                command, capture_output=True, text=True,
+                encoding="utf-8", errors="replace", timeout=90, env=environment,
+            )
+        except subprocess.TimeoutExpired as error:
+            return {"returncode": 124, "stdout": "", "stderr": "Repository fetch timed out.", "fetched_revision": None}
+        fetched_revision = None
+        if result.returncode == 0:
+            fetched_revision = GitContinuityInspector._git(repository, "rev-parse", "FETCH_HEAD^{commit}")
+        return {
+            "returncode": result.returncode,
+            "stdout": self._bounded(result.stdout),
+            "stderr": self._bounded(result.stderr),
+            "fetched_revision": fetched_revision,
+        }
+
+    def create_work_branch(
+        self,
+        root: Path,
+        base_repository: Path,
+        base_branch: str,
+        source: str,
+        destination: Path,
+        target_branch: str,
+    ) -> None:
+        """Create an isolated local branch from an acquired exact baseline."""
+
+        try:
+            GitIsolatedWorkspacePreparer._validate_branch(target_branch)
+        except EnvironmentProviderError as exc:
+            raise RepositoryAcquisitionFailure(
+                RepositoryAcquisitionFailureCategory.INVALID_BRANCH,
+                "The requested local branch name is invalid.",
+                technical_evidence={"operation": "git check-ref-format --branch"},
+                retryable=False,
+            ) from exc
+        if not base_repository.resolve().is_dir():
+            raise EnvironmentProviderError("Bound repository baseline is unavailable")
+        base_revision = GitContinuityInspector._git(
+            base_repository, "rev-parse", "HEAD^{commit}"
+        )
+        GitContinuityInspector._git(
+            root,
+            "clone", "--no-local", "--single-branch", "--branch", base_branch,
+            "--", str(base_repository), str(destination),
+        )
+        observed = GitContinuityInspector._git(
+            destination, "rev-parse", "HEAD^{commit}"
+        )
+        if observed != base_revision:
+            raise EnvironmentProviderError("Branch base differs from bound repository revision")
+        GitContinuityInspector._git(destination, "switch", "-c", target_branch)
+        GitContinuityInspector._git(destination, "remote", "set-url", "origin", source)
+        if GitContinuityInspector._git(destination, "rev-parse", "HEAD^{commit}") != base_revision:
+            raise EnvironmentProviderError("Branch creation changed the baseline commit")
+
+    @staticmethod
+    def _bounded(value: str | bytes | None) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, bytes):
+            value = value.decode("utf-8", errors="replace")
+        return value.strip()[:4000]
+
+    def _failure(
+        self, result: subprocess.CompletedProcess[str]
+    ) -> RepositoryAcquisitionFailure:
+        stderr = self._bounded(result.stderr)
+        lowered = stderr.casefold()
+        category = RepositoryAcquisitionFailureCategory.ACQUISITION_FAILED_RETRYABLE
+        message = "Repository acquisition failed and can be retried."
+        retryable = True
+        if any(
+            marker in lowered
+            for marker in (
+                "authentication failed",
+                "could not read username",
+                "terminal prompts disabled",
+                "permission denied (publickey)",
+                "http basic: access denied",
+            )
+        ):
+            category = RepositoryAcquisitionFailureCategory.AUTH_REQUIRED
+            message = "Repository read authorization is required before Watt can acquire this repository."
+        elif any(
+            marker in lowered
+            for marker in (
+                "remote branch",
+                "couldn't find remote ref",
+                "invalid branch name",
+            )
+        ):
+            category = RepositoryAcquisitionFailureCategory.INVALID_BRANCH
+            message = "The selected repository branch does not exist or is invalid."
+            retryable = False
+        elif any(
+            marker in lowered
+            for marker in (
+                "repository not found",
+                "does not appear to be a git repository",
+                "not found",
+            )
+        ):
+            category = RepositoryAcquisitionFailureCategory.REPOSITORY_NOT_FOUND
+            message = "The repository could not be found at the supplied address."
+            retryable = False
+        elif any(
+            marker in lowered
+            for marker in (
+                "could not resolve host",
+                "failed to connect",
+                "connection timed out",
+                "network is unreachable",
+                "connection reset",
+            )
+        ):
+            category = RepositoryAcquisitionFailureCategory.NETWORK_FAILURE
+            message = "Network access to the repository failed. Retry when connectivity is restored."
+        elif any(
+            marker in lowered
+            for marker in (
+                "permission denied",
+                "no space left on device",
+                "read-only file system",
+                "cannot create directory",
+            )
+        ):
+            category = RepositoryAcquisitionFailureCategory.FILESYSTEM_FAILURE
+            message = "The repository workspace could not be written on this runtime."
+        elif result.returncode in {128, 129} and not stderr:
+            category = RepositoryAcquisitionFailureCategory.ACQUISITION_FAILED_TERMINAL
+            message = "Repository acquisition failed without a recoverable response."
+            retryable = False
+        return RepositoryAcquisitionFailure(
+            category,
+            message,
+            technical_evidence={
+                "operation": "git clone --single-branch",
+                "returncode": result.returncode,
+                "stderr": stderr,
+            },
+            retryable=retryable,
+        )
 
 
 class ContainerRuntimePort(Protocol):

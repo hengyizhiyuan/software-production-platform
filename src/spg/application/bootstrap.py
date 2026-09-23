@@ -85,6 +85,41 @@ class Application:
 
         return NativeExecutorRuntimeService(database or self.persistence())
 
+    def repository_asset_service(self, database: Database | None = None):
+        """Compose repository intake with the same Native/PE production boundary."""
+        from spg.application.assets import RepositoryAssetService
+        from spg.application.native_git_operations import NativeGitOperationRunner
+        from spg.application.native_production_environment import NativeProductionEnvironmentRuntime
+        from spg.infrastructure.production_environment import (
+            ContainerProductionEnvironmentProvider, DockerCliContainerRuntime,
+        )
+        from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+
+        selected_database = database or self.persistence()
+        environment = NativeProductionEnvironmentRuntime(
+            store=JsonProductionEnvironmentStore(
+                self.settings.native_executor_production_environment_store_root
+            ),
+            provider=ContainerProductionEnvironmentProvider(
+                DockerCliContainerRuntime(
+                    workspace_volume=self.settings.native_executor_production_environment_workspace_volume,
+                    workspace_volume_root=self.settings.workspace_root,
+                )
+            ),
+            image_reference=self.settings.native_executor_production_environment_image,
+        )
+        return RepositoryAssetService(
+            selected_database,
+            self.settings.workspace_root.parent / "repository-assets",
+            self.settings.workspace_root.parent / "repository-imports",
+            native_git_operations=NativeGitOperationRunner(
+                selected_database,
+                production_environment=environment,
+                workspace_root=self.settings.workspace_root,
+                checkpoint_root=self.settings.native_executor_storage_root,
+            ),
+        )
+
     def preparation(self, database: Database | None = None) -> PreparationService:
         """Compose S2-A preparation without composing or dispatching an Executor."""
 
@@ -486,6 +521,7 @@ class Application:
         *,
         capability: PlanSteeringCapability | None = None,
         semantic_capability: SemanticStepCapability | None = None,
+        repository_assets=None,
     ) -> PlanSteeringDriver:
         """Compose bounded Steering progression over existing governed seams."""
 
@@ -548,6 +584,7 @@ class Application:
             production_orchestrator,
             capability=capability,
             semantic_capability=selected_semantic,
+            repository_assets=repository_assets,
         )
 
     def steering_bootstrap(

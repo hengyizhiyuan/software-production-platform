@@ -354,6 +354,18 @@ test("V4 attention badge and Actions derive from the same executable Human opera
   ]);
   assert.equal(review.required, true);
   assert.equal(review.actionableAttention.length, 1);
+  const question = project({ work_id: "one", status: "NEEDS_ATTENTION" }, [
+    {
+      work_id: "one",
+      kind: "STEERING_DECISION_REQUIRED",
+      conversation_prompt: "Which feature should be added first?",
+      available_actions: [],
+    },
+  ]);
+  assert.equal(question.required, true);
+  assert.equal(question.summary, "Answer the current Work question in conversation.");
+  assert.equal(question.conversationalDecision.conversation_prompt, "Which feature should be added first?");
+  assert.match(app, /attention\.conversation_prompt \? "Answer in conversation"/);
   const unrelated = project({ work_id: "one", status: "RUNNING" }, [
     { work_id: "two", kind: "CANDIDATE_AUTHORIZATION", available_actions: ["AUTHORIZE"] },
   ]);
@@ -369,7 +381,9 @@ test("V4 attention badge and Actions derive from the same executable Human opera
   assert.deepEqual(Array.from(stopped.workActions), []);
   assert.equal(stopped.summary, "No action required.");
   assert.match(app, /attentionMarker\.hidden = !controlRoom\.humanActionProjection/);
-  assert.match(app, /workspaceActionsSummary\.textContent = humanActions\.summary/);
+  assert.match(app, /workspaceActionsSummary\.textContent = repositoryAuthorizationRequired/);
+  assert.match(app, /: humanActions\.summary;/);
+  assert.match(app, /humanActions\.required \|\| repositoryAuthorizationRequired/);
   assert.match(app, /\/retry-steering/);
 });
 
@@ -414,4 +428,23 @@ test("Production details are disclosed, while Actions contain only contextual co
   assert.match(app, /agreementActionPanel\.hidden = !selected/);
   assert.match(source, /No action required\./);
   assert.doesNotMatch(app, /Exact Candidate \$\{preview\.repository_revision/);
+});
+
+test("repository acquisition UI exposes persisted intermediate states and governed retry", () => {
+  assert.match(app, /Repository acquisition requested/);
+  assert.match(app, /Acquiring repository/);
+  assert.match(app, /Waiting for GitHub authorization/);
+  assert.match(app, /Repository acquisition failed/);
+  assert.match(app, /Repository ready/);
+  assert.match(app, /Authorize repository access · unavailable/);
+  assert.match(app, /Retry after external access changes/);
+  assert.match(app, /integration_available/);
+  assert.match(app, /repository-acquisition\/retry/);
+  assert.match(app, /source\.revision/);
+});
+
+test("Work revision admission is rendered once through its authoritative panel", () => {
+  assert.match(app, /item\.kind !== "WORK_REVISION_APPROVAL"/);
+  assert.match(app, /workRevisionAdmission\.hidden/);
+  assert.match(html, /id="approve-work-revision"/);
 });

@@ -65,11 +65,18 @@ from spg.application.control_state import (
 )
 from spg.application.delivery import DeliveryApplicationService, artifact_media_type
 from spg.application.control_room import ControlRoomError, ControlRoomService
+from spg.application.connectors import ConnectorResolver
 from spg.application.software_runtime import SoftwareRuntimeService
-from spg.domain.assets import RepositoryIntakeRequest, AssetScopeAdmissionRequest
+from spg.domain.assets import (
+    AssetScopeAdmissionRequest,
+    RepositoryAcquisitionFailureCategory,
+    RepositoryIntakeRequest,
+)
+from spg.domain.change import ProductionTargetKind
 from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
 from spg.domain.product import (
     AttentionAction,
+    AttentionKind,
     AttentionResolutionRequest,
     ProductInvariantViolation,
     ProductRecordNotFound,
@@ -145,10 +152,15 @@ def create_http_application(
         selected_database = selected_database or work_service.database
 
     configured_workspace = getattr(getattr(container, "settings", None), "workspace_root", Path(".spg/workspaces"))
-    asset_service = repository_asset_service or RepositoryAssetService(
-        selected_database,
-        configured_workspace.parent / "repository-assets",
-        configured_workspace.parent / "repository-imports",
+    asset_factory = getattr(container, "repository_asset_service", None)
+    asset_service = repository_asset_service or (
+        asset_factory(selected_database)
+        if callable(asset_factory)
+        else RepositoryAssetService(
+            selected_database,
+            configured_workspace.parent / "repository-assets",
+            configured_workspace.parent / "repository-imports",
+        )
     )
     delivery_service = DeliveryApplicationService(selected_database)
     settings = getattr(container, "settings", None)
@@ -162,10 +174,22 @@ def create_http_application(
     selected_orchestrator = orchestrator or container.production_orchestrator(
         work_service
     )
+    configure_orchestrator_guard = getattr(
+        selected_orchestrator, "configure_activation_guard", None
+    )
+    if callable(configure_orchestrator_guard):
+        configure_orchestrator_guard(
+            getattr(
+                asset_service,
+                "repository_activation_allowed",
+                lambda _work_id: True,
+            )
+        )
     selected_steering_driver = steering_driver or container.plan_steering_driver(
         selected_database,
         work_service,
         selected_orchestrator,
+        repository_assets=asset_service,
     )
     selected_runtime_activation = runtime_activation or container.runtime_activation(
         selected_database
@@ -178,6 +202,11 @@ def create_http_application(
         selected_steering_bootstrap,
         selected_steering_driver,
         selected_orchestrator,
+        activation_guard=getattr(
+            asset_service,
+            "repository_activation_allowed",
+            lambda _work_id: True,
+        ),
     )
     selected_guided_design = guided_design_service or (
         container.guided_design(selected_database)
@@ -193,7 +222,8 @@ def create_http_application(
         else NativeExecutorRuntimeService(selected_database)
     )
     selected_native_vectors = NativeCandidateVectorService(selected_database)
-    control_room = ControlRoomService(selected_database, work_service)
+    control_room = ControlRoomService(selected_database, work_service, asset_service)
+    production_admission_trigger = None
     if selected_interaction is not None:
         production_admission_trigger = ProductionAdmissionTrigger(
             selected_interaction,
@@ -201,13 +231,47 @@ def create_http_application(
             asset_service,
             selected_post_admission,
         )
-        selected_interaction.configure_production_admission(
-            production_admission_trigger.execute
+        configure_repository_action = getattr(
+            selected_steering_driver, "configure_governed_repository_action", None
         )
+        if callable(configure_repository_action):
+            configure_repository_action(
+                lambda work_id, interaction_id, authority_identity:
+                    production_admission_trigger.reconcile_governed_branch(
+                        work_id,
+                        interaction_id=interaction_id,
+                        authority_identity=authority_identity,
+                    )
+            )
+        selected_interaction.configure_production_admission(
+            production_admission_trigger.execute,
+            prepare_handler=production_admission_trigger.prepare,
+            reality_provider=production_admission_trigger.projection,
+        )
+
+        def execution_reality(work_id: UUID) -> tuple[str | None, str | None]:
+            projection = work_service.get_work(work_id)
+            if (
+                projection.status is not WorkStatus.RUNNING
+                or projection.current_steering_step_type != "PRODUCE"
+                or projection.current_production_run_id is None
+            ):
+                return None, None
+            kind = (
+                "DESIGN_ARTIFACT"
+                if projection.target_kind is ProductionTargetKind.DOCUMENTATION_WORK
+                else "IMPLEMENTATION"
+            )
+            return kind, f"production-run:{projection.current_production_run_id}"
+
+        selected_interaction.configure_work_execution_reality(execution_reality)
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
         software_runtime.restore()
+        if production_admission_trigger is not None:
+            for work_id in production_admission_trigger.governed_branch_work_ids():
+                selected_steering_driver.schedule(work_id)
         if selected_interaction is not None:
             resume_turns = getattr(selected_interaction, "resume_pending_turns", None)
             if callable(resume_turns):
@@ -259,7 +323,14 @@ def create_http_application(
 
         def with_control_state(candidate: WorkResponse) -> WorkResponse:
             attention = work_service.list_attention(work_id=projection.work_id)
-            action_count = sum(len(item.available_actions) for item in attention)
+            action_count = sum(
+                len(item.available_actions)
+                + int(
+                    item.kind is AttentionKind.STEERING_DECISION_REQUIRED
+                    and bool(item.conversation_prompt)
+                )
+                for item in attention
+            )
             progress = candidate.execution_progress
             active_subject = bool(
                 candidate.current_production_run_id
@@ -823,25 +894,6 @@ def create_http_application(
             raise InteractionInvariantViolation(
                 "Only the exact current READY assessment may prepare repository Reality"
             )
-        if selected_resource_id is None and projection.repository_source:
-            intake = asset_service.intake(
-                RepositoryIntakeRequest(
-                    request_id=uuid5(
-                        NAMESPACE_URL,
-                        "watt:interaction-repository:"
-                        f"{interaction_id}:{assessment.id}:{projection.repository_source}",
-                    ),
-                    source=projection.repository_source,
-                    title=(projection.interpreted_motive or "Repository production Work")[:200],
-                    description=(
-                        projection.desired_outcome
-                        or "Discover repository Reality for the admitted production request."
-                    )[:4000],
-                    authority_identity=request.authority_identity,
-                )
-            )
-            if intake.get("resource_id") is not None:
-                selected_resource_id = UUID(intake["resource_id"])
         work = work_service.admit_interaction_work(
             interaction_id,
             engineering_resource_id=selected_resource_id,
@@ -851,7 +903,81 @@ def create_http_application(
             authority_identity=request.authority_identity,
             rationale=request.rationale,
         )
-        selected_post_admission.activate(work.work_id)
+        repository_observation = None
+        if selected_resource_id is None and projection.repository_source:
+            attempt_id = uuid5(
+                NAMESPACE_URL,
+                "watt:interaction-repository:"
+                f"{work.work_id}:1:{projection.repository_source}",
+            )
+            asset_service.start_intake(
+                RepositoryIntakeRequest(
+                    request_id=attempt_id,
+                    source=projection.repository_source,
+                    title=(
+                        projection.interpreted_motive
+                        or "Repository production Work"
+                    )[:200],
+                    description=(
+                        projection.desired_outcome
+                        or "Discover repository Reality for the admitted production request."
+                    )[:4000],
+                    authority_identity=request.authority_identity,
+                    interaction_id=interaction_id,
+                    work_id=work.work_id,
+                    attempt_number=1,
+                )
+            )
+            repository_observation = asset_service.execute_intake(attempt_id)
+            if (
+                repository_observation.get("condition") == "READY"
+                and repository_observation.get("resource_id")
+            ):
+                try:
+                    work = work_service.admit_asset_scope(
+                        work.work_id,
+                        AssetScopeAdmissionRequest(
+                            resource_id=UUID(repository_observation["resource_id"]),
+                            expected_work_revision_id=(
+                                work.current_work_reality_revision_id
+                            ),
+                            observation_fingerprint=(
+                                repository_observation["fingerprint"]
+                            ),
+                            authority_identity=request.authority_identity,
+                            rationale=(
+                                "Bind acquired repository Reality before activating "
+                                "manual Work admission."
+                            ),
+                        ),
+                        repository_observation,
+                    )
+                except Exception as error:
+                    repository_observation = asset_service.mark_attempt_failure(
+                        attempt_id,
+                        category=(
+                            RepositoryAcquisitionFailureCategory.ACQUISITION_FAILED_RETRYABLE
+                        ),
+                        human_message=(
+                            "The repository was acquired, but it could not be bound "
+                            "to this Work. Retry is available."
+                        ),
+                        technical_evidence={
+                            "phase": "WORK_REALITY_BINDING",
+                            "error_type": type(error).__name__,
+                            "message": str(error)[:2000],
+                        },
+                        retryable=True,
+                    )
+        if (
+            selected_resource_id is not None
+            or projection.repository_source is None
+            or (
+                repository_observation is not None
+                and repository_observation.get("condition") == "READY"
+            )
+        ):
+            selected_post_admission.activate(work.work_id)
         return SharedUnderstandingResponse.from_projection(
             service.get_shared_understanding(interaction_id)
         )
@@ -945,6 +1071,20 @@ def create_http_application(
     def get_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.get_work(work_id))
 
+    @api.get("/api/works/{work_id}/capability-gaps")
+    def work_capability_gaps(work_id: UUID) -> list[dict]:
+        work_service.get_work(work_id)
+        return [
+            {
+                "gap_id": str(item["id"]),
+                "capability_id": item["capability_id"],
+                "operation_ref": item["operation_ref"],
+                "condition": item["condition"],
+                "reason": item["reason"],
+            }
+            for item in ConnectorResolver(selected_database).gaps_for_work(work_id)
+        ]
+
     @api.post("/api/works/{work_id}/discard-pre-work", status_code=204)
     def discard_pre_work(work_id: UUID, request: HumanDecisionRequest) -> Response:
         work_service.discard_pre_work(
@@ -956,6 +1096,19 @@ def create_http_application(
     @api.get("/api/works/{work_id}/control-room/sources")
     def work_sources(work_id: UUID):
         return control_room.sources(work_id)
+
+    @api.post("/api/works/{work_id}/repository-acquisition/retry")
+    def retry_repository_acquisition(
+        work_id: UUID, request: HumanDecisionRequest
+    ) -> dict:
+        if production_admission_trigger is None:
+            raise ProductInvariantViolation(
+                "Repository acquisition is unavailable in this runtime"
+            )
+        return production_admission_trigger.retry_work(
+            work_id,
+            authority_identity=request.authority_identity,
+        )
 
     @api.get("/api/works/{work_id}/control-room/file")
     def work_source_file(work_id: UUID, path: str, revision: str):

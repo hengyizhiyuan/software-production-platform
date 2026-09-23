@@ -17,7 +17,9 @@ from spg.executor.tools import (
     PUBLIC_NATIVE_TOOL_CONTRACTS,
     NativeToolRegistry,
     ToolDefinition,
+    validate_generic_git_process,
 )
+from spg.executor.git_operations import git_operation_commands, git_operation_is_read_only
 from spg.infrastructure.executor_runtime.workspace_host import PrivateWorkspaceHost
 from spg.infrastructure.executor_runtime.landlock_sandbox import (
     LandlockProcessSandbox,
@@ -122,9 +124,11 @@ class LocalNativeToolHost:
         handlers = {
             "file.read": self.read_file,
             "file.write": self.write_file,
+            "filesystem.operation": self.filesystem_operation,
             "process.run": self.run_process,
             "git.status": self.git_status,
             "git.diff": self.git_diff,
+            "git.operation": self.git_operation,
             "test.run": self.run_test,
             "build.run": self.run_build,
             "dependency.sync": self.sync_dependencies,
@@ -141,6 +145,9 @@ class LocalNativeToolHost:
             )
             for contract in PUBLIC_NATIVE_TOOL_CONTRACTS
         ))
+
+    async def filesystem_operation(self, request: ToolExecutionRequest) -> ToolExecutionResult:
+        raise ValueError("governed filesystem operations require a Production Environment-bound Native Tool Host")
 
     async def read_file(self, request: ToolExecutionRequest) -> ToolExecutionResult:
         relative = str(request.proposal.arguments["path"])
@@ -204,6 +211,20 @@ class LocalNativeToolHost:
             cwd_value=cwd,
         )
 
+    async def git_operation(self, request: ToolExecutionRequest) -> ToolExecutionResult:
+        operation = str(request.proposal.arguments["operation"])
+        if not git_operation_is_read_only(operation):
+            raise ValueError("Git mutations require a Production Environment-bound Native Tool Host")
+        command = git_operation_commands(request.proposal.arguments)[0]
+        result = await self._run_argv(request, "git.operation", argv=list(command))
+        output = {**result.output, "operation": operation}
+        return self._result(
+            request.delivery_id,
+            "git.operation",
+            output,
+            condition=result.condition,
+        )
+
     async def run_test(self, request: ToolExecutionRequest) -> ToolExecutionResult:
         argv = self._argv(request)
         allowed = (
@@ -262,6 +283,8 @@ class LocalNativeToolHost:
         executable = Path(argv[0]).name.lower()
         if executable not in {item.lower() for item in self.process_allowlist}:
             raise ValueError(f"process executable is not allowlisted: {executable}")
+        if identity == "process.run":
+            validate_generic_git_process(argv)
         for argument in argv[1:]:
             candidate = Path(argument)
             if argument in {"-c", "-e", "--eval"} and executable in {

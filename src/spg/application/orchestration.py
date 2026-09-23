@@ -77,11 +77,13 @@ class ProductionOrchestrator:
         work_service: WorkApplicationService,
         *,
         max_automatic_transitions: int = DEFAULT_MAX_AUTOMATIC_TRANSITIONS,
+        activation_guard: Callable[[UUID], bool] | None = None,
     ) -> None:
         if max_automatic_transitions < 1:
             raise ValueError("automatic transition bound must be positive")
         self.work_service = work_service
         self.max_automatic_transitions = max_automatic_transitions
+        self.activation_guard = activation_guard or (lambda _work_id: True)
         self._condition = Condition(RLock())
         self._active_work_ids: set[UUID] = set()
         self._threads: dict[UUID, Thread] = {}
@@ -90,9 +92,16 @@ class ProductionOrchestrator:
         self._outcome_listeners: list[Callable[[OrchestrationOutcome], None]] = []
         self._stopping = Event()
 
+    def configure_activation_guard(self, guard: Callable[[UUID], bool]) -> None:
+        """Apply the same prerequisite gate to fresh and restart scheduling."""
+
+        self.activation_guard = guard
+
     def schedule(self, work_id: UUID) -> bool:
         """Schedule one Work once; duplicate activations are rejected."""
 
+        if not self.activation_guard(work_id):
+            return False
         with self._condition:
             if self._stopping.is_set() or work_id in self._active_work_ids:
                 return False
@@ -127,6 +136,7 @@ class ProductionOrchestrator:
             if (
                 not work.steering_enabled
                 and work.status in _AUTOMATIC_STATUSES
+                and self.activation_guard(work.work_id)
                 and self.schedule(work.work_id)
             ):
                 scheduled.append(work.work_id)

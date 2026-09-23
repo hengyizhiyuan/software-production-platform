@@ -470,10 +470,28 @@ Future
   Pattern Evolution
   Pattern Studio
   Evaluation Platform
+  Connector Management Panel
 ```
 
 The Evaluation Framework is a current architecture baseline. The Evaluation
 Platform remains future work.
+
+### Connector Management Panel (future product requirement)
+
+The executable part of System Capability Reality records capability identity,
+provider, scope, maturity, availability, permission and credential requirements,
+side-effect level, version, and provenance. Connector resolution binds a
+governed obligation to an available provider; it never grants Work, delivery,
+or external-account authority. Current learned-connector scope stops at WORK
+and USER. TEAM, ORGANIZATION, and PLATFORM promotion metadata are reserved,
+but promotion governance and automation are deferred.
+
+A future Connector Management page must let authorized Humans/Admins inspect
+the connector list, family, owner scope, maturity, enablement, health,
+usage/success/failure statistics, version, permissions, credential connection
+state, provisional connectors, promotion candidates, deprecation, and audit
+history. It may later allow disable/enable and governed promotion. This page
+is not part of the present implementation.
 
 ## Implementation status
 

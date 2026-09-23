@@ -24,6 +24,7 @@ from spg.domain.production_intelligence import (
     ContextCandidate,
     ContextSource,
     EngineeringActivity,
+    TaskMode,
 )
 from spg.domain.runtime import CompletionContract
 from spg.infrastructure.configured_executor import render_governed_instruction
@@ -229,6 +230,36 @@ def test_task_contract_preserves_semantic_authority_scope_and_lineage():
     assert "This projection preserves already admitted intent and lineage" in instruction
     assert f"[{fact.fact_id}]" in instruction
     assert "does not widen execution authority" in instruction
+
+
+def test_implementation_task_contract_preserves_design_prerequisite_evidence():
+    reference = (
+        "approved-design-artifact:docs/design.md@runtime-commit:1"
+        "#human-authorization:2"
+    )
+    task = default_task_contract_builder().build(
+        TaskContractRequest(
+            task_mode=TaskMode.IMPLEMENTATION,
+            objective="Implement the approved design",
+            scope=("CREATE:src/app.py",),
+            acceptance_meaning=("Verify the implementation",),
+            out_of_scope=("Any path outside src/app.py",),
+            authority_lineage=("work:1", "steering-decision:2"),
+            required_prerequisites=("APPROVED_DESIGN_ARTIFACT",),
+            prerequisite_evidence=(reference,),
+            work_reality_references=("work:1",),
+            ecf_references=("engineering-resource:1", "source-baseline:2@abc"),
+            decision_reference="steering-decision:2",
+        )
+    )
+
+    assert task.task_mode is TaskMode.IMPLEMENTATION
+    assert task.required_prerequisites == ("APPROVED_DESIGN_ARTIFACT",)
+    assert task.prerequisite_evidence == (reference,)
+    assert any(
+        item.reference == reference and item.authority == "PERSISTED_EXECUTION_REALITY"
+        for item in task.relevant_context
+    )
 
 
 def test_pattern_or_sop_context_cannot_be_promoted_to_authoritative_truth():

@@ -27,6 +27,7 @@ from spg.domain.response_contract import (
     JudgmentStance,
     ResponseIntent,
     production_intent_evidence,
+    repository_acquisition_recovery_requested,
 )
 
 from spg.domain.conversation import ConversationContextMessage, ConversationTurnIntent
@@ -96,7 +97,12 @@ from spg.domain.wic_response import (
     WicResponseEventType,
     WicRuntimeMode,
 )
-from spg.domain.steering import RealityReferenceKind, SteeringOutcome, SteeringStepType
+from spg.domain.steering import (
+    RealityReferenceKind,
+    SteeringAttentionReason,
+    SteeringOutcome,
+    SteeringStepType,
+)
 from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.interaction_store import InteractionStore
@@ -108,6 +114,49 @@ from spg.infrastructure.persistence.steering_store import SteeringStore
 ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v6"
 READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
+
+
+def _repository_branch_status_question(content: str) -> bool:
+    return bool(
+        re.search(r"(?:分支|branch)", content, re.IGNORECASE)
+        and re.search(
+            r"(?:切好|当前|目前|现在|什么|哪个|已经|状态|好了|yet|current)",
+            content,
+            re.IGNORECASE,
+        )
+    )
+
+
+def _repository_branch_status_answer(
+    content: str, reality: SharedUnderstanding
+) -> str | None:
+    """Answer an exact branch-state query from current admitted Work Reality."""
+
+    if not _repository_branch_status_question(content):
+        return None
+    revision = reality.governed_revision
+    if revision is None or revision.repository_ref is None:
+        return "当前 Work 尚未绑定可确认的仓库分支；不能说分支已经切好。"
+    branch = revision.repository_ref.removeprefix("refs/heads/")
+    commit = revision.source_revision or "未知"
+    state = reality.repository_acquisition_state
+    if state in {RepositoryAcquisitionState.REQUESTED, RepositoryAcquisitionState.RUNNING}:
+        return (
+            f"当前 Work 仍绑定本地分支 {branch}，提交 {commit}。"
+            "新的分支操作已记录但尚未完成；完成后才会更新 Work 的分支。"
+        )
+    if state in {
+        RepositoryAcquisitionState.FAILED_RETRYABLE,
+        RepositoryAcquisitionState.FAILED_TERMINAL,
+    }:
+        return (
+            f"当前 Work 仍绑定本地分支 {branch}，提交 {commit}。"
+            "新的分支操作失败，尚未切换；请查看 Reality 面板中的失败原因。"
+        )
+    return (
+        f"当前 Work 绑定的本地分支是 {branch}，提交 {commit}。"
+        "这不表示该分支已经推送到远端。"
+    )
 
 
 _LONG_LIVED_OBJECT_TERMS = (
@@ -516,6 +565,22 @@ class WorkInteractionService:
         self._production_admission_handler: Callable[
             [UUID, InteractionAssessment, InteractionRecord], None
         ] | None = None
+        self._production_admission_prepare_handler: Callable[
+            [UUID, InteractionAssessment, InteractionRecord], None
+        ] | None = None
+        self._production_admission_reality_provider: Callable[
+            [UUID, UUID | None],
+            tuple[
+                ProductionAdmissionExecutionState,
+                RepositoryAcquisitionState,
+                str,
+                str | None,
+            ]
+            | None,
+        ] | None = None
+        self._work_execution_reality_provider: Callable[
+            [UUID], tuple[str | None, str | None]
+        ] | None = None
         self._production_admission_progress: OrderedDict[
             UUID,
             tuple[
@@ -531,11 +596,36 @@ class WorkInteractionService:
         handler: Callable[
             [UUID, InteractionAssessment, InteractionRecord], None
         ] | None,
+        *,
+        prepare_handler: Callable[
+            [UUID, InteractionAssessment, InteractionRecord], None
+        ] | None = None,
+        reality_provider: Callable[
+            [UUID, UUID | None],
+            tuple[
+                ProductionAdmissionExecutionState,
+                RepositoryAcquisitionState,
+                str,
+                str | None,
+            ]
+            | None,
+        ] | None = None,
     ) -> None:
         """Attach the existing governed admission path to completed WIC Turns."""
 
         with self._turn_lock:
             self._production_admission_handler = handler
+            self._production_admission_prepare_handler = prepare_handler
+            self._production_admission_reality_provider = reality_provider
+
+    def configure_work_execution_reality(
+        self,
+        provider: Callable[[UUID], tuple[str | None, str | None]] | None,
+    ) -> None:
+        """Attach a read-only persisted-operation projection for response truth."""
+
+        with self._turn_lock:
+            self._work_execution_reality_provider = provider
 
     def record_production_admission_progress(
         self,
@@ -560,30 +650,45 @@ class WorkInteractionService:
         with self._turn_lock:
             self._production_admission_progress.pop(interaction_id, None)
 
-    def _trigger_production_admission_if_ready(
+    def _prepare_production_admission_if_ready(
         self,
         interaction_id: UUID,
         assessment: InteractionAssessment,
         request_record: InteractionRecord,
     ) -> bool:
         evidence = production_intent_evidence(request_record.content)
+        projection = self.get_shared_understanding(interaction_id)
+        recovery = bool(
+            projection.governed_work_id is not None
+            and repository_acquisition_recovery_requested(request_record.content)
+        )
         with self._turn_lock:
-            admission_handler = self._production_admission_handler
+            admission_handler = (
+                self._production_admission_prepare_handler
+                or self._production_admission_handler
+            )
         if (
             admission_handler is None
-            or not evidence.production_request
-            or not evidence.repository_relevant
-            or not evidence.action_requested
-            or assessment.readiness.status
-            is not WorkAdmissionReadinessStatus.READY
+            or (
+                not recovery
+                and (
+                    not evidence.production_request
+                    or not evidence.repository_relevant
+                    or not evidence.action_requested
+                    or assessment.readiness.status
+                    is not WorkAdmissionReadinessStatus.READY
+                )
+            )
         ):
             return False
         self.record_production_admission_progress(
             interaction_id,
             admission_state=ProductionAdmissionExecutionState.ADMISSION_RUNNING,
             repository_state=(
-                RepositoryAcquisitionState.READY_TO_ACQUIRE
+                RepositoryAcquisitionState.NOT_STARTED
                 if evidence.repository_source
+                else None
+                if recovery
                 else RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
             ),
             next_step=(
@@ -604,7 +709,7 @@ class WorkInteractionService:
                     ProductionAdmissionExecutionState.ADMISSION_RETRY_REQUIRED
                 ),
                 repository_state=(
-                    RepositoryAcquisitionState.ACQUISITION_RETRY_REQUIRED
+                    RepositoryAcquisitionState.FAILED_RETRYABLE
                     if evidence.repository_source
                     else RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
                 ),
@@ -613,6 +718,51 @@ class WorkInteractionService:
                 ),
             )
         return True
+
+    def _execute_prepared_production_admission(
+        self,
+        interaction_id: UUID,
+        assessment: InteractionAssessment,
+        request_record: InteractionRecord,
+    ) -> bool:
+        with self._turn_lock:
+            handler = self._production_admission_handler
+        if handler is None:
+            return False
+        try:
+            handler(interaction_id, assessment, request_record)
+        except Exception as error:
+            projection = self.get_shared_understanding(interaction_id)
+            admission = (
+                ProductionAdmissionExecutionState.WORK_CREATED
+                if projection.governed_work_id is not None
+                else ProductionAdmissionExecutionState.ADMISSION_RETRY_REQUIRED
+            )
+            self.record_production_admission_progress(
+                interaction_id,
+                admission_state=admission,
+                repository_state=RepositoryAcquisitionState.FAILED_RETRYABLE,
+                next_step=(
+                    "Repository acquisition completed but Work binding failed; retry "
+                    f"the governed operation. ({type(error).__name__})"
+                ),
+            )
+        return True
+
+    def _trigger_production_admission_if_ready(
+        self,
+        interaction_id: UUID,
+        assessment: InteractionAssessment,
+        request_record: InteractionRecord,
+    ) -> bool:
+        prepared = self._prepare_production_admission_if_ready(
+            interaction_id, assessment, request_record
+        )
+        if prepared:
+            self._execute_prepared_production_admission(
+                interaction_id, assessment, request_record
+            )
+        return prepared
 
     def resume_ready_production_admissions(self) -> tuple[UUID, ...]:
         """Reconcile completed explicit requests left before Work formation."""
@@ -628,17 +778,46 @@ class WorkInteractionService:
                 ),
                 None,
             )
-            if (
-                projection.governed_work_id is None
-                and projection.latest_assessment_current
-                and assessment is not None
-                and request_record is not None
-                and self._trigger_production_admission_if_ready(
+            if assessment is None or request_record is None:
+                continue
+            if projection.governed_work_id is None:
+                if not projection.latest_assessment_current:
+                    continue
+                recovered = self._trigger_production_admission_if_ready(
                     projection.interaction.id,
                     assessment,
                     request_record,
                 )
-            ):
+            else:
+                with self._turn_lock:
+                    provider = self._production_admission_reality_provider
+                reality = (
+                    None
+                    if provider is None
+                    else provider(
+                        projection.interaction.id,
+                        projection.governed_work_id,
+                    )
+                )
+                # Resume only a persisted REQUESTED/RUNNING Attempt. Failed
+                # Attempts wait for explicit retry authority and completed ones
+                # are immutable. A governed Work does not require the latest
+                # conversational assessment to remain current: the persisted
+                # Attempt is the recovery authority and exact operation basis.
+                recovered = bool(
+                    reality is not None
+                    and reality[1]
+                    in {
+                        RepositoryAcquisitionState.REQUESTED,
+                        RepositoryAcquisitionState.RUNNING,
+                    }
+                    and self._execute_prepared_production_admission(
+                        projection.interaction.id,
+                        assessment,
+                        request_record,
+                    )
+                )
+            if recovered:
                 resumed.append(projection.interaction.id)
         return tuple(resumed)
 
@@ -1333,6 +1512,12 @@ class WorkInteractionService:
         with self._turn_lock:
             self._turn_realization_started.add(turn_id)
         deep_content = self._human_facing_response(assessment.natural_response)
+        action_reality = self.get_shared_understanding(assessment.interaction_id)
+        branch_status_answer = _repository_branch_status_answer(
+            latest_human_input, action_reality
+        )
+        if branch_status_answer is not None:
+            deep_content = branch_status_answer
         events = self.response_events(turn_id)
         provisional_event = next(
             (
@@ -1383,6 +1568,17 @@ class WorkInteractionService:
                 continuation = "\n\n" + deep_content
         else:
             continuation = deep_content
+        execution_kind = None
+        execution_reference = None
+        with self._turn_lock:
+            execution_provider = self._work_execution_reality_provider
+        if (
+            execution_provider is not None
+            and action_reality.governed_work_id is not None
+        ):
+            execution_kind, execution_reference = execution_provider(
+                action_reality.governed_work_id
+            )
         envelope = governed_response_envelope(
             assessment,
             governed_content=continuation,
@@ -1392,8 +1588,23 @@ class WorkInteractionService:
             response_contract=contract,
             previous_response_contract=previous_contract,
             recent_relevant_messages=recent_messages,
+            production_admission_state=(
+                None
+                if action_reality.production_admission_state is None
+                else action_reality.production_admission_state.value
+            ),
+            repository_acquisition_state=(
+                None
+                if action_reality.repository_acquisition_state is None
+                else action_reality.repository_acquisition_state.value
+            ),
+            production_next_step=action_reality.production_next_step,
+            execution_operation_kind=execution_kind,
+            execution_operation_reference=execution_reference,
         )
         response_realizer = self.response_realizer
+        if branch_status_answer is not None:
+            response_realizer = DeterministicGovernedResponseRealizer()
         pipeline_evidence = getattr(self.capability, "last_pipeline_evidence", None)
         if (_provider_supplied_human_wording(pipeline_evidence)
                 or assessment.provider_identity == "watt-native:work-reality-query"):
@@ -1539,6 +1750,8 @@ class WorkInteractionService:
             def start_fast_reception(basis: InteractionInterpretationInput) -> None:
                 if self.fast_reception is None:
                     return
+                if _repository_branch_status_question(basis.records[-1].content):
+                    return
                 self._mark_turn_timing(turn_id, "fast_path_started")
                 if turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED:
                     self._record_response_event(
@@ -1644,6 +1857,11 @@ class WorkInteractionService:
                 on_pipeline_stage=lambda stage: self._mark_turn_timing(turn_id, stage),
                 on_basis_ready=start_fast_reception,
                 policy_governed=controlled,
+            )
+            admission_prepared = self._prepare_production_admission_if_ready(
+                turn.interaction_id,
+                assessment,
+                request_record,
             )
             realization: GovernedResponseRealization | None = None
             reconciliation: ResponseReconciliation | None = None
@@ -1765,11 +1983,12 @@ class WorkInteractionService:
                 uow.commit()
             self._mark_turn_timing(turn_id, "persistence_completed")
             self._mark_turn_timing(turn_id, "completed")
-            self._trigger_production_admission_if_ready(
-                turn.interaction_id,
-                assessment,
-                request_record,
-            )
+            if admission_prepared:
+                self._execute_prepared_production_admission(
+                    turn.interaction_id,
+                    assessment,
+                    request_record,
+                )
         except Exception as error:  # persisted failure is the product-facing truth
             failed_at = datetime.now(UTC)
             failure = _classify_turn_failure(error, failed_at)
@@ -2362,35 +2581,71 @@ class WorkInteractionService:
             ),
             "",
         )
-        production_evidence = production_intent_evidence(latest_human_input)
+        current_production_evidence = production_intent_evidence(latest_human_input)
+        established_production_evidence = next(
+            (
+                evidence
+                for record in reversed(records)
+                if record.actor is InteractionActor.HUMAN
+                and (evidence := production_intent_evidence(record.content)).production_request
+                and evidence.repository_relevant
+            ),
+            current_production_evidence,
+        )
+        production_evidence = (
+            current_production_evidence
+            if current_production_evidence.production_request
+            else established_production_evidence
+            if governed_revision is not None
+            else current_production_evidence
+        )
         production_admission_state = None
         repository_acquisition_state = None
         production_next_step = None
+        persisted_repository_source = None
         if production_evidence.production_request:
             with self._turn_lock:
                 admission_progress = self._production_admission_progress.get(
                     interaction_id
                 )
+                reality_provider = self._production_admission_reality_provider
+            persisted_reality = (
+                None
+                if reality_provider is None
+                else reality_provider(
+                    interaction_id,
+                    interaction.current_work_id if governed_revision is not None else None,
+                )
+            )
             if admission_progress is not None:
                 (
                     production_admission_state,
                     repository_acquisition_state,
                     production_next_step,
                 ) = admission_progress
+                if persisted_reality is not None:
+                    persisted_repository_source = persisted_reality[3]
+            elif persisted_reality is not None:
+                (
+                    production_admission_state,
+                    repository_acquisition_state,
+                    production_next_step,
+                    persisted_repository_source,
+                ) = persisted_reality
             elif governed_revision is not None:
                 production_admission_state = (
                     ProductionAdmissionExecutionState.WORK_CREATED
                 )
                 if governed_revision.repository_identity is not None:
                     repository_acquisition_state = (
-                        RepositoryAcquisitionState.REPOSITORY_REALITY_BOUND
+                        RepositoryAcquisitionState.READY
                     )
                     production_next_step = (
                         "Continue Steering against the acquired repository Reality."
                     )
                 elif production_evidence.repository_source:
                     repository_acquisition_state = (
-                        RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_AUTHORIZATION
+                        RepositoryAcquisitionState.WAITING_FOR_AUTHORIZATION
                     )
                     production_next_step = (
                         "Authorize read access to the referenced repository; delivery "
@@ -2408,7 +2663,7 @@ class WorkInteractionService:
                     ProductionAdmissionExecutionState.READY_FOR_ADMISSION
                 )
                 repository_acquisition_state = (
-                    RepositoryAcquisitionState.READY_TO_ACQUIRE
+                    RepositoryAcquisitionState.NOT_STARTED
                     if production_evidence.repository_source
                     else RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
                     if production_evidence.repository_relevant
@@ -2512,7 +2767,9 @@ class WorkInteractionService:
                 and current_work.condition is WorkCondition.PRE_WORK
             ),
             production_request_detected=production_evidence.production_request,
-            repository_source=production_evidence.repository_source,
+            repository_source=(
+                persisted_repository_source or production_evidence.repository_source
+            ),
             production_admission_state=production_admission_state,
             repository_acquisition_state=repository_acquisition_state,
             production_next_step=production_next_step,
@@ -3046,6 +3303,11 @@ class WorkInteractionService:
             binding = product.runtime_binding(revision.work_id)
             summary = None if binding is None else product.runtime_summary(binding)
             decision = None if plan_revision is None else steering.latest_decision(plan_revision.id)
+            semantic_result = (
+                None
+                if decision is None
+                else steering.latest_semantic_result_for_step(decision.current_step_id)
+            )
             queue_entries = NativeExecutionStore(uow.session).list_queue(work_id=revision.work_id)
         phase = {"DESIGN": "整理解决方案", "REFINE": "澄清当前步骤", "PRODUCE": "生产", "VERIFY_ACCEPT": "验证与验收", "COMPLETE": "完成"}.get(
             None if current is None else current.type.value, "等待下一步")
@@ -3074,7 +3336,12 @@ class WorkInteractionService:
             and current is not None
             and decision.current_step_id == current.id
         ):
-            next_step = "下一步由你审阅当前提案。"
+            if semantic_result is not None and semantic_result.unresolved_questions:
+                next_step = "下一步请在 Actions 中查看并回答当前设计问题。"
+            elif decision.attention_reason is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED:
+                next_step = "下一步由你审阅当前生产提案。"
+            else:
+                next_step = "下一步请在 Actions 中处理当前 Human 决策。"
         else:
             next_step = (
                 "当前没有需要你处理的事项；下一步由 Watt 按当前步骤继续推进。"

@@ -463,6 +463,38 @@ class ProductionRecordV1(ProductionEnvironmentContract):
         return self
 
 
+class GitOperationProductionRecordV1(ProductionEnvironmentContract):
+    """Immutable Production Record for a verified Git-only PWU (no fake delivery)."""
+
+    schema_version: int = Field(default=1, ge=1, le=1)
+    id: UUID
+    work_id: UUID
+    task_contract_id: UUID
+    pwu_id: UUID
+    attempt_id: UUID
+    environment_id: UUID
+    checkpoint_id: UUID
+    capability_id: str = Field(min_length=1)
+    operation: str = Field(min_length=1)
+    repository_identity: str = Field(min_length=1)
+    source_revision: str = Field(pattern=GIT_OBJECT_PATTERN)
+    resulting_branch: str = Field(min_length=1)
+    resulting_revision: str = Field(pattern=GIT_OBJECT_PATTERN)
+    verification_reference: str = Field(min_length=1)
+    created_at: datetime
+    content_digest: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+
+    _created_timezone = field_validator("created_at")(require_timezone)
+
+    @model_validator(mode="after")
+    def bind_content_digest(self) -> "GitOperationProductionRecordV1":
+        expected = canonical_digest(self.model_dump(mode="json", exclude={"content_digest"}))
+        if self.content_digest is not None and self.content_digest != expected:
+            raise ValueError("Git Production Record digest does not match its content")
+        object.__setattr__(self, "content_digest", expected)
+        return self
+
+
 class ProviderEnvironmentHandle(ProductionEnvironmentContract):
     provider_identity: str = Field(min_length=1)
     environment_id: UUID

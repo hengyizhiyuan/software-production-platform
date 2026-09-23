@@ -378,6 +378,30 @@ class GuidedDesignApplicationService:
         self.database = database
         self.steering = SteeringApplicationService(database)
 
+    def approved_design_artifact_references(self, work_id: UUID) -> tuple[str, ...]:
+        """Return exact reviewed design outputs already committed to Work Reality."""
+
+        with self.database.unit_of_work() as unit_of_work:
+            product = ProductStore(unit_of_work.session)
+            references: list[str] = []
+            for binding in product.runtime_bindings(work_id):
+                summary = product.runtime_summary(binding)
+                if (
+                    summary.extra.get("task_contract_mode") != "DESIGN_ARTIFACT"
+                    or summary.authorization_id is None
+                    or summary.runtime_commit_id is None
+                ):
+                    continue
+                path = summary.extra.get("artifact_contract_path")
+                if not isinstance(path, str) or path not in summary.artifact_paths:
+                    continue
+                references.append(
+                    "approved-design-artifact:"
+                    f"{path}@runtime-commit:{summary.runtime_commit_id}"
+                    f"#human-authorization:{summary.authorization_id}"
+                )
+        return tuple(references)
+
     @staticmethod
     def eligible(work: WorkRecord) -> bool:
         return bool(

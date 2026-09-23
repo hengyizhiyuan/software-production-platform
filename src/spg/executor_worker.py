@@ -28,6 +28,7 @@ from spg.infrastructure.executor_runtime.inference import (
     OpenAIResponsesInferenceAdapter,
     ResponsesInferenceAdapter,
 )
+from spg.infrastructure.executor_runtime.git_inference import GovernedGitOperationInferenceAdapter
 from spg.infrastructure.executor_runtime.local_storage import ContentAddressedStorage
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.executor_runtime.remote_tool_host import RemoteNativeToolHost
@@ -315,9 +316,21 @@ async def run_worker() -> None:
 
     def kernel_factory(grant):
         with database.unit_of_work() as uow:
-            binding = NativeExecutionStore(uow.session).attempt_binding(grant.allocation.attempt_id)
+            native_store = NativeExecutionStore(uow.session)
+            binding = native_store.attempt_binding(grant.allocation.attempt_id)
+            contract = native_store.contract(binding.pwu_contract_version_id)
+        git_operation = contract.contract_payload.get("git_operation")
+        selected_inference = (
+            GovernedGitOperationInferenceAdapter(
+                operation=git_operation["operation"],
+                arguments=git_operation["arguments"],
+                expected_revision=git_operation["expected_revision"],
+            )
+            if isinstance(git_operation, dict)
+            else inference
+        )
         return NativeExecutorKernel(
-            inference=inference,
+            inference=selected_inference,
             tools=remote_tools,
             checkpoints=DurableCheckpointPort(
                 database, storage, attempt_id=binding.attempt_id,
@@ -337,7 +350,7 @@ async def run_worker() -> None:
         provider_profiles=(settings.native_executor_provider_profile,),
         resource_profiles=(settings.native_executor_resource_profile,),
         capability_identities=(
-            "file.read", "file.write", "process.run", "git.status", "git.diff",
+            "file.read", "file.write", "filesystem.operation", "process.run", "git.status", "git.diff", "git.operation",
             "test.run", "build.run", "dependency.sync", "preview.inspect",
         ),
     )

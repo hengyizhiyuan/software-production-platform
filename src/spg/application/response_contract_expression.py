@@ -356,14 +356,30 @@ def _expression_payload(envelope: GovernedResponseEnvelope) -> dict[str, object]
         "forbidden_claims": envelope.forbidden_claims,
         "provisional_content": envelope.provisional_content,
         "reconciliation": envelope.reconciliation.value,
+        "production_admission_state": envelope.production_admission_state,
+        "repository_acquisition_state": envelope.repository_acquisition_state,
+        "production_next_step": envelope.production_next_step,
+        "execution_operation_kind": envelope.execution_operation_kind,
+        "execution_operation_reference": envelope.execution_operation_reference,
         "authority_boundary": (
             "Detailed design prose is deliberately omitted from expression context. "
             "Acknowledge the current command and its existing governed next action. "
             "EXECUTE is not evidence that an earlier or approved plan exists. Refer "
             "to such a plan only when the current Human input or supplied evidence "
             "actually establishes it; otherwise name only the requested action. "
-            "This view contains no evidence that execution has started or succeeded, "
-            "and grants no permission to mutate Work or replace an authority decision. "
+            "Action wording must match repository_acquisition_state exactly: say an "
+            "acquisition is running only for RUNNING, ready only for READY, and waiting "
+            "for authorization only for WAITING_FOR_AUTHORIZATION. A missing state is "
+            "not evidence that execution started or succeeded; when it is missing, "
+            "there is no evidence that execution has started or succeeded. This expression view "
+            "must also bind active-action wording to execution_operation_kind: "
+            "DESIGN_ARTIFACT may describe active design-document production and "
+            "IMPLEMENTATION may describe active coding; a missing or different kind "
+            "forbids claiming that operation is active. A persisted active operation "
+            "also outranks conversational plans: do not describe another operation as "
+            "the current or immediate next action while it is active. "
+            "This expression view grants no permission to mutate Work or replace an "
+            "authority decision. "
             "Use semantic_truth_to_preserve as settled governed input; do not derive a "
             "new meaning from the original phrase or silently substitute layout, scope, "
             "cardinality, or other implementation assumptions."

@@ -16,6 +16,7 @@ from spg.domain.preparation import ContextSemanticRole
 from spg.domain.engineering_semantics import SemanticFactReference
 from spg.domain.planning import ProductionPlanProposal
 from spg.domain.planning import ProductionPlanArtifactTarget
+from spg.domain.production_intelligence import TaskMode
 from spg.domain.refinement import RepositoryChangeProposal
 from spg.domain.steering import RealityReference, SteeringAttentionReason
 
@@ -248,6 +249,9 @@ class SteeringProductionRequest(BaseModel):
     constraints: tuple[str, ...] = ()
     engineering_semantic_facts: tuple[SemanticFactReference, ...] = ()
     verification_expectation: str = Field(min_length=1)
+    task_mode: TaskMode = TaskMode.GENERAL
+    required_prerequisites: tuple[str, ...] = ()
+    prerequisite_evidence: tuple[str, ...] = ()
 
 
 class SteeringProductionAdmission(BaseModel):
@@ -325,6 +329,7 @@ class AttentionItem(BaseModel):
     governed_subject_ref: str
     steering_reason: SteeringAttentionReason | None = None
     recommendation: str | None = None
+    conversation_prompt: str | None = None
     alternatives: tuple[str, ...] = ()
     trade_offs: tuple[str, ...] = ()
     expected_impact: str | None = None

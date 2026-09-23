@@ -1321,6 +1321,7 @@ class AttentionResponse(ApiDto):
     governed_subject_ref: str
     steering_reason: SteeringAttentionReason | None = None
     recommendation: str | None = None
+    conversation_prompt: str | None = None
     alternatives: tuple[str, ...] = ()
     trade_offs: tuple[str, ...] = ()
     expected_impact: str | None = None
@@ -1344,6 +1345,7 @@ class AttentionResponse(ApiDto):
             governed_subject_ref=attention.governed_subject_ref,
             steering_reason=attention.steering_reason,
             recommendation=attention.recommendation,
+            conversation_prompt=attention.conversation_prompt,
             alternatives=attention.alternatives,
             trade_offs=attention.trade_offs,
             expected_impact=attention.expected_impact,

@@ -12,6 +12,10 @@ from spg.infrastructure.persistence.database import (
 )
 from spg.infrastructure.persistence.metadata import metadata
 from spg.infrastructure.persistence.control_room_schema import work_agreement_events
+from spg.infrastructure.persistence.connector_schema import (
+    capability_gaps,
+    connector_capabilities,
+)
 from spg.infrastructure.persistence.native_execution_schema import (
     native_execution_tables,
 )
@@ -40,6 +44,8 @@ __all__ = [
     "configured_database_url",
     "metadata",
     "work_agreement_events",
+    "connector_capabilities",
+    "capability_gaps",
     "native_execution_tables",
     "product_tables",
     "runtime_tables",
