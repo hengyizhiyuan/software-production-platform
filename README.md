@@ -2,9 +2,9 @@
 
 This repository contains the controlled implementation of the Software Production Governor Runtime.
 
-The current implementation includes the FVS-1 project and persistence foundations plus the S1–S5 governed Runtime path: Context Package and Attempt preparation, isolated dispatch, Provider Report, independent Production Observation, Completion and Verification, Candidate governance, authorized Repository Integration, Runtime Commit, and recovery foundations. R4-B verified maintenance-lineage recovery is implemented and has focused/affected validation plus Architecture Lead review PASS; complete R4 qualification and real maintenance recovery are deferred from the MVP critical path.
+The current implementation runs governed Work through Watt's API-key-native Executor, Tool Host, Production Environment, independent observation, verification, Candidate governance, authorized integration, and durable recovery. The 8+1 autonomous production behavior is implemented through those existing owners; Human authority remains required for sensitive access, Delivery Authorization, and final acceptance. Earlier FVS/R4 milestones remain historical evidence, not alternate execution paths.
 
-The repository includes the Goal / Work application flow, its minimal HTTP API, a functional same-origin Web UI, and a local Docker product runtime. The current delivery priority is defined by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): validate the integrated local MVP before Linux deployment and systematic self-dogfood.
+The repository includes the Goal / Work application flow, its HTTP API, a same-origin Control Room, and a local Docker product runtime. The [historical MVP scope calibration](docs/roadmap/mvp-scope-calibration.md) remains available for provenance; current qualification uses the native runtime and the executable evaluation gate below.
 
 ## Local Docker product
 
@@ -37,9 +37,8 @@ value and must not be reused outside this local environment.
 The default WIC and Conversation path uses the DeepSeek Responses API with
 `deepseek-flash` at low reasoning effort. Configure `SPG_DEEPSEEK_API_KEY` in the
 ignored local environment. Human-facing realization remains independently
-selectable through `SPG_CONVERSATION_PROVIDER_ADAPTER` and
-`SPG_CONVERSATION_PROVIDER_MODEL`; `codex-sdk` remains an explicit rollback
-adapter and is not imported by the default path.
+configurable through `SPG_CONVERSATION_PROVIDER_ADAPTER=deepseek` and
+`SPG_CONVERSATION_PROVIDER_MODEL`. There is no coding-agent SDK fallback.
 
 Human collaboration retains WIC interpretation (including Design Intent Framing)
 and Conversation expression as separate responsibilities. Pre-Work conversations
@@ -76,32 +75,26 @@ reload restores drafts but pauses pending delivery. This uses tab-local browser
 storage, with uncertain sends never automatically retried. Model waiting remains
 variable, and the default model/effort configuration is unchanged.
 
-For the explicitly governed local Codex E2E only, set
-`SPG_CODEX_AUTH_FILE_HOST` in the ignored `.env` file to the absolute existing
-`auth.json` cache file, then use the optional override:
+For governed API-key-native execution, configure the DeepSeek key in the
+ignored local environment and run the native profile. The optional E2E
+overlay selects contract-driven verification on top of that profile:
 
-    docker compose -f compose.yaml -f compose.e2e.yaml up -d --build
-    docker compose -f compose.yaml -f compose.e2e.yaml exec -T app python /app/docker/e2e_preflight.py
+    docker compose -f compose.yaml -f compose.native-executor.yaml -f compose.e2e.yaml --profile provider up -d --build
 
-The override installs the locked `codex-executor` and `test` dependency extras;
-the latter is required by independent typed `PYTEST_TARGET` Verification. A dedicated
-Docker named volume provides the Linux-native mutable `CODEX_HOME`; only the
-exact authorized authentication cache is exposed as a read-only Compose secret
-and linked into that state root. The preflight starts and initializes the Codex
-app-server and its SQLite state without creating a Provider Thread or Turn.
-Separate persistent E2E database/runtime volumes remain in use. Credentials are
-not copied into the image or transported through SPG product/domain contracts.
-This local topology does not claim OS/container-level credential isolation.
+The Native Executor owns model/tool execution; the tool host and Production
+Environment constrain side effects. Provider failures are recorded as failures,
+not routed to an alternate coding-agent runtime. Never mount host model or Git
+credentials into an untrusted workspace.
 
-The E2E profile explicitly selects the Codex SDK public `full-access` sandbox
-policy because the Dedicated Executor already runs inside the isolated Docker
-boundary and nested Linux namespace creation is unavailable there. This only
-disables Codex's nested command sandbox for that E2E profile: the non-root
-container, exact Attempt worktree, separate authoritative repository,
-credential filtering, authorized-path contract, and independent Production
-Observation remain mandatory. The default product and SDK configuration remain
-`workspace-write`. Production-grade sandbox hardening remains
-`DEFERRED_BY_MVP`; the E2E setting is not a production security claim.
+The normal app launcher activates only the committed Current Trusted Baseline.
+For pre-commit qualification of an image built from a dirty worktree, append
+`compose.uncommitted-qualification.yaml` to the native Compose files and use a
+distinct Compose project and
+`SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_WORKSPACE_VOLUME` value. This
+explicit profile still creates/migrates its isolated PostgreSQL database and
+checks the repository foundation, but serves the image's current package
+without claiming an admitted application revision. It is not a production or
+Human Acceptance profile; omit the overlay for ordinary startup.
 
 The first real MVP-E2E-1A Attempt remains blocked historical evidence:
 Provider Outcome is `UNKNOWN`, Production Reality is `NONE`, and no Provider
@@ -118,10 +111,18 @@ The supported local workflow uses uv:
 
     uv sync --extra test
 
-For a Dedicated Executor host using the Codex Provider, select the
-Provider-specific profile explicitly in addition to the test profile:
+The local test profile uses the same API-key-native dependency set:
 
-    uv sync --locked --extra test --extra codex-executor
+    uv sync --locked --extra test
+
+Before promoting a candidate Watt version, set `SPG_TEST_DATABASE_URL` to an
+isolated migrated PostgreSQL test database and run:
+
+    uv run spg-evaluate --report evaluation-result.json
+
+The command executes the domain-separated acceptance corpus and exits nonzero
+if a critical case fails or the database-backed cases are unavailable. It
+does not replace full regression, Guardian evidence, or Human Acceptance.
 
 Run the CLI:
 

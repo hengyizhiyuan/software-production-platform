@@ -40,6 +40,7 @@ from spg.domain.native_execution import (
     NativeExecutionConflict,
     PWUContractVersionRecord,
     QueueCondition,
+    RepairabilityClassification,
     RecoveryClassification,
     ResourceEnvelope,
     SourceMember,
@@ -53,7 +54,7 @@ from spg.domain.native_execution import (
     WorkspaceMount,
     canonical_digest,
 )
-from spg.executor.kernel import NativeExecutorKernel
+from spg.executor.kernel import NativeExecutorKernel, NullKernelAudit
 from spg.executor.context import NativeContextAssembler, NativeContextCapacityError
 from spg.executor.recovery import NativeRecoveryClassifier
 from spg.executor.tools import NativeToolRegistry, ToolDefinition, _within
@@ -73,7 +74,7 @@ from spg.infrastructure.executor_runtime.local_storage import (
 from spg.infrastructure.executor_runtime.native_compatibility_executor import (
     NativeQueuedExecutorCapability,
 )
-from spg.infrastructure.executor_runtime.runtime_ports import DurableCheckpointPort
+from spg.infrastructure.executor_runtime.runtime_ports import DurableCheckpointPort, DurableKernelAudit
 from spg.infrastructure.executor_runtime.tool_host import LocalNativeToolHost
 from spg.infrastructure.executor_runtime.worker import NativeExecutionWorker
 from spg.tool_host_api import create_tool_host_application
@@ -671,6 +672,85 @@ def test_kernel_repairs_one_observed_rejected_provider_decision_without_replay()
     assert len(checkpoints.items) == 2
 
 
+def test_kernel_orients_from_bounded_durable_repair_history() -> None:
+    binding, contract = _binding()
+    incident = {
+        "event_id": "prior-event",
+        "failure_family": "PROVIDER_DECISION_VALIDATION",
+        "failure_signature": "TOOL_ARGUMENTS_NOT_OBJECT",
+        "status": "RECOVERED",
+    }
+
+    class HistoryAudit(NullKernelAudit):
+        def recent_repair_reality(self):
+            return (incident,)
+
+    inference = ScriptedInferenceAdapter((InferenceResponse(
+        action=InferenceAction.RESULT_READY,
+        summary="oriented from prior repair",
+        working_plan=_plan(2),
+        result_claim={"output_vector": {"files": []}, "evidence_ids": []},
+        residual_obligations=(),
+    ),))
+    result = asyncio.run(NativeExecutorKernel(
+        inference=inference,
+        tools=NativeToolRegistry(()),
+        checkpoints=_Checkpoints(),
+        audit=HistoryAudit(),
+    ).run(binding=binding, contract=contract, worker_epoch=1, working_plan=_plan()))
+
+    assert result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+    history = next(
+        fact for fact in inference.requests[0].context_facts
+        if fact["fact_type"] == "RECENT_SELF_REFINE"
+    )
+    assert history["events"] == [incident]
+    assert "not permission" in history["rule"]
+
+
+def test_resumed_kernel_retains_persisted_evidence_before_mutation_boundary() -> None:
+    binding, contract = _binding()
+    attempted_writes = []
+
+    class PendingEvidenceAudit(NullKernelAudit):
+        def recent_repair_reality(self):
+            return ({
+                "event_id": "pending-compiler-diagnosis",
+                "operation_id": str(binding.attempt_id),
+                "failure_family": "DEPENDENCY_BUILD_FAILURE",
+                "repairability": RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE.value,
+                "status": "OPEN",
+            },)
+
+    async def write_file(request):
+        attempted_writes.append(request)
+        return ToolExecutionResult(
+            delivery_id=request.delivery_id, tool_identity="file.write",
+            condition=EffectCondition.SETTLED, output={}, output_digest=canonical_digest({}),
+        )
+
+    inference = ScriptedInferenceAdapter((InferenceResponse(
+        action=InferenceAction.CONTINUE,
+        summary="try to mutate before reading diagnostic source",
+        working_plan=_plan(2),
+        tool_calls=(ToolCallProposal(
+            proposal_index=0, tool_identity="file.write",
+            arguments={"path": "src/main.py", "content": "changed"},
+        ),), residual_obligations=("test",),
+    ),))
+    result = asyncio.run(NativeExecutorKernel(
+        inference=inference,
+        tools=NativeToolRegistry((ToolDefinition(
+            "file.write", "1", "write source", {}, "LOCAL_MUTATION", write_file,
+        ),)),
+        checkpoints=_Checkpoints(), audit=PendingEvidenceAudit(),
+    ).run(binding=binding, contract=contract, worker_epoch=1, working_plan=_plan()))
+
+    assert result.terminal_outcome is AttemptTerminalOutcome.BOUNDARY_CROSSING_REQUIRED
+    assert attempted_writes == []
+    assert inference.requests[0].available_tools == ()
+
+
 def test_kernel_checkpoints_safe_provider_validation_fingerprint() -> None:
     binding, contract = _binding()
 
@@ -860,6 +940,90 @@ def test_context_compaction_preserves_exact_invariants_and_evidence_identity() -
     assert checkpoint_fact["semantic_manifest"]["compacted"] is True
     assert request.previous_results[0]["output"]["compacted"] is True
     assert request.previous_results[0]["output_digest"] == previous.output_digest
+
+
+def test_diagnostic_context_selects_bounded_log_excerpt_and_retains_receipt_identity() -> None:
+    binding, contract = _binding()
+    stderr = "compiler warning\n" + "diagnostic detail\n" * 400
+    output = {"stderr": stderr, "diagnostic_code": "E0425", "path": "src/main.rs"}
+    previous = ToolExecutionResult(
+        delivery_id=uuid4(), tool_identity="build.run",
+        condition=EffectCondition.FAILED, output=output,
+        output_digest=canonical_digest(output), evidence=(),
+    )
+
+    request = NativeContextAssembler().assemble(
+        binding=binding, contract=contract, working_plan=_plan(),
+        step_sequence=2, available_tools=(), previous_results=(previous,),
+    )
+    selected = request.previous_results[0]["output"]
+    assert selected["diagnostic_code"] == "E0425"
+    assert selected["path"] == "src/main.rs"
+    assert selected["stderr"]["original_bytes"] == len(stderr.encode("utf-8"))
+    assert selected["stderr"]["selected_tail"] == stderr[-2048:]
+    assert selected["stderr"]["full_receipt_digest"] == previous.output_digest
+    assert stderr not in request.model_dump_json()
+
+
+def test_repairability_requires_exact_oracle_and_admitted_write_scope() -> None:
+    binding, _ = _binding()
+    payload = {"task_contract": {
+        "acceptance_meaning": ["tax = 6"],
+        "authority_lineage": ["human:explicit-tax"],
+        "scope": ["src"],
+    }}
+    output = {"assertion": {"id": "tax", "expected": 6, "observed": 13}}
+    classification, _ = DurableKernelAudit._classify_repairability(
+        payload, binding=binding, tool="test.run",
+        condition=EffectCondition.FAILED, output=output,
+    )
+    assert classification is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+
+    missing_observation, _ = DurableKernelAudit._classify_repairability(
+        payload, binding=binding, tool="test.run",
+        condition=EffectCondition.FAILED,
+        output={"assertion": {"id": "tax", "expected": 6}},
+    )
+    assert missing_observation is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+
+    outside_scope = {"task_contract": {**payload["task_contract"], "scope": ["private/secrets"]}}
+    classification, _ = DurableKernelAudit._classify_repairability(
+        outside_scope, binding=binding, tool="test.run",
+        condition=EffectCondition.FAILED, output=output,
+    )
+    assert classification is RepairabilityClassification.REQUIRES_HUMAN_DECISION
+
+    classification, _ = DurableKernelAudit._classify_repairability(
+        payload, binding=binding, tool="build.run",
+        condition=EffectCondition.FAILED,
+        output={"diagnostic_code": "E0425", "path": "src/main.rs"},
+    )
+    assert classification is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+
+
+def test_repair_orientation_is_compacted_before_exact_contract_reality() -> None:
+    binding, contract = _binding()
+    incident = {
+        "event_id": "incident-1",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "a" * 64,
+        "status": "OPEN",
+        "observed_reality": {"large_safe_detail": "x" * 20000},
+    }
+
+    request = NativeContextAssembler(max_request_bytes=6000).assemble(
+        binding=binding, contract=contract, working_plan=_plan(),
+        step_sequence=1, available_tools=(), repair_history=(incident,),
+    )
+
+    assert request.context_facts[0]["payload"] == contract.contract_payload
+    history = next(
+        fact for fact in request.context_facts
+        if fact["fact_type"] == "RECENT_SELF_REFINE"
+    )
+    assert history["compacted"] is True
+    assert history["events"][0]["failure_signature"] == "a" * 64
+    assert "observed_reality" not in history["events"][0]
 
 
 def test_context_declares_single_mount_tool_paths_without_mount_prefix() -> None:
@@ -1902,26 +2066,26 @@ def test_backend_cutover_keeps_active_handle_pinned_and_rollback_is_additive() -
             return self.identity
 
     native = Backend("watt-native", multi=True)
-    legacy = Backend("legacy-codex", multi=False)
-    router = PinnedExecutionBackendRouter((native, legacy), default_backend="watt-native")
+    alternate = Backend("alternate-native", multi=False)
+    router = PinnedExecutionBackendRouter((native, alternate), default_backend="watt-native")
     native_admission = SimpleNamespace(binding=binding)
     native_handle = asyncio.run(router.start(native_admission))
 
-    router.set_default("legacy-codex")
+    router.set_default("alternate-native")
     assert asyncio.run(router.observe(native_handle)) == "watt-native"
     with pytest.raises(NativeExecutionConflict, match="pinned"):
         asyncio.run(router.start(native_admission))
 
-    legacy_binding = binding.model_copy(
-        update={"backend_implementation": "legacy-codex", "attempt_id": uuid4()}
+    alternate_binding = binding.model_copy(
+        update={"backend_implementation": "alternate-native", "attempt_id": uuid4()}
     )
-    legacy_handle = asyncio.run(
-        router.start(SimpleNamespace(binding=legacy_binding))
+    alternate_handle = asyncio.run(
+        router.start(SimpleNamespace(binding=alternate_binding))
     )
-    assert legacy_handle.backend_identity == "legacy-codex"
+    assert alternate_handle.backend_identity == "alternate-native"
 
     router.set_default("watt-native")
-    assert asyncio.run(router.observe(legacy_handle)) == "legacy-codex"
+    assert asyncio.run(router.observe(alternate_handle)) == "alternate-native"
     assert asyncio.run(router.observe(native_handle)) == "watt-native"
 
 

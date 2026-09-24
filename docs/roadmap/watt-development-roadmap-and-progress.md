@@ -4,6 +4,12 @@ Status: **PROGRAM-LEVEL NAVIGATION / CURRENT REALITY**
 
 Last updated: **2026-09-13**
 
+Runtime reality update (2026-09-24): Watt's active execution route is Native
+Executor plus API-key model providers. References below to a Codex SDK adapter
+describe historical milestone evidence only; they are not a current deployment,
+compatibility, or rollback option. Autonomous Production Intelligence 8+1 is
+not yet accepted.
+
 This document maintains one high-level view of Watt's current development
 phase, completed capability foundations, active findings, near-term priorities,
 and future capability backlog. It is a navigation and alignment document. It

@@ -21,6 +21,9 @@ _CREATE_BRANCH = re.compile(
 )
 _NON_COMMAND = re.compile(r"(?:如何|怎么|怎样|为什么|不要|别|不需要|how (?:do|can)|don't|do not)", re.IGNORECASE)
 BRANCH_FACT_SUBJECTS = frozenset({
+    "repository.branch_name",
+})
+BRANCH_EXTRACTION_SUBJECTS = frozenset({
     "repository.branch", "repository.branch_name", "repository.branch.name",
 })
 _EXACT_CREATE_COMMAND = re.compile(
@@ -39,24 +42,19 @@ def exact_branch_creation_command(content: str) -> str | None:
     return None if match is None else match.group("name")
 
 
-def _cites_explicit_branch_command(
-    fact: EngineeringSemanticFact,
-    record_for_id: Callable[[UUID], InteractionRecord | None],
-) -> bool:
+def explicit_human_branch_command(content: str, proposed_branch: str) -> bool:
+    """Validate an extracted branch against the cited Human command once, at binding."""
+
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]{0,127}", proposed_branch):
+        return False
     branch = re.compile(
-        rf"(?<![A-Za-z0-9/._-]){re.escape(fact.value)}(?![A-Za-z0-9/._-])"
+        rf"(?<![A-Za-z0-9/._-]){re.escape(proposed_branch)}(?![A-Za-z0-9/._-])"
     )
-    for record_id in fact.provenance.source_record_ids:
-        record = record_for_id(record_id)
-        if (
-            record is not None
-            and record.actor is InteractionActor.HUMAN
-            and branch.search(record.content)
-            and _CREATE_BRANCH.search(record.content)
-            and not _NON_COMMAND.search(record.content)
-        ):
-            return True
-    return False
+    return bool(
+        branch.search(content)
+        and _CREATE_BRANCH.search(content)
+        and not _NON_COMMAND.search(content)
+    )
 
 
 def governed_branch_creation_target(
@@ -64,14 +62,13 @@ def governed_branch_creation_target(
     *,
     record_for_id: Callable[[UUID], InteractionRecord | None],
 ) -> str | None:
-    """Accept the canonical action fact or an equivalent cited Human command.
+    """Accept only the current canonical branch action and target facts.
 
-    Provider vocabulary such as ``branch_kind=new`` or ``repository.branch`` is
-    advisory on its own. It becomes executable only when the cited Human record
-    explicitly commands creation of the same branch. Historical Work facts are
-    not rewritten.
+    Provider vocabulary is normalized at semantic binding. Downstream action
+    selection consumes only the admitted canonical action and target fact.
     """
 
+    del record_for_id
     current = current_semantic_facts(tuple(facts))
     canonical_action = any(
         fact.subject == "repository.branch_action"
@@ -86,12 +83,6 @@ def governed_branch_creation_target(
             or not isinstance(fact.value, str)
         ):
             continue
-        if (
-            fact.subject == "repository.branch_name"
-            and fact.qualifiers.get("state") == "to_be_created"
-            and canonical_action
-        ):
-            return fact.value
-        if _cites_explicit_branch_command(fact, record_for_id):
+        if fact.qualifiers.get("state") == "to_be_created" and canonical_action:
             return fact.value
     return None

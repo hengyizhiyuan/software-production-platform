@@ -1,15 +1,12 @@
-"""Codex adapters for WIC semantics and dedicated Human-facing conversation."""
+"""Provider-neutral WIC wire contracts and collaboration pipeline."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from contextlib import AbstractContextManager
 from copy import deepcopy
 from dataclasses import dataclass
 from inspect import Parameter, signature
 import json
-from queue import Empty, Queue
-from threading import Thread
 from time import monotonic
 from typing import Any
 
@@ -20,10 +17,7 @@ from spg.application.conversation import (
     WattNativeConversationContextAssembler,
     conversation_response_policy,
 )
-from spg.application.guided_design import (
-    design_schema_by_identity,
-    design_schema_registry,
-)
+from spg.application.guided_design import design_schema_by_identity, design_schema_registry
 from spg.domain.response_contract import ResponseIntent
 from spg.application.production_intelligence import default_system_capability_reality
 from spg.application.response_contract_expression import (
@@ -59,20 +53,6 @@ from spg.domain.interaction import (
     WorkFocusClassification,
     WorkImpactDisposition,
 )
-from spg.domain.wic_response import (
-    GovernedResponseEnvelope,
-    GovernedResponseRealization,
-)
-
-
-CodexFactory = Callable[[], AbstractContextManager[Any]]
-INTERRUPT_GRACE_SECONDS = 5.0
-
-
-def _enum_value(value: object) -> str:
-    candidate = getattr(value, "value", value)
-    return str(candidate).lower()
-
 
 def _safe_validation_summary(error: BaseException) -> str:
     """Expose schema locations/types without echoing Provider input or secrets."""
@@ -106,21 +86,6 @@ def _provider_strict_output_schema(schema: dict[str, Any]) -> dict[str, Any]:
 
     normalize(normalized)
     return normalized
-
-
-def _default_codex_factory() -> AbstractContextManager[Any]:
-    """Load the legacy SDK only when that explicit rollback adapter is used."""
-
-    from openai_codex import Codex
-
-    return Codex()
-
-
-def _codex_controls() -> tuple[Any, Any]:
-    from openai_codex import ApprovalMode, Sandbox
-
-    return ApprovalMode, Sandbox
-
 
 class _InteractionProviderMeaning(InterpretationMeaning):
     """Strict wire shape over unchanged domain defaults."""
@@ -226,19 +191,7 @@ class _CoalescedInteractionProviderPayload(_ConversationProviderPayload):
 
 
 @dataclass(frozen=True)
-class _StreamingTurnResult:
-    status: object
-    error: object | None
-    final_response: str
 
-
-@dataclass(frozen=True)
-class _StreamingTerminal:
-    result: _StreamingTurnResult | None = None
-    timed_out: bool = False
-
-
-@dataclass(frozen=True)
 class ConversationPipelineEvidence:
     """Ephemeral Provider provenance for validation, never product truth."""
 
@@ -282,7 +235,6 @@ class ConversationPipelineEvidence:
     semantic_retry_count: int | None = None
     conversation_retry_count: int | None = None
     coalesced_retry_count: int | None = None
-
 
 def _compact_interaction_basis(
     basis: InteractionInterpretationInput, *, coalesced: bool = False
@@ -418,188 +370,8 @@ class _JsonStringFieldStream:
             index += 2
         return "".join(decoded)
 
-
-def _wait_for_streaming_terminal(
-    turn: Any,
-    *,
-    timeout_seconds: float | None,
-    on_response_delta: Callable[[str], None] | None,
-    response_field: str | None,
-    on_pipeline_stage: Callable[[str], None] | None = None,
-) -> _StreamingTerminal:
-    completed: Queue[tuple[str, Any]] = Queue(maxsize=1)
-
-    def consume() -> None:
-        raw_response: list[str] = []
-        final_item_text: str | None = None
-        completed_turn: object | None = None
-        extractor = (
-            None if response_field is None else _JsonStringFieldStream(response_field)
-        )
-        response_closed = False
-
-        def observe_response_complete(probe: _JsonStringFieldStream) -> None:
-            nonlocal response_closed
-            if probe.complete and not response_closed:
-                response_closed = True
-                if on_pipeline_stage is not None:
-                    on_pipeline_stage("natural_response_completed")
-
-        try:
-            for notification in turn.stream():
-                if notification.method == "item/agentMessage/delta":
-                    if on_pipeline_stage is not None:
-                        on_pipeline_stage("provider_first_token")
-                    delta = str(notification.payload.delta)
-                    raw_response.append(delta)
-                    if extractor is not None:
-                        response_delta = extractor.feed(delta)
-                        if response_delta and on_response_delta is not None:
-                            on_response_delta(response_delta)
-                        observe_response_complete(extractor)
-                elif notification.method == "item/completed":
-                    item = notification.payload.item
-                    if getattr(item, "type", None) == "agentMessage":
-                        final_item_text = str(item.text)
-                        if response_field is not None and not response_closed:
-                            final_probe = _JsonStringFieldStream(response_field)
-                            final_probe.feed(final_item_text)
-                            observe_response_complete(final_probe)
-                elif notification.method == "turn/completed":
-                    completed_turn = notification.payload.turn
-                    if (
-                        on_pipeline_stage is not None
-                        and _enum_value(completed_turn.status) == "completed"
-                        and completed_turn.error is None
-                    ):
-                        on_pipeline_stage("semantic_envelope_completed")
-            if completed_turn is None:
-                raise RuntimeError("turn completed event not received")
-            completed.put(
-                (
-                    "result",
-                    _StreamingTurnResult(
-                        status=completed_turn.status,
-                        error=completed_turn.error,
-                        final_response=final_item_text or "".join(raw_response),
-                    ),
-                )
-            )
-        except Exception as error:
-            completed.put(("error", error))
-
-    worker = Thread(
-        target=consume,
-        name="spg-conversation-codex-stream",
-        daemon=True,
-    )
-    worker.start()
-    try:
-        kind, value = completed.get(timeout=timeout_seconds)
-    except Empty:
-        try:
-            turn.interrupt()
-        except Exception:
-            pass
-        try:
-            completed.get(timeout=INTERRUPT_GRACE_SECONDS)
-        except Empty:
-            pass
-        return _StreamingTerminal(timed_out=True)
-    if kind == "error":
-        raise value
-    return _StreamingTerminal(result=value)
-
-
-class CodexSdkInteractionSemanticCapability:
-    """WIC-owned advisory semantic interpretation, without response wording."""
-
-    def __init__(
-        self,
-        *,
-        repository_location: str,
-        codex_factory: CodexFactory | None = None,
-        model: str | None = None,
-        reasoning_effort: str | None = None,
-        timeout_seconds: float | None = None,
-    ) -> None:
-        self.repository_location = repository_location
-        self.codex_factory = codex_factory or _default_codex_factory
-        self.model = model
-        self.reasoning_effort = reasoning_effort
-        self.timeout_seconds = timeout_seconds
-        self.last_thread_id: str | None = None
-        self.last_turn_id: str | None = None
-        self.last_prompt_characters: int | None = None
-
-    def interpret_semantics(
-        self, basis: InteractionInterpretationInput
-    ) -> InteractionSemanticCandidate:
-        self.last_thread_id = None
-        self.last_turn_id = None
-        instruction = self.instruction(basis)
-        self.last_prompt_characters = len(instruction)
-        ApprovalMode, Sandbox = _codex_controls()
-        with self.codex_factory() as codex:
-            thread = codex.thread_start(
-                approval_mode=ApprovalMode.deny_all,
-                cwd=self.repository_location,
-                ephemeral=True,
-                model=self.model,
-                sandbox=Sandbox.read_only,
-            )
-            turn = thread.turn(
-                instruction,
-                approval_mode=ApprovalMode.deny_all,
-                cwd=self.repository_location,
-                effort=self.reasoning_effort,
-                model=self.model,
-                output_schema=self.output_schema(),
-                sandbox=Sandbox.read_only,
-            )
-            terminal = _wait_for_streaming_terminal(
-                turn,
-                timeout_seconds=self.timeout_seconds,
-                on_response_delta=None,
-                response_field=None,
-            )
-        if terminal.timed_out or terminal.result is None:
-            raise InteractionInvariantViolation(
-                "WIC semantic Provider did not complete in its bounded Turn"
-            )
-        result = terminal.result
-        if _enum_value(result.status) != "completed" or result.error is not None:
-            raise InteractionInvariantViolation(
-                "WIC semantic Provider did not return a completed result"
-            )
-        try:
-            payload = _InteractionSemanticProviderPayload.model_validate_json(
-                result.final_response.strip()
-            )
-        except ValidationError as error:
-            safe_errors = [
-                {
-                    "location": [str(item) for item in detail["loc"]],
-                    "message": detail["msg"],
-                    "type": detail["type"],
-                }
-                for detail in error.errors(include_input=False)
-            ]
-            raise InteractionInvariantViolation(
-                "WIC semantic Provider returned an invalid structured result: "
-                + json.dumps(safe_errors, ensure_ascii=False, sort_keys=True)
-            ) from error
-        except (ValueError, TypeError) as error:
-            raise InteractionInvariantViolation(
-                "WIC semantic Provider returned an invalid structured result"
-            ) from error
-        self.last_thread_id = str(thread.id)
-        self.last_turn_id = str(turn.id)
-        return InteractionSemanticCandidate(
-            **payload.model_dump(),
-            provider_identity=f"codex-sdk:semantic-thread:{thread.id}:turn:{turn.id}",
-            model_identity=self.model,
-        )
+class InteractionSemanticContract:
+    """Canonical WIC semantic schema and instruction."""
 
     @staticmethod
     def output_schema() -> dict[str, Any]:
@@ -894,107 +666,8 @@ class CodexSdkInteractionSemanticCapability:
             + json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         )
 
-
-class CodexSdkConversationProvider:
-    """Dedicated replaceable Provider for Watt-to-Human language realization."""
-
-    def __init__(
-        self,
-        *,
-        repository_location: str,
-        codex_factory: CodexFactory | None = None,
-        model: str | None = None,
-        reasoning_effort: str | None = None,
-        timeout_seconds: float | None = None,
-    ) -> None:
-        self.repository_location = repository_location
-        self.codex_factory = codex_factory or _default_codex_factory
-        self.model = model
-        self.reasoning_effort = reasoning_effort
-        self.timeout_seconds = timeout_seconds
-        self.last_thread_id: str | None = None
-        self.last_turn_id: str | None = None
-        self.last_prompt_characters: int | None = None
-
-    def respond(
-        self,
-        context: ConversationContext,
-        collaboration: StructuredCollaborationResult,
-    ) -> ConversationResponseCandidate:
-        return self._respond(context, collaboration, on_response_delta=None)
-
-    def respond_stream(
-        self,
-        context: ConversationContext,
-        collaboration: StructuredCollaborationResult,
-        *,
-        on_response_delta: Callable[[str], None],
-    ) -> ConversationResponseCandidate:
-        return self._respond(
-            context,
-            collaboration,
-            on_response_delta=on_response_delta,
-        )
-
-    def _respond(
-        self,
-        context: ConversationContext,
-        collaboration: StructuredCollaborationResult,
-        *,
-        on_response_delta: Callable[[str], None] | None,
-    ) -> ConversationResponseCandidate:
-        self.last_thread_id = None
-        self.last_turn_id = None
-        instruction = self.instruction(context, collaboration)
-        self.last_prompt_characters = len(instruction)
-        ApprovalMode, Sandbox = _codex_controls()
-        with self.codex_factory() as codex:
-            thread = codex.thread_start(
-                approval_mode=ApprovalMode.deny_all,
-                cwd=self.repository_location,
-                ephemeral=True,
-                model=self.model,
-                sandbox=Sandbox.read_only,
-            )
-            turn = thread.turn(
-                instruction,
-                approval_mode=ApprovalMode.deny_all,
-                cwd=self.repository_location,
-                effort=self.reasoning_effort,
-                model=self.model,
-                output_schema=self.output_schema(),
-                sandbox=Sandbox.read_only,
-            )
-            terminal = _wait_for_streaming_terminal(
-                turn,
-                timeout_seconds=self.timeout_seconds,
-                on_response_delta=on_response_delta,
-                response_field="natural_response",
-            )
-        if terminal.timed_out or terminal.result is None:
-            raise InteractionInvariantViolation(
-                "Conversation Provider did not complete in its bounded Turn"
-            )
-        result = terminal.result
-        if _enum_value(result.status) != "completed" or result.error is not None:
-            raise InteractionInvariantViolation(
-                "Conversation Provider did not return a completed result"
-            )
-        try:
-            payload = _ConversationProviderPayload.model_validate_json(
-                result.final_response.strip()
-            )
-        except (ValueError, TypeError) as error:
-            raise InteractionInvariantViolation(
-                "Conversation Provider returned an invalid Human-facing result"
-            ) from error
-        self.last_thread_id = str(thread.id)
-        self.last_turn_id = str(turn.id)
-        return ConversationResponseCandidate(
-            content=payload.natural_response,
-            provider_identity=f"codex-sdk:conversation-thread:{thread.id}:turn:{turn.id}",
-            model_identity=self.model,
-        )
+class ConversationContract:
+    """Canonical Human-facing response schema and instruction."""
 
     @staticmethod
     def output_schema() -> dict[str, Any]:
@@ -1015,7 +688,7 @@ class CodexSdkConversationProvider:
             "You are Watt's dedicated Human-facing Conversation Provider. Turn the "
             "supplied structured collaboration result and bounded conversation context "
             "into one natural response. "
-            + CodexSdkConversationProvider.response_policy()
+            + ConversationContract.response_policy()
             + " Return JSON only with natural_response."
             + "\n\nBounded Conversation Context:\n"
             + json.dumps(
@@ -1030,182 +703,28 @@ class CodexSdkConversationProvider:
         )
 
 
-class CodexSdkGovernedResponseRealizer:
-    """Codex transport for expression-only realization of governed WIC semantics."""
-
-    provider_identity = "codex-sdk:governed-realizer"
+class WorkInteractionPipeline:
+    """Provider-neutral WIC semantic and conversation composition."""
 
     def __init__(
-        self,
-        *,
-        repository_location: str,
-        codex_factory: CodexFactory,
-        model: str | None,
-        reasoning_effort: str | None,
-        timeout_seconds: float | None,
-    ) -> None:
-        self.repository_location = repository_location
-        self.codex_factory = codex_factory
-        self.model_identity = model
-        self.reasoning_effort = reasoning_effort
-        self.timeout_seconds = timeout_seconds
-        self.last_thread_id: str | None = None
-        self.last_turn_id: str | None = None
-
-    def realize_stream(
-        self,
-        envelope: GovernedResponseEnvelope,
-        *,
-        on_response_delta: Callable[[str], None],
-    ) -> GovernedResponseRealization:
-        instruction = (
-            "You are Watt's Governed Response Realizer. The supplied envelope is "
-            "already governed. Express it naturally without changing intent, facts, "
-            "constraints, Work boundaries, readiness, authority, corrections, or its "
-            "Human-owned decisions. Interaction Strategy owns only the conversational "
-            "move, altitude, and whether a question is useful; follow it exactly. Treat "
-            "governed_content as semantic material rather than wording to echo. Show "
-            "understanding by advancing the thinking, not by paraphrasing the Human. "
-            "Lead with the answer, judgment, useful frame, comparison, or proposal named "
-            "by primary_move. When answer_first is true, answer before framing or asking. "
-            "When candidate_first is true, contribute a concrete, low-commitment candidate "
-            "before any question. Stay at next_conversational_granularity. If question_allowed "
-            "is false, ask no question. If true, ask at most max_questions and follow "
-            "question_guidance. A selected_question is governed input but Interaction "
-            "Strategy decides whether it should be visible this turn. Never emit "
-            "forbidden_claims, narrate internal workflow, or add a production decision. "
-            "Use concise, natural language unless depth is needed. Return JSON only with "
-            "natural_response.\n\n"
-            + response_contract_expression_guidance(envelope.response_contract)
-            + json.dumps(
-                envelope.model_dump(mode="json"),
-                ensure_ascii=False,
-                sort_keys=True,
-                separators=(",", ":"),
-            )
-        )
-        if envelope.response_contract is not None:
-            instruction = governed_contract_realizer_instruction(envelope)
-        ApprovalMode, Sandbox = _codex_controls()
-        started_at = monotonic()
-        first_delta_seconds: float | None = None
-        stages: dict[str, float] = {}
-
-        def stage(name: str) -> None:
-            stages.setdefault(name, monotonic() - started_at)
-
-        def publish(delta: str) -> None:
-            nonlocal first_delta_seconds
-            if delta.strip() and first_delta_seconds is None:
-                first_delta_seconds = monotonic() - started_at
-            on_response_delta(delta)
-
-        with self.codex_factory() as codex:
-            thread = codex.thread_start(
-                approval_mode=ApprovalMode.deny_all,
-                cwd=self.repository_location,
-                ephemeral=True,
-                model=self.model_identity,
-                sandbox=Sandbox.read_only,
-            )
-            turn = thread.turn(
-                instruction,
-                approval_mode=ApprovalMode.deny_all,
-                cwd=self.repository_location,
-                effort=self.reasoning_effort,
-                model=self.model_identity,
-                output_schema=CodexSdkConversationProvider.output_schema(),
-                sandbox=Sandbox.read_only,
-            )
-            terminal = _wait_for_streaming_terminal(
-                turn,
-                timeout_seconds=self.timeout_seconds,
-                on_response_delta=publish,
-                response_field="natural_response",
-                on_pipeline_stage=stage,
-            )
-        if terminal.timed_out or terminal.result is None:
-            raise InteractionInvariantViolation(
-                "Governed Response Realizer did not complete in its bounded Turn"
-            )
-        result = terminal.result
-        if _enum_value(result.status) != "completed" or result.error is not None:
-            raise InteractionInvariantViolation(
-                "Governed Response Realizer did not return a completed result"
-            )
-        try:
-            payload = _ConversationProviderPayload.model_validate_json(
-                result.final_response.strip()
-            )
-        except (ValueError, TypeError) as error:
-            raise InteractionInvariantViolation(
-                "Governed Response Realizer returned an invalid result"
-            ) from error
-        self.last_thread_id = str(thread.id)
-        self.last_turn_id = str(turn.id)
-        return GovernedResponseRealization(
-            content=payload.natural_response,
-            provider_identity=(
-                f"codex-sdk:governed-realizer-thread:{thread.id}:turn:{turn.id}"
-            ),
-            model_identity=self.model_identity,
-            timing={
-                "request_to_first_text_seconds": first_delta_seconds,
-                "request_to_complete_seconds": monotonic() - started_at,
-                **stages,
-            },
-        )
-
-
-class CodexSdkWorkInteractionCapability:
-    """Keep semantic/expression ownership while coalescing eligible pre-Work transport."""
-
-    def __init__(
-        self,
-        *,
-        repository_location: str,
-        codex_factory: CodexFactory | None = None,
-        model: str | None = None,
+        self, *, repository_location: str, model: str | None = None,
         conversation_model: str | None = None,
         reasoning_effort: str | None = None,
         conversation_reasoning_effort: str | None = None,
-        coalesce_pre_work: bool = True,
         timeout_seconds: float | None = None,
-        semantic_capability: Any | None = None,
-        conversation_provider: Any | None = None,
+        coalesce_pre_work: bool = True,
+        semantic_capability: Any,
+        conversation_provider: Any,
     ) -> None:
         self.repository_location = repository_location
-        self.codex_factory = codex_factory or _default_codex_factory
         self.model = model
         self.reasoning_effort = reasoning_effort
         self.timeout_seconds = timeout_seconds
-        if (semantic_capability is None) != (conversation_provider is None):
-            raise ValueError("Semantic and Conversation providers must be supplied together")
-        self.semantic_capability = semantic_capability or CodexSdkInteractionSemanticCapability(
-            repository_location=repository_location,
-            codex_factory=self.codex_factory,
-            model=model,
-            reasoning_effort=reasoning_effort,
-            timeout_seconds=timeout_seconds,
-        )
-        self.conversation_provider = conversation_provider or CodexSdkConversationProvider(
-            repository_location=repository_location,
-            codex_factory=self.codex_factory,
-            model=conversation_model or model,
-            reasoning_effort=conversation_reasoning_effort,
-            timeout_seconds=timeout_seconds,
-        )
+        self.semantic_capability = semantic_capability
+        self.conversation_provider = conversation_provider
         self.coalesce_pre_work = coalesce_pre_work
-        self.response_composer = ConversationResponseComposer(
-            self.conversation_provider
-        )
-        self.governed_response_realizer = CodexSdkGovernedResponseRealizer(
-            repository_location=repository_location,
-            codex_factory=self.codex_factory,
-            model=conversation_model or model,
-            reasoning_effort=conversation_reasoning_effort,
-            timeout_seconds=timeout_seconds,
-        )
+        self.response_composer = ConversationResponseComposer(conversation_provider)
+        self.governed_response_realizer = None
         self.last_pipeline_evidence: ConversationPipelineEvidence | None = None
         self.last_collaboration_result: StructuredCollaborationResult | None = None
 
@@ -1231,7 +750,7 @@ class CodexSdkWorkInteractionCapability:
     ) -> InteractionAssessmentCandidate:
         if (
             getattr(self.interpret_stream, "__func__", None)
-            is not CodexSdkWorkInteractionCapability.interpret_stream
+            is not WorkInteractionPipeline.interpret_stream
         ):
             return self.interpret_stream(basis, on_response_delta=on_response_delta)
         return self._interpret(
@@ -1340,27 +859,7 @@ class CodexSdkWorkInteractionCapability:
         return self._assessment_candidate(semantic, response)
 
     def pipeline_selection(self, basis: InteractionInterpretationInput) -> tuple[str, str]:
-        """Expose the effective route without running a Provider or changing state."""
-
-        if not self.coalesce_pre_work:
-            return "staged", "explicit_opt_out"
-        if basis.active_work_context is not None:
-            return "staged", "active_work"
-        # Explicit replacements retain their own contracts and must be invoked.
-        if (
-            type(self.semantic_capability) is not CodexSdkInteractionSemanticCapability
-            or type(self.conversation_provider) is not CodexSdkConversationProvider
-            or type(self.response_composer) is not ConversationResponseComposer
-            or type(self.response_composer.context_provider)
-            is not WattNativeConversationContextAssembler
-            or self.response_composer.provider is not self.conversation_provider
-        ):
-            return "staged", "custom_provider_or_context"
-        if self.semantic_capability.model != self.conversation_provider.model:
-            return "staged", "models_differ"
-        if self.semantic_capability.reasoning_effort != self.conversation_provider.reasoning_effort:
-            return "staged", "reasoning_efforts_differ"
-        return "coalesced_pre_work", "native_pre_work_shared_configuration"
+        return "staged", "provider_neutral_pipeline"
 
     @staticmethod
     def _assessment_candidate(
@@ -1387,134 +886,6 @@ class CodexSdkWorkInteractionCapability:
             provider_identity=semantic.provider_identity,
             model_identity=semantic.model_identity,
         )
-
-    def _interpret_coalesced(
-        self,
-        basis: InteractionInterpretationInput,
-        *,
-        on_response_delta: Callable[[str], None] | None,
-        on_pipeline_stage: Callable[[str], None] | None = None,
-    ) -> InteractionAssessmentCandidate:
-        """Share one ephemeral call; admission still waits for the complete envelope."""
-
-        started_at = monotonic()
-        first_response_delta_seconds: float | None = None
-        stages: dict[str, float] = {}
-
-        def stage(name: str) -> None:
-            if name not in stages:
-                stages[name] = monotonic() - started_at
-                if on_pipeline_stage is not None:
-                    on_pipeline_stage(name)
-
-        def publish_delta(delta: str) -> None:
-            nonlocal first_response_delta_seconds
-            if delta.strip() and first_response_delta_seconds is None:
-                first_response_delta_seconds = monotonic() - started_at
-            if on_response_delta is not None:
-                on_response_delta(delta)
-
-        stage("provider_context_started")
-        instruction = self.coalesced_instruction(basis)
-        stage("provider_context_prepared")
-        model = self.semantic_capability.model
-        effort = self.semantic_capability.reasoning_effort
-        stage("provider_starting")
-        ApprovalMode, Sandbox = _codex_controls()
-        with self.codex_factory() as codex:
-            thread = codex.thread_start(
-                approval_mode=ApprovalMode.deny_all,
-                cwd=self.repository_location,
-                ephemeral=True,
-                model=model,
-                sandbox=Sandbox.read_only,
-            )
-            turn = thread.turn(
-                instruction,
-                approval_mode=ApprovalMode.deny_all,
-                cwd=self.repository_location,
-                effort=effort,
-                model=model,
-                output_schema=self.coalesced_output_schema(),
-                sandbox=Sandbox.read_only,
-            )
-            stage("provider_turn_started")
-            terminal = _wait_for_streaming_terminal(
-                turn,
-                timeout_seconds=self.timeout_seconds,
-                on_response_delta=(publish_delta if on_response_delta is not None else None),
-                response_field="natural_response",
-                on_pipeline_stage=stage,
-            )
-        stage("provider_teardown_completed")
-        if terminal.timed_out or terminal.result is None:
-            raise InteractionInvariantViolation(
-                "Coalesced collaboration Provider did not complete in its bounded Turn"
-            )
-        result = terminal.result
-        if _enum_value(result.status) != "completed" or result.error is not None:
-            raise InteractionInvariantViolation(
-                "Coalesced collaboration Provider did not return a completed result"
-            )
-        stage("payload_validation_started")
-        try:
-            payload = _CoalescedInteractionProviderPayload.model_validate_json(
-                result.final_response.strip()
-            )
-        except (ValueError, TypeError) as error:
-            raise InteractionInvariantViolation(
-                "Coalesced collaboration Provider returned an invalid structured result "
-                f"({_safe_validation_summary(error)})"
-            ) from error
-        content = payload.natural_response.strip()
-        if not content:
-            raise InteractionInvariantViolation(
-                "Coalesced collaboration Provider returned an empty Human-facing response"
-            )
-        identity = f"codex-sdk:collaboration-thread:{thread.id}:turn:{turn.id}"
-        semantic_values = payload.semantics.model_dump(
-            exclude={
-                "retained_prior_meaning_indexes", "reuse_prior_design_intent_frame",
-                "meanings", "collaboration",
-            }
-        )
-        semantic_values["meanings"] = self._expand_coalesced_meanings(payload.semantics, basis)
-        semantic_values["collaboration"] = self._expand_coalesced_collaboration(
-            payload.semantics, basis
-        )
-        semantic = InteractionSemanticCandidate(
-            **semantic_values,
-            provider_identity=identity,
-            model_identity=model,
-        )
-        response = ConversationResponseCandidate(
-            content=content, provider_identity=identity, model_identity=model
-        )
-        candidate = self._assessment_candidate(semantic, response)
-        stage("payload_validated")
-        self.last_collaboration_result = semantic.collaboration
-        self.last_pipeline_evidence = ConversationPipelineEvidence(
-            pipeline_mode="coalesced_pre_work",
-            pipeline_reason="native_pre_work_shared_configuration",
-            provider_call_count=1,
-            coalesced_thread_id=str(thread.id),
-            coalesced_turn_id=str(turn.id),
-            coalesced_seconds=monotonic() - started_at,
-            coalesced_prompt_characters=len(instruction),
-            coalesced_model=model,
-            coalesced_reasoning_effort=effort,
-            first_response_delta_seconds=first_response_delta_seconds,
-            coalesced_output_characters=len(result.final_response),
-            coalesced_semantic_characters=len(json.dumps(
-                payload.semantics.model_dump(mode="json"),
-                ensure_ascii=False, separators=(",", ":"),
-            )),
-            retained_prior_meaning_count=len(payload.semantics.retained_prior_meaning_indexes),
-            new_meaning_count=len(payload.semantics.meanings),
-            reused_prior_design_intent_frame=payload.semantics.reuse_prior_design_intent_frame,
-            provider_stage_seconds=dict(stages),
-        )
-        return candidate
 
     @staticmethod
     def _expand_coalesced_meanings(
@@ -1593,9 +964,9 @@ class CodexSdkWorkInteractionCapability:
     @staticmethod
     def coalesced_instruction(basis: InteractionInterpretationInput) -> str:
         return (
-            CodexSdkInteractionSemanticCapability.instruction(basis, coalesced=True)
+            InteractionSemanticContract.instruction(basis, coalesced=True)
             + "\n\nConversation Intelligence expression policy:\n"
-            + CodexSdkConversationProvider.response_policy()
+            + ConversationContract.response_policy()
             + "\n\nReturn one JSON envelope with natural_response FIRST, then semantics. "
             "Use the same interpretation for both; begin the useful answer before the "
             "semantic ledger. The response remains advisory until complete validation. "
@@ -1620,30 +991,16 @@ class CodexSdkWorkInteractionCapability:
 
     @staticmethod
     def output_schema() -> dict[str, Any]:
-        """Backward-compatible alias for the WIC semantic wire contract."""
+        """Provider-neutral alias for the WIC semantic wire contract."""
 
-        return CodexSdkInteractionSemanticCapability.output_schema()
+        return InteractionSemanticContract.output_schema()
 
     @staticmethod
     def conversation_output_schema() -> dict[str, Any]:
-        return CodexSdkConversationProvider.output_schema()
+        return ConversationContract.output_schema()
 
     @staticmethod
     def _instruction(basis: InteractionInterpretationInput) -> str:
-        """Backward-compatible alias for focused contract inspection."""
+        """Provider-neutral alias for focused contract inspection."""
 
-        return CodexSdkInteractionSemanticCapability.instruction(basis)
-
-    @staticmethod
-    def _wait_for_streaming_terminal(
-        turn: Any,
-        *,
-        timeout_seconds: float | None,
-        on_response_delta: Callable[[str], None] | None,
-    ) -> _StreamingTerminal:
-        return _wait_for_streaming_terminal(
-            turn,
-            timeout_seconds=timeout_seconds,
-            on_response_delta=on_response_delta,
-            response_field="natural_response",
-        )
+        return InteractionSemanticContract.instruction(basis)

@@ -309,8 +309,16 @@
                   <div><dt>Remaining blocker or risk</dt><dd id="remaining-risk">This Work has not completed.</dd></div>
                   </dl>
                   <div id="candidate-preview-panel" class="work-actions" hidden>
-                    <button id="open-candidate-preview" type="button">Preview result</button>
-                    <a id="candidate-preview-link" class="text-button" target="_blank" rel="noopener" hidden>Open exact preview</a>
+                    <div id="functional-preview-panel" hidden>
+                      <h4>Functional Preview</h4>
+                      <p id="functional-preview-status" class="empty-copy"></p>
+                      <p id="functional-preview-revision" class="empty-copy"></p>
+                      <button id="start-functional-preview" type="button">Start functional preview</button>
+                      <a id="open-functional-preview" class="text-button" target="_blank" rel="noopener noreferrer" hidden>Open functional preview</a>
+                      <button id="stop-functional-preview" type="button" hidden>Stop preview</button>
+                    </div>
+                    <h4>Code Review</h4>
+                    <button id="open-candidate-preview" type="button">Review code changes</button>
                     <div id="candidate-artifact-actions" class="action-row" aria-label="Produced artifact downloads"></div>
                     <a id="candidate-delivery-link" class="text-button" hidden>Review delivery context</a>
                     <p id="candidate-preview-status" class="empty-copy"></p>
@@ -424,6 +432,26 @@
               <details id="native-execution-details" hidden>
                 <summary>Execution evidence and checkpoint</summary>
                 <pre id="native-execution-evidence"></pre>
+              </details>
+            </section>
+            <section id="self-refine-card" class="control-room-card" aria-labelledby="self-refine-heading">
+              <p class="eyebrow">Recovery Evidence</p>
+              <h3 id="self-refine-heading">Self-Refine incidents</h3>
+              <p id="self-refine-summary" class="control-room-summary">No recovery incident recorded for this Work.</p>
+              <div class="button-row">
+                <button id="self-refine-work-view" type="button" class="secondary">Current Work</button>
+                <button id="self-refine-platform-view" type="button" class="secondary">Platform / all Works</button>
+              </div>
+              <div id="self-refine-filters" class="button-row" hidden>
+                <label>Failure family <input id="self-refine-family-filter" type="text" autocomplete="off"></label>
+                <label>Component <input id="self-refine-component-filter" type="text" autocomplete="off"></label>
+                <label>Result <select id="self-refine-result-filter"><option value="">All</option><option>RECOVERED</option><option>ESCALATED</option><option>FAILED</option></select></label>
+                <button id="self-refine-filter-apply" type="button" class="secondary">Filter</button>
+              </div>
+              <ol id="self-refine-list" class="compact-list"></ol>
+              <details id="self-refine-detail" hidden>
+                <summary>Incident detail</summary>
+                <div id="self-refine-detail-body"></div>
               </details>
             </section>
           </section>

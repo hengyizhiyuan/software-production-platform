@@ -13,6 +13,7 @@ from spg.infrastructure.production_environment import GitRepositoryAcquirer
 from spg.application.interaction import _repository_branch_status_answer
 from spg.application.repository_branch_authority import (
     exact_branch_creation_command,
+    explicit_human_branch_command,
     governed_branch_creation_target,
 )
 from spg.domain.engineering_semantics import SemanticFactAuthority
@@ -143,7 +144,7 @@ def test_branch_status_answer_uses_current_work_revision_not_model_plan() -> Non
         ("repository.branch.name", {}),
     ),
 )
-def test_provider_branch_vocabulary_requires_cited_human_command(
+def test_provider_branch_vocabulary_is_normalized_only_at_binding(
     human_command: str, expected: str | None,
     subject: str, qualifiers: dict[str, str],
 ) -> None:
@@ -158,9 +159,33 @@ def test_provider_branch_vocabulary_requires_cited_human_command(
     )
     record = SimpleNamespace(actor=InteractionActor.HUMAN, content=human_command)
 
+    assert explicit_human_branch_command(human_command, "test") == (expected is not None)
     assert governed_branch_creation_target(
         (branch_fact,), record_for_id=lambda record_id: record if record_id == source_id else None,
-    ) == expected
+    ) is None
+
+
+def test_branch_execution_requires_canonical_admitted_action_and_target() -> None:
+    source_id = uuid4()
+    action = SimpleNamespace(
+        is_current=True,
+        subject="repository.branch_action",
+        value="创建新分支",
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+    )
+    target = SimpleNamespace(
+        is_current=True,
+        subject="repository.branch_name",
+        value="test",
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        qualifiers={"state": "to_be_created"},
+    )
+    assert governed_branch_creation_target(
+        (action, target), record_for_id=lambda _record_id: None,
+    ) == "test"
+    assert governed_branch_creation_target(
+        (target,), record_for_id=lambda _record_id: None,
+    ) is None
 
 
 @pytest.mark.parametrize(

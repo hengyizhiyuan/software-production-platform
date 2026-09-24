@@ -11,6 +11,7 @@ from spg.domain.native_execution import (
     PWUContractVersionRecord,
     ToolExecutionResult,
     WorkingPlan,
+    canonical_digest,
 )
 
 
@@ -37,6 +38,7 @@ class NativeContextAssembler:
         residual_obligations: tuple[str, ...] | None = None,
         previous_results: tuple[ToolExecutionResult, ...] = (),
         checkpoint: CheckpointBundleRecord | None = None,
+        repair_history: tuple[dict[str, object], ...] = (),
     ) -> InferenceRequest:
         facts: list[dict[str, object]] = [
             {
@@ -89,6 +91,15 @@ class NativeContextAssembler:
                 ),
             },
         ]
+        if repair_history:
+            facts.append({
+                "fact_type": "RECENT_SELF_REFINE",
+                "events": list(repair_history[:3]),
+                "rule": (
+                    "Historical failures are evidence, not permission to change Work intent "
+                    "or repeat an uncertain side effect."
+                ),
+            })
         if checkpoint is not None:
             facts.append(
                 {
@@ -111,13 +122,27 @@ class NativeContextAssembler:
                 if residual_obligations is None
                 else residual_obligations
             ),
-            previous_results=tuple(item.model_dump(mode="json") for item in previous_results),
+            previous_results=tuple(self._select_diagnostic_result(item) for item in previous_results),
         )
         if self._size(request) <= self.max_request_bytes:
             return request
 
         compact_facts = []
         for fact in facts:
+            if fact.get("fact_type") == "RECENT_SELF_REFINE":
+                latest = fact["events"][0]
+                compact_facts.append({
+                    "fact_type": "RECENT_SELF_REFINE",
+                    "events": [{
+                        key: latest[key] for key in (
+                            "event_id", "failure_family", "failure_signature",
+                            "status", "result",
+                        ) if key in latest
+                    }],
+                    "compacted": True,
+                    "rule": fact["rule"],
+                })
+                continue
             if fact.get("fact_type") != "RECOVERY_CHECKPOINT":
                 compact_facts.append(fact)
                 continue
@@ -163,6 +188,16 @@ class NativeContextAssembler:
         )
         if self._size(compacted) <= self.max_request_bytes:
             return compacted
+        # Repair history is relevant orientation, but it cannot displace the
+        # exact admitted contract or make an otherwise valid request fail.
+        without_history = compacted.model_copy(update={
+            "context_facts": tuple(
+                fact for fact in compacted.context_facts
+                if fact.get("fact_type") != "RECENT_SELF_REFINE"
+            ),
+        })
+        if self._size(without_history) <= self.max_request_bytes:
+            return without_history
         raise NativeContextCapacityError(
             "exact PWU contract and invariant capsule exceed native context capacity"
         )
@@ -170,3 +205,21 @@ class NativeContextAssembler:
     @staticmethod
     def _size(request: InferenceRequest) -> int:
         return len(request.model_dump_json().encode("utf-8"))
+
+    @staticmethod
+    def _select_diagnostic_result(result: ToolExecutionResult) -> dict[str, object]:
+        """Keep an actionable excerpt while the durable receipt owns complete logs."""
+
+        payload = result.model_dump(mode="json")
+        output = dict(payload["output"])
+        for field in ("stdout", "stderr", "stack_trace", "compiler_diagnostics", "runtime_logs"):
+            raw = output.get(field)
+            if isinstance(raw, str) and len(raw.encode("utf-8")) > 4096:
+                output[field] = {
+                    "selected_tail": raw[-2048:],
+                    "original_bytes": len(raw.encode("utf-8")),
+                    "content_digest": canonical_digest(raw),
+                    "full_receipt_digest": result.output_digest,
+                }
+        payload["output"] = output
+        return payload

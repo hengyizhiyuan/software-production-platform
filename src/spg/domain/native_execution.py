@@ -201,6 +201,21 @@ class RecoveryClassification(StrEnum):
     EFFECT_UNRESOLVED = "EFFECT_UNRESOLVED"
 
 
+class RepairabilityClassification(StrEnum):
+    AUTONOMOUSLY_REPAIRABLE = "AUTONOMOUSLY_REPAIRABLE"
+    REPAIRABLE_WITH_SUFFICIENT_EVIDENCE = "REPAIRABLE_WITH_SUFFICIENT_EVIDENCE"
+    REQUIRES_HUMAN_INPUT = "REQUIRES_HUMAN_INPUT"
+    REQUIRES_HUMAN_DECISION = "REQUIRES_HUMAN_DECISION"
+    UNSAFE_TO_AUTOREPAIR = "UNSAFE_TO_AUTOREPAIR"
+
+
+class ObservationConfidence(StrEnum):
+    OBSERVED_SUCCESS = "OBSERVED_SUCCESS"
+    TRANSIENT_ANOMALY = "TRANSIENT_ANOMALY"
+    CONFIRMED_FAILURE = "CONFIRMED_FAILURE"
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+
 class NativeRecord(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -906,6 +921,8 @@ class KernelRunResult(NativeRecord):
     result_claim: dict[str, Any] | None = None
     residual_obligations: tuple[str, ...] = ()
     resource_retryable: bool = True
+    failure_family: str | None = None
+    observation_evidence: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def validate_kernel_result(self) -> "KernelRunResult":
@@ -916,3 +933,47 @@ class KernelRunResult(NativeRecord):
         if self.runtime_mode is not ExecutionMode.WAITING_RESOURCE and not self.resource_retryable:
             raise ValueError("resource_retryable applies only to WAITING_RESOURCE")
         return self
+
+
+class SelfRefineEventRecord(NativeRecord):
+    """Durable diagnosis for one bounded repair episode on a governed operation."""
+
+    id: UUID
+    work_id: UUID
+    operation_id: UUID
+    created_at: datetime
+    failure_family: str
+    failure_signature: str = Field(pattern=r"^[0-9a-f]{64}$")
+    affected_component: str
+    expected_reality: dict[str, Any]
+    observed_reality: dict[str, Any]
+    diagnosis_summary: str
+    root_cause_classification: str
+    repair_hypothesis: str
+    evidence_references: tuple[str, ...]
+    repairability: RepairabilityClassification = RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+    observation_confidence: ObservationConfidence = ObservationConfidence.CONFIRMED_FAILURE
+    budget_decision: dict[str, Any] = Field(default_factory=dict)
+    diagnostic_evidence: dict[str, Any] = Field(default_factory=dict)
+    final_result: str | None = None
+    work_resume_result: str | None = None
+    extra_elapsed_seconds: int | None = None
+    model_token_usage: dict[str, Any] = Field(default_factory=dict)
+    compute_overhead: dict[str, Any] = Field(default_factory=dict)
+    known_failure_match: bool = False
+    platform_improvement_candidate_ref: str | None = None
+    status: str = "OPEN"
+    updated_at: datetime
+
+
+class SelfRefineActionRecord(NativeRecord):
+    """Append-only action/observation during a Self-Refine episode."""
+
+    id: UUID
+    event_id: UUID
+    sequence: int = Field(ge=1)
+    created_at: datetime
+    repair_action: str
+    observed_reality: dict[str, Any]
+    evidence_references: tuple[str, ...]
+    outcome: str

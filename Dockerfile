@@ -31,8 +31,8 @@ COPY migrations ./migrations
 COPY docker ./docker
 
 RUN useradd --create-home --uid 10001 spg \
-    && mkdir -p /var/lib/spg /var/lib/spg/native-workspaces /var/lib/spg/native-checkpoints /home/spg/.codex \
-    && chown -R spg:spg /var/lib/spg /home/spg/.codex
+    && mkdir -p /var/lib/spg /var/lib/spg/native-workspaces /var/lib/spg/native-checkpoints /var/lib/spg/native-tool-receipts \
+    && chown -R spg:spg /var/lib/spg
 
 USER spg
 
@@ -47,11 +47,5 @@ RUN uv sync --locked --no-dev --no-editable --extra test
 USER spg
 
 FROM native-verification AS native-tool-host
-
-FROM runtime-base AS codex-executor
-
-USER root
-RUN uv sync --locked --no-dev --no-editable --extra codex-executor --extra test
-USER spg
 
 FROM runtime-base AS runtime

@@ -83,7 +83,14 @@ class Application:
     ) -> NativeExecutorRuntimeService:
         """Compose the additive Watt-native Executor v2 runtime."""
 
-        return NativeExecutorRuntimeService(database or self.persistence())
+        return NativeExecutorRuntimeService(
+            database or self.persistence(),
+            self_refine_attempt_budget=self.settings.native_executor_self_refine_attempt_budget,
+            same_failure_threshold=self.settings.native_executor_same_failure_threshold,
+            self_refine_time_budget_seconds=self.settings.native_executor_self_refine_time_budget_seconds,
+            self_refine_inference_budget=self.settings.native_executor_self_refine_inference_budget,
+            self_refine_token_budget=self.settings.native_executor_self_refine_token_budget,
+        )
 
     def repository_asset_service(self, database: Database | None = None):
         """Compose repository intake with the same Native/PE production boundary."""
@@ -228,23 +235,7 @@ class Application:
         selected_verifier = verifier
         selected_binding = executor_binding
         selected_preparation = None
-        if selected_executor is None and self.settings.executor_adapter == "codex-sdk":
-            from spg.infrastructure.configured_executor import (
-                GovernedDedicatedExecutor,
-            )
-
-            selected_executor = GovernedDedicatedExecutor(
-                selected_database,
-                provider_timeout_seconds=self.settings.executor_timeout_seconds,
-                max_internal_turns=self.settings.executor_max_internal_turns,
-                provider_sandbox_mode=self.settings.executor_sandbox_mode,
-            )
-            selected_binding = ExecutorBinding(
-                binding_ref="binding:codex-sdk-dedicated-process",
-                capability_identity="capability:executor",
-                profile_identity="profile:local-docker-codex-e2e",
-            )
-        elif selected_executor is None and self.settings.executor_adapter == "watt-native":
+        if selected_executor is None and self.settings.executor_adapter == "watt-native":
             from spg.application.native_production_environment import (
                 NativeProductionEnvironmentRuntime,
             )
@@ -325,10 +316,35 @@ class Application:
             options["preparation"] = selected_preparation
         if selected_binding is not None:
             options["executor_binding"] = selected_binding
-        return WorkApplicationService(
+        service = WorkApplicationService(
             selected_database,
             **options,
         )
+        if self.settings.native_executor_enabled:
+            from spg.application.candidate_preview import CandidatePreviewApplicationService
+            from spg.application.delivery import DeliveryApplicationService
+            from spg.domain.production_environment import CandidatePreviewMode
+            from spg.infrastructure.candidate_preview_runtime import DockerCandidatePreviewRuntime
+            from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+
+            pe_root = self.settings.native_executor_production_environment_store_root
+            preview = CandidatePreviewApplicationService(
+                DeliveryApplicationService(selected_database),
+                JsonProductionEnvironmentStore(pe_root),
+                DockerCandidatePreviewRuntime(pe_root / "candidate-preview-runtime",
+                    verification_image=self.settings.native_executor_production_environment_image),
+            )
+
+            def require_functional_preview(work_id, candidate_id):
+                context = preview.delivery.candidate_context(work_id)
+                if context is not None and preview.mode_for(context) in {
+                    CandidatePreviewMode.FULL_APPLICATION_RUNTIME,
+                    CandidatePreviewMode.FRONTEND_RUNTIME,
+                }:
+                    preview.require_ready(work_id, candidate_id)
+
+            service.configure_candidate_authorization_guard(require_functional_preview)
+        return service
 
     def interaction(
         self,
@@ -356,9 +372,7 @@ class Application:
         """Compose the configured WIC provider without persistence or admission."""
 
         capability = UnavailableWorkInteractionCapability()
-        semantic_adapter = (
-            self.settings.wic_provider_adapter or self.settings.executor_adapter
-        )
+        semantic_adapter = self.settings.wic_provider_adapter
         conversation_adapter = (
             self.settings.conversation_provider_adapter or semantic_adapter
         )
@@ -442,25 +456,6 @@ class Application:
                 runtime=runtime,
                 coalesce_pre_work=self.settings.wic_coalesce_pre_work,
             )
-        if semantic_adapter == "codex-sdk" and conversation_adapter == "codex-sdk":
-            from spg.providers.codex_interaction import (
-                CodexSdkWorkInteractionCapability,
-            )
-
-            capability = CodexSdkWorkInteractionCapability(
-                repository_location=str(self.settings.repository_path),
-                model=self.settings.wic_provider_model,
-                conversation_model=(
-                    self.settings.conversation_provider_model
-                    or self.settings.wic_provider_model
-                ),
-                timeout_seconds=self.settings.collaboration_provider_timeout_seconds,
-                reasoning_effort=self.settings.wic_provider_reasoning_effort,
-                coalesce_pre_work=self.settings.wic_coalesce_pre_work,
-                conversation_reasoning_effort=(
-                    self.settings.conversation_provider_reasoning_effort
-                ),
-            )
         return capability
 
     def production_orchestrator(
@@ -526,16 +521,8 @@ class Application:
         """Compose bounded Steering progression over existing governed seams."""
 
         selected_semantic = semantic_capability
-        semantic_adapter = (
-            self.settings.wic_provider_adapter or self.settings.executor_adapter
-        )
-        if selected_semantic is None and semantic_adapter == "codex-sdk":
-            from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
-
-            selected_semantic = CodexSdkSemanticStepCapability(
-                timeout_seconds=self.settings.executor_timeout_seconds,
-            )
-        elif selected_semantic is None and semantic_adapter == "deepseek":
+        semantic_adapter = self.settings.wic_provider_adapter
+        if selected_semantic is None and semantic_adapter == "deepseek":
             from spg.domain.model_runtime import (
                 ModelProfile,
                 ModelProvider,
@@ -585,6 +572,9 @@ class Application:
             capability=capability,
             semantic_capability=selected_semantic,
             repository_assets=repository_assets,
+            provider_retry_attempt_budget=self.settings.native_executor_self_refine_attempt_budget,
+            provider_retry_same_failure_threshold=self.settings.native_executor_same_failure_threshold,
+            provider_retry_time_budget_seconds=self.settings.native_executor_self_refine_time_budget_seconds,
         )
 
     def steering_bootstrap(

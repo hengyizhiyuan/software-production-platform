@@ -20,9 +20,9 @@ from spg.domain.interaction import (
     WorkSatisfactionState,
     WorkTransitionChoice,
 )
-from spg.providers.codex_interaction import (
-    CodexSdkConversationProvider,
-    CodexSdkWorkInteractionCapability,
+from spg.providers.interaction_contract import (
+    ConversationContract,
+    WorkInteractionPipeline,
     _JsonStringFieldStream,
 )
 
@@ -49,7 +49,7 @@ def _schema_nodes(value: object) -> Iterator[dict]:
 
 
 def test_wic_provider_schema_is_recursively_strict_and_ref_safe() -> None:
-    schema = CodexSdkWorkInteractionCapability.output_schema()
+    schema = WorkInteractionPipeline.output_schema()
     assert "natural_response" not in schema["properties"]
     assert "collaboration" in schema["properties"]
     for path, object_schema in _object_schemas(schema):
@@ -87,55 +87,6 @@ def test_wic_provider_stream_exposes_only_incremental_human_response() -> None:
     assert "interpreted_motive" not in emitted
 
 
-def test_wic_streaming_terminal_collects_provider_events_and_final_result() -> None:
-    payload = {
-        "natural_response": "I will lead with the highest-impact design decision.",
-        "interpreted_motive": "Design an operations platform",
-        "desired_outcome": None,
-        "candidate_context": [],
-        "candidate_constraints": [],
-        "current_requests": [],
-        "unresolved_material_questions": [],
-        "meanings": [],
-        "focus_classification": None,
-        "impact_disposition": None,
-        "supporting_references": [],
-    }
-    encoded = json.dumps(payload, separators=(",", ":"))
-
-    class Turn:
-        def stream(self):
-            for offset in range(0, len(encoded), 11):
-                yield SimpleNamespace(
-                    method="item/agentMessage/delta",
-                    payload=SimpleNamespace(delta=encoded[offset : offset + 11]),
-                )
-            yield SimpleNamespace(
-                method="item/completed",
-                payload=SimpleNamespace(
-                    item=SimpleNamespace(type="agentMessage", text=encoded)
-                ),
-            )
-            yield SimpleNamespace(
-                method="turn/completed",
-                payload=SimpleNamespace(
-                    turn=SimpleNamespace(status="completed", error=None)
-                ),
-            )
-
-    deltas: list[str] = []
-    terminal = CodexSdkWorkInteractionCapability._wait_for_streaming_terminal(
-        Turn(),
-        timeout_seconds=1,
-        on_response_delta=deltas.append,
-    )
-
-    assert terminal.timed_out is False
-    assert terminal.result is not None
-    assert terminal.result.final_response == encoded
-    assert "".join(deltas) == payload["natural_response"]
-
-
 def test_ready_readiness_cannot_hide_material_questions() -> None:
     with pytest.raises(ValidationError, match="cannot retain material blockers"):
         WorkAdmissionReadiness(
@@ -151,7 +102,7 @@ def test_ready_readiness_cannot_hide_material_questions() -> None:
 
 
 def test_wic3_provider_contract_exposes_bounded_focus_and_impact_taxonomies() -> None:
-    schema = CodexSdkWorkInteractionCapability.output_schema()
+    schema = WorkInteractionPipeline.output_schema()
     encoded = str(schema)
     assert {item.value for item in WorkFocusClassification} == {
         "ON_TOPIC",
@@ -205,7 +156,7 @@ def test_wic_provider_instruction_requires_progressive_context_aware_leadership(
         ),
     )
 
-    instruction = CodexSdkWorkInteractionCapability._instruction(basis)
+    instruction = WorkInteractionPipeline._instruction(basis)
 
     assert "WIC semantic boundary" in instruction
     assert "do not write the Human-facing response" in instruction
@@ -233,7 +184,7 @@ def test_dedicated_conversation_provider_owns_human_facing_policy() -> None:
         policy_hints=(ConversationPolicyHint.GUIDE_PROACTIVELY,),
     )
 
-    instruction = CodexSdkConversationProvider.instruction(context, collaboration)
+    instruction = ConversationContract.instruction(context, collaboration)
 
     assert "dedicated Human-facing Conversation Provider" in instruction
     assert "own wording" in instruction

@@ -18,9 +18,9 @@ from spg.domain.design_intent import (
     DesignObjectType,
     DesignScopeLevel,
 )
-from spg.providers.codex_interaction import (
-    CodexSdkConversationProvider,
-    CodexSdkInteractionSemanticCapability,
+from spg.providers.interaction_contract import (
+    ConversationContract,
+    InteractionSemanticContract,
 )
 
 
@@ -86,7 +86,7 @@ def test_operations_platform_context_does_not_override_product_object() -> None:
 
 
 def test_provider_wire_and_prompts_carry_frame_without_an_extra_provider_stage() -> None:
-    schema = CodexSdkInteractionSemanticCapability.output_schema()
+    schema = InteractionSemanticContract.output_schema()
     collaboration = schema["$defs"]["_StructuredCollaborationProviderPayload"]
 
     assert "design_intent_frame" in collaboration["properties"]
@@ -106,7 +106,7 @@ def test_provider_wire_and_prompts_carry_frame_without_an_extra_provider_stage()
         design_intent_frame=frame,
         response_language="Chinese",
     )
-    instruction = CodexSdkConversationProvider.instruction(context, result)
+    instruction = ConversationContract.instruction(context, result)
     supplied_result = json.loads(instruction.split("Structured Collaboration Result:\n", 1)[1])
     supplied_frame = supplied_result["design_intent_frame"]
 

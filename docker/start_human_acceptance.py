@@ -21,7 +21,6 @@ def main() -> None:
         raise RuntimeError("image startup module is unavailable")
     startup = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(startup)
-    startup.prepare_optional_codex_state()
     startup.ensure_local_databases()
     startup.migrate_product_database()
     repository = startup.prepare_repository_snapshot()

@@ -2,11 +2,12 @@
 
 Date: 2026-09-21
 
-Status: **ARCHITECTURE BASELINE / EVALUATION PLATFORM PENDING**. This document
+Status: **ARCHITECTURE BASELINE / EXECUTABLE RELEASE GATE V1 / EVALUATION PLATFORM PENDING**. This document
 defines the evaluation dimensions, evidence boundaries, corpus strategy, and
 improvement loop for Watt as an AI-native software production system. It does
-not implement a benchmark platform, leaderboard, public ranking, or automated
-evaluation infrastructure.
+not implement a benchmark platform, leaderboard, public ranking, or a general
+automated evaluation platform. The repository's `spg-evaluate` command runs a
+bounded, domain-separated acceptance corpus and fails on critical regressions.
 
 ## 1. Purpose
 
@@ -147,8 +148,17 @@ Candidate sources include:
 
 The corpus is an evaluation input, not an authority source. Its cases must state
 the expected invariant, relevant context, permissible variation, and review
-authority. This document defines that corpus strategy but does not implement
-the corpus platform.
+authority. The executable v1 corpus lives in `spg.evaluation.release_gate`;
+the broader corpus platform remains outside the current scope.
+
+Each executable case now records its capability and failure family, protected
+invariant, risk, scenario type, origin, similarity group, required environment,
+estimated cost, failure history, and baseline version. Focused development
+qualification selects affected capability/failure families. Milestone release
+qualification selects every critical invariant and Golden Journey. Similar
+noncritical cases may share one representative, preferring a case with a
+meaningful regression history before the cheaper case; no historical case is
+deleted and critical protections are never consolidated away.
 
 ## 5. Production Capability Evaluation
 
@@ -357,13 +367,16 @@ The current architecture scope establishes:
 - the three evaluation dimensions;
 - authority and evidence boundaries;
 - failure-classification and feedback routing; and
-- the corpus strategy.
+- the corpus strategy; and
+- a bounded executable release gate covering interaction, production,
+  resilience, and assurance cases with distinct first-pass, recovered,
+  escalated, and failed outcomes.
 
 The current scope does **not** implement:
 
 - a Benchmark Platform;
 - a leaderboard or public ranking;
-- automated evaluation infrastructure;
+- a general automated evaluation platform or leaderboard;
 - a new Evaluation service, database, or UI;
 - autonomous architecture, Pattern, or SOP mutation; or
 - replacement of Full Regression, Guardian, or Human Acceptance.

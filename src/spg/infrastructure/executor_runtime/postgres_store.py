@@ -32,11 +32,16 @@ from spg.domain.native_execution import (
     NativeExecutionNotFound,
     PWUContractVersionRecord,
     QueueCondition,
+    RepairabilityClassification,
     ResourceEnvelope,
     ResourceReservationCondition,
     ResourceUsageEntryRecord,
     ResultReadyClaimRecord,
+    SelfRefineActionRecord,
+    SelfRefineEventRecord,
     SourceVector,
+    StepCondition,
+    StepKind,
     ToolExecutionResult,
     UsageCertainty,
     WorkerLeaseRecord,
@@ -71,6 +76,8 @@ from spg.infrastructure.persistence.native_execution_schema import (
     native_attempt_states,
     pwu_contract_versions,
     result_ready_claims,
+    self_refine_actions,
+    self_refine_events,
 )
 
 
@@ -793,6 +800,167 @@ class NativeExecutionStore:
             insert(execution_recovery_cases).values(**record.model_dump(mode="json"))
         )
 
+    def open_self_refine_event(self, operation_id: UUID) -> SelfRefineEventRecord | None:
+        row = self.session.execute(
+            select(self_refine_events)
+            .where(self_refine_events.c.operation_id == operation_id)
+            .where(self_refine_events.c.status == "OPEN")
+            .order_by(self_refine_events.c.created_at.desc())
+            .limit(1)
+        ).mappings().first()
+        return None if row is None else SelfRefineEventRecord.model_validate(dict(row))
+
+    def insert_self_refine_event(self, event: SelfRefineEventRecord) -> None:
+        self.session.execute(insert(self_refine_events).values(**event.model_dump(mode="json")))
+
+    def prior_self_refine_matches(self, signature: str, *, before_event_id: UUID) -> int:
+        return int(self.session.scalar(
+            select(func.count())
+            .select_from(self_refine_events)
+            .where(self_refine_events.c.failure_signature == signature)
+            .where(self_refine_events.c.id != before_event_id)
+        ) or 0)
+
+    def append_self_refine_action(self, action: SelfRefineActionRecord) -> None:
+        self.session.execute(insert(self_refine_actions).values(**action.model_dump(mode="json")))
+
+    def update_self_refine_budget(self, event_id: UUID, decision: dict[str, Any], *, updated_at: datetime) -> None:
+        changed = self.session.execute(
+            update(self_refine_events)
+            .where(self_refine_events.c.id == event_id)
+            .where(self_refine_events.c.status == "OPEN")
+            .values(budget_decision=decision, updated_at=updated_at)
+        )
+        if changed.rowcount != 1:
+            raise NativeExecutionConflict("Self-Refine event is no longer open")
+
+    def advance_self_refine_repairability(
+        self, event_id: UUID, *, repairability: RepairabilityClassification,
+        diagnostic_evidence: dict[str, Any], updated_at: datetime,
+    ) -> None:
+        changed = self.session.execute(
+            update(self_refine_events)
+            .where(self_refine_events.c.id == event_id)
+            .where(self_refine_events.c.status == "OPEN")
+            .where(self_refine_events.c.repairability ==
+                   RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE.value)
+            .values(repairability=repairability.value,
+                    diagnostic_evidence=diagnostic_evidence, updated_at=updated_at)
+        )
+        if changed.rowcount != 1:
+            raise NativeExecutionConflict("Self-Refine evidence boundary changed")
+
+    def self_refine_actions(self, event_id: UUID) -> tuple[SelfRefineActionRecord, ...]:
+        rows = self.session.execute(
+            select(self_refine_actions)
+            .where(self_refine_actions.c.event_id == event_id)
+            .order_by(self_refine_actions.c.sequence)
+        ).mappings().all()
+        return tuple(SelfRefineActionRecord.model_validate(dict(row)) for row in rows)
+
+    def complete_self_refine_event(
+        self, event_id: UUID, *, result: str, resume_result: str,
+        status: str, elapsed_seconds: int, updated_at: datetime,
+        compute_overhead: dict[str, Any],
+        model_token_usage: dict[str, Any] | None = None,
+    ) -> None:
+        values: dict[str, Any] = {
+            "final_result": result,
+            "work_resume_result": resume_result,
+            "status": status,
+            "extra_elapsed_seconds": elapsed_seconds,
+            "compute_overhead": compute_overhead,
+            "updated_at": updated_at,
+        }
+        if model_token_usage is not None:
+            values["model_token_usage"] = model_token_usage
+        changed = self.session.execute(
+            update(self_refine_events)
+            .where(self_refine_events.c.id == event_id)
+            .where(self_refine_events.c.status == "OPEN")
+            .values(**values)
+        )
+        if changed.rowcount != 1:
+            raise NativeExecutionConflict("Self-Refine event is no longer open")
+
+    def observed_repair_model_usage(
+        self, attempt_id: UUID, *, since: datetime,
+    ) -> dict[str, Any]:
+        """Sum only provider-observed token usage after the repair began."""
+
+        totals: dict[str, int] = {}
+        observed = 0
+        for step in self.steps_for_attempt(attempt_id):
+            if (
+                step.kind is not StepKind.INFERENCE
+                or step.condition is not StepCondition.COMPLETED
+                or step.started_at < since
+            ):
+                continue
+            provider = step.result_payload.get("provider_observation")
+            usage = provider.get("usage") if isinstance(provider, dict) else None
+            if not isinstance(usage, dict):
+                continue
+            observed += 1
+            for key in (
+                "input_tokens", "output_tokens", "total_tokens",
+                "cached_input_tokens", "reasoning_tokens",
+            ):
+                value = usage.get(key)
+                if isinstance(value, int) and not isinstance(value, bool):
+                    totals[key] = totals.get(key, 0) + value
+        return {**totals, "observed_response_count": observed} if observed else {}
+
+    def list_self_refine_events(
+        self, *, work_id: UUID | None = None,
+        failure_family: str | None = None,
+        component: str | None = None,
+        result: str | None = None,
+        limit: int = 100,
+    ) -> tuple[SelfRefineEventRecord, ...]:
+        query = select(self_refine_events)
+        if work_id is not None:
+            query = query.where(self_refine_events.c.work_id == work_id)
+        if failure_family is not None:
+            query = query.where(self_refine_events.c.failure_family == failure_family)
+        if component is not None:
+            query = query.where(self_refine_events.c.affected_component == component)
+        if result is not None:
+            query = query.where(self_refine_events.c.final_result == result)
+        rows = self.session.execute(
+            query.order_by(self_refine_events.c.created_at.desc()).limit(limit)
+        ).mappings().all()
+        return tuple(SelfRefineEventRecord.model_validate(dict(row)) for row in rows)
+
+    def self_refine_event(self, event_id: UUID) -> SelfRefineEventRecord:
+        row = self.session.execute(
+            select(self_refine_events).where(self_refine_events.c.id == event_id)
+        ).mappings().one_or_none()
+        if row is None:
+            raise NativeExecutionNotFound(f"Self-Refine event not found: {event_id}")
+        return SelfRefineEventRecord.model_validate(dict(row))
+
+    def self_refine_metrics(self, *, work_id: UUID | None = None) -> dict[str, Any]:
+        attempts_query = select(func.count(func.distinct(executor_queue.c.attempt_id)))
+        events_query = select(
+            self_refine_events.c.final_result,
+        )
+        if work_id is not None:
+            attempts_query = attempts_query.where(executor_queue.c.work_id == work_id)
+            events_query = events_query.where(self_refine_events.c.work_id == work_id)
+        attempts = int(self.session.scalar(attempts_query) or 0)
+        results = [row[0] for row in self.session.execute(events_query).all()]
+        count = len(results)
+        return {
+            "native_attempts": attempts,
+            "self_refine_events": count,
+            "self_refine_rate": count / attempts if attempts else 0.0,
+            "recovered": results.count("RECOVERED"),
+            "escalated": results.count("ESCALATED"),
+            "failed": results.count("FAILED"),
+            "active": results.count(None),
+        }
+
     def append_event(self, record: ExecutionEventRecord) -> None:
         """Persist event and outbox atomically in the caller's transaction."""
 
@@ -805,6 +973,16 @@ class NativeExecutionStore:
                 available_at=record.created_at,
             )
         )
+
+    def latest_native_observation(self, attempt_id: UUID) -> dict[str, Any] | None:
+        payload = self.session.execute(
+            select(execution_events.c.payload)
+            .where(execution_events.c.attempt_id == attempt_id)
+            .where(execution_events.c.event_type == "NativeObservationClassified")
+            .order_by(execution_events.c.sequence.desc())
+            .limit(1)
+        ).scalar_one_or_none()
+        return dict(payload) if isinstance(payload, dict) else None
 
     def next_event_sequence(self, pwu_id: UUID) -> int:
         value = self.session.scalar(

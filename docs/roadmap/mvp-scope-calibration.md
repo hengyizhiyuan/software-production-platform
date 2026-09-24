@@ -1,5 +1,9 @@
 # MVP Scope Calibration and Phase-2 Hardening Backlog
 
+> Historical SDK-era MVP scope and dogfood evidence. Not a current executor
+> selection or rollback guide: active execution uses Watt Native Executor with
+> API-key model providers.
+
 ## 1. Status and Authority
 
 This document is the authoritative MVP delivery calibration under Architecture Baseline v0.1.

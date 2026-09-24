@@ -1,0 +1,7 @@
+# Explicit pre-commit qualification only. Normal startup still activates the
+# Current Trusted Baseline; this profile runs the code baked into the image.
+services:
+  app:
+    command: ["python", "/app/docker/start_uncommitted_qualification.py"]
+    environment:
+      SPG_RUNTIME_PROFILE: uncommitted-qualification

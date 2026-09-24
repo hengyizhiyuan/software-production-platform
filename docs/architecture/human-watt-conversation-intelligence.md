@@ -66,11 +66,11 @@ credential handle, endpoint, persistent keep-alive client, strict JSON Schema
 transport, streaming events, normalized failures, request identity, usage and
 timing. WIC business code contains no DeepSeek branch.
 
-The default path does not import `openai_codex`, inspect `CODEX_HOME`, or create
-Codex threads. The legacy Codex SDK adapters remain lazy-loaded behind the
-explicit `codex-sdk` configuration for rollback. Executor profile selection
-remains independent; it may reuse the canonical `SPG_DEEPSEEK_API_KEY` secret
-handle without sharing WIC or Executor high-level inference contracts.
+The WIC and Conversation runtime uses the DeepSeek API-key provider contract.
+There is no external coding-agent SDK adapter or rollback path. Executor
+profile selection remains independent; it may reuse the canonical
+`SPG_DEEPSEEK_API_KEY` secret handle without sharing WIC or Executor high-level
+inference contracts.
 
 ## Structured collaboration result
 

@@ -9,7 +9,7 @@ import logging
 from datetime import UTC, datetime
 from threading import Condition, Event, RLock, Thread, Timer
 from time import monotonic
-from uuid import NAMESPACE_URL, UUID, uuid5
+from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.orchestration import (
     OrchestrationOutcome,
@@ -67,6 +67,8 @@ from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.domain.native_execution import SelfRefineActionRecord, SelfRefineEventRecord
 from spg.infrastructure.model_runtime import ModelProviderError
 
 
@@ -91,6 +93,9 @@ class PlanSteeringDriver:
         max_automatic_transitions: int = DEFAULT_MAX_STEERING_TRANSITIONS,
         provider_retry_base_delay_seconds: float = DEFAULT_PROVIDER_RETRY_BASE_DELAY_SECONDS,
         provider_retry_max_delay_seconds: float = DEFAULT_PROVIDER_RETRY_MAX_DELAY_SECONDS,
+        provider_retry_attempt_budget: int = 3,
+        provider_retry_same_failure_threshold: int = 2,
+        provider_retry_time_budget_seconds: int = 300,
     ) -> None:
         if max_automatic_transitions < 1:
             raise ValueError("Steering transition bound must be positive")
@@ -98,12 +103,17 @@ class PlanSteeringDriver:
             raise ValueError("Provider retry base delay must be positive")
         if provider_retry_max_delay_seconds < provider_retry_base_delay_seconds:
             raise ValueError("Provider retry max delay must not be less than base delay")
+        if min(provider_retry_attempt_budget, provider_retry_same_failure_threshold, provider_retry_time_budget_seconds) < 1:
+            raise ValueError("Provider recovery budgets must be positive")
         self.database = database
         self.work_service = work_service
         self.production_orchestrator = production_orchestrator
         self.max_automatic_transitions = max_automatic_transitions
         self.provider_retry_base_delay_seconds = provider_retry_base_delay_seconds
         self.provider_retry_max_delay_seconds = provider_retry_max_delay_seconds
+        self.provider_retry_attempt_budget = provider_retry_attempt_budget
+        self.provider_retry_same_failure_threshold = provider_retry_same_failure_threshold
+        self.provider_retry_time_budget_seconds = provider_retry_time_budget_seconds
         self.steering = SteeringApplicationService(database)
         self.frames = PlanFrameAssembler(database)
         self.decisions = SteeringDecisionApplicationService(
@@ -131,7 +141,6 @@ class PlanSteeringDriver:
         self._provider_retry_attempts: dict[UUID, int] = {}
         self._provider_retry_timers: dict[UUID, Timer] = {}
         self._retryable_provider_failures: set[UUID] = set()
-        self._last_provider_errors: dict[UUID, str] = {}
         self._stopping = Event()
         self._governed_repository_action: Callable[[UUID, UUID, str], dict | None] | None = None
         listener = getattr(production_orchestrator, "add_outcome_listener", None)
@@ -172,12 +181,19 @@ class PlanSteeringDriver:
                 for reference in frame.reconstruction.active_revision.revision.reality_refs
             )
         )
+        # A newly admitted Human request can supersede a broad design agenda
+        # without first producing a stale Candidate or an active Runtime binding.
+        # Reuse the existing governed plan-revision path rather than continuing
+        # to ask questions from a plan that predates the current Work request.
+        request_revision_unacknowledged = self._unacknowledged_admitted_request(
+            frame, revision_acknowledged=revision_acknowledged
+        )
         other_blockers = tuple(
             blocker
             for blocker in frame.open_blocking_reality
             if blocker.kind is not PlanFrameBlockerKind.CURRENT_RESULT_MAY_BE_INSUFFICIENT
         )
-        if revision_blocked and not revision_acknowledged:
+        if (revision_blocked or request_revision_unacknowledged) and not revision_acknowledged:
             return self._revise_for_current_work_reality(frame, before)
         repository_action = self._repository_action_iteration(frame, before)
         if repository_action is not None:
@@ -213,6 +229,14 @@ class PlanSteeringDriver:
         if current.type is SteeringStepType.PRODUCE:
             if work.production_plan is None:
                 return self._revise_for_missing_production_plan(frame, before)
+            if (
+                work.production_plan.target_kind is ProductionTargetKind.CODE_WORK
+                and self.guided_design.get_optional(work_id) is not None
+                and not self.guided_design.approved_design_artifact_references(work_id)
+            ):
+                return self._revise_for_missing_production_plan(
+                    frame, before, missing_design_artifact=True
+                )
             return self._produce_iteration(frame, before)
         if current.type in {SteeringStepType.DESIGN, SteeringStepType.REFINE}:
             return self._semantic_iteration(frame, before)
@@ -444,8 +468,10 @@ class PlanSteeringDriver:
         self,
         frame: PlanFrame,
         before: str,
+        *,
+        missing_design_artifact: bool = False,
     ) -> SteeringIterationResult:
-        """Recover a legacy/impossible PRODUCE frontier without rewriting history."""
+        """Recover an inadmissible PRODUCE frontier without rewriting history."""
 
         references = tuple(item.reference for item in frame.basis.resolved_reality)
         self.steering.revise_plan(
@@ -455,6 +481,8 @@ class PlanSteeringDriver:
                     frame.reconstruction.active_revision.revision.id
                 ),
                 rationale=(
+                    "Recover the missing approved design artifact before code production."
+                    if missing_design_artifact else
                     "Recover the admitted Work Reality by rebuilding the missing "
                     "current Production Plan before any production cycle is admitted."
                 ),
@@ -463,10 +491,15 @@ class PlanSteeringDriver:
                     SteeringStepSpec(
                         type=SteeringStepType.DESIGN,
                         objective=(
+                            "Prepare the exact design artifact required for the latest "
+                            "admitted change"
+                            if missing_design_artifact else
                             "Rebuild the exact bounded production direction for the "
                             "latest admitted Work Reality"
                         ),
                         completion_condition=(
+                            "A bounded design-artifact Production Plan is materialized"
+                            if missing_design_artifact else
                             "A current reviewable Production Plan is materialized"
                         ),
                         state=SteeringStepState.CURRENT,
@@ -510,6 +543,13 @@ class PlanSteeringDriver:
 
     def activate(self, work_id: UUID) -> SteeringActivationResult:
         """Continue bounded stepwise actions until a typed stop is reached."""
+
+        if self._provider_failure_escalated(work_id):
+            return SteeringActivationResult(
+                work_id=work_id,
+                iterations_executed=0,
+                stop_reason=SteeringDriverStopReason.CAPABILITY_UNAVAILABLE,
+            )
 
         iterations = 0
         last_action = None
@@ -607,15 +647,49 @@ class PlanSteeringDriver:
 
         scheduled: list[UUID] = []
         for work in self.work_service.list_works():
+            stale_attention_with_new_request = False
+            if work.steering_enabled and work.status is WorkStatus.NEEDS_ATTENTION:
+                try:
+                    frame = self.frames.assemble(work.work_id)
+                    stale_attention_with_new_request = self._unacknowledged_admitted_request(
+                        frame
+                    )
+                except (SteeringInvariantViolation, ProductInvariantViolation):
+                    pass
             if (
                 work.steering_enabled
-                and work.status in {WorkStatus.READY, WorkStatus.RUNNING}
+                and (
+                    work.status in {WorkStatus.READY, WorkStatus.RUNNING}
+                    or stale_attention_with_new_request
+                )
                 and not self.production_orchestrator.is_active(work.work_id)
                 and self._restart_eligible(work.work_id)
                 and self.schedule(work.work_id)
             ):
                 scheduled.append(work.work_id)
         return tuple(scheduled)
+
+    def _unacknowledged_admitted_request(
+        self, frame: PlanFrame, *, revision_acknowledged: bool | None = None,
+    ) -> bool:
+        if frame.work_reality_revision_id is None:
+            return False
+        if revision_acknowledged is None:
+            revision_acknowledged = any(
+                reference.kind is RealityReferenceKind.WORK_REALITY_REVISION
+                and reference.identity == frame.work_reality_revision_id
+                for reference in frame.reconstruction.active_revision.revision.reality_refs
+            )
+        if revision_acknowledged:
+            return False
+        with self.database.unit_of_work() as uow:
+            revision = ProductStore(uow.session).current_work_reality_revision(frame.work_id)
+        return bool(
+            revision is not None
+            and revision.id == frame.work_reality_revision_id
+            and revision.source_kind == "INTERACTION_ASSESSMENT"
+            and "requests" in revision.change_set
+        )
 
     def project(self, work_id: UUID) -> SteeringPlanProjection:
         reconstruction = self.steering.reconstruct(work_id)
@@ -1332,21 +1406,103 @@ class PlanSteeringDriver:
     def _record_provider_failure(
         self, work_id: UUID, error: ModelProviderError
     ) -> None:
-        with self._condition:
-            self._last_provider_errors[work_id] = str(error)
-            if error.retryable:
-                self._retryable_provider_failures.add(work_id)
-                self._provider_retry_attempts[work_id] = (
-                    self._provider_retry_attempts.get(work_id, 0) + 1
+        now = datetime.now(UTC)
+        family = f"PROVIDER_{error.kind.value}"
+        signature = sha256(f"{family}:{error.retryable}".encode("utf-8")).hexdigest()
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+            revision_id = None if revision is None else str(revision.id)
+            event = store.open_self_refine_event(work_id)
+            if event is None:
+                event_id = uuid4()
+                event = SelfRefineEventRecord(
+                    id=event_id, work_id=work_id, operation_id=work_id,
+                    created_at=now, failure_family=family,
+                    failure_signature=signature, affected_component="steering/provider",
+                    expected_reality={"outcome": "GOVERNED_STEERING_PROGRESSION", "work_revision_id": revision_id},
+                    observed_reality={"provider_kind": error.kind.value, "retryable": error.retryable},
+                    diagnosis_summary="Steering Provider did not return an admissible result.",
+                    root_cause_classification=family,
+                    repair_hypothesis="Retry the same governed semantic basis after bounded backoff without changing Human authority.",
+                    evidence_references=(f"work:{work_id}",),
+                    known_failure_match=store.prior_self_refine_matches(signature, before_event_id=event_id) > 0,
+                    updated_at=now,
                 )
+                store.insert_self_refine_event(event)
+            actions = store.self_refine_actions(event.id)
+            same = sum(
+                action.observed_reality.get("failure_signature") == signature
+                for action in actions
+            ) + 1
+            exhausted = (
+                not error.retryable
+                or len(actions) + 1 > self.provider_retry_attempt_budget
+                or same >= self.provider_retry_same_failure_threshold
+                or (now - event.created_at).total_seconds() >= self.provider_retry_time_budget_seconds
+            )
+            store.append_self_refine_action(SelfRefineActionRecord(
+                id=uuid4(), event_id=event.id, sequence=len(actions) + 1,
+                created_at=now,
+                repair_action=(
+                    "Escalate Provider failure; current evidence does not justify another retry"
+                    if exhausted else "Retry governed Steering against the same persisted Work Reality"
+                ),
+                observed_reality={"failure_signature": signature, "work_revision_id": revision_id},
+                evidence_references=(f"work:{work_id}",),
+                outcome="ESCALATED" if exhausted else "RETRY_SCHEDULED",
+            ))
+            if exhausted:
+                store.complete_self_refine_event(
+                    event.id, result="ESCALATED", resume_result="NOT_RESUMED",
+                    status="MITIGATED", elapsed_seconds=max(0, int((now - event.created_at).total_seconds())),
+                    updated_at=now, compute_overhead={"provider_attempts": len(actions) + 1},
+                )
+            uow.commit()
+        with self._condition:
+            if error.retryable and not exhausted:
+                self._retryable_provider_failures.add(work_id)
+                self._provider_retry_attempts[work_id] = len(actions) + 1
             else:
                 self._retryable_provider_failures.discard(work_id)
 
     def _clear_provider_failure(self, work_id: UUID) -> None:
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            event = store.open_self_refine_event(work_id)
+            if event is not None and event.affected_component == "steering/provider":
+                now = datetime.now(UTC)
+                actions = store.self_refine_actions(event.id)
+                store.append_self_refine_action(SelfRefineActionRecord(
+                    id=uuid4(), event_id=event.id, sequence=len(actions) + 1,
+                    created_at=now,
+                    repair_action="Re-observe governed Steering progression after Provider recovery",
+                    observed_reality={"provider_result": "ADMITTED"},
+                    evidence_references=(f"work:{work_id}",),
+                    outcome="RECOVERED",
+                ))
+                store.complete_self_refine_event(
+                    event.id, result="RECOVERED", resume_result="RESUMED",
+                    status="VERIFIED", elapsed_seconds=max(0, int((now - event.created_at).total_seconds())),
+                    updated_at=now, compute_overhead={"provider_attempts": len(actions) + 1},
+                )
+                uow.commit()
         with self._condition:
             self._retryable_provider_failures.discard(work_id)
             self._provider_retry_attempts.pop(work_id, None)
-            self._last_provider_errors.pop(work_id, None)
+
+    def _provider_failure_escalated(self, work_id: UUID) -> bool:
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            latest = store.list_self_refine_events(
+                work_id=work_id, component="steering/provider", limit=1,
+            )
+            if not latest or latest[0].final_result != "ESCALATED":
+                return False
+            revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+            return latest[0].expected_reality.get("work_revision_id") == (
+                None if revision is None else str(revision.id)
+            )
 
     def _provider_failure_is_retryable(self, work_id: UUID) -> bool:
         with self._condition:

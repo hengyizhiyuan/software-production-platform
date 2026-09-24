@@ -34,6 +34,7 @@ from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.application.orchestration import OrchestrationStopReason, ProductionOrchestrator
 from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.production_admission import ProductionAdmissionTrigger
+from spg.application.repository_branch_authority import governed_branch_creation_target
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.runtime import RuntimeService
 from spg.application.semantic_steps import SemanticStepApplicationService
@@ -134,6 +135,7 @@ from spg.domain.steering import (
     SemanticStepResultCandidate,
     SteeringAuthorityAssessment,
     SteeringActionType,
+    SteeringInvariantViolation,
 )
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_schema import (
@@ -178,7 +180,6 @@ from spg.providers.deterministic_executor import (
     DeterministicTestExecutor,
 )
 from spg.providers.deterministic_verifier import DeterministicVerificationProvider
-from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
 from spg.domain.verification import (
     VerificationCapabilityRequest,
     VerificationResultValue,
@@ -342,9 +343,11 @@ class _CourseScheduleSemanticCapability:
 class _ExplicitBranchSemanticCapability:
     def __init__(
         self, *, provider_variant: bool = False, actual_provider_fact: bool = False,
+        branch_name: str = "test",
     ) -> None:
         self.provider_variant = provider_variant
         self.actual_provider_fact = actual_provider_fact
+        self.branch_name = branch_name
 
     def interpret(self, basis: InteractionInterpretationInput) -> InteractionAssessmentCandidate:
         revision = basis.active_work_context.work_revision
@@ -356,7 +359,7 @@ class _ExplicitBranchSemanticCapability:
                 SemanticRelation.REFERENCE if self.provider_variant or self.actual_provider_fact
                 else SemanticRelation.EQUALITY
             ),
-            value="test",
+            value=self.branch_name,
             qualifiers=(
                 {} if self.actual_provider_fact else {"branch_kind": "new"} if self.provider_variant
                 else {"state": "to_be_created"}
@@ -364,7 +367,7 @@ class _ExplicitBranchSemanticCapability:
             authority=SemanticFactAuthority.HUMAN_EXPLICIT,
             epistemic_status=SemanticEpistemicStatus.CONFIRMED,
             source_record_ids=(latest.id,),
-            source_text="test" if self.provider_variant or self.actual_provider_fact else latest.content,
+            source_text=self.branch_name if self.provider_variant or self.actual_provider_fact else latest.content,
             role_origin=SemanticRoleOrigin.EXPLICIT,
         )
         action = EngineeringSemanticFactCandidate(
@@ -381,12 +384,12 @@ class _ExplicitBranchSemanticCapability:
         return InteractionAssessmentCandidate(
             interpreted_motive=revision.motive,
             desired_outcome=(
-                f"{revision.desired_outcome} 创建 test 分支"
+                f"{revision.desired_outcome} 创建 {self.branch_name} 分支"
                 if self.actual_provider_fact else revision.desired_outcome
             ),
             candidate_context=revision.context_facts,
             candidate_constraints=(
-                (*revision.constraints, "后续开发基于 test 分支（模型推断）")
+                (*revision.constraints, f"后续开发基于 {self.branch_name} 分支（模型推断）")
                 if self.actual_provider_fact else revision.constraints
             ),
             current_requests=(*revision.requests, latest.content),
@@ -396,7 +399,7 @@ class _ExplicitBranchSemanticCapability:
             ),
             focus_classification=WorkFocusClassification.ON_TOPIC,
             impact_disposition=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
-            natural_response="已记录创建 test 分支的明确请求，等待 Work Reality 接纳。",
+            natural_response=f"已记录创建 {self.branch_name} 分支的明确请求，等待 Work Reality 接纳。",
             provider_identity="test:explicit-branch-semantic",
         )
 
@@ -2585,8 +2588,9 @@ def test_repository_acquisition_unexpected_effect_failure_is_terminalized(
 
 
 @pytest.mark.parametrize(
-    "provider_variant,actual_provider_fact",
-    ((False, False), (True, False), (False, True)),
+    "provider_variant,actual_provider_fact,branch_name",
+    ((False, False, "test"), (True, False, "test"), (False, True, "test"),
+     (False, True, "feat_test")),
 )
 def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     postgres_database: Database,
@@ -2594,6 +2598,7 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     services,
     provider_variant: bool,
     actual_provider_fact: bool,
+    branch_name: str,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     if subprocess.run(("docker", "image", "inspect", "watt-native-executor-runtime:local"), capture_output=True).returncode:
@@ -2666,22 +2671,31 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
             work_id=work_id,
             operation_kind="CREATE_BRANCH",
             base_resource_id=UUID(acquired["resource_id"]),
-            target_branch="test",
+            target_branch=branch_name,
         ))
     branch_interactions = WorkInteractionService(
         postgres_database,
         capability=_ExplicitBranchSemanticCapability(
             provider_variant=provider_variant,
             actual_provider_fact=actual_provider_fact,
+            branch_name=branch_name,
         ),
     )
     pending = branch_interactions.append_and_assess(
         ready.interaction.id,
-        "为了后续开发，请切一个新分支：test",
+        f"为了后续开发，请切一个新分支：{branch_name}",
         human_identity="human:test",
     )
     proposal = pending.latest_assessment
     assert proposal is not None
+    assert governed_branch_creation_target(
+        proposal.engineering_semantic_facts,
+        record_for_id=lambda _record_id: None,
+    ) == branch_name, tuple(
+        (fact.subject, fact.value, fact.qualifiers, fact.authority)
+        for fact in current_semantic_facts(proposal.engineering_semantic_facts)
+        if fact.subject.startswith("repository.branch")
+    )
     with postgres_database.unit_of_work() as uow:
         base_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
     assert base_revision is not None
@@ -2701,14 +2715,14 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
         answer = trigger.execute_explicit_branch_turn(
             ready.interaction.id, proposal, pending.records[-1],
         )
-        assert answer is not None and "已从当前仓库基线创建并绑定本地分支 test" in answer, {
+        assert answer is not None and f"已从当前仓库基线创建并绑定本地分支 {branch_name}" in answer, {
             key: value for key, value in service.latest_attempt_for_work(work_id).items()
             if key in {"condition", "failure_category", "human_message", "technical_evidence"}
         }
         with postgres_database.unit_of_work() as uow:
             branch_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
         assert branch_revision is not None
-        assert branch_revision.repository_ref == "refs/heads/test"
+        assert branch_revision.repository_ref == f"refs/heads/{branch_name}"
         assert branch_revision.source_revision == acquired["revision"]
         assert branch_revision.constraints == base_revision.constraints
         assert branch_revision.desired_outcome == base_revision.desired_outcome
@@ -2729,9 +2743,21 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     subjects = {
         fact.subject for fact in current_semantic_facts(branch_revision.engineering_semantic_facts)
     }
-    assert ("repository.branch.name" if actual_provider_fact else "repository.branch_name") in subjects
-    if not provider_variant and not actual_provider_fact:
-        assert "repository.branch_action" in subjects
+    assert "repository.branch_name" in subjects
+    assert "repository.branch.name" not in subjects
+    assert "repository.branch_action" in subjects
+    branch_facts = {
+        fact.subject: fact
+        for fact in current_semantic_facts(branch_revision.engineering_semantic_facts)
+        if fact.subject in {"repository.branch_name", "repository.branch_action"}
+    }
+    assert branch_facts["repository.branch_name"].value == branch_name
+    assert branch_facts["repository.branch_name"].qualifiers == {"state": "to_be_created"}
+    assert all(
+        fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
+        and pending.records[-1].id in fact.provenance.source_record_ids
+        for fact in branch_facts.values()
+    )
     steering_bootstrap = SteeringBootstrapService(postgres_database)
     steering_bootstrap.bootstrap(work_id)
     orchestrator = ProductionOrchestrator(work_service)
@@ -2808,12 +2834,12 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
 
     assert branch["condition"] == "READY"
     assert branch["operation_kind"] == "CREATE_BRANCH"
-    assert branch["target_branch"] == "test"
-    assert branch["repository_ref"] == "refs/heads/test"
+    assert branch["target_branch"] == branch_name
+    assert branch["repository_ref"] == f"refs/heads/{branch_name}"
     assert branch["revision"] == acquired["revision"]
     assert branch["operation_evidence"]["capability_id"] == "git.branch.create"
     assert branch["operation_evidence"]["connector_id"] == "builtin:git"
-    assert branch["operation_evidence"]["resulting_branch"] == "refs/heads/test"
+    assert branch["operation_evidence"]["resulting_branch"] == f"refs/heads/{branch_name}"
     assert branch["operation_evidence"]["resulting_revision"] == acquired["revision"]
     assert branch["operation_evidence"]["verified"] is True
     assert branch["operation_evidence"]["native_attempt_id"]
@@ -2869,23 +2895,23 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
         user_id="human:other", operation_ref="task-contract:branch-inspect",
     ))
     record_id = UUID(branch["operation_evidence"]["production_record_id"])
-    assert service.native_git_operations.production_environment.store.get_git_operation_record(record_id).resulting_branch == "test"
+    assert service.native_git_operations.production_environment.store.get_git_operation_record(record_id).resulting_branch == branch_name
     repeated = service.execute_intake(UUID(branch["intake_request_id"]))
     assert repeated["operation_evidence"]["production_record_id"] == str(record_id)
     assert repeated["operation_evidence"]["native_attempt_id"] == branch["operation_evidence"]["native_attempt_id"]
     assert branch_resource.repository_identity != main_resource.repository_identity
     assert _git(Path(main_resource.location_ref), "branch", "--show-current") == "main"
-    assert _git(Path(branch_resource.location_ref), "branch", "--show-current") == "test"
+    assert _git(Path(branch_resource.location_ref), "branch", "--show-current") == branch_name
     assert _git(Path(branch_resource.location_ref), "remote", "get-url", "origin") == str(source_repository)
     with postgres_database.unit_of_work() as uow:
         bound_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
     assert bound_revision is not None
-    assert bound_revision.repository_ref == "refs/heads/test"
+    assert bound_revision.repository_ref == f"refs/heads/{branch_name}"
     assert bound_revision.source_revision == branch["revision"]
     answer = _repository_branch_status_answer(
         "当前项目在哪个分支？", interactions.get_shared_understanding(ready.interaction.id)
     )
-    assert answer is not None and "test" in answer and branch["revision"] in answer
+    assert answer is not None and branch_name in answer and branch["revision"] in answer
     shadow = WorkInteractionService(
         postgres_database,
         capability=_ExplicitBranchSemanticCapability(provider_variant=True),
@@ -2905,7 +2931,7 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
             time.sleep(0.01)
         assert state.status is InteractionTurnStatus.COMPLETED, state.failure_message
         response = shadow.get_shared_understanding(ready.interaction.id).conversation_messages[-1].content
-        assert "本地分支是 test" in response
+        assert f"本地分支是 {branch_name}" in response
         assert branch["revision"] in response
         assert "推送到远端" in response
     finally:
@@ -3053,94 +3079,6 @@ def test_advisory_and_exploration_turns_do_not_auto_admit_work(
 
     assert turn["status"] == "COMPLETED"
     assert payload["governed_work_id"] is None
-
-
-@pytest.mark.real_codex
-def test_guided_design_real_provider_leads_multi_step_design_without_production(
-    postgres_database: Database,
-    services,
-) -> None:
-    if os.environ.get("SPG_RUN_REAL_GUIDED_DESIGN") != "1":
-        pytest.skip(
-            "set SPG_RUN_REAL_GUIDED_DESIGN=1 for the authorized Guided Design proof"
-        )
-    work, _interactions = services
-    interactions = WorkInteractionService(
-        postgres_database,
-        capability=_GeneralProductDesignCapability(),
-    )
-    interaction = interactions.create_interaction(human_identity="human:proof")
-    shared = interactions.append_and_assess(
-        interaction.id,
-        "我想做一个运营管理平台。",
-        human_identity="human:proof",
-    )
-    shared = interactions.append_and_assess(
-        interaction.id,
-        (
-            "这个平台主要服务中小团队的运营负责人和一线运营人员，解决计划、"
-            "执行、结果反馈分散而难以形成闭环的问题。第一阶段希望让团队能从"
-            "运营目标形成计划、跟踪执行并把结果反馈到下一轮计划；不包含完整"
-            "企业 ERP、财务结算或大规模组织权限重构。"
-        ),
-        human_identity="human:proof",
-    )
-    assert shared.latest_assessment is not None
-    admitted = work.admit_interaction_work(
-        interaction.id,
-        assessment_id=shared.latest_assessment.id,
-        basis_fingerprint=shared.latest_assessment.basis_fingerprint,
-        authority_identity="human:guided-design-proof",
-        rationale="Admit the bounded product-design proof, not production.",
-    )
-    plan = SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
-    orchestrator = ProductionOrchestrator(work)
-    driver = PlanSteeringDriver(
-        postgres_database,
-        work,
-        orchestrator,
-        semantic_capability=CodexSdkSemanticStepCapability(timeout_seconds=180),
-        max_automatic_transitions=32,
-    )
-    try:
-        outcome = driver.activate(admitted.work_id)
-    finally:
-        orchestrator.shutdown()
-        driver.shutdown()
-
-    reconstructed = SteeringApplicationService(postgres_database).reconstruct(
-        admitted.work_id
-    )
-    guided = GuidedDesignApplicationService(postgres_database).get(admitted.work_id)
-    assert reconstructed.steering_plan_id == plan.steering_plan_id
-    assert len(reconstructed.semantic_results) >= 2
-    assert len(
-        [issue for issue in guided.issues if issue.state is DesignIssueState.SATISFIED]
-    ) >= 2
-    assert guided.agenda_revision_number >= 3
-    assert outcome.stop_reason.value == "HUMAN_ATTENTION"
-    assert guided.current_focus is not None
-    attention = work.list_attention(work_id=admitted.work_id)
-    assert attention
-    print(
-        "GUIDED_DESIGN_REAL_PROOF",
-        {
-            "semantic_results": len(reconstructed.semantic_results),
-            "agenda_revision": guided.agenda_revision_number,
-            "satisfied_issues": [
-                issue.key
-                for issue in guided.issues
-                if issue.state is DesignIssueState.SATISFIED
-            ],
-            "current_focus": guided.current_focus_key,
-            "readiness": guided.readiness.state.value,
-            "attention_kind": attention[0].kind.value,
-            "provider_threads": len(reconstructed.semantic_results),
-            "provider_turns": len(reconstructed.semantic_results),
-        },
-    )
-    for table in PRODUCTION_TABLES:
-        assert _count(postgres_database, table) == 0, table.name
 
 
 @pytest.mark.parametrize(
@@ -3847,6 +3785,79 @@ def _complete_wic_work(
     assert completed.current_step.type is SteeringStepType.COMPLETE
     assert work_service.get_work(admitted.work_id).status is WorkStatus.COMPLETED
     return work_service
+
+
+def test_new_admitted_request_revises_stale_design_agenda_without_runtime_result(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    initial = SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    old_plan_revision = initial.active_revision.revision
+    active = WorkInteractionService(
+        postgres_database,
+        capability=_ActiveCapability(
+            focus=WorkFocusClassification.ON_TOPIC,
+            impact=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
+            request="Add the exact work-panel header link to https://docs.gognlv.work.",
+        ),
+    )
+    pending = active.append_and_assess(
+        ready.interaction.id,
+        "在工作面板页的页头加上工律使用文档链接。",
+        human_identity="human:test",
+    )
+    assessment = pending.latest_assessment
+    assert assessment is not None
+    work.decide_interaction_work_revision(
+        ready.interaction.id,
+        assessment_id=assessment.id,
+        basis_fingerprint=assessment.basis_fingerprint,
+        expected_previous_revision_id=admitted.current_work_reality_revision_id,
+        action=AttentionAction.APPROVE,
+        authority_identity="human:governor",
+    )
+    with postgres_database.unit_of_work() as uow:
+        revision = ProductStore(uow.session).current_work_reality_revision(admitted.work_id)
+    assert revision is not None and "requests" in revision.change_set
+    driver = PlanSteeringDriver(postgres_database, work, _NoopOrchestrator())
+    try:
+        assert driver._unacknowledged_admitted_request(
+            PlanFrameAssembler(postgres_database).assemble(admitted.work_id)
+        ) is True
+        iteration = driver.iterate(admitted.work_id)
+    finally:
+        driver.shutdown()
+    assert iteration.action is SteeringActionType.PLAN_REVISION
+    assert iteration.progressed is True
+    current = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
+    assert current.active_revision.revision.id != old_plan_revision.id
+    assert RealityReference(
+        kind=RealityReferenceKind.WORK_REALITY_REVISION,
+        identity=revision.id,
+    ) in current.active_revision.revision.reality_refs
+    assert current.current_step.objective.startswith("Reassess the latest admitted change")
+    assert GuidedDesignApplicationService(postgres_database).get_optional(
+        admitted.work_id
+    ) is not None
+    semantic_input = SemanticStepApplicationService(
+        postgres_database, None, work_service=work,
+    ).assemble_input(admitted.work_id)
+    assert semantic_input.design_context is None
+    assert semantic_input.production_proposal_required is True
+    assert semantic_input.required_intermediate_artifacts == (
+        "APPROVED_DESIGN_ARTIFACT",
+    )
+    with pytest.raises(
+        SteeringInvariantViolation,
+        match="Implementation cannot be proposed before a design artifact",
+    ):
+        SemanticStepApplicationService(
+            postgres_database, _UnguidedSemanticCapability(), work_service=work,
+        ).execute(admitted.work_id)
+    assert work.get_work(admitted.work_id).production_plan is None
 
 
 def test_wic4_completed_work_continuation_reopens_satisfaction_without_rewriting_completion(

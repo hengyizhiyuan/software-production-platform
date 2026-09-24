@@ -498,7 +498,11 @@ print(json.dumps(result, sort_keys=True))
             if candidate.is_absolute() or ".." in candidate.parts:
                 raise ValueError("process arguments cannot escape the execution workspace")
         cwd = self._cwd(str(request.proposal.arguments.get("cwd", ".")))
-        observation = await self._execute(tuple(argv), cwd=cwd)
+        observation = await self._execute(
+            tuple(argv),
+            cwd=cwd,
+            python_source_path=f"{self.workspace_root}/src",
+        )
         output = {
             "argv": argv,
             "cwd": str(request.proposal.arguments.get("cwd", ".")),
@@ -523,11 +527,21 @@ print(json.dumps(result, sort_keys=True))
             settled=observation.result.exit_code == 0,
         )
 
-    async def _execute(self, argv: tuple[str, ...], *, cwd: str):
+    async def _execute(
+        self,
+        argv: tuple[str, ...],
+        *,
+        cwd: str,
+        python_source_path: str | None = None,
+    ):
         return await asyncio.to_thread(
             self.provider.execute_observed,
             self.handle,
-            EnvironmentCommand(argv=argv, working_directory=cwd),
+            EnvironmentCommand(
+                argv=argv,
+                working_directory=cwd,
+                python_source_path=python_source_path,
+            ),
         )
 
     def _result(self, request, identity, output, observation, *, settled: bool):

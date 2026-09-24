@@ -83,10 +83,15 @@ class EnvironmentRuntimeState(StrEnum):
 
 class PreviewRuntimeStatus(StrEnum):
     CREATED = "CREATED"
+    REQUESTED = "REQUESTED"
+    PREPARING = "PREPARING"
+    BUILDING = "BUILDING"
     STARTING = "STARTING"
     READY = "READY"
     NOT_READY = "NOT_READY"
+    STOPPING = "STOPPING"
     STOPPED = "STOPPED"
+    STALE = "STALE"
     FAILED = "FAILED"
 
 
@@ -311,6 +316,54 @@ class PreviewRuntimeV1(ProductionEnvironmentContract):
                 raise ValueError("READY Preview requires an ACTIVE environment")
             if self.endpoint is None:
                 raise ValueError("READY Preview requires an endpoint")
+        return self
+
+
+class CandidatePreviewMode(StrEnum):
+    STATIC_PREVIEW = "STATIC_PREVIEW"
+    FRONTEND_RUNTIME = "FRONTEND_RUNTIME"
+    FULL_APPLICATION_RUNTIME = "FULL_APPLICATION_RUNTIME"
+
+
+class CandidatePreviewSessionV1(ProductionEnvironmentContract):
+    """Mutable current projection; each version is retained by the PE store."""
+
+    id: UUID
+    work_id: UUID
+    candidate_id: UUID
+    candidate_fingerprint: str = Field(min_length=1)
+    repository_identity: str = Field(min_length=1)
+    repository_revision: str = Field(pattern=GIT_OBJECT_PATTERN)
+    repository_tree: str = Field(pattern=GIT_OBJECT_PATTERN)
+    workspace_id: UUID
+    environment_id: UUID
+    mode: CandidatePreviewMode
+    status: PreviewRuntimeStatus
+    definition_version: str = Field(min_length=1)
+    endpoint: str | None = None
+    image_reference: str | None = None
+    service_identities: tuple[str, ...] = ()
+    resource_references: tuple[str, ...] = ()
+    evidence: tuple[dict[str, Any], ...] = ()
+    failure_code: str | None = None
+    failure_reason: str | None = None
+    version: int = Field(default=1, ge=1)
+    created_at: datetime
+    updated_at: datetime
+
+    _created_timezone = field_validator("created_at")(require_timezone)
+    _updated_timezone = field_validator("updated_at")(require_timezone)
+
+    @model_validator(mode="after")
+    def validate_reality(self) -> "CandidatePreviewSessionV1":
+        if self.updated_at < self.created_at:
+            raise ValueError("Preview update predates creation")
+        if self.status is PreviewRuntimeStatus.READY and (
+            not self.endpoint or not self.image_reference or not self.service_identities
+        ):
+            raise ValueError("READY Preview requires endpoint, image, and running services")
+        if self.status in {PreviewRuntimeStatus.STOPPED, PreviewRuntimeStatus.STALE, PreviewRuntimeStatus.FAILED} and self.endpoint:
+            raise ValueError("Stopped or failed Preview cannot advertise an endpoint")
         return self
 
 
@@ -566,8 +619,12 @@ class EnvironmentProvisionRequest(ProductionEnvironmentContract):
 class EnvironmentCommand(ProductionEnvironmentContract):
     argv: tuple[str, ...] = Field(min_length=1)
     working_directory: str
+    python_source_path: str | None = None
 
     _safe_working_directory = field_validator("working_directory")(safe_workspace_path)
+    _safe_python_source_path = field_validator("python_source_path")(
+        lambda value: None if value is None else safe_workspace_path(value)
+    )
 
     @field_validator("argv")
     @classmethod

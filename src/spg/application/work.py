@@ -6,7 +6,7 @@ import json
 from pathlib import Path, PurePosixPath
 import re
 import subprocess
-from typing import Protocol
+from typing import Callable, Protocol
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.completion import CompletionService
@@ -231,8 +231,14 @@ class WorkApplicationService:
             observer=self.execution.observer,
         )
         self.governance = CandidateGovernanceService(database)
+        self.candidate_authorization_guard: Callable[[UUID, UUID], None] | None = None
         self.integration = RepositoryIntegrationService(database)
         self.runtime_commit = RuntimeCommitService(database)
+
+    def configure_candidate_authorization_guard(
+        self, guard: Callable[[UUID, UUID], None],
+    ) -> None:
+        self.candidate_authorization_guard = guard
 
     def create_goal(self, title: str, description: str | None = None) -> GoalRecord:
         title = title.strip()
@@ -884,11 +890,22 @@ class WorkApplicationService:
                 branch_facts = tuple(
                     fact for fact in assessment.engineering_semantic_facts
                     if fact.id not in prior_ids
-                    and fact.subject in BRANCH_FACT_SUBJECTS
-                    and fact.value == target
+                    and (
+                        (fact.subject in BRANCH_FACT_SUBJECTS and fact.value == target)
+                        or (
+                            fact.subject == "repository.branch_action"
+                            and fact.value == "创建新分支"
+                        )
+                    )
                     and records[-1].id in fact.provenance.source_record_ids
                 )
-                if target is None or len(branch_facts) != 1:
+                if (
+                    target is None
+                    or len(branch_facts) != 2
+                    or {fact.subject for fact in branch_facts} != {
+                        "repository.branch_name", "repository.branch_action"
+                    }
+                ):
                     raise ProductInvariantViolation(
                         "Branch-only revision requires one exact Human branch command"
                     )
@@ -2097,12 +2114,13 @@ class WorkApplicationService:
                 )
             if (
                 report.outcome.value not in {"FAILURE", "UNKNOWN"}
-                or facts.artifact_paths
                 or facts.runtime_commit_id is not None
+                or facts.candidate_id is not None
+                or facts.authorization_id is not None
             ):
                 raise ProductInvariantViolation(
-                    "production retry is allowed only after a failed dispatch "
-                    "without observed artifacts"
+                    "production retry requires a failed dispatch without an "
+                    "authoritative Candidate or Runtime commit"
                 )
             if attempt.generation > 3:
                 raise ProductInvariantViolation(
@@ -2852,6 +2870,8 @@ class WorkApplicationService:
                 summary = product.runtime_summary(binding)
             if summary.candidate_id is None:
                 raise ProductInvariantViolation("Candidate Attention lost its subject")
+            if self.candidate_authorization_guard is not None:
+                self.candidate_authorization_guard(attention.work_id, summary.candidate_id)
             candidate = self.governance.candidate(summary.candidate_id)
             self.governance.authorize_candidate(
                 HumanAuthorizationRequest(

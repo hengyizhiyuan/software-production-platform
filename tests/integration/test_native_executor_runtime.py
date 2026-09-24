@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 from threading import Barrier
 from uuid import UUID, uuid4
 
@@ -27,20 +28,26 @@ from spg.domain.native_execution import (
     BackendControlCommand,
     CapabilityGrant,
     ControlAction,
+    EffectCondition,
     ExecutionHandle,
     ExecutionEventRecord,
     ExecutionMode,
     InferenceAction,
+    InferenceDecisionRejected,
+    InferenceProviderObservation,
     InferenceRequest,
     InferenceResponse,
+    InferenceUsage,
     KernelCheckpoint,
     KernelRunResult,
     NativeExecutionAdmission,
     NativeExecutionConflict,
+    ObservationConfidence,
     PWUContractVersionRecord,
     QueueCondition,
     QueueProgressionState,
     ResourceEnvelope,
+    RepairabilityClassification,
     ResourceReservationCondition,
     ResourceUsageEntryRecord,
     SourceMember,
@@ -76,7 +83,6 @@ from spg.infrastructure.executor_runtime.local_storage import (
     WorkspaceArchiveStore,
 )
 from spg.infrastructure.executor_runtime.backends import (
-    LegacyCodexExecutionBackend,
     NativeExecutionBackend,
     PinnedExecutionBackendRouter,
 )
@@ -88,6 +94,9 @@ from spg.infrastructure.executor_runtime.inference import (
 from spg.infrastructure.executor_runtime.runtime_ports import DurableCheckpointPort
 from spg.infrastructure.executor_runtime.runtime_ports import DurableKernelAudit
 from spg.infrastructure.executor_runtime.worker import NativeExecutionWorker
+from spg.executor.kernel import NativeExecutorKernel
+from spg.executor.tools import NativeToolRegistry, ToolDefinition
+from spg.infrastructure.executor_runtime.inference import ScriptedInferenceAdapter
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.native_execution_schema import (
@@ -185,7 +194,10 @@ def _authority(database: Database, repository: Path):
     return spine, attempt
 
 
-def _admission(database: Database, repository: Path, *, command_id=None, actor="human:test"):
+def _admission(
+    database: Database, repository: Path, *, command_id=None, actor="human:test",
+    contract_payload: dict | None = None,
+):
     spine, attempt = _authority(database, repository)
     commit = _git(repository, "rev-parse", "HEAD")
     tree = _git(repository, "rev-parse", "HEAD^{tree}")
@@ -212,7 +224,7 @@ def _admission(database: Database, repository: Path, *, command_id=None, actor="
         mounts=(WorkspaceMount(mount_id="primary", host_path=str(repository), container_path="/workspace/primary", writable=True, write_scope=("README.md",), forbidden_paths=(".git",)),),
         evidence_namespace="qualification", retention_policy="test",
     )
-    payload = {"objective": "change one bounded file", "verification": ["targeted test"]}
+    payload = contract_payload or {"objective": "change one bounded file", "verification": ["targeted test"]}
     contract = PWUContractVersionRecord(
         id=uuid4(), pwu_id=spine.work_unit.id, revision=1,
         objective="change one bounded file", contract_payload=payload,
@@ -945,64 +957,6 @@ def test_lost_workspace_without_complete_bundle_fails_recovery_promise(
     assert not successor_path.exists()
 
 
-def test_operational_backend_cutover_and_rollback_preserve_active_native_reader(
-    postgres_database: Database, git_repository: Path
-) -> None:
-    runtime = NativeExecutorRuntimeService(postgres_database)
-    admission = _admission(postgres_database, git_repository)
-    legacy_handles: dict[UUID, ExecutionHandle] = {}
-
-    async def legacy_start(command):
-        handle = ExecutionHandle(
-            backend_identity="legacy-codex",
-            dispatch_id=uuid4(),
-            attempt_id=command.binding.attempt_id,
-            generation=command.binding.generation,
-            opaque_reference=f"legacy:{command.binding.attempt_id}",
-        )
-        legacy_handles[handle.attempt_id] = handle
-        return handle
-
-    async def legacy_observe(handle):
-        assert legacy_handles[handle.attempt_id] == handle
-        return BackendObservation(
-                handle=handle,
-                runtime_mode=ExecutionMode.QUEUED,
-                terminal_outcome=None,
-                current_checkpoint_id=None,
-                progress_summary="legacy handle remains readable",
-            observed_at=datetime.now(timezone.utc),
-        )
-
-    router = PinnedExecutionBackendRouter(
-        (
-            NativeExecutionBackend(runtime),
-            LegacyCodexExecutionBackend(legacy_start, legacy_observe),
-        ),
-        default_backend="watt-native",
-    )
-    native_handle = asyncio.run(router.start(admission))
-    assert asyncio.run(router.observe(native_handle)).runtime_mode is ExecutionMode.QUEUED
-
-    router.set_default("legacy-codex")
-    assert asyncio.run(router.observe(native_handle)).handle == native_handle
-    with pytest.raises(NativeExecutionConflict, match="pinned"):
-        asyncio.run(router.start(admission))
-    legacy_admission = admission.model_copy(update={
-        "binding": admission.binding.model_copy(update={
-            "backend_implementation": "legacy-codex",
-        }),
-    })
-    legacy_handle = asyncio.run(router.start(legacy_admission))
-    assert asyncio.run(router.observe(legacy_handle)).handle == legacy_handle
-
-    router.set_default("watt-native")
-    after_rollback = asyncio.run(router.observe(native_handle))
-    assert after_rollback.runtime_mode is ExecutionMode.QUEUED
-    assert after_rollback.handle.backend_identity == "watt-native"
-    assert asyncio.run(router.observe(legacy_handle)).handle.backend_identity == "legacy-codex"
-
-
 def test_hundred_round_allocation_race_never_double_grants(
     postgres_database: Database, git_repository: Path
 ) -> None:
@@ -1274,6 +1228,468 @@ def test_provider_capacity_wait_releases_worker_and_requeues_after_backoff(
     assert service.allocate(_offer()) is not None
 
 
+def test_self_refine_records_failure_repair_and_verified_resume(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    clock = [datetime.now(timezone.utc)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]}
+    )
+    service.admit(admission)
+    first = service.allocate(_offer())
+    assert first is not None
+    service.activate_allocation(first)
+    service.finish_allocation(first, KernelRunResult(
+        runtime_mode=ExecutionMode.WAITING_RESOURCE, final_checkpoint_id=None,
+        step_count=0, inference_submissions=1, tool_effects=0,
+        summary="controlled transient provider disconnect", failure_family="PROVIDER_TRANSPORT",
+        resource_retryable=True,
+    ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        event = store.open_self_refine_event(admission.binding.attempt_id)
+        assert event is not None
+        assert event.work_id == admission.binding.work_id
+        assert event.failure_family == "PROVIDER_TRANSPORT"
+        assert event.expected_reality["outcome"] == "RESULT_READY"
+        assert event.status == "OPEN"
+        assert store.self_refine_actions(event.id)[0].outcome == "RETRY_SCHEDULED"
+    clock[0] += timedelta(seconds=31)
+    second = service.allocate(_offer())
+    assert second is not None
+    service.activate_allocation(second)
+    service.finish_allocation(second, KernelRunResult(
+        runtime_mode=ExecutionMode.FINISHED,
+        terminal_outcome=AttemptTerminalOutcome.RESULT_READY,
+        final_checkpoint_id=None, step_count=1,
+        inference_submissions=1, tool_effects=1,
+        summary="verified recovery",
+    ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        completed = store.self_refine_event(event.id)
+        assert completed.final_result == "RECOVERED"
+        assert completed.status == "VERIFIED"
+        assert completed.work_resume_result == "RESUMED"
+        assert [action.outcome for action in store.self_refine_actions(event.id)] == [
+            "RETRY_SCHEDULED", "RECOVERED",
+        ]
+        metrics = store.self_refine_metrics(work_id=admission.binding.work_id)
+        assert metrics["native_attempts"] == 1
+        assert metrics["self_refine_events"] == 1
+        assert metrics["recovered"] == 1
+        assert metrics["self_refine_rate"] == 1.0
+
+
+def test_self_converge_stops_repeated_unchanged_failure(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    clock = [datetime.now(timezone.utc)]
+    service = NativeExecutorRuntimeService(
+        postgres_database, now=lambda: clock[0], same_failure_threshold=2,
+    )
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]}
+    )
+    service.admit(admission)
+    for attempt_number in range(2):
+        if attempt_number:
+            clock[0] += timedelta(seconds=31)
+        grant = service.allocate(_offer())
+        assert grant is not None
+        service.activate_allocation(grant)
+        service.finish_allocation(grant, KernelRunResult(
+            runtime_mode=ExecutionMode.WAITING_RESOURCE,
+            final_checkpoint_id=None, step_count=0,
+            inference_submissions=1, tool_effects=0,
+            summary="same controlled failure", failure_family="PROVIDER_TRANSPORT",
+            resource_retryable=True,
+        ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        event = store.list_self_refine_events(work_id=admission.binding.work_id)[0]
+        assert event.final_result == "ESCALATED"
+        assert event.work_resume_result == "NOT_RESUMED"
+        assert event.status == "MITIGATED"
+        assert event.budget_decision["policy_version"] == "adaptive-self-converge-v1"
+        assert event.budget_decision["remaining"]["same_signature"] == 0
+        assert event.budget_decision["allow_retry"] is False
+        assert [action.outcome for action in store.self_refine_actions(event.id)] == [
+            "RETRY_SCHEDULED", "ESCALATED",
+        ]
+        assert store.self_refine_actions(event.id)[0].observed_reality["budget_decision"]["allow_retry"] is True
+        assert store.queue_for_attempt(admission.binding.attempt_id).condition is QueueCondition.COMPLETED
+    clock[0] += timedelta(seconds=31)
+    assert service.allocate(_offer()) is None
+
+
+def test_transient_health_noise_resolves_without_self_refine(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    clock = [datetime.now(timezone.utc)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]}
+    )
+    service.admit(admission)
+    first = service.allocate(_offer())
+    assert first is not None
+    service.activate_allocation(first)
+    service.finish_allocation(first, KernelRunResult(
+        runtime_mode=ExecutionMode.WAITING_RESOURCE, final_checkpoint_id=None,
+        step_count=0, inference_submissions=0, tool_effects=0,
+        summary="startup health probe timeout", failure_family="RUNTIME_HEALTH",
+        observation_evidence={"health_probe_count": 1},
+    ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        assert store.list_self_refine_events(work_id=admission.binding.work_id) == ()
+        assert store.queue_for_attempt(admission.binding.attempt_id).condition is QueueCondition.WAITING_RESOURCE
+        events = uow.session.execute(select(execution_events.c.event_type, execution_events.c.payload)).all()
+        assert any(
+            kind == "NativeObservationClassified"
+            and payload["classification"] == ObservationConfidence.TRANSIENT_ANOMALY.value
+            for kind, payload in events
+        )
+    clock[0] += timedelta(seconds=31)
+    second = service.allocate(_offer())
+    assert second is not None
+    service.activate_allocation(second)
+    service.finish_allocation(second, KernelRunResult(
+        runtime_mode=ExecutionMode.FINISHED,
+        terminal_outcome=AttemptTerminalOutcome.RESULT_READY,
+        final_checkpoint_id=None, step_count=1,
+        inference_submissions=0, tool_effects=0, summary="health recovered",
+    ))
+    with postgres_database.unit_of_work() as uow:
+        assert NativeExecutionStore(uow.session).list_self_refine_events(
+            work_id=admission.binding.work_id,
+        ) == ()
+
+
+def test_stable_health_failure_is_confirmed_before_self_refine(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    clock = [datetime.now(timezone.utc)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]}
+    )
+    service.admit(admission)
+    for number in range(2):
+        if number:
+            clock[0] += timedelta(seconds=31)
+        grant = service.allocate(_offer())
+        assert grant is not None
+        service.activate_allocation(grant)
+        service.finish_allocation(grant, KernelRunResult(
+            runtime_mode=ExecutionMode.WAITING_RESOURCE, final_checkpoint_id=None,
+            step_count=0, inference_submissions=0, tool_effects=0,
+            summary="startup health probe timeout", failure_family="RUNTIME_HEALTH",
+            observation_evidence={"health_probe_count": number + 1},
+        ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        events = store.list_self_refine_events(work_id=admission.binding.work_id)
+        assert len(events) == 1
+        assert events[0].observation_confidence is ObservationConfidence.CONFIRMED_FAILURE
+        assert events[0].repairability is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+        assert store.self_refine_actions(events[0].id)[0].outcome == "RETRY_SCHEDULED"
+
+
+def test_authoritative_git_mismatch_is_confirmed_without_debounce(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    observed_branch = _git(git_repository, "branch", "--show-current")
+    assert observed_branch == "main"
+    service = NativeExecutorRuntimeService(postgres_database)
+    admission = _admission(postgres_database, git_repository)
+    service.admit(admission)
+    grant = service.allocate(_offer())
+    assert grant is not None
+    service.activate_allocation(grant)
+    service.finish_allocation(grant, KernelRunResult(
+        runtime_mode=ExecutionMode.WAITING_RESOURCE, final_checkpoint_id=None,
+        step_count=0, inference_submissions=0, tool_effects=0,
+        summary="branch remains main after branch.create",
+        failure_family="REPOSITORY_REALITY_MISMATCH",
+        observation_evidence={
+            "authoritative_state_mismatch": True,
+            "expected_revision": "refs/heads/feat_test",
+            "observed_revision": f"refs/heads/{observed_branch}",
+        },
+    ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        event = store.list_self_refine_events(work_id=admission.binding.work_id)[0]
+        assert event.observation_confidence is ObservationConfidence.CONFIRMED_FAILURE
+        assert event.observed_reality["observation_evidence"]["observed_revision"] == "refs/heads/main"
+        assert store.self_refine_actions(event.id)[0].outcome == "RETRY_SCHEDULED"
+
+
+def test_adaptive_repair_budget_uses_scope_risk_and_observed_token_usage(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    service = NativeExecutorRuntimeService(postgres_database, self_refine_token_budget=100)
+    admitted = _admission(postgres_database, git_repository)
+    small = {"task_contract": {
+        "scope": ["README.md"], "acceptance_meaning": ["README renders"],
+        "evidence_requirements": ["preview"], "required_capabilities": ["file.write"],
+    }}
+    arguments = dict(
+        binding=admitted.binding, family="PROVIDER_TRANSPORT",
+        repairability=RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+        queue_resume_count=0, same_failures=1, elapsed=1,
+        inference_total=1, tool_total=1, observed_tokens=20,
+    )
+    simple = service._adaptive_budget(contract_payload=small, **arguments)
+    assert simple["complexity"] == "SMALL"
+    assert simple["risk"] == "NORMAL"
+    assert simple["limits"]["attempts"] == 2
+    assert simple["remaining"]["model_tokens"] == 80
+    assert simple["allow_retry"] is True
+
+    large = {"task_contract": {**small["task_contract"],
+        "scope": [f"src/module_{index}.py" for index in range(10)],
+    }}
+    assert service._adaptive_budget(contract_payload=large, **arguments)["limits"]["attempts"] == 3
+
+    migration = {"task_contract": {**large["task_contract"], "activity": "MIGRATION"}}
+    migration_budget = service._adaptive_budget(contract_payload=migration, **arguments)
+    assert migration_budget["risk"] == "HIGH"
+    assert migration_budget["risk_factors"] == ["high_impact_engineering_activity"]
+    assert migration_budget["limits"]["attempts"] == 1
+
+    second_mount = admitted.binding.workspace.mounts[0].model_copy(update={
+        "mount_id": "secondary", "container_path": "/workspace/secondary",
+    })
+    higher_risk = admitted.binding.model_copy(update={"workspace":
+        admitted.binding.workspace.model_copy(update={"mounts": (
+            *admitted.binding.workspace.mounts, second_mount,
+        )}),
+    })
+    constrained = service._adaptive_budget(
+        contract_payload=large, **{**arguments, "binding": higher_risk},
+    )
+    assert constrained["risk"] == "HIGH"
+    assert constrained["risk_factors"] == ["multiple_writable_mounts"]
+    assert constrained["limits"]["attempts"] == 1
+    exhausted = service._adaptive_budget(
+        contract_payload=small, **{**arguments, "observed_tokens": 100},
+    )
+    assert exhausted["allow_retry"] is False
+    assert exhausted["remaining"]["model_tokens"] == 0
+
+
+def _business_admission(
+    database: Database, repository: Path, *, acceptance_meaning: str,
+) -> NativeExecutionAdmission:
+    admitted = _admission(database, repository, contract_payload={
+        "objective": "correct the tax result without changing product intent",
+        "task_contract": {
+            "acceptance_meaning": [acceptance_meaning],
+            "authority_lineage": ["human:explicit-tax-requirement"],
+            "scope": ["README.md"],
+            "evidence_requirements": ["tax assertion must pass"],
+        },
+    })
+    binding = admitted.binding.model_copy(update={
+        "capability_grants": (
+            *admitted.binding.capability_grants,
+            CapabilityGrant(identity="test.run", version="1", scope={}),
+        ),
+        "resource_envelope": admitted.binding.resource_envelope.model_copy(update={
+            "max_inference_submissions": 6,
+        }),
+    })
+    return admitted.model_copy(update={"binding": binding})
+
+
+def test_explicit_business_oracle_repairs_verifies_and_resumes_without_human(
+    postgres_database: Database, git_repository: Path, tmp_path: Path,
+) -> None:
+    (git_repository / "README.md").write_text("tax=13\n", encoding="utf-8")
+    _git(git_repository, "add", "README.md")
+    _git(git_repository, "commit", "-m", "initial tax behavior")
+    admitted = _business_admission(
+        postgres_database, git_repository, acceptance_meaning="tax = 6",
+    )
+    runtime = NativeExecutorRuntimeService(postgres_database)
+    runtime.admit(admitted)
+    plan = WorkingPlan(
+        version=1, objective_reference=str(admitted.contract.id),
+        chosen_approach="verify and correct admitted tax assertion",
+        approach_rationale="explicit Human oracle in Task Contract",
+    )
+    inference = ScriptedInferenceAdapter((
+        InferenceResponse(action=InferenceAction.CONTINUE, summary="run tax assertion",
+            working_plan=plan, tool_calls=(ToolCallProposal(
+                proposal_index=0, tool_identity="test.run", arguments={"recipe": "tax"},
+            ),), residual_obligations=("tax assertion",)),
+        InferenceResponse(action=InferenceAction.CONTINUE, summary="correct tax implementation",
+            working_plan=plan.model_copy(update={"version": 2}), tool_calls=(ToolCallProposal(
+                proposal_index=0, tool_identity="file.write",
+                arguments={"path": "README.md", "content": "tax=6\n"},
+            ),), residual_obligations=("tax assertion",)),
+        InferenceResponse(action=InferenceAction.CONTINUE, summary="rerun tax assertion",
+            working_plan=plan.model_copy(update={"version": 3}), tool_calls=(ToolCallProposal(
+                proposal_index=0, tool_identity="test.run", arguments={"recipe": "tax"},
+            ),), residual_obligations=("tax assertion",)),
+        InferenceResponse(action=InferenceAction.RESULT_READY, summary="tax oracle verified",
+            working_plan=plan.model_copy(update={"version": 4}),
+            result_claim={"output_vector": {"files": ["README.md"]}, "evidence_ids": []},
+            residual_obligations=()),
+    ))
+
+    async def run_tax(request: ToolExecutionRequest) -> ToolExecutionResult:
+        observed = int((git_repository / "README.md").read_text(encoding="utf-8").strip().split("=")[1])
+        completed = subprocess.run(
+            [sys.executable, "-c", "from pathlib import Path; assert Path('README.md').read_text().strip() == 'tax=6'"],
+            cwd=git_repository, capture_output=True, text=True, check=False,
+        )
+        output = {
+            "returncode": completed.returncode,
+            "test_identity": "tax_is_six",
+            "assertion": {"id": "tax", "expected": 6, "observed": observed},
+            "stderr": completed.stderr,
+        }
+        return ToolExecutionResult(
+            delivery_id=request.delivery_id, tool_identity="test.run",
+            condition=EffectCondition.SETTLED if completed.returncode == 0 else EffectCondition.FAILED,
+            output=output, output_digest=canonical_digest(output),
+            evidence=({"type": "TEST_ASSERTION", "test_identity": "tax_is_six"},),
+        )
+
+    async def write_tax(request: ToolExecutionRequest) -> ToolExecutionResult:
+        (git_repository / "README.md").write_text(
+            str(request.proposal.arguments["content"]), encoding="utf-8",
+        )
+        output = {"path": "README.md", "changed_files": ["README.md"]}
+        return ToolExecutionResult(
+            delivery_id=request.delivery_id, tool_identity="file.write",
+            condition=EffectCondition.SETTLED, output=output,
+            output_digest=canonical_digest(output),
+        )
+
+    tools = NativeToolRegistry((
+        ToolDefinition("test.run", "1", "run tax assertion", {}, "PROCESS", run_tax),
+        ToolDefinition("file.write", "1", "correct tax file", {}, "LOCAL_MUTATION", write_tax),
+    ))
+
+    def kernel_factory(grant):
+        return NativeExecutorKernel(
+            inference=inference, tools=tools,
+            audit=DurableKernelAudit(
+                postgres_database, attempt_id=admitted.binding.attempt_id,
+                session_id=admitted.binding.session_id,
+                pwu_id=admitted.binding.pwu_id,
+                envelope_id=admitted.binding.resource_envelope.envelope_id,
+            ),
+            checkpoints=DurableCheckpointPort(
+                postgres_database, ContentAddressedStorage(tmp_path / "tax-checkpoints"),
+                attempt_id=admitted.binding.attempt_id,
+                session_id=admitted.binding.session_id,
+                worker_epoch=grant.allocation.lease_epoch,
+            ),
+        )
+
+    offer = _offer().model_copy(update={"capability_identities": ("file.write", "test.run")})
+    assert asyncio.run(NativeExecutionWorker(runtime, kernel_factory).run_once(offer)) is True
+    assert (git_repository / "README.md").read_text(encoding="utf-8") == "tax=6\n"
+    assert len(inference.requests) == 4
+    assert any(
+        fact.get("fact_type") == "RECENT_SELF_REFINE"
+        and fact["events"][0]["repairability"] == RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE.value
+        for fact in inference.requests[1].context_facts
+    )
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        state = store.attempt_state(admitted.binding.attempt_id)
+        event = store.list_self_refine_events(work_id=admitted.binding.work_id)[0]
+        assert state.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+        assert event.repairability is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+        assert event.final_result == "RECOVERED"
+        assert event.work_resume_result == "RESUMED"
+        assert event.diagnostic_evidence["test_identity"] == "tax_is_six"
+        assert event.diagnostic_evidence["assertion_id"] == "tax"
+        assert event.diagnostic_evidence["stderr_ref"].startswith("native-receipt:")
+        assert len(event.evidence_references) == 3
+        assert [action.outcome for action in store.self_refine_actions(event.id)] == [
+            "RETRY_SCHEDULED", "RECOVERED",
+        ]
+
+
+def test_ambiguous_business_truth_escalates_without_code_mutation(
+    postgres_database: Database, git_repository: Path, tmp_path: Path,
+) -> None:
+    admitted = _business_admission(
+        postgres_database, git_repository, acceptance_meaning="tax depends on product policy",
+    )
+    runtime = NativeExecutorRuntimeService(postgres_database)
+    runtime.admit(admitted)
+    plan = WorkingPlan(
+        version=1, objective_reference=str(admitted.contract.id),
+        chosen_approach="check tax behavior", approach_rationale="product choice is unresolved",
+    )
+    inference = ScriptedInferenceAdapter((InferenceResponse(
+        action=InferenceAction.CONTINUE, summary="observe ambiguous assertion",
+        working_plan=plan, tool_calls=(ToolCallProposal(
+            proposal_index=0, tool_identity="test.run", arguments={"recipe": "tax"},
+        ),), residual_obligations=("Human tax decision",),
+    ),))
+    writes: list[str] = []
+
+    async def ambiguous_test(request: ToolExecutionRequest) -> ToolExecutionResult:
+        output = {"returncode": 1, "test_identity": "tax_policy",
+                  "assertion": {"id": "tax", "observed": 13, "alternatives": [6, 8]},
+                  "product_choice_required": True}
+        return ToolExecutionResult(
+            delivery_id=request.delivery_id, tool_identity="test.run",
+            condition=EffectCondition.FAILED, output=output,
+            output_digest=canonical_digest(output),
+        )
+
+    async def forbidden_write(request: ToolExecutionRequest) -> ToolExecutionResult:
+        writes.append(str(request.proposal.arguments))
+        raise AssertionError("ambiguous truth must not cause a mutation")
+
+    tools = NativeToolRegistry((
+        ToolDefinition("test.run", "1", "observe tax", {}, "PROCESS", ambiguous_test),
+        ToolDefinition("file.write", "1", "write tax", {}, "LOCAL_MUTATION", forbidden_write),
+    ))
+
+    def kernel_factory(grant):
+        return NativeExecutorKernel(
+            inference=inference, tools=tools,
+            audit=DurableKernelAudit(
+                postgres_database, attempt_id=admitted.binding.attempt_id,
+                session_id=admitted.binding.session_id,
+                pwu_id=admitted.binding.pwu_id,
+                envelope_id=admitted.binding.resource_envelope.envelope_id,
+            ),
+            checkpoints=DurableCheckpointPort(
+                postgres_database, ContentAddressedStorage(tmp_path / "ambiguous-checkpoints"),
+                attempt_id=admitted.binding.attempt_id,
+                session_id=admitted.binding.session_id,
+                worker_epoch=grant.allocation.lease_epoch,
+            ),
+        )
+
+    offer = _offer().model_copy(update={"capability_identities": ("file.write", "test.run")})
+    assert asyncio.run(NativeExecutionWorker(runtime, kernel_factory).run_once(offer)) is True
+    assert writes == []
+    assert len(inference.requests) == 1
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        state = store.attempt_state(admitted.binding.attempt_id)
+        event = store.list_self_refine_events(work_id=admitted.binding.work_id)[0]
+        assert state.terminal_outcome is AttemptTerminalOutcome.BOUNDARY_CROSSING_REQUIRED
+        assert event.repairability is RepairabilityClassification.REQUIRES_HUMAN_DECISION
+        assert event.final_result == "ESCALATED"
+        assert event.work_resume_result == "NOT_RESUMED"
+
+
 def test_queue_without_live_compatible_worker_becomes_truthful_and_recovers(
     postgres_database: Database, git_repository: Path
 ) -> None:
@@ -1358,19 +1774,21 @@ def test_live_busy_worker_is_real_capacity_wait_and_release_advances_next_item(
     assert next_grant.queue_entry.id == pending_queue.id
 
 
-def test_retryable_provider_failure_stops_after_three_automatic_retries(
+def test_retryable_provider_failure_stops_at_adaptive_small_task_budget(
     postgres_database: Database, git_repository: Path
 ) -> None:
     clock = [datetime.now(timezone.utc)]
-    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    service = NativeExecutorRuntimeService(
+        postgres_database, now=lambda: clock[0], same_failure_threshold=5,
+    )
     admission = _admission(postgres_database, git_repository).model_copy(
         update={"available_at": clock[0]}
     )
     service.admit(admission)
 
-    for retry_number in range(4):
+    for retry_number in range(3):
         grant = service.allocate(_offer())
-        assert grant is not None
+        assert grant is not None, f"expected retry allocation {retry_number}"
         service.activate_allocation(grant)
         service.finish_allocation(
             grant,
@@ -1384,7 +1802,7 @@ def test_retryable_provider_failure_stops_after_three_automatic_retries(
                 resource_retryable=True,
             ),
         )
-        if retry_number < 3:
+        if retry_number < 2:
             clock[0] += timedelta(seconds=31)
 
     with postgres_database.unit_of_work() as uow:
@@ -1393,9 +1811,17 @@ def test_retryable_provider_failure_stops_after_three_automatic_retries(
         state = store.attempt_state(admission.binding.attempt_id)
         assert queue is not None
         assert queue.condition is QueueCondition.COMPLETED
-        assert queue.resume_count == 3
+        assert queue.resume_count == 2
         assert state.runtime_mode is ExecutionMode.FINISHED
         assert state.terminal_outcome is AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+        events = store.list_self_refine_events(work_id=admission.binding.work_id)
+        assert len(events) == 1
+        assert events[0].budget_decision["complexity"] == "SMALL"
+        assert events[0].budget_decision["limits"]["attempts"] == 2
+        assert events[0].budget_decision["remaining"]["attempts"] == 0
+        assert [action.outcome for action in store.self_refine_actions(events[0].id)] == [
+            "RETRY_SCHEDULED", "RETRY_SCHEDULED", "ESCALATED",
+        ]
     assert service.allocate(_offer()) is None
 
 
@@ -1529,6 +1955,265 @@ def test_inference_resource_reservation_is_settled_with_durable_evidence(
         assert row["certainty"] == "ACTUAL"
         assert row["condition"] == "CONSUMED"
         assert row["evidence"]["response_observed"] is True
+
+
+def test_structural_decision_repair_is_durable_and_recovers_same_attempt(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    service = NativeExecutorRuntimeService(postgres_database)
+    admission = _admission(postgres_database, git_repository)
+    service.admit(admission)
+    grant = service.allocate(_offer())
+    assert grant is not None
+    service.activate_allocation(grant)
+    audit = DurableKernelAudit(
+        postgres_database,
+        attempt_id=admission.binding.attempt_id,
+        session_id=admission.binding.session_id,
+        pwu_id=admission.binding.pwu_id,
+        envelope_id=admission.binding.resource_envelope.envelope_id,
+    )
+    request = InferenceRequest(
+        attempt_id=admission.binding.attempt_id,
+        session_id=admission.binding.session_id,
+        step_sequence=1,
+        objective=admission.contract.objective,
+        working_plan=WorkingPlan(
+            version=1, objective_reference=str(admission.contract.id),
+            chosen_approach="validate decision", approach_rationale="bounded qualification",
+        ),
+        context_facts=(), available_tools=(), residual_obligations=(),
+    )
+    step_id = asyncio.run(audit.begin_inference(request))
+    asyncio.run(audit.finish_inference(
+        step_id, None,
+        InferenceDecisionRejected("TOOL_ARGUMENTS_NOT_OBJECT", "invalid provider shape"),
+    ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        event = store.open_self_refine_event(admission.binding.attempt_id)
+        assert event is not None
+        assert event.work_id == admission.binding.work_id
+        assert event.failure_family == "SEMANTIC_BINDING_FAILURE"
+        assert event.expected_reality["outcome"] == "VALID_GOVERNED_DECISION"
+        actions = store.self_refine_actions(event.id)
+        assert len(actions) == 1
+        assert actions[0].outcome == "RETRY_SCHEDULED"
+        assert actions[0].evidence_references == (f"native-inference-step:{step_id}",)
+    service.finish_allocation(grant, KernelRunResult(
+        runtime_mode=ExecutionMode.FINISHED,
+        terminal_outcome=AttemptTerminalOutcome.RESULT_READY,
+        final_checkpoint_id=None,
+        step_count=2, inference_submissions=2, tool_effects=0,
+        summary="validated constrained decision without tool replay",
+    ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        recovered = store.self_refine_event(event.id)
+        assert recovered.final_result == "RECOVERED"
+        assert recovered.status == "VERIFIED"
+        assert recovered.work_resume_result == "RESUMED"
+        assert [action.outcome for action in store.self_refine_actions(event.id)] == [
+            "RETRY_SCHEDULED", "RECOVERED",
+        ]
+        assert store.attempt_state(admission.binding.attempt_id).terminal_outcome is (
+            AttemptTerminalOutcome.RESULT_READY
+        )
+    repair_history = audit.recent_repair_reality()
+    assert len(repair_history) == 1
+    assert repair_history[0]["event_id"] == str(event.id)
+    assert repair_history[0]["failure_signature"] == event.failure_signature
+    assert len(repair_history[0]["failure_signature"]) == 64
+    assert repair_history[0]["result"] == "RECOVERED"
+
+
+def test_failed_verification_effect_creates_safe_self_refine_evidence(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    service = NativeExecutorRuntimeService(postgres_database)
+    admission = _admission(postgres_database, git_repository)
+    service.admit(admission)
+    grant = service.allocate(_offer())
+    assert grant is not None
+    service.activate_allocation(grant)
+    audit = DurableKernelAudit(
+        postgres_database,
+        attempt_id=admission.binding.attempt_id,
+        session_id=admission.binding.session_id,
+        pwu_id=admission.binding.pwu_id,
+        envelope_id=admission.binding.resource_envelope.envelope_id,
+    )
+    plan = WorkingPlan(
+        version=1, objective_reference=str(admission.contract.id),
+        chosen_approach="test the admitted change",
+        approach_rationale="independent tool receipt",
+    )
+    request = InferenceRequest(
+        attempt_id=admission.binding.attempt_id,
+        session_id=admission.binding.session_id,
+        step_sequence=1,
+        objective=admission.contract.objective,
+        working_plan=plan,
+        context_facts=(), available_tools=(), residual_obligations=("targeted test",),
+    )
+    step_id = asyncio.run(audit.begin_inference(request))
+    proposal = ToolCallProposal(
+        proposal_index=0, tool_identity="test.run",
+        arguments={"recipe": "node --test"},
+    )
+    asyncio.run(audit.finish_inference(step_id, InferenceResponse(
+        action=InferenceAction.CONTINUE, summary="run admitted test",
+        working_plan=plan, tool_calls=(proposal,),
+        residual_obligations=("targeted test",),
+    ), None))
+    tool_request = ToolExecutionRequest(
+        delivery_id=uuid4(), attempt_id=admission.binding.attempt_id,
+        worker_epoch=grant.allocation.lease_epoch, step_id=step_id,
+        proposal=proposal, capability_grants=admission.binding.capability_grants,
+        workspace=admission.binding.workspace,
+    )
+    effect_id = asyncio.run(audit.begin_tool(step_id, tool_request))
+    output = {"returncode": 1, "stderr": "sensitive details must not enter diagnosis"}
+    asyncio.run(audit.finish_tool(effect_id, tool_request, ToolExecutionResult(
+        delivery_id=tool_request.delivery_id, tool_identity="test.run",
+        condition=EffectCondition.FAILED, output=output,
+        output_digest=canonical_digest(output),
+    ), None))
+    with postgres_database.unit_of_work() as uow:
+        native = NativeExecutionStore(uow.session)
+        event = native.open_self_refine_event(admission.binding.attempt_id)
+        assert event is not None
+        assert event.failure_family == "VERIFICATION_FAILURE"
+        assert event.expected_reality["effect_condition"] == "SETTLED"
+        assert event.observed_reality["failure_code"] == 1
+        assert "sensitive details" not in event.model_dump_json()
+        references = native.self_refine_actions(event.id)[0].evidence_references
+        assert references[0] == f"native-effect:{effect_id}"
+        assert len(references) == 2
+        assert references[1].startswith("native-receipt:")
+        assert event.diagnostic_evidence["receipt_ref"] == references[1]
+        assert event.diagnostic_evidence["stderr_ref"] == f"{references[1]}#stderr"
+        assert event.diagnostic_evidence["stderr_bytes"] == len(output["stderr"].encode("utf-8"))
+    repair_request = request.model_copy(update={"step_sequence": 2})
+    repair_step_id = asyncio.run(audit.begin_inference(repair_request))
+    asyncio.run(audit.finish_inference(repair_step_id, InferenceResponse(
+        action=InferenceAction.RESULT_READY,
+        summary="corrected after observed verification failure",
+        working_plan=plan.model_copy(update={"version": 2}),
+        result_claim={"output_vector": {"files": []}},
+        provider_observation=InferenceProviderObservation(
+            provider_identity="deepseek-responses",
+            requested_model="deepseek-flash",
+            response_status="completed",
+            usage=InferenceUsage(
+                input_tokens=24, output_tokens=9, total_tokens=33,
+            ),
+        ),
+    ), None))
+    service.finish_allocation(grant, KernelRunResult(
+        runtime_mode=ExecutionMode.FINISHED,
+        terminal_outcome=AttemptTerminalOutcome.RESULT_READY,
+        final_checkpoint_id=None,
+        step_count=2, inference_submissions=2, tool_effects=1,
+        summary="corrected and re-observed within the same attempt",
+    ))
+    with postgres_database.unit_of_work() as uow:
+        recovered = NativeExecutionStore(uow.session).self_refine_event(event.id)
+        assert recovered.final_result == "RECOVERED"
+        assert recovered.model_token_usage == {
+            "input_tokens": 24,
+            "output_tokens": 9,
+            "total_tokens": 33,
+            "observed_response_count": 1,
+        }
+
+
+def test_compiler_diagnostic_requires_source_evidence_before_bounded_repair(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    admitted = _business_admission(
+        postgres_database, git_repository, acceptance_meaning="README compiles",
+    )
+    binding = admitted.binding.model_copy(update={"capability_grants": (
+        *admitted.binding.capability_grants,
+        CapabilityGrant(identity="file.read", version="1", scope={"paths": ["README.md"]}),
+        CapabilityGrant(identity="build.run", version="1", scope={}),
+    )})
+    admitted = admitted.model_copy(update={"binding": binding})
+    service = NativeExecutorRuntimeService(postgres_database)
+    service.admit(admitted)
+    offer = _offer().model_copy(update={"capability_identities": (
+        "file.write", "file.read", "build.run", "test.run",
+    )})
+    grant = service.allocate(offer)
+    assert grant is not None
+    service.activate_allocation(grant)
+    audit = DurableKernelAudit(
+        postgres_database, attempt_id=binding.attempt_id,
+        session_id=binding.session_id, pwu_id=binding.pwu_id,
+        envelope_id=binding.resource_envelope.envelope_id,
+    )
+    plan = WorkingPlan(
+        version=1, objective_reference=str(admitted.contract.id),
+        chosen_approach="diagnose compiler failure", approach_rationale="bounded source scope",
+    )
+
+    def observed_tool(sequence: int, identity: str, arguments: dict,
+                      condition: EffectCondition, output: dict) -> RepairabilityClassification | None:
+        proposal = ToolCallProposal(proposal_index=0, tool_identity=identity, arguments=arguments)
+        inference_request = InferenceRequest(
+            attempt_id=binding.attempt_id, session_id=binding.session_id,
+            step_sequence=sequence, objective=admitted.contract.objective,
+            working_plan=plan.model_copy(update={"version": sequence}),
+            context_facts=(), available_tools=(), residual_obligations=("compile",),
+        )
+        step_id = asyncio.run(audit.begin_inference(inference_request))
+        asyncio.run(audit.finish_inference(step_id, InferenceResponse(
+            action=InferenceAction.CONTINUE, summary="observe diagnostic",
+            working_plan=inference_request.working_plan,
+            tool_calls=(proposal,), residual_obligations=("compile",),
+        ), None))
+        tool_request = ToolExecutionRequest(
+            delivery_id=uuid4(), attempt_id=binding.attempt_id,
+            worker_epoch=grant.allocation.lease_epoch, step_id=step_id,
+            proposal=proposal, capability_grants=binding.capability_grants,
+            workspace=binding.workspace,
+        )
+        effect_id = asyncio.run(audit.begin_tool(step_id, tool_request))
+        return asyncio.run(audit.finish_tool(effect_id, tool_request, ToolExecutionResult(
+            delivery_id=tool_request.delivery_id, tool_identity=identity,
+            condition=condition, output=output, output_digest=canonical_digest(output),
+        ), None))
+
+    assert observed_tool(1, "build.run", {"recipe": "compile"}, EffectCondition.FAILED, {
+        "diagnostic_code": "E0425", "path": "README.md", "stderr": "symbol not found",
+        "returncode": 1,
+    }) is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+    assert observed_tool(2, "file.read", {"path": "README.md"}, EffectCondition.SETTLED, {
+        "path": "README.md", "exists": True,
+        "content": (git_repository / "README.md").read_text(encoding="utf-8"),
+    }) is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        event = store.open_self_refine_event(binding.attempt_id)
+        assert event is not None
+        assert event.repairability is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+        assert event.diagnostic_evidence["source_read_receipt_ref"].startswith("native-receipt:")
+        actions = store.self_refine_actions(event.id)
+        assert [action.outcome for action in actions] == ["RETRY_SCHEDULED", "EVIDENCE_SUFFICIENT"]
+        assert actions[0].observed_reality["initial_repairability"] == (
+            RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE.value
+        )
+        for index in range(4):
+            later = event.model_copy(update={
+                "id": uuid4(), "operation_id": uuid4(),
+                "created_at": event.created_at + timedelta(seconds=index + 1),
+                "updated_at": event.created_at + timedelta(seconds=index + 1),
+                "status": "MITIGATED", "final_result": "FAILED",
+            })
+            store.insert_self_refine_event(later)
+        uow.commit()
+    assert audit.recent_repair_reality()[0]["event_id"] == str(event.id)
 
 
 def test_inference_transport_failure_persists_safe_structured_diagnostics(

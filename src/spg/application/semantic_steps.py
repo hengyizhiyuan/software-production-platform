@@ -147,6 +147,15 @@ class SemanticStepApplicationService:
             self.guided_design.approved_design_artifact_references(work.id)
             if guided_design is not None else ()
         )
+        required_intermediate_artifacts = (
+            ("APPROVED_DESIGN_ARTIFACT",)
+            if guided_design is not None
+            and step.type is SteeringStepType.DESIGN
+            and next_step is not None
+            and next_step.type is SteeringStepType.PRODUCE
+            and not approved_design_artifacts
+            else ()
+        )
         production_proposal_required = bool(
             step.type is SteeringStepType.DESIGN
             and next_step is not None
@@ -159,13 +168,6 @@ class SemanticStepApplicationService:
                     and approved_design_artifacts
                 )
             )
-        )
-        required_intermediate_artifacts = (
-            ("APPROVED_DESIGN_ARTIFACT",)
-            if design_context is not None
-            and design_context.get("production_transition_issue") is True
-            and not approved_design_artifacts
-            else ()
         )
         from spg.application.connectors import ConnectorResolver
         from spg.domain.connectors import ConnectorAvailability
@@ -332,17 +334,16 @@ class SemanticStepApplicationService:
             raise SteeringInvariantViolation(
                 "Approved intermediate design cannot replace the remaining code implementation"
             )
+        if (
+            "APPROVED_DESIGN_ARTIFACT" in fresh.required_intermediate_artifacts
+            and candidate.proposed_production is not None
+            and candidate.proposed_production.target_kind is ProductionTargetKind.CODE_WORK
+        ):
+            raise SteeringInvariantViolation(
+                "Implementation cannot be proposed before a design artifact is "
+                "produced, reviewed, and committed to current Work Reality"
+            )
         if fresh.design_context is not None and candidate.proposed_production is not None:
-            if (
-                "APPROVED_DESIGN_ARTIFACT"
-                in fresh.required_intermediate_artifacts
-                and candidate.proposed_production.target_kind
-                is ProductionTargetKind.CODE_WORK
-            ):
-                raise SteeringInvariantViolation(
-                    "Implementation cannot be proposed before a design artifact is "
-                    "produced, reviewed, and committed to current Work Reality"
-                )
             with self.database.unit_of_work() as design_uow:
                 design_store = SteeringStore(design_uow.session)
                 records = [design_store.semantic_result(ref.identity) for ref in fresh.reality_refs

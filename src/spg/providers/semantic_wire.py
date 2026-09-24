@@ -1,9 +1,7 @@
-"""Read-only Codex adapter for governed semantic Steering Step execution."""
+"""Provider-neutral wire contract for governed semantic Steering Steps."""
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from contextlib import AbstractContextManager
 from copy import deepcopy
 import json
 from typing import Any, Literal
@@ -14,15 +12,10 @@ from spg.domain.planning import ProductionPlanArtifactTarget
 from spg.domain.steering import (
     SemanticBoundedRepositoryArea,
     SemanticProductionProposal,
-    SemanticResultKind,
     SemanticStepInput,
-    SemanticStepResultCandidate,
     SteeringAuthorityAssessment,
     SteeringInvariantViolation,
-    SteeringStepType,
 )
-CodexFactory = Callable[[], AbstractContextManager[Any]]
-
 
 def _provider_strict_output_schema(schema: dict[str, Any]) -> dict[str, Any]:
     """Adapt typed JSON Schema to the Provider's strict pure-``$ref`` dialect."""
@@ -167,85 +160,8 @@ def _admitted_derived_constraints(
     )
 
 
-class CodexSdkSemanticStepCapability:
-    """Execute one semantic Step in an ephemeral read-only provider Turn."""
-
-    def __init__(
-        self,
-        *,
-        codex_factory: CodexFactory | None = None,
-        model: str | None = None,
-        timeout_seconds: float | None = None,
-    ) -> None:
-        if timeout_seconds is not None and timeout_seconds <= 0:
-            raise ValueError("timeout_seconds must be positive when provided")
-        if codex_factory is None:
-            from openai_codex import Codex
-
-            codex_factory = Codex
-        self.codex_factory = codex_factory
-        self.model = model
-        self.timeout_seconds = timeout_seconds
-
-    def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
-        from openai_codex import ApprovalMode, Sandbox
-
-        from spg.providers.codex_sdk_executor import _enum_value, _wait_for_terminal
-
-        with self.codex_factory() as codex:
-            thread = codex.thread_start(
-                approval_mode=ApprovalMode.deny_all,
-                cwd=input.repository_location,
-                ephemeral=True,
-                model=self.model,
-                sandbox=Sandbox.read_only,
-            )
-            turn = thread.turn(
-                self._instruction(input),
-                approval_mode=ApprovalMode.deny_all,
-                cwd=input.repository_location,
-                model=self.model,
-                output_schema=self.output_schema(),
-                sandbox=Sandbox.read_only,
-            )
-            terminal = _wait_for_terminal(turn, self.timeout_seconds)
-        if terminal.timed_out or terminal.result is None:
-            raise SteeringInvariantViolation(
-                "Semantic reasoning Provider did not complete within its bounded Turn"
-            )
-        result = terminal.result
-        if _enum_value(result.status) != "completed" or result.error is not None:
-            raise SteeringInvariantViolation(
-                "Semantic reasoning Provider did not return a completed result"
-            )
-        payload = self._parse_payload(result.final_response)
-        kind = (
-            SemanticResultKind.DESIGN_DIRECTION
-            if input.step.type is SteeringStepType.DESIGN
-            else SemanticResultKind.WORK_REFINEMENT
-        )
-        return SemanticStepResultCandidate(
-            work_id=input.work_id,
-            steering_plan_revision_id=input.steering_plan_revision_id,
-            step_id=input.step.id,
-            step_type=input.step.type,
-            basis_fingerprint=input.basis_fingerprint,
-            result_kind=kind,
-            bounded_summary=payload.bounded_summary,
-            decisions=payload.decisions,
-            derived_constraints=_admitted_derived_constraints(payload, input),
-            evidence_refs=input.reality_refs,
-            unresolved_questions=payload.unresolved_questions,
-            authority_assessment=payload.authority_assessment,
-            human_attention_recommendation=(
-                payload.human_attention_recommendation
-            ),
-            proposed_production=payload.domain_production_proposal(),
-            reasoning_provider_identity=(
-                f"codex-sdk:thread:{thread.id}:turn:{turn.id}"
-            ),
-            completion_claimed=payload.completion_claimed,
-        )
+class SemanticStepWireContract:
+    """Canonical provider-neutral schema and instruction for one governed Step."""
 
     @staticmethod
     def output_schema() -> dict[str, Any]:
@@ -375,8 +291,10 @@ class CodexSdkSemanticStepCapability:
             "proposed_production must be null. "
             "When design_context is present, address only its current_issue and preserve "
             "that governed focus. Earlier admitted results are context, not permission to "
-            "collapse the remaining agenda. When production_transition_issue is false, "
-            "proposed_production must be null. Only the production-transition issue may "
+            "collapse the remaining agenda. When design_context is present and "
+            "production_transition_issue is false, proposed_production must be null. "
+            "An unguided DESIGN Step with production_proposal_required=true may also "
+            "form a reviewable proposal. Only a production-transition DESIGN Step may "
             "form a reviewable production proposal, and it must do so to claim completion. "
             "When production_proposal_required is true, the current DESIGN Step leads to "
             "PRODUCE but the latest Work Reality has no current implementation Production Plan. A RESOLVED "

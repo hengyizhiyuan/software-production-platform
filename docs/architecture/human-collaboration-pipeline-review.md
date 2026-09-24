@@ -2,6 +2,10 @@
 
 Date: 2026-09-09. Assessment recorded before implementation.
 
+This is a historical assessment of the then-current SDK pipeline. Its provider
+paths and rollback discussion are not current runtime instructions. The active
+WIC/Conversation implementation now uses API-key model provider contracts.
+
 ## Observed pipeline
 
 The current path is `POST /turns -> durable Human message + RECEIVED ->

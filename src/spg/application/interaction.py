@@ -20,7 +20,11 @@ from spg.application.guided_design import (
 )
 from spg.application.design_intent import frame_design_intent_text
 from spg.application.engineering_semantics import bind_engineering_semantic_facts
-from spg.application.repository_branch_authority import exact_branch_creation_command
+from spg.application.repository_branch_authority import (
+    BRANCH_EXTRACTION_SUBJECTS,
+    exact_branch_creation_command,
+    explicit_human_branch_command,
+)
 from spg.application.response_contract import build_response_contract
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.domain.response_contract import (
@@ -2239,6 +2243,11 @@ class WorkInteractionService:
                     else prior_assessment.engineering_semantic_facts
                 )
             )
+            if active_context is not None:
+                candidate = self._canonicalize_explicit_branch_facts(
+                    candidate,
+                    latest_human_record,
+                )
             engineering_semantic_facts = bind_engineering_semantic_facts(
                 basis_fingerprint=current_basis,
                 records=records,
@@ -3380,6 +3389,54 @@ class WorkInteractionService:
         )
 
     @staticmethod
+    def _canonicalize_explicit_branch_facts(
+        candidate: InteractionAssessmentCandidate,
+        latest: InteractionRecord,
+    ) -> InteractionAssessmentCandidate:
+        """Normalize Provider branch vocabulary at binding, never at execution."""
+
+        normalized: list[EngineeringSemanticFactCandidate] = []
+        explicit_branch = False
+        for fact in candidate.semantic_fact_candidates:
+            if (
+                fact.subject in BRANCH_EXTRACTION_SUBJECTS
+                and isinstance(fact.value, str)
+                and latest.id in fact.source_record_ids
+                and explicit_human_branch_command(latest.content, fact.value)
+            ):
+                normalized.append(fact.model_copy(update={
+                    "subject": "repository.branch_name",
+                    "relation": SemanticRelation.REFERENCE,
+                    "qualifiers": {"state": "to_be_created"},
+                    "authority": SemanticFactAuthority.HUMAN_EXPLICIT,
+                    "epistemic_status": SemanticEpistemicStatus.CONFIRMED,
+                    "source_record_ids": (latest.id,),
+                    "source_text": latest.content,
+                    "role_origin": SemanticRoleOrigin.EXPLICIT,
+                }))
+                explicit_branch = True
+            else:
+                normalized.append(fact)
+        if explicit_branch and not any(
+            fact.subject == "repository.branch_action"
+            and fact.value == "创建新分支"
+            and fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
+            for fact in normalized
+        ):
+            normalized.append(EngineeringSemanticFactCandidate(
+                candidate_id="human-new-branch-action",
+                subject="repository.branch_action",
+                relation=SemanticRelation.EQUALITY,
+                value="创建新分支",
+                authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                source_record_ids=(latest.id,),
+                source_text=latest.content,
+                role_origin=SemanticRoleOrigin.EXPLICIT,
+            ))
+        return candidate.model_copy(update={"semantic_fact_candidates": tuple(normalized)})
+
+    @staticmethod
     def _explicit_branch_candidate(
         basis: InteractionInterpretationInput, branch_name: str,
     ) -> InteractionAssessmentCandidate:
@@ -3407,7 +3464,17 @@ class WorkInteractionService:
                 source_record_ids=(latest.id,),
                 source_text=latest.content,
                 role_origin=SemanticRoleOrigin.EXPLICIT,
-            ),),
+            ), EngineeringSemanticFactCandidate(
+                candidate_id="human-new-branch-action",
+                subject="repository.branch_action",
+                relation=SemanticRelation.EQUALITY,
+                value="创建新分支",
+                authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                source_record_ids=(latest.id,),
+                source_text=latest.content,
+                role_origin=SemanticRoleOrigin.EXPLICIT,
+            )),
             focus_classification=WorkFocusClassification.ON_TOPIC,
             impact_disposition=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
             natural_response=f"准备创建本地分支 {branch_name}。",

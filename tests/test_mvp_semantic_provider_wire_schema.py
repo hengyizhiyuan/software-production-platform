@@ -7,8 +7,8 @@ import pytest
 from spg.domain.change import ProductionTargetKind
 from spg.domain.planning import PlannedArtifactOperation
 from spg.domain.steering import SemanticProductionProposal, SteeringInvariantViolation
-from spg.providers.codex_semantic import (
-    CodexSdkSemanticStepCapability,
+from spg.providers.semantic_wire import (
+    SemanticStepWireContract,
     _admitted_derived_constraints,
     _provider_strict_output_schema,
 )
@@ -56,7 +56,7 @@ def _proposal_schema(schema: dict[str, Any]) -> dict[str, Any]:
 
 
 def test_sem_wire_01_03_04_05_08_09_10_15_schema_is_recursively_strict() -> None:
-    schema = CodexSdkSemanticStepCapability.output_schema()
+    schema = SemanticStepWireContract.output_schema()
 
     object_schemas = tuple(_object_schemas(schema))
     assert object_schemas
@@ -121,7 +121,7 @@ def test_sem_ref_01_02_03_04_16_dogfood_6_ref_sibling_is_normalized() -> None:
     assert normalized["properties"]["target_kind"] == {
         "$ref": "#/$defs/ProductionTargetKind"
     }
-    proposal = _proposal_schema(CodexSdkSemanticStepCapability.output_schema())
+    proposal = _proposal_schema(SemanticStepWireContract.output_schema())
     assert proposal["properties"]["target_kind"] == {
         "$ref": "#/$defs/ProductionTargetKind"
     }
@@ -152,7 +152,7 @@ def test_semantic_code_proposal_rejects_the_same_allowed_and_forbidden_area() ->
 
 
 def test_sem_wire_03_04_06_no_production_round_trip_uses_explicit_values() -> None:
-    wire = CodexSdkSemanticStepCapability._parse_payload(json.dumps(_payload()))
+    wire = SemanticStepWireContract._parse_payload(json.dumps(_payload()))
 
     assert wire.derived_constraints == ()
     assert wire.unresolved_questions == ()
@@ -167,7 +167,7 @@ def test_provider_inference_cannot_become_unadmitted_constraint_truth() -> None:
         "Preserve data",
         "Use the model's preferred framework",
     ]
-    wire = CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))
+    wire = SemanticStepWireContract._parse_payload(json.dumps(payload))
     semantic_input = type(
         "ConstraintInput",
         (),
@@ -194,7 +194,7 @@ def test_deepseek_annotation_tolerance_preserves_strict_semantic_fields() -> Non
     )
     payload["provider_note"] = "Transport-only prose."
 
-    parsed = CodexSdkSemanticStepCapability._parse_payload_ignoring_annotations(
+    parsed = SemanticStepWireContract._parse_payload_ignoring_annotations(
         json.dumps(payload)
     )
 
@@ -205,7 +205,7 @@ def test_deepseek_annotation_tolerance_preserves_strict_semantic_fields() -> Non
 
     del payload["proposed_production"]["verification_expectation"]
     with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
-        CodexSdkSemanticStepCapability._parse_payload_ignoring_annotations(
+        SemanticStepWireContract._parse_payload_ignoring_annotations(
             json.dumps(payload)
         )
 
@@ -243,11 +243,11 @@ def test_sem_wire_dogfood_7_cross_field_incoherence_is_not_representable(
     payload["disposition"] = disposition
 
     with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
-        CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))
+        SemanticStepWireContract._parse_payload(json.dumps(payload))
 
 
 def test_sem_wire_04_06_code_work_round_trip_preserves_typed_values() -> None:
-    wire = CodexSdkSemanticStepCapability._parse_payload(
+    wire = SemanticStepWireContract._parse_payload(
         json.dumps(
             _payload(
                 {
@@ -273,7 +273,7 @@ def test_sem_wire_04_06_code_work_round_trip_preserves_typed_values() -> None:
 
 
 def test_sem_wire_04_06_documentation_round_trip_preserves_typed_values() -> None:
-    wire = CodexSdkSemanticStepCapability._parse_payload(
+    wire = SemanticStepWireContract._parse_payload(
         json.dumps(
             _payload(
                 {
@@ -360,7 +360,7 @@ def test_sem_wire_07_malformed_semantic_values_remain_rejected(
     proposal: dict[str, object],
 ) -> None:
     with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
-        CodexSdkSemanticStepCapability._parse_payload(
+        SemanticStepWireContract._parse_payload(
             json.dumps(_payload(proposal))
         )
 
@@ -380,7 +380,7 @@ def test_sem_wire_03_04_absent_wire_keys_are_not_defaulted(
     payload.pop(missing_key)
 
     with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
-        CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))
+        SemanticStepWireContract._parse_payload(json.dumps(payload))
 
 
 def test_dogfood_8_broad_fallback_is_rejected_before_candidate_admission() -> None:
@@ -400,12 +400,12 @@ def test_dogfood_8_broad_fallback_is_rejected_before_candidate_admission() -> No
     }
 
     with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
-        CodexSdkSemanticStepCapability._parse_payload(
+        SemanticStepWireContract._parse_payload(
             json.dumps(_payload(proposal))
         )
 
     proposal["allowed_areas"] = ["src/spg/web/**", "tests/js/**"]
-    parsed = CodexSdkSemanticStepCapability._parse_payload(
+    parsed = SemanticStepWireContract._parse_payload(
         json.dumps(_payload(proposal))
     )
     assert parsed.domain_production_proposal().allowed_areas == (
@@ -433,7 +433,7 @@ def test_sem_wire_04_15_absent_proposal_collections_are_not_defaulted(
     proposal.pop(missing_key)
 
     with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
-        CodexSdkSemanticStepCapability._parse_payload(
+        SemanticStepWireContract._parse_payload(
             json.dumps(_payload(proposal))
         )
 
@@ -442,7 +442,7 @@ def test_resolved_issue_cannot_silently_claim_incomplete_without_a_question():
     payload = _payload()
     payload["disposition"]["completion_claimed"] = False
     with pytest.raises(SteeringInvariantViolation, match="invalid structured result"):
-        CodexSdkSemanticStepCapability._parse_payload(json.dumps(payload))
+        SemanticStepWireContract._parse_payload(json.dumps(payload))
 
 
 def test_human_attention_wire_requires_missing_authority_and_material_step_question():
@@ -456,7 +456,7 @@ def test_human_attention_wire_requires_missing_authority_and_material_step_quest
         "human_attention_recommendation": "Choose the authorized access boundary.",
         "completion_claimed": False,
     }
-    parsed = CodexSdkSemanticStepCapability._parse_payload(json.dumps(unresolved))
+    parsed = SemanticStepWireContract._parse_payload(json.dumps(unresolved))
     assert parsed.authority_assessment.value == "UNCERTAIN"
     assert parsed.unresolved_questions
 
@@ -476,4 +476,4 @@ def test_human_attention_wire_requires_missing_authority_and_material_step_quest
             SteeringInvariantViolation,
             match="invalid structured result",
         ):
-            CodexSdkSemanticStepCapability._parse_payload(json.dumps(invalid))
+            SemanticStepWireContract._parse_payload(json.dumps(invalid))

@@ -11,10 +11,13 @@ from spg.application.production_environment_contracts import (
     change_reality_v1_payload,
     delivery_reality_v1_payload,
     guardian_assurance_intake_v1_payload,
+    preview_reality_v1_payload,
     repository_reality_v1_payload,
     workspace_reality_v1_payload,
 )
 from spg.domain.production_environment import (
+    CandidatePreviewMode,
+    CandidatePreviewSessionV1,
     DeliveryResultReference,
     EnvironmentConfiguration,
     EnvironmentLifecycleState,
@@ -33,6 +36,7 @@ from spg.domain.production_environment import (
     RuntimeConfiguration,
     VerificationOutcome,
     VerificationResultReference,
+    PreviewRuntimeStatus,
 )
 
 
@@ -219,3 +223,29 @@ def test_watt_payloads_are_admitted_by_ecf_and_guardian_contract_owners():
     assert delivery_reality.commit == continuity.current_commit
     assert assurance_intake.production_record_reference.digest == record.content_digest
     assert assurance_intake.environment_reference.reference == record.environment_reference
+
+
+def test_candidate_preview_current_and_stale_reality_is_ecf_admissible(tmp_path):
+    load_sibling_contracts()
+    from ecf.contracts.production_environment import PreviewRealityState, PreviewRealityV1
+    from ecf.runtime import ECFRealityRuntime, JsonRealityStore
+
+    now = datetime.now(UTC)
+    session = CandidatePreviewSessionV1(
+        id=uuid4(), work_id=uuid4(), candidate_id=uuid4(),
+        candidate_fingerprint="f" * 64, repository_identity="repo:one",
+        repository_revision="a" * 40, repository_tree="b" * 40,
+        workspace_id=uuid4(), environment_id=uuid4(),
+        mode=CandidatePreviewMode.FULL_APPLICATION_RUNTIME,
+        status=PreviewRuntimeStatus.READY, definition_version="watt-compose-topology-v1",
+        endpoint="http://127.0.0.1:8001/app", image_reference="sha256:" + "c" * 64,
+        service_identities=("app", "db"), created_at=now, updated_at=now,
+    )
+    runtime = ECFRealityRuntime(JsonRealityStore(tmp_path / "ecf"))
+    ready = runtime.admit_preview_payload(preview_reality_v1_payload(session))
+    assert PreviewRealityV1.model_validate(ready).runtime_state is PreviewRealityState.READY
+    stale = session.model_copy(update={"status": PreviewRuntimeStatus.STALE,
+        "endpoint": None, "version": 2})
+    stopped = runtime.admit_preview_payload(preview_reality_v1_payload(stale))
+    assert PreviewRealityV1.model_validate(stopped).runtime_state is PreviewRealityState.STALE
+    assert runtime.store.latest("preview", f"work:{session.work_id}").preview_endpoint is None

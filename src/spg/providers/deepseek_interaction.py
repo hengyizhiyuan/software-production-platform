@@ -33,10 +33,10 @@ from spg.domain.wic_response import (
     GovernedResponseEnvelope,
     GovernedResponseRealization,
 )
-from spg.providers.codex_interaction import (
-    CodexSdkConversationProvider,
-    CodexSdkInteractionSemanticCapability,
-    CodexSdkWorkInteractionCapability,
+from spg.providers.interaction_contract import (
+    ConversationContract,
+    InteractionSemanticContract,
+    WorkInteractionPipeline,
     ConversationPipelineEvidence,
     _CoalescedInteractionProviderPayload,
     _ConversationProviderPayload,
@@ -132,17 +132,17 @@ class DeepSeekInteractionSemanticCapability:
         *,
         on_stage: Callable[[str], None] | None = None,
     ) -> InteractionSemanticCandidate:
-        instruction = CodexSdkInteractionSemanticCapability.instruction(basis)
+        instruction = InteractionSemanticContract.instruction(basis)
         self.last_prompt_characters = len(instruction)
         result = self.runtime.generate(
             purpose=ModelPurpose.WIC_SEMANTIC,
             instructions=instruction,
             input_text="Return the WIC semantic result for the exact supplied basis.",
-            output_schema=CodexSdkInteractionSemanticCapability.output_schema(),
+            output_schema=InteractionSemanticContract.output_schema(),
             on_stage=on_stage,
         )
         self.last_structured_repair_count = 0
-        schema = CodexSdkInteractionSemanticCapability.output_schema()
+        schema = InteractionSemanticContract.output_schema()
         try:
             payload = _InteractionSemanticProviderPayload.model_validate_json(
                 _structured_json_text(result.output_text)
@@ -241,7 +241,7 @@ class DeepSeekConversationProvider:
         *,
         on_response_delta: Callable[[str], None] | None,
     ) -> ConversationResponseCandidate:
-        instruction = CodexSdkConversationProvider.instruction(context, collaboration)
+        instruction = ConversationContract.instruction(context, collaboration)
         self.last_prompt_characters = len(instruction)
         extractor = _JsonStringFieldStream("natural_response")
 
@@ -254,7 +254,7 @@ class DeepSeekConversationProvider:
             purpose=ModelPurpose.CONVERSATION_RESPONSE,
             instructions=instruction,
             input_text="Return the Human-facing response for this exact handoff.",
-            output_schema=CodexSdkConversationProvider.output_schema(),
+            output_schema=ConversationContract.output_schema(),
             on_output_delta=receive if on_response_delta is not None else None,
         )
         try:
@@ -366,7 +366,7 @@ class DeepSeekGovernedResponseRealizer:
             purpose=ModelPurpose.CONVERSATION_RESPONSE,
             instructions=instruction,
             input_text="Realize this governed response without changing its semantics.",
-            output_schema=CodexSdkConversationProvider.output_schema(),
+            output_schema=ConversationContract.output_schema(),
             on_output_delta=receive,
         )
         try:
@@ -396,7 +396,7 @@ class DeepSeekGovernedResponseRealizer:
         )
 
 
-class DeepSeekWorkInteractionCapability(CodexSdkWorkInteractionCapability):
+class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
     """Preserve WIC ownership and coalescing over DeepSeek Responses transport."""
 
     def __init__(self, *, runtime: WattModelRuntime, coalesce_pre_work: bool = True) -> None:

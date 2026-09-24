@@ -25,6 +25,7 @@ from spg.application.steering_decision import (
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.steering_production import SteeringProductionService
 from spg.application.work import WorkApplicationService
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.api.http import create_http_application
 from spg.domain.change import ProductionTargetKind
 from spg.domain.preparation import ContextSemanticRole
@@ -58,7 +59,7 @@ from spg.infrastructure.persistence.runtime_schema import (
 )
 from spg.infrastructure.persistence.steering_schema import semantic_step_results
 from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
-from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
+from spg.providers.semantic_wire import SemanticStepWireContract
 
 
 pytestmark = pytest.mark.postgresql
@@ -157,6 +158,20 @@ class _TransientProviderFailureCapability(_SemanticCapability):
                 retryable=True,
             )
         return super().execute(input)
+
+
+class _RepeatedProviderFailureCapability(_SemanticCapability):
+    def __init__(self) -> None:
+        super().__init__(step_type=SteeringStepType.DESIGN)
+        self.calls = 0
+
+    def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+        self.calls += 1
+        raise ModelProviderError(
+            ModelFailureKind.TIMEOUT_OR_NETWORK,
+            "controlled repeated transport failure",
+            request_sent=True, usage_unknown=True, retryable=True,
+        )
 
 
 def _migration_config(database: Database) -> Config:
@@ -306,7 +321,7 @@ def test_sem_01_03_04_05_06_08_09_10_12_14_15_real_product_path(
         assert capability.inputs[0].context_materials[0].repository_relative_path == (
             "AI_context.md"
         )
-        instruction = CodexSdkSemanticStepCapability._instruction(capability.inputs[0])
+        instruction = SemanticStepWireContract._instruction(capability.inputs[0])
         assert "Do not invoke shell, filesystem, or repository tools" in instruction
         assert "repository_tree_paths and context_materials" in instruction
         assert "missing full contents alone is not a Human decision" in instruction
@@ -478,6 +493,17 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
             sleep(0.01)
         assert capability.calls == 2
         assert driver.wait_until_idle(admitted.work_id, 2)
+        with postgres_database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            recovery = store.list_self_refine_events(
+                work_id=admitted.work_id, component="steering/provider",
+            )
+            assert len(recovery) == 1
+            assert recovery[0].final_result == "RECOVERED"
+            assert recovery[0].work_resume_result == "RESUMED"
+            assert [action.outcome for action in store.self_refine_actions(recovery[0].id)] == [
+                "RETRY_SCHEDULED", "RECOVERED",
+            ]
         result = driver.last_outcome(admitted.work_id)
         assert result is not None
         assert result.last_action is SteeringActionType.SEMANTIC_RESULT_ADMISSION
@@ -506,6 +532,47 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
         assert advanced.current_step is not None
         assert advanced.current_step.type is SteeringStepType.PRODUCE
         assert len(advanced.semantic_results) == 1
+        assert capability.calls == 2
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
+
+
+def test_repeated_steering_provider_failure_converges_to_durable_escalation(
+    postgres_database: Database, product,
+) -> None:
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+    capability = _RepeatedProviderFailureCapability()
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(
+        postgres_database, works, orchestrator,
+        semantic_capability=capability,
+        max_automatic_transitions=1,
+        provider_retry_base_delay_seconds=0.05,
+        provider_retry_max_delay_seconds=0.05,
+        provider_retry_same_failure_threshold=2,
+    )
+    try:
+        assert driver.schedule(admitted.work_id)
+        deadline = monotonic() + 4
+        while monotonic() < deadline:
+            with postgres_database.unit_of_work() as uow:
+                store = NativeExecutionStore(uow.session)
+                records = store.list_self_refine_events(
+                    work_id=admitted.work_id, component="steering/provider",
+                )
+            if records and records[0].final_result == "ESCALATED":
+                break
+            sleep(0.02)
+        assert capability.calls == 2
+        assert records[0].final_result == "ESCALATED"
+        with postgres_database.unit_of_work() as uow:
+            assert [action.outcome for action in NativeExecutionStore(uow.session).self_refine_actions(records[0].id)] == [
+                "RETRY_SCHEDULED", "ESCALATED",
+            ]
+        assert driver.schedule(admitted.work_id)
+        assert driver.wait_until_idle(admitted.work_id, 2)
         assert capability.calls == 2
     finally:
         driver.shutdown()
@@ -618,351 +685,12 @@ def test_sem_16_provider_wording_and_identity_do_not_define_material_direction(
     assert first.material_direction_fingerprint == second.material_direction_fingerprint
 
 
-class _FakeSemanticTurn:
-    id = "turn-semantic-test"
-
-    def __init__(self, response: str) -> None:
-        self.response = response
-
-    def run(self):
-        return SimpleNamespace(
-            id=self.id,
-            status=SimpleNamespace(value="completed"),
-            error=None,
-            final_response=self.response,
-        )
-
-
-class _FakeSemanticThread:
-    id = "thread-semantic-test"
-
-    def __init__(self, owner: "_FakeSemanticCodex") -> None:
-        self.owner = owner
-
-    def turn(self, instruction: str, **kwargs):
-        self.owner.instruction = instruction
-        self.owner.turn_kwargs = kwargs
-        return _FakeSemanticTurn(self.owner.response)
-
-
-class _FakeSemanticCodex:
-    def __init__(self, response: str) -> None:
-        self.response = response
-        self.thread_kwargs = None
-        self.turn_kwargs = None
-        self.instruction = None
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *_args):
-        return None
-
-    def thread_start(self, **kwargs):
-        self.thread_kwargs = kwargs
-        return _FakeSemanticThread(self)
-
-
-def test_sem_03_real_adapter_is_structured_read_only_and_provider_neutral(
-    postgres_database: Database,
-    product,
-) -> None:
-    works, _repository = product
-    admitted, _plan = _admitted_plan(works)
-    semantic_input = SemanticStepApplicationService(
-        postgres_database,
-        None,
-    ).assemble_input(admitted.work_id)
-    fake = _FakeSemanticCodex(
-        json.dumps(
-            {
-                "bounded_summary": (
-                    "Use the existing status projection to expose bounded progress."
-                ),
-                "decisions": ["Reuse the current Work and Steering projections."],
-                "derived_constraints": list(semantic_input.constraints),
-                "proposed_production": {
-                    "target_kind": "CODE_WORK",
-                    "objective": "Expose bounded execution progress observability",
-                    "artifact_targets": [],
-                    "code_targets": ["src/spg/web/app.js"],
-                    "allowed_areas": [],
-                    "forbidden_areas": [],
-                    "verification_expectation": "PATH_SCOPE and GIT_DIFF_CHECK",
-                },
-                "disposition": {
-                    "state": "RESOLVED",
-                    "authority_assessment": "WITHIN_AUTHORITY",
-                    "unresolved_questions": [],
-                    "human_attention_recommendation": None,
-                    "completion_claimed": True,
-                },
-            }
-        )
-    )
-    candidate = CodexSdkSemanticStepCapability(
-        codex_factory=lambda: fake,
-    ).execute(semantic_input)
-
-    assert candidate.work_id == semantic_input.work_id
-    assert candidate.step_id == semantic_input.step.id
-    assert candidate.basis_fingerprint == semantic_input.basis_fingerprint
-    assert candidate.evidence_refs == semantic_input.reality_refs
-    assert candidate.proposed_production is not None
-    assert candidate.proposed_production.code_targets == ("src/spg/web/app.js",)
-    assert candidate.reasoning_provider_identity == (
-        "codex-sdk:thread:thread-semantic-test:turn:turn-semantic-test"
-    )
-    assert fake.thread_kwargs["approval_mode"].value == "deny_all"
-    assert fake.thread_kwargs["sandbox"].value == "read-only"
-    assert fake.turn_kwargs["sandbox"].value == "read-only"
-    assert fake.turn_kwargs["output_schema"] == (
-        CodexSdkSemanticStepCapability.output_schema()
-    )
-    schema = fake.turn_kwargs["output_schema"]
-    assert schema["$defs"]["ProductionTargetKind"]["enum"] == [
-        "DOCUMENTATION_WORK",
-        "CODE_WORK",
-    ]
-    assert schema["$defs"]["_SemanticProviderProductionProposal"]["properties"][
-        "target_kind"
-    ] == {"$ref": "#/$defs/ProductionTargetKind"}
-    assert schema["$defs"]["_SemanticProviderProductionProposal"]["properties"][
-        "artifact_targets"
-    ]["items"] == {"$ref": "#/$defs/ProductionPlanArtifactTarget"}
-    assert schema["$defs"]["_SemanticProviderProductionProposal"]["properties"][
-        "allowed_areas"
-    ]["items"]["pattern"] == r"^[^/]+/[^/]+(?:/[^/]+)*/\*\*$"
-    assert "Return JSON only" in fake.instruction
-    assert "target_kind must be exactly DOCUMENTATION_WORK or CODE_WORK" in (
-        fake.instruction
-    )
-    assert "ending with /**" in fake.instruction
-    assert str(semantic_input.repository_location) not in fake.instruction
-
-    admitted_result = SemanticStepApplicationService(
-        postgres_database,
-        None,
-    ).admit(semantic_input, candidate)
-    assert admitted_result.step_id == semantic_input.step.id
-    assert admitted_result.basis_fingerprint == semantic_input.basis_fingerprint
-    assert admitted_result.completion_satisfied is True
-    assert admitted_result.proposed_production is not None
-    assert admitted_result.reasoning_provider_identity == (
-        "codex-sdk:thread:thread-semantic-test:turn:turn-semantic-test"
-    )
-    assert _runtime_counts(postgres_database) == (0, 0, 0)
-
-
-def test_dogfood_7_coherent_wire_result_closes_design_and_admits_produce(
-    postgres_database: Database,
-    product,
-) -> None:
-    works, repository = product
-    admitted, plan = _admitted_plan(works)
-    assert plan.current_step is not None
-    assert plan.current_step.type is SteeringStepType.DESIGN
-    fake = _FakeSemanticCodex(
-        json.dumps(
-            {
-                "bounded_summary": (
-                    "Expose bounded execution progress through the existing web path."
-                ),
-                "decisions": [
-                    "Reuse the current Work projection and existing application UI."
-                ],
-                "derived_constraints": list(admitted.constraints),
-                "proposed_production": {
-                    "target_kind": "CODE_WORK",
-                    "objective": "Expose bounded execution progress observability",
-                    "artifact_targets": [],
-                    "code_targets": ["src/spg/web/app.js"],
-                    "allowed_areas": [],
-                    "forbidden_areas": [],
-                    "verification_expectation": "PATH_SCOPE and GIT_DIFF_CHECK",
-                },
-                "disposition": {
-                    "state": "RESOLVED",
-                    "authority_assessment": "WITHIN_AUTHORITY",
-                    "unresolved_questions": [],
-                    "human_attention_recommendation": None,
-                    "completion_claimed": True,
-                },
-            }
-        )
-    )
-    orchestrator = ProductionOrchestrator(works)
-    driver = PlanSteeringDriver(
-        postgres_database,
-        works,
-        orchestrator,
-        semantic_capability=CodexSdkSemanticStepCapability(
-            codex_factory=lambda: fake,
-        ),
-    )
-    try:
-        admitted_result = driver.iterate(admitted.work_id)
-        assert admitted_result.action is SteeringActionType.SEMANTIC_RESULT_ADMISSION
-        reconstructed = SteeringApplicationService(postgres_database).reconstruct(
-            admitted.work_id
-        )
-        assert len(reconstructed.semantic_results) == 1
-        assert reconstructed.semantic_results[0].completion_satisfied is True
-        assert _runtime_counts(postgres_database) == (0, 0, 0)
-        assert _git(repository, "status", "--porcelain") == ""
-
-        transitioned = driver.iterate(admitted.work_id)
-        assert transitioned.action is SteeringActionType.STEP_TRANSITION
-        reconstructed = SteeringApplicationService(postgres_database).reconstruct(
-            admitted.work_id
-        )
-        assert reconstructed.current_step is not None
-        assert reconstructed.current_step.type is SteeringStepType.PRODUCE
-        assert _runtime_counts(postgres_database) == (0, 0, 0)
-
-        production = SteeringProductionService(postgres_database)
-        production_request = production.materialize_request(admitted.work_id)
-        production_admission = production.admit_cycle(production_request)
-        assert production_admission.binding is not None
-        assert _runtime_counts(postgres_database) == (1, 1, 0)
-        assert _git(repository, "status", "--porcelain") == ""
-    finally:
-        driver.shutdown()
-        orchestrator.shutdown()
-
-
-@pytest.mark.real_codex
-def test_semantic_provider_real_end_to_end_governed_design_result(
-    postgres_database: Database,
-    product,
-) -> None:
-    if os.environ.get("SPG_RUN_REAL_SEMANTIC_CODEX") != "1":
-        pytest.skip("set SPG_RUN_REAL_SEMANTIC_CODEX=1 for the authorized probe")
-
-    works, repository = product
-    admitted, plan = _admitted_plan(works)
-    assert admitted.production_plan is None
-    assert plan.current_step is not None
-    assert plan.current_step.type is SteeringStepType.DESIGN
-    assert _runtime_counts(postgres_database) == (0, 0, 0)
-
-    class RecordingRealCapability:
-        def __init__(self) -> None:
-            self.delegate = CodexSdkSemanticStepCapability(timeout_seconds=600)
-            self.input: SemanticStepInput | None = None
-            self.candidate: SemanticStepResultCandidate | None = None
-
-        def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
-            self.input = input
-            self.candidate = self.delegate.execute(input)
-            return self.candidate
-
-    capability = RecordingRealCapability()
-    service = SemanticStepApplicationService(
-        postgres_database,
-        capability,
-    )
-    result = service.execute(admitted.work_id)
-
-    candidate = capability.candidate
-    semantic_input = capability.input
-    assert candidate is not None
-    assert semantic_input is not None
-    assert candidate.completion_claimed is True
-    assert candidate.authority_assessment is (
-        SteeringAuthorityAssessment.WITHIN_AUTHORITY
-    )
-    assert not candidate.unresolved_questions
-    assert result.step_id == plan.current_step.id
-    assert result.result_kind is SemanticResultKind.DESIGN_DIRECTION
-    assert result.completion_satisfied is True
-    assert result.decisions
-    assert result.evidence_refs
-    assert result.reasoning_provider_identity.startswith("codex-sdk:thread:")
-    reconstruction = SteeringApplicationService(postgres_database).reconstruct(
-        admitted.work_id
-    )
-    assert reconstruction.current_step is not None
-    assert reconstruction.current_step.type is SteeringStepType.DESIGN
-    assert reconstruction.current_step.state.value == "CURRENT"
-    assert tuple(item.id for item in reconstruction.semantic_results) == (result.id,)
-    assert _runtime_counts(postgres_database) == (0, 0, 0)
-    assert _git(repository, "status", "--porcelain") == ""
-
-    orchestrator = ProductionOrchestrator(works)
-    driver = PlanSteeringDriver(postgres_database, works, orchestrator)
-    try:
-        transitioned = driver.iterate(admitted.work_id)
-        assert transitioned.action is SteeringActionType.STEP_TRANSITION
-        reconstruction = SteeringApplicationService(postgres_database).reconstruct(
-            admitted.work_id
-        )
-        assert reconstruction.current_step is not None
-        assert reconstruction.current_step.type is SteeringStepType.PRODUCE
-        assert reconstruction.latest_decision is not None
-        assert reconstruction.latest_decision.steering_outcome is (
-            SteeringOutcome.AUTO_CONTINUE
-        )
-        assert _runtime_counts(postgres_database) == (0, 0, 0)
-
-        production = SteeringProductionService(postgres_database)
-        production_request = production.materialize_request(admitted.work_id)
-        production_admission = production.admit_cycle(production_request)
-        assert production_admission.binding is not None
-        assert _runtime_counts(postgres_database) == (1, 1, 0)
-        assert _git(repository, "status", "--porcelain") == ""
-    finally:
-        driver.shutdown()
-        orchestrator.shutdown()
-    print(
-        "REAL_SEMANTIC_EVIDENCE="
-        + json.dumps(
-            {
-                "work_id": str(admitted.work_id),
-                "step_id": str(plan.current_step.id),
-                "source_revision": semantic_input.source_revision,
-                "source_tree": semantic_input.source_tree,
-                "basis_fingerprint": candidate.basis_fingerprint,
-                "result_id": str(result.id),
-                "result_kind": result.result_kind.value,
-                "bounded_summary": result.bounded_summary,
-                "decisions": list(result.decisions),
-                "evidence_refs": [
-                    item.model_dump(mode="json") for item in result.evidence_refs
-                ],
-                "authority_assessment": result.authority_assessment.value,
-                "human_attention_recommendation": (
-                    result.human_attention_recommendation
-                ),
-                "proposed_production": (
-                    None
-                    if result.proposed_production is None
-                    else result.proposed_production.model_dump(mode="json")
-                ),
-                "completion_satisfied": result.completion_satisfied,
-                "provider_identity": result.reasoning_provider_identity,
-                "current_step_after_transition": (
-                    reconstruction.current_step.type.value
-                ),
-                "runtime_counts": {
-                    "runs": 1,
-                    "pwus": 1,
-                    "runtime_commits": 0,
-                },
-                "repository_clean": True,
-            },
-            ensure_ascii=False,
-            sort_keys=True,
-        )
-    )
-
-
 def test_sem_03_real_adapter_rejects_unstructured_provider_prose() -> None:
     with pytest.raises(
         SteeringInvariantViolation,
         match="invalid structured result",
     ):
-        CodexSdkSemanticStepCapability._parse_payload(
+        SemanticStepWireContract._parse_payload(
             "A free-form design answer is not governed application Reality."
         )
 
@@ -1025,11 +753,11 @@ def test_sem_schema_03_04_05_06_15_dogfood_4_malformed_shapes_remain_rejected(
             SteeringInvariantViolation,
             match="invalid structured result",
         ):
-            CodexSdkSemanticStepCapability._parse_payload(
+            SemanticStepWireContract._parse_payload(
                 json.dumps(common | {"proposed_production": proposed_production})
             )
 
-    schema = CodexSdkSemanticStepCapability.output_schema()
+    schema = SemanticStepWireContract.output_schema()
     proposal = schema["$defs"]["_SemanticProviderProductionProposal"]["properties"]
     assert "BOUNDED_CODE_CHANGE" not in schema["$defs"][
         "ProductionTargetKind"
@@ -1040,85 +768,6 @@ def test_sem_schema_03_04_05_06_15_dogfood_4_malformed_shapes_remain_rejected(
     assert proposal["allowed_areas"]["items"]["pattern"] == (
         r"^[^/]+/[^/]+(?:/[^/]+)*/\*\*$"
     )
-
-
-def test_sem_schema_12_13_blocked_driver_is_truthful_in_work_api(
-    postgres_database: Database,
-    product,
-) -> None:
-    works, _repository = product
-    admitted, plan = _admitted_plan(works)
-    assert plan.current_step is not None
-    invalid = {
-        "bounded_summary": "Malformed Dogfood #4 provider result.",
-        "decisions": ["Attempt a bounded change."],
-        "derived_constraints": list(admitted.constraints),
-        "proposed_production": {
-            "target_kind": "BOUNDED_CODE_CHANGE",
-            "objective": "Expose progress",
-            "artifact_targets": [],
-            "code_targets": ["src/spg/web/app.js"],
-            "allowed_areas": [],
-            "forbidden_areas": [],
-            "verification_expectation": "Focused tests",
-        },
-        "disposition": {
-            "state": "RESOLVED",
-            "authority_assessment": "WITHIN_AUTHORITY",
-            "unresolved_questions": [],
-            "human_attention_recommendation": None,
-            "completion_claimed": True,
-        },
-    }
-    fake = _FakeSemanticCodex(json.dumps(invalid))
-    orchestrator = ProductionOrchestrator(works)
-    driver = PlanSteeringDriver(
-        postgres_database,
-        works,
-        orchestrator,
-        semantic_capability=CodexSdkSemanticStepCapability(
-            codex_factory=lambda: fake,
-        ),
-    )
-    try:
-        assert driver.schedule(admitted.work_id) is True
-        assert driver.wait_until_idle(admitted.work_id, 5)
-        outcome = driver.last_outcome(admitted.work_id)
-        assert outcome is not None
-        assert outcome.stop_reason is SteeringDriverStopReason.BLOCKED
-        assert not SteeringApplicationService(postgres_database).reconstruct(
-            admitted.work_id
-        ).semantic_results
-        assert _runtime_counts(postgres_database) == (0, 0, 0)
-
-        api = create_http_application(
-            database=postgres_database,
-            work_service=works,
-            orchestrator=orchestrator,
-            steering_driver=driver,
-        )
-        response = TestClient(api).get(f"/api/works/{admitted.work_id}")
-        assert response.status_code == 200
-        body = response.json()
-        assert body["current_steering_step_type"] == "DESIGN"
-        assert body["automatic_progression_state"] == "STOPPED"
-        assert body["last_stop_reason"] == "BLOCKED"
-        assert body["most_recent_meaningful_event"] == "STEERING_STOPPED_BLOCKED"
-        assert "stopped on a governed invariant" in body["what_happens_next"]
-        assert body["next_owner"] == "WATT_RECOVERY"
-        assert body["human_attention_required"] is False
-        assert body["control_state_valid"] is True
-        assert body["control_state_violations"] == []
-
-        retry = TestClient(api).post(
-            f"/api/works/{admitted.work_id}/retry-steering",
-            json={"authority_identity": "test-operator"},
-        )
-        assert retry.status_code == 200
-        assert driver.wait_until_idle(admitted.work_id, 5)
-    finally:
-        driver.shutdown()
-        orchestrator.shutdown()
 
 
 def test_semantic_result_migration_downgrade_and_reupgrade(

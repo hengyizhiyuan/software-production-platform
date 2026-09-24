@@ -22,6 +22,7 @@ from spg.application.connectors import ConnectorResolver
 from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.application.native_production_environment import NativeProductionEnvironmentRuntime
 from spg.application.native_production_record import NativeProductionRecordService
+from spg.application.native_connector_qualification import NativeConnectorQualificationService
 from spg.application.preparation import PreparationService
 from spg.application.runtime import RuntimeService
 from spg.application.work import WorkApplicationService
@@ -30,7 +31,9 @@ from spg.domain.native_execution import (
     EffectCondition,
     ExecutionMode,
     InferenceAction,
+    InferenceDecisionRejected,
     InferenceResponse,
+    NativeExecutionNotFound,
     ToolCallProposal,
     WorkerOffer,
     WorkingPlan,
@@ -76,7 +79,10 @@ from spg.providers.repository_code_verifier import RepositoryCodeVerifier
 
 pytestmark = [pytest.mark.postgresql, pytest.mark.real_container]
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-IMAGE = "watt-engineering-semantic-human-retest-app:latest"
+IMAGE = os.environ.get(
+    "SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_IMAGE",
+    "watt-native-executor-runtime:local",
+)
 CAPABILITIES = (
     "file.read",
     "file.write",
@@ -136,10 +142,12 @@ def clean_runtime(postgres_database: Database):
             os.environ["SPG_DATABASE_URL"] = previous
 
 
+@pytest.mark.parametrize("inject_structural_failure", (False, True))
 def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
     postgres_database: Database,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    inject_structural_failure: bool,
 ):
     if subprocess.run(
         ["docker", "image", "inspect", IMAGE],
@@ -244,7 +252,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
         resource_profile="standard",
         environment_profile="local-container-v1",
         poll_seconds=0.05,
-        wait_seconds=30,
+        wait_seconds=90,
         production_environment=pe_runtime,
     )
     preparation = PreparationService(
@@ -271,7 +279,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
                 grant.allocation.attempt_id
             )
         target = "preview/native-production-environment.html"
-        inference = ScriptedInferenceAdapter(
+        settled_inference = ScriptedInferenceAdapter(
             (
                 InferenceResponse(
                     action=InferenceAction.CONTINUE,
@@ -308,13 +316,25 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
                 ),
             )
         )
+        class ControlledRepairInference:
+            calls = 0
+
+            async def infer(self, request):
+                self.calls += 1
+                if inject_structural_failure and self.calls == 1:
+                    raise InferenceDecisionRejected(
+                        "TOOL_ARGUMENTS_NOT_OBJECT",
+                        "controlled provider decision mismatch",
+                    )
+                return await settled_inference.infer(request)
+
         tools = ProductionEnvironmentNativeToolHost.from_manifest(
             binding.binding.workspace,
             provider=provider,
         )
         assert tools is not None
         return NativeExecutorKernel(
-            inference=inference,
+            inference=ControlledRepairInference(),
             tools=tools.registry(),
             checkpoints=DurableCheckpointPort(
                 postgres_database,
@@ -339,15 +359,30 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
         provider_profiles=("scripted-native-pe",),
         resource_profiles=("standard",),
         capability_identities=CAPABILITIES,
-        lease_seconds=10,
+        lease_seconds=30,
     )
+    qualification_misses = 0
+    original_run_once = NativeExecutionWorker.run_once
+
+    async def run_once_with_transient_qualification_contention(self, worker_offer):
+        nonlocal qualification_misses
+        if (
+            inject_structural_failure
+            and worker_offer.provider_profiles == (NativeConnectorQualificationService.provider_profile,)
+            and qualification_misses == 0
+        ):
+            qualification_misses += 1
+            return False
+        return await original_run_once(self, worker_offer)
+
+    monkeypatch.setattr(NativeExecutionWorker, "run_once", run_once_with_transient_qualification_contention)
     stop = Event()
 
     def worker_loop():
         while not stop.is_set():
-            if asyncio.run(worker.run_once(offer)):
-                return
-            time.sleep(0.05)
+            handled = asyncio.run(worker.run_once(offer))
+            if not handled:
+                time.sleep(0.05)
 
     thread = Thread(target=worker_loop, daemon=True)
     thread.start()
@@ -361,14 +396,29 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
             binding = product.runtime_binding(admitted.work_id)
             summary = None if binding is None else product.runtime_summary(binding)
             report = None if summary is None or summary.dispatch_id is None else RuntimeStore(uow.session).provider_execution_report(summary.dispatch_id)
+            native = NativeExecutionStore(uow.session)
+            try:
+                attempted = None if summary is None else native.attempt_state(summary.attempt_id)
+            except NativeExecutionNotFound:
+                attempted = None
+            queue_entry = None if summary is None else native.queue_for_attempt(summary.attempt_id)
+            steps = () if summary is None else native.steps_for_attempt(summary.attempt_id)
+            incidents = native.list_self_refine_events(work_id=admitted.work_id)
+        attentions = service.list_attention(work_id=admitted.work_id)
         assert projection.status is WorkStatus.NEEDS_ATTENTION, (
-            None if report is None else (report.outcome, report.summary, report.metadata)
+            projection.current_production_step,
+            projection.most_recent_meaningful_event,
+            projection.what_happens_next,
+            tuple((item.kind, item.decision, item.reason) for item in attentions),
+            None if report is None else (report.outcome, report.summary, report.metadata),
+            None if attempted is None else (attempted.runtime_mode, attempted.terminal_outcome),
+            None if queue_entry is None else queue_entry.condition,
+            tuple((step.kind, step.condition, step.result_payload) for step in steps),
+            tuple((event.failure_family, event.final_result) for event in incidents),
         )
-        attention = next(
-            item
-            for item in service.list_attention(work_id=admitted.work_id)
-            if item.kind is AttentionKind.CANDIDATE_AUTHORIZATION
-        )
+        matching = [item for item in attentions if item.kind is AttentionKind.CANDIDATE_AUTHORIZATION]
+        assert len(matching) == 1, tuple((item.kind, item.decision, item.reason) for item in attentions)
+        attention = matching[0]
         context = DeliveryApplicationService(postgres_database).candidate_context(
             admitted.work_id
         )
@@ -403,6 +453,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
         native_binding = NativeExecutionStore(uow.session).attempt_binding(summary.attempt_id)
         evidence = NativeExecutionStore(uow.session).evidence_for_attempt(summary.attempt_id)
     assert work_unit is not None and work_unit.completion_contract.task_contract is not None
+    assert qualification_misses == int(inject_structural_failure)
     assert "quality.run" in work_unit.completion_contract.task_contract.required_capabilities
     with postgres_database.unit_of_work() as uow:
         retained_report = RuntimeStore(uow.session).provider_execution_report(summary.dispatch_id)
@@ -431,7 +482,9 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
             production_work_units.c.production_run_id == qualification_run
         )).scalar_one()
         qualification_pwu = RuntimeStore(uow.session).work_unit(qualification_pwu_id)
-        qualification_attempt = RuntimeStore(uow.session).attempts_for_work_unit(qualification_pwu_id)[-1]
+        qualification_attempts = RuntimeStore(uow.session).attempts_for_work_unit(qualification_pwu_id)
+        assert len(qualification_attempts) == 1
+        qualification_attempt = qualification_attempts[0]
         native = NativeExecutionStore(uow.session)
         qualification_binding = native.attempt_binding(qualification_attempt.id)
         qualification_state = native.attempt_state(qualification_attempt.id)
@@ -446,6 +499,21 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
                for effect in qualification_effects)
     assert native_binding.binding.work_id == admitted.work_id
     assert native_binding.binding.pwu_id == binding.work_unit_id
+    with postgres_database.unit_of_work() as uow:
+        native = NativeExecutionStore(uow.session)
+        incidents = native.list_self_refine_events(work_id=admitted.work_id)
+        production_effects = native.effects_for_attempt(summary.attempt_id)
+        if inject_structural_failure:
+            assert len(incidents) == 1
+            assert incidents[0].failure_family == "SEMANTIC_BINDING_FAILURE"
+            assert incidents[0].final_result == "RECOVERED"
+            assert incidents[0].status == "VERIFIED"
+            assert [action.outcome for action in native.self_refine_actions(incidents[0].id)] == [
+                "RETRY_SCHEDULED", "RECOVERED",
+            ]
+        else:
+            assert incidents == ()
+        assert len([effect for effect in production_effects if effect.tool_identity == "file.write"]) == 1
     pe_binding = pe_store.get_native_execution_binding(summary.attempt_id)
     assert pe_binding is not None
     assert pe_binding.task_contract_reference == (

@@ -21,6 +21,7 @@ from spg.domain.native_execution import (
     KernelCheckpoint,
     KernelRunResult,
     PWUContractVersionRecord,
+    RepairabilityClassification,
     ToolExecutionRequest,
     ToolExecutionResult,
     WorkingPlan,
@@ -50,7 +51,7 @@ class KernelAuditPort(Protocol):
         request: ToolExecutionRequest,
         result: ToolExecutionResult | None,
         error: BaseException | None,
-    ) -> None: ...
+    ) -> RepairabilityClassification | None: ...
 
 
 class NullKernelAudit:
@@ -82,6 +83,7 @@ class NativeExecutorKernel:
     """Run bounded inference/tool cycles while preserving resumable working state."""
 
     _PROCESS_TOOLS = {"process.run", "test.run", "build.run", "dependency.sync"}
+    _DIAGNOSTIC_TOOLS = {"file.read", "git.status", "git.diff", "test.run", "build.run", "preview.inspect"}
 
     def __init__(
         self,
@@ -129,6 +131,7 @@ class NativeExecutorKernel:
         residual_obligations = tuple(binding.obligation_references)
         ineffective_rounds = 0
         rejected_decision_rounds = 0
+        evidence_required = False
         if prior_checkpoint is not None:
             checkpoint_residual = prior_checkpoint.semantic_manifest.get(
                 "residual_obligations"
@@ -138,7 +141,17 @@ class NativeExecutorKernel:
             ):
                 residual_obligations = tuple(checkpoint_residual)
 
+        history_provider = getattr(self.audit, "recent_repair_reality", None)
+        repair_history = history_provider() if callable(history_provider) else ()
+
         while inference_count < binding.resource_envelope.max_inference_submissions:
+            repair_history = history_provider() if callable(history_provider) else repair_history
+            evidence_required = any(
+                item.get("operation_id") == str(binding.attempt_id)
+                and item.get("status") == "OPEN"
+                and item.get("repairability") == RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE.value
+                for item in repair_history
+            )
             control = await control_probe() if control_probe else None
             if control in {ControlAction.PAUSE, ControlAction.STOP, ControlAction.CANCEL}:
                 checkpoint = await self._checkpoint(
@@ -179,13 +192,17 @@ class NativeExecutorKernel:
                 # round bound below still forces a terminal decision after three
                 # read/check-only rounds.
                 available_tools=(
-                    self.tools.contracts()
+                    tuple(
+                        item for item in self.tools.contracts()
+                        if not evidence_required or item.get("identity") in self._DIAGNOSTIC_TOOLS
+                    )
                     if ineffective_rounds < 3
                     else ()
                 ),
                 residual_obligations=residual_obligations,
                 previous_results=prior_results,
                 checkpoint=prior_checkpoint,
+                repair_history=repair_history,
             )
             inference_step_id = await self.audit.begin_inference(request)
             try:
@@ -246,6 +263,23 @@ class NativeExecutorKernel:
             if response.action is InferenceAction.CONTINUE:
                 results: list[ToolExecutionResult] = []
                 for proposal in response.tool_calls:
+                    if evidence_required and proposal.tool_identity not in self._DIAGNOSTIC_TOOLS:
+                        checkpoint = await self._checkpoint(
+                            binding=binding, worker_epoch=worker_epoch,
+                            step_sequence=step_sequence, working_plan=working_plan,
+                            tool_results=prior_results,
+                            residual_obligations=residual_obligations,
+                        )
+                        return KernelRunResult(
+                            runtime_mode=ExecutionMode.FINISHED,
+                            terminal_outcome=AttemptTerminalOutcome.BOUNDARY_CROSSING_REQUIRED,
+                            final_checkpoint_id=checkpoint.id,
+                            step_count=step_sequence,
+                            inference_submissions=inference_count,
+                            tool_effects=tool_count,
+                            summary="Mutation requires an admitted acceptance oracle after inconclusive diagnostic evidence",
+                            residual_obligations=residual_obligations,
+                        )
                     if tool_count >= binding.resource_envelope.max_tool_effects:
                         return await self._budget_exhausted(
                             binding=binding,
@@ -320,9 +354,38 @@ class NativeExecutorKernel:
                     except BaseException as error:
                         await self.audit.finish_tool(effect_id, tool_request, None, error)
                         raise
-                    await self.audit.finish_tool(effect_id, tool_request, result, None)
+                    repairability = await self.audit.finish_tool(effect_id, tool_request, result, None)
                     tool_count += 1
                     results.append(result)
+                    if repairability is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE:
+                        evidence_required = True
+                    elif repairability is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE:
+                        evidence_required = False
+                    elif repairability in {
+                        RepairabilityClassification.REQUIRES_HUMAN_INPUT,
+                        RepairabilityClassification.REQUIRES_HUMAN_DECISION,
+                        RepairabilityClassification.UNSAFE_TO_AUTOREPAIR,
+                    }:
+                        checkpoint = await self._checkpoint(
+                            binding=binding, worker_epoch=worker_epoch,
+                            step_sequence=step_sequence, working_plan=working_plan,
+                            tool_results=prior_results + tuple(results),
+                            residual_obligations=residual_obligations,
+                        )
+                        return KernelRunResult(
+                            runtime_mode=ExecutionMode.FINISHED,
+                            terminal_outcome=(
+                                AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+                                if repairability is RepairabilityClassification.UNSAFE_TO_AUTOREPAIR
+                                else AttemptTerminalOutcome.BOUNDARY_CROSSING_REQUIRED
+                            ),
+                            final_checkpoint_id=checkpoint.id,
+                            step_count=step_sequence,
+                            inference_submissions=inference_count,
+                            tool_effects=tool_count,
+                            summary=f"Repairability boundary: {repairability.value}",
+                            residual_obligations=residual_obligations,
+                        )
                     if interrupted_by is not None:
                         checkpoint = await self._checkpoint(
                             binding=binding,

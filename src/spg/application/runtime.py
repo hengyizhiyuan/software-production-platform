@@ -347,11 +347,30 @@ class RuntimeService:
         timestamp = datetime.now(UTC)
         attempt_id = uuid4()
         generation = work_unit.current_execution_generation + 1
+        if retry_of is not None and work_unit.condition not in {
+            WorkUnitCondition.PROPOSED,
+            WorkUnitCondition.PRODUCED,
+        }:
+            raise RuntimeInvariantViolation(
+                "only an unfinished or produced PWU may create a retry Attempt"
+            )
         store.advance_work_unit_generation(
             work_unit.id,
             expected_version=work_unit.version,
             generation=generation,
         )
+        if retry_of is not None and work_unit.condition is WorkUnitCondition.PRODUCED:
+            self._append_transition(
+                store,
+                entity_type="PRODUCTION_WORK_UNIT",
+                entity_id=work_unit.id,
+                from_condition=WorkUnitCondition.PRODUCED.value,
+                to_condition=WorkUnitCondition.PROPOSED.value,
+                reason="RETRY_REOPENED_WORK_UNIT",
+                actor=RUNTIME_ACTOR,
+                correlation=attempt_id,
+                timestamp=timestamp,
+            )
         store.insert_attempt(
             {
                 "id": attempt_id,

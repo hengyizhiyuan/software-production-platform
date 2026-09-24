@@ -249,6 +249,7 @@ test("machine controls belong to Production and Human authority actions belong t
   assert.match(app, /actions\.append\(revisionAdmission\)/);
   assert.match(app, /RETRY_PRODUCTION: "Retry production"/);
   assert.match(app, /\/retry-production/);
+  assert.match(app, /state\.nativeAttempt\?\.state\?\.terminal_outcome === "UNABLE_TO_COMPLETE"[\s\S]*work\.status === "BLOCKED"[\s\S]*!state\.result\?\.trusted_result/);
   assert.match(app, /actions\.append\(transitionDecision\)/);
   assert.match(app, /evidence\.append\(manual\)/);
   assert.match(app, /production\.insertBefore\(machineControls, result\)/);
@@ -260,6 +261,22 @@ test("machine controls belong to Production and Human authority actions belong t
   assert.match(html, /id="agreement-action-panel"/);
   assert.match(app, /candidate-preview-panel/);
   assert.match(app, /agreementSelectionActions\.hidden = !selected/);
+});
+
+test("Candidate review shows one action matching the governed preview kind", () => {
+  assert.match(html, /id="open-candidate-preview"/);
+  for (const id of ["functional-preview-panel", "start-functional-preview", "open-functional-preview", "stop-functional-preview"]) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+  assert.doesNotMatch(html, /id="candidate-preview-link"/);
+  assert.match(app, /const codeDiff = exactPreview\?\.preview_kind === "CODE_DIFF"/);
+  assert.match(app, /elements\.openCandidatePreview\.textContent = codeDiff \? "Review code changes" : "Preview result"/);
+  assert.match(app, /elements\.openCandidatePreview\.hidden = !canOpen/);
+  assert.match(app, /functional\.status === "FAILED"/);
+  assert.match(app, /functional\.status === "NOT_REQUESTED"/);
+  assert.match(app, /functional\.session\.endpoint/);
+  assert.match(app, /state\.functionalPreview\?\.status !== "READY"/);
+  assert.doesNotMatch(app, /produced_artifacts\.some\(\(path\) => path\.endsWith\("\.html"\)\)/);
 });
 
 test("conversation sidebar does not retain governed revision controls", () => {
@@ -468,4 +485,20 @@ test("Work revision admission is rendered once through its authoritative panel",
   assert.match(app, /item\.kind !== "WORK_REVISION_APPROVAL"/);
   assert.match(app, /workRevisionAdmission\.hidden/);
   assert.match(html, /id="approve-work-revision"/);
+});
+
+test("Self-Refine provides Work and platform incident lists with evidence detail", () => {
+  for (const id of [
+    "self-refine-summary", "self-refine-work-view", "self-refine-platform-view",
+    "self-refine-list", "self-refine-detail", "self-refine-detail-body",
+    "self-refine-family-filter", "self-refine-component-filter", "self-refine-result-filter",
+  ]) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+  assert.match(app, /function renderSelfRefine\(\)/);
+  assert.match(app, /\/api\/works\/\$\{workId\}\/self-refine/);
+  assert.match(app, /\/api\/self-refine\/\$\{event\.id\}/);
+  assert.match(app, /detail\.actions\.forEach/);
+  assert.match(app, /known_failure_match/);
+  assert.match(app, /self_refine_rate/);
 });

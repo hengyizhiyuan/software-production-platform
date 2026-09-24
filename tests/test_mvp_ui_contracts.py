@@ -359,7 +359,7 @@ def test_control_room_slice_1_is_a_read_only_projection_over_existing_reality() 
     assert "Not available from governed Work Reality." in state_javascript
 
     render_start = javascript.index("function renderControlRoomFoundation")
-    render_end = javascript.index("function renderResult", render_start)
+    render_end = javascript.index("\n  function ", render_start + 1)
     render_projection = javascript[render_start:render_end]
     assert "apiRequest" not in render_projection
     assert 'method: "POST"' not in render_projection
@@ -399,7 +399,7 @@ def test_control_room_slice_2_preserves_wic_truth_layers_without_mutation() -> N
     assert "governed_revision" in state_javascript
 
     render_start = javascript.index("function renderUnderstandingAlignment")
-    render_end = javascript.index("function renderResult", render_start)
+    render_end = javascript.index("\n  function ", render_start + 1)
     render_projection = javascript[render_start:render_end]
     assert "state.interactions" in render_projection
     assert "apiRequest" not in render_projection
@@ -451,7 +451,7 @@ def test_control_room_slice_3_projects_plan_and_trust_reality_without_mutation()
     assert "state.attention" in javascript
 
     render_start = javascript.index("function renderProductionIntelligence")
-    render_end = javascript.index("function renderResult", render_start)
+    render_end = javascript.index("\n  function ", render_start + 1)
     render_projection = javascript[render_start:render_end]
     assert "apiRequest" not in render_projection
     assert 'method: "POST"' not in render_projection
@@ -518,10 +518,33 @@ def test_delivery_preview_and_context_assembly_are_human_visible() -> None:
     delivery_html = (WEB_ROOT / "delivery.html").read_text(encoding="utf-8")
     delivery_javascript = (WEB_ROOT / "delivery.js").read_text(encoding="utf-8")
     assert 'id="open-candidate-preview"' in html
+    assert 'id="candidate-preview-link"' not in html
     assert 'id="candidate-preview-status"' in html
+    assert 'id="start-functional-preview"' in html
+    assert 'id="open-functional-preview"' in html
+    assert 'id="stop-functional-preview"' in html
     assert "/candidate-preview" in javascript
+    assert "/functional-preview" in javascript
+    assert '"Review code changes" : "Preview result"' in javascript
     assert "Preview the result before deciding." in javascript
     assert 'id="delivery-context"' in delivery_html
     assert "/delivery-context" in delivery_javascript
     assert "GOVERNED_REALITY" in delivery_javascript
     assert "无需重新填写" in delivery_javascript
+def test_self_refine_work_and_platform_views_are_wired_to_durable_api() -> None:
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    html = (root / "src/spg/web/index.html").read_text(encoding="utf-8")
+    javascript = (root / "src/spg/web/app.js").read_text(encoding="utf-8")
+    api = (root / "src/spg/api/http.py").read_text(encoding="utf-8")
+    for identifier in (
+        "self-refine-summary", "self-refine-work-view", "self-refine-platform-view",
+        "self-refine-list", "self-refine-detail", "self-refine-family-filter",
+        "self-refine-component-filter", "self-refine-result-filter",
+    ):
+        assert f'id="{identifier}"' in html
+        assert identifier in javascript
+    assert '/api/works/{work_id}/self-refine' in api
+    assert '/api/self-refine/{event_id}' in api
+    assert '@api.get("/api/self-refine")' in api

@@ -7,6 +7,8 @@ store/lock is deliberately outside this first vertical slice.
 
 from __future__ import annotations
 
+import json
+from hashlib import sha256
 import os
 from pathlib import Path
 from threading import RLock
@@ -16,6 +18,7 @@ from pydantic import BaseModel
 
 from spg.domain.brownfield_delivery import BrownfieldReviewSessionV1
 from spg.domain.production_environment import (
+    CandidatePreviewSessionV1,
     DeliveryIntentV1,
     HumanDeliveryDecision,
     LifecycleTransitionRecord,
@@ -106,6 +109,88 @@ class JsonProductionEnvironmentStore:
     def save_preview(self, preview: PreviewRuntimeV1) -> PreviewRuntimeV1:
         path = self.root / "previews" / f"{preview.id}.json"
         return self._admit_immutable(path, preview, PreviewRuntimeV1)
+
+    def create_candidate_preview(self, preview: CandidatePreviewSessionV1) -> CandidatePreviewSessionV1:
+        with self._lock:
+            pointer = self.root / "candidate-previews" / "by-work" / f"{preview.work_id}.json"
+            if pointer.exists():
+                raise ProductionEnvironmentStoreConflict("Work already has a current Candidate Preview")
+            self._write_candidate_preview(preview)
+            self._replace_atomic(pointer, preview.model_dump_json(include={"id", "work_id"}))
+        return preview
+
+    def current_candidate_preview(self, work_id: UUID) -> CandidatePreviewSessionV1 | None:
+        pointer = self.root / "candidate-previews" / "by-work" / f"{work_id}.json"
+        if not pointer.exists():
+            return None
+        preview_id = UUID(json.loads(pointer.read_text(encoding="utf-8"))["id"])
+        return self.get_candidate_preview(preview_id)
+
+    def get_candidate_preview(self, preview_id: UUID) -> CandidatePreviewSessionV1 | None:
+        return self._read(
+            self.root / "candidate-previews" / "sessions" / str(preview_id) / "current.json",
+            CandidatePreviewSessionV1,
+        )
+
+    def advance_candidate_preview(
+        self, before: CandidatePreviewSessionV1, after: CandidatePreviewSessionV1,
+    ) -> CandidatePreviewSessionV1:
+        if before.id != after.id or after.version != before.version + 1:
+            raise ProductionEnvironmentStoreConflict("Candidate Preview transition has invalid lineage")
+        with self._lock:
+            if self.get_candidate_preview(before.id) != before:
+                raise ProductionEnvironmentStoreConflict("Candidate Preview changed before transition")
+            self._write_candidate_preview(after)
+        return after
+
+    def replace_current_candidate_preview(self, preview: CandidatePreviewSessionV1) -> CandidatePreviewSessionV1:
+        with self._lock:
+            pointer = self.root / "candidate-previews" / "by-work" / f"{preview.work_id}.json"
+            self._write_candidate_preview(preview)
+            self._replace_atomic(pointer, preview.model_dump_json(include={"id", "work_id"}))
+        return preview
+
+    def _write_candidate_preview(self, preview: CandidatePreviewSessionV1) -> None:
+        directory = self.root / "candidate-previews" / "sessions" / str(preview.id)
+        encoded = preview.model_dump_json(indent=2)
+        self._write_new(directory / "versions" / f"{preview.version}.json", encoded)
+        self._replace_atomic(directory / "current.json", encoded)
+
+    def save_candidate_preview_boundary_evidence(
+        self, preview_id: UUID, change_reality: dict, guardian_intake: dict,
+    ) -> tuple[str, str]:
+        directory = self.root / "candidate-previews" / "evidence" / str(preview_id)
+        change = directory / "ecf-change-reality.json"
+        guardian = directory / "guardian-intake.json"
+        with self._lock:
+            for path, payload in ((change, change_reality), (guardian, guardian_intake)):
+                encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str, indent=2)
+                if path.exists():
+                    if path.read_text(encoding="utf-8") != encoded:
+                        raise ProductionEnvironmentStoreConflict("Preview boundary evidence identity changed")
+                else:
+                    self._write_new(path, encoded)
+        return str(change), str(guardian)
+
+    def save_candidate_preview_failure_detail(self, preview_id: UUID, detail: str) -> dict:
+        path = self.root / "candidate-previews" / "evidence" / str(preview_id) / "failure.log"
+        encoded = detail[-50_000:]
+        with self._lock:
+            self._write_new(path, encoded)
+        return {"reference": str(path), "sha256": sha256(encoded.encode("utf-8")).hexdigest()}
+
+    def save_candidate_preview_reality_evidence(self, preview_id: UUID,
+        version: int, payload: dict) -> str:
+        path = (self.root / "candidate-previews" / "evidence" / str(preview_id)
+            / "preview-reality" / f"{version}.json")
+        encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str, indent=2)
+        with self._lock:
+            if path.exists():
+                if path.read_text(encoding="utf-8") != encoded:
+                    raise ProductionEnvironmentStoreConflict("Preview Reality version changed")
+            else:
+                self._write_new(path, encoded)
+        return str(path)
 
     def create_delivery_intent(self, intent: DeliveryIntentV1) -> DeliveryIntentV1:
         with self._lock:
@@ -241,11 +326,11 @@ class JsonProductionEnvironmentStore:
             self._write_new(path, value.model_dump_json(indent=2))
         return value
 
-    @staticmethod
-    def _read(path: Path, model):
-        if not path.exists():
-            return None
-        return model.model_validate_json(path.read_text(encoding="utf-8"))
+    def _read(self, path: Path, model):
+        with self._lock:
+            if not path.exists():
+                return None
+            return model.model_validate_json(path.read_text(encoding="utf-8"))
 
     @staticmethod
     def _write_new(path: Path, content: str) -> None:

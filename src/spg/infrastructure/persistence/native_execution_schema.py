@@ -615,6 +615,54 @@ execution_recovery_cases = Table(
     Column("resolved_at", DateTime(timezone=True), nullable=True),
 )
 
+self_refine_events = Table(
+    "self_refine_events",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("work_id", Uuid(as_uuid=True), nullable=False),
+    Column("operation_id", Uuid(as_uuid=True), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("failure_family", String(64), nullable=False),
+    Column("failure_signature", String(64), nullable=False),
+    Column("affected_component", String(255), nullable=False),
+    Column("expected_reality", JSONB, nullable=False),
+    Column("observed_reality", JSONB, nullable=False),
+    Column("diagnosis_summary", Text, nullable=False),
+    Column("root_cause_classification", String(64), nullable=False),
+    Column("repair_hypothesis", Text, nullable=False),
+    Column("evidence_references", JSONB, nullable=False),
+    Column("repairability", String(64), nullable=False, server_default="REPAIRABLE_WITH_SUFFICIENT_EVIDENCE"),
+    Column("observation_confidence", String(64), nullable=False, server_default="CONFIRMED_FAILURE"),
+    Column("budget_decision", JSONB, nullable=False, server_default=text("'{}'::jsonb")),
+    Column("diagnostic_evidence", JSONB, nullable=False, server_default=text("'{}'::jsonb")),
+    Column("final_result", String(32), nullable=True),
+    Column("work_resume_result", String(64), nullable=True),
+    Column("extra_elapsed_seconds", Integer, nullable=True),
+    Column("model_token_usage", JSONB, nullable=False),
+    Column("compute_overhead", JSONB, nullable=False),
+    Column("known_failure_match", Boolean, nullable=False),
+    Column("platform_improvement_candidate_ref", String(255), nullable=True),
+    Column("status", String(32), nullable=False),
+    Column("updated_at", DateTime(timezone=True), nullable=False),
+)
+Index("ix_self_refine_events_work_created", self_refine_events.c.work_id, self_refine_events.c.created_at)
+Index("ix_self_refine_events_signature", self_refine_events.c.failure_signature)
+Index("ix_self_refine_events_status", self_refine_events.c.status)
+
+self_refine_actions = Table(
+    "self_refine_actions",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("event_id", Uuid(as_uuid=True), ForeignKey("self_refine_events.id"), nullable=False),
+    Column("sequence", Integer, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("repair_action", Text, nullable=False),
+    Column("observed_reality", JSONB, nullable=False),
+    Column("evidence_references", JSONB, nullable=False),
+    Column("outcome", String(32), nullable=False),
+    UniqueConstraint("event_id", "sequence", name="uq_self_refine_actions_sequence"),
+)
+
 execution_events = Table(
     "execution_events",
     metadata,
@@ -848,6 +896,8 @@ native_execution_tables = (
     execution_resource_usage,
     execution_control_requests,
     execution_recovery_cases,
+    self_refine_events,
+    self_refine_actions,
     execution_events,
     event_outbox,
     executor_scheduler_state,

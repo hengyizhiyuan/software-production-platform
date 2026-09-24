@@ -432,12 +432,14 @@ class ProductStore:
                 )
             ).mappings().first()
 
-        completion = self.session.execute(
-            select(completion_evaluations)
-            .where(completion_evaluations.c.work_unit_id == binding.work_unit_id)
-            .order_by(completion_evaluations.c.created_at.desc())
-            .limit(1)
-        ).mappings().first()
+        completion = None
+        if attempt is not None:
+            completion = self.session.execute(
+                select(completion_evaluations)
+                .where(completion_evaluations.c.attempt_id == attempt["id"])
+                .order_by(completion_evaluations.c.created_at.desc())
+                .limit(1)
+            ).mappings().first()
         proposed = None
         if completion is not None:
             proposed = self.session.execute(
@@ -495,13 +497,17 @@ class ProductStore:
                 .limit(1)
             ).mappings().first()
 
-        artifacts = tuple(
-            row["artifact_path"]
-            for row in self.session.execute(
-                select(work_product_references.c.artifact_path)
-                .where(work_product_references.c.work_unit_id == binding.work_unit_id)
-                .order_by(work_product_references.c.artifact_path)
-            ).mappings()
+        artifacts = (
+            ()
+            if attempt is None
+            else tuple(
+                row["artifact_path"]
+                for row in self.session.execute(
+                    select(work_product_references.c.artifact_path)
+                    .where(work_product_references.c.attempt_id == attempt["id"])
+                    .order_by(work_product_references.c.artifact_path)
+                ).mappings()
+            )
         )
         event = self.session.execute(
             select(transition_history.c.reason)

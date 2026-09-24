@@ -455,7 +455,6 @@ def test_utf8_14_posix_child_environment_remains_compatible() -> None:
     assert child == {
         "HOME": "/home/spg",
         "PATH": "/usr/bin",
-        "CODEX_HOME": "/home/spg/.codex",
         "PYTHONIOENCODING": "utf-8",
     }
     assert EXECUTOR_WIRE_ENCODING == "utf-8"

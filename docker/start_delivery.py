@@ -4,7 +4,6 @@ import os
 import subprocess
 import sys
 
-from start_app import prepare_optional_codex_state
 
 
 def run(*args, cwd=None):
@@ -12,7 +11,6 @@ def run(*args, cwd=None):
 
 
 def main():
-    prepare_optional_codex_state()
     run(sys.executable, "-m", "alembic", "upgrade", "head", cwd="/app")
     imports = Path(os.environ.get("SPG_WORKSPACE_ROOT", "/var/lib/spg/workspaces")).parent / "repository-imports"
     imports.mkdir(parents=True, exist_ok=True)

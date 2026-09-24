@@ -357,7 +357,10 @@ Command response: receipt_id, subject IDs, status ACCEPTED/ALREADY_APPLIED/REJEC
 
 `ExecutionBackend.capabilities` declares protocol/schema support, control/recovery features, max writable mounts, allowed resource/environment profiles and evidence completeness. `start(dispatch_id, binding)` returns a stable execution handle immediately after durable acceptance; `observe(handle)` returns meaningful current/terminal state; `control(handle, command)` returns a capability-checked receipt. An optional synchronous `wait_terminal` is a caller convenience with timeout returning STILL_RUNNING, never a fabricated terminal result.
 
-Legacy Codex implements this through a supervised job around its synchronous v1 dispatch; pause/native checkpoint/multi-write support remain false. Native implements the full contract. A disconnected caller reuses handle/dispatch_id. Binding validation rejects native-only requirements on legacy before execution. Terminal compatibility reports are immutable, emitted once; native intermediate Steps never become separate SPG Attempts.
+Watt Native Executor implements the active contract. A disconnected caller reuses
+the durable handle/dispatch identity. Historical compatibility reports remain
+immutable evidence, but no external coding-agent backend is selectable for new
+execution. Native intermediate Steps never become separate SPG Attempts.
 
 ### Reconciliation worked examples
 
@@ -366,3 +369,27 @@ Legacy Codex implements this through a supervised job around its synchronous v1 
 **Two repositories, interrupted integration:** Candidate vector `(API=a2, client=b2)` verified against sources `(a1,b1)` is authorized. CAS A succeeds; CAS B is uncertain. Aggregate state is PARTIAL, trusted pointers remain `(a1,b1)`, physical-ref observation shows A at a2. Query B: if b2, record converged observation; if b1, permitted forward CAS may run; if b3, block and prepare an explicitly authorized recovery vector, never force b2. Only after all current exact checks succeed may PostgreSQL admit the aggregate trusted vector. No code Executor is granted write access to those authoritative refs.
 
 **Worker replacement during mutation:** epoch 7 owns a process still writing mount A. Heartbeats expire; epoch 7 loses future admissions, but scope A stays quarantined until host termination and inventory prove what happened. Epoch 8 may inspect but cannot launch an overlapping mutator. If the grant stayed valid and all effects become known, it can resume the same Attempt from a new bundle. If the Attempt was fenced/closed UNKNOWN, epoch 8 instead belongs to a successor Attempt. These alternatives depend on explicit grant facts, not on whether the old process happens to respond again.
+
+### Self-Refine reliability qualification
+
+An observed failure is classified before a repair is admitted: autonomous
+repair, repair after sufficient evidence, missing Human input, Human-owned
+product decision, or unsafe/uncertain effect. A failing test with an exact
+admitted acceptance oracle and observed expected/actual mismatch can justify
+bounded in-scope correction; a bare
+compiler diagnostic can only initiate further diagnosis. A matching source
+read promotes that diagnosis only when its path is inside the Task Contract,
+workspace and capability write scopes; the initial classification and read
+receipt remain linked as history. A restarted worker reloads the open evidence
+boundary before offering any mutating tool. Unknown effects are not replayed. A distinct
+later failure closes the earlier repair episode and starts a new one without
+rewriting the earlier receipts or actions.
+
+Runtime health noise requires a repeated matching observation or a stable
+failure signal before Self-Refine starts. Authoritative repository/source
+mismatches do not wait for a debounce. Each repair decision records the
+applied attempt, time, inference, effect, token, cost, complexity and risk
+bounds. Repeated signatures are counted against the same material tool-result
+frontier; a changed frontier is recorded rather than silently treated as an
+unchanged loop. Full tool stdout/stderr and stack evidence remain in durable receipts;
+the model sees a compact diagnostic projection with receipt references.

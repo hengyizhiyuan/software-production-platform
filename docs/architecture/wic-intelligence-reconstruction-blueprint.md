@@ -299,7 +299,7 @@ prompts.
 | Interaction contracts | `src/spg/domain/interaction.py` | Add provisional reception, semantic delta, and readiness-decision contracts | additive schema version |
 | Conversation | `src/spg/domain/conversation.py`, `src/spg/application/conversation.py` | Realize/reconcile one evolving response from typed semantics | expression only |
 | DeepSeek WIC | `src/spg/providers/deepseek_interaction.py` | Add small fast-reception schema and retain complete failure provenance | provider adapter only |
-| Existing WIC prompt path | `src/spg/providers/codex_interaction.py` | Consume typed policy/context inputs; keep legacy path during shadowing | no immediate replacement |
+| Existing WIC prompt path | `src/spg/providers/interaction_contract.py` and `src/spg/providers/deepseek_interaction.py` | Consume typed policy/context inputs through API-key provider contracts | no coding-agent SDK fallback |
 | Model routing | `src/spg/domain/model_runtime.py`, `src/spg/infrastructure/model_runtime.py` | Add `WIC_FAST_RECEPTION` purpose and bounded profile | configured hosted Providers |
 | Composition | `src/spg/application/bootstrap.py` | Compose capabilities independently of persistence via the new seam | current behavior already regression-tested |
 | Context projection | new `application/wic_context.py` | Build and validate Fast Context Card | rebuildable, no truth ownership |

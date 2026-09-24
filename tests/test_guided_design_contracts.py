@@ -15,7 +15,7 @@ from spg.domain.guided_design import (
     DesignOutputClass,
 )
 from spg.domain.steering import SemanticStepInput, SteeringStepState, SteeringStepType
-from spg.providers.codex_semantic import CodexSdkSemanticStepCapability
+from spg.providers.semantic_wire import SemanticStepWireContract
 
 
 def test_guided_design_schema_is_general_adaptive_and_steering_linked() -> None:
@@ -121,7 +121,7 @@ def test_final_issue_is_the_only_reviewable_production_proposal_issue() -> None:
 def test_semantic_provider_instruction_preserves_guided_focus() -> None:
     fields = SemanticStepInput.model_fields
     assert "design_context" in fields
-    source = CodexSdkSemanticStepCapability._instruction
+    source = SemanticStepWireContract._instruction
     assert callable(source)
     # The exact provider contract is intentionally asserted from source-level constants
     # by the established provider-wire suite; here the domain seam is the obligation.

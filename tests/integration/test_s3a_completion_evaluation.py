@@ -694,6 +694,62 @@ def test_s3a_15_new_observation_creates_new_evaluation(
     assert history == (first.evaluation, second.evaluation)
 
 
+def test_in_flight_retry_from_legacy_produced_pwu_can_complete_without_rewriting_history(
+    postgres_database: Database,
+    git_repository: Path,
+    tmp_path: Path,
+) -> None:
+    facts = _build(
+        postgres_database,
+        git_repository,
+        tmp_path,
+        CompletionContract(required_outputs=("docs/result.md",)),
+        operations=(_create("docs/result.md", "first attempt\n"),),
+    )
+    first = facts.completion.evaluate_observation(
+        facts.execution_result.observation.id
+    )
+    assert first.evaluation.outcome is CompletionEvaluationOutcome.PRODUCED
+
+    retry = facts.runtime.retry_attempt(facts.attempt.id)
+    with postgres_database.unit_of_work() as unit_of_work:
+        store = RuntimeStore(unit_of_work.session)
+        reopened = store.work_unit(facts.spine.work_unit.id)
+        assert reopened.condition is WorkUnitCondition.PROPOSED
+        # Recreate the persisted shape of a retry admitted before PWU reopening
+        # was fixed. The original Produced evidence remains untouched.
+        update_versioned_row(
+            unit_of_work.session,
+            production_work_units,
+            identity={"id": reopened.id},
+            expected_version=reopened.version,
+            values={"condition": WorkUnitCondition.PRODUCED.value},
+        )
+        unit_of_work.commit()
+
+    facts.preparation.prepare_attempt(
+        retry.id,
+        facts.package.id,
+        _binding(),
+        facts.repository,
+        facts.workspace_root,
+    )
+    executor = DeterministicTestExecutor(
+        DeterministicExecutionSpecification(
+            operations=(_create("docs/result.md", "second attempt\n"),),
+            reported_outcome=ProviderReportedOutcome.SUCCESS,
+        )
+    )
+    second_execution = facts.execution.dispatch_and_observe(retry.id, executor)
+    second = facts.completion.evaluate_observation(second_execution.observation.id)
+    assert second.evaluation.outcome is CompletionEvaluationOutcome.PRODUCED
+    with postgres_database.unit_of_work() as unit_of_work:
+        history = RuntimeStore(
+            unit_of_work.session
+        ).completion_evaluations_for_work_unit(facts.spine.work_unit.id)
+    assert history == (first.evaluation, second.evaluation)
+
+
 def test_s3a_16_stale_generation_cannot_produce_current_pwu(
     postgres_database: Database,
     git_repository: Path,

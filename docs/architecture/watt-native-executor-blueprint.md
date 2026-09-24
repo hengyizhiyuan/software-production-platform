@@ -45,6 +45,45 @@ flowchart TD
     DB --> UI[Reconnectable execution view]
 ```
 
+## A.1 Current Autonomous Production Intelligence loop
+
+The 8+1 names describe behaviors of the existing responsibility owners, not
+eight independent engines. Current production follows this bounded loop:
+
+| Behavior | Owner and durable boundary |
+|---|---|
+| Self-Orient | WIC, Context Orchestrator, Work Reality, ECF and capability Reality assemble decision-scoped facts; admitted Human-explicit semantic facts outrank provider phrasing. |
+| Self-Check | Steering, Task Contract, Connector Resolver and Tool Host enforce prerequisites, executable capability, resource and authority scope before a side effect. |
+| Self-Execute | Steering admits a PWU/Attempt; the Queue allocates a Watt Native Executor Worker, which invokes API-key inference and scoped Tool Host operations in a Production Environment. |
+| Self-Observe | Durable steps, effect receipts, independent repository observations, Completion and Verification compare the admitted obligation with the observed result. A model statement is not a side-effect receipt. |
+| Self-Refine | A failed provider attempt or rejected canonical decision creates an append-only, Work-linked incident and bounded repair actions. Recovery resumes the same admitted contract without granting additional authority. |
+| Self-Converge | Configurable attempt, repeated-signature, elapsed-time and inference budgets stop nonconverging same-layer retries; evidence remains historical. |
+| Self-Resume | PostgreSQL Queue, lease epochs, checkpoints and effect receipts distinguish safe replay from uncertain effects after Worker interruption. |
+| Self-Evaluate | The executable domain-separated evaluation corpus checks accepted interaction, production, resilience and assurance behaviors and fails on a critical regression. |
+| Human Governance | Work intent, material revision, sensitive authority, exact Candidate authorization, Delivery and final acceptance remain Human-owned. |
+
+The active execution provider contract is Watt Native Executor plus API-key
+model providers (currently DeepSeek). There is no external coding-agent SDK
+runtime, alternate executor or hidden fallback. Provider/model identity and a
+secret reference travel through infrastructure configuration; raw API keys do
+not enter prompts, Work Reality, Production Records or Self-Refine evidence.
+
+Self-Refine incidents are durable in `self_refine_events` with append-only
+`self_refine_actions`. An incident records its operation/Work identity, failure
+signature, expected and observed Reality, safe diagnosis, repair hypothesis,
+evidence references, overhead and known-failure match. `OPEN` denotes ongoing
+repair; `MITIGATED` records a stopped or escalated execution-level episode;
+`VERIFIED` denotes a successfully re-observed repair outcome. An Executor
+`RESULT_READY` is still only a claim for downstream Completion and independent
+Verification, never Human Acceptance. Work and cross-Work list/detail/metrics
+are projected through `/api/works/{work_id}/self-refine` and `/api/self-refine`.
+
+The event structure supports later frequency analysis, clustering and proposed
+Platform Improvement Work. It does not authorize automatic platform-code
+mutation or widen Work authority. The evaluation command is
+`python -m spg.evaluation.release_gate`; it requires a real PostgreSQL test
+database and reports domain-level results, not one aggregate coding score.
+
 Freeze the following for the implementation specification after Human closure:
 
 | Direction | Concrete closure decision |
@@ -69,7 +108,7 @@ These are observed current facts, not promises that native behavior already exis
 | Guided Design / Steering | [GuidedDesignApplicationService](../../src/spg/application/guided_design.py), [Steering admission](../../src/spg/application/steering.py); distinct design revisions and exact Reality admission. | Preserve WHAT NEXT and admission ownership; runtime local plan cannot advance Steering. |
 | PWU / Attempt | [runtime contracts](../../src/spg/domain/runtime.py): PWU conditions PROPOSED/PRODUCED/SATISFIED/SUPERSEDED; Attempt condition only CREATED, generation plus retry_of. | Add native lifecycle records; do not infer a full Attempt machine from the present enum. |
 | Executor boundary | [ExecutorCapabilityContract](../../src/spg/domain/executor.py), [execution records](../../src/spg/domain/execution.py), [dedicated subprocess transport](../../src/spg/infrastructure/executor_boundary.py). | Preserve governed dispatch and untrusted output; introduce an asynchronous, idempotent backend contract alongside v1. |
-| Codex adapter | [Codex SDK dispatch](../../src/spg/providers/codex_sdk_executor.py): ephemeral thread, bounded internal turns, total timeout, broad exceptions to UNKNOWN. | Keep as an explicitly limited compatibility backend; native inference never delegates its tool loop to Codex. |
+| External coding-agent adapter | Removed from the active runtime. Historical evidence remains in earlier records. | Watt Native Executor and API-key model providers are the only active execution path. |
 | Workspace / recovery | [GitAttemptWorkspace](../../src/spg/infrastructure/git_workspace.py), [AttemptRecoveryService](../../src/spg/application/attempt_recovery.py): one detached worktree, exact source, salvage before clean retry; provider resume deferred. | Plural isolated mounts, native journal and portable partial-work continuation. |
 | Observation / completion | [ExecutionService](../../src/spg/application/execution.py), [CompletionService](../../src/spg/application/completion.py): independent immutable observation and obligation evaluation. | Independent exact-vector observations with multiple immutable generations, rather than overwriting one dispatch observation. |
 | Assurance / trust | [Verification](../../src/spg/application/verification.py), [Candidate governance](../../src/spg/application/governance.py), [Git CAS](../../src/spg/infrastructure/git_integration.py), [Runtime Commit](../../src/spg/application/runtime_commit.py). | Retain owners; extend exact-subject and convergence contracts to vectors. |
@@ -444,16 +483,14 @@ Every failure record separates `failure_class`, `effect_certainty = NOT_STARTED 
 | SOURCE_DRIFT / PARTIAL_INTEGRATION | SPG/integration reconciliation over exact vectors, no silent rebase or partial trusted success. |
 | VERIFICATION_FAILURE_OR_UNAVAILABLE | FAIL/INCONCLUSIVE remains external assessment; repair or wait, never self-issued PASS. |
 
-## AA. Migration from the Codex adapter
+## AA. Current API-key-native execution boundary
 
-1. Add native v2 schema/contracts behind explicit backend capability routing while v1 is unchanged. Introduce durable asynchronous `ExecutionBackend.start/observe/control` (lifecycle companion). A `LegacyCodexBackend` runs existing synchronous dispatch in a supervised compatibility job and exposes terminal claim/evidence, with `supports_pause=false`, `supports_native_checkpoint=false`, `max_writable_repositories=1`. Do not fake unsupported controls.
-2. The native backend consumes the new immutable binding and emits normalized result-ready/evidence. For **single-repository v1 SPG flows**, a completion bridge can wait/poll native execution and map one terminal result to the existing dispatch result contract, preserving independent observation and trust. It cannot translate vector work to one selected repository or turn an HTTP timeout into a terminal UNKNOWN while the native worker is still running.
-3. Extend SPG preparation, observation, Completion, Verification, Candidate, integration and commit to native vectors additively. Keep the same owners and Work/PWU identities. v2 inputs cannot enter v1-only methods; unsupported requests fail explicitly. Existing v1 rows are read without fabricated native Steps/checkpoints.
-4. Run deterministic end-to-end qualification, then paired isolated dogfood with admitted real-provider profiles. A shadow comparison uses separate Attempts/workspaces and explicit diagnostic authority; it never duplicates production external effects or writes two implementations into one workspace.
-5. Enable native for selected new PWUs, then make it default after all safety/continuity/integration/Human gates. Pin backend selection in each Attempt; runtime feature-flag changes do not swap an active grant. Legacy is a temporary opt-in fallback/reference for compatible new/successor Attempts only.
-6. Remove default dependency on Codex execution after two successful native acceptance cycles and documented rollback rehearsal. Retain v1 readers/evidence permanently according to retention; optional external backend can remain. WIC/conversation providers that currently use Codex are independent and are not silently migrated by this feature.
-
-Rollback: stop new native admissions, keep native control/recovery reader running, reconcile or park active native Attempts, preserve all native state/artifacts. Compatible residual work may receive a new legacy Attempt after explicit binding/capability/resource admission; multi-repo/native-only operations remain paused until native fix or governed decomposition. Never downgrade/delete populated schema or claim the legacy backend can resume native process state. Migration changes require separate implementation authorization after closure.
+The historical migration sequence has completed. New execution admits only the
+Watt Native Executor with API-key model providers; no external coding-agent
+SDK backend, compatibility executor, rollback path, or fallback is selectable.
+Historical Attempt reports and closure evidence remain immutable. A provider
+failure is recorded as Operation Reality and handled through governed recovery,
+not a silent runtime switch.
 
 ## AB. Implementation module map
 

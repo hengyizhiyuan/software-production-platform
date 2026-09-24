@@ -186,11 +186,11 @@ surface or expose raw Provider transcripts.
 
 ## Provider neutrality
 
-The design contracts contain no Codex-specific semantics. The current Codex
-adapter runs read-only, deny-all, ephemeral Turns against the same strict typed
-wire schema used by application parsing. Provider/model/thread/turn identity is
-provenance metadata, never Work Truth, Design Truth, Plan Truth or Authority.
-Another provider can implement the same `SemanticStepCapability` contract.
+The design contracts contain no external coding-agent semantics. The current
+API-key semantic provider uses the strict typed wire schema enforced by
+application parsing. Provider and model identity are provenance metadata,
+never Work Truth, Design Truth, Plan Truth or Authority. Another API-key
+provider can implement the same `SemanticStepCapability` contract.
 
 ## Invariants
 

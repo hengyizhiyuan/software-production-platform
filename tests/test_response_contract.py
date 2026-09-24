@@ -178,7 +178,7 @@ def test_capability_alignment_answers_software_how_to_then_connects_production_o
     assert alignment.response_mode is CapabilityAlignmentMode.PRODUCTION_ADVISORY
     assert alignment.production_relevance is ProductionRelevance.POTENTIAL_PRODUCTION_GOAL
     assert alignment.watt_capability_match is True
-    assert alignment.capability_reality_reference == "system-capability-reality:1"
+    assert alignment.capability_reality_reference == "system-capability-reality:2"
     assert contract.interaction_mode is Mode.ANSWER
     assert contract.response_moves == (
         Move.DIRECT_ANSWER,

@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from hashlib import sha256
 import json
 import os
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path
 import subprocess
 import sys
 from typing import Any, Protocol
@@ -667,64 +667,12 @@ def build_executor_child_environment(
         if value:
             environment[name] = value
 
-    codex_home = _resolve_codex_home(source, is_windows=is_windows)
-    if codex_home is not None:
-        environment["CODEX_HOME"] = codex_home
     environment["PYTHONIOENCODING"] = "utf-8"
     return environment
 
 
 def _minimal_executor_environment() -> dict[str, str]:
     return build_executor_child_environment()
-
-
-def _resolve_codex_home(
-    source: Mapping[str, str],
-    *,
-    is_windows: bool,
-) -> str | None:
-    explicit = _environment_value(
-        source,
-        "CODEX_HOME",
-        case_insensitive=is_windows,
-    )
-    if explicit:
-        return _require_absolute_state_root(
-            explicit,
-            variable_name="CODEX_HOME",
-            is_windows=is_windows,
-        )
-
-    native_home_name = "USERPROFILE" if is_windows else "HOME"
-    native_home = _environment_value(
-        source,
-        native_home_name,
-        case_insensitive=is_windows,
-    )
-    if not native_home:
-        return None
-    native_root = _require_absolute_state_root(
-        native_home,
-        variable_name=native_home_name,
-        is_windows=is_windows,
-    )
-    if is_windows:
-        return str(PureWindowsPath(native_root) / ".codex")
-    return str(PurePosixPath(native_root) / ".codex")
-
-
-def _require_absolute_state_root(
-    value: str,
-    *,
-    variable_name: str,
-    is_windows: bool,
-) -> str:
-    path = PureWindowsPath(value) if is_windows else PurePosixPath(value)
-    if not path.is_absolute():
-        raise RuntimeInvariantViolation(
-            f"{variable_name} must identify an absolute Executor state root"
-        )
-    return str(path)
 
 
 def _environment_value(

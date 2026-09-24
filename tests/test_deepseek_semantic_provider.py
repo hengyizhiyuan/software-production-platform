@@ -135,6 +135,51 @@ def test_missing_disposition_gets_one_typed_repair_without_loose_admission() -> 
     assert len(broken.calls) == 2
 
 
+def test_incomplete_unresolved_disposition_gets_one_strict_repair() -> None:
+    class Runtime(_Runtime):
+        def generate(self, **options):
+            result = super().generate(**options)
+            candidate = json.loads(result.output_text)
+            candidate["disposition"] = {
+                "state": "UNRESOLVED",
+                "authority_assessment": "UNCERTAIN",
+                "unresolved_questions": ["Which admitted direction should this Step use?"],
+                "human_attention_recommendation": "Choose the bounded direction.",
+                "completion_claimed": False,
+            }
+            if len(self.calls) == 1:
+                del candidate["disposition"]["human_attention_recommendation"]
+                del candidate["disposition"]["completion_claimed"]
+            return replace(result, output_text=json.dumps(candidate))
+
+    value = SimpleNamespace(
+        work_id=UUID(int=1), steering_plan_revision_id=UUID(int=2),
+        step=SimpleNamespace(id=UUID(int=3), type=SteeringStepType.DESIGN),
+        basis_fingerprint="a" * 64, constraints=(),
+        reality_refs=(RealityReference(kind=RealityReferenceKind.WORK, identity=UUID(int=1)),),
+        model_dump=lambda **_options: {"step": {"type": "DESIGN"}},
+    )
+    runtime = Runtime()
+    result = DeepSeekSemanticStepCapability(runtime).execute(value)
+
+    assert len(runtime.calls) == 2
+    assert "prior disposition omitted" in runtime.calls[1]["input_text"].lower()
+    assert result.completion_claimed is False
+    assert result.human_attention_recommendation == "Choose the bounded direction."
+
+    class ConflictingAuthority(Runtime):
+        def generate(self, **options):
+            result = super().generate(**options)
+            candidate = json.loads(result.output_text)
+            candidate["disposition"]["authority_assessment"] = "WITHIN_AUTHORITY"
+            return replace(result, output_text=json.dumps(candidate))
+
+    conflicting = ConflictingAuthority()
+    with pytest.raises(SteeringInvariantViolation):
+        DeepSeekSemanticStepCapability(conflicting).execute(value)
+    assert len(conflicting.calls) == 1
+
+
 def test_invalid_json_gets_exactly_one_strict_repair() -> None:
     class Runtime(_Runtime):
         def generate(self, **options):

@@ -20,16 +20,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-codex-executor = [
-    "openai-codex==0.147.0",
-    "openai-codex-cli-bin==0.147.0",
-]
 test = [
     "pytest>=8,<10",
 ]
 
 [project.scripts]
 spg = "spg.cli:main"
+spg-evaluate = "spg.evaluation.release_gate:main"
 
 [tool.pytest.ini_options]
 addopts = "-q"
@@ -37,7 +34,6 @@ testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
     "postgresql: requires the explicitly configured real PostgreSQL test database",
-    "real_codex: requires explicit authorization for one real Codex SDK execution",
     "cross_repository: requires sibling ECF and Guardian repositories",
     "real_container: requires a local Docker Engine and qualified image",
 ]

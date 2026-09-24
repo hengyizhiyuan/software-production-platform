@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from contextlib import nullcontext
 from types import SimpleNamespace
 from uuid import UUID
 
@@ -743,43 +742,3 @@ def test_deepseek_realizer_uses_contract_instruction_and_streams_only_response()
     assert calls[0]["instructions"] == governed_contract_realizer_instruction(envelope)
     assert "".join(emitted) == expected == result.content
     assert len(emitted) > 1
-
-
-def test_codex_realizer_uses_same_contract_instruction_without_legacy_conflicts(monkeypatch) -> None:
-    from spg.providers import codex_interaction as provider
-
-    envelope = _envelope(_contract(InteractionMode.EXECUTE))
-    calls = []
-    expected = "按已确定的方案继续实现。"
-
-    def start_turn(instruction, **_options):
-        calls.append(instruction)
-        return SimpleNamespace(id="turn-test")
-
-    def terminal(_turn, **options):
-        options["on_response_delta"](expected[:5])
-        options["on_response_delta"](expected[5:])
-        return SimpleNamespace(
-            timed_out=False,
-            result=SimpleNamespace(
-                status="completed", error=None,
-                final_response=json.dumps({"natural_response": expected}, ensure_ascii=False),
-            ),
-        )
-
-    codex = SimpleNamespace(
-        thread_start=lambda **_options: SimpleNamespace(id="thread-test", turn=start_turn)
-    )
-    monkeypatch.setattr(
-        provider, "_codex_controls",
-        lambda: (SimpleNamespace(deny_all="deny"), SimpleNamespace(read_only="read")),
-    )
-    monkeypatch.setattr(provider, "_wait_for_streaming_terminal", terminal)
-    emitted = []
-    result = provider.CodexSdkGovernedResponseRealizer(
-        repository_location=".", codex_factory=lambda: nullcontext(codex),
-        model="test-model", reasoning_effort="low", timeout_seconds=10,
-    ).realize_stream(envelope, on_response_delta=emitted.append)
-    assert calls == [governed_contract_realizer_instruction(envelope)]
-    assert "".join(emitted) == expected == result.content
-    assert len(emitted) == 2

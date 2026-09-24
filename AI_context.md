@@ -1,5 +1,12 @@
 # AI-Native Software Production Platform
 
+> Runtime transition note (2026-09-24): the active source and deployment
+> profiles use the Watt Native Executor with API-key model providers. Historical
+> Codex SDK milestones below describe preserved past evidence, not a selectable
+> current executor, fallback, WIC provider, or deployment profile. The 8+1
+> autonomous-intelligence qualification remains an implementation mission, not
+> an accepted capability claim.
+
 ## Project Identity
 
 - **Project:** AI-Native Software Production Platform
@@ -253,7 +260,7 @@ MVP-E2E-1G and MVP-E2E-1H are **CLOSED / PASS**. The first complete Watt governe
 
 MVP-E2E-1I is **CLOSED / PASS**. After the CONVERGED Repository Integration, startup now materializes the Watt-owned authoritative checkout only when the Current Trusted Baseline, Runtime Commit, Integration Effect, repository identity, authoritative ref/tree, and exact source-Baseline index all agree and no independent local changes exist. Unexpected changes stop with `REPOSITORY_CHECKOUT_DIVERGENCE`. The current `watt-e2e2` app restarted successfully and remained restart-idempotent, the checkout stayed clean at the unchanged Trusted Baseline, completed Work and `trusted_result=true` remained queryable, and no Provider or Runtime production history was added or rewritten.
 
-The current delivery priority is governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md): review the implemented local Docker MVP, then validate one real local governed Codex production loop before Linux deployment and systematic self-dogfood. ChatGPT + Codex remains the development workflow; a CLI-only Runtime is not the MVP product.
+The historical MVP priority was governed by [MVP Scope Calibration and Phase-2 Hardening Backlog](docs/roadmap/mvp-scope-calibration.md). Current Watt production uses the Watt Native Executor with API-key model providers; that earlier Codex dogfood milestone is preserved as history, not a selectable runtime or pending production path.
 
 For product-facing language, **Motive is the thing the user genuinely wants to
 make happen**. The current implementation preserves **Work** as its internal

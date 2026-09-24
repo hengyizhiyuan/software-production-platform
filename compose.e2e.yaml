@@ -1,40 +1,7 @@
+# Compose with compose.native-executor.yaml and the provider profile.
+# This profile uses the same API-key-only Watt Native Executor chain.
 services:
-  postgres:
-    volumes:
-      - type: volume
-        source: spg-e2e-postgres-data
-        target: /var/lib/postgresql/data
-
   app:
-    build:
-      target: codex-executor
     environment:
-      CODEX_HOME: /home/spg/.codex
-      SPG_CODEX_AUTH_SOURCE: /run/secrets/spg-codex-auth
-      SPG_EXECUTOR_ADAPTER: codex-sdk
-      SPG_WIC_PROVIDER_ADAPTER: codex-sdk
-      SPG_CONVERSATION_PROVIDER_ADAPTER: codex-sdk
-      SPG_EXECUTOR_MAX_INTERNAL_TURNS: "3"
-      SPG_EXECUTOR_TIMEOUT_SECONDS: "600"
-      SPG_EXECUTOR_SANDBOX_MODE: full-access
-      SPG_RUNTIME_PROFILE: local-docker-codex-e2e
+      SPG_RUNTIME_PROFILE: local-docker-native-e2e
       SPG_VERIFICATION_ADAPTER: contract-driven-repository
-    secrets:
-      - source: spg-codex-auth
-        target: spg-codex-auth
-    volumes:
-      - type: volume
-        source: spg-e2e-codex-state
-        target: /home/spg/.codex
-      - type: volume
-        source: spg-e2e-runtime-data
-        target: /var/lib/spg
-
-volumes:
-  spg-e2e-postgres-data:
-  spg-e2e-runtime-data:
-  spg-e2e-codex-state:
-
-secrets:
-  spg-codex-auth:
-    file: ${SPG_CODEX_AUTH_FILE_HOST:?Set SPG_CODEX_AUTH_FILE_HOST to the existing host Codex auth.json}

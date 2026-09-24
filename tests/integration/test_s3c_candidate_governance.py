@@ -591,7 +591,18 @@ def test_s3c_28_optimistic_concurrency_and_lineage_protection(postgres_database,
     )
     with pytest.raises(OptimisticConcurrencyConflict):
         facts.governance.seal_candidate(request)
-    facts.runtime.retry_attempt(facts.attempt.id)
+    with pytest.raises(RuntimeInvariantViolation, match="only an unfinished or produced PWU"):
+        facts.runtime.retry_attempt(facts.attempt.id)
+    with facts.database.engine.begin() as connection:
+        connection.execute(
+            update(production_work_units)
+            .where(production_work_units.c.id == facts.satisfaction_result.work_unit.id)
+            .values(
+                current_execution_generation=(
+                    facts.satisfaction_result.work_unit.current_execution_generation + 1
+                )
+            )
+        )
     current = facts.runtime.inspect_run(facts.spine.run.id).work_unit
     with pytest.raises(RuntimeInvariantViolation, match="stale"):
         facts.governance.seal_candidate(

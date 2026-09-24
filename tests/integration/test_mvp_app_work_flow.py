@@ -600,6 +600,24 @@ def test_code_01_02_07_08_09_10_11_13_15_17_18_20_21_happy_path(
     assert executor.dispatch_count == 1
     assert service.get_work_result(draft.work_id).human_attention_required is True
 
+    guarded_candidate_ids = []
+    def reject_without_functional_preview(work_id, candidate_id):
+        guarded_candidate_ids.append(candidate_id)
+        raise RuntimeError("exact functional Preview is not READY")
+
+    service.configure_candidate_authorization_guard(reject_without_functional_preview)
+    with pytest.raises(RuntimeError, match="functional Preview is not READY"):
+        service.resolve_attention(
+            attention[0].id,
+            AttentionResolutionRequest(
+                action=AttentionAction.AUTHORIZE,
+                authority_identity="human:code-candidate",
+            ),
+        )
+    assert guarded_candidate_ids == [summary.candidate_id]
+    with app_facts.database.unit_of_work() as unit_of_work:
+        assert ProductStore(unit_of_work.session).runtime_summary(binding).authorization_id is None
+    service.configure_candidate_authorization_guard(lambda _work_id, _candidate_id: None)
     service.resolve_attention(
         attention[0].id,
         AttentionResolutionRequest(
@@ -846,6 +864,70 @@ def test_node_07_08_09_10_12_node_result_aggregates_without_changing_completion(
             automatic_progression_state=None,
             active_execution_subject=False,
         ) == "WATT_RECOVERY"
+
+
+def test_failed_native_style_dispatch_with_untrusted_artifacts_can_retry(
+    app_facts: AppFacts,
+) -> None:
+    submitted = app_facts.service.submit_work(NODE_DOGFOOD_INTENT)
+    draft = app_facts.service.refine_work(submitted.work_id)
+    app_facts.service.approve_work(
+        draft.work_id, authority_identity="human:retry-test"
+    )
+    executor = DeterministicTestExecutor(
+        DeterministicExecutionSpecification(
+            operations=(
+                DeterministicFileOperation(
+                    operation=DeterministicFileOperationType.MODIFY,
+                    repository_relative_path="src/spg/web/app.js",
+                    content="const composerState = globalThis.localStorage;\n\n",
+                ),
+                DeterministicFileOperation(
+                    operation=DeterministicFileOperationType.MODIFY,
+                    repository_relative_path="tests/js/test_web_state.cjs",
+                    content=_node_test_source("composerState"),
+                ),
+            ),
+            reported_outcome=ProviderReportedOutcome.FAILURE,
+            summary="Native execution produced changes but could not complete obligations",
+        )
+    )
+    service = WorkApplicationService(
+        app_facts.database,
+        workspace_root=app_facts.workspace_root,
+        executor=executor,
+        verifier=ContractDrivenRepositoryVerifier(app_facts.database),
+    )
+    blocked, attention = _advance_until_governed_stop(service, draft.work_id)
+    assert blocked.status is WorkStatus.BLOCKED
+    assert attention == ()
+    binding = _runtime_binding(app_facts, draft.work_id)
+    assert binding is not None
+    with app_facts.database.unit_of_work() as unit_of_work:
+        summary = ProductStore(unit_of_work.session).runtime_summary(binding)
+    assert summary.artifact_paths
+    assert summary.candidate_id is None
+    assert summary.runtime_commit_id is None
+    assert summary.verification_results[1] == VerificationResultValue.FAIL.value
+    old_attempt_id = summary.attempt_id
+
+    retried = service.retry_failed_production(
+        draft.work_id, authority_identity="human:retry-test"
+    )
+    assert retried.status in {WorkStatus.READY, WorkStatus.RUNNING}
+    with app_facts.database.unit_of_work() as unit_of_work:
+        runtime = RuntimeStore(unit_of_work.session)
+        old_attempt = runtime.attempt(old_attempt_id)
+        work_unit = runtime.work_unit(old_attempt.work_unit_id)
+        attempts = runtime.attempts_for_work_unit(work_unit.id)
+        current_summary = ProductStore(unit_of_work.session).runtime_summary(binding)
+    assert old_attempt.generation == 1
+    assert work_unit.current_execution_generation == 2
+    assert work_unit.condition.value == "PROPOSED"
+    assert {attempt.generation for attempt in attempts} == {1, 2}
+    assert current_summary.attempt_id != old_attempt_id
+    assert current_summary.completion_id is None
+    assert current_summary.artifact_paths == ()
 
 
 def test_refcode_03_04_15_16_17_human_edits_proposal_then_admits_contract(

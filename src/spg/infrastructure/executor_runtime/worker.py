@@ -139,6 +139,7 @@ class NativeExecutionWorker:
                     summary=str(error),
                     residual_obligations=residual,
                     resource_retryable=error.retryable,
+                    failure_family="PROVIDER_CAPACITY",
                 )
             except InferenceTransportUnknown as error:
                 latest = await asyncio.to_thread(
@@ -164,6 +165,7 @@ class NativeExecutionWorker:
                     ),
                     residual_obligations=residual,
                     resource_retryable=error.retryable,
+                    failure_family="PROVIDER_TRANSPORT",
                 )
             except NativeContextCapacityError as error:
                 latest = await asyncio.to_thread(
@@ -187,6 +189,7 @@ class NativeExecutionWorker:
                     summary=str(error),
                     residual_obligations=residual,
                     resource_retryable=False,
+                    failure_family="CONTEXT_CAPACITY",
                 )
             except InferenceAdapterError as error:
                 latest = await asyncio.to_thread(
@@ -213,6 +216,7 @@ class NativeExecutionWorker:
                         f"{error}"
                     ),
                     residual_obligations=residual,
+                    failure_family="INVALID_PROVIDER_RESPONSE",
                 )
             await asyncio.to_thread(self.runtime.finish_allocation, grant, result)
             return True

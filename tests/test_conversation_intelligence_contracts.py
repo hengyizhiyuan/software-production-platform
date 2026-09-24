@@ -24,10 +24,10 @@ from spg.domain.interaction import (
     InteractionActor,
     InteractionSemanticCandidate,
 )
-from spg.providers.codex_interaction import (
-    CodexSdkConversationProvider,
-    CodexSdkInteractionSemanticCapability,
-    CodexSdkWorkInteractionCapability,
+from spg.providers.interaction_contract import (
+    ConversationContract,
+    InteractionSemanticContract,
+    WorkInteractionPipeline,
 )
 
 
@@ -147,9 +147,9 @@ def test_response_composer_supplies_only_bounded_context_and_structured_result()
     assert received_result == result
 
 
-def test_codex_wire_contracts_separate_semantics_from_human_expression() -> None:
-    semantic_schema = CodexSdkWorkInteractionCapability.output_schema()
-    conversation_schema = CodexSdkConversationProvider.output_schema()
+def test_provider_wire_contracts_separate_semantics_from_human_expression() -> None:
+    semantic_schema = WorkInteractionPipeline.output_schema()
+    conversation_schema = ConversationContract.output_schema()
 
     assert "natural_response" not in semantic_schema["properties"]
     assert "collaboration" in semantic_schema["properties"]
@@ -195,11 +195,10 @@ def test_compatibility_facade_runs_two_provider_neutral_stages_and_streams_wordi
                 model_identity="test-model",
             )
 
-    capability = CodexSdkWorkInteractionCapability(repository_location=".", coalesce_pre_work=False)
-    capability.semantic_capability = SemanticCapability()
-    capability.conversation_provider = ConversationProvider()
-    capability.response_composer = ConversationResponseComposer(
-        capability.conversation_provider
+    capability = WorkInteractionPipeline(
+        repository_location=".", coalesce_pre_work=False,
+        semantic_capability=SemanticCapability(),
+        conversation_provider=ConversationProvider(),
     )
     deltas: list[str] = []
 
@@ -427,7 +426,7 @@ def test_latest_source_input_is_present_after_legacy_synchronous_append() -> Non
 def test_staged_and_coalesced_transport_share_one_conversation_policy(monkeypatch) -> None:
     # This guards ownership and prompt wiring; real responses still need Human review.
     monkeypatch.setattr(
-        CodexSdkInteractionSemanticCapability,
+        InteractionSemanticContract,
         "instruction",
         staticmethod(lambda _basis, *, coalesced=False: "WIC semantic instructions"),
     )
@@ -442,10 +441,10 @@ def test_staged_and_coalesced_transport_share_one_conversation_policy(monkeypatc
         concise_basis="公众号、小红书和直播需要协调内容与排期",
     )
     policy = conversation_response_policy()
-    staged = CodexSdkConversationProvider.instruction(context, collaboration)
-    coalesced = CodexSdkWorkInteractionCapability.coalesced_instruction(object())
+    staged = ConversationContract.instruction(context, collaboration)
+    coalesced = WorkInteractionPipeline.coalesced_instruction(object())
 
-    assert CodexSdkConversationProvider.response_policy() == policy
+    assert ConversationContract.response_policy() == policy
     assert staged.count(policy) == 1
     assert coalesced.count(policy) == 1
     assert collaboration.recommended_next_action in staged

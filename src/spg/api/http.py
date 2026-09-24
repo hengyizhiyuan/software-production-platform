@@ -14,6 +14,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import Response, FileResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 
 from spg.api.dto import (
     AttentionResolveRequest,
@@ -64,6 +65,7 @@ from spg.application.control_state import (
     validate_control_state,
 )
 from spg.application.delivery import DeliveryApplicationService, artifact_media_type
+from spg.application.candidate_preview import CandidatePreviewApplicationService, CandidatePreviewUnavailable
 from spg.application.control_room import ControlRoomError, ControlRoomService
 from spg.application.connectors import ConnectorResolver
 from spg.application.software_runtime import SoftwareRuntimeService
@@ -102,6 +104,9 @@ from spg.domain.native_vector import (
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.persistence import Database, DatabaseConfigurationError
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.candidate_preview_runtime import DockerCandidatePreviewRuntime
+from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+from spg.domain.production_environment import CandidatePreviewMode
 
 
 class ProductHttpError(RuntimeError):
@@ -164,6 +169,15 @@ def create_http_application(
     )
     delivery_service = DeliveryApplicationService(selected_database)
     settings = getattr(container, "settings", None)
+    candidate_runtime_preview = None
+    if getattr(settings, "native_executor_enabled", False):
+        pe_root = settings.native_executor_production_environment_store_root
+        candidate_runtime_preview = CandidatePreviewApplicationService(
+            delivery_service,
+            JsonProductionEnvironmentStore(pe_root),
+            DockerCandidatePreviewRuntime(pe_root / "candidate-preview-runtime",
+                verification_image=settings.native_executor_production_environment_image),
+        )
     software_runtime = SoftwareRuntimeService(delivery_service,
         enabled=getattr(settings, "delivery_runtime_enabled", False),
         bind_host=getattr(settings, "delivery_runtime_bind_host", "127.0.0.1"),
@@ -272,6 +286,8 @@ def create_http_application(
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
         software_runtime.restore()
+        if candidate_runtime_preview is not None:
+            candidate_runtime_preview.restore()
         if production_admission_trigger is not None:
             for work_id in production_admission_trigger.governed_branch_work_ids():
                 selected_steering_driver.schedule(work_id)
@@ -496,6 +512,12 @@ def create_http_application(
     @api.exception_handler(ControlRoomError)
     async def control_room_error_handler(_request: Request, error: ControlRoomError) -> JSONResponse:
         return _error(409, "CONTROL_ROOM_CONFLICT", str(error))
+
+    @api.exception_handler(CandidatePreviewUnavailable)
+    async def candidate_preview_unavailable_handler(
+        _request: Request, error: CandidatePreviewUnavailable,
+    ) -> JSONResponse:
+        return _error(409, "CANDIDATE_PREVIEW_UNAVAILABLE", str(error))
 
     @api.exception_handler(ProductHttpError)
     async def product_http_handler(
@@ -1074,6 +1096,53 @@ def create_http_application(
     def get_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.get_work(work_id))
 
+    @api.get("/api/works/{work_id}/self-refine")
+    def work_self_refine_events(work_id: UUID) -> dict:
+        work_service.get_work(work_id)
+        with selected_database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            records = store.list_self_refine_events(work_id=work_id)
+            metrics = store.self_refine_metrics(work_id=work_id)
+        return {
+            "count": len(records),
+            "events": [record.model_dump(mode="json") for record in records],
+            "metrics": metrics,
+        }
+
+    @api.get("/api/self-refine")
+    def platform_self_refine_events(
+        failure_family: str | None = None,
+        component: str | None = None,
+        result: str | None = None,
+    ) -> dict:
+        with selected_database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            records = store.list_self_refine_events(
+                failure_family=failure_family, component=component, result=result,
+            )
+            metrics = store.self_refine_metrics()
+        return {
+            "count": len(records),
+            "events": [record.model_dump(mode="json") for record in records],
+            "metrics": metrics,
+        }
+
+    @api.get("/api/self-refine/metrics")
+    def platform_self_refine_metrics() -> dict:
+        with selected_database.unit_of_work() as uow:
+            return NativeExecutionStore(uow.session).self_refine_metrics()
+
+    @api.get("/api/self-refine/{event_id}")
+    def self_refine_event_detail(event_id: UUID) -> dict:
+        with selected_database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            event = store.self_refine_event(event_id)
+            actions = store.self_refine_actions(event_id)
+        return {
+            "event": event.model_dump(mode="json"),
+            "actions": [action.model_dump(mode="json") for action in actions],
+        }
+
     @api.get("/api/works/{work_id}/capability-gaps")
     def work_capability_gaps(work_id: UUID) -> list[dict]:
         work_service.get_work(work_id)
@@ -1452,10 +1521,11 @@ def create_http_application(
             work_id,
             authority_identity=request.authority_identity,
         )
-        if projection.steering_enabled:
-            selected_steering_driver.schedule(work_id)
-        else:
-            selected_orchestrator.schedule(work_id)
+        # The current production cycle is already admitted. Steering may still
+        # observe the prior failed Verification as BLOCKED until this successor
+        # Attempt runs, so schedule its owner directly and let normal Steering
+        # reconcile the resulting evidence afterward.
+        selected_orchestrator.schedule(work_id)
         return work_response(projection)
 
     @api.post("/api/works/{work_id}/retry-steering", response_model=WorkResponse)
@@ -1513,7 +1583,24 @@ def create_http_application(
             authority_identity=request.authority_identity,
             rationale=request.rationale,
         )
+        preview_authorization_work = None
+        if request.action is AttentionAction.AUTHORIZE:
+            attention = next((item for item in work_service.list_attention()
+                if item.id == attention_id), None)
+            if attention is not None and attention.kind is AttentionKind.CANDIDATE_AUTHORIZATION:
+                context = delivery_service.candidate_context(attention.work_id)
+                if context is not None and CandidatePreviewApplicationService.mode_for(context) in {
+                    CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME,
+                }:
+                    if candidate_runtime_preview is None:
+                        raise CandidatePreviewUnavailable("Functional Candidate Preview is unavailable")
+                    candidate_runtime_preview.require_ready(attention.work_id, UUID(context["candidate_id"]))
+                    preview_authorization_work = attention.work_id
         projection = work_service.resolve_attention(attention_id, resolution)
+        if preview_authorization_work is not None:
+            candidate_runtime_preview.record_authorization(
+                preview_authorization_work, request.authority_identity,
+            )
         if request.action is AttentionAction.APPROVE:
             projection = selected_post_admission.activate(projection.work_id)
         elif projection.status in {WorkStatus.READY, WorkStatus.RUNNING}:
@@ -1567,6 +1654,31 @@ def create_http_application(
             "downloads": [{"path": path, "url": (
                 f"{prefix}/candidate-download/{fingerprint}/{quote(path, safe='/')}")}
                 for path in context["artifacts"]]}
+
+    @api.get("/api/works/{work_id}/functional-preview")
+    def functional_candidate_preview(work_id: UUID):
+        context = delivery_service.candidate_context(work_id)
+        if context is None:
+            return {"mode": None, "status": "NOT_READY", "session": None}
+        mode = CandidatePreviewApplicationService.mode_for(context)
+        session = None if candidate_runtime_preview is None else candidate_runtime_preview.current(work_id)
+        return {"mode": None if mode is None else mode.value,
+            "status": "NOT_REQUESTED" if session is None else session.status.value,
+            "candidate_revision": context["repository_revision"],
+            "candidate_fingerprint": context["candidate_fingerprint"],
+            "session": None if session is None else session.model_dump(mode="json")}
+
+    @api.post("/api/works/{work_id}/functional-preview")
+    def start_functional_candidate_preview(work_id: UUID):
+        if candidate_runtime_preview is None:
+            raise CandidatePreviewUnavailable("Full-application Preview Runtime is not configured")
+        return candidate_runtime_preview.request(work_id).model_dump(mode="json")
+
+    @api.post("/api/works/{work_id}/functional-preview/stop")
+    def stop_functional_candidate_preview(work_id: UUID):
+        if candidate_runtime_preview is None:
+            raise CandidatePreviewUnavailable("Full-application Preview Runtime is not configured")
+        return candidate_runtime_preview.stop(work_id).model_dump(mode="json")
 
     @api.get("/api/works/{work_id}/candidate-code-diff/{candidate_fingerprint}")
     def candidate_code_diff(work_id: UUID, candidate_fingerprint: str):

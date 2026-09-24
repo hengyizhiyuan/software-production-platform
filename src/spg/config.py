@@ -29,9 +29,9 @@ class Settings(BaseSettings):
     delivery_runtime_bind_host: str = "127.0.0.1"
     delivery_runtime_first_port: int = Field(default=8010, ge=1024, le=65000)
     delivery_runtime_port_count: int = Field(default=10, ge=1, le=20)
-    executor_adapter: str = "unconfigured"
+    executor_adapter: Literal["unconfigured", "watt-native"] = "unconfigured"
     native_executor_enabled: bool = False
-    native_executor_backend: Literal["watt-native", "legacy-codex"] = "watt-native"
+    native_executor_backend: Literal["watt-native"] = "watt-native"
     native_executor_worker_id: str = "native-worker-local-1"
     native_executor_worker_profile: str = "local-container-v1"
     native_executor_resource_profile: str = "standard"
@@ -61,12 +61,17 @@ class Settings(BaseSettings):
         pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]+$",
     )
     native_executor_poll_seconds: float = Field(default=1.0, ge=0.1, le=30)
+    native_executor_self_refine_attempt_budget: int = Field(default=3, ge=1, le=20)
+    native_executor_same_failure_threshold: int = Field(default=2, ge=1, le=20)
+    native_executor_self_refine_time_budget_seconds: int = Field(default=300, ge=1, le=86400)
+    native_executor_self_refine_inference_budget: int = Field(default=12, ge=1, le=1000)
+    native_executor_self_refine_token_budget: int = Field(default=20000, ge=1, le=2000000)
     native_executor_compatibility_wait_seconds: float = Field(
         default=7200.0, ge=30.0, le=86400.0
     )
-    wic_provider_adapter: str | None = Field(default="deepseek", min_length=1)
+    wic_provider_adapter: Literal["deepseek"] | None = "deepseek"
     wic_provider_model: str | None = Field(default="deepseek-flash", min_length=1)
-    conversation_provider_adapter: str | None = Field(default=None, min_length=1)
+    conversation_provider_adapter: Literal["deepseek"] | None = None
     conversation_provider_model: str | None = Field(default=None, min_length=1)
     wic_coalesce_pre_work: bool = True
     wic_runtime_mode: Literal[

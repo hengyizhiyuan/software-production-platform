@@ -11,6 +11,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
+import time
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 from sqlalchemy import select
@@ -246,18 +247,27 @@ class NativeConnectorQualificationService:
             opaque_reference=f"queue:{entry.id}",
         )
         observed = self.runtime.observe(handle)
-        if observed.runtime_mode is not ExecutionMode.FINISHED:
+        if observed.runtime_mode not in {ExecutionMode.FINISHED, ExecutionMode.STOPPED}:
             offer = WorkerOffer(
                 worker_id=f"connector-qualification:{requirement.work_id}",
                 worker_profile="local-container-v1",
                 provider_profiles=(self.provider_profile,), resource_profiles=("standard",),
-                capability_identities=("process.run",), lease_seconds=30,
+                capability_identities=("process.run",),
+                requested_attempt_id=attempt.id,
+                lease_seconds=30,
             )
+            deadline = time.monotonic() + 10
             with ThreadPoolExecutor(max_workers=1, thread_name_prefix="watt-connector-qualification") as pool:
-                pool.submit(lambda: asyncio.run(
-                    NativeExecutionWorker(self.runtime, kernel_factory).run_once(offer)
-                )).result()
-            observed = self.runtime.observe(handle)
+                while (
+                    observed.runtime_mode not in {ExecutionMode.FINISHED, ExecutionMode.STOPPED}
+                    and time.monotonic() < deadline
+                ):
+                    handled = pool.submit(lambda: asyncio.run(
+                        NativeExecutionWorker(self.runtime, kernel_factory).run_once(offer)
+                    )).result()
+                    observed = self.runtime.observe(handle)
+                    if not handled:
+                        time.sleep(0.05)
         if observed.terminal_outcome is not AttemptTerminalOutcome.RESULT_READY:
             return False
         ConnectorResolver(self.database).admit_qualified_candidate(

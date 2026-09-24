@@ -15,7 +15,12 @@ from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.application.semantic_steps import SemanticStepApplicationService
 from spg.domain.planning import PlannedArtifactOperation
-from spg.domain.assets import RepositoryIntakeRequest, AssetScopeAdmissionRequest
+from spg.domain.assets import (
+    RepositoryIntakeRequest,
+    AssetScopeAdmissionRequest,
+    RepositoryAcquisitionFailure,
+    RepositoryAcquisitionFailureCategory,
+)
 from spg.domain.delivery import DeliveryTargetKind, DeliveryTargetRequest, HumanAcceptanceRequest, HumanAcceptanceDecision
 from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.product import AttentionAction, AttentionKind, AttentionResolutionRequest, ProductInvariantViolation
@@ -110,24 +115,26 @@ def test_empty_work_then_two_repository_namespaces(postgres_database, tmp_path):
 def test_unconfirmed_remote_repository_remains_nonblocking_asset_candidate(
     postgres_database,
     tmp_path,
-    monkeypatch,
 ):
     work, projection = admit_empty(postgres_database, tmp_path)
+    acquisition_calls = []
+
+    class InaccessibleAcquirer:
+        def acquire(self, root, source, destination):
+            acquisition_calls.append((root, source, destination))
+            raise RepositoryAcquisitionFailure(
+                RepositoryAcquisitionFailureCategory.NETWORK_FAILURE,
+                "Repository access failed; retry when the network is available.",
+                technical_evidence={"stderr": "synthetic access denial"},
+                retryable=True,
+            )
+
     assets = RepositoryAssetService(
         postgres_database,
         tmp_path / "assets",
         tmp_path / "imports",
+        repository_acquirer=InaccessibleAcquirer(),
     )
-    original_git = assets._git
-    clone_arguments = []
-
-    def inaccessible(path, *args):
-        if args and args[0] == "clone":
-            clone_arguments.append(args)
-            raise ProductInvariantViolation("synthetic access denial")
-        return original_git(path, *args)
-
-    monkeypatch.setattr(assets, "_git", inaccessible)
     request = RepositoryIntakeRequest(
         request_id=uuid4(),
         source="https://example.invalid/private/repository.git",
@@ -139,18 +146,17 @@ def test_unconfirmed_remote_repository_remains_nonblocking_asset_candidate(
     candidate = assets.intake(request)
 
     assert assets.intake(request) == candidate
-    assert candidate["condition"] == "UNRESOLVED"
-    assert clone_arguments == [(
-        "clone",
-        "--no-local",
-        "--single-branch",
-        "--",
+    assert candidate["condition"] == "FAILED_RETRYABLE"
+    assert candidate["failure_category"] == "NETWORK_FAILURE"
+    assert candidate["technical_evidence"]["stderr"] == "synthetic access denial"
+    assert "synthetic access denial" not in candidate["message"]
+    assert acquisition_calls == [(
+        tmp_path / "assets",
         request.source,
-        str(tmp_path / "assets" / str(request.request_id)),
+        tmp_path / "assets" / str(request.request_id),
     )]
     assert candidate["resource_id"] is None
     assert set(candidate["authorization"].values()) == {"UNKNOWN"}
-    assert "Work may continue" in candidate["message"]
     assert assets.list_assets(work_id=projection.work_id) == [
         {**candidate, "bound": False, "selected_for_production": False}
     ]

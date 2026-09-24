@@ -29,7 +29,9 @@ from spg.application.orchestration import (
 )
 from spg.application.work import WorkApplicationService
 from spg.api import create_http_application
+from spg.domain.change import ProductionTargetKind
 from spg.domain.execution import ProviderReportedOutcome
+from spg.domain.planning import PlannedArtifactOperation, ProductionPlanArtifactTarget
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import (
     AttentionAction,
@@ -52,6 +54,7 @@ from spg.domain.steering import (
     RealityReferenceKind,
     ReviseSteeringPlanRequest,
     SemanticResultKind,
+    SemanticProductionProposal,
     SemanticStepInput,
     SemanticStepResultCandidate,
     StaleSteeringCandidate,
@@ -538,6 +541,20 @@ class _WordingCapability:
 
 class _TestSemanticCapability:
     def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
+        proposal = (
+            SemanticProductionProposal(
+                target_kind=ProductionTargetKind.DOCUMENTATION_WORK,
+                objective="Establish the first bounded artifact",
+                artifact_targets=(ProductionPlanArtifactTarget(
+                    path="docs/steering-result.md",
+                    operation=PlannedArtifactOperation.CREATE,
+                ),),
+                verification_expectation="Verify the admitted artifact",
+            )
+            if input.step.type is SteeringStepType.DESIGN
+            and input.production_proposal_required
+            else None
+        )
         return SemanticStepResultCandidate(
             work_id=input.work_id,
             steering_plan_revision_id=input.steering_plan_revision_id,
@@ -556,6 +573,7 @@ class _TestSemanticCapability:
             derived_constraints=input.constraints,
             evidence_refs=input.reality_refs,
             authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+            proposed_production=proposal,
             reasoning_provider_identity="fake:semantic-step",
             completion_claimed=True,
         )
@@ -1434,7 +1452,7 @@ def test_steer_loop_auto_continues_two_cycles_across_restart_and_projects_api(
             assert not orchestrator_a.is_active(work.work_id)
             assert not driver_a.is_active(work.work_id)
 
-        _wait_for(cycle_a_waiting_for_human)
+        _wait_for(cycle_a_waiting_for_human, timeout=90)
         assert executor_a.dispatch_count == 1
         driver_a.shutdown()
         _authorize_current_candidate(works_a, work.work_id)
@@ -1445,7 +1463,7 @@ def test_steer_loop_auto_continues_two_cycles_across_restart_and_projects_api(
             assert projection.current_production_cycle_trusted is True
             assert not orchestrator_a.is_active(work.work_id)
 
-        _wait_for(cycle_a_trusted)
+        _wait_for(cycle_a_trusted, timeout=90)
         baseline_one = RuntimeService(postgres_database).current_baseline()
         assert baseline_one.id != baseline_zero.id
     finally:
@@ -1532,7 +1550,7 @@ def test_steer_loop_auto_continues_two_cycles_across_restart_and_projects_api(
             assert not orchestrator_b.is_active(work.work_id)
             assert not driver_b.is_active(work.work_id)
 
-        _wait_for(long_lived_work_completed)
+        _wait_for(long_lived_work_completed, timeout=90)
         baseline_two = RuntimeService(postgres_database).current_baseline()
         assert baseline_two.id not in {baseline_zero.id, baseline_one.id}
         reconstruction = SteeringApplicationService(postgres_database).reconstruct(

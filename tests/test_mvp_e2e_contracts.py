@@ -44,24 +44,17 @@ def test_e2e_01_optional_image_profile_preserves_default_runtime() -> None:
     base = (PROJECT_ROOT / "compose.yaml").read_text(encoding="utf-8")
     override = (PROJECT_ROOT / "compose.e2e.yaml").read_text(encoding="utf-8")
 
-    assert "FROM runtime-base AS codex-executor" in dockerfile
-    assert "--extra codex-executor" in dockerfile
+    assert "FROM native-verification AS native-tool-host" in dockerfile
+    assert "--extra codex-executor" not in dockerfile
     assert dockerfile.rstrip().endswith("FROM runtime-base AS runtime")
     assert "target: runtime" in base
     assert "CODEX_HOME" not in base
     assert "SPG_EXECUTOR_ADAPTER" not in base
     assert "SPG_EXECUTOR_SANDBOX_MODE" not in base
-    assert "target: codex-executor" in override
-    assert "SPG_EXECUTOR_ADAPTER: codex-sdk" in override
-    assert 'SPG_EXECUTOR_MAX_INTERNAL_TURNS: "3"' in override
-    assert "SPG_EXECUTOR_SANDBOX_MODE: full-access" in override
+    assert "compose.native-executor.yaml" in override
+    assert "codex-sdk" not in override
     assert "SPG_VERIFICATION_ADAPTER: contract-driven-repository" in override
-    assert "SPG_CODEX_AUTH_FILE_HOST" in override
-    assert "spg-e2e-codex-state" in override
-    assert "target: /home/spg/.codex" in override
-    assert "source: ${SPG_CODEX_HOME_HOST" not in override
-    assert "spg-e2e-postgres-data" in override
-    assert "spg-e2e-runtime-data" in override
+    assert "SPG_RUNTIME_PROFILE: local-docker-native-e2e" in override
 
 
 def test_e2e_02_typed_configuration_is_bounded() -> None:
@@ -72,7 +65,7 @@ def test_e2e_02_typed_configuration_is_bounded() -> None:
     assert defaults.executor_max_internal_turns == 3
     assert defaults.executor_sandbox_mode == "workspace-write"
     configured = Settings(
-        executor_adapter="codex-sdk",
+        executor_adapter="watt-native",
         verification_adapter="mvp-e2e-markdown",
         executor_timeout_seconds=600,
         executor_max_internal_turns=1,
@@ -93,7 +86,7 @@ def test_e2e_03_child_environment_keeps_credentials_out_of_transport() -> None:
     environment = build_executor_child_environment(
         {
             "HOME": "/home/spg",
-            "CODEX_HOME": "/home/spg/.codex",
+            "LEGACY_EXECUTOR_HOME": "/home/spg/.legacy-executor",
             "PATH": "/usr/local/bin:/usr/bin",
             "SPG_DATABASE_URL": "not-transported",
             "OPENAI_API_KEY": "not-transported",
@@ -101,7 +94,7 @@ def test_e2e_03_child_environment_keeps_credentials_out_of_transport() -> None:
         },
         platform_name="posix",
     )
-    assert environment["CODEX_HOME"] == "/home/spg/.codex"
+    assert "LEGACY_EXECUTOR_HOME" not in environment
     assert environment["HOME"] == "/home/spg"
     assert "SPG_DATABASE_URL" not in environment
     assert "OPENAI_API_KEY" not in environment
@@ -110,7 +103,7 @@ def test_e2e_03_child_environment_keeps_credentials_out_of_transport() -> None:
 
 def test_e2e_04_provider_timeout_is_explicit_and_bounded() -> None:
     transport = SubprocessExecutorTransport(
-        provider_binding="codex-sdk-real",
+        provider_binding="deterministic-fixture",
         timeout_seconds=630,
         provider_timeout_seconds=600,
         provider_max_internal_turns=3,

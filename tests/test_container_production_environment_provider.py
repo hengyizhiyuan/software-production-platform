@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
 from pathlib import Path
 import subprocess
+from types import SimpleNamespace
 from uuid import uuid4
+import asyncio
 
 import pytest
 
@@ -26,6 +28,13 @@ from spg.domain.production_environment import (
 from spg.infrastructure.production_environment import (
     ContainerProductionEnvironmentProvider,
     DockerCliContainerRuntime,
+)
+from spg.infrastructure.executor_runtime.production_environment_tool_host import (
+    ProductionEnvironmentNativeToolHost,
+)
+from spg.domain.production_environment import (
+    EnvironmentCommandObservation,
+    ProviderEnvironmentHandle,
 )
 
 
@@ -221,3 +230,69 @@ def test_docker_runtime_uses_shared_compose_workspace_volume(tmp_path: Path):
             check=False,
             capture_output=True,
         )
+
+
+def test_native_tool_command_binds_workspace_python_imports() -> None:
+    commands = []
+
+    class RecordingProvider:
+        def execute_observed(self, _handle, command):
+            commands.append(command)
+            return EnvironmentCommandObservation(
+                result=EnvironmentCommandResult(command=command, exit_code=0),
+                stdout="passed",
+                stderr="",
+            )
+
+    host = ProductionEnvironmentNativeToolHost(
+        provider=RecordingProvider(),
+        handle=ProviderEnvironmentHandle(
+            provider_identity="test:production-environment",
+            environment_id=uuid4(),
+            opaque_reference="test-environment",
+        ),
+        environment_reference="production-environment:test",
+        workspace_reference="production-workspace:test",
+    )
+    request = SimpleNamespace(
+        delivery_id=uuid4(),
+        proposal=SimpleNamespace(arguments={
+            "cwd": ".",
+            "argv": ["python", "-m", "pytest", "tests/test_mvp_ui_contracts.py", "-q"],
+        }),
+    )
+    result = asyncio.run(host._run_argv(request, "test.run"))
+    assert result.output["returncode"] == 0
+    assert commands[0].working_directory == "/workspace/primary"
+    assert commands[0].python_source_path == "/workspace/primary/src"
+
+
+def test_docker_execution_passes_bounded_workspace_python_environment() -> None:
+    class RecordingRuntime(DockerCliContainerRuntime):
+        def __init__(self):
+            super().__init__()
+            self.arguments = None
+
+        def _run(self, *arguments):
+            self.arguments = arguments
+            return subprocess.CompletedProcess(arguments, 0, "passed", "")
+
+    runtime = RecordingRuntime()
+    command = EnvironmentCommand(
+        argv=("python", "-m", "pytest", "tests/test_mvp_ui_contracts.py", "-q"),
+        working_directory="/workspace/primary",
+        python_source_path="/workspace/primary/src",
+    )
+    observed = runtime.execute_observed("test-container", command)
+    assert observed.result.exit_code == 0
+    assert runtime.arguments == (
+        "exec", "-w", "/workspace/primary",
+        "-e", "PYTHONPATH=/workspace/primary/src",
+        "-e", "PYTHONDONTWRITEBYTECODE=1",
+        "test-container", "python", "-m", "pytest",
+        "tests/test_mvp_ui_contracts.py", "-q",
+    )
+    assert EnvironmentCommand(
+        argv=("python", "-m", "pytest"),
+        working_directory="/workspace/primary",
+    ).python_source_path is None

@@ -24,9 +24,14 @@
     selectedWork: null,
     attention: [],
     result: null,
+    candidatePreview: null,
+    functionalPreview: null,
     steering: null,
     nativeQueue: [],
     nativeAttempt: null,
+    selfRefineEvents: [],
+    selfRefineMetrics: null,
+    selfRefineScope: "work",
     sources: null,
     agreements: [],
     selectedAgreementId: null,
@@ -217,6 +222,17 @@
     nativeStopControl: document.getElementById("native-stop-control"),
     nativeCancelControl: document.getElementById("native-cancel-control"),
     nativeExecutionDetails: document.getElementById("native-execution-details"),
+    selfRefineSummary: document.getElementById("self-refine-summary"),
+    selfRefineWorkView: document.getElementById("self-refine-work-view"),
+    selfRefinePlatformView: document.getElementById("self-refine-platform-view"),
+    selfRefineFilters: document.getElementById("self-refine-filters"),
+    selfRefineFamilyFilter: document.getElementById("self-refine-family-filter"),
+    selfRefineComponentFilter: document.getElementById("self-refine-component-filter"),
+    selfRefineResultFilter: document.getElementById("self-refine-result-filter"),
+    selfRefineFilterApply: document.getElementById("self-refine-filter-apply"),
+    selfRefineList: document.getElementById("self-refine-list"),
+    selfRefineDetail: document.getElementById("self-refine-detail"),
+    selfRefineDetailBody: document.getElementById("self-refine-detail-body"),
     nativeExecutionEvidence: document.getElementById("native-execution-evidence"),
     alignmentStatus: document.getElementById("alignment-status"),
     alignmentStatusBasis: document.getElementById("alignment-status-basis"),
@@ -310,7 +326,12 @@
     remainingRisk: document.getElementById("remaining-risk"),
     candidatePreviewPanel: document.getElementById("candidate-preview-panel"),
     openCandidatePreview: document.getElementById("open-candidate-preview"),
-    candidatePreviewLink: document.getElementById("candidate-preview-link"),
+    functionalPreviewPanel: document.getElementById("functional-preview-panel"),
+    functionalPreviewStatus: document.getElementById("functional-preview-status"),
+    functionalPreviewRevision: document.getElementById("functional-preview-revision"),
+    startFunctionalPreview: document.getElementById("start-functional-preview"),
+    openFunctionalPreview: document.getElementById("open-functional-preview"),
+    stopFunctionalPreview: document.getElementById("stop-functional-preview"),
     candidateArtifactActions: document.getElementById("candidate-artifact-actions"),
     candidateDeliveryLink: document.getElementById("candidate-delivery-link"),
     candidatePreviewStatus: document.getElementById("candidate-preview-status"),
@@ -441,6 +462,8 @@
     state.selectedWork = null;
     state.attention = [];
     state.result = null;
+    state.candidatePreview = null;
+    state.functionalPreview = null;
     state.steering = null;
     state.nativeQueue = [];
     state.nativeAttempt = null;
@@ -1159,7 +1182,8 @@
     if (
       state.nativeAttempt?.state?.runtime_mode === "FINISHED"
       && state.nativeAttempt?.state?.terminal_outcome === "UNABLE_TO_COMPLETE"
-      && !(state.result?.produced_artifacts || []).length
+      && work.status === "BLOCKED"
+      && !state.result?.trusted_result
     ) {
       actions.push("RETRY_PRODUCTION");
     }
@@ -1198,7 +1222,9 @@
       const candidateDecision = attention.kind === "CANDIDATE_AUTHORIZATION";
       card.append(createElement("h4", "", candidateDecision ? "Review the result" : attention.decision));
       card.append(createElement("p", "", candidateDecision
-        ? "Preview or download the candidate, then decide whether to authorize it."
+        ? ["FULL_APPLICATION_RUNTIME", "FRONTEND_RUNTIME"].includes(state.functionalPreview?.mode)
+          ? "Operate the exact Candidate in its isolated functional Preview before authorization. Code diff alone is not functional acceptance."
+          : "Preview or download the candidate, then decide whether to authorize it."
         : attention.reason || "Choose how you want Watt to continue."));
       if (attention.kind === "PRODUCTION_PROPOSAL_REVIEW") {
         const work = state.selectedWork;
@@ -1221,6 +1247,12 @@
         );
         button.type = "button";
         button.dataset.mutation = action;
+        if (candidateDecision && action === "AUTHORIZE"
+          && ["FULL_APPLICATION_RUNTIME", "FRONTEND_RUNTIME"].includes(state.functionalPreview?.mode)
+          && state.functionalPreview?.status !== "READY") {
+          button.disabled = true;
+          button.title = "A healthy exact-Candidate functional Preview is required first.";
+        }
         button.addEventListener("click", () => resolveAttention(attention.attention_id, action));
         actions.append(button);
       });
@@ -1401,6 +1433,68 @@
     elements.trustBasis.textContent = trust.basis;
   }
 
+  function renderSelfRefine() {
+    const events = state.selfRefineEvents;
+    const current = events.filter((event) => event.work_id === state.selectedWorkId);
+    const active = current.filter((event) => event.status === "OPEN").length;
+    const recovered = current.filter((event) => event.final_result === "RECOVERED").length;
+    const metrics = state.selfRefineMetrics;
+    elements.selfRefineSummary.textContent = `${current.length} Work incident(s) · ${active} active · ${recovered} recovered` + (
+      metrics ? ` · ${metrics.self_refine_events}/${metrics.native_attempts} Native attempts triggered recovery (${(metrics.self_refine_rate * 100).toFixed(1)}%)` : ""
+    );
+    elements.selfRefineFilters.hidden = state.selfRefineScope !== "platform";
+    elements.selfRefineList.replaceChildren();
+    elements.selfRefineDetail.hidden = true;
+    if (!events.length) {
+      elements.selfRefineList.append(createElement("li", "", "No Self-Refine evidence in this view."));
+      return;
+    }
+    events.forEach((event) => {
+      const row = createElement("li", "", "");
+      const button = createElement("button", "secondary", `${event.failure_family} · ${event.status} · ${event.final_result || "IN PROGRESS"}`);
+      button.type = "button";
+      button.addEventListener("click", async () => {
+        try {
+          const detail = await apiRequest(`/api/self-refine/${event.id}`);
+          elements.selfRefineDetailBody.replaceChildren();
+          const item = detail.event;
+          const summary = createElement("p", "", `${item.diagnosis_summary} ${item.repair_hypothesis}`);
+          const basis = createElement("p", "", `Work ${item.work_id} · operation ${item.operation_id} · signature ${item.failure_signature} · ${item.affected_component}`);
+          const metrics = createElement("p", "", `Attempts ${detail.actions.length} · extra time ${item.extra_elapsed_seconds ?? "ongoing"}s · model tokens ${JSON.stringify(item.model_token_usage)} · compute ${JSON.stringify(item.compute_overhead)} · known failure ${item.known_failure_match ? "yes" : "no"}`);
+          const evidence = createElement("p", "", `Evidence: ${(item.evidence_references || []).join(", ") || "none"}`);
+          elements.selfRefineDetailBody.append(summary, basis, metrics, evidence);
+          detail.actions.forEach((action) => {
+            elements.selfRefineDetailBody.append(createElement("p", "", `#${action.sequence} ${action.repair_action} · ${action.outcome} · ${JSON.stringify(action.observed_reality)}`));
+          });
+          elements.selfRefineDetail.hidden = false;
+          elements.selfRefineDetail.open = true;
+        } catch (error) { showNotice(error); }
+      });
+      row.append(button);
+      elements.selfRefineList.append(row);
+    });
+  }
+
+  function selfRefineEndpoint(workId) {
+    if (state.selfRefineScope === "work") return `/api/works/${workId}/self-refine`;
+    const params = new URLSearchParams();
+    if (elements.selfRefineFamilyFilter.value.trim()) params.set("failure_family", elements.selfRefineFamilyFilter.value.trim());
+    if (elements.selfRefineComponentFilter.value.trim()) params.set("component", elements.selfRefineComponentFilter.value.trim());
+    if (elements.selfRefineResultFilter.value) params.set("result", elements.selfRefineResultFilter.value);
+    return `/api/self-refine${params.size ? `?${params}` : ""}`;
+  }
+
+  async function loadSelfRefine() {
+    const workId = state.selectedWorkId;
+    if (!workId) return;
+    const endpoint = selfRefineEndpoint(workId);
+    const response = await apiRequest(endpoint);
+    if (state.selectedWorkId !== workId) return;
+    state.selfRefineEvents = response.events || [];
+    state.selfRefineMetrics = response.metrics || null;
+    renderSelfRefine();
+  }
+
   function renderGuidedDesign(work) {
     const design = work && work.guided_design;
     elements.guidedDesignPanel.hidden = !design;
@@ -1493,11 +1587,32 @@
     ) || "No remaining blocker reported.";
     const previewable = result.repository_state === "SEALED_CANDIDATE"
       || result.repository_state === "TRUSTED_BASELINE_ADVANCED";
-    const webPreviewable = previewable && Array.isArray(result.produced_artifacts)
-      && result.produced_artifacts.some((path) => path.endsWith(".html"));
+    const exactPreview = state.candidatePreview;
+    const canOpen = previewable && exactPreview?.status === "READY" && Boolean(exactPreview.url);
+    const codeDiff = exactPreview?.preview_kind === "CODE_DIFF";
     elements.candidatePreviewPanel.hidden = !previewable;
-    elements.openCandidatePreview.hidden = !webPreviewable;
-    elements.candidatePreviewLink.hidden = true;
+    const functional = state.functionalPreview;
+    const functionalRequired = previewable && ["FULL_APPLICATION_RUNTIME", "FRONTEND_RUNTIME"].includes(functional?.mode);
+    const functionalReady = functionalRequired && functional.status === "READY"
+      && Boolean(functional.session?.endpoint);
+    elements.functionalPreviewPanel.hidden = !functionalRequired;
+    elements.functionalPreviewStatus.textContent = functionalRequired
+      ? functionalReady
+        ? "READY · Isolated application and database passed readiness checks."
+        : functional.status === "FAILED"
+          ? `FAILED · ${functional.session?.failure_reason || "Inspect runtime evidence."}`
+          : functional.status === "NOT_REQUESTED"
+            ? "Not started. Functional acceptance is unavailable until the exact Candidate runs."
+            : `${functional.status} · Preparing the exact Candidate runtime.`
+      : "";
+    elements.functionalPreviewRevision.textContent = functionalRequired
+      ? `Candidate revision: ${functional.candidate_revision}` : "";
+    elements.startFunctionalPreview.hidden = !functionalRequired || !["NOT_REQUESTED", "FAILED", "STOPPED", "STALE"].includes(functional.status);
+    elements.openFunctionalPreview.hidden = !functionalReady;
+    elements.openFunctionalPreview.href = functionalReady ? functional.session.endpoint : "#";
+    elements.stopFunctionalPreview.hidden = !functionalRequired || !functionalReady;
+    elements.openCandidatePreview.hidden = !canOpen;
+    elements.openCandidatePreview.textContent = codeDiff ? "Review code changes" : "Preview result";
     elements.candidateArtifactActions.replaceChildren();
     if (previewable && Array.isArray(result.produced_artifacts)) {
       result.produced_artifacts.forEach((path) => {
@@ -1513,9 +1628,13 @@
     elements.candidatePreviewStatus.textContent = previewable
       ? result.trusted_result
         ? "The result is ready to review."
-        : webPreviewable
-          ? "Preview the result before deciding."
-          : "Download the result before deciding."
+        : codeDiff && functionalRequired
+          ? "Code diff is available separately; use the isolated Functional Preview to test behavior."
+          : codeDiff
+          ? "Review the exact code changes. No runnable Preview is available for this Candidate."
+          : canOpen
+            ? "Preview the result before deciding."
+            : "Download the result before deciding."
       : "";
   }
 
@@ -1525,17 +1644,24 @@
     try {
       const preview = await apiRequest(`/api/works/${state.selectedWorkId}/candidate-preview`, { method: "POST" });
       if (preview.status !== "READY") throw new ApiError(409, "PREVIEW_NOT_READY", preview.reason || "Preview is not ready.");
-      elements.candidatePreviewLink.href = preview.url;
-      elements.candidatePreviewLink.hidden = false;
-      const codeDiff = preview.preview_kind === "CODE_DIFF";
-      elements.candidatePreviewLink.textContent = codeDiff ? "Open exact code changes" : "Open exact preview";
-      elements.candidatePreviewStatus.textContent = codeDiff
-        ? "This existing application cannot run as a bounded static preview. Review the exact code changes or download the changed file."
+      state.candidatePreview = preview;
+      elements.candidatePreviewStatus.textContent = preview.preview_kind === "CODE_DIFF"
+        ? "Exact code changes opened. Candidate authorization is still your decision."
         : preview.authorization_pending
-          ? "Preview ready. Your decision is still pending." : "Preview ready.";
+          ? "Preview opened. Your decision is still pending." : "Preview opened.";
       window.open(preview.url, "_blank", "noopener");
     } catch (error) { showNotice(error); }
     finally { setBusy(false); renderAttention(); }
+  }
+
+  async function mutateFunctionalPreview(endpoint) {
+    if (state.busy || !state.selectedWorkId) return;
+    hideNotice(); setBusy(true);
+    try {
+      await apiRequest(`/api/works/${state.selectedWorkId}/functional-preview${endpoint}`, { method: "POST" });
+      await refreshSelected();
+    } catch (error) { showNotice(error); }
+    finally { setBusy(false); renderAttention(); scheduleObservationPolling(); }
   }
 
   async function downloadCandidateArtifact(path) {
@@ -1573,6 +1699,7 @@
     renderGuidedDesign(work);
     renderProductionIntelligence(work);
     renderExecutionQueue();
+    renderSelfRefine();
     elements.workRequest.textContent = work.raw_user_requirement || "No request text available.";
     elements.desiredOutcome.textContent = work.desired_outcome || "Not defined yet";
     elements.scopeSummary.textContent = work.engineering_scope
@@ -1665,7 +1792,9 @@
       && (item.available_actions || []).includes("AUTHORIZE"))
       && state.result && state.result.repository_state === "SEALED_CANDIDATE";
     const availableActions = [
-      ...(previewRequired ? ["Preview result"] : []),
+      ...(previewRequired && state.candidatePreview?.status === "READY"
+        ? [state.candidatePreview.preview_kind === "CODE_DIFF" ? "Review code changes" : "Preview result"]
+        : []),
       ...attentionActions.map(actionLabel),
       ...(humanActions.conversationalDecision ? ["Respond in conversation"] : []),
     ];
@@ -2007,6 +2136,8 @@
   }
 
   elements.openCandidatePreview.addEventListener("click", openCandidatePreview);
+  elements.startFunctionalPreview.addEventListener("click", () => mutateFunctionalPreview(""));
+  elements.stopFunctionalPreview.addEventListener("click", () => mutateFunctionalPreview("/stop"));
 
   async function performWorkAction(action) {
     if (state.busy || !state.selectedWorkId) {
@@ -2222,9 +2353,13 @@
       state.selectedWork = null;
       state.attention = [];
       state.result = null;
+      state.candidatePreview = null;
+      state.functionalPreview = null;
       state.steering = null;
       state.nativeQueue = [];
       state.nativeAttempt = null;
+      state.selfRefineEvents = [];
+      state.selfRefineMetrics = null;
       state.sources = null;
       state.agreements = [];
       state.selectedAgreementId = null;
@@ -2233,7 +2368,7 @@
     }
     const workId = state.selectedWorkId;
     const interactionId = state.selectedInteractionId;
-    const [work, attention, result, steering, nativeQueue, sources, agreements] = await Promise.all([
+    const [work, attention, result, steering, nativeQueue, sources, agreements, selfRefine] = await Promise.all([
       apiRequest(`/api/works/${workId}`),
       apiRequest(`/api/attention?work_id=${encodeURIComponent(workId)}`),
       apiRequest(`/api/works/${workId}/result`),
@@ -2244,17 +2379,34 @@
         throw error;
       }),
       apiRequest(`/api/works/${workId}/working-agreements`),
+      apiRequest(selfRefineEndpoint(workId)),
     ]);
+    const [candidatePreview, functionalPreview] = result && ["SEALED_CANDIDATE", "TRUSTED_BASELINE_ADVANCED"].includes(result.repository_state)
+      ? await Promise.all([
+        apiRequest(`/api/works/${workId}/candidate-preview`, { method: "POST" }).catch((error) => {
+          if (error instanceof ApiError && [404, 409].includes(error.status)) return null;
+          throw error;
+        }),
+        apiRequest(`/api/works/${workId}/functional-preview`).catch((error) => {
+          if (error instanceof ApiError && [404, 409].includes(error.status)) return null;
+          throw error;
+        }),
+      ])
+      : [null, null];
     if (state.selectedWorkId !== workId || state.selectedInteractionId !== interactionId) return;
     state.selectedWork = work;
     state.works = state.works.map((item) => item.work_id === workId ? work : item);
     renderWorkList();
     state.attention = attention;
     state.result = result;
+    state.candidatePreview = candidatePreview;
+    state.functionalPreview = functionalPreview;
     state.steering = steering;
     state.nativeQueue = nativeQueue;
     state.sources = sources;
     state.agreements = agreements;
+    state.selfRefineEvents = selfRefine.events || [];
+    state.selfRefineMetrics = selfRefine.metrics || null;
     const currentQueue = controlRoom.currentProductionQueue(work, nativeQueue);
     state.nativeAttempt = currentQueue.length
       ? await apiRequest(`/api/native-execution/attempts/${currentQueue[currentQueue.length - 1].attempt_id}`)
@@ -2268,7 +2420,9 @@
       globalThis.clearTimeout(state.pollTimer);
       state.pollTimer = null;
     }
-    if (!state.selectedWork || !viewModel.shouldPoll(state.selectedWork.status)) {
+    const previewInProgress = ["REQUESTED", "PREPARING", "BUILDING", "STARTING", "STOPPING"]
+      .includes(state.functionalPreview?.status);
+    if (!state.selectedWork || (!viewModel.shouldPoll(state.selectedWork.status) && !previewInProgress)) {
       return;
     }
     state.pollTimer = globalThis.setTimeout(async () => {
@@ -3099,6 +3253,15 @@
   elements.nativeResumeControl.addEventListener("click", () => controlNativeExecution("RESUME"));
   elements.nativeStopControl.addEventListener("click", () => controlNativeExecution("STOP"));
   elements.nativeCancelControl.addEventListener("click", () => controlNativeExecution("CANCEL"));
+  elements.selfRefineWorkView.addEventListener("click", () => {
+    state.selfRefineScope = "work";
+    loadSelfRefine().catch(showNotice);
+  });
+  elements.selfRefinePlatformView.addEventListener("click", () => {
+    state.selfRefineScope = "platform";
+    loadSelfRefine().catch(showNotice);
+  });
+  elements.selfRefineFilterApply.addEventListener("click", () => loadSelfRefine().catch(showNotice));
   elements.saveArtifactTarget.addEventListener("click", updateArtifactTarget);
   elements.saveCodeChangeContract.addEventListener("click", updateCodeChangeContract);
   elements.retryControl.addEventListener("click", reloadWorkspace);

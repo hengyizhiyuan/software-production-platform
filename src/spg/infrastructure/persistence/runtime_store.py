@@ -306,7 +306,10 @@ class RuntimeStore:
             production_work_units,
             identity={"id": work_unit_id},
             expected_version=expected_version,
-            values={"current_execution_generation": generation},
+            values={
+                "current_execution_generation": generation,
+                "condition": WorkUnitCondition.PROPOSED.value,
+            },
         )
 
     def mark_work_unit_produced(

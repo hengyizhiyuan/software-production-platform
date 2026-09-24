@@ -1,11 +1,8 @@
-"""Stable execution backend adapters for migration from legacy Codex execution."""
+"""Stable Watt-native execution backend and pinned handle routing."""
 
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable
-from datetime import datetime, timezone
-from uuid import uuid4
 
 from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.domain.native_execution import (
@@ -13,7 +10,6 @@ from spg.domain.native_execution import (
     BackendControlCommand,
     BackendControlReceipt,
     BackendObservation,
-    ControlRequestCondition,
     ExecutionHandle,
     NativeExecutionAdmission,
     NativeExecutionConflict,
@@ -53,45 +49,6 @@ class NativeExecutionBackend:
 
     async def control(self, command: BackendControlCommand) -> BackendControlReceipt:
         return await asyncio.to_thread(self.runtime.control, command)
-
-
-LegacyStart = Callable[[NativeExecutionAdmission], Awaitable[ExecutionHandle]]
-LegacyObserve = Callable[[ExecutionHandle], Awaitable[BackendObservation]]
-
-
-class LegacyCodexExecutionBackend:
-    """Explicit compatibility bridge; legacy Codex remains distinct from native execution."""
-
-    def __init__(self, start: LegacyStart, observe: LegacyObserve) -> None:
-        self._start = start
-        self._observe = observe
-
-    def capabilities(self) -> BackendCapabilities:
-        return BackendCapabilities(
-            backend_identity="legacy-codex",
-            backend_version="1",
-            binding_schema_versions=(2,),
-            supports_pause=False,
-            supports_native_checkpoint=False,
-            supports_multi_repository=False,
-            max_writable_repositories=1,
-            environment_profiles=("legacy-dedicated-executor",),
-        )
-
-    async def start(self, admission: NativeExecutionAdmission) -> ExecutionHandle:
-        return await self._start(admission)
-
-    async def observe(self, handle: ExecutionHandle) -> BackendObservation:
-        return await self._observe(handle)
-
-    async def control(self, command: BackendControlCommand) -> BackendControlReceipt:
-        return BackendControlReceipt(
-            command_id=command.command_id,
-            accepted=False,
-            condition=ControlRequestCondition.REJECTED,
-            message="legacy Codex backend does not support native control",
-            recorded_at=datetime.now(timezone.utc),
-        )
 
 
 class PinnedExecutionBackendRouter:

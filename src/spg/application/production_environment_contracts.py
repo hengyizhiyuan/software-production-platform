@@ -10,6 +10,7 @@ from datetime import datetime
 from uuid import UUID
 
 from spg.domain.production_environment import (
+    CandidatePreviewSessionV1,
     GitContinuityV1,
     ProductionEnvironmentV1,
     ProductionRecordV1,
@@ -17,6 +18,43 @@ from spg.domain.production_environment import (
     RepositoryAcquisitionPolicyV1,
     RepositoryBranchSelection,
 )
+
+
+def preview_reality_v1_payload(session: CandidatePreviewSessionV1) -> dict:
+    """Project immutable, versioned runtime observation for ECF ownership."""
+
+    from uuid import NAMESPACE_URL, uuid5
+
+    record = next((item["reference"] for item in session.evidence
+        if item["kind"] == "PRODUCTION_RECORD"), None)
+    return {
+        "schema_version": 1,
+        "reality_id": uuid5(NAMESPACE_URL, f"watt:candidate-preview-reality:{session.id}:{session.version}"),
+        "preview_identity": f"candidate-preview:{session.id}",
+        "work_reference": f"work:{session.work_id}",
+        "candidate_reference": f"candidate:{session.candidate_id}",
+        "repository_identity": session.repository_identity,
+        "candidate_revision": session.repository_revision,
+        "candidate_tree_identity": session.repository_tree,
+        "workspace_reference": f"workspace:{session.workspace_id}",
+        "environment_reference": f"production-environment:{session.environment_id}",
+        "runtime_definition_version": session.definition_version,
+        "runtime_state": session.status.value,
+        "preview_endpoint": session.endpoint,
+        "runtime_service_references": session.service_identities,
+        "production_record_reference": record,
+        "provenance": {
+            "source_system": "watt-production-environment",
+            "source_reference": f"candidate-preview:{session.id}:v{session.version}",
+            "observed_by": "watt:candidate-preview:v1",
+        },
+        "freshness": {
+            "state": ("STALE" if session.status.value in {"STALE", "STOPPED"}
+                else "UNKNOWN" if session.status.value == "FAILED" else "FRESH"),
+            "observed_at": session.updated_at,
+            "refresh_after": None,
+        },
+    }
 
 
 def _metadata(

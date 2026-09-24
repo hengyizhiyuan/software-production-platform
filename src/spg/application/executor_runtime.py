@@ -35,11 +35,15 @@ from spg.domain.native_execution import (
     NativeExecutionConflict,
     NativeExecutionNotFound,
     NativeExecutionNotRunnable,
+    ObservationConfidence,
     QueueCondition,
     QueueCapacityObservation,
     QueueProgressionState,
     RecoveryClassification,
+    RepairabilityClassification,
     ResultReadyClaimRecord,
+    SelfRefineActionRecord,
+    SelfRefineEventRecord,
     SchedulingDecision,
     SessionCondition,
     StepCondition,
@@ -130,10 +134,26 @@ class NativeExecutorRuntimeService:
         *,
         scheduler: FairCapacityScheduler | None = None,
         now=_utcnow,
+        self_refine_attempt_budget: int = 3,
+        same_failure_threshold: int = 2,
+        self_refine_time_budget_seconds: int = 300,
+        self_refine_inference_budget: int = 12,
+        self_refine_token_budget: int = 20000,
     ) -> None:
+        if min(
+            self_refine_attempt_budget, same_failure_threshold,
+            self_refine_time_budget_seconds, self_refine_inference_budget,
+            self_refine_token_budget,
+        ) < 1:
+            raise ValueError("Self-Refine budgets must be positive")
         self.database = database
         self.scheduler = scheduler or FairCapacityScheduler()
         self._now = now
+        self.self_refine_attempt_budget = self_refine_attempt_budget
+        self.same_failure_threshold = same_failure_threshold
+        self.self_refine_time_budget_seconds = self_refine_time_budget_seconds
+        self.self_refine_inference_budget = self_refine_inference_budget
+        self.self_refine_token_budget = self_refine_token_budget
 
     def admit(self, command: NativeExecutionAdmission) -> ExecutionQueueEntryRecord:
         binding = command.binding
@@ -668,21 +688,20 @@ class NativeExecutorRuntimeService:
             queue = store.queue_entry(allocation.queue_entry_id)
             if state.worker_epoch != allocation.lease_epoch:
                 raise NativeExecutionConflict("worker epoch was fenced before completion")
-            retry_exhausted = (
-                result.runtime_mode is ExecutionMode.WAITING_RESOURCE
-                and result.resource_retryable
-                and queue.resume_count >= 3
+            retry_terminal, observation_confidence = self._record_self_refine(
+                store, allocation=allocation, queue=queue, result=result,
             )
+            retry_exhausted = retry_terminal is not None
             if result.runtime_mode is ExecutionMode.PAUSED:
                 next_queue = QueueCondition.CHECKPOINTED
                 next_mode = ExecutionMode.PAUSED
                 grant_state = AttemptGrantState.GRANTED
                 terminal = None
-            elif retry_exhausted:
+            elif retry_terminal is not None:
                 next_queue = QueueCondition.COMPLETED
                 next_mode = ExecutionMode.FINISHED
                 grant_state = AttemptGrantState.RELEASED
-                terminal = AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+                terminal = retry_terminal
             elif result.runtime_mode is ExecutionMode.WAITING_RESOURCE:
                 next_queue = QueueCondition.WAITING_RESOURCE
                 next_mode = ExecutionMode.WAITING_RESOURCE
@@ -783,9 +802,379 @@ class NativeExecutorRuntimeService:
                     "terminal_outcome": terminal.value if terminal else None,
                     "checkpoint_id": str(result.final_checkpoint_id) if result.final_checkpoint_id else None,
                     "automatic_retry_exhausted": retry_exhausted,
+                    "observation_confidence": observation_confidence.value,
                 },
             )
             uow.commit()
+
+    def _record_self_refine(
+        self, store, *, allocation, queue, result: KernelRunResult,
+    ) -> tuple[AttemptTerminalOutcome | None, ObservationConfidence]:
+        """Classify observed Reality before any repair, then persist the applied decision."""
+
+        now = self._now()
+        prior_observation = store.latest_native_observation(allocation.attempt_id)
+        confidence = self._observation_confidence(result, prior_observation)
+        event = store.open_self_refine_event(allocation.attempt_id)
+        if result.runtime_mode is ExecutionMode.WAITING_RESOURCE and result.resource_retryable:
+            family = result.failure_family or "RUNTIME_PROVIDER_FAILURE"
+            signature = sha256(f"{family}:{result.summary}".encode("utf-8")).hexdigest()
+            if confidence is ObservationConfidence.TRANSIENT_ANOMALY:
+                self._append_event(
+                    store, pwu_id=allocation.pwu_id, attempt_id=allocation.attempt_id,
+                    event_type="NativeObservationClassified",
+                    payload={"classification": confidence.value, "failure_family": family,
+                             "failure_signature": signature, "self_refine_started": False},
+                )
+                return None, confidence
+
+            if event is not None and event.failure_signature != signature:
+                prior_actions = store.self_refine_actions(event.id)
+                store.append_self_refine_action(SelfRefineActionRecord(
+                    id=uuid4(), event_id=event.id, sequence=len(prior_actions) + 1,
+                    created_at=now,
+                    repair_action="Close the prior diagnosis after a distinct runtime failure",
+                    observed_reality={"next_failure_signature": signature},
+                    evidence_references=(f"native-attempt:{allocation.attempt_id}",),
+                    outcome="SUPERSEDED_BY_NEW_FAILURE",
+                ))
+                store.complete_self_refine_event(
+                    event.id, result="FAILED", resume_result="NOT_RESUMED",
+                    status="MITIGATED",
+                    elapsed_seconds=max(0, int((now - event.created_at).total_seconds())),
+                    updated_at=now,
+                    compute_overhead={"tool_effects": len(prior_actions)},
+                )
+                event = None
+
+            binding = store.attempt_binding(allocation.attempt_id).binding
+            contract = store.contract(binding.pwu_contract_version_id)
+            repairability = self._runtime_repairability(family, contract.contract_payload)
+            actions = () if event is None else store.self_refine_actions(event.id)
+            checkpoint = (
+                store.checkpoint(result.final_checkpoint_id)
+                if result.final_checkpoint_id else None
+            )
+            material_reality_digest = canonical_digest({
+                "source_vector": binding.source_vector.digest,
+                "tool_results": (
+                    checkpoint.execution_manifest.get("tool_results", [])
+                    if checkpoint else []
+                ),
+            })
+            same_failures = sum(
+                action.observed_reality.get("failure_signature") == signature
+                and action.observed_reality.get("material_reality_digest") == material_reality_digest
+                for action in actions
+            ) + 1
+            inference_total = result.inference_submissions + sum(
+                int(action.observed_reality.get("inference_submissions", 0))
+                for action in actions
+            )
+            tool_total = result.tool_effects + sum(
+                int(action.observed_reality.get("tool_effects", 0))
+                for action in actions
+            )
+            elapsed = 0 if event is None else max(0, int((now - event.created_at).total_seconds()))
+            observed_tokens = (
+                0 if event is None else int(store.observed_repair_model_usage(
+                    allocation.attempt_id, since=event.created_at,
+                ).get("total_tokens", 0))
+            )
+            decision = self._adaptive_budget(
+                binding=binding, contract_payload=contract.contract_payload,
+                family=family, repairability=repairability, queue_resume_count=queue.resume_count,
+                same_failures=same_failures, elapsed=elapsed,
+                inference_total=inference_total, tool_total=tool_total,
+                observed_tokens=observed_tokens,
+            )
+            exhausted = not decision["allow_retry"]
+            if event is None:
+                event_id = uuid4()
+                event = SelfRefineEventRecord(
+                    id=event_id, work_id=binding.work_id,
+                    operation_id=allocation.attempt_id, created_at=now,
+                    failure_family=family, failure_signature=signature,
+                    affected_component="native-executor/provider",
+                    expected_reality={"outcome": "RESULT_READY", "contract_digest": binding.pwu_contract_digest},
+                    observed_reality={
+                        "runtime_mode": result.runtime_mode.value,
+                        "checkpoint_id": str(result.final_checkpoint_id) if result.final_checkpoint_id else None,
+                        "failure_signature": signature,
+                        "material_reality_digest": material_reality_digest,
+                        "observation_evidence": self._safe_observation_evidence(result.observation_evidence),
+                    },
+                    diagnosis_summary="The admitted Native Attempt did not reach its expected result.",
+                    root_cause_classification=family,
+                    repair_hypothesis=(
+                        "Reconcile the durable checkpoint and retry the same admitted contract "
+                        "only while current authority and adaptive budget permit."
+                    ),
+                    evidence_references=(f"native-attempt:{allocation.attempt_id}",),
+                    repairability=repairability,
+                    observation_confidence=confidence,
+                    budget_decision=decision,
+                    diagnostic_evidence={
+                        "native_attempt_ref": f"native-attempt:{allocation.attempt_id}",
+                        "checkpoint_ref": (
+                            f"native-checkpoint:{result.final_checkpoint_id}"
+                            if result.final_checkpoint_id else None
+                        ),
+                        "failure_signature": signature,
+                        "failure_family": family,
+                    },
+                    model_token_usage={},
+                    compute_overhead={
+                        "inference_submissions": result.inference_submissions,
+                        "tool_effects": result.tool_effects,
+                    },
+                    known_failure_match=store.prior_self_refine_matches(
+                        signature, before_event_id=event_id,
+                    ) > 0,
+                    updated_at=now,
+                )
+                store.insert_self_refine_event(event)
+            else:
+                store.update_self_refine_budget(event.id, decision, updated_at=now)
+            store.append_self_refine_action(SelfRefineActionRecord(
+                id=uuid4(), event_id=event.id, sequence=len(actions) + 1,
+                created_at=now,
+                repair_action=(
+                    "Stop same-layer replay and preserve the governing failure"
+                    if exhausted else "Resume from the durable checkpoint under the applied budget"
+                ),
+                observed_reality={
+                    "runtime_mode": result.runtime_mode.value,
+                    "checkpoint_id": str(result.final_checkpoint_id) if result.final_checkpoint_id else None,
+                    "failure_signature": signature,
+                    "material_reality_digest": material_reality_digest,
+                    "same_failure_count": same_failures,
+                    "queue_resume_count": queue.resume_count,
+                    "inference_submissions": result.inference_submissions,
+                    "tool_effects": result.tool_effects,
+                    "observation_confidence": confidence.value,
+                    "repairability": repairability.value,
+                    "budget_decision": decision,
+                },
+                evidence_references=(f"native-attempt:{allocation.attempt_id}",),
+                outcome="ESCALATED" if exhausted else "RETRY_SCHEDULED",
+            ))
+            if exhausted:
+                store.complete_self_refine_event(
+                    event.id, result="ESCALATED", resume_result="NOT_RESUMED",
+                    status="MITIGATED", elapsed_seconds=elapsed,
+                    updated_at=now,
+                    compute_overhead={"inference_submissions": inference_total, "tool_effects": tool_total},
+                    model_token_usage=store.observed_repair_model_usage(
+                        allocation.attempt_id, since=event.created_at,
+                    ),
+                )
+                human_owned = repairability in {
+                    RepairabilityClassification.REQUIRES_HUMAN_INPUT,
+                    RepairabilityClassification.REQUIRES_HUMAN_DECISION,
+                }
+                return (
+                    AttemptTerminalOutcome.BOUNDARY_CROSSING_REQUIRED
+                    if human_owned else AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
+                    confidence,
+                )
+            return None, confidence
+
+        if event is not None and result.runtime_mode is ExecutionMode.FINISHED:
+            actions = store.self_refine_actions(event.id)
+            recovered = result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+            store.append_self_refine_action(SelfRefineActionRecord(
+                id=uuid4(), event_id=event.id, sequence=len(actions) + 1,
+                created_at=now,
+                repair_action="Re-observe the resumed Native Attempt outcome",
+                observed_reality={
+                    "runtime_mode": result.runtime_mode.value,
+                    "terminal_outcome": result.terminal_outcome.value if result.terminal_outcome else None,
+                    "checkpoint_id": str(result.final_checkpoint_id) if result.final_checkpoint_id else None,
+                    "observation_confidence": confidence.value,
+                },
+                evidence_references=(f"native-attempt:{allocation.attempt_id}",),
+                outcome="RECOVERED" if recovered else "FAILED",
+            ))
+            store.complete_self_refine_event(
+                event.id,
+                result="RECOVERED" if recovered else "FAILED",
+                resume_result="RESUMED" if recovered else "NOT_RESUMED",
+                status="VERIFIED" if recovered else "MITIGATED",
+                elapsed_seconds=max(0, int((now - event.created_at).total_seconds())),
+                updated_at=now,
+                model_token_usage=store.observed_repair_model_usage(
+                    allocation.attempt_id, since=event.created_at,
+                ),
+                compute_overhead={
+                    "inference_submissions": result.inference_submissions + sum(
+                        int(action.observed_reality.get("inference_submissions", 0))
+                        for action in actions
+                    ),
+                    "tool_effects": result.tool_effects + sum(
+                        int(action.observed_reality.get("tool_effects", 0))
+                        for action in actions
+                    ),
+                },
+            )
+        return None, confidence
+
+    @staticmethod
+    def _observation_confidence(
+        result: KernelRunResult, prior_observation: dict | None,
+    ) -> ObservationConfidence:
+        if result.runtime_mode is ExecutionMode.FINISHED:
+            return (
+                ObservationConfidence.OBSERVED_SUCCESS
+                if result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+                else ObservationConfidence.CONFIRMED_FAILURE
+            )
+        if result.runtime_mode is not ExecutionMode.WAITING_RESOURCE:
+            return ObservationConfidence.INCONCLUSIVE
+        signal = result.observation_evidence
+        if signal.get("authoritative_state_mismatch") is True:
+            return ObservationConfidence.CONFIRMED_FAILURE
+        if result.failure_family in {"REPOSITORY_REALITY_MISMATCH", "SOURCE_VECTOR_MISMATCH"}:
+            return ObservationConfidence.CONFIRMED_FAILURE
+        if result.failure_family in {"RUNTIME_HEALTH", "STARTUP_HEALTH"}:
+            if signal.get("process_exit_code") is not None or signal.get("stable_failure") is True:
+                return ObservationConfidence.CONFIRMED_FAILURE
+            signature = sha256(
+                f"{result.failure_family}:{result.summary}".encode("utf-8")
+            ).hexdigest()
+            return (
+                ObservationConfidence.CONFIRMED_FAILURE
+                if prior_observation is not None
+                and prior_observation.get("failure_signature") == signature
+                and prior_observation.get("classification") == ObservationConfidence.TRANSIENT_ANOMALY.value
+                else ObservationConfidence.TRANSIENT_ANOMALY
+            )
+        return ObservationConfidence.CONFIRMED_FAILURE
+
+    @staticmethod
+    def _safe_observation_evidence(signal: dict) -> dict[str, object]:
+        """Persist authoritative observation facts, not free-form runtime log text."""
+
+        allowed = {
+            "authoritative_state_mismatch", "stable_failure", "process_exit_code",
+            "expected_revision", "observed_revision", "health_probe_count",
+            "source_reference", "evidence_digest",
+        }
+        return {
+            key: value[:255] if isinstance(value, str) else value
+            for key, value in signal.items()
+            if key in allowed and isinstance(value, (str, int, bool))
+        }
+
+    @staticmethod
+    def _runtime_repairability(
+        family: str, contract_payload: dict,
+    ) -> RepairabilityClassification:
+        if family in {"PROVIDER_TRANSPORT", "PROVIDER_CAPACITY", "RUNTIME_HEALTH", "STARTUP_HEALTH"}:
+            return RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+        if family in {"AUTH_REQUIRED", "MISSING_HUMAN_INPUT"}:
+            return RepairabilityClassification.REQUIRES_HUMAN_INPUT
+        if family in {"PRODUCT_AMBIGUITY", "PRODUCT_INTENT_CHANGE"}:
+            return RepairabilityClassification.REQUIRES_HUMAN_DECISION
+        if family in {"REPOSITORY_REALITY_MISMATCH", "SOURCE_VECTOR_MISMATCH"}:
+            operation = contract_payload.get("git_operation")
+            if isinstance(operation, dict) and operation.get("operation") == "branch.create":
+                return RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+            return RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+        return RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+
+    def _adaptive_budget(
+        self, *, binding, contract_payload: dict, family: str,
+        repairability: RepairabilityClassification, queue_resume_count: int,
+        same_failures: int, elapsed: int, inference_total: int,
+        tool_total: int, observed_tokens: int,
+    ) -> dict[str, object]:
+        """Bound retry by admitted Work/PWU resources and observed failure cost."""
+
+        envelope = binding.resource_envelope
+        task = contract_payload.get("task_contract")
+        if not isinstance(task, dict):
+            completion = contract_payload.get("completion_contract")
+            task = completion.get("task_contract") if isinstance(completion, dict) else None
+        task = task if isinstance(task, dict) else {}
+        complexity_points = sum(
+            len(task.get(key, [])) if isinstance(task.get(key), list) else 0
+            for key in ("scope", "acceptance_meaning", "evidence_requirements", "required_capabilities")
+        )
+        complexity = "LARGE" if complexity_points >= 12 else "SMALL"
+        writable_mounts = sum(mount.writable for mount in binding.workspace.mounts)
+        risk_factors = [
+            *(["high_impact_engineering_activity"]
+              if task.get("activity") in {"MIGRATION", "REFACTORING", "RELEASE", "ARCHITECTURE_DECISION"}
+              else []),
+            *(["multiple_writable_mounts"] if writable_mounts > 1 else []),
+            *(["authoritative_source_or_intent_mismatch"]
+              if family in {"SOURCE_VECTOR_MISMATCH", "PRODUCT_INTENT_CHANGE"} else []),
+        ]
+        risk = "HIGH" if risk_factors else "NORMAL"
+        reversible = family in {
+            "PROVIDER_TRANSPORT", "PROVIDER_CAPACITY", "RUNTIME_PROVIDER_FAILURE",
+            "RUNTIME_HEALTH", "STARTUP_HEALTH",
+            "REPOSITORY_REALITY_MISMATCH",
+        }
+        attempt_limit = min(
+            self.self_refine_attempt_budget,
+            envelope.max_successor_recoveries + 1,
+            1 if risk == "HIGH" else 3 if complexity == "LARGE" else 2 if reversible else 1,
+        )
+        time_limit = min(self.self_refine_time_budget_seconds, envelope.max_active_seconds)
+        inference_limit = min(self.self_refine_inference_budget, envelope.max_inference_submissions)
+        remaining = {
+            "attempts": max(0, attempt_limit - queue_resume_count),
+            "same_signature": max(0, self.same_failure_threshold - same_failures),
+            "active_seconds": max(0, time_limit - elapsed),
+            "inference_submissions": max(0, inference_limit - inference_total),
+            "tool_effects": max(0, envelope.max_tool_effects - tool_total),
+            "model_tokens": max(0, self.self_refine_token_budget - observed_tokens),
+        }
+        allowed_classifications = {
+            RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+            RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE,
+        }
+        allow_retry = (
+            repairability in allowed_classifications
+            and remaining["attempts"] > 0
+            and remaining["same_signature"] > 0
+            and remaining["active_seconds"] > 0
+            and remaining["inference_submissions"] > 0
+            and remaining["tool_effects"] > 0
+            and remaining["model_tokens"] > 0
+            and envelope.max_cost_units != 0
+        )
+        return {
+            "policy_version": "adaptive-self-converge-v1",
+            "allow_retry": allow_retry,
+            "repairability": repairability.value,
+            "complexity": complexity,
+            "complexity_points": complexity_points,
+            "risk": risk,
+            "risk_factors": risk_factors,
+            "reversible": reversible,
+            "failure_family": family,
+            "limits": {
+                "attempts": attempt_limit,
+                "same_signature": self.same_failure_threshold,
+                "active_seconds": time_limit,
+                "inference_submissions": inference_limit,
+                "tool_effects": envelope.max_tool_effects,
+                "model_tokens": self.self_refine_token_budget,
+                "cost_units": envelope.max_cost_units,
+            },
+            "observed": {
+                "prior_retries": queue_resume_count,
+                "same_signature_failures": same_failures,
+                "elapsed_seconds": elapsed,
+                "inference_submissions": inference_total,
+                "tool_effects": tool_total,
+                "model_tokens": observed_tokens,
+            },
+            "remaining": remaining,
+        }
 
     def observe(self, handle: ExecutionHandle) -> BackendObservation:
         with self.database.unit_of_work() as uow:

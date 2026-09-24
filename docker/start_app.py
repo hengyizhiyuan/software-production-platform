@@ -33,7 +33,6 @@ SOURCE_REPOSITORY = Path("/source")
 RUNTIME_REPOSITORY = Path("/var/lib/spg/repository")
 REPOSITORY_IDENTITY = "local://software-production-platform"
 LOCAL_AUTHORITY = "local-docker-bootstrap"
-CODEX_AUTH_SOURCE_VARIABLE = "SPG_CODEX_AUTH_SOURCE"
 ACTIVATION_EVIDENCE_FILE = Path("/var/lib/spg/runtime-activation.json")
 PREVIOUS_ACTIVE_REVISION_VARIABLE = "SPG_PREVIOUS_ACTIVE_RUNTIME_REVISION"
 
@@ -78,36 +77,6 @@ def ensure_local_databases() -> None:
                     )
                 )
     print("local databases ready: spg_dev, spg_test", flush=True)
-
-
-def prepare_optional_codex_state() -> None:
-    """Expose only an authorized auth cache to a container-native state root."""
-
-    codex_home_value = os.environ.get("CODEX_HOME")
-    auth_source_value = os.environ.get(CODEX_AUTH_SOURCE_VARIABLE)
-    if codex_home_value is None and auth_source_value is None:
-        return
-    if not codex_home_value or not auth_source_value:
-        raise RuntimeError(
-            "Codex E2E requires both CODEX_HOME and SPG_CODEX_AUTH_SOURCE"
-        )
-
-    codex_home = Path(codex_home_value)
-    auth_source = Path(auth_source_value)
-    codex_home.mkdir(parents=True, exist_ok=True)
-    if not auth_source.is_file():
-        raise RuntimeError("authorized Codex authentication input is unavailable")
-
-    auth_target = codex_home / "auth.json"
-    if auth_target.is_symlink():
-        if auth_target.readlink() != auth_source:
-            raise RuntimeError("Codex authentication link targets an unexpected input")
-    elif auth_target.exists():
-        if not auth_target.is_file():
-            raise RuntimeError("container-native Codex auth target is not a file")
-    else:
-        auth_target.symlink_to(auth_source)
-    print("container-native Codex state root ready", flush=True)
 
 
 def migrate_product_database() -> None:
@@ -431,7 +400,6 @@ def _activated_environment(evidence: ActiveRuntimeEvidence) -> dict[str, str]:
 
 
 def main() -> None:
-    prepare_optional_codex_state()
     ensure_local_databases()
     migrate_product_database()
     repository = prepare_repository_snapshot()

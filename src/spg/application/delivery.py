@@ -155,6 +155,8 @@ class DeliveryApplicationService:
             dispatch = None if observation is None else runtime.execution_dispatch(observation.dispatch_id)
             if dispatch is None:
                 raise ProductInvariantViolation("Current Candidate has no exact repository workspace")
+            work_unit = runtime.work_unit(binding.work_unit_id)
+            task_contract = None if work_unit is None else work_unit.completion_contract.task_contract
             repository = dispatch.workspace.repository_path
             tree = git_bytes(repository, "rev-parse", candidate.proposed_commit_identity + "^{tree}").decode().strip()
             if tree != candidate.proposed_tree_identity:
@@ -163,6 +165,14 @@ class DeliveryApplicationService:
                 repository, candidate.proposed_commit_identity, summary.artifact_paths,
             )
             return {"candidate_id": str(candidate.id), "candidate_fingerprint": candidate.fingerprint,
+                    "repository_identity": candidate.repository_identity,
+                    "source_revision": candidate.expected_source_repository_revision,
+                    "target_branch": candidate.target_authoritative_ref.removeprefix("refs/heads/"),
+                    "task_contract_reference": (
+                        f"task-contract:{task_contract.task_contract_id}" if task_contract is not None
+                        else f"work-unit:{binding.work_unit_id}"
+                    ),
+                    "verification_references": [f"verification:{item}" for item in candidate.verification_record_ids],
                     "repository_revision": candidate.proposed_commit_identity, "tree": tree,
                     "repository_path": repository, "paths": paths, "entrypoint": entrypoint,
                     "preview_kind": "STATIC_WEB" if entrypoint else "CODE_DIFF" if any(

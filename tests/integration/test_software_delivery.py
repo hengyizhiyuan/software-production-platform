@@ -14,15 +14,18 @@ import pytest
 
 from test_work_delivery import (clean_schema, create_asset, bind, _GuidedDesignSemanticCapability,
     _SchedulingOrchestrator, _GeneralProductDesignCapability)
+from test_wic_governed_work_admission import _UnguidedSemanticCapability
 from spg.api import create_http_application
 from spg.application.assets import RepositoryAssetService
 from spg.application.delivery import DeliveryApplicationService, read_artifact
 from spg.application.software_runtime import SoftwareRuntimeService
 from spg.application.interaction import WorkInteractionService
+from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.work import WorkApplicationService
 from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.steering_driver import PlanSteeringDriver
 from spg.domain.change import ProductionTargetKind
+from spg.domain.planning import PlannedArtifactOperation
 from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
 from spg.domain.steering import SemanticProductionProposal
 from spg.domain.product import AttentionAction, AttentionKind, AttentionResolutionRequest, ProductInvariantViolation
@@ -45,11 +48,27 @@ class SoftwareIntent(_GeneralProductDesignCapability):
 
 class SoftwareDesign(_GuidedDesignSemanticCapability):
     def execute(self, input):
-        result = super().execute(input)
+        if input.design_context is None:
+            assert input.approved_artifact_references
+            result = _UnguidedSemanticCapability().execute(input)
+        else:
+            result = super().execute(input)
         if result.proposed_production:
-            result = result.model_copy(update={'proposed_production': SemanticProductionProposal(
-                target_kind=ProductionTargetKind.CODE_WORK, objective='Implement the reviewed inventory behavior with executable tests',
-                code_targets=tuple(SOURCE), verification_expectation='Node tests independently prove threshold boundary behavior')})
+            if input.approved_artifact_references:
+                proposal = SemanticProductionProposal(
+                    target_kind=ProductionTargetKind.CODE_WORK,
+                    objective='Implement the reviewed inventory behavior with executable tests',
+                    code_targets=tuple(SOURCE),
+                    verification_expectation='Node tests independently prove threshold boundary behavior',
+                )
+            else:
+                design_target = result.proposed_production.artifact_targets[0].model_copy(
+                    update={'path': 'docs/design.md', 'operation': PlannedArtifactOperation.CREATE}
+                )
+                proposal = result.proposed_production.model_copy(
+                    update={'artifact_targets': (design_target,)}
+                )
+            result = result.model_copy(update={'proposed_production': proposal})
         return result
 
 def produce(database, tmp_path, *, failing=False, user_repository=True,
@@ -68,13 +87,49 @@ def produce(database, tmp_path, *, failing=False, user_repository=True,
     sources = dict(SOURCE)
     if failing:
         sources['inventory.js'] = sources['inventory.js'].replace('q < threshold', 'q <= threshold')
+    design_executor = DeterministicTestExecutor(DeterministicExecutionSpecification(
+        operations=(DeterministicFileOperation(
+            operation=DeterministicFileOperationType.CREATE,
+            repository_relative_path='docs/design.md',
+            content='# Inventory application design\n\nImplement a tested low-stock boundary.\n',
+        ),),
+        reported_outcome=ProviderReportedOutcome.SUCCESS,
+    ))
+    design_service = WorkApplicationService(
+        database, workspace_root=tmp_path/'workspaces', executor=design_executor,
+        verifier=ContractDrivenRepositoryVerifier(database),
+    )
+    SteeringBootstrapService(database).bootstrap(work.work_id)
+    design_driver = PlanSteeringDriver(
+        database, design_service, _SchedulingOrchestrator(),
+        semantic_capability=SoftwareDesign(), max_automatic_transitions=32,
+    )
+    design_driver.activate(work.work_id)
+    for attention in design_service.list_attention(work_id=work.work_id):
+        if attention.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW:
+            design_service.resolve_attention(attention.id, AttentionResolutionRequest(
+                action=AttentionAction.APPROVE, authority_identity='human:test',
+            ))
+            design_driver.activate(work.work_id)
+    for _ in range(20):
+        design_service.advance_work(work.work_id)
+        for attention in design_service.list_attention(work_id=work.work_id):
+            if attention.kind is AttentionKind.CANDIDATE_AUTHORIZATION:
+                design_service.resolve_attention(attention.id, AttentionResolutionRequest(
+                    action=AttentionAction.AUTHORIZE, authority_identity='human:test',
+                ))
+        if GuidedDesignApplicationService(database).approved_design_artifact_references(work.work_id):
+            break
+    assert GuidedDesignApplicationService(database).approved_design_artifact_references(work.work_id)
+    design_driver.shutdown()
+
     executor = DeterministicTestExecutor(DeterministicExecutionSpecification(operations=tuple(
         DeterministicFileOperation(operation=DeterministicFileOperationType.CREATE, repository_relative_path=path, content=content)
         for path, content in sources.items()), reported_outcome=ProviderReportedOutcome.SUCCESS))
     service = WorkApplicationService(database, workspace_root=tmp_path/'workspaces', executor=executor, verifier=ContractDrivenRepositoryVerifier(database))
-    SteeringBootstrapService(database).bootstrap(work.work_id)
-    driver = PlanSteeringDriver(database, service, _SchedulingOrchestrator(), semantic_capability=SoftwareDesign())
-    driver.activate(work.work_id)
+    driver = PlanSteeringDriver(database, service, _SchedulingOrchestrator(), semantic_capability=SoftwareDesign(), max_automatic_transitions=32)
+    initial_activation = driver.activate(work.work_id)
+    assert initial_activation.stop_reason.value in {'PRODUCTION_RUNNING', 'HUMAN_ATTENTION'}
     production_reviews = tuple(
         item for item in service.list_attention(work_id=work.work_id)
         if item.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
@@ -108,7 +163,12 @@ def test_exact_candidate_is_previewable_before_repository_authorization(postgres
     service, work_id, delivery, _ = produce(
         postgres_database, tmp_path, authorize_candidate=False, set_delivery_target=False)
     result = service.get_work_result(work_id)
-    assert result.repository_state == 'SEALED_CANDIDATE'
+    assert result.repository_state == 'SEALED_CANDIDATE', (
+        service.get_work(work_id).status,
+        service.get_work(work_id).production_plan,
+        [item.kind.value for item in service.list_attention(work_id=work_id)],
+        result.remaining_blocker_or_risk,
+    )
     assert not result.trusted_result
     context = delivery.candidate_context(work_id)
     assert context is not None and context['authorization_pending']

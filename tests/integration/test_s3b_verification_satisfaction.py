@@ -597,11 +597,14 @@ def test_s3b_20_stale_production_lineage_cannot_satisfy(
     tmp_path: Path,
 ) -> None:
     facts = _build(postgres_database, git_repository, tmp_path)
-    facts.runtime.retry_attempt(facts.attempt.id)
-    with pytest.raises(RuntimeInvariantViolation, match="stale production lineage"):
+    retry = facts.runtime.retry_attempt(facts.attempt.id)
+    with pytest.raises(RuntimeInvariantViolation, match="only a PRODUCED PWU"):
         _snapshot(facts)
     assert facts.runtime.attempt_is_current(facts.attempt.id) is False
-    assert facts.runtime.inspect_run(facts.spine.run.id).work_unit.condition is WorkUnitCondition.PRODUCED
+    assert facts.runtime.attempt_is_current(retry.id) is True
+    assert facts.runtime.inspect_run(facts.spine.run.id).work_unit.condition is WorkUnitCondition.PROPOSED
+    assert _count(postgres_database, proposed_repository_snapshots) == 0
+    assert _count(postgres_database, production_admissibility_records) == 0
 
 
 def test_s3b_21_satisfaction_creates_no_candidate(

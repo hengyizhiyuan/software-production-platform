@@ -182,20 +182,38 @@ class CompletionService:
                     if expected_work_unit_version is None
                     else expected_work_unit_version
                 )
-                store.mark_work_unit_produced(
-                    current.work_unit.id,
-                    expected_version,
-                )
-                self._append_history(
-                    store,
-                    entity_type="PRODUCTION_WORK_UNIT",
-                    entity_id=current.work_unit.id,
-                    from_condition=WorkUnitCondition.PROPOSED.value,
-                    to_condition=WorkUnitCondition.PRODUCED.value,
-                    reason="COMPLETION_OUTPUT_OBLIGATIONS_SATISFIED",
-                    correlation=evaluation_id,
-                    timestamp=timestamp,
-                )
+                if current.work_unit.condition is WorkUnitCondition.PROPOSED:
+                    store.mark_work_unit_produced(
+                        current.work_unit.id,
+                        expected_version,
+                    )
+                    self._append_history(
+                        store,
+                        entity_type="PRODUCTION_WORK_UNIT",
+                        entity_id=current.work_unit.id,
+                        from_condition=WorkUnitCondition.PROPOSED.value,
+                        to_condition=WorkUnitCondition.PRODUCED.value,
+                        reason="COMPLETION_OUTPUT_OBLIGATIONS_SATISFIED",
+                        correlation=evaluation_id,
+                        timestamp=timestamp,
+                    )
+                elif not (
+                    current.work_unit.condition is WorkUnitCondition.PRODUCED
+                    and current.attempt.retry_of is not None
+                    and any(
+                        prior.attempt_id == current.attempt.retry_of
+                        and prior.outcome is CompletionEvaluationOutcome.PRODUCED
+                        for prior in store.completion_evaluations_for_work_unit(
+                            current.work_unit.id
+                        )
+                    )
+                ):
+                    raise RuntimeInvariantViolation(
+                        "current PWU condition is inconsistent with Completion"
+                    )
+                # An in-flight retry created before PWU reopening was added can
+                # still finish. Its prior-generation Produced transition remains
+                # historical; the new Completion Evaluation is the new evidence.
 
             evaluation = store.completion_evaluation_by_basis(basis_fingerprint)
             work_unit = store.work_unit(current.work_unit.id)

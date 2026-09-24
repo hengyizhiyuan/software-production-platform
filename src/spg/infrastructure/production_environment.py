@@ -689,6 +689,7 @@ class DockerCliContainerRuntime:
             "exec",
             "-w",
             command.working_directory,
+            *self._python_environment_arguments(command),
             opaque_reference,
             *command.argv,
         )
@@ -710,6 +711,7 @@ class DockerCliContainerRuntime:
             "exec",
             "-w",
             command.working_directory,
+            *self._python_environment_arguments(command),
             opaque_reference,
             *command.argv,
         )
@@ -728,6 +730,17 @@ class DockerCliContainerRuntime:
             stderr=stderr[:limit].decode("utf-8", errors="replace"),
             stdout_truncated=len(stdout) > limit,
             stderr_truncated=len(stderr) > limit,
+        )
+
+    @staticmethod
+    def _python_environment_arguments(command: EnvironmentCommand) -> tuple[str, ...]:
+        if command.python_source_path is None:
+            return ()
+        return (
+            "-e",
+            f"PYTHONPATH={command.python_source_path}",
+            "-e",
+            "PYTHONDONTWRITEBYTECODE=1",
         )
 
     def collect(
