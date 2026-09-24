@@ -56,7 +56,7 @@ from spg.domain.native_execution import (
 from spg.executor.kernel import NativeExecutorKernel
 from spg.executor.context import NativeContextAssembler, NativeContextCapacityError
 from spg.executor.recovery import NativeRecoveryClassifier
-from spg.executor.tools import NativeToolRegistry, ToolDefinition
+from spg.executor.tools import NativeToolRegistry, ToolDefinition, _within
 from spg.infrastructure.executor_runtime.inference import (
     InferenceAdapterError,
     InferenceTransportUnknown,
@@ -82,6 +82,12 @@ from spg.tool_host_api import create_tool_host_application
 NOW = datetime(2026, 9, 11, 8, 0, tzinfo=timezone.utc)
 
 
+def test_bounded_area_grant_covers_descendants_and_preserves_boundary() -> None:
+    assert _within("tests/js/apply_nav_link.py", "tests/js/**")
+    assert _within("tests/js", "tests/js/**")
+    assert not _within("tests/json/apply_nav_link.py", "tests/js/**")
+
+
 def test_native_compatibility_waits_through_reconciliation() -> None:
     attempt_id = uuid4()
     queue_id = uuid4()
@@ -104,6 +110,7 @@ def test_native_compatibility_waits_through_reconciliation() -> None:
                 handle=handle,
                 runtime_mode=runtime_mode,
                 terminal_outcome=terminal_outcome,
+                current_checkpoint_id=None,
             )
 
     capability = object.__new__(NativeQueuedExecutorCapability)

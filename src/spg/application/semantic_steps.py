@@ -57,7 +57,7 @@ from spg.providers.repository_change_proposal import (
 from spg.providers.rule_based_planner import RuleBasedProductionPlanner
 
 
-MAX_TREE_PATHS = 400
+MAX_TREE_PATHS = 1_000
 MAX_CONTEXT_FILES = 8
 MAX_CONTEXT_CHARS_PER_FILE = 8_000
 MAX_CONTEXT_CHARS_TOTAL = 24_000
@@ -142,11 +142,23 @@ class SemanticStepApplicationService:
         refs = tuple(item.reference for item in frame.basis.resolved_reality)
         next_step = frame.reconstruction.next_step
         design_context = self.guided_design.semantic_context(work.id, step.id)
+        guided_design = self.guided_design.get_optional(work.id)
         approved_design_artifacts = (
             self.guided_design.approved_design_artifact_references(work.id)
-            if design_context is not None
-            and design_context.get("production_transition_issue") is True
-            else ()
+            if guided_design is not None else ()
+        )
+        production_proposal_required = bool(
+            step.type is SteeringStepType.DESIGN
+            and next_step is not None
+            and next_step.type is SteeringStepType.PRODUCE
+            and (
+                work.production_plan is None
+                or design_context is None
+                or (
+                    work.production_plan.target_kind is ProductionTargetKind.DOCUMENTATION_WORK
+                    and approved_design_artifacts
+                )
+            )
         )
         required_intermediate_artifacts = (
             ("APPROVED_DESIGN_ARTIFACT",)
@@ -190,12 +202,7 @@ class SemanticStepApplicationService:
             repository_tree_paths=paths,
             context_materials=materials,
             design_context=design_context,
-            production_proposal_required=bool(
-                step.type is SteeringStepType.DESIGN
-                and next_step is not None
-                and next_step.type is SteeringStepType.PRODUCE
-                and work.production_plan is None
-            ),
+            production_proposal_required=production_proposal_required,
             required_intermediate_artifacts=required_intermediate_artifacts,
             approved_artifact_references=approved_design_artifacts,
             available_executable_capabilities=tuple(
@@ -314,6 +321,16 @@ class SemanticStepApplicationService:
         ):
             raise SteeringInvariantViolation(
                 "DESIGN cannot close toward PRODUCE without a current production proposal"
+            )
+        if (
+            fresh.production_proposal_required
+            and fresh.approved_artifact_references
+            and candidate.proposed_production is not None
+            and candidate.proposed_production.target_kind
+            is ProductionTargetKind.DOCUMENTATION_WORK
+        ):
+            raise SteeringInvariantViolation(
+                "Approved intermediate design cannot replace the remaining code implementation"
             )
         if fresh.design_context is not None and candidate.proposed_production is not None:
             if (

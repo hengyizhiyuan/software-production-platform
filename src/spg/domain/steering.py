@@ -256,6 +256,8 @@ class SemanticProductionProposal(BaseModel):
             )
         if set(self.code_targets) & set(self.forbidden_areas):
             raise ValueError("semantic production target conflicts with a forbidden path")
+        if set(self.allowed_areas) & set(self.forbidden_areas):
+            raise ValueError("semantic production allowed area conflicts with a forbidden area")
         return self
 
 

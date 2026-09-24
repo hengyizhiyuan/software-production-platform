@@ -92,8 +92,14 @@
   function currentProductionQueue(work, queue) {
     const entries = Array.isArray(queue) ? queue : [];
     const revisionId = work?.current_work_reality_revision_id;
-    if (!revisionId || !entries.some((entry) => entry.work_reality_revision_id)) {
+    if (!revisionId) {
       return entries;
+    }
+    // Repository preparation actions have no production cycle or Work revision.
+    // Once a new Work revision is admitted, their completed queue rows are
+    // historical evidence, not the current feature's execution state.
+    if (!entries.some((entry) => entry.work_reality_revision_id)) {
+      return work?.current_production_cycle_number == null ? [] : entries;
     }
     return entries.filter(
       (entry) => entry.work_reality_revision_id === revisionId,
@@ -104,7 +110,9 @@
     const entry = currentQueue.length ? currentQueue[currentQueue.length - 1] : null;
     const revisionScopedQueue = Array.isArray(queue)
       && queue.some((item) => item.work_reality_revision_id);
-    const attemptIsCurrent = Boolean(entry) || !revisionScopedQueue;
+    const attemptIsCurrent = Boolean(entry) || (
+      !revisionScopedQueue && !work?.current_work_reality_revision_id
+    );
     const mode = attemptIsCurrent ? attempt?.state?.runtime_mode : null;
     const terminalOutcome = attemptIsCurrent ? attempt?.state?.terminal_outcome : null;
     const candidateReady = Array.isArray(attentionItems) && attentionItems.some(

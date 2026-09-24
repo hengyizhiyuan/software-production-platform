@@ -2203,11 +2203,12 @@ class WorkInteractionService:
                 raise InteractionInvariantViolation(
                     "Interpretation meaning references a record outside its basis"
                 )
-            latest_human_input = next(
-                record.content
+            latest_human_record = next(
+                record
                 for record in reversed(records)
                 if record.actor is InteractionActor.HUMAN
             )
+            latest_human_input = latest_human_record.content
             if _declares_distinct_long_lived_object(
                 latest_human_input,
                 active_context,
@@ -2265,6 +2266,8 @@ class WorkInteractionService:
                 candidate,
                 active_context,
                 engineering_semantic_facts,
+                latest_human_input=latest_human_input,
+                latest_human_record_id=latest_human_record.id,
             )
             progressive_semantics = build_progressive_semantics(
                 candidate=candidate,
@@ -3122,6 +3125,9 @@ class WorkInteractionService:
         candidate: InteractionAssessmentCandidate,
         active: ActiveWorkInterpretationContext | None,
         engineering_semantic_facts: tuple[EngineeringSemanticFact, ...] = (),
+        *,
+        latest_human_input: str | None = None,
+        latest_human_record_id: UUID | None = None,
     ) -> tuple[
         WorkFocusClassification | None,
         WorkImpactDisposition | None,
@@ -3133,22 +3139,61 @@ class WorkInteractionService:
             # An objection requests assessment of a judgment. It cannot become a
             # Work change because a provider mislabeled its expression CORRECT.
             return WorkFocusClassification.SIDE_QUESTION, WorkImpactDisposition.NO_GOVERNED_CHANGE, None
-        if candidate.response_intent is not None and candidate.response_intent.interaction_mode in {
-            InteractionMode.EXPLORE, InteractionMode.ANALYZE, InteractionMode.DESIGN,
-            InteractionMode.DECIDE, InteractionMode.ANSWER, InteractionMode.STATUS,
-        }:
-            return WorkFocusClassification.SIDE_QUESTION, WorkImpactDisposition.NO_GOVERNED_CHANGE, None
         focus = candidate.focus_classification or WorkFocusClassification.ON_TOPIC
         if focus in {
             WorkFocusClassification.MATERIAL_BRANCH,
             WorkFocusClassification.UNRELATED_NEW_DEMAND,
         }:
             return focus, WorkImpactDisposition.NEW_WORK_RECOMMENDED, None
+        # Response posture describes how Watt should speak, not whether the
+        # Human has changed the Work. A provider can choose DESIGN while also
+        # recognizing an exact, explicit request to modify the current Work.
+        # Require a new request grounded in the latest Human record so an
+        # advisory discussion cannot silently become governed change. The
+        # provider may preserve the wording or paraphrase it.
+        new_requests = tuple(
+            request for request in candidate.current_requests
+            if request not in active.work_revision.requests
+        )
+        latest_request_meaning = any(
+            meaning.kind in {
+                InterpretationMeaningKind.REQUEST,
+                InterpretationMeaningKind.OBJECTIVE_OR_SCOPE_CHANGE,
+            }
+            and (
+                latest_human_record_id is None
+                or latest_human_record_id in meaning.source_record_ids
+            )
+            for meaning in candidate.meanings
+        )
+        explicit_current_work_change = bool(
+            latest_human_input
+            and new_requests
+            and candidate.turn_intent in {
+                ConversationTurnIntent.BUILD,
+                ConversationTurnIntent.MODIFY,
+                ConversationTurnIntent.ACTION_REQUEST,
+                ConversationTurnIntent.CONTINUE_CURRENT_WORK,
+            }
+            and latest_request_meaning
+            and (
+                latest_human_input.strip() in new_requests
+                or latest_human_record_id is not None
+            )
+            and not _nonmutating_question(latest_human_input)
+        )
+        if candidate.response_intent is not None and candidate.response_intent.interaction_mode in {
+            InteractionMode.EXPLORE, InteractionMode.ANALYZE, InteractionMode.DESIGN,
+            InteractionMode.DECIDE, InteractionMode.ANSWER, InteractionMode.STATUS,
+        } and not explicit_current_work_change:
+            return WorkFocusClassification.SIDE_QUESTION, WorkImpactDisposition.NO_GOVERNED_CHANGE, None
         if focus in {
             WorkFocusClassification.RELEVANT_EXPLORATION,
             WorkFocusClassification.SIDE_QUESTION,
-        }:
+        } and not explicit_current_work_change:
             return focus, WorkImpactDisposition.NO_GOVERNED_CHANGE, None
+        if explicit_current_work_change:
+            focus = WorkFocusClassification.ON_TOPIC
 
         current = active.work_revision
         motive = (candidate.interpreted_motive or current.motive).strip()

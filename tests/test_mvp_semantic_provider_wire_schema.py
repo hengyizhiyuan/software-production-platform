@@ -140,6 +140,17 @@ def test_sem_wire_02_domain_defaults_remain_unchanged() -> None:
     assert proposal.forbidden_areas == ()
 
 
+def test_semantic_code_proposal_rejects_the_same_allowed_and_forbidden_area() -> None:
+    with pytest.raises(ValueError, match="allowed area conflicts"):
+        SemanticProductionProposal(
+            target_kind=ProductionTargetKind.CODE_WORK,
+            objective="Add the Work navigation link",
+            allowed_areas=("src/spg/application/**",),
+            forbidden_areas=("src/spg/application/**",),
+            verification_expectation="Check the rendered link",
+        )
+
+
 def test_sem_wire_03_04_06_no_production_round_trip_uses_explicit_values() -> None:
     wire = CodexSdkSemanticStepCapability._parse_payload(json.dumps(_payload()))
 

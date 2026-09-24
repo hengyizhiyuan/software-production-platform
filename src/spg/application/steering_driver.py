@@ -189,6 +189,14 @@ class PlanSteeringDriver:
                 action=None,
                 stop=SteeringDriverStopReason.BLOCKED,
             )
+        if (
+            current.type is SteeringStepType.DESIGN
+            and self.semantic.result_for_step(current.id) is not None
+            and work.change_proposal is not None
+            and set(work.change_proposal.allowed_areas)
+            & set(work.change_proposal.forbidden_areas)
+        ):
+            return self._revise_invalid_code_scope(frame, before)
         if work.status is WorkStatus.NEEDS_ATTENTION:
             return self._result(
                 work_id,
@@ -197,6 +205,11 @@ class PlanSteeringDriver:
                 stop=SteeringDriverStopReason.HUMAN_ATTENTION,
             )
 
+        if current.type in {SteeringStepType.VERIFY_ACCEPT, SteeringStepType.COMPLETE}:
+            design_artifact = self._approved_intermediate_design_artifact(frame)
+            if design_artifact:
+                return self._revise_after_design_artifact(frame, before)
+
         if current.type is SteeringStepType.PRODUCE:
             if work.production_plan is None:
                 return self._revise_for_missing_production_plan(frame, before)
@@ -204,6 +217,111 @@ class PlanSteeringDriver:
         if current.type in {SteeringStepType.DESIGN, SteeringStepType.REFINE}:
             return self._semantic_iteration(frame, before)
         return self._decision_iteration(frame, before)
+
+    def _revise_invalid_code_scope(
+        self, frame: PlanFrame, before: str,
+    ) -> SteeringIterationResult:
+        references = tuple(item.reference for item in frame.basis.resolved_reality)
+        self.steering.revise_plan(
+            ReviseSteeringPlanRequest(
+                steering_plan_id=frame.reconstruction.steering_plan_id,
+                superseded_revision_id=frame.reconstruction.active_revision.revision.id,
+                rationale=(
+                    "The proposed code scope both allows and forbids the same area; "
+                    "form a corrected proposal from the complete repository path inventory."
+                ),
+                reality_refs=references,
+                steps=(
+                    SteeringStepSpec(
+                        type=SteeringStepType.DESIGN,
+                        objective="Correct the implementation target and scope",
+                        completion_condition="A non-conflicting code proposal is reviewable",
+                        state=SteeringStepState.CURRENT,
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.PRODUCE,
+                        objective="Implement the admitted code change",
+                        completion_condition="The code change reaches trusted Runtime Commit",
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.VERIFY_ACCEPT,
+                        objective="Verify the implemented change",
+                        completion_condition="Governed evidence supports the Work outcome",
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.COMPLETE,
+                        objective="Complete the Work outcome",
+                        completion_condition="The requested behavior is truthfully satisfied",
+                    ),
+                ),
+            )
+        )
+        return self._result(
+            frame.work_id, before,
+            action=SteeringActionType.PLAN_REVISION, stop=None,
+        )
+
+    def _approved_intermediate_design_artifact(self, frame: PlanFrame) -> bool:
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            work = product.work(frame.work_id)
+            binding = product.runtime_binding(frame.work_id)
+            if work is None or binding is None or work.production_plan is None:
+                return False
+            if work.production_plan.target_kind is not ProductionTargetKind.DOCUMENTATION_WORK:
+                return False
+            if binding.work_reality_revision_id != work.current_work_reality_revision_id:
+                return False
+            summary = product.runtime_summary(binding)
+            if (
+                summary.extra.get("task_contract_mode") != "DESIGN_ARTIFACT"
+                or summary.runtime_commit_id is None
+            ):
+                return False
+        return bool(self.guided_design.approved_design_artifact_references(frame.work_id))
+
+    def _revise_after_design_artifact(
+        self, frame: PlanFrame, before: str,
+    ) -> SteeringIterationResult:
+        references = tuple(item.reference for item in frame.basis.resolved_reality)
+        self.steering.revise_plan(
+            ReviseSteeringPlanRequest(
+                steering_plan_id=frame.reconstruction.steering_plan_id,
+                superseded_revision_id=frame.reconstruction.active_revision.revision.id,
+                rationale=(
+                    "The approved design artifact is an intermediate prerequisite; "
+                    "the admitted working-software outcome still requires implementation."
+                ),
+                reality_refs=references,
+                steps=(
+                    SteeringStepSpec(
+                        type=SteeringStepType.DESIGN,
+                        objective="Form the bounded code change from the approved design artifact",
+                        completion_condition="A reviewable implementation proposal is admitted",
+                        state=SteeringStepState.CURRENT,
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.PRODUCE,
+                        objective="Implement the approved design in the admitted repository",
+                        completion_condition="The code change reaches trusted Runtime Commit",
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.VERIFY_ACCEPT,
+                        objective="Verify the implemented change against the Work outcome",
+                        completion_condition="Governed evidence supports the requested behavior",
+                    ),
+                    SteeringStepSpec(
+                        type=SteeringStepType.COMPLETE,
+                        objective="Complete the admitted Work outcome",
+                        completion_condition="The requested working behavior is truthfully satisfied",
+                    ),
+                ),
+            )
+        )
+        return self._result(
+            frame.work_id, before,
+            action=SteeringActionType.PLAN_REVISION, stop=None,
+        )
 
     def configure_governed_repository_action(
         self, action: Callable[[UUID, UUID, str], dict | None],

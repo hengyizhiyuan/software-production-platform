@@ -121,6 +121,7 @@ from spg.domain.verification import (
 )
 from spg.domain.verifier import VerificationCapabilityContract
 from spg.domain.steering import (
+    RealityReference,
     RealityReferenceKind,
     SteeringAttentionReason,
     SteeringOutcome,
@@ -2772,21 +2773,72 @@ class WorkApplicationService:
                 from spg.application.guided_design import (
                     GuidedDesignApplicationService,
                 )
-
-                GuidedDesignApplicationService(self.database).reopen_issue(
-                    attention.work_id,
-                    "verification-staged-readiness",
-                    rationale=(
-                        request.rationale
-                        or "Human requested refinement of the production proposal."
-                    ),
-                    reality_refs=(
-                        RealityReference(
-                            kind=RealityReferenceKind.GOVERNANCE_DECISION,
-                            identity=governance_id,
+                with self.database.unit_of_work() as uow:
+                    current_step = SteeringStore(uow.session).step(attention.steering_step_id)
+                if current_step is not None and current_step.design_issue_key is not None:
+                    GuidedDesignApplicationService(self.database).reopen_issue(
+                        attention.work_id,
+                        current_step.design_issue_key,
+                        rationale=(
+                            request.rationale
+                            or "Human requested refinement of the production proposal."
                         ),
-                    ),
-                )
+                        reality_refs=(
+                            RealityReference(
+                                kind=RealityReferenceKind.GOVERNANCE_DECISION,
+                                identity=governance_id,
+                            ),
+                        ),
+                    )
+                else:
+                    from spg.application.steering import SteeringApplicationService
+                    from spg.domain.steering import (
+                        ReviseSteeringPlanRequest, SteeringStepSpec,
+                        SteeringStepState, SteeringStepType,
+                    )
+
+                    current_plan = SteeringApplicationService(self.database).reconstruct(
+                        attention.work_id
+                    )
+                    SteeringApplicationService(self.database).revise_plan(
+                        ReviseSteeringPlanRequest(
+                            steering_plan_id=current_plan.steering_plan_id,
+                            superseded_revision_id=attention.steering_plan_revision_id,
+                            rationale=(
+                                request.rationale
+                                or "Refine the bounded production proposal before admission."
+                            ),
+                            reality_refs=(
+                                RealityReference(
+                                    kind=RealityReferenceKind.GOVERNANCE_DECISION,
+                                    identity=governance_id,
+                                ),
+                            ),
+                            steps=(
+                                SteeringStepSpec(
+                                    type=SteeringStepType.DESIGN,
+                                    objective="Refine the exact implementation scope",
+                                    completion_condition="A corrected code proposal is reviewable",
+                                    state=SteeringStepState.CURRENT,
+                                ),
+                                SteeringStepSpec(
+                                    type=SteeringStepType.PRODUCE,
+                                    objective="Implement the admitted code change",
+                                    completion_condition="The code change reaches trusted Runtime Commit",
+                                ),
+                                SteeringStepSpec(
+                                    type=SteeringStepType.VERIFY_ACCEPT,
+                                    objective="Verify the implemented change",
+                                    completion_condition="Governed evidence supports the Work outcome",
+                                ),
+                                SteeringStepSpec(
+                                    type=SteeringStepType.COMPLETE,
+                                    objective="Complete the Work outcome",
+                                    completion_condition="The requested behavior is truthfully satisfied",
+                                ),
+                            ),
+                        )
+                    )
             return self.get_work(attention.work_id)
 
         if attention.kind is AttentionKind.CANDIDATE_AUTHORIZATION:
@@ -2930,6 +2982,9 @@ class WorkApplicationService:
             steering_plan is not None
             and latest_steering_decision is not None
             and latest_steering_decision.steering_outcome is SteeringOutcome.COMPLETE
+            # A reviewed design artifact is a prerequisite for implementation,
+            # not evidence that the Human's working-software outcome exists.
+            and latest_summary.extra.get("task_contract_mode") != "DESIGN_ARTIFACT"
             and latest_summary.runtime_commit_id is not None
             and latest_summary.completion_outcome == "PRODUCED"
             and latest_summary.verification_results

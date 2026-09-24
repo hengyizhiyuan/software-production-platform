@@ -284,5 +284,5 @@ class NativeToolRegistry:
 
 
 def _within(path: str, root: str) -> bool:
-    root = root.rstrip("/")
+    root = root[:-3] if root.endswith("/**") else root.rstrip("/")
     return path == root or path.startswith(f"{root}/")

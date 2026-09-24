@@ -126,8 +126,8 @@ def test_human_review_runtime_supports_the_software_acceptance_path_it_displays(
 def test_work_plan_projection_uses_fresh_control_room_assets() -> None:
     html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
     assert "/assets/appearance.css?v=work-plan-projection-1" in html
-    assert "/assets/control-room.js?v=work-plan-projection-1" in html
-    assert "/assets/app.js?v=work-plan-projection-1" in html
+    assert "/assets/control-room.js?v=work-revision-state-2" in html
+    assert "/assets/app.js?v=work-revision-state-2" in html
 
 
 def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:

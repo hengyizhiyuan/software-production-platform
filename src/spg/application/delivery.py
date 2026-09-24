@@ -81,14 +81,15 @@ def git_bytes(repository: str, *args: str) -> bytes:
 
 
 def candidate_file_inventory(repository: str, revision: str, artifacts: tuple[str, ...]) -> tuple[list[str], str | None]:
-    """Expose exact document artifacts without treating a large source tree as a Web preview."""
+    """Bound Web preview to small trees; keep large code results inspectable."""
     html_artifacts = [path for path in artifacts if path.endswith(".html")]
     if html_artifacts:
         paths = git_bytes(repository, "ls-tree", "-r", "--name-only", "-z", revision).decode().split("\0")[:-1]
-        if len(paths) > 500:
-            raise ProductInvariantViolation("Candidate preview exceeds the bounded file inventory")
-        entrypoint = next((path for path in html_artifacts if path in paths), None)
-        return paths, entrypoint
+        if len(paths) <= 500:
+            entrypoint = next((path for path in html_artifacts if path in paths), None)
+            return paths, entrypoint
+        # An existing application is not a bounded, browser-runnable static site.
+        # The changed files remain downloadable and its exact diff is reviewable.
     paths = []
     for path in artifacts:
         row = git_bytes(repository, "ls-tree", "-z", revision, "--", ":(literal)" + path)
@@ -96,6 +97,20 @@ def candidate_file_inventory(repository: str, revision: str, artifacts: tuple[st
             raise ProductInvariantViolation("Candidate artifact is absent from the sealed revision")
         paths.append(path)
     return paths, None
+
+
+def candidate_change_diff(repository: str, revision: str, artifacts: tuple[str, ...]) -> str:
+    """Read a bounded diff from the sealed Candidate's single parent."""
+    parents = git_bytes(repository, "rev-list", "--parents", "-n", "1", revision).decode().split()
+    if len(parents) != 2 or parents[0] != revision:
+        raise ProductInvariantViolation("Candidate code preview requires a single-parent commit")
+    if not artifacts or len(artifacts) > 100:
+        raise ProductInvariantViolation("Candidate code preview has no bounded changed-file set")
+    diff = git_bytes(repository, "diff", "--no-ext-diff", "--no-textconv", "--unified=3",
+        parents[1], revision, "--", *(":(literal)" + path for path in artifacts))
+    if len(diff) > MAX_ARTIFACT_BYTES:
+        raise ProductInvariantViolation("Candidate code preview exceeds the 1 MiB inspection limit")
+    return diff.decode("utf-8", errors="replace")
 
 
 class DeliveryApplicationService:
@@ -150,6 +165,8 @@ class DeliveryApplicationService:
             return {"candidate_id": str(candidate.id), "candidate_fingerprint": candidate.fingerprint,
                     "repository_revision": candidate.proposed_commit_identity, "tree": tree,
                     "repository_path": repository, "paths": paths, "entrypoint": entrypoint,
+                    "preview_kind": "STATIC_WEB" if entrypoint else "CODE_DIFF" if any(
+                        path.endswith(".html") for path in summary.artifact_paths) else None,
                     "artifacts": list(summary.artifact_paths),
                     "verification": [f"{name}: {result}" for name, result in zip(
                         summary.verification_obligations, summary.verification_results, strict=True)],
@@ -212,6 +229,18 @@ class DeliveryApplicationService:
         if path not in context["paths"] or not path.endswith((".html", ".js", ".mjs", ".css", ".json", ".svg", ".png", ".ico")):
             raise ProductRecordNotFound("Candidate artifact is not previewable")
         return read_artifact(context["repository_path"], context["repository_revision"], path, software=True)
+
+    def candidate_code_diff(self, work_id: UUID, candidate_fingerprint: str) -> str:
+        """Inspect exact changed code when a full Web preview is not bounded."""
+        context = self.candidate_context(work_id)
+        if context is None or context["candidate_fingerprint"] != candidate_fingerprint:
+            raise ProductInvariantViolation("Candidate preview is stale against current Work Reality")
+        if context["preview_kind"] != "CODE_DIFF":
+            raise ProductInvariantViolation("This Candidate has no code-diff preview")
+        return candidate_change_diff(
+            context["repository_path"], context["repository_revision"],
+            tuple(context["artifacts"]),
+        )
 
     def candidate_download(self, work_id: UUID, candidate_fingerprint: str, path: str) -> bytes:
         """Download a declared produced artifact from the same immutable Candidate binding."""

@@ -421,6 +421,27 @@ test("Production follows the current Work revision instead of a completed prior 
   }).state, "RUNNING");
 });
 
+test("a completed branch-preparation attempt is not the new feature's production", () => {
+  const work = {
+    current_work_reality_revision_id: "feature-revision",
+    current_production_cycle_number: null,
+    automatic_progression_state: "ACTIVE",
+    what_happens_next: "Shaping the admitted navigation-link change",
+  };
+  const branchPreparation = [{
+    condition: "COMPLETED",
+    attempt_id: "branch-attempt",
+    work_reality_revision_id: null,
+    production_cycle_number: null,
+  }];
+  assert.deepEqual(Array.from(controlRoom.currentProductionQueue(work, branchPreparation)), []);
+  const state = controlRoom.productionState(work, branchPreparation, {
+    state: { runtime_mode: "FINISHED", terminal_outcome: "RESULT_READY" },
+  });
+  assert.equal(state.state, "PREPARING");
+  assert.equal(state.detail, "Shaping the admitted navigation-link change");
+});
+
 test("Production details are disclosed, while Actions contain only contextual controls", () => {
   assert.match(app, /evidence\.append\(result\)/);
   assert.match(html, /<section id="agreement-action-panel"[^>]+hidden>/);

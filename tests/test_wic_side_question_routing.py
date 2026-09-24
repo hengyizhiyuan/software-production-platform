@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from uuid import uuid4
 
 from spg.application.interaction import (
     WorkInteractionService,
@@ -9,10 +10,13 @@ from spg.application.interaction import (
 from spg.domain.conversation import ConversationTurnIntent
 from spg.domain.interaction import (
     InteractionAssessmentCandidate,
+    InterpretationMeaning,
+    InterpretationMeaningKind,
     WorkFocusClassification,
     WorkImpactDisposition,
     WorkSatisfactionState,
 )
+from spg.domain.response_contract import InteractionMode, ResponseIntent
 
 
 def test_side_question_new_motive_and_current_feature_edit_remain_distinct() -> None:
@@ -73,3 +77,78 @@ def test_semantic_only_provider_evidence_never_bypasses_visible_realization() ->
         pipeline_mode="coalesced_pre_work", provider_call_count=1,
         conversation_request_id=None,
     ))
+
+
+def test_explicit_feature_request_survives_design_response_posture() -> None:
+    request = (
+        "我想在工作面板页上方导航条加个链接，链接的标题是“工律使用文档”，"
+        "链接的URL是：https://docs.gonglv.work"
+    )
+    active = SimpleNamespace(
+        work_revision=SimpleNamespace(
+            motive="在已有仓库开发新需求",
+            desired_outcome="实现并验证新需求",
+            context_facts=(), constraints=(), requests=("切个新分支：feat_test",),
+            engineering_semantic_facts=(),
+        ),
+        active_production_binding_id=None,
+        satisfaction_state=WorkSatisfactionState.IN_PROGRESS,
+    )
+    latest_record_id = uuid4()
+    candidate = InteractionAssessmentCandidate(
+        turn_intent=ConversationTurnIntent.MODIFY,
+        response_intent=ResponseIntent(
+            interaction_mode=InteractionMode.DESIGN,
+            rationale="Discuss the bounded implementation.",
+        ),
+        focus_classification=WorkFocusClassification.SIDE_QUESTION,
+        impact_disposition=WorkImpactDisposition.NO_GOVERNED_CHANGE,
+        interpreted_motive="在已有仓库的工作面板页增加文档链接",
+        desired_outcome="工作面板页显示工律使用文档链接",
+        current_requests=(*active.work_revision.requests, request),
+        meanings=(InterpretationMeaning(
+            kind=InterpretationMeaningKind.REQUEST,
+            statement="Add the requested documentation link.",
+            source_record_ids=(latest_record_id,),
+            confidence=0.95,
+            rationale="The Human explicitly requested this UI change.",
+        ),),
+        natural_response="I will make the change.",
+        provider_identity="test",
+    )
+    focus, impact, change = WorkInteractionService._normalize_active_candidate(
+        candidate, active, latest_human_input=request,
+    )
+    assert focus is WorkFocusClassification.ON_TOPIC
+    assert impact is WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED
+    assert change is not None
+    assert "requests" in change.changed_fields
+
+    paraphrased = candidate.model_copy(update={
+        "current_requests": (*active.work_revision.requests, "Add the requested documentation link."),
+    })
+    focus, impact, change = WorkInteractionService._normalize_active_candidate(
+        paraphrased, active,
+        latest_human_input=request,
+        latest_human_record_id=latest_record_id,
+    )
+    assert focus is WorkFocusClassification.ON_TOPIC
+    assert impact is WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED
+    assert change is not None
+
+    _, unrelated_impact, unrelated_change = WorkInteractionService._normalize_active_candidate(
+        paraphrased, active,
+        latest_human_input=request,
+        latest_human_record_id=uuid4(),
+    )
+    assert unrelated_impact is WorkImpactDisposition.NO_GOVERNED_CHANGE
+    assert unrelated_change is None
+
+    advisory = candidate.model_copy(update={
+        "turn_intent": ConversationTurnIntent.DIRECT_QUESTION,
+    })
+    _, advisory_impact, advisory_change = WorkInteractionService._normalize_active_candidate(
+        advisory, active, latest_human_input=request,
+    )
+    assert advisory_impact is WorkImpactDisposition.NO_GOVERNED_CHANGE
+    assert advisory_change is None

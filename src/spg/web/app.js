@@ -181,6 +181,7 @@
     prospectiveStart: document.getElementById("prospective-start"),
     prospectiveRefine: document.getElementById("prospective-refine"),
     workRevisionAdmission: document.getElementById("work-revision-admission"),
+    workRevisionSummary: document.getElementById("work-revision-summary"),
     workRevisionAuthorityIdentity: document.getElementById("work-revision-authority-identity"),
     approveWorkRevision: document.getElementById("approve-work-revision"),
     rejectWorkRevision: document.getElementById("reject-work-revision"),
@@ -904,6 +905,9 @@
       ? `${joined(candidate.changed_fields, "change")} · Outcome: ${candidate.desired_outcome}`
       : "None";
     elements.workRevisionAdmissionStatus.textContent = projection.work_revision_admission_status || "NOT_APPLICABLE";
+    elements.workRevisionSummary.textContent = candidate
+      ? `Confirm this Work change: ${candidate.desired_outcome}`
+      : "";
     elements.workSatisfactionState.textContent = projection.work_satisfaction_state || "NO_FOCUSED_WORK";
     elements.interactionRelationshipState.textContent = projection.interaction_relationship_state || projection.condition;
     elements.workFocusHistory.textContent = joined(projection.work_focus_history, "None");
@@ -1196,6 +1200,16 @@
       card.append(createElement("p", "", candidateDecision
         ? "Preview or download the candidate, then decide whether to authorize it."
         : attention.reason || "Choose how you want Watt to continue."));
+      if (attention.kind === "PRODUCTION_PROPOSAL_REVIEW") {
+        const work = state.selectedWork;
+        const target = work?.artifact_target;
+        const scope = target?.path
+          ? `${target.operation || "Change"} ${target.path}`
+          : work?.target_kind || "the proposed production step";
+        card.append(createElement("p", "", `Proposed step: ${scope}. ${work?.target_kind === "DOCUMENTATION_WORK"
+          ? "This creates a design document; it does not implement the requested UI change yet."
+          : "Review the scope and verification basis before production starts."}`));
+      }
       const actions = createElement("div", "action-row");
       attention.available_actions.forEach((action) => {
         const recommended = attention.recommended_action === action;
@@ -1513,8 +1527,12 @@
       if (preview.status !== "READY") throw new ApiError(409, "PREVIEW_NOT_READY", preview.reason || "Preview is not ready.");
       elements.candidatePreviewLink.href = preview.url;
       elements.candidatePreviewLink.hidden = false;
-      elements.candidatePreviewStatus.textContent = preview.authorization_pending
-        ? "Preview ready. Your decision is still pending." : "Preview ready.";
+      const codeDiff = preview.preview_kind === "CODE_DIFF";
+      elements.candidatePreviewLink.textContent = codeDiff ? "Open exact code changes" : "Open exact preview";
+      elements.candidatePreviewStatus.textContent = codeDiff
+        ? "This existing application cannot run as a bounded static preview. Review the exact code changes or download the changed file."
+        : preview.authorization_pending
+          ? "Preview ready. Your decision is still pending." : "Preview ready.";
       window.open(preview.url, "_blank", "noopener");
     } catch (error) { showNotice(error); }
     finally { setBusy(false); renderAttention(); }
@@ -1827,8 +1845,9 @@
     const remaining = plan.remainingStages.length
       ? plan.remainingStages.join(" → ")
       : "none";
+    const goal = state.selectedWork?.desired_outcome || plan.goal;
     elements.workspaceAgendaSummary.textContent = (
-      `Goal: ${plan.goal} · Current: ${plan.currentStage || "no active stage"} · Remaining: ${remaining}`
+      `Goal: ${goal} · Current: ${plan.currentStage || "no active stage"} · Remaining: ${remaining}`
     );
     elements.workspacePlanChange.hidden = !plan.latestChange;
     elements.workspacePlanChange.textContent = plan.latestChange

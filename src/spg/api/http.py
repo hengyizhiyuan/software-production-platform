@@ -1471,10 +1471,19 @@ def create_http_application(
                 "This Work does not use automatic Plan Steering",
             )
         steering = selected_steering_driver.project(work_id)
+        recoverable_block = (
+            steering.last_stop_reason is not None
+            and steering.last_stop_reason.value == "BLOCKED"
+        )
+        resolved_attention = (
+            steering.last_stop_reason is not None
+            and steering.last_stop_reason.value == "HUMAN_ATTENTION"
+            and projection.status is WorkStatus.READY
+            and not work_service.list_attention(work_id=work_id)
+        )
         if not (
             steering.automatic_progression_state.value == "STOPPED"
-            and steering.last_stop_reason is not None
-            and steering.last_stop_reason.value == "BLOCKED"
+            and (recoverable_block or resolved_attention)
         ):
             raise ProductHttpError(
                 409,
@@ -1544,17 +1553,26 @@ def create_http_application(
         if context is None:
             return {"status": "NOT_READY", "reason": "No current verified Candidate is available", "downloads": []}
         public = {key: context[key] for key in ("candidate_id", "candidate_fingerprint",
-            "repository_revision", "tree", "entrypoint", "artifacts", "verification", "authorization_pending")}
+            "repository_revision", "tree", "entrypoint", "preview_kind", "artifacts",
+            "verification", "authorization_pending")}
         prefix = f"/api/works/{work_id}"
         fingerprint = context["candidate_fingerprint"]
         entrypoint = context["entrypoint"]
-        return {**public, "status": "READY" if entrypoint else "NOT_READY",
-            "reason": None if entrypoint else "No current static-Web Candidate is available",
-            "url": None if entrypoint is None else (
-                f"{prefix}/candidate-preview/{fingerprint}/{quote(entrypoint, safe='/')}"),
+        preview_kind = context["preview_kind"]
+        return {**public, "status": "READY" if preview_kind else "NOT_READY",
+            "reason": None if preview_kind else "No current preview is available",
+            "url": (f"{prefix}/candidate-preview/{fingerprint}/{quote(entrypoint, safe='/')}"
+                if preview_kind == "STATIC_WEB" else
+                f"{prefix}/candidate-code-diff/{fingerprint}" if preview_kind == "CODE_DIFF" else None),
             "downloads": [{"path": path, "url": (
                 f"{prefix}/candidate-download/{fingerprint}/{quote(path, safe='/')}")}
                 for path in context["artifacts"]]}
+
+    @api.get("/api/works/{work_id}/candidate-code-diff/{candidate_fingerprint}")
+    def candidate_code_diff(work_id: UUID, candidate_fingerprint: str):
+        return Response(delivery_service.candidate_code_diff(work_id, candidate_fingerprint),
+            media_type="text/plain; charset=utf-8", headers={"X-Content-Type-Options": "nosniff",
+                "Cache-Control": "no-store", "Content-Security-Policy": "default-src 'none'; sandbox"})
 
     @api.get("/api/works/{work_id}/candidate-preview/{candidate_fingerprint}/{path:path}")
     def candidate_preview_artifact(work_id: UUID, candidate_fingerprint: str, path: str):

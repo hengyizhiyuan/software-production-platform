@@ -114,6 +114,7 @@ from spg.domain.runtime import (
     ProductionHorizon,
 )
 from spg.domain.runtime_activation import RuntimeActivationProjection, RuntimeActivationState
+from spg.domain.response_contract import InteractionMode, ResponseIntent
 from spg.domain.native_execution import AttemptTerminalOutcome, QueueCondition
 from spg.domain.wic_response import WicRuntimeMode
 from spg.domain.steering import (
@@ -3208,6 +3209,60 @@ def test_wic3_focus_preservation_never_silently_mutates_work(
     assert work.list_attention(work_id=admitted.work_id) == ()
 
 
+def test_design_posture_does_not_discard_explicit_current_feature_request(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    request = (
+        "我想在工作面板页上方导航条加个链接，链接的标题是“工律使用文档”，"
+        "链接的URL是：https://docs.gonglv.work"
+    )
+
+    class _DesignPostureCapability:
+        def interpret(self, basis: InteractionInterpretationInput) -> InteractionAssessmentCandidate:
+            revision = basis.active_work_context.work_revision
+            latest = basis.records[-1]
+            return InteractionAssessmentCandidate(
+                turn_intent=ConversationTurnIntent.MODIFY,
+                response_intent=ResponseIntent(
+                    interaction_mode=InteractionMode.DESIGN,
+                    rationale="Discuss a bounded feature change.",
+                ),
+                focus_classification=WorkFocusClassification.SIDE_QUESTION,
+                impact_disposition=WorkImpactDisposition.NO_GOVERNED_CHANGE,
+                interpreted_motive=revision.motive,
+                desired_outcome="The Work navigation includes the requested documentation link.",
+                current_requests=(*revision.requests, "Add the requested documentation link."),
+                meanings=(InterpretationMeaning(
+                    kind=InterpretationMeaningKind.REQUEST,
+                    statement="Add the requested documentation link.",
+                    source_record_ids=(latest.id,),
+                    confidence=1,
+                    rationale="The latest Human turn requests a feature change.",
+                ),),
+                natural_response="I will add the link to this Work.",
+                provider_identity="test:design-posture-current-feature",
+            )
+
+    active = WorkInteractionService(postgres_database, capability=_DesignPostureCapability())
+    result = active.append_and_assess(
+        ready.interaction.id, request, human_identity="human:test",
+    )
+
+    assert result.governed_work_id == admitted.work_id
+    assert result.focus_classification is WorkFocusClassification.ON_TOPIC
+    assert result.impact_disposition is WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED
+    assert result.work_revision_admission_status is WorkRevisionAdmissionStatus.PENDING_HUMAN
+    assert result.candidate_change is not None
+    assert "requests" in result.candidate_change.changed_fields
+    assert result.governed_revision.id == admitted.current_work_reality_revision_id
+    assert _count(postgres_database, work_reality_revisions) == 1
+    assert work.list_attention(work_id=admitted.work_id)[0].kind is AttentionKind.WORK_REVISION_APPROVAL
+
+
 @pytest.mark.parametrize(
     ("human_text", "focus", "impact", "meaning", "change_kwargs", "changed_field", "status"),
     (
@@ -3983,6 +4038,47 @@ def test_wic4_completed_work_continuation_reopens_satisfaction_without_rewriting
         assert recovery_input.production_proposal_required is True
     finally:
         steering_driver.shutdown()
+
+
+def test_approved_design_artifact_reopens_plan_for_code_instead_of_completing_work(
+    postgres_database: Database,
+    services,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    work, interactions = services
+    admitted = _admit(work, _ready(interactions))
+    completed_work = _complete_wic_work(postgres_database, work, admitted)
+    original_summary = ProductStore.runtime_summary
+
+    def design_artifact_summary(store: ProductStore, binding):
+        summary = original_summary(store, binding)
+        if summary.runtime_commit_id is None:
+            return summary
+        return summary.model_copy(update={
+            "extra": {**summary.extra, "task_contract_mode": "DESIGN_ARTIFACT"},
+        })
+
+    monkeypatch.setattr(ProductStore, "runtime_summary", design_artifact_summary)
+    monkeypatch.setattr(
+        GuidedDesignApplicationService,
+        "approved_design_artifact_references",
+        lambda self, work_id: ("approved-design-artifact:docs/wic-slice-4-result.md",),
+    )
+    projection = completed_work.get_work(admitted.work_id)
+    assert projection.status is WorkStatus.RUNNING
+    assert projection.work_complete is False
+
+    driver = PlanSteeringDriver(
+        postgres_database, completed_work, _NoopOrchestrator(),
+    )
+    try:
+        iteration = driver.iterate(admitted.work_id)
+    finally:
+        driver.shutdown()
+    assert iteration.action is SteeringActionType.PLAN_REVISION
+    reconstruction = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
+    assert reconstruction.current_step.type is SteeringStepType.DESIGN
+    assert "code change" in reconstruction.current_step.objective
 
 
 @pytest.mark.parametrize(
