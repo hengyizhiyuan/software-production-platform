@@ -9,6 +9,14 @@ unimplemented directions. The bounded foundations described in the
 implementation-status section are now Repository Reality; broader runtime,
 management, and lifecycle capabilities remain future work.
 
+Current implementation note (2026-09-26): Watt now has a bounded long-lived
+Product identity across Works, graph-aware PWU economics, managed Connector and
+GitHub grant state, local Brownfield intake, reference-aware Native workspace
+and Candidate Preview runtime retention, Work/operator diagnosis, and a
+versioned four-domain evaluation corpus. These strengthen the existing owners;
+they do not imply commercial billing, arbitrary imports, full ECF/Guardian
+owner convergence, or Human acceptance of end-to-end production.
+
 ## Vision
 
 Watt is not a coding agent. Watt is an AI-native software production system.
@@ -49,7 +57,7 @@ separate services, databases, agents, or user-interface surfaces.
 | Domain Intelligence | Software Domain Grounding | What should an engineer consider? | Pattern representation and structured activation foundation implemented |
 | Production Intelligence | Software Production SOP | How should this engineering activity progress? | Activity/checkpoint/evidence foundation implemented |
 | Governance | Steering and existing authority boundaries | What governed action is allowed and next? | Steering implemented within current scope |
-| Production Environment | Watt production orchestration | What Work-bound workspace, toolchain, runtime/preview, and delivery resources are prepared? | Foundation v1 contracts and provider seams implemented; integrated orchestration pending |
+| Production Environment | Watt production orchestration | What Work-bound workspace, toolchain, runtime/preview, and delivery resources are prepared? | Bounded Native workspace, full Watt-topology Preview, production record and retention paths implemented; general environment graph remains pending |
 | Execution | Task Contract, PWU, Executor | What bounded work is executed, and how? | Task Contract foundation integrated into PWU/Executor |
 | Assurance | Guardian | Is the result sufficiently supported and trustworthy? | Foundation/integration boundary established; full capability pending |
 
@@ -393,8 +401,9 @@ resources for admitted Work. It consumes ECF-owned Engineering Reality, provides
 attributable environment evidence to Guardian, preserves Git continuity, and
 does not replace Work, ECF, Executor, Verification, Delivery, or Human
 authority. Its lifecycle, Resource Reference Graph, managed Git direction, and
-Production Passport remain architecture only; no Runtime implementation is
-authorized by this baseline.
+Production Passport remains a future direction. Bounded Native Environment,
+Preview and retention runtimes were subsequently implemented under their own
+admitted contracts; this baseline itself grants no wider runtime authority.
 
 ### Task Contract lifecycle direction
 
@@ -509,13 +518,15 @@ Future
   Pattern Evolution
   Pattern Studio
   Evaluation Platform
-  Connector Management Panel
+  Extended Connector Management
 ```
 
-The Evaluation Framework is a current architecture baseline. The Evaluation
-Platform remains future work.
+The bounded versioned evaluation corpus, focused/milestone/release selectors,
+durable results, and baseline comparison are now implemented. A general
+Evaluation Platform remains future work; automated evidence is not Human
+acceptance.
 
-### Connector Management Panel (future product requirement)
+### Connector Management (bounded implementation)
 
 The executable part of System Capability Reality records capability identity,
 provider, scope, maturity, availability, permission and credential requirements,
@@ -525,12 +536,12 @@ or external-account authority. Current learned-connector scope stops at WORK
 and USER. TEAM, ORGANIZATION, and PLATFORM promotion metadata are reserved,
 but promotion governance and automation are deferred.
 
-A future Connector Management page must let authorized Humans/Admins inspect
-the connector list, family, owner scope, maturity, enablement, health,
-usage/success/failure statistics, version, permissions, credential connection
-state, provisional connectors, promotion candidates, deprecation, and audit
-history. It may later allow disable/enable and governed promotion. This page
-is not part of the present implementation.
+The existing operator panel now exposes Connector inventory, enablement,
+health, version, qualification, ownership scope, provisional/deprecation
+state and audit history. GitHub grants expose credential references and
+read/write status, revocation and rotation without returning raw secrets.
+Only the supported GitHub grant path has this credential lifecycle; broad
+provider credential administration and organization promotion remain future.
 
 ### Public external search and retrieval (2026-09-25)
 
@@ -610,10 +621,10 @@ CONTEXT_ORCHESTRATOR = FOUNDATION_IMPLEMENTED / GENERAL_PLATFORM_PENDING
 SOFTWARE_DOMAIN_GROUNDING = FOUNDATION_IMPLEMENTED
 SOFTWARE_PRODUCTION_SOP = FOUNDATION_IMPLEMENTED
 TASK_CONTRACT = FOUNDATION_IMPLEMENTED / PWU_INTEGRATED
-PRODUCTION_ENVIRONMENT = FOUNDATION_V1_IMPLEMENTED / INTEGRATED_ORCHESTRATION_PENDING
+PRODUCTION_ENVIRONMENT = BOUNDED_NATIVE_AND_PREVIEW_RUNTIME / GENERAL_GRAPH_PENDING
 DECISION_EVIDENCE = FOUNDATION_IMPLEMENTED / EMBEDDED_LINEAGE
 TASK_CONTRACT_LIFECYCLE = ARCHITECTURE_DIRECTION / IMPLEMENTATION_PENDING
-AI_SOFTWARE_PRODUCTION_EVALUATION_FRAMEWORK = ARCHITECTURE_BASELINE / PLATFORM_PENDING
+AI_SOFTWARE_PRODUCTION_EVALUATION_FRAMEWORK = BOUNDED_VERSIONED_CORPUS_IMPLEMENTED / GENERAL_PLATFORM_PENDING
 ```
 
 ## Explicit non-goals
@@ -623,13 +634,10 @@ NOT_IMPLEMENTED:
 - Pattern Studio
 - Pattern management UI
 - Pattern Evolution engine
-- WIC Evaluation Corpus
-- Benchmark infrastructure
 - Evaluation Platform
 - Leaderboard or public ranking
-- Automated evaluation infrastructure
-- Production Environment Runtime or Lifecycle Policy Engine
-- Resource Reference Graph storage or garbage collection
+- General Production Environment lifecycle policy across arbitrary providers
+- Full Resource Reference Graph garbage collection
 - Managed Git hosting
 - Full Production Passport
 - Full adaptive Software Production SOP runtime and administration

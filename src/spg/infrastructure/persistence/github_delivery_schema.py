@@ -1,6 +1,6 @@
 """GitHub grant and governed remote-effect evidence."""
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Table, Text, Uuid, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table, Text, Uuid, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
@@ -19,6 +19,11 @@ github_access_grants = Table(
     Column("observed_permission", JSONB, nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("revoked_at", DateTime(timezone=True)),
+    Column("expires_at", DateTime(timezone=True)),
+    Column("last_verified_at", DateTime(timezone=True)),
+    Column("usage_count", Integer, nullable=False, server_default="0"),
+    Column("failure_count", Integer, nullable=False, server_default="0"),
+    Column("last_failure_at", DateTime(timezone=True)),
     UniqueConstraint("actor_id", "repository_url", "capability",
         name="uq_github_grant_actor_repo_capability"),
 )

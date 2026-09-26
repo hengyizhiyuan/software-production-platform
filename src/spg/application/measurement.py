@@ -5,6 +5,16 @@ from hashlib import sha256
 import json
 from typing import Any
 from uuid import NAMESPACE_URL, UUID, uuid5
+from sqlalchemy import select
+from spg.infrastructure.persistence.product_schema import product_works, work_runtime_bindings
+from spg.infrastructure.persistence.runtime_schema import (
+    production_work_units, execution_attempts, provider_execution_reports,
+    plan_revisions,
+)
+from spg.infrastructure.persistence.native_execution_schema import (
+    execution_steps, execution_resource_usage, executor_queue,
+    execution_allocations, native_attempt_states, self_refine_events,
+)
 
 from spg.domain.change import ChangeOperation, ProductionTargetKind
 from spg.domain.governance import BaselineCandidateRecord
@@ -39,11 +49,235 @@ class MeasurementLineageError(RuntimeError):
     """Persisted identities cannot support one truthful measurement projection."""
 
 
+def _id(value: UUID | None) -> str | None:
+    return None if value is None else str(value)
+
+
 class ProductionMeasurementService:
     """Query existing authoritative facts without changing production decisions."""
 
     def __init__(self, database: Database) -> None:
         self.database = database
+
+    def graph_economics(self, work_id: UUID) -> dict:
+        """Read each PWU/Attempt once; keep unknown spend and missing usage explicit."""
+        with self.database.unit_of_work() as uow:
+            session = uow.session
+            work = session.execute(select(product_works).where(
+                product_works.c.id == work_id,
+            )).mappings().one_or_none()
+            if work is None:
+                raise MeasurementSubjectNotFound(f"Work not found: {work_id}")
+            bindings = session.execute(select(work_runtime_bindings).where(
+                work_runtime_bindings.c.work_id == work_id,
+            ).order_by(work_runtime_bindings.c.cycle_number)).mappings().all()
+            run_ids = tuple(dict.fromkeys(row["production_run_id"] for row in bindings))
+            if not run_ids:
+                return {"work_id": str(work_id), "product_id": _id(work["product_id"]),
+                        "pwu_count": 0, "join_count": 0, "pwu": [],
+                        "observed_provider_spend": {"status": "UNREPORTED", "amount": None},
+                        "wall_elapsed_seconds": None, "execution_seconds": 0,
+                        "queue_wait_seconds": 0, "critical_path_seconds": None,
+                        "parallelism_effect_seconds": None, "token_usage": {"status": "UNREPORTED"},
+                        "self_refine_event_count": 0, "first_pass_pwu_count": 0,
+                        "retried_pwu_count": 0, "human_escalation_count": 0,
+                        "refinement_extra_seconds": 0, "resource_units": {},
+                        "final_outcome": work["condition"]}
+            units = session.execute(select(production_work_units).where(
+                production_work_units.c.production_run_id.in_(run_ids),
+            )).mappings().all()
+            unit_ids = tuple(row["id"] for row in units)
+            attempts = [] if not unit_ids else session.execute(select(execution_attempts).where(
+                execution_attempts.c.work_unit_id.in_(unit_ids),
+            )).mappings().all()
+            attempt_ids = tuple(row["id"] for row in attempts)
+            reports = [] if not attempt_ids else session.execute(select(provider_execution_reports).where(
+                provider_execution_reports.c.attempt_id.in_(attempt_ids),
+            )).mappings().all()
+            steps = [] if not attempt_ids else session.execute(select(execution_steps).where(
+                execution_steps.c.attempt_id.in_(attempt_ids),
+                execution_steps.c.kind == "INFERENCE",
+            )).mappings().all()
+            usages = [] if not attempt_ids else session.execute(select(execution_resource_usage).where(
+                execution_resource_usage.c.attempt_id.in_(attempt_ids),
+            )).mappings().all()
+            queue = [] if not attempt_ids else session.execute(select(executor_queue).where(
+                executor_queue.c.attempt_id.in_(attempt_ids),
+            )).mappings().all()
+            queue_ids = tuple(row["id"] for row in queue)
+            allocations = [] if not queue_ids else session.execute(select(execution_allocations).where(
+                execution_allocations.c.queue_entry_id.in_(queue_ids),
+            )).mappings().all()
+            states = [] if not attempt_ids else session.execute(select(native_attempt_states).where(
+                native_attempt_states.c.attempt_id.in_(attempt_ids),
+            )).mappings().all()
+            plans = session.execute(select(plan_revisions).where(
+                plan_revisions.c.production_run_id.in_(run_ids),
+            )).mappings().all()
+            refinements = session.execute(select(self_refine_events).where(
+                self_refine_events.c.work_id == work_id,
+            )).mappings().all()
+        by_unit: dict[UUID, dict] = {}
+        report_by_attempt: dict[UUID, list] = {}
+        step_by_attempt: dict[UUID, list] = {}
+        usage_by_attempt: dict[UUID, list] = {}
+        queue_by_attempt: dict[UUID, list] = {}
+        allocation_by_queue: dict[UUID, list] = {}
+        state_by_attempt = {row["attempt_id"]: row for row in states}
+        for rows, destination, key in (
+            (reports, report_by_attempt, "attempt_id"),
+            (steps, step_by_attempt, "attempt_id"),
+            (usages, usage_by_attempt, "attempt_id"),
+            (queue, queue_by_attempt, "attempt_id"),
+            (allocations, allocation_by_queue, "queue_entry_id"),
+        ):
+            for row in rows:
+                destination.setdefault(row[key], []).append(row)
+        total_tokens = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
+        observed_token_attempts = 0
+        spend_by_currency: dict[str, float] = {}
+        unreported_spend_attempts = 0
+        starts: list[datetime] = []
+        finishes: list[datetime] = []
+        for unit in units:
+            unit_attempts = sorted((row for row in attempts if row["work_unit_id"] == unit["id"]),
+                                   key=lambda row: row["generation"])
+            execution_seconds = 0.0
+            duration_observed = False
+            queue_seconds = 0.0
+            unit_tokens = {key: 0 for key in total_tokens}
+            unit_usage_observed = False
+            providers: set[str] = set()
+            resource_units: dict[str, int] = {}
+            outcomes: list[str] = []
+            for attempt in unit_attempts:
+                aid = attempt["id"]
+                native_steps = step_by_attempt.get(aid, [])
+                timed_steps = [row for row in native_steps if row["started_at"] and row["finished_at"]]
+                if timed_steps:
+                    duration_observed = True
+                    execution_seconds += sum((row["finished_at"] - row["started_at"]).total_seconds() for row in timed_steps)
+                    starts.extend(row["started_at"] for row in timed_steps)
+                    finishes.extend(row["finished_at"] for row in timed_steps)
+                else:
+                    for report in report_by_attempt.get(aid, []):
+                        duration_observed = True
+                        execution_seconds += (report["finished_at"] - report["started_at"]).total_seconds()
+                        starts.append(report["started_at"])
+                        finishes.append(report["finished_at"])
+                for queued in queue_by_attempt.get(aid, []):
+                    for allocation in allocation_by_queue.get(queued["id"], []):
+                        queue_seconds += max(0.0, (allocation["issued_at"] - queued["enqueued_at"]).total_seconds())
+                token_facts = [((row["result_payload"] or {}).get("provider_observation") or {}).get("usage")
+                               for row in native_steps]
+                token_facts = [fact for fact in token_facts if isinstance(fact, dict)]
+                if not token_facts:
+                    token_facts = [row["metadata"].get("token_usage") for row in report_by_attempt.get(aid, [])
+                                   if isinstance(row["metadata"].get("token_usage"), dict)]
+                if token_facts:
+                    observed_token_attempts += 1
+                    unit_usage_observed = True
+                for fact in token_facts:
+                    for key in total_tokens:
+                        value = fact.get(key)
+                        if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+                            unit_tokens[key] += value
+                            total_tokens[key] += value
+                for row in native_steps:
+                    observation = ((row["result_payload"] or {}).get("provider_observation") or {})
+                    if observation.get("provider_identity"):
+                        providers.add(observation["provider_identity"])
+                for report in report_by_attempt.get(aid, []):
+                    providers.add(report["provider_reference"])
+                for row in usage_by_attempt.get(aid, []):
+                    if row["certainty"] == "ACTUAL" and row["condition"] == "CONSUMED":
+                        resource_units[row["resource_type"]] = resource_units.get(row["resource_type"], 0) + row["amount"]
+                spend_facts = [row["metadata"].get("provider_spend") for row in report_by_attempt.get(aid, [])]
+                valid_spend = [fact for fact in spend_facts if isinstance(fact, dict)
+                               and isinstance(fact.get("amount"), (int, float))
+                               and not isinstance(fact.get("amount"), bool)
+                               and fact.get("amount") >= 0 and isinstance(fact.get("currency"), str)]
+                if valid_spend:
+                    for fact in valid_spend:
+                        spend_by_currency[fact["currency"]] = spend_by_currency.get(fact["currency"], 0) + fact["amount"]
+                elif native_steps or report_by_attempt.get(aid):
+                    unreported_spend_attempts += 1
+                state = state_by_attempt.get(aid)
+                outcomes.append((state or {}).get("terminal_outcome") or attempt["condition"])
+            item = {"pwu_id": str(unit["id"]), "node_id": unit["node_id"],
+                    "run_id": str(unit["production_run_id"]), "condition": unit["condition"],
+                    "attempt_count": len(unit_attempts), "outcomes": outcomes,
+                    "providers": sorted(providers), "execution_seconds": execution_seconds,
+                    "duration_observed": duration_observed,
+                    "queue_wait_seconds": queue_seconds, "token_usage": {
+                        **unit_tokens, "status": "OBSERVED" if unit_usage_observed else "UNREPORTED"},
+                    "resource_units": resource_units}
+            by_unit[unit["id"]] = item
+        pwu = list(by_unit.values())
+        graph_paths: list[float] = []
+        join_count = 0
+        measured_graphs = 0
+        graph_incomplete = False
+        for plan in plans:
+            graph = plan["graph"] or {}
+            nodes = [node for node in graph.get("nodes", []) if node.get("kind") != "GROUP"]
+            plan_units = {row["node_id"]: row for row in units
+                          if row["plan_revision_id"] == plan["id"] and row["node_id"]}
+            if not nodes or not plan_units:
+                continue
+            measured_graphs += 1
+            join_count += sum(node.get("kind") == "JOIN" and node["node_id"] in plan_units
+                              for node in nodes)
+            if any(node["node_id"] not in plan_units or
+                   not by_unit[plan_units[node["node_id"]]["id"]]["duration_observed"]
+                   for node in nodes):
+                graph_incomplete = True
+                continue
+            durations = {node_id: by_unit[row["id"]]["execution_seconds"]
+                         for node_id, row in plan_units.items()}
+            cache: dict[str, float] = {}
+            node_by_id = {node["node_id"]: node for node in nodes}
+            def path(node_id: str) -> float:
+                if node_id not in cache:
+                    deps = node_by_id[node_id].get("dependency_ids", [])
+                    cache[node_id] = durations[node_id] + max((path(dep) for dep in deps), default=0.0)
+                return cache[node_id]
+            graph_paths.append(max(path(node["node_id"]) for node in nodes))
+        execution_total = sum(row["execution_seconds"] for row in pwu)
+        resource_totals: dict[str, int] = {}
+        for item in pwu:
+            for resource_type, amount in item["resource_units"].items():
+                resource_totals[resource_type] = resource_totals.get(resource_type, 0) + amount
+        escalation_count = sum(
+            "BOUNDARY_CROSSING_REQUIRED" in item["outcomes"] for item in pwu
+        ) + sum(event["final_result"] in {"ESCALATED", "ESCALATED_TO_HUMAN"}
+                for event in refinements)
+        wall = (max(finishes) - min(starts)).total_seconds() if starts and finishes else None
+        critical = sum(graph_paths) if measured_graphs and not graph_incomplete and \
+            len(graph_paths) == measured_graphs else None
+        return {"work_id": str(work_id), "product_id": _id(work["product_id"]),
+                "pwu_count": len(pwu), "join_count": join_count, "pwu": pwu,
+                "token_usage": {**total_tokens, "status": "OBSERVED" if observed_token_attempts == len(attempts) and attempts else
+                                "PARTIAL" if observed_token_attempts else "UNREPORTED"},
+                "observed_provider_spend": {"status": "PARTIAL" if unreported_spend_attempts and spend_by_currency else
+                                            "OBSERVED" if spend_by_currency else "UNREPORTED",
+                                            "by_currency": spend_by_currency,
+                                            "unreported_attempt_count": unreported_spend_attempts,
+                                            "amount": None if len(spend_by_currency) != 1 or unreported_spend_attempts
+                                            else next(iter(spend_by_currency.values()))},
+                "execution_seconds": execution_total,
+                "queue_wait_seconds": sum(row["queue_wait_seconds"] for row in pwu),
+                "wall_elapsed_seconds": wall, "critical_path_seconds": critical,
+                "parallelism_effect_seconds": None if wall is None else max(0.0, execution_total - wall),
+                "self_refine_event_count": len(refinements),
+                "first_pass_pwu_count": sum(item["attempt_count"] == 1 and
+                                             item["condition"] == "SATISFIED" for item in pwu),
+                "retried_pwu_count": sum(item["attempt_count"] > 1 for item in pwu),
+                "human_escalation_count": escalation_count,
+                "refinement_extra_seconds": sum(event["extra_elapsed_seconds"] or 0
+                                                for event in refinements),
+                "resource_units": resource_totals,
+                "final_outcome": work["condition"]}
 
     def task_shape_snapshot(self, work_unit_id: UUID) -> TaskShapeSnapshotV0:
         with self.database.unit_of_work() as unit_of_work:
@@ -62,7 +296,6 @@ class ProductionMeasurementService:
                 )
             if (
                 plan_revision.id != binding.plan_revision_id
-                or plan_revision.source_baseline_id != work_unit.source_baseline_id
             ):
                 raise MeasurementLineageError(
                     "Task shape Plan/PWU/Baseline lineage does not match"
@@ -430,8 +663,7 @@ class ProductionMeasurementService:
                 f"Admitted Work/PWU lineage not found: {work_unit_id}"
             )
         if (
-            binding.work_unit_id != work_unit.id
-            or binding.production_run_id != work_unit.production_run_id
+            binding.production_run_id != work_unit.production_run_id
             or binding.plan_revision_id != work_unit.plan_revision_id
         ):
             raise MeasurementLineageError("Work/PWU Runtime binding does not match")
@@ -441,16 +673,20 @@ class ProductionMeasurementService:
     def _candidate_lineage(
         product: ProductStore,
         candidate: BaselineCandidateRecord,
-    ) -> tuple[WorkRuntimeBindingRecord, UUID]:
-        if len(candidate.satisfied_work_unit_ids) != 1:
-            raise MeasurementLineageError(
-                "DCP-2 v0 Candidate measurement requires one satisfied PWU"
-            )
-        work_unit_id = candidate.satisfied_work_unit_ids[0]
-        binding = product.runtime_binding_for_work_unit(work_unit_id)
-        if binding is None or binding.production_run_id != candidate.production_run_id:
+    ) -> tuple[WorkRuntimeBindingRecord, UUID | None]:
+        if not candidate.satisfied_work_unit_ids:
+            raise MeasurementLineageError("Candidate has no satisfied PWU lineage")
+        bindings = tuple(
+            product.runtime_binding_for_work_unit(work_unit_id)
+            for work_unit_id in candidate.satisfied_work_unit_ids
+        )
+        if any(binding is None or binding.production_run_id != candidate.production_run_id
+               for binding in bindings):
             raise MeasurementLineageError("Candidate Work/PWU lineage does not match")
-        return binding, work_unit_id
+        if len({binding.work_id for binding in bindings if binding is not None}) != 1:
+            raise MeasurementLineageError("Candidate spans more than one Work")
+        return bindings[0], (candidate.satisfied_work_unit_ids[0]
+                             if len(bindings) == 1 else None)
 
     @classmethod
     def _task_shape(

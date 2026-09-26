@@ -19,6 +19,7 @@ from spg.infrastructure.persistence.github_delivery_schema import (
     github_access_grants, remote_delivery_authorizations, remote_delivery_receipts,
 )
 from spg.infrastructure.persistence.control_room_schema import work_agreement_events
+from spg.infrastructure.persistence.evaluation_schema import evaluation_runs
 from spg.infrastructure.persistence.connector_schema import (
     capability_gaps,
     connector_capabilities,
@@ -58,6 +59,7 @@ __all__ = [
     "remote_delivery_authorizations",
     "remote_delivery_receipts",
     "work_agreement_events",
+    "evaluation_runs",
     "connector_capabilities",
     "capability_gaps",
     "native_execution_tables",

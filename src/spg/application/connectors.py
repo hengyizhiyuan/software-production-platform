@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import NAMESPACE_URL, UUID, uuid5
+from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from sqlalchemy import and_, insert, or_, select, update
 
@@ -20,7 +20,9 @@ from spg.domain.connectors import (
 )
 from spg.domain.native_execution import AttemptTerminalOutcome, EffectCondition, ExecutionMode
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
-from spg.infrastructure.persistence.connector_schema import capability_gaps, connector_capabilities
+from spg.infrastructure.persistence.connector_schema import (
+    capability_gaps, connector_capabilities, connector_controls, connector_audit_events,
+)
 
 
 class ConnectorResolver:
@@ -257,6 +259,7 @@ class ConnectorResolver:
             }:
                 continue
             visible.append(ExecutableCapability.model_validate(row["definition"]))
+        visible = [item for item in visible if self._control_enabled(item)]
         return tuple(sorted(
             visible,
             key=lambda item: (
@@ -295,9 +298,12 @@ class ConnectorResolver:
             }:
                 continue
             item = ExecutableCapability.model_validate(row["definition"])
+            if not self._control_enabled(item):
+                continue
             grouped.setdefault(item.capability_id, []).append(item)
         for item in default_system_capability_reality().executable_capabilities:
-            grouped.setdefault(item.capability_id, []).append(item)
+            if self._control_enabled(item):
+                grouped.setdefault(item.capability_id, []).append(item)
         selected = []
         for capability_id, candidates in grouped.items():
             candidates.sort(
@@ -326,6 +332,7 @@ class ConnectorResolver:
         built_ins = default_system_capability_reality().executable_capabilities
         matches = self._overlays(requirement) + tuple(
             item for item in built_ins if item.capability_id == requirement.capability_id
+            and self._control_enabled(item)
         )
         executable = next(
             (
@@ -365,6 +372,18 @@ class ConnectorResolver:
             reason=reason,
             gap_id=gap_id,
         )
+
+    def _control_enabled(self, capability: ExecutableCapability) -> bool:
+        with self.database.unit_of_work() as uow:
+            row = uow.session.execute(select(connector_controls.c.enabled,
+                connector_controls.c.deprecated, connector_controls.c.health).where(
+                connector_controls.c.connector_id == capability.connector_id,
+                connector_controls.c.capability_id == capability.capability_id,
+                connector_controls.c.owner_scope == capability.scope.value,
+                connector_controls.c.owner_id == capability.owner_id,
+                connector_controls.c.version == capability.version,
+            )).first()
+        return row is None or (row.enabled and not row.deprecated and row.health != "UNHEALTHY")
 
     def require_local_execution(self, requirement: CapabilityRequirement) -> ExecutableCapability:
         resolution = self.resolve(requirement)
@@ -421,3 +440,133 @@ class ConnectorResolver:
                 select(capability_gaps).where(capability_gaps.c.work_id == work_id)
             ).mappings().all()
         return tuple(dict(row) for row in rows)
+
+
+class ConnectorManagement:
+    """Operator view and explicit control over the existing Connector catalog."""
+
+    def __init__(self, database):
+        self.database = database
+
+    @staticmethod
+    def _id(capability: ExecutableCapability) -> UUID:
+        return uuid5(NAMESPACE_URL, ":".join(("watt-connector-control",
+            capability.connector_id, capability.capability_id,
+            capability.scope.value, capability.owner_id, capability.version)))
+
+    def _catalog(self) -> tuple[ExecutableCapability, ...]:
+        with self.database.unit_of_work() as uow:
+            rows = uow.session.execute(select(connector_capabilities)).mappings().all()
+        return (*default_system_capability_reality().executable_capabilities,
+                *(ExecutableCapability.model_validate(row["definition"]) for row in rows))
+
+    def list(self) -> list[dict]:
+        catalog = self._catalog()
+        with self.database.unit_of_work() as uow:
+            controls = {row["id"]: row for row in uow.session.execute(select(connector_controls)).mappings()}
+        result = []
+        for item in catalog:
+            control_id = self._id(item)
+            control = controls.get(control_id)
+            enabled = item.enabled and (control is None or control["enabled"] and not control["deprecated"])
+            healthy = control is None or control["health"] != "UNHEALTHY"
+            result.append({
+                "id": str(control_id), "connector_id": item.connector_id,
+                "capability_id": item.capability_id, "capability_family": item.capability_family,
+                "provider": item.execution_provider, "scope": item.scope.value,
+                "owner_id": item.owner_id, "maturity": item.maturity.value,
+                "availability": item.availability.value,
+                "enabled": enabled, "health": "UNKNOWN" if control is None else control["health"],
+                "executable": enabled and healthy and item.availability is ConnectorAvailability.AVAILABLE,
+                "version": item.version, "permissions_required": list(item.permissions_required),
+                "credential_requirements": list(item.credential_requirements),
+                "qualification": "QUALIFIED" if item.verification_evidence else
+                                 "BUILT_IN" if item.maturity is ConnectorMaturity.BUILT_IN else "UNVERIFIED",
+                "provisional": item.maturity is ConnectorMaturity.PROVISIONAL,
+                "reuse_scope": item.scope.value,
+                "deprecated": False if control is None else control["deprecated"],
+                # Connector invocation is not instrumented here. Health observations
+                # must not be reported as connector use.
+                "usage_count": None, "usage_count_status": "NOT_INSTRUMENTED",
+                "failure_count": 0 if control is None else control["failure_count"],
+                "failure_count_scope": "HEALTH_OBSERVATIONS",
+                "last_success_at": None if control is None or control["last_success_at"] is None
+                                   else control["last_success_at"].isoformat(),
+                "last_success_status": "NOT_INSTRUMENTED",
+                "last_failure_at": None if control is None or control["last_failure_at"] is None
+                                   else control["last_failure_at"].isoformat(),
+                "last_failure_code": None if control is None else control["last_failure_code"],
+                "verification_evidence": list(item.verification_evidence),
+            })
+        return sorted(result, key=lambda row: (row["capability_id"], row["scope"], row["version"]))
+
+    def control(self, control_id: UUID, actor_id: str, *, enabled: bool | None = None,
+                deprecated: bool | None = None, health: str | None = None,
+                failure_code: str | None = None, evidence_ref: str | None = None) -> dict:
+        if actor_id != "human:owner":
+            raise PermissionError("Connector control requires Human owner")
+        if health is not None and health not in {"HEALTHY", "UNHEALTHY", "UNKNOWN"}:
+            raise ValueError("Unsupported connector health")
+        if enabled is None and deprecated is None and health is None:
+            raise ValueError("No connector control change requested")
+        if health in {"HEALTHY", "UNHEALTHY"} and not evidence_ref:
+            raise ValueError("Health observation needs an evidence reference")
+        capability = next((item for item in self._catalog() if self._id(item) == control_id), None)
+        if capability is None:
+            raise LookupError("Connector not found")
+        now = datetime.now(UTC)
+        with self.database.unit_of_work() as uow:
+            existing = uow.session.execute(select(connector_controls).where(
+                connector_controls.c.id == control_id,
+            ).with_for_update()).mappings().one_or_none()
+            values = {
+                "enabled": True if existing is None else existing["enabled"],
+                "deprecated": False if existing is None else existing["deprecated"],
+                "health": "UNKNOWN" if existing is None else existing["health"],
+                "usage_count": 0 if existing is None else existing["usage_count"],
+                "failure_count": 0 if existing is None else existing["failure_count"],
+                "last_success_at": None if existing is None else existing["last_success_at"],
+                "last_failure_at": None if existing is None else existing["last_failure_at"],
+                "last_failure_code": None if existing is None else existing["last_failure_code"],
+                "updated_at": now,
+            }
+            if enabled is not None:
+                values["enabled"] = enabled
+            if deprecated is not None:
+                values["deprecated"] = deprecated
+            if health is not None:
+                values["health"] = health
+                if health == "UNHEALTHY":
+                    values["failure_count"] += 1
+                    values["last_failure_at"] = now
+                    values["last_failure_code"] = failure_code or "OBSERVED_FAILURE"
+                elif health == "HEALTHY":
+                    values["last_failure_code"] = None
+            if existing is None:
+                uow.session.execute(insert(connector_controls).values(id=control_id,
+                    connector_id=capability.connector_id,
+                    capability_id=capability.capability_id,
+                    owner_scope=capability.scope.value, owner_id=capability.owner_id,
+                    version=capability.version, **values))
+            else:
+                uow.session.execute(update(connector_controls).where(
+                    connector_controls.c.id == control_id,
+                ).values(**values))
+            uow.session.execute(insert(connector_audit_events).values(
+                id=uuid4(), actor_id=actor_id, subject_kind="CONNECTOR",
+                subject_id=str(control_id), action="CONTROL_CHANGED",
+                detail={"enabled": enabled, "deprecated": deprecated, "health": health,
+                        "failure_code": failure_code, "evidence_ref": evidence_ref},
+                created_at=now))
+            uow.commit()
+        return next(row for row in self.list() if row["id"] == str(control_id))
+
+    def history(self, subject_kind: str, subject_id: str) -> list[dict]:
+        with self.database.unit_of_work() as uow:
+            rows = uow.session.execute(select(connector_audit_events).where(
+                connector_audit_events.c.subject_kind == subject_kind,
+                connector_audit_events.c.subject_id == subject_id,
+            ).order_by(connector_audit_events.c.created_at)).mappings().all()
+        return [{"id": str(row["id"]), "actor_id": row["actor_id"],
+                 "action": row["action"], "detail": row["detail"],
+                 "created_at": row["created_at"].isoformat()} for row in rows]

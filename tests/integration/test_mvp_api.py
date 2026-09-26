@@ -268,6 +268,102 @@ def test_api_01_health_boots_without_provider_and_api_18_is_safe(
     configured.state.database.dispose()
 
 
+def test_p1_q1_product_continues_across_three_distinct_works(api_facts: ApiFacts) -> None:
+    client = api_facts.client
+    created = client.post("/api/products", json={"name": "Finance Management"})
+    assert created.status_code == 201, created.text
+    product_id = created.json()["id"]
+    requirements = ("Add accounting vouchers", "Add reimbursement", "Add reports")
+    work_ids = []
+    for requirement in requirements:
+        response = client.post("/api/works", json={
+            "requirement": requirement, "product_id": product_id,
+        })
+        assert response.status_code == 201, response.text
+        assert response.json()["product_id"] == product_id
+        work_ids.append(response.json()["work_id"])
+    with api_facts.database.unit_of_work() as uow:
+        from spg.infrastructure.persistence.product_schema import engineering_resources
+        resource_id = uow.session.execute(select(engineering_resources.c.id).where(
+            engineering_resources.c.repository_identity == "test://mvp-api-repository"
+        )).scalar_one()
+    asset = client.post(f"/api/products/{product_id}/assets", json={
+        "kind": "REPOSITORY", "reference": "test://mvp-api-repository",
+        "resource_id": str(resource_id), "metadata": {"revision": "observed-baseline"},
+    })
+    assert asset.status_code == 200, asset.text
+    observed = client.get(f"/api/products/{product_id}").json()
+    assert {item["id"] for item in observed["works"]} == set(work_ids)
+    assert len(observed["current_sources"]) == 1
+    history = client.get(f"/api/products/{product_id}/history").json()
+    assert [item["requirement"] for item in history["timeline"]
+            if item["kind"] == "WORK_REQUESTED"] == list(requirements)
+    assert all(client.get(f"/api/works/{work_id}/operations").status_code == 200
+               for work_id in work_ids)
+
+
+def test_p1_q6_operator_diagnosis_identifies_capability_blocker(api_facts: ApiFacts) -> None:
+    from spg.application.connectors import ConnectorResolver
+    from spg.domain.connectors import CapabilityRequirement
+    created = api_facts.client.post("/api/works", json={
+        "requirement": "Run a missing specialist connector",
+    })
+    assert created.status_code == 201
+    work_id = UUID(created.json()["work_id"])
+    ConnectorResolver(api_facts.database).resolve(CapabilityRequirement(
+        capability_id="specialist.missing", work_id=work_id,
+        user_id="human:owner", operation_ref="p1-q6"))
+    response = api_facts.client.get(f"/api/works/{work_id}/operations")
+    assert response.status_code == 200, response.text
+    diagnosis = response.json()
+    assert diagnosis["state"] == "BLOCKED_BY_CAPABILITY"
+    assert diagnosis["evidence_refs"][0].startswith("capability-gap:")
+    assert diagnosis["economics"]["observed_provider_spend"]["status"] == "UNREPORTED"
+    platform = api_facts.client.get("/api/operations/summary")
+    assert platform.status_code == 200, platform.text
+    assert platform.json()["recent_works"]["by_state"]["BLOCKED_BY_CAPABILITY"] >= 1
+
+
+def test_p1_q8_product_history_survives_new_service_session(api_facts: ApiFacts) -> None:
+    from spg.application.product_assets import ProductAssetService
+    client = api_facts.client
+    product_id = client.post("/api/products", json={"name": "Long Horizon Finance"}).json()["id"]
+    first = client.post("/api/works", json={
+        "requirement": "Start the voucher feature", "product_id": product_id,
+    }).json()["work_id"]
+    second = client.post("/api/works", json={
+        "requirement": "Add reimbursement later", "product_id": product_id,
+    }).json()["work_id"]
+    reconstructed = ProductAssetService(api_facts.database)
+    history = reconstructed.history(UUID(product_id), "human:owner")
+    requested = [item for item in history["timeline"] if item["kind"] == "WORK_REQUESTED"]
+    assert [(item["work_id"], item["requirement"]) for item in requested] == [
+        (first, "Start the voucher feature"),
+        (second, "Add reimbursement later"),
+    ]
+    assert history["product_id"] == product_id
+
+
+def test_p1_q6_operator_probe_detects_unhealthy_candidate_preview(api_facts: ApiFacts) -> None:
+    from types import SimpleNamespace
+    from spg.application.control_room import ControlRoomService
+    work_id = UUID(api_facts.client.post("/api/works", json={
+        "requirement": "Inspect unhealthy preview",
+    }).json()["work_id"])
+    preview_id = uuid4()
+    preview = SimpleNamespace(id=preview_id, status=SimpleNamespace(value="READY"),
+        repository_revision="a" * 40, repository_tree="b" * 40, mode="FULL_APPLICATION_RUNTIME")
+    service = SimpleNamespace(
+        store=SimpleNamespace(current_candidate_preview=lambda _work_id: preview),
+        provider=SimpleNamespace(probe=lambda *_args, **_kwargs: False),
+    )
+    diagnosis = ControlRoomService(api_facts.database, api_facts.service,
+        candidate_preview_service=service).diagnosis(work_id)
+    assert diagnosis["state"] == "PREVIEW_UNHEALTHY"
+    assert diagnosis["evidence_refs"] == [f"candidate-preview:{preview_id}"]
+    assert diagnosis["preview"] == [{"preview_id": str(preview_id), "status": "UNHEALTHY"}]
+
+
 def test_api_02_goal_create_list_and_summary_get(api_facts: ApiFacts) -> None:
     created = api_facts.client.post(
         "/api/goals",

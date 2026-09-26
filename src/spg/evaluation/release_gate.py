@@ -5,16 +5,23 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
+from hashlib import sha256
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
+from time import monotonic
+from uuid import uuid4
 from xml.etree import ElementTree
+
+from sqlalchemy import create_engine, insert, select
+from spg.infrastructure.persistence.evaluation_schema import evaluation_runs
 
 
 ROOT = Path(__file__).resolve().parents[3]
+CORPUS_VERSION = "watt-p1-v1"
 
 
 @dataclass(frozen=True)
@@ -233,6 +240,79 @@ CORPUS = (
         capability_family="EXTERNAL_RESEARCH", protected_invariant="equivalent repeated results stop within bounded query budget",
         required_environment="PYTHON", baseline_version="external-search-v1", estimated_cost_seconds=5,
     ),
+    EvaluationCase(
+        "P1-Q1", "PRODUCTION",
+        "tests/integration/test_mvp_api.py::test_p1_q1_product_continues_across_three_distinct_works",
+        capability_family="PRODUCT_CONTINUITY", protected_invariant="one Product retains three independent Work histories and exact repository asset",
+        scenario_type="GOLDEN_JOURNEY", baseline_version="p1-v1", estimated_cost_seconds=20,
+    ),
+    EvaluationCase(
+        "P1-Q2", "PRODUCTION",
+        "tests/integration/test_dcp2_production_measurement.py::test_p1_q2_parallel_fan_in_economics_and_candidate_lineage",
+        capability_family="PRODUCTION_ECONOMICS", protected_invariant="parallel fan-in reports exact PWU usage and separates wall from accumulated time",
+        baseline_version="p1-v1", estimated_cost_seconds=20,
+    ),
+    EvaluationCase(
+        "P1-Q3", "ASSURANCE",
+        "tests/integration/test_github_governed_delivery.py::test_p1_q3_connector_disable_health_and_credential_rotation_are_governed",
+        capability_family="CONNECTOR", protected_invariant="invalid credential fails closed and rotation preserves grant audit",
+        baseline_version="p1-v1", estimated_cost_seconds=25,
+    ),
+    EvaluationCase(
+        "P1-Q4", "PRODUCTION",
+        "tests/integration/test_brownfield_native_production_flow.py::test_real_work_task_contract_pwu_native_pe_preview_and_authorization[False]",
+        capability_family="BROWNFIELD", protected_invariant="existing project produces a verified native Candidate and governed delivery boundary under one Product",
+        scenario_type="GOLDEN_JOURNEY", required_environment="REAL_CONTAINER",
+        baseline_version="p1-v1", estimated_cost_seconds=240,
+    ),
+    EvaluationCase(
+        "P1-Q4-INTAKE", "PRODUCTION",
+        "tests/integration/test_p1_brownfield_product.py::test_p1_q4_brownfield_intake_product_work_and_delivery_boundary",
+        capability_family="BROWNFIELD", protected_invariant="local existing Git project imports exact branch/revision and binds durable Product source",
+        baseline_version="p1-v1", estimated_cost_seconds=30,
+    ),
+    EvaluationCase(
+        "P1-Q5", "RESILIENCE",
+        "tests/integration/test_native_executor_runtime.py::test_workspace_hibernation_respects_pins_and_restores_verified_bundle",
+        capability_family="RETENTION", protected_invariant="evidence-referenced workspace survives while expired unreferenced workspace retires idempotently",
+        baseline_version="p1-v1", estimated_cost_seconds=40,
+    ),
+    EvaluationCase(
+        "P1-Q5-PREVIEW", "RESILIENCE",
+        "tests/test_candidate_full_preview.py::test_p1_preview_retention_keeps_review_and_evidence_then_releases_runtime",
+        capability_family="RETENTION", protected_invariant="pending review protects Preview and old reviewed runtime stops while immutable evidence survives",
+        required_environment="PYTHON", baseline_version="p1-v1", estimated_cost_seconds=10,
+    ),
+    EvaluationCase(
+        "P1-Q6", "PRODUCTION",
+        "tests/integration/test_mvp_api.py::test_p1_q6_operator_diagnosis_identifies_capability_blocker",
+        capability_family="OPERATIONS", protected_invariant="Work and platform views identify an observed capability blocker with evidence",
+        baseline_version="p1-v1", estimated_cost_seconds=20,
+    ),
+    EvaluationCase(
+        "P1-Q6-PREVIEW", "PRODUCTION",
+        "tests/integration/test_mvp_api.py::test_p1_q6_operator_probe_detects_unhealthy_candidate_preview",
+        capability_family="OPERATIONS", protected_invariant="operator diagnosis probes exact Candidate Preview health instead of trusting a persisted launch record",
+        baseline_version="p1-v1", estimated_cost_seconds=20,
+    ),
+    EvaluationCase(
+        "P1-Q7", "ASSURANCE",
+        "tests/test_release_evaluation_gate.py::test_p1_q7_versioned_release_evaluation_compares_qualified_baseline",
+        capability_family="EVALUATION", protected_invariant="versioned four-domain evaluation compares a qualified baseline without equating tests to Human acceptance",
+        required_environment="PYTHON", baseline_version="p1-v1", estimated_cost_seconds=10,
+    ),
+    EvaluationCase(
+        "P1-Q8", "INTERACTION",
+        "tests/integration/test_mvp_api.py::test_p1_q8_product_history_survives_new_service_session",
+        capability_family="LONG_HORIZON_HISTORY", protected_invariant="returning Human can inspect distinct governed Product Work facts across sessions",
+        baseline_version="p1-v1", estimated_cost_seconds=20,
+    ),
+    EvaluationCase(
+        "P1-Q9", "ASSURANCE",
+        "tests/integration/test_p1_schema_hygiene.py::test_p1_q9_upgrade_p0_schema_preserves_work_and_alembic_check_passes",
+        capability_family="SCHEMA", protected_invariant="forward P0 to P1 migration keeps unbound Work history and schema autogenerate clean",
+        baseline_version="p1-v1", estimated_cost_seconds=30,
+    ),
 )
 
 _BASELINE_METADATA = {
@@ -267,8 +347,8 @@ def select_cases(
 ) -> tuple[EvaluationCase, ...]:
     """Select one governed purpose slice while preserving every critical invariant."""
 
-    if purpose not in {"focused", "release"}:
-        raise ValueError("evaluation purpose must be focused or release")
+    if purpose not in {"focused", "milestone", "release"}:
+        raise ValueError("evaluation purpose must be focused, milestone or release")
     if minimum_risk not in {"LOW", "MEDIUM", "HIGH", "CRITICAL"}:
         raise ValueError("minimum risk is not governed")
     if purpose == "focused" and not capability_families and not failure_families:
@@ -279,6 +359,7 @@ def select_cases(
         if rank[case.risk] >= rank[minimum_risk]
         and (
             (purpose == "release" and (case.critical or case.scenario_type == "GOLDEN_JOURNEY"))
+            or (purpose == "milestone" and case.estimated_cost_seconds <= 180)
             or (purpose == "focused" and (
                 case.capability_family in capability_families
                 or case.failure_family in failure_families
@@ -293,7 +374,12 @@ def select_cases(
     )):
         # Duplicate grouping only consolidates noncritical siblings; critical
         # invariants and Golden Journeys remain independently executable.
-        if case.duplicate_group and not case.critical:
+        if purpose == "milestone":
+            group = f"{case.domain}:{case.capability_family}"
+            if group in grouped:
+                continue
+            grouped.add(group)
+        elif case.duplicate_group and not case.critical:
             if case.duplicate_group in grouped:
                 continue
             grouped.add(case.duplicate_group)
@@ -302,6 +388,7 @@ def select_cases(
 
 
 def run_case(case: EvaluationCase, *, root: Path = ROOT) -> dict:
+    started = monotonic()
     with TemporaryDirectory(prefix="watt-evaluation-") as directory:
         report_path = Path(directory) / "result.xml"
         command = [
@@ -312,6 +399,7 @@ def run_case(case: EvaluationCase, *, root: Path = ROOT) -> dict:
             command, cwd=root, capture_output=True, text=True, check=False,
             timeout=900, env=os.environ.copy(),
         )
+        elapsed = monotonic() - started
         counts = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
         if report_path.exists():
             tree = ElementTree.parse(report_path)
@@ -330,6 +418,10 @@ def run_case(case: EvaluationCase, *, root: Path = ROOT) -> dict:
             "critical": case.critical,
             "counts": counts,
             "exit_code": completed.returncode,
+            "elapsed_seconds": round(elapsed, 3),
+            "failure_signature": None if passed else sha256(
+                (completed.stdout + completed.stderr)[-2400:].encode("utf-8")
+            ).hexdigest()[:24],
             "diagnostic_tail": "" if passed else (completed.stdout + completed.stderr)[-2400:],
             "metadata": {
                 "capability_family": case.capability_family,
@@ -357,6 +449,7 @@ def qualify(cases: tuple[EvaluationCase, ...] = CORPUS, *, root: Path = ROOT) ->
     domains = sorted({case.domain for case in cases})
     gate = all(not result["critical"] or result["result"] != "FAILED" for result in results)
     return {
+        "corpus_version": CORPUS_VERSION,
         "qualification": "PASS" if gate else "FAIL",
         "domains": {
             domain: "PASS" if all(
@@ -371,10 +464,97 @@ def qualify(cases: tuple[EvaluationCase, ...] = CORPUS, *, root: Path = ROOT) ->
     }
 
 
+def evaluation_metrics(report: dict) -> dict:
+    """Comparable observed dimensions; absent production telemetry remains unknown."""
+    cases = report.get("cases", [])
+    count = lambda outcome: sum(row["result"] == outcome for row in cases)
+    durations = sorted(row["elapsed_seconds"] for row in cases
+                       if isinstance(row.get("elapsed_seconds"), (int, float)))
+    failures = sorted({row["failure_signature"] for row in cases
+                       if row.get("failure_signature")})
+    return {
+        "case_count": len(cases),
+        "first_pass_success": count("FIRST_PASS_SUCCESS"),
+        "recovered_by_self_refine": count("RECOVERED_BY_SELF_REFINE"),
+        "human_escalation": count("ESCALATED_TO_HUMAN"),
+        "failure": count("FAILED"),
+        "total_success": count("FIRST_PASS_SUCCESS") + count("RECOVERED_BY_SELF_REFINE"),
+        "convergence_rate": None if not cases else round(
+            (count("FIRST_PASS_SUCCESS") + count("RECOVERED_BY_SELF_REFINE")) / len(cases), 4),
+        "average_case_seconds": None if not durations else round(sum(durations) / len(durations), 3),
+        "p95_case_seconds": None if not durations else durations[max(0, (95 * len(durations) + 99) // 100 - 1)],
+        "average_refinement_attempts": None,
+        "p95_refinement_attempts": None,
+        "token_usage": "UNREPORTED", "compute_usage": "UNREPORTED",
+        "work_cost": "UNREPORTED",
+        "failure_signatures": failures,
+        "real_container_cases": sum(row.get("metadata", {}).get("required_environment") == "REAL_CONTAINER"
+                                    for row in cases),
+        "real_container_failures": sum(row.get("metadata", {}).get("required_environment") == "REAL_CONTAINER"
+                                       and row["result"] == "FAILED" for row in cases),
+    }
+
+
+def compare_baseline(current: dict, previous: dict | None) -> dict:
+    current_metrics = evaluation_metrics(current)
+    if previous is None:
+        return {"status": "NO_QUALIFIED_BASELINE", "current": current_metrics,
+                "previous": None, "delta": None}
+    previous_metrics = evaluation_metrics(previous)
+    current_by_id = {row["case"]: row for row in current.get("cases", [])}
+    previous_by_id = {row["case"]: row for row in previous.get("cases", [])}
+    shared = sorted(current_by_id.keys() & previous_by_id.keys())
+    comparable_current = evaluation_metrics({"cases": [current_by_id[key] for key in shared]})
+    comparable_previous = evaluation_metrics({"cases": [previous_by_id[key] for key in shared]})
+    dimensions = ("first_pass_success", "recovered_by_self_refine", "human_escalation",
+                  "failure", "total_success", "convergence_rate",
+                  "average_case_seconds", "p95_case_seconds")
+    delta = {key: None if not shared or comparable_current[key] is None or comparable_previous[key] is None
+             else round(comparable_current[key] - comparable_previous[key], 4) for key in dimensions}
+    return {"status": "COMPARED" if current_by_id.keys() == previous_by_id.keys()
+                      else "PARTIAL_COMPARISON", "current": current_metrics,
+            "previous": previous_metrics, "delta": delta,
+            "comparable_case_ids": shared,
+            "new_case_ids": sorted(current_by_id.keys() - previous_by_id.keys()),
+            "removed_case_ids": sorted(previous_by_id.keys() - current_by_id.keys()),
+            "case_set_changed": current_by_id.keys() != previous_by_id.keys()}
+
+
+def persist_evaluation(database_url: str, *, version: str, revision: str,
+                       purpose: str, report: dict) -> dict:
+    if not version.strip() or not revision.strip() or purpose not in {"focused", "milestone", "release"}:
+        raise ValueError("Version, revision and governed purpose are required")
+    engine = create_engine(database_url)
+    try:
+        with engine.begin() as connection:
+            baseline = connection.execute(select(evaluation_runs).where(
+                evaluation_runs.c.purpose == "release",
+                evaluation_runs.c.qualification == "PASS",
+                evaluation_runs.c.version != version.strip(),
+            ).order_by(evaluation_runs.c.created_at.desc(), evaluation_runs.c.id.desc())
+            .limit(1)).mappings().first()
+            trend = compare_baseline(report, None if baseline is None else baseline["report"])
+            run_id = uuid4()
+            connection.execute(insert(evaluation_runs).values(
+                id=run_id, version=version.strip(), revision=revision.strip(),
+                corpus_version=CORPUS_VERSION, purpose=purpose,
+                qualification=report["qualification"],
+                baseline_run_id=None if baseline is None else baseline["id"],
+                report=report, trend=trend,
+            ))
+        return {"id": str(run_id), "version": version, "revision": revision,
+                "purpose": purpose, "baseline_run_id": None if baseline is None else str(baseline["id"]),
+                "trend": trend}
+    finally:
+        engine.dispose()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--report", type=Path, help="Write JSON qualification evidence")
-    parser.add_argument("--purpose", choices=("focused", "release"), default="release")
+    parser.add_argument("--purpose", choices=("focused", "milestone", "release"), default="release")
+    parser.add_argument("--version", help="Candidate Watt version; enables durable run evidence")
+    parser.add_argument("--database-url", default=os.environ.get("SPG_DATABASE_URL"))
     parser.add_argument("--capability", action="append", default=[])
     parser.add_argument("--failure-family", action="append", default=[])
     parser.add_argument("--minimum-risk", choices=("LOW", "MEDIUM", "HIGH", "CRITICAL"), default="LOW")
@@ -396,6 +576,14 @@ def main() -> None:
         "selected_count": len(selected),
         "corpus_count": len(CORPUS),
     }
+    if arguments.version:
+        if not arguments.database_url:
+            parser.error("--version requires --database-url or SPG_DATABASE_URL")
+        revision = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
+            capture_output=True, text=True, check=True).stdout.strip()
+        result["persisted"] = persist_evaluation(arguments.database_url,
+            version=arguments.version, revision=revision,
+            purpose=arguments.purpose, report=result)
     encoded = json.dumps(result, ensure_ascii=False, indent=2)
     if arguments.report is not None:
         arguments.report.parent.mkdir(parents=True, exist_ok=True)

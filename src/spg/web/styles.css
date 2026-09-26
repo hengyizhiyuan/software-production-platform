@@ -1477,3 +1477,10 @@ dd {
 .outbox-message p { margin: 0 0 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .outbox-message .outbox-content { max-height: 6rem; overflow: auto; }
 .outbox-actions { display: flex; gap: 12px; }
+.p1-work-context { border: 1px solid var(--border, #31525e); padding: .8rem 1rem; margin: .8rem 0; }
+.p1-binding-row { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.p1-binding-row select { min-width: 12rem; }
+.p1-product-button { display: block; width: 100%; text-align: left; margin: .25rem 0; padding: .5rem; background: transparent; color: inherit; border: 1px solid currentColor; cursor: pointer; }
+.p1-product-button[aria-pressed="true"] { border-color: #17d5d0; }
+#p1-operator-panel[open] { max-height: 45vh; overflow: auto; }
+#p1-operator-panel p { font-size: .85rem; overflow-wrap: anywhere; }

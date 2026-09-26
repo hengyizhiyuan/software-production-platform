@@ -26,6 +26,7 @@ from spg.application.native_connector_qualification import NativeConnectorQualif
 from spg.application.preparation import PreparationService
 from spg.application.runtime import RuntimeService
 from spg.application.work import WorkApplicationService
+from spg.application.product_assets import ProductAssetService
 from spg.domain.native_execution import (
     AttemptTerminalOutcome,
     EffectCondition,
@@ -204,7 +205,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
         postgres_database,
         workspace_root=tmp_path / "workspaces",
     )
-    admission.register_engineering_resource(
+    resource = admission.register_engineering_resource(
         repository_identity="repo:brownfield-native-pe",
         location_ref=str(repository),
         authoritative_ref="refs/heads/main",
@@ -219,8 +220,16 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
             ),
         ),
     )
+    products = ProductAssetService(postgres_database)
+    product = products.create(human_actor, "Brownfield Preview Product")
+    software_product_id = UUID(product["id"])
+    products.attach_asset(software_product_id, human_actor, kind="REPOSITORY",
+        reference="repo:brownfield-native-pe", resource_id=resource.id,
+        metadata={"revision": git(repository, "rev-parse", "HEAD"),
+                  "repository_ref": "refs/heads/main", "context_path": "AI_context.md"})
     submitted = admission.submit_work(
-        "Create preview/native-production-environment.html describing the completed governed result"
+        "Create preview/native-production-environment.html describing the completed governed result",
+        product_id=software_product_id,
     )
     draft = admission.refine_work(
         submitted.work_id,
@@ -550,3 +559,8 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
     assert guardian_store.get(
         UUID(completion.guardian_intake_reference.rsplit(":", 1)[-1])
     ) is not None
+    history = products.history(software_product_id, human_actor)
+    assert any(event["kind"] == "WORK_REQUESTED" and event["work_id"] == str(admitted.work_id)
+               for event in history["timeline"])
+    assert any(event["kind"] == "PWU" for event in history["timeline"])
+    assert any(event["kind"] == "CANDIDATE" for event in history["timeline"])

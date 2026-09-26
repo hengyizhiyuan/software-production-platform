@@ -347,6 +347,15 @@ class ProductStore:
             work_runtime_bindings,
             work_runtime_bindings.c.work_unit_id == work_unit_id,
         )
+        if row is None:
+            # Multi-PWU cycles bind one Work to the Run, not one binding row per
+            # executable sibling. Resolve sibling lineage through that Run.
+            run_id = self.session.execute(select(production_work_units.c.production_run_id).where(
+                production_work_units.c.id == work_unit_id,
+            )).scalar_one_or_none()
+            if run_id is not None:
+                row = self._one(work_runtime_bindings,
+                    work_runtime_bindings.c.production_run_id == run_id)
         return None if row is None else self._runtime_binding(row)
 
     def associate_runtime_binding(

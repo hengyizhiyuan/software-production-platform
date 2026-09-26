@@ -3,7 +3,10 @@
 ## Guardian
 
 The platform orchestrates Guardian. The platform is not the owner of Guardian Core.
-The MVP does not implement Guardian. It reserves an Assurance Extension Point for a future flow:
+Watt sends attributable intake in required-owner mode. The currently inspected
+Guardian owner runtime exposes intake and retrieval, but not findings,
+challenge, or an assurance decision/gate. Watt therefore cannot claim a
+Guardian PASS from intake alone. The owned boundary remains:
 
 ```text
 Verification → Guardian → Evidence → Acceptance
@@ -14,7 +17,10 @@ Guardian remains an Independent Assurance System: platform-native but platform-i
 ## Engineering Context Fabric
 
 The platform consumes ECF capability. It does not design or redefine ECF Core.
-The MVP does not implement ECF. It reserves a Context Provider abstraction for a future relationship:
+Watt's required-owner mode consumes revisioned, fresh/superseding ECF
+repository Reality before a governed attempt and across sessions. Full
+Journey A/B convergence with all upstream owners still needs qualification.
+The owner relationship remains:
 
 ```text
 Role Runtime → ECF Projection → Engineering Context

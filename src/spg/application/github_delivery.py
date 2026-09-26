@@ -23,6 +23,7 @@ from spg.application.delivery import DeliveryApplicationService
 from spg.infrastructure.persistence.github_delivery_schema import (
     github_access_grants, remote_delivery_authorizations, remote_delivery_receipts,
 )
+from spg.infrastructure.persistence.connector_schema import connector_audit_events
 from spg.infrastructure.persistence.product_schema import engineering_resources
 
 
@@ -152,14 +153,24 @@ class GitHubDeliveryService:
                     id=grant_id, actor_id=actor_id, repository_url=url,
                     capability=capability, credential_ref=credential_ref,
                     credential_sha256=credential_sha256,
-                    condition="ACTIVE", observed_permission=permissions))
+                    condition="ACTIVE", observed_permission=permissions,
+                    last_verified_at=datetime.now(UTC)))
+                action = "CREATED"
             else:
                 grant_id = existing["id"]
+                action = "ROTATED" if existing["credential_sha256"] != credential_sha256 else "REVERIFIED"
                 uow.session.execute(update(github_access_grants).where(
                     github_access_grants.c.id == grant_id).values(
                     credential_ref=credential_ref,
                     credential_sha256=credential_sha256, condition="ACTIVE",
-                    observed_permission=permissions, revoked_at=None))
+                    observed_permission=permissions, revoked_at=None,
+                    last_verified_at=datetime.now(UTC), last_failure_at=None))
+            uow.session.execute(insert(connector_audit_events).values(
+                id=uuid4(), actor_id=actor_id, subject_kind="GITHUB_GRANT",
+                subject_id=str(grant_id), action=action,
+                detail={"repository_url": url, "capability": capability,
+                        "credential_ref": credential_ref, "permission_observed": allowed},
+                created_at=datetime.now(UTC)))
             uow.commit()
         return {"grant_id": str(grant_id), "repository_url": url,
             "capability": capability, "condition": "ACTIVE",
@@ -174,6 +185,10 @@ class GitHubDeliveryService:
                     condition="REVOKED", revoked_at=datetime.now(UTC)))
             if result.rowcount != 1:
                 raise GitHubDeliveryError("GRANT_NOT_FOUND", "Active GitHub grant is unavailable")
+            uow.session.execute(insert(connector_audit_events).values(
+                id=uuid4(), actor_id=actor_id, subject_kind="GITHUB_GRANT",
+                subject_id=str(grant_id), action="REVOKED", detail={},
+                created_at=datetime.now(UTC)))
             uow.commit()
 
     def list_grants(self, actor_id: str) -> list[dict]:
@@ -185,7 +200,27 @@ class GitHubDeliveryService:
             "repository_url": row["repository_url"],
             "capability": row["capability"], "condition": row["condition"],
             "credential_ref": row["credential_ref"],
+            "credential_status": self._grant_status(row),
+            "owner_id": row["actor_id"], "scope": "REPOSITORY",
+            "provider": "GitHub", "permission": row["capability"],
+            "expires_at": None if row["expires_at"] is None else row["expires_at"].isoformat(),
+            "last_verified_at": None if row["last_verified_at"] is None else row["last_verified_at"].isoformat(),
+            "usage_count": row["usage_count"], "failure_count": row["failure_count"],
+            "last_failure_at": None if row["last_failure_at"] is None else row["last_failure_at"].isoformat(),
             "observed_permission": row["observed_permission"]} for row in rows]
+
+    def _grant_status(self, row) -> str:
+        if row["condition"] != "ACTIVE":
+            return "REVOKED"
+        if row["expires_at"] is not None and row["expires_at"] <= datetime.now(UTC):
+            return "EXPIRED"
+        setting = self.settings.github_read_token if row["capability"] == "READ" else self.settings.github_write_token
+        token = None if setting is None else setting.get_secret_value()
+        if not token:
+            return "MISSING"
+        if row["credential_sha256"] != sha256(token.encode("utf-8")).hexdigest():
+            return "INVALID"
+        return "ACTIVE"
 
     def active_token(self, actor_id: str, repository_url: str, capability: str) -> str | None:
         _, _, url = github_repository(repository_url)
@@ -198,6 +233,8 @@ class GitHubDeliveryService:
             )).mappings().one_or_none()
         if grant is None:
             return None
+        if self._grant_status(grant) != "ACTIVE":
+            raise GitHubDeliveryError("GRANT_STALE", "GitHub credential is missing, invalid, expired or revoked; renew the grant")
         credential_ref, token = self._credential(capability)
         if (grant["credential_ref"] != credential_ref
                 or grant["credential_sha256"] != sha256(token.encode("utf-8")).hexdigest()):
@@ -324,6 +361,15 @@ class GitHubDeliveryService:
             uow.session.execute(insert(remote_delivery_receipts).values(
                 authorization_id=authorization_id, remote_before=remote_before,
                 remote_after=remote_after, push_condition="OBSERVED"))
+            grant = uow.session.execute(select(github_access_grants).where(
+                github_access_grants.c.actor_id == actor_id,
+                github_access_grants.c.repository_url == url,
+                github_access_grants.c.capability == "WRITE",
+            )).mappings().one_or_none()
+            if grant is not None:
+                uow.session.execute(update(github_access_grants).where(
+                    github_access_grants.c.id == grant["id"],
+                ).values(usage_count=grant["usage_count"] + 1))
             uow.commit()
         return {"authorization_id": str(authorization_id),
             "remote_before": remote_before, "remote_after": remote_after,

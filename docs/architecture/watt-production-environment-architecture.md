@@ -11,7 +11,15 @@ boundary with an initial container adapter, Git continuity observation, Preview
 projection, explicit Human Delivery authorization, resource references, minimal
 Production Record lineage, and versioned ECF/Guardian payloads. It does not
 implement a general Runtime orchestrator, sandbox engine, managed Git hosting,
-automatic cleanup, or full Production Passport.
+automatic cleanup, or full Production Passport at the v1 foundation stage.
+
+P1 implementation note (2026-09-26): Native workspaces now have audited
+30-day hot / 180-day cold retention defaults, reference/pin/review/recovery
+guards, verified archive and idempotent retirement. Exact Candidate Preview
+runtime may be stopped after final Human delivery review and hot retention;
+versioned Preview, Environment and Production Record evidence remains. This is
+a bounded policy for these providers, not a general Resource Reference Graph
+collector or authorization to delete arbitrary artifacts.
 
 ## 1. Core position
 
@@ -136,13 +144,13 @@ Lifecycle decisions are policy-driven. Inputs may include:
 - organization retention and security policy; and
 - cost policy.
 
-No automatic transition, timeout, retention duration, or recovery behavior is
-defined here. A Lifecycle Policy Engine is explicitly not part of this
-architecture-foundation task.
+This original foundation contract did not set durations. The later bounded P1
+Native/Preview policies above supply defaults for their own resources. A
+general Lifecycle Policy Engine remains outside this contract.
 
 ## 5. Resource Reference Graph
 
-Future cleanup must be based on governed references rather than resource age or
+General cleanup must be based on governed references rather than resource age or
 process liveness alone. The future Resource Reference Graph should make visible
 at least:
 
@@ -157,8 +165,9 @@ and applicable retention policy permits disposal. Reachability does not itself
 authorize deletion, and physical deletion must not erase immutable production,
 evidence, or decision history.
 
-The graph, reachability algorithm, retention engine, and garbage collector are
-not implemented or specified by this document.
+The full cross-provider graph, reachability algorithm, and garbage collector
+remain future work. Native workspace and Candidate Preview cleanup implement
+only their explicit local reference checks.
 
 ## 6. Source-control continuity
 

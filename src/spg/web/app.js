@@ -464,6 +464,8 @@
   function clearSelectedWorkState() {
     state.selectedWorkId = "";
     state.selectedWork = null;
+    elements.selectedWork.dataset.workId = "";
+    elements.selectedWork.dataset.productId = "";
     state.attention = [];
     state.result = null;
     state.candidatePreview = null;
@@ -1713,6 +1715,9 @@
       return;
     }
     elements.selectedWork.dataset.prospective = "false";
+    if (elements.selectedWork.dataset.workId !== work.work_id) elements.selectedWork.dataset.workId = work.work_id;
+    const productId = work.product_id || "";
+    if (elements.selectedWork.dataset.productId !== productId) elements.selectedWork.dataset.productId = productId;
     elements.prospectiveActions.hidden = true;
     setSurface("selected");
     elements.workTitle.textContent = viewModel.workTitle(work);

@@ -36,6 +36,31 @@ product_goals = Table(
     Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 
+# A Product persists across Works; unknown historical Work ownership stays NULL.
+software_products = Table(
+    "software_products", metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("owner_id", String(255), nullable=False),
+    Column("name", String(255), nullable=False),
+    Column("lifecycle", String(32), nullable=False),
+    Column("description", Text, nullable=True),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    CheckConstraint("lifecycle IN ('ACTIVE', 'PAUSED', 'ARCHIVED')", name="ck_software_products_lifecycle"),
+)
+
+software_product_assets = Table(
+    "software_product_assets", metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("product_id", Uuid(as_uuid=True), ForeignKey("software_products.id"), nullable=False),
+    Column("asset_kind", String(32), nullable=False),
+    Column("reference", Text, nullable=False),
+    Column("resource_id", Uuid(as_uuid=True), ForeignKey("engineering_resources.id"), nullable=True),
+    Column("metadata", JSONB, nullable=False, server_default=text("'{}'::jsonb")),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    UniqueConstraint("product_id", "asset_kind", "reference", name="uq_software_product_asset_ref"),
+)
+
 engineering_resources = Table(
     "engineering_resources",
     metadata,
@@ -61,6 +86,7 @@ product_works = Table(
     "product_works",
     metadata,
     Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("product_id", Uuid(as_uuid=True), ForeignKey("software_products.id", name="fk_product_works_product"), nullable=True),
     Column(
         "goal_id",
         Uuid(as_uuid=True),
@@ -112,6 +138,8 @@ product_works = Table(
         name="ck_product_works_work_mode_known",
     ),
 )
+
+Index("ix_product_works_product_created", product_works.c.product_id, product_works.c.created_at)
 
 engineering_scopes = Table(
     "engineering_scopes",
@@ -716,6 +744,8 @@ work_runtime_bindings = Table(
 product_tables = (
     product_goals,
     engineering_resources,
+    software_products,
+    software_product_assets,
     product_works,
     engineering_scopes,
     engineering_resource_bindings,

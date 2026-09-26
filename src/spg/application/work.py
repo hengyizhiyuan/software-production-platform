@@ -9,6 +9,9 @@ import subprocess
 from typing import Callable, Protocol
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
+from sqlalchemy import insert, select
+from spg.infrastructure.persistence.product_schema import product_works, software_product_assets
+
 from spg.application.completion import CompletionService
 from spg.application.execution import ExecutionService
 from spg.application.engineering_semantics import admit_semantic_facts
@@ -325,6 +328,7 @@ class WorkApplicationService:
         goal_id: UUID | None = None,
         tags: tuple[str, ...] = (),
         mode: WorkMode = WorkMode.IMMEDIATE_PRODUCTION,
+        product_id: UUID | None = None,
     ) -> WorkProjection:
         if not raw_user_requirement.strip():
             raise ProductInvariantViolation("Work requirement is required")
@@ -334,6 +338,16 @@ class WorkApplicationService:
             store = ProductStore(unit_of_work.session)
             if goal_id is not None and store.goal(goal_id) is None:
                 raise ProductRecordNotFound(f"Goal not found: {goal_id}")
+            if product_id is not None:
+                from spg.infrastructure.persistence.product_schema import software_products
+                from sqlalchemy import select
+                if unit_of_work.session.execute(
+                    select(software_products.c.id).where(
+                        software_products.c.id == product_id,
+                        software_products.c.lifecycle != "ARCHIVED",
+                    )
+                ).scalar_one_or_none() is None:
+                    raise ProductRecordNotFound(f"Active Product not found: {product_id}")
             normalized_tags = tuple(
                 sorted({item.strip() for item in tags if item.strip()})
             )
@@ -341,6 +355,7 @@ class WorkApplicationService:
                 {
                     "id": work_id,
                     "goal_id": goal_id,
+                    "product_id": product_id,
                     "work_mode": mode.value,
                     "raw_user_requirement": raw_user_requirement,
                     "refined_title": None,
@@ -1271,7 +1286,27 @@ class WorkApplicationService:
                 WorkCondition.AWAITING_APPROVAL,
             }:
                 raise ProductInvariantViolation("Only a draft Work may be refined")
-            resource = store.resource_for_work(work_id) or (store.default_resource() if store.scope_for_work(work_id) is None else None)
+            current_resource = store.resource_for_work(work_id)
+            product_id = unit_of_work.session.execute(select(product_works.c.product_id).where(
+                product_works.c.id == work_id)).scalar_one()
+            product_resources = () if product_id is None else tuple(unit_of_work.session.execute(
+                select(software_product_assets.c.resource_id).where(
+                    software_product_assets.c.product_id == product_id,
+                    software_product_assets.c.asset_kind == "REPOSITORY",
+                )).scalars())
+            if request.engineering_resource_id is not None:
+                if product_id is not None and product_resources and \
+                        request.engineering_resource_id not in product_resources:
+                    raise ProductInvariantViolation("Selected repository is not attached to this Product")
+                resource = store.resource(request.engineering_resource_id)
+            elif len(product_resources) == 1:
+                resource = store.resource(product_resources[0])
+            elif len(product_resources) > 1:
+                if current_resource is None or current_resource.id not in product_resources:
+                    raise ProductInvariantViolation("Product has multiple repositories; select the exact Engineering Resource")
+                resource = current_resource
+            else:
+                resource = current_resource or (store.default_resource() if store.scope_for_work(work_id) is None else None)
             if resource is None:
                 raise ProductInvariantViolation(
                     "A configured default Engineering Resource is required"
@@ -1288,6 +1323,14 @@ class WorkApplicationService:
                 raise ProductInvariantViolation(
                     "Engineering Resource does not match current governed Baseline"
                 )
+            if product_id is not None and not product_resources:
+                unit_of_work.session.execute(insert(software_product_assets).values(
+                    id=uuid4(), product_id=product_id, asset_kind="REPOSITORY",
+                    reference=resource.repository_identity, resource_id=resource.id,
+                    metadata={"revision": baseline.repository_revision,
+                              "repository_ref": baseline.repository_ref,
+                              "source": "WORK_REFINEMENT"}, created_at=datetime.now(UTC),
+                ))
             constraints = self._merge_constraints(
                 work.constraints,
                 request.constraints,
@@ -3491,7 +3534,7 @@ class WorkApplicationService:
                     WorkStatus.NEEDS_REFINEMENT,
                     "PRODUCTION_PLANNING",
                     "MULTI_PWU_REQUIRED",
-                    "Narrow the Work to one governed PWU; multi-PWU production is deferred",
+                    "Revise this legacy one-PWU draft or admit a governed Multi-PWU plan",
                 )
             return (
                 WorkStatus.NEEDS_REFINEMENT,

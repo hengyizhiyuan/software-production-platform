@@ -1,6 +1,7 @@
 """FastAPI boundary for the minimal Goal / Work MVP product surface."""
 
 from contextlib import asynccontextmanager
+from datetime import timedelta
 import asyncio
 from importlib.resources import files
 import json
@@ -46,7 +47,7 @@ from spg.api.dto import (
     WorkingAgreementCreateRequest,
     WorkingAgreementAbandonRequest,
 )
-from spg.api.authority import install_authority_boundary
+from spg.api.authority import ACTOR_ID, install_authority_boundary
 from spg.application.bootstrap import Application, bootstrap
 from spg.config import Settings
 from spg.application.orchestration import ProductionOrchestrator
@@ -75,7 +76,11 @@ from spg.application.github_delivery import (
 )
 from spg.application.candidate_preview import CandidatePreviewApplicationService, CandidatePreviewUnavailable
 from spg.application.control_room import ControlRoomError, ControlRoomService
-from spg.application.connectors import ConnectorResolver
+from spg.application.connectors import ConnectorResolver, ConnectorManagement
+from spg.application.product_assets import ProductAssetService
+from spg.application.measurement import ProductionMeasurementService, MeasurementSubjectNotFound
+from spg.application.native_retention import NativeRetentionService
+from spg.infrastructure.executor_runtime.local_storage import WorkspaceArchiveStore
 from spg.application.software_runtime import SoftwareRuntimeService
 from spg.domain.assets import (
     AssetScopeAdmissionRequest,
@@ -113,6 +118,8 @@ from spg.domain.native_vector import (
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.persistence import Database, DatabaseConfigurationError
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.evaluation_schema import evaluation_runs
+from pydantic import BaseModel, Field
 from spg.infrastructure.candidate_preview_runtime import DockerCandidatePreviewRuntime
 from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
 from spg.domain.production_environment import CandidatePreviewMode
@@ -123,6 +130,32 @@ class ProductHttpError(RuntimeError):
         super().__init__(message)
         self.status_code = status_code
         self.code = code
+
+
+class SoftwareProductCreateRequest(BaseModel):
+    name: str = Field(min_length=1)
+    description: str | None = None
+
+
+class SoftwareProductAssetRequest(BaseModel):
+    kind: str
+    reference: str = Field(min_length=1)
+    resource_id: UUID | None = None
+    metadata: dict = Field(default_factory=dict)
+
+
+class ConnectorControlRequest(BaseModel):
+    enabled: bool | None = None
+    deprecated: bool | None = None
+    health: str | None = None
+    failure_code: str | None = None
+    evidence_ref: str | None = None
+
+
+class RetentionCleanupRequest(BaseModel):
+    hot_retention_days: int = Field(default=30, ge=1)
+    cold_retention_days: int = Field(default=180, ge=1)
+    limit: int = Field(default=100, ge=1, le=1000)
 
 
 def _error(status_code: int, code: str, message: str) -> JSONResponse:
@@ -177,6 +210,9 @@ def create_http_application(
         )
     )
     delivery_service = DeliveryApplicationService(selected_database)
+    software_products = ProductAssetService(selected_database)
+    connector_management = ConnectorManagement(selected_database)
+    production_measurement = ProductionMeasurementService(selected_database)
     settings = getattr(container, "settings", None)
     github_delivery = GitHubDeliveryService(selected_database,
         settings or Settings(), delivery=delivery_service)
@@ -249,7 +285,9 @@ def create_http_application(
         else NativeExecutorRuntimeService(selected_database)
     )
     selected_native_vectors = NativeCandidateVectorService(selected_database)
-    control_room = ControlRoomService(selected_database, work_service, asset_service)
+    control_room = ControlRoomService(selected_database, work_service, asset_service,
+        candidate_preview_service=candidate_runtime_preview,
+        delivery_runtime_service=software_runtime)
     production_admission_trigger = None
     if selected_interaction is not None:
         production_admission_trigger = ProductionAdmissionTrigger(
@@ -352,6 +390,12 @@ def create_http_application(
 
     def work_response(projection: WorkProjection) -> WorkResponse:
         response = WorkResponse.from_projection(projection)
+        from spg.infrastructure.persistence.product_schema import product_works
+        from sqlalchemy import select
+        with selected_database.unit_of_work() as uow:
+            response.product_id = uow.session.execute(
+                select(product_works.c.product_id).where(product_works.c.id == projection.work_id)
+            ).scalar_one_or_none()
 
         def with_control_state(candidate: WorkResponse) -> WorkResponse:
             attention = work_service.list_attention(work_id=projection.work_id)
@@ -1123,6 +1167,60 @@ def create_http_application(
     def list_goals() -> list[GoalResponse]:
         return [GoalResponse.from_record(goal) for goal in work_service.list_goals()]
 
+    @api.post("/api/products", status_code=201)
+    def create_software_product(request: SoftwareProductCreateRequest, http_request: Request):
+        return software_products.create(getattr(http_request.state, "actor_id", ACTOR_ID), request.name, request.description)
+
+    @api.get("/api/products")
+    def list_software_products(http_request: Request):
+        return software_products.list(getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.get("/api/products/{product_id}")
+    def get_software_product(product_id: UUID, http_request: Request):
+        return software_products.get(product_id, getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.get("/api/products/{product_id}/history")
+    def product_history(product_id: UUID, http_request: Request):
+        return software_products.history(product_id, getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.get("/api/products/{product_id}/economics")
+    def product_economics(product_id: UUID, http_request: Request):
+        return software_products.economics(product_id, getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.post("/api/products/{product_id}/works/{work_id}")
+    def bind_product_work(product_id: UUID, work_id: UUID, http_request: Request):
+        return software_products.bind_work(product_id, work_id, getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.post("/api/products/{product_id}/assets")
+    def attach_product_asset(product_id: UUID, request: SoftwareProductAssetRequest,
+                             http_request: Request):
+        return software_products.attach_asset(product_id, getattr(http_request.state, "actor_id", ACTOR_ID),
+            kind=request.kind, reference=request.reference,
+            resource_id=request.resource_id, metadata=request.metadata)
+
+    @api.post("/api/products/{product_id}/repository-intake")
+    def intake_product_repository(product_id: UUID, request: RepositoryIntakeRequest,
+                                  http_request: Request):
+        actor = getattr(http_request.state, "actor_id", ACTOR_ID)
+        software_products.get(product_id, actor)
+        if request.work_id is not None:
+            with selected_database.unit_of_work() as uow:
+                from sqlalchemy import select
+                from spg.infrastructure.persistence.product_schema import product_works
+                bound = uow.session.execute(select(product_works.c.product_id).where(
+                    product_works.c.id == request.work_id)).scalar_one_or_none()
+            if bound != product_id:
+                raise ProductHttpError(409, "PRODUCT_WORK_MISMATCH",
+                    "Repository intake Work must belong to the selected Product")
+        observation = asset_service.intake(request)
+        if observation.get("resource_id") and observation.get("condition") in {"READY", "OBSERVED"}:
+            software_products.attach_asset(product_id, actor, kind="REPOSITORY",
+                reference=observation["repository_identity"],
+                resource_id=UUID(observation["resource_id"]),
+                metadata={key: observation.get(key) for key in
+                    ("repository_ref", "revision", "tree", "context_path", "authorization")})
+        return {"observation": observation, "product": software_products.get(product_id, actor)}
+
     @api.get("/api/goals/{goal_id}", response_model=GoalSummaryResponse)
     def get_goal(goal_id: UUID) -> GoalSummaryResponse:
         return GoalSummaryResponse.from_projection(
@@ -1137,6 +1235,7 @@ def create_http_application(
                 goal_id=request.goal_id,
                 tags=request.tags,
                 mode=request.mode,
+                product_id=request.product_id,
             )
         )
 
@@ -1155,6 +1254,10 @@ def create_http_application(
     @api.get("/api/works/{work_id}", response_model=WorkResponse)
     def get_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.get_work(work_id))
+
+    @api.get("/api/works/{work_id}/economics")
+    def work_economics(work_id: UUID):
+        return production_measurement.graph_economics(work_id)
 
     @api.get("/api/works/{work_id}/self-refine")
     def work_self_refine_events(work_id: UUID) -> dict:
@@ -1230,6 +1333,10 @@ def create_http_application(
     @api.get("/api/works/{work_id}/control-room/sources")
     def work_sources(work_id: UUID):
         return control_room.sources(work_id)
+
+    @api.get("/api/works/{work_id}/operations")
+    def work_operations(work_id: UUID):
+        return control_room.diagnosis(work_id)
 
     @api.post("/api/works/{work_id}/repository-acquisition/retry")
     def retry_repository_acquisition(
@@ -1709,6 +1816,90 @@ def create_http_application(
     @api.get("/api/github/grants")
     def list_github_grants(http_request: Request):
         return github_delivery.list_grants(http_request.state.actor_id)
+
+    @api.get("/api/operations/connectors")
+    def connector_operations(http_request: Request):
+        actor = getattr(http_request.state, "actor_id", ACTOR_ID)
+        return {"connectors": connector_management.list(),
+                "credentials": github_delivery.list_grants(actor),
+                "credential_scope": "GitHub repository READ/WRITE grants backed by configured secret references"}
+
+    @api.get("/api/operations/summary")
+    def platform_operations():
+        return control_room.platform_summary()
+
+    @api.get("/api/operations/evaluations")
+    def evaluation_history(limit: int = Query(default=20, ge=1, le=100)):
+        from sqlalchemy import select
+        with selected_database.unit_of_work() as uow:
+            rows = uow.session.execute(select(evaluation_runs).order_by(
+                evaluation_runs.c.created_at.desc()).limit(limit)).mappings().all()
+        return [{"id": str(row["id"]), "version": row["version"],
+                 "revision": row["revision"], "purpose": row["purpose"],
+                 "corpus_version": row["corpus_version"],
+                 "qualification": row["qualification"],
+                 "baseline_run_id": None if row["baseline_run_id"] is None else str(row["baseline_run_id"]),
+                 "trend": row["trend"], "created_at": row["created_at"].isoformat()}
+                for row in rows]
+
+    @api.get("/api/operations/evaluations/{run_id}")
+    def evaluation_detail(run_id: UUID):
+        from sqlalchemy import select
+        with selected_database.unit_of_work() as uow:
+            row = uow.session.execute(select(evaluation_runs).where(
+                evaluation_runs.c.id == run_id)).mappings().one_or_none()
+        if row is None:
+            raise ProductHttpError(404, "EVALUATION_NOT_FOUND", "Evaluation run not found")
+        return {"id": str(run_id), "version": row["version"],
+                "revision": row["revision"], "purpose": row["purpose"],
+                "qualification": row["qualification"], "report": row["report"],
+                "trend": row["trend"]}
+
+    @api.put("/api/operations/connectors/{control_id}")
+    def control_connector(control_id: UUID, request: ConnectorControlRequest,
+                          http_request: Request):
+        return connector_management.control(control_id,
+            getattr(http_request.state, "actor_id", ACTOR_ID),
+            enabled=request.enabled, deprecated=request.deprecated,
+            health=request.health, failure_code=request.failure_code,
+            evidence_ref=request.evidence_ref)
+
+    @api.get("/api/operations/connectors/{control_id}/history")
+    def connector_history(control_id: UUID):
+        return connector_management.history("CONNECTOR", str(control_id))
+
+    def retention_service() -> NativeRetentionService:
+        root = getattr(settings, "native_executor_workspace_root",
+                       Path(".watt/native-executor/workspaces")).parent / "retention-archives"
+        return NativeRetentionService(selected_database, WorkspaceArchiveStore(root))
+
+    @api.get("/api/operations/workspaces/{workspace_id}/retention")
+    def workspace_retention(workspace_id: UUID):
+        return retention_service().eligibility(workspace_id)
+
+    @api.post("/api/operations/retention/cleanup")
+    def cleanup_retention(request: RetentionCleanupRequest):
+        return retention_service().cleanup_expired(
+            hot_retention=timedelta(days=request.hot_retention_days),
+            cold_retention=timedelta(days=request.cold_retention_days),
+            limit=request.limit)
+
+    @api.get("/api/operations/previews/{work_id}/retention")
+    def preview_retention(work_id: UUID):
+        if candidate_runtime_preview is None:
+            raise CandidatePreviewUnavailable("Functional Preview Runtime is not configured")
+        return candidate_runtime_preview.retention_decision(work_id)
+
+    @api.post("/api/operations/previews/retention/cleanup")
+    def cleanup_previews(request: RetentionCleanupRequest):
+        if candidate_runtime_preview is None:
+            raise CandidatePreviewUnavailable("Functional Preview Runtime is not configured")
+        return candidate_runtime_preview.cleanup_expired(
+            hot_retention=timedelta(days=request.hot_retention_days), limit=request.limit)
+
+    @api.get("/api/github/grants/{grant_id}/history")
+    def github_grant_history(grant_id: UUID):
+        return connector_management.history("GITHUB_GRANT", str(grant_id))
 
     @api.delete("/api/github/grants/{grant_id}")
     def revoke_github_grant(grant_id: UUID, http_request: Request):

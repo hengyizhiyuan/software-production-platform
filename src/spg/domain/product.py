@@ -360,6 +360,7 @@ class WorkRefinementRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     title: str | None = None
+    engineering_resource_id: UUID | None = None
     desired_outcome: str | None = None
     constraints: tuple[str, ...] = ()
     scope_summary: str | None = None

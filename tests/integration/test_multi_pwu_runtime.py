@@ -110,7 +110,7 @@ def test_multi_pwu_plan_persists_three_units_and_blocks_join_before_parents(post
     with pytest.raises(RuntimeError, match="Cannot downgrade versioned multi-PWU"):
         command.downgrade(Config(Path(__file__).resolve().parents[2] / "alembic.ini"), "20260925_49")
     with postgres_database.engine.connect() as connection:
-        assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "20260926_54"
+        assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "20260926_57"
 
 
 def test_serial_baseline_progression_and_replan_preserve_completed_history(postgres_database, tmp_path):

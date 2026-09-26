@@ -4,6 +4,14 @@
 
 **DCP-2: IMPLEMENTED / FOCUSED VALIDATION PASS**
 
+P1 extension (2026-09-26): the read-only owner now accepts Candidate lineage
+covering every satisfied PWU in one Work/run and exposes a Work-level graph
+economics projection. It attributes each actual PWU/Attempt once, reports
+parallel wall time separately from accumulated execution, derives a critical
+path only when all materialized nodes have observed durations, and keeps
+unreported provider spend explicit. Product economics sums distinct Works.
+Neither provider price nor missing telemetry is inferred.
+
 Production Measurement v0 is the first implementation slice under the closed
 [Duration & Capacity Semantic
 Foundation](duration-capacity-semantic-foundation.md). It normalizes currently

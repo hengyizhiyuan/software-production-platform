@@ -640,7 +640,7 @@ completion_evaluations = Table(
     Column("repository_observation_fingerprint", String(64), nullable=False),
     Column("work_product_lineage", JSONB, nullable=False),
     Column("work_product_set_fingerprint", String(64), nullable=False),
-    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("basis_fingerprint", String(64), nullable=False),
     Column("outcome", String(32), nullable=False),
     Column("obligation_results", JSONB, nullable=False),
     Column(
@@ -691,7 +691,6 @@ proposed_repository_snapshots = Table(
         Uuid(as_uuid=True),
         ForeignKey("completion_evaluations.id", name="fk_proposed_snapshots_completion"),
         nullable=False,
-        unique=True,
     ),
     Column(
         "repository_observation_id",
@@ -704,7 +703,7 @@ proposed_repository_snapshots = Table(
     Column("authoritative_ref_revision", String(128), nullable=False),
     Column("proposed_commit_identity", String(128), nullable=False),
     Column("tree_identity", String(128), nullable=False),
-    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("basis_fingerprint", String(64), nullable=False),
     Column(
         "created_at",
         DateTime(timezone=True),
@@ -760,7 +759,7 @@ verification_records = Table(
     Column("provider_binding", JSONB, nullable=False),
     Column("result", String(32), nullable=False),
     Column("evidence", JSONB, nullable=False),
-    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("basis_fingerprint", String(64), nullable=False),
     Column(
         "created_at",
         DateTime(timezone=True),
@@ -812,7 +811,7 @@ production_admissibility_records = Table(
     Column("required_obligations_fingerprint", String(64), nullable=False),
     Column("verification_record_ids", JSONB, nullable=False),
     Column("obligation_results", JSONB, nullable=False),
-    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("basis_fingerprint", String(64), nullable=False),
     Column("outcome", String(32), nullable=False),
     Column(
         "created_at",
@@ -919,9 +918,8 @@ human_authorizations = Table(
             name="fk_human_authorizations_governance",
         ),
         nullable=False,
-        unique=True,
     ),
-    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("basis_fingerprint", String(64), nullable=False),
     Column(
         "authorized_at",
         DateTime(timezone=True),
@@ -958,7 +956,7 @@ repository_integration_effects = Table(
     Column("expected_source_repository_revision", String(128), nullable=False),
     Column("proposed_repository_revision", String(128), nullable=False),
     Column("proposed_tree_identity", String(128), nullable=False),
-    Column("operation_fingerprint", String(64), nullable=False, unique=True),
+    Column("operation_fingerprint", String(64), nullable=False),
     Column(
         "prepared_at",
         DateTime(timezone=True),
@@ -993,7 +991,6 @@ runtime_commits = Table(
         Uuid(as_uuid=True),
         ForeignKey("baseline_candidates.id", name="fk_runtime_commits_candidate"),
         nullable=False,
-        unique=True,
     ),
     Column("candidate_fingerprint", String(64), nullable=False),
     Column(
@@ -1013,7 +1010,6 @@ runtime_commits = Table(
             name="fk_runtime_commits_integration_effect",
         ),
         nullable=False,
-        unique=True,
     ),
     Column(
         "source_baseline_id",
@@ -1032,7 +1028,6 @@ runtime_commits = Table(
             name="fk_runtime_commits_new_baseline",
         ),
         nullable=False,
-        unique=True,
     ),
     Column(
         "production_run_id",
@@ -1068,7 +1063,7 @@ runtime_commits = Table(
         String(64),
         nullable=False,
     ),
-    Column("commit_fingerprint", String(64), nullable=False, unique=True),
+    Column("commit_fingerprint", String(64), nullable=False),
     Column(
         "committed_at",
         DateTime(timezone=True),
@@ -1092,7 +1087,7 @@ recovery_assessments = Table(
     Column("safely_recoverable", SmallInteger, nullable=False),
     Column("requires_human_attention", SmallInteger, nullable=False),
     Column("recovery_barrier", SmallInteger, nullable=False),
-    Column("basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("basis_fingerprint", String(64), nullable=False),
     Column(
         "assessed_at",
         DateTime(timezone=True),
@@ -1187,7 +1182,7 @@ recovery_action_records = Table(
         ),
         nullable=True,
     ),
-    Column("action_basis_fingerprint", String(64), nullable=False, unique=True),
+    Column("action_basis_fingerprint", String(64), nullable=False),
     Column("outcome", String(32), nullable=False),
     Column("observed_repository_revision", String(128), nullable=True),
     Column("observed_tree_identity", String(128), nullable=True),
@@ -1368,6 +1363,24 @@ maintenance_recovery_admissions = Table(
     ),
 )
 
+
+
+# Historical deployed constraint names are deliberate. Keep metadata aligned
+# with the forward migration chain without rewriting already-applied DDL.
+completion_evaluations.append_constraint(UniqueConstraint(completion_evaluations.c.basis_fingerprint, name="uq_completion_evaluations_basis"))
+proposed_repository_snapshots.append_constraint(UniqueConstraint(proposed_repository_snapshots.c.basis_fingerprint, name="uq_proposed_snapshots_basis"))
+proposed_repository_snapshots.append_constraint(UniqueConstraint(proposed_repository_snapshots.c.completion_evaluation_id, name="uq_proposed_snapshots_completion"))
+verification_records.append_constraint(UniqueConstraint(verification_records.c.basis_fingerprint, name="uq_verification_records_basis"))
+production_admissibility_records.append_constraint(UniqueConstraint(production_admissibility_records.c.basis_fingerprint, name="uq_admissibility_records_basis"))
+human_authorizations.append_constraint(UniqueConstraint(human_authorizations.c.basis_fingerprint, name="uq_human_authorizations_basis"))
+human_authorizations.append_constraint(UniqueConstraint(human_authorizations.c.governance_record_id, name="uq_human_authorizations_governance"))
+repository_integration_effects.append_constraint(UniqueConstraint(repository_integration_effects.c.operation_fingerprint, name="uq_repository_effects_operation"))
+runtime_commits.append_constraint(UniqueConstraint(runtime_commits.c.candidate_id, name="uq_runtime_commits_candidate"))
+runtime_commits.append_constraint(UniqueConstraint(runtime_commits.c.repository_integration_effect_id, name="uq_runtime_commits_integration_effect"))
+runtime_commits.append_constraint(UniqueConstraint(runtime_commits.c.new_baseline_id, name="uq_runtime_commits_new_baseline"))
+runtime_commits.append_constraint(UniqueConstraint(runtime_commits.c.commit_fingerprint, name="uq_runtime_commits_basis"))
+recovery_assessments.append_constraint(UniqueConstraint(recovery_assessments.c.basis_fingerprint, name="uq_recovery_assessments_basis"))
+recovery_action_records.append_constraint(UniqueConstraint(recovery_action_records.c.action_basis_fingerprint, name="uq_recovery_actions_basis"))
 
 runtime_tables = (
     production_snapshots,

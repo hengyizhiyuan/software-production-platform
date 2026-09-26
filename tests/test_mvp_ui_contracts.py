@@ -2,6 +2,7 @@
 
 from importlib.resources import files
 from pathlib import Path
+import re
 
 from fastapi.testclient import TestClient
 
@@ -468,8 +469,9 @@ def test_control_room_slice_3_projects_plan_and_trust_reality_without_mutation()
 
 def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None:
     html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
-    assert "https://" not in html
-    assert "http://" not in html
+    # Repository URL examples in form placeholders are user input hints, not
+    # frontend runtime dependencies. Asset-bearing tags must remain local.
+    assert re.search(r'<(?:script|link)\b[^>]*\b(?:src|href)="https?://', html, re.I) is None
     assert 'src="/assets/state.js?' in html
     assert 'src="/assets/appearance.js?v=formal-ui-phase1"' in html
     assert 'src="/assets/app.js?' in html

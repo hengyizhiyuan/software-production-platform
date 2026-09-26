@@ -2,12 +2,17 @@
 
 Date: 2026-09-21
 
-Status: **ARCHITECTURE BASELINE / EXECUTABLE RELEASE GATE V1 / EVALUATION PLATFORM PENDING**. This document
+Status: **ARCHITECTURE BASELINE / VERSIONED EXECUTABLE EVALUATION / GENERAL PLATFORM PENDING**. This document
 defines the evaluation dimensions, evidence boundaries, corpus strategy, and
 improvement loop for Watt as an AI-native software production system. It does
 not implement a benchmark platform, leaderboard, public ranking, or a general
 automated evaluation platform. The repository's `spg-evaluate` command runs a
-bounded, domain-separated acceptance corpus and fails on critical regressions.
+bounded, versioned four-domain corpus, supports focused/milestone/release
+selection, persists run/failure evidence, compares a prior qualified release
+on shared cases, and fails on critical regressions. Changed case sets are
+flagged as partial comparisons. Token, compute and Work cost remain
+UNREPORTED when evaluation cases do not provide these facts. These automated
+results are separate from Human Acceptance.
 
 ## 1. Purpose
 

@@ -13,6 +13,7 @@ from spg.application.measurement import (
     MeasurementSubjectNotFound,
     ProductionMeasurementService,
 )
+from spg.application.product_assets import ProductAssetService
 from spg.domain.measurement import (
     MeasurementAvailability,
     MeasurementDerivation,
@@ -60,6 +61,7 @@ from spg.infrastructure.persistence.runtime_schema import (
     provider_execution_reports,
     repository_integration_effects,
     repository_observations,
+    runtime_commits,
     verification_records,
 )
 from spg.infrastructure.persistence.steering_schema import (
@@ -186,6 +188,175 @@ def test_dcp2_query_failure_cannot_create_authority_or_integration(
 
     assert _count(postgres_database, human_authorizations) == before_authorizations
     assert _count(postgres_database, repository_integration_effects) == before_effects
+
+
+def test_p1_q2_parallel_fan_in_economics_and_candidate_lineage(
+    postgres_database: Database,
+) -> None:
+    ids = _seed_measurement_reality(postgres_database)
+    b, join, b_attempt, join_attempt, b_dispatch, join_dispatch = (uuid4() for _ in range(6))
+    start = datetime(2026, 9, 6, 9, 0, tzinfo=UTC)
+    graph = {"planning_rationale": "Parallel implementation followed by an explicit join",
+             "nodes": [
+        {"node_id": name, "kind": kind, "objective": name,
+         "dependency_ids": dependencies, "responsibility_boundary": name,
+         "acceptance_criteria": ["verified"]}
+        for name, kind, dependencies in (("A", "PWU", []), ("B", "PWU", []),
+                                         ("J", "JOIN", ["A", "B"]))
+    ]}
+    with postgres_database.engine.begin() as connection:
+        contract = connection.execute(select(production_work_units.c.completion_contract).where(
+            production_work_units.c.id == ids["work_unit"])).scalar_one()
+        dispatch = connection.execute(select(execution_dispatches).where(
+            execution_dispatches.c.id == ids["dispatch"])).mappings().one()
+        connection.execute(update(plan_revisions).where(plan_revisions.c.id == ids["plan_revision"])
+                           .values(graph=graph))
+        connection.execute(update(production_work_units).where(
+            production_work_units.c.id == ids["work_unit"]).values(node_id="A"))
+        connection.execute(update(provider_execution_reports).where(
+            provider_execution_reports.c.id == ids["report"]).values(
+                started_at=start, finished_at=start + timedelta(seconds=60),
+                metadata={"token_usage": {"input_tokens": 5, "output_tokens": 5,
+                                          "total_tokens": 10}}))
+        for unit_id, attempt_id, dispatch_id, node_id, offset, duration in (
+            (b, b_attempt, b_dispatch, "B", 0, 60),
+            (join, join_attempt, join_dispatch, "J", 60, 40),
+        ):
+            connection.execute(insert(production_work_units).values(
+                id=unit_id, production_run_id=ids["run"],
+                plan_revision_id=ids["plan_revision"], source_baseline_id=ids["baseline"],
+                node_id=node_id, objective=node_id, completion_contract=contract,
+                condition="SATISFIED", version=1, current_execution_generation=1,
+                created_at=start + timedelta(seconds=offset)))
+            connection.execute(insert(execution_attempts).values(
+                id=attempt_id, work_unit_id=unit_id, generation=1,
+                plan_revision_id=ids["plan_revision"], source_baseline_id=ids["baseline"],
+                condition="CREATED", created_at=start + timedelta(seconds=offset)))
+            connection.execute(insert(execution_dispatches).values(
+                id=dispatch_id, attempt_id=attempt_id, generation=1,
+                context_package_id=ids["context"], source_baseline_id=ids["baseline"],
+                executor_binding=dispatch["executor_binding"],
+                workspace_identity=f"workspace:{node_id}", workspace_path=f"/tmp/{node_id}",
+                repository_identity=dispatch["repository_identity"],
+                repository_path=dispatch["repository_path"],
+                source_revision=dispatch["source_revision"],
+                authoritative_ref_revision=dispatch["authoritative_ref_revision"],
+                dispatched_at=start + timedelta(seconds=offset)))
+            connection.execute(insert(provider_execution_reports).values(
+                id=uuid4(), dispatch_id=dispatch_id, attempt_id=attempt_id, generation=1,
+                executor_binding=dispatch["executor_binding"],
+                provider_reference="provider:test:dcp2", outcome="SUCCESS",
+                started_at=start + timedelta(seconds=offset),
+                finished_at=start + timedelta(seconds=offset + duration),
+                metadata={"token_usage": {"input_tokens": 10, "output_tokens": 10,
+                                          "total_tokens": 20}},
+                recorded_at=start + timedelta(seconds=offset + duration)))
+        connection.execute(update(baseline_candidates).where(
+            baseline_candidates.c.id == ids["candidate"]).values(
+                satisfied_work_unit_ids=[str(ids["work_unit"]), str(b), str(join)]))
+    measurement = ProductionMeasurementService(postgres_database)
+    assert measurement.task_shape_snapshot(b).work_unit_id == b
+    assert measurement.human_wait_measurement(ids["candidate"]).work_unit_id is None
+    facts = measurement.graph_economics(ids["work"])
+    assert facts["pwu_count"] == 3
+    assert facts["join_count"] == 1
+    assert facts["execution_seconds"] == 160
+    assert facts["wall_elapsed_seconds"] == 100
+    assert facts["critical_path_seconds"] == 100
+    assert facts["parallelism_effect_seconds"] == 60
+    assert facts["token_usage"]["total_tokens"] == 50
+    assert facts["observed_provider_spend"]["status"] == "UNREPORTED"
+    assert facts["observed_provider_spend"]["amount"] is None
+    # A failed B attempt followed by one recovered generation must remain
+    # attributable to B, including the extra runtime and partial cost.
+    recovered_attempt, recovered_dispatch = uuid4(), uuid4()
+    with postgres_database.engine.begin() as connection:
+        connection.execute(update(provider_execution_reports).where(
+            provider_execution_reports.c.attempt_id == b_attempt).values(outcome="FAILED"))
+        connection.execute(update(provider_execution_reports).where(
+            provider_execution_reports.c.attempt_id == join_attempt).values(
+                started_at=start + timedelta(seconds=90),
+                finished_at=start + timedelta(seconds=130)))
+        connection.execute(update(production_work_units).where(
+            production_work_units.c.id == b).values(current_execution_generation=2))
+        connection.execute(insert(execution_attempts).values(
+            id=recovered_attempt, work_unit_id=b, generation=2,
+            plan_revision_id=ids["plan_revision"], source_baseline_id=ids["baseline"],
+            condition="CREATED", retry_of=b_attempt,
+            created_at=start + timedelta(seconds=60)))
+        connection.execute(insert(execution_dispatches).values(
+            id=recovered_dispatch, attempt_id=recovered_attempt, generation=2,
+            context_package_id=ids["context"], source_baseline_id=ids["baseline"],
+            executor_binding=dispatch["executor_binding"],
+            workspace_identity="workspace:B:recovery", workspace_path="/tmp/B-recovery",
+            repository_identity=dispatch["repository_identity"],
+            repository_path=dispatch["repository_path"],
+            source_revision=dispatch["source_revision"],
+            authoritative_ref_revision=dispatch["authoritative_ref_revision"],
+            dispatched_at=start + timedelta(seconds=60)))
+        connection.execute(insert(provider_execution_reports).values(
+            id=uuid4(), dispatch_id=recovered_dispatch, attempt_id=recovered_attempt,
+            generation=2, executor_binding=dispatch["executor_binding"],
+            provider_reference="provider:test:dcp2", outcome="SUCCESS",
+            started_at=start + timedelta(seconds=60),
+            finished_at=start + timedelta(seconds=90),
+            metadata={"token_usage": {"input_tokens": 3, "output_tokens": 3,
+                                      "total_tokens": 6},
+                      "provider_spend": {"amount": 0.5, "currency": "USD"}},
+            recorded_at=start + timedelta(seconds=90)))
+    recovered = measurement.graph_economics(ids["work"])
+    assert recovered["pwu_count"] == 3
+    assert recovered["retried_pwu_count"] == 1
+    assert recovered["execution_seconds"] == 190
+    assert recovered["wall_elapsed_seconds"] == 130
+    assert recovered["critical_path_seconds"] == 130
+    assert recovered["token_usage"]["total_tokens"] == 56
+    assert recovered["observed_provider_spend"]["status"] == "PARTIAL"
+    assert recovered["observed_provider_spend"]["by_currency"] == {"USD": 0.5}
+    assert recovered["observed_provider_spend"]["unreported_attempt_count"] == 3
+
+
+def test_p1_q1_product_current_source_advances_from_authorized_runtime_commit(
+    postgres_database: Database,
+) -> None:
+    ids = _seed_measurement_reality(postgres_database)
+    products = ProductAssetService(postgres_database)
+    product = products.create("human:owner", "Measured Finance Product")
+    product_id = UUID(product["id"])
+    products.bind_work(product_id, ids["work"], "human:owner")
+    products.attach_asset(product_id, "human:owner", kind="REPOSITORY",
+        reference="test://dcp2-measurement", resource_id=ids["resource"],
+        metadata={"revision": "a" * 40, "repository_ref": "refs/heads/main"})
+    new_baseline = uuid4()
+    with postgres_database.engine.begin() as connection:
+        connection.execute(insert(production_snapshots).values(
+            id=new_baseline, condition="TRUSTED",
+            repository_identity="test://dcp2-measurement",
+            repository_ref="refs/heads/main", repository_revision="b" * 40,
+            source_baseline_id=ids["baseline"], created_at=datetime.now(UTC)))
+        connection.execute(insert(runtime_commits).values(
+            id=uuid4(), candidate_id=ids["candidate"], candidate_fingerprint="c" * 64,
+            human_authorization_id=ids["authorization"],
+            repository_integration_effect_id=ids["effect"],
+            source_baseline_id=ids["baseline"], new_baseline_id=new_baseline,
+            production_run_id=ids["run"], plan_revision_id=ids["plan_revision"],
+            repository_identity="test://dcp2-measurement",
+            target_authoritative_ref="refs/heads/main",
+            expected_source_repository_revision="a" * 40,
+            repository_revision="b" * 40, repository_tree_identity="c" * 40,
+            satisfied_work_unit_ids=[str(ids["work_unit"])],
+            completion_evaluation_ids=[str(ids["completion"])],
+            verification_record_ids=[str(ids["verification"])],
+            production_admissibility_id=ids["admissibility"],
+            production_admissibility_basis_fingerprint="b" * 64,
+            commit_fingerprint="d" * 64, committed_at=datetime.now(UTC)))
+    observed = products.get(product_id, "human:owner")
+    source = observed["current_sources"][0]
+    assert source["metadata"]["revision"] == "b" * 40
+    assert source["metadata"]["last_work_id"] == str(ids["work"])
+    assert source["metadata"]["revision_evidence_ref"].startswith("runtime-commit:")
+    assert any(item["kind"] == "SOURCE_COMMITTED" for item in
+               products.history(product_id, "human:owner")["timeline"])
 
 
 def _seed_measurement_reality(database: Database) -> dict[str, UUID | datetime]:

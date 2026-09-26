@@ -483,6 +483,10 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
         )
         assert waiting.last_stop_reason is SteeringDriverStopReason.CAPABILITY_UNAVAILABLE
 
+        # The first phase may spend most of its deadline observing the initial
+        # failure under a loaded integration DB. Give the bounded retry its own
+        # observation window rather than racing the first phase's deadline.
+        deadline = monotonic() + 3
         while monotonic() < deadline:
             if (
                 capability.calls == 2

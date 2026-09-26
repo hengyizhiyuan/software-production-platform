@@ -126,6 +126,18 @@ class JsonProductionEnvironmentStore:
         preview_id = UUID(json.loads(pointer.read_text(encoding="utf-8"))["id"])
         return self.get_candidate_preview(preview_id)
 
+    def list_current_candidate_previews(self) -> tuple[CandidatePreviewSessionV1, ...]:
+        directory = self.root / "candidate-previews" / "by-work"
+        previews = []
+        for pointer in sorted(directory.glob("*.json")):
+            # Resolve through the normal current pointer and versioned session;
+            # malformed or missing persisted state must fail closed.
+            preview = self.current_candidate_preview(UUID(pointer.stem))
+            if preview is None:
+                raise ProductionEnvironmentStoreConflict("Candidate Preview pointer has no session")
+            previews.append(preview)
+        return tuple(previews)
+
     def get_candidate_preview(self, preview_id: UUID) -> CandidatePreviewSessionV1 | None:
         return self._read(
             self.root / "candidate-previews" / "sessions" / str(preview_id) / "current.json",

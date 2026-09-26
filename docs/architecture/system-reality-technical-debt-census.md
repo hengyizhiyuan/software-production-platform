@@ -50,6 +50,30 @@ authority-table discrepancy was removed in `9a74c19`; the older drift is a
 separate non-blocking schema-maintenance finding, not evidence of a missing P0
 table or a reason to rewrite unrelated migrations in this batch.
 
+## P1 core readiness reconciliation (2026-09-26)
+
+The rows farther below remain the original pre-P0 audit snapshot. Current
+P1 status is recorded here and qualified in the [P1 batch evidence](../evidence/watt-p1-core-readiness-20260926.md).
+"Closed" means the bounded implemented journey, not arbitrary enterprise
+providers or Human acceptance.
+
+| ID | Prior finding | P1 implementation and evidence | Classification | Remaining condition |
+| --- | --- | --- | --- | --- |
+| TD-ASSET-001 | Work-centric model had no durable Product owner. | [Product service](../../src/spg/application/product_assets.py), [Q1 and Q8](../../tests/integration/test_mvp_api.py): owner/name/lifecycle, Work binding without historical backfill, Engineering Assets, authorized Runtime Commit source and cross-session history. | CLOSED | Portfolio administration is outside this bounded Product slice. |
+| TD-PLAN-002 | Candidate and measurement assumed one PWU. | [Graph economics](../../src/spg/application/measurement.py), [Q2](../../tests/integration/test_dcp2_production_measurement.py): all satisfied PWUs and Attempts, critical path, parallel wall versus accumulated execution. | CLOSED | Future billing/price policy is separate. |
+| TD-COST-001 | Provider spend could be unreported; graph totals were incomplete. | [Work/Product economics](../../src/spg/application/measurement.py), [Q2](../../tests/integration/test_dcp2_production_measurement.py): observed tokens/resources/spend with `UNREPORTED` and `PARTIAL` distinguished from zero. | CLOSED | Broader provider telemetry and commercial price data are not inferred. |
+| TD-CONN-003 | No Human management or credential lifecycle. | [Connector controls](../../src/spg/application/connectors.py), [GitHub grant lifecycle](../../src/spg/application/github_delivery.py), [Q3](../../tests/integration/test_github_governed_delivery.py): inventory, disable/health, audit, scoped READ/WRITE reference and rotation/revoke. | CLOSED | Other provider credential adapters and organization promotion remain future scope; capability never supplies authority. |
+| TD-IMPORT-001 | Intake existed without a coherent Product-to-delivery journey. | [Product intake](../../src/spg/api/http.py), [Q4](../../tests/integration/test_p1_brownfield_product.py), [real native flow](../../tests/integration/test_brownfield_native_production_flow.py): exact Git source/ref/revision, Product Work, Candidate/Preview/Verification and delivery boundary. | PARTIALLY_CLOSED | Live external push is `BLOCKED_EXTERNAL` by absent approved WRITE credential and exact Human acceptance/authorization; arbitrary source types remain unsupported. |
+| TD-PE-002 | No reference-aware retention or collector. | [Native retention](../../src/spg/application/native_retention.py), [Q5](../../tests/integration/test_native_executor_runtime.py), [Preview retention](../../tests/test_candidate_full_preview.py): evidence/pin/review protection, verified archive, cleanup and restart-safe audit. | PARTIALLY_CLOSED | The bounded Native workspace and Candidate Preview paths are qualified; a general cross-provider environment graph collector is still open. |
+| TD-OPS-001 | Worker, connector, preview and cost facts required manual correlation. | [Control Room diagnosis](../../src/spg/application/control_room.py), [Q6](../../tests/integration/test_mvp_api.py): Work root cause, worker/lease/queue, capability gap, Preview probe, Evidence and economics. | CLOSED | Enterprise alerting and other providers' telemetry are future scope. |
+| TD-EVAL-001 | Regression selectors lacked durable versioned release comparison. | [Versioned corpus and runs](../../src/spg/evaluation/release_gate.py), [Q7](../../tests/test_release_evaluation_gate.py): focused/milestone/release selection and shared-case qualified-baseline trends. | CLOSED | Automated results are not Human Acceptance; expand real-world cases from observed failure modes. |
+| TD-WIC-002 | Returning Human lacked inspectable production continuity. | [Product history](../../src/spg/application/product_assets.py), [Q8](../../tests/integration/test_mvp_api.py): governed Work/PWU/Candidate/Verification/commit/acceptance facts across sessions. | PARTIALLY_CLOSED | Long-horizon multi-turn Human stability still needs dogfood. |
+| TD-DOC-001 | Active wording and legacy schema metadata drifted from runtime. | [Architecture updates](watt-ai-native-software-production-architecture.md), [Q9](../../tests/integration/test_p1_schema_hygiene.py): bounded current Reality, legacy SQLAlchemy names aligned with deployed schema, `alembic check` PASS. | CLOSED | Dated historical evidence and applied migration history remain unchanged. |
+
+P1 Human Acceptance remains **PENDING**. The WIC-only sampled Human acceptance
+from the earlier milestone does not extend to Product, Multi-PWU production,
+Connector operations, retention or the end-to-end Brownfield journey.
+
 ## Executive answer
 
 **Genuinely proven within a bounded scope.** WIC's sampled entry interaction

@@ -33,7 +33,13 @@ from spg.infrastructure.persistence.native_execution_schema import (
     native_resource_pins,
     native_retention_actions,
     native_workspace_tombstones,
+    native_attempt_states, execution_evidence,
 )
+from spg.infrastructure.persistence.runtime_schema import (
+    production_work_units, baseline_candidates, human_authorizations,
+)
+from spg.infrastructure.persistence.product_schema import work_runtime_bindings
+from spg.infrastructure.persistence.delivery_schema import work_delivery_manifests, work_delivery_acceptances
 
 
 def _utcnow() -> datetime:
@@ -118,6 +124,64 @@ class NativeRetentionService:
             if row is None:
                 raise NativeExecutionNotFound(f"retention pin not found: {pin_id}")
             return ResourcePinRecord.model_validate(dict(row))
+
+    def eligibility(self, workspace_id: UUID, *,
+                    hot_retention: timedelta = timedelta(days=30),
+                    cold_retention: timedelta = timedelta(days=180)) -> dict:
+        """Explain a reference-aware decision before any physical cleanup."""
+        now = self._now()
+        with self.database.unit_of_work() as uow:
+            workspace = self._workspace_row(uow.session, workspace_id)
+            reasons = self._blockers(uow.session, workspace)
+            condition = workspace["condition"]
+            age = now - workspace["updated_at"]
+            if reasons:
+                classification = "REFERENCED" if any("reference" in reason or "pin" in reason
+                                                 for reason in reasons) else "ACTIVE"
+            elif condition == WorkspaceCondition.HIBERNATED.value:
+                classification = "ELIGIBLE_FOR_CLEANUP" if age >= cold_retention else "ARCHIVED"
+            elif condition in {WorkspaceCondition.READY.value, WorkspaceCondition.SEALED.value}:
+                classification = "ELIGIBLE_FOR_CLEANUP" if age >= hot_retention else "RETAINED_FOR_REVIEW"
+            elif condition in {WorkspaceCondition.DELETED.value, WorkspaceCondition.RETIRED.value}:
+                classification = "RELEASED"
+            else:
+                classification = "ACTIVE"
+            return {"workspace_id": str(workspace_id), "classification": classification,
+                    "condition": condition, "reasons": reasons,
+                    "eligible_action": ("DELETE" if condition == WorkspaceCondition.HIBERNATED.value
+                                        else "HIBERNATE") if classification == "ELIGIBLE_FOR_CLEANUP" else None,
+                    "hot_retention_seconds": int(hot_retention.total_seconds()),
+                    "cold_retention_seconds": int(cold_retention.total_seconds())}
+
+    def cleanup_expired(self, *, hot_retention: timedelta = timedelta(days=30),
+                        cold_retention: timedelta = timedelta(days=180),
+                        limit: int = 100) -> list[dict]:
+        if limit < 1 or limit > 1000:
+            raise ValueError("Cleanup limit must be between 1 and 1000")
+        with self.database.unit_of_work() as uow:
+            ids = uow.session.execute(select(execution_workspaces.c.id).where(
+                execution_workspaces.c.condition.in_((WorkspaceCondition.READY.value,
+                    WorkspaceCondition.SEALED.value, WorkspaceCondition.HIBERNATED.value)),
+            ).order_by(execution_workspaces.c.updated_at).limit(limit)).scalars().all()
+        results = []
+        for workspace_id in ids:
+            decision = self.eligibility(workspace_id, hot_retention=hot_retention,
+                                        cold_retention=cold_retention)
+            if decision["eligible_action"] is None:
+                results.append(decision)
+                continue
+            try:
+                action = (self.retire(workspace_id, minimum_hibernated=cold_retention)
+                          if decision["eligible_action"] == "DELETE" else
+                          self.hibernate(workspace_id, minimum_idle=hot_retention))
+            except (NativeExecutionConflict, OSError) as error:
+                results.append({**decision, "cleanup_result": "DEFERRED",
+                                "reason": str(error)})
+            else:
+                results.append({**decision, "cleanup_result": "COMPLETED",
+                                "action_id": str(action.id),
+                                "audit": "native_retention_actions"})
+        return results
 
     def hibernate(
         self,
@@ -567,27 +631,45 @@ class NativeRetentionService:
             self._assert_no_blockers(uow.session, workspace)
 
     def _assert_no_blockers(self, session, workspace) -> None:
+        reasons = self._blockers(session, workspace)
+        if reasons:
+            raise NativeExecutionConflict(reasons[0])
+
+    @staticmethod
+    def _references_workspace(value, workspace_id: str, path: str) -> bool:
+        if isinstance(value, str):
+            return value in {workspace_id, path}
+        if isinstance(value, list):
+            return any(NativeRetentionService._references_workspace(item, workspace_id, path)
+                       for item in value)
+        if isinstance(value, dict):
+            return any(NativeRetentionService._references_workspace(item, workspace_id, path)
+                       for item in value.values())
+        return False
+
+    def _blockers(self, session, workspace) -> tuple[str, ...]:
+        reasons: list[str] = []
         if session.execute(
             select(execution_allocations.c.id).where(
                 execution_allocations.c.attempt_id == workspace["attempt_id"],
                 execution_allocations.c.condition.in_(("ISSUED", "ACTIVE")),
             )
         ).first() is not None:
-            raise NativeExecutionConflict("active allocation pins workspace")
+            reasons.append("active allocation pins workspace")
         if session.execute(
             select(execution_recovery_cases.c.id).where(
                 execution_recovery_cases.c.attempt_id == workspace["attempt_id"],
                 execution_recovery_cases.c.resolved_at.is_(None),
             )
         ).first() is not None:
-            raise NativeExecutionConflict("unresolved recovery pins workspace")
+            reasons.append("unresolved recovery pins workspace")
         if session.execute(
             select(native_candidate_vectors.c.id).where(
                 native_candidate_vectors.c.pwu_id == workspace["pwu_id"],
                 native_candidate_vectors.c.condition != "COMMITTED",
             )
         ).first() is not None:
-            raise NativeExecutionConflict("uncommitted CandidateVector pins workspace")
+            reasons.append("uncommitted CandidateVector pins workspace")
         if session.execute(
             select(native_resource_pins.c.id).where(
                 native_resource_pins.c.resource_kind == "WORKSPACE",
@@ -595,7 +677,48 @@ class NativeRetentionService:
                 native_resource_pins.c.active.is_(True),
             )
         ).first() is not None:
-            raise NativeExecutionConflict("active retention pin protects workspace")
+            reasons.append("active retention pin protects workspace")
+        state = session.execute(select(native_attempt_states.c.runtime_mode).where(
+            native_attempt_states.c.attempt_id == workspace["attempt_id"],
+        )).scalar_one_or_none()
+        if state is not None and state not in {"FINISHED", "STOPPED"}:
+            reasons.append("active or recoverable Attempt pins workspace")
+        run_id = session.execute(select(production_work_units.c.production_run_id).where(
+            production_work_units.c.id == workspace["pwu_id"],
+        )).scalar_one_or_none()
+        if run_id is not None:
+            candidates = session.execute(select(baseline_candidates.c.id).where(
+                baseline_candidates.c.production_run_id == run_id,
+            )).scalars().all()
+            for candidate_id in candidates:
+                authorized = session.execute(select(human_authorizations.c.id).where(
+                    human_authorizations.c.candidate_id == candidate_id,
+                )).first()
+                if authorized is None:
+                    reasons.append("Human authorization pending; retain workspace for review")
+                    break
+            work_id = session.execute(select(work_runtime_bindings.c.work_id).where(
+                work_runtime_bindings.c.production_run_id == run_id,
+            )).scalar_one_or_none()
+            if work_id is not None:
+                manifests = session.execute(select(work_delivery_manifests.c.id).where(
+                    work_delivery_manifests.c.work_id == work_id,
+                )).scalars().all()
+                for manifest_id in manifests:
+                    accepted = session.execute(select(work_delivery_acceptances.c.id).where(
+                        work_delivery_acceptances.c.manifest_id == manifest_id,
+                    )).first()
+                    if accepted is None:
+                        reasons.append("Human delivery acceptance pending; retain workspace for review")
+                        break
+        evidence = session.execute(select(execution_evidence.c.payload).where(
+            execution_evidence.c.attempt_id == workspace["attempt_id"],
+        )).scalars().all()
+        if any(self._references_workspace(payload, str(workspace["id"]),
+                                          workspace["materialization_path"])
+               for payload in evidence):
+            reasons.append("Evidence reference protects workspace")
+        return tuple(reasons)
 
     def _advance_action(
         self,

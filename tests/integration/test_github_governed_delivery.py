@@ -4,6 +4,9 @@ from uuid import uuid4
 
 import pytest
 from sqlalchemy import delete, insert
+from spg.application.connectors import ConnectorManagement, ConnectorResolver
+from spg.domain.connectors import CapabilityRequirement
+from spg.infrastructure.persistence.connector_schema import connector_audit_events, connector_controls
 
 from spg.application.github_delivery import (
     GitHubDeliveryError, GitHubDeliveryService, github_repository,
@@ -26,7 +29,8 @@ def _clean_github_delivery(postgres_database):
     def clean():
         with postgres_database.engine.begin() as connection:
             for table in (remote_delivery_receipts,
-                remote_delivery_authorizations, github_access_grants):
+                remote_delivery_authorizations, connector_audit_events,
+                connector_controls, github_access_grants):
                 connection.execute(delete(table))
             connection.execute(delete(engineering_resources).where(
                 engineering_resources.c.repository_identity == URL))
@@ -93,6 +97,51 @@ def test_rotated_github_credential_requires_fresh_permission_observation(
     service.grant("human:owner", URL, "READ")
     assert service.active_token("human:owner", URL, "READ") == "rotated-test-token"
     assert len(observations) == 2
+
+
+def test_p1_q3_connector_disable_health_and_credential_rotation_are_governed(
+    postgres_database, monkeypatch,
+):
+    management = ConnectorManagement(postgres_database)
+    capability = next(item for item in management.list()
+                      if item["capability_id"] == "git.branch.current" and item["scope"] == "PLATFORM")
+    control_id = __import__("uuid").UUID(capability["id"])
+    requirement = CapabilityRequirement(capability_id="git.branch.current",
+        work_id=uuid4(), user_id="human:owner", operation_ref="p1-q3")
+    resolver = ConnectorResolver(postgres_database)
+    assert resolver.resolve(requirement, record_gap=False).executable
+    management.control(control_id, "human:owner", enabled=False)
+    assert not resolver.resolve(requirement, record_gap=False).executable
+    management.control(control_id, "human:owner", enabled=True,
+        health="UNHEALTHY", failure_code="PROVIDER_DOWN", evidence_ref="probe:p1-q3")
+    assert not resolver.resolve(requirement, record_gap=False).executable
+    restored = management.control(control_id, "human:owner", health="HEALTHY",
+                                  evidence_ref="probe:p1-q3-restored")
+    assert restored["failure_count"] == 1
+    assert restored["failure_count_scope"] == "HEALTH_OBSERVATIONS"
+    assert restored["usage_count"] is None
+    assert restored["usage_count_status"] == "NOT_INSTRUMENTED"
+    assert restored["last_success_at"] is None
+    assert restored["last_success_status"] == "NOT_INSTRUMENTED"
+    assert resolver.resolve(requirement, record_gap=False).executable
+    assert len(management.history("CONNECTOR", str(control_id))) == 3
+
+    service = GitHubDeliveryService(postgres_database,
+        Settings(github_read_token="first-test-token"))
+    monkeypatch.setattr(service, "_api", lambda *_args, **_kwargs:
+        {"permissions": {"pull": True, "push": False}})
+    grant = service.grant("human:owner", URL, "READ")
+    assert service.list_grants("human:owner")[0]["credential_status"] == "ACTIVE"
+    service.settings = Settings(github_read_token="rotated-test-token")
+    assert service.list_grants("human:owner")[0]["credential_status"] == "INVALID"
+    with pytest.raises(GitHubDeliveryError, match="renew"):
+        service.active_token("human:owner", URL, "READ")
+    service.grant("human:owner", URL, "READ")
+    assert service.list_grants("human:owner")[0]["credential_status"] == "ACTIVE"
+    service.revoke("human:owner", __import__("uuid").UUID(grant["grant_id"]))
+    assert service.list_grants("human:owner")[0]["credential_status"] == "REVOKED"
+    assert [item["action"] for item in management.history("GITHUB_GRANT", grant["grant_id"])] == [
+        "CREATED", "ROTATED", "REVOKED"]
 
 
 def test_exact_push_observes_remote_and_does_not_repeat_effect(

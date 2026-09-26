@@ -17,7 +17,7 @@ from alembic import command
 from alembic.config import Config
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import func, inspect, insert, select, update
+from sqlalchemy import delete, func, inspect, insert, select, update
 
 from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.api.http import create_http_application
@@ -109,6 +109,7 @@ from spg.infrastructure.persistence.native_execution_schema import (
     event_outbox,
     execution_control_requests,
     execution_events,
+    execution_evidence,
     execution_resource_usage,
     execution_workspaces,
     executor_leases,
@@ -715,7 +716,8 @@ def test_multi_repository_vector_preserves_partial_reality_and_commits_atomicall
 
 
 def test_workspace_hibernation_respects_pins_and_restores_verified_bundle(
-    postgres_database: Database, git_repository: Path, tmp_path: Path
+    postgres_database: Database, git_repository: Path, tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     clock = [datetime.now(timezone.utc)]
     runtime = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
@@ -784,10 +786,43 @@ def test_workspace_hibernation_respects_pins_and_restores_verified_bundle(
     )
     with pytest.raises(NativeExecutionConflict, match="retention pin"):
         retention.hibernate(admission.binding.workspace.workspace_id)
+    assert retention.eligibility(admission.binding.workspace.workspace_id)["classification"] == "REFERENCED"
     retention.release_pin(pin.id)
 
+    evidence_id = uuid4()
+    with postgres_database.unit_of_work() as uow:
+        uow.session.execute(insert(execution_evidence).values(
+            id=evidence_id, pwu_id=admission.binding.pwu_id,
+            attempt_id=admission.binding.attempt_id, step_id=None, effect_id=None,
+            evidence_type="WORKSPACE_REFERENCE", producer_identity="p1-q5",
+            subject_digest="a" * 64,
+            payload={"workspace_id": str(admission.binding.workspace.workspace_id)},
+            content_digest="b" * 64, created_at=clock[0]))
+        uow.commit()
+    assert retention.eligibility(admission.binding.workspace.workspace_id)["classification"] == "REFERENCED"
+    with pytest.raises(NativeExecutionConflict, match="Evidence reference"):
+        retention.hibernate(admission.binding.workspace.workspace_id)
+    with postgres_database.unit_of_work() as uow:
+        uow.session.execute(delete(execution_evidence).where(execution_evidence.c.id == evidence_id))
+        uow.commit()
+
     original = (git_repository / "README.md").read_text(encoding="utf-8")
-    action = retention.hibernate(admission.binding.workspace.workspace_id)
+    assert retention.eligibility(admission.binding.workspace.workspace_id)["classification"] == "ELIGIBLE_FOR_CLEANUP"
+    def interrupted_before_removal(_workspace_id):
+        raise OSError("simulated restart after verified archive")
+    monkeypatch.setattr(retention, "_recheck_before_physical_change", interrupted_before_removal)
+    with pytest.raises(OSError, match="simulated restart"):
+        retention.hibernate(admission.binding.workspace.workspace_id)
+    # A fresh service resumes the persisted action rather than recopying or
+    # deleting a workspace without its verified recovery bundle.
+    retention = NativeRetentionService(
+        postgres_database, WorkspaceArchiveStore(tmp_path / "workspace-archives"),
+        now=lambda: clock[0],
+    )
+    result = next(item for item in retention.cleanup_expired()
+                  if item["workspace_id"] == str(admission.binding.workspace.workspace_id))
+    assert result["cleanup_result"] == "COMPLETED"
+    action = retention.action(UUID(result["action_id"]))
     assert action.condition.value == "COMPLETED"
     assert action.bundle_digest is not None
     assert not git_repository.exists()

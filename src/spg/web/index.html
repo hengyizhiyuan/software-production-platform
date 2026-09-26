@@ -19,6 +19,7 @@
     <script src="/assets/response-presentation.js?v=formal-ui-phase1" defer></script>
     <script src="/assets/control-room.js?v=work-revision-state-2" defer></script>
     <script src="/assets/app.js?v=work-revision-state-2" defer></script>
+    <script src="/assets/p1-readiness.js?v=1" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#work-surface">Skip to selected Work</a>
@@ -53,6 +54,23 @@
 
     <main class="control-room">
       <aside class="navigator" aria-label="Goal and Work navigation">
+        <section class="nav-section" aria-labelledby="products-heading">
+          <div class="section-heading-row"><div><p class="eyebrow">Long-lived asset</p><h2 id="products-heading">Products</h2></div></div>
+          <div id="p1-product-list" class="work-list" aria-live="polite"></div>
+          <form id="p1-product-form" class="inline-form">
+            <label for="p1-product-name">New Product</label>
+            <div class="inline-form-row"><input id="p1-product-name" maxlength="255" required placeholder="Finance Management"><button class="primary-button compact" type="submit">Create</button></div>
+          </form>
+          <div id="p1-product-detail" hidden>
+            <p id="p1-product-summary" class="empty-copy"></p>
+            <div id="p1-product-assets" class="p1-fact-list"></div>
+            <form id="p1-repository-form" class="inline-form">
+              <label for="p1-repository-url">Import an existing Git HTTPS repository</label>
+              <input id="p1-repository-url" type="url" placeholder="https://github.com/owner/repo.git" required>
+              <button class="secondary-button compact" type="submit">Import into Product</button>
+            </form>
+          </div>
+        </section>
         <section class="nav-section goal-section" aria-labelledby="goals-heading">
           <div class="section-heading-row">
             <div>
@@ -99,6 +117,19 @@
           <div id="work-list" class="work-list" aria-live="polite"></div>
           <p id="work-list-empty" class="empty-copy" hidden>No Works in this view yet.</p>
         </section>
+        <details id="p1-operator-panel" class="nav-section">
+          <summary>Operations · Connectors · Evaluation</summary>
+          <p id="p1-platform-status" class="empty-copy">Open to inspect current operator state.</p>
+          <form id="p1-github-grant-form" class="inline-form">
+            <label for="p1-github-repository">GitHub repository credential grant</label>
+            <input id="p1-github-repository" type="url" placeholder="https://github.com/owner/repo.git" required>
+            <select id="p1-github-permission"><option value="READ">Read</option><option value="WRITE">Write</option></select>
+            <button class="secondary-button compact" type="submit">Verify / rotate grant</button>
+          </form>
+          <div id="p1-connector-list"></div>
+          <div id="p1-credential-list"></div>
+          <div id="p1-evaluation-list"></div>
+        </details>
       </aside>
 
       <section id="work-surface" class="work-surface work-workspace" data-workspace-skin="INDUSTRIAL_CYAN" aria-label="Selected Work">
@@ -215,6 +246,13 @@
               <button id="work-refresh-control" class="secondary-button compact" type="button">Refresh</button>
             </div>
           </header>
+          <section class="p1-work-context" aria-label="Product and production continuity">
+            <div class="p1-binding-row"><label for="p1-work-product">Product</label><select id="p1-work-product"></select><button id="p1-bind-work" class="secondary-button compact" type="button">Bind Work</button></div>
+            <p id="p1-work-product-summary" class="empty-copy"></p>
+            <details><summary>Production diagnosis, PWU economics and history</summary>
+              <div id="p1-diagnosis"></div><div id="p1-economics"></div><div id="p1-history"></div>
+            </details>
+          </section>
 
           <section id="formal-workspace-grid" class="formal-workspace-grid" aria-label="Stable Work Workspace">
             <section id="reality-surface" class="workspace-surface workspace-surface-reality" aria-labelledby="reality-surface-heading">

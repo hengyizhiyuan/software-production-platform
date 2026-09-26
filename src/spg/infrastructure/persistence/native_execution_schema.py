@@ -479,6 +479,7 @@ checkpoint_bundles = Table(
     Column("consistency_class", String(64), nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False),
     Column("committed_at", DateTime(timezone=True), nullable=True),
+    CheckConstraint("schema_version > 0", name="ck_checkpoint_bundles_schema_version_positive"),
 )
 
 execution_evidence = Table(

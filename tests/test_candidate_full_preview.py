@@ -1,6 +1,8 @@
 """Permanent protections for exact Candidate-bound Production Environment Preview."""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from contextlib import contextmanager
+from types import SimpleNamespace
 import json
 from pathlib import Path
 import subprocess
@@ -92,6 +94,39 @@ def await_ready(service: CandidatePreviewApplicationService, work_id):
             return current
         time.sleep(0.02)
     raise AssertionError("Preview did not reach a terminal preparation state")
+
+
+def test_p1_preview_retention_keeps_review_and_evidence_then_releases_runtime(tmp_path: Path):
+    repository, revision, tree = candidate_repository(tmp_path)
+    source = CandidateSource(context(repository, revision, tree))
+    provider = RuntimeProvider()
+    store = JsonProductionEnvironmentStore(tmp_path / "retention-previews")
+    service = CandidatePreviewApplicationService(source, store, provider)
+    work_id = uuid4()
+    service.request(work_id)
+    ready = await_ready(service, work_id)
+    reviewed = False
+
+    @contextmanager
+    def unit_of_work():
+        result = SimpleNamespace(first=lambda: object() if reviewed else None)
+        yield SimpleNamespace(session=SimpleNamespace(execute=lambda _query: result))
+
+    source.database = SimpleNamespace(unit_of_work=unit_of_work)
+    assert service.retention_decision(work_id)["classification"] == "RETAINED_FOR_REVIEW"
+    assert service.cleanup_expired(hot_retention=timedelta(days=1)) == []
+    reviewed = True
+    aged = ready.model_copy(update={"version": ready.version + 1,
+                                    "created_at": datetime.now(UTC) - timedelta(days=41),
+                                    "updated_at": datetime.now(UTC) - timedelta(days=40)})
+    store.advance_candidate_preview(ready, aged)
+    assert service.retention_decision(work_id)["classification"] == "ELIGIBLE_FOR_CLEANUP"
+    result = service.cleanup_expired(hot_retention=timedelta(days=30))
+    assert result[0]["cleanup_result"] == "COMPLETED"
+    assert provider.stopped == [ready.id]
+    assert store.current_candidate_preview(work_id).status is PreviewRuntimeStatus.STOPPED
+    assert (store.root / "candidate-previews" / "evidence" / str(ready.id)).is_dir()
+    assert service.cleanup_expired(hot_retention=timedelta(days=30)) == []
 
 
 def test_exact_candidate_preparation_rejects_tree_mismatch(tmp_path: Path):

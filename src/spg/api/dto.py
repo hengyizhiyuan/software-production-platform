@@ -1003,6 +1003,7 @@ class GuidedDesignResponse(ApiDto):
 
 class WorkResponse(ApiDto):
     work_id: UUID
+    product_id: UUID | None = None
     goal_id: UUID | None
     mode: WorkMode
     raw_user_requirement: str
@@ -1284,6 +1285,7 @@ class GoalSummaryResponse(ApiDto):
 
 class WorkSubmitRequest(ApiDto):
     requirement: str = Field(min_length=1)
+    product_id: UUID | None = None
     goal_id: UUID | None = None
     tags: tuple[str, ...] = ()
     mode: WorkMode = WorkMode.IMMEDIATE_PRODUCTION
@@ -1291,6 +1293,7 @@ class WorkSubmitRequest(ApiDto):
 
 class WorkRefineRequest(ApiDto):
     title: str | None = None
+    engineering_resource_id: UUID | None = None
     desired_outcome: str | None = None
     constraints: tuple[str, ...] = ()
     scope_summary: str | None = None

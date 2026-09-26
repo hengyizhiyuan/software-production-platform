@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 import subprocess
 import traceback
 from threading import RLock, Thread
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
+
+from sqlalchemy import select
 
 from spg.application.delivery import DeliveryApplicationService
 from spg.application.production_environment import ProductionEnvironmentLifecycle
@@ -27,6 +29,8 @@ from spg.domain.production_environment import (
 )
 from spg.infrastructure.candidate_preview_runtime import DockerCandidatePreviewRuntime
 from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+from spg.infrastructure.persistence.delivery_schema import work_delivery_manifests, work_delivery_acceptances
+from spg.infrastructure.persistence.runtime_schema import runtime_commits
 
 
 class CandidatePreviewUnavailable(RuntimeError):
@@ -44,6 +48,60 @@ class CandidatePreviewApplicationService:
         self._lock = RLock()
         self._threads: dict[UUID, Thread] = {}
         self._lifecycle = ProductionEnvironmentLifecycle()
+
+    def retention_decision(self, work_id: UUID, *,
+                           hot_retention: timedelta = timedelta(days=30),
+                           now: datetime | None = None) -> dict:
+        """Keep exact Preview evidence; release only runtime after final review."""
+        session = self.store.current_candidate_preview(work_id)
+        if session is None:
+            raise CandidatePreviewUnavailable("No Preview session exists for this Work")
+        current_time = now or datetime.now(UTC)
+        if session.status in {PreviewRuntimeStatus.STOPPED, PreviewRuntimeStatus.STALE}:
+            classification, reason = "ARCHIVED", "Runtime stopped; immutable Preview evidence remains"
+        elif session.status in {PreviewRuntimeStatus.REQUESTED, PreviewRuntimeStatus.PREPARING,
+                                PreviewRuntimeStatus.BUILDING, PreviewRuntimeStatus.STARTING,
+                                PreviewRuntimeStatus.STOPPING}:
+            classification, reason = "ACTIVE", "Preview preparation or cleanup is active"
+        else:
+            with self.delivery.database.unit_of_work() as uow:
+                reviewed = uow.session.execute(select(work_delivery_acceptances.c.id).select_from(
+                    work_delivery_acceptances.join(work_delivery_manifests,
+                        work_delivery_acceptances.c.manifest_id == work_delivery_manifests.c.id)
+                    .join(runtime_commits,
+                        work_delivery_manifests.c.runtime_commit_id == runtime_commits.c.id)
+                ).where(work_delivery_manifests.c.work_id == work_id,
+                        runtime_commits.c.candidate_id == session.candidate_id)).first() is not None
+            if not reviewed:
+                classification, reason = "RETAINED_FOR_REVIEW", "Exact Candidate has no final Human delivery decision"
+            elif current_time - session.updated_at < hot_retention:
+                classification, reason = "RETAINED_FOR_REVIEW", "Reviewed Preview remains in hot retention period"
+            else:
+                classification, reason = "ELIGIBLE_FOR_CLEANUP", "Final review recorded and hot retention expired"
+        return {"preview_id": str(session.id), "work_id": str(work_id),
+                "candidate_id": str(session.candidate_id),
+                "classification": classification, "reason": reason,
+                "runtime_action": "STOP" if classification == "ELIGIBLE_FOR_CLEANUP" else None,
+                "evidence_action": "RETAIN"}
+
+    def cleanup_expired(self, *, hot_retention: timedelta = timedelta(days=30),
+                        limit: int = 100) -> list[dict]:
+        results = []
+        for session in self.store.list_current_candidate_previews()[:limit]:
+            decision = self.retention_decision(session.work_id, hot_retention=hot_retention)
+            if decision["classification"] != "ELIGIBLE_FOR_CLEANUP":
+                continue
+            with self._lock:
+                current = self.store.current_candidate_preview(session.work_id)
+                if current is None or current.id != session.id:
+                    continue
+                decision = self.retention_decision(session.work_id, hot_retention=hot_retention)
+                if decision["classification"] != "ELIGIBLE_FOR_CLEANUP":
+                    continue
+                stopped = self.stop(session.work_id)
+                results.append({**decision, "cleanup_result": "COMPLETED",
+                                "retained_evidence_count": len(stopped.evidence)})
+        return results
 
     @staticmethod
     def mode_for(context: dict) -> CandidatePreviewMode | None:
