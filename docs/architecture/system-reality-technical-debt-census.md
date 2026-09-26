@@ -1,6 +1,7 @@
 # Watt Systemic Reality and Technical Debt Census
 
-Date: 2026-09-26. Scope: the **current working tree** of
+Original audit date: 2026-09-26. The body below this update records the
+**historical pre-P0 inspection** of the working tree of
 `feature/production-environment-foundation` at HEAD
 `3953f0cb0240559bd2d6b92a216f9becfbb54253`. This is a read-only audit of
 implementation, active wiring, tests and recorded Human observations. It is
@@ -18,6 +19,36 @@ The working-tree Alembic head is `20260926_51`; migrations
 [`51`](../../migrations/versions/20260926_51_baseline_tree_identity.py) are
 among the untracked files. The prior qualification exercised migration/schema
 consistency; this audit did not run a new database migration.
+
+## P0 batch reconciliation (2026-09-26)
+
+The historical finding rows and recommendation below remain as the original
+audit, rather than being silently rewritten. The **current** status of each
+affected P0 ID is maintained here with the qualification limits. See the
+[P0 closure evidence](../evidence/watt-p0-full-system-closure-20260926.md)
+for exact revision, migration and test results.
+
+| ID | Current status | Current Reality and remaining condition |
+| --- | --- | --- |
+| TD-BASE-001 | CLOSED | Self-Refine, Search and Multi-PWU were frozen in committed, pushed baseline `364f40fde5a22dbb2738b436f887cd7ad1e76ea5` (tree `f61ae4ba330aaa96b117f886ddbf1be028f27e93`, migration `20260926_51`). The P0 result revision is recorded in closure evidence. |
+| TD-IDENT-001 | CLOSED for single-owner profile | HTTP now authenticates the operator, derives `human:owner` server-side, checks persisted membership/resource access and ignores forged caller identity. This is not shared enterprise IAM. Migration `52`; authenticated API and CSRF tests. |
+| TD-REPO-002 | BLOCKED_EXTERNAL for live remote proof | GitHub READ/WRITE grant, credential references, exact Human delivery authorization, observed non-force push and optional PR paths are implemented and test-isolated. No approved live read/write token was supplied; Guardian owner decision gate is also absent for the full profile. No remote effect is claimed. Migration `54`. |
+| TD-REPO-003 | PARTIALLY_CLOSED | Git history is captured as a checked Git bundle in PostgreSQL, recovered into another worker checkout and exportable; migration `53` and real local Git/PostgreSQL recovery test. Off-host PostgreSQL durability, restore and machine-loss proof require infrastructure activation. |
+| TD-CONT-001 | BLOCKED_EXTERNAL for independent-host proof | Durable queue/lease/checkpoint code remains in the original owner paths; independent-host Compose overlay and qualification runbook are supplied. Desktop sleep and host replacement have not been observed on an independent host. |
+| TD-PREV-001 | CLOSED for supported Watt topology | Real Docker preview qualified an exact Watt Candidate with frontend, backend and PostgreSQL. A complete-application delivery target routes Human review to this exact preview. Declared Redis support is bounded; unsupported topologies fail explicitly. The final-revision proof and limits are in closure evidence. |
+| TD-VERIFY-001 | CLOSED for supported Watt scenario | Preview READY now requires observed served revision/tree, reachable frontend and backend, database health, and a goal write/read round trip; evidence is persisted and required for complete-application acceptance. This does not certify arbitrary feature correctness. |
+| TD-ECF-001 | PARTIALLY_CLOSED | Required owner mode wires ECF into the normal Watt Work service, checks owner Reality before each new governed attempt, and consumes revisioned, fresh/superseding repository Reality across sessions. Full Journey A/B convergence with all upstream owners is not yet proven. |
+| TD-GUARD-001 | BLOCKED_EXTERNAL | Required owner mode wires attributable Guardian intake. Inspected Guardian owner runtime only exposes `admit`/`get`, not findings, challenge or assurance decision/gate; Watt cannot truthfully substitute its own PASS. |
+| TD-SCOPE-001 | CLOSED | Human approved Journey A/B and the bounded frontend/backend/PostgreSQL plus declared-support-service topology in this batch request. Human Acceptance remains pending. |
+
+These statuses distinguish code completion from runtime and Human acceptance.
+The prior table's classifications describe the original audit snapshot, not
+the status of this batch. P1/P2 findings remain open unless separately proven.
+The P0 migration head is applied, but `alembic check` still detects pre-P0
+index/check/unique-constraint naming drift on older tables. The sole new
+authority-table discrepancy was removed in `9a74c19`; the older drift is a
+separate non-blocking schema-maintenance finding, not evidence of a missing P0
+table or a reason to rewrite unrelated migrations in this batch.
 
 ## Executive answer
 
