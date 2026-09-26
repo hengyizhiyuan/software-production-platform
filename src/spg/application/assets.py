@@ -14,6 +14,9 @@ from sqlalchemy import insert, select, text, update
 from spg.application.runtime import RuntimeService
 from spg.application.connectors import ConnectorResolver
 from spg.application.native_git_operations import NativeGitOperationRunner
+from spg.application.managed_git_source import ManagedGitSource
+from spg.application.github_delivery import GitHubDeliveryService
+from spg.config import Settings
 from spg.application.repository_branch_authority import governed_branch_creation_target
 from spg.application.work import WorkApplicationService
 from spg.domain.assets import (
@@ -53,12 +56,15 @@ class RepositoryAssetService:
         import_root: Path,
         repository_acquirer: GitRepositoryAcquirer | None = None,
         native_git_operations: NativeGitOperationRunner | None = None,
+        settings: Settings | None = None,
     ):
         self.database = database
         self.asset_root = asset_root.resolve()
         self.import_root = import_root.resolve()
         self.repository_acquirer = repository_acquirer or GitRepositoryAcquirer()
         self.native_git_operations = native_git_operations
+        self.managed_source = ManagedGitSource(database)
+        self.github_delivery = GitHubDeliveryService(database, settings or Settings())
 
     @contextmanager
     def _lock(self, identity):
@@ -314,6 +320,23 @@ class RepositoryAssetService:
                     )
                 ).scalar_one_or_none()
             if existing is not None:
+                if (identity.startswith("watt://repositories/")
+                        or self.managed_source.has_source(identity)):
+                    restored = self.asset_root / str(request.request_id)
+                    if not self.managed_source.has_source(identity):
+                        with self.database.unit_of_work() as uow:
+                            existing_path = uow.session.execute(
+                                select(engineering_resources.c.location_ref).where(
+                                    engineering_resources.c.id == existing)
+                            ).scalar_one()
+                        if Path(existing_path).is_dir():
+                            self.managed_source.sync(identity, Path(existing_path))
+                    self.managed_source.recover(identity, restored)
+                    with self.database.unit_of_work() as uow:
+                        uow.session.execute(update(engineering_resources).where(
+                            engineering_resources.c.id == existing).values(
+                                location_ref=str(restored)))
+                        uow.commit()
                 observed = {
                     **self.observation(existing),
                     "condition": "READY",
@@ -338,6 +361,15 @@ class RepositoryAssetService:
             repository = self.asset_root / str(request.request_id)
             connector_capability = None
             native_result = None
+            managed_branch = False
+            if request.operation_kind == "CREATE_BRANCH":
+                with self.database.unit_of_work() as uow:
+                    base_for_source = ProductStore(uow.session).resource(
+                        request.base_resource_id)
+                managed_branch = bool(base_for_source and (
+                    base_for_source.repository_identity.startswith(
+                        "watt://repositories/") or self.managed_source.has_source(
+                            base_for_source.repository_identity)))
             if not repository.exists():
                 if request.operation_kind == "CREATE_BRANCH":
                     requirement = CapabilityRequirement(
@@ -437,7 +469,10 @@ class RepositoryAssetService:
                         str(native_result["workspace_path"]),
                         repository,
                     )
-                    self._git(repository, "remote", "set-url", "origin", source)
+                    if source is None:
+                        self._git(repository, "remote", "remove", "origin")
+                    else:
+                        self._git(repository, "remote", "set-url", "origin", source)
                     if (
                         self._git(repository, "branch", "--show-current") != request.target_branch
                         or self._git(repository, "rev-parse", "HEAD") != native_result["revision"]
@@ -496,11 +531,17 @@ class RepositoryAssetService:
                         # selected default branch without fetching unrelated
                         # remote branches. Production Environment remains the
                         # owner of the eventual execution Workspace.
-                        self.repository_acquirer.acquire(
-                            self.asset_root,
-                            source,
-                            repository,
-                        )
+                        credential = None
+                        if urlsplit(source).hostname == "github.com":
+                            credential = self.github_delivery.active_token(
+                                request.authority_identity, source, "READ")
+                        if credential is None:
+                            self.repository_acquirer.acquire(
+                                self.asset_root, source, repository)
+                        else:
+                            self.repository_acquirer.acquire(
+                                self.asset_root, source, repository,
+                                credential=credential)
                     except RepositoryAcquisitionFailure as failure:
                         if repository.exists() and repository.parent == self.asset_root:
                             shutil.rmtree(repository, ignore_errors=True)
@@ -551,6 +592,12 @@ class RepositoryAssetService:
                             )
                             uow.commit()
                         return candidate
+            # Capture complete Git history before exposing a managed checkout.
+            # The checkout remains disposable; PostgreSQL owns canonical bytes.
+            if source is None and request.operation_kind != "CREATE_BRANCH":
+                self.managed_source.sync(identity, repository)
+            elif managed_branch:
+                self.managed_source.sync(identity, repository, internal_branch=True)
             # A previous interrupted intake may leave a valid repository: observe, never overwrite.
             ref = self._git(repository, "symbolic-ref", "HEAD")
             revision = self._git(repository, "rev-parse", "HEAD")
@@ -746,6 +793,16 @@ class RepositoryAssetService:
         with self.database.unit_of_work() as uow:
             selected = ProductStore(uow.session).resource_for_work(work_id)
         if selected is not None:
+            if (selected.repository_identity.startswith("watt://repositories/")
+                    or self.managed_source.has_source(selected.repository_identity)):
+                if not self.managed_source.has_source(selected.repository_identity):
+                    if not Path(selected.location_ref).is_dir():
+                        raise ProductInvariantViolation(
+                            "Legacy managed repository checkout and canonical source are unavailable")
+                    self.managed_source.sync(
+                        selected.repository_identity, Path(selected.location_ref))
+                self.managed_source.recover(
+                    selected.repository_identity, Path(selected.location_ref))
             return work_service.get_work(work_id)
 
         request_id = uuid5(

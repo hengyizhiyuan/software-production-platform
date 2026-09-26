@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import subprocess
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 from spg.application.brownfield_delivery import GuardianIntakeGateway, RealityGateway
@@ -72,15 +73,18 @@ class NativeProductionRecordService:
                 if summary.attempt_id is None
                 else runtime.execution_dispatch_for_attempt(summary.attempt_id)
             )
-            observation = (
-                None
-                if summary.observation_id is None
-                else runtime.repository_observation_by_id(summary.observation_id)
-            )
             candidate = (
                 None
                 if summary.candidate_id is None
                 else runtime.baseline_candidate(summary.candidate_id)
+            )
+            snapshot = (
+                None if candidate is None
+                else runtime.proposed_snapshot(candidate.proposed_snapshot_id)
+            )
+            observation = (
+                None if snapshot is None
+                else runtime.repository_observation_by_id(snapshot.repository_observation_id)
             )
             effect = (
                 None
@@ -144,17 +148,37 @@ class NativeProductionRecordService:
             NAMESPACE_URL,
             f"watt:native-production-record:{runtime_commit.id}",
         )
-        changes = tuple(
-            ProductionChangeReference(
-                repository_identity=observation.repository_identity,
-                path=item.repository_relative_path,
-                change_type=ProductionChangeType(item.change_type.value),
-                artifact_reference=(
-                    f"artifact:git-object:{item.observed_fingerprint or item.source_fingerprint}"
-                ),
-            )
-            for item in observation.changes
-        )
+        # The terminal PWU observation covers only its own effect.  An ECF
+        # Production Record describes the entire committed Work graph.
+        diff = subprocess.run(
+            ["git", "--no-replace-objects", "-C", resource.location_ref,
+             "diff", "--no-renames", "--name-status", "-z",
+             runtime_commit.expected_source_repository_revision,
+             runtime_commit.repository_revision],
+            capture_output=True, check=True, timeout=30,
+        ).stdout.split(b"\0")
+        changes = []
+        for index in range(0, len(diff) - 1, 2):
+            status = diff[index].decode("ascii")
+            path = diff[index + 1].decode("utf-8")
+            if status not in {"A", "M", "D", "T"}:
+                raise ProductInvariantViolation(
+                    "Production Record encountered an unsupported Git change type")
+            revision = (runtime_commit.expected_source_repository_revision
+                        if status == "D" else runtime_commit.repository_revision)
+            object_id = subprocess.run(
+                ["git", "--no-replace-objects", "-C", resource.location_ref,
+                 "rev-parse", f"{revision}:{path}"],
+                capture_output=True, check=True, text=True, timeout=10,
+            ).stdout.strip()
+            changes.append(ProductionChangeReference(
+                repository_identity=runtime_commit.repository_identity,
+                path=path,
+                change_type=ProductionChangeType({"A": "ADDED", "M": "MODIFIED",
+                                                  "D": "DELETED", "T": "MODIFIED"}[status]),
+                artifact_reference=f"artifact:git-object:{object_id}",
+            ))
+        changes = tuple(changes)
         if not changes:
             raise ProductInvariantViolation("Production Record requires observed changes")
         verification_results = tuple(

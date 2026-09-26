@@ -7,7 +7,7 @@ import socket
 import subprocess
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
-from uuid import UUID
+from uuid import UUID, uuid4
 from zipfile import ZipFile
 from fastapi.testclient import TestClient
 import pytest
@@ -17,6 +17,7 @@ from test_work_delivery import (clean_schema, create_asset, bind, _GuidedDesignS
 from test_wic_governed_work_admission import _UnguidedSemanticCapability
 from spg.api import create_http_application
 from spg.application.assets import RepositoryAssetService
+from spg.domain.assets import RepositoryIntakeRequest
 from spg.application.delivery import DeliveryApplicationService, read_artifact
 from spg.application.software_runtime import SoftwareRuntimeService
 from spg.application.interaction import WorkInteractionService
@@ -40,6 +41,14 @@ SOURCE = {
     'index.html': '<!doctype html><html><body><h1>Inventory</h1><script src="inventory.js"></script></body></html>\n',
     'inventory.js': 'function low(q, threshold) { return q < threshold; }\nif (typeof module !== "undefined") module.exports = {low};\n',
     'tests/inventory.test.cjs': 'const {test}=require("node:test"); const assert=require("node:assert/strict"); const {low}=require("../inventory.js");\ntest("threshold boundary",()=>{assert.equal(low(1,2),true); assert.equal(low(2,2),false);});\n',
+}
+FULL_APP_RUNTIME_FILES = {
+    'Dockerfile': 'FROM python:3.13 AS native-verification\nCOPY . /app\n',
+    'pyproject.toml': '[project]\nname="inventory"\nversion="0.1"\n',
+    'uv.lock': 'version = 1\n',
+    'alembic.ini': '[alembic]\nscript_location = migrations\n',
+    'docker/start_app.py': 'print("started")\n',
+    'migrations/versions/001.py': 'revision = "001"\n',
 }
 
 class SoftwareIntent(_GeneralProductDesignCapability):
@@ -72,7 +81,8 @@ class SoftwareDesign(_GuidedDesignSemanticCapability):
         return result
 
 def produce(database, tmp_path, *, failing=False, user_repository=True,
-            authorize_candidate=True, set_delivery_target=True):
+            authorize_candidate=True, set_delivery_target=True,
+            full_application_baseline=False):
     interaction = WorkInteractionService(database, capability=SoftwareIntent())
     item = interaction.create_interaction(human_identity='human:test')
     understanding = interaction.append_and_assess(item.id, 'Build an inventory application', human_identity='human:test')
@@ -82,7 +92,29 @@ def produce(database, tmp_path, *, failing=False, user_repository=True,
     assert work.engineering_scope.bindings == ()
     assets = RepositoryAssetService(database, tmp_path/'assets', tmp_path/'imports')
     if user_repository:
-        asset = create_asset(assets, 'Software')
+        if full_application_baseline:
+            source = tmp_path / 'imports' / 'full-application'
+            source.mkdir(parents=True)
+            subprocess.run(['git', 'init', '-b', 'main'], cwd=source, check=True,
+                capture_output=True)
+            subprocess.run(['git', 'config', 'user.name', 'Delivery Test'],
+                cwd=source, check=True, capture_output=True)
+            subprocess.run(['git', 'config', 'user.email', 'delivery@example.invalid'],
+                cwd=source, check=True, capture_output=True)
+            for path, content in {'README.md': '# Inventory\n',
+                                  **FULL_APP_RUNTIME_FILES}.items():
+                destination = source / path
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_text(content)
+            subprocess.run(['git', 'add', '.'], cwd=source, check=True,
+                capture_output=True)
+            subprocess.run(['git', 'commit', '-m', 'runtime baseline'],
+                cwd=source, check=True, capture_output=True)
+            asset = assets.intake(RepositoryIntakeRequest(request_id=uuid4(),
+                title='Full application', description='Bounded Watt runtime',
+                source=str(source), authority_identity='human:test'))
+        else:
+            asset = create_asset(assets, 'Software')
         work = bind(service, work, asset)
     sources = dict(SOURCE)
     if failing:
@@ -297,6 +329,30 @@ def test_work_without_user_repository_uses_managed_workspace_and_delivers(postgr
             assert "script-src 'self' 'unsafe-inline'" in response.headers["Content-Security-Policy"]
     finally:
         runtime.shutdown()
+
+
+def test_full_application_delivery_uses_exact_served_candidate_for_acceptance(
+    postgres_database, tmp_path,
+):
+    service, work_id, delivery, _ = produce(postgres_database, tmp_path,
+        set_delivery_target=False, full_application_baseline=True)
+    assert service.get_work_result(work_id).trusted_result
+    context = delivery.context(work_id)
+    assert context['target']['runtime_recipe'] == {
+        'adapter': 'FULL_APPLICATION_RUNTIME', 'entrypoint': None}
+    manifest = delivery.publish(work_id)
+    assert manifest.software.runtime_recipe.adapter == 'FULL_APPLICATION_RUNTIME'
+    assert {item.path for item in manifest.artifacts} >= set(FULL_APP_RUNTIME_FILES)
+    acceptance = HumanAcceptanceRequest(manifest_fingerprint=manifest.fingerprint,
+        decision='ACCEPT', authority_identity='human:test',
+        rationale='Reviewed the exact served application')
+    with pytest.raises(ProductInvariantViolation, match='exact served Candidate'):
+        delivery.decide(work_id, manifest.id, acceptance)
+    calls = []
+    delivery.full_application_runtime_probe = lambda *args: calls.append(args)
+    assert delivery.decide(work_id, manifest.id, acceptance).decision.value == 'ACCEPT'
+    assert calls[0][0] == work_id
+    assert calls[0][2] == manifest.repository_revision
 
 def test_failing_behavior_test_cannot_publish_software(postgres_database, tmp_path):
     service, work_id, delivery, _ = produce(postgres_database, tmp_path, failing=True)

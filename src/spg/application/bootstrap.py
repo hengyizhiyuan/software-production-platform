@@ -119,6 +119,7 @@ class Application:
             selected_database,
             self.settings.workspace_root.parent / "repository-assets",
             self.settings.workspace_root.parent / "repository-imports",
+            settings=self.settings,
             native_git_operations=NativeGitOperationRunner(
                 selected_database,
                 production_environment=environment,
@@ -312,6 +313,27 @@ class Application:
             "verifier": selected_verifier,
             "planner": planner,
         }
+        if self.settings.owner_runtime_mode == "REQUIRED":
+            if self.settings.executor_adapter != "watt-native":
+                raise RuntimeError("ECF/Guardian normal-path integration requires the native production adapter")
+            try:
+                from ecf.runtime import ECFRealityRuntime, JsonRealityStore
+                from guardian.runtime import JsonAssuranceIntakeStore
+            except ImportError as error:
+                raise RuntimeError(
+                    "ECF and Guardian owner runtimes must be installed for the required integration profile"
+                ) from error
+            from spg.application.native_production_record import NativeProductionRecordService
+            from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+
+            owner_root = self.settings.owner_runtime_store_root
+            options["production_recorder"] = NativeProductionRecordService(
+                selected_database,
+                store=JsonProductionEnvironmentStore(
+                    self.settings.native_executor_production_environment_store_root),
+                reality=ECFRealityRuntime(JsonRealityStore(owner_root / "ecf")),
+                guardian=JsonAssuranceIntakeStore(owner_root / "guardian"),
+            )
         if selected_preparation is not None:
             options["preparation"] = selected_preparation
         if selected_binding is not None:

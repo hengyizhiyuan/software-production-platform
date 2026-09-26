@@ -15,6 +15,9 @@ import secrets
 import shutil
 import subprocess
 import time
+import json
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 from uuid import UUID
 
 from spg.domain.production_environment import CandidatePreviewMode, EnvironmentProviderError
@@ -22,6 +25,9 @@ from spg.domain.production_environment import CandidatePreviewMode, EnvironmentP
 
 class DockerCandidatePreviewRuntime:
     definition_version = "watt-compose-topology-v1"
+    _SUPPORTING_SERVICES = {
+        "redis": ("redis:7.4-alpine", ["redis-cli", "ping"]),
+    }
 
     def __init__(self, root: Path, *, docker_binary: str = "docker",
         verification_image: str = "watt-native-executor-runtime:local") -> None:
@@ -29,6 +35,7 @@ class DockerCandidatePreviewRuntime:
         self.root.mkdir(parents=True, exist_ok=True)
         self.docker_binary = docker_binary
         self.verification_image = verification_image
+        self._preview_auth_tokens: dict[UUID, str] = {}
 
     @staticmethod
     def _names(preview_id: UUID) -> dict[str, str]:
@@ -44,7 +51,29 @@ class DockerCandidatePreviewRuntime:
             "postgres": f"{prefix}-postgres",
             "app": f"{prefix}-app",
             "proxy": f"{prefix}-proxy",
+            "redis": f"{prefix}-redis",
         }
+
+    def _supporting_services(self, preview_id: UUID) -> tuple[str, ...]:
+        declaration = self._workspace(preview_id) / ".watt" / "preview-topology.json"
+        if not declaration.exists():
+            return ()
+        try:
+            value = json.loads(declaration.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as error:
+            raise EnvironmentProviderError("Candidate preview topology declaration is invalid") from error
+        if (not isinstance(value, dict)
+                or set(value) != {"schema_version", "supporting_services"}
+                or value["schema_version"] != 1
+                or not isinstance(value["supporting_services"], list)
+                or len(value["supporting_services"]) > 1
+                or any(not isinstance(item, str)
+                    for item in value["supporting_services"])
+                or any(item not in self._SUPPORTING_SERVICES
+                    for item in value["supporting_services"])
+                or len(set(value["supporting_services"])) != len(value["supporting_services"])):
+            raise EnvironmentProviderError("Candidate declares an unsupported preview topology")
+        return tuple(value["supporting_services"])
 
     def _run(self, argv: list[str], *, timeout: int = 120, check: bool = True) -> subprocess.CompletedProcess[str]:
         result = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8",
@@ -163,7 +192,12 @@ class DockerCandidatePreviewRuntime:
         names = self._names(preview_id)
         label = f"watt.candidate-preview={preview_id}"
         workspace = self._workspace(preview_id)
+        supporting_services = self._supporting_services(preview_id)
+        if mode is not CandidatePreviewMode.FULL_APPLICATION_RUNTIME and supporting_services:
+            raise EnvironmentProviderError("Frontend-only preview cannot declare backend supporting services")
         password = secrets.token_urlsafe(24)
+        operator_token = secrets.token_urlsafe(36)
+        self._preview_auth_tokens[preview_id] = operator_token
         port = 8000
         if mode is CandidatePreviewMode.FRONTEND_RUNTIME:
             exposed = re.findall(r"(?im)^EXPOSE\s+(\d+)\s*$", (workspace / "Dockerfile").read_text(encoding="utf-8"))
@@ -200,13 +234,25 @@ class DockerCandidatePreviewRuntime:
                 f"type=volume,source={names['database']},target=/var/lib/postgresql/data",
                 "postgres:17.6-alpine")
             self._wait(preview_id, names["postgres"], ["pg_isready", "-U", "spg"], timeout=90)
+            for service in supporting_services:
+                image, health = self._SUPPORTING_SERVICES[service]
+                self._docker("run", "-d", "--name", names[service], "--label", label,
+                    "--network", names["internal"], "--network-alias", service,
+                    image)
+                self._wait(preview_id, names[service], health, timeout=60)
         database_url = (f"postgresql+psycopg://spg:{password}@db:5432/spg_dev"
             "?sslmode=disable&connect_timeout=5")
         runtime_arguments = (["-e", f"SPG_DATABASE_URL={database_url}",
+            "-e", f"SPG_OPERATOR_TOKEN={operator_token}",
             "-e", "SPG_REPOSITORY_PATH=/var/lib/spg/repository",
             "-e", "SPG_WORKSPACE_ROOT=/var/lib/spg/workspaces",
+            "-e", "SPG_NATIVE_EXECUTOR_STORAGE_ROOT=/var/lib/spg/native-checkpoints",
+            "-e", "SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT=/var/lib/spg/native-workspaces",
+            "-e", "SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_STORE_ROOT=/var/lib/spg/production-environments",
             "-e", "SPG_RUNTIME_PROFILE=watt-candidate-preview",
             "-e", "SPG_NATIVE_EXECUTOR_ENABLED=false",
+            *(["-e", "REDIS_URL=redis://redis:6379"]
+                if "redis" in supporting_services else []),
             "--mount", f"type=volume,source={names['data']},target=/var/lib/spg"]
             if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else [])
         self._docker("run", "-d", "--name", names["app"], "--label", label,
@@ -233,13 +279,19 @@ class DockerCandidatePreviewRuntime:
         host_port = self._docker("port", names["proxy"], "80/tcp").stdout.strip()
         if not re.fullmatch(r"127\.0\.0\.1:\d+", host_port):
             raise EnvironmentProviderError("Preview Gateway did not publish a local endpoint")
-        services = ((names["postgres"],) if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else ()) + (names["app"], names["proxy"])
+        services = ((names["postgres"],)
+            if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else ()) + \
+            tuple(names[item] for item in supporting_services) + (names["app"], names["proxy"])
         resources = (names["internal"], names["gateway"]) + tuple(names[key] for key in volume_keys)
         return {"endpoint": f"http://{host_port}{'/app' if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else '/'}",
             "services": services, "resources": resources,
             "health": {"database": "READY" if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else "NOT_REQUIRED",
                 "application": "READY", "gateway": "READY",
-                "repository_revision": source_revision, "repository_tree": source_tree}}
+                **{item: "READY" for item in supporting_services},
+                "repository_revision": source_revision, "repository_tree": source_tree},
+            "topology": {"frontend": "app", "backend": "app",
+                "database": "postgres" if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else None,
+                "supporting_services": supporting_services}}
 
     def _wait(self, preview_id: UUID, container: str, command: list[str], *, timeout: int) -> None:
         deadline = time.monotonic() + timeout
@@ -262,7 +314,9 @@ class DockerCandidatePreviewRuntime:
         # healthy runtime into an observed runtime failure.
         self._docker("info", "--format", "{{.ServerVersion}}", timeout=15)
         names = self._names(preview_id)
-        services = ((names["postgres"],) if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else ()) + (names["app"], names["proxy"])
+        supporting_services = self._supporting_services(preview_id)
+        services = ((names["postgres"],) if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else ()) + \
+            tuple(names[item] for item in supporting_services) + (names["app"], names["proxy"])
         for name in services:
             if self._docker("inspect", "--format", "{{.State.Running}}", name,
                     check=False).stdout.strip() != "true":
@@ -294,11 +348,103 @@ class DockerCandidatePreviewRuntime:
                 "-C", "/source", "rev-parse", "HEAD^{tree}", check=False).stdout.strip()
         return (actual, actual_tree) == (revision, tree)
 
+    def verify_served(self, preview_id: UUID, revision: str, tree: str,
+        *, mode: CandidatePreviewMode = CandidatePreviewMode.FULL_APPLICATION_RUNTIME) -> dict:
+        """Observe the served Candidate, including a database-backed API round trip.
+
+        This is deliberately separate from container readiness.  A healthy
+        process or a successful image build cannot establish application
+        correctness through the gateway.
+        """
+        if not self.probe(preview_id, revision, tree, mode=mode):
+            raise EnvironmentProviderError("Served runtime differs from the exact Candidate")
+        names = self._names(preview_id)
+        host_port = self._docker("port", names["proxy"], "80/tcp").stdout.strip()
+        if not re.fullmatch(r"127\.0\.0\.1:\d+", host_port):
+            raise EnvironmentProviderError("Served runtime has no isolated gateway")
+        origin = f"http://{host_port}"
+
+        cookie: str | None = None
+        bearer = self._preview_auth_tokens.get(preview_id)
+        if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME and bearer is not None:
+            try:
+                login_payload = json.dumps({"token": bearer}).encode("utf-8")
+                with urlopen(Request(origin + "/auth/session", data=login_payload,
+                    headers={"Content-Type": "application/json"}, method="POST"),
+                    timeout=10) as login_response:
+                    if login_response.status != 200:
+                        raise EnvironmentProviderError("Candidate login contract failed")
+                    cookie = login_response.headers.get("Set-Cookie", "").split(";", 1)[0]
+                    if not cookie.startswith("watt_session="):
+                        raise EnvironmentProviderError("Candidate session cookie is unavailable")
+            except HTTPError as error:
+                if error.code != 404:
+                    raise EnvironmentProviderError("Candidate login contract failed") from error
+
+        def request(path: str, *, payload: dict | None = None) -> tuple[int, bytes, str, str]:
+            headers = {"Content-Type": "application/json"} if payload is not None else {}
+            if bearer is not None:
+                headers["Authorization"] = f"Bearer {bearer}"
+            if cookie is not None:
+                headers["Cookie"] = cookie
+            body = None if payload is None else json.dumps(payload).encode("utf-8")
+            try:
+                with urlopen(Request(origin + path, data=body, headers=headers,
+                    method="POST" if body is not None else "GET"), timeout=10) as response:
+                    return (response.status, response.read(1_000_000),
+                        response.headers.get("Content-Type", ""), response.geturl())
+            except (OSError, URLError) as error:
+                raise EnvironmentProviderError(f"Served runtime request failed at {path}") from error
+
+        observations: dict[str, object] = {
+            "candidate_revision": revision,
+            "candidate_tree": tree,
+            "gateway": origin,
+            "mode": mode.value,
+        }
+        page_path = "/app" if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else "/"
+        status, page, content_type, final_url = request(page_path)
+        if (status != 200 or not page or "html" not in content_type.lower()
+                or final_url != origin + page_path):
+            raise EnvironmentProviderError("Served frontend did not return an HTML page")
+        observations["frontend"] = {"path": page_path, "status": status,
+            "body_sha256": sha256(page).hexdigest()}
+        if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME:
+            status, body, _, _ = request("/health")
+            health = json.loads(body)
+            if status != 200 or health.get("database") != "available":
+                raise EnvironmentProviderError("Served backend cannot reach its database")
+            observations["health"] = health
+            status, body, _, _ = request("/api/goals")
+            if status != 200 or not isinstance(json.loads(body), list):
+                raise EnvironmentProviderError("Served backend read contract failed")
+            title = f"Preview verification {preview_id}"
+            status, body, _, _ = request("/api/goals", payload={"title": title})
+            created = json.loads(body)
+            goal_id = created.get("id") or created.get("goal_id")
+            if status != 201 or not isinstance(goal_id, str):
+                raise EnvironmentProviderError("Served backend write contract failed")
+            status, body, _, _ = request(f"/api/goals/{goal_id}")
+            observed = json.loads(body)
+            if status != 200 or observed.get("goal", {}).get("title") != title:
+                raise EnvironmentProviderError("Served backend read-after-write contract failed")
+            observations["database_round_trip"] = {"goal_id": goal_id,
+                "created_status": 201, "observed_status": status}
+        observations["result"] = "PASS"
+        return observations
+
     def stop(self, preview_id: UUID) -> dict:
+        self._preview_auth_tokens.pop(preview_id, None)
         names = self._names(preview_id)
         label = str(preview_id)
         logs = []
-        for key in ("proxy", "app", "postgres", "staging"):
+        try:
+            supporting_services = (self._supporting_services(preview_id)
+                if self._workspace(preview_id).exists()
+                else tuple(self._SUPPORTING_SERVICES))
+        except EnvironmentProviderError:
+            supporting_services = tuple(self._SUPPORTING_SERVICES)
+        for key in ("proxy", "app", "postgres", *supporting_services, "staging"):
             name = names[key]
             owned = self._docker("inspect", "--format", "{{index .Config.Labels \"watt.candidate-preview\"}}",
                 name, check=False).stdout.strip()

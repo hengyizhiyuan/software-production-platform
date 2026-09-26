@@ -6,6 +6,8 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
@@ -26,17 +28,20 @@ class DeliveryTargetKind(StrEnum):
 class SoftwareRuntimeRecipe(BaseModel):
     """Typed adapter selection; never an arbitrary shell command."""
     model_config = ConfigDict(extra="forbid", frozen=True)
-    adapter: str = Field(pattern=r"^STATIC_WEB$")
-    entrypoint: str = "index.html"
+    adapter: Literal["STATIC_WEB", "FULL_APPLICATION_RUNTIME"]
+    entrypoint: str | None = "index.html"
 
-    @field_validator("entrypoint")
-    @classmethod
-    def safe_entrypoint(cls, value: str) -> str:
+    @model_validator(mode="after")
+    def supported_runtime(self):
         from spg.domain.change import safe_repository_path
-        normalized = safe_repository_path(value)
-        if normalized != value or not value.endswith(".html"):
+        if self.adapter == "FULL_APPLICATION_RUNTIME":
+            if self.entrypoint is not None:
+                raise ValueError("Full application runtime has no static entrypoint")
+        elif (self.entrypoint is None
+                or safe_repository_path(self.entrypoint) != self.entrypoint
+                or not self.entrypoint.endswith(".html")):
             raise ValueError("Static Web entrypoint must be an exact HTML repository path")
-        return value
+        return self
 
 
 class SoftwareDeliveryDetails(BaseModel):
@@ -64,7 +69,7 @@ class DeliveryTargetRequest(BaseModel):
     def delivery_adapter_contract(self):
         if self.kind is DeliveryTargetKind.SOFTWARE_ARTIFACT:
             if self.software_form is not DeliveryTargetKind.WEB_APPLICATION or self.runtime_recipe is None:
-                raise ValueError("The first software adapter requires WEB_APPLICATION and a STATIC_WEB runtime recipe")
+                raise ValueError("Software delivery requires WEB_APPLICATION and a supported runtime recipe")
         elif self.software_form is not None or self.runtime_recipe is not None:
             raise ValueError("Software configuration belongs to SOFTWARE_ARTIFACT")
         return self

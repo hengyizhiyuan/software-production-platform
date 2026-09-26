@@ -77,7 +77,7 @@ class NativeGitOperationRunner:
         source_repository: Path,
         source_identity: str,
         source_ref: str,
-        source_url: str,
+        source_url: str | None,
         target_branch: str,
         authority_identity: str,
     ) -> dict[str, object]:
@@ -186,8 +186,12 @@ class NativeGitOperationRunner:
             source_revision=base_commit,
             repository_ref=source_ref,
         )
-        # The Work's remote source, not the internal baseline clone, remains origin.
-        self._git(workspace.workspace_path, "remote", "set-url", "origin", source_url)
+        # External Work keeps its credential-free source URL. Managed Work has
+        # no remote dependency: its canonical Git bundle is captured by Watt.
+        if source_url is None:
+            self._git(workspace.workspace_path, "remote", "remove", "origin")
+        else:
+            self._git(workspace.workspace_path, "remote", "set-url", "origin", source_url)
         payload = {
             "task_contract": task.model_dump(mode="json"),
             "git_operation": {

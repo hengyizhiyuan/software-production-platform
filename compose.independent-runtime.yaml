@@ -1,0 +1,44 @@
+# Overlay for a non-desktop host.  Each named external volume must be backed by
+# storage that survives loss of this host; Docker local volumes do not satisfy
+# the continuity claim.  Use with compose.native-executor.yaml.
+services:
+  postgres:
+    restart: unless-stopped
+  app:
+    restart: unless-stopped
+    environment:
+      SPG_OWNER_RUNTIME_MODE: REQUIRED
+      SPG_OWNER_RUNTIME_STORE_ROOT: /var/lib/spg/owner-runtime
+      PYTHONPATH: /opt/watt-owners/ecf/src:/opt/watt-owners/guardian/src:/app/src
+    volumes:
+      - type: bind
+        source: ${SPG_ECF_OWNER_SOURCE_PATH:?Mount the approved ECF owner checkout}
+        target: /opt/watt-owners/ecf
+        read_only: true
+      - type: bind
+        source: ${SPG_GUARDIAN_OWNER_SOURCE_PATH:?Mount the approved Guardian owner checkout}
+        target: /opt/watt-owners/guardian
+        read_only: true
+  native-coordinator:
+    restart: unless-stopped
+  native-tool-host:
+    restart: unless-stopped
+  native-worker:
+    restart: unless-stopped
+
+volumes:
+  native-postgres-data:
+    external: true
+    name: ${SPG_DURABLE_POSTGRES_VOLUME:?Provision an off-host durable PostgreSQL volume}
+  native-app-data:
+    external: true
+    name: ${SPG_DURABLE_APP_VOLUME:?Provision an off-host durable app/source volume}
+  native-workspaces:
+    external: true
+    name: ${SPG_DURABLE_WORKSPACE_VOLUME:?Provision an off-host durable shared workspace volume}
+  native-checkpoints:
+    external: true
+    name: ${SPG_DURABLE_CHECKPOINT_VOLUME:?Provision an off-host durable checkpoint volume}
+  native-tool-receipts:
+    external: true
+    name: ${SPG_DURABLE_RECEIPT_VOLUME:?Provision an off-host durable Tool Host receipt volume}

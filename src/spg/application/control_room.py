@@ -11,6 +11,8 @@ from spg.infrastructure.persistence import Database, ProductStore
 from spg.infrastructure.persistence.control_room_schema import work_agreement_events
 from spg.infrastructure.persistence.product_schema import product_works
 from spg.application.connectors import ConnectorResolver
+from spg.application.owner_reality import current_owner_repository_reality
+from spg.domain.product import ProductInvariantViolation
 
 
 class ControlRoomError(ValueError):
@@ -58,12 +60,28 @@ class ControlRoomService:
             resource = ProductStore(uow.session).resource_for_work(work_id)
         if resource is None or resource.kind.value != "REPOSITORY":
             raise ControlRoomError("This Work has no bound repository to inspect")
+        if (self.asset_service is not None
+                and self.asset_service.managed_source.has_source(
+                    resource.repository_identity)
+                and not Path(resource.location_ref).exists()):
+            self.asset_service.managed_source.recover(
+                resource.repository_identity, Path(resource.location_ref))
         try:
             root = Path(resource.location_ref).resolve(strict=True)
         except OSError as error:
             raise ControlRoomError("Bound repository source is unavailable for inspection") from error
         revision = _git(root, "rev-parse", "--verify", f"{resource.authoritative_ref}^{{commit}}").decode().strip()
         return work, resource, root, revision
+
+    def _owner_repository_reality(self, resource, root: Path, revision: str) -> dict | None:
+        recorder = getattr(self.work_service, "production_recorder", None)
+        reality = getattr(recorder, "reality", None)
+        if reality is None:
+            return None
+        try:
+            return current_owner_repository_reality(reality, resource, root, revision)
+        except ProductInvariantViolation as error:
+            raise ControlRoomError(str(error)) from error
 
     def sources(self, work_id: UUID) -> dict:
         gaps = [
@@ -106,12 +124,12 @@ class ControlRoomService:
                     },
                     "authorization": {
                         "required": condition == "WAITING_FOR_AUTHORIZATION",
-                        # No GitHub App/OAuth connector is configured by the
-                        # current runtime. Expose that absence explicitly rather
-                        # than rendering a control that cannot grant access.
-                        "integration_available": False,
+                        "integration_available": bool(
+                            getattr(getattr(getattr(self.asset_service,
+                                "github_delivery", None), "settings", None),
+                                "github_read_token", None)),
                         "human_action": (
-                            "Grant repository read access outside Watt, then retry "
+                            "Create a scoped GitHub READ Access Grant, then retry "
                             "this persisted acquisition."
                             if condition == "WAITING_FOR_AUTHORIZATION"
                             else None
@@ -152,6 +170,8 @@ class ControlRoomService:
             "revision": revision, "repository_identity": resource.repository_identity,
             "selection": "WORK_RELEVANT" if any(item["relevant"] for item in entries) else "REPOSITORY_OVERVIEW",
             "sources": entries,
+            "engineering_reality": self._owner_repository_reality(
+                resource, root, revision),
             "capability_gaps": gaps,
             "branch_operation": (
                 {

@@ -486,6 +486,8 @@ test("repository acquisition UI exposes persisted intermediate states and govern
   assert.match(app, /Repository acquisition failed/);
   assert.match(app, /Repository ready/);
   assert.match(app, /Authorize repository access · unavailable/);
+  assert.match(app, /api\/github\/grants/);
+  assert.match(app, /repository_url: acquisition\.source, capability: "READ"/);
   assert.match(app, /Retry after external access changes/);
   assert.match(app, /integration_available/);
   assert.match(app, /repository-acquisition\/retry/);

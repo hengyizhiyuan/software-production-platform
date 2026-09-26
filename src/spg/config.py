@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     application_name: str = "SPG Runtime"
     runtime_profile: str = Field(default="local-fvs", min_length=1)
+    auth_mode: Literal["required", "test-only-disabled"] = "required"
+    operator_token: SecretStr | None = None
     repository_path: Path = Field(default_factory=Path.cwd)
     workspace_root: Path = Path(".spg/workspaces")
     database_url: str | None = Field(
@@ -31,6 +33,8 @@ class Settings(BaseSettings):
     delivery_runtime_port_count: int = Field(default=10, ge=1, le=20)
     executor_adapter: Literal["unconfigured", "watt-native"] = "unconfigured"
     native_executor_enabled: bool = False
+    owner_runtime_mode: Literal["OFF", "REQUIRED"] = "OFF"
+    owner_runtime_store_root: Path = Path(".watt/owner-runtime")
     native_executor_backend: Literal["watt-native"] = "watt-native"
     native_executor_worker_id: str = "native-worker-local-1"
     native_executor_worker_profile: str = "local-container-v1"
@@ -44,6 +48,7 @@ class Settings(BaseSettings):
     deepseek_api_key: SecretStr | None = None
     deepseek_base_url: str = "https://api.deepseek.com"
     github_read_token: SecretStr | None = None
+    github_write_token: SecretStr | None = None
     web_search_api_key: SecretStr | None = None
     native_executor_deepseek_api_key: SecretStr | None = None
     native_executor_deepseek_base_url: str = "https://api.deepseek.com"

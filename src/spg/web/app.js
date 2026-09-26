@@ -1888,8 +1888,34 @@
         authorize.type = "button";
         authorize.disabled = !acquisition.authorization?.integration_available;
         authorize.title = acquisition.authorization?.integration_available
-          ? "Authorize read access for this repository."
-          : "This runtime has no configured GitHub App/OAuth authorization connector.";
+          ? "Authorize GitHub read access for this repository and retry acquisition."
+          : "This runtime has no configured GitHub read credential.";
+        authorize.addEventListener("click", async () => {
+          if (!state.selectedWorkId || state.busy || !acquisition.source) return;
+          setBusy(true);
+          hideNotice();
+          try {
+            await apiRequest("/api/github/grants", {
+              method: "POST",
+              body: { repository_url: acquisition.source, capability: "READ" },
+            });
+            await apiRequest(
+              `/api/works/${state.selectedWorkId}/repository-acquisition/retry`,
+              {
+                method: "POST",
+                body: {
+                  authority_identity: "human:local-operator",
+                  rationale: "Human granted scoped GitHub read access and retried acquisition.",
+                },
+              },
+            );
+            await refreshSelected();
+          } catch (error) {
+            showNotice(error);
+          } finally {
+            setBusy(false);
+          }
+        });
         tree.append(authorize);
       }
       if (acquisition.retry_available) {

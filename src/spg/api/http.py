@@ -46,7 +46,9 @@ from spg.api.dto import (
     WorkingAgreementCreateRequest,
     WorkingAgreementAbandonRequest,
 )
+from spg.api.authority import install_authority_boundary
 from spg.application.bootstrap import Application, bootstrap
+from spg.config import Settings
 from spg.application.orchestration import ProductionOrchestrator
 from spg.application.preview_security import PREVIEW_CONTENT_SECURITY_POLICY
 from spg.application.interaction import WorkInteractionService
@@ -66,6 +68,11 @@ from spg.application.control_state import (
     validate_control_state,
 )
 from spg.application.delivery import DeliveryApplicationService, artifact_media_type
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.application.github_delivery import (
+    GitHubDeliveryService, GitHubDeliveryError, GitHubGrantRequest,
+    RemoteDeliveryAuthorizationRequest, PullRequestCreateRequest,
+)
 from spg.application.candidate_preview import CandidatePreviewApplicationService, CandidatePreviewUnavailable
 from spg.application.control_room import ControlRoomError, ControlRoomService
 from spg.application.connectors import ConnectorResolver
@@ -171,6 +178,8 @@ def create_http_application(
     )
     delivery_service = DeliveryApplicationService(selected_database)
     settings = getattr(container, "settings", None)
+    github_delivery = GitHubDeliveryService(selected_database,
+        settings or Settings(), delivery=delivery_service)
     candidate_runtime_preview = None
     if getattr(settings, "native_executor_enabled", False):
         pe_root = settings.native_executor_production_environment_store_root
@@ -180,6 +189,8 @@ def create_http_application(
             DockerCandidatePreviewRuntime(pe_root / "candidate-preview-runtime",
                 verification_image=settings.native_executor_production_environment_image),
         )
+        delivery_service.full_application_runtime_probe = (
+            candidate_runtime_preview.require_served_for_delivery)
     software_runtime = SoftwareRuntimeService(delivery_service,
         enabled=getattr(settings, "delivery_runtime_enabled", False),
         bind_host=getattr(settings, "delivery_runtime_bind_host", "127.0.0.1"),
@@ -527,6 +538,14 @@ def create_http_application(
         error: ProductHttpError,
     ) -> JSONResponse:
         return _error(error.status_code, error.code, str(error))
+
+    @api.exception_handler(GitHubDeliveryError)
+    async def github_delivery_error_handler(
+        _request: Request, error: GitHubDeliveryError,
+    ) -> JSONResponse:
+        status = 401 if error.code == "CREDENTIAL_REQUIRED" else 403 if error.code in {
+            "ACCESS_DENIED", "PERMISSION_DENIED", "WRITE_GRANT_REQUIRED"} else 409
+        return _error(status, error.code, str(error))
 
     @api.exception_handler(NativeExecutionError)
     async def native_execution_error_handler(
@@ -1664,9 +1683,59 @@ def create_http_application(
     def repository_assets(work_id: UUID | None = None):
         return asset_service.list_assets(work_id)
 
+    @api.get("/api/repository-assets/{resource_id}/export")
+    def export_managed_repository(resource_id: UUID):
+        observed = asset_service.observation(resource_id)
+        identity = observed.get("repository_identity")
+        if not isinstance(identity, str) or not asset_service.managed_source.has_source(identity):
+            raise ProductHttpError(409, "NOT_MANAGED_REPOSITORY",
+                "Only Watt-managed repositories have a canonical Git bundle export")
+        bundle, evidence = asset_service.managed_source.export_bundle(identity)
+        return Response(bundle, media_type="application/x-git-bundle",
+            headers={"Content-Disposition": f'attachment; filename="watt-repository-{resource_id}.bundle"',
+                "X-Git-Revision": evidence["revision"],
+                "X-Git-Tree": evidence["tree"],
+                "X-Content-Type-Options": "nosniff"})
+
     @api.post("/api/repository-assets/intake")
     def intake_repository(request: RepositoryIntakeRequest):
         return asset_service.intake(request)
+
+    @api.post("/api/github/grants")
+    def create_github_grant(request: GitHubGrantRequest, http_request: Request):
+        return github_delivery.grant(http_request.state.actor_id,
+            request.repository_url, request.capability)
+
+    @api.get("/api/github/grants")
+    def list_github_grants(http_request: Request):
+        return github_delivery.list_grants(http_request.state.actor_id)
+
+    @api.delete("/api/github/grants/{grant_id}")
+    def revoke_github_grant(grant_id: UUID, http_request: Request):
+        github_delivery.revoke(http_request.state.actor_id, grant_id)
+        return {"grant_id": str(grant_id), "condition": "REVOKED"}
+
+    @api.post("/api/works/{work_id}/remote-delivery/authorize")
+    def authorize_remote_delivery(work_id: UUID,
+        request: RemoteDeliveryAuthorizationRequest, http_request: Request):
+        return github_delivery.authorize(http_request.state.actor_id,
+            work_id=work_id, manifest_id=request.manifest_id,
+            expected_revision=request.expected_revision,
+            target_branch=request.target_branch,
+            expected_remote_revision=request.expected_remote_revision,
+            rationale=request.rationale)
+
+    @api.post("/api/remote-deliveries/{authorization_id}/push")
+    def push_remote_delivery(authorization_id: UUID, http_request: Request):
+        return github_delivery.push(authorization_id,
+            actor_id=http_request.state.actor_id)
+
+    @api.post("/api/remote-deliveries/{authorization_id}/pull-request")
+    def create_remote_pull_request(authorization_id: UUID,
+        request: PullRequestCreateRequest, http_request: Request):
+        return github_delivery.create_pull_request(authorization_id,
+            actor_id=http_request.state.actor_id, base=request.base,
+            title=request.title, body=request.body)
 
     @api.post("/api/works/{work_id}/asset-scope-admissions")
     def admit_asset_scope(work_id: UUID, request: AssetScopeAdmissionRequest):
@@ -1759,12 +1828,44 @@ def create_http_application(
     def publish_delivery(work_id: UUID):
         return delivery_service.publish(work_id)
 
+    def full_application_basis(work_id: UUID, manifest_id: UUID):
+        manifest = delivery_service.manifest(work_id, manifest_id)
+        if manifest.software is None or manifest.software.runtime_recipe.adapter != "FULL_APPLICATION_RUNTIME":
+            return None
+        if candidate_runtime_preview is None:
+            raise CandidatePreviewUnavailable("Full-application Preview Runtime is not configured")
+        with selected_database.unit_of_work() as uow:
+            commit = RuntimeStore(uow.session).runtime_commit(manifest.runtime_commit_id)
+        context = delivery_service.candidate_context(work_id)
+        if (commit is None or context is None
+                or str(commit.candidate_id) != context["candidate_id"]
+                or commit.repository_revision != manifest.repository_revision
+                or commit.repository_revision != context["repository_revision"]
+                or commit.repository_tree_identity != context["tree"]):
+            raise CandidatePreviewUnavailable(
+                "Full application delivery differs from the current exact Candidate")
+        return commit
+
     @api.post("/api/works/{work_id}/deliveries/{manifest_id}/runtime")
     def start_software_runtime(work_id: UUID, manifest_id: UUID):
+        if full_application_basis(work_id, manifest_id) is not None:
+            return candidate_runtime_preview.request(work_id).model_dump(mode="json")
         return software_runtime.start(work_id, manifest_id)
 
     @api.get("/api/works/{work_id}/deliveries/{manifest_id}/runtime")
     def get_software_runtime(work_id: UUID, manifest_id: UUID):
+        commit = full_application_basis(work_id, manifest_id)
+        if commit is not None:
+            session = candidate_runtime_preview.current(work_id)
+            if session is None or session.status.value != "READY":
+                return {"status": "NOT_READY" if session is None else session.status.value,
+                    "url": None}
+            ready = candidate_runtime_preview.require_served_for_delivery(
+                work_id, commit.candidate_id, commit.repository_revision,
+                commit.repository_tree_identity)
+            return {"status": "READY", "url": ready.endpoint,
+                "candidate_revision": ready.repository_revision,
+                "served_verification": "PASS"}
         return software_runtime.view(work_id, manifest_id)
 
     @api.get("/api/works/{work_id}/deliveries/{manifest_id}/artifact")
@@ -1788,4 +1889,6 @@ def create_http_application(
             selected_runtime_activation.project(),
         )
 
+    install_authority_boundary(api, database=selected_database,
+        settings=getattr(container, "settings", Settings()))
     return api

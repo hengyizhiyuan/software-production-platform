@@ -14,6 +14,7 @@ from spg.application.execution import ExecutionService
 from spg.application.engineering_semantics import admit_semantic_facts
 from spg.application.governance import CandidateGovernanceService
 from spg.application.integration import RepositoryIntegrationService
+from spg.application.owner_reality import current_owner_repository_reality
 from spg.application.interaction import interaction_basis_fingerprint
 from spg.application.planning import ProductionPlanningService
 from spg.application.production_intelligence import (
@@ -2313,6 +2314,20 @@ class WorkApplicationService:
             if self.production_recorder is not None:
                 self.production_recorder.record_authorized_work(work_id)
             return self.get_work(work_id)
+        if summary.attempt_id is None:
+            reality = getattr(self.production_recorder, "reality", None)
+            if reality is not None:
+                observed_head = subprocess.run(
+                    ["git", "--no-replace-objects", "-C", resource.location_ref,
+                     "rev-parse", "--verify",
+                     f"{resource.authoritative_ref}^{{commit}}"],
+                    capture_output=True, text=True, timeout=15,
+                )
+                if observed_head.returncode:
+                    raise ProductInvariantViolation(
+                        "ECF source admission requires the bound repository revision")
+                current_owner_repository_reality(reality, resource,
+                    Path(resource.location_ref), observed_head.stdout.strip())
         if plan_revision is not None and plan_revision.graph is not None and summary.attempt_id is not None and (
             summary.completion_outcome == "NOT_PRODUCED"
             or (summary.admissibility_outcome is not None

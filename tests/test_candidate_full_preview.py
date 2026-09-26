@@ -143,6 +143,37 @@ def test_ready_requires_exact_candidate_and_stale_preview_is_invalidated(tmp_pat
     assert store.get_candidate_preview(ready.id).version > 1
 
 
+def test_full_application_delivery_requires_exact_served_runtime_evidence(tmp_path: Path):
+    repository, revision, tree = candidate_repository(tmp_path)
+    source = CandidateSource(context(repository, revision, tree))
+    work_id = uuid4()
+    unverified = CandidatePreviewApplicationService(source,
+        JsonProductionEnvironmentStore(tmp_path / "unverified"), RuntimeProvider())
+    unverified.request(work_id)
+    first = await_ready(unverified, work_id)
+    with pytest.raises(CandidatePreviewUnavailable, match="served-runtime"):
+        unverified.require_served_for_delivery(work_id, first.candidate_id,
+            revision, tree)
+
+    class ServedProvider(RuntimeProvider):
+        def verify_served(self, _preview_id, observed_revision, observed_tree,
+            *, mode=None):
+            return {"result": "PASS", "candidate_revision": observed_revision,
+                "candidate_tree": observed_tree,
+                "database_round_trip": {"created_status": 201,
+                    "observed_status": 200}}
+
+    verified = CandidatePreviewApplicationService(source,
+        JsonProductionEnvironmentStore(tmp_path / "verified"), ServedProvider())
+    verified.request(work_id)
+    second = await_ready(verified, work_id)
+    assert verified.require_served_for_delivery(work_id, second.candidate_id,
+        revision, tree).id == second.id
+    with pytest.raises(CandidatePreviewUnavailable, match="served-runtime"):
+        verified.require_served_for_delivery(work_id, second.candidate_id,
+            revision, "0" * 40)
+
+
 def test_restart_reconciles_missing_runtime_without_claiming_ready(tmp_path: Path):
     repository, revision, tree = candidate_repository(tmp_path)
     source = CandidateSource(context(repository, revision, tree))

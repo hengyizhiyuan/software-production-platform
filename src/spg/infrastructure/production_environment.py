@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import base64
 from hashlib import sha256
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -41,7 +42,8 @@ from spg.domain.production_environment import (
 class GitRepositoryAcquirer:
     """Production Environment-owned acquisition of one complete branch history."""
 
-    def acquire(self, root: Path, source: str, destination: Path) -> None:
+    def acquire(self, root: Path, source: str, destination: Path,
+        *, credential: str | None = None) -> None:
         command = [
             "git",
             "-c",
@@ -61,6 +63,18 @@ class GitRepositoryAcquirer:
             "GIT_TERMINAL_PROMPT": "0",
             "LANG": "C.UTF-8",
         }
+        if credential is not None:
+            if urlsplit(source).hostname != "github.com":
+                raise RepositoryAcquisitionFailure(
+                    RepositoryAcquisitionFailureCategory.AUTH_REQUIRED,
+                    "GitHub credential cannot be used for another repository host.",
+                    technical_evidence={"operation": "git clone", "credential_scope": "github.com"},
+                    retryable=False,
+                )
+            basic = base64.b64encode(f"x-access-token:{credential}".encode()).decode()
+            environment.update({"GIT_CONFIG_COUNT": "1",
+                "GIT_CONFIG_KEY_0": "http.https://github.com/.extraheader",
+                "GIT_CONFIG_VALUE_0": f"Authorization: Basic {basic}"})
         try:
             result = subprocess.run(
                 command,

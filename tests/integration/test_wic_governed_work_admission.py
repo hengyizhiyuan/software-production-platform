@@ -2230,7 +2230,7 @@ def test_unbound_repository_request_creates_work_without_bypassing_access(
             "required": True,
             "integration_available": False,
             "human_action": (
-                "Grant repository read access outside Watt, then retry this "
+                "Create a scoped GitHub READ Access Grant, then retry this "
                 "persisted acquisition."
             ),
         }

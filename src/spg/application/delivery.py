@@ -23,6 +23,8 @@ from spg.infrastructure.persistence.delivery_schema import (
 from spg.infrastructure.persistence.product_schema import product_works
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.infrastructure.persistence.runtime_schema import work_product_references
+from spg.domain.verification import VerificationResultValue
 
 MAX_ARTIFACT_BYTES = 1024 * 1024
 MAX_PACKAGE_BYTES = 10 * MAX_ARTIFACT_BYTES
@@ -118,6 +120,7 @@ class DeliveryApplicationService:
     def __init__(self, database: Database):
         self.database = database
         self.runtime_probe = None
+        self.full_application_runtime_probe = None
 
     @staticmethod
     def _work(session, work_id: UUID):
@@ -146,11 +149,14 @@ class DeliveryApplicationService:
                 return None
             candidate = runtime.baseline_candidate(summary.candidate_id)
             if (candidate is None or binding.work_unit_id not in candidate.satisfied_work_unit_ids
-                    or candidate.proposed_snapshot_id != summary.proposed_snapshot_id
-                    or not candidate.verification_record_ids or
-                    any(result != "PASS" for result in summary.verification_results)):
+                    or not candidate.verification_record_ids):
                 raise ProductInvariantViolation("Current Candidate lacks exact passing Verification")
             snapshot = runtime.proposed_snapshot(candidate.proposed_snapshot_id)
+            verification = tuple(runtime.verification_record(item) for item in candidate.verification_record_ids)
+            if (snapshot is None or snapshot.proposed_commit_identity != candidate.proposed_commit_identity
+                    or any(item is None or item.result is not VerificationResultValue.PASS
+                           for item in verification)):
+                raise ProductInvariantViolation("Current Candidate lacks exact passing Verification")
             observation = None if snapshot is None else runtime.repository_observation_by_id(snapshot.repository_observation_id)
             dispatch = None if observation is None else runtime.execution_dispatch(observation.dispatch_id)
             if dispatch is None:
@@ -161,8 +167,14 @@ class DeliveryApplicationService:
             tree = git_bytes(repository, "rev-parse", candidate.proposed_commit_identity + "^{tree}").decode().strip()
             if tree != candidate.proposed_tree_identity:
                 raise ProductInvariantViolation("Candidate preview tree differs from sealed Reality")
+            produced_paths = tuple(uow.session.execute(select(work_product_references.c.artifact_path)
+                .where(work_product_references.c.id.in_(candidate.work_product_reference_ids))
+                .order_by(work_product_references.c.artifact_path)).scalars())
+            final_paths = set(git_bytes(repository, "ls-tree", "-r", "--name-only", "-z",
+                candidate.proposed_commit_identity).decode("utf-8").split("\0")[:-1])
+            artifacts = tuple(path for path in produced_paths if path in final_paths)
             paths, entrypoint = candidate_file_inventory(
-                repository, candidate.proposed_commit_identity, summary.artifact_paths,
+                repository, candidate.proposed_commit_identity, artifacts,
             )
             return {"candidate_id": str(candidate.id), "candidate_fingerprint": candidate.fingerprint,
                     "repository_identity": candidate.repository_identity,
@@ -176,16 +188,33 @@ class DeliveryApplicationService:
                     "repository_revision": candidate.proposed_commit_identity, "tree": tree,
                     "repository_path": repository, "paths": paths, "entrypoint": entrypoint,
                     "preview_kind": "STATIC_WEB" if entrypoint else "CODE_DIFF" if any(
-                        path.endswith(".html") for path in summary.artifact_paths) else None,
-                    "artifacts": list(summary.artifact_paths),
-                    "verification": [f"{name}: {result}" for name, result in zip(
-                        summary.verification_obligations, summary.verification_results, strict=True)],
+                        path.endswith(".html") for path in artifacts) else None,
+                    "artifacts": list(artifacts),
+                    "verification": [f"{item.obligation}: {item.result.value}" for item in verification if item is not None],
                     "authorization_pending": summary.authorization_id is None}
 
     @staticmethod
-    def _derived_target(work, summary) -> DeliveryTargetRequest | None:
+    def _derived_target(work, summary, commit=None, resource=None) -> DeliveryTargetRequest | None:
         """Only one unambiguous current artifact form is defaultable."""
         paths = set(summary.artifact_paths)
+        if (work.production_plan is not None
+                and work.production_plan.target_kind.value == "CODE_WORK"
+                and commit is not None and resource is not None):
+            tree_paths = set(git_bytes(resource.location_ref, "ls-tree", "-r",
+                "--name-only", "-z", commit.repository_revision).decode("utf-8").split("\0")[:-1])
+            if {"Dockerfile", "pyproject.toml", "uv.lock", "alembic.ini",
+                    "docker/start_app.py"}.issubset(tree_paths) and any(
+                    path.startswith("migrations/versions/") for path in tree_paths):
+                return DeliveryTargetRequest(kind=DeliveryTargetKind.SOFTWARE_ARTIFACT,
+                    title=work.refined_title or work.desired_outcome[:255],
+                    acceptance_criteria=tuple(dict.fromkeys((work.desired_outcome,
+                        *work.constraints,
+                        "Exact full application preview serves its frontend and backend with PostgreSQL.",
+                        "Observed runtime read/write behavior passes before Human Acceptance."))),
+                    authority_identity="system:governed-delivery-context",
+                    software_form=DeliveryTargetKind.WEB_APPLICATION,
+                    runtime_recipe={"adapter": "FULL_APPLICATION_RUNTIME",
+                        "entrypoint": None})
         html = [path for path in paths if path.endswith(".html")]
         if (work.production_plan is not None
                 and work.production_plan.target_kind.value == "CODE_WORK" and len(html) == 1):
@@ -210,7 +239,9 @@ class DeliveryApplicationService:
             binding = ProductStore(uow.session).runtime_binding(work_id)
             summary = None if binding is None or binding.work_reality_revision_id != work.current_work_reality_revision_id else ProductStore(uow.session).runtime_summary(binding)
             commit = None if summary is None or summary.runtime_commit_id is None else RuntimeStore(uow.session).runtime_commit(summary.runtime_commit_id)
-            derived = None if target or commit is None else self._derived_target(work, summary)
+            resource = None if binding is None else ProductStore(uow.session).resource(binding.resource_id)
+            derived = None if target or commit is None else self._derived_target(
+                work, summary, commit, resource)
             chosen = target or derived
             target_source = (
                 "GOVERNED_REALITY"
@@ -270,6 +301,10 @@ class DeliveryApplicationService:
             raise ProductRecordNotFound("Delivery manifest not found for this Work")
         return DeliveryManifest.model_validate(payload)
 
+    def manifest(self, work_id: UUID, manifest_id: UUID) -> DeliveryManifest:
+        with self.database.unit_of_work() as uow:
+            return self._manifest(uow.session, work_id, manifest_id)
+
     def set_target(self, work_id: UUID, request: DeliveryTargetRequest) -> DeliveryTarget:
         if request.kind not in {DeliveryTargetKind.DOCUMENT_PACKAGE, DeliveryTargetKind.SOFTWARE_ARTIFACT}:
             raise ProductInvariantViolation("Choose Document Package or Software Artifact with a supported runtime adapter")
@@ -298,10 +333,15 @@ class DeliveryApplicationService:
         if binding is None or binding.work_reality_revision_id != work.current_work_reality_revision_id:
             raise ProductInvariantViolation("Delivery requires a production cycle for the current Work Reality")
         summary = product.runtime_summary(binding)
-        if (summary.runtime_commit_id is None or not summary.verification_results
-                or any(value != "PASS" for value in summary.verification_results)):
+        if summary.runtime_commit_id is None:
             raise ProductInvariantViolation("Delivery requires passing Verification and a trusted Runtime Commit")
         commit = runtime.runtime_commit(summary.runtime_commit_id)
+        records = () if commit is None else tuple(runtime.verification_record(item) for item in commit.verification_record_ids)
+        if (not records or any(item is None or item.result is not VerificationResultValue.PASS
+                or item.work_unit_id not in commit.satisfied_work_unit_ids for item in records)
+                or not any(item is not None and item.proposed_commit_identity == commit.repository_revision
+                           for item in records)):
+            raise ProductInvariantViolation("Delivery requires exact-commit passing Verification")
         resource = product.resource(binding.resource_id)
         if (commit is None or resource is None
                 or binding.work_unit_id not in commit.satisfied_work_unit_ids
@@ -313,25 +353,56 @@ class DeliveryApplicationService:
     def _software_basis(session, target, binding, commit, resource):
         from spg.domain.verification import VerificationResultValue
         runtime = RuntimeStore(session)
-        unit = runtime.work_unit(binding.work_unit_id)
-        contract = None if unit is None else unit.completion_contract.change_contract
-        if contract is None:
+        graph_units = [runtime.work_unit(identity)
+            for identity in commit.satisfied_work_unit_ids]
+        if not graph_units or any(unit is None for unit in graph_units) or not any(
+            unit.completion_contract.change_contract is not None
+            for unit in graph_units if unit is not None
+        ):
             raise ProductInvariantViolation("Software delivery requires a governed Code Work contract")
         records = [runtime.verification_record(identity) for identity in commit.verification_record_ids]
-        if not records or any(record is None or record.result is not VerificationResultValue.PASS
-                or record.proposed_commit_identity != commit.repository_revision
-                or record.work_unit_id != binding.work_unit_id for record in records):
+        if (not records or any(record is None or record.result is not VerificationResultValue.PASS
+                or record.work_unit_id not in commit.satisfied_work_unit_ids
+                for record in records)
+                or not any(record is not None and record.proposed_commit_identity == commit.repository_revision
+                           for record in records)):
             raise ProductInvariantViolation("Software delivery requires exact-commit passing Verification")
         # A minimal static page may have only PATH_SCOPE/GIT_DIFF_CHECK evidence.
         # Report that exact coverage; never imply its browser behavior was tested.
-        paths = git_bytes(resource.location_ref, "ls-tree", "-r", "--name-only", "-z", commit.repository_revision).decode("utf-8").split("\0")[:-1]
-        if len(paths) > 500:
-            raise ProductInvariantViolation("Software package exceeds the 500-file limit")
-        if target.runtime_recipe.entrypoint not in paths:
+        all_paths = git_bytes(resource.location_ref, "ls-tree", "-r", "--name-only", "-z",
+            commit.repository_revision).decode("utf-8").split("\0")[:-1]
+        full_application = target.runtime_recipe.adapter == "FULL_APPLICATION_RUNTIME"
+        if full_application:
+            required = {"Dockerfile", "pyproject.toml", "uv.lock", "alembic.ini",
+                "docker/start_app.py"}
+            if not required.issubset(all_paths) or not any(
+                path.startswith("migrations/versions/") for path in all_paths):
+                raise ProductInvariantViolation(
+                    "Full application package lacks its supported Docker/PostgreSQL runtime definition")
+            dockerfile = git_bytes(resource.location_ref, "show",
+                f"{commit.repository_revision}:Dockerfile").decode("utf-8")
+            if not re.search(r"(?im)^FROM\s+\S+\s+AS\s+native-verification\s*$", dockerfile):
+                raise ProductInvariantViolation(
+                    "Full application package lacks the bounded verification image target")
+            paths = [path for path in all_paths if path.startswith((
+                "src/", "migrations/", "docker/", "tests/")) or path in {
+                "Dockerfile", "pyproject.toml", "uv.lock", "alembic.ini",
+                "README.md", ".watt/preview-topology.json", "compose.yaml",
+                "compose.native-executor.yaml", "compose.independent-runtime.yaml"}]
+            if len(paths) > 500:
+                raise ProductInvariantViolation(
+                    "Full application source package exceeds the 500-file supported profile")
+        else:
+            paths = all_paths
+            if len(paths) > 500:
+                raise ProductInvariantViolation("Software package exceeds the 500-file limit")
+        if not full_application and target.runtime_recipe.entrypoint not in paths:
             raise ProductInvariantViolation("Software package requires its declared entrypoint")
-        changes_raw = git_bytes(resource.location_ref, "diff-tree", "--no-commit-id", "--no-renames", "--name-status", "-z", "-r", contract.source_revision, commit.repository_revision).decode("utf-8").split("\0")[:-1]
+        changes_raw = git_bytes(resource.location_ref, "diff-tree", "--no-commit-id", "--no-renames", "--name-status", "-z", "-r", commit.expected_source_repository_revision, commit.repository_revision).decode("utf-8").split("\0")[:-1]
         changes = tuple({"status": changes_raw[i], "path": changes_raw[i + 1]} for i in range(0, len(changes_raw), 2))
-        if not any(item["path"].endswith((".js", ".mjs", ".cjs", ".html", ".css")) for item in changes):
+        code_suffixes = ((".py", ".js", ".mjs", ".cjs", ".html", ".css")
+            if full_application else (".js", ".mjs", ".cjs", ".html", ".css"))
+        if not any(item["path"].endswith(code_suffixes) for item in changes):
             raise ProductInvariantViolation("Software delivery requires a software change in this production cycle")
         test_commands = tuple(
             ("node --test " if record.obligation.startswith("NODE_TEST_TARGET:") else "python -m pytest -q ")
@@ -339,14 +410,27 @@ class DeliveryApplicationService:
             for record in records
             if record.obligation.startswith(("NODE_TEST_TARGET:", "PYTEST_TARGET:"))
         )
+        reproduction = ((
+            "Check out the exact commit and inspect the supported Dockerfile and migration set.",
+            "Provision an isolated PostgreSQL database and a dedicated operator token.",
+            "Build the native-verification Docker target, start the application, and repeat the recorded served-runtime checks.",
+            *test_commands,
+            "The preview evidence is tied to this exact commit; this package does not grant deployment authority.",
+        ) if full_application else (
+            "Extract the package and open a terminal in source/.",
+            "Prerequisites: Node.js 18+ for JavaScript tests; Python 3 for the optional local HTTP server.",
+            *test_commands,
+            "python -m http.server 8080 --bind 127.0.0.1",
+            "Open http://127.0.0.1:8080/" + target.runtime_recipe.entrypoint,
+            "Review delivery-target.json and verification.json for the exact acceptance and evidence basis. No build or dependency download is required by STATIC_WEB.",
+        ))
         return SoftwareDeliveryDetails(
             form=target.software_form, runtime_recipe=target.runtime_recipe,
-            repository_ref=resource.authoritative_ref, source_revision=contract.source_revision,
+            repository_ref=resource.authoritative_ref,
+            source_revision=commit.expected_source_repository_revision,
             commit_message=git_bytes(resource.location_ref, "show", "-s", "--format=%B", commit.repository_revision).decode("utf-8").strip(),
             changed_files=changes, verification=tuple(record.model_dump(mode="json") for record in records),
-            reproduction=("Extract the package and open a terminal in source/.", "Prerequisites: Node.js 18+ for JavaScript tests; Python 3 for the optional local HTTP server.", *test_commands,
-                "python -m http.server 8080 --bind 127.0.0.1", "Open http://127.0.0.1:8080/" + target.runtime_recipe.entrypoint,
-                "Review delivery-target.json and verification.json for the exact acceptance and evidence basis. No build or dependency download is required by STATIC_WEB."),
+            reproduction=reproduction,
         ), sorted(paths)
 
     def publish(self, work_id: UUID) -> DeliveryManifest:
@@ -355,7 +439,7 @@ class DeliveryApplicationService:
             target = self._target(uow.session, work_id)
             work, binding, summary, commit, resource = self._trusted_basis(uow.session, work_id)
             if target is None:
-                request = self._derived_target(work, summary)
+                request = self._derived_target(work, summary, commit, resource)
                 if request is None:
                     raise ProductInvariantViolation("No single supported current delivery target can be derived")
                 target = DeliveryTarget(**request.model_dump(), id=uuid4(), work_id=work_id, created_at=datetime.now(UTC))
@@ -471,9 +555,16 @@ class DeliveryApplicationService:
                     return record
                 raise ProductInvariantViolation("This exact delivery already has an immutable Human decision")
             if manifest.software is not None and request.decision.value == "ACCEPT":
-                if self.runtime_probe is None:
-                    raise ProductInvariantViolation("Software acceptance requires an accessible exact-manifest runtime")
-                self.runtime_probe(work_id, manifest_id)
+                if manifest.software.runtime_recipe.adapter == "FULL_APPLICATION_RUNTIME":
+                    if self.full_application_runtime_probe is None:
+                        raise ProductInvariantViolation(
+                            "Full application acceptance requires an exact served Candidate runtime")
+                    self.full_application_runtime_probe(work_id, commit.candidate_id,
+                        commit.repository_revision, commit.repository_tree_identity)
+                else:
+                    if self.runtime_probe is None:
+                        raise ProductInvariantViolation("Software acceptance requires an accessible exact-manifest runtime")
+                    self.runtime_probe(work_id, manifest_id)
             record = HumanAcceptance(**request.model_dump(), id=uuid4(), manifest_id=manifest_id, created_at=datetime.now(UTC))
             uow.session.execute(insert(work_delivery_acceptances).values(
                 id=record.id, manifest_id=manifest_id, payload=record.model_dump(mode="json"), created_at=record.created_at,

@@ -97,6 +97,12 @@ CAPABILITIES = (
 
 
 def load_runtime_owners():
+    try:
+        from ecf.runtime import ECFRealityRuntime, JsonRealityStore
+        from guardian.runtime import JsonAssuranceIntakeStore
+        return ECFRealityRuntime, JsonRealityStore, JsonAssuranceIntakeStore
+    except ImportError:
+        pass
     ecf_src = PROJECT_ROOT.parent / "engineering-context-fabric" / "src"
     guardian_src = PROJECT_ROOT.parent / "guardian" / "src"
     if not (ecf_src / "ecf" / "runtime.py").is_file() or not (guardian_src / "guardian" / "runtime.py").is_file():
@@ -391,6 +397,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
             projection = service.advance_work(admitted.work_id)
             if projection.status in {WorkStatus.NEEDS_ATTENTION, WorkStatus.BLOCKED}:
                 break
+        assert ecf_store.latest("repository", "repo:brownfield-native-pe") is not None
         with postgres_database.unit_of_work() as uow:
             product = ProductStore(uow.session)
             binding = product.runtime_binding(admitted.work_id)

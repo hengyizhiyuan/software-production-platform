@@ -402,3 +402,39 @@ This document does not implement or authorize:
 - ECF Core Architecture beyond the bounded Reality contracts/runtime;
 - Guardian Core Architecture beyond the bounded Intake contract/runtime; or
 - a complete Production Passport implementation.
+
+## 14. P0 runtime extension (2026-09-26)
+
+The bounded Full Application Preview runs Watt-shaped frontend/backend code
+against isolated PostgreSQL. An exact Candidate may also declare one Redis
+supporting service in tracked `.watt/preview-topology.json` with
+`{"schema_version":1,"supporting_services":["redis"]}`. Unknown topology
+declarations fail explicitly. The candidate's own Dockerfile, migration tree,
+commit and Git tree remain the build source; the fixed gateway exposes only a
+loopback preview URL. No arbitrary Compose files or host mounts are admitted.
+
+READY now requires a served-runtime check in addition to process and revision
+health: HTML is returned at the expected route, the backend reports database
+availability, and a goal created through the gateway can be read back from
+the same isolated runtime. These observations are retained with exact
+Candidate revision/tree, service identities and the Production Record. A
+healthy container alone does not establish functional correctness.
+
+The required owner-runtime profile wires ECF's own Reality runtime and
+Guardian's own Assurance Intake runtime into the normal Native Production
+Record path. Control Room source inspection reads ECF's latest repository
+Reality and refreshes it when Git revision or freshness changes. Guardian's
+current owner package supplies intake only; it has no assurance decision API.
+Watt therefore cannot claim a Guardian release gate from that intake. The
+full-system gate remains an explicit owner-side blocker until Guardian returns
+an attributable decision that Watt can enforce.
+
+The accepted P0 path can project a `FULL_APPLICATION_RUNTIME` software
+delivery target only when the exact Git tree carries Watt's bounded Docker,
+Python and migration runtime definition. The delivery manifest hashes a
+bounded, reproducible runtime source subset from the exact Git tree, excluding
+unrelated large documentation assets. Human Acceptance of that target requires the same
+exact Candidate preview session to remain READY with a persisted served
+frontend/backend/PostgreSQL read/write verification PASS; the static-Web
+runtime adapter cannot substitute for it. This does not bypass the separate
+Guardian owner gate or Human Delivery Authorization for remote Git effects.

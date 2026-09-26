@@ -215,6 +215,22 @@ class CandidatePreviewApplicationService:
             raise CandidatePreviewUnavailable("Exact Candidate functional Preview is not READY")
         return session
 
+    def require_served_for_delivery(self, work_id: UUID, candidate_id: UUID,
+        revision: str, tree: str) -> CandidatePreviewSessionV1:
+        """Human acceptance needs the same exact, observed application runtime."""
+        session = self.require_ready(work_id, candidate_id)
+        if (session.mode is not CandidatePreviewMode.FULL_APPLICATION_RUNTIME
+                or session.repository_revision != revision
+                or session.repository_tree != tree
+                or not any(item.get("kind") == "SERVED_VERIFICATION"
+                    and item.get("result") == "PASS"
+                    and item.get("candidate_revision") == revision
+                    and item.get("candidate_tree") == tree
+                    for item in session.evidence)):
+            raise CandidatePreviewUnavailable(
+                "Full application lacks exact served-runtime verification")
+        return session
+
     def record_authorization(self, work_id: UUID, authority_identity: str) -> CandidatePreviewSessionV1:
         with self._lock:
             session = self.store.current_candidate_preview(work_id)
@@ -282,6 +298,12 @@ class CandidatePreviewApplicationService:
                     evidence=self._required(preview_id).evidence + ({"kind": "BUILD", **build},))
             runtime = self.provider.start(preview_id, session.repository_revision, session.repository_tree,
                 mode=session.mode)
+            served_verifier = getattr(self.provider, "verify_served", None)
+            served_evidence = (
+                served_verifier(preview_id, session.repository_revision,
+                    session.repository_tree, mode=session.mode)
+                if callable(served_verifier) else None
+            )
             with self._lock:
                 latest_context = self.delivery.candidate_context(session.work_id)
                 if latest_context is None or latest_context["candidate_fingerprint"] != session.candidate_fingerprint:
@@ -290,6 +312,11 @@ class CandidatePreviewApplicationService:
                 if not self.provider.probe(preview_id, session.repository_revision, session.repository_tree,
                     mode=session.mode):
                     raise CandidatePreviewUnavailable("Preview readiness or exact revision check failed")
+                if served_evidence is not None:
+                    session = self._advance(self._required(preview_id),
+                        PreviewRuntimeStatus.STARTING,
+                        evidence=self._required(preview_id).evidence + (
+                            {"kind": "SERVED_VERIFICATION", **served_evidence},))
                 self._transition_environment(self._required(preview_id), EnvironmentLifecycleState.ACTIVE,
                     "Candidate image and isolated application passed readiness",
                     provider_reference=build["image_id"],
@@ -428,7 +455,13 @@ class CandidatePreviewApplicationService:
             changes=tuple(changes),
             verification_results=tuple(VerificationResultReference(
                 reference=reference, outcome=VerificationOutcome.PASS)
-                for reference in context["verification_references"]),
+                for reference in (
+                    *context["verification_references"],
+                    *((f"candidate-preview:{session.id}:served-runtime",)
+                        if any(item.get("kind") == "SERVED_VERIFICATION"
+                            and item.get("result") == "PASS" for item in session.evidence)
+                        else ()),
+                )),
             delivery_result=DeliveryResultReference(
                 reference=f"candidate-preview:{session.id}",
                 state=ProductionDeliveryState.READY_FOR_HUMAN_ACCEPTANCE),

@@ -11,6 +11,13 @@ from spg.infrastructure.persistence.database import (
     configured_database_url,
 )
 from spg.infrastructure.persistence.metadata import metadata
+from spg.infrastructure.persistence.auth_schema import (
+    authority_actors, authority_memberships, authority_resource_access,
+)
+from spg.infrastructure.persistence.managed_repository_schema import managed_repository_sources
+from spg.infrastructure.persistence.github_delivery_schema import (
+    github_access_grants, remote_delivery_authorizations, remote_delivery_receipts,
+)
 from spg.infrastructure.persistence.control_room_schema import work_agreement_events
 from spg.infrastructure.persistence.connector_schema import (
     capability_gaps,
@@ -43,6 +50,13 @@ __all__ = [
     "UnitOfWork",
     "configured_database_url",
     "metadata",
+    "authority_actors",
+    "authority_memberships",
+    "authority_resource_access",
+    "managed_repository_sources",
+    "github_access_grants",
+    "remote_delivery_authorizations",
+    "remote_delivery_receipts",
     "work_agreement_events",
     "connector_capabilities",
     "capability_gaps",

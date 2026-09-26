@@ -121,6 +121,12 @@ class RuntimeCommitService:
                     basis.pointer,
                     observed_revision,
                 )
+                from spg.application.managed_git_source import ManagedGitSource
+                managed_source = ManagedGitSource(self.database)
+                if managed_source.has_source(basis.candidate.repository_identity):
+                    managed_source.sync(
+                        basis.candidate.repository_identity, basis.repository_path,
+                        session=unit_of_work.session)
                 unit_of_work.commit()
                 self._synchronize_checkout(basis, result)
                 return result
@@ -231,6 +237,12 @@ class RuntimeCommitService:
                 observed_repository_revision=observed_revision,
                 idempotent_recognition=False,
             )
+            from spg.application.managed_git_source import ManagedGitSource
+            managed_source = ManagedGitSource(self.database)
+            if managed_source.has_source(candidate.repository_identity):
+                managed_source.sync(
+                    candidate.repository_identity, basis.repository_path,
+                    session=unit_of_work.session)
             unit_of_work.commit()
         self._synchronize_checkout(basis, result)
         return result
