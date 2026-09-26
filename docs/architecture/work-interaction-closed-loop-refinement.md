@@ -789,3 +789,10 @@ read restores existing bounded repairability, not additional Human permission.
 Runtime-secret questions remain explicit and Human-owned. For a new repository
 Work they do not block read-only preparation; repository access credentials and
 explicit privacy/authority changes still block their relevant current boundary.
+
+WIC structure repair retains the original governing contract, exact basis and safe
+validation locations/types. JSON Schema alone cannot encode cross-field semantic
+authority rules. Repair remains one bounded call, preserves valid meaning, never
+relaxes authority, and never emits a second provisional Human-facing stream.
+Native grounding also preserves observed business vocabularies: an unconstrained
+string field cannot authorize invented payment/shipping/refund lifecycle concepts.

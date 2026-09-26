@@ -82,6 +82,8 @@ def _repair_structured_result(
     output_schema: dict[str, object],
     on_stage: Callable[[str], None] | None,
     contract_name: str,
+    original_instruction: str,
+    validation_feedback: str,
 ) -> StructuredModelResult:
     """Run one structure-only repair without exposing a second provisional stream."""
 
@@ -95,7 +97,12 @@ def _repair_structured_result(
             "meaning and Human-facing statement exactly unless a change is strictly "
             "required to satisfy the schema. Remove forbidden extra fields. Do not infer "
             "new facts, add recommendations, change authority, or create Semantic Truth. "
-            "Return only the repaired JSON object."
+            "Return only the repaired JSON object.\n"
+            f"Observed validation locations/types: {validation_feedback}\n"
+            "Original governing contract and exact basis follow. Use them only to "
+            "satisfy the rejected contract, including cross-field authority constraints "
+            "that JSON Schema cannot express; do not regenerate valid business meaning.\n"
+            + original_instruction
         ),
         input_text=invalid_output,
         output_schema=output_schema,
@@ -162,6 +169,8 @@ class DeepSeekInteractionSemanticCapability:
                 output_schema=schema,
                 on_stage=on_stage,
                 contract_name="WIC semantic",
+                original_instruction=instruction,
+                validation_feedback=first_issue,
             )
             self.last_structured_repair_count = 1
             try:
@@ -612,6 +621,8 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
                 output_schema=self.coalesced_output_schema(),
                 on_stage=stage,
                 contract_name="coalesced collaboration",
+                original_instruction=instruction,
+                validation_feedback=_safe_validation_summary(first_error),
             )
             repair_count = 1
             try:

@@ -89,3 +89,14 @@ that premature runtime-prerequisite question remains an explicit failed qualific
 GC-IP-07 trial 2 passed actual name/email search, empty results, unchanged customer
 domain and actual API/SQLite persistence after one allowed domain choice.
 Human Acceptance and final Full Regression remain PENDING.
+
+
+WIC structure recovery, Native contracts and progressive stage sufficiency passed
+123 targeted checks (`/tmp/watt-stability-repair-authority-context.log`). The final
+private-repository prerequisite negative variants passed 40 WIC policy checks.
+GC-EX-01 trial 3 passed the original one-line source/real Preview/no-delivery oracle:
+three independent FSI trials now have business PASS. GC-IP-01 trial 2 passed actual
+About content without unsupported organizational/contact claims. GC-IP-05 trial 3
+and GC-IP-08 trial 5 passed actual form/API/SQLite and reload observations.
+GC-IP-03 trial 2 and GC-EX-03 trial 3 are retained failures, not green Preview scores.
+Final Full Regression and Human Acceptance remain PENDING.

@@ -212,6 +212,9 @@ def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta
     assert capability.last_pipeline_evidence.semantic_structured_repair_count == 1
     assert "structured_output_repair_started" in stages
     assert "structured_output_repair_completed" in stages
+    assert "Observed validation locations/types: root:json_invalid" in adapter.requests[1]["instructions"]
+    assert "must be SYSTEM_INFERRED with WORKING_ASSUMPTION or UNRESOLVED" in adapter.requests[1]["instructions"]
+    assert "我想做一个运营管理平台" in adapter.requests[1]["instructions"]
 
 
 def test_controlled_pre_work_uses_semantics_then_governed_realizer_stream() -> None:

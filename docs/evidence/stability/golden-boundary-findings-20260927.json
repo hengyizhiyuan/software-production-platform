@@ -4859,6 +4859,138 @@
       "economics": {},
       "manual_rescue_actions": [],
       "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-IP-03",
+      "trial": 2,
+      "signal": "MODEL_CANDIDATE_CANNOT_EXPAND_SCOPE: invented paid/shipped lifecycle choices in unconstrained existing order status",
+      "architecture_owner": "Native domain grounding / implementation policy",
+      "source_head": "a717777ad7cefb2b83dbdec59c4f0a6c069faab2",
+      "work_id": "89828393-b68b-5e62-aaf8-122766aea493",
+      "interaction_id": "f9de7d05-2f39-40bb-beb7-3776ec2e9719",
+      "result": {
+        "case": "GC-IP-03",
+        "trial": 2,
+        "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+        "work_id": "89828393-b68b-5e62-aaf8-122766aea493",
+        "elapsed_seconds": 563,
+        "human_acceptance": "PENDING",
+        "automatic_delivery_authorization": false,
+        "business_oracle": "NOT_YET_EVALUATED"
+      },
+      "attention": [
+        {
+          "attention_id": "6d6a12d6-ebd2-5ce7-9e54-9e60c3905219",
+          "work_id": "89828393-b68b-5e62-aaf8-122766aea493",
+          "kind": "CANDIDATE_AUTHORIZATION",
+          "decision": "Authorize exact sealed Candidate integration?",
+          "reason": "Repository integration requires exact Human Authority.",
+          "available_actions": [
+            "AUTHORIZE"
+          ],
+          "recommended_action": null,
+          "governed_subject_ref": "baseline-candidate:4af6783f-6f34-581b-bd16-f5566b859709",
+          "steering_reason": null,
+          "recommendation": null,
+          "conversation_prompt": null,
+          "alternatives": [],
+          "trade_offs": [],
+          "expected_impact": null,
+          "reality_refs": [],
+          "steering_plan_revision_id": null,
+          "steering_step_id": null,
+          "interaction_id": null,
+          "interaction_assessment_id": null,
+          "expected_work_reality_revision_id": null
+        }
+      ],
+      "economics": {
+        "work_id": "89828393-b68b-5e62-aaf8-122766aea493",
+        "product_id": "a5aa1dae-78d5-4d3c-91f7-8f120d359160",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "015a5ec7-e71b-49ce-b856-9ef28233ab40",
+            "node_id": null,
+            "run_id": "cb3f64e8-bd97-4cc8-9965-d6532cfaa9a6",
+            "condition": "SATISFIED",
+            "attempt_count": 1,
+            "outcomes": [
+              "RESULT_READY"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:ff9fbb3b-48e4-47ec-bb6b-395e52dc6476"
+            ],
+            "execution_seconds": 128.299574,
+            "duration_observed": true,
+            "queue_wait_seconds": 56.646399,
+            "token_usage": {
+              "input_tokens": 137274,
+              "output_tokens": 17302,
+              "total_tokens": 154576,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 8,
+              "tool_effect": 17
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 137274,
+          "output_tokens": 17302,
+          "total_tokens": 154576,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 128.299574,
+        "queue_wait_seconds": 56.646399,
+        "wall_elapsed_seconds": 137.619571,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 2,
+        "first_pass_pwu_count": 1,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 108,
+        "resource_units": {
+          "inference_submission": 8,
+          "tool_effect": 17
+        },
+        "final_outcome": "READY"
+      },
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-03",
+      "trial": 3,
+      "signal": "NON_CANONICAL_CANDIDATE: bounded WIC schema repair lacked original cross-field authority invariants",
+      "architecture_owner": "WIC structured-result recovery",
+      "source_head": "a717777ad7cefb2b83dbdec59c4f0a6c069faab2",
+      "work_id": null,
+      "interaction_id": "0019b4c9-8226-4cb6-834f-f3de794fa815",
+      "result": {
+        "case": "GC-EX-03",
+        "trial": 3,
+        "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+        "work_id": null,
+        "elapsed_seconds": 178,
+        "human_acceptance": "PENDING",
+        "automatic_delivery_authorization": false,
+        "business_oracle": "NOT_YET_EVALUATED"
+      },
+      "attention": [],
+      "economics": {},
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
     }
   ]
 }

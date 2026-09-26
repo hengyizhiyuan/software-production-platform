@@ -93,6 +93,12 @@ def main():
                 and event['diagnostic_evidence'].get('final_condition') == 'READY'
                 and event['diagnostic_evidence'].get('attempt_budget') == 3
                 for event in acquisition)
+        if identity == 'GC-EX-15':
+            review = json.loads((root/'review-authority-oracle.json').read_text())
+            checks.update(exact_candidate_accepted=review.get('candidate_accepted') is True,
+                local_runtime_commit_only=review.get('local_runtime_commit_observed') is True,
+                remote_refs_unchanged=review.get('remote_unchanged') is True,
+                no_delivery_after_acceptance=review.get('no_delivery_authorization') is True)
         if identity == 'GC-EX-04':
             baseline = (Path(__file__).resolve().parents[3]/'.spg/stability-runtime'
                 /'fixture-sources/large-file/web/index.html').read_bytes()
@@ -151,6 +157,24 @@ def main():
                 and database.get('api_name_and_email_search') is True
                 and database.get('empty_search_has_no_results') is True,
             no_unrequested_product_surfaces=all(path in {'server.py','web/index.html','web/app.js','web/styles.css'} for path in paths))
+    elif identity in {'GC-IP-05','GC-IP-08'}:
+        browser = json.loads((root/'browser-oracle.json').read_text())
+        database = json.loads((root/'persistence-oracle.json').read_text())
+        checks['api_and_database_agree'] = database.get('api_and_database_agree') is True
+        if identity == 'GC-IP-05':
+            checks.update(feedback_form_submitted=browser.get('feedback_form_submitted') is True,
+                reload_shows_persisted_feedback=browser.get('reload_shows_persisted_feedback') is True,
+                existing_visibility_model=browser.get('team_visibility_in_existing_model') is True,
+                actual_feedback_persisted=any(row.get('message') == 'Golden persisted user feedback'
+                    for row in database.get('sqlite_rows', [])))
+        else:
+            checks.update(customer_create_and_edit=browser.get('create_form_submitted') is True
+                    and browser.get('edit_form_submitted') is True,
+                reload_restores_edit=browser.get('reload_preserves_customer_edit') is True,
+                actual_customer_persisted=any(row.get('name') == 'Golden managed edited customer'
+                    and row.get('email') == 'managed-edited@example.invalid' for row in database.get('sqlite_rows', [])))
+        checks['no_extra_product_surfaces'] = all(path in {'server.py','web/index.html','web/app.js','web/styles.css'}
+            or (path.startswith('migrations/') and path.endswith('.sql')) for path in paths)
     elif identity == 'GC-EX-10':
         attempt_record = root/'native-attempt.json'
         attempt = json.loads(attempt_record.read_text()) if attempt_record.exists() else {}
