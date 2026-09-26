@@ -52,6 +52,7 @@ class OrchestrationOutcome:
     work_status: WorkStatus | None
     stop_reason: OrchestrationStopReason
     operator_message: str | None = None
+    failure_kind: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -292,6 +293,7 @@ class ProductionOrchestrator:
                 OrchestrationStopReason.INFRASTRUCTURE_ERROR,
                 "Orchestration stopped on infrastructure error; operator "
                 f"review is required ({type(error).__name__}).",
+                failure_kind=type(error).__name__,
             )
         finally:
             with self._condition:

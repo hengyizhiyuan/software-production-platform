@@ -6,6 +6,12 @@ from spg.application.bootstrap import bootstrap
 from spg.config import Settings
 
 
+@pytest.mark.parametrize("human_request", ["给搜索页面加一个过滤按钮", "请加一项姓名字段", "加个保存按钮"])
+def test_chinese_counted_add_request_is_production_intent(human_request):
+    from spg.domain.response_contract import production_intent_evidence
+    assert production_intent_evidence(human_request).production_request is True
+
+
 def test_routes_and_design_terms_are_not_explicit_file_write_targets():
     from spg.application.work import WorkApplicationService
     assert WorkApplicationService._explicit_repository_paths(

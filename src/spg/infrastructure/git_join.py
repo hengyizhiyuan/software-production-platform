@@ -57,10 +57,17 @@ class GitJoinReconciler:
         for revision, tree in zip(parent_revisions, parent_trees):
             if self._required(repository, "rev-parse", f"{revision}^{{tree}}") != tree:
                 raise RepositoryRealityError("verified parent commit/tree Reality changed")
+            # Prepared workspaces can be independent clones made before branch
+            # outputs existed. Import exact verified objects without moving a
+            # ref or FETCH_HEAD, then compose in the destination object store.
+            self._required(workspace, "fetch", "--no-tags", "--no-write-fetch-head",
+                str(repository), revision)
+            if self._required(workspace, "rev-parse", f"{revision}^{{tree}}") != tree:
+                raise RepositoryRealityError("Join workspace did not acquire the exact verified parent")
         current = parent_revisions[0]
         conflicts: list[str] = []
         for index, following in enumerate(parent_revisions[1:], start=2):
-            result = self._run(repository, "merge-tree", "--write-tree", current, following)
+            result = self._run(workspace, "merge-tree", "--write-tree", current, following)
             lines = result.stdout.decode(errors="replace").splitlines()
             tree = lines[0].strip() if lines else ""
             if result.returncode not in (0, 1) or not _OBJECT_ID.fullmatch(tree):
@@ -80,7 +87,7 @@ class GitJoinReconciler:
                 "GIT_COMMITTER_DATE": "2000-01-01T00:00:00+00:00",
             })
             synthetic = self._run(
-                repository, "commit-tree", tree, "-p", current, "-p", following,
+                workspace, "commit-tree", tree, "-p", current, "-p", following,
                 env=environment,
             )
             if synthetic.returncode:

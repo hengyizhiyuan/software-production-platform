@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import re
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.steering import SteeringApplicationService
@@ -28,6 +29,7 @@ from spg.domain.guided_design import (
     GuidedDesignProjection,
 )
 from spg.domain.product import WorkMode, WorkRecord
+from spg.domain.response_contract import production_intent_evidence
 from spg.domain.steering import (
     RealityReference,
     RealityReferenceKind,
@@ -439,6 +441,26 @@ class GuidedDesignApplicationService:
             assessment = InteractionStore(unit_of_work.session).assessment(
                 admitted.source_assessment_id
             )
+            human_records = tuple(InteractionStore(unit_of_work.session).record(identity)
+                for identity in admitted.source_record_ids)
+            human_text = "\n".join(record.content for record in human_records if record is not None)
+            human_scope = re.sub(r"https?://[^\s<>()，。；]+", "", human_text)
+            bounded_feature = bool(re.search(
+                r"页面|表单|按钮|字段|列表|搜索|链接|功能|能力|"
+                r"\b(?:page|form|button|field|list|search|link|feature|capability)\b",
+                human_scope, re.IGNORECASE))
+            systemic_design = bool(re.search(
+                r"(?:设计|重构|搭建|重新规划).{0,24}(?:系统|平台|架构)|"
+                r"(?:完整|整个|整套).{0,12}(?:系统|平台|网站)|"
+                r"\b(?:design|redesign|rearchitect|build|create).{0,32}\b(?:system|platform|architecture)\b",
+                human_scope, re.IGNORECASE))
+            if (assessment is not None and not assessment.readiness.unresolved_material_questions
+                    and production_intent_evidence(human_text).production_request
+                    and bounded_feature and not systemic_design):
+                # The Human's admitted bounded feature outranks an advisory
+                # PRODUCT_SYSTEM frame or deferred repository questions. Ordinary
+                # Steering still inspects Reality and may escalate genuine risk.
+                return False
             frame = None if assessment is None else assessment.design_intent_frame
             return not bool(
                 assessment is not None

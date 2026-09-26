@@ -1493,6 +1493,33 @@ class PlanSteeringDriver:
             not self._stopping.is_set()
             and self.work_service.get_work(outcome.work_id).steering_enabled
         ):
+            if outcome.stop_reason is OrchestrationStopReason.INFRASTRUCTURE_ERROR:
+                with self.database.unit_of_work() as uow:
+                    store = NativeExecutionStore(uow.session)
+                    signature = canonical_digest({"boundary": "PRODUCTION_ORCHESTRATION",
+                        "reason": outcome.stop_reason.value, "failure_kind": outcome.failure_kind})
+                    event = SelfRefineEventRecord(id=uuid4(), work_id=outcome.work_id,
+                        operation_id=outcome.work_id, created_at=datetime.now(UTC), updated_at=datetime.now(UTC),
+                        failure_family="PRODUCTION_ORCHESTRATION_FAILURE", failure_signature=signature,
+                        affected_component="production/orchestration",
+                        signal_kind=RefinementSignalKind.EXECUTION_FAILURE,
+                        refinement_class=classify_refinement(converged=False, budget_exhausted=True),
+                        expected_reality={"outcome": "GOVERNED_PRODUCTION_PROGRESSION"},
+                        observed_reality={"stop_reason": outcome.stop_reason.value,
+                            "failure_kind": outcome.failure_kind},
+                        diagnosis_summary="Deterministic production stopped before an admissible next result.",
+                        root_cause_classification="PRODUCTION_ORCHESTRATION_FAILURE",
+                        repair_hypothesis="Preserve exact execution evidence; replay requires a qualified safe recipe.",
+                        evidence_references=(f"work:{outcome.work_id}",),
+                        final_result="ESCALATED", work_resume_result="NOT_RESUMED", status="MITIGATED",
+                        diagnostic_evidence={"qualified_safe_replay": False,
+                            "unexpected_error_is_not_pending_execution": True},
+                        budget_decision={"bounded": True, "automatic_replay_budget": 0})
+                    store.insert_self_refine_event(event)
+                    uow.commit()
+                self._observe_convergence(outcome.work_id, failed=True, boundary="PRODUCTION",
+                    failure_signature=signature, owner_budget_exhausted=True)
+                return
             self.schedule(outcome.work_id)
 
     def _restart_eligible(self, work_id: UUID) -> bool:

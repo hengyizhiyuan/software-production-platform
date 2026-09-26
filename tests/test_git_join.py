@@ -2,6 +2,7 @@
 
 import subprocess
 from pathlib import Path
+import pytest
 
 from spg.infrastructure.git_join import GitJoinReconciler
 
@@ -10,7 +11,8 @@ def _git(path: Path, *args: str) -> str:
     return subprocess.run(["git", "-C", str(path), *args], check=True, capture_output=True, text=True).stdout.strip()
 
 
-def test_real_join_composes_independent_branch_trees_without_moving_ref(tmp_path):
+@pytest.mark.parametrize("independent_clone", [False, True])
+def test_real_join_composes_independent_branch_trees_without_moving_ref(tmp_path, independent_clone):
     repository = tmp_path / "repo"
     repository.mkdir()
     _git(repository, "init", "-b", "main")
@@ -20,16 +22,19 @@ def test_real_join_composes_independent_branch_trees_without_moving_ref(tmp_path
     _git(repository, "add", ".")
     _git(repository, "commit", "-m", "base")
     base = _git(repository, "rev-parse", "HEAD")
+    workspace = tmp_path / "join"
+    if independent_clone:
+        _git(repository, "clone", "--no-local", str(repository), str(workspace))
     parents = []
-    for name in ("api", "web"):
+    for name in ("api", "web", "schema"):
         branch = tmp_path / f"branch-{name}"
         _git(repository, "worktree", "add", "--detach", str(branch), base)
         (branch / f"{name}.txt").write_text(f"{name}\n")
         _git(branch, "add", ".")
         _git(branch, "commit", "-m", name)
         parents.append(_git(branch, "rev-parse", "HEAD"))
-    workspace = tmp_path / "join"
-    _git(repository, "worktree", "add", "--detach", str(workspace), base)
+    if not independent_clone:
+        _git(repository, "worktree", "add", "--detach", str(workspace), base)
     trees = tuple(_git(repository, "rev-parse", f"{revision}^{{tree}}") for revision in parents)
     reconciler = GitJoinReconciler()
     first = reconciler.reconcile(
@@ -44,6 +49,7 @@ def test_real_join_composes_independent_branch_trees_without_moving_ref(tmp_path
     assert first.conflicts == ()
     assert (workspace / "api.txt").read_text() == "api\n"
     assert (workspace / "web.txt").read_text() == "web\n"
+    assert (workspace / "schema.txt").read_text() == "schema\n"
     assert _git(repository, "rev-parse", "refs/heads/main") == base
     assert _git(workspace, "rev-parse", "HEAD") == base
 

@@ -600,6 +600,29 @@ def test_repeated_steering_provider_failure_converges_to_durable_escalation(
         orchestrator.shutdown()
 
 
+def test_production_infrastructure_stop_is_durable_work_incident(postgres_database, product):
+    from spg.application.orchestration import OrchestrationOutcome, OrchestrationStopReason
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(postgres_database, works, orchestrator)
+    try:
+        driver._production_stopped(OrchestrationOutcome(admitted.work_id, 0, None,
+            OrchestrationStopReason.INFRASTRUCTURE_ERROR, failure_kind="RepositoryRealityError"))
+        with postgres_database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            events = store.list_self_refine_events(work_id=admitted.work_id, component="production/orchestration")
+            assert events[0].observed_reality["failure_kind"] == "RepositoryRealityError"
+            assert events[0].final_result == "ESCALATED"
+            assert store.work_convergence_history(admitted.work_id)[-1].condition == "NON_CONVERGING"
+        reconstructed = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
+        assert reconstructed.latest_decision.human_required is True
+        assert driver.activate(admitted.work_id).stop_reason is SteeringDriverStopReason.BLOCKED
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
+
+
 def test_sem_07_stale_semantic_candidate_is_rejected(
     postgres_database: Database,
     product,

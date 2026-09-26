@@ -700,3 +700,19 @@ also records Work `NON_CONVERGING` and admits a diagnostic Human Attention decis
 It cannot leave a READY Work idle indefinitely while only its local event says
 ESCALATED. Owner component identity selects open refinement events so one boundary
 cannot accidentally complete another boundary's repair lineage.
+
+Guided Design eligibility uses preserved Human records and current admission
+readiness. A bounded page, form, field or capability request bound to an existing
+repository is handled by ordinary Steering; an advisory `PRODUCT_SYSTEM` frame
+or deferred discovery question cannot inflate it into a whole-product governance
+agenda. Explicit systemic design and genuine material decisions retain Guided
+Design. Ordinary Steering still validates source necessity and completeness before
+planning, so bypassing an inapplicable questionnaire grants no extra write scope.
+
+Git Join imports exact verified parent commits into its prepared workspace without
+moving refs or FETCH_HEAD and composes trees there. Independent clones do not share
+newly generated source-repository objects implicitly. Repeated composition retains
+the same baseline, trees and evidence; verification remains mandatory. An unexpected
+deterministic production stop without a proved safe replay recipe emits a scoped
+orchestration failure and durable Work non-convergence/diagnostic attention, rather
+than leaving a RUNNING Work with no active execution.

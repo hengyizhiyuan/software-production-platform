@@ -116,17 +116,17 @@ _REPOSITORY_SIGNAL = re.compile(
     re.IGNORECASE,
 )
 _PRODUCTION_ACTION = re.compile(
-    r"(?:拉取|克隆|开发|修改|修复|新增|增加|添加|实现|改造|接入|升级|重构|改为|改成|替换|调整|启动|"
+    r"(?:拉取|克隆|开发|修改|修复|新增|增加|添加|加(?:一个|一项|一条|个|条)|实现|改造|接入|升级|重构|改为|改成|替换|调整|启动|"
     r"\b(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b)",
     re.IGNORECASE,
 )
 _DIRECT_REQUEST = re.compile(
-    r"(?:请|帮我|帮忙|需要你|给我|直接|把|将|我想(?:要|让)|我要|我希望|"
+    r"(?:请|帮我|帮忙|需要你|给我|^给.{0,24}(?:加(?:一个|一项|一条|个|条)|新增|增加|添加)|直接|把|将|我想(?:要|让)|我要|我希望|"
     r"\b(?:please|help\s+me|can\s+you|could\s+you)\b)",
     re.IGNORECASE,
 )
 _ACTION_OPENING = re.compile(
-    r"^\s*(?:请\s*)?(?:拉取|克隆|开发|修改|修复|新增|增加|添加|实现|改造|接入|升级|重构|"
+    r"^\s*(?:请\s*)?(?:拉取|克隆|开发|修改|修复|新增|增加|添加|加(?:一个|一项|一条|个|条)|实现|改造|接入|升级|重构|"
     r"(?:please\s+)?(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b)",
     re.IGNORECASE,
 )

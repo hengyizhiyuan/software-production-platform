@@ -1341,11 +1341,13 @@ def test_admission_bootstraps_revision_bound_steering_without_production(
 
 @pytest.mark.parametrize("mode", [DesignCollaborationMode.EXECUTION, DesignCollaborationMode.DESIGN])
 @pytest.mark.parametrize("constraints", [(), ("Keep the existing behavior outside the request",)])
+@pytest.mark.parametrize("framed_scope", ["implementation", "capability", "product"])
 def test_bounded_feature_execution_uses_steering_without_product_questionnaire(
     postgres_database: Database,
     services,
     mode,
     constraints,
+    framed_scope,
 ) -> None:
     work, _ = services
     class FeatureCapability(_BoundedFeatureExecutionCapability):
@@ -1354,7 +1356,9 @@ def test_bounded_feature_execution_uses_steering_without_product_questionnaire(
             return candidate.model_copy(update={
                 "candidate_constraints": constraints,
                 "design_intent_frame": candidate.design_intent_frame.model_copy(
-                    update={"collaboration_mode": mode}),
+                    update={"collaboration_mode": mode,
+                        "scope_level": DesignScopeLevel(framed_scope),
+                        "object_type": DesignObjectType.PRODUCT_SYSTEM if framed_scope == "product" else DesignObjectType.FEATURE}),
             })
     interactions = WorkInteractionService(
         postgres_database, capability=FeatureCapability()
