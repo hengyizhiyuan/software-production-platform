@@ -771,6 +771,8 @@ def create_http_application(
         state = "NOT_REQUESTED"
         metrics = None
         failures = []
+        project_observation = None
+        synthesis_refinements = []
         for event in observed:
             if event.event_type.value == "SEARCH_STARTED":
                 state = "IN_PROGRESS"
@@ -780,10 +782,20 @@ def create_http_application(
                     evidence[item["evidence_id"]] = item
             elif event.event_type.value == "SEARCH_FAILED":
                 failures.append(event.metadata)
+            elif event.event_type.value == "PROJECT_RESEARCH_EVIDENCE":
+                item = event.metadata.get("repository_observation", {})
+                project_observation = {key: item.get(key) for key in (
+                    "condition", "repository_identity", "revision", "tree", "observed_at",
+                    "intake_request_id", "bounded_inspection", "failure_category")}
+                project_observation["materials"] = [{key: material.get(key) for key in (
+                    "path", "content_sha256", "truncated")} for material in item.get("materials", [])]
+            elif (event.event_type.value == "SEARCH_REFINEMENT"
+                    and event.metadata.get("boundary") == "external-research/synthesis"):
+                synthesis_refinements.append(event.metadata)
             elif event.event_type.value == "SEARCH_COMPLETED":
                 metrics = event.metadata.get("metrics")
                 state = (
-                    "PARTIAL" if evidence and failures else
+                    "PARTIAL" if evidence and (failures or not (metrics or {}).get("sufficient")) else
                     "COMPLETED" if evidence else
                     "BLOCKED" if any(item.get("category") == "CREDENTIAL_REQUIRED" for item in failures)
                     else "FAILED"
@@ -791,7 +803,9 @@ def create_http_application(
         if state == "IN_PROGRESS" and turn.status.value == "FAILED":
             state = "FAILED"
         return {"state": state, "evidence": list(evidence.values()),
-                "metrics": metrics, "failures": failures}
+                "metrics": metrics, "failures": failures,
+                "project_observation": project_observation,
+                "synthesis_refinements": synthesis_refinements}
 
     @api.post(
         "/api/interactions/{interaction_id}/turns/{turn_id}/retry",

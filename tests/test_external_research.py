@@ -349,6 +349,8 @@ def test_project_specific_research_supplies_committed_asset_evidence_without_wor
             return SimpleNamespace(output_text=json.dumps({
                 "observations": [{"evidence_id":"external-search:one", "fact":"Documented queue API"}],
                 "comparison":"Use a framework-neutral adapter in the observed Python server.",
+                "project_recommendation":"Reuse the observed Python HTTP server; do not assume a frontend framework.",
+                "project_evidence_paths":["server.py"],
                 "limitations":"The repository observation is bounded.",
                 "cited_evidence_ids":["external-search:one"]}), usage=SimpleNamespace(total_tokens=100))
     service, resolver = _research(_GitHub(((_evidence("one"), _evidence("two", 2)),)))
@@ -367,6 +369,40 @@ def test_project_specific_research_supplies_committed_asset_evidence_without_wor
         for kind, details in events)
     assert all(not record_gap for _, record_gap, _ in resolver.calls)
     assert "github.repository.search" in {call[0] for call in resolver.calls}
+
+
+@pytest.mark.parametrize("recover", [True, False])
+def test_synthesis_invalid_citations_are_bounded_and_never_claim_grounded_advice(recover):
+    calls, events = [], []
+    class Model:
+        def generate(self, *, input_text, **_):
+            packet = json.loads(input_text)
+            calls.append(packet)
+            valid = recover and len(calls) == 2
+            return SimpleNamespace(output_text=json.dumps({
+                "observations": [{"evidence_id":"external-search:one", "fact":"Observed API"}],
+                "comparison":"A bounded implementation comparison.", "limitations":"Bounded observation.",
+                "cited_evidence_ids":["external-search:one" if valid else "external-search:invented"],
+                "project_recommendation":"Adapt the API in the observed server.",
+                "project_evidence_paths":["server.py"]}), usage=SimpleNamespace(total_tokens=100))
+    service, _ = _research(_GitHub(((_evidence("one"), _evidence("two", 2)),)))
+    service.model = Model()
+    failures = []
+    answer, tokens = service._synthesize("Recommend for this project", (_evidence("one", inspected=True),),
+        failures, project_context={"condition":"READY","materials":[{"path":"server.py"}],
+            "revision":"a"*40,"repository_identity":"https://github.com/owner/project.git"},
+        on_event=lambda kind, details: events.append((kind, details)))
+    assert len(calls) == 2 and calls[1]["validation_feedback"]
+    assert tokens == 200
+    assert all(details["attempt_budget"] == 2 and not details["authority_expanded"] for _, details in events)
+    if recover:
+        assert "项目建议：Adapt the API" in answer and not failures
+        assert len(events) == 1
+    else:
+        assert "尚未形成通过来源校验的综合建议" in answer
+        assert "项目建议：" not in answer
+        assert failures == [SearchFailure.INSUFFICIENT_EVIDENCE]
+        assert len(events) == 2
 
 
 def test_http_rate_limit_is_not_misreported_as_no_results(monkeypatch):

@@ -141,3 +141,14 @@ observed before questioning Human. Qualification: 72 governed admission scope te
 passed (`/tmp/watt-stability-maintenance-scope-pg-qualified.log`); full targeted Native
 owner tests passed 51 (`/tmp/watt-stability-lease-owner-broad.log`); project research
 through actual Turn/event persistence passed 4 (`/tmp/watt-stability-project-research-turn-pg.log`).
+
+
+### Final independent interaction and persistence qualification
+
+EX-13 trials 5–6, IP-02 trials 6–7, and IP-07 trials 3–4 reached real Browser/API/SQLite business outcomes. EX-13 now has three independent successful multi-surface/Join trials; IP-02 and IP-07 likewise have three successful trials. Harness assumptions about the SQL column `notes` versus observed `note`, and query parameter `q` versus observed `search`, were corrected using source evidence. Initial oracle FAIL records remain preserved. One corrected oracle uses explicitly retired runtime evidence and does not claim its endpoint remains available.
+
+EX-10 trial 8 passed actual compiler-failure/repair/success receipts and Preview. EX-10 trial 9 and IP-08 trial 7 exhausted their three Preview attempts because Docker default address pools were exhausted; preserved diagnostics identify infrastructure capacity. Completed qualification runtimes were retired with all volumes retained before fresh independent trials. No old Work was manually rescued.
+
+EX-11 trial 5 inspected exact repository source before legitimately escalating the unavailable external secret. It stopped before dispatching an impossible PWU, preserving the semantic receipt and convergence observation. Its negative acceptance oracle passes bounded detection/escalation; it does not claim successful startup or Native execution.
+
+Real research trial 3 observed exact project sources and real GitHub sources, but synthesis fell back to a list without a project recommendation. The owner now validates recommendation/path grounding and permits one bounded correction, with explicit incomplete status at exhaustion. Targeted search units: 19 passed; persisted Turn/provenance API checks: 4 passed. Fresh real provider qualification is still required. Brave credentials remain absent; full GitHub+Web qualification is not inferred.

@@ -41,12 +41,16 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--directory',type=Path,required=True)
     parser.add_argument('--base',required=True)
+    parser.add_argument('--browser-record', default='browser-oracle.json')
+    parser.add_argument('--database-record', default='persistence-oracle.json')
+    parser.add_argument('--historical-runtime', action='store_true',
+        help='Reconcile retained evidence after explicit runtime retirement; never restart Preview')
     parser.add_argument('--env-file',type=Path,required=True)
     parser.add_argument('--record-name', default='business-oracle.json',
         help='A new evidence identity; existing oracle records are never replaced')
     args=parser.parse_args()
     root=args.directory
-    if Path(args.record_name).name != args.record_name:
+    if any(Path(value).name != value for value in (args.record_name, args.browser_record, args.database_record)):
         raise SystemExit('Evidence record name must be a single filename')
     output=root/args.record_name
     if output.exists(): raise SystemExit('Oracle record already exists; do not rewrite historical results')
@@ -59,12 +63,25 @@ def main():
                 'Authorization':'Bearer '+env['SPG_OPERATOR_TOKEN'],'Content-Type':'application/json'})
         return urllib.request.urlopen(request,timeout=20).read().decode()
     work_id=state['work']['work_id']; prefix='/api/works/'+work_id
-    meta=json.loads(read(prefix+'/candidate-preview',{}))
-    diff=read(prefix+'/candidate-code-diff/'+meta['candidate_fingerprint'])
-    (root/'candidate.diff').write_text(diff)
-    preview=json.loads(read(prefix+'/functional-preview'))
-    body=urllib.request.urlopen(preview['session']['endpoint'],timeout=20).read().decode()
-    (root/'served.html').write_text(body)
+    if args.historical_runtime:
+        retired=json.loads((root/'runtime-retirement.json').read_text())
+        prior=json.loads((root/'business-oracle.json').read_text())
+        preview=state['preview']
+        session=preview['session']
+        if (retired['prior_status'] != 'READY' or retired['preview_id'] != session['id']
+                or prior['candidate_revision'] != session['repository_revision']
+                or prior['candidate_tree'] != session['repository_tree']):
+            raise SystemExit('Historical source/runtime identity does not agree')
+        meta={'repository_revision':prior['candidate_revision'], 'tree':prior['candidate_tree']}
+        diff=(root/'candidate.diff').read_text()
+        body=(root/'served.html').read_text()
+    else:
+        meta=json.loads(read(prefix+'/candidate-preview',{}))
+        diff=read(prefix+'/candidate-code-diff/'+meta['candidate_fingerprint'])
+        (root/'candidate.diff').write_text(diff)
+        preview=json.loads(read(prefix+'/functional-preview'))
+        body=urllib.request.urlopen(preview['session']['endpoint'],timeout=20).read().decode()
+        (root/'served.html').write_text(body)
     paths=[line.split(' b/',1)[1] for line in diff.splitlines() if line.startswith('diff --git')]
     added=[line[1:] for line in diff.splitlines() if line.startswith('+') and not line.startswith('+++')]
     removed=[line[1:] for line in diff.splitlines() if line.startswith('-') and not line.startswith('---')]
@@ -131,9 +148,9 @@ def main():
                     'old_text' in effect['semantic_input'] and 'new_text' in effect['semantic_input']
                     and 'content' not in effect['semantic_input'] for effect in writes))
     elif identity in {'GC-EX-03','GC-EX-05'}:
-        checks.update(browser_dialog_oracle=(root/'browser-oracle.json').exists())
+        checks.update(browser_dialog_oracle=(root/args.browser_record).exists())
         if checks['browser_dialog_oracle']:
-            checks['actual_cancel_closes_dialog']=json.loads((root/'browser-oracle.json').read_text()).get('cancel_closes') is True
+            checks['actual_cancel_closes_dialog']=json.loads((root/args.browser_record).read_text()).get('cancel_closes') is True
         if identity == 'GC-EX-05':
             attempt = json.loads((root/'native-attempt.json').read_text())
             receipts = {item['delivery_id']: item for step in attempt.get('steps', [])
@@ -147,7 +164,7 @@ def main():
                     and event.get('observed_reality', {}).get('failure_code') == 'CAPABILITY_PATH_INVALID'
                     for event in state.get('refinement', {}).get('events', [])))
     elif identity == 'GC-EX-08':
-        browser = json.loads((root/'browser-oracle.json').read_text())
+        browser = json.loads((root/args.browser_record).read_text())
         choice = json.loads((root/'human-clarification.json').read_text())
         checks.update(header_only_prominent=browser.get('header_only_prominent') is True,
             one_genuine_scope_choice=choice.get('question_count') == 1,
@@ -158,14 +175,14 @@ def main():
                     for selector in block.split(','))
                     for block in re.findall(r'([^{}]+)\{[^{}]*\}', '\n'.join(added))))
     elif identity == 'GC-IP-06':
-        browser = json.loads((root/'browser-oracle.json').read_text())
-        database = json.loads((root/'persistence-oracle.json').read_text())
+        browser = json.loads((root/args.browser_record).read_text())
+        database = json.loads((root/args.database_record).read_text())
         checks.update(dynamic_metrics_match_actual_records=browser.get('dynamic_metrics_after_new_business_records') is True,
             api_and_database_agree=database.get('api_and_database_agree') is True,
             only_available_domains=set(database.get('expected_metrics', {})) == {'users','customers','orders','total'})
     elif identity == 'GC-IP-07':
-        browser = json.loads((root/'browser-oracle.json').read_text())
-        database = json.loads((root/'persistence-oracle.json').read_text())
+        browser = json.loads((root/args.browser_record).read_text())
+        database = json.loads((root/args.database_record).read_text())
         choice = json.loads((root/'human-clarification.json').read_text())
         checks.update(one_genuine_domain_choice=choice.get('question_count') == 1,
             name_and_email_search=browser.get('name_search_selected_user_only') is True
@@ -177,8 +194,8 @@ def main():
                 and database.get('empty_search_has_no_results') is True,
             no_unrequested_product_surfaces=all(path in {'server.py','web/index.html','web/app.js','web/styles.css'} for path in paths))
     elif identity in {'GC-IP-05','GC-IP-08'}:
-        browser = json.loads((root/'browser-oracle.json').read_text())
-        database = json.loads((root/'persistence-oracle.json').read_text())
+        browser = json.loads((root/args.browser_record).read_text())
+        database = json.loads((root/args.database_record).read_text())
         checks['api_and_database_agree'] = database.get('api_and_database_agree') is True
         if identity == 'GC-IP-05':
             checks.update(feedback_form_submitted=browser.get('feedback_form_submitted') is True,
@@ -195,8 +212,8 @@ def main():
         checks['no_extra_product_surfaces'] = all(path in {'server.py','web/index.html','web/app.js','web/styles.css'}
             or (path.startswith('migrations/') and path.endswith('.sql')) for path in paths)
     elif identity == 'GC-IP-03':
-        browser = json.loads((root/'browser-oracle.json').read_text())
-        database = json.loads((root/'persistence-oracle.json').read_text())
+        browser = json.loads((root/args.browser_record).read_text())
+        database = json.loads((root/args.database_record).read_text())
         checks.update(actual_order_fields=browser.get('actual_order_fields') == ['customer_id','total','status'],
             grounded_status_model=browser.get('open_status_input_preserved') is True,
             no_invented_logistics_refunds=browser.get('no_logistics_or_refunds') is True,
@@ -220,8 +237,8 @@ def main():
                 and result['output'].get('returncode') == 0 for result in compilation),
             in_scope_source_repair=paths == ['server.py'] and len(added) == len(removed) == 1)
     elif identity in {'GC-EX-09', 'GC-IP-04'}:
-        browser_record = root/'browser-oracle.json'
-        database_record = root/'persistence-oracle.json'
+        browser_record = root/args.browser_record
+        database_record = root/args.database_record
         browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}
         database = json.loads(database_record.read_text()) if database_record.exists() else {}
         checks['api_and_real_database_agree'] = database.get('api_and_database_agree') is True
@@ -243,13 +260,13 @@ def main():
                     and row.get('email') == 'golden-profile@example.invalid' for row in database.get('sqlite_rows', [])),
                 existing_identity_boundary_preserved=all(path in {'web/app.js', 'web/index.html', 'web/styles.css'} for path in paths))
     elif identity == 'GC-IP-01':
-        browser_record = root/'browser-oracle.json'
+        browser_record = root/args.browser_record
         browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}
         checks.update(about_page_observed=browser.get('about_page_reachable') is True,
             no_unsupported_content_claims=browser.get('unsupported_contact_reference') is False)
     elif identity in {'GC-EX-13', 'GC-IP-02'}:
-        browser_record = root/'browser-oracle.json'
-        database_record = root/'persistence-oracle.json'
+        browser_record = root/args.browser_record
+        database_record = root/args.database_record
         browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}
         database = json.loads(database_record.read_text()) if database_record.exists() else {}
         checks['api_and_real_database_agree'] = database.get('api_and_database_agree') is True
@@ -259,7 +276,7 @@ def main():
                 edit_form_submitted=browser.get('edit_form_submitted') is True,
                 reload_preserves_edit=browser.get('reload_restores_edited_note') is True,
                 persisted_edited_note=any(row.get('name') == 'Golden note customer'
-                    and row.get('notes') == 'Golden persisted edited note' for row in rows),
+                    and row.get(browser.get('observed_note_field', 'notes')) == 'Golden persisted edited note' for row in rows),
                 migration_present=any(path.endswith('.sql') for path in paths))
             plan = state['work'].get('production_plan_runtime') or {}
             nodes = plan.get('pwus', [])
@@ -278,6 +295,7 @@ def main():
         'status':'PASS' if all(value is True for value in checks.values()) else
             ('NOT_EVALUATED' if any(value is None for value in checks.values()) else 'FAIL'),
         'candidate_revision':meta['repository_revision'],'candidate_tree':meta['tree'],
+        'browser_evidence_record':args.browser_record,'persistence_evidence_record':args.database_record,'historical_runtime_evidence':args.historical_runtime,
         'changed_paths':paths,'preview_endpoint':preview['session']['endpoint'],
         'human_acceptance':'PENDING','manual_rescue_actions':[]}
     output.write_text(json.dumps(result,ensure_ascii=False,indent=2))

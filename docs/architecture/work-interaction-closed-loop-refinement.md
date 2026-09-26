@@ -818,3 +818,6 @@ candidate outside those governed prerequisites must still pass complete Human-in
 validation and cannot replace an admitted working-software outcome. Repository-derived
 runtime facts are observed before Human questioning; missing external secrets remain
 Human-owned at the boundary where evidence proves they prevent execution.
+
+
+External research synthesis uses the same Candidate → boundary validation → bounded correction semantics. The owner validates exact retrieved-source citations and, for project-specific advice, an explicit recommendation supported by inspected committed project paths. One same-authority correction is allowed within the existing time/token budget. Exhaustion leaves the source records available but marks the recommendation incomplete; it never promotes a source list into completed advisory work. Turn evidence exposes bounded project identity/provenance and synthesis correction receipts separately from production authority.

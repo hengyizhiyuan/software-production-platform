@@ -222,3 +222,11 @@ def test_project_research_observation_survives_real_turn_event_persistence(postg
     projection = service.get_shared_understanding(interaction.id)
     assert projection.governed_work_id is None
     assert "commit " + "a" * 40 in projection.conversation_messages[-1].content
+    app = create_http_application(Application(Settings(database_url=os.environ["SPG_TEST_DATABASE_URL"])),
+        database=postgres_database, interaction_service=service)
+    with TestClient(app) as client:
+        result = client.get(f"/api/interactions/{interaction.id}/turns/{turn.id}/external-evidence").json()
+    assert result["project_observation"]["revision"] == "a" * 40
+    assert result["project_observation"]["materials"][0]["path"] == "server.py"
+    assert "content" not in result["project_observation"]["materials"][0]
+    assert result["synthesis_refinements"] == []
