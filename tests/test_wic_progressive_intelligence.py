@@ -220,15 +220,16 @@ def test_provider_turn_intent_survives_deterministic_semantic_admission() -> Non
     assert result.turn_intent is ConversationTurnIntent.BUILD
 
 
-@pytest.mark.parametrize("question", [
-    "Which exact feature should be added?",
-    "需要收集哪些用户字段，以及提交后的数据保存在哪里？",
-    "Which existing API and data model fields should this page use?",
-    "Who provides the startup external service secret and how is it injected?",
-    "由谁提供启动所需的外部服务密钥，以及以何种安全方式注入运行环境？",
+@pytest.mark.parametrize("question,human_request", [
+    ("Which exact feature should be added?", None),
+    ("需要收集哪些用户字段，以及提交后的数据保存在哪里？", None),
+    ("Which existing API and data model fields should this page use?", None),
+    ("Who provides the startup external service secret and how is it injected?", None),
+    ("由谁提供启动所需的外部服务密钥，以及以何种安全方式注入运行环境？", None),
+    ("外部服务密钥的值或安全提供方式是什么？", "启动 https://github.com/acme/shop 项目并给我实际预览。"),
 ])
-def test_repository_production_request_is_admission_ready_before_feature_refinement(question) -> None:
-    text = (
+def test_repository_production_request_is_admission_ready_before_feature_refinement(question, human_request) -> None:
+    text = human_request or (
         "Please pull https://github.com/acme/shop and add new features; "
         "the exact feature can be refined after repository discovery."
     )

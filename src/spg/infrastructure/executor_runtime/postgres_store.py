@@ -608,7 +608,8 @@ class NativeExecutionStore:
     ) -> None:
         result = self.session.execute(
             update(execution_steps)
-            .where(execution_steps.c.id == step_id)
+            .where(execution_steps.c.id == step_id,
+                   execution_steps.c.condition == StepCondition.RUNNING.value)
             .values(
                 condition=condition,
                 result_payload=dict(result_payload),
@@ -617,7 +618,7 @@ class NativeExecutionStore:
             )
         )
         if result.rowcount != 1:
-            raise NativeExecutionNotFound(f"execution step not found: {step_id}")
+            raise NativeExecutionConflict(f"execution step is missing or no longer running: {step_id}")
 
     def insert_effect(self, record: ExecutionEffectRecord) -> None:
         self.session.execute(insert(execution_effects).values(**record.model_dump(mode="json")))

@@ -100,3 +100,27 @@ About content without unsupported organizational/contact claims. GC-IP-05 trial 
 and GC-IP-08 trial 5 passed actual form/API/SQLite and reload observations.
 GC-IP-03 trial 2 and GC-EX-03 trial 3 are retained failures, not green Preview scores.
 Final Full Regression and Human Acceptance remain PENDING.
+
+GC-EX-10 trial 5 passed actual compiler failure, fresh source confirmation, bounded
+source repair, successful Native compilation and automatic Preview. GC-EX-03 trial 4,
+GC-EX-05 trial 6, GC-EX-06 trial 3 and GC-EX-07 trial 3 passed their business oracles.
+GC-IP-03 trial 3 created an actual order, retained the existing open status vocabulary,
+and showed matching API/SQLite rows after reload. Human Acceptance remains PENDING.
+
+GC-EX-14 trial 1 observed a settled checkpoint and pure in-flight inference before
+declared Worker loss, but the old coordinator fenced it UNKNOWN. This failed runtime
+is preserved without Work rescue. Lease classification now distinguishes inference
+interruption from unresolved effects, preserves UNKNOWN Provider usage, rejects late
+results/expired-epoch tools, and applies existing bounded Self-Converge governance.
+Five targeted PostgreSQL checks passed (`/tmp/watt-stability-worker-convergence-pg.log`).
+Repository research owner observation plus recovery checks passed five targeted
+PostgreSQL checks (`/tmp/watt-stability-worker-research-owner-pg.log`).
+
+GC-EX-11 trial 3 retained the premature secret question as a failure. Runtime-stage
+sufficiency now considers the exact Human startup request as well as question wording.
+GC-EX-12 trial 1 retained incorrect production admission and missing project inspection;
+research noun references now remain advisory, while explicit later change clauses
+retain production authority. Project synthesis uses existing Asset source observation
+without a production Work. WIC/research/source-authority checks passed 145 unit checks
+(`/tmp/watt-stability-research-recovery-scope.log`). Fresh runtime requalification is
+required for these owner changes; no Full Regression PASS is claimed here.

@@ -86,6 +86,32 @@ def test_acquired_repository_creates_and_reuses_owner_product(
     assert product["assets"][0]["reference"] == observation["repository_identity"]
 
 
+def test_research_intake_observes_exact_source_without_work_or_source_mutation(
+    postgres_database, tmp_path: Path,
+) -> None:
+    repository = tmp_path / "imports" / "research-project"
+    repository.mkdir(parents=True)
+    _git(repository, "init", "-b", "main")
+    _git(repository, "config", "user.name", "Qualification")
+    _git(repository, "config", "user.email", "qualification@example.invalid")
+    (repository / "README.md").write_text("# Python HTTP project\n")
+    (repository / "server.py").write_text("from http.server import HTTPServer\n")
+    (repository / ".env").write_text("SHOULD_NOT_ENTER_MODEL_PACKET=placeholder\n")
+    _git(repository, "add", ".")
+    _git(repository, "commit", "-m", "research baseline")
+    head, refs = _git(repository, "rev-parse", "HEAD"), _git(repository, "show-ref")
+    assets = RepositoryAssetService(postgres_database, tmp_path / "assets", tmp_path / "imports")
+    context = assets.research_context(turn_id=uuid4(), interaction_id=uuid4(),
+        source=str(repository), authority_identity="human:research")
+    assert context["condition"] == "READY"
+    assert context["revision"] == head
+    assert {item["path"] for item in context["materials"]} == {"README.md", "server.py"}
+    assert _git(repository, "status", "--porcelain") == ""
+    assert _git(repository, "show-ref") == refs
+    assert assets.list_assets()[0]["work_id"] is None
+    assert not assets.list_assets()[0]["selected_for_production"]
+
+
 def test_p1_q4_brownfield_intake_product_work_and_delivery_boundary(
     postgres_database, tmp_path: Path,
 ) -> None:

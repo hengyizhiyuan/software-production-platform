@@ -135,6 +135,16 @@ _ADVISORY_OPENING = re.compile(
     r"^\s*(?:如何|怎么|怎样|有什么办法|how\s+(?:do|can|should)\s+i\b)",
     re.IGNORECASE,
 )
+_RESEARCH_OPENING = re.compile(
+    r"^\s*(?:(?:请|帮我|帮忙)\s*)?(?:搜索|检索|查找|查下|搜下|调研|研究|"
+    r"(?:please\s+)?(?:search|research|find|look\s+up)\b)", re.IGNORECASE,
+)
+_REQUEST_CLAUSES = re.compile(
+    r"[\n，,；;。]|(?:然后|再|并|and\s+then|then|and)\s*(?="
+    r"(?:请|帮我|直接|把|将|拉取|克隆|开发|修改|修复|新增|增加|添加|实现|改造|接入|升级|重构|"
+    r"(?:please\s+)?(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b))",
+    re.IGNORECASE,
+)
 _REQUESTED_SOFTWARE_OUTCOME = re.compile(
     r"(?:我想(?:要|让)|我要|我希望|希望).*(?:页面|功能|能力|系统|网站|应用|支持)",
     re.IGNORECASE,
@@ -176,9 +186,20 @@ def production_intent_evidence(text: str) -> ProductionIntentEvidence:
         else url_match.group(0).rstrip(".,;:!?)]}，。；：！？")
     )
     repository_relevant = bool(repository_source or _REPOSITORY_SIGNAL.search(value))
-    action_requested = bool(_PRODUCTION_ACTION.search(value)
-        or _REQUESTED_SOFTWARE_OUTCOME.search(value))
-    advisory_question = bool(_ADVISORY_OPENING.search(value))
+    # Research references to implementations are not instructions to implement.
+    # Evaluate change clauses separately so "search, then implement" retains
+    # its explicit execution authority without promoting cited source prose.
+    clauses = tuple(part.strip() for part in _REQUEST_CLAUSES.split(
+        _HTTPS_REPOSITORY.sub("", value)) if part.strip())
+    research_context = any(_RESEARCH_OPENING.search(part) for part in clauses)
+    execution_clauses = tuple(part for part in clauses
+        if not _RESEARCH_OPENING.search(part) and not _ADVISORY_OPENING.search(part)
+        and (not research_context or _ACTION_OPENING.search(part)
+             or (_DIRECT_REQUEST.search(part) and _PRODUCTION_ACTION.search(part))))
+    action_requested = any(_PRODUCTION_ACTION.search(part)
+        or _REQUESTED_SOFTWARE_OUTCOME.search(part) for part in execution_clauses)
+    advisory_question = bool(_ADVISORY_OPENING.search(value)
+        or (research_context and not action_requested))
     explicit_request = bool(
         _DIRECT_REQUEST.search(value) or _ACTION_OPENING.search(value)
     )

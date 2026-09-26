@@ -303,6 +303,32 @@ def test_chinese_add_link_with_repository_and_preview_is_production_request():
     assert evidence.action_requested
 
 
+@pytest.mark.parametrize("human_text", [
+    "搜索 GitHub 和 Web 中成熟的表单验证实现，结合当前项目建议该如何使用，并给出真实来源。",
+    "帮我查下 GitHub 上有没有能增加缓存的实现，给出建议。",
+    "Search GitHub for implementations that add caching and recommend one for this project.",
+    "Research libraries that implement validation for our repository.",
+])
+def test_repository_research_references_do_not_admit_production(human_text):
+    evidence = production_intent_evidence(
+        "这是项目仓库：https://github.com/example/project.git\n" + human_text)
+    assert evidence.repository_relevant
+    assert not evidence.production_request
+    assert not evidence.action_requested
+
+
+@pytest.mark.parametrize("human_text", [
+    "搜索成熟实现，然后实现当前项目的验证功能。",
+    "搜索 GitHub 中可用的库，并修改当前项目的验证逻辑。",
+    "Search GitHub for libraries, then implement validation in this repository.",
+    "Research libraries and fix this repository's validation bug.",
+    "实现当前项目的验证功能。",
+])
+def test_research_with_explicit_change_clause_retains_production(human_text):
+    assert production_intent_evidence(
+        "https://github.com/example/project.git\n" + human_text).production_request
+
+
 def test_capability_alignment_cannot_claim_production_without_a_capability_match():
     with pytest.raises(ValidationError, match="requires an evidenced Watt capability match"):
         CapabilityAlignmentContext(

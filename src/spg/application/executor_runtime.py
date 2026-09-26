@@ -47,6 +47,9 @@ from spg.domain.native_execution import (
     SchedulingDecision,
     SessionCondition,
     StepCondition,
+    StepKind,
+    ResourceReservationCondition,
+    UsageCertainty,
     WorkerLeaseRecord,
     WorkerOffer,
     canonical_digest,
@@ -920,7 +923,8 @@ class NativeExecutorRuntimeService:
                         if family == "VERIFICATION_FAILURE"
                         else RefinementSignalKind.EXECUTION_FAILURE
                     ),
-                    affected_component="native-executor/provider",
+                    affected_component=("native-executor/lease-recovery"
+                        if family == "WORKER_LEASE_LOST" else "native-executor/provider"),
                     expected_reality={"outcome": "RESULT_READY", "contract_digest": binding.pwu_contract_digest},
                     observed_reality={
                         "runtime_mode": result.runtime_mode.value,
@@ -1095,7 +1099,7 @@ class NativeExecutorRuntimeService:
     def _runtime_repairability(
         family: str, contract_payload: dict,
     ) -> RepairabilityClassification:
-        if family in {"PROVIDER_TRANSPORT", "PROVIDER_CAPACITY", "RUNTIME_HEALTH", "STARTUP_HEALTH"}:
+        if family in {"PROVIDER_TRANSPORT", "PROVIDER_CAPACITY", "RUNTIME_HEALTH", "STARTUP_HEALTH", "WORKER_LEASE_LOST"}:
             return RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
         if family in {"AUTH_REQUIRED", "MISSING_HUMAN_INPUT"}:
             return RepairabilityClassification.REQUIRES_HUMAN_INPUT
@@ -1141,6 +1145,7 @@ class NativeExecutorRuntimeService:
         reversible = family in {
             "PROVIDER_TRANSPORT", "PROVIDER_CAPACITY", "RUNTIME_PROVIDER_FAILURE",
             "RUNTIME_HEALTH", "STARTUP_HEALTH",
+            "WORKER_LEASE_LOST",
             "REPOSITORY_REALITY_MISMATCH",
         }
         attempt_limit = min(
@@ -1386,10 +1391,72 @@ class NativeExecutorRuntimeService:
                         EffectCondition.FAILED,
                     }
                     for effect in effects
-                ) or any(step.condition is StepCondition.RUNNING for step in steps)
+                ) or any(
+                    step.condition is StepCondition.RUNNING
+                    and step.kind is not StepKind.INFERENCE
+                    for step in steps
+                )
                 store.release_allocation(allocation.id, expired=True)
                 if not unresolved:
+                    # An interrupted inference has no Tool effect to reconcile.
+                    # Retain unknown Provider consumption and reject late results;
+                    # do not refund its budget or replay settled deliveries.
+                    interrupted = tuple(
+                        step for step in steps
+                        if step.condition is StepCondition.RUNNING
+                        and step.kind is StepKind.INFERENCE
+                    )
+                    binding = store.attempt_binding(lease.attempt_id).binding
+                    for step in interrupted:
+                        evidence = {"reason": "WORKER_LEASE_EXPIRED",
+                                    "worker_epoch": lease.epoch,
+                                    "response_observed": False,
+                                    "tool_effect_uncertainty": False}
+                        store.finish_step(
+                            step.id, condition=StepCondition.INTERRUPTED.value,
+                            result_payload=evidence,
+                            result_digest=canonical_digest(evidence), finished_at=now,
+                        )
+                        store.settle_resource_usage(
+                            envelope_id=binding.resource_envelope.envelope_id,
+                            reservation_key=f"inference:{step.id}",
+                            resource_type="inference_submission",
+                            certainty=UsageCertainty.UNKNOWN,
+                            condition=ResourceReservationCondition.UNKNOWN,
+                            evidence=evidence,
+                        )
                     queue = store.queue_entry(allocation.queue_entry_id)
+                    restart_terminal, _ = self._record_self_refine(
+                        store, allocation=allocation, queue=queue,
+                        result=KernelRunResult(
+                            runtime_mode=ExecutionMode.WAITING_RESOURCE,
+                            final_checkpoint_id=checkpoint.id if checkpoint else None,
+                            step_count=max((step.sequence for step in steps), default=0),
+                            inference_submissions=len(interrupted), tool_effects=0,
+                            summary="Worker lease expired with a settled effect journal",
+                            failure_family="WORKER_LEASE_LOST",
+                            observation_evidence={"stable_failure": True},
+                        ),
+                    )
+                    if restart_terminal is not None:
+                        store.set_queue_condition(queue.id, expected_version=queue.version,
+                            condition=QueueCondition.COMPLETED,
+                            wait_reason="Worker restart convergence budget exhausted")
+                        store.update_attempt_state(lease.attempt_id,
+                            expected_version=state.version, values={
+                                "grant_state": AttemptGrantState.RELEASED,
+                                "runtime_mode": ExecutionMode.FINISHED,
+                                "terminal_outcome": restart_terminal,
+                                "effect_uncertainty": False,
+                                "blocker_reasons": ("Worker restart convergence budget exhausted",),
+                            })
+                        self._append_event(store, pwu_id=allocation.pwu_id,
+                            attempt_id=allocation.attempt_id,
+                            event_type="NativeExecutionWorkerRestartBudgetExhausted",
+                            payload={"expired_worker_epoch":lease.epoch,
+                                "checkpoint_id":str(checkpoint.id) if checkpoint else None})
+                        reconciled.append(lease.attempt_id)
+                        continue
                     store.set_queue_condition(
                         queue.id,
                         expected_version=queue.version,
@@ -1433,6 +1500,7 @@ class NativeExecutorRuntimeService:
                                 "worker_id": lease.worker_id,
                                 "lease_epoch": lease.epoch,
                                 "settled_effect_count": len(effects),
+                                "interrupted_inference_ids": [str(step.id) for step in interrupted],
                             },
                             residual_obligations=residual,
                             effect_uncertainty=False,
@@ -1450,6 +1518,7 @@ class NativeExecutorRuntimeService:
                             "expired_worker_epoch": lease.epoch,
                             "checkpoint_id": str(checkpoint.id) if checkpoint else None,
                             "settled_effect_count": len(effects),
+                            "interrupted_inference_ids": [str(step.id) for step in interrupted],
                         },
                     )
                     reconciled.append(lease.attempt_id)

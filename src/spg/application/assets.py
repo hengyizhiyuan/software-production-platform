@@ -853,6 +853,58 @@ class RepositoryAssetService:
                 raise ProductRecordNotFound("Repository has no product intake observation")
             return row
 
+    def research_context(self, *, turn_id: UUID, interaction_id: UUID,
+                         source: str, authority_identity: str) -> dict:
+        """Observe a Human-supplied repository for advice without admitting Work.
+
+        Acquisition reuses durable Asset intake. Only committed, bounded text is
+        supplied as untrusted Evidence; no branch, PWU or Delivery is created.
+        """
+        observation = self.intake(RepositoryIntakeRequest(
+            request_id=uuid5(NAMESPACE_URL, f"interaction-research:{turn_id}:{source}"),
+            source=source, title="Interaction repository research",
+            description="Read committed project context for the Human's research request",
+            authority_identity=authority_identity, interaction_id=interaction_id,
+        ))
+        packet = {key: observation.get(key) for key in (
+            "intake_request_id", "condition", "repository_identity", "revision",
+            "tree", "observed_at", "failure_category")}
+        packet["materials"] = []
+        if observation.get("condition") != "READY":
+            return packet
+        with self.database.unit_of_work() as uow:
+            resource = ProductStore(uow.session).resource(UUID(observation["resource_id"]))
+        if resource is None:
+            raise ProductRecordNotFound("Research repository Asset is unavailable")
+        repository = Path(resource.location_ref)
+        suffixes = {".md", ".py", ".js", ".cjs", ".mjs", ".ts", ".tsx",
+                    ".html", ".css", ".json", ".toml", ".sql"}
+        paths = tuple(path for path in observation["paths"]
+            if Path(path).suffix.lower() in suffixes
+            and not any(part.startswith('.') for part in Path(path).parts)
+            and not any(part in {"node_modules", "vendor", "dist", "build"} for part in Path(path).parts))
+        paths = sorted(paths, key=lambda path: (
+            not Path(path).name.lower().startswith('readme'),
+            Path(path).name not in {"package.json", "pyproject.toml"}, path))[:8]
+        remaining = 24000
+        for path in paths:
+            raw = subprocess.run(["git", "-c", "core.hooksPath=/dev/null", "-C", str(repository),
+                "show", f"{observation['revision']}:{path}"], check=True,
+                capture_output=True, timeout=15).stdout
+            try:
+                content = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                continue
+            if remaining <= 0:
+                break
+            excerpt = content[:min(8000, remaining)]
+            remaining -= len(excerpt)
+            packet["materials"].append({"path": path, "content": excerpt,
+                "content_sha256": sha256(raw).hexdigest(),
+                "truncated": len(content) != len(excerpt)})
+        packet["bounded_inspection"] = True
+        return packet
+
     def list_assets(self, work_id=None):
         with self.database.unit_of_work() as uow:
             observations = uow.session.execute(select(repository_intakes.c.observation).where(repository_intakes.c.observation.is_not(None))).scalars().all()

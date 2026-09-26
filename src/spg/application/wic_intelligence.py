@@ -184,7 +184,7 @@ def build_progressive_semantics(
             and (
                 _DEFERABLE_FEATURE_REFINEMENT.search(question)
                 or (active_context is None
-                    and _RUNTIME_PREREQUISITE.search(question)
+                    and (_RUNTIME_PREREQUISITE.search(question) or _RUNTIME_PREREQUISITE.search(text))
                     and _EXTERNAL_CREDENTIAL.search(question)
                     and not re.search(r"(?:repository|git|仓库).*(?:access|auth|private|权限|授权|私有)|"
                         r"(?:access|auth|private|权限|授权|私有).*(?:repository|git|仓库)", question, re.IGNORECASE))

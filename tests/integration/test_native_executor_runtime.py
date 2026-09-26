@@ -55,6 +55,7 @@ from spg.domain.native_execution import (
     ResourceUsageEntryRecord,
     SourceMember,
     SourceVector,
+    StepCondition,
     ToolCallProposal,
     ToolExecutionRequest,
     ToolExecutionResult,
@@ -1079,6 +1080,33 @@ def test_expired_worker_before_any_step_restarts_same_attempt_with_new_epoch(
     assert successor.allocation.lease_epoch == grant.allocation.lease_epoch + 1
 
 
+def test_repeated_settled_worker_loss_is_bounded_without_human_authority_expansion(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    clock = [datetime.now(timezone.utc)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]})
+    service.admit(admission)
+    for _ in range(2):
+        grant = service.allocate(_offer(lease_seconds=5))
+        assert grant is not None
+        service.activate_allocation(grant)
+        clock[0] += timedelta(seconds=6)
+        assert service.reconcile_expired_leases() == (admission.binding.attempt_id,)
+    assert service.allocate(_offer()) is None
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        state = store.attempt_state(admission.binding.attempt_id)
+        assert state.terminal_outcome is AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+        assert state.runtime_mode is ExecutionMode.FINISHED
+        assert not state.effect_uncertainty
+        events = store.list_self_refine_events(work_id=admission.binding.work_id)
+        assert events[0].failure_family == "WORKER_LEASE_LOST"
+        assert events[0].budget_decision["allow_retry"] is False
+        assert events[0].budget_decision["human_escalated"] is False
+
+
 def test_expired_worker_with_unresolved_effect_is_fenced_unknown(
     postgres_database: Database, git_repository: Path
 ) -> None:
@@ -1154,6 +1182,71 @@ def test_expired_worker_with_unresolved_effect_is_fenced_unknown(
         assert state.terminal_outcome is AttemptTerminalOutcome.UNKNOWN
         assert state.runtime_mode is ExecutionMode.RECONCILING
         assert state.effect_uncertainty is True
+
+
+def test_expired_worker_during_inference_preserves_checkpoint_and_unknown_usage(
+    postgres_database: Database, git_repository: Path, tmp_path: Path
+) -> None:
+    clock = [datetime.now(timezone.utc)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]}
+    )
+    service.admit(admission)
+    grant = service.allocate(_offer(lease_seconds=5))
+    assert grant is not None
+    service.activate_allocation(grant)
+    plan = WorkingPlan(version=1, objective_reference=str(admission.contract.id),
+        chosen_approach="bounded edit", approach_rationale="contract")
+    checkpoint = asyncio.run(DurableCheckpointPort(
+        postgres_database, ContentAddressedStorage(tmp_path / "interrupted-inference"),
+        attempt_id=admission.binding.attempt_id,
+        session_id=admission.binding.session_id,
+        worker_epoch=grant.allocation.lease_epoch,
+    ).commit(KernelCheckpoint(step_sequence=1, working_plan=plan, tool_results=(),
+        source_vector_digest=admission.binding.source_vector.digest or "",
+        residual_obligations=("finish admitted edit",))))
+    audit = DurableKernelAudit(postgres_database,
+        attempt_id=admission.binding.attempt_id,
+        session_id=admission.binding.session_id, pwu_id=admission.binding.pwu_id,
+        envelope_id=admission.binding.resource_envelope.envelope_id)
+    request = InferenceRequest(attempt_id=admission.binding.attempt_id,
+        session_id=admission.binding.session_id, step_sequence=2,
+        objective=admission.contract.objective, working_plan=plan,
+        context_facts=(), available_tools=(), residual_obligations=("finish admitted edit",))
+    step_id = asyncio.run(audit.begin_inference(request))
+    clock[0] += timedelta(seconds=6)
+    assert service.reconcile_expired_leases() == (admission.binding.attempt_id,)
+    assert service.reconcile_expired_leases() == ()
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        assert store.steps_for_attempt(admission.binding.attempt_id)[0].condition is StepCondition.INTERRUPTED
+        assert store.latest_checkpoint(admission.binding.attempt_id).id == checkpoint.id
+        assert store.effects_for_attempt(admission.binding.attempt_id) == ()
+        usage = uow.session.execute(select(execution_resource_usage)).mappings().one()
+        assert usage["condition"] == ResourceReservationCondition.UNKNOWN.value
+        assert usage["certainty"] == UsageCertainty.UNKNOWN.value
+        state = store.attempt_state(admission.binding.attempt_id)
+        assert state.runtime_mode is ExecutionMode.QUEUED
+        assert not state.effect_uncertainty
+    successor = service.allocate(_offer())
+    assert successor is not None
+    assert successor.allocation.attempt_id == admission.binding.attempt_id
+    assert successor.allocation.lease_epoch == grant.allocation.lease_epoch + 1
+    response = InferenceResponse(action=InferenceAction.CONTINUE, summary="late response",
+        working_plan=plan, tool_calls=(ToolCallProposal(proposal_index=0,
+            tool_identity="file.write", arguments={"path":"README.md", "content":"late"}),),
+        residual_obligations=("finish admitted edit",))
+    with pytest.raises(NativeExecutionConflict, match="no longer running"):
+        asyncio.run(audit.finish_inference(step_id, response, None))
+    with pytest.raises(NativeExecutionConflict, match="expired worker grant"):
+        asyncio.run(audit.begin_tool(step_id, ToolExecutionRequest(
+            delivery_id=uuid4(), attempt_id=admission.binding.attempt_id,
+            worker_epoch=grant.allocation.lease_epoch, step_id=step_id,
+            proposal=ToolCallProposal(proposal_index=0, tool_identity="file.write",
+                arguments={"path":"README.md", "content":"late effect"}),
+            capability_grants=admission.binding.capability_grants,
+            workspace=admission.binding.workspace)))
 
 
 def test_receipt_before_checkpoint_is_rehydrated_without_replaying_effect(

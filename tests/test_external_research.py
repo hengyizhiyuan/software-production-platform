@@ -334,6 +334,38 @@ def test_model_information_gap_can_request_governed_search_then_resume_with_evid
     assert result.metrics.model_tokens == 500
     assert "来源事实 [external-search:one]" in result.answer
     assert "比较与判断" in result.answer
+
+
+def test_project_specific_research_supplies_committed_asset_evidence_without_work():
+    calls, packets, events = [], [], []
+    def inspect(**kwargs):
+        calls.append(kwargs)
+        return {"condition": "READY", "repository_identity": kwargs["source"],
+            "revision": "a" * 40, "tree": "b" * 40,
+            "materials": [{"path": "server.py", "content": "from http.server import HTTPServer"}]}
+    class Model:
+        def generate(self, *, input_text, **_):
+            packets.append(json.loads(input_text))
+            return SimpleNamespace(output_text=json.dumps({
+                "observations": [{"evidence_id":"external-search:one", "fact":"Documented queue API"}],
+                "comparison":"Use a framework-neutral adapter in the observed Python server.",
+                "limitations":"The repository observation is bounded.",
+                "cited_evidence_ids":["external-search:one"]}), usage=SimpleNamespace(total_tokens=100))
+    service, resolver = _research(_GitHub(((_evidence("one"), _evidence("two", 2)),)))
+    service.project_repository, service.model = inspect, Model()
+    turn_id, interaction_id = uuid4(), uuid4()
+    result = service.run(turn_id=turn_id, interaction_id=interaction_id, work_id=None,
+        user_id="human:owner", text="项目仓库：https://github.com/owner/project.git\n搜索 GitHub 的成熟实现，给出项目建议。",
+        requests=(SearchRequest(intent=SearchIntent.SEARCH_GITHUB_REPOSITORIES,
+            query="async queue implementation", reason="Human research", origin="HUMAN_EXPLICIT"),),
+        on_event=lambda kind, details: events.append((kind, details)))
+    assert calls == [{"turn_id":turn_id,"interaction_id":interaction_id,
+        "source":"https://github.com/owner/project.git","authority_identity":"human:owner"}]
+    assert packets[-1]["project_context"]["materials"][0]["path"] == "server.py"
+    assert "commit " + "a" * 40 in result.answer
+    assert any(kind == "PROJECT_RESEARCH_EVIDENCE" and details["production_authorized"] is False
+        for kind, details in events)
+    assert all(not record_gap for _, record_gap, _ in resolver.calls)
     assert "github.repository.search" in {call[0] for call in resolver.calls}
 
 

@@ -4991,6 +4991,45 @@
       "economics": {},
       "manual_rescue_actions": [],
       "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-14",
+      "trial": 1,
+      "signal": "SETTLED_CHECKPOINT_INFERENCE_INTERRUPTION_FENCED_AS_UNKNOWN_EFFECT",
+      "architecture_owner": "Native lease-recovery classifier",
+      "source_head": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+      "work_id": "a1bb1719-4418-519f-bd9f-2731d4e856b9",
+      "interaction_id": "e7064996-723d-4ad4-b308-7a995558f4d7",
+      "observed_status": "RUNNING",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-14/trial-1"
+    },
+    {
+      "case": "GC-EX-11",
+      "trial": 3,
+      "signal": "RUNTIME_PREREQUISITE_REASKED_BEFORE_REPOSITORY_OBSERVATION",
+      "architecture_owner": "WIC question policy",
+      "source_head": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+      "work_id": null,
+      "interaction_id": "86ef5718-2d77-4445-b6cd-193ce1907325",
+      "observed_status": null,
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-11/trial-3"
+    },
+    {
+      "case": "GC-EX-12",
+      "trial": 1,
+      "signal": "RESEARCH_IMPLEMENTATION_REFERENCE_MISROUTED_TO_PRODUCTION_AND_PROJECT_CONTEXT_NOT_OBSERVED",
+      "architecture_owner": "WIC production grammar / Repository Asset / governed external research",
+      "source_head": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+      "work_id": "4cb6a967-4226-526c-8def-e580c607845c",
+      "interaction_id": "86894c6d-2f5b-4e56-85c8-aeb97fd1c5be",
+      "observed_status": "NEEDS_ATTENTION",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-12/trial-1"
     }
   ]
 }

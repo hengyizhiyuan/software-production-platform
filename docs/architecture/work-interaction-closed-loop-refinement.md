@@ -796,3 +796,17 @@ authority rules. Repair remains one bounded call, preserves valid meaning, never
 relaxes authority, and never emits a second provisional Human-facing stream.
 Native grounding also preserves observed business vocabularies: an unconstrained
 string field cannot authorize invented payment/shipping/refund lifecycle concepts.
+
+Lease recovery distinguishes an interrupted inference from unresolved Tool effects.
+A settled journal permits same-Attempt recovery under the existing adaptive
+Self-Converge budget. Interrupted inference consumption remains UNKNOWN and counted;
+late inference results and expired-epoch Tool proposals cannot overwrite the frontier.
+Unsettled effects remain fenced for reconciliation. Repeated Worker loss reaches a
+bounded system failure rather than becoming an unrequested Human product decision.
+
+Research references to software implementations do not authorize production.
+Mixed search-and-change requests retain their explicit change clauses. Project-aware
+research uses existing Repository Asset intake and exact committed, bounded source
+observations without admitting Work, creating a production branch or authorizing
+Delivery. External-source provenance and project-source observations remain distinct
+Evidence inputs to advisory synthesis.

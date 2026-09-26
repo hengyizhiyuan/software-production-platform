@@ -108,6 +108,10 @@ def main():
         if status == 'PREVIEW_READY':
             result['status'] = 'REVIEW_READY_AWAITING_BUSINESS_ORACLE'
             break
+        if (not work_id and status == 'COMPLETED'
+                and case['expected_governed_journey'][-1] == 'advisory response'):
+            result['status'] = 'ADVISORY_COMPLETE_AWAITING_SOURCE_ORACLE'
+            break
         pending_turn = (interaction.get('turns') or [{}])[-1].get('status') in {'RECEIVED', 'PROCESSING'}
         if not pending_turn and (state.get('attention') or status in {'BLOCKED', 'FAILED'}):
             result['status'] = 'ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION'

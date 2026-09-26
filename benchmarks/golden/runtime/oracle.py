@@ -175,6 +175,18 @@ def main():
                     and row.get('email') == 'managed-edited@example.invalid' for row in database.get('sqlite_rows', [])))
         checks['no_extra_product_surfaces'] = all(path in {'server.py','web/index.html','web/app.js','web/styles.css'}
             or (path.startswith('migrations/') and path.endswith('.sql')) for path in paths)
+    elif identity == 'GC-IP-03':
+        browser = json.loads((root/'browser-oracle.json').read_text())
+        database = json.loads((root/'persistence-oracle.json').read_text())
+        checks.update(actual_order_fields=browser.get('actual_order_fields') == ['customer_id','total','status'],
+            grounded_status_model=browser.get('open_status_input_preserved') is True,
+            no_invented_logistics_refunds=browser.get('no_logistics_or_refunds') is True,
+            actual_management_loop=browser.get('create_form_submitted') is True
+                and browser.get('reload_restores_order') is True,
+            api_and_database_agree=database.get('api_and_database_agree') is True,
+            real_created_order=any(row.get('customer_id') == 1 and row.get('total') == 75
+                and row.get('status') == 'open' for row in database.get('sqlite_rows', [])),
+            no_extra_product_surfaces=all(path in {'server.py','web/index.html','web/app.js','web/styles.css'} for path in paths))
     elif identity == 'GC-EX-10':
         attempt_record = root/'native-attempt.json'
         attempt = json.loads(attempt_record.read_text()) if attempt_record.exists() else {}

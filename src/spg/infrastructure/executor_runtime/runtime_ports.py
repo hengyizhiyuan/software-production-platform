@@ -7,12 +7,14 @@ from hashlib import sha256
 from uuid import UUID, uuid4
 
 from spg.domain.native_execution import (
+    AttemptGrantState,
     CheckpointBundleRecord,
     CheckpointCondition,
     EffectClassification,
     EffectCondition,
     EffectReceiptRecord,
     ExecutionBindingV2,
+    ExecutionMode,
     ExecutionEffectRecord,
     ExecutionEvidenceRecord,
     ExecutionStepRecord,
@@ -263,6 +265,11 @@ class DurableKernelAudit:
               if key in {"path", "destination", "cwd"} and isinstance(value, str)
         )
         with self.database.unit_of_work() as uow:
+            state = NativeExecutionStore(uow.session).attempt_state(self.attempt_id, lock=True)
+            if (state.worker_epoch != request.worker_epoch
+                    or state.grant_state is not AttemptGrantState.GRANTED
+                    or state.runtime_mode is not ExecutionMode.RUNNING):
+                raise NativeExecutionConflict("Tool proposal belongs to an expired worker grant")
             NativeExecutionStore(uow.session).insert_effect(
                 ExecutionEffectRecord(
                     id=effect_id,

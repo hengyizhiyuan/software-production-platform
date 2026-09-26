@@ -399,6 +399,7 @@ class Application:
             ),
             http=http,
             model=getattr(capability, "runtime", None),
+            project_repository=self.repository_asset_service(selected_database).research_context,
         )
         return WorkInteractionService(
             selected_database,
