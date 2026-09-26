@@ -260,24 +260,59 @@ print(json.dumps(result, sort_keys=True))
     async def write_file(self, request: ToolExecutionRequest) -> ToolExecutionResult:
         relative = self._relative(str(request.proposal.arguments["path"]))
         content = request.proposal.arguments.get("content")
-        if not isinstance(content, str):
-            raise ValueError("file.write content must be text")
-        encoded = base64.b64encode(content.encode("utf-8")).decode("ascii")
-        script = (
-            "from pathlib import Path; import base64, os, sys; "
-            "p=Path(sys.argv[1]); p.parent.mkdir(parents=True, exist_ok=True); "
-            "t=p.with_name('.'+p.name+'.'+sys.argv[3]+'.tmp'); "
-            "t.write_bytes(base64.b64decode(sys.argv[2])); os.replace(t,p)"
-        )
+        old_text = request.proposal.arguments.get("old_text")
+        new_text = request.proposal.arguments.get("new_text")
+        if isinstance(content, str):
+            if old_text is not None or new_text is not None:
+                raise ValueError("file.write accepts either content or old_text/new_text")
+            encoded = base64.b64encode(content.encode("utf-8")).decode("ascii")
+            script = (
+                "from pathlib import Path; import base64, os, sys; "
+                "p=Path(sys.argv[1]); p.parent.mkdir(parents=True, exist_ok=True); "
+                "t=p.with_name('.'+p.name+'.'+sys.argv[3]+'.tmp'); "
+                "t.write_bytes(base64.b64decode(sys.argv[2])); os.replace(t,p)"
+            )
+            arguments = (relative, encoded, str(request.delivery_id))
+        elif isinstance(old_text, str) and old_text and isinstance(new_text, str):
+            script = """import base64, os, pathlib, sys
+root = pathlib.Path.cwd().resolve()
+relative = pathlib.PurePosixPath(sys.argv[1])
+path = root
+for part in relative.parts:
+    path = path / part
+    if path.is_symlink(): raise ValueError('file.write target contains a symlink')
+if not path.is_file() or path.stat().st_nlink != 1:
+    raise ValueError('file.write exact edit requires one regular unlinked file')
+old = base64.b64decode(sys.argv[2]).decode('utf-8')
+new = base64.b64decode(sys.argv[3]).decode('utf-8')
+original = path.read_text(encoding='utf-8')
+if original.count(old) != 1:
+    raise ValueError('file.write old_text must match exactly once')
+updated = original.replace(old, new, 1)
+temporary = path.with_name('.' + path.name + '.' + sys.argv[4] + '.tmp')
+temporary.write_text(updated, encoding='utf-8')
+os.replace(temporary, path)
+print(len(updated.encode('utf-8')))
+"""
+            arguments = (
+                relative,
+                base64.b64encode(old_text.encode("utf-8")).decode("ascii"),
+                base64.b64encode(new_text.encode("utf-8")).decode("ascii"),
+                str(request.delivery_id),
+            )
+        else:
+            raise ValueError("file.write requires content or old_text/new_text")
         observation = await self._execute(
-            ("python", "-c", script, relative, encoded, str(request.delivery_id)),
-            cwd=self.workspace_root,
+            ("python", "-c", script, *arguments), cwd=self.workspace_root,
         )
         self._require_success(observation, "file.write")
         return self._result(
             request,
             "file.write",
-            {"path": relative, "bytes": len(content.encode("utf-8"))},
+            {"path": relative, "bytes": (
+                len(content.encode("utf-8")) if isinstance(content, str)
+                else int(observation.stdout.strip())
+            ), "mode": "FULL" if isinstance(content, str) else "EXACT_REPLACE"},
             observation,
             settled=True,
         )

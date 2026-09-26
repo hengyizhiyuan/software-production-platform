@@ -180,8 +180,18 @@ class LocalNativeToolHost:
     async def write_file(self, request: ToolExecutionRequest) -> ToolExecutionResult:
         relative = str(request.proposal.arguments["path"])
         content = request.proposal.arguments.get("content")
-        if not isinstance(content, str):
-            raise ValueError("file.write content must be text")
+        old_text = request.proposal.arguments.get("old_text")
+        new_text = request.proposal.arguments.get("new_text")
+        if isinstance(content, str):
+            if old_text is not None or new_text is not None:
+                raise ValueError("file.write accepts either content or old_text/new_text")
+        elif isinstance(old_text, str) and old_text and isinstance(new_text, str):
+            original = await asyncio.to_thread(self._read_text, relative)
+            if original.count(old_text) != 1:
+                raise ValueError("file.write old_text must match exactly once")
+            content = original.replace(old_text, new_text, 1)
+        else:
+            raise ValueError("file.write requires content or old_text/new_text")
         await asyncio.to_thread(
             self._atomic_write_text,
             relative,

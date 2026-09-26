@@ -55,8 +55,8 @@ class RepositoryAwareChangeProposalProvider:
                 path=path,
                 paths=path_set,
                 disposition=ProposalTargetDisposition.REQUIRED,
-                rationale="The Human explicitly named this repository target.",
-                evidence=f"Explicit path in refined intent; inspected at {request.source_revision[:12]}.",
+                rationale="The refinement supplied this exact repository target.",
+                evidence=f"Exact path in refined intent; inspected at {request.source_revision[:12]}.",
                 confidence=ProposalConfidence.HIGH,
             )
             for path in explicit
@@ -118,7 +118,7 @@ class RepositoryAwareChangeProposalProvider:
                 request.explicit_forbidden_areas,
             ),
             rationale=(
-                "Proposed from explicit Human paths and exact-baseline inspection."
+                "Proposed from exact targets in refinement and exact-baseline inspection."
                 if explicit
                 else "Proposed from exact-baseline path, symbol, and adjacent-test evidence."
             ),

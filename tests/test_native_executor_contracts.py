@@ -1179,6 +1179,49 @@ def test_tool_host_process_environment_filters_secrets_case_insensitively(
     assert "must-not-cross" not in str(result.output)
 
 
+def test_file_write_exact_replace_preserves_unseen_large_file_content(tmp_path: Path) -> None:
+    page = tmp_path / "src" / "page.html"
+    page.parent.mkdir(parents=True)
+    page.write_text('<nav><a href="/delivery">Deliveries</a></nav>' + "x" * 40000,
+                    encoding="utf-8")
+    binding, _ = _binding()
+    workspace = binding.workspace.model_copy(update={
+        "host_storage_id": str(tmp_path),
+        "mounts": (binding.workspace.mounts[0].model_copy(
+            update={"host_path": str(tmp_path)}
+        ),),
+    })
+
+    def request(old_text: str) -> ToolExecutionRequest:
+        return ToolExecutionRequest(
+            delivery_id=uuid4(), attempt_id=binding.attempt_id,
+            worker_epoch=1, step_id=uuid4(),
+            proposal=ToolCallProposal(
+                proposal_index=0, tool_identity="file.write",
+                arguments={
+                    "path": "src/page.html", "old_text": old_text,
+                    "new_text": '<a href="/about">关于我们</a>',
+                },
+            ),
+            capability_grants=(CapabilityGrant(
+                identity="file.write", version="1",
+                scope={"paths": ["src/page.html"]},
+            ),),
+            workspace=workspace,
+        )
+
+    host = LocalNativeToolHost(tmp_path)
+    result = asyncio.run(host.registry().execute(request('</nav>')))
+    assert result.condition is EffectCondition.SETTLED
+    updated = page.read_text(encoding="utf-8")
+    assert updated.startswith('<nav><a href="/delivery">Deliveries</a>'
+                              '<a href="/about">关于我们</a>')
+    assert updated.endswith("x" * 40000)
+    with pytest.raises(ValueError, match="match exactly once"):
+        asyncio.run(host.registry().execute(request("not present")))
+    assert page.read_text(encoding="utf-8") == updated
+
+
 def test_tool_host_observes_missing_file_without_ambiguous_failure(tmp_path: Path) -> None:
     binding, _ = _binding()
     workspace = binding.workspace.model_copy(

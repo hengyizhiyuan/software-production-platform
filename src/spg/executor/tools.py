@@ -45,15 +45,15 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
     {
         "identity": "file.read",
         "version": "1",
-        "description": "Read one UTF-8 file from the private execution workspace.",
+        "description": "Read one UTF-8 file from the private execution workspace. Content may be truncated at 32 KiB; use file.write old_text/new_text for a small exact edit without rewriting the whole file.",
         "input_schema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"], "additionalProperties": False},
         "effect_classification": "READ",
     },
     {
         "identity": "file.write",
         "version": "1",
-        "description": "Atomically write one UTF-8 file inside an admitted path scope.",
-        "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}}, "required": ["path", "content"], "additionalProperties": False},
+        "description": "Atomically write one UTF-8 file inside an admitted path scope. Supply content for full replacement, or old_text and new_text for an exact single-occurrence edit of an existing file; the latter preserves unseen content in large files.",
+        "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}, "old_text": {"type": "string"}, "new_text": {"type": "string"}}, "required": ["path"], "additionalProperties": False},
         "effect_classification": "LOCAL_MUTATION",
     },
     {
@@ -77,8 +77,9 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
         "identity": "process.run",
         "version": "1",
         "description": (
-            "Run one allowlisted argv process without a shell. Inline code flags such as "
-            "python -c are rejected. For a Python import check, use "
+            "Run one allowlisted argv process without a shell. Do not use sed, tail, or wc; "
+            "they are not allowlisted. Edit files with file.write, including its exact old_text/new_text mode. "
+            "Inline code flags such as python -c are rejected. For a Python import check, use "
             "['python', '-m', 'package.module'] with cwd='src', or use test.run with "
             "pytest --collect-only."
         ),

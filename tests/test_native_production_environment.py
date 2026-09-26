@@ -261,7 +261,8 @@ def test_native_executor_runs_tools_through_real_production_environment(tmp_path
                         tool_identity="file.write",
                         arguments={
                             "path": "index.html",
-                            "content": "<h1>Native Executor via Production Environment</h1>",
+                            "old_text": "<h1>baseline</h1>",
+                            "new_text": "<h1>Native Executor via Production Environment</h1>",
                         },
                     ),
                 ),
