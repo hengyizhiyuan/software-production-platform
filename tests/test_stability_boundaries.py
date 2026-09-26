@@ -6,6 +6,14 @@ from spg.application.bootstrap import bootstrap
 from spg.config import Settings
 
 
+def test_routes_and_design_terms_are_not_explicit_file_write_targets():
+    from spg.application.work import WorkApplicationService
+    assert WorkApplicationService._explicit_repository_paths(
+        "不要进行 UX/UI 重构，沿用 /api/customers 接口。") == ()
+    assert WorkApplicationService._explicit_repository_paths(
+        "修改 web/app.js 和 docker/Dockerfile。") == ("web/app.js", "docker/Dockerfile")
+
+
 def test_multiclause_explicit_change_survives_lossy_preview_summary():
     request = "Please fix the Cancel button. Show a preview; wait before delivery."
     outcome = preserve_explicit_production_outcome("Show a preview", request)

@@ -1323,6 +1323,27 @@
       },
       "manual_rescue_actions": [],
       "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-IP-02",
+      "trial": 3,
+      "signal": "INAPPROPRIATE_PRE_DISCOVERY_QUESTION",
+      "architecture_owner": "WIC Question Budget and admission readiness",
+      "result": {
+        "status": "INAPPROPRIATE_PRE_DISCOVERY_QUESTION",
+        "owner": "WIC Question Budget and admission readiness",
+        "baseline": "cf7e4a82cdee512a6e67589d8c5f59617e7be603",
+        "questions": [
+          "需要收集哪些用户字段，以及提交后的数据保存在哪里（沿用 business-app 现有后端接口还是新建存储）"
+        ],
+        "repository_discovery_not_yet_performed": true,
+        "human_intervention_count": 0,
+        "manual_rescue_actions": [],
+        "human_acceptance": "PENDING"
+      },
+      "interaction_id": "ca665c75-3ab5-4bb1-a18d-b10b1b65b4e1",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
     }
   ]
 }

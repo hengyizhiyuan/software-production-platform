@@ -28,9 +28,13 @@ def main():
     parser.add_argument('--directory',type=Path,required=True)
     parser.add_argument('--base',required=True)
     parser.add_argument('--env-file',type=Path,required=True)
+    parser.add_argument('--record-name', default='business-oracle.json',
+        help='A new evidence identity; existing oracle records are never replaced')
     args=parser.parse_args()
     root=args.directory
-    output=root/'business-oracle.json'
+    if Path(args.record_name).name != args.record_name:
+        raise SystemExit('Evidence record name must be a single filename')
+    output=root/args.record_name
     if output.exists(): raise SystemExit('Oracle record already exists; do not rewrite historical results')
     state=json.loads((root/'latest.json').read_text())
     journey=json.loads((root/'journey.json').read_text())
@@ -61,9 +65,17 @@ def main():
         checks.update(exactly_one_requested_link=links.links.count((href,label))==1,
             one_source_file=len(paths)==1, one_added_line=len(added)==1,
             zero_removed_lines=not removed)
-    elif identity in {'GC-EX-02','GC-EX-04','GC-EX-14','GC-EX-15'}:
+    elif identity in {'GC-EX-02','GC-EX-04','GC-EX-06','GC-EX-14','GC-EX-15'}:
         checks.update(new_label='立即体验' in body, old_label='开始使用' not in body,
             one_source_file=len(paths)==1, minimal_source_diff=len(added)==1 and len(removed)==1)
+        if identity == 'GC-EX-06':
+            acquisition = [event for event in state.get('refinement', {}).get('events', [])
+                if event['affected_component'] == 'repository/acquisition']
+            checks['automatic_acquisition_recovery'] = any(
+                event['final_result'] == 'LOCAL_OBLIGATION_RECOVERED'
+                and event['diagnostic_evidence'].get('final_condition') == 'READY'
+                and event['diagnostic_evidence'].get('attempt_budget') == 3
+                for event in acquisition)
     elif identity in {'GC-EX-03','GC-EX-05'}:
         checks.update(browser_dialog_oracle=(root/'browser-oracle.json').exists())
         if checks['browser_dialog_oracle']:

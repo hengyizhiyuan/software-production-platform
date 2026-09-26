@@ -220,7 +220,12 @@ def test_provider_turn_intent_survives_deterministic_semantic_admission() -> Non
     assert result.turn_intent is ConversationTurnIntent.BUILD
 
 
-def test_repository_production_request_is_admission_ready_before_feature_refinement() -> None:
+@pytest.mark.parametrize("question", [
+    "Which exact feature should be added?",
+    "需要收集哪些用户字段，以及提交后的数据保存在哪里？",
+    "Which existing API and data model fields should this page use?",
+])
+def test_repository_production_request_is_admission_ready_before_feature_refinement(question) -> None:
     text = (
         "Please pull https://github.com/acme/shop and add new features; "
         "the exact feature can be refined after repository discovery."
@@ -230,7 +235,7 @@ def test_repository_production_request_is_admission_ready_before_feature_refinem
         "OW-A",
         turn_intent=ConversationTurnIntent.HOW_TO,
         desired_outcome=None,
-        unresolved_material_questions=("Which exact feature should be added?",),
+        unresolved_material_questions=(question,),
     )
     candidate = WorkInteractionService._with_production_request_evidence(
         provider_candidate,

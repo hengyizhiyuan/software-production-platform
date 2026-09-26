@@ -99,6 +99,11 @@ def main():
         if state.get('attention') or status in {'BLOCKED', 'FAILED'}:
             result['status'] = 'ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION'
             break
+        if (not work_id and status == 'COMPLETED'
+                and interaction.get('unresolved_material_questions')
+                and time.monotonic()-started > 60):
+            result['status'] = 'CLARIFICATION_REQUIRES_CLASSIFICATION'
+            break
         if (interaction.get('repository_acquisition_state') in {'FAILED_RETRYABLE', 'FAILED_TERMINAL'}
                 and time.monotonic()-started > 120 and not state.get('queue')):
             result['status'] = 'UNRECOVERED_ACQUISITION'

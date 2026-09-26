@@ -75,6 +75,15 @@ DOGFOOD_MOTIVE = """我希望改善 Watt 在任务执行过程中的状态可观
 
 
 class _SemanticCapability:
+    def validate_production_scope(self, input, _proposal):
+        from spg.domain.refinement import RepositoryScopeValidation, RepositoryTargetNecessityProof
+        return RepositoryScopeValidation(required_targets=(RepositoryTargetNecessityProof(
+            path="src/spg/web/app.js", source_path="src/spg/web/app.js",
+            repository_quote="const status = 'ready';",
+            human_clause="状态可观测性",
+            necessity="The existing frontend status module owns the requested observability behavior.",
+        ),), rejected_behaviors=(), explanation="Exact baseline witness establishes the existing frontend change surface.")
+
     def __init__(
         self,
         *,
@@ -461,12 +470,12 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
         orchestrator,
         semantic_capability=capability,
         max_automatic_transitions=1,
-        provider_retry_base_delay_seconds=0.2,
-        provider_retry_max_delay_seconds=0.2,
+        provider_retry_base_delay_seconds=1,
+        provider_retry_max_delay_seconds=1,
     )
     try:
         assert driver.schedule(admitted.work_id) is True
-        deadline = monotonic() + 3
+        deadline = monotonic() + 10
         waiting = None
         while monotonic() < deadline:
             waiting = driver.project(admitted.work_id)
@@ -486,7 +495,7 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
         # The first phase may spend most of its deadline observing the initial
         # failure under a loaded integration DB. Give the bounded retry its own
         # observation window rather than racing the first phase's deadline.
-        deadline = monotonic() + 3
+        deadline = monotonic() + 10
         while monotonic() < deadline:
             if (
                 capability.calls == 2

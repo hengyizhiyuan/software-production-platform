@@ -3978,7 +3978,7 @@ class WorkApplicationService:
         # In particular an HTTP port followed by /repo.git is not a new path.
         raw = re.sub(r"https?://[^\s<>()，。；]+", "", raw, flags=re.IGNORECASE)
         nested = re.findall(
-            r"(?<![\w./-])((?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+)(?![\w./*-])",
+            r"(?<![\w./-])((?:[A-Za-z0-9_.-]+/)+(?:[A-Za-z0-9_.-]*\.[A-Za-z0-9_-]+|Dockerfile|Makefile|LICENSE|Procfile))(?![\w./*-])",
             raw,
         )
         roots = re.findall(

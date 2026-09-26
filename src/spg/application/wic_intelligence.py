@@ -38,7 +38,8 @@ _WORK_INTENT = re.compile(
 )
 _DEFERABLE_FEATURE_REFINEMENT = re.compile(
     r"(?:feature|functionality|scope|requirement|what.+(?:add|change|implement)|"
-    r"功能|需求|范围|改什么|实现什么)",
+    r"功能|需求|范围|改什么|实现什么|字段|数据模型|接口|存储|保存在哪里|"
+    r"schema|data model|fields?|columns?|existing.+(?:api|storage))",
     re.IGNORECASE,
 )
 

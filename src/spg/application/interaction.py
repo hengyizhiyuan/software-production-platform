@@ -2156,9 +2156,10 @@ class WorkInteractionService:
                     and recoveries < 2 and records
                     and records[-1].id == turn.request_record_id
                     and store.message_for_turn(turn_id, InteractionActor.WATT) is None)
-                failure.metadata.update(automatic_recovery_pending=automatic_recovery,
-                    automatic_attempt_budget=3, model_usage_unknown=(
-                        error.usage_unknown if isinstance(error, ModelProviderError) else False))
+                if turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED:
+                    failure.metadata.update(automatic_recovery_pending=automatic_recovery,
+                        automatic_attempt_budget=3, model_usage_unknown=(
+                            error.usage_unknown if isinstance(error, ModelProviderError) else None))
                 store.update_turn(
                     turn_id,
                     status=InteractionTurnStatus.FAILED,
