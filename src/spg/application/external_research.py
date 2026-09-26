@@ -21,6 +21,7 @@ from spg.domain.external_search import (
     SearchProviderError, SearchRequest,
 )
 from spg.domain.model_runtime import ModelPurpose, WattModelRuntime
+from spg.domain.response_contract import production_intent_evidence
 from spg.domain.production_intelligence import EngineeringActivity
 from spg.providers.external_search import (
     BoundedPublicHttp, BraveWebSearchProvider, GitHubPublicSearchProvider,
@@ -29,7 +30,7 @@ from spg.providers.external_search import (
 
 
 _SEARCH_VERB = re.compile(
-    r"(?:查(?:一下|下|找)?|搜(?:一下|下|搜)?|找(?:几个|一下|找)?|检索|调研|"
+    r"(?:查(?!看)(?:一下|下|找)?|搜(?:一下|下|搜)?|找(?:几个|一下|找)?|检索|调研|"
     r"look\s+(?:up|online|for)|search|research|find)", re.I,
 )
 _GITHUB = re.compile(r"(?:github|(?<![A-Za-z0-9])repo(?:sitor(?:y|ies))?(?![A-Za-z0-9])|开源|源码)", re.I)
@@ -44,6 +45,11 @@ _FETCH_VERB = re.compile(r"(?:打开|读取|查看|检查|检视|获取|fetch|in
 def explicit_search_intents(text: str) -> tuple[SearchIntent, ...]:
     """Conservative Human-source routing; ordinary advice stays in WIC."""
 
+    # A GitHub URL supplied as the target of a software-change request belongs
+    # to Repository Acquisition. "查看预览" is not an instruction to fetch the
+    # repository as an external research result.
+    if production_intent_evidence(text).production_request and not _SEARCH_VERB.search(text):
+        return ()
     url_match = _PUBLIC_URL.search(text)
     if url_match is not None and _FETCH_VERB.search(text):
         return (
@@ -211,6 +217,8 @@ class GovernedExternalResearch:
         self.budget = budget or SearchBudget()
 
     def requests_for_turn(self, text: str, assessment_response: str) -> tuple[SearchRequest, ...]:
+        if production_intent_evidence(text).production_request and not _SEARCH_VERB.search(text):
+            return ()
         url_match = _PUBLIC_URL.search(text)
         if url_match is not None and _FETCH_VERB.search(text):
             url = url_match.group(0).rstrip(".,;:!?)]}，。；：！？")

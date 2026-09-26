@@ -560,6 +560,22 @@ class ProductionAdmissionTrigger:
             next_step=self._next_step(started),
         )
 
+    def _execute_acquisition_attempt(self, attempt_id: UUID) -> dict:
+        try:
+            return self.assets.execute_intake(attempt_id)
+        except Exception as error:
+            return self.assets.mark_attempt_failure(
+                attempt_id,
+                category=RepositoryAcquisitionFailureCategory.ACQUISITION_FAILED_RETRYABLE,
+                human_message="Repository acquisition could not be completed and can be retried.",
+                technical_evidence={
+                    "phase": "REPOSITORY_ACQUISITION",
+                    "error_type": type(error).__name__,
+                    "message": str(error)[:2000],
+                },
+                retryable=True,
+            )
+
     def execute(
         self,
         interaction_id: UUID,
@@ -582,25 +598,32 @@ class ProductionAdmissionTrigger:
             "RUNNING",
         }:
             return latest
-        try:
-            observation = self.assets.execute_intake(
-                UUID(latest["intake_request_id"])
+        observation = self._execute_acquisition_attempt(
+            UUID(latest["intake_request_id"])
+        )
+        if (
+            observation.get("condition") == "FAILED_RETRYABLE"
+            and observation.get("failure_category")
+            == RepositoryAcquisitionFailureCategory.NETWORK_FAILURE.value
+            and latest.get("operation_kind") != "CREATE_BRANCH"
+            and latest.get("source")
+        ):
+            # A transient public-clone timeout should not make the Human the
+            # retry scheduler. Preserve the failed Attempt and allow exactly
+            # one automatic new Attempt under the same admitted Work authority.
+            retry = self._start_attempt(
+                interaction_id=interaction_id,
+                work_id=work_id,
+                source=latest["source"],
+                title=projection.interpreted_motive or "Repository production Work",
+                description=(
+                    projection.desired_outcome
+                    or "Retry the public repository baseline acquisition."
+                ),
+                authority_identity=request_record.source,
             )
-        except Exception as error:
-            observation = self.assets.mark_attempt_failure(
-                UUID(latest["intake_request_id"]),
-                category=(
-                    RepositoryAcquisitionFailureCategory.ACQUISITION_FAILED_RETRYABLE
-                ),
-                human_message=(
-                    "Repository acquisition could not be completed and can be retried."
-                ),
-                technical_evidence={
-                    "phase": "REPOSITORY_ACQUISITION",
-                    "error_type": type(error).__name__,
-                    "message": str(error)[:2000],
-                },
-                retryable=True,
+            observation = self._execute_acquisition_attempt(
+                UUID(retry["intake_request_id"])
             )
         observation = self._bind_and_activate(
             work_id=work_id,

@@ -115,7 +115,7 @@ _REPOSITORY_SIGNAL = re.compile(
     re.IGNORECASE,
 )
 _PRODUCTION_ACTION = re.compile(
-    r"(?:拉取|克隆|开发|修改|修复|新增|添加|实现|改造|接入|升级|重构|"
+    r"(?:拉取|克隆|开发|修改|修复|新增|增加|添加|实现|改造|接入|升级|重构|"
     r"\b(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b)",
     re.IGNORECASE,
 )
@@ -125,7 +125,7 @@ _DIRECT_REQUEST = re.compile(
     re.IGNORECASE,
 )
 _ACTION_OPENING = re.compile(
-    r"^\s*(?:请\s*)?(?:拉取|克隆|开发|修改|修复|新增|添加|实现|改造|接入|升级|重构|"
+    r"^\s*(?:请\s*)?(?:拉取|克隆|开发|修改|修复|新增|增加|添加|实现|改造|接入|升级|重构|"
     r"(?:please\s+)?(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b)",
     re.IGNORECASE,
 )

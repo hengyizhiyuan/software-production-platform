@@ -6,7 +6,12 @@ from datetime import UTC, datetime
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.steering import SteeringApplicationService
-from spg.domain.design_intent import DesignIntentFrame, DesignObjectType
+from spg.domain.design_intent import (
+    DesignCollaborationMode,
+    DesignIntentFrame,
+    DesignObjectType,
+    DesignScopeLevel,
+)
 from spg.domain.guided_design import (
     DesignAgendaRevisionCondition,
     DesignAgendaRevisionRecord,
@@ -35,6 +40,7 @@ from spg.domain.steering import (
 )
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
+from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 
@@ -402,13 +408,46 @@ class GuidedDesignApplicationService:
                 )
         return tuple(references)
 
-    @staticmethod
-    def eligible(work: WorkRecord) -> bool:
-        return bool(
-            work.mode is WorkMode.LONG_LIVED_STEERING
-            and work.current_work_reality_revision_id is not None
-            and work.production_plan is None
-        )
+    def eligible(self, work: WorkRecord) -> bool:
+        if (
+            work.mode is not WorkMode.LONG_LIVED_STEERING
+            or work.current_work_reality_revision_id is None
+            or work.production_plan is not None
+        ):
+            return False
+        # Guided Design is for an unresolved product/system direction. A Human
+        # who admitted an exact implementation request has already selected the
+        # problem and scope; the ordinary Steering DESIGN step can establish a
+        # bounded code proposal from repository Reality without replaying the
+        # broad existing-product design questionnaire.
+        with self.database.unit_of_work() as unit_of_work:
+            revisions = ProductStore(unit_of_work.session).work_reality_revisions(work.id)
+            current = next(
+                (item for item in reversed(revisions)
+                 if item.id == work.current_work_reality_revision_id),
+                None,
+            )
+            if current is None or current.engineering_resource_id is None:
+                return True
+            admitted = next(
+                (item for item in reversed(revisions)
+                 if item.source_assessment_id is not None),
+                None,
+            )
+            if admitted is None or not admitted.requests or not admitted.constraints:
+                return True
+            assessment = InteractionStore(unit_of_work.session).assessment(
+                admitted.source_assessment_id
+            )
+            frame = None if assessment is None else assessment.design_intent_frame
+            return not bool(
+                assessment is not None
+                and not assessment.unresolved_material_questions
+                and frame is not None
+                and frame.object_type is DesignObjectType.FEATURE
+                and frame.scope_level is DesignScopeLevel.IMPLEMENTATION
+                and frame.collaboration_mode is DesignCollaborationMode.EXECUTION
+            )
 
     def bootstrap(
         self,

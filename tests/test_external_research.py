@@ -18,6 +18,7 @@ from spg.domain.external_search import (
     SearchBudget, SearchEvidence, SearchFailure, SearchIntent, SearchProviderError,
     SearchRequest,
 )
+from spg.domain.response_contract import production_intent_evidence
 from spg.providers.external_search import (
     BoundedPublicHttp, BraveWebSearchProvider, GitHubPublicSearchProvider,
     inspect_web_resource,
@@ -93,6 +94,20 @@ def test_explicit_search_routing_is_canonical_and_not_production_mutation():
     assert explicit_search_intents("帮我找相关repo") == (SearchIntent.SEARCH_GITHUB_REPOSITORIES,)
     assert potential_external_research("目前 Python 异步任务队列有哪些维护活跃的库？")
     assert not potential_external_research("帮我开发一个异步队列")
+
+
+def test_target_repository_and_viewable_preview_do_not_trigger_external_fetch():
+    request = (
+        "这是项目仓库：https://github.com/hengyizhiyuan/software-production-platform.git\n"
+        "请在现有网站顶部导航栏增加一个“关于我们”的文字链接，链接到 /about。\n"
+        "完成后给我一个可以实际查看的预览。我确认以后再决定是否交付。"
+    )
+    assert production_intent_evidence(request).production_request
+    assert explicit_search_intents(request) == ()
+    assert not potential_external_research(request)
+    service, resolver = _research(_GitHub(()))
+    assert service.requests_for_turn(request, "I will prepare the Work.") == ()
+    assert resolver.calls == []
 
 
 def test_query_refines_once_and_stops_on_repeated_evidence():

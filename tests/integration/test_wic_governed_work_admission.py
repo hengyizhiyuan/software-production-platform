@@ -55,6 +55,12 @@ from spg.domain.assets import (
     RepositoryIntakeRequest,
 )
 from spg.domain.conversation import ConversationTurnIntent
+from spg.domain.design_intent import (
+    DesignCollaborationMode,
+    DesignIntentFrame,
+    DesignObjectType,
+    DesignScopeLevel,
+)
 from spg.domain.connectors import (
     CapabilityRequirement, CapabilityScope, ConnectorAvailability,
     ConnectorMaturity, ExecutableCapability, SideEffectLevel,
@@ -219,6 +225,32 @@ class _ReadyCapability:
             current_requests=(basis.records[-1].content,),
             natural_response="The understanding is ready for Human Work admission.",
             provider_identity="test:wic-slice-2",
+        )
+
+
+class _BoundedFeatureExecutionCapability:
+    def interpret(
+        self, basis: InteractionInterpretationInput
+    ) -> InteractionAssessmentCandidate:
+        request = basis.records[-1].content
+        return InteractionAssessmentCandidate(
+            turn_intent=ConversationTurnIntent.MODIFY,
+            interpreted_motive=request,
+            desired_outcome="Top navigation has a 关于我们 link to /about and a reviewable preview.",
+            design_intent_frame=DesignIntentFrame(
+                design_subject="Existing site top navigation link",
+                object_type=DesignObjectType.FEATURE,
+                scope_level=DesignScopeLevel.IMPLEMENTATION,
+                collaboration_mode=DesignCollaborationMode.EXECUTION,
+                confidence=0.9,
+            ),
+            candidate_constraints=(
+                "Only add the top-navigation text link to /about.",
+                "Do not deliver before Human acceptance.",
+            ),
+            current_requests=(request,),
+            natural_response="The bounded change is ready for Work admission.",
+            provider_identity="test:bounded-feature-execution",
         )
 
 
@@ -1303,6 +1335,34 @@ def test_admission_bootstraps_revision_bound_steering_without_production(
         admitted.work_id
     )
     assert reconstructed.steering_plan_id == plan.steering_plan_id
+    assert _count(postgres_database, steering_plans) == 1
+
+
+def test_bounded_feature_execution_uses_steering_without_product_questionnaire(
+    postgres_database: Database,
+    services,
+) -> None:
+    work, _ = services
+    interactions = WorkInteractionService(
+        postgres_database, capability=_BoundedFeatureExecutionCapability()
+    )
+    interaction = interactions.create_interaction(human_identity="human:test")
+    ready = interactions.append_and_assess(
+        interaction.id,
+        "请在现有网站顶部导航栏加一个关于我们链接到 /about，先给我预览。",
+        human_identity="human:test",
+    )
+    admitted = _admit(work, ready)
+    plan = SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+
+    assert plan.current_step is not None
+    assert plan.current_step.type is SteeringStepType.DESIGN
+    assert plan.current_step.design_issue_key is None
+    assert len(plan.active_revision.steps) == 4
+    assert GuidedDesignApplicationService(postgres_database).get_optional(
+        admitted.work_id
+    ) is None
+    assert _count(postgres_database, guided_design_processes) == 0
     assert _count(postgres_database, steering_plans) == 1
 
 

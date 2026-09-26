@@ -48,6 +48,7 @@ from spg.domain.response_contract import (
     ResponseIntent,
     ResponseMove as Move,
     ReasoningStep as Reason,
+    production_intent_evidence,
 )
 from spg.domain.wic_intelligence import (
     GovernanceCandidateKind,
@@ -286,6 +287,20 @@ def test_imperative_repo_bug_fix_is_a_production_request():
         is CapabilityAlignmentMode.PRODUCTION_REQUEST
     )
     assert contract.interaction_mode is Mode.EXECUTE
+
+
+def test_chinese_add_link_with_repository_and_preview_is_production_request():
+    request = (
+        "这是项目仓库：https://github.com/hengyizhiyuan/software-production-platform.git\n"
+        "请在现有网站顶部导航栏增加一个“关于我们”的文字链接，链接到 /about。\n"
+        "完成后给我一个可以实际查看的预览。我确认以后再决定是否交付。"
+    )
+    evidence = production_intent_evidence(request)
+    assert evidence.production_request
+    assert evidence.repository_source == (
+        "https://github.com/hengyizhiyuan/software-production-platform.git"
+    )
+    assert evidence.action_requested
 
 
 def test_capability_alignment_cannot_claim_production_without_a_capability_match():
