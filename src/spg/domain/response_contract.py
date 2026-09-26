@@ -116,12 +116,12 @@ _REPOSITORY_SIGNAL = re.compile(
     re.IGNORECASE,
 )
 _PRODUCTION_ACTION = re.compile(
-    r"(?:拉取|克隆|开发|修改|修复|新增|增加|添加|实现|改造|接入|升级|重构|"
+    r"(?:拉取|克隆|开发|修改|修复|新增|增加|添加|实现|改造|接入|升级|重构|改为|改成|替换|调整|启动|"
     r"\b(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b)",
     re.IGNORECASE,
 )
 _DIRECT_REQUEST = re.compile(
-    r"(?:请|帮我|帮忙|需要你|给我|直接|"
+    r"(?:请|帮我|帮忙|需要你|给我|直接|把|将|我想(?:要|让)|我要|我希望|"
     r"\b(?:please|help\s+me|can\s+you|could\s+you)\b)",
     re.IGNORECASE,
 )
@@ -132,6 +132,10 @@ _ACTION_OPENING = re.compile(
 )
 _ADVISORY_OPENING = re.compile(
     r"^\s*(?:如何|怎么|怎样|有什么办法|how\s+(?:do|can|should)\s+i\b)",
+    re.IGNORECASE,
+)
+_REQUESTED_SOFTWARE_OUTCOME = re.compile(
+    r"(?:我想(?:要|让)|我要|我希望|希望).*(?:页面|功能|能力|系统|网站|应用|支持)",
     re.IGNORECASE,
 )
 _REPOSITORY_RECOVERY_ACTION = re.compile(
@@ -171,7 +175,8 @@ def production_intent_evidence(text: str) -> ProductionIntentEvidence:
         else url_match.group(0).rstrip(".,;:!?)]}，。；：！？")
     )
     repository_relevant = bool(repository_source or _REPOSITORY_SIGNAL.search(value))
-    action_requested = bool(_PRODUCTION_ACTION.search(value))
+    action_requested = bool(_PRODUCTION_ACTION.search(value)
+        or _REQUESTED_SOFTWARE_OUTCOME.search(value))
     advisory_question = bool(_ADVISORY_OPENING.search(value))
     explicit_request = bool(
         _DIRECT_REQUEST.search(value) or _ACTION_OPENING.search(value)

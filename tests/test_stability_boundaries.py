@@ -1,4 +1,5 @@
 """Generic failure-map invariants, independent of FSI names or target paths."""
+import pytest
 from spg.domain.response_contract import preserve_explicit_production_outcome
 from spg.domain.refinement_contract import test_execution_evidence as execution_evidence
 from spg.application.bootstrap import bootstrap
@@ -35,3 +36,24 @@ def test_explicit_git_source_survives_admission_for_existing_custom_host_recipe(
     evidence = production_intent_evidence(f'这是项目仓库：{source}\n请修复取消按钮并给我预览。')
     assert evidence.repository_source == source
     assert evidence.production_request
+
+
+@pytest.mark.parametrize('human_input', [
+    '把页面上的旧标签改为新标签。其他行为不变。',
+    '请启动这个项目让我查看实际效果。',
+    '我想要一个收集联系信息的页面。',
+    '我想让网站支持反馈。',
+    '我希望应用具备现有数据的搜索能力。',
+])
+def test_explicit_change_and_outcome_grammar_does_not_depend_on_one_case(human_input):
+    from spg.domain.response_contract import production_intent_evidence
+    assert production_intent_evidence(human_input).production_request
+
+
+@pytest.mark.parametrize('human_input', [
+    '如何启动这个项目？', '我想知道反馈页面为什么这样设计。',
+    '搜索 GitHub 和 Web 中成熟的实现，给出真实来源。',
+])
+def test_knowledge_and_retrieval_do_not_gain_production_authority(human_input):
+    from spg.domain.response_contract import production_intent_evidence
+    assert not production_intent_evidence(human_input).production_request
