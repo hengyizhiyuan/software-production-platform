@@ -598,11 +598,22 @@ class SemanticStepApplicationService:
         assert proposal is not None
         change_proposal = None
         if proposal.target_kind is ProductionTargetKind.CODE_WORK:
+            # Provider-selected code_targets are hypotheses, not Human scope.
+            # Only paths stated by Human and present in the exact source tree
+            # may enter the explicit-target channel. Otherwise let read-only
+            # repository discovery select the minimum required implementation.
+            human_text = "\n".join(semantic_input.work_requests)
+            tree_paths = set(semantic_input.repository_tree_paths)
+            human_targets = tuple(
+                path for path in WorkApplicationService._explicit_repository_paths(human_text)
+                if path in tree_paths
+            )
+            human_areas = WorkApplicationService._explicit_repository_areas(human_text)
             change_proposal = self.change_proposals.propose(
                 RepositoryChangeProposalRequest(
                     work_id=semantic_input.work_id,
                     refined_code_intent="\n".join(
-                        (candidate.bounded_summary, *candidate.decisions)
+                        (semantic_input.desired_outcome, *semantic_input.constraints)
                     ),
                     constraints=semantic_input.constraints,
                     engineering_resource_id=semantic_input.engineering_resource_id,
@@ -611,8 +622,9 @@ class SemanticStepApplicationService:
                     source_baseline_id=semantic_input.source_baseline_id,
                     source_ref=semantic_input.repository_ref,
                     source_revision=semantic_input.source_revision,
-                    explicit_targets=proposal.code_targets,
-                    explicit_allowed_areas=proposal.allowed_areas,
+                    explicit_targets=human_targets,
+                    candidate_targets=proposal.code_targets,
+                    explicit_allowed_areas=human_areas,
                     explicit_forbidden_areas=proposal.forbidden_areas,
                 )
             )

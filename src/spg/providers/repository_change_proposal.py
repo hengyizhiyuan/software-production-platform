@@ -25,6 +25,9 @@ _TEXT_SUFFIXES = {".py", ".js", ".cjs", ".mjs", ".html", ".css", ".ts", ".tsx"}
 _TEST_PREFIXES = ("tests/", "test/")
 _FRONTEND_MARKERS = ("frontend", "javascript", "browser", "web ui", "前端", "页面", "浏览器")
 _SEMANTIC_TERMS = {
+    "导航": ("topbar", "nav", "navigation"),
+    "链接": ("href", "link"),
+    "关于我们": ("about",),
     "composer": ("composer",),
     "展开": ("expand", "expanded", "aria-expanded", "toggle"),
     "收缩": ("collapse", "collapsed", "aria-expanded", "toggle"),
@@ -73,6 +76,22 @@ class RepositoryAwareChangeProposalProvider:
             )
             targets.extend(discovered)
             unresolved.extend(discovery_questions)
+            if not any(target.disposition is ProposalTargetDisposition.REQUIRED
+                       for target in targets):
+                # A single model-proposed path may be retained only after exact
+                # tree inspection. Multiple guesses cannot all become required
+                # merely because the provider listed them.
+                candidates = tuple(dict.fromkeys(
+                    path for path in request.candidate_targets if path in path_set
+                ))
+                if len(candidates) == 1:
+                    targets.append(self._target(
+                        path=candidates[0], paths=path_set,
+                        disposition=ProposalTargetDisposition.REQUIRED,
+                        rationale="One provider candidate exists at the exact Source Baseline; Human did not name it.",
+                        evidence=f"Candidate path inspected at {request.source_revision[:12]}.",
+                        confidence=ProposalConfidence.MEDIUM,
+                    ))
 
         obligations = self._verification_obligations(
             tuple(target for target in targets if target.disposition is ProposalTargetDisposition.REQUIRED),
@@ -236,9 +255,9 @@ class RepositoryAwareChangeProposalProvider:
     @staticmethod
     def _frontend_only(intent: str, constraints: tuple[str, ...]) -> bool:
         text = " ".join((intent, *constraints)).casefold()
-        return any(marker in text for marker in _FRONTEND_MARKERS) and any(
+        return any(marker in text for marker in (*_FRONTEND_MARKERS, "网站", "导航栏")) and any(
             marker in text
-            for marker in ("only", "only modify", "不要改动其他", "只修改", "仅修改")
+            for marker in ("only", "only modify", "不要改动其他", "只修改", "仅修改", "限于")
         )
 
     @staticmethod

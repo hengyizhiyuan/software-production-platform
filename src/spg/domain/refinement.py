@@ -140,6 +140,7 @@ class RepositoryChangeProposalRequest(BaseModel):
     source_ref: str = Field(min_length=1)
     source_revision: str = Field(min_length=1)
     explicit_targets: tuple[str, ...] = ()
+    candidate_targets: tuple[str, ...] = ()
     explicit_allowed_areas: tuple[str, ...] = ()
     explicit_forbidden_areas: tuple[str, ...] = ()
     requested_verification: tuple[CodeVerificationObligation, ...] = ()

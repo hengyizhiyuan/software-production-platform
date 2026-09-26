@@ -142,7 +142,7 @@ class RuleBasedProductionPlanner:
                 target.path for target in request.change_proposal.required_targets
             )
             if required:
-                steps.append(f"Prepare the Human-proposed code targets: {required}.")
+                steps.append(f"Prepare the repository-inspected code targets: {required}.")
             if request.change_proposal.allowed_areas:
                 areas = ", ".join(request.change_proposal.allowed_areas)
                 steps.append(f"Keep any Human-admitted code changes inside: {areas}.")
