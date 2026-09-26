@@ -132,7 +132,7 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
     {
         "identity": "build.run",
         "version": "1",
-        "description": "Run an admitted build recipe.",
+        "description": "Run an admitted project-native build recipe, for example npm run build or python -m build. For Python syntax compilation use process.run with ['python', '-m', 'py_compile', source_path].",
         "input_schema": {"type": "object", "properties": {"argv": {"type": "array", "items": {"type": "string"}}, "cwd": {"type": "string"}}, "required": ["argv", "cwd"], "additionalProperties": False},
         "effect_classification": "PROCESS",
     },

@@ -627,7 +627,7 @@ class ResponsesInferenceAdapter:
             "or credentials. Unknown optional information may remain explicitly unspecified; never "
             "present a suggested future capability as something the current site already provides. "
             "For a reported compiler/type/build defect, obtain baseline failure evidence with an "
-            "admitted build.run recipe before editing, then inspect its in-scope source and verify "
+            "admitted compiler process.run or project-native build.run recipe before editing, then inspect its in-scope source and verify "
             "the repaired build. Use repository-observed recipes, not imagined test paths or commands. "
             "A confirmed no-effect rejection permits an alternative inside existing grants; it never "
             "permits retrying a forbidden path or expanding permissions. Missing test executables "

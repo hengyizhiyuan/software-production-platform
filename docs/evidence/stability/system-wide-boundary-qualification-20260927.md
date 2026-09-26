@@ -54,3 +54,25 @@ qualification remain PENDING.
 Further owner qualification: 88 Semantic/WIC/Response Contract checks passed; 49 real PostgreSQL bounded-feature, governed-question continuation and semantic validation checks passed; 16 real Docker Preview checks passed after retiring completed qualification runtimes. Invalid semantic output after the owner repair budget now stops Work; a source-bound answer to the current genuine Steering question revises the same Work and resumes Steering. JSON round-trip representation no longer falsely rejects Preview failure/retry state updates. These are targeted qualification results, not Full Regression or Human Acceptance.
 
 Native fault qualification exposed a confirmed no-effect capability failure that incorrectly hid granted mutation tools. Existing repairability now permits an alternative inside current grants; forbidden paths remain forbidden. Real OCI missing-executable output is test-environment evidence, and real compiler diagnostics bind their invoked source. Targeted results: 82 Native/stability unit checks passed; 12 Native and terminal-owner checks passed; seven real PostgreSQL Work terminal/convergence/Human-decision checks passed. Golden user-status Multi-PWU/Join and profile editing passed browser + HTTP + actual SQLite oracles. The compiler trial with a correct source repair but no observed failing compilation remains oracle FAIL. All historical results are retained. Full Regression, remaining Golden trials and Human Acceptance remain pending.
+
+
+### Continued runtime qualification after `3d6024d`
+
+Native source-progress, safe recipe correction and Semantic current-Step policy:
+75 targeted checks passed (`/tmp/watt-stability-source-progress-question-policy.log`).
+Final Full Regression has not run and is not inferred from these targeted checks.
+
+GC-EX-05 trial 5 reached actual Cancel-close behavior after a recorded no-effect
+tool-path failure, with autonomous repairability evidence and unchanged write
+scope. Superseded local failure records remain FAILED; the business result does
+not rewrite those local diagnoses. GC-EX-08 trial 3 continued the same Work after
+one allowed scope choice and changed only header-button CSS. GC-IP-06 trial 2
+showed live counts and amount changes matching public API and actual SQLite.
+Business oracles PASS; Human Acceptance remains PENDING. The first EX-05/EX-08
+oracle projections contained harness field/selector parsing mistakes. Their FAIL
+records are retained; v2 binds the actual typed repairability field and complete
+CSS selector blocks. Product acceptance criteria have not changed.
+
+GC-EX-10 trial 3, GC-IP-08 trial 4 and GC-IP-05 trial 2 remain preserved failed
+qualifications; generic recipe, Reality-progress and question-policy corrections
+require fresh independently versioned runtime requalification.

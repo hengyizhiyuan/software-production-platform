@@ -190,7 +190,7 @@ class NativeExecutorKernel:
                 # no residual work: the effects have not yet been observed and a
                 # follow-up verification may still be required. The ineffective
                 # round bound below still forces a terminal decision after three
-                # read/check-only rounds.
+                # rounds without new source evidence or settled mutations.
                 available_tools=(
                     tuple(
                         item for item in self.tools.contracts()
@@ -410,6 +410,15 @@ class NativeExecutorKernel:
                 # Provider-native tool calls cannot update residual obligations in
                 # the same response, so the next reasoning step needs all earlier
                 # receipts to decide whether the admitted outcome is complete.
+                observed_sources = {
+                    source for receipt in prior_results
+                    if (source := self._source_observation(receipt)) is not None
+                }
+                new_source_evidence = any(
+                    source not in observed_sources
+                    for receipt in results
+                    if (source := self._source_observation(receipt)) is not None
+                )
                 prior_results = prior_results + tuple(results)
                 useful_mutation = any(
                     proposal.tool_identity not in {"file.read", "git.status", "git.diff", "test.run", "build.run", "process.run", "preview.inspect"}
@@ -420,7 +429,9 @@ class NativeExecutorKernel:
                     and result.condition is EffectCondition.SETTLED
                     for proposal, result in zip(response.tool_calls, results, strict=False)
                 )
-                ineffective_rounds = 0 if useful_mutation else ineffective_rounds + 1
+                ineffective_rounds = (
+                    0 if useful_mutation or new_source_evidence else ineffective_rounds + 1
+                )
                 checkpoint = await self._checkpoint(
                     binding=binding,
                     worker_epoch=worker_epoch,
@@ -510,6 +521,23 @@ class NativeExecutorKernel:
             summary=f"control request applied after process-tree termination: {control.value}",
             residual_obligations=residual_obligations,
         )
+
+    @staticmethod
+    def _source_observation(receipt: ToolExecutionResult) -> tuple[str, str] | None:
+        """Count observed source changes, excluding receipt/process identities.
+
+        The full checkpoint frontier survives Self-Resume. Re-reading unchanged
+        content cannot buy another convergence budget; genuinely new source
+        evidence can inform the next admitted edit within the global envelope.
+        """
+        output = receipt.output
+        if (receipt.tool_identity == "file.read"
+                and receipt.condition is EffectCondition.SETTLED
+                and output.get("exists") is True
+                and isinstance(output.get("path"), str)
+                and isinstance(output.get("content"), str)):
+            return output["path"], output["content"]
+        return None
 
     async def _checkpoint(
         self,

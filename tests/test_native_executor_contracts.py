@@ -662,6 +662,55 @@ def test_kernel_requires_terminal_decision_after_three_ineffective_rounds() -> N
     assert len(inference.requests[3].previous_results) == 3
 
 
+@pytest.mark.parametrize("distinct_sources", [True, False])
+def test_source_discovery_progress_keeps_admitted_edit_available(distinct_sources) -> None:
+    binding, contract = _binding()
+    binding = binding.model_copy(update={
+        "capability_grants": (
+            CapabilityGrant(identity="file.read", version="1", scope={}),
+            CapabilityGrant(identity="file.write", version="1", scope={}),
+        ),
+        "resource_envelope": binding.resource_envelope.model_copy(update={
+            "max_inference_submissions": 6, "max_tool_effects": 6,
+        }),
+    })
+
+    async def receipt(request: ToolExecutionRequest) -> ToolExecutionResult:
+        output = {"path": request.proposal.arguments["path"], "exists": True,
+                  "content": "observed source", "process_identity": str(uuid4())}
+        return ToolExecutionResult(delivery_id=request.delivery_id,
+            tool_identity=request.proposal.tool_identity, condition=EffectCondition.SETTLED,
+            output=output, output_digest=canonical_digest(output))
+
+    reads = tuple(InferenceResponse(action=InferenceAction.CONTINUE,
+        summary="inspect current source", working_plan=_plan(version + 2),
+        tool_calls=(ToolCallProposal(proposal_index=0, tool_identity="file.read",
+            arguments={"path": f"source-{version if distinct_sources else 0}.py"}),),
+        residual_obligations=("edit admitted source",)) for version in range(4))
+    tail = (InferenceResponse(action=InferenceAction.CONTINUE,
+        summary="apply admitted edit", working_plan=_plan(5),
+        tool_calls=(ToolCallProposal(proposal_index=0, tool_identity="file.write",
+            arguments={"path": "source-0.py", "old_text": "observed", "new_text": "changed"}),),
+        residual_obligations=("submit",)),) if distinct_sources else ()
+    inference = ScriptedInferenceAdapter((*reads, *tail, InferenceResponse(
+        action=InferenceAction.RESULT_READY, summary="submit", working_plan=_plan(6),
+        result_claim={"output_vector": {"files": []}, "evidence_ids": []},
+        residual_obligations=())))
+    result = asyncio.run(NativeExecutorKernel(inference=inference,
+        tools=NativeToolRegistry(tuple(ToolDefinition(identity, "1", "source", {}, "READ", receipt)
+            for identity in ("file.read", "file.write"))), checkpoints=_Checkpoints()).run(
+        binding=binding, contract=contract, worker_epoch=1, working_plan=_plan()))
+    assert result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+    if distinct_sources:
+        assert "file.write" in {tool["identity"] for tool in inference.requests[4].available_tools}
+        assert inference.requests[5].previous_results[-1]["tool_identity"] == "file.write"
+    else:
+        # Only the first read is progress. Three repeats consume three rounds;
+        # receipt UUID churn must not reset that counter.
+        assert len(inference.requests[4].previous_results) == 4
+        assert inference.requests[4].available_tools == ()
+
+
 def test_kernel_repairs_one_observed_rejected_provider_decision_without_replay() -> None:
     binding, contract = _binding()
 
@@ -1032,13 +1081,20 @@ def test_repairability_requires_exact_oracle_and_admitted_write_scope() -> None:
     assert classification is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
 
 
-def test_rejected_process_recipe_can_be_corrected_without_human() -> None:
+@pytest.mark.parametrize("tool,message", [
+    ("process.run", "process executable is not allowlisted: wc"),
+    ("process.run", "inline code execution is not admitted by process.run"),
+    ("process.run", "process arguments cannot escape the execution workspace"),
+    ("build.run", "build.run requires a supported project-native build recipe"),
+    ("test.run", "test.run requires a supported project-native test recipe"),
+])
+def test_rejected_process_recipe_can_be_corrected_without_human(tool, message) -> None:
     binding, _ = _binding()
     classification, basis = DurableKernelAudit._classify_repairability(
-        {}, binding=binding, tool="process.run",
+        {}, binding=binding, tool=tool,
         condition=EffectCondition.FAILED,
         output={"error_type": "ValueError", "effect_observed": False,
-                "message": "process executable is not allowlisted: wc"},
+                "message": message},
     )
     assert classification is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
     assert "no effect" in basis
@@ -1207,6 +1263,33 @@ def test_tool_host_process_environment_filters_secrets_case_insensitively(
     ]
     assert not (tmp_path / "__pycache__").exists()
     assert "must-not-cross" not in str(result.output)
+
+
+def test_admitted_process_compilation_produces_real_failure_and_success_receipts(tmp_path: Path) -> None:
+    source = tmp_path / "source.py"
+    source.write_text("def broken(:\n    pass\n")
+    binding, _ = _binding()
+    workspace = binding.workspace.model_copy(update={
+        "host_storage_id": str(tmp_path), "mounts": (
+            binding.workspace.mounts[0].model_copy(update={"host_path": str(tmp_path)}),),
+    })
+    host = LocalNativeToolHost(tmp_path, process_allowlist=(Path(sys.executable).name,))
+    def compile_source():
+        return asyncio.run(host.registry().execute(ToolExecutionRequest(
+            delivery_id=uuid4(), attempt_id=binding.attempt_id, worker_epoch=1,
+            step_id=uuid4(), proposal=ToolCallProposal(proposal_index=0,
+                tool_identity="process.run", arguments={"argv": [sys.executable, "-m", "py_compile", "source.py"]}),
+            capability_grants=(CapabilityGrant(identity="process.run", version="1"),), workspace=workspace)))
+    failed = compile_source()
+    assert failed.condition is EffectCondition.FAILED
+    assert failed.output["diagnostic_code"] == "PYTHON_SYNTAX_ERROR"
+    assert failed.output["path"] == "source.py"
+    assert "SyntaxError" in failed.output["stderr"]
+    source.write_text("def repaired():\n    pass\n")
+    passed = compile_source()
+    assert passed.condition is EffectCondition.SETTLED
+    assert passed.output["returncode"] == 0
+    assert "diagnostic_code" not in passed.output
 
 
 def test_file_write_exact_replace_preserves_unseen_large_file_content(tmp_path: Path) -> None:

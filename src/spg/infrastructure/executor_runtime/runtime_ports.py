@@ -465,6 +465,8 @@ class DurableKernelAudit:
             "file.write": "IMPLEMENTATION_EFFECT_FAILURE",
             "process.run": "RUNTIME_PROCESS_FAILURE",
         }.get(tool, "EXECUTION_EFFECT_FAILURE")
+        if tool == "process.run" and output.get("diagnostic_code") == "PYTHON_SYNTAX_ERROR":
+            family = "DEPENDENCY_BUILD_FAILURE"
         failure_code = output.get("diagnostic_code", output.get("returncode"))
         if not isinstance(failure_code, (int, str)):
             failure_code = output.get("error_type")
@@ -635,12 +637,18 @@ class DurableKernelAudit:
             and output.get("effect_observed") is False
             and output.get("error_type") == "ValueError"
             and isinstance(output.get("message"), str)
-            and output["message"].startswith("process executable is not allowlisted:")
+            and output["message"].startswith(("process executable is not allowlisted:",
+                "inline code execution is not admitted by process.run",
+                "process arguments cannot escape the execution workspace",
+                "build.run requires a supported project-native build recipe",
+                "build.run accepts only admitted npm or Python build recipes",
+                "test.run requires a supported project-native test recipe",
+                "dependency.sync requires a lock-governed project-native recipe"))
         ):
             # The rejected command never ran. Choosing a permitted inspection
             # recipe stays inside the existing Task Contract and needs no new
             # Human authority or acceptance oracle.
-            return RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE, "rejected process recipe had no effect"
+            return RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE, "rejected tool recipe had no effect"
         assertion = output.get("assertion")
         task = contract_payload.get("task_contract")
         if not isinstance(task, dict):

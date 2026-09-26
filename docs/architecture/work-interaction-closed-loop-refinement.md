@@ -766,3 +766,18 @@ A terminal BLOCKED production outcome stops Work convergence and produces durabl
 diagnostic attention. Human intervention measurement counts distinct source-bound
 Human decisions in admitted revisions and actual Candidate authorization; the
 initial intent and an unanswered escalation request are not Human interventions.
+
+Native source discovery counts a successful new path/content observation as Reality
+progress. The comparison uses the checkpoint receipt frontier, excluding changing
+receipt/process identities. Repeated unchanged reads and check-only rounds still
+consume the three-round no-progress budget; total inference/tool/resource limits
+remain binding. Known pre-execution unsupported recipes and inline-code denials
+produce no-effect repair evidence without making the denied recipe admissible.
+Compilation uses the granted process invocation or a supported project-native
+build recipe. Both paths attach actual compiler diagnostics to the existing
+build-failure repair owner; no compiler failure is inferred from source text alone.
+
+Semantic questioning preserves the observed access/security model. Speculative
+alternatives requiring new unrequested capabilities cannot create a material
+Human decision. A role named as a recipient does not itself impose exclusive
+access; existing restricted visibility must equally remain restricted.

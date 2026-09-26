@@ -109,6 +109,35 @@ def main():
         checks.update(browser_dialog_oracle=(root/'browser-oracle.json').exists())
         if checks['browser_dialog_oracle']:
             checks['actual_cancel_closes_dialog']=json.loads((root/'browser-oracle.json').read_text()).get('cancel_closes') is True
+        if identity == 'GC-EX-05':
+            attempt = json.loads((root/'native-attempt.json').read_text())
+            receipts = {item['delivery_id']: item for step in attempt.get('steps', [])
+                for item in step.get('request_payload', {}).get('previous_results', [])}
+            checks.update(actual_no_effect_tool_failure=any(item['condition'] == 'FAILED'
+                    and item.get('output', {}).get('error_type') == 'CAPABILITY_PATH_INVALID'
+                    and item['output'].get('effect_observed') is False for item in receipts.values()),
+                bounded_source_repair=paths == ['web/app.js'],
+                autonomous_refinement_signal=any(event.get('repairability') == 'AUTONOMOUSLY_REPAIRABLE'
+                    and event.get('affected_component') == 'native-tool-host/file.read'
+                    and event.get('observed_reality', {}).get('failure_code') == 'CAPABILITY_PATH_INVALID'
+                    for event in state.get('refinement', {}).get('events', [])))
+    elif identity == 'GC-EX-08':
+        browser = json.loads((root/'browser-oracle.json').read_text())
+        choice = json.loads((root/'human-clarification.json').read_text())
+        checks.update(header_only_prominent=browser.get('header_only_prominent') is True,
+            one_genuine_scope_choice=choice.get('question_count') == 1,
+            only_presentational_source=paths == ['web/styles.css'],
+            selected_button_scoped=bool(added) and not removed
+                and bool(re.findall(r'([^{}]+)\{[^{}]*\}', '\n'.join(added)))
+                and all(all(selector.strip().startswith('#header-login')
+                    for selector in block.split(','))
+                    for block in re.findall(r'([^{}]+)\{[^{}]*\}', '\n'.join(added))))
+    elif identity == 'GC-IP-06':
+        browser = json.loads((root/'browser-oracle.json').read_text())
+        database = json.loads((root/'persistence-oracle.json').read_text())
+        checks.update(dynamic_metrics_match_actual_records=browser.get('dynamic_metrics_after_new_business_records') is True,
+            api_and_database_agree=database.get('api_and_database_agree') is True,
+            only_available_domains=set(database.get('expected_metrics', {})) == {'users','customers','orders','total'})
     elif identity == 'GC-EX-10':
         attempt_record = root/'native-attempt.json'
         attempt = json.loads(attempt_record.read_text()) if attempt_record.exists() else {}

@@ -4332,6 +4332,374 @@
       },
       "manual_rescue_actions": [],
       "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 3,
+      "signal": "CAPABILITY_PATH_INVALID: compiler invocation advertised through unsupported project build recipe",
+      "architecture_owner": "Native tool contract / inference recipe / compiler receipt classification",
+      "source_head": "3d6024d6f73c4e0d4de2f5b7c72a7c8b885fcb41",
+      "work_id": "7fe454c0-af7a-5d18-a2bc-88bc07a2cae7",
+      "interaction_id": "0ec751b3-02f0-440e-bb8d-6912ff1d9f50",
+      "result": {
+        "case": "GC-EX-10",
+        "trial": 3,
+        "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+        "work_id": "7fe454c0-af7a-5d18-a2bc-88bc07a2cae7",
+        "elapsed_seconds": 130,
+        "human_acceptance": "PENDING",
+        "automatic_delivery_authorization": false,
+        "business_oracle": "NOT_YET_EVALUATED"
+      },
+      "attention": [
+        {
+          "attention_id": "87f463b3-e858-5ac6-a5ce-7af64c499922",
+          "work_id": "7fe454c0-af7a-5d18-a2bc-88bc07a2cae7",
+          "kind": "STEERING_DECISION_REQUIRED",
+          "decision": "Choose how to handle a material risk or cost",
+          "reason": "The choice materially changes risk, cost, or an irreversible effect for this step.",
+          "available_actions": [],
+          "recommended_action": null,
+          "governed_subject_ref": "steering-decision:984dde3e-612d-4cfa-a510-bd0ae1c87b8e",
+          "steering_reason": "MATERIAL_RISK_OR_COST_DECISION",
+          "recommendation": "Select the acceptable bounded trade-off.",
+          "conversation_prompt": null,
+          "alternatives": [],
+          "trade_offs": [],
+          "expected_impact": "The selected risk or cost boundary will constrain continuation.",
+          "reality_refs": [
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "941ab398-6a5e-5bff-9669-77f000ccb3b3"
+            },
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "df6995fa-8858-41a3-8151-51c25df89444"
+            },
+            {
+              "kind": "REPOSITORY_OBSERVATION",
+              "identity": "4a6e40d6-ab83-4d1c-824b-d12f9fe18053"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "b81bb3b7-e6d8-4484-92dd-3dc15d4fdf0e"
+            },
+            {
+              "kind": "TRUSTED_BASELINE",
+              "identity": "22fb1bf9-6019-474a-96c4-26df8236f6fb"
+            },
+            {
+              "kind": "WORK",
+              "identity": "7fe454c0-af7a-5d18-a2bc-88bc07a2cae7"
+            },
+            {
+              "kind": "WORK_REALITY_REVISION",
+              "identity": "2004c043-195a-5a9c-88e9-ba42efcb270b"
+            }
+          ],
+          "steering_plan_revision_id": "057a342f-e123-4a15-a421-a3903d6461e4",
+          "steering_step_id": "897f58b8-ff2b-4454-b50a-5921dc09e7cd",
+          "interaction_id": null,
+          "interaction_assessment_id": null,
+          "expected_work_reality_revision_id": null
+        }
+      ],
+      "economics": {
+        "work_id": "7fe454c0-af7a-5d18-a2bc-88bc07a2cae7",
+        "product_id": "ef18cd30-0b80-4b3e-890a-2c17b2294a76",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "b16f2f3e-e124-4359-8ffa-79da2d8f79b9",
+            "node_id": null,
+            "run_id": "df7396ee-c78f-4e05-8fb1-be2f85e163cc",
+            "condition": "PROPOSED",
+            "attempt_count": 1,
+            "outcomes": [
+              "UNABLE_TO_COMPLETE"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:54bfb054-bee8-40d9-8024-210f6debd4b0"
+            ],
+            "execution_seconds": 81.15155299999999,
+            "duration_observed": true,
+            "queue_wait_seconds": 0.855414,
+            "token_usage": {
+              "input_tokens": 34571,
+              "output_tokens": 3395,
+              "total_tokens": 37966,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 3,
+              "tool_effect": 3
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 34571,
+          "output_tokens": 3395,
+          "total_tokens": 37966,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 81.15155299999999,
+        "queue_wait_seconds": 0.855414,
+        "wall_elapsed_seconds": 82.063787,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 2,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 75,
+        "resource_units": {
+          "inference_submission": 3,
+          "tool_effect": 3
+        },
+        "final_outcome": "READY"
+      },
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 4,
+      "signal": "CONFIRMED_NO_EFFECT_TOOL_RECIPE / novel source observations incorrectly counted as no progress",
+      "architecture_owner": "Native executor kernel / pre-execution recipe repairability",
+      "source_head": "3d6024d6f73c4e0d4de2f5b7c72a7c8b885fcb41",
+      "work_id": "0d49407d-ce3f-5472-9f11-f36f5c601c70",
+      "interaction_id": "ae67a57f-7f37-4041-b3dd-3c545a900ff3",
+      "result": {
+        "case": "GC-IP-08",
+        "trial": 4,
+        "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+        "work_id": "0d49407d-ce3f-5472-9f11-f36f5c601c70",
+        "elapsed_seconds": 400,
+        "human_acceptance": "PENDING",
+        "automatic_delivery_authorization": false,
+        "business_oracle": "NOT_YET_EVALUATED"
+      },
+      "attention": [
+        {
+          "attention_id": "a4b05fcb-4f15-5175-a3c1-f49379029011",
+          "work_id": "0d49407d-ce3f-5472-9f11-f36f5c601c70",
+          "kind": "STEERING_DECISION_REQUIRED",
+          "decision": "Choose how to handle a material risk or cost",
+          "reason": "The choice materially changes risk, cost, or an irreversible effect for this step.",
+          "available_actions": [],
+          "recommended_action": null,
+          "governed_subject_ref": "steering-decision:8e14552c-57b4-4e2f-b53f-0806db8b3ca3",
+          "steering_reason": "MATERIAL_RISK_OR_COST_DECISION",
+          "recommendation": "Select the acceptable bounded trade-off.",
+          "conversation_prompt": null,
+          "alternatives": [],
+          "trade_offs": [],
+          "expected_impact": "The selected risk or cost boundary will constrain continuation.",
+          "reality_refs": [
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "4e2feda8-a5c2-5801-a03a-d6e4fbc85ed1"
+            },
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "ec77e390-736e-4da9-ac6a-e01d93ed4572"
+            },
+            {
+              "kind": "REPOSITORY_OBSERVATION",
+              "identity": "5b4aae77-d01e-4b77-9b67-6a2362065a70"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "f3f37a04-d62f-44af-80e9-001b757cfe3e"
+            },
+            {
+              "kind": "TRUSTED_BASELINE",
+              "identity": "068a741d-178b-477d-8124-68d384d2601d"
+            },
+            {
+              "kind": "WORK",
+              "identity": "0d49407d-ce3f-5472-9f11-f36f5c601c70"
+            },
+            {
+              "kind": "WORK_REALITY_REVISION",
+              "identity": "3f4b1818-e58a-5c62-915a-1fcea0e0f374"
+            }
+          ],
+          "steering_plan_revision_id": "772d05f2-9ee6-4841-bd43-f3d2b0bebdb3",
+          "steering_step_id": "53dd9dd7-ac4b-4cc2-bd25-80927d8027e4",
+          "interaction_id": null,
+          "interaction_assessment_id": null,
+          "expected_work_reality_revision_id": null
+        }
+      ],
+      "economics": {
+        "work_id": "0d49407d-ce3f-5472-9f11-f36f5c601c70",
+        "product_id": "1d45b2da-1a46-48e8-8c6e-7c01d8712fd6",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "24a26e6d-edc8-4534-afff-23ecc0e4d70b",
+            "node_id": null,
+            "run_id": "7830170e-9fca-40e1-ac49-376a90fb1e4b",
+            "condition": "PROPOSED",
+            "attempt_count": 1,
+            "outcomes": [
+              "UNABLE_TO_COMPLETE"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:7dead64c-3140-4fa7-9d2e-fbbdfdd0c028"
+            ],
+            "execution_seconds": 143.871856,
+            "duration_observed": true,
+            "queue_wait_seconds": 33.036713,
+            "token_usage": {
+              "input_tokens": 98602,
+              "output_tokens": 30772,
+              "total_tokens": 129374,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 7,
+              "tool_effect": 12
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 98602,
+          "output_tokens": 30772,
+          "total_tokens": 129374,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 143.871856,
+        "queue_wait_seconds": 33.036713,
+        "wall_elapsed_seconds": 151.077099,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 3,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 128,
+        "resource_units": {
+          "inference_submission": 7,
+          "tool_effect": 12
+        },
+        "final_outcome": "READY"
+      },
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-IP-05",
+      "trial": 2,
+      "signal": "PROVIDER_CANDIDATE_PROMOTED_TO_REQUIRED_SCOPE: speculative exclusive-access alternative causes Human interruption",
+      "architecture_owner": "Semantic Step sufficiency / existing security-model preservation",
+      "source_head": "3d6024d6f73c4e0d4de2f5b7c72a7c8b885fcb41",
+      "work_id": "68e1e613-8bf0-59bc-87ed-f4b5332812f8",
+      "interaction_id": "6ef567f7-4f6b-4a7e-af5b-2bcc253c55f3",
+      "result": {
+        "case": "GC-IP-05",
+        "trial": 2,
+        "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+        "work_id": "68e1e613-8bf0-59bc-87ed-f4b5332812f8",
+        "elapsed_seconds": 107,
+        "human_acceptance": "PENDING",
+        "automatic_delivery_authorization": false,
+        "business_oracle": "NOT_YET_EVALUATED"
+      },
+      "attention": [
+        {
+          "attention_id": "80f68f0d-f6e0-59d6-b9a1-1930d096a3e3",
+          "work_id": "68e1e613-8bf0-59bc-87ed-f4b5332812f8",
+          "kind": "STEERING_DECISION_REQUIRED",
+          "decision": "Answer the current Work question",
+          "reason": "The requested outcome says the team can view feedback, but the read/visibility surface and access expectation are not stated. Which observed alternative applies? (a) an in-site feedback listing readable by anyone who can reach the site (no authentication, matching the current baseline where 'authentication is not implemented'), or (b) a view restricted to the team, which would require adding an authorization mechanism that does not exist in the admitted baseline and would expand scope and risk. Please confirm the read acceptance criterion and who may access it.",
+          "available_actions": [],
+          "recommended_action": null,
+          "governed_subject_ref": "steering-decision:93b3d800-f310-42a4-9410-5e091debe051",
+          "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+          "recommendation": "Confirm the feedback read surface and access expectation before the feedback feature is specified as complete: state whether an in-site team view of submitted feedback is required, and whether it must be restricted to the team (which requires an authorization mechanism absent from the current baseline) or may be openly readable within the site.",
+          "conversation_prompt": "The requested outcome says the team can view feedback, but the read/visibility surface and access expectation are not stated. Which observed alternative applies? (a) an in-site feedback listing readable by anyone who can reach the site (no authentication, matching the current baseline where 'authentication is not implemented'), or (b) a view restricted to the team, which would require adding an authorization mechanism that does not exist in the admitted baseline and would expand scope and risk. Please confirm the read acceptance criterion and who may access it.",
+          "alternatives": [],
+          "trade_offs": [],
+          "expected_impact": "The decision will govern subsequent design and production.",
+          "reality_refs": [
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "18d3eb2c-10a7-4992-94a9-191b1105aee8"
+            },
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "7df2abfb-193f-5384-8a84-7f231b1e78c0"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "da1cba39-e69a-4b63-a29d-a7e5039fa7a8"
+            },
+            {
+              "kind": "TRUSTED_BASELINE",
+              "identity": "068a741d-178b-477d-8124-68d384d2601d"
+            },
+            {
+              "kind": "WORK",
+              "identity": "68e1e613-8bf0-59bc-87ed-f4b5332812f8"
+            },
+            {
+              "kind": "WORK_REALITY_REVISION",
+              "identity": "ef207f9c-64a7-5646-9e9d-f0cfe2d051bc"
+            }
+          ],
+          "steering_plan_revision_id": "1691c95b-7f77-41e8-8b6d-5037d6a7ac4d",
+          "steering_step_id": "e619eed4-c612-46fc-ad1b-72abd3d87e05",
+          "interaction_id": null,
+          "interaction_assessment_id": null,
+          "expected_work_reality_revision_id": null
+        }
+      ],
+      "economics": {
+        "work_id": "68e1e613-8bf0-59bc-87ed-f4b5332812f8",
+        "product_id": "1d45b2da-1a46-48e8-8c6e-7c01d8712fd6",
+        "pwu_count": 0,
+        "join_count": 0,
+        "pwu": [],
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "amount": null
+        },
+        "wall_elapsed_seconds": null,
+        "execution_seconds": 0,
+        "queue_wait_seconds": 0,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": null,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "self_refine_event_count": 0,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {},
+        "final_outcome": "READY"
+      },
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
     }
   ]
 }

@@ -372,7 +372,7 @@ class LocalNativeToolHost:
         if identity == "test.run":
             from spg.domain.refinement_contract import test_execution_evidence
             output.update(test_execution_evidence(output))
-        elif identity == "build.run":
+        elif identity in {"build.run", "process.run"}:
             from spg.domain.refinement_contract import compilation_execution_evidence
             output.update(compilation_execution_evidence(output))
         return self._result(
