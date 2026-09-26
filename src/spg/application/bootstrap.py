@@ -65,6 +65,10 @@ class Application:
             "application": self.settings.application_name,
             "foundation": "ready",
             "runtime_profile": self.settings.runtime_profile,
+            "wic_runtime_mode": self.settings.wic_runtime_mode,
+            "qualified_wic_runtime_mode": "WIC_VNEXT_CONTROLLED",
+            "wic_configuration_parity": (
+                "PASS" if self.settings.wic_runtime_mode == "WIC_VNEXT_CONTROLLED" else "EXPERIMENTAL"),
         }
 
     def persistence(self) -> Database:
@@ -366,6 +370,7 @@ class Application:
                     preview.require_ready(work_id, candidate_id)
 
             service.configure_candidate_authorization_guard(require_functional_preview)
+            service.configure_candidate_review(preview.prepare_review, preview.review_ready)
         return service
 
     def interaction(

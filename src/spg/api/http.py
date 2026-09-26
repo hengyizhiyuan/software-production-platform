@@ -191,6 +191,11 @@ def create_http_application(
     """Compose one ASGI application over the existing application bootstrap path."""
 
     container = application or bootstrap()
+    runtime_settings = getattr(container, "settings", None)
+    if (runtime_settings is not None and runtime_settings.auth_mode == "required"
+            and runtime_settings.wic_runtime_mode != "WIC_VNEXT_CONTROLLED"):
+        raise ValueError("Product runtime requires qualified WIC_VNEXT_CONTROLLED; "
+            "legacy/shadow modes are restricted to explicit test-only runtimes")
     selected_database = database
     if work_service is None:
         selected_database = selected_database or container.persistence()
@@ -227,6 +232,8 @@ def create_http_application(
         )
         delivery_service.full_application_runtime_probe = (
             candidate_runtime_preview.require_served_for_delivery)
+        work_service.configure_candidate_review(candidate_runtime_preview.prepare_review,
+            candidate_runtime_preview.review_ready)
     software_runtime = SoftwareRuntimeService(delivery_service,
         enabled=getattr(settings, "delivery_runtime_enabled", False),
         bind_host=getattr(settings, "delivery_runtime_bind_host", "127.0.0.1"),
@@ -254,6 +261,8 @@ def create_http_application(
         selected_orchestrator,
         repository_assets=asset_service,
     )
+    if candidate_runtime_preview is not None:
+        candidate_runtime_preview.outcome_listener = selected_steering_driver.preview_outcome
     selected_runtime_activation = runtime_activation or container.runtime_activation(
         selected_database
     )
@@ -360,6 +369,8 @@ def create_http_application(
             yield
         finally:
             software_runtime.shutdown()
+            if candidate_runtime_preview is not None:
+                candidate_runtime_preview.shutdown()
             selected_steering_driver.shutdown()
             selected_orchestrator.shutdown()
             if selected_interaction is not None:
@@ -1266,10 +1277,12 @@ def create_http_application(
             store = NativeExecutionStore(uow.session)
             records = store.list_self_refine_events(work_id=work_id)
             metrics = store.self_refine_metrics(work_id=work_id)
+            convergence = store.work_convergence_history(work_id)
         return {
             "count": len(records),
             "events": [record.model_dump(mode="json") for record in records],
             "metrics": metrics,
+            "work_convergence": [row.model_dump(mode="json") for row in convergence],
         }
 
     @api.get("/api/self-refine")

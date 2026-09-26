@@ -144,6 +144,13 @@ class JsonProductionEnvironmentStore:
             CandidatePreviewSessionV1,
         )
 
+    def candidate_preview_history(self, work_id: UUID) -> tuple[CandidatePreviewSessionV1, ...]:
+        directory = self.root / "candidate-previews" / "sessions"
+        sessions = (self._read(path, CandidatePreviewSessionV1)
+            for path in directory.glob("*/current.json"))
+        return tuple(sorted((item for item in sessions if item is not None
+            and item.work_id == work_id), key=lambda item: item.created_at))
+
     def advance_candidate_preview(
         self, before: CandidatePreviewSessionV1, after: CandidatePreviewSessionV1,
     ) -> CandidatePreviewSessionV1:

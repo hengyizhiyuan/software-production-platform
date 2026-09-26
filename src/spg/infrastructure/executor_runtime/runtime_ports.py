@@ -465,8 +465,8 @@ class DurableKernelAudit:
             "file.write": "IMPLEMENTATION_EFFECT_FAILURE",
             "process.run": "RUNTIME_PROCESS_FAILURE",
         }.get(tool, "EXECUTION_EFFECT_FAILURE")
-        failure_code = output.get("returncode")
-        if not isinstance(failure_code, int):
+        failure_code = output.get("diagnostic_code", output.get("returncode"))
+        if not isinstance(failure_code, (int, str)):
             failure_code = output.get("error_type")
         if not isinstance(failure_code, (int, str)):
             failure_code = condition.value
@@ -514,11 +514,20 @@ class DurableKernelAudit:
             )
         if event is None:
             event_id = uuid4()
+            from spg.domain.refinement_contract import RefinementSignalKind
+            signal_kind = (
+                RefinementSignalKind.EVIDENCE_INSUFFICIENT
+                if failure_code in {"TEST_ENVIRONMENT_NOT_READY", "VERIFICATION_EVIDENCE_INCOMPLETE"}
+                else RefinementSignalKind.CAPABILITY_MISMATCH
+                if output.get("effect_observed") is False and output.get("error_type") == "ValueError"
+                else RefinementSignalKind.REALITY_MISMATCH
+                if tool == "preview.inspect" else RefinementSignalKind.EXECUTION_FAILURE)
             event = SelfRefineEventRecord(
                 id=event_id, work_id=binding.work_id,
                 operation_id=self.attempt_id, created_at=now,
                 failure_family=family,
                 failure_signature=signature,
+                signal_kind=signal_kind,
                 affected_component=f"native-tool-host/{tool}",
                 expected_reality={"effect_condition": EffectCondition.SETTLED.value,
                                   "tool_identity": tool},
@@ -595,6 +604,15 @@ class DurableKernelAudit:
             return RepairabilityClassification.REQUIRES_HUMAN_DECISION, "multiple valid product outcomes"
         if output.get("product_intent_change") is True:
             return RepairabilityClassification.REQUIRES_HUMAN_DECISION, "repair would change Product Intent"
+        grants = {grant.identity for grant in binding.capability_grants}
+        if (tool == "test.run" and output.get("diagnostic_code") == "TEST_ENVIRONMENT_NOT_READY"
+                and "dependency.sync" in grants):
+            return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+                "Use the granted locked dependency synchronization or an equivalent admitted test path; "
+                "do not add dependencies or change the acceptance oracle")
+        if tool == "test.run" and output.get("diagnostic_code") == "VERIFICATION_EVIDENCE_INCOMPLETE":
+            return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+                "Collect-only produced no assertion evidence; run the admitted test recipe")
         if (
             condition is EffectCondition.FAILED
             and output.get("effect_observed") is False
@@ -661,7 +679,8 @@ class DurableKernelAudit:
             "receipt_ref": f"native-receipt:{receipt_id}",
             "evidence_refs": [f"native-evidence:{identity}" for identity in evidence_ids],
         }
-        for field in ("test_identity", "diagnostic_code", "returncode", "path", "git_ref"):
+        for field in ("test_identity", "diagnostic_code", "returncode", "path", "git_ref",
+                "test_environment_readiness", "verification_evidence"):
             value = output.get(field)
             if isinstance(value, (str, int)) and not isinstance(value, bool):
                 indexed[field] = value if isinstance(value, int) else value[:255]

@@ -271,6 +271,7 @@ class SemanticStepInput(BaseModel):
     constraints: tuple[str, ...]
     work_context_facts: tuple[str, ...] = ()
     work_requests: tuple[str, ...] = ()
+    human_explicit_requests: tuple[str, ...] = ()
     steering_plan_revision_id: UUID
     step: "SteeringStepRecord"
     basis_fingerprint: str = Field(min_length=64, max_length=64)

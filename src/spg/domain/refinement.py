@@ -127,6 +127,28 @@ class RepositoryChangeProposal(BaseModel):
         ).hexdigest()
 
 
+class RepositoryTargetNecessityProof(BaseModel):
+    """Read-only witness of a minimum change surface, not model authority."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    path: str = Field(min_length=1)
+    source_path: str = Field(min_length=1)
+    repository_quote: str = Field(min_length=5, max_length=2000)
+    human_clause: str = Field(min_length=3, max_length=2000)
+    necessity: str = Field(min_length=10, max_length=2000)
+
+    @field_validator("path", "source_path")
+    @classmethod
+    def normalize_witness_path(cls, value: str) -> str:
+        return safe_repository_path(value)
+
+
+class RepositoryScopeValidation(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    required_targets: tuple[RepositoryTargetNecessityProof, ...]
+    rejected_behaviors: tuple[str, ...]
+    explanation: str = Field(min_length=10)
+
+
 class RepositoryChangeProposalRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -141,6 +163,8 @@ class RepositoryChangeProposalRequest(BaseModel):
     source_revision: str = Field(min_length=1)
     explicit_targets: tuple[str, ...] = ()
     candidate_targets: tuple[str, ...] = ()
+    necessity_proofs: tuple[RepositoryTargetNecessityProof, ...] = ()
+    human_authority_text: str | None = None
     explicit_allowed_areas: tuple[str, ...] = ()
     explicit_forbidden_areas: tuple[str, ...] = ()
     requested_verification: tuple[CodeVerificationObligation, ...] = ()

@@ -70,6 +70,7 @@ from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.domain.native_execution import SelfRefineActionRecord, SelfRefineEventRecord
+from spg.domain.native_execution import canonical_digest
 from spg.infrastructure.model_runtime import ModelProviderError
 
 
@@ -545,6 +546,9 @@ class PlanSteeringDriver:
     def activate(self, work_id: UUID) -> SteeringActivationResult:
         """Continue bounded stepwise actions until a typed stop is reached."""
 
+        if self._work_convergence_halted(work_id):
+            return SteeringActivationResult(work_id=work_id, iterations_executed=0,
+                stop_reason=SteeringDriverStopReason.BLOCKED)
         if self._provider_failure_escalated(work_id):
             return SteeringActivationResult(
                 work_id=work_id,
@@ -564,7 +568,10 @@ class PlanSteeringDriver:
                 )
             try:
                 result = self.iterate(work_id)
-            except (SteeringInvariantViolation, ProductInvariantViolation):
+            except (SteeringInvariantViolation, ProductInvariantViolation) as error:
+                self._observe_convergence(work_id, failed=True,
+                    failure_signature=canonical_digest({"boundary": "STEERING",
+                        "error_type": type(error).__name__, "reason": str(error)}))
                 LOGGER.exception("Steering stopped on governed invariant Work=%s", work_id)
                 return SteeringActivationResult(
                     work_id=work_id,
@@ -574,6 +581,9 @@ class PlanSteeringDriver:
                 )
             except ModelProviderError as error:
                 self._record_provider_failure(work_id, error)
+                self._observe_convergence(work_id, failed=True,
+                    failure_signature=canonical_digest({"boundary": "PROVIDER",
+                        "kind": error.kind.value}))
                 LOGGER.warning(
                     "Steering waits for Provider recovery Work=%s kind=%s retryable=%s request_sent=%s usage_unknown=%s",
                     work_id,
@@ -589,6 +599,20 @@ class PlanSteeringDriver:
                     last_action=last_action,
                 )
             self._clear_provider_failure(work_id)
+            if result.action is not None or result.stop_reason in {
+                SteeringDriverStopReason.NO_PROGRESS, SteeringDriverStopReason.BLOCKED,
+                SteeringDriverStopReason.CAPABILITY_UNAVAILABLE,
+            }:
+                observation = self._observe_convergence(work_id,
+                    failed=result.stop_reason in {SteeringDriverStopReason.NO_PROGRESS,
+                        SteeringDriverStopReason.BLOCKED, SteeringDriverStopReason.CAPABILITY_UNAVAILABLE},
+                    failure_signature=None if result.stop_reason is None else canonical_digest(
+                        {"stop_reason": result.stop_reason.value}),
+                    boundary="STEERING" if result.action is None else result.action.value)
+                if observation.condition in {"NON_CONVERGING", "ESCALATED"}:
+                    return SteeringActivationResult(work_id=work_id,
+                        iterations_executed=iterations, stop_reason=SteeringDriverStopReason.BLOCKED,
+                        last_action=result.action)
             if result.action is not None:
                 iterations += 1
                 last_action = result.action
@@ -612,6 +636,100 @@ class PlanSteeringDriver:
             stop_reason=SteeringDriverStopReason.TRANSITION_BOUND,
             last_action=last_action,
         )
+
+    def _convergence_basis(self, work_id: UUID) -> dict:
+        with self.database.unit_of_work() as uow:
+            store = ProductStore(uow.session)
+            work = store.work(work_id)
+            if work is None:
+                raise ProductInvariantViolation("Work convergence requires persisted Work")
+            bindings = store.runtime_bindings(work_id)
+            facts = store.runtime_summary(bindings[-1]) if bindings else RuntimeFactSummary()
+            resource = store.resource_for_work(work_id)
+            intent = canonical_digest({"raw_requirement": work.raw_user_requirement,
+                "desired_outcome": work.desired_outcome, "constraints": work.constraints})
+            missing = []
+            if resource is None:
+                missing.append("REPOSITORY_BOUND")
+            if work.production_plan is None:
+                missing.append("PRODUCTION_PLAN_ADMITTED")
+            if facts.admissibility_outcome != "ADMISSIBLE":
+                missing.append("SOURCE_VERIFIED")
+            if facts.candidate_id is None:
+                missing.append("CANDIDATE_SEALED")
+            # Human review is a destination, not an automatic acceptance grant.
+            if (facts.candidate_id is None or (self.work_service.candidate_review_readiness
+                    and not self.work_service.candidate_review_readiness(work_id, facts.candidate_id))):
+                missing.append("REVIEW_RUNTIME_READY")
+            reality = canonical_digest({"repository": None if resource is None else resource.repository_identity,
+                "candidate_fingerprint": facts.candidate_fingerprint,
+                "verification_results": facts.verification_results,
+                "missing_acceptance": sorted(missing)})
+        return {"intent_identity": intent, "reality_identity": reality,
+            "candidate_identity": facts.candidate_fingerprint,
+            "missing_acceptance": tuple(missing)}
+
+    def _work_convergence_halted(self, work_id: UUID) -> bool:
+        basis = self._convergence_basis(work_id)
+        with self.database.unit_of_work() as uow:
+            history = NativeExecutionStore(uow.session).work_convergence_history(work_id)
+        current = next((row for row in reversed(history)
+            if row.intent_identity == basis["intent_identity"]), None)
+        return bool(current is not None and current.condition in {"NON_CONVERGING", "ESCALATED"}
+            and not set(basis["missing_acceptance"]) < set(current.missing_acceptance))
+
+    def _observe_convergence(self, work_id: UUID, *, failed: bool,
+        failure_signature: str | None = None, boundary: str = "STEERING"):
+        basis = self._convergence_basis(work_id)
+        from spg.application.measurement import ProductionMeasurementService
+        economics = ProductionMeasurementService(self.database).graph_economics(work_id)
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            refinements = store.list_self_refine_events(work_id=work_id, limit=1)
+            observation = store.observe_work_convergence(
+                work_id=work_id, boundary=boundary, failed=failed,
+                failure_signature=failure_signature, **basis,
+                token_usage=economics["token_usage"],
+                model_cost=economics["observed_provider_spend"],
+                compute_cost={"execution_seconds": economics["execution_seconds"],
+                    "resource_units": economics.get("resource_units", {}),
+                    "status": "OBSERVED" if economics["pwu_count"] else "UNREPORTED"},
+                human_intervention_count=economics.get("human_escalation_count", 0),
+                previous_repair_class=refinements[0].refinement_class if refinements else None,
+                evidence={"source": "persisted Work/Runtime and Candidate Preview",
+                    "product_id": economics["product_id"],
+                    "human_acceptance": "PENDING", "delivery_authorized": False})
+            uow.commit()
+        if observation.condition in {"NON_CONVERGING", "ESCALATED"}:
+            fresh = self.frames.assemble(work_id)
+            reason = (f"Work convergence stopped: {observation.condition}; "
+                f"{observation.no_progress_count} failed no-progress outcomes, "
+                f"{observation.attempts} boundary attempts, {observation.elapsed_seconds}s. "
+                f"Missing acceptance: {', '.join(observation.missing_acceptance)}. "
+                "Evidence is preserved; restarting or changing candidate IDs does not reset this budget.")
+            current = fresh.reconstruction.latest_decision
+            if current is None or current.reason != reason:
+                self.decisions.admit(work_id, NextStepCandidate(
+                    type=SteeringStepType.HUMAN_DECISION,
+                    objective="Resolve the bounded Work convergence incident",
+                    reason=reason,
+                    reality_refs=tuple(item.reference for item in fresh.basis.resolved_reality),
+                    human_required=True,
+                    completion_condition="A genuinely revised admitted intent or verified acceptance improvement resolves the incident",
+                    proposed_outcome=SteeringOutcome.HUMAN_ATTENTION,
+                    basis_fingerprint=fresh.basis.fingerprint,
+                    authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+                    proposed_engineering_scope_fingerprint=fresh.engineering_scope_fingerprint,
+                    attention_reason=SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION,
+                    recommendation="Review preserved boundary diagnostics; do not restart the unchanged Work as a repair.",
+                    expected_impact="Automatic retries stop; no authority or delivery is granted."))
+        return observation
+
+    def preview_outcome(self, work_id: UUID, failed: bool) -> None:
+        observation = self._observe_convergence(work_id, failed=failed, boundary="PREVIEW",
+            failure_signature=canonical_digest({"signal": "PREVIEW_NOT_READY"}) if failed else None)
+        if observation.condition not in {"NON_CONVERGING", "ESCALATED"} and not failed:
+            self.schedule(work_id)
 
     def schedule(self, work_id: UUID) -> bool:
         """Schedule one bounded activation; duplicate wakeups are coalesced."""
@@ -862,6 +980,13 @@ class PlanSteeringDriver:
 
         if binding is not None and summary.runtime_commit_id is not None:
             return self._transition_iteration(frame, before)
+        if summary.candidate_id is not None and summary.authorization_id is None:
+            self.work_service.prepare_candidate_review(frame.work_id)
+            ready = self.work_service.candidate_review_readiness
+            return self._result(frame.work_id, before, action=None,
+                stop=(SteeringDriverStopReason.PRODUCTION_RUNNING
+                    if ready is not None and not ready(frame.work_id, summary.candidate_id)
+                    else SteeringDriverStopReason.HUMAN_ATTENTION))
         if binding is not None and (
             summary.completion_outcome == "NOT_PRODUCED"
             or any(result != "PASS" for result in summary.verification_results)

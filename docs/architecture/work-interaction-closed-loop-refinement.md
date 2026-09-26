@@ -629,3 +629,55 @@ Work Interaction & Closed-loop Refinement Core
 Watt Product MVP
     NOT CLOSED
 ```
+
+
+## System-wide refinement and durable Work convergence
+
+Self-Refine is the existing governed convergence behavior across owner boundaries;
+it is not another domain engine. WIC validates explicit Human intent completeness
+before Work admission. Semantic scope judgment uses exact-source witnesses and
+verbatim Human requests before candidate paths become necessary change surfaces.
+Steering reconciles that scope; Planning checks proven surfaces and available
+capabilities; Task Contract failures return structured feedback for bounded
+regeneration. Executor receipts distinguish no-effect recipes, environment readiness,
+executed assertions and incomplete collection. Preview validates the exact Candidate
+and its served behavior from the actual verifier namespace.
+
+A successful local repair is `LOCAL_OBLIGATION_RECOVERED`. It does not mean the
+Work recovered. Version-1 historical `RECOVERED` events retain their original
+meaning and remain separately counted. New owner refinements record signals,
+evidence, repair lineage and one of routine stochastic, degrading/recurring, or
+systemic/non-converging classifications without expanding authority.
+
+`work_convergence_observations` records an append-only Work/intent trajectory:
+predecessor, boundary, signatures, candidate/Reality identities, missing acceptance
+obligations, lifetime attempts/time, failed no-progress count, observed token/model/
+compute costs, Human escalation count and previous repair class. Polling does not
+spend attempts. Changing candidate IDs or boundary names does not reset a failure
+trajectory. Verified reduction of missing obligations resets consecutive no-progress;
+lifetime budgets remain. Three failed no-progress outcomes, 128 observed owner
+transitions or two hours stop the trajectory. A genuine new admitted intent starts
+its own budget; restarting the process does not. Unknown costs are reported as
+unreported rather than invented. The terminal destination can be
+`CONVERGED_FOR_REVIEW`; Human Acceptance remains a separate decision.
+
+Candidate sealing schedules supported functional Preview automatically. Candidate
+review attention waits for exact-fingerprint READY plus persisted served-verification
+PASS. The verifier runs in the Candidate gateway network; a host-loopback URL is
+reserved for the Human-facing endpoint. Ordinary transient acquisition and Preview
+failures retry automatically with persisted lineage, bounded backoff and a three-
+attempt budget. Permanent authority or source failures do not retry blindly. Preview
+restart restores pending retry from evidence without deleting failed sessions.
+Human interruption is reserved for genuine high-impact ambiguity, external authority
+or secrets, and final review/delivery governance.
+
+Production requires qualified `WIC_VNEXT_CONTROLLED`; authenticated application
+startup rejects experimental mode drift. Qualification status reports the effective
+mode. A versioned Tier-0 Golden Case in `benchmarks/golden/tier0-v1.json` means
+one natural-language product journey through actual configured model, owners,
+execution and served-runtime oracle. Unit/runtime regressions and synthetic
+benchmarks remain distinct evidence. Single-pass permits Watt-owned internal
+refinement; it forbids tester implementation, hidden hints, manual Preview start
+or retries as rescue. Repeated trials assess semantic outcomes and intervention,
+scope, recovery and convergence dimensions separately. Golden automation does not
+constitute Human Acceptance.

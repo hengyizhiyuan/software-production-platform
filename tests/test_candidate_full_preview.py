@@ -96,6 +96,101 @@ def await_ready(service: CandidatePreviewApplicationService, work_id):
     raise AssertionError("Preview did not reach a terminal preparation state")
 
 
+def test_review_preparation_is_automatic_and_waits_for_served_evidence(tmp_path):
+    repository, revision, tree = candidate_repository(tmp_path)
+    source = CandidateSource(context(repository, revision, tree))
+    work_id = uuid4()
+    class ServedProvider(RuntimeProvider):
+        def verify_served(self, _preview_id, revision, tree, *, mode=None):
+            return {"result": "PASS", "candidate_revision": revision, "candidate_tree": tree}
+    service = CandidatePreviewApplicationService(source,
+        JsonProductionEnvironmentStore(tmp_path / "auto-preview"), ServedProvider())
+    assert not service.review_ready(work_id, UUID(source.context["candidate_id"]))
+    service.prepare_review(work_id)
+    ready = await_ready(service, work_id)
+    assert ready.status is PreviewRuntimeStatus.READY
+    assert service.review_ready(work_id, ready.candidate_id)
+    service.prepare_review(work_id)
+    assert len(service.store.candidate_preview_history(work_id)) == 1
+    assert not any(item["kind"] == "HUMAN_CANDIDATE_AUTHORIZATION" for item in ready.evidence)
+
+
+def test_preview_transient_failure_retries_with_preserved_lineage(tmp_path):
+    repository, revision, tree = candidate_repository(tmp_path)
+    source = CandidateSource(context(repository, revision, tree))
+    class TransientProvider(RuntimeProvider):
+        calls = 0
+        def start(self, *args, **kwargs):
+            self.calls += 1
+            if self.calls == 1:
+                raise ConnectionError("temporary connection failure")
+            self.alive = True
+            return super().start(*args, **kwargs)
+        def verify_served(self, _preview_id, revision, tree, *, mode=None):
+            return {"result": "PASS", "candidate_revision": revision, "candidate_tree": tree}
+    provider = TransientProvider()
+    service = CandidatePreviewApplicationService(source,
+        JsonProductionEnvironmentStore(tmp_path / "auto-retry"), provider)
+    work_id = uuid4()
+    service.prepare_review(work_id)
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline:
+        current = service.store.current_candidate_preview(work_id)
+        if current and current.status is PreviewRuntimeStatus.READY:
+            break
+        time.sleep(0.02)
+    service.shutdown()
+    assert current.status is PreviewRuntimeStatus.READY
+    history = service.store.candidate_preview_history(work_id)
+    assert len(history) == 2
+    assert history[0].status is PreviewRuntimeStatus.FAILED
+    assert history[0].failure_code == "STARTUP_FAILED"
+    assert any(item["kind"] == "REFINEMENT_LINEAGE"
+        and item["previous_preview_id"] == str(history[0].id) for item in current.evidence)
+
+
+def test_preview_pending_retry_survives_service_restart(tmp_path):
+    repository, revision, tree = candidate_repository(tmp_path)
+    source = CandidateSource(context(repository, revision, tree))
+    class RestartProvider(RuntimeProvider):
+        calls = 0
+        def start(self, *args, **kwargs):
+            self.calls += 1
+            if self.calls == 1:
+                raise ConnectionError("temporary connection failure")
+            self.alive = True
+            return super().start(*args, **kwargs)
+        def verify_served(self, _preview_id, revision, tree, *, mode=None):
+            return {"result": "PASS", "candidate_revision": revision, "candidate_tree": tree}
+    provider = RestartProvider()
+    store = JsonProductionEnvironmentStore(tmp_path / "restart-retry")
+    service = CandidatePreviewApplicationService(source, store, provider)
+    work_id = uuid4()
+    service.prepare_review(work_id)
+    failed = await_ready(service, work_id)
+    assert failed.status is PreviewRuntimeStatus.FAILED
+    # Wait for the persisted retry signal, then discard in-memory timers.
+    deadline = time.monotonic() + 2
+    while time.monotonic() < deadline:
+        failed = store.current_candidate_preview(work_id)
+        if any(item.get("next_action") == "BOUNDED_AUTOMATIC_RETRY" for item in failed.evidence):
+            break
+        time.sleep(0.01)
+    service.shutdown()
+    restarted = CandidatePreviewApplicationService(source, store, provider)
+    restarted.restore()
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline:
+        current = store.current_candidate_preview(work_id)
+        if current.status is PreviewRuntimeStatus.READY:
+            break
+        time.sleep(0.02)
+    restarted.shutdown()
+    assert current.status is PreviewRuntimeStatus.READY
+    assert len(store.candidate_preview_history(work_id)) == 2
+    assert store.get_candidate_preview(failed.id).status is PreviewRuntimeStatus.FAILED
+
+
 def test_p1_preview_retention_keeps_review_and_evidence_then_releases_runtime(tmp_path: Path):
     repository, revision, tree = candidate_repository(tmp_path)
     source = CandidateSource(context(repository, revision, tree))

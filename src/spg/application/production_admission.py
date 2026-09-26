@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from uuid import NAMESPACE_URL, UUID, uuid5
+from time import monotonic, sleep
 
 from spg.application.assets import RepositoryAssetService
 from spg.application.product_assets import ProductAssetService
@@ -32,6 +33,8 @@ from spg.domain.response_contract import (
 )
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.interaction_store import InteractionStore
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.domain.refinement_contract import RefinementSignalKind
 
 
 class ProductionAdmissionTrigger:
@@ -603,21 +606,29 @@ class ProductionAdmissionTrigger:
         if latest is None or latest.get("condition") not in {
             "REQUESTED",
             "RUNNING",
+            "FAILED_RETRYABLE",
         }:
             return latest
-        observation = self._execute_acquisition_attempt(
-            UUID(latest["intake_request_id"])
-        )
-        if (
+        started_at = monotonic()
+        observation = (latest if latest.get("condition") == "FAILED_RETRYABLE"
+            else self._execute_acquisition_attempt(UUID(latest["intake_request_id"])))
+        attempted_retry = False
+        while (
             observation.get("condition") == "FAILED_RETRYABLE"
             and observation.get("failure_category")
             == RepositoryAcquisitionFailureCategory.NETWORK_FAILURE.value
             and latest.get("operation_kind") != "CREATE_BRANCH"
             and latest.get("source")
+            and sum(item.get("source") == latest["source"]
+                for item in self.assets.attempts_for_work(work_id)) < 3
+            and monotonic() - started_at < 120
         ):
-            # A transient public-clone timeout should not make the Human the
-            # retry scheduler. Preserve the failed Attempt and allow exactly
-            # one automatic new Attempt under the same admitted Work authority.
+            # Persisted lineage survives process restart. Permanent access and
+            # not-found failures do not enter this bounded network-only loop.
+            count = sum(item.get("source") == latest["source"]
+                for item in self.assets.attempts_for_work(work_id))
+            sleep(min(2 ** max(0, count - 1), 4))
+            attempted_retry = True
             retry = self._start_attempt(
                 interaction_id=interaction_id,
                 work_id=work_id,
@@ -632,6 +643,21 @@ class ProductionAdmissionTrigger:
             observation = self._execute_acquisition_attempt(
                 UUID(retry["intake_request_id"])
             )
+        if attempted_retry:
+            history = self.assets.attempts_for_work(work_id)
+            with self.work.database.unit_of_work() as uow:
+                NativeExecutionStore(uow.session).record_bounded_refinement(
+                    work_id=work_id, operation_id=UUID(latest["intake_request_id"]),
+                    component="repository/acquisition", signal_kind=RefinementSignalKind.REALITY_MISMATCH,
+                    signature_basis="ACQUISITION_RETRYABLE_NO_AUTOMATIC_RETRY:NETWORK_FAILURE",
+                    evidence_references=tuple(f"repository-intake:{item['intake_request_id']}"
+                        for item in history), converged=observation.get("condition") == "READY",
+                    attempt_count=max(2, len(history)), elapsed_seconds=int(monotonic() - started_at),
+                    diagnostic_evidence={"signal": "TRANSIENT_INFRASTRUCTURE_FAILURE",
+                        "attempt_budget": 3, "time_budget_seconds": 120,
+                        "final_condition": observation.get("condition"),
+                        "failure_category": observation.get("failure_category")})
+                uow.commit()
         observation = self._bind_and_activate(
             work_id=work_id,
             observation=observation,

@@ -861,9 +861,9 @@ class WorkInteractionService:
                         projection.governed_work_id,
                     )
                 )
-                # Resume only a persisted REQUESTED/RUNNING Attempt. Failed
-                # Attempts wait for explicit retry authority and completed ones
-                # are immutable. A governed Work does not require the latest
+                # Resume persisted active/retryable acquisition lineage. The
+                # acquisition owner checks network-only retry budgets; permanent
+                # failures and completed attempts remain immutable. A Work does not require the latest
                 # conversational assessment to remain current: the persisted
                 # Attempt is the recovery authority and exact operation basis.
                 recovered = bool(
@@ -872,6 +872,7 @@ class WorkInteractionService:
                     in {
                         RepositoryAcquisitionState.REQUESTED,
                         RepositoryAcquisitionState.RUNNING,
+                        RepositoryAcquisitionState.FAILED_RETRYABLE,
                     }
                     and self._execute_prepared_production_admission(
                         projection.interaction.id,
@@ -2365,6 +2366,26 @@ class WorkInteractionService:
                     "focus_classification": WorkFocusClassification.SIDE_QUESTION,
                     "impact_disposition": WorkImpactDisposition.NO_GOVERNED_CHANGE,
                 })
+            from spg.domain.response_contract import preserve_explicit_production_outcome
+            complete_outcome = preserve_explicit_production_outcome(
+                candidate.desired_outcome, latest_human_input)
+            if complete_outcome != candidate.desired_outcome:
+                explicit_literals = re.findall(r'[“"「]([^”"」\n]{2,80})[”"」]', latest_human_input)
+                omissions = tuple(value for value in explicit_literals
+                    if value not in (candidate.desired_outcome or ""))
+                if omissions and interaction.current_work_id is not None:
+                    from spg.domain.refinement_contract import RefinementSignalKind
+                    NativeExecutionStore(uow.session).record_bounded_refinement(
+                        work_id=interaction.current_work_id, operation_id=latest_human_record.id,
+                        component="wic/intent-completeness",
+                        signal_kind=RefinementSignalKind.CANDIDATE_INCONSISTENT,
+                        signature_basis="PRIMARY_HUMAN_CHANGE_MISSING_FROM_DURABLE_OUTCOME",
+                        evidence_references=(f"interaction-record:{latest_human_record.id}",),
+                        converged=True, attempt_count=2,
+                        diagnostic_evidence={"signal": "INTENT_COMPLETENESS_MISMATCH",
+                            "omitted_explicit_literal_count": len(omissions),
+                            "correction": "RETAIN_VERBATIM_HUMAN_AUTHORITY", "authority_expanded": False})
+                candidate = candidate.model_copy(update={"desired_outcome": complete_outcome})
             focus, impact, candidate_change = self._normalize_active_candidate(
                 candidate,
                 active_context,

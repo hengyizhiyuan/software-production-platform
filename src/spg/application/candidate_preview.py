@@ -6,7 +6,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 import subprocess
 import traceback
-from threading import RLock, Thread
+from threading import RLock, Thread, Timer
+from collections.abc import Callable
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from sqlalchemy import select
@@ -31,6 +32,8 @@ from spg.infrastructure.candidate_preview_runtime import DockerCandidatePreviewR
 from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
 from spg.infrastructure.persistence.delivery_schema import work_delivery_manifests, work_delivery_acceptances
 from spg.infrastructure.persistence.runtime_schema import runtime_commits
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.domain.refinement_contract import RefinementSignalKind
 
 
 class CandidatePreviewUnavailable(RuntimeError):
@@ -48,6 +51,67 @@ class CandidatePreviewApplicationService:
         self._lock = RLock()
         self._threads: dict[UUID, Thread] = {}
         self._lifecycle = ProductionEnvironmentLifecycle()
+        self._retry_timers: dict[UUID, Timer] = {}
+        self.outcome_listener: Callable[[UUID, bool], None] | None = None
+
+    def shutdown(self) -> None:
+        with self._lock:
+            for timer in self._retry_timers.values():
+                timer.cancel()
+            self._retry_timers.clear()
+
+    def _record_refinement(self, session: CandidatePreviewSessionV1, *, converged: bool) -> None:
+        history = tuple(item for item in self.store.candidate_preview_history(session.work_id)
+            if item.candidate_fingerprint == session.candidate_fingerprint)
+        # Test doubles without a persistence boundary cannot fabricate telemetry.
+        if len(history) < 2 or not hasattr(self.delivery, "database"):
+            return
+        with self.delivery.database.unit_of_work() as uow:
+            NativeExecutionStore(uow.session).record_bounded_refinement(
+                work_id=session.work_id, operation_id=session.candidate_id,
+                component="preview/runtime", signal_kind=RefinementSignalKind.REALITY_MISMATCH,
+                signature_basis="PREVIEW_NOT_READY",
+                evidence_references=tuple(f"candidate-preview:{item.id}" for item in history),
+                converged=converged, attempt_count=len(history),
+                elapsed_seconds=int((session.updated_at - history[0].created_at).total_seconds()),
+                diagnostic_evidence={"signal": "PREVIEW_NOT_READY",
+                    "failure_codes": [item.failure_code for item in history if item.failure_code],
+                    "local_obligation": "EXACT_CANDIDATE_SERVED_RUNTIME", "attempt_budget": 3,
+                    "human_acceptance": "PENDING"})
+            uow.commit()
+
+    def prepare_review(self, work_id: UUID) -> None:
+        previous = self.store.current_candidate_preview(work_id)
+        if previous is not None and previous.status is PreviewRuntimeStatus.FAILED:
+            # Transient failures have their own persisted, bounded retry path.
+            # Scheduling/polling must not restart a deterministic failed build.
+            context = self.delivery.candidate_context(work_id)
+            if context is not None and previous.candidate_fingerprint == context["candidate_fingerprint"]:
+                return
+        context = self.delivery.candidate_context(work_id)
+        if context is not None and self.mode_for(context) in {
+            CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME,
+        }:
+            self.request(work_id)
+
+    def review_ready(self, work_id: UUID, candidate_id: UUID) -> bool:
+        """Read persisted readiness; authority still performs a fresh probe.
+
+        Projection polls neither start runtimes nor consume refinement attempts.
+        """
+        context = self.delivery.candidate_context(work_id)
+        if context is None or UUID(context["candidate_id"]) != candidate_id:
+            return False
+        if self.mode_for(context) not in {
+            CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME,
+        }:
+            return True
+        session = self.store.current_candidate_preview(work_id)
+        return bool(session is not None and session.status is PreviewRuntimeStatus.READY
+            and session.candidate_id == candidate_id
+            and session.candidate_fingerprint == context["candidate_fingerprint"]
+            and any(item.get("kind") == "SERVED_VERIFICATION" and item.get("result") == "PASS"
+                for item in session.evidence))
 
     def retention_decision(self, work_id: UUID, *,
                            hot_retention: timedelta = timedelta(days=30),
@@ -164,6 +228,11 @@ class CandidatePreviewApplicationService:
             if mode not in {CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME}:
                 raise CandidatePreviewUnavailable("Candidate has no supported container runtime definition")
             previous = self.store.current_candidate_preview(work_id)
+            history = tuple(item for item in self.store.candidate_preview_history(work_id)
+                if item.candidate_fingerprint == context["candidate_fingerprint"])
+            failed = tuple(item for item in history if item.status is PreviewRuntimeStatus.FAILED)
+            if previous is not None and previous.status is PreviewRuntimeStatus.FAILED and len(failed) >= 3:
+                raise CandidatePreviewUnavailable("Preview convergence budget exhausted; inspect preserved runtime evidence")
             if previous is not None:
                 if previous.candidate_fingerprint == context["candidate_fingerprint"] and previous.status in {
                     PreviewRuntimeStatus.REQUESTED, PreviewRuntimeStatus.PREPARING,
@@ -179,7 +248,7 @@ class CandidatePreviewApplicationService:
                         raise CandidatePreviewUnavailable(
                             "Preview runtime cannot currently be inspected; retry when runtime control is available"
                         ) from exc
-                if previous.status not in {PreviewRuntimeStatus.STOPPED, PreviewRuntimeStatus.STALE}:
+                if previous.status not in {PreviewRuntimeStatus.STOPPED, PreviewRuntimeStatus.STALE, PreviewRuntimeStatus.FAILED}:
                     cleanup = self.provider.stop(previous.id) or {}
                     previous = self._advance(previous, PreviewRuntimeStatus.STALE if previous.candidate_fingerprint != context["candidate_fingerprint"]
                         else PreviewRuntimeStatus.STOPPED, endpoint=None,
@@ -198,6 +267,9 @@ class CandidatePreviewApplicationService:
                 definition_version=self.provider.definition_version if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME
                     else "frontend-docker-runtime-v1",
                 created_at=now, updated_at=now,
+                evidence=(() if previous is None else ({"kind": "REFINEMENT_LINEAGE",
+                    "previous_preview_id": str(previous.id), "attempt": len(history) + 1,
+                    "previous_failure_code": previous.failure_code},)),
             )
             source_branch = subprocess.run(["git", "-C", str(context["repository_path"]),
                 "symbolic-ref", "--short", "HEAD"], capture_output=True, text=True,
@@ -314,7 +386,19 @@ class CandidatePreviewApplicationService:
             session = None
             try:
                 session = self.store.current_candidate_preview(UUID(pointer.stem))
-                if session is None or session.status in {PreviewRuntimeStatus.STOPPED, PreviewRuntimeStatus.STALE, PreviewRuntimeStatus.FAILED}:
+                if session is None or session.status in {PreviewRuntimeStatus.STOPPED, PreviewRuntimeStatus.STALE}:
+                    continue
+                if session.status is PreviewRuntimeStatus.FAILED:
+                    pending_retry = any(item.get("kind") == "REFINEMENT_SIGNAL"
+                        and item.get("next_action") == "BOUNDED_AUTOMATIC_RETRY"
+                        for item in session.evidence)
+                    history = tuple(item for item in self.store.candidate_preview_history(session.work_id)
+                        if item.candidate_fingerprint == session.candidate_fingerprint)
+                    if pending_retry and len(history) < 3:
+                        timer = Timer(min(2 ** len(history), 4), self._retry, args=(session.work_id,))
+                        timer.daemon = True
+                        self._retry_timers[session.work_id] = timer
+                        timer.start()
                     continue
                 if session.status is PreviewRuntimeStatus.READY and self.provider.probe(
                     session.id, session.repository_revision, session.repository_tree, mode=session.mode,
@@ -347,7 +431,7 @@ class CandidatePreviewApplicationService:
                 session.repository_revision, session.repository_tree, mode=session.mode)
             with self._lock:
                 session = self._advance(self._required(preview_id), PreviewRuntimeStatus.BUILDING,
-                    evidence=({"kind": "WORKSPACE", **workspace},))
+                    evidence=self._required(preview_id).evidence + ({"kind": "WORKSPACE", **workspace},))
             build = self.provider.build(preview_id, session.repository_revision, session.repository_tree,
                 mode=session.mode)
             with self._lock:
@@ -381,7 +465,7 @@ class CandidatePreviewApplicationService:
                     artifact_references=(f"baseline-candidate:{session.candidate_id}",),
                     evidence_references=(build["build_log"],))
                 record = self._record_preview_evidence(self._required(preview_id))
-                self._advance(self._required(preview_id), PreviewRuntimeStatus.READY,
+                ready = self._advance(self._required(preview_id), PreviewRuntimeStatus.READY,
                     endpoint=runtime["endpoint"], service_identities=runtime["services"],
                     resource_references=runtime["resources"],
                     evidence=self._required(preview_id).evidence + (
@@ -389,6 +473,9 @@ class CandidatePreviewApplicationService:
                         {"kind": "PRODUCTION_RECORD", "reference": f"production-record:{record.id}",
                             "digest": record.content_digest},
                     ))
+            self._record_refinement(ready, converged=True)
+            if self.outcome_listener is not None:
+                self.outcome_listener(ready.work_id, False)
         except Exception as exc:
             cleanup = {}
             try:
@@ -406,11 +493,39 @@ class CandidatePreviewApplicationService:
                     }.get(stage, ("PREVIEW_FAILED", "Candidate functional Preview could not be prepared"))
                     detail = self.store.save_candidate_preview_failure_detail(
                         preview_id, traceback.format_exc())
-                    self._fail(current, code, public_reason,
+                    failed_session = self._fail(current, code, public_reason,
                         cleanup={**cleanup, "technical_evidence": detail})
+                    history = tuple(item for item in self.store.candidate_preview_history(current.work_id)
+                        if item.candidate_fingerprint == current.candidate_fingerprint)
+                    retryable = isinstance(exc, (subprocess.TimeoutExpired, ConnectionError)) or (
+                        isinstance(exc, EnvironmentProviderError) and any(term in str(exc).casefold()
+                            for term in ("timeout", "timed out", "connection refused", "connection reset",
+                                "temporary failure", "network is unreachable")))
+                    if retryable and len(history) < 3:
+                        self._advance(failed_session, PreviewRuntimeStatus.FAILED,
+                            evidence=failed_session.evidence + ({"kind": "REFINEMENT_SIGNAL",
+                                "signal": "TRANSIENT_INFRASTRUCTURE_FAILURE",
+                                "attempt": len(history), "attempt_budget": 3,
+                                "next_action": "BOUNDED_AUTOMATIC_RETRY"},))
+                        timer = Timer(min(2 ** len(history), 4), self._retry, args=(current.work_id,))
+                        timer.daemon = True
+                        self._retry_timers[current.work_id] = timer
+                        timer.start()
+                    else:
+                        self._record_refinement(failed_session, converged=False)
+                    if self.outcome_listener is not None:
+                        self.outcome_listener(current.work_id, True)
         finally:
             with self._lock:
                 self._threads.pop(preview_id, None)
+
+    def _retry(self, work_id: UUID) -> None:
+        with self._lock:
+            self._retry_timers.pop(work_id, None)
+            current = self.store.current_candidate_preview(work_id)
+            if current is None or current.status is not PreviewRuntimeStatus.FAILED:
+                return
+            self.request(work_id)
 
     def _required(self, preview_id: UUID) -> CandidatePreviewSessionV1:
         session = self.store.get_candidate_preview(preview_id)

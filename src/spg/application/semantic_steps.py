@@ -52,6 +52,7 @@ from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.domain.refinement_contract import RefinementSignalKind
 from spg.application.work import WorkApplicationService
 from spg.providers.repository_change_proposal import (
@@ -72,6 +73,8 @@ REFINABLE_ADMISSION_FEEDBACK = (
     "Approved intermediate design cannot replace the remaining code implementation",
     "Implementation cannot be proposed before a design artifact is produced",
     "Semantic production proposal does not satisfy PLAN-1B ONE_PWU_FIT",
+    "Semantic production proposal has no executable PWU boundary",
+    "Task Contract candidate failed validation",
 )
 
 
@@ -90,7 +93,7 @@ class SemanticStepApplicationService:
         self.capability = capability
         self.frames = PlanFrameAssembler(database)
         self.runtime = RuntimeService(database)
-        self.planning = ProductionPlanningService(RuleBasedProductionPlanner())
+        self.planning = ProductionPlanningService(RuleBasedProductionPlanner(), database=database)
         self.change_proposals = RepositoryChangeProposalService(
             RepositoryAwareChangeProposalProvider()
         )
@@ -122,6 +125,10 @@ class SemanticStepApplicationService:
             if work is None or scope is None:
                 raise ProductInvariantViolation("Semantic Work authority is incomplete")
             work_revision = product.current_work_reality_revision(work.id)
+            human_records = () if work_revision is None else tuple(
+                record.content for identity in work_revision.source_record_ids
+                if (record := InteractionStore(unit_of_work.session).record(identity)) is not None
+                and record.actor.value == "HUMAN")
             if (
                 work.condition is not WorkCondition.READY
                 or scope.condition is not EngineeringScopeCondition.ADMITTED
@@ -198,6 +205,7 @@ class SemanticStepApplicationService:
             work_requests=(
                 () if work_revision is None else work_revision.requests
             ),
+            human_explicit_requests=human_records or (work.raw_user_requirement,),
             steering_plan_revision_id=frame.reconstruction.active_revision.revision.id,
             step=step,
             basis_fingerprint=frame.basis.fingerprint,
@@ -261,7 +269,9 @@ class SemanticStepApplicationService:
         first_usage = getattr(self.capability, "last_usage", None)
         try:
             return self.admit(semantic_input, candidate)
-        except SteeringInvariantViolation as error:
+        except (SteeringInvariantViolation, ValueError) as error:
+            if isinstance(error, ValueError):
+                error = SteeringInvariantViolation(f"Task Contract candidate failed validation: {error}")
             if isinstance(error, StaleSemanticStepCandidate) or not str(error).startswith(
                 REFINABLE_ADMISSION_FEEDBACK
             ):
@@ -598,6 +608,8 @@ class SemanticStepApplicationService:
         assert proposal is not None
         change_proposal = None
         if proposal.target_kind is ProductionTargetKind.CODE_WORK:
+            validate_scope = getattr(getattr(self, "capability", None), "validate_production_scope", None)
+            scope_validation = validate_scope(semantic_input, proposal) if callable(validate_scope) else None
             # Provider-selected code_targets are hypotheses, not Human scope.
             # Only paths stated by Human and present in the exact source tree
             # may enter the explicit-target channel. Otherwise let read-only
@@ -613,7 +625,7 @@ class SemanticStepApplicationService:
                 RepositoryChangeProposalRequest(
                     work_id=semantic_input.work_id,
                     refined_code_intent="\n".join(
-                        (semantic_input.desired_outcome, *semantic_input.constraints)
+                        (semantic_input.desired_outcome, *semantic_input.work_requests, *semantic_input.constraints)
                     ),
                     constraints=semantic_input.constraints,
                     engineering_resource_id=semantic_input.engineering_resource_id,
@@ -624,10 +636,30 @@ class SemanticStepApplicationService:
                     source_revision=semantic_input.source_revision,
                     explicit_targets=human_targets,
                     candidate_targets=proposal.code_targets,
+                    necessity_proofs=(() if scope_validation is None else scope_validation.required_targets),
+                    human_authority_text="\n".join(semantic_input.human_explicit_requests),
                     explicit_allowed_areas=human_areas,
                     explicit_forbidden_areas=proposal.forbidden_areas,
                 )
             )
+            if scope_validation is not None and (
+                scope_validation.rejected_behaviors
+                or set(proposal.code_targets) != {target.path for target in change_proposal.required_targets}
+            ):
+                with self.database.unit_of_work() as uow:
+                    NativeExecutionStore(uow.session).record_bounded_refinement(
+                        work_id=semantic_input.work_id, operation_id=semantic_input.step.id,
+                        component="semantic/scope", signal_kind=RefinementSignalKind.CANDIDATE_INCONSISTENT,
+                        signature_basis="PROVIDER_CANDIDATE_PROMOTED_TO_REQUIRED_SCOPE",
+                        evidence_references=(f"source-baseline:{semantic_input.source_baseline_id}",),
+                        converged=bool(change_proposal.required_targets), attempt_count=2,
+                        model_token_usage=getattr(self.capability, "last_usage", None),
+                        diagnostic_evidence={"signal": "SCOPE_INFLATION",
+                            "candidate_paths": list(proposal.code_targets),
+                            "required_paths": [target.path for target in change_proposal.required_targets],
+                            "rejected_behaviors": list(scope_validation.rejected_behaviors),
+                            "authority_expanded": False})
+                    uow.commit()
         # Semantic provider prose is advisory. It may suggest useful implementation
         # details, but cannot add a route, page, or other product behavior to the
         # governed objective or verification contract without Human authority.
@@ -664,6 +696,9 @@ class SemanticStepApplicationService:
                     item.repository_relative_path
                     for item in semantic_input.context_materials
                 ),
+                available_capabilities=semantic_input.available_executable_capabilities or None,
+                refinement_reasons=(change_proposal.unresolved_scope_questions
+                    if change_proposal is not None else ()),
             )
         )
         if plan.fit_classification not in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}:

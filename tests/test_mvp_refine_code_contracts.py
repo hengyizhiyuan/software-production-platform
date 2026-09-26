@@ -330,6 +330,6 @@ def test_refcode_18_planner_cannot_widen_change_proposal(
 
     plan = ProductionPlanningService(_ProposalExpandingPlanner()).propose(request)
 
-    assert plan.fit_classification is OnePwuFitClassification.NEEDS_REFINEMENT
+    assert plan.fit_classification is OnePwuFitClassification.ONE_PWU_FIT
     assert plan.change_proposal == proposal
-    assert "unauthorized Change Proposal" in plan.unresolved_questions[0]
+    assert not plan.unresolved_questions

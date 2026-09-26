@@ -105,7 +105,8 @@ class ProductionIntentEvidence(BaseModel):
 
 
 _HTTPS_REPOSITORY = re.compile(
-    r"https://(?:github\.com|gitlab\.com|bitbucket\.org)/[^\s<>'\"，。]+",
+    r"https://(?:github\.com|gitlab\.com|bitbucket\.org)/[^\s<>'\"，。]+"
+    r"|https?://[^\s<>'\"，。/@]+(?::[0-9]+)?/[^\s<>'\"，。?#]+\.git(?=$|[\s，。])",
     re.IGNORECASE,
 )
 _REPOSITORY_SIGNAL = re.compile(
@@ -144,6 +145,19 @@ def repository_acquisition_recovery_requested(text: str) -> bool:
     """Recognize an action on an already-governed acquisition, not new intent."""
 
     return bool(_REPOSITORY_RECOVERY_ACTION.search(text.strip()))
+
+
+def preserve_explicit_production_outcome(summary: str | None, human_request: str) -> str | None:
+    """A lossy model summary cannot discard an admitted Human change clause.
+
+    Retain verbatim authority alongside the summary rather than attempting to
+    invent missing requirements from keywords. Advisory Turns remain advisory.
+    """
+    if not production_intent_evidence(human_request).production_request:
+        return summary
+    if human_request.strip() in (summary or ""):
+        return summary
+    return "\n\n".join(value for value in (summary, "Human explicit request:\n" + human_request.strip()) if value)
 
 
 def production_intent_evidence(text: str) -> ProductionIntentEvidence:

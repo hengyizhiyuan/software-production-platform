@@ -266,6 +266,7 @@ class ProductionPlanningRequest(BaseModel):
     target_effort_seconds: dict[str, int] = Field(default_factory=dict)
     max_pwu_duration_seconds: int = Field(default=1_800, ge=1)
     refinement_reasons: tuple[str, ...] = ()
+    available_capabilities: tuple[str, ...] | None = None
 
     @model_validator(mode="after")
     def validate_sizing_evidence(self) -> "ProductionPlanningRequest":

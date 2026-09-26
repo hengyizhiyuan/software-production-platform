@@ -187,9 +187,9 @@ def test_code_12_planner_cannot_widen_the_admitted_contract() -> None:
     contract = _contract()
     proposal = ProductionPlanningService(_WideningPlanner()).propose(_request(contract))
 
-    assert proposal.fit_classification is OnePwuFitClassification.NEEDS_REFINEMENT
+    assert proposal.fit_classification is OnePwuFitClassification.ONE_PWU_FIT
     assert proposal.change_contract == contract
-    assert "widened" in proposal.unresolved_questions[0]
+    assert not proposal.unresolved_questions
 
 
 def test_code_15_16_17_18_verification_is_typed_and_contract_owned() -> None:

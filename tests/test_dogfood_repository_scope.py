@@ -1,6 +1,7 @@
 """A Human nav-link request admits only repository-proven necessary paths."""
 
 from pathlib import Path
+import pytest
 import subprocess
 from uuid import uuid4
 
@@ -9,7 +10,7 @@ from spg.application.refinement import RepositoryChangeProposalService
 from spg.application.semantic_steps import SemanticStepApplicationService
 from spg.domain.change import CodeVerificationKind, ProductionTargetKind
 from spg.domain.planning import OnePwuFitClassification
-from spg.domain.refinement import RepositoryChangeProposalRequest
+from spg.domain.refinement import RepositoryChangeProposalRequest, RepositoryTargetNecessityProof
 from spg.domain.steering import (
     SemanticProductionProposal, SemanticStepInput, SemanticStepResultCandidate,
 )
@@ -80,10 +81,11 @@ def test_nav_link_discovers_markup_without_promoting_adjacent_files(tmp_path: Pa
             candidate_targets=("src/spg/web/app.js",),
         )
     )
-    assert [target.path for target in fallback.required_targets] == [
+    assert not fallback.required_targets
+    assert [target.path for target in fallback.conditional_targets] == [
         "src/spg/web/app.js"
     ]
-    assert "Human did not name" in fallback.required_targets[0].rationale
+    assert "necessity is not established" in fallback.conditional_targets[0].rationale
 
 
 def test_provider_cannot_add_about_route_to_admitted_nav_link_work(tmp_path: Path) -> None:
@@ -133,3 +135,54 @@ def test_provider_cannot_add_about_route_to_admitted_nav_link_work(tmp_path: Pat
     assert [target.path for target in change.required_targets] == [
         "src/spg/web/index.html"
     ]
+
+
+@pytest.mark.parametrize("invalid_witness", ["repository", "human", "candidate"])
+def test_scope_proof_rejects_fabricated_or_unauthorized_witness(tmp_path, invalid_witness):
+    repository = tmp_path / "source"
+    repository.mkdir()
+    (repository / "api.py").write_text("def list_users(): return database.users()\n")
+    _git(repository, "init", "-b", "main")
+    _git(repository, "add", ".")
+    _git(repository, "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+         "commit", "-m", "baseline")
+    revision = _git(repository, "rev-parse", "HEAD")
+    human = "Expose user status from persisted data"
+    proof = RepositoryTargetNecessityProof(path="api.py", source_path="api.py",
+        repository_quote="database.users()" if invalid_witness != "repository" else "fictional.query()",
+        human_clause=human if invalid_witness != "human" else "Delete all users",
+        necessity="The API must expose the existing persisted user status.")
+    request = RepositoryChangeProposalRequest(work_id=uuid4(), refined_code_intent=human,
+        human_authority_text=human, engineering_resource_id=uuid4(), repository_identity="local://source",
+        repository_location=str(repository), source_baseline_id=uuid4(), source_ref="refs/heads/main",
+        source_revision=revision, candidate_targets=() if invalid_witness == "candidate" else ("api.py",),
+        necessity_proofs=(proof,))
+    with pytest.raises(ValueError, match="Scope necessity proof"):
+        RepositoryAwareChangeProposalProvider().propose(request)
+
+
+def test_scope_proofs_admit_multiple_real_surfaces_without_adjacent_test_write(tmp_path):
+    repository = tmp_path / "source"
+    repository.mkdir()
+    sources = {"api.py": "def list_users(): return database.users()\n",
+               "ui.js": "fetch('/api/users').then(renderUsers);\n",
+               "test_api.py": "assert users()\n"}
+    for path, text in sources.items():
+        (repository / path).write_text(text)
+    _git(repository, "init", "-b", "main")
+    _git(repository, "add", ".")
+    _git(repository, "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+         "commit", "-m", "baseline")
+    human = "Show persisted user status in the user list"
+    proof = lambda path, quote: RepositoryTargetNecessityProof(path=path, source_path=path,
+        repository_quote=quote, human_clause=human,
+        necessity="This existing implementation surface must carry the requested user status.")
+    proposal = RepositoryAwareChangeProposalProvider().propose(RepositoryChangeProposalRequest(
+        work_id=uuid4(), refined_code_intent=human, human_authority_text=human,
+        engineering_resource_id=uuid4(), repository_identity="local://source",
+        repository_location=str(repository), source_baseline_id=uuid4(), source_ref="refs/heads/main",
+        source_revision=_git(repository, "rev-parse", "HEAD"),
+        candidate_targets=tuple(sources), necessity_proofs=(
+            proof("api.py", "database.users()"), proof("ui.js", "renderUsers"))))
+    assert {target.path for target in proposal.required_targets} == {"api.py", "ui.js"}
+    assert all(target.path != "test_api.py" for target in proposal.required_targets)

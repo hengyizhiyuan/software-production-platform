@@ -1312,7 +1312,7 @@ def test_self_refine_records_failure_repair_and_verified_resume(
     with postgres_database.unit_of_work() as uow:
         store = NativeExecutionStore(uow.session)
         completed = store.self_refine_event(event.id)
-        assert completed.final_result == "RECOVERED"
+        assert completed.final_result == "LOCAL_OBLIGATION_RECOVERED"
         assert completed.refinement_class is RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT
         assert completed.status == "VERIFIED"
         assert completed.work_resume_result == "RESUMED"
@@ -1322,7 +1322,8 @@ def test_self_refine_records_failure_repair_and_verified_resume(
         metrics = store.self_refine_metrics(work_id=admission.binding.work_id)
         assert metrics["native_attempts"] == 1
         assert metrics["self_refine_events"] == 1
-        assert metrics["recovered"] == 1
+        assert metrics["local_obligation_recovered"] == 1
+        assert metrics["recovered"] == 0
         assert metrics["self_refine_rate"] == 1.0
 
 
@@ -1828,7 +1829,7 @@ def test_explicit_business_oracle_repairs_verifies_and_resumes_without_human(
         event = store.list_self_refine_events(work_id=admitted.binding.work_id)[0]
         assert state.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
         assert event.repairability is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
-        assert event.final_result == "RECOVERED"
+        assert event.final_result == "LOCAL_OBLIGATION_RECOVERED"
         assert event.work_resume_result == "RESUMED"
         assert event.diagnostic_evidence["test_identity"] == "tax_is_six"
         assert event.diagnostic_evidence["assertion_id"] == "tax"
@@ -2288,7 +2289,7 @@ def test_structural_decision_repair_is_durable_and_recovers_same_attempt(
     with postgres_database.unit_of_work() as uow:
         store = NativeExecutionStore(uow.session)
         recovered = store.self_refine_event(event.id)
-        assert recovered.final_result == "RECOVERED"
+        assert recovered.final_result == "LOCAL_OBLIGATION_RECOVERED"
         assert recovered.status == "VERIFIED"
         assert recovered.work_resume_result == "RESUMED"
         assert [action.outcome for action in store.self_refine_actions(event.id)] == [
@@ -2302,7 +2303,7 @@ def test_structural_decision_repair_is_durable_and_recovers_same_attempt(
     assert repair_history[0]["event_id"] == str(event.id)
     assert repair_history[0]["failure_signature"] == event.failure_signature
     assert len(repair_history[0]["failure_signature"]) == 64
-    assert repair_history[0]["result"] == "RECOVERED"
+    assert repair_history[0]["result"] == "LOCAL_OBLIGATION_RECOVERED"
 
 
 def test_failed_verification_effect_creates_safe_self_refine_evidence(
@@ -2397,7 +2398,7 @@ def test_failed_verification_effect_creates_safe_self_refine_evidence(
     ))
     with postgres_database.unit_of_work() as uow:
         recovered = NativeExecutionStore(uow.session).self_refine_event(event.id)
-        assert recovered.final_result == "RECOVERED"
+        assert recovered.final_result == "LOCAL_OBLIGATION_RECOVERED"
         assert recovered.model_token_usage == {
             "input_tokens": 24,
             "output_tokens": 9,

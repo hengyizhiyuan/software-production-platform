@@ -8,20 +8,44 @@ from spg.domain.planning import (
     ProductionPlanStep,
     ProductionPlanner,
     ProductionPlanningRequest,
+    ProductionNodeKind,
 )
 
 
 class ProductionPlanningService:
     """Accept planning intelligence only when it stays inside governed Work facts."""
 
-    def __init__(self, planner: ProductionPlanner) -> None:
+    def __init__(self, planner: ProductionPlanner, *, database=None) -> None:
         self.planner = planner
+        self.database = database
 
     def propose(self, request: ProductionPlanningRequest) -> ProductionPlanProposal:
         proposal = self.planner.propose(request)
         violations = self._authority_violations(request, proposal)
         if not violations:
             return proposal
+        from spg.providers.rule_based_planner import RuleBasedProductionPlanner
+        # Regenerate from admitted facts, not by deleting failed validations or
+        # accepting an expanded model scope. Genuine unresolved facts remain so.
+        revised = RuleBasedProductionPlanner().propose(request)
+        remaining = self._authority_violations(request, revised)
+        if self.database is not None:
+            from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+            from spg.domain.refinement_contract import RefinementSignalKind
+            with self.database.unit_of_work() as uow:
+                NativeExecutionStore(uow.session).record_bounded_refinement(
+                    work_id=request.work_id, operation_id=proposal.proposal_id,
+                    component="planning/production-plan", signal_kind=RefinementSignalKind.CONTRACT_MISMATCH,
+                    signature_basis="|".join(violations),
+                    evidence_references=(f"production-plan:{proposal.proposal_id}",),
+                    converged=not remaining and revised.fit_classification in {
+                        OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT},
+                    attempt_count=2, diagnostic_evidence={"initial_violations": list(violations),
+                        "remaining_violations": list(remaining), "authority_expanded": False})
+                uow.commit()
+        if not remaining:
+            return revised
+        violations = remaining
         return ProductionPlanProposal(
             proposal_id=uuid5(
                 NAMESPACE_URL,
@@ -82,4 +106,33 @@ class ProductionPlanningService:
             or proposal.source_revision != request.source_revision
         ):
             violations.append("Planner changed the exact Source Baseline.")
+        if request.available_capabilities is not None and proposal.graph is None:
+            required = {"filesystem.read", "filesystem.write"}
+            if request.change_contract is not None and any(
+                item.kind.value in {"PYTEST_TARGET", "NODE_TEST_TARGET"}
+                for item in request.change_contract.verification_obligations
+            ):
+                required.add("test.run")
+            unavailable = required - set(request.available_capabilities)
+            if unavailable:
+                violations.append("PWU_REQUIRED_CAPABILITY_UNAVAILABLE_AT_ADMISSION: "
+                    + ", ".join(sorted(unavailable)))
+        if proposal.graph is not None:
+            paths = set(target.path for target in request.artifact_targets)
+            if request.change_contract is not None:
+                paths.update(target.path for target in request.change_contract.exact_targets)
+            if request.change_proposal is not None:
+                paths.update(target.path for target in request.change_proposal.required_targets)
+            units = tuple(node for node in proposal.graph.nodes
+                if node.kind is not ProductionNodeKind.GROUP)
+            if sum(node.kind is ProductionNodeKind.PWU for node in units) > len(paths):
+                violations.append("PWU_COUNT_EXCEEDS_PROVEN_CHANGE_SURFACES")
+            for node in units:
+                if set(node.writable_paths) - paths:
+                    violations.append("Planner introduced an unproven PWU write surface.")
+                if request.available_capabilities is not None:
+                    unavailable = set(node.required_capabilities) - set(request.available_capabilities)
+                    if unavailable:
+                        violations.append("PWU_REQUIRED_CAPABILITY_UNAVAILABLE_AT_ADMISSION: "
+                            + ", ".join(sorted(unavailable)))
         return tuple(violations)

@@ -11,6 +11,8 @@ def test_bootstrap_has_no_external_side_effects(tmp_path) -> None:
         "application": "SPG Runtime",
         "foundation": "ready",
         "runtime_profile": "local-fvs",
+        "wic_runtime_mode": "WIC_VNEXT_CONTROLLED",
+        "qualified_wic_runtime_mode": "WIC_VNEXT_CONTROLLED",
+        "wic_configuration_parity": "PASS",
     }
     assert not workspace_root.exists()
-

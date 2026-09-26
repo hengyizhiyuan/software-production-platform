@@ -504,7 +504,7 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
                 work_id=admitted.work_id, component="steering/provider",
             )
             assert len(recovery) == 1
-            assert recovery[0].final_result == "RECOVERED"
+            assert recovery[0].final_result == "LOCAL_OBLIGATION_RECOVERED"
             assert recovery[0].work_resume_result == "RESUMED"
             assert [action.outcome for action in store.self_refine_actions(recovery[0].id)] == [
                 "RETRY_SCHEDULED", "RECOVERED",
@@ -572,6 +572,7 @@ def test_repeated_steering_provider_failure_converges_to_durable_escalation(
             sleep(0.02)
         assert capability.calls == 2
         assert records[0].final_result == "ESCALATED"
+        assert driver.wait_until_idle(admitted.work_id, 2)
         with postgres_database.unit_of_work() as uow:
             assert [action.outcome for action in NativeExecutionStore(uow.session).self_refine_actions(records[0].id)] == [
                 "RETRY_SCHEDULED", "ESCALATED",
@@ -633,7 +634,7 @@ def test_semantic_admission_conflict_refines_once_on_same_basis_and_records_rout
         assert len(events) == 1
         assert events[0].refinement_class is RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT
         assert events[0].signal_kind is RefinementSignalKind.CONTRACT_MISMATCH
-        assert events[0].final_result == "RECOVERED"
+        assert events[0].final_result == "LOCAL_OBLIGATION_RECOVERED"
         assert events[0].budget_decision["attempt_count"] == 2
 
 
@@ -893,3 +894,22 @@ def _git(repository: Path, *args: str) -> str:
         text=True,
     )
     return completed.stdout.strip()
+
+
+def test_work_nonconvergence_is_durable_human_attention_not_idle(product, postgres_database):
+    works, _ = product
+    admitted, _ = _admitted_plan(works)
+    driver = PlanSteeringDriver(postgres_database, works, ProductionOrchestrator(works),
+        semantic_capability=_SemanticCapability(step_type=SteeringStepType.DESIGN))
+    for index in range(3):
+        observation = driver._observe_convergence(admitted.work_id, failed=True,
+            boundary=f"boundary-{index}", failure_signature=str(index).zfill(64))
+    assert observation.condition == "NON_CONVERGING"
+    assert works.get_work(admitted.work_id).human_attention_required
+    fresh_driver = PlanSteeringDriver(postgres_database, works, ProductionOrchestrator(works),
+        semantic_capability=_SemanticCapability(step_type=SteeringStepType.DESIGN))
+    assert fresh_driver.activate(admitted.work_id).stop_reason is SteeringDriverStopReason.BLOCKED
+    assert fresh_driver.project(admitted.work_id).human_attention_required
+    history = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
+    assert "Missing acceptance" in history.latest_decision.reason
+    assert "does not reset" in history.latest_decision.reason

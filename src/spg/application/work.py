@@ -221,7 +221,7 @@ class WorkApplicationService:
         self.executor = executor
         self.verifier = verifier
         self.planning = ProductionPlanningService(
-            planner or RuleBasedProductionPlanner()
+            planner or RuleBasedProductionPlanner(), database=database,
         )
         self.change_proposals = RepositoryChangeProposalService(
             change_proposal_provider or RepositoryAwareChangeProposalProvider()
@@ -238,6 +238,8 @@ class WorkApplicationService:
         )
         self.governance = CandidateGovernanceService(database)
         self.candidate_authorization_guard: Callable[[UUID, UUID], None] | None = None
+        self.candidate_review_preparer: Callable[[UUID], None] | None = None
+        self.candidate_review_readiness: Callable[[UUID, UUID], bool] | None = None
         self.integration = RepositoryIntegrationService(database)
         self.runtime_commit = RuntimeCommitService(database)
 
@@ -245,6 +247,16 @@ class WorkApplicationService:
         self, guard: Callable[[UUID, UUID], None],
     ) -> None:
         self.candidate_authorization_guard = guard
+
+    def configure_candidate_review(self, prepare: Callable[[UUID], None],
+        ready: Callable[[UUID, UUID], bool]) -> None:
+        """Prepare review autonomously without granting integration authority."""
+        self.candidate_review_preparer = prepare
+        self.candidate_review_readiness = ready
+
+    def prepare_candidate_review(self, work_id: UUID) -> None:
+        if self.candidate_review_preparer is not None:
+            self.candidate_review_preparer(work_id)
 
     def create_goal(self, title: str, description: str | None = None) -> GoalRecord:
         title = title.strip()
@@ -2500,9 +2512,11 @@ class WorkApplicationService:
                     expected_work_unit_version=current.version,
                 )
             )
+            self.prepare_candidate_review(work_id)
             return self.get_work(work_id)
 
         if summary.authorization_id is None:
+            self.prepare_candidate_review(work_id)
             return self.get_work(work_id)
         if summary.integration_effect_id is None:
             self.integration.integrate_repository_candidate(
@@ -2892,7 +2906,9 @@ class WorkApplicationService:
                     if binding is None
                     else store.runtime_summary(binding)
                 )
-            if summary.candidate_id is not None and summary.authorization_id is None:
+            if (summary.candidate_id is not None and summary.authorization_id is None
+                    and (self.candidate_review_readiness is None
+                        or self.candidate_review_readiness(projection.work_id, summary.candidate_id))):
                 items.append(
                     AttentionItem(
                         id=uuid5(
@@ -3625,6 +3641,10 @@ class WorkApplicationService:
         ):
             return WorkStatus.BLOCKED, "VERIFICATION", "NOT_ADMISSIBLE", "Review Verification evidence"
         if facts.candidate_id is not None and facts.authorization_id is None:
+            if (self.candidate_review_readiness is not None
+                    and not self.candidate_review_readiness(work.id, facts.candidate_id)):
+                return (WorkStatus.RUNNING, "CANDIDATE_PREVIEW", "CANDIDATE_SEALED",
+                    "Watt prepares and verifies the exact Candidate Preview before Human review")
             return (
                 WorkStatus.NEEDS_ATTENTION,
                 "CANDIDATE_AUTHORITY",

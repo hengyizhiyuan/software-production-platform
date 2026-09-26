@@ -484,7 +484,7 @@
                 <label>Class <select id="self-refine-class-filter"><option value="">All</option><option>ROUTINE_STOCHASTIC_REFINEMENT</option><option>DEGRADING_OR_RECURRING_REFINEMENT</option><option>SYSTEMIC_OR_NON_CONVERGING_INCIDENT</option><option>LEGACY_EXECUTION_INCIDENT</option></select></label>
                 <label>Signal family <input id="self-refine-family-filter" type="text" autocomplete="off"></label>
                 <label>Component <input id="self-refine-component-filter" type="text" autocomplete="off"></label>
-                <label>Result <select id="self-refine-result-filter"><option value="">All</option><option>RECOVERED</option><option>ESCALATED</option><option>FAILED</option></select></label>
+                <label>Result <select id="self-refine-result-filter"><option value="">All</option><option value="LOCAL_OBLIGATION_RECOVERED">Local obligation recovered</option><option value="RECOVERED">Historical recovered</option><option>ESCALATED</option><option>FAILED</option></select></label>
                 <button id="self-refine-filter-apply" type="button" class="secondary">Filter</button>
               </div>
               <ol id="self-refine-list" class="compact-list"></ol>

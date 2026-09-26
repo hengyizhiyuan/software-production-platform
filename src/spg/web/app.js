@@ -1465,7 +1465,7 @@
     const systemic = visible.filter((event) => event.refinement_class === "SYSTEMIC_OR_NON_CONVERGING_INCIDENT" || event.refinement_class === "LEGACY_EXECUTION_INCIDENT").length;
     const metrics = state.selfRefineMetrics;
     elements.selfRefineSummary.textContent = `${state.selfRefineScope === "platform" ? "Platform" : "Work"}: ${visible.length} refinement event(s) · ${systemic} incident(s) · ${active} active` + (
-      metrics ? ` · ${metrics.recovered} recovered · ${metrics.escalated} escalated · ${(metrics.improvement_candidates || []).length} improvement candidate(s) · Native retry rate ${(metrics.self_refine_rate * 100).toFixed(1)}%` : ""
+      metrics ? ` · ${metrics.local_obligation_recovered || 0} local obligations recovered · ${metrics.recovered} historical recovered · ${metrics.escalated} escalated · ${(metrics.improvement_candidates || []).length} improvement candidate(s) · Native retry rate ${(metrics.self_refine_rate * 100).toFixed(1)}%` : ""
     );
     elements.selfRefineFilters.hidden = state.selfRefineScope !== "platform";
     elements.selfRefineList.replaceChildren();

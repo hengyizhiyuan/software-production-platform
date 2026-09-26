@@ -616,6 +616,34 @@ execution_recovery_cases = Table(
     Column("resolved_at", DateTime(timezone=True), nullable=True),
 )
 
+work_convergence_observations = Table(
+    "work_convergence_observations", metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("work_id", Uuid(as_uuid=True), nullable=False),
+    Column("intent_identity", String(64), nullable=False),
+    Column("predecessor_id", Uuid(as_uuid=True), nullable=True),
+    Column("sequence", Integer, nullable=False),
+    Column("boundary", String(128), nullable=False),
+    Column("failure_signature", String(64), nullable=True),
+    Column("candidate_identity", String(255), nullable=True),
+    Column("reality_identity", String(64), nullable=False),
+    Column("missing_acceptance", JSONB, nullable=False),
+    Column("attempts", Integer, nullable=False),
+    Column("no_progress_count", Integer, nullable=False),
+    Column("elapsed_seconds", Integer, nullable=False),
+    Column("token_usage", JSONB, nullable=False),
+    Column("model_cost", JSONB, nullable=False),
+    Column("compute_cost", JSONB, nullable=False),
+    Column("human_intervention_count", Integer, nullable=False),
+    Column("previous_repair_class", String(64), nullable=True),
+    Column("condition", String(32), nullable=False),
+    Column("evidence", JSONB, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    UniqueConstraint("work_id", "sequence", name="uq_work_convergence_sequence"),
+)
+Index("ix_work_convergence_intent", work_convergence_observations.c.work_id,
+    work_convergence_observations.c.intent_identity)
+
 self_refine_events = Table(
     "self_refine_events",
     metadata,
@@ -881,6 +909,7 @@ native_workspace_tombstones = Table(
 
 
 native_execution_tables = (
+    work_convergence_observations,
     pwu_contract_versions,
     execution_source_vectors,
     execution_source_members,

@@ -554,12 +554,15 @@ print(len(updated.encode('utf-8')))
             "environment_reference": self.environment_reference,
             "workspace_reference": self.workspace_reference,
         }
+        if identity == "test.run":
+            from spg.domain.refinement_contract import test_execution_evidence
+            output.update(test_execution_evidence(output))
         return self._result(
             request,
             identity,
             output,
             observation,
-            settled=observation.result.exit_code == 0,
+            settled=observation.result.exit_code == 0 and output.get("verification_evidence") != "INCOMPLETE",
         )
 
     async def _execute(

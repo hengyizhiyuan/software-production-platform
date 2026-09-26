@@ -27,7 +27,6 @@ _FRONTEND_MARKERS = ("frontend", "javascript", "browser", "web ui", "前端", "�
 _SEMANTIC_TERMS = {
     "导航": ("topbar", "nav", "navigation"),
     "链接": ("href", "link"),
-    "关于我们": ("about",),
     "composer": ("composer",),
     "展开": ("expand", "expanded", "aria-expanded", "toggle"),
     "收缩": ("collapse", "collapsed", "aria-expanded", "toggle"),
@@ -35,6 +34,10 @@ _SEMANTIC_TERMS = {
     "刷新": ("storage", "localstorage", "sessionstorage", "state"),
     "保持": ("storage", "localstorage", "sessionstorage", "state"),
     "状态": ("state", "storage"),
+    "阶段": ("stage", "step"),
+    "进度": ("progress", "status"),
+    "取消": ("cancel", "dialog"),
+    "登录": ("login",),
 }
 
 
@@ -66,7 +69,24 @@ class RepositoryAwareChangeProposalProvider:
         ]
         unresolved: list[str] = []
 
-        if not explicit and not request.explicit_allowed_areas:
+        for proof in request.necessity_proofs:
+            if proof.path in explicit:
+                continue
+            if proof.path not in request.candidate_targets or proof.source_path not in path_set:
+                raise ValueError("Scope necessity proof is outside observed candidate Reality")
+            source = subprocess.run(["git", "-C", str(repository), "show",
+                f"{request.source_revision}:{proof.source_path}"], capture_output=True,
+                text=True, timeout=15, check=True).stdout
+            if (proof.repository_quote not in source or proof.human_clause not in request.refined_code_intent
+                    or proof.human_clause not in (request.human_authority_text or "")):
+                raise ValueError("Scope necessity proof has no exact repository/Human witness")
+            targets.append(self._target(path=proof.path, paths=path_set,
+                disposition=ProposalTargetDisposition.REQUIRED,
+                rationale=proof.necessity,
+                evidence=f"Exact {request.source_revision}:{proof.source_path} witness: {proof.repository_quote}",
+                confidence=ProposalConfidence.HIGH))
+
+        if not targets and not request.explicit_allowed_areas:
             discovered, discovery_questions = self._discover(
                 repository,
                 request.source_revision,
@@ -78,17 +98,17 @@ class RepositoryAwareChangeProposalProvider:
             unresolved.extend(discovery_questions)
             if not any(target.disposition is ProposalTargetDisposition.REQUIRED
                        for target in targets):
-                # A single model-proposed path may be retained only after exact
-                # tree inspection. Multiple guesses cannot all become required
-                # merely because the provider listed them.
+                # Existence proves availability, never necessity. Preserve even
+                # a single provider path as advisory until behavioral evidence
+                # or an explicit Human target establishes required scope.
                 candidates = tuple(dict.fromkeys(
                     path for path in request.candidate_targets if path in path_set
                 ))
-                if len(candidates) == 1:
+                for path in candidates:
                     targets.append(self._target(
-                        path=candidates[0], paths=path_set,
-                        disposition=ProposalTargetDisposition.REQUIRED,
-                        rationale="One provider candidate exists at the exact Source Baseline; Human did not name it.",
+                        path=path, paths=path_set,
+                        disposition=ProposalTargetDisposition.CONDITIONAL,
+                        rationale="Provider candidate exists but required change necessity is not established.",
                         evidence=f"Candidate path inspected at {request.source_revision[:12]}.",
                         confidence=ProposalConfidence.MEDIUM,
                     ))
@@ -247,6 +267,7 @@ class RepositoryAwareChangeProposalProvider:
             for token in re.findall(r"[a-z][a-z0-9_-]{3,}", normalized)
             if token not in {"only", "with", "from", "that", "this", "change", "modify"}
         }
+        terms.update(value for value in re.findall(r'[“"「]([^”"」\n]{2,80})[”"」]', normalized))
         for marker, expansions in _SEMANTIC_TERMS.items():
             if marker in normalized:
                 terms.update(expansions)

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from uuid import UUID
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.domain.refinement_contract import RefinementSignalKind
 
 from spg.application.steering import SteeringApplicationService
 from spg.domain.product import EngineeringScopeCondition, WorkCondition
@@ -511,7 +513,25 @@ class SteeringDecisionApplicationService:
     def evaluate(self, work_id: UUID) -> tuple[PlanFrame, NextStepCandidate]:
         frame = self.frames.assemble(work_id)
         candidate = self.capability.evaluate(frame)
-        self._validate_candidate(frame, candidate)
+        try:
+            self._validate_candidate(frame, candidate)
+        except StaleSteeringCandidate:
+            raise
+        except SteeringInvariantViolation as error:
+            # The existing deterministic owner supplies a conservative candidate
+            # on exactly the same frame; this cannot extend Human authority.
+            revised = DeterministicPlanSteeringCapability().evaluate(frame)
+            self._validate_candidate(frame, revised)
+            with self.database.unit_of_work() as uow:
+                NativeExecutionStore(uow.session).record_bounded_refinement(
+                    work_id=work_id, operation_id=frame.reconstruction.current_step.id,
+                    component="steering/decision", signal_kind=RefinementSignalKind.CONTRACT_MISMATCH,
+                    signature_basis=str(error), evidence_references=(f"plan-frame:{frame.basis.fingerprint}",),
+                    converged=True, attempt_count=2,
+                    diagnostic_evidence={"same_basis": frame.basis.fingerprint,
+                        "correction": "EXISTING_DETERMINISTIC_STEERING_POLICY", "authority_expanded": False})
+                uow.commit()
+            candidate = revised
         return frame, candidate
 
     def admit(

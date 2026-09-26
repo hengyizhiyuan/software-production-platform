@@ -447,3 +447,18 @@ exact Candidate preview session to remain READY with a persisted served
 frontend/backend/PostgreSQL read/write verification PASS; the static-Web
 runtime adapter cannot substitute for it. This does not bypass the separate
 Guardian owner gate or Human Delivery Authorization for remote Git effects.
+
+
+### Candidate review preparation and namespace qualification
+
+The Work-to-Candidate owner schedules functional Preview before projecting final
+Human review. Review readiness requires the current exact fingerprint and persisted
+served-runtime PASS; authorization still checks current live readiness. The Docker
+verifier runs as a constrained disposable process on the Candidate gateway network,
+resolving its proxy by network DNS. Host-published loopback is a Human endpoint,
+not a container-verifier endpoint. Verifier credentials are passed over stdin and
+never mounted with a Docker socket or persisted in command arguments. Preflight
+checks Engine/image/dependency availability before expensive preparation. Failed
+Preview sessions and diagnostics remain durable; transient retries and restart
+recovery share the same three-session Candidate budget. A READY health probe alone
+cannot substitute for served behavior, and local repair cannot grant delivery.

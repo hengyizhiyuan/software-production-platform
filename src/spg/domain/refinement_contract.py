@@ -1,6 +1,10 @@
 """Shared refinement semantics; domain owners retain candidate and authority ownership."""
 
 from enum import StrEnum
+from datetime import datetime
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RefinementClass(StrEnum):
@@ -24,6 +28,69 @@ class RefinementSignalKind(StrEnum):
     EXECUTION_FAILURE = "EXECUTION_FAILURE"
     VERIFICATION_CONTRADICTION = "VERIFICATION_CONTRADICTION"
     REPEATED_UNCHANGED_OUTCOME = "REPEATED_UNCHANGED_OUTCOME"
+
+
+class WorkConvergenceObservation(BaseModel):
+    """Evidence from an owner boundary, never authority to change its scope.
+
+    Missing acceptance obligations describe distance to the Human outcome.
+    New attempt/candidate identifiers alone are not acceptance improvement.
+    Polling a running stage must not produce observations or spend attempts.
+    """
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: UUID
+    work_id: UUID
+    intent_identity: str
+    predecessor_id: UUID | None = None
+    sequence: int = Field(ge=1)
+    boundary: str
+    failure_signature: str | None = None
+    candidate_identity: str | None = None
+    reality_identity: str
+    missing_acceptance: tuple[str, ...]
+    attempts: int = Field(ge=1)
+    no_progress_count: int = Field(ge=0)
+    elapsed_seconds: int = Field(ge=0)
+    token_usage: dict = Field(default_factory=dict)
+    model_cost: dict = Field(default_factory=dict)
+    compute_cost: dict = Field(default_factory=dict)
+    human_intervention_count: int = Field(default=0, ge=0)
+    previous_repair_class: RefinementClass | None = None
+    condition: str
+    evidence: dict = Field(default_factory=dict)
+    created_at: datetime
+
+
+def convergence_condition(*, missing_acceptance: tuple[str, ...],
+    attempts: int, no_progress_count: int, elapsed_seconds: int,
+    authority_required: bool = False, attempt_budget: int = 128,
+    no_progress_budget: int = 3, time_budget_seconds: int = 7200) -> str:
+    """Govern the whole trajectory independently of local repair success."""
+    if authority_required:
+        return "ESCALATED"
+    if not missing_acceptance:
+        return "CONVERGED_FOR_REVIEW"
+    if (attempts >= attempt_budget or no_progress_count >= no_progress_budget
+            or elapsed_seconds >= time_budget_seconds):
+        return "NON_CONVERGING"
+    return "NOT_YET_CONVERGED"
+
+
+def test_execution_evidence(output: dict) -> dict:
+    """Distinguish executed assertions from collection and missing prerequisites.
+
+    This records deterministic tool observations, not an application oracle.
+    """
+    logs = str(output.get("stdout", "")) + "\n" + str(output.get("stderr", ""))
+    if "ModuleNotFoundError" in logs or "ImportError while importing test module" in logs:
+        return {"diagnostic_code": "TEST_ENVIRONMENT_NOT_READY",
+            "test_environment_readiness": "NOT_READY", "verification_evidence": "INCOMPLETE"}
+    if any(argument in {"--collect-only", "--co"} for argument in output.get("argv", ())):
+        return {"diagnostic_code": "VERIFICATION_EVIDENCE_INCOMPLETE",
+            "test_environment_readiness": "COLLECTION_ONLY", "verification_evidence": "INCOMPLETE"}
+    return {"test_environment_readiness": "OBSERVED_EXECUTION",
+        "verification_evidence": "EXECUTED" if output.get("returncode") == 0 else "FAILED"}
 
 
 def classify_refinement(

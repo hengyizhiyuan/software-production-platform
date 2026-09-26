@@ -13,6 +13,9 @@ def test_cli_status_loads_settings_and_bootstraps(monkeypatch, capsys) -> None:
         "application=SPG Runtime",
         "foundation=ready",
         "runtime_profile=test-fvs",
+        "wic_runtime_mode=WIC_VNEXT_CONTROLLED",
+        "qualified_wic_runtime_mode=WIC_VNEXT_CONTROLLED",
+        "wic_configuration_parity=PASS",
     ]
 
 

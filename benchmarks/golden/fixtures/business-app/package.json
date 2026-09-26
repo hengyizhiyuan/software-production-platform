@@ -1,0 +1,1 @@
+{"name":"golden-business-fixture","private":true,"scripts":{"test":"node --test tests/*.cjs"}}

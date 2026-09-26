@@ -522,7 +522,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
         if inject_structural_failure:
             assert len(incidents) == 1
             assert incidents[0].failure_family == "SEMANTIC_BINDING_FAILURE"
-            assert incidents[0].final_result == "RECOVERED"
+            assert incidents[0].final_result == "LOCAL_OBLIGATION_RECOVERED"
             assert incidents[0].status == "VERIFIED"
             assert [action.outcome for action in native.self_refine_actions(incidents[0].id)] == [
                 "RETRY_SCHEDULED", "RECOVERED",

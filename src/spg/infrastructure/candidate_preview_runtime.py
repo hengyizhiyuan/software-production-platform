@@ -16,8 +16,7 @@ import shutil
 import subprocess
 import time
 import json
-from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
+from base64 import b64decode
 from uuid import UUID
 
 from spg.domain.production_environment import CandidatePreviewMode, EnvironmentProviderError
@@ -75,16 +74,82 @@ class DockerCandidatePreviewRuntime:
             raise EnvironmentProviderError("Candidate declares an unsupported preview topology")
         return tuple(value["supporting_services"])
 
-    def _run(self, argv: list[str], *, timeout: int = 120, check: bool = True) -> subprocess.CompletedProcess[str]:
+    def _run(self, argv: list[str], *, timeout: int = 120, check: bool = True,
+        input_data: str | None = None) -> subprocess.CompletedProcess[str]:
         result = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8",
-            errors="replace", timeout=timeout, check=False)
+            errors="replace", timeout=timeout, check=False, input=input_data)
         if check and result.returncode:
             detail = (result.stderr or result.stdout).strip()[-3000:]
             raise EnvironmentProviderError(f"Preview operation failed: {detail}")
         return result
 
-    def _docker(self, *args: str, timeout: int = 120, check: bool = True) -> subprocess.CompletedProcess[str]:
-        return self._run([self.docker_binary, *args], timeout=timeout, check=check)
+    def _docker(self, *args: str, timeout: int = 120, check: bool = True,
+        input_data: str | None = None) -> subprocess.CompletedProcess[str]:
+        return self._run([self.docker_binary, *args], timeout=timeout, check=check,
+            input_data=input_data)
+
+    def preflight(self) -> dict:
+        """Qualify the verifier namespace before building a Candidate image.
+
+        The public endpoint belongs to the Docker host. Internal observations
+        use a disposable, unprivileged verifier on the gateway network instead.
+        No host loopback or host.docker.internal assumption is needed.
+        """
+        self._docker("info", "--format", "{{.ServerVersion}}")
+        self._docker("image", "inspect", self.verification_image)
+        self._docker("run", "--rm", "--network", "none", "--read-only",
+            "--user", "65534:65534",
+            "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
+            "--entrypoint", "python", self.verification_image, "-c",
+            "import urllib.request, json, base64; print('verifier-ready')")
+        return {"verifier_namespace": "candidate-gateway-network",
+            "verifier_image": self.verification_image,
+            "public_endpoint_namespace": "docker-host"}
+
+    def _gateway_request(self, preview_id: UUID, path: str, *,
+        payload: dict | None = None, headers: dict | None = None) -> dict:
+        """Observe the same proxy as Human, from a namespace with a route to it.
+
+        Credentials travel only over stdin. Redirects are rejected so Candidate
+        content cannot redirect an authenticated probe to an external endpoint.
+        """
+        names = self._names(preview_id)
+        script = '''import base64, json, sys
+from urllib.request import Request, build_opener, HTTPRedirectHandler
+from urllib.error import HTTPError
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+value = json.load(sys.stdin)
+body = None if value["payload"] is None else json.dumps(value["payload"]).encode()
+request = Request(value["url"], data=body, headers=value["headers"],
+    method="GET" if body is None else "POST")
+try:
+    response = build_opener(NoRedirect).open(request, timeout=10)
+except HTTPError as error:
+    response = error
+with response:
+    print(json.dumps({"status": response.code,
+        "body": base64.b64encode(response.read(1000000)).decode(),
+        "content_type": response.headers.get("Content-Type", ""),
+        "cookie": response.headers.get("Set-Cookie", "").split(";", 1)[0],
+        "url": response.geturl()}))
+'''
+        if not path.startswith("/") or path.startswith("//"):
+            raise EnvironmentProviderError("Preview verification path is not relative")
+        value = {"url": f"http://{names['proxy']}{path}",
+            "payload": payload, "headers": headers or {}}
+        result = self._docker("run", "--rm", "-i", "--network", names["gateway"],
+            "--user", "65534:65534",
+            "--label", f"watt.candidate-preview={preview_id}", "--read-only",
+            "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
+            "--memory", "128m", "--pids-limit", "64",
+            "--entrypoint", "python", self.verification_image, "-c", script,
+            timeout=30, input_data=json.dumps(value))
+        try:
+            return json.loads(result.stdout)
+        except (ValueError, TypeError) as error:
+            raise EnvironmentProviderError("Preview verifier returned invalid evidence") from error
 
     def _workspace(self, preview_id: UUID) -> Path:
         path = (self.root / str(preview_id) / "workspace").resolve()
@@ -102,6 +167,7 @@ class DockerCandidatePreviewRuntime:
     def prepare(self, preview_id: UUID, repository: Path, revision: str, tree: str,
         *, mode: CandidatePreviewMode = CandidatePreviewMode.FULL_APPLICATION_RUNTIME) -> dict:
         """Make an isolated branch at the exact sealed commit; source remains untouched."""
+        topology = self.preflight()
         workspace = self._workspace(preview_id)
         if workspace.exists():
             raise EnvironmentProviderError("Preview Workspace already exists")
@@ -124,7 +190,8 @@ class DockerCandidatePreviewRuntime:
             ):
                 raise EnvironmentProviderError("Candidate has no supported project-native runtime definition")
             return {"workspace": str(workspace), "revision": observed_revision,
-                "tree": observed_tree, "dockerfile_sha256": sha256((workspace / "Dockerfile").read_bytes()).hexdigest()}
+                "tree": observed_tree, "topology_preflight": topology,
+                "dockerfile_sha256": sha256((workspace / "Dockerfile").read_bytes()).hexdigest()}
         except Exception:
             self._remove_workspace(preview_id)
             raise
@@ -362,24 +429,21 @@ class DockerCandidatePreviewRuntime:
         host_port = self._docker("port", names["proxy"], "80/tcp").stdout.strip()
         if not re.fullmatch(r"127\.0\.0\.1:\d+", host_port):
             raise EnvironmentProviderError("Served runtime has no isolated gateway")
-        origin = f"http://{host_port}"
+        public_origin = f"http://{host_port}"
+        origin = f"http://{names['proxy']}"
 
         cookie: str | None = None
         bearer = self._preview_auth_tokens.get(preview_id)
         if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME and bearer is not None:
-            try:
-                login_payload = json.dumps({"token": bearer}).encode("utf-8")
-                with urlopen(Request(origin + "/auth/session", data=login_payload,
-                    headers={"Content-Type": "application/json"}, method="POST"),
-                    timeout=10) as login_response:
-                    if login_response.status != 200:
-                        raise EnvironmentProviderError("Candidate login contract failed")
-                    cookie = login_response.headers.get("Set-Cookie", "").split(";", 1)[0]
-                    if not cookie.startswith("watt_session="):
-                        raise EnvironmentProviderError("Candidate session cookie is unavailable")
-            except HTTPError as error:
-                if error.code != 404:
-                    raise EnvironmentProviderError("Candidate login contract failed") from error
+            login_response = self._gateway_request(preview_id, "/auth/session",
+                payload={"token": bearer}, headers={"Content-Type": "application/json"})
+            # Older supported Candidates use bearer-only authentication.
+            if login_response["status"] != 404:
+                if login_response["status"] != 200:
+                    raise EnvironmentProviderError("Candidate login contract failed")
+                cookie = login_response["cookie"]
+                if not cookie.startswith("watt_session="):
+                    raise EnvironmentProviderError("Candidate session cookie is unavailable")
 
         def request(path: str, *, payload: dict | None = None) -> tuple[int, bytes, str, str]:
             headers = {"Content-Type": "application/json"} if payload is not None else {}
@@ -387,19 +451,17 @@ class DockerCandidatePreviewRuntime:
                 headers["Authorization"] = f"Bearer {bearer}"
             if cookie is not None:
                 headers["Cookie"] = cookie
-            body = None if payload is None else json.dumps(payload).encode("utf-8")
-            try:
-                with urlopen(Request(origin + path, data=body, headers=headers,
-                    method="POST" if body is not None else "GET"), timeout=10) as response:
-                    return (response.status, response.read(1_000_000),
-                        response.headers.get("Content-Type", ""), response.geturl())
-            except (OSError, URLError) as error:
-                raise EnvironmentProviderError(f"Served runtime request failed at {path}") from error
+            response = self._gateway_request(preview_id, path,
+                payload=payload, headers=headers)
+            return (response["status"], b64decode(response["body"]),
+                response["content_type"], response["url"])
 
         observations: dict[str, object] = {
             "candidate_revision": revision,
             "candidate_tree": tree,
             "gateway": origin,
+            "public_gateway": public_origin,
+            "verifier_namespace": names["gateway"],
             "mode": mode.value,
         }
         page_path = "/app" if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else "/"

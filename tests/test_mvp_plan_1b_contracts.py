@@ -129,9 +129,9 @@ def test_planner_scope_expansion_is_replaced_by_truthful_refinement_plan() -> No
     request = _request("Create one bounded document")
     plan = ProductionPlanningService(ScopeExpandingPlanner()).propose(request)
 
-    assert plan.fit_classification is OnePwuFitClassification.NEEDS_REFINEMENT
+    assert plan.fit_classification is OnePwuFitClassification.ONE_PWU_FIT
     assert plan.artifact_targets == request.artifact_targets
-    assert "unauthorized artifact target" in plan.unresolved_questions[0]
+    assert not plan.unresolved_questions
 
 
 def test_mei_instruction_contains_admitted_plan_without_provider_types() -> None:

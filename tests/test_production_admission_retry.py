@@ -37,6 +37,10 @@ def test_retries_only_network_failure_once_under_same_work(
             assert selected_work_id == work_id
             return len(self.attempts) + 1
 
+        def attempts_for_work(self, selected_work_id):
+            assert selected_work_id == work_id
+            return tuple(self.attempts)
+
         def start_intake(self, request):
             self.requests.append(request)
             self.attempts.append({
@@ -73,7 +77,16 @@ def test_retries_only_network_failure_once_under_same_work(
             self.progress.append((args, kwargs))
 
     assets, interactions = Assets(), Interactions()
-    trigger = ProductionAdmissionTrigger(interactions, None, assets, None)
+    monkeypatch.setattr("spg.application.production_admission.sleep", lambda _: None)
+    # Runtime persistence is separately covered by real PostgreSQL journeys.
+    from contextlib import contextmanager
+    @contextmanager
+    def unit_of_work():
+        yield SimpleNamespace(session=None, commit=lambda: None)
+    monkeypatch.setattr("spg.application.production_admission.NativeExecutionStore",
+        lambda _: SimpleNamespace(record_bounded_refinement=lambda **kwargs: None))
+    trigger = ProductionAdmissionTrigger(interactions,
+        SimpleNamespace(database=SimpleNamespace(unit_of_work=unit_of_work)), assets, None)
     monkeypatch.setattr(
         trigger, "_bind_and_activate", lambda **kwargs: kwargs["observation"]
     )

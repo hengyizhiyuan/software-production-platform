@@ -54,7 +54,8 @@ from spg.domain.native_execution import (
     canonical_digest,
 )
 from spg.domain.refinement_contract import (
-    RefinementClass, RefinementSignalKind, classify_refinement,
+    RefinementClass, RefinementSignalKind, WorkConvergenceObservation,
+    classify_refinement, convergence_condition,
 )
 from spg.infrastructure.persistence.concurrency import update_versioned_row
 from spg.infrastructure.persistence.native_execution_schema import (
@@ -83,6 +84,7 @@ from spg.infrastructure.persistence.native_execution_schema import (
     pwu_contract_versions,
     result_ready_claims,
     self_refine_actions,
+    work_convergence_observations,
     self_refine_events,
 )
 
@@ -106,6 +108,63 @@ class NativeExecutionStore:
 
     def __init__(self, session: Session) -> None:
         self.session = session
+
+    def work_convergence_history(self, work_id: UUID) -> tuple[WorkConvergenceObservation, ...]:
+        rows = self.session.execute(select(work_convergence_observations).where(
+            work_convergence_observations.c.work_id == work_id).order_by(
+                work_convergence_observations.c.sequence)).mappings().all()
+        return tuple(WorkConvergenceObservation.model_validate(dict(row)) for row in rows)
+
+    def observe_work_convergence(self, *, work_id: UUID, intent_identity: str,
+        boundary: str, reality_identity: str, missing_acceptance: tuple[str, ...],
+        failure_signature: str | None = None, candidate_identity: str | None = None,
+        failed: bool = False, authority_required: bool = False,
+        token_usage: dict | None = None, model_cost: dict | None = None,
+        compute_cost: dict | None = None, human_intervention: bool = False,
+        human_intervention_count: int | None = None,
+        previous_repair_class: RefinementClass | None = None,
+        evidence: dict | None = None, now: datetime | None = None,
+        attempt_budget: int = 128, no_progress_budget: int = 3,
+        time_budget_seconds: int = 7200) -> WorkConvergenceObservation:
+        """Append owner evidence under a Work lock; restart cannot reset budgets.
+
+        This method observes attempts, not API polls. IDs and plan churn cannot
+        buy more repairs. Only verified reduction in acceptance distance clears
+        the consecutive no-progress counter; lifetime attempts/time remain.
+        """
+        lock_key = int.from_bytes(work_id.bytes[:8], "big", signed=True)
+        self.session.execute(select(func.pg_advisory_xact_lock(lock_key)))
+        history = self.work_convergence_history(work_id)
+        lineage = [row for row in history if row.intent_identity == intent_identity]
+        previous = lineage[-1] if lineage else None
+        now = now or _utcnow()
+        missing = tuple(sorted(set(missing_acceptance)))
+        improved = previous is not None and set(missing) < set(previous.missing_acceptance)
+        count = (0 if improved else previous.no_progress_count) if previous else 0
+        if failed and not improved:
+            count += 1
+        attempts = 1 if previous is None else previous.attempts + 1
+        elapsed = max(0, int((now - (lineage[0].created_at if lineage else now)).total_seconds()))
+        condition = convergence_condition(missing_acceptance=missing, attempts=attempts,
+            no_progress_count=count, elapsed_seconds=elapsed, authority_required=authority_required,
+            attempt_budget=attempt_budget, no_progress_budget=no_progress_budget,
+            time_budget_seconds=time_budget_seconds)
+        if previous and previous.condition in {"NON_CONVERGING", "ESCALATED"} and not improved:
+            condition = previous.condition
+        record = WorkConvergenceObservation(id=uuid4(), work_id=work_id,
+            intent_identity=intent_identity, predecessor_id=history[-1].id if history else None,
+            sequence=len(history) + 1, boundary=boundary, failure_signature=failure_signature,
+            candidate_identity=candidate_identity, reality_identity=reality_identity,
+            missing_acceptance=missing, attempts=attempts, no_progress_count=count,
+            elapsed_seconds=elapsed, token_usage=token_usage or {}, model_cost=model_cost or {},
+            compute_cost=compute_cost or {}, human_intervention_count=(
+                max(human_intervention_count or 0,
+                    (previous.human_intervention_count if previous else 0) + int(human_intervention))),
+            previous_repair_class=previous_repair_class or (
+                previous.previous_repair_class if previous else None),
+            condition=condition, evidence=evidence or {}, created_at=now)
+        self.session.execute(insert(work_convergence_observations).values(**record.model_dump(mode="json")))
+        return record
 
     def insert_contract(self, record: PWUContractVersionRecord) -> None:
         self.session.execute(insert(pwu_contract_versions).values(**record.model_dump()))
@@ -874,7 +933,7 @@ class NativeExecutionStore:
             ),
             diagnostic_evidence=diagnostic_evidence or {},
             known_failure_match=prior > 0,
-            final_result="RECOVERED" if converged else "SUPERSEDED" if superseded else "ESCALATED",
+            final_result="LOCAL_OBLIGATION_RECOVERED" if converged else "SUPERSEDED" if superseded else "ESCALATED",
             work_resume_result="RESUMED" if converged else "REORIENTED" if superseded else "NOT_RESUMED",
             extra_elapsed_seconds=max(0, elapsed_seconds),
             budget_decision={
@@ -954,6 +1013,8 @@ class NativeExecutionStore:
         model_token_usage: dict[str, Any] | None = None,
     ) -> None:
         event = self.self_refine_event(event_id)
+        if event.semantic_version >= 2 and result == "RECOVERED":
+            result = "LOCAL_OBLIGATION_RECOVERED"
         values: dict[str, Any] = {
             "final_result": result,
             "work_resume_result": resume_result,
@@ -979,7 +1040,7 @@ class NativeExecutionStore:
                 event.failure_signature, before_event_id=event_id,
             )
             refinement_class = classify_refinement(
-                converged=result == "RECOVERED",
+                converged=result in {"RECOVERED", "LOCAL_OBLIGATION_RECOVERED"},
                 same_signature_count=same_signature_count,
                 prior_occurrences=prior_occurrences,
                 budget_exhausted=result in {"ESCALATED", "FAILED"},
@@ -1135,6 +1196,8 @@ class NativeExecutionStore:
             "self_refine_rate": len(refined_native_attempts) / attempts if attempts else 0.0,
             "first_pass_success_rate": first_pass_successes / len(completed_attempts) if completed_attempts else 0.0,
             "recovered": results.count("RECOVERED"),
+            "local_obligation_recovered": results.count("LOCAL_OBLIGATION_RECOVERED"),
+            "recovery_scope": "LOCAL_OBLIGATION; Work convergence is independently observed",
             "escalated": results.count("ESCALATED"),
             "failed": results.count("FAILED"),
             "active": results.count(None),
@@ -1142,7 +1205,8 @@ class NativeExecutionStore:
                 item.value: sum(record.refinement_class is item for record in records)
                 for item in RefinementClass
             },
-            "convergence_success_rate": results.count("RECOVERED") / len(settled) if settled else 0.0,
+            "convergence_success_rate": sum(result in {"RECOVERED", "LOCAL_OBLIGATION_RECOVERED"}
+                for result in results) / len(settled) if settled else 0.0,
             "average_refinement_attempts": sum(action_counts) / len(action_counts) if action_counts else 0.0,
             "p95_refinement_attempts": _p95(action_counts),
             "average_refinement_seconds": sum(durations) / len(durations) if durations else 0.0,

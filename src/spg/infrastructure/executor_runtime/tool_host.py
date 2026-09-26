@@ -369,11 +369,15 @@ class LocalNativeToolHost:
                 else "in-process-test-only"
             ),
         }
+        if identity == "test.run":
+            from spg.domain.refinement_contract import test_execution_evidence
+            output.update(test_execution_evidence(output))
         return self._result(
             request.delivery_id,
             identity,
             output,
-            condition=EffectCondition.SETTLED if process.returncode == 0 else EffectCondition.FAILED,
+            condition=(EffectCondition.SETTLED if process.returncode == 0
+                and output.get("verification_evidence") != "INCOMPLETE" else EffectCondition.FAILED),
         )
 
     @staticmethod
