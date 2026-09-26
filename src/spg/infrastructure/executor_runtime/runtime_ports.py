@@ -519,7 +519,9 @@ class DurableKernelAudit:
                 RefinementSignalKind.EVIDENCE_INSUFFICIENT
                 if failure_code in {"TEST_ENVIRONMENT_NOT_READY", "VERIFICATION_EVIDENCE_INCOMPLETE"}
                 else RefinementSignalKind.CAPABILITY_MISMATCH
-                if output.get("effect_observed") is False and output.get("error_type") == "ValueError"
+                if output.get("effect_observed") is False and output.get("error_type") in {
+                    "ValueError", "NativeExecutionConflict", "CAPABILITY_PATH_INVALID", "TOOL_GRANT_MISMATCH", "CAPABILITY_UNAVAILABLE",
+                }
                 else RefinementSignalKind.REALITY_MISMATCH
                 if tool == "preview.inspect" else RefinementSignalKind.EXECUTION_FAILURE)
             event = SelfRefineEventRecord(
@@ -605,6 +607,21 @@ class DurableKernelAudit:
         if output.get("product_intent_change") is True:
             return RepairabilityClassification.REQUIRES_HUMAN_DECISION, "repair would change Product Intent"
         grants = {grant.identity for grant in binding.capability_grants}
+        if (condition is EffectCondition.FAILED and output.get("effect_observed") is False
+                and output.get("error_type") == "NativeExecutionConflict"
+                and (output.get("message") in {
+                    "tool path is explicitly forbidden", "tool path is outside the granted scope",
+                    "tool path escapes the workspace", "tool paths must use POSIX separators",
+                } or str(output.get("message", "")).startswith("tool capability was not granted:"))):
+            return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+                "denied recipe had no effect; use only already admitted paths and capabilities")
+        if (condition is EffectCondition.FAILED
+                and output.get("effect_observed") is False
+                and output.get("error_type") in {
+                    "CAPABILITY_PATH_INVALID", "TOOL_GRANT_MISMATCH", "CAPABILITY_UNAVAILABLE",
+                }):
+            return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+                "confirmed no effect; select an alternative within existing capability grants and Task Contract")
         if (tool == "test.run" and output.get("diagnostic_code") == "TEST_ENVIRONMENT_NOT_READY"
                 and "dependency.sync" in grants):
             return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,

@@ -44,6 +44,30 @@ def test_runtime_defaults_and_qualification_mode_match():
     assert status["wic_configuration_parity"] == "PASS"
 
 
+def test_missing_container_test_executable_is_not_an_executed_test_failure():
+    logs = 'OCI runtime exec failed: unable to start container process: exec: "runner": executable file not found in $PATH'
+    result = execution_evidence({"argv": ["runner", "test"], "returncode": 127, "stdout": logs})
+    assert result["test_environment_readiness"] == "NOT_READY"
+    assert result["verification_evidence"] == "INCOMPLETE"
+    assert result["effect_observed"] is False
+    assert execution_evidence({"returncode": 127, "stdout": "a test assertion failed"})["verification_evidence"] == "FAILED"
+
+
+def test_real_compiler_diagnostic_binds_only_its_invoked_source(tmp_path):
+    import subprocess
+    import sys
+    from spg.domain.refinement_contract import compilation_execution_evidence
+    source = tmp_path/'broken.py'
+    source.write_text('def function(:\n    pass\n')
+    observed = subprocess.run([sys.executable, '-m', 'py_compile', source.name],
+        cwd=tmp_path, capture_output=True, text=True)
+    output = {'argv': ['python', '-m', 'py_compile', source.name],
+        'returncode': observed.returncode, 'stderr': observed.stderr}
+    assert compilation_execution_evidence(output) == {'diagnostic_code': 'PYTHON_SYNTAX_ERROR', 'path': source.name}
+    assert compilation_execution_evidence({**output, 'argv': ['python', '-m', 'py_compile', 'other.py']}) == {}
+    assert compilation_execution_evidence({**output, 'returncode': 0}) == {}
+
+
 def test_explicit_git_source_survives_admission_for_existing_custom_host_recipe():
     from spg.domain.response_contract import production_intent_evidence
     source = 'http://qualified-git:8080/business.git'

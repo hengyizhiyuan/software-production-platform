@@ -36,6 +36,7 @@ from spg.domain.product import (
 )
 from spg.domain.guided_design import DesignReadinessState
 from spg.domain.change import ProductionTargetKind
+from spg.domain.interaction import InteractionActor, InterpretationMeaningKind
 from spg.domain.planning import OnePwuFitClassification
 from spg.domain.steering import (
     NextStepCandidate,
@@ -650,6 +651,20 @@ class PlanSteeringDriver:
                 raise ProductInvariantViolation("Work convergence requires persisted Work")
             bindings = store.runtime_bindings(work_id)
             facts = store.runtime_summary(bindings[-1]) if bindings else RuntimeFactSummary()
+            revisions = store.work_reality_revisions(work_id)
+            initial_records = set(revisions[0].source_record_ids) if revisions else set()
+            interactions = InteractionStore(uow.session)
+            human_decisions = set()
+            for revision in revisions[1:]:
+                assessment = (interactions.assessment(revision.source_assessment_id)
+                    if revision.source_assessment_id is not None else None)
+                for meaning in (() if assessment is None else assessment.meanings):
+                    if meaning.kind is not InterpretationMeaningKind.DECISION_INPUT:
+                        continue
+                    for identity in set(meaning.source_record_ids) - initial_records:
+                        record = interactions.record(identity)
+                        if record is not None and record.actor is InteractionActor.HUMAN:
+                            human_decisions.add(identity)
             resource = store.resource_for_work(work_id)
             intent = canonical_digest({"raw_requirement": work.raw_user_requirement,
                 "desired_outcome": work.desired_outcome, "constraints": work.constraints})
@@ -672,7 +687,8 @@ class PlanSteeringDriver:
                 "missing_acceptance": sorted(missing)})
         return {"intent_identity": intent, "reality_identity": reality,
             "candidate_identity": facts.candidate_fingerprint,
-            "missing_acceptance": tuple(missing)}
+            "missing_acceptance": tuple(missing),
+            "human_intervention_count": len(human_decisions) + int(facts.authorization_id is not None)}
 
     def _work_convergence_halted(self, work_id: UUID) -> bool:
         basis = self._convergence_basis(work_id)
@@ -687,6 +703,7 @@ class PlanSteeringDriver:
         failure_signature: str | None = None, boundary: str = "STEERING",
         owner_budget_exhausted: bool = False):
         basis = self._convergence_basis(work_id)
+        human_intervention_count = basis.pop("human_intervention_count")
         from spg.application.measurement import ProductionMeasurementService
         economics = ProductionMeasurementService(self.database).graph_economics(work_id)
         with self.database.unit_of_work() as uow:
@@ -701,7 +718,7 @@ class PlanSteeringDriver:
                 compute_cost={"execution_seconds": economics["execution_seconds"],
                     "resource_units": economics.get("resource_units", {}),
                     "status": "OBSERVED" if economics["pwu_count"] else "UNREPORTED"},
-                human_intervention_count=economics.get("human_escalation_count", 0),
+                human_intervention_count=human_intervention_count,
                 previous_repair_class=refinements[0].refinement_class if refinements else None,
                 evidence={"source": "persisted Work/Runtime and Candidate Preview",
                     "product_id": economics["product_id"],
@@ -1533,6 +1550,11 @@ class PlanSteeringDriver:
                     uow.commit()
                 self._observe_convergence(outcome.work_id, failed=True, boundary="PRODUCTION",
                     failure_signature=signature, owner_budget_exhausted=True)
+                return
+            if outcome.work_status is WorkStatus.BLOCKED:
+                self._observe_convergence(outcome.work_id, failed=True, boundary="PRODUCTION",
+                    failure_signature=canonical_digest({"boundary": "TERMINAL_PRODUCTION",
+                        "stop_reason": outcome.stop_reason.value}), owner_budget_exhausted=True)
                 return
             self.schedule(outcome.work_id)
 

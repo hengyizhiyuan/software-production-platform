@@ -4524,6 +4524,7 @@ def test_human_answer_to_current_design_question_admits_once_and_schedules(postg
     SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
     driver = PlanSteeringDriver(postgres_database, work, ProductionOrchestrator(work))
     frame = driver.frames.assemble(admitted.work_id)
+    assert driver._convergence_basis(admitted.work_id)["human_intervention_count"] == 0
     decision = driver.decisions.admit(admitted.work_id, NextStepCandidate(
         type=SteeringStepType.HUMAN_DECISION, objective="Choose the target",
         reason="Which existing user should the edit target?", human_required=True,
@@ -4559,6 +4560,8 @@ def test_human_answer_to_current_design_question_admits_once_and_schedules(postg
     try:
         assert trigger.execute_governed_turn(ready.interaction.id, assessment, record)
         assert scheduled == [admitted.work_id]
+        observed = driver._observe_convergence(admitted.work_id, failed=False)
+        assert observed.human_intervention_count == 1
         with postgres_database.unit_of_work() as uow:
             assert "Use the currently selected user" in ProductStore(uow.session).current_work_reality_revision(admitted.work_id).requests
         assert trigger.execute_governed_turn(ready.interaction.id, assessment, record) is None

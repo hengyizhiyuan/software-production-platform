@@ -1726,8 +1726,10 @@ def _business_admission(
     return admitted.model_copy(update={"binding": binding})
 
 
+@pytest.mark.parametrize("initial_failure", ["admitted_assertion", "capability_no_effect"])
 def test_explicit_business_oracle_repairs_verifies_and_resumes_without_human(
     postgres_database: Database, git_repository: Path, tmp_path: Path,
+    initial_failure: str,
 ) -> None:
     (git_repository / "README.md").write_text("tax=13\n", encoding="utf-8")
     _git(git_repository, "add", "README.md")
@@ -1764,6 +1766,10 @@ def test_explicit_business_oracle_repairs_verifies_and_resumes_without_human(
 
     async def run_tax(request: ToolExecutionRequest) -> ToolExecutionResult:
         observed = int((git_repository / "README.md").read_text(encoding="utf-8").strip().split("=")[1])
+        if initial_failure == "capability_no_effect" and observed == 13:
+            output = {"error_type": "CAPABILITY_PATH_INVALID", "effect_observed": False}
+            return ToolExecutionResult(delivery_id=request.delivery_id, tool_identity="test.run",
+                condition=EffectCondition.FAILED, output=output, output_digest=canonical_digest(output))
         completed = subprocess.run(
             [sys.executable, "-c", "from pathlib import Path; assert Path('README.md').read_text().strip() == 'tax=6'"],
             cwd=git_repository, capture_output=True, text=True, check=False,
@@ -1818,6 +1824,7 @@ def test_explicit_business_oracle_repairs_verifies_and_resumes_without_human(
     assert asyncio.run(NativeExecutionWorker(runtime, kernel_factory).run_once(offer)) is True
     assert (git_repository / "README.md").read_text(encoding="utf-8") == "tax=6\n"
     assert len(inference.requests) == 4
+    assert "file.write" in {tool["identity"] for tool in inference.requests[1].available_tools}
     assert any(
         fact.get("fact_type") == "RECENT_SELF_REFINE"
         and fact["events"][0]["repairability"] == RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE.value
@@ -1831,10 +1838,13 @@ def test_explicit_business_oracle_repairs_verifies_and_resumes_without_human(
         assert event.repairability is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
         assert event.final_result == "LOCAL_OBLIGATION_RECOVERED"
         assert event.work_resume_result == "RESUMED"
-        assert event.diagnostic_evidence["test_identity"] == "tax_is_six"
-        assert event.diagnostic_evidence["assertion_id"] == "tax"
-        assert event.diagnostic_evidence["stderr_ref"].startswith("native-receipt:")
-        assert len(event.evidence_references) == 3
+        if initial_failure == "admitted_assertion":
+            assert event.diagnostic_evidence["test_identity"] == "tax_is_six"
+            assert event.diagnostic_evidence["assertion_id"] == "tax"
+            assert event.diagnostic_evidence["stderr_ref"].startswith("native-receipt:")
+            assert len(event.evidence_references) == 3
+        else:
+            assert event.signal_kind.value == "CAPABILITY_MISMATCH"
         assert [action.outcome for action in store.self_refine_actions(event.id)] == [
             "RETRY_SCHEDULED", "RECOVERED",
         ]

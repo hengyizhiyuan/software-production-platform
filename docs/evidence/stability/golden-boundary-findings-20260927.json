@@ -4116,6 +4116,222 @@
       "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-01/trial-1",
       "manual_rescue_actions": [],
       "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-05",
+      "trial": 4,
+      "signal": "MISSING_REFINEMENT_WIRING / EVIDENCE_INSUFFICIENT",
+      "cause": "Authoritative no-effect CAPABILITY_PATH_INVALID was classified as diagnosis-only. Granted mutation tools disappeared; Native ended UNABLE_TO_COMPLETE after observing the source.",
+      "architecture_owner": "Native repairability classification",
+      "work_id": "32dca4d0-31ac-5f1d-9cff-b2a421e6a61b",
+      "economics": {
+        "work_id": "32dca4d0-31ac-5f1d-9cff-b2a421e6a61b",
+        "product_id": "09f79fa8-1254-439c-af1c-3abbcea32cda",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "1abfa77f-0055-4d4c-b47d-719694572a1a",
+            "node_id": null,
+            "run_id": "831138a1-d252-4e11-a5fc-2b9e929d15b0",
+            "condition": "PROPOSED",
+            "attempt_count": 1,
+            "outcomes": [
+              "UNABLE_TO_COMPLETE"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:41dccee3-777e-453f-a3b2-d00f4cb77108"
+            ],
+            "execution_seconds": 35.463364,
+            "duration_observed": true,
+            "queue_wait_seconds": 0.986158,
+            "token_usage": {
+              "input_tokens": 40185,
+              "output_tokens": 6992,
+              "total_tokens": 47177,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 3,
+              "tool_effect": 4
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 40185,
+          "output_tokens": 6992,
+          "total_tokens": 47177,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 35.463364,
+        "queue_wait_seconds": 0.986158,
+        "wall_elapsed_seconds": 37.125632,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 2,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 32,
+        "resource_units": {
+          "inference_submission": 3,
+          "tool_effect": 4
+        },
+        "final_outcome": "READY"
+      },
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-08",
+      "trial": 2,
+      "signal": "MISSING_REFINEMENT_WIRING / EVIDENCE_INSUFFICIENT",
+      "cause": "One legitimate clarification resumed the same Work. A forbidden test-reference read and missing OCI npm executable then hid granted tools; terminal production failure did not become diagnostic Human Attention.",
+      "architecture_owner": "Native no-effect recipe classification; deterministic test-environment evidence; Work terminal outcome propagation",
+      "work_id": "b46f45bd-2daa-5af5-8332-d702ba2cb4e6",
+      "economics": {
+        "work_id": "b46f45bd-2daa-5af5-8332-d702ba2cb4e6",
+        "product_id": "9d2f4cfe-66d0-4295-96d7-40c7a053a5d2",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "7ea4d1ab-8a64-4e08-9987-e91209424ddf",
+            "node_id": null,
+            "run_id": "bcb54378-cf57-446e-8fca-3b453e86c530",
+            "condition": "PROPOSED",
+            "attempt_count": 1,
+            "outcomes": [
+              "UNABLE_TO_COMPLETE"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:c4a9ccff-3218-48e4-996a-fcc3fa041634"
+            ],
+            "execution_seconds": 331.040417,
+            "duration_observed": true,
+            "queue_wait_seconds": 182.995522,
+            "token_usage": {
+              "input_tokens": 67719,
+              "output_tokens": 50226,
+              "total_tokens": 117945,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 5,
+              "tool_effect": 5
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 67719,
+          "output_tokens": 50226,
+          "total_tokens": 117945,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 331.040417,
+        "queue_wait_seconds": 182.995522,
+        "wall_elapsed_seconds": 333.671359,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 4,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 329,
+        "resource_units": {
+          "inference_submission": 5,
+          "tool_effect": 5
+        },
+        "final_outcome": "READY"
+      },
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 2,
+      "signal": "MISSING_REFINEMENT_WIRING / EVIDENCE_INSUFFICIENT",
+      "cause": "Source repair and actual Preview succeeded, but the runtime skipped reproduction of the baseline compiler failure. The required compiler-failure oracle was not reached.",
+      "architecture_owner": "Native evidence-acquisition policy and compiler receipt grounding",
+      "work_id": "4fb77f49-20b1-51f1-8d24-d2b4e109f8ab",
+      "economics": {
+        "work_id": "4fb77f49-20b1-51f1-8d24-d2b4e109f8ab",
+        "product_id": "001ea1eb-9d82-4f6b-a487-d7ae09c2d267",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "182d628a-a6ee-4770-8157-8ff8846d6871",
+            "node_id": null,
+            "run_id": "cb4a8e43-5976-4d6d-9a5e-b8ad73383f2a",
+            "condition": "SATISFIED",
+            "attempt_count": 1,
+            "outcomes": [
+              "RESULT_READY"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:0ac94557-5b95-41fd-86ff-b30a75ea9cc5"
+            ],
+            "execution_seconds": 24.595517,
+            "duration_observed": true,
+            "queue_wait_seconds": 0.465583,
+            "token_usage": {
+              "input_tokens": 51963,
+              "output_tokens": 4101,
+              "total_tokens": 56064,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 4,
+              "tool_effect": 5
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 51963,
+          "output_tokens": 4101,
+          "total_tokens": 56064,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 24.595517,
+        "queue_wait_seconds": 0.465583,
+        "wall_elapsed_seconds": 26.051141,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 1,
+        "first_pass_pwu_count": 1,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {
+          "inference_submission": 4,
+          "tool_effect": 5
+        },
+        "final_outcome": "READY"
+      },
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
     }
   ]
 }

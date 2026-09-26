@@ -1044,6 +1044,36 @@ def test_rejected_process_recipe_can_be_corrected_without_human() -> None:
     assert "no effect" in basis
 
 
+@pytest.mark.parametrize("failure_code", ["CAPABILITY_PATH_INVALID", "TOOL_GRANT_MISMATCH", "CAPABILITY_UNAVAILABLE"])
+def test_no_effect_capability_failure_preserves_bounded_repair(failure_code) -> None:
+    binding, _ = _binding()
+    output = {"error_type": failure_code, "effect_observed": False}
+    classification, _ = DurableKernelAudit._classify_repairability(
+        {}, binding=binding, tool="file.read", condition=EffectCondition.FAILED, output=output)
+    assert classification is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+    classification, _ = DurableKernelAudit._classify_repairability(
+        {}, binding=binding, tool="file.read", condition=EffectCondition.UNKNOWN, output=output)
+    assert classification is RepairabilityClassification.UNSAFE_TO_AUTOREPAIR
+    classification, _ = DurableKernelAudit._classify_repairability(
+        {}, binding=binding, tool="file.read", condition=EffectCondition.FAILED,
+        output={**output, "product_choice_required": True})
+    assert classification is RepairabilityClassification.REQUIRES_HUMAN_DECISION
+    classification, _ = DurableKernelAudit._classify_repairability(
+        {}, binding=binding, tool="file.read", condition=EffectCondition.FAILED,
+        output={"error_type": failure_code})
+    assert classification is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+
+
+def test_denied_path_can_choose_existing_authority_but_identity_conflict_cannot():
+    binding, _ = _binding()
+    def classify(message):
+        return DurableKernelAudit._classify_repairability({}, binding=binding,
+            tool="file.read", condition=EffectCondition.FAILED,
+            output={"error_type": "NativeExecutionConflict", "effect_observed": False, "message": message})[0]
+    assert classify("tool path is explicitly forbidden") is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+    assert classify("tool result identity differs") is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+
+
 def test_repair_orientation_is_compacted_before_exact_contract_reality() -> None:
     binding, contract = _binding()
     incident = {

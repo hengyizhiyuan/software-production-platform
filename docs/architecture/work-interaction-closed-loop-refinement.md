@@ -751,3 +751,18 @@ this transition. Candidate integration and delivery authorization remain separat
 Preview state compare-and-swap uses the persisted JSON contract. Transport log
 tuples round-trip as JSON arrays; that representation change is not a concurrent
 state mutation. Actual lineage or state differences still reject stale updates.
+
+Native repairability treats authoritative confirmed no-effect capability failures
+and pre-execution path/grant rejections as repairable through an already admitted
+alternative. It does not grant access to the rejected path or tool, and uncertain
+effects, conflicting receipt identities and Human-owned choices retain their
+existing safeguards. A missing executable reported by OCI before a test process
+starts is incomplete test-environment evidence, not an executed source assertion.
+Real compilation diagnostics can bind an invoked Python source target to its
+failed compilation receipt; subsequent observed in-scope source evidence can
+enable the existing bounded compiler repair policy.
+
+A terminal BLOCKED production outcome stops Work convergence and produces durable
+diagnostic attention. Human intervention measurement counts distinct source-bound
+Human decisions in admitted revisions and actual Candidate authorization; the
+initial intent and an unanswered escalation request are not Human interventions.

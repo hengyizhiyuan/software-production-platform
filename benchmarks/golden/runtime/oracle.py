@@ -109,6 +109,42 @@ def main():
         checks.update(browser_dialog_oracle=(root/'browser-oracle.json').exists())
         if checks['browser_dialog_oracle']:
             checks['actual_cancel_closes_dialog']=json.loads((root/'browser-oracle.json').read_text()).get('cancel_closes') is True
+    elif identity == 'GC-EX-10':
+        attempt_record = root/'native-attempt.json'
+        attempt = json.loads(attempt_record.read_text()) if attempt_record.exists() else {}
+        results = {result['delivery_id']: result for step in attempt.get('steps', [])
+            for result in step.get('request_payload', {}).get('previous_results', [])}
+        compilation = [result for result in results.values()
+            if result['tool_identity'] in {'build.run', 'process.run'}
+            and result.get('output', {}).get('argv', [])[1:3] == ['-m', 'py_compile']]
+        checks.update(compiler_failure_observed=any(result['condition'] == 'FAILED'
+                and 'SyntaxError' in result['output'].get('stderr', '') for result in compilation),
+            successful_native_build=any(result['condition'] == 'SETTLED'
+                and result['output'].get('returncode') == 0 for result in compilation),
+            in_scope_source_repair=paths == ['server.py'] and len(added) == len(removed) == 1)
+    elif identity in {'GC-EX-09', 'GC-IP-04'}:
+        browser_record = root/'browser-oracle.json'
+        database_record = root/'persistence-oracle.json'
+        browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}
+        database = json.loads(database_record.read_text()) if database_record.exists() else {}
+        checks['api_and_real_database_agree'] = database.get('api_and_database_agree') is True
+        if identity == 'GC-EX-09':
+            checks.update(real_active_and_inactive_rows_visible=browser.get('actual_active_and_inactive_rows') is True,
+                status_is_backend_data=any(row.get('name') == 'Golden inactive user' and row.get('status') == 'inactive'
+                    for row in database.get('sqlite_rows', [])))
+            plan = state['work'].get('production_plan_runtime') or {}
+            nodes = plan.get('pwus', [])
+            checks['verified_multiple_surfaces_and_join'] = (len(nodes) >= 3
+                and all(node['state'] == 'VERIFIED' for node in nodes)
+                and any(node['kind'] == 'JOIN' for node in nodes)
+                and plan.get('integrated_revision') == meta['repository_revision'])
+        else:
+            checks.update(edit_form_submitted=browser.get('edit_form_submitted') is True,
+                reload_preserves_profile=browser.get('reload_preserves_profile_name') is True
+                    and browser.get('saved_email_visible_in_screenshot') is True,
+                persisted_profile=any(row.get('name') == 'Golden edited profile'
+                    and row.get('email') == 'golden-profile@example.invalid' for row in database.get('sqlite_rows', [])),
+                existing_identity_boundary_preserved=all(path in {'web/app.js', 'web/index.html', 'web/styles.css'} for path in paths))
     elif identity == 'GC-IP-01':
         browser_record = root/'browser-oracle.json'
         browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}

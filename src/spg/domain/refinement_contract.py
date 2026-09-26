@@ -1,6 +1,8 @@
 """Shared refinement semantics; domain owners retain candidate and authority ownership."""
 
 from enum import StrEnum
+import re
+from pathlib import PurePosixPath
 from datetime import datetime
 from uuid import UUID
 
@@ -84,6 +86,11 @@ def test_execution_evidence(output: dict) -> dict:
     This records deterministic tool observations, not an application oracle.
     """
     logs = str(output.get("stdout", "")) + "\n" + str(output.get("stderr", ""))
+    if (output.get("returncode") in {126, 127}
+            and "unable to start container process" in logs
+            and "executable file not found" in logs):
+        return {"diagnostic_code": "TEST_ENVIRONMENT_NOT_READY", "effect_observed": False,
+            "test_environment_readiness": "NOT_READY", "verification_evidence": "INCOMPLETE"}
     if "ModuleNotFoundError" in logs or "ImportError while importing test module" in logs:
         return {"diagnostic_code": "TEST_ENVIRONMENT_NOT_READY",
             "test_environment_readiness": "NOT_READY", "verification_evidence": "INCOMPLETE"}
@@ -92,6 +99,22 @@ def test_execution_evidence(output: dict) -> dict:
             "test_environment_readiness": "COLLECTION_ONLY", "verification_evidence": "INCOMPLETE"}
     return {"test_environment_readiness": "OBSERVED_EXECUTION",
         "verification_evidence": "EXECUTED" if output.get("returncode") == 0 else "FAILED"}
+
+
+def compilation_execution_evidence(output: dict) -> dict:
+    """Bind a real Python compilation diagnostic to its invoked source target."""
+    argv = output.get("argv") or ()
+    if (len(argv) != 4 or PurePosixPath(str(argv[0])).name not in {"python", "python3"}
+            or list(argv[1:3]) != ["-m", "py_compile"] or not output.get("returncode")):
+        return {}
+    target = str(argv[3])
+    logs = str(output.get("stderr", ""))
+    witness = re.search(r'File "([^"]+)", line \d+', logs)
+    if (target.startswith("/") or ".." in PurePosixPath(target).parts
+            or "SyntaxError" not in logs or witness is None
+            or not (witness[1] == target or witness[1].endswith("/" + target))):
+        return {}
+    return {"diagnostic_code": "PYTHON_SYNTAX_ERROR", "path": target}
 
 
 def classify_refinement(

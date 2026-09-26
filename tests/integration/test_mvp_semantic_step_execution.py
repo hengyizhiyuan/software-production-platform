@@ -623,6 +623,27 @@ def test_production_infrastructure_stop_is_durable_work_incident(postgres_databa
         orchestrator.shutdown()
 
 
+def test_terminal_production_failure_requires_durable_diagnostic_attention(postgres_database, product):
+    from spg.application.orchestration import OrchestrationOutcome, OrchestrationStopReason
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(postgres_database, works, orchestrator)
+    try:
+        driver._production_stopped(OrchestrationOutcome(admitted.work_id, 0, WorkStatus.BLOCKED,
+            OrchestrationStopReason.HUMAN_OR_TERMINAL_BOUNDARY))
+        with postgres_database.unit_of_work() as uow:
+            observation = NativeExecutionStore(uow.session).work_convergence_history(admitted.work_id)[-1]
+            assert observation.condition == "NON_CONVERGING"
+            assert observation.evidence["owner_budget_exhausted"] is True
+        decision = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id).latest_decision
+        assert decision.human_required is True
+        assert "converg" in decision.reason.lower()
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()
+
+
 def test_sem_07_stale_semantic_candidate_is_rejected(
     postgres_database: Database,
     product,
