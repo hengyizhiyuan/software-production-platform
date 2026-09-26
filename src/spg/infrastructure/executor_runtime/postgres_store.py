@@ -119,6 +119,7 @@ class NativeExecutionStore:
         boundary: str, reality_identity: str, missing_acceptance: tuple[str, ...],
         failure_signature: str | None = None, candidate_identity: str | None = None,
         failed: bool = False, authority_required: bool = False,
+        owner_budget_exhausted: bool = False,
         token_usage: dict | None = None, model_cost: dict | None = None,
         compute_cost: dict | None = None, human_intervention: bool = False,
         human_intervention_count: int | None = None,
@@ -148,7 +149,7 @@ class NativeExecutionStore:
         condition = convergence_condition(missing_acceptance=missing, attempts=attempts,
             no_progress_count=count, elapsed_seconds=elapsed, authority_required=authority_required,
             attempt_budget=attempt_budget, no_progress_budget=no_progress_budget,
-            time_budget_seconds=time_budget_seconds)
+            time_budget_seconds=time_budget_seconds, owner_budget_exhausted=owner_budget_exhausted)
         if previous and previous.condition in {"NON_CONVERGING", "ESCALATED"} and not improved:
             condition = previous.condition
         record = WorkConvergenceObservation(id=uuid4(), work_id=work_id,
@@ -869,11 +870,12 @@ class NativeExecutionStore:
             insert(execution_recovery_cases).values(**record.model_dump(mode="json"))
         )
 
-    def open_self_refine_event(self, operation_id: UUID) -> SelfRefineEventRecord | None:
+    def open_self_refine_event(self, operation_id: UUID, *, component: str | None = None) -> SelfRefineEventRecord | None:
         row = self.session.execute(
             select(self_refine_events)
             .where(self_refine_events.c.operation_id == operation_id)
             .where(self_refine_events.c.status == "OPEN")
+            .where(True if component is None else self_refine_events.c.affected_component == component)
             .order_by(self_refine_events.c.created_at.desc())
             .limit(1)
         ).mappings().first()

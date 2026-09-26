@@ -982,6 +982,7 @@ NODE_DOGFOOD_INTENT = (
     "让底部 Work Composer 的展开/收缩状态在页面刷新后保持用户上一次选择。"
     "只修改实现这个行为所需的前端文件和相关测试，"
     "不要改动其他功能，也不要进行 UI 重构。"
+    "实现文件 src/spg/web/app.js，更新测试 tests/js/test_web_state.cjs。"
 )
 
 
@@ -1455,12 +1456,12 @@ def test_work_14_15_18_24_provider_report_is_not_completion(
         observation = connection.execute(
             select(repository_observations.c.id)
         ).scalar_one()
-        completion_count = connection.scalar(
-            select(func.count()).select_from(completion_evaluations)
-        )
+        completion_outcomes = connection.execute(
+            select(completion_evaluations.c.outcome)
+        ).scalars().all()
     assert report == ProviderReportedOutcome.SUCCESS.value
     assert observation is not None
-    assert completion_count == 0
+    assert completion_outcomes == ["NOT_PRODUCED"]
     assert executor.dispatch_count == 1
 
 

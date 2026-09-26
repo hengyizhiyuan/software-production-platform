@@ -825,6 +825,31 @@ test("uncertain delivery remains visible and survives refresh without an automat
   assert.equal(viewModel.nextInteractionOutboxItem(recovered, "interaction-1", { turns: [] }), null);
 });
 
+test("automatic Turn recovery discards interrupted text and settles one preserved Turn", async () => {
+  let posts = 0;
+  let projection = { turns: [{ turn_id: "turn-1", status: "PROCESSING" }] };
+  const harness = conversationHarness(async (url) => {
+    if (url.endsWith("/turns")) { posts += 1; return { turn_id: "turn-1", status: "RECEIVED" }; }
+    return projection;
+  });
+  await harness.submit("Keep this request"); await settle();
+  const source = harness.sources[0];
+  source.emit("response.delta", { response_id: "turn-1", sequence: 1, content: "Interrupted reply" });
+  source.emit("turn.recovery.started", { response_id: "turn-1", sequence: 2 });
+  harness.flushFrames();
+  assert.equal(harness.state.streamingAssistantMessage.content, "");
+  assert.notEqual(source.closed, true);
+  source.emit("response.delta", { response_id: "turn-1", sequence: 3, content: "Recovered reply" });
+  harness.flushFrames();
+  assert.equal(harness.state.streamingAssistantMessage.content, "Recovered reply");
+  projection = { turns: [{ turn_id: "turn-1", status: "COMPLETED" }],
+    conversation_messages: [{ actor: "WATT", content: "Recovered reply", turn_id: "turn-1" }] };
+  source.emit("message.completed", { response_id: "turn-1", sequence: 4 });
+  harness.flushFrames(); await settle();
+  assert.equal(posts, 1);
+  assert.equal(harness.state.sharedUnderstanding.conversation_messages.at(-1).content, "Recovered reply");
+});
+
 test("failed replies pause later messages, keeping exact content for explicit resume", async () => {
   let posts = 0;
   let projection = { turns: [{ turn_id: "turn-1", status: "PROCESSING" }] };

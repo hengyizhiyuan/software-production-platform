@@ -11,7 +11,7 @@ import hashlib
 import json
 import re
 from threading import RLock
-from time import monotonic
+from time import monotonic, sleep
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.guided_design import (
@@ -1191,7 +1191,7 @@ class WorkInteractionService:
             raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
         return turn
 
-    def retry_turn(self, interaction_id: UUID, turn_id: UUID) -> InteractionTurn:
+    def retry_turn(self, interaction_id: UUID, turn_id: UUID, *, automatic: bool = False) -> InteractionTurn:
         """Retry one preserved failed Human Turn without creating duplicate input."""
 
         now = datetime.now(UTC)
@@ -1220,6 +1220,9 @@ class WorkInteractionService:
                 event.event_type is WicResponseEventType.TURN_RECOVERY_STARTED
                 for event in events
             )
+            if automatic and (turn.wic_mode is not WicRuntimeMode.WIC_VNEXT_CONTROLLED
+                    or recovery_attempt > 2):
+                raise InteractionInvariantViolation("Automatic Turn recovery budget is exhausted")
             previous_failure_code = turn.failure_code
             store.reset_turn_for_retry(turn_id, updated_at=now)
             store.update_turn_messages_status(
@@ -1243,16 +1246,23 @@ class WorkInteractionService:
                             "attempt": recovery_attempt,
                             "previous_failure_class": previous_failure_code,
                             "human_input_reused": True,
+                            "automatic": automatic,
+                            "backoff_seconds": recovery_attempt if automatic else 0,
+                            "attempt_budget": 3 if automatic else None,
                         },
                         "created_at": now,
                     }
                 )
             uow.commit()
+        self._schedule_preserved_turn(turn_id)
+        return self.get_turn(turn_id)
+
+    def _schedule_preserved_turn(self, turn_id: UUID) -> None:
         with self._turn_lock:
             self._turn_response_streams.pop(turn_id, None)
             self._turn_fast_candidates.pop(turn_id, None)
             self._turn_realization_started.discard(turn_id)
-            self._turn_timings[turn_id] = _TurnTiming(now, monotonic())
+            self._turn_timings[turn_id] = _TurnTiming(datetime.now(UTC), monotonic())
         if not self.schedule_turn(turn_id):
             # The failed processor can still be unwinding after its durable FAILED
             # transition. Re-enter only after that exact attempt releases ownership.
@@ -1264,7 +1274,6 @@ class WorkInteractionService:
                     )
                 else:
                     self.schedule_turn(turn_id)
-        return self.get_turn(turn_id)
 
     def schedule_turn(self, turn_id: UUID) -> bool:
         with self._turn_lock:
@@ -1809,6 +1818,10 @@ class WorkInteractionService:
             )
             uow.commit()
         self._mark_turn_timing(turn_id, "processing_started")
+        recovery_events = tuple(event for event in self.response_events(turn_id)
+            if event.event_type is WicResponseEventType.TURN_RECOVERY_STARTED)
+        if recovery_events and recovery_events[-1].metadata.get("automatic"):
+            sleep(min(2, int(recovery_events[-1].metadata.get("backoff_seconds", 1))))
         try:
             def start_fast_reception(basis: InteractionInterpretationInput) -> None:
                 if self.fast_reception is None:
@@ -2107,7 +2120,12 @@ class WorkInteractionService:
                         "sequence": store.next_response_event_sequence(turn_id),
                         "event_type": WicResponseEventType.TURN_COMPLETED.value,
                         "content": None, "basis_fingerprint": assessment.basis_fingerprint,
-                        "reconciliation": None, "event_metadata": {},
+                        "reconciliation": None, "event_metadata": {
+                            "automatic_recovery_attempts": sum(
+                                event.metadata.get("automatic") is True for event in recovery_events),
+                            "recovery_scope": "WIC_TURN_ONLY",
+                            "work_converged": False,
+                        },
                         "created_at": completed_at,
                     })
                 uow.commit()
@@ -2122,8 +2140,25 @@ class WorkInteractionService:
         except Exception as error:  # persisted failure is the product-facing truth
             failed_at = datetime.now(UTC)
             failure = _classify_turn_failure(error, failed_at)
+            automatic_recovery = False
             with self.database.unit_of_work() as uow:
                 store = InteractionStore(uow.session)
+                events = store.response_events(turn_id)
+                recoveries = sum(event.event_type is WicResponseEventType.TURN_RECOVERY_STARTED
+                    for event in events)
+                records = store.records(turn.interaction_id)
+                automatic_recovery = bool(
+                    turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED
+                    and isinstance(error, ModelProviderError) and error.retryable
+                    and error.kind in {ModelFailureKind.INCOMPLETE_RESPONSE,
+                        ModelFailureKind.TIMEOUT_OR_NETWORK,
+                        ModelFailureKind.CAPACITY_OR_RATE_LIMIT}
+                    and recoveries < 2 and records
+                    and records[-1].id == turn.request_record_id
+                    and store.message_for_turn(turn_id, InteractionActor.WATT) is None)
+                failure.metadata.update(automatic_recovery_pending=automatic_recovery,
+                    automatic_attempt_budget=3, model_usage_unknown=(
+                        error.usage_unknown if isinstance(error, ModelProviderError) else False))
                 store.update_turn(
                     turn_id,
                     status=InteractionTurnStatus.FAILED,
@@ -2149,8 +2184,27 @@ class WorkInteractionService:
                         "event_metadata": failure.metadata,
                         "created_at": failed_at,
                     })
+                if automatic_recovery:
+                    # Failure and recovery are one durable transition. Readers
+                    # see RECEIVED while the historical failed event is retained.
+                    store.reset_turn_for_retry(turn_id, updated_at=failed_at)
+                    store.update_turn_messages_status(turn_id,
+                        status=InteractionTurnStatus.RECEIVED, updated_at=failed_at)
+                    store.insert_response_event({
+                        "id": uuid4(), "interaction_id": turn.interaction_id,
+                        "turn_id": turn_id, "response_id": turn_id,
+                        "sequence": store.next_response_event_sequence(turn_id),
+                        "event_type": WicResponseEventType.TURN_RECOVERY_STARTED.value,
+                        "content": None, "basis_fingerprint": None, "reconciliation": None,
+                        "event_metadata": {"attempt": recoveries + 1,
+                            "previous_failure_class": failure.code, "human_input_reused": True,
+                            "automatic": True, "backoff_seconds": recoveries + 1,
+                            "attempt_budget": 3, "recovery_scope": "WIC_TURN_ONLY"},
+                        "created_at": failed_at})
                 uow.commit()
             self._mark_turn_timing(turn_id, "failed")
+            if automatic_recovery:
+                self._schedule_preserved_turn(turn_id)
 
     def assess_current(self, interaction_id: UUID) -> InteractionAssessment:
         return self._assess_current(

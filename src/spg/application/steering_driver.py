@@ -550,6 +550,8 @@ class PlanSteeringDriver:
             return SteeringActivationResult(work_id=work_id, iterations_executed=0,
                 stop_reason=SteeringDriverStopReason.BLOCKED)
         if self._provider_failure_escalated(work_id):
+            self._observe_convergence(work_id, failed=True, boundary="PROVIDER",
+                owner_budget_exhausted=True)
             return SteeringActivationResult(
                 work_id=work_id,
                 iterations_executed=0,
@@ -582,6 +584,8 @@ class PlanSteeringDriver:
             except ModelProviderError as error:
                 self._record_provider_failure(work_id, error)
                 self._observe_convergence(work_id, failed=True,
+                    boundary="PROVIDER",
+                    owner_budget_exhausted=self._provider_failure_escalated(work_id),
                     failure_signature=canonical_digest({"boundary": "PROVIDER",
                         "kind": error.kind.value}))
                 LOGGER.warning(
@@ -679,7 +683,8 @@ class PlanSteeringDriver:
             and not set(basis["missing_acceptance"]) < set(current.missing_acceptance))
 
     def _observe_convergence(self, work_id: UUID, *, failed: bool,
-        failure_signature: str | None = None, boundary: str = "STEERING"):
+        failure_signature: str | None = None, boundary: str = "STEERING",
+        owner_budget_exhausted: bool = False):
         basis = self._convergence_basis(work_id)
         from spg.application.measurement import ProductionMeasurementService
         economics = ProductionMeasurementService(self.database).graph_economics(work_id)
@@ -689,6 +694,7 @@ class PlanSteeringDriver:
             observation = store.observe_work_convergence(
                 work_id=work_id, boundary=boundary, failed=failed,
                 failure_signature=failure_signature, **basis,
+                owner_budget_exhausted=owner_budget_exhausted,
                 token_usage=economics["token_usage"],
                 model_cost=economics["observed_provider_spend"],
                 compute_cost={"execution_seconds": economics["execution_seconds"],
@@ -698,7 +704,8 @@ class PlanSteeringDriver:
                 previous_repair_class=refinements[0].refinement_class if refinements else None,
                 evidence={"source": "persisted Work/Runtime and Candidate Preview",
                     "product_id": economics["product_id"],
-                    "human_acceptance": "PENDING", "delivery_authorized": False})
+                    "human_acceptance": "PENDING", "delivery_authorized": False,
+                    "owner_budget_exhausted": owner_budget_exhausted})
             uow.commit()
         if observation.condition in {"NON_CONVERGING", "ESCALATED"}:
             fresh = self.frames.assemble(work_id)
@@ -1539,7 +1546,7 @@ class PlanSteeringDriver:
             store = NativeExecutionStore(uow.session)
             revision = ProductStore(uow.session).current_work_reality_revision(work_id)
             revision_id = None if revision is None else str(revision.id)
-            event = store.open_self_refine_event(work_id)
+            event = store.open_self_refine_event(work_id, component="steering/provider")
             if event is None:
                 event_id = uuid4()
                 event = SelfRefineEventRecord(
@@ -1555,7 +1562,10 @@ class PlanSteeringDriver:
                         budget_exhausted=not error.retryable,
                     ),
                     expected_reality={"outcome": "GOVERNED_STEERING_PROGRESSION", "work_revision_id": revision_id},
-                    observed_reality={"provider_kind": error.kind.value, "retryable": error.retryable},
+                    observed_reality={"provider_kind": error.kind.value, "retryable": error.retryable,
+                        "provider_status": error.provider_status,
+                        "termination_reason": error.termination_reason,
+                        "usage_unknown": error.usage_unknown, "request_id": error.request_id},
                     diagnosis_summary="Steering Provider did not return an admissible result.",
                     root_cause_classification=family,
                     repair_hypothesis="Retry the same governed semantic basis after bounded backoff without changing Human authority.",
@@ -1582,7 +1592,9 @@ class PlanSteeringDriver:
                     "Escalate Provider failure; current evidence does not justify another retry"
                     if exhausted else "Retry governed Steering against the same persisted Work Reality"
                 ),
-                observed_reality={"failure_signature": signature, "work_revision_id": revision_id},
+                observed_reality={"failure_signature": signature, "work_revision_id": revision_id,
+                    "provider_status": error.provider_status, "termination_reason": error.termination_reason,
+                    "usage_unknown": error.usage_unknown, "request_id": error.request_id},
                 evidence_references=(f"work:{work_id}",),
                 outcome="ESCALATED" if exhausted else "RETRY_SCHEDULED",
             ))
@@ -1603,7 +1615,7 @@ class PlanSteeringDriver:
     def _clear_provider_failure(self, work_id: UUID) -> None:
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
-            event = store.open_self_refine_event(work_id)
+            event = store.open_self_refine_event(work_id, component="steering/provider")
             if event is not None and event.affected_component == "steering/provider":
                 now = datetime.now(UTC)
                 actions = store.self_refine_actions(event.id)
@@ -1613,10 +1625,10 @@ class PlanSteeringDriver:
                     repair_action="Re-observe governed Steering progression after Provider recovery",
                     observed_reality={"provider_result": "ADMITTED"},
                     evidence_references=(f"work:{work_id}",),
-                    outcome="RECOVERED",
+                    outcome="LOCAL_OBLIGATION_RECOVERED" if event.semantic_version >= 2 else "RECOVERED",
                 ))
                 store.complete_self_refine_event(
-                    event.id, result="RECOVERED", resume_result="RESUMED",
+                    event.id, result="LOCAL_OBLIGATION_RECOVERED" if event.semantic_version >= 2 else "RECOVERED", resume_result="RESUMED",
                     status="VERIFIED", elapsed_seconds=max(0, int((now - event.created_at).total_seconds())),
                     updated_at=now, compute_overhead={"provider_attempts": len(actions) + 1},
                 )

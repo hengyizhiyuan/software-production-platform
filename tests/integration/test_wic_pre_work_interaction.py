@@ -1401,6 +1401,71 @@ def test_incomplete_turn_is_recoverable_without_admitting_invalid_reality(
     service.shutdown()
 
 
+def test_controlled_turn_automatically_recovers_preserved_input_and_sse(
+    postgres_database: Database,
+) -> None:
+    capability = _IncompleteOnceCapability()
+    service = WorkInteractionService(postgres_database, capability=capability,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED)
+    client = TestClient(create_http_application(application=object(),
+        database=postgres_database, work_service=_NeverCalledWorkService(postgres_database),
+        orchestrator=_NoopOrchestrator(), steering_driver=_NoopDriver(),
+        runtime_activation=_RuntimeActivation(), interaction_service=service))
+    with client:
+        interaction = service.create_interaction(human_identity="human:test")
+        turn = service.submit_turn(interaction.id, "你是谁？", human_identity="human:test")
+        stream = client.get(f"/api/interactions/{interaction.id}/turns/{turn.id}/events")
+        assert "event: turn.failed" not in stream.text
+        assert "event: turn.recovery.started" in stream.text
+        assert stream.text.count("event: message.completed") == 1
+        assert service.get_turn(turn.id).status is InteractionTurnStatus.COMPLETED
+        assert capability.calls == 2
+        projection = service.get_shared_understanding(interaction.id)
+        assert len(projection.records) == 1
+        assert len(projection.conversation_messages) == 2
+        assert _count(postgres_database, product_works) == 0
+        events = service.response_events(turn.id)
+        failed = [event for event in events if event.event_type is WicResponseEventType.TURN_FAILED]
+        assert len(failed) == 1
+        assert failed[0].metadata["automatic_recovery_pending"] is True
+        assert failed[0].metadata["termination_reason"] == "max_output_tokens"
+        assert events[-1].metadata["automatic_recovery_attempts"] == 1
+        assert events[-1].metadata["work_converged"] is False
+
+
+def test_controlled_turn_recovery_budget_survives_restart(
+    postgres_database: Database,
+) -> None:
+    class AlwaysIncomplete:
+        calls = 0
+        def interpret(self, _basis):
+            self.calls += 1
+            raise ModelProviderError(ModelFailureKind.INCOMPLETE_RESPONSE,
+                "incomplete", request_sent=True, usage_unknown=True, retryable=True)
+
+    capability = AlwaysIncomplete()
+    service = WorkInteractionService(postgres_database, capability=capability,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED)
+    interaction = service.create_interaction(human_identity="human:test")
+    turn = service.submit_turn(interaction.id, "你是谁？", human_identity="human:test")
+    assert _wait_for_turn(service, turn.id, timeout=10).status is InteractionTurnStatus.FAILED
+    assert capability.calls == 3
+    events = service.response_events(turn.id)
+    assert sum(event.event_type is WicResponseEventType.TURN_FAILED for event in events) == 3
+    assert sum(event.event_type is WicResponseEventType.TURN_RECOVERY_STARTED for event in events) == 2
+    assert events[-1].metadata["automatic_recovery_pending"] is False
+    service.shutdown()
+    restarted = WorkInteractionService(postgres_database, capability=capability,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED)
+    try:
+        assert restarted.resume_pending_turns() == ()
+        with pytest.raises(InteractionInvariantViolation, match="budget is exhausted"):
+            restarted.retry_turn(interaction.id, turn.id, automatic=True)
+        assert capability.calls == 3
+    finally:
+        restarted.shutdown()
+
+
 def test_failed_turn_evidence_is_sanitized_and_written_before_cleanup(
     postgres_database: Database,
     tmp_path: Path,

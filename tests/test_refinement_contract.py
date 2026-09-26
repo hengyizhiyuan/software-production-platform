@@ -7,6 +7,16 @@ from spg.domain.interaction import StructuredResponseSchemaViolation
 from spg.domain.refinement_contract import RefinementClass, classify_refinement
 
 
+def test_owner_retry_exhaustion_is_work_nonconvergence_without_authority_fabrication():
+    from spg.domain.refinement_contract import convergence_condition
+    basis = dict(missing_acceptance=("REVIEW_RUNTIME_READY",), attempts=2,
+        no_progress_count=2, elapsed_seconds=60)
+    assert convergence_condition(**basis) == "NOT_YET_CONVERGED"
+    assert convergence_condition(**basis, owner_budget_exhausted=True) == "NON_CONVERGING"
+    assert convergence_condition(**{**basis, "missing_acceptance": ()},
+        owner_budget_exhausted=True) == "CONVERGED_FOR_REVIEW"
+
+
 def test_bounded_success_is_routine_not_incident() -> None:
     assert classify_refinement(converged=True, same_signature_count=1) is (
         RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT

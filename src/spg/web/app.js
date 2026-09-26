@@ -2769,6 +2769,19 @@
       state.streamingAssistantMessage.status = JSON.parse(event.data).status;
       scheduleStreamRender();
     });
+    source.addEventListener("turn.recovery.started", (event) => {
+      if (!current()) return;
+      const payload = JSON.parse(event.data);
+      if (!acceptResponseEvent(payload)) return;
+      streamed = "";
+      state.streamingAssistantMessage.content = "";
+      state.streamingAssistantMessage.status = "PROCESSING";
+      state.streamingAssistantMessage.phase = "PROVISIONAL";
+      state.streamingAssistantMessage.pendingResponseDeltas = [];
+      state.streamingAssistantMessage.deferredFinalContent = null;
+      state.streamingAssistantMessage.pendingSettlement = null;
+      scheduleStreamRender();
+    });
     source.addEventListener("search.started", (event) => {
       if (!current()) return;
       const payload = JSON.parse(event.data);

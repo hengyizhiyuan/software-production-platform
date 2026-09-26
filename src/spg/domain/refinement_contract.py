@@ -65,13 +65,14 @@ class WorkConvergenceObservation(BaseModel):
 def convergence_condition(*, missing_acceptance: tuple[str, ...],
     attempts: int, no_progress_count: int, elapsed_seconds: int,
     authority_required: bool = False, attempt_budget: int = 128,
-    no_progress_budget: int = 3, time_budget_seconds: int = 7200) -> str:
+    no_progress_budget: int = 3, time_budget_seconds: int = 7200,
+    owner_budget_exhausted: bool = False) -> str:
     """Govern the whole trajectory independently of local repair success."""
     if authority_required:
         return "ESCALATED"
     if not missing_acceptance:
         return "CONVERGED_FOR_REVIEW"
-    if (attempts >= attempt_budget or no_progress_count >= no_progress_budget
+    if (owner_budget_exhausted or attempts >= attempt_budget or no_progress_count >= no_progress_budget
             or elapsed_seconds >= time_budget_seconds):
         return "NON_CONVERGING"
     return "NOT_YET_CONVERGED"

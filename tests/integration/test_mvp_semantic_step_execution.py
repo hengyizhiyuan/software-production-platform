@@ -507,7 +507,7 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
             assert recovery[0].final_result == "LOCAL_OBLIGATION_RECOVERED"
             assert recovery[0].work_resume_result == "RESUMED"
             assert [action.outcome for action in store.self_refine_actions(recovery[0].id)] == [
-                "RETRY_SCHEDULED", "RECOVERED",
+                "RETRY_SCHEDULED", "LOCAL_OBLIGATION_RECOVERED",
             ]
         result = driver.last_outcome(admitted.work_id)
         assert result is not None
@@ -574,12 +574,18 @@ def test_repeated_steering_provider_failure_converges_to_durable_escalation(
         assert records[0].final_result == "ESCALATED"
         assert driver.wait_until_idle(admitted.work_id, 2)
         with postgres_database.unit_of_work() as uow:
+            convergence = NativeExecutionStore(uow.session).work_convergence_history(admitted.work_id)
+            assert convergence[-1].condition == "NON_CONVERGING"
+            assert convergence[-1].evidence["owner_budget_exhausted"] is True
             assert [action.outcome for action in NativeExecutionStore(uow.session).self_refine_actions(records[0].id)] == [
                 "RETRY_SCHEDULED", "ESCALATED",
             ]
         assert driver.schedule(admitted.work_id)
         assert driver.wait_until_idle(admitted.work_id, 2)
         assert capability.calls == 2
+        reconstructed = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
+        assert reconstructed.latest_decision.human_required is True
+        assert reconstructed.latest_decision.steering_outcome.value == "HUMAN_ATTENTION"
     finally:
         driver.shutdown()
         orchestrator.shutdown()

@@ -891,20 +891,22 @@ def create_http_application(
                             continue
                         payload = response_event.model_dump(mode="json")
                         payload["response_id"] = str(response_event.response_id)
-                        if response_event.event_type.value == "TURN_FAILED":
+                        recovery_pending = response_event.metadata.get("automatic_recovery_pending") is True
+                        if response_event.event_type.value == "TURN_FAILED" and not recovery_pending:
                             current = service.get_turn(turn_id)
                             payload.update(
                                 code=current.failure_code,
                                 message=current.failure_message,
                             )
-                        event_name = event_names[response_event.event_type.value]
+                        event_name = ("response.refinement" if recovery_pending
+                            else event_names[response_event.event_type.value])
                         service.record_turn_stream_event(turn_id)
                         yield (
                             f"id: {cursor}\nevent: {event_name}\ndata: "
                             + json.dumps(payload, ensure_ascii=False)
                             + "\n\n"
                         )
-                        if response_event.event_type.value in {"TURN_COMPLETED", "TURN_FAILED"}:
+                        if response_event.event_type.value in {"TURN_COMPLETED", "TURN_FAILED"} and not recovery_pending:
                             if response_event.event_type.value == "TURN_COMPLETED":
                                 service.record_turn_stream_completed(turn_id)
                             return

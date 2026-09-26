@@ -681,3 +681,22 @@ refinement; it forbids tester implementation, hidden hints, manual Preview start
 or retries as rescue. Repeated trials assess semantic outcomes and intervention,
 scope, recovery and convergence dimensions separately. Golden automation does not
 constitute Human Acceptance.
+
+Controlled WIC retries a transient incomplete/network/capacity failure at most
+twice against the same preserved Human Turn. Failure evidence and the RECEIVED
+recovery transition commit atomically. Restart resumes the durable pending Turn;
+it cannot reset the recorded three-attempt budget. Newer Human input or a settled
+Watt reply prevents automatic replay. SSE announces recovery, discards interrupted
+text, and settles one reply. Turn recovery is explicitly `WIC_TURN_ONLY`, never a
+claim of Work convergence. Authentication, quota and invalid contract failures do
+not enter this transient retry path.
+
+The collaboration output ceiling defaults to 16,384 tokens (configurable up to
+32,768). Real qualification exposed structured responses truncated at the former
+8,192-token ceiling; stable provider termination reasons are preserved. This is a
+per-call output ceiling, not extra retry authority. Costs remain observable or
+explicitly unknown. A Steering provider owner exhausting its narrower retry budget
+also records Work `NON_CONVERGING` and admits a diagnostic Human Attention decision.
+It cannot leave a READY Work idle indefinitely while only its local event says
+ESCALATED. Owner component identity selects open refinement events so one boundary
+cannot accidentally complete another boundary's repair lineage.
