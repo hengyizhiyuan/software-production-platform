@@ -242,10 +242,6 @@ def test_node_11_12_frontend_proposal_uses_typed_node_target(
     assert tuple(item.kind for item in proposal.verification_obligations) == (
         CodeVerificationKind.PATH_SCOPE,
         CodeVerificationKind.GIT_DIFF_CHECK,
-        CodeVerificationKind.NODE_TEST_TARGET,
-    )
-    assert proposal.verification_obligations[-1].target == (
-        "tests/js/test_web_state.cjs"
     )
     assert not proposal.unresolved_scope_questions
 

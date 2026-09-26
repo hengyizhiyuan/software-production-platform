@@ -7,7 +7,7 @@ from uuid import uuid4
 from spg.application.planning import ProductionPlanningService
 from spg.application.refinement import RepositoryChangeProposalService
 from spg.application.semantic_steps import SemanticStepApplicationService
-from spg.domain.change import ProductionTargetKind
+from spg.domain.change import CodeVerificationKind, ProductionTargetKind
 from spg.domain.planning import OnePwuFitClassification
 from spg.domain.refinement import RepositoryChangeProposalRequest
 from spg.domain.steering import (
@@ -67,6 +67,8 @@ def test_nav_link_discovers_markup_without_promoting_adjacent_files(tmp_path: Pa
     ]
     assert not any(target.path.startswith("tests/") for target in proposal.required_targets)
     assert any(target.path == "tests/js/test_ui.cjs" for target in proposal.conditional_targets)
+    assert all(obligation.kind is not CodeVerificationKind.NODE_TEST_TARGET
+               for obligation in proposal.verification_obligations)
 
     fallback = RepositoryAwareChangeProposalProvider().propose(
         RepositoryChangeProposalRequest(

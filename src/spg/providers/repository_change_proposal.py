@@ -97,11 +97,6 @@ class RepositoryAwareChangeProposalProvider:
             tuple(target for target in targets if target.disposition is ProposalTargetDisposition.REQUIRED),
             request.explicit_allowed_areas,
             request.requested_verification,
-            tuple(
-                target.path for target in targets
-                if target.disposition is ProposalTargetDisposition.CONDITIONAL
-                and target.path.startswith(_TEST_PREFIXES)
-            ),
         )
         if not any(
             target.disposition is ProposalTargetDisposition.REQUIRED for target in targets
@@ -303,7 +298,6 @@ class RepositoryAwareChangeProposalProvider:
         targets: tuple[RepositoryChangeProposalTarget, ...],
         allowed_areas: tuple[str, ...],
         requested: tuple[CodeVerificationObligation, ...],
-        adjacent_tests: tuple[str, ...] = (),
     ) -> tuple[CodeVerificationObligation, ...]:
         obligations = [
             CodeVerificationObligation(kind=CodeVerificationKind.PATH_SCOPE),
@@ -312,7 +306,7 @@ class RepositoryAwareChangeProposalProvider:
         if requested:
             obligations.extend(requested)
         else:
-            paths = tuple(target.path for target in targets) + adjacent_tests
+            paths = tuple(target.path for target in targets)
             if any(path.endswith(".py") for path in paths):
                 obligations.append(
                     CodeVerificationObligation(kind=CodeVerificationKind.PYTHON_COMPILE)

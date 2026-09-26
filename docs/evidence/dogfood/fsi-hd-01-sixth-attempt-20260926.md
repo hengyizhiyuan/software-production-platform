@@ -1,0 +1,9 @@
+# FSI-HD-01 — sixth unchanged Human journey, verification boundary mismatch
+
+Date: 2026-09-27. Repair revision `3c11d3f953874bde6711b622646ddffde7209095`, isolated product runtime `http://127.0.0.1:8060/app`. Exact original Human request submitted through `/app`. Work `46306fa9-e703-45da-9832-7f13463c72ed`; Product `c59e6244-3ab6-4df4-bc48-d428533e90e6`; exact acquired `refs/heads/main` baseline `0b535f63302fe45e88d0b3e203ae991868ced079`.
+
+The governed production objective remained the single “关于我们” link to `/about` plus reviewable preview. Exact-tree discovery required only `src/spg/web/index.html`; adjacent source and test were conditional. The plan was `ONE_PWU_FIT` as expected. At production materialization, the change proposal nevertheless included `PYTEST_TARGET:tests/integration/test_mvp_app_work_flow.py` as a typed verification obligation because the conditional test references `index.html`. `CodeChangeContract` requires a typed test target to lie inside the admitted writable change boundary; the test was deliberately outside it. Its validation raised `PYTEST_TARGET must be inside the admitted change boundary`. Steering stopped `BLOCKED` before creating a PWU Attempt. No Candidate or Preview resulted.
+
+Expected: conditional read-only adjacent test evidence must not be promoted into a typed obligation that expands or contradicts the exact writable boundary. Owner: repository-aware change proposal obligation selection. The target test can remain advisory context; repository-appropriate verification must use valid existing governed mechanisms. Human impact: no result, with an internal invariant surfaced as a blocked Work. Self-Refine did not activate. The failed Work and logs remain in the r6 persistent volumes; no target repository file was hand-edited.
+
+`DOGFOOD_RESULT = FAILED`; `HUMAN_ACCEPTANCE = PENDING`; `NO_UNAUTHORIZED_DELIVERY = PASS`.
