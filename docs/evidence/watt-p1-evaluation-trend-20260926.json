@@ -1,0 +1,101 @@
+{
+  "baseline": {
+    "id": "9ad7c932-a0b0-43f9-a8e8-cd90e67c9819",
+    "version": "p0-qualified",
+    "revision": "9bc4b65a8d07f14c6031d3bd7a098bc010a307ec",
+    "purpose": "release",
+    "baseline_run_id": null,
+    "trend": {
+      "status": "NO_QUALIFIED_BASELINE",
+      "current": {
+        "case_count": 4,
+        "first_pass_success": 4,
+        "recovered_by_self_refine": 0,
+        "human_escalation": 0,
+        "failure": 0,
+        "total_success": 4,
+        "convergence_rate": 1.0,
+        "average_case_seconds": 31.251,
+        "p95_case_seconds": 67.006,
+        "average_refinement_attempts": null,
+        "p95_refinement_attempts": null,
+        "token_usage": "UNREPORTED",
+        "compute_usage": "UNREPORTED",
+        "work_cost": "UNREPORTED",
+        "failure_signatures": [],
+        "real_container_cases": 0,
+        "real_container_failures": 0
+      },
+      "previous": null,
+      "delta": null
+    }
+  },
+  "current": {
+    "id": "a4cfe9d3-3546-4fc5-9237-4aeabc9e2020",
+    "version": "p1-core-readiness",
+    "revision": "5625ede3f4af5fb4173ede3c9bcb35382ac7a37f",
+    "purpose": "release",
+    "baseline_run_id": "9ad7c932-a0b0-43f9-a8e8-cd90e67c9819",
+    "trend": {
+      "status": "COMPARED",
+      "current": {
+        "case_count": 4,
+        "first_pass_success": 4,
+        "recovered_by_self_refine": 0,
+        "human_escalation": 0,
+        "failure": 0,
+        "total_success": 4,
+        "convergence_rate": 1.0,
+        "average_case_seconds": 35.508,
+        "p95_case_seconds": 81.255,
+        "average_refinement_attempts": null,
+        "p95_refinement_attempts": null,
+        "token_usage": "UNREPORTED",
+        "compute_usage": "UNREPORTED",
+        "work_cost": "UNREPORTED",
+        "failure_signatures": [],
+        "real_container_cases": 0,
+        "real_container_failures": 0
+      },
+      "previous": {
+        "case_count": 4,
+        "first_pass_success": 4,
+        "recovered_by_self_refine": 0,
+        "human_escalation": 0,
+        "failure": 0,
+        "total_success": 4,
+        "convergence_rate": 1.0,
+        "average_case_seconds": 31.251,
+        "p95_case_seconds": 67.006,
+        "average_refinement_attempts": null,
+        "p95_refinement_attempts": null,
+        "token_usage": "UNREPORTED",
+        "compute_usage": "UNREPORTED",
+        "work_cost": "UNREPORTED",
+        "failure_signatures": [],
+        "real_container_cases": 0,
+        "real_container_failures": 0
+      },
+      "delta": {
+        "first_pass_success": 0,
+        "recovered_by_self_refine": 0,
+        "human_escalation": 0,
+        "failure": 0,
+        "total_success": 0,
+        "convergence_rate": 0.0,
+        "average_case_seconds": 4.257,
+        "p95_case_seconds": 14.249
+      },
+      "comparable_case_ids": [
+        "GJ-SR-01",
+        "HUMAN_DELIVERY_AUTHORITY",
+        "RESTART_RESUME",
+        "SR-Q2"
+      ],
+      "new_case_ids": [],
+      "removed_case_ids": [],
+      "case_set_changed": false
+    }
+  },
+  "comparison_scope": "four-domain representative subset; not entire release corpus or Human Acceptance"
+}

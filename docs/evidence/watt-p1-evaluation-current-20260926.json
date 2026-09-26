@@ -1,0 +1,147 @@
+{
+  "corpus_version": "watt-p1-v1",
+  "qualification": "PASS",
+  "domains": {
+    "ASSURANCE": "PASS",
+    "INTERACTION": "PASS",
+    "PRODUCTION": "PASS",
+    "RESILIENCE": "PASS"
+  },
+  "cases": [
+    {
+      "case": "GJ-SR-01",
+      "domain": "PRODUCTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 42.984,
+      "failure_signature": null,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "PRODUCTION",
+        "failure_family": null,
+        "protected_invariant": "governed branch lineage stays bound to exact commit",
+        "risk": "CRITICAL",
+        "scenario_type": "GOLDEN_JOURNEY",
+        "origin": "DOGFOOD",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 120,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "RESTART_RESUME",
+      "domain": "RESILIENCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 15.22,
+      "failure_signature": null,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_RESUME",
+        "failure_family": "WORKER_LOSS",
+        "protected_invariant": "restart resumes same Attempt without duplicate effect",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "HUMAN_DELIVERY_AUTHORITY",
+      "domain": "ASSURANCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 81.255,
+      "failure_signature": null,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "HUMAN_GOVERNANCE",
+        "failure_family": null,
+        "protected_invariant": "Candidate preview does not authorize delivery",
+        "risk": "CRITICAL",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 240,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SR-Q2",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 2.575,
+      "failure_signature": null,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "WIC",
+        "failure_family": null,
+        "protected_invariant": "high-impact ambiguity consumes only minimum-sufficient question budget",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 10,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    }
+  ],
+  "recovered_case_count": 0,
+  "selection": {
+    "purpose": "release-representative",
+    "selected_case_ids": [
+      "GJ-SR-01",
+      "RESTART_RESUME",
+      "HUMAN_DELIVERY_AUTHORITY",
+      "SR-Q2"
+    ]
+  },
+  "revision": "5625ede3f4af5fb4173ede3c9bcb35382ac7a37f"
+}
