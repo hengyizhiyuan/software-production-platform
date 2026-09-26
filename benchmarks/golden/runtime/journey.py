@@ -51,6 +51,10 @@ def main():
     directory.mkdir(parents=True, exist_ok=True)
     if (directory/'result.json').exists():
         raise SystemExit('Existing attempt result is immutable; choose a new trial identity')
+    runtime_record = directory/'runtime-activation.json'
+    if not runtime_record.exists():
+        runtime_record.write_text(json.dumps(client.request('/api/runtime-activation'),
+            ensure_ascii=False, indent=2))
     intent = case['human_request']
     if case['fixture'] != 'public-watt-main':
         intent = f"这是当前项目仓库：{args.fixture_base}/{case['fixture']}.git\n" + intent

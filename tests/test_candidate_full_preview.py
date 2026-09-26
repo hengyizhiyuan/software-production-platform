@@ -464,3 +464,37 @@ def test_frontend_runtime_has_real_endpoint_and_deterministic_cleanup(tmp_path: 
     for command in (("inspect", names["app"]), ("network", "inspect", names["internal"]),
         ("volume", "inspect", names["source"])):
         assert subprocess.run(["docker", *command], capture_output=True, check=False).returncode != 0
+
+
+@pytest.mark.parametrize("failure", ["build failed", "all predefined address pools have been fully subnetted"])
+def test_final_preview_failure_records_first_or_exhausted_owner_budget(tmp_path, monkeypatch, failure):
+    from spg.application import candidate_preview as preview_module
+    repository, revision, tree = candidate_repository(tmp_path)
+    source = CandidateSource(context(repository, revision, tree))
+    records, outcomes = [], []
+    @contextmanager
+    def unit_of_work():
+        yield SimpleNamespace(session=object(), commit=lambda: None)
+    source.database = SimpleNamespace(unit_of_work=unit_of_work)
+    monkeypatch.setattr(preview_module, "NativeExecutionStore", lambda _session:
+        SimpleNamespace(record_bounded_refinement=lambda **values: records.append(values),
+            list_self_refine_events=lambda **_values: []))
+    class FailedProvider(RuntimeProvider):
+        def start(self, *_args, **_kwargs):
+            raise EnvironmentProviderError(failure)
+    service = CandidatePreviewApplicationService(source,
+        JsonProductionEnvironmentStore(tmp_path / "failed-preview"), FailedProvider())
+    service.outcome_listener = lambda work_id, failed: outcomes.append((work_id, failed))
+    work_id = uuid4()
+    service.prepare_review(work_id)
+    deadline = time.monotonic() + 12
+    while not records and time.monotonic() < deadline:
+        time.sleep(0.02)
+    service.shutdown()
+    assert records and records[0]["converged"] is False
+    assert records[0]["attempt_count"] == (3 if "address pools" in failure else 1)
+    assert records[0]["diagnostic_evidence"]["owner_budget_exhausted"] is True
+    assert records[0]["diagnostic_evidence"]["candidate_fingerprint"] == source.context["candidate_fingerprint"]
+    service.prepare_review(work_id)
+    assert len(service.store.candidate_preview_history(work_id)) == records[0]["attempt_count"]
+    assert outcomes[-1] == (work_id, True)

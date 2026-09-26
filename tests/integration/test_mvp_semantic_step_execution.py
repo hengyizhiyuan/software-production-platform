@@ -951,3 +951,42 @@ def test_work_nonconvergence_is_durable_human_attention_not_idle(product, postgr
     history = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
     assert "Missing acceptance" in history.latest_decision.reason
     assert "does not reset" in history.latest_decision.reason
+
+
+@pytest.mark.parametrize("same_candidate", [True, False])
+def test_preview_terminal_owner_failure_stops_only_matching_candidate(
+    postgres_database, product, monkeypatch, same_candidate,
+):
+    from uuid import uuid4
+    from spg.application.delivery import DeliveryApplicationService
+    from spg.domain.refinement_contract import RefinementSignalKind
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+    monkeypatch.setattr(DeliveryApplicationService, "candidate_context",
+        lambda _self, _work_id: {"candidate_fingerprint": "current-candidate"})
+    with postgres_database.unit_of_work() as uow:
+        event = NativeExecutionStore(uow.session).record_bounded_refinement(
+            work_id=admitted.work_id, operation_id=uuid4(), component="preview/runtime",
+            signal_kind=RefinementSignalKind.REALITY_MISMATCH,
+            signature_basis="PREVIEW_NOT_READY", evidence_references=("preview:failed",),
+            converged=False, attempt_count=1,
+            diagnostic_evidence={"candidate_fingerprint": "current-candidate" if same_candidate else "superseded-candidate",
+                "owner_budget_exhausted": True})
+        uow.commit()
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(postgres_database, works, orchestrator)
+    try:
+        driver.preview_outcome(admitted.work_id, True)
+        with postgres_database.unit_of_work() as uow:
+            history = NativeExecutionStore(uow.session).work_convergence_history(admitted.work_id)
+            assert history[-1].evidence["owner_budget_exhausted"] is same_candidate
+            assert (history[-1].condition == "NON_CONVERGING") is same_candidate
+            assert NativeExecutionStore(uow.session).self_refine_actions(event.id)[0].outcome == "ESCALATED"
+        assert works.get_work(admitted.work_id).human_attention_required is same_candidate
+        if same_candidate:
+            restarted = PlanSteeringDriver(postgres_database, works, orchestrator)
+            assert restarted.activate(admitted.work_id).stop_reason is SteeringDriverStopReason.BLOCKED
+            restarted.shutdown()
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()

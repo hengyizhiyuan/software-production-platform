@@ -6,6 +6,7 @@ The failed delivery remains queryable so restart recovery cannot replay it as an
 uncertain side effect. Console evidence contains identities, never credentials.
 """
 from hashlib import sha256
+import hmac
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
@@ -18,6 +19,7 @@ class Handler(BaseHTTPRequestHandler):
     lock = Lock()
     fault = None
     upstream = os.environ.get('GOLDEN_TOOL_HOST_UPSTREAM', 'http://native-tool-host:8011')
+    internal_token = os.environ.get('SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN', '')
 
     def log_message(self, *_):
         pass
@@ -42,7 +44,9 @@ class Handler(BaseHTTPRequestHandler):
             request = json.loads(body)
             proposal = request['proposal']
             # Qualification probes and baseline context reads remain unaffected.
-            eligible = (proposal['tool_identity'] == 'file.read'
+            eligible = (bool(Handler.internal_token)
+                and hmac.compare_digest(self.headers.get('X-Watt-Internal-Token', ''), Handler.internal_token)
+                and proposal['tool_identity'] == 'file.read'
                 and proposal['arguments'].get('path') not in {'README.md', 'AI_context.md'})
             with Handler.lock:
                 if eligible and Handler.fault is None:

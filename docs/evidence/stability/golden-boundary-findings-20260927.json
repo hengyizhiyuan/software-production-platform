@@ -2721,6 +2721,610 @@
       },
       "manual_rescue_actions": [],
       "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-07",
+      "trial": 1,
+      "signal": "ORACLE_CONTRACT_MISMATCH",
+      "architecture_owner": "Golden product acceptance oracle",
+      "observed": "Requested link inserted inline in the existing navigation line; no unrelated change. Original oracle incorrectly demanded a standalone insertion line.",
+      "old_oracle_records": [
+        "business-oracle.json",
+        "business-oracle-v2.json"
+      ],
+      "corrected_oracle_record": {
+        "case": "GC-EX-07",
+        "trial": 1,
+        "checks": {
+          "automatic_preview_ready": true,
+          "served_verification": true,
+          "no_unauthorized_delivery": true,
+          "exactly_one_requested_link": true,
+          "one_source_file": true,
+          "only_requested_link_changed": true
+        },
+        "status": "PASS",
+        "candidate_revision": "d6d9faa003801422b4d3facf47a93d2ed1598c31",
+        "candidate_tree": "59d7a8a3e9240f076b5b6e1e80a136e7db32d8dc",
+        "changed_paths": [
+          "web/index.html"
+        ],
+        "preview_endpoint": "http://127.0.0.1:53706/",
+        "human_acceptance": "PENDING",
+        "manual_rescue_actions": []
+      },
+      "production_code_changed": false,
+      "acceptance_criteria_changed": false,
+      "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-02",
+      "trial": 3,
+      "signal": "PREVIEW_NOT_READY / MISSING_WORK_CONVERGENCE_WIRING",
+      "architecture_owner": "Preview/runtime and Work convergence",
+      "work_id": "0c388e1c-5a54-54f5-b16d-aa01d4fd8962",
+      "observed_preview_status": "FAILED",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "cause": "Docker network pool exhausted; terminal Preview failure lacked final refinement event and Work escalation.",
+      "queue": [
+        {
+          "queue_entry_id": "6f023e66-a376-4852-b27c-61ef68af26c1",
+          "work_id": "0c388e1c-5a54-54f5-b16d-aa01d4fd8962",
+          "pwu_id": "99f75370-3dd2-414a-9558-ce7a65803761",
+          "attempt_id": "fda393ba-4ccb-459e-b80e-25a14fc5f73d",
+          "fairness_group": "work:0c388e1c-5a54-54f5-b16d-aa01d4fd8962",
+          "condition": "COMPLETED",
+          "wait_reason": null,
+          "enqueued_at": "2026-09-26T19:45:55.939724Z",
+          "available_at": "2026-09-26T19:45:55.938395Z",
+          "resume_count": 0,
+          "progression_state": "NOT_APPLICABLE",
+          "progression_reason": "Queue allocation is not currently pending.",
+          "scheduler_alive": true,
+          "compatible_worker_count": 1,
+          "occupied_worker_count": 0,
+          "capacity_observed_at": "2026-09-26T20:01:55.394472Z",
+          "production_cycle_number": 1,
+          "work_reality_revision_id": "a0b715c1-cd32-50b1-b4fd-2f7693a040c3"
+        }
+      ],
+      "refinement_events": [
+        {
+          "id": "fdd57bf0-5c6a-4279-825d-5d616561ed08",
+          "work_id": "0c388e1c-5a54-54f5-b16d-aa01d4fd8962",
+          "operation_id": "360faf61-e6c6-4463-a38d-5097243ffa8c",
+          "created_at": "2026-09-26T19:45:53.407448Z",
+          "failure_family": "CANDIDATE_INCONSISTENT",
+          "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "semantic_version": 2,
+          "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+          "signal_kind": "CANDIDATE_INCONSISTENT",
+          "affected_component": "semantic/scope",
+          "expected_reality": {},
+          "observed_reality": {},
+          "diagnosis_summary": "A model candidate required bounded validation feedback.",
+          "root_cause_classification": "CANDIDATE_INCONSISTENT",
+          "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+          "evidence_references": [
+            "source-baseline:a68dae1a-ef6e-456a-b756-8240d5f067b5"
+          ],
+          "repairability": "AUTONOMOUSLY_REPAIRABLE",
+          "observation_confidence": "OBSERVED_SUCCESS",
+          "budget_decision": {
+            "bounded": true,
+            "attempt_count": 2,
+            "human_escalated": false
+          },
+          "diagnostic_evidence": {
+            "signal": "SCOPE_INFLATION",
+            "required_paths": [
+              "web/index.html"
+            ],
+            "candidate_paths": [
+              "web/index.html",
+              "web/app.js"
+            ],
+            "authority_expanded": false,
+            "rejected_behaviors": [
+              "Creating a new HTML page, route or template for the preview",
+              "Modifying web/app.js, since no occurrence of the CTA literal exists there and behavior is unchanged",
+              "Adding or altering styles in web/styles.css to \"present\" the new label",
+              "Changing any other homepage string, section, button id, nav link or API collection",
+              "Altering migrations/001_initial.sql, fixtures or the SQLite schema",
+              "Changing server.py routes, entrypoint or port",
+              "Introducing authentication, login behavior or new permissions",
+              "Rewriting the CTA into a link to a new destination page"
+            ]
+          },
+          "final_result": "LOCAL_OBLIGATION_RECOVERED",
+          "work_resume_result": "RESUMED",
+          "extra_elapsed_seconds": 0,
+          "model_token_usage": {
+            "unknown": false,
+            "input_tokens": 8081,
+            "total_tokens": 10360,
+            "cached_tokens": 384,
+            "output_tokens": 2279,
+            "reasoning_tokens": 109
+          },
+          "compute_overhead": {},
+          "known_failure_match": true,
+          "platform_improvement_candidate_ref": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "status": "VERIFIED",
+          "updated_at": "2026-09-26T19:45:53.407448Z"
+        }
+      ],
+      "economics": {
+        "work_id": "0c388e1c-5a54-54f5-b16d-aa01d4fd8962",
+        "product_id": "a41ea4ed-043d-4c85-bde6-d9f57c3f2ed2",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "99f75370-3dd2-414a-9558-ce7a65803761",
+            "node_id": null,
+            "run_id": "3c61459e-4950-4747-9367-98911169194c",
+            "condition": "SATISFIED",
+            "attempt_count": 1,
+            "outcomes": [
+              "RESULT_READY"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:fda393ba-4ccb-459e-b80e-25a14fc5f73d"
+            ],
+            "execution_seconds": 21.16261,
+            "duration_observed": true,
+            "queue_wait_seconds": 57.394333,
+            "token_usage": {
+              "input_tokens": 51170,
+              "output_tokens": 2825,
+              "total_tokens": 53995,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 4,
+              "tool_effect": 6
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 51170,
+          "output_tokens": 2825,
+          "total_tokens": 53995,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 21.16261,
+        "queue_wait_seconds": 57.394333,
+        "wall_elapsed_seconds": 22.998402,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 1,
+        "first_pass_pwu_count": 1,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {
+          "inference_submission": 4,
+          "tool_effect": 6
+        },
+        "final_outcome": "READY"
+      },
+      "preview_failure": "STARTUP_FAILED"
+    },
+    {
+      "case": "GC-EX-04",
+      "trial": 1,
+      "signal": "PREVIEW_NOT_READY / MISSING_WORK_CONVERGENCE_WIRING",
+      "architecture_owner": "Preview/runtime and Work convergence",
+      "work_id": "0d030878-cc77-58a1-8ab5-96d4d171d21d",
+      "observed_preview_status": "FAILED",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "cause": "Docker network pool exhausted; terminal Preview failure lacked final refinement event and Work escalation.",
+      "queue": [
+        {
+          "queue_entry_id": "3e8d93e6-0065-4300-91dd-f1e9e3f350a3",
+          "work_id": "0d030878-cc77-58a1-8ab5-96d4d171d21d",
+          "pwu_id": "c7e99b2c-f41d-4406-be04-ef911c44d76a",
+          "attempt_id": "40374e10-5cf7-4733-aa27-7653537d6a7c",
+          "fairness_group": "work:0d030878-cc77-58a1-8ab5-96d4d171d21d",
+          "condition": "COMPLETED",
+          "wait_reason": null,
+          "enqueued_at": "2026-09-26T19:46:01.933877Z",
+          "available_at": "2026-09-26T19:46:01.931084Z",
+          "resume_count": 0,
+          "progression_state": "NOT_APPLICABLE",
+          "progression_reason": "Queue allocation is not currently pending.",
+          "scheduler_alive": true,
+          "compatible_worker_count": 1,
+          "occupied_worker_count": 0,
+          "capacity_observed_at": "2026-09-26T20:01:55.807663Z",
+          "production_cycle_number": 1,
+          "work_reality_revision_id": "4a04a500-3e5b-577f-9cd3-69235a2bf65d"
+        }
+      ],
+      "refinement_events": [
+        {
+          "id": "80f98c92-5c87-4383-82a9-49edc70a2da2",
+          "work_id": "0d030878-cc77-58a1-8ab5-96d4d171d21d",
+          "operation_id": "f25e7162-8093-4c04-98e6-e2ae07c4f6e2",
+          "created_at": "2026-09-26T19:45:57.971035Z",
+          "failure_family": "CANDIDATE_INCONSISTENT",
+          "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "semantic_version": 2,
+          "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+          "signal_kind": "CANDIDATE_INCONSISTENT",
+          "affected_component": "semantic/scope",
+          "expected_reality": {},
+          "observed_reality": {},
+          "diagnosis_summary": "A model candidate required bounded validation feedback.",
+          "root_cause_classification": "CANDIDATE_INCONSISTENT",
+          "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+          "evidence_references": [
+            "source-baseline:79f54fbf-c5ae-4b20-be58-1a7cd9f00144"
+          ],
+          "repairability": "AUTONOMOUSLY_REPAIRABLE",
+          "observation_confidence": "OBSERVED_SUCCESS",
+          "budget_decision": {
+            "bounded": true,
+            "attempt_count": 2,
+            "human_escalated": false
+          },
+          "diagnostic_evidence": {
+            "signal": "SCOPE_INFLATION",
+            "required_paths": [
+              "web/index.html"
+            ],
+            "candidate_paths": [
+              "web/index.html"
+            ],
+            "authority_expanded": false,
+            "rejected_behaviors": [
+              "Creating new pages, routes, or link destination pages that were not requested",
+              "Modifying server.py, web/app.js, web/styles.css, migrations, or tests, since the request states 其他内容保持原样",
+              "Changing the other existing buttons 登录, 账户登录, 打开对话框, 取消, or any navigation labels",
+              "Adding new features, refactors, styling changes, or fictional business facts/permissions",
+              "Adding or altering tests/application.cjs, which is only a read-only reference for this one-line copy change"
+            ]
+          },
+          "final_result": "LOCAL_OBLIGATION_RECOVERED",
+          "work_resume_result": "RESUMED",
+          "extra_elapsed_seconds": 0,
+          "model_token_usage": {
+            "unknown": false,
+            "input_tokens": 15377,
+            "total_tokens": 18340,
+            "cached_tokens": 384,
+            "output_tokens": 2963,
+            "reasoning_tokens": 211
+          },
+          "compute_overhead": {},
+          "known_failure_match": true,
+          "platform_improvement_candidate_ref": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "status": "VERIFIED",
+          "updated_at": "2026-09-26T19:45:57.971035Z"
+        }
+      ],
+      "economics": {
+        "work_id": "0d030878-cc77-58a1-8ab5-96d4d171d21d",
+        "product_id": "b6ef2b31-5c6d-4635-bbda-93f923523070",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "c7e99b2c-f41d-4406-be04-ef911c44d76a",
+            "node_id": null,
+            "run_id": "1434f591-5a87-406a-9f95-b275656913eb",
+            "condition": "SATISFIED",
+            "attempt_count": 1,
+            "outcomes": [
+              "RESULT_READY"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:40374e10-5cf7-4733-aa27-7653537d6a7c"
+            ],
+            "execution_seconds": 29.088589,
+            "duration_observed": true,
+            "queue_wait_seconds": 74.497581,
+            "token_usage": {
+              "input_tokens": 76083,
+              "output_tokens": 4956,
+              "total_tokens": 81039,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 4,
+              "tool_effect": 5
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 76083,
+          "output_tokens": 4956,
+          "total_tokens": 81039,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 29.088589,
+        "queue_wait_seconds": 74.497581,
+        "wall_elapsed_seconds": 31.019639,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 1,
+        "first_pass_pwu_count": 1,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {
+          "inference_submission": 4,
+          "tool_effect": 5
+        },
+        "final_outcome": "READY"
+      },
+      "preview_failure": "STARTUP_FAILED"
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 2,
+      "signal": "PREVIEW_NOT_READY / MISSING_WORK_CONVERGENCE_WIRING",
+      "architecture_owner": "Preview/runtime and Work convergence",
+      "work_id": "ca384e96-a087-521c-b4a1-5f763114b863",
+      "observed_preview_status": "FAILED",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "cause": "Docker network pool exhausted; terminal Preview failure lacked final refinement event and Work escalation.",
+      "queue": [
+        {
+          "queue_entry_id": "6b906ed5-67e8-472e-8306-9c05afe6cd81",
+          "work_id": "ca384e96-a087-521c-b4a1-5f763114b863",
+          "pwu_id": "0094772a-3214-4796-9a1e-5f55be262462",
+          "attempt_id": "60ad0ada-e832-4d29-9839-bb8cece380e8",
+          "fairness_group": "work:ca384e96-a087-521c-b4a1-5f763114b863",
+          "condition": "COMPLETED",
+          "wait_reason": null,
+          "enqueued_at": "2026-09-26T19:42:22.774493Z",
+          "available_at": "2026-09-26T19:42:22.772964Z",
+          "resume_count": 0,
+          "progression_state": "NOT_APPLICABLE",
+          "progression_reason": "Queue allocation is not currently pending.",
+          "scheduler_alive": true,
+          "compatible_worker_count": 1,
+          "occupied_worker_count": 0,
+          "capacity_observed_at": "2026-09-26T20:01:54.662699Z",
+          "production_cycle_number": 1,
+          "work_reality_revision_id": "d6225ab4-a206-5036-8d14-46d1a544c155"
+        }
+      ],
+      "refinement_events": [
+        {
+          "id": "83728b58-7f5c-4f51-8f84-3e1047f4bbf9",
+          "work_id": "ca384e96-a087-521c-b4a1-5f763114b863",
+          "operation_id": "83308f62-c525-4f9d-a588-fddf567dd3f7",
+          "created_at": "2026-09-26T19:42:20.249734Z",
+          "failure_family": "CANDIDATE_INCONSISTENT",
+          "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "semantic_version": 2,
+          "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+          "signal_kind": "CANDIDATE_INCONSISTENT",
+          "affected_component": "semantic/scope",
+          "expected_reality": {},
+          "observed_reality": {},
+          "diagnosis_summary": "A model candidate required bounded validation feedback.",
+          "root_cause_classification": "CANDIDATE_INCONSISTENT",
+          "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+          "evidence_references": [
+            "source-baseline:a68dae1a-ef6e-456a-b756-8240d5f067b5"
+          ],
+          "repairability": "AUTONOMOUSLY_REPAIRABLE",
+          "observation_confidence": "OBSERVED_SUCCESS",
+          "budget_decision": {
+            "bounded": true,
+            "attempt_count": 2,
+            "human_escalated": false
+          },
+          "diagnostic_evidence": {
+            "signal": "SCOPE_INFLATION",
+            "required_paths": [
+              "web/index.html",
+              "web/app.js"
+            ],
+            "candidate_paths": [
+              "server.py",
+              "web/app.js",
+              "web/index.html",
+              "tests/application.cjs"
+            ],
+            "authority_expanded": false,
+            "rejected_behaviors": [
+              "Customer deletion via DELETE /api/customers/{id}; deletion is not explicitly requested, and existing create/read/update support already permits entry, viewing, and correction of customer information.",
+              "New routes, pages, authentication, permissions, or login behavior; not requested and README states authentication is not implemented.",
+              "Customer notes, feedback records, CRM workflows, or additional customer fields beyond the existing name and email; README states these do not exist.",
+              "Changing tests/application.cjs or adding test files; tests are read-only references unless their mandatory oracle must change, and no test change is requested.",
+              "Changing migrations, database schema, or fixture data; the existing customers table already has the necessary name and email fields.",
+              "Refactoring existing server-side generic handlers, FIELDS, navigation, or unrelated UI affordances; not necessary for the requested simple capability."
+            ]
+          },
+          "final_result": "LOCAL_OBLIGATION_RECOVERED",
+          "work_resume_result": "RESUMED",
+          "extra_elapsed_seconds": 0,
+          "model_token_usage": {
+            "unknown": false,
+            "input_tokens": 8463,
+            "total_tokens": 15783,
+            "cached_tokens": 384,
+            "output_tokens": 7320,
+            "reasoning_tokens": 4360
+          },
+          "compute_overhead": {},
+          "known_failure_match": false,
+          "platform_improvement_candidate_ref": null,
+          "status": "VERIFIED",
+          "updated_at": "2026-09-26T19:42:20.249734Z"
+        }
+      ],
+      "economics": {
+        "work_id": "ca384e96-a087-521c-b4a1-5f763114b863",
+        "product_id": "a41ea4ed-043d-4c85-bde6-d9f57c3f2ed2",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "0094772a-3214-4796-9a1e-5f55be262462",
+            "node_id": null,
+            "run_id": "c7fe7bca-4ad8-49c8-95b6-2b8ea28587f7",
+            "condition": "SATISFIED",
+            "attempt_count": 1,
+            "outcomes": [
+              "RESULT_READY"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:60ad0ada-e832-4d29-9839-bb8cece380e8"
+            ],
+            "execution_seconds": 40.805578,
+            "duration_observed": true,
+            "queue_wait_seconds": 0.837982,
+            "token_usage": {
+              "input_tokens": 65364,
+              "output_tokens": 8300,
+              "total_tokens": 73664,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 5,
+              "tool_effect": 11
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 65364,
+          "output_tokens": 8300,
+          "total_tokens": 73664,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 40.805578,
+        "queue_wait_seconds": 0.837982,
+        "wall_elapsed_seconds": 47.396143,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 1,
+        "first_pass_pwu_count": 1,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {
+          "inference_submission": 5,
+          "tool_effect": 11
+        },
+        "final_outcome": "READY"
+      },
+      "preview_failure": "STARTUP_FAILED"
+    },
+    {
+      "case": "GC-EX-05",
+      "trial": 1,
+      "signal": "QUALIFICATION_FIXTURE_NETWORK_NOT_ATTACHED",
+      "architecture_owner": "Golden qualification infrastructure",
+      "work_id": "7bf0a3ee-a41c-5008-a50c-d66d9f5965d4",
+      "observed_preview_status": "NOT_READY",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "cause": "Fixture DNS alias absent during three bounded acquisition attempts; source health corrected only for independent future trials.",
+      "queue": [],
+      "refinement_events": [
+        {
+          "id": "ce9493b3-0a26-41c6-b04a-0d49bf6666a6",
+          "work_id": "7bf0a3ee-a41c-5008-a50c-d66d9f5965d4",
+          "operation_id": "c79fc734-ba7c-5a37-a570-e4479225c357",
+          "created_at": "2026-09-26T19:50:38.977322Z",
+          "failure_family": "REALITY_MISMATCH",
+          "failure_signature": "3fab0cefdee0a0a961ce8464fbd251d0e21aefb5fc2a3b1d6ac1923d8247be7e",
+          "semantic_version": 2,
+          "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+          "signal_kind": "REALITY_MISMATCH",
+          "affected_component": "repository/acquisition",
+          "expected_reality": {},
+          "observed_reality": {},
+          "diagnosis_summary": "A model candidate required bounded validation feedback.",
+          "root_cause_classification": "REALITY_MISMATCH",
+          "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+          "evidence_references": [
+            "repository-intake:c79fc734-ba7c-5a37-a570-e4479225c357",
+            "repository-intake:b3153b25-6f1b-52a3-ace7-3e150e7ec6ef",
+            "repository-intake:4cdbd79c-549c-5413-9da4-6a232232fd32"
+          ],
+          "repairability": "AUTONOMOUSLY_REPAIRABLE",
+          "observation_confidence": "CONFIRMED_FAILURE",
+          "budget_decision": {
+            "bounded": true,
+            "attempt_count": 3,
+            "human_escalated": false
+          },
+          "diagnostic_evidence": {
+            "signal": "TRANSIENT_INFRASTRUCTURE_FAILURE",
+            "attempt_budget": 3,
+            "final_condition": "FAILED_RETRYABLE",
+            "failure_category": "NETWORK_FAILURE",
+            "time_budget_seconds": 120
+          },
+          "final_result": "ESCALATED",
+          "work_resume_result": "NOT_RESUMED",
+          "extra_elapsed_seconds": 3,
+          "model_token_usage": {},
+          "compute_overhead": {},
+          "known_failure_match": false,
+          "platform_improvement_candidate_ref": "refinement-signature:3fab0cefdee0a0a961ce8464fbd251d0e21aefb5fc2a3b1d6ac1923d8247be7e",
+          "status": "MITIGATED",
+          "updated_at": "2026-09-26T19:50:38.977322Z"
+        }
+      ],
+      "economics": {
+        "work_id": "7bf0a3ee-a41c-5008-a50c-d66d9f5965d4",
+        "product_id": null,
+        "pwu_count": 0,
+        "join_count": 0,
+        "pwu": [],
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "amount": null
+        },
+        "wall_elapsed_seconds": null,
+        "execution_seconds": 0,
+        "queue_wait_seconds": 0,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": null,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "self_refine_event_count": 0,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {},
+        "final_outcome": "READY"
+      },
+      "preview_failure": null
     }
   ]
 }

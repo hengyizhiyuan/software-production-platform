@@ -7,6 +7,7 @@ absence is reported as NOT_EVALUATED rather than converted into a green score.
 import argparse
 from html.parser import HTMLParser
 import json
+import re
 from pathlib import Path
 import urllib.request
 
@@ -21,6 +22,19 @@ class Links(HTMLParser):
     def handle_endtag(self, tag):
         if tag == 'a' and self.current is not None:
             self.links.append(tuple(self.current)); self.current=None
+
+
+def only_link_added(added, removed, *, label, href):
+    if len(added) != 1 or len(removed) > 1:
+        return False
+    pattern = r'<a\s+href=([\"\'])' + re.escape(href) + r'\1\s*>' + re.escape(label) + r'</a>'
+    matches = list(re.finditer(pattern, added[0]))
+    if len(matches) != 1:
+        return False
+    prefix, suffix = added[0][:matches[0].start()], added[0][matches[0].end():]
+    before = removed[0] if removed else ''
+    return any(remainder.strip() == before.strip() for remainder in (
+        prefix + suffix, prefix.rstrip(' \t') + suffix, prefix + suffix.lstrip(' \t')))
 
 
 def main():
@@ -63,8 +77,11 @@ def main():
         label,href=('关于我们','/about') if identity=='GC-EX-01' else ('使用帮助','/help')
         links=Links();links.feed(body)
         checks.update(exactly_one_requested_link=links.links.count((href,label))==1,
-            one_source_file=len(paths)==1, one_added_line=len(added)==1,
-            zero_removed_lines=not removed)
+            one_source_file=len(paths)==1)
+        if identity == 'GC-EX-01':
+            checks.update(one_added_line=len(added)==1, zero_removed_lines=not removed)
+        else:
+            checks['only_requested_link_changed'] = only_link_added(added, removed, label=label, href=href)
     elif identity in {'GC-EX-02','GC-EX-04','GC-EX-06','GC-EX-14','GC-EX-15'}:
         checks.update(new_label='立即体验' in body, old_label='开始使用' not in body,
             one_source_file=len(paths)==1, minimal_source_diff=len(added)==1 and len(removed)==1)
@@ -80,6 +97,31 @@ def main():
         checks.update(browser_dialog_oracle=(root/'browser-oracle.json').exists())
         if checks['browser_dialog_oracle']:
             checks['actual_cancel_closes_dialog']=json.loads((root/'browser-oracle.json').read_text()).get('cancel_closes') is True
+    elif identity in {'GC-EX-13', 'GC-IP-02'}:
+        browser_record = root/'browser-oracle.json'
+        database_record = root/'persistence-oracle.json'
+        browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}
+        database = json.loads(database_record.read_text()) if database_record.exists() else {}
+        checks['api_and_real_database_agree'] = database.get('api_and_database_agree') is True
+        rows = database.get('sqlite_rows', [])
+        if identity == 'GC-EX-13':
+            checks.update(create_form_submitted=browser.get('create_form_submitted') is True,
+                edit_form_submitted=browser.get('edit_form_submitted') is True,
+                reload_preserves_edit=browser.get('reload_restores_edited_note') is True,
+                persisted_edited_note=any(row.get('name') == 'Golden note customer'
+                    and row.get('notes') == 'Golden persisted edited note' for row in rows),
+                migration_present=any(path.endswith('.sql') for path in paths))
+            plan = state['work'].get('production_plan_runtime') or {}
+            nodes = plan.get('pwus', [])
+            checks['verified_three_surfaces_and_join'] = (len(nodes) >= 4
+                and all(node['state'] == 'VERIFIED' for node in nodes)
+                and any(node['kind'] == 'JOIN' for node in nodes)
+                and plan.get('integrated_revision') == meta['repository_revision'])
+        else:
+            checks.update(form_submitted=browser.get('form_submitted') is True,
+                reload_preserves_record=browser.get('reload_preserves_collected_user') is True,
+                user_model_persistence=any(row.get('name') == 'Golden collected user'
+                    and row.get('email') == 'golden-collection@example.invalid' for row in rows))
     else:
         checks['case_business_oracle']=None
     result={'case':identity,'trial':journey['trial'],'checks':checks,

@@ -64,10 +64,16 @@ class CandidatePreviewApplicationService:
         history = tuple(item for item in self.store.candidate_preview_history(session.work_id)
             if item.candidate_fingerprint == session.candidate_fingerprint)
         # Test doubles without a persistence boundary cannot fabricate telemetry.
-        if len(history) < 2 or not hasattr(self.delivery, "database"):
+        if (converged and len(history) < 2) or not hasattr(self.delivery, "database"):
             return
         with self.delivery.database.unit_of_work() as uow:
-            NativeExecutionStore(uow.session).record_bounded_refinement(
+            store = NativeExecutionStore(uow.session)
+            existing = store.list_self_refine_events(work_id=session.work_id,
+                component="preview/runtime", limit=1)
+            if existing and (f"candidate-preview:{session.id}" in existing[0].evidence_references
+                and existing[0].final_result == ("LOCAL_OBLIGATION_RECOVERED" if converged else "ESCALATED")):
+                return
+            store.record_bounded_refinement(
                 work_id=session.work_id, operation_id=session.candidate_id,
                 component="preview/runtime", signal_kind=RefinementSignalKind.REALITY_MISMATCH,
                 signature_basis="PREVIEW_NOT_READY",
@@ -77,6 +83,8 @@ class CandidatePreviewApplicationService:
                 diagnostic_evidence={"signal": "PREVIEW_NOT_READY",
                     "failure_codes": [item.failure_code for item in history if item.failure_code],
                     "local_obligation": "EXACT_CANDIDATE_SERVED_RUNTIME", "attempt_budget": 3,
+                    "candidate_fingerprint": session.candidate_fingerprint,
+                    "owner_budget_exhausted": not converged,
                     "human_acceptance": "PENDING"})
             uow.commit()
 
@@ -215,8 +223,12 @@ class CandidatePreviewApplicationService:
                     ) from exc
                 if not ready:
                     cleanup = self.provider.stop(session.id) or {}
-                    return self._fail(session, "RUNTIME_LOST",
+                    failed = self._fail(session, "RUNTIME_LOST",
                         "Preview services or exact revision are no longer ready", cleanup=cleanup)
+                    self._record_refinement(failed, converged=False)
+                    if self.outcome_listener is not None:
+                        self.outcome_listener(failed.work_id, True)
+                    return failed
             return session
 
     def request(self, work_id: UUID) -> CandidatePreviewSessionV1:
@@ -399,14 +411,21 @@ class CandidatePreviewApplicationService:
                         timer.daemon = True
                         self._retry_timers[session.work_id] = timer
                         timer.start()
+                    else:
+                        self._record_refinement(session, converged=False)
+                        if self.outcome_listener is not None:
+                            self.outcome_listener(session.work_id, True)
                     continue
                 if session.status is PreviewRuntimeStatus.READY and self.provider.probe(
                     session.id, session.repository_revision, session.repository_tree, mode=session.mode,
                 ):
                     continue
                 cleanup = self.provider.stop(session.id) or {}
-                self._fail(session, "RESTART_RECONCILIATION",
+                failed = self._fail(session, "RESTART_RECONCILIATION",
                     "Preview runtime was not READY after service restart", cleanup=cleanup)
+                self._record_refinement(failed, converged=False)
+                if self.outcome_listener is not None:
+                    self.outcome_listener(failed.work_id, True)
             except EnvironmentProviderError:
                 # Runtime observation is unavailable, not evidence of runtime loss.
                 # Public current()/require_ready() fail closed until it can be probed.
@@ -500,7 +519,8 @@ class CandidatePreviewApplicationService:
                     retryable = isinstance(exc, (subprocess.TimeoutExpired, ConnectionError)) or (
                         isinstance(exc, EnvironmentProviderError) and any(term in str(exc).casefold()
                             for term in ("timeout", "timed out", "connection refused", "connection reset",
-                                "temporary failure", "network is unreachable")))
+                                "temporary failure", "network is unreachable",
+                                "all predefined address pools have been fully subnetted")))
                     if retryable and len(history) < 3:
                         self._advance(failed_session, PreviewRuntimeStatus.FAILED,
                             evidence=failed_session.evidence + ({"kind": "REFINEMENT_SIGNAL",

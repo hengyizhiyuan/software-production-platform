@@ -716,3 +716,18 @@ the same baseline, trees and evidence; verification remains mandatory. An unexpe
 deterministic production stop without a proved safe replay recipe emits a scoped
 orchestration failure and durable Work non-convergence/diagnostic attention, rather
 than leaving a RUNNING Work with no active execution.
+
+
+### Terminal Preview owner outcome
+
+A Preview preparation failure that has no admissible automatic repair path is a
+terminal local owner outcome even on the first attempt. Its refinement evidence
+records the exact Candidate fingerprint and exhausted owner budget. Transient
+transport and Docker network-capacity failures retain the existing three-attempt
+budget; intermediate retry signals do not claim recovery. Steering consumes a
+terminal Preview outcome only for the current Candidate and stops the Work with
+durable diagnostic attention. An old Candidate failure cannot halt a replacement
+Candidate. Restart reconciliation re-publishes a persisted final failure without
+creating another refinement event for the same Preview evidence. Runtime loss
+uses the same failure boundary. Neither local runtime recovery nor automation
+constitutes Human Acceptance or Delivery Authorization.

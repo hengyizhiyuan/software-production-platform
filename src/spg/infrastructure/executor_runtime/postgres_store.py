@@ -899,8 +899,8 @@ class NativeExecutionStore:
         The caller retains its candidate, validator and authority policy. Only
         bounded diagnostic metadata crosses into the shared observation store.
         """
-        if attempt_count < 2:
-            raise ValueError("A refinement observation requires at least two candidate attempts")
+        if attempt_count < 1 or (converged and attempt_count < 2):
+            raise ValueError("Refinement requires an observed failure or at least two successful candidate attempts")
         now = _utcnow()
         event_id = uuid4()
         signature = sha256(
@@ -920,7 +920,7 @@ class NativeExecutionStore:
             refinement_class=refinement_class, signal_kind=signal_kind,
             affected_component=component,
             expected_reality={}, observed_reality={},
-            diagnosis_summary="A model candidate required bounded validation feedback.",
+            diagnosis_summary="The owner observed a failure against its bounded acceptance obligation.",
             root_cause_classification=signal_kind.value,
             repair_hypothesis="Revalidate a revised candidate against the unchanged governed basis.",
             evidence_references=evidence_references,

@@ -36,3 +36,17 @@ The qualification image reuses the locally cached dependency image and overlays 
 `FULL_BACKEND_REGRESSION = NOT_YET_RUN`
 
 `HUMAN_ACCEPTANCE = PENDING`
+
+
+Further independent qualification found Docker network pool exhaustion could leave
+an exact Candidate Preview FAILED while Work remained RUNNING. The first terminal
+Preview outcome previously had no refinement event. The Preview owner now records
+that outcome, preserves exact Candidate identity, retries transient network
+capacity at most three times, and signals durable Work-level non-convergence at
+its final budget. Qualification: 18 Preview/oracle checks passed; two real
+PostgreSQL checks passed for current-Candidate escalation and stale-Candidate
+non-escalation. Completed complex journeys also passed browser + HTTP + actual
+SQLite persistence checks for customer create/edit notes (three branch PWUs plus
+verified Join) and user information collection. These are automated business
+oracles; Human Acceptance remains PENDING. Full regression and remaining Golden
+qualification remain PENDING.

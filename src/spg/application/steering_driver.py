@@ -733,7 +733,20 @@ class PlanSteeringDriver:
         return observation
 
     def preview_outcome(self, work_id: UUID, failed: bool) -> None:
+        exhausted = False
+        if failed:
+            from spg.application.delivery import DeliveryApplicationService
+            context = DeliveryApplicationService(self.database).candidate_context(work_id)
+            if context is not None:
+                with self.database.unit_of_work() as uow:
+                    events = NativeExecutionStore(uow.session).list_self_refine_events(
+                        work_id=work_id, component="preview/runtime", limit=1)
+                exhausted = bool(events and events[0].final_result == "ESCALATED"
+                    and events[0].diagnostic_evidence.get("owner_budget_exhausted")
+                    and events[0].diagnostic_evidence.get("candidate_fingerprint")
+                        == context["candidate_fingerprint"])
         observation = self._observe_convergence(work_id, failed=failed, boundary="PREVIEW",
+            owner_budget_exhausted=exhausted,
             failure_signature=canonical_digest({"signal": "PREVIEW_NOT_READY"}) if failed else None)
         if observation.condition not in {"NON_CONVERGING", "ESCALATED"} and not failed:
             self.schedule(work_id)
