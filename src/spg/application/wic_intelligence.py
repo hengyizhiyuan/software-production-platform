@@ -42,6 +42,8 @@ _DEFERABLE_FEATURE_REFINEMENT = re.compile(
     r"schema|data model|fields?|columns?|existing.+(?:api|storage))",
     re.IGNORECASE,
 )
+_RUNTIME_PREREQUISITE = re.compile(r"(?:startup|runtime|deploy|启动|运行|部署)", re.IGNORECASE)
+_EXTERNAL_CREDENTIAL = re.compile(r"(?:secret|credential|api.?key|密钥|凭据)", re.IGNORECASE)
 
 _QUESTION_COST_RANK = {"LOW": 2, "MEDIUM": 1, "HIGH": 0}
 
@@ -179,7 +181,14 @@ def build_progressive_semantics(
             production_evidence.production_request
             and production_evidence.repository_relevant
             and not human_owned
-            and _DEFERABLE_FEATURE_REFINEMENT.search(question)
+            and (
+                _DEFERABLE_FEATURE_REFINEMENT.search(question)
+                or (active_context is None
+                    and _RUNTIME_PREREQUISITE.search(question)
+                    and _EXTERNAL_CREDENTIAL.search(question)
+                    and not re.search(r"(?:repository|git|仓库).*(?:access|auth|private|权限|授权|私有)|"
+                        r"(?:access|auth|private|权限|授权|私有).*(?:repository|git|仓库)", question, re.IGNORECASE))
+            )
         )
         questions.append(QuestionEvaluation(
             question=question, affected_dimensions=("SCOPE",),

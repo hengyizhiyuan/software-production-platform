@@ -224,6 +224,8 @@ def test_provider_turn_intent_survives_deterministic_semantic_admission() -> Non
     "Which exact feature should be added?",
     "需要收集哪些用户字段，以及提交后的数据保存在哪里？",
     "Which existing API and data model fields should this page use?",
+    "Who provides the startup external service secret and how is it injected?",
+    "由谁提供启动所需的外部服务密钥，以及以何种安全方式注入运行环境？",
 ])
 def test_repository_production_request_is_admission_ready_before_feature_refinement(question) -> None:
     text = (
@@ -266,15 +268,17 @@ def test_repository_production_request_is_admission_ready_before_feature_refinem
     assert readiness.status is WorkAdmissionReadinessStatus.READY
 
 
-def test_repository_production_request_does_not_defer_authority_blocker() -> None:
+@pytest.mark.parametrize("question", [
+    "Who authorizes access to this private repository?",
+    "Who supplies startup credentials for private repository access?",
+])
+def test_repository_production_request_does_not_defer_authority_blocker(question) -> None:
     text = "Please pull https://github.com/acme/shop and fix the bug."
     record, active, fingerprint = _inputs("OW-A", text=text)
     provider_candidate = _candidate(
         "OW-A",
         turn_intent=ConversationTurnIntent.HOW_TO,
-        unresolved_material_questions=(
-            "Who authorizes access to this private repository?",
-        ),
+        unresolved_material_questions=(question,),
     )
     candidate = WorkInteractionService._with_production_request_evidence(
         provider_candidate,

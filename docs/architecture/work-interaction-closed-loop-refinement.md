@@ -781,3 +781,11 @@ Semantic questioning preserves the observed access/security model. Speculative
 alternatives requiring new unrequested capabilities cannot create a material
 Human decision. A role named as a recipient does not itself impose exclusive
 access; existing restricted visibility must equally remain restricted.
+
+Compiler source confirmation compares admitted CREATE/UPDATE operation-qualified
+Task scope with the actual source path, while retaining exact grant and workspace
+checks. Diagnostic-only projection is an evidence gate: a post-diagnostic source
+read restores existing bounded repairability, not additional Human permission.
+Runtime-secret questions remain explicit and Human-owned. For a new repository
+Work they do not block read-only preparation; repository access credentials and
+explicit privacy/authority changes still block their relevant current boundary.

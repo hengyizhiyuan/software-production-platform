@@ -394,6 +394,12 @@ class DurableKernelAudit:
         task_scopes = task.get("scope")
         if not isinstance(task_scopes, list) or not task_scopes:
             return None
+        # Code Task Contracts encode operation:path; the grants and workspace
+        # carry plain paths. Only admitted create/update scope can repair source.
+        task_scopes = [
+            scope.split(":", 1)[1] if scope.startswith(("UPDATE:", "CREATE:")) else scope
+            for scope in task_scopes if isinstance(scope, str)
+        ]
         allowed_scopes = {
             scope for grant in binding.capability_grants
             if grant.identity == "file.write"
@@ -404,6 +410,7 @@ class DurableKernelAudit:
             for scope in mount.write_scope
         }
         def within(target: str, scope: str) -> bool:
+            scope = scope.removesuffix("/**")
             return target == scope or target.startswith(scope.rstrip("/") + "/")
         if (
             path.startswith("/") or "\\" in path or ".." in path.split("/")

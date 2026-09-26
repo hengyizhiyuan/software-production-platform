@@ -4700,6 +4700,165 @@
       },
       "manual_rescue_actions": [],
       "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 4,
+      "signal": "CONTRACT_INCONSISTENCY: operation-qualified Task scope cannot promote plain compiler target; model mistakes diagnostic projection for missing grants",
+      "architecture_owner": "Native diagnostic evidence admission and reasoning context",
+      "source_head": "a717777ad7cefb2b83dbdec59c4f0a6c069faab2",
+      "work_id": "38d7fdee-8943-592a-9e29-2e423d2fe5de",
+      "interaction_id": "d4b12d0d-1362-4306-8769-5fdf9fc388ad",
+      "result": {
+        "case": "GC-EX-10",
+        "trial": 4,
+        "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+        "work_id": "38d7fdee-8943-592a-9e29-2e423d2fe5de",
+        "elapsed_seconds": 540,
+        "human_acceptance": "PENDING",
+        "automatic_delivery_authorization": false,
+        "business_oracle": "NOT_YET_EVALUATED"
+      },
+      "attention": [
+        {
+          "attention_id": "d4d15249-a6bc-5554-a7ed-3f36b5b294cc",
+          "work_id": "38d7fdee-8943-592a-9e29-2e423d2fe5de",
+          "kind": "STEERING_DECISION_REQUIRED",
+          "decision": "Choose how to handle a material risk or cost",
+          "reason": "The choice materially changes risk, cost, or an irreversible effect for this step.",
+          "available_actions": [],
+          "recommended_action": null,
+          "governed_subject_ref": "steering-decision:b1c41f6f-614d-4cf7-ba05-83ace5c95b5b",
+          "steering_reason": "MATERIAL_RISK_OR_COST_DECISION",
+          "recommendation": "Select the acceptable bounded trade-off.",
+          "conversation_prompt": null,
+          "alternatives": [],
+          "trade_offs": [],
+          "expected_impact": "The selected risk or cost boundary will constrain continuation.",
+          "reality_refs": [
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "0bc19243-0f64-5cbf-8068-5755694c0577"
+            },
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "c48ad314-a65b-46bd-9593-9522de802924"
+            },
+            {
+              "kind": "REPOSITORY_OBSERVATION",
+              "identity": "030e332a-1218-4ea2-842c-54b863ab909f"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "b7b7b331-ac66-4155-adfe-61db39714fb9"
+            },
+            {
+              "kind": "TRUSTED_BASELINE",
+              "identity": "ebe9fc9d-1037-4f31-b414-045a39021f81"
+            },
+            {
+              "kind": "WORK",
+              "identity": "38d7fdee-8943-592a-9e29-2e423d2fe5de"
+            },
+            {
+              "kind": "WORK_REALITY_REVISION",
+              "identity": "d0adaadf-48b3-505f-89ab-690dd33c1a7b"
+            }
+          ],
+          "steering_plan_revision_id": "dcdb90de-2e19-4228-996a-ea49919af076",
+          "steering_step_id": "a2abea0b-652d-4a8f-8f28-a8f14fc6c3e2",
+          "interaction_id": null,
+          "interaction_assessment_id": null,
+          "expected_work_reality_revision_id": null
+        }
+      ],
+      "economics": {
+        "work_id": "38d7fdee-8943-592a-9e29-2e423d2fe5de",
+        "product_id": "4dc4b81f-89a8-418a-9263-7f116c0564eb",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "967aae4d-cf61-4cdb-be5d-45f4b3e4408b",
+            "node_id": null,
+            "run_id": "6d581ef4-36fc-4c7a-a6dd-4d633e75ca33",
+            "condition": "PROPOSED",
+            "attempt_count": 1,
+            "outcomes": [
+              "UNABLE_TO_COMPLETE"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:cdd3cb8b-503b-49d5-88b6-5a7444a61f1d"
+            ],
+            "execution_seconds": 117.529332,
+            "duration_observed": true,
+            "queue_wait_seconds": 404.828552,
+            "token_usage": {
+              "input_tokens": 65266,
+              "output_tokens": 24374,
+              "total_tokens": 89640,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 5,
+              "tool_effect": 4
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 65266,
+          "output_tokens": 24374,
+          "total_tokens": 89640,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 117.529332,
+        "queue_wait_seconds": 404.828552,
+        "wall_elapsed_seconds": 291.827946,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 5,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 1,
+        "refinement_extra_seconds": 287,
+        "resource_units": {
+          "inference_submission": 5,
+          "tool_effect": 4
+        },
+        "final_outcome": "READY"
+      },
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-11",
+      "trial": 2,
+      "signal": "CURRENT_STEP_SUFFICIENCY: runtime secret question blocks repository preparation before observed source",
+      "architecture_owner": "WIC progressive admission / stage-specific prerequisite policy",
+      "source_head": "a717777ad7cefb2b83dbdec59c4f0a6c069faab2",
+      "work_id": null,
+      "interaction_id": "e1338b77-1432-4e19-a040-3e835f591c23",
+      "result": {
+        "case": "GC-EX-11",
+        "trial": 2,
+        "status": "CLARIFICATION_REQUIRES_CLASSIFICATION",
+        "work_id": null,
+        "elapsed_seconds": 147,
+        "human_acceptance": "PENDING",
+        "automatic_delivery_authorization": false,
+        "business_oracle": "NOT_YET_EVALUATED"
+      },
+      "attention": [],
+      "economics": {},
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
     }
   ]
 }

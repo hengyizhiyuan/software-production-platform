@@ -76,3 +76,16 @@ CSS selector blocks. Product acceptance criteria have not changed.
 GC-EX-10 trial 3, GC-IP-08 trial 4 and GC-IP-05 trial 2 remain preserved failed
 qualifications; generic recipe, Reality-progress and question-policy corrections
 require fresh independently versioned runtime requalification.
+
+
+Compiler repair admission across both process/build tools and both plain/operation
+Task scopes passed 7 targeted PostgreSQL checks (`/tmp/watt-stability-compiler-operation-scope.log`).
+The actual real compiler failure/success receipt, Native source progress and WIC
+prerequisite checks passed 108 unit checks before the final private-repository
+negative variant (`/tmp/watt-stability-prerequisite-stage-scope.log`).
+GC-EX-10 trial 4 stopped under bounded convergence; it is preserved as a failed
+compiler qualification. GC-EX-11 trial 2 stopped before repository acquisition;
+that premature runtime-prerequisite question remains an explicit failed qualification.
+GC-IP-07 trial 2 passed actual name/email search, empty results, unchanged customer
+domain and actual API/SQLite persistence after one allowed domain choice.
+Human Acceptance and final Full Regression remain PENDING.

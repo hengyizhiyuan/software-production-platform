@@ -138,6 +138,19 @@ def main():
         checks.update(dynamic_metrics_match_actual_records=browser.get('dynamic_metrics_after_new_business_records') is True,
             api_and_database_agree=database.get('api_and_database_agree') is True,
             only_available_domains=set(database.get('expected_metrics', {})) == {'users','customers','orders','total'})
+    elif identity == 'GC-IP-07':
+        browser = json.loads((root/'browser-oracle.json').read_text())
+        database = json.loads((root/'persistence-oracle.json').read_text())
+        choice = json.loads((root/'human-clarification.json').read_text())
+        checks.update(one_genuine_domain_choice=choice.get('question_count') == 1,
+            name_and_email_search=browser.get('name_search_selected_user_only') is True
+                and browser.get('email_search_selected_user_only') is True,
+            empty_result=browser.get('no_matches_empty') is True,
+            unrelated_domain_unchanged=browser.get('customer_domain_unchanged') is True,
+            api_search_matches_actual_database=database.get('api_and_database_agree') is True
+                and database.get('api_name_and_email_search') is True
+                and database.get('empty_search_has_no_results') is True,
+            no_unrequested_product_surfaces=all(path in {'server.py','web/index.html','web/app.js','web/styles.css'} for path in paths))
     elif identity == 'GC-EX-10':
         attempt_record = root/'native-attempt.json'
         attempt = json.loads(attempt_record.read_text()) if attempt_record.exists() else {}

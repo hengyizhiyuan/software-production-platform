@@ -1704,13 +1704,14 @@ def test_adaptive_repair_budget_uses_scope_risk_and_observed_token_usage(
 
 def _business_admission(
     database: Database, repository: Path, *, acceptance_meaning: str,
+    source_scope: str = "README.md",
 ) -> NativeExecutionAdmission:
     admitted = _admission(database, repository, contract_payload={
         "objective": "correct the tax result without changing product intent",
         "task_contract": {
             "acceptance_meaning": [acceptance_meaning],
             "authority_lineage": ["human:explicit-tax-requirement"],
-            "scope": ["README.md"],
+            "scope": [source_scope],
             "evidence_requirements": ["tax assertion must pass"],
         },
     })
@@ -2417,22 +2418,26 @@ def test_failed_verification_effect_creates_safe_self_refine_evidence(
         }
 
 
+@pytest.mark.parametrize("source_scope", ["README.md", "UPDATE:README.md"])
+@pytest.mark.parametrize("compiler_tool", ["build.run", "process.run"])
 def test_compiler_diagnostic_requires_source_evidence_before_bounded_repair(
     postgres_database: Database, git_repository: Path,
+    source_scope: str, compiler_tool: str,
 ) -> None:
     admitted = _business_admission(
         postgres_database, git_repository, acceptance_meaning="README compiles",
+        source_scope=source_scope,
     )
     binding = admitted.binding.model_copy(update={"capability_grants": (
         *admitted.binding.capability_grants,
         CapabilityGrant(identity="file.read", version="1", scope={"paths": ["README.md"]}),
-        CapabilityGrant(identity="build.run", version="1", scope={}),
+        CapabilityGrant(identity=compiler_tool, version="1", scope={}),
     )})
     admitted = admitted.model_copy(update={"binding": binding})
     service = NativeExecutorRuntimeService(postgres_database)
     service.admit(admitted)
     offer = _offer().model_copy(update={"capability_identities": (
-        "file.write", "file.read", "build.run", "test.run",
+        "file.write", "file.read", compiler_tool, "test.run",
     )})
     grant = service.allocate(offer)
     assert grant is not None
@@ -2474,8 +2479,9 @@ def test_compiler_diagnostic_requires_source_evidence_before_bounded_repair(
             condition=condition, output=output, output_digest=canonical_digest(output),
         ), None))
 
-    assert observed_tool(1, "build.run", {"recipe": "compile"}, EffectCondition.FAILED, {
-        "diagnostic_code": "E0425", "path": "README.md", "stderr": "symbol not found",
+    assert observed_tool(1, compiler_tool, {"recipe": "compile"}, EffectCondition.FAILED, {
+        "diagnostic_code": "PYTHON_SYNTAX_ERROR" if compiler_tool == "process.run" else "E0425",
+        "path": "README.md", "stderr": "symbol not found",
         "returncode": 1,
     }) is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
     assert observed_tool(2, "file.read", {"path": "README.md"}, EffectCondition.SETTLED, {
