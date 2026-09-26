@@ -1,6 +1,6 @@
 """Minimal single-owner authority seam for current self-dogfood runtime."""
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Table, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, String, Table
 from sqlalchemy.sql import func
 
 from spg.infrastructure.persistence.metadata import metadata
@@ -26,5 +26,4 @@ authority_resource_access = Table(
     Column("resource_id", String(64), primary_key=True),
     Column("actor_id", String(255), ForeignKey("authority_actors.id"), primary_key=True),
     Column("role", String(32), nullable=False),
-    UniqueConstraint("resource_kind", "resource_id", "actor_id"),
 )
