@@ -434,7 +434,7 @@ class GuidedDesignApplicationService:
                  if item.source_assessment_id is not None),
                 None,
             )
-            if admitted is None or not admitted.requests or not admitted.constraints:
+            if admitted is None or not admitted.requests:
                 return True
             assessment = InteractionStore(unit_of_work.session).assessment(
                 admitted.source_assessment_id
@@ -446,7 +446,9 @@ class GuidedDesignApplicationService:
                 and frame is not None
                 and frame.object_type is DesignObjectType.FEATURE
                 and frame.scope_level is DesignScopeLevel.IMPLEMENTATION
-                and frame.collaboration_mode is DesignCollaborationMode.EXECUTION
+                and frame.collaboration_mode in {
+                    DesignCollaborationMode.EXECUTION, DesignCollaborationMode.DESIGN,
+                }
             )
 
     def bootstrap(

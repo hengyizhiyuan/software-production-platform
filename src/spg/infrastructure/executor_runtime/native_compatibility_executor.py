@@ -388,7 +388,10 @@ class NativeQueuedExecutorCapability:
                     identity=identity,
                     version="1",
                     scope={
-                        "paths": list(write_paths),
+                        # The SourceMember already admits read-only inspection of
+                        # this bound repository. A branch's exact mutation scope
+                        # must not also prohibit reading sibling interfaces.
+                        "paths": [] if identity == "file.read" else list(write_paths),
                         "forbidden_paths": list(forbidden_paths),
                         "capabilities": (
                             list(git_capabilities) if identity == "git.operation"

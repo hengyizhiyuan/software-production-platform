@@ -610,15 +610,16 @@ class SemanticStepApplicationService:
         if proposal.target_kind is ProductionTargetKind.CODE_WORK:
             validate_scope = getattr(getattr(self, "capability", None), "validate_production_scope", None)
             scope_validation = validate_scope(semantic_input, proposal) if callable(validate_scope) else None
+            if scope_validation is not None and scope_validation.missing_acceptance_requirements:
+                raise ValueError("INTENT_COMPLETENESS_MISMATCH: " + "; ".join(
+                    scope_validation.missing_acceptance_requirements))
             # Provider-selected code_targets are hypotheses, not Human scope.
-            # Only paths stated by Human and present in the exact source tree
-            # may enter the explicit-target channel. Otherwise let read-only
+            # Only paths stated by Human may enter the explicit-target channel,
+            # including explicitly requested new files. Otherwise let read-only
             # repository discovery select the minimum required implementation.
-            human_text = "\n".join(semantic_input.work_requests)
-            tree_paths = set(semantic_input.repository_tree_paths)
+            human_text = "\n".join(semantic_input.human_explicit_requests)
             human_targets = tuple(
                 path for path in WorkApplicationService._explicit_repository_paths(human_text)
-                if path in tree_paths
             )
             human_areas = WorkApplicationService._explicit_repository_areas(human_text)
             change_proposal = self.change_proposals.propose(
@@ -703,7 +704,8 @@ class SemanticStepApplicationService:
         )
         if plan.fit_classification not in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}:
             raise SteeringInvariantViolation(
-                "Semantic production proposal has no executable PWU boundary"
+                "Semantic production proposal has no executable PWU boundary: "
+                + "; ".join(plan.unresolved_questions)
             )
         return plan, change_proposal
 

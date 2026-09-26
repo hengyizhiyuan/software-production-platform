@@ -125,6 +125,27 @@ def test_multi_pwu_replan_api_replaces_active_revision_without_widening_scope(ap
     assert len(actual["production_plan_runtime"]["pwus"]) == 3
 
 
+def test_multi_pwu_terminal_no_output_is_evaluated_and_bounded(app_facts: "AppFacts") -> None:
+    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        code_exact_targets=("src/spg_example.py", "src/spg/web/app.js")))
+    app_facts.service.approve_work(draft.work_id, authority_identity="human:multi-no-output")
+    executor = DeterministicTestExecutor(DeterministicExecutionSpecification(
+        operations=(), reported_outcome=ProviderReportedOutcome.FAILURE))
+    service = WorkApplicationService(app_facts.database, workspace_root=app_facts.workspace_root,
+        executor=executor, verifier=ContractDrivenRepositoryVerifier(app_facts.database))
+    for _ in range(60):
+        projection = service.advance_work(draft.work_id)
+        if projection.status is WorkStatus.BLOCKED:
+            break
+    assert projection.status is WorkStatus.BLOCKED
+    assert executor.dispatch_count == 6  # three bounded attempts for each root
+    with app_facts.database.engine.connect() as connection:
+        evaluations = connection.execute(select(completion_evaluations.c.outcome)).scalars().all()
+    assert len(evaluations) == 6
+    assert set(evaluations) == {"NOT_PRODUCED"}
+
+
 def test_multi_pwu_work_runs_two_code_units_join_and_human_delivery(app_facts: "AppFacts") -> None:
     """One admitted Work reaches Candidate, authorization, and trusted commit."""
 

@@ -265,6 +265,13 @@ class GitRepositoryAcquirer:
                 "connection timed out",
                 "network is unreachable",
                 "connection reset",
+                "empty reply from server",
+                "recv failure",
+                "operation timed out",
+                "requested url returned error: 500",
+                "requested url returned error: 502",
+                "requested url returned error: 503",
+                "requested url returned error: 504",
             )
         ):
             category = RepositoryAcquisitionFailureCategory.NETWORK_FAILURE

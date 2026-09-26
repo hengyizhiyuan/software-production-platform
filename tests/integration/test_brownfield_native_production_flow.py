@@ -308,6 +308,11 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
                     tool_calls=(
                         ToolCallProposal(
                             proposal_index=0,
+                            tool_identity="file.read",
+                            arguments={"path": "AI_context.md"},
+                        ),
+                        ToolCallProposal(
+                            proposal_index=1,
                             tool_identity="file.write",
                             arguments={
                                 "path": target,
@@ -348,6 +353,10 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
             provider=provider,
         )
         assert tools is not None
+        grants = {item.identity: item for item in binding.binding.capability_grants}
+        assert grants["file.read"].scope["paths"] == []
+        assert grants["file.write"].scope["paths"] == [target]
+        assert ".git" in grants["file.read"].scope["forbidden_paths"]
         return NativeExecutorKernel(
             inference=ControlledRepairInference(),
             tools=tools.registry(),

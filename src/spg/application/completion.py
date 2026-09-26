@@ -515,7 +515,7 @@ class CompletionService:
                 return None
             baseline_content, fingerprint = self.exact_reality.read_blob(
                 basis.dispatch.workspace.repository_path,
-                basis.dispatch.source_revision,
+                basis.dispatch.workspace.source_revision,
                 path,
             )
             content = target.read_bytes()

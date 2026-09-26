@@ -147,6 +147,7 @@ class RepositoryScopeValidation(BaseModel):
     required_targets: tuple[RepositoryTargetNecessityProof, ...]
     rejected_behaviors: tuple[str, ...]
     explanation: str = Field(min_length=10)
+    missing_acceptance_requirements: tuple[str, ...] = ()
 
 
 class RepositoryChangeProposalRequest(BaseModel):

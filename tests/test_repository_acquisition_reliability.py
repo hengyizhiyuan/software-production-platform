@@ -39,6 +39,16 @@ from spg.domain.interaction import InteractionActor, RepositoryAcquisitionState
             True,
         ),
         (
+            "fatal: unable to access 'http://source/project.git/': The requested URL returned error: 503",
+            RepositoryAcquisitionFailureCategory.NETWORK_FAILURE,
+            True,
+        ),
+        (
+            "fatal: unable to access: Empty reply from server",
+            RepositoryAcquisitionFailureCategory.NETWORK_FAILURE,
+            True,
+        ),
+        (
             "fatal: Remote branch missing not found in upstream origin",
             RepositoryAcquisitionFailureCategory.INVALID_BRANCH,
             False,

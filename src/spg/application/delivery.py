@@ -187,8 +187,10 @@ class DeliveryApplicationService:
                     "verification_references": [f"verification:{item}" for item in candidate.verification_record_ids],
                     "repository_revision": candidate.proposed_commit_identity, "tree": tree,
                     "repository_path": repository, "paths": paths, "entrypoint": entrypoint,
-                    "preview_kind": "STATIC_WEB" if entrypoint else "CODE_DIFF" if any(
-                        path.endswith(".html") for path in artifacts) else None,
+                    "preview_kind": "STATIC_WEB" if entrypoint else "CODE_DIFF" if artifacts and (
+                        (work.production_plan is not None
+                            and work.production_plan.target_kind.value == "CODE_WORK")
+                        or any(path.endswith(".html") for path in artifacts)) else None,
                     "artifacts": list(artifacts),
                     "verification": [f"{item.obligation}: {item.result.value}" for item in verification if item is not None],
                     "authorization_pending": summary.authorization_id is None}
@@ -272,11 +274,11 @@ class DeliveryApplicationService:
         return read_artifact(context["repository_path"], context["repository_revision"], path, software=True)
 
     def candidate_code_diff(self, work_id: UUID, candidate_fingerprint: str) -> str:
-        """Inspect exact changed code when a full Web preview is not bounded."""
+        """Inspect exact changed code, including Candidates with a Web preview."""
         context = self.candidate_context(work_id)
         if context is None or context["candidate_fingerprint"] != candidate_fingerprint:
             raise ProductInvariantViolation("Candidate preview is stale against current Work Reality")
-        if context["preview_kind"] != "CODE_DIFF":
+        if context["preview_kind"] not in {"CODE_DIFF", "STATIC_WEB"}:
             raise ProductInvariantViolation("This Candidate has no code-diff preview")
         return candidate_change_diff(
             context["repository_path"], context["repository_revision"],

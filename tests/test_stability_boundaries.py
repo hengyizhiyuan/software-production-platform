@@ -57,3 +57,17 @@ def test_explicit_change_and_outcome_grammar_does_not_depend_on_one_case(human_i
 def test_knowledge_and_retrieval_do_not_gain_production_authority(human_input):
     from spg.domain.response_contract import production_intent_evidence
     assert not production_intent_evidence(human_input).production_request
+
+
+def test_explicit_new_root_web_and_schema_files_are_not_lost():
+    from spg.application.work import WorkApplicationService
+    assert WorkApplicationService._explicit_repository_paths(
+        'Create contact.html with contact.js and schema.sql; keep the other files unchanged.'
+    ) == ('contact.html', 'contact.js', 'schema.sql')
+
+
+def test_repository_url_with_port_never_becomes_a_write_target():
+    from spg.application.work import WorkApplicationService
+    assert WorkApplicationService._explicit_repository_paths(
+        'Use http://source-host:8080/project.git\nCreate contact.html.'
+    ) == ('contact.html',)

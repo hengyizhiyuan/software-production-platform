@@ -2454,11 +2454,9 @@ class WorkApplicationService:
                     )
             return self.get_work(work_id)
         if summary.completion_id is None:
-            if (
-                work_unit.completion_contract.requires_observed_production_result
-                and not summary.artifact_paths
-            ):
-                return self.get_work(work_id)
+            # The observation is terminal and authoritative. Missing products
+            # are failed obligations for Completion to evaluate, not pending
+            # evidence that can arrive after this exact observation is sealed.
             self.completion.evaluate_observation(summary.observation_id)
             return self.get_work(work_id)
         if summary.completion_outcome != "PRODUCED":
@@ -3976,12 +3974,15 @@ class WorkApplicationService:
 
     @staticmethod
     def _explicit_repository_paths(raw: str) -> tuple[str, ...]:
+        # Repository addresses establish source authority, not file-write scope.
+        # In particular an HTTP port followed by /repo.git is not a new path.
+        raw = re.sub(r"https?://[^\s<>()，。；]+", "", raw, flags=re.IGNORECASE)
         nested = re.findall(
             r"(?<![\w./-])((?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+)(?![\w./*-])",
             raw,
         )
         roots = re.findall(
-            r"(?<![\w./-])([A-Za-z0-9_-]+\.(?:py|toml|json|ya?ml))(?![\w./-])",
+            r"(?<![\w./-])([A-Za-z0-9_-]+\.(?:py|toml|json|ya?ml|html|css|js|cjs|mjs|ts|tsx|sql))(?![\w/-]|\.[A-Za-z0-9_-])",
             raw,
             flags=re.IGNORECASE,
         )

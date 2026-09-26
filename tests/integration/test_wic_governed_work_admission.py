@@ -796,11 +796,12 @@ def _count(database: Database, table) -> int:
         return int(connection.scalar(select(func.count()).select_from(table)) or 0)
 
 
-def _ready(interactions: WorkInteractionService):
+def _ready(interactions: WorkInteractionService, *, content: str =
+           "Please improve long-running progress feedback without redesigning the UI."):
     interaction = interactions.create_interaction(human_identity="human:test")
     projection = interactions.append_and_assess(
         interaction.id,
-        "Please improve long-running progress feedback without redesigning the UI.",
+        content,
         human_identity="human:test",
     )
     assert projection.readiness is not None
@@ -1338,13 +1339,25 @@ def test_admission_bootstraps_revision_bound_steering_without_production(
     assert _count(postgres_database, steering_plans) == 1
 
 
+@pytest.mark.parametrize("mode", [DesignCollaborationMode.EXECUTION, DesignCollaborationMode.DESIGN])
+@pytest.mark.parametrize("constraints", [(), ("Keep the existing behavior outside the request",)])
 def test_bounded_feature_execution_uses_steering_without_product_questionnaire(
     postgres_database: Database,
     services,
+    mode,
+    constraints,
 ) -> None:
     work, _ = services
+    class FeatureCapability(_BoundedFeatureExecutionCapability):
+        def interpret(self, basis):
+            candidate = super().interpret(basis)
+            return candidate.model_copy(update={
+                "candidate_constraints": constraints,
+                "design_intent_frame": candidate.design_intent_frame.model_copy(
+                    update={"collaboration_mode": mode}),
+            })
     interactions = WorkInteractionService(
-        postgres_database, capability=_BoundedFeatureExecutionCapability()
+        postgres_database, capability=FeatureCapability()
     )
     interaction = interactions.create_interaction(human_identity="human:test")
     ready = interactions.append_and_assess(
@@ -1555,7 +1568,7 @@ def test_approved_design_artifact_allows_bounded_implementation_contract(
         tmp_path,
         "watt://repositories/approved-design-test",
     )
-    admitted = _admit(work, _ready(interactions))
+    admitted = _admit(work, _ready(interactions, content='Please implement progress feedback in index.html and its verification in tests/js/test_page.cjs.'))
     SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
 
     class ApprovedImplementationSemantic(_GuidedDesignSemanticCapability):
@@ -1628,7 +1641,7 @@ def test_action_eligibility_hides_implementation_approval_when_design_evidence_s
         tmp_path,
         "watt://repositories/action-eligibility-test",
     )
-    admitted = _admit(work, _ready(interactions))
+    admitted = _admit(work, _ready(interactions, content='Please implement progress feedback in src/part_0.py, src/part_1.py, src/part_2.py, src/part_3.py, src/part_4.py.'))
     SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
 
     class BroadImplementationSemantic(_GuidedDesignSemanticCapability):
@@ -1935,6 +1948,8 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
             self.requests.append(request)
             observation = {
                 "resource_id": str(resource.id),
+                "revision": _git(Path(resource.location_ref), "rev-parse", resource.authoritative_ref),
+                "repository_ref": resource.authoritative_ref,
                 "condition": "RUNNING",
                 "source": request.source,
                 "interaction_id": str(request.interaction_id),
@@ -2067,6 +2082,8 @@ def test_explicit_pull_recovers_admitted_work_that_has_no_prior_acquisition_atte
             self.requests.append(request)
             observation = {
                 "resource_id": str(resource.id),
+                "revision": _git(Path(resource.location_ref), "rev-parse", resource.authoritative_ref),
+                "repository_ref": resource.authoritative_ref,
                 "condition": "RUNNING",
                 "source": request.source,
                 "interaction_id": str(request.interaction_id),
@@ -2343,6 +2360,8 @@ def test_failed_repository_acquisition_reuses_work_and_retries_with_new_attempt(
                 observation = {
                     **current,
                     "resource_id": str(resource.id),
+                "revision": _git(Path(resource.location_ref), "rev-parse", resource.authoritative_ref),
+                "repository_ref": resource.authoritative_ref,
                     "condition": "READY",
                     "failure_category": None,
                     "human_message": "Repository is ready.",
@@ -3946,7 +3965,7 @@ def test_wic4_completed_work_continuation_reopens_satisfaction_without_rewriting
 
     pending = active.append_and_assess(
         ready.interaction.id,
-        "Can we also show elapsed time more clearly?",
+        "Can we also show elapsed time more clearly in index.html, with verification in tests/js/test_page.cjs?",
         human_identity="human:test",
     )
     assessment = pending.latest_assessment

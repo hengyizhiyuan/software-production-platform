@@ -85,7 +85,9 @@ def produce(database, tmp_path, *, failing=False, user_repository=True,
             full_application_baseline=False):
     interaction = WorkInteractionService(database, capability=SoftwareIntent())
     item = interaction.create_interaction(human_identity='human:test')
-    understanding = interaction.append_and_assess(item.id, 'Build an inventory application', human_identity='human:test')
+    understanding = interaction.append_and_assess(item.id,
+        'Build an inventory application in these exact output files: ' + ', '.join(SOURCE),
+        human_identity='human:test')
     service = WorkApplicationService(database, workspace_root=tmp_path/'workspaces')
     work = service.admit_interaction_work(item.id, assessment_id=understanding.latest_assessment.id,
         basis_fingerprint=understanding.latest_assessment.basis_fingerprint, authority_identity='human:test', use_default_resource=False)
@@ -161,7 +163,7 @@ def produce(database, tmp_path, *, failing=False, user_repository=True,
     service = WorkApplicationService(database, workspace_root=tmp_path/'workspaces', executor=executor, verifier=ContractDrivenRepositoryVerifier(database))
     driver = PlanSteeringDriver(database, service, _SchedulingOrchestrator(), semantic_capability=SoftwareDesign(), max_automatic_transitions=32)
     initial_activation = driver.activate(work.work_id)
-    assert initial_activation.stop_reason.value in {'PRODUCTION_RUNNING', 'HUMAN_ATTENTION'}
+    assert initial_activation.stop_reason.value in {'PRODUCTION_RUNNING', 'HUMAN_ATTENTION'}, [item.reason for item in service.list_attention(work_id=work.work_id)]
     production_reviews = tuple(
         item for item in service.list_attention(work_id=work.work_id)
         if item.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW
@@ -205,6 +207,7 @@ def test_exact_candidate_is_previewable_before_repository_authorization(postgres
     context = delivery.candidate_context(work_id)
     assert context is not None and context['authorization_pending']
     assert context['entrypoint'] == 'index.html'
+    assert 'index.html' in delivery.candidate_code_diff(work_id, context['candidate_fingerprint'])
     assert context['verification'] and all(item.endswith(': PASS') for item in context['verification'])
     before = service.get_work_result(work_id)
     assert delivery.candidate_artifact(work_id, context['candidate_fingerprint'], 'index.html') == SOURCE['index.html'].encode()
@@ -233,6 +236,18 @@ def free_port():
     with socket.socket() as sock:
         sock.bind(('127.0.0.1', 0))
         return sock.getsockname()[1]
+
+
+def test_script_only_code_candidate_exposes_review_diff(postgres_database, tmp_path, monkeypatch):
+    # A functional Preview can be based on the unchanged entrypoint. Review
+    # availability must follow the Code Work Candidate, not changed HTML files.
+    monkeypatch.delitem(SOURCE, 'index.html')
+    service, work_id, delivery, _ = produce(
+        postgres_database, tmp_path, authorize_candidate=False, set_delivery_target=False)
+    context = delivery.candidate_context(work_id)
+    assert context['preview_kind'] == 'CODE_DIFF'
+    diff = delivery.candidate_code_diff(work_id, context['candidate_fingerprint'])
+    assert 'inventory.js' in diff
 
 def test_code_to_package_runtime_restore_and_explicit_acceptance(postgres_database, tmp_path):
     service, work_id, delivery, assets = produce(postgres_database, tmp_path)

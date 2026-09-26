@@ -1,6 +1,7 @@
 """A Human nav-link request admits only repository-proven necessary paths."""
 
 from pathlib import Path
+from types import SimpleNamespace
 import pytest
 import subprocess
 from uuid import uuid4
@@ -186,3 +187,22 @@ def test_scope_proofs_admit_multiple_real_surfaces_without_adjacent_test_write(t
             proof("api.py", "database.users()"), proof("ui.js", "renderUsers"))))
     assert {target.path for target in proposal.required_targets} == {"api.py", "ui.js"}
     assert all(target.path != "test_api.py" for target in proposal.required_targets)
+
+
+def test_incomplete_persistence_proposal_cannot_admit_without_requested_form():
+    from spg.domain.refinement import RepositoryScopeValidation
+    service = object.__new__(SemanticStepApplicationService)
+    service.capability = SimpleNamespace(validate_production_scope=lambda *_:
+        RepositoryScopeValidation(required_targets=(), rejected_behaviors=(),
+            explanation="Backend-only scope cannot fulfill an editable form request",
+            missing_acceptance_requirements=(
+            "The requested editable form is absent from the proposed implementation",)))
+    intent = SemanticStepInput.model_construct(
+        engineering_resource_id=uuid4(), source_baseline_id=uuid4())
+    candidate = SemanticStepResultCandidate.model_construct(
+        proposed_production=SemanticProductionProposal(
+            target_kind=ProductionTargetKind.CODE_WORK,
+            objective="Persist a contact preference and let users edit it in the form",
+            code_targets=("server.py",), verification_expectation="Real write/read"))
+    with pytest.raises(ValueError, match="INTENT_COMPLETENESS_MISMATCH"):
+        service._materialize_production_plan(intent, candidate)
