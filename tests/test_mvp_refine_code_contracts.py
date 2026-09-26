@@ -147,9 +147,9 @@ def test_refcode_05_07_09_12_24_dogfood_intent_gets_grounded_bounded_proposal(
     )
 
     required = tuple(target.path for target in proposal.required_targets)
-    assert required == (
-        "src/spg/web/app.js",
-        "tests/js/test_web_state.cjs",
+    assert required == ("src/spg/web/app.js",)
+    assert "tests/js/test_web_state.cjs" in tuple(
+        target.path for target in proposal.conditional_targets
     )
     assert "src/spg/domain/backend.py" not in {
         target.path for target in proposal.proposed_targets

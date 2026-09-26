@@ -628,17 +628,33 @@ class SemanticStepApplicationService:
                     explicit_forbidden_areas=proposal.forbidden_areas,
                 )
             )
+        # Semantic provider prose is advisory. It may suggest useful implementation
+        # details, but cannot add a route, page, or other product behavior to the
+        # governed objective or verification contract without Human authority.
+        production_objective = (
+            semantic_input.desired_outcome
+            if proposal.target_kind is ProductionTargetKind.CODE_WORK
+            else proposal.objective
+        )
+        verification_expectation = (
+            "Verify the admitted desired outcome against the exact Candidate, "
+            "run repository-appropriate checks, and provide a real preview "
+            "when requested; do not add unrequested functionality or deliver "
+            "without Human authorization."
+            if proposal.target_kind is ProductionTargetKind.CODE_WORK
+            else proposal.verification_expectation
+        )
         plan = self.planning.propose(
             ProductionPlanningRequest(
                 work_id=semantic_input.work_id,
                 target_kind=proposal.target_kind,
                 admitted_requirement=semantic_input.desired_outcome,
                 desired_outcome=semantic_input.desired_outcome,
-                production_objective=proposal.objective,
+                production_objective=production_objective,
                 artifact_targets=proposal.artifact_targets,
                 change_proposal=change_proposal,
                 constraints=semantic_input.constraints,
-                verification_expectation=proposal.verification_expectation,
+                verification_expectation=verification_expectation,
                 engineering_scope_summary=semantic_input.engineering_scope_summary,
                 engineering_resource_id=semantic_input.engineering_resource_id,
                 repository_identity=semantic_input.repository_identity,

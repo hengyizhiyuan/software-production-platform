@@ -97,6 +97,11 @@ class RepositoryAwareChangeProposalProvider:
             tuple(target for target in targets if target.disposition is ProposalTargetDisposition.REQUIRED),
             request.explicit_allowed_areas,
             request.requested_verification,
+            tuple(
+                target.path for target in targets
+                if target.disposition is ProposalTargetDisposition.CONDITIONAL
+                and target.path.startswith(_TEST_PREFIXES)
+            ),
         )
         if not any(
             target.disposition is ProposalTargetDisposition.REQUIRED for target in targets
@@ -212,8 +217,8 @@ class RepositoryAwareChangeProposalProvider:
                 self._target(
                     path=test_path,
                     paths=set(paths),
-                    disposition=ProposalTargetDisposition.REQUIRED,
-                    rationale="This adjacent test directly loads or references the selected implementation file.",
+                    disposition=ProposalTargetDisposition.CONDITIONAL,
+                    rationale="This adjacent test can verify the selected implementation file; an edit is not yet proven necessary.",
                     evidence=(
                         f"{test_path} references {Path(primary).name} "
                         f"at exact Source Baseline {revision[:12]}."
@@ -257,7 +262,10 @@ class RepositoryAwareChangeProposalProvider:
         text = " ".join((intent, *constraints)).casefold()
         return any(marker in text for marker in (*_FRONTEND_MARKERS, "网站", "导航栏")) and any(
             marker in text
-            for marker in ("only", "only modify", "不要改动其他", "只修改", "仅修改", "限于")
+            for marker in (
+                "only", "only modify", "不要改动其他", "不改变其他", "只修改",
+                "仅修改", "只在", "限于",
+            )
         )
 
     @staticmethod
@@ -295,6 +303,7 @@ class RepositoryAwareChangeProposalProvider:
         targets: tuple[RepositoryChangeProposalTarget, ...],
         allowed_areas: tuple[str, ...],
         requested: tuple[CodeVerificationObligation, ...],
+        adjacent_tests: tuple[str, ...] = (),
     ) -> tuple[CodeVerificationObligation, ...]:
         obligations = [
             CodeVerificationObligation(kind=CodeVerificationKind.PATH_SCOPE),
@@ -303,7 +312,7 @@ class RepositoryAwareChangeProposalProvider:
         if requested:
             obligations.extend(requested)
         else:
-            paths = tuple(target.path for target in targets)
+            paths = tuple(target.path for target in targets) + adjacent_tests
             if any(path.endswith(".py") for path in paths):
                 obligations.append(
                     CodeVerificationObligation(kind=CodeVerificationKind.PYTHON_COMPILE)
