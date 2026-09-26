@@ -2444,9 +2444,152 @@
           "failure_classification": null,
           "continuation_observations": {},
           "human_clarification": null,
-          "runtime_retirement": null,
-          "business_oracles": [],
-          "business_status": "NOT_EVALUATED",
+          "runtime_retirement": {
+            "preview_id": "bdd91612-383b-422c-8b40-9f1af012b67d",
+            "completed_qualification": true,
+            "prior_status": "READY",
+            "preserve_all_volumes": true,
+            "work_or_database_changes": false,
+            "containers": [
+              {
+                "name": "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-proxy",
+                "state": {
+                  "Status": "running",
+                  "Running": true,
+                  "Paused": false,
+                  "Restarting": false,
+                  "OOMKilled": false,
+                  "Dead": false,
+                  "Pid": 55086,
+                  "ExitCode": 0,
+                  "Error": "",
+                  "StartedAt": "2026-09-26T22:31:09.728217793Z",
+                  "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "mounts": [],
+                "networks": {
+                  "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-gateway": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "23b70c1a4ac05a6c3740f98141b283c6b2be43811f582a749a73526f7552fb00",
+                    "EndpointID": "aa03767086b8c6646186c952224ebd2d93aa8ed3ed54e2c34725bb58170914f1",
+                    "Gateway": "172.27.0.1",
+                    "IPAddress": "172.27.0.2",
+                    "MacAddress": "5a:06:4c:1f:d3:6e",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-proxy",
+                      "5561594eec09"
+                    ]
+                  },
+                  "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-internal": {
+                    "IPAMConfig": {},
+                    "Links": null,
+                    "Aliases": [],
+                    "DriverOpts": {},
+                    "GwPriority": 0,
+                    "NetworkID": "b0d9853725236f5a05db4ab7a4ecd90a58a64aa15eea25068949ffebaa47fe5f",
+                    "EndpointID": "e3f825b059844bbb4a414e078fdc18554a2b3c53dbf60c44dfce6ca6f8e6130d",
+                    "Gateway": "",
+                    "IPAddress": "172.26.0.3",
+                    "MacAddress": "8e:56:f2:a2:7e:83",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-proxy",
+                      "5561594eec09"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-app",
+                "state": {
+                  "Status": "running",
+                  "Running": true,
+                  "Paused": false,
+                  "Restarting": false,
+                  "OOMKilled": false,
+                  "Dead": false,
+                  "Pid": 54727,
+                  "ExitCode": 0,
+                  "Error": "",
+                  "StartedAt": "2026-09-26T22:31:08.143570488Z",
+                  "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "mounts": [
+                  {
+                    "Type": "volume",
+                    "Name": "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-source",
+                    "Source": "/var/lib/docker/volumes/watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-source/_data",
+                    "Destination": "/source",
+                    "Driver": "local",
+                    "Mode": "z",
+                    "RW": false,
+                    "Propagation": ""
+                  }
+                ],
+                "networks": {
+                  "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-internal": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                      "app"
+                    ],
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "b0d9853725236f5a05db4ab7a4ecd90a58a64aa15eea25068949ffebaa47fe5f",
+                    "EndpointID": "4b384d1cf8a36a0c15300aa090927df3056515e55221150ff256fcfd5613f19b",
+                    "Gateway": "",
+                    "IPAddress": "172.26.0.2",
+                    "MacAddress": "96:08:1f:f8:7e:73",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d-app",
+                      "app",
+                      "3486eb3ec4df"
+                    ]
+                  }
+                }
+              }
+            ],
+            "endpoint_available_after_retirement": false
+          },
+          "business_oracles": [
+            {
+              "evidence_record": "business-oracle.json",
+              "case": "GC-EX-03",
+              "trial": 5,
+              "checks": {
+                "automatic_preview_ready": true,
+                "served_verification": true,
+                "no_unauthorized_delivery": true,
+                "browser_dialog_oracle": true,
+                "actual_cancel_closes_dialog": true
+              },
+              "status": "PASS",
+              "candidate_revision": "07a85348be3e8cd40d85084b31cd9bb5059a522c",
+              "candidate_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+              "changed_paths": [
+                "web/app.js"
+              ],
+              "preview_endpoint": "http://127.0.0.1:64120/",
+              "human_acceptance": "PENDING",
+              "manual_rescue_actions": []
+            }
+          ],
+          "business_status": "PASS",
           "work_id": "769a0621-14e7-5d9e-8374-0eb6859654e3",
           "interaction_id": "33a57d77-70a4-4491-be99-10a70d34c0aa",
           "refinements": [
@@ -2626,7 +2769,7 @@
           "human_acceptance": "PENDING"
         }
       ],
-      "successful_independent_trials": 2,
+      "successful_independent_trials": 3,
       "status": "PASS"
     },
     {
@@ -4424,9 +4567,155 @@
           "failure_classification": null,
           "continuation_observations": {},
           "human_clarification": null,
-          "runtime_retirement": null,
-          "business_oracles": [],
-          "business_status": "NOT_EVALUATED",
+          "runtime_retirement": {
+            "preview_id": "2cae6928-08e4-4ffb-94bf-27eb77b8fbc4",
+            "completed_qualification": true,
+            "prior_status": "READY",
+            "preserve_all_volumes": true,
+            "work_or_database_changes": false,
+            "containers": [
+              {
+                "name": "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-proxy",
+                "state": {
+                  "Status": "running",
+                  "Running": true,
+                  "Paused": false,
+                  "Restarting": false,
+                  "OOMKilled": false,
+                  "Dead": false,
+                  "Pid": 63428,
+                  "ExitCode": 0,
+                  "Error": "",
+                  "StartedAt": "2026-09-26T22:32:26.588809331Z",
+                  "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "mounts": [],
+                "networks": {
+                  "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-gateway": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "1bca4b678063696867f7cdb8cb85cfc743587cd48981cf06ecb3434aad313079",
+                    "EndpointID": "0fe329324ae3862e1dc6bb3d0460ac38d829e93a5cbc4caec35006ecaa7f3bfe",
+                    "Gateway": "192.168.32.1",
+                    "IPAddress": "192.168.32.2",
+                    "MacAddress": "aa:83:92:55:64:c3",
+                    "IPPrefixLen": 20,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-proxy",
+                      "d2bc25ae0d5b"
+                    ]
+                  },
+                  "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-internal": {
+                    "IPAMConfig": {},
+                    "Links": null,
+                    "Aliases": [],
+                    "DriverOpts": {},
+                    "GwPriority": 0,
+                    "NetworkID": "72a6a3fdb6f10c9db6a0c1ff34d1b61b0e9211375146ccef49ecdb7b1ec9133d",
+                    "EndpointID": "e675202c845015d54ca59913d988132ca93f767f1caeeaa98a9e841e9155a9be",
+                    "Gateway": "",
+                    "IPAddress": "192.168.16.3",
+                    "MacAddress": "32:73:da:37:37:06",
+                    "IPPrefixLen": 20,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-proxy",
+                      "d2bc25ae0d5b"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-app",
+                "state": {
+                  "Status": "running",
+                  "Running": true,
+                  "Paused": false,
+                  "Restarting": false,
+                  "OOMKilled": false,
+                  "Dead": false,
+                  "Pid": 63202,
+                  "ExitCode": 0,
+                  "Error": "",
+                  "StartedAt": "2026-09-26T22:32:25.377977645Z",
+                  "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "mounts": [
+                  {
+                    "Type": "volume",
+                    "Name": "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-source",
+                    "Source": "/var/lib/docker/volumes/watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-source/_data",
+                    "Destination": "/source",
+                    "Driver": "local",
+                    "Mode": "z",
+                    "RW": false,
+                    "Propagation": ""
+                  }
+                ],
+                "networks": {
+                  "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-internal": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                      "app"
+                    ],
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "72a6a3fdb6f10c9db6a0c1ff34d1b61b0e9211375146ccef49ecdb7b1ec9133d",
+                    "EndpointID": "76c943955e364345954020ea657c1cf9838c775175eeffef2fe5eb66b8121531",
+                    "Gateway": "",
+                    "IPAddress": "192.168.16.2",
+                    "MacAddress": "9e:b1:08:02:74:c9",
+                    "IPPrefixLen": 20,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4-app",
+                      "app",
+                      "f37dd32c504c"
+                    ]
+                  }
+                }
+              }
+            ],
+            "endpoint_available_after_retirement": false
+          },
+          "business_oracles": [
+            {
+              "evidence_record": "business-oracle.json",
+              "case": "GC-EX-05",
+              "trial": 7,
+              "checks": {
+                "automatic_preview_ready": true,
+                "served_verification": true,
+                "no_unauthorized_delivery": true,
+                "browser_dialog_oracle": true,
+                "actual_cancel_closes_dialog": true,
+                "actual_no_effect_tool_failure": true,
+                "bounded_source_repair": true,
+                "autonomous_refinement_signal": true
+              },
+              "status": "PASS",
+              "candidate_revision": "e082e8a9ddcea11b818ad2b6e3b14b631212248e",
+              "candidate_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+              "changed_paths": [
+                "web/app.js"
+              ],
+              "preview_endpoint": "http://127.0.0.1:64950/",
+              "human_acceptance": "PENDING",
+              "manual_rescue_actions": []
+            }
+          ],
+          "business_status": "PASS",
           "work_id": "c56670ab-b86d-5dd3-81c5-f4a3dbd13831",
           "interaction_id": "1977b0eb-c151-439a-b7c6-e7894d24c663",
           "refinements": [
@@ -4628,7 +4917,7 @@
           "human_acceptance": "PENDING"
         }
       ],
-      "successful_independent_trials": 2,
+      "successful_independent_trials": 3,
       "status": "PASS"
     },
     {
@@ -5281,9 +5570,352 @@
           ],
           "manual_rescue_actions": [],
           "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 4,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-06/trial-4",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+            "active_repository_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+            "active_source_package_fingerprint": "116ed8cffad9f06d1a75f9ccbe3e609b70a025bd",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+            "current_trusted_baseline_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-06",
+            "trial": 4,
+            "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+            "work_id": "4da78c5c-2f00-5715-8829-f7ff46132007",
+            "elapsed_seconds": 212,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": {
+            "preview_id": "8ef9dd5b-f779-42a1-aac7-afdc4b8bc2f4",
+            "completed_qualification": true,
+            "prior_status": "READY",
+            "preserve_all_volumes": true,
+            "work_or_database_changes": false,
+            "containers": [
+              {
+                "name": "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-proxy",
+                "state": {
+                  "Status": "running",
+                  "Running": true,
+                  "Paused": false,
+                  "Restarting": false,
+                  "OOMKilled": false,
+                  "Dead": false,
+                  "Pid": 11687,
+                  "ExitCode": 0,
+                  "Error": "",
+                  "StartedAt": "2026-09-26T22:39:41.65409401Z",
+                  "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "mounts": [],
+                "networks": {
+                  "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-gateway": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "cf1a31ba53b21100e57cc279120d2a03b12d8d0feaa19039c7a062d68c447b9b",
+                    "EndpointID": "08c4c86f831bd1e2592386f055275ae6d4278356f00e0a467d7e6fb3c1ae82c9",
+                    "Gateway": "192.168.144.1",
+                    "IPAddress": "192.168.144.2",
+                    "MacAddress": "ce:fd:1c:9b:36:7f",
+                    "IPPrefixLen": 20,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-proxy",
+                      "8b2eb7bdde87"
+                    ]
+                  },
+                  "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-internal": {
+                    "IPAMConfig": {},
+                    "Links": null,
+                    "Aliases": [],
+                    "DriverOpts": {},
+                    "GwPriority": 0,
+                    "NetworkID": "c5682374a5d1d72f45de0cddc4acc3e534704701e7a7cbb4f8996a294b7d1ca1",
+                    "EndpointID": "0c4a2aca7d18014532f572b58200b38e7a5ed50728e4c510b33f2f8f2c80022d",
+                    "Gateway": "",
+                    "IPAddress": "192.168.128.3",
+                    "MacAddress": "82:8f:67:5a:66:cb",
+                    "IPPrefixLen": 20,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-proxy",
+                      "8b2eb7bdde87"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-app",
+                "state": {
+                  "Status": "running",
+                  "Running": true,
+                  "Paused": false,
+                  "Restarting": false,
+                  "OOMKilled": false,
+                  "Dead": false,
+                  "Pid": 11368,
+                  "ExitCode": 0,
+                  "Error": "",
+                  "StartedAt": "2026-09-26T22:39:39.822121895Z",
+                  "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "mounts": [
+                  {
+                    "Type": "volume",
+                    "Name": "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-source",
+                    "Source": "/var/lib/docker/volumes/watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-source/_data",
+                    "Destination": "/source",
+                    "Driver": "local",
+                    "Mode": "z",
+                    "RW": false,
+                    "Propagation": ""
+                  }
+                ],
+                "networks": {
+                  "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-internal": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                      "app"
+                    ],
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "c5682374a5d1d72f45de0cddc4acc3e534704701e7a7cbb4f8996a294b7d1ca1",
+                    "EndpointID": "fc007c6ae23bc43effa1c2cbacb93d0c2ac42b29f54db0991104116fd1684181",
+                    "Gateway": "",
+                    "IPAddress": "192.168.128.2",
+                    "MacAddress": "72:cd:d4:29:bd:83",
+                    "IPPrefixLen": 20,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4-app",
+                      "app",
+                      "377bfd33378c"
+                    ]
+                  }
+                }
+              }
+            ],
+            "endpoint_available_after_retirement": false
+          },
+          "business_oracles": [
+            {
+              "evidence_record": "business-oracle.json",
+              "case": "GC-EX-06",
+              "trial": 4,
+              "checks": {
+                "automatic_preview_ready": true,
+                "served_verification": true,
+                "no_unauthorized_delivery": true,
+                "new_label": true,
+                "old_label": true,
+                "one_source_file": true,
+                "minimal_source_diff": true,
+                "automatic_acquisition_recovery": true
+              },
+              "status": "PASS",
+              "candidate_revision": "8332031b8c0cda2d228edebf2ea755ea899decfe",
+              "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+              "changed_paths": [
+                "web/index.html"
+              ],
+              "preview_endpoint": "http://127.0.0.1:52648/",
+              "human_acceptance": "PENDING",
+              "manual_rescue_actions": []
+            }
+          ],
+          "business_status": "PASS",
+          "work_id": "4da78c5c-2f00-5715-8829-f7ff46132007",
+          "interaction_id": "bb286982-1231-4804-be0f-86907500119f",
+          "refinements": [
+            {
+              "id": "bf037c07-7b9e-447f-95cb-84f44e43de1e",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "web/index.html"
+                ],
+                "candidate_paths": [
+                  "web/index.html"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Editing server.py (route handling, API, migrations wiring) — no requested behavior concerns routing or the backend.",
+                  "Editing web/styles.css — no requested styling change; the CTA's appearance must be preserved.",
+                  "Editing web/app.js — no requested script/behavior change; the button has no handler and none is requested.",
+                  "Adding new HTML files, routes, or pages for the new label — a link/label change never entails creating a destination.",
+                  "Renaming or removing the #start id or repositioning the button — only the visible label text is requested.",
+                  "Creating files or configuration for preview serving, verification scripts, or delivery authorization — those belong to downstream lifecycle owners, not to source scope.",
+                  "Inventing authentication, CRM, notes, or other fictional business behavior."
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 10761,
+                "total_tokens": 12757,
+                "cached_tokens": 512,
+                "output_tokens": 1996,
+                "reasoning_tokens": 225
+              },
+              "extra_elapsed_seconds": 0
+            },
+            {
+              "id": "7345c8d7-01dd-45c6-bf0b-7c5b2f8fe2bc",
+              "affected_component": "repository/acquisition",
+              "signal_kind": "REALITY_MISMATCH",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "TRANSIENT_INFRASTRUCTURE_FAILURE",
+                "attempt_budget": 3,
+                "final_condition": "READY",
+                "failure_category": null,
+                "time_budget_seconds": 120
+              },
+              "model_token_usage": {},
+              "extra_elapsed_seconds": 1
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "20bf3c6a-4e89-427f-8374-fe66d5184f6b",
+              "attempt_id": "84112f0e-ac11-4c95-9da1-04c49a0c9725",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "4da78c5c-2f00-5715-8829-f7ff46132007",
+            "product_id": "b7cc8e56-839e-40dd-b7c0-039f2c55749e",
+            "pwu_count": 1,
+            "join_count": 0,
+            "pwu": [
+              {
+                "pwu_id": "20bf3c6a-4e89-427f-8374-fe66d5184f6b",
+                "node_id": null,
+                "run_id": "65d288e3-40d3-4e1c-b8c2-0c36f25131f1",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:84112f0e-ac11-4c95-9da1-04c49a0c9725"
+                ],
+                "execution_seconds": 40.732203,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.819952,
+                "token_usage": {
+                  "input_tokens": 75176,
+                  "output_tokens": 6584,
+                  "total_tokens": 81760,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 6,
+                  "tool_effect": 7
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 75176,
+              "output_tokens": 6584,
+              "total_tokens": 81760,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 1,
+              "amount": null
+            },
+            "execution_seconds": 40.732203,
+            "queue_wait_seconds": 0.819952,
+            "wall_elapsed_seconds": 44.628254,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 2,
+            "first_pass_pwu_count": 1,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 1,
+            "resource_units": {
+              "inference_submission": 6,
+              "tool_effect": 7
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "6d1c8176-9013-5da4-bf24-3fa746154827",
+              "work_id": "4da78c5c-2f00-5715-8829-f7ff46132007",
+              "kind": "CANDIDATE_AUTHORIZATION",
+              "decision": "Authorize exact sealed Candidate integration?",
+              "reason": "Repository integration requires exact Human Authority.",
+              "available_actions": [
+                "AUTHORIZE"
+              ],
+              "recommended_action": null,
+              "governed_subject_ref": "baseline-candidate:3d8ecf30-3c70-58fd-9f13-7eee9ad9467c",
+              "steering_reason": null,
+              "recommendation": null,
+              "conversation_prompt": null,
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": null,
+              "reality_refs": [],
+              "steering_plan_revision_id": null,
+              "steering_step_id": null,
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
         }
       ],
-      "successful_independent_trials": 2,
+      "successful_independent_trials": 3,
       "status": "PASS"
     },
     {
@@ -9102,6 +9734,354 @@
           ],
           "manual_rescue_actions": [],
           "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 6,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-6",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-10",
+            "trial": 6,
+            "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+            "work_id": "bba28a66-6303-516c-bcc3-5dabad1d6f81",
+            "elapsed_seconds": 511,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "bba28a66-6303-516c-bcc3-5dabad1d6f81",
+          "interaction_id": "f1438904-600b-4552-8339-a865d5aedf6f",
+          "refinements": [],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "bba28a66-6303-516c-bcc3-5dabad1d6f81",
+            "product_id": "0c7d7c6e-00bd-4a74-8461-903c4391dcdf",
+            "pwu_count": 0,
+            "join_count": 0,
+            "pwu": [],
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "amount": null
+            },
+            "wall_elapsed_seconds": null,
+            "execution_seconds": 0,
+            "queue_wait_seconds": 0,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": null,
+            "token_usage": {
+              "status": "UNREPORTED"
+            },
+            "self_refine_event_count": 0,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {},
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "15dba0ed-e66d-559b-bdd8-9fb4813340a9",
+              "work_id": "bba28a66-6303-516c-bcc3-5dabad1d6f81",
+              "kind": "PRODUCTION_PROPOSAL_REVIEW",
+              "decision": "Review the bounded production proposal",
+              "reason": "Production requires explicit Human admission of its scope and verification basis.",
+              "available_actions": [
+                "APPROVE",
+                "REQUEST_REFINEMENT"
+              ],
+              "recommended_action": "APPROVE",
+              "governed_subject_ref": "steering-decision:bfbda4ab-50af-41f0-b84a-db1c5a35b2d7",
+              "steering_reason": "PRODUCTION_PROPOSAL_REVIEW_REQUIRED",
+              "recommendation": "Approve the proposal or request a bounded refinement.",
+              "conversation_prompt": null,
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": "No production authority is created until this review is resolved.",
+              "reality_refs": [
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "02a13c6a-d808-40c9-89bc-ffea643baa61"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "11dc4efe-329b-4864-9e99-e7818c6f5167"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "5179c1f5-5e6a-465c-a8f5-ac2d92b5449f"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "788f0d3a-271a-4420-b3db-d0048f3b50ef"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "ab45daec-e537-42cd-abef-c464f99ca07f"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "ee689bf5-879a-49bf-a9ea-a654b057551f"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "f7cd6484-3dc9-422f-8934-a30694de0c27"
+                },
+                {
+                  "kind": "DESIGN_PROCESS",
+                  "identity": "d9189b49-a9d9-5c4a-b09d-d4eae3e19218"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "bcee3391-ee89-4a31-9fff-24912496818d"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "fcaceb44-ef8e-552b-af42-517761a9aa60"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "091eb51f-c89c-45c3-acc3-38247de62f66"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "0bed102a-0322-4018-b1e3-36d291ff7dbe"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "3811481c-9c36-47d7-8f4b-4c26e456d945"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "437964bb-a2a4-4637-8bd7-e31ae8f66615"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "778d37a1-0460-403e-9587-c7803c95f59b"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "7aa875d1-daef-42a9-bfa9-12b334b732a3"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "ec1b35a3-7c70-4182-96a1-912742b2b478"
+                },
+                {
+                  "kind": "TRUSTED_BASELINE",
+                  "identity": "b5700475-14b0-4ad7-a349-504a1e371bcb"
+                },
+                {
+                  "kind": "WORK",
+                  "identity": "bba28a66-6303-516c-bcc3-5dabad1d6f81"
+                },
+                {
+                  "kind": "WORK_REALITY_REVISION",
+                  "identity": "b9a47443-4c10-5430-96c3-9885faa179f3"
+                }
+              ],
+              "steering_plan_revision_id": "6a9647da-9fa0-4bdb-a428-5e787f9843bf",
+              "steering_step_id": "e54ee168-e264-4b45-a09b-7a384ed446de",
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 7,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-7",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-10",
+            "trial": 7,
+            "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+            "work_id": "9e245dc4-2fc8-5b8a-aae9-bcea9d504560",
+            "elapsed_seconds": 622,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "9e245dc4-2fc8-5b8a-aae9-bcea9d504560",
+          "interaction_id": "cec64a68-8150-4d8d-83a9-404eb0311d00",
+          "refinements": [],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "9e245dc4-2fc8-5b8a-aae9-bcea9d504560",
+            "product_id": "0c7d7c6e-00bd-4a74-8461-903c4391dcdf",
+            "pwu_count": 0,
+            "join_count": 0,
+            "pwu": [],
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "amount": null
+            },
+            "wall_elapsed_seconds": null,
+            "execution_seconds": 0,
+            "queue_wait_seconds": 0,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": null,
+            "token_usage": {
+              "status": "UNREPORTED"
+            },
+            "self_refine_event_count": 0,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {},
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "0d71620b-6185-57ce-b75b-040f1b263feb",
+              "work_id": "9e245dc4-2fc8-5b8a-aae9-bcea9d504560",
+              "kind": "PRODUCTION_PROPOSAL_REVIEW",
+              "decision": "Review the bounded production proposal",
+              "reason": "Production requires explicit Human admission of its scope and verification basis.",
+              "available_actions": [
+                "APPROVE",
+                "REQUEST_REFINEMENT"
+              ],
+              "recommended_action": "APPROVE",
+              "governed_subject_ref": "steering-decision:0a2d6c78-5fca-47bc-9102-4f1f625b774e",
+              "steering_reason": "PRODUCTION_PROPOSAL_REVIEW_REQUIRED",
+              "recommendation": "Approve the proposal or request a bounded refinement.",
+              "conversation_prompt": null,
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": "No production authority is created until this review is resolved.",
+              "reality_refs": [
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "3408c089-8405-4e02-9dce-423f3b8e68cd"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "4d9fc16c-a2e0-4d9e-9074-26a87fcd7567"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "597395ab-d7ab-4f76-96f4-4f2d3419d138"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "5e9fac40-aead-4386-9a61-d63781b921c5"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "b0aee030-1061-441e-b24f-34138af763d1"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "b9a2c6cb-c041-4fab-bdce-a31683e6303e"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "db3c5abe-789a-4711-9426-51a0c8ae5814"
+                },
+                {
+                  "kind": "DESIGN_PROCESS",
+                  "identity": "052a484d-6028-5b70-8ba6-5371f4e4395a"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "027602af-23d2-408a-82c6-12e43ebfee03"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "93a60168-20b0-54ad-ac4d-490eafd26518"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "31f4677a-0f92-4c73-b9b9-54ea737a7767"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "4c281b59-a574-430c-8e63-00cb4fb1c90d"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "62072dfd-e8a0-47b6-91b0-ad5c902d1f78"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "a3fe637b-c8e0-4e21-9af1-2a9ef7ffc777"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "d83f953f-581d-4353-a3ca-0f83d830f5f1"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "dcbb07ab-c649-4437-98aa-bf381da8f19b"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "f2e6c859-db26-48c5-b7a6-690f6e6b5b11"
+                },
+                {
+                  "kind": "TRUSTED_BASELINE",
+                  "identity": "b5700475-14b0-4ad7-a349-504a1e371bcb"
+                },
+                {
+                  "kind": "WORK",
+                  "identity": "9e245dc4-2fc8-5b8a-aae9-bcea9d504560"
+                },
+                {
+                  "kind": "WORK_REALITY_REVISION",
+                  "identity": "09395c2f-3483-5901-a8c7-5015df58043a"
+                }
+              ],
+              "steering_plan_revision_id": "4ffaeb16-8fb8-4cb5-96fe-b902138616e7",
+              "steering_step_id": "428e921b-c467-4292-b907-101c3c7fcd86",
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
         }
       ],
       "successful_independent_trials": 1,
@@ -9234,6 +10214,48 @@
           "business_status": "NOT_EVALUATED",
           "work_id": null,
           "interaction_id": "86ef5718-2d77-4445-b6cd-193ce1907325",
+          "refinements": [],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {},
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 4,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-11/trial-4",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+            "active_repository_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+            "active_source_package_fingerprint": "116ed8cffad9f06d1a75f9ccbe3e609b70a025bd",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+            "current_trusted_baseline_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-11",
+            "trial": 4,
+            "status": "CLARIFICATION_REQUIRES_CLASSIFICATION",
+            "work_id": null,
+            "elapsed_seconds": 61,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": null,
+          "interaction_id": "271bb387-8e64-4845-9dcb-db2abf326e56",
           "refinements": [],
           "execution_lineage": [],
           "plan_lineage": null,
@@ -9475,6 +10497,48 @@
               "expected_work_reality_revision_id": null
             }
           ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 2,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-12/trial-2",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+            "active_repository_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+            "active_source_package_fingerprint": "116ed8cffad9f06d1a75f9ccbe3e609b70a025bd",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+            "current_trusted_baseline_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-12",
+            "trial": 2,
+            "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+            "work_id": null,
+            "elapsed_seconds": 54,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": null,
+          "interaction_id": "17044098-2ad5-4624-bbba-bcb766a8823b",
+          "refinements": [],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {},
+          "human_attention": [],
           "manual_rescue_actions": [],
           "human_acceptance": "PENDING"
         }
@@ -11388,9 +12452,577 @@
         "no duplicate side effect",
         "same intent reaches Preview"
       ],
-      "trials": [],
-      "successful_independent_trials": 0,
-      "status": "PENDING"
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-14/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-14",
+            "trial": 1,
+            "status": "TIMEOUT",
+            "work_id": "a1bb1719-4418-519f-bd9f-2731d4e856b9",
+            "elapsed_seconds": 1803,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "a1bb1719-4418-519f-bd9f-2731d4e856b9",
+          "interaction_id": "e7064996-723d-4ad4-b308-7a995558f4d7",
+          "refinements": [
+            {
+              "id": "1fffa019-08f2-41e6-b735-ae7b1d2e878c",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "web/index.html"
+                ],
+                "candidate_paths": [
+                  "web/index.html"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Editing server.py (routing, FIELDS, API handlers, migrate(), or port logic) — no requested behavior touches routing, API, or persistence",
+                  "Editing web/app.js — dialog and list-loading behavior is unrelated to the button label and must stay unchanged",
+                  "Editing web/styles.css — no style change was requested",
+                  "Adding or altering migrations/001_initial.sql or creating new migrations — no schema or data change was requested",
+                  "Creating new files (new HTML pages, JS modules, tests, configs) — no new behavior was requested and no witness requires a new file",
+                  "Editing tests/application.cjs — its oracle was not shown and the requested label change is a content edit, not a test-behavior change",
+                  "Touching Dockerfile, package.json, README.md, or .gitignore — unchanged runtime and documentation are required",
+                  "Renaming the button id or adding new elements/links/routes — only the visible text changes",
+                  "Inventing authentication, CRM, notes, or other business features — the fixture explicitly states these do not exist"
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 10779,
+                "total_tokens": 12785,
+                "cached_tokens": 512,
+                "output_tokens": 2006,
+                "reasoning_tokens": 376
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "c63ae00b-46e7-4c32-9372-c49e56ff8db4",
+              "attempt_id": "f91d2f7b-1f6f-4d33-812f-bc7b37a3d5ff",
+              "condition": "EXECUTING",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "a1bb1719-4418-519f-bd9f-2731d4e856b9",
+            "product_id": "8c6f254e-6188-4598-ba84-fc2186f60bf8",
+            "pwu_count": 1,
+            "join_count": 0,
+            "pwu": [
+              {
+                "pwu_id": "c63ae00b-46e7-4c32-9372-c49e56ff8db4",
+                "node_id": null,
+                "run_id": "7ee9cce8-3379-4331-a620-7f75ffe514a6",
+                "condition": "PROPOSED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "UNKNOWN"
+                ],
+                "providers": [
+                  "deepseek"
+                ],
+                "execution_seconds": 2.585502,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.818799,
+                "token_usage": {
+                  "input_tokens": 10468,
+                  "output_tokens": 87,
+                  "total_tokens": 10555,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 1,
+                  "tool_effect": 1
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 10468,
+              "output_tokens": 87,
+              "total_tokens": 10555,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 1,
+              "amount": null
+            },
+            "execution_seconds": 2.585502,
+            "queue_wait_seconds": 0.818799,
+            "wall_elapsed_seconds": 2.585502,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 1,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {
+              "inference_submission": 1,
+              "tool_effect": 1
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 2,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-14/trial-2",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+            "active_repository_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+            "active_source_package_fingerprint": "116ed8cffad9f06d1a75f9ccbe3e609b70a025bd",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+            "current_trusted_baseline_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-14",
+            "trial": 2,
+            "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+            "work_id": "95dcdc6c-6d70-5036-a74a-c32d3d17ddf6",
+            "elapsed_seconds": 235,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": {
+            "preview_id": "29d9c36c-c744-44ba-a845-92c1dca1ef4a",
+            "completed_qualification": true,
+            "prior_status": "READY",
+            "preserve_all_volumes": true,
+            "work_or_database_changes": false,
+            "containers": [
+              {
+                "name": "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-proxy",
+                "state": {
+                  "Status": "running",
+                  "Running": true,
+                  "Paused": false,
+                  "Restarting": false,
+                  "OOMKilled": false,
+                  "Dead": false,
+                  "Pid": 16263,
+                  "ExitCode": 0,
+                  "Error": "",
+                  "StartedAt": "2026-09-26T22:40:09.90558014Z",
+                  "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "mounts": [],
+                "networks": {
+                  "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-gateway": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "5afcf364404abefa5d740e0aa361249d9f3365ff47dba9e2f7dc1ed3d12bb31c",
+                    "EndpointID": "b08cec0d6509461cbe29b3b9e8040edd867ebc4e7de6e8bdc6d8c8c0b9438bac",
+                    "Gateway": "192.168.176.1",
+                    "IPAddress": "192.168.176.2",
+                    "MacAddress": "6e:2a:64:d9:11:ae",
+                    "IPPrefixLen": 20,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-proxy",
+                      "c87cb865a6c8"
+                    ]
+                  },
+                  "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-internal": {
+                    "IPAMConfig": {},
+                    "Links": null,
+                    "Aliases": [],
+                    "DriverOpts": {},
+                    "GwPriority": 0,
+                    "NetworkID": "5cabbdcb109eb414942fecf268d35060ea0764419412faf8ae78549c6f8a9382",
+                    "EndpointID": "5f3d8e7821d0832fb2c0ff7f4e09e563526889e56160d22d0f7ba1c67f1ceb7e",
+                    "Gateway": "",
+                    "IPAddress": "192.168.160.3",
+                    "MacAddress": "fa:3f:a9:34:bd:c8",
+                    "IPPrefixLen": 20,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-proxy",
+                      "c87cb865a6c8"
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-app",
+                "state": {
+                  "Status": "running",
+                  "Running": true,
+                  "Paused": false,
+                  "Restarting": false,
+                  "OOMKilled": false,
+                  "Dead": false,
+                  "Pid": 15988,
+                  "ExitCode": 0,
+                  "Error": "",
+                  "StartedAt": "2026-09-26T22:40:08.040854587Z",
+                  "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "mounts": [
+                  {
+                    "Type": "volume",
+                    "Name": "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-source",
+                    "Source": "/var/lib/docker/volumes/watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-source/_data",
+                    "Destination": "/source",
+                    "Driver": "local",
+                    "Mode": "z",
+                    "RW": false,
+                    "Propagation": ""
+                  }
+                ],
+                "networks": {
+                  "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-internal": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                      "app"
+                    ],
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "5cabbdcb109eb414942fecf268d35060ea0764419412faf8ae78549c6f8a9382",
+                    "EndpointID": "a9d71ba982e87e51823ea3ad23dd907e7a342ccba7a00f14bddae1f6ac5ef4ae",
+                    "Gateway": "",
+                    "IPAddress": "192.168.160.2",
+                    "MacAddress": "f2:99:70:7a:d7:ee",
+                    "IPPrefixLen": 20,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                      "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a-app",
+                      "app",
+                      "308eb09c4cb1"
+                    ]
+                  }
+                }
+              }
+            ],
+            "endpoint_available_after_retirement": false
+          },
+          "business_oracles": [
+            {
+              "evidence_record": "business-oracle.json",
+              "case": "GC-EX-14",
+              "trial": 2,
+              "checks": {
+                "automatic_preview_ready": true,
+                "served_verification": true,
+                "no_unauthorized_delivery": true,
+                "new_label": true,
+                "old_label": true,
+                "one_source_file": true,
+                "minimal_source_diff": true,
+                "actual_worker_interruption": true,
+                "same_attempt_new_lease_epoch": true,
+                "automatic_same_attempt_resume": true,
+                "no_duplicate_source_effect": true,
+                "interrupted_inference_preserved": true,
+                "native_refinement_recovered": false
+              },
+              "status": "FAIL",
+              "candidate_revision": "2eccd346a0a5550bccd54780baa52b7886e7f640",
+              "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+              "changed_paths": [
+                "web/index.html"
+              ],
+              "preview_endpoint": "http://127.0.0.1:52767/",
+              "human_acceptance": "PENDING",
+              "manual_rescue_actions": []
+            },
+            {
+              "evidence_record": "business-oracle-v2.json",
+              "case": "GC-EX-14",
+              "trial": 2,
+              "checks": {
+                "automatic_preview_ready": true,
+                "served_verification": true,
+                "no_unauthorized_delivery": true,
+                "new_label": true,
+                "old_label": true,
+                "one_source_file": true,
+                "minimal_source_diff": true,
+                "actual_worker_interruption": true,
+                "same_attempt_new_lease_epoch": true,
+                "automatic_same_attempt_resume": true,
+                "no_duplicate_source_effect": true,
+                "interrupted_inference_preserved": true,
+                "native_refinement_recovered": true
+              },
+              "status": "PASS",
+              "candidate_revision": "2eccd346a0a5550bccd54780baa52b7886e7f640",
+              "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+              "changed_paths": [
+                "web/index.html"
+              ],
+              "preview_endpoint": "http://127.0.0.1:52767/",
+              "human_acceptance": "PENDING",
+              "manual_rescue_actions": []
+            }
+          ],
+          "business_status": "PASS",
+          "work_id": "95dcdc6c-6d70-5036-a74a-c32d3d17ddf6",
+          "interaction_id": "b44bb044-2ee7-477e-9ea2-83f49d62e283",
+          "refinements": [
+            {
+              "id": "bbb69709-ffd1-44d5-b1de-19620338fb08",
+              "affected_component": "native-executor/lease-recovery",
+              "signal_kind": "EXECUTION_FAILURE",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "risk": "NORMAL",
+                "limits": {
+                  "attempts": 2,
+                  "cost_units": null,
+                  "model_tokens": 20000,
+                  "tool_effects": 400,
+                  "active_seconds": 300,
+                  "same_signature": 2,
+                  "inference_submissions": 12
+                },
+                "observed": {
+                  "model_tokens": 0,
+                  "tool_effects": 0,
+                  "prior_retries": 0,
+                  "elapsed_seconds": 0,
+                  "inference_submissions": 1,
+                  "same_signature_failures": 1
+                },
+                "remaining": {
+                  "attempts": 2,
+                  "model_tokens": 20000,
+                  "tool_effects": 400,
+                  "active_seconds": 300,
+                  "same_signature": 1,
+                  "inference_submissions": 11
+                },
+                "complexity": "SMALL",
+                "reversible": true,
+                "allow_retry": true,
+                "risk_factors": [],
+                "repairability": "AUTONOMOUSLY_REPAIRABLE",
+                "failure_family": "WORKER_LEASE_LOST",
+                "policy_version": "adaptive-self-converge-v1",
+                "human_escalated": false,
+                "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+                "complexity_points": 5
+              },
+              "diagnostic_evidence": {
+                "checkpoint_ref": "native-checkpoint:05ca40a4-d18b-430f-853a-d4f21e51c8d2",
+                "failure_family": "WORKER_LEASE_LOST",
+                "failure_signature": "228eb4c7ddfc7a2b85188efd870fdc456162b815f10aa08a400aa8cc0f5867cb",
+                "native_attempt_ref": "native-attempt:c71a3836-c310-4545-8ed8-13f269229076"
+              },
+              "model_token_usage": {
+                "input_tokens": 42030,
+                "total_tokens": 44202,
+                "output_tokens": 2172,
+                "reasoning_tokens": 1451,
+                "cached_input_tokens": 5760,
+                "observed_response_count": 3
+              },
+              "extra_elapsed_seconds": 51
+            },
+            {
+              "id": "659d23f6-8dae-412b-bcc2-71c72369074b",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "web/index.html"
+                ],
+                "candidate_paths": [
+                  "web/index.html"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Editing web/app.js: it only wires the dialog and fetches /api/users and /api/customers; no selector or text for #start, so the label change does not require it.",
+                  "Editing web/styles.css: the requested change is copy text only, not styling, and the constraint says everything else stays the same.",
+                  "Editing server.py: it already serves web/index.html for `/` with the correct content type; no runtime change is requested.",
+                  "Editing migrations/001_initial.sql, package.json, Dockerfile, README.md, tests/application.cjs: no persistence, build, documentation, or test-oracle behavior is requested; these would be unrequested refactors.",
+                  "Creating new files (e.g. a new page, route, asset, or preview HTML): no repository witness or explicit new-behavior request exists, and adding a destination page/route is never entailed by a copy change.",
+                  "Altering the other homepage controls (header-login, account-login, open-dialog, nav links) or any other routes (/users, /customers, /orders, /help, /about)."
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 10767,
+                "total_tokens": 13210,
+                "cached_tokens": 512,
+                "output_tokens": 2443,
+                "reasoning_tokens": 169
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "f1ee85d0-565d-4b01-b563-9d2a8d2587c4",
+              "attempt_id": "c71a3836-c310-4545-8ed8-13f269229076",
+              "condition": "COMPLETED",
+              "resume_count": 1
+            }
+          ],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "95dcdc6c-6d70-5036-a74a-c32d3d17ddf6",
+            "product_id": "7cd2471c-1fd4-4170-ad24-dbf51a9c6318",
+            "pwu_count": 1,
+            "join_count": 0,
+            "pwu": [
+              {
+                "pwu_id": "f1ee85d0-565d-4b01-b563-9d2a8d2587c4",
+                "node_id": null,
+                "run_id": "89bf164e-fe38-4ae4-ba49-f16da9a6d6c2",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:c71a3836-c310-4545-8ed8-13f269229076"
+                ],
+                "execution_seconds": 42.052363,
+                "duration_observed": true,
+                "queue_wait_seconds": 65.09753500000001,
+                "token_usage": {
+                  "input_tokens": 53331,
+                  "output_tokens": 2249,
+                  "total_tokens": 55580,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 4,
+                  "tool_effect": 6
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 53331,
+              "output_tokens": 2249,
+              "total_tokens": 55580,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 1,
+              "amount": null
+            },
+            "execution_seconds": 42.052363,
+            "queue_wait_seconds": 65.09753500000001,
+            "wall_elapsed_seconds": 80.837836,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 2,
+            "first_pass_pwu_count": 1,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 51,
+            "resource_units": {
+              "inference_submission": 4,
+              "tool_effect": 6
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "1d5ffb59-4390-5d12-ba23-e1441b760f1e",
+              "work_id": "95dcdc6c-6d70-5036-a74a-c32d3d17ddf6",
+              "kind": "CANDIDATE_AUTHORIZATION",
+              "decision": "Authorize exact sealed Candidate integration?",
+              "reason": "Repository integration requires exact Human Authority.",
+              "available_actions": [
+                "AUTHORIZE"
+              ],
+              "recommended_action": null,
+              "governed_subject_ref": "baseline-candidate:853f5ae7-85f9-5de2-8ff0-e17c1b03ab0c",
+              "steering_reason": null,
+              "recommendation": null,
+              "conversation_prompt": null,
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": null,
+              "reality_refs": [],
+              "steering_plan_revision_id": null,
+              "steering_step_id": null,
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
+      "successful_independent_trials": 1,
+      "status": "PASS"
     },
     {
       "id": "GC-EX-15",
@@ -13510,6 +15142,479 @@
               ],
               "recommended_action": null,
               "governed_subject_ref": "baseline-candidate:250f346f-433c-53d5-ae3b-60415040fb2f",
+              "steering_reason": null,
+              "recommendation": null,
+              "conversation_prompt": null,
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": null,
+              "reality_refs": [],
+              "steering_plan_revision_id": null,
+              "steering_step_id": null,
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 6,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-02/trial-6",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-02",
+            "trial": 6,
+            "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+            "work_id": "08fdd503-aa1d-54e9-a6fc-737fa4b3045f",
+            "elapsed_seconds": 1244,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "08fdd503-aa1d-54e9-a6fc-737fa4b3045f",
+          "interaction_id": "cd0c4b33-648a-49e8-a131-d973b0cfffa4",
+          "refinements": [
+            {
+              "id": "0f4438ce-7dbc-4ddc-a8e2-675a737fa319",
+              "affected_component": "native-tool-host/test.run",
+              "signal_kind": "EVIDENCE_INSUFFICIENT",
+              "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "policy_version": "native-effect-repair-v1",
+                "classification_basis": "Use the granted locked dependency synchronization or an equivalent admitted test path; do not add dependencies or change the acceptance oracle"
+              },
+              "diagnostic_evidence": {
+                "returncode": 127,
+                "stderr_ref": "native-receipt:73116336-0907-4f41-89e9-38914c82c3d8#stderr",
+                "stdout_ref": "native-receipt:73116336-0907-4f41-89e9-38914c82c3d8#stdout",
+                "receipt_ref": "native-receipt:73116336-0907-4f41-89e9-38914c82c3d8",
+                "stderr_bytes": 0,
+                "stdout_bytes": 121,
+                "evidence_refs": [
+                  "native-evidence:f948e852-ba84-4cdf-aaf9-1bbe7e69cda1"
+                ],
+                "output_digest": "866168a7dddd62ccecf9de0d34298bed9a650f4dbfe4cba963a598b9cc47f8a7",
+                "tool_identity": "test.run",
+                "diagnostic_code": "TEST_ENVIRONMENT_NOT_READY",
+                "verification_evidence": "INCOMPLETE",
+                "test_environment_readiness": "NOT_READY"
+              },
+              "model_token_usage": {
+                "input_tokens": 63699,
+                "total_tokens": 76602,
+                "output_tokens": 12903,
+                "reasoning_tokens": 11542,
+                "cached_input_tokens": 4480,
+                "observed_response_count": 3
+              },
+              "extra_elapsed_seconds": 67
+            },
+            {
+              "id": "95ac1aeb-6187-4b14-bbfe-306b5194ecf6",
+              "affected_component": "native-tool-host/file.read",
+              "signal_kind": "CAPABILITY_MISMATCH",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "policy_version": "native-effect-repair-v1",
+                "classification_basis": "denied recipe had no effect; use only already admitted paths and capabilities"
+              },
+              "diagnostic_evidence": {
+                "receipt_ref": "native-receipt:b74fe2bb-1f27-424d-b4a4-109cb8fc63f2",
+                "evidence_refs": [
+                  "native-evidence:3ed3975f-05be-4a89-8d00-bc808cabc508"
+                ],
+                "output_digest": "e42810d54afdfba3ff369fd8b3a017d8d5978732b5ddf51ae5c7d276e67f2752",
+                "tool_identity": "file.read"
+              },
+              "model_token_usage": {
+                "input_tokens": 51153,
+                "total_tokens": 64131,
+                "output_tokens": 12978,
+                "reasoning_tokens": 11706,
+                "cached_input_tokens": 5760,
+                "observed_response_count": 3
+              },
+              "extra_elapsed_seconds": 63
+            },
+            {
+              "id": "3b6b704c-9054-4c56-826d-ef655c71332d",
+              "affected_component": "native-tool-host/file.read",
+              "signal_kind": "CAPABILITY_MISMATCH",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "policy_version": "native-effect-repair-v1",
+                "classification_basis": "denied recipe had no effect; use only already admitted paths and capabilities"
+              },
+              "diagnostic_evidence": {
+                "receipt_ref": "native-receipt:5aacd46f-b2af-4111-8447-c4f19c0e31b9",
+                "evidence_refs": [
+                  "native-evidence:244f924e-a74f-4f4d-ac88-1f3ed2ccd268"
+                ],
+                "output_digest": "e42810d54afdfba3ff369fd8b3a017d8d5978732b5ddf51ae5c7d276e67f2752",
+                "tool_identity": "file.read"
+              },
+              "model_token_usage": {
+                "input_tokens": 67048,
+                "total_tokens": 79263,
+                "output_tokens": 12215,
+                "reasoning_tokens": 10936,
+                "cached_input_tokens": 7680,
+                "observed_response_count": 4
+              },
+              "extra_elapsed_seconds": 63
+            },
+            {
+              "id": "220d5542-a28f-404f-8ab8-51c13bd29e96",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "server.py",
+                  "web/collect.html",
+                  "web/index.html"
+                ],
+                "candidate_paths": [
+                  "server.py",
+                  "web/index.html",
+                  "web/collect.html",
+                  "web/collect.js",
+                  "tests/application.cjs"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Changing tests/application.cjs; the existing test oracle covers customer CRUD, and no test change is requested or required for the collection page.",
+                  "Adding authentication/login wiring or changing the anonymous access model; README states login controls are existing affordances and authentication is not implemented.",
+                  "Changing SQLite migrations or schema; the users table already has name, email and status, and the existing API already supports POST /api/users.",
+                  "Adding a separate web/collect.js asset or /collect.js route when the collection page script can be inline in web/collect.html; no separate script asset is explicitly requested.",
+                  "Altering existing routes or /api/* behavior beyond adding the new page route; existing routes must keep working unchanged.",
+                  "Presenting seeded fixture rows as real company facts; README warns against it.",
+                  "Adding unrequested CRM workflows, notes, feedback, external integrations or refactors."
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 11256,
+                "total_tokens": 26296,
+                "cached_tokens": 512,
+                "output_tokens": 15040,
+                "reasoning_tokens": 9972
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "e9323a05-7cae-5ec6-b786-20036194411c",
+              "attempt_id": "a5e8efe7-a5a1-4158-ab98-cc923dc790a0",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            },
+            {
+              "pwu_id": "9b378dd7-dd63-52c5-824c-f88d3535c778",
+              "attempt_id": "dc89d223-a76f-4c1e-9f50-e293321f09d4",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            },
+            {
+              "pwu_id": "a369e767-243f-5cec-8abf-bfa1df662487",
+              "attempt_id": "58971f96-3d38-4bbc-a967-e31a48cc30c2",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            },
+            {
+              "pwu_id": "4907fc88-40bb-57a3-a46c-d15febee08a6",
+              "attempt_id": "311497af-212f-4ccc-a253-8c3900e05cb1",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": {
+            "plan_revision_id": "a2a66e05-9fa5-4326-822d-7e525ca080a9",
+            "revision_number": 1,
+            "groups": [
+              {
+                "node_id": "group:server",
+                "objective": "Produce the server change surface",
+                "parent_id": null
+              },
+              {
+                "node_id": "group:collect",
+                "objective": "Produce the collect change surface",
+                "parent_id": null
+              },
+              {
+                "node_id": "group:web",
+                "objective": "Produce the web change surface",
+                "parent_id": null
+              }
+            ],
+            "pwus": [
+              {
+                "node_id": "pwu:1",
+                "pwu_id": "e9323a05-7cae-5ec6-b786-20036194411c",
+                "kind": "PWU",
+                "objective": "Produce and verify the server capability change",
+                "group_id": "group:server",
+                "dependency_ids": [],
+                "state": "VERIFIED",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": "300086e4-2515-5927-bd0b-9868c94cdfe9",
+                "verified_output_revision": "9238633ef07e00604b8f83376c8915f48b809ade",
+                "workspace_attempt_id": "a5e8efe7-a5a1-4158-ab98-cc923dc790a0"
+              },
+              {
+                "node_id": "pwu:2",
+                "pwu_id": "9b378dd7-dd63-52c5-824c-f88d3535c778",
+                "kind": "PWU",
+                "objective": "Produce and verify the collect capability change",
+                "group_id": "group:collect",
+                "dependency_ids": [],
+                "state": "VERIFIED",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": "89213d23-4271-53ca-a0aa-20f3346bdc0c",
+                "verified_output_revision": "4a952d0ba351b6ce98dca765bdba70d00da5b178",
+                "workspace_attempt_id": "dc89d223-a76f-4c1e-9f50-e293321f09d4"
+              },
+              {
+                "node_id": "pwu:3",
+                "pwu_id": "a369e767-243f-5cec-8abf-bfa1df662487",
+                "kind": "PWU",
+                "objective": "Produce and verify the web capability change",
+                "group_id": "group:web",
+                "dependency_ids": [],
+                "state": "VERIFIED",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": "9f08ba8d-e192-53b0-93ce-83a70b0eaa72",
+                "verified_output_revision": "6bbf4851f74e5009674380a8183f73cf0a6fe4cb",
+                "workspace_attempt_id": "58971f96-3d38-4bbc-a967-e31a48cc30c2"
+              },
+              {
+                "node_id": "pwu:join",
+                "pwu_id": "4907fc88-40bb-57a3-a46c-d15febee08a6",
+                "kind": "JOIN",
+                "objective": "Reconcile and verify the independently produced branch baselines",
+                "group_id": null,
+                "dependency_ids": [
+                  "pwu:1",
+                  "pwu:2",
+                  "pwu:3"
+                ],
+                "state": "VERIFIED",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": "1891aecf-9e36-5f8d-abc7-c9415dc27d28",
+                "verified_output_revision": "502a7a85cde95c5ce244b8fa891345aa864720a8",
+                "workspace_attempt_id": "311497af-212f-4ccc-a253-8c3900e05cb1"
+              }
+            ],
+            "integrated_baseline_id": "1891aecf-9e36-5f8d-abc7-c9415dc27d28",
+            "integrated_revision": "502a7a85cde95c5ce244b8fa891345aa864720a8"
+          },
+          "economics": {
+            "work_id": "08fdd503-aa1d-54e9-a6fc-737fa4b3045f",
+            "product_id": "34a2ed53-f469-4c4a-a67d-4707b5ad34ce",
+            "pwu_count": 4,
+            "join_count": 1,
+            "pwu": [
+              {
+                "pwu_id": "e9323a05-7cae-5ec6-b786-20036194411c",
+                "node_id": "pwu:1",
+                "run_id": "d75b0dd8-7e87-4791-befe-0ae71754e1e1",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:a5e8efe7-a5a1-4158-ab98-cc923dc790a0"
+                ],
+                "execution_seconds": 63.868549,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.633388,
+                "token_usage": {
+                  "input_tokens": 78223,
+                  "output_tokens": 12417,
+                  "total_tokens": 90640,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 5,
+                  "tool_effect": 9
+                }
+              },
+              {
+                "pwu_id": "9b378dd7-dd63-52c5-824c-f88d3535c778",
+                "node_id": "pwu:2",
+                "run_id": "d75b0dd8-7e87-4791-befe-0ae71754e1e1",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:dc89d223-a76f-4c1e-9f50-e293321f09d4"
+                ],
+                "execution_seconds": 67.236372,
+                "duration_observed": true,
+                "queue_wait_seconds": 29.908653,
+                "token_usage": {
+                  "input_tokens": 77433,
+                  "output_tokens": 13669,
+                  "total_tokens": 91102,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 5,
+                  "tool_effect": 10
+                }
+              },
+              {
+                "pwu_id": "a369e767-243f-5cec-8abf-bfa1df662487",
+                "node_id": "pwu:3",
+                "run_id": "d75b0dd8-7e87-4791-befe-0ae71754e1e1",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:58971f96-3d38-4bbc-a967-e31a48cc30c2"
+                ],
+                "execution_seconds": 64.589148,
+                "duration_observed": true,
+                "queue_wait_seconds": 40.961835,
+                "token_usage": {
+                  "input_tokens": 99123,
+                  "output_tokens": 12733,
+                  "total_tokens": 111856,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 6,
+                  "tool_effect": 12
+                }
+              },
+              {
+                "pwu_id": "4907fc88-40bb-57a3-a46c-d15febee08a6",
+                "node_id": "pwu:join",
+                "run_id": "d75b0dd8-7e87-4791-befe-0ae71754e1e1",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:311497af-212f-4ccc-a253-8c3900e05cb1"
+                ],
+                "execution_seconds": 81.427402,
+                "duration_observed": true,
+                "queue_wait_seconds": 47.213401,
+                "token_usage": {
+                  "input_tokens": 93326,
+                  "output_tokens": 15756,
+                  "total_tokens": 109082,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 5,
+                  "tool_effect": 12
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 348105,
+              "output_tokens": 54575,
+              "total_tokens": 402680,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 4,
+              "amount": null
+            },
+            "execution_seconds": 277.121471,
+            "queue_wait_seconds": 118.717277,
+            "wall_elapsed_seconds": 676.996849,
+            "critical_path_seconds": 148.663774,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 4,
+            "first_pass_pwu_count": 4,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 193,
+            "resource_units": {
+              "inference_submission": 21,
+              "tool_effect": 43
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "17834f98-d32c-5549-8a86-305b38282bcb",
+              "work_id": "08fdd503-aa1d-54e9-a6fc-737fa4b3045f",
+              "kind": "CANDIDATE_AUTHORIZATION",
+              "decision": "Authorize exact sealed Candidate integration?",
+              "reason": "Repository integration requires exact Human Authority.",
+              "available_actions": [
+                "AUTHORIZE"
+              ],
+              "recommended_action": null,
+              "governed_subject_ref": "baseline-candidate:2b127ed9-8925-5014-a6e0-7dd6a68c793a",
               "steering_reason": null,
               "recommendation": null,
               "conversation_prompt": null,
@@ -17504,6 +19609,718 @@
           ],
           "manual_rescue_actions": [],
           "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 3,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-07/trial-3",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-07",
+            "trial": 3,
+            "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+            "work_id": "87815406-d2d0-5ae4-9f54-a46102160e6f",
+            "elapsed_seconds": 472,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": {
+            "case": "GC-IP-07",
+            "trial": 3,
+            "question": {
+              "attention_id": "56d3d20d-48cc-5d1e-b9ad-811dc45223d6",
+              "work_id": "87815406-d2d0-5ae4-9f54-a46102160e6f",
+              "kind": "STEERING_DECISION_REQUIRED",
+              "decision": "Answer the current Work question",
+              "reason": "搜索应覆盖哪些已观察到的数据域：users、customers、orders 之一，还是全部？该选择决定验收范围。",
+              "available_actions": [],
+              "recommended_action": null,
+              "governed_subject_ref": "steering-decision:d1077e54-2bb2-47c9-86ee-1fba7dcfdd6a",
+              "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+              "recommendation": "请确认搜索覆盖的数据域（users / customers / orders 之一或全部）以及搜索入口所在页面，随后再形成有界生产提案。",
+              "conversation_prompt": "搜索应覆盖哪些已观察到的数据域：users、customers、orders 之一，还是全部？该选择决定验收范围。",
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": "The decision will govern subsequent design and production.",
+              "reality_refs": [
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "49e66017-9130-5a08-ac56-e09b410d493a"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "c5733308-594d-4c25-bbba-fe24974338f5"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "40c6273f-1bee-428c-9112-301e4589ecff"
+                },
+                {
+                  "kind": "TRUSTED_BASELINE",
+                  "identity": "4a366ec3-15e7-4eae-8ded-b22a60940960"
+                },
+                {
+                  "kind": "WORK",
+                  "identity": "87815406-d2d0-5ae4-9f54-a46102160e6f"
+                },
+                {
+                  "kind": "WORK_REALITY_REVISION",
+                  "identity": "c346808b-eef1-526c-902e-78e32818700e"
+                }
+              ],
+              "steering_plan_revision_id": "f1fd1cb0-8f8d-4f3c-8f13-454a58b34ffb",
+              "steering_step_id": "c07224ab-1e16-45dc-beeb-25962c0cd40c",
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            },
+            "answer": "只搜索用户，按姓名和邮箱匹配，不搜索客户和订单。",
+            "classification": "LEGITIMATE_PRODUCT_SCOPE_CHOICE",
+            "question_count": 1,
+            "implementation_assistance": false,
+            "human_acceptance": "PENDING"
+          },
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "87815406-d2d0-5ae4-9f54-a46102160e6f",
+          "interaction_id": "0d80c507-f9ae-4326-804a-5d87974bb2c5",
+          "refinements": [
+            {
+              "id": "0ae90c75-889f-4033-a6fd-e833bbb5ce79",
+              "affected_component": "native-tool-host/test.run",
+              "signal_kind": "EVIDENCE_INSUFFICIENT",
+              "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "policy_version": "native-effect-repair-v1",
+                "classification_basis": "Use the granted locked dependency synchronization or an equivalent admitted test path; do not add dependencies or change the acceptance oracle"
+              },
+              "diagnostic_evidence": {
+                "returncode": 127,
+                "stderr_ref": "native-receipt:1f505352-5c3e-4882-ab19-94b33540e3db#stderr",
+                "stdout_ref": "native-receipt:1f505352-5c3e-4882-ab19-94b33540e3db#stdout",
+                "receipt_ref": "native-receipt:1f505352-5c3e-4882-ab19-94b33540e3db",
+                "stderr_bytes": 0,
+                "stdout_bytes": 121,
+                "evidence_refs": [
+                  "native-evidence:e65c1769-8834-4b35-a5d2-c29ae1874433"
+                ],
+                "output_digest": "84a6840dae9cc4ea94562c17486381a3b28cbf590dc46edec62e92a2615b17b9",
+                "tool_identity": "test.run",
+                "diagnostic_code": "TEST_ENVIRONMENT_NOT_READY",
+                "verification_evidence": "INCOMPLETE",
+                "test_environment_readiness": "NOT_READY"
+              },
+              "model_token_usage": {
+                "input_tokens": 49177,
+                "total_tokens": 56015,
+                "output_tokens": 6838,
+                "reasoning_tokens": 5988,
+                "cached_input_tokens": 3840,
+                "observed_response_count": 2
+              },
+              "extra_elapsed_seconds": 39
+            },
+            {
+              "id": "3376c2f8-3cf8-4ac2-a28f-c1f5300e38dc",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "server.py",
+                  "web/index.html",
+                  "web/app.js"
+                ],
+                "candidate_paths": [
+                  "server.py",
+                  "web/index.html",
+                  "web/app.js",
+                  "tests/application.cjs"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Adding search to /api/customers, /api/orders, or any customer/order view",
+                  "Altering customer or order routes, data, or UI for search",
+                  "Adding new database tables, migrations, seed data, or indexes for search",
+                  "Creating a new search page, route, or separate search application",
+                  "Adding authentication, permissions, roles, or authorization around search",
+                  "Adding search filters beyond name and email, such as status, id, or order totals",
+                  "Refactoring unrelated server routes, UI controls, or existing login affordances",
+                  "Modifying tests/application.cjs as a required implementation surface; it remains an existing read-only reference unless a mandatory oracle changes"
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 11240,
+                "total_tokens": 16875,
+                "cached_tokens": 512,
+                "output_tokens": 5635,
+                "reasoning_tokens": 3616
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "67e84e87-c32d-5f88-a871-e78694a99496",
+              "attempt_id": "5cbffd60-92a0-4f26-9d55-dffd91718a1a",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            },
+            {
+              "pwu_id": "435cd95d-de5b-50a0-92a8-66fb3e7b4b8c",
+              "attempt_id": "abbca858-874e-44fe-b249-ed50168379a1",
+              "condition": "EXECUTING",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": {
+            "plan_revision_id": "955dca46-a998-43a1-8768-ab5e7083bbac",
+            "revision_number": 1,
+            "groups": [
+              {
+                "node_id": "group:server",
+                "objective": "Produce the server change surface",
+                "parent_id": null
+              },
+              {
+                "node_id": "group:app",
+                "objective": "Produce the app change surface",
+                "parent_id": null
+              }
+            ],
+            "pwus": [
+              {
+                "node_id": "pwu:1",
+                "pwu_id": "67e84e87-c32d-5f88-a871-e78694a99496",
+                "kind": "PWU",
+                "objective": "Produce and verify the server capability change",
+                "group_id": "group:server",
+                "dependency_ids": [],
+                "state": "VERIFYING",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": null,
+                "verified_output_revision": null,
+                "workspace_attempt_id": "5cbffd60-92a0-4f26-9d55-dffd91718a1a"
+              },
+              {
+                "node_id": "pwu:2",
+                "pwu_id": "435cd95d-de5b-50a0-92a8-66fb3e7b4b8c",
+                "kind": "PWU",
+                "objective": "Produce and verify the app capability change",
+                "group_id": "group:app",
+                "dependency_ids": [],
+                "state": "RUNNING",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": null,
+                "verified_output_revision": null,
+                "workspace_attempt_id": "abbca858-874e-44fe-b249-ed50168379a1"
+              },
+              {
+                "node_id": "pwu:join",
+                "pwu_id": "d0e4b5a6-5ac0-5f2a-a218-56701372888d",
+                "kind": "JOIN",
+                "objective": "Reconcile and verify the independently produced branch baselines",
+                "group_id": null,
+                "dependency_ids": [
+                  "pwu:1",
+                  "pwu:2"
+                ],
+                "state": "DEPENDENCIES_PENDING",
+                "blocked_reason": "Waiting for verified predecessor baselines",
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": null,
+                "input_revision": null,
+                "verified_output_baseline_id": null,
+                "verified_output_revision": null,
+                "workspace_attempt_id": null
+              }
+            ],
+            "integrated_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+            "integrated_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+          },
+          "economics": {
+            "work_id": "87815406-d2d0-5ae4-9f54-a46102160e6f",
+            "product_id": "34a2ed53-f469-4c4a-a67d-4707b5ad34ce",
+            "pwu_count": 3,
+            "join_count": 1,
+            "pwu": [
+              {
+                "pwu_id": "d0e4b5a6-5ac0-5f2a-a218-56701372888d",
+                "node_id": "pwu:join",
+                "run_id": "385f643b-413b-4e58-8256-ebcb720a3b2c",
+                "condition": "PROPOSED",
+                "attempt_count": 0,
+                "outcomes": [],
+                "providers": [],
+                "execution_seconds": 0.0,
+                "duration_observed": false,
+                "queue_wait_seconds": 0.0,
+                "token_usage": {
+                  "input_tokens": 0,
+                  "output_tokens": 0,
+                  "total_tokens": 0,
+                  "status": "UNREPORTED"
+                },
+                "resource_units": {}
+              },
+              {
+                "pwu_id": "67e84e87-c32d-5f88-a871-e78694a99496",
+                "node_id": "pwu:1",
+                "run_id": "385f643b-413b-4e58-8256-ebcb720a3b2c",
+                "condition": "PROPOSED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:5cbffd60-92a0-4f26-9d55-dffd91718a1a"
+                ],
+                "execution_seconds": 135.461485,
+                "duration_observed": true,
+                "queue_wait_seconds": 65.322556,
+                "token_usage": {
+                  "input_tokens": 172772,
+                  "output_tokens": 28448,
+                  "total_tokens": 201220,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 9,
+                  "tool_effect": 14
+                }
+              },
+              {
+                "pwu_id": "435cd95d-de5b-50a0-92a8-66fb3e7b4b8c",
+                "node_id": "pwu:2",
+                "run_id": "385f643b-413b-4e58-8256-ebcb720a3b2c",
+                "condition": "PROPOSED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "CREATED"
+                ],
+                "providers": [
+                  "deepseek"
+                ],
+                "execution_seconds": 62.120619000000005,
+                "duration_observed": true,
+                "queue_wait_seconds": 243.185708,
+                "token_usage": {
+                  "input_tokens": 106270,
+                  "output_tokens": 12051,
+                  "total_tokens": 118321,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 6,
+                  "tool_effect": 14
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 279042,
+              "output_tokens": 40499,
+              "total_tokens": 319541,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 2,
+              "amount": null
+            },
+            "execution_seconds": 197.58210400000002,
+            "queue_wait_seconds": 308.508264,
+            "wall_elapsed_seconds": 476.603186,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 2,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 39,
+            "resource_units": {
+              "inference_submission": 15,
+              "tool_effect": 28
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 4,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-07/trial-4",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-07",
+            "trial": 4,
+            "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+            "work_id": "6cc2d18c-c929-5a2d-9f34-c329d9614866",
+            "elapsed_seconds": 499,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": {
+            "case": "GC-IP-07",
+            "trial": 4,
+            "question": {
+              "attention_id": "34689dcb-b7e1-56ef-9dda-55664e76d27c",
+              "work_id": "6cc2d18c-c929-5a2d-9f34-c329d9614866",
+              "kind": "STEERING_DECISION_REQUIRED",
+              "decision": "Answer the current Work question",
+              "reason": "The request '给系统增加搜索' does not select a data domain, while the observed Reality exposes three distinct searchable collections — users (/api/users), customers (/api/customers) and orders (/api/orders). Should search cover one of these named collections, or be a single unified search across all three?",
+              "available_actions": [],
+              "recommended_action": null,
+              "governed_subject_ref": "steering-decision:1307f4cc-ff9d-4f54-bfd8-1079b4061fc4",
+              "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+              "recommendation": "Confirm which of the observed collections the search must cover — users, customers, orders, or a unified search across all three — so the bounded search design (endpoint shape, UI placement, and verification targets in server.py and web/) can be fixed and taken to production.",
+              "conversation_prompt": "The request '给系统增加搜索' does not select a data domain, while the observed Reality exposes three distinct searchable collections — users (/api/users), customers (/api/customers) and orders (/api/orders). Should search cover one of these named collections, or be a single unified search across all three?",
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": "The decision will govern subsequent design and production.",
+              "reality_refs": [
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "a316ad91-8e1f-53c4-8014-1fe099759d1c"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "cc83fdcb-f6c7-469c-8fb3-7ac34dc95644"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "f84c2612-b096-447a-bc51-fdc0a0b4728e"
+                },
+                {
+                  "kind": "TRUSTED_BASELINE",
+                  "identity": "4a366ec3-15e7-4eae-8ded-b22a60940960"
+                },
+                {
+                  "kind": "WORK",
+                  "identity": "6cc2d18c-c929-5a2d-9f34-c329d9614866"
+                },
+                {
+                  "kind": "WORK_REALITY_REVISION",
+                  "identity": "a619c9f0-06de-534d-b3b2-18e0dcdf42b4"
+                }
+              ],
+              "steering_plan_revision_id": "da3a313b-b351-487b-8500-907dc7cf85c3",
+              "steering_step_id": "483f280f-4821-4b81-aa05-198fb0002c4c",
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            },
+            "answer": "只搜索用户，按姓名和邮箱匹配，不搜索客户和订单。",
+            "classification": "LEGITIMATE_PRODUCT_SCOPE_CHOICE",
+            "question_count": 1,
+            "implementation_assistance": false,
+            "human_acceptance": "PENDING"
+          },
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "6cc2d18c-c929-5a2d-9f34-c329d9614866",
+          "interaction_id": "f9eef2fd-d2be-4ad0-b82b-b7b52ff79eed",
+          "refinements": [
+            {
+              "id": "7eca4e03-8c45-40cc-bfc5-aa15797b88f1",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "server.py",
+                  "web/index.html",
+                  "web/app.js"
+                ],
+                "candidate_paths": [
+                  "server.py",
+                  "web/index.html",
+                  "web/app.js",
+                  "tests/application.cjs"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Searching customers or orders, or modifying customer and order endpoints/tables",
+                  "Changing the existing login buttons, dialog, navigation, or unrelated customer/order UI",
+                  "Adding authentication, authorization, indexing services, or a schema migration",
+                  "Creating new files such as a separate search route, page, or module",
+                  "Changing the runtime entrypoint, Dockerfile, or package.json test command",
+                  "Modifying tests/application.cjs; the existing oracle tests customer CRUD and is read-only for this request"
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 11404,
+                "total_tokens": 18554,
+                "cached_tokens": 512,
+                "output_tokens": 7150,
+                "reasoning_tokens": 4944
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "4220d6bd-e6c1-5e59-a98a-5fa2f950799c",
+              "attempt_id": "fbe71b83-3a38-4db3-b7f3-2765192def5b",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            },
+            {
+              "pwu_id": "3c30d2d0-8f7d-59b7-8857-2ab85b3b5af3",
+              "attempt_id": "69adadbe-a1f4-4e26-acf4-c6b6c97e4b95",
+              "condition": "EXECUTING",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": {
+            "plan_revision_id": "214cdabd-7a76-4a78-9600-9b7a5206a060",
+            "revision_number": 1,
+            "groups": [
+              {
+                "node_id": "group:server",
+                "objective": "Produce the server change surface",
+                "parent_id": null
+              },
+              {
+                "node_id": "group:app",
+                "objective": "Produce the app change surface",
+                "parent_id": null
+              }
+            ],
+            "pwus": [
+              {
+                "node_id": "pwu:1",
+                "pwu_id": "4220d6bd-e6c1-5e59-a98a-5fa2f950799c",
+                "kind": "PWU",
+                "objective": "Produce and verify the server capability change",
+                "group_id": "group:server",
+                "dependency_ids": [],
+                "state": "VERIFYING",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": null,
+                "verified_output_revision": null,
+                "workspace_attempt_id": "fbe71b83-3a38-4db3-b7f3-2765192def5b"
+              },
+              {
+                "node_id": "pwu:2",
+                "pwu_id": "3c30d2d0-8f7d-59b7-8857-2ab85b3b5af3",
+                "kind": "PWU",
+                "objective": "Produce and verify the app capability change",
+                "group_id": "group:app",
+                "dependency_ids": [],
+                "state": "RUNNING",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": null,
+                "verified_output_revision": null,
+                "workspace_attempt_id": "69adadbe-a1f4-4e26-acf4-c6b6c97e4b95"
+              },
+              {
+                "node_id": "pwu:join",
+                "pwu_id": "b8476f0d-aefb-527b-87c1-49d24fd9b01d",
+                "kind": "JOIN",
+                "objective": "Reconcile and verify the independently produced branch baselines",
+                "group_id": null,
+                "dependency_ids": [
+                  "pwu:1",
+                  "pwu:2"
+                ],
+                "state": "DEPENDENCIES_PENDING",
+                "blocked_reason": "Waiting for verified predecessor baselines",
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": null,
+                "input_revision": null,
+                "verified_output_baseline_id": null,
+                "verified_output_revision": null,
+                "workspace_attempt_id": null
+              }
+            ],
+            "integrated_baseline_id": "4a366ec3-15e7-4eae-8ded-b22a60940960",
+            "integrated_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+          },
+          "economics": {
+            "work_id": "6cc2d18c-c929-5a2d-9f34-c329d9614866",
+            "product_id": "34a2ed53-f469-4c4a-a67d-4707b5ad34ce",
+            "pwu_count": 3,
+            "join_count": 1,
+            "pwu": [
+              {
+                "pwu_id": "b8476f0d-aefb-527b-87c1-49d24fd9b01d",
+                "node_id": "pwu:join",
+                "run_id": "26857ea5-0aab-45f4-a251-7e25090fab4d",
+                "condition": "PROPOSED",
+                "attempt_count": 0,
+                "outcomes": [],
+                "providers": [],
+                "execution_seconds": 0.0,
+                "duration_observed": false,
+                "queue_wait_seconds": 0.0,
+                "token_usage": {
+                  "input_tokens": 0,
+                  "output_tokens": 0,
+                  "total_tokens": 0,
+                  "status": "UNREPORTED"
+                },
+                "resource_units": {}
+              },
+              {
+                "pwu_id": "4220d6bd-e6c1-5e59-a98a-5fa2f950799c",
+                "node_id": "pwu:1",
+                "run_id": "26857ea5-0aab-45f4-a251-7e25090fab4d",
+                "condition": "PROPOSED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:fbe71b83-3a38-4db3-b7f3-2765192def5b"
+                ],
+                "execution_seconds": 89.912296,
+                "duration_observed": true,
+                "queue_wait_seconds": 56.554386,
+                "token_usage": {
+                  "input_tokens": 202028,
+                  "output_tokens": 16256,
+                  "total_tokens": 218284,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 10,
+                  "tool_effect": 17
+                }
+              },
+              {
+                "pwu_id": "3c30d2d0-8f7d-59b7-8857-2ab85b3b5af3",
+                "node_id": "pwu:2",
+                "run_id": "26857ea5-0aab-45f4-a251-7e25090fab4d",
+                "condition": "PROPOSED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "CREATED"
+                ],
+                "providers": [
+                  "deepseek"
+                ],
+                "execution_seconds": 65.876599,
+                "duration_observed": true,
+                "queue_wait_seconds": 221.389665,
+                "token_usage": {
+                  "input_tokens": 64471,
+                  "output_tokens": 13306,
+                  "total_tokens": 77777,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 4,
+                  "tool_effect": 12
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 266499,
+              "output_tokens": 29562,
+              "total_tokens": 296061,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 2,
+              "amount": null
+            },
+            "execution_seconds": 155.788895,
+            "queue_wait_seconds": 277.944051,
+            "wall_elapsed_seconds": 408.971706,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 1,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {
+              "inference_submission": 14,
+              "tool_effect": 29
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
         }
       ],
       "successful_independent_trials": 1,
@@ -19031,6 +21848,220 @@
               ],
               "recommended_action": null,
               "governed_subject_ref": "baseline-candidate:df86992b-f7aa-5a82-bc45-9a29d50092ad",
+              "steering_reason": null,
+              "recommendation": null,
+              "conversation_prompt": null,
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": null,
+              "reality_refs": [],
+              "steering_plan_revision_id": null,
+              "steering_step_id": null,
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 6,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-08/trial-6",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+            "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-08",
+            "trial": 6,
+            "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+            "work_id": "58038834-b023-5db9-afc0-3e6e9c2d48e7",
+            "elapsed_seconds": 750,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "58038834-b023-5db9-afc0-3e6e9c2d48e7",
+          "interaction_id": "f79433ac-2bf9-4044-a55d-8c8d2433a968",
+          "refinements": [
+            {
+              "id": "318a2a39-198e-4985-84c4-e4392e3232da",
+              "affected_component": "native-tool-host/test.run",
+              "signal_kind": "EVIDENCE_INSUFFICIENT",
+              "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "policy_version": "native-effect-repair-v1",
+                "classification_basis": "Use the granted locked dependency synchronization or an equivalent admitted test path; do not add dependencies or change the acceptance oracle"
+              },
+              "diagnostic_evidence": {
+                "returncode": 127,
+                "stderr_ref": "native-receipt:a51684a1-f238-4958-91c2-a1829f994983#stderr",
+                "stdout_ref": "native-receipt:a51684a1-f238-4958-91c2-a1829f994983#stdout",
+                "receipt_ref": "native-receipt:a51684a1-f238-4958-91c2-a1829f994983",
+                "stderr_bytes": 0,
+                "stdout_bytes": 121,
+                "evidence_refs": [
+                  "native-evidence:09cfb294-554c-490c-9d49-06f4278bfcfa"
+                ],
+                "output_digest": "42c223f13eb3c511634f4442e0407717ddd5e6083862db6a6feebfaea76c32fa",
+                "tool_identity": "test.run",
+                "diagnostic_code": "TEST_ENVIRONMENT_NOT_READY",
+                "verification_evidence": "INCOMPLETE",
+                "test_environment_readiness": "NOT_READY"
+              },
+              "model_token_usage": {
+                "input_tokens": 31360,
+                "total_tokens": 35472,
+                "output_tokens": 4112,
+                "reasoning_tokens": 2929,
+                "cached_input_tokens": 2560,
+                "observed_response_count": 2
+              },
+              "extra_elapsed_seconds": 27
+            },
+            {
+              "id": "82dfc495-634b-473f-ba81-ba2d5e5b8e09",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "web/index.html",
+                  "web/app.js"
+                ],
+                "candidate_paths": [
+                  "web/index.html",
+                  "web/app.js",
+                  "web/styles.css",
+                  "tests/customer.cjs"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "web/styles.css 的最小样式补充：Human 只要求“简单”的客户信息录入与管理，未请求样式变更；现有 styles.css 已包含 button/input 基础样式，因此样式补充不是完成该行为的必要表面。",
+                  "tests/customer.cjs：该路径不在 repository_tree_paths 且不在 observed_sources 中，没有现有实现见证；测试文件是只读参考，Human 也未要求新增或修改测试。",
+                  "修改 server.py 或 migrations/：既有 POST /api/customers 与 POST /api/customers/{id} 已由 server.py 提供，客户表已包含 name/email，Human 未请求后端或 schema 变更。",
+                  "新增或改变认证、访问控制、删除客户、CRM 工作流、外部账户连接或虚构业务事实：均未被 Human 请求，且超出“简单”范围。",
+                  "为链接创建目标页面或路由：本请求不涉及新增链接或路由。"
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 10582,
+                "total_tokens": 18355,
+                "cached_tokens": 512,
+                "output_tokens": 7773,
+                "reasoning_tokens": 4426
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "a8674c5b-af56-4735-86c2-bab19224bd71",
+              "attempt_id": "1fe7cf91-5657-4e79-9f86-83c1be80f558",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "58038834-b023-5db9-afc0-3e6e9c2d48e7",
+            "product_id": "34a2ed53-f469-4c4a-a67d-4707b5ad34ce",
+            "pwu_count": 1,
+            "join_count": 0,
+            "pwu": [
+              {
+                "pwu_id": "a8674c5b-af56-4735-86c2-bab19224bd71",
+                "node_id": null,
+                "run_id": "cb99e3ee-cc4b-4f4f-9221-a34ad6584a7f",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:1fe7cf91-5657-4e79-9f86-83c1be80f558"
+                ],
+                "execution_seconds": 61.215273,
+                "duration_observed": true,
+                "queue_wait_seconds": 54.586283,
+                "token_usage": {
+                  "input_tokens": 80258,
+                  "output_tokens": 11483,
+                  "total_tokens": 91741,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 6,
+                  "tool_effect": 9
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 80258,
+              "output_tokens": 11483,
+              "total_tokens": 91741,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 1,
+              "amount": null
+            },
+            "execution_seconds": 61.215273,
+            "queue_wait_seconds": 54.586283,
+            "wall_elapsed_seconds": 67.123062,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 2,
+            "first_pass_pwu_count": 1,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 27,
+            "resource_units": {
+              "inference_submission": 6,
+              "tool_effect": 9
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "aa434e13-9a1c-5d12-9210-6730236addc2",
+              "work_id": "58038834-b023-5db9-afc0-3e6e9c2d48e7",
+              "kind": "CANDIDATE_AUTHORIZATION",
+              "decision": "Authorize exact sealed Candidate integration?",
+              "reason": "Repository integration requires exact Human Authority.",
+              "available_actions": [
+                "AUTHORIZE"
+              ],
+              "recommended_action": null,
+              "governed_subject_ref": "baseline-candidate:cf013ea2-3a50-5fbd-8d0b-a9bc6ece42a6",
               "steering_reason": null,
               "recommendation": null,
               "conversation_prompt": null,

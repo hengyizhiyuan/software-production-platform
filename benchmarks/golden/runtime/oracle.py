@@ -99,6 +99,25 @@ def main():
                 local_runtime_commit_only=review.get('local_runtime_commit_observed') is True,
                 remote_refs_unchanged=review.get('remote_unchanged') is True,
                 no_delivery_after_acceptance=review.get('no_delivery_authorization') is True)
+        if identity == 'GC-EX-14':
+            fault_path = root/'worker-interruption.json'
+            fault = json.loads(fault_path.read_text()) if fault_path.exists() else {}
+            attempt_path = root/'native-attempt.json'
+            attempt = json.loads(attempt_path.read_text()) if attempt_path.exists() else {}
+            effects = attempt.get('effects', [])
+            writes = [item for item in effects if item['tool_identity'] == 'file.write']
+            checks.update(actual_worker_interruption=fault.get('fault') == 'DECLARED_WORKER_PROCESS_LOSS'
+                    and fault.get('in_flight_tool_effect') is False,
+                same_attempt_new_lease_epoch=attempt.get('state',{}).get('attempt_id') == fault.get('attempt_id')
+                    and attempt.get('state',{}).get('worker_epoch',0) > fault.get('lease_before',{}).get('epoch',0),
+                automatic_same_attempt_resume=any(item.get('attempt_id') == fault.get('attempt_id')
+                    and item.get('resume_count',0) >= 1 for item in state.get('queue', [])),
+                no_duplicate_source_effect=len(writes) == 1 and writes[0]['condition'] == 'SETTLED',
+                interrupted_inference_preserved=any(item.get('kind') == 'INFERENCE'
+                    and item.get('condition') == 'INTERRUPTED' for item in attempt.get('steps',[])),
+                native_refinement_recovered=any(item.get('failure_family') == 'WORKER_LEASE_LOST'
+                    and item.get('final_result') == 'LOCAL_OBLIGATION_RECOVERED'
+                    for item in state.get('refinement',{}).get('events',[])))
         if identity == 'GC-EX-04':
             baseline = (Path(__file__).resolve().parents[3]/'.spg/stability-runtime'
                 /'fixture-sources/large-file/web/index.html').read_bytes()

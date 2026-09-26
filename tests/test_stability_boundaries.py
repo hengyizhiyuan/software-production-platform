@@ -109,3 +109,22 @@ def test_repository_url_with_port_never_becomes_a_write_target():
     assert WorkApplicationService._explicit_repository_paths(
         'Use http://source-host:8080/project.git\nCreate contact.html.'
     ) == ('contact.html',)
+
+
+def test_documentation_candidate_cannot_bypass_primary_implementation_validation():
+    from types import SimpleNamespace
+    from spg.application.semantic_steps import SemanticStepApplicationService
+    from spg.domain.change import ProductionTargetKind
+    observed = []
+    def validate(input, proposal):
+        observed.append(proposal.target_kind)
+        return SimpleNamespace(missing_acceptance_requirements=("Requested source behavior is absent",))
+    owner = object.__new__(SemanticStepApplicationService)
+    owner.capability = SimpleNamespace(validate_production_scope=validate)
+    candidate = SimpleNamespace(proposed_production=SimpleNamespace(
+        target_kind=ProductionTargetKind.DOCUMENTATION_WORK))
+    input = SimpleNamespace(engineering_resource_id="existing", source_baseline_id="exact",
+        required_intermediate_artifacts=())
+    with pytest.raises(ValueError, match="INTENT_COMPLETENESS_MISMATCH"):
+        owner._materialize_production_plan(input, candidate)
+    assert observed == [ProductionTargetKind.DOCUMENTATION_WORK]

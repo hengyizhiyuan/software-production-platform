@@ -196,3 +196,29 @@ def test_model_search_gap_suppresses_memory_provisional_in_shadow_mode(postgres_
     assert published == ["正在检索公开来源并核查结果…"]
     answer = service.get_shared_understanding(interaction.id).conversation_messages[-1].content
     assert "https://github.com/owner/one" in answer
+
+
+def test_project_research_observation_survives_real_turn_event_persistence(postgres_database, monkeypatch):
+    monkeypatch.setenv("SPG_DATABASE_URL", os.environ["SPG_TEST_DATABASE_URL"])
+    command.upgrade(Config("alembic.ini"), "head")
+    packet = {"condition":"READY", "repository_identity":"https://github.com/owner/project.git",
+        "revision":"a" * 40,"tree":"b" * 40,
+        "materials":[{"path":"server.py","content":"from http.server import HTTPServer"}]}
+    research = GovernedExternalResearch(ConnectorResolver(postgres_database),
+        github=_GitHub(((_evidence("one"),_evidence("two",2)),)), web=_Web(),
+        http=BoundedPublicHttp(), project_repository=lambda **_: packet)
+    service = WorkInteractionService(postgres_database, capability=_Semantic(),
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED, external_research=research)
+    interaction = service.create_interaction(human_identity="human:research-test")
+    turn = service.submit_turn(interaction.id,
+        "这是项目仓库：https://github.com/owner/project.git\n搜索 GitHub 的成熟实现并建议当前项目如何使用。",
+        human_identity="human:research-test")
+    settled = _wait(service, turn.id)
+    assert settled.status is InteractionTurnStatus.COMPLETED, settled.failure_message
+    events = service.response_events(turn.id)
+    observed = next(event for event in events if event.event_type.value == "PROJECT_RESEARCH_EVIDENCE")
+    assert observed.metadata["repository_observation"] == packet
+    assert observed.metadata["production_authorized"] is False
+    projection = service.get_shared_understanding(interaction.id)
+    assert projection.governed_work_id is None
+    assert "commit " + "a" * 40 in projection.conversation_messages[-1].content

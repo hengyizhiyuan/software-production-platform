@@ -621,12 +621,14 @@ class SemanticStepApplicationService:
         proposal = candidate.proposed_production
         assert proposal is not None
         change_proposal = None
+        validate_scope = getattr(getattr(self, "capability", None), "validate_production_scope", None)
+        scope_validation = (validate_scope(semantic_input, proposal)
+            if callable(validate_scope) and (proposal.target_kind is ProductionTargetKind.CODE_WORK
+                or not semantic_input.required_intermediate_artifacts) else None)
+        if scope_validation is not None and scope_validation.missing_acceptance_requirements:
+            raise ValueError("INTENT_COMPLETENESS_MISMATCH: " + "; ".join(
+                scope_validation.missing_acceptance_requirements))
         if proposal.target_kind is ProductionTargetKind.CODE_WORK:
-            validate_scope = getattr(getattr(self, "capability", None), "validate_production_scope", None)
-            scope_validation = validate_scope(semantic_input, proposal) if callable(validate_scope) else None
-            if scope_validation is not None and scope_validation.missing_acceptance_requirements:
-                raise ValueError("INTENT_COMPLETENESS_MISMATCH: " + "; ".join(
-                    scope_validation.missing_acceptance_requirements))
             # Provider-selected code_targets are hypotheses, not Human scope.
             # Only paths stated by Human may enter the explicit-target channel,
             # including explicitly requested new files. Otherwise let read-only

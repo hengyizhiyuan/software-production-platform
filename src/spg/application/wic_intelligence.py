@@ -44,6 +44,11 @@ _DEFERABLE_FEATURE_REFINEMENT = re.compile(
 )
 _RUNTIME_PREREQUISITE = re.compile(r"(?:startup|runtime|deploy|启动|运行|部署)", re.IGNORECASE)
 _EXTERNAL_CREDENTIAL = re.compile(r"(?:secret|credential|api.?key|密钥|凭据)", re.IGNORECASE)
+_REPOSITORY_RUNTIME_FACT = re.compile(
+    r"(?:技术栈|启动命令|运行入口|启动入口|(?:本地|现有|仓库).{0,24}预览(?:方式|命令)|"
+    r"(?:repository|existing|local).{0,40}(?:stack|entrypoint|startup command|preview command|preview mechanism))",
+    re.IGNORECASE,
+)
 
 _QUESTION_COST_RANK = {"LOW": 2, "MEDIUM": 1, "HIGH": 0}
 
@@ -183,6 +188,7 @@ def build_progressive_semantics(
             and not human_owned
             and (
                 _DEFERABLE_FEATURE_REFINEMENT.search(question)
+                or (active_context is None and _REPOSITORY_RUNTIME_FACT.search(question))
                 or (active_context is None
                     and (_RUNTIME_PREREQUISITE.search(question) or _RUNTIME_PREREQUISITE.search(text))
                     and _EXTERNAL_CREDENTIAL.search(question)

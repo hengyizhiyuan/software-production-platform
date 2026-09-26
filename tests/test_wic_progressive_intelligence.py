@@ -227,6 +227,8 @@ def test_provider_turn_intent_survives_deterministic_semantic_admission() -> Non
     ("Who provides the startup external service secret and how is it injected?", None),
     ("由谁提供启动所需的外部服务密钥，以及以何种安全方式注入运行环境？", None),
     ("外部服务密钥的值或安全提供方式是什么？", "启动 https://github.com/acme/shop 项目并给我实际预览。"),
+    ("仓库内是否已有可用的本地预览方式（如前端 dev server）未知", "启动 https://github.com/acme/shop 项目并给我实际预览。"),
+    ("技术栈和启动命令是什么？", "启动 https://github.com/acme/shop 项目并给我实际预览。"),
 ])
 def test_repository_production_request_is_admission_ready_before_feature_refinement(question, human_request) -> None:
     text = human_request or (

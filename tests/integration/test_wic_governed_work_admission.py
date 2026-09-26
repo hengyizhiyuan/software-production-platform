@@ -1339,7 +1339,7 @@ def test_admission_bootstraps_revision_bound_steering_without_production(
     assert _count(postgres_database, steering_plans) == 1
 
 
-@pytest.mark.parametrize("human_request", ["请在现有网站顶部导航栏加一个关于我们链接到 /about，先给我预览。", "我想让网站支持用户反馈。", "我想让应用提供业务概览。", "增加业务概览，让我一眼看出运营情况。"] )
+@pytest.mark.parametrize("human_request", ["请在现有网站顶部导航栏加一个关于我们链接到 /about，先给我预览。", "我想让网站支持用户反馈。", "我想让应用提供业务概览。", "增加业务概览，让我一眼看出运营情况。", "修复当前项目的构建错误，并给出可运行预览。", "启动当前项目，给我预览。"] )
 @pytest.mark.parametrize("mode", [DesignCollaborationMode.EXECUTION, DesignCollaborationMode.DESIGN])
 @pytest.mark.parametrize("constraints", [(), ("Keep the existing behavior outside the request",)])
 @pytest.mark.parametrize("framed_scope", ["implementation", "capability", "product"])

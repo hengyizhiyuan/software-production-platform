@@ -810,3 +810,11 @@ research uses existing Repository Asset intake and exact committed, bounded sour
 observations without admitting Work, creating a production branch or authorizing
 Delivery. External-source provenance and project-source observations remain distinct
 Evidence inputs to advisory synthesis.
+
+Bounded maintenance and startup requests against an admitted existing repository
+use ordinary Steering discovery even when a Provider suggests a broad product frame.
+Explicit whole-system design retains Guided Design prerequisites. A documentation
+candidate outside those governed prerequisites must still pass complete Human-intent
+validation and cannot replace an admitted working-software outcome. Repository-derived
+runtime facts are observed before Human questioning; missing external secrets remain
+Human-owned at the boundary where evidence proves they prevent execution.

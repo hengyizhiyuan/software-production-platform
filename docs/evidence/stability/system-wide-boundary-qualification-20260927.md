@@ -124,3 +124,20 @@ retain production authority. Project synthesis uses existing Asset source observ
 without a production Work. WIC/research/source-authority checks passed 145 unit checks
 (`/tmp/watt-stability-research-recovery-scope.log`). Fresh runtime requalification is
 required for these owner changes; no Full Regression PASS is claimed here.
+
+GC-EX-14 trial 2 passed actual declared Worker interruption, same-Attempt epoch
+advance/resume, retained INTERRUPTED inference, one settled source write and served
+Preview. The first oracle used an obsolete `RECOVERED` projection label; its FAIL
+is retained, while v2 binds the canonical `LOCAL_OBLIGATION_RECOVERED` label. This
+is a harness correction, not a claim that local recovery alone completes Work.
+
+Further independent compiler trials 6/7 exposed stochastic broad design routing;
+they remain failures. Existing Guided Design eligibility now recognizes bounded
+maintenance/startup requests as well as bounded features, while broad system design
+still requires its accepted design artifact. Documentation candidates outside that
+required prerequisite cannot bypass independent primary-intent validation.
+Repository-derived runtime facts (stack/entrypoint/local preview mechanism) can be
+observed before questioning Human. Qualification: 72 governed admission scope tests
+passed (`/tmp/watt-stability-maintenance-scope-pg-qualified.log`); full targeted Native
+owner tests passed 51 (`/tmp/watt-stability-lease-owner-broad.log`); project research
+through actual Turn/event persistence passed 4 (`/tmp/watt-stability-project-research-turn-pg.log`).

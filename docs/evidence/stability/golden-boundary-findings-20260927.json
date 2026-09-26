@@ -5030,6 +5030,102 @@
       "manual_rescue_actions": [],
       "human_acceptance": "PENDING",
       "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-12/trial-1"
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 6,
+      "signal": "BOUNDED_MAINTENANCE_MISROUTED_TO_SYSTEM_EVOLUTION_DESIGN_ARTIFACT_APPROVAL",
+      "architecture_owner": "Guided Design eligibility / Semantic intent completeness",
+      "source_head": {
+        "state": "ACTIVE_AT_TRUSTED_BASELINE",
+        "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+        "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+        "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+        "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+        "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+        "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+        "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+        "human_review_version_id": null,
+        "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+        "image_rebuild_paths": []
+      },
+      "work_id": "bba28a66-6303-516c-bcc3-5dabad1d6f81",
+      "interaction_id": "f1438904-600b-4552-8339-a865d5aedf6f",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-6"
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 7,
+      "signal": "BOUNDED_MAINTENANCE_MISROUTED_TO_SYSTEM_EVOLUTION_DESIGN_ARTIFACT_APPROVAL",
+      "architecture_owner": "Guided Design eligibility / Semantic intent completeness",
+      "source_head": {
+        "state": "ACTIVE_AT_TRUSTED_BASELINE",
+        "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+        "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+        "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+        "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+        "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+        "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+        "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+        "human_review_version_id": null,
+        "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+        "image_rebuild_paths": []
+      },
+      "work_id": "9e245dc4-2fc8-5b8a-aae9-bcea9d504560",
+      "interaction_id": "cec64a68-8150-4d8d-83a9-404eb0311d00",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-7"
+    },
+    {
+      "case": "GC-EX-11",
+      "trial": 4,
+      "signal": "SOURCE_DERIVABLE_PREVIEW_MECHANISM_QUESTION_BLOCKED_REPOSITORY_OBSERVATION",
+      "architecture_owner": "WIC stage sufficiency",
+      "source_head": {
+        "state": "ACTIVE_AT_TRUSTED_BASELINE",
+        "active_application_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+        "active_repository_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+        "active_source_package_fingerprint": "116ed8cffad9f06d1a75f9ccbe3e609b70a025bd",
+        "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+        "current_trusted_baseline_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+        "current_trusted_baseline_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+        "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+        "human_review_version_id": null,
+        "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+        "image_rebuild_paths": []
+      },
+      "work_id": null,
+      "interaction_id": "271bb387-8e64-4845-9dcb-db2abf326e56",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-11/trial-4"
+    },
+    {
+      "case": "GC-EX-12",
+      "trial": 2,
+      "signal": "PROJECT_RESEARCH_EVIDENCE_EVENT_NOT_REGISTERED",
+      "architecture_owner": "WIC Response event contract",
+      "source_head": {
+        "state": "ACTIVE_AT_TRUSTED_BASELINE",
+        "active_application_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+        "active_repository_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+        "active_source_package_fingerprint": "116ed8cffad9f06d1a75f9ccbe3e609b70a025bd",
+        "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+        "current_trusted_baseline_revision": "c6f2fb3d3f65cbf6a73de68c8769cbef1e68e538",
+        "current_trusted_baseline_tree_identity": "3757c3783637cec782cfe0ac05723745206bad55",
+        "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+        "human_review_version_id": null,
+        "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+        "image_rebuild_paths": []
+      },
+      "work_id": null,
+      "interaction_id": "17044098-2ad5-4624-bbba-bcb766a8823b",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-12/trial-2"
     }
   ]
 }
