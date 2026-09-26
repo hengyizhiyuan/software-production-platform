@@ -1,0 +1,288 @@
+{
+  "qualification": "PASS",
+  "domains": {
+    "ASSURANCE": "PASS",
+    "INTERACTION": "PASS",
+    "RESILIENCE": "PASS"
+  },
+  "cases": [
+    {
+      "case": "SEARCH-Q2",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "EXTERNAL_RESEARCH",
+        "failure_family": null,
+        "protected_invariant": "Web search snippet and fetched page remain distinct source observations",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 5,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "external-search-v1"
+      }
+    },
+    {
+      "case": "SEARCH-Q4",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "EXTERNAL_RESEARCH",
+        "failure_family": null,
+        "protected_invariant": "structured model information gap becomes governed read capability and grounded synthesis",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 5,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "external-search-v1"
+      }
+    },
+    {
+      "case": "SEARCH-Q5",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "EXTERNAL_RESEARCH",
+        "failure_family": null,
+        "protected_invariant": "weak query broadens once without creating an incident or infinite search",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 5,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "external-search-v1"
+      }
+    },
+    {
+      "case": "SEARCH-Q6",
+      "domain": "ASSURANCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "EXTERNAL_RESEARCH",
+        "failure_family": "RATE_LIMITED",
+        "protected_invariant": "provider limit is not reported as absence of implementations",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 5,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "external-search-v1"
+      }
+    },
+    {
+      "case": "SEARCH-Q7",
+      "domain": "ASSURANCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "EXTERNAL_RESEARCH",
+        "failure_family": "CREDENTIAL_REQUIRED",
+        "protected_invariant": "missing Web credential does not hide public GitHub evidence or expand authority",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 5,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "external-search-v1"
+      }
+    },
+    {
+      "case": "SEARCH-Q9",
+      "domain": "RESILIENCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "EXTERNAL_RESEARCH",
+        "failure_family": null,
+        "protected_invariant": "equivalent repeated results stop within bounded query budget",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 5,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "external-search-v1"
+      }
+    },
+    {
+      "case": "SEARCH-Q1",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "EXTERNAL_RESEARCH",
+        "failure_family": null,
+        "protected_invariant": "explicit GitHub search executes through Connector and persists inspected source Evidence",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 20,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "external-search-v1"
+      }
+    },
+    {
+      "case": "SEARCH-Q3",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "EXTERNAL_RESEARCH",
+        "failure_family": null,
+        "protected_invariant": "GitHub and Web results merge into one sourced answer without duplicate evidence",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 20,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "external-search-v1"
+      }
+    },
+    {
+      "case": "SEARCH-Q8",
+      "domain": "ASSURANCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "EXTERNAL_RESEARCH",
+        "failure_family": null,
+        "protected_invariant": "final source claims retain persisted URL and Evidence identity",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 20,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "external-search-v1"
+      }
+    }
+  ],
+  "recovered_case_count": 0,
+  "selection": {
+    "purpose": "focused",
+    "selected_case_ids": [
+      "SEARCH-Q2",
+      "SEARCH-Q4",
+      "SEARCH-Q5",
+      "SEARCH-Q6",
+      "SEARCH-Q7",
+      "SEARCH-Q9",
+      "SEARCH-Q1",
+      "SEARCH-Q3",
+      "SEARCH-Q8"
+    ],
+    "selected_count": 9,
+    "corpus_count": 41
+  }
+}

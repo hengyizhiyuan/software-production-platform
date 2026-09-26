@@ -163,6 +163,7 @@ class InteractionStore:
         assessment_id: UUID | None = None,
         failure_code: str | None = None,
         failure_message: str | None = None,
+        refinement_observation: dict[str, Any] | None = None,
         started_at=None,
         completed_at=None,
     ) -> None:
@@ -173,6 +174,8 @@ class InteractionStore:
             "failure_code": failure_code,
             "failure_message": failure_message,
         }
+        if refinement_observation is not None:
+            values["refinement_observation"] = refinement_observation
         if started_at is not None:
             values["started_at"] = started_at
         if completed_at is not None:
@@ -690,6 +693,7 @@ class InteractionStore:
                 "basis_active_runtime_binding_id"
             ],
             supporting_references=tuple(row["supporting_references"]),
+            refinement_observation=row["refinement_observation"],
             natural_response=row["natural_response"],
             readiness=WorkAdmissionReadiness.model_validate(row["readiness"]),
             progressive_semantics=(
@@ -714,6 +718,7 @@ class InteractionStore:
             status=InteractionTurnStatus(row["status"]),
             failure_code=row["failure_code"],
             failure_message=row["failure_message"],
+            refinement_observation=row["refinement_observation"],
             created_at=row["created_at"],
             started_at=row["started_at"],
             completed_at=row["completed_at"],

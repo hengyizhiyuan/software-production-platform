@@ -1,0 +1,979 @@
+{
+  "qualification": "PASS",
+  "domains": {
+    "ASSURANCE": "PASS",
+    "INTERACTION": "PASS",
+    "PRODUCTION": "PASS",
+    "RESILIENCE": "PASS"
+  },
+  "cases": [
+    {
+      "case": "NO_EXTERNAL_AGENT",
+      "domain": "ASSURANCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "PRODUCTION",
+        "failure_family": null,
+        "protected_invariant": "external coding-agent fallback remains absent",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 5,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "CONNECTOR_SCOPE",
+      "domain": "PRODUCTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "PRODUCTION",
+        "failure_family": null,
+        "protected_invariant": "connector effects stay inside admitted scope",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 10,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "HUMAN_RESPONSE",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 48,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "INTERACTION",
+        "failure_family": null,
+        "protected_invariant": "governed response remains consistent with Work",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 10,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SR-Q2",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "WIC",
+        "failure_family": null,
+        "protected_invariant": "high-impact ambiguity consumes only minimum-sufficient question budget",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 10,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    },
+    {
+      "case": "SR-Q9",
+      "domain": "PRODUCTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "DETERMINISTIC_EVIDENCE",
+        "failure_family": null,
+        "protected_invariant": "Git recipe rejects widening without model reflection inside primitive",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 10,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    },
+    {
+      "case": "GATE_FAILS_REGRESSION",
+      "domain": "ASSURANCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_EVALUATE",
+        "failure_family": null,
+        "protected_invariant": "critical regression fails release qualification",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "PYTHON",
+        "estimated_cost_seconds": 15,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SR-Q10",
+      "domain": "RESILIENCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_REFINE",
+        "failure_family": null,
+        "protected_invariant": "successful recurring correction produces cost and improvement signal without each Work becoming incident",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 30,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    },
+    {
+      "case": "SR-Q3",
+      "domain": "PRODUCTION",
+      "expected_outcome": "RECOVERED_BY_SELF_REFINE",
+      "result": "RECOVERED_BY_SELF_REFINE",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "STEERING",
+        "failure_family": null,
+        "protected_invariant": "rejected semantic plan candidate is revised on unchanged Reality before admission",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 30,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    },
+    {
+      "case": "SR-Q8",
+      "domain": "ASSURANCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "HUMAN_GOVERNANCE",
+        "failure_family": null,
+        "protected_invariant": "candidate correction cannot auto-expand Human constraints",
+        "risk": "CRITICAL",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 30,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    },
+    {
+      "case": "AUTHORITATIVE_REALITY_MISMATCH",
+      "domain": "RESILIENCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_OBSERVE",
+        "failure_family": "REPOSITORY_REALITY_MISMATCH",
+        "protected_invariant": "authoritative Git mismatch is not debounced",
+        "risk": "HIGH",
+        "scenario_type": "CONTROLLED_FAILURE",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 45,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "CONFIRMED_HEALTH_FAILURE",
+      "domain": "RESILIENCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_OBSERVE",
+        "failure_family": "RUNTIME_HEALTH",
+        "protected_invariant": "stable health failure starts evidence-backed Self-Refine",
+        "risk": "HIGH",
+        "scenario_type": "CONTROLLED_FAILURE",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 45,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SR-Q6",
+      "domain": "ASSURANCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "VERIFICATION",
+        "failure_family": null,
+        "protected_invariant": "PASS for wrong exact revision cannot satisfy current production",
+        "risk": "CRITICAL",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 45,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    },
+    {
+      "case": "SR-Q7",
+      "domain": "RESILIENCE",
+      "expected_outcome": "ESCALATED_TO_HUMAN",
+      "result": "ESCALATED_TO_HUMAN",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_CONVERGE",
+        "failure_family": null,
+        "protected_invariant": "unchanged failure stops retry and preserves incident evidence",
+        "risk": "CRITICAL",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 45,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    },
+    {
+      "case": "TRANSIENT_HEALTH_NOISE",
+      "domain": "RESILIENCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_OBSERVE",
+        "failure_family": "RUNTIME_HEALTH",
+        "protected_invariant": "one transient health timeout does not start Self-Refine",
+        "risk": "HIGH",
+        "scenario_type": "CONTROLLED_FAILURE",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 45,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SR-Q4",
+      "domain": "PRODUCTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "CONNECTOR",
+        "failure_family": null,
+        "protected_invariant": "missing capability cannot enter executable Task Contract without qualified connector and original Work resume",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 60,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    },
+    {
+      "case": "ACQUISITION_RECOVERY",
+      "domain": "RESILIENCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_RESUME",
+        "failure_family": "REPOSITORY_ACQUISITION",
+        "protected_invariant": "failed acquisition resumes existing Work",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "AMBIGUOUS_BUSINESS_TRUTH",
+      "domain": "ASSURANCE",
+      "expected_outcome": "ESCALATED_TO_HUMAN",
+      "result": "ESCALATED_TO_HUMAN",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "HUMAN_GOVERNANCE",
+        "failure_family": "PRODUCT_AMBIGUITY",
+        "protected_invariant": "ambiguous Product Truth cannot be invented by repair",
+        "risk": "CRITICAL",
+        "scenario_type": "CONTROLLED_FAILURE",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "COMPILER_DIAGNOSTIC_PROMOTION",
+      "domain": "RESILIENCE",
+      "expected_outcome": "EVIDENCE_SUFFICIENT_FOR_REPAIR",
+      "result": "EVIDENCE_SUFFICIENT_FOR_REPAIR",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_REFINE",
+        "failure_family": "DEPENDENCY_BUILD_FAILURE",
+        "protected_invariant": "compiler finding requires admitted source evidence before repair",
+        "risk": "CRITICAL",
+        "scenario_type": "CONTROLLED_FAILURE",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "DESIGN_BEFORE_CODE",
+      "domain": "PRODUCTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "PRODUCTION",
+        "failure_family": null,
+        "protected_invariant": "design prerequisite precedes implementation",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "REPOSITORY_REALITY",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "WORK_ADMISSION",
+        "failure_family": null,
+        "protected_invariant": "repository request creates governed Work",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "RESPONSE_OPERATION_REALITY",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_OBSERVE",
+        "failure_family": null,
+        "protected_invariant": "conversation reflects persisted repository operation",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "RESTART_RESUME",
+      "domain": "RESILIENCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_RESUME",
+        "failure_family": "WORKER_LOSS",
+        "protected_invariant": "restart resumes same Attempt without duplicate effect",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SELF_CONVERGE",
+      "domain": "RESILIENCE",
+      "expected_outcome": "ESCALATED_TO_HUMAN",
+      "result": "ESCALATED_TO_HUMAN",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_CONVERGE",
+        "failure_family": "REPEATED_FAILURE",
+        "protected_invariant": "unchanged failure contracts retry budget",
+        "risk": "CRITICAL",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SELF_REFINE_RECOVERY",
+      "domain": "RESILIENCE",
+      "expected_outcome": "RECOVERED_BY_SELF_REFINE",
+      "result": "RECOVERED_BY_SELF_REFINE",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_REFINE",
+        "failure_family": "PROVIDER_TRANSPORT",
+        "protected_invariant": "failed attempt recovers under same admitted contract",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": "self-refine-recovery",
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SEMANTIC_AUTHORITY",
+      "domain": "INTERACTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "HUMAN_GOVERNANCE",
+        "failure_family": null,
+        "protected_invariant": "explicit Human correction supersedes weaker meaning",
+        "risk": "CRITICAL",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "STRUCTURAL_REPAIR",
+      "domain": "RESILIENCE",
+      "expected_outcome": "RECOVERED_BY_SELF_REFINE",
+      "result": "RECOVERED_BY_SELF_REFINE",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_REFINE",
+        "failure_family": "SEMANTIC_BINDING_FAILURE",
+        "protected_invariant": "structural decision repair preserves authority",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": "self-refine-recovery",
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 90,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "BUSINESS_ORACLE_REPAIR",
+      "domain": "RESILIENCE",
+      "expected_outcome": "RECOVERED_BY_SELF_REFINE",
+      "result": "RECOVERED_BY_SELF_REFINE",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_REFINE",
+        "failure_family": "VERIFICATION_FAILURE",
+        "protected_invariant": "explicit admitted business oracle can be repaired without Human",
+        "risk": "CRITICAL",
+        "scenario_type": "CONTROLLED_FAILURE",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 120,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "GJ-SR-01",
+      "domain": "PRODUCTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "PRODUCTION",
+        "failure_family": null,
+        "protected_invariant": "governed branch lineage stays bound to exact commit",
+        "risk": "CRITICAL",
+        "scenario_type": "GOLDEN_JOURNEY",
+        "origin": "DOGFOOD",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 120,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SR-Q1",
+      "domain": "PRODUCTION",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SEMANTIC_TRUTH",
+        "failure_family": null,
+        "protected_invariant": "provider representation variance still produces exact branch operation through canonical binding",
+        "risk": "CRITICAL",
+        "scenario_type": "GOLDEN_JOURNEY",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "REAL_CONTAINER",
+        "estimated_cost_seconds": 180,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    },
+    {
+      "case": "HUMAN_DELIVERY_AUTHORITY",
+      "domain": "ASSURANCE",
+      "expected_outcome": "FIRST_PASS_SUCCESS",
+      "result": "FIRST_PASS_SUCCESS",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "HUMAN_GOVERNANCE",
+        "failure_family": null,
+        "protected_invariant": "Candidate preview does not authorize delivery",
+        "risk": "CRITICAL",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "POSTGRESQL",
+        "estimated_cost_seconds": 240,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "REAL_CONTAINER_REPAIR",
+      "domain": "RESILIENCE",
+      "expected_outcome": "RECOVERED_BY_SELF_REFINE",
+      "result": "RECOVERED_BY_SELF_REFINE",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_REFINE",
+        "failure_family": "IMPLEMENTATION_EFFECT_FAILURE",
+        "protected_invariant": "real container repair produces verified Candidate",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": "self-refine-recovery",
+        "required_environment": "REAL_CONTAINER",
+        "estimated_cost_seconds": 240,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "8-plus-1-v1"
+      }
+    },
+    {
+      "case": "SR-Q5",
+      "domain": "RESILIENCE",
+      "expected_outcome": "RECOVERED_BY_SELF_REFINE",
+      "result": "RECOVERED_BY_SELF_REFINE",
+      "critical": true,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "diagnostic_tail": "",
+      "metadata": {
+        "capability_family": "SELF_REFINE",
+        "failure_family": null,
+        "protected_invariant": "real container candidate repair remains bounded and verified",
+        "risk": "HIGH",
+        "scenario_type": "REGRESSION",
+        "origin": "REGRESSION",
+        "duplicate_group": null,
+        "required_environment": "REAL_CONTAINER",
+        "estimated_cost_seconds": 240,
+        "last_failure": null,
+        "last_meaningful_regression": null,
+        "baseline_version": "self-refine-v2"
+      }
+    }
+  ],
+  "recovered_case_count": 6,
+  "selection": {
+    "purpose": "release",
+    "selected_case_ids": [
+      "NO_EXTERNAL_AGENT",
+      "CONNECTOR_SCOPE",
+      "HUMAN_RESPONSE",
+      "SR-Q2",
+      "SR-Q9",
+      "GATE_FAILS_REGRESSION",
+      "SR-Q10",
+      "SR-Q3",
+      "SR-Q8",
+      "AUTHORITATIVE_REALITY_MISMATCH",
+      "CONFIRMED_HEALTH_FAILURE",
+      "SR-Q6",
+      "SR-Q7",
+      "TRANSIENT_HEALTH_NOISE",
+      "SR-Q4",
+      "ACQUISITION_RECOVERY",
+      "AMBIGUOUS_BUSINESS_TRUTH",
+      "COMPILER_DIAGNOSTIC_PROMOTION",
+      "DESIGN_BEFORE_CODE",
+      "REPOSITORY_REALITY",
+      "RESPONSE_OPERATION_REALITY",
+      "RESTART_RESUME",
+      "SELF_CONVERGE",
+      "SELF_REFINE_RECOVERY",
+      "SEMANTIC_AUTHORITY",
+      "STRUCTURAL_REPAIR",
+      "BUSINESS_ORACLE_REPAIR",
+      "GJ-SR-01",
+      "SR-Q1",
+      "HUMAN_DELIVERY_AUTHORITY",
+      "REAL_CONTAINER_REPAIR",
+      "SR-Q5"
+    ],
+    "selected_count": 32,
+    "corpus_count": 32
+  }
+}

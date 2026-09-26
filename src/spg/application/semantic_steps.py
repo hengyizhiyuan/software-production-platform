@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
 import subprocess
+from time import monotonic
 from uuid import UUID, uuid4
 
 from spg.application.planning import ProductionPlanningService
@@ -50,6 +51,8 @@ from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
+from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.domain.refinement_contract import RefinementSignalKind
 from spg.application.work import WorkApplicationService
 from spg.providers.repository_change_proposal import (
     RepositoryAwareChangeProposalProvider,
@@ -61,6 +64,15 @@ MAX_TREE_PATHS = 1_000
 MAX_CONTEXT_FILES = 8
 MAX_CONTEXT_CHARS_PER_FILE = 8_000
 MAX_CONTEXT_CHARS_TOTAL = 24_000
+REFINABLE_ADMISSION_FEEDBACK = (
+    "Semantic result references Reality outside its governed input",
+    "An intermediate guided design issue cannot form production",
+    "Implementation-readiness design requires a reviewable production proposal",
+    "DESIGN cannot close toward PRODUCE without a current production proposal",
+    "Approved intermediate design cannot replace the remaining code implementation",
+    "Implementation cannot be proposed before a design artifact is produced",
+    "Semantic production proposal does not satisfy PLAN-1B ONE_PWU_FIT",
+)
 
 
 class SemanticStepApplicationService:
@@ -244,8 +256,74 @@ class SemanticStepApplicationService:
             raise SteeringInvariantViolation(
                 "No Semantic Step capability is configured for DESIGN/REFINE"
             )
+        started = monotonic()
         candidate = self.capability.execute(semantic_input)
-        return self.admit(semantic_input, candidate)
+        first_usage = getattr(self.capability, "last_usage", None)
+        try:
+            return self.admit(semantic_input, candidate)
+        except SteeringInvariantViolation as error:
+            if isinstance(error, StaleSemanticStepCandidate) or not str(error).startswith(
+                REFINABLE_ADMISSION_FEEDBACK
+            ):
+                raise
+            refine = getattr(self.capability, "refine", None)
+            if not callable(refine):
+                raise
+            try:
+                revised = refine(semantic_input, validation_feedback=str(error))
+                admitted = self.admit(semantic_input, revised)
+            except Exception as second_error:
+                self._record_semantic_refinement(
+                    semantic_input, str(error), started, first_usage,
+                    converged=False, second_error=second_error,
+                    superseded=isinstance(second_error, StaleSemanticStepCandidate),
+                )
+                raise
+            self._record_semantic_refinement(
+                semantic_input, str(error), started, first_usage,
+                converged=True,
+            )
+            return admitted
+
+    def _record_semantic_refinement(
+        self, semantic_input: SemanticStepInput, feedback: str,
+        started: float, first_usage: object, *, converged: bool,
+        second_error: Exception | None = None,
+        superseded: bool = False,
+    ) -> None:
+        second_usage = getattr(self.capability, "last_usage", None)
+        usages = (
+            (first_usage,) if second_usage is first_usage
+            else (first_usage, second_usage)
+        )
+        total_tokens = sum(
+            int(usage.get("total_tokens") or 0)
+            for usage in usages if isinstance(usage, dict)
+        )
+        with self.database.unit_of_work() as uow:
+            NativeExecutionStore(uow.session).record_bounded_refinement(
+                work_id=semantic_input.work_id,
+                operation_id=semantic_input.step.id,
+                component="steering/semantic-step",
+                signal_kind=(
+                    RefinementSignalKind.REALITY_MISMATCH
+                    if superseded else RefinementSignalKind.CONTRACT_MISMATCH
+                ),
+                signature_basis=feedback,
+                evidence_references=(f"steering-step:{semantic_input.step.id}",),
+                converged=converged, attempt_count=2,
+                elapsed_seconds=int(monotonic() - started),
+                model_token_usage={"total_tokens": total_tokens} if total_tokens else {},
+                diagnostic_evidence=(
+                    {
+                        "basis_fingerprint": semantic_input.basis_fingerprint,
+                        "first_validation_feedback": feedback,
+                        "second_error_type": type(second_error).__name__,
+                    } if second_error is not None else None
+                ),
+                superseded=superseded,
+            )
+            uow.commit()
 
     @staticmethod
     def _result_still_current(
@@ -560,9 +638,9 @@ class SemanticStepApplicationService:
                 ),
             )
         )
-        if plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT:
+        if plan.fit_classification not in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}:
             raise SteeringInvariantViolation(
-                "Semantic production proposal does not satisfy PLAN-1B ONE_PWU_FIT"
+                "Semantic production proposal has no executable PWU boundary"
             )
         return plan, change_proposal
 

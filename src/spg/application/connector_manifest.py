@@ -6,6 +6,8 @@ discoverable capability gaps, never promises of an installed integration.
 
 from __future__ import annotations
 
+import os
+
 from spg.domain.connectors import (
     CapabilityScope,
     ConnectorAvailability,
@@ -63,6 +65,8 @@ def built_in_executable_capabilities() -> tuple[ExecutableCapability, ...]:
     W = SideEffectLevel.WORKSPACE_MUTATION
     E = SideEffectLevel.EXTERNAL_WRITE
     D = SideEffectLevel.DESTRUCTIVE
+    github_read_available = bool(os.environ.get("SPG_GITHUB_READ_TOKEN"))
+    web_search_available = bool(os.environ.get("SPG_WEB_SEARCH_API_KEY"))
     entries = (
         _cap("filesystem", "read", provider="native-tool:file.read"),
         _cap("filesystem", "write", provider="native-tool:file.write", effect=W, permissions=("work.workspace.write",)),
@@ -90,7 +94,15 @@ def built_in_executable_capabilities() -> tuple[ExecutableCapability, ...]:
         _cap("git", "remote.inspect", provider="native-tool:git.operation"),
         _cap("github", "push", effect=E, credentials=("github.write",), permissions=("delivery.authorize",)),
         _cap("github", "pr.prepare", effect=E, credentials=("github.write",), permissions=("delivery.authorize",)),
-        _cap("github", "repository.metadata", credentials=("github.read",)),
+        _cap("github", "repository.metadata", provider="github-rest-public"),
+        _cap("github", "repository.search", provider="github-rest-public"),
+        _cap("github", "resource.fetch", provider="github-rest-public"),
+        _cap("github", "issue.search", provider="github-rest-public"),
+        _cap("github", "code.search", provider="github-rest-public",
+             credentials=() if github_read_available else ("github.read",)),
+        _cap("web", "search", provider="brave-web-search",
+             credentials=() if web_search_available else ("brave.search",)),
+        _cap("web", "resource.fetch", provider="public-https-read"),
         _cap("gitlab", "push", effect=E, credentials=("gitlab.write",), permissions=("delivery.authorize",)),
         _cap("gitlab", "mr.prepare", effect=E, credentials=("gitlab.write",), permissions=("delivery.authorize",)),
         _cap("gitee", "push", effect=E, credentials=("gitee.write",), permissions=("delivery.authorize",)),

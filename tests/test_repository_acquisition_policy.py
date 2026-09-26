@@ -96,7 +96,7 @@ def workspace_from_realities(*realities) -> ProductionWorkspaceV1:
             RepositoryAssetBinding(
                 asset_id=uuid4(),
                 repository_identity=reality.repository_identity,
-                source=Path(reality.source.removeprefix("file:///")).as_posix()
+                source=(Path("/") / reality.source.removeprefix("file:///")).as_posix()
                 if reality.source.startswith("file:///")
                 else reality.source,
                 branch=reality.selected_branch,

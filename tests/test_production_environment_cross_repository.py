@@ -227,6 +227,11 @@ def test_watt_payloads_are_admitted_by_ecf_and_guardian_contract_owners():
 
 def test_candidate_preview_current_and_stale_reality_is_ecf_admissible(tmp_path):
     load_sibling_contracts()
+    import ecf.contracts.production_environment as ecf_contracts
+    if not all(hasattr(ecf_contracts, name) for name in (
+        "PreviewRealityState", "PreviewRealityV1",
+    )):
+        pytest.skip("sibling ECF preview contract is unavailable at its checked-out revision")
     from ecf.contracts.production_environment import PreviewRealityState, PreviewRealityV1
     from ecf.runtime import ECFRealityRuntime, JsonRealityStore
 

@@ -313,6 +313,14 @@ deepening is technically qualified. Distributed execution, broader capacity
 evolution and later integrations remain future work behind the closed native
 contracts.
 
+The current local production flow also persists a versioned multi-PWU Plan,
+exact per-PWU baseline lineage, serial successor readiness, isolated parallel
+branches, explicit Join reconciliation, and Work-level integration checkpoints.
+The existing capacity scheduler can lease two READY PWUs from one Work to
+different workers. Plan revision retains completed history and supersedes
+unstarted future units at a verified checkpoint. This does not claim distributed
+cross-host scheduling or deep Human end-to-end production acceptance.
+
 ### 5.3 Engineering Context Fabric (ECF)
 
 **Purpose:** provide decision-scoped context discovery, assembly, freshness,
@@ -377,6 +385,12 @@ governed together by the
 ### 5.9 External Engineering Intelligence
 
 **Status:** **RECORDED / DEFERRED — valuable future product capability, not current implementation priority**.
+
+Read-only public GitHub/Web Search and Fetch now provide an implemented
+Evidence-acquisition foundation in the existing Interaction/Connector path
+([architecture](../architecture/watt-ai-native-software-production-architecture.md#public-external-search-and-retrieval-2026-09-25)).
+The broader comparison, local adaptation, and governed production capability
+in this section remains deferred.
 
 **Purpose:** a future Human-visible capability allowing users to research
 mature external engineering solutions, understand their mechanisms, compare

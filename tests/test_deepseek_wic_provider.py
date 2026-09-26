@@ -209,6 +209,7 @@ def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta
     assert capability.last_pipeline_evidence is not None
     assert capability.last_pipeline_evidence.provider_call_count == 2
     assert capability.last_pipeline_evidence.semantic_retry_count == 1
+    assert capability.last_pipeline_evidence.semantic_structured_repair_count == 1
     assert "structured_output_repair_started" in stages
     assert "structured_output_repair_completed" in stages
 

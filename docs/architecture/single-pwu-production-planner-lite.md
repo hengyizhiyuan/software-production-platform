@@ -1,5 +1,10 @@
 # Single-PWU Production Planner Intelligence Lite
 
+> Historical PLAN-1B slice contract. Its single-PWU admission and deferred
+> multi-PWU statements describe that slice at closure, not the current runtime.
+> Current versioned multi-PWU lineage is described in
+> [Watt AI-Native Software Production Architecture](watt-ai-native-software-production-architecture.md#versioned-multi-pwu-production).
+
 ## Status
 
 **MVP-PLAN-1B: CLOSED / PASS**

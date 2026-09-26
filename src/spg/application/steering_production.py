@@ -443,9 +443,9 @@ class SteeringProductionService:
                 ),
             )
         )
-        if plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT:
+        if plan.fit_classification not in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}:
             raise ProductInvariantViolation(
-                "Individual Steering PRODUCE Step is not ONE_PWU_FIT"
+                "Individual Steering PRODUCE Step has no executable PWU boundary"
             )
         task_contract = self._task_contract(request)
         if request.target_kind is ProductionTargetKind.DOCUMENTATION_WORK:

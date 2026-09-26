@@ -69,7 +69,7 @@ class DeterministicInitialSteeringPlanFormation:
         production_ready = bool(
             work.production_plan is not None
             and work.production_plan.fit_classification
-            is OnePwuFitClassification.ONE_PWU_FIT
+            in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}
         )
         if any(marker in normalized for marker in self._HUMAN_DECISION_MARKERS):
             first = SteeringStepType.HUMAN_DECISION

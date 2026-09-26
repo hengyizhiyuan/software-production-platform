@@ -287,6 +287,7 @@ class WorkProjection(BaseModel):
     change_proposal: RepositoryChangeProposal | None = None
     change_contract: CodeChangeContract | None = None
     production_plan: ProductionPlanProposal | None = None
+    production_plan_runtime: dict[str, Any] | None = None
     tags: tuple[str, ...]
     engineering_scope: EngineeringScopeRecord | None
     status: WorkStatus

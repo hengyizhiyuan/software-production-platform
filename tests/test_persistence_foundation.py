@@ -113,4 +113,4 @@ def test_alembic_environment_has_native_executor_head() -> None:
     config = Config(project_root / "alembic.ini")
     scripts = ScriptDirectory.from_config(config)
 
-    assert scripts.get_heads() == ["20260924_46"]
+    assert scripts.get_heads() == ["20260926_51"]

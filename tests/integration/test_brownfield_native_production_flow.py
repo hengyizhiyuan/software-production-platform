@@ -99,7 +99,7 @@ CAPABILITIES = (
 def load_runtime_owners():
     ecf_src = PROJECT_ROOT.parent / "engineering-context-fabric" / "src"
     guardian_src = PROJECT_ROOT.parent / "guardian" / "src"
-    if not ecf_src.is_dir() or not guardian_src.is_dir():
+    if not (ecf_src / "ecf" / "runtime.py").is_file() or not (guardian_src / "guardian" / "runtime.py").is_file():
         pytest.skip("sibling ECF and Guardian repositories are unavailable")
     sys.path[:0] = [str(ecf_src), str(guardian_src)]
     from ecf.runtime import ECFRealityRuntime, JsonRealityStore

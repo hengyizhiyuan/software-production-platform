@@ -10,6 +10,12 @@ Acceptance remains separate and is deferred by Human governance. Current
 classification and exact revisions are recorded in the
 [final technical closure](../evidence/watt-native-executor-technical-closure.md).
 
+Self-Refine is now the broader governed candidate-convergence behavior defined
+in the [Blueprint](watt-native-executor-blueprint.md#a1-current-autonomous-production-intelligence-loop).
+This lifecycle still owns the Native Executor failure-repair subtype and its
+Self-Converge limits. Historical 8+1 technical qualification remains evidence;
+Human acceptance of the combined candidate is pending.
+
 ## Transition conventions
 
 Every table row specifies trigger, precondition/authority, durable writes/event, side effects and failure. Unlisted transitions are rejected. State names belong to separate aggregates; no global runtime enum is introduced.

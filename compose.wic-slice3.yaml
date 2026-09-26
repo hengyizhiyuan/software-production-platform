@@ -30,6 +30,8 @@ services:
       SPG_DELIVERY_RUNTIME_ENABLED: "true"
       SPG_DELIVERY_RUNTIME_BIND_HOST: "0.0.0.0"
       SPG_DEEPSEEK_API_KEY: ${SPG_DEEPSEEK_API_KEY:?SPG_DEEPSEEK_API_KEY must be configured in the ignored .env file}
+      SPG_GITHUB_READ_TOKEN: ${SPG_GITHUB_READ_TOKEN:-}
+      SPG_WEB_SEARCH_API_KEY: ${SPG_WEB_SEARCH_API_KEY:-}
       SPG_DEEPSEEK_BASE_URL: ${SPG_DEEPSEEK_BASE_URL:-https://api.deepseek.com}
       SPG_WIC_PROVIDER_ADAPTER: deepseek
       SPG_WIC_PROVIDER_MODEL: deepseek-flash

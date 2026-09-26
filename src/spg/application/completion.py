@@ -274,9 +274,9 @@ class CompletionService:
             or work_unit.plan_revision_id != plan.id
             or work_unit.source_baseline_id != snapshot.id
             or run.current_plan_revision_id != plan.id
-            or run.source_baseline_id != snapshot.id
+            or (plan.graph is None and run.source_baseline_id != snapshot.id)
             or plan.production_run_id != run.id
-            or plan.source_baseline_id != snapshot.id
+            or (plan.graph is None and plan.source_baseline_id != snapshot.id)
             or observation.repository_identity != snapshot.repository_identity
             or observation.source_revision != snapshot.repository_revision
             or dispatch.workspace.repository_identity != snapshot.repository_identity

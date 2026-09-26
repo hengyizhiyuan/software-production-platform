@@ -277,7 +277,7 @@ class PreparationService:
                     preparation.context_package_id,
                 )
             )
-        self.workspaces.validate(preparation.workspace)
+        self.validate_ready_workspace(preparation.workspace, work_unit)
         return self._execution_request(
             preparation,
             package,
@@ -285,6 +285,22 @@ class PreparationService:
             work_unit,
             run,
         )
+
+    def validate_ready_workspace(self, binding: WorkspaceBinding, work_unit) -> None:
+        if work_unit.reconciliation_evidence is None:
+            self.workspaces.validate(binding)
+            return
+        # Join preparation is an admitted deterministic Git effect. Its staged
+        # tree is exact; unrelated unstaged/untracked content blocks dispatch.
+        self.workspaces.validate_basis(binding)
+        workspace = binding.workspace_path
+        candidate_tree = work_unit.reconciliation_evidence.get("candidate_tree")
+        if GitExactReality._git(workspace, "write-tree") != candidate_tree:
+            raise RuntimeInvariantViolation("Join workspace differs from recorded parent reconciliation")
+        if GitExactReality._git(workspace, "diff", "--name-only") or GitExactReality._git(
+            workspace, "ls-files", "--others", "--exclude-standard"
+        ):
+            raise RuntimeInvariantViolation("Join workspace has unadmitted changes before dispatch")
 
     def is_execution_ready(self, attempt_id: UUID) -> bool:
         try:
@@ -313,8 +329,8 @@ class PreparationService:
         if (
             run.current_plan_revision_id != plan.id
             or plan.production_run_id != run.id
-            or plan.source_baseline_id != snapshot.id
-            or run.source_baseline_id != snapshot.id
+            or (plan.graph is None and plan.source_baseline_id != snapshot.id)
+            or (plan.graph is None and run.source_baseline_id != snapshot.id)
         ):
             raise RuntimeInvariantViolation("PWU Run/Plan/Baseline lineage is stale")
         return work_unit, run, plan, snapshot

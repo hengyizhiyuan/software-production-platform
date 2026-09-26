@@ -1,5 +1,9 @@
 # Bounded Single-PWU Code Work
 
+> Historical MVP-CODE-1 slice contract. Current governed production may admit
+> a versioned multi-PWU DAG; the one-PWU language below describes this slice's
+> original closure boundary.
+
 ## Status
 
 **MVP-CODE-1: CLOSED / PASS**

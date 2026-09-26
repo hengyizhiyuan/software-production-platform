@@ -43,6 +43,8 @@ class Settings(BaseSettings):
     ] = "high"
     deepseek_api_key: SecretStr | None = None
     deepseek_base_url: str = "https://api.deepseek.com"
+    github_read_token: SecretStr | None = None
+    web_search_api_key: SecretStr | None = None
     native_executor_deepseek_api_key: SecretStr | None = None
     native_executor_deepseek_base_url: str = "https://api.deepseek.com"
     native_executor_openai_api_key: SecretStr | None = None

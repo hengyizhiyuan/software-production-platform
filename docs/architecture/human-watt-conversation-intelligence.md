@@ -1,8 +1,10 @@
 # Human–Watt Conversation Intelligence
 
-Status: **IMPLEMENTED / GOVERNED STREAMING QUALIFIED / EXPERIENCE RECOVERY PENDING HUMAN RETEST**
+Status: **IMPLEMENTED / WIC INTERACTION MILESTONE HUMAN ACCEPTED / EXTERNAL RESEARCH QUALIFICATION IN PROGRESS**
 
-Human Product Acceptance: **FAIL (2026-09-16); RECOVERY RETEST PENDING**
+WIC Interaction Intelligence Human Acceptance: **PASS (2026-09-22)**;
+end-to-end production Human Acceptance: **NOT_EVALUATED**. The earlier
+2026-09-16 failure remains historical evidence, not the current verdict.
 
 ## Purpose
 
@@ -18,6 +20,19 @@ mature general AI product.
 
 ## Architecture
 
+WIC is an existing instance of the [governed Self-Refine convergence
+contract](watt-native-executor-blueprint.md#a1-current-autonomous-production-intelligence-loop):
+an intent hypothesis is checked against Human meaning and high-impact
+ambiguity; contextual refinement or one minimum-sufficient clarification
+precedes a response strategy. Question Budget, interaction-stage matching,
+EXPLORE/EXECUTE and the Minimum Sufficient Answer remain authoritative WIC
+rules. A clarification is not automatically an incident, and this calibration
+does not add questions merely to generate a refinement event. Bounded
+provider schema repair is recorded on the owning assessment; failed repair is
+recorded on the Turn. Controlled final-response metadata also carries this
+observation. Neither raw provider output nor a first interpretation becomes
+canonical Human intent merely because it was generated.
+
 ```text
 Human Turn
     -> WIC / relevant Watt domain capability
@@ -30,6 +45,15 @@ Human Turn
     -> Conversation Realizer
     -> existing streaming Watt message
 ```
+
+An explicit public search request is an evidence-acquisition obligation, not
+an answer-from-memory obligation. After WIC interpretation, the Turn-local
+research path maps Human wording or a model-produced information gap to
+canonical read capabilities, a DISCOVERY Task Contract, Connector resolution,
+real GitHub/Web providers, and persisted source Evidence. It then forms a
+source-linked reply; the original WIC wording cannot be presented as a searched
+finding. Provider limits and missing credentials are reported as limits.
+See [Public external search and retrieval](watt-ai-native-software-production-architecture.md#public-external-search-and-retrieval-2026-09-25).
 
 The implementation separates the WIC path into two Watt-owned Provider
 contracts:

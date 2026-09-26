@@ -70,7 +70,7 @@ class TaskContractRequest(BaseModel):
     required_prerequisites: tuple[str, ...] = ()
     prerequisite_evidence: tuple[str, ...] = ()
     work_reality_references: tuple[str, ...] = Field(min_length=1)
-    ecf_references: tuple[str, ...] = Field(min_length=1)
+    ecf_references: tuple[str, ...] = ()
     semantic_facts: tuple[SemanticFactReference, ...] = ()
     decision_reference: str
 
@@ -273,6 +273,13 @@ class TaskContractBuilder:
         self.orchestrator = orchestrator
 
     def build(self, request: TaskContractRequest) -> TaskContract:
+        interaction_discovery = (
+            request.activity is EngineeringActivity.DISCOVERY
+            and any(item.startswith("interaction-turn:") for item in request.authority_lineage)
+            and any(item.startswith("interaction:") for item in request.work_reality_references)
+        )
+        if not request.ecf_references and not interaction_discovery:
+            raise ValueError("Production Task Contracts require an exact ECF source basis")
         basis = _fingerprint(request.model_dump(mode="json"))
         candidates = [
             ContextCandidate(
@@ -364,16 +371,22 @@ class TaskContractBuilder:
         )
 
         evidence = tuple(self._semantic_evidence(fact) for fact in request.semantic_facts)
-        evidence += (
-            EvidenceReference(
-                category=EvidenceCategory.ENGINEERING,
-                source_reference=request.ecf_references[-1],
-                subject_reference="task-scope",
-                basis_reference=request.ecf_references[-1],
-                assertion="The task is bound to the admitted engineering source basis.",
-                authority_domain="ECF/SOURCE_REALITY",
-            ),
+        source_basis = (
+            request.ecf_references[-1] if request.ecf_references
+            else request.work_reality_references[-1]
         )
+        evidence += (EvidenceReference(
+            category=(EvidenceCategory.ENGINEERING if request.ecf_references
+                      else EvidenceCategory.HUMAN),
+            source_reference=source_basis,
+            subject_reference="task-scope",
+            basis_reference=source_basis,
+            assertion=("The task is bound to the admitted engineering source basis."
+                       if request.ecf_references else
+                       "Read-only discovery is bounded by the Human Interaction Turn."),
+            authority_domain=("ECF/SOURCE_REALITY" if request.ecf_references
+                              else "HUMAN_INTERACTION"),
+        ),)
         sop_expectations = self._sop_expectations(request.activity)
         assurance_expectations = tuple(
             EvidenceExpectation(
@@ -405,7 +418,8 @@ class TaskContractBuilder:
         factors = (
             "Current governed objective and scope",
             "Current Semantic Truth without reinterpretation",
-            "Exact engineering source basis",
+            ("Exact engineering source basis" if request.ecf_references
+             else "Exact Human Interaction Turn basis"),
             "Independent evidence required for acceptance",
             *(f"Pattern guidance {item}" for item in package.selected_pattern_ids),
         )
@@ -491,7 +505,7 @@ def activity_for_response_contract(contract: ResponseContract) -> EngineeringAct
 def budget_for_response_contract(contract: ResponseContract) -> ContextBudget:
     return {
         InformationBudget.MINIMAL_ACKNOWLEDGEMENT: ContextBudget(
-            max_items=6, max_characters=2000, max_items_per_source=3
+            max_items=6, max_characters=3000, max_items_per_source=3
         ),
         InformationBudget.MINIMUM_SUFFICIENT: ContextBudget(
             max_items=8, max_characters=3000, max_items_per_source=4
@@ -524,7 +538,7 @@ def default_system_capability_reality() -> SystemCapabilityReality:
     from spg.application.connector_manifest import built_in_executable_capabilities
 
     return SystemCapabilityReality(
-        version="2",
+        version="3",
         capabilities=(
             "Understand Human goals, constraints, corrections, and governed meaning.",
             "Reason about software products, architecture, engineering trade-offs, and repositories.",
@@ -532,6 +546,7 @@ def default_system_capability_reality() -> SystemCapabilityReality:
             "Execute bounded engineering tasks and manage their production workflow.",
             "Verify produced results and consume attributable Guardian assurance evidence.",
             "Preserve Work Reality, engineering facts, decisions, and evidence lineage.",
+            "Acquire bounded public GitHub/Web evidence through read-only governed Connectors.",
         ),
         production_object_types=(
             DesignObjectType.PRODUCT_SYSTEM,

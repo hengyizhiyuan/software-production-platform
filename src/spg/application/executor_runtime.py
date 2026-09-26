@@ -51,6 +51,9 @@ from spg.domain.native_execution import (
     WorkerOffer,
     canonical_digest,
 )
+from spg.domain.refinement_contract import (
+    RefinementClass, RefinementSignalKind, classify_refinement,
+)
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.persistence import Database
 
@@ -881,12 +884,21 @@ class NativeExecutorRuntimeService:
                     allocation.attempt_id, since=event.created_at,
                 ).get("total_tokens", 0))
             )
+            prior_occurrences = store.prior_self_refine_matches(
+                signature, before_event_id=event.id if event is not None else UUID(int=0),
+            )
+            provisional_class = classify_refinement(
+                converged=False, same_signature_count=same_failures,
+                prior_occurrences=prior_occurrences,
+                nonconvergence_threshold=self.same_failure_threshold,
+            )
             decision = self._adaptive_budget(
                 binding=binding, contract_payload=contract.contract_payload,
                 family=family, repairability=repairability, queue_resume_count=queue.resume_count,
                 same_failures=same_failures, elapsed=elapsed,
                 inference_total=inference_total, tool_total=tool_total,
                 observed_tokens=observed_tokens,
+                refinement_class=provisional_class,
             )
             exhausted = not decision["allow_retry"]
             if event is None:
@@ -895,6 +907,19 @@ class NativeExecutorRuntimeService:
                     id=event_id, work_id=binding.work_id,
                     operation_id=allocation.attempt_id, created_at=now,
                     failure_family=family, failure_signature=signature,
+                    refinement_class=classify_refinement(
+                        converged=False, same_signature_count=same_failures,
+                        prior_occurrences=prior_occurrences,
+                        budget_exhausted=exhausted,
+                        nonconvergence_threshold=self.same_failure_threshold,
+                    ),
+                    signal_kind=(
+                        RefinementSignalKind.REALITY_MISMATCH
+                        if family in {"REPOSITORY_REALITY_MISMATCH", "SOURCE_VECTOR_MISMATCH"}
+                        else RefinementSignalKind.VERIFICATION_CONTRADICTION
+                        if family == "VERIFICATION_FAILURE"
+                        else RefinementSignalKind.EXECUTION_FAILURE
+                    ),
                     affected_component="native-executor/provider",
                     expected_reality={"outcome": "RESULT_READY", "contract_digest": binding.pwu_contract_digest},
                     observed_reality={
@@ -1088,6 +1113,7 @@ class NativeExecutorRuntimeService:
         repairability: RepairabilityClassification, queue_resume_count: int,
         same_failures: int, elapsed: int, inference_total: int,
         tool_total: int, observed_tokens: int,
+        refinement_class: RefinementClass = RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT,
     ) -> dict[str, object]:
         """Bound retry by admitted Work/PWU resources and observed failure cost."""
 
@@ -1138,6 +1164,7 @@ class NativeExecutorRuntimeService:
         }
         allow_retry = (
             repairability in allowed_classifications
+            and refinement_class is not RefinementClass.SYSTEMIC_OR_NON_CONVERGING_INCIDENT
             and remaining["attempts"] > 0
             and remaining["same_signature"] > 0
             and remaining["active_seconds"] > 0
@@ -1150,6 +1177,13 @@ class NativeExecutorRuntimeService:
             "policy_version": "adaptive-self-converge-v1",
             "allow_retry": allow_retry,
             "repairability": repairability.value,
+            "human_escalated": (
+                not allow_retry and repairability in {
+                    RepairabilityClassification.REQUIRES_HUMAN_INPUT,
+                    RepairabilityClassification.REQUIRES_HUMAN_DECISION,
+                }
+            ),
+            "refinement_class": refinement_class.value,
             "complexity": complexity,
             "complexity_points": complexity_points,
             "risk": risk,

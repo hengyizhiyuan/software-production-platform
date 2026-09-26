@@ -335,6 +335,45 @@ PWU owns the governed execution lifecycle. Executor owns how admitted work is
 performed inside its envelope. Neither SOP nor Task Contract grants authority
 beyond admitted Work and current governance.
 
+### Versioned multi-PWU production
+
+A PWU is a coherent production responsibility with its own objective, scoped
+write authority and context, Attempt lineage, acceptance criteria, and
+verification evidence. It is not a time slice of a larger Executor call. The
+admitted Work may have several such responsibilities. Its active Production
+Plan revision persists two separate structures: semantic groups for Human
+orientation and an executable dependency DAG. Existing single-PWU Works keep
+their historical shape; they are not retroactively represented as a DAG.
+
+Each executable PWU starts only when its exact input baseline is known. Roots
+use the Work's trusted source baseline, or the current verified integration
+checkpoint after an explicit Plan revision. A serial successor consumes its
+predecessor's verified output. Independent parallel roots may be READY and
+leased to separate workers at once, each in an isolated workspace; scheduler
+completion order does not choose an authoritative baseline. A multi-parent
+dependency requires an explicit Join PWU. Its input is the parents' compatible
+common ancestor, and its workspace receives their verified trees in the fixed
+Plan order. Git reconciliation is preparation evidence, not acceptance: the
+Join still needs its own production, verification, and admissibility. A
+conflicted tree cannot be accepted unchanged; bounded retry may produce a
+resolved tree. Independent Verification can explicitly classify a failed Join
+as a Product Intent, Architecture, Authority, or material-risk decision that
+requires Human judgment. That signal stops autonomous retry and projects a
+conversational Steering decision; the Work baseline does not advance even when
+Git merged the parent trees without textual conflict.
+
+The Work integrated baseline advances only at a verified serial checkpoint or
+after a verified Join, never merely because a parallel branch finishes. The
+final Candidate proves every active Plan PWU's verified input/output lineage,
+then uses the original Work source baseline for the Human-authorized repository
+ref update and Runtime Commit. Within the admitted authority, verified PWU
+outputs automatically make successors eligible. A Reality-driven Plan revision
+keeps the old Plan and completed PWUs, supersedes unstarted future PWUs, and
+starts the replacement DAG from the current verified integration checkpoint;
+it cannot widen admitted paths or erase an in-flight Attempt. The Control Room
+projects current Plan revision, hierarchy, dependencies, PWU states and
+blockers, and Work integrated baseline.
+
 ### Production Environment foundation
 
 The [Watt Production Environment Architecture](watt-production-environment-architecture.md)
@@ -493,6 +532,61 @@ state, provisional connectors, promotion candidates, deprecation, and audit
 history. It may later allow disable/enable and governed promotion. This page
 is not part of the present implementation.
 
+### Public external search and retrieval (2026-09-25)
+
+External research is a read-only Capability and Evidence Acquisition action
+inside the existing Interaction/Connector/Task Contract boundary. A Human's
+explicit GitHub/Web search or public resource inspection is recognized from the
+exact Turn; for a current technical question, the model may instead return a
+structured information gap and proposed query. Neither raw model wording nor a
+source page invokes a tool. `GovernedExternalResearch` canonicalizes the need
+to `github.repository.search`, `github.code.search`, `github.issue.search`,
+`github.resource.fetch`, `web.search`, or `web.resource.fetch`, forms a bounded
+DISCOVERY Task Contract, and asks `ConnectorResolver` to verify each read-only
+operation before dispatch. The Interaction Turn supplies scope and Human source
+lineage; when a Work-bound current Steering step exists, its exact reference is
+retained in the Task Contract. This does not form a production Work, advance a
+Steering step, grant write authority, or replace Steering for admitted production.
+
+GitHub REST executes public repository and issue search, repository metadata,
+README/root-path and available package-manifest inspection, and exact public-file fetch. Repository and issue
+search need no credential. Code search uses an optional `SPG_GITHUB_READ_TOKEN`;
+without it, Capability Reality reports `github.code.search` as credential
+required. Public Web search uses the Brave Web Search API and requires the
+server-side `SPG_WEB_SEARCH_API_KEY`. `web.resource.fetch` fetches selected
+public HTTPS text through a bounded transport with public-address and redirect
+checks. Neither search credential permits external writes or private-source
+research. The configured read secrets are supplied only to their provider;
+they never enter browser state or search Evidence.
+
+Search and inspected resources are append-preserving `SEARCH_*` Interaction
+response events. Each Evidence record retains query, provider, source type,
+URL, title, retrieval time, rank, snippet, inspected text where available,
+completeness, and observable metadata. The final Conversation message carries
+Evidence references and source links; externally obtained facts remain source
+observations, not Engineering Semantic Truth. The model can synthesize only
+from this bounded Evidence packet; source instructions are untrusted. The
+Turn's `external-evidence` API and current Interaction state expose progress,
+completion, blocked credentials, and provider failures.
+
+One weak result set can broaden its query once; the Interaction publishes one
+search-progress notice instead of one per query. A duplicate result identity
+ends refinement; query/fetch/time/Evidence-packet budgets and a bounded model
+output profile constrain provider use. Search
+does not create a Self-Refine Incident merely for reformulation. `NO_RESULTS`,
+`PROVIDER_UNAVAILABLE`, `NETWORK_FAILURE`, `CREDENTIAL_REQUIRED`,
+`RATE_LIMITED`, `FETCH_FAILED`, `UNSUPPORTED_SEARCH_TYPE`, and
+`INSUFFICIENT_EVIDENCE` remain distinct. A failed Web query cannot turn into a
+claim that no Web implementation exists. A Work-bound unavailable capability
+records a Connector gap; after a read credential is configured and the runtime
+restarted, a follow-up request in the same Work can resolve the capability and
+continue research. A completed Turn is not silently replayed. Watt cannot
+acquire a key or enlarge Human authority on its own.
+For a request about mature implementations, observed repository adoption
+metadata helps choose which sources to inspect; it is not a global quality
+score or proof of suitability. The answer keeps the inspected source facts
+separate from comparison and unresolved validation limits.
+
 ## Implementation status
 
 ```text
@@ -508,6 +602,7 @@ ECF = FOUNDATION_ESTABLISHED / FULL_CAPABILITY_PENDING
 STEERING = IMPLEMENTED_WITHIN_CURRENT_SCOPE
 WORK_PLAN_PROJECTION = IMPLEMENTED_WITHIN_CURRENT_SCOPE
 PWU = IMPLEMENTED_WITHIN_CURRENT_SCOPE
+MULTI_PWU_PLAN_DAG_AND_BASELINE_LINEAGE = IMPLEMENTED_WITHIN_CURRENT_SCOPE
 EXECUTOR = IMPLEMENTED_WITHIN_CURRENT_SCOPE
 GUARDIAN = FOUNDATION_ESTABLISHED / FULL_CAPABILITY_PENDING
 

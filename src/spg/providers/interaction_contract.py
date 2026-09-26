@@ -233,8 +233,10 @@ class ConversationPipelineEvidence:
     conversation_usage: dict[str, object] | None = None
     coalesced_usage: dict[str, object] | None = None
     semantic_retry_count: int | None = None
+    semantic_structured_repair_count: int | None = None
     conversation_retry_count: int | None = None
     coalesced_retry_count: int | None = None
+    coalesced_structured_repair_count: int | None = None
 
 def _compact_interaction_basis(
     basis: InteractionInterpretationInput, *, coalesced: bool = False

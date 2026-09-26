@@ -12,6 +12,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from spg.domain.refinement_contract import RefinementClass, RefinementSignalKind
+
 
 def canonical_digest(value: BaseModel | dict[str, Any] | list[Any] | tuple[Any, ...]) -> str:
     """Return the version-independent digest used by native immutable contracts."""
@@ -936,7 +938,7 @@ class KernelRunResult(NativeRecord):
 
 
 class SelfRefineEventRecord(NativeRecord):
-    """Durable diagnosis for one bounded repair episode on a governed operation."""
+    """Durable observation of bounded refinement on a governed operation."""
 
     id: UUID
     work_id: UUID
@@ -944,6 +946,9 @@ class SelfRefineEventRecord(NativeRecord):
     created_at: datetime
     failure_family: str
     failure_signature: str = Field(pattern=r"^[0-9a-f]{64}$")
+    semantic_version: int = Field(default=2, ge=1)
+    refinement_class: RefinementClass = RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT
+    signal_kind: RefinementSignalKind = RefinementSignalKind.EXECUTION_FAILURE
     affected_component: str
     expected_reality: dict[str, Any]
     observed_reality: dict[str, Any]

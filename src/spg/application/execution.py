@@ -214,7 +214,10 @@ class ExecutionService:
                     "current Attempt generation already has a dispatch fact"
                 )
             snapshot = self._require_current_dispatch_binding(store, request)
-            self.preparation.workspaces.validate(request.workspace)
+            work_unit = store.work_unit(request.work_unit_id)
+            if work_unit is None:
+                raise RuntimeInvariantViolation("dispatch PWU is unavailable")
+            self.preparation.validate_ready_workspace(request.workspace, work_unit)
             authoritative_ref_revision = self.observer.current_ref_revision(
                 request.workspace.repository_path,
                 snapshot.repository_ref,
@@ -319,9 +322,9 @@ class ExecutionService:
             or attempt.plan_revision_id != work_unit.plan_revision_id
             or attempt.source_baseline_id != work_unit.source_baseline_id
             or run.current_plan_revision_id != plan.id
-            or run.source_baseline_id != snapshot.id
+            or (plan.graph is None and run.source_baseline_id != snapshot.id)
             or plan.production_run_id != run.id
-            or plan.source_baseline_id != snapshot.id
+            or (plan.graph is None and plan.source_baseline_id != snapshot.id)
             or request.production_run_id != run.id
             or request.work_unit_id != work_unit.id
             or request.plan_revision_id != plan.id

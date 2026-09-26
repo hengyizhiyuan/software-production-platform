@@ -471,12 +471,101 @@ class RuntimeStore:
         row = self.session.execute(
             select(production_work_units)
             .where(production_work_units.c.production_run_id == run_id)
-            .order_by(production_work_units.c.created_at)
+            .order_by(
+                production_work_units.c.source_baseline_id.is_(None),
+                production_work_units.c.created_at,
+                production_work_units.c.node_id,
+            )
             .limit(1)
         ).mappings().one_or_none()
         if row is None:
             return None
         return self._work_unit_record(row)
+
+    def work_units_for_plan(self, plan_id: UUID) -> tuple[WorkUnitRecord, ...]:
+        rows = self.session.execute(
+            select(production_work_units)
+            .where(production_work_units.c.plan_revision_id == plan_id)
+            .order_by(production_work_units.c.created_at, production_work_units.c.id)
+        ).mappings()
+        return tuple(self._work_unit_record(row) for row in rows)
+
+    def work_unit_for_node(self, plan_id: UUID, node_id: str) -> WorkUnitRecord | None:
+        row = self.session.execute(
+            select(production_work_units).where(
+                production_work_units.c.plan_revision_id == plan_id,
+                production_work_units.c.node_id == node_id,
+            )
+        ).mappings().one_or_none()
+        return None if row is None else self._work_unit_record(row)
+
+    def bind_work_unit_input(
+        self, work_unit: WorkUnitRecord, baseline_id: UUID,
+        parent_ids: tuple[UUID, ...], contract: CompletionContract,
+    ) -> int:
+        if work_unit.source_baseline_id is not None or work_unit.current_execution_generation:
+            raise RuntimeInvariantViolation("PWU input is already bound or execution has begun")
+        return update_versioned_row(
+            self.session, production_work_units,
+            identity={"id": work_unit.id, "condition": WorkUnitCondition.PROPOSED.value},
+            expected_version=work_unit.version,
+            values={"source_baseline_id": baseline_id,
+                    "parent_baseline_ids": [str(item) for item in parent_ids],
+                    "completion_contract": contract.model_dump(mode="json")},
+        )
+
+    def set_verified_output(self, work_unit: WorkUnitRecord, baseline_id: UUID) -> int:
+        if work_unit.condition is not WorkUnitCondition.SATISFIED:
+            raise RuntimeInvariantViolation("only a satisfied PWU can publish verified output")
+        if work_unit.verified_output_baseline_id is not None:
+            if work_unit.verified_output_baseline_id != baseline_id:
+                raise RuntimeInvariantViolation("verified PWU output cannot be replaced")
+            return work_unit.version
+        return update_versioned_row(
+            self.session, production_work_units,
+            identity={"id": work_unit.id, "condition": WorkUnitCondition.SATISFIED.value},
+            expected_version=work_unit.version,
+            values={"verified_output_baseline_id": baseline_id},
+        )
+
+    def record_join_reconciliation(self, work_unit: WorkUnitRecord, evidence: dict[str, Any]) -> int:
+        if work_unit.reconciliation_evidence is not None:
+            if work_unit.reconciliation_evidence != evidence:
+                raise RuntimeInvariantViolation("Join reconciliation evidence cannot be replaced")
+            return work_unit.version
+        return update_versioned_row(
+            self.session, production_work_units,
+            identity={"id": work_unit.id, "condition": WorkUnitCondition.PROPOSED.value},
+            expected_version=work_unit.version,
+            values={"reconciliation_evidence": evidence},
+        )
+
+    def mark_join_resolution(self, work_unit: WorkUnitRecord, proposed_snapshot_id: UUID, tree: str) -> int:
+        evidence = work_unit.reconciliation_evidence
+        if evidence is None:
+            raise RuntimeInvariantViolation("Join has no reconciliation evidence")
+        if evidence.get("verification_state") == "RESOLVED_AND_VERIFIED":
+            if evidence.get("resolved_tree") != tree or evidence.get("proposed_snapshot_id") != str(proposed_snapshot_id):
+                raise RuntimeInvariantViolation("Join resolution evidence changed")
+            return work_unit.version
+        return update_versioned_row(
+            self.session, production_work_units,
+            identity={"id": work_unit.id, "condition": WorkUnitCondition.SATISFIED.value},
+            expected_version=work_unit.version,
+            values={"reconciliation_evidence": {
+                **evidence, "verification_state": "RESOLVED_AND_VERIFIED",
+                "resolved_tree": tree, "proposed_snapshot_id": str(proposed_snapshot_id),
+            }},
+        )
+
+    def advance_run_integrated_baseline(
+        self, run: ProductionRunRecord, baseline_id: UUID,
+    ) -> int:
+        return update_versioned_row(
+            self.session, production_runs,
+            identity={"id": run.id}, expected_version=run.version,
+            values={"integrated_baseline_id": baseline_id},
+        )
 
     def attempt(self, attempt_id: UUID) -> ExecutionAttemptRecord | None:
         row = self._one(execution_attempts, execution_attempts.c.id == attempt_id)

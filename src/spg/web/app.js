@@ -226,6 +226,7 @@
     selfRefineWorkView: document.getElementById("self-refine-work-view"),
     selfRefinePlatformView: document.getElementById("self-refine-platform-view"),
     selfRefineFilters: document.getElementById("self-refine-filters"),
+    selfRefineClassFilter: document.getElementById("self-refine-class-filter"),
     selfRefineFamilyFilter: document.getElementById("self-refine-family-filter"),
     selfRefineComponentFilter: document.getElementById("self-refine-component-filter"),
     selfRefineResultFilter: document.getElementById("self-refine-result-filter"),
@@ -305,6 +306,9 @@
     planFit: document.getElementById("plan-fit"),
     planObjective: document.getElementById("plan-objective"),
     planSteps: document.getElementById("plan-steps"),
+    planRuntime: document.getElementById("plan-runtime"),
+    planRuntimeSummary: document.getElementById("plan-runtime-summary"),
+    planRuntimeUnits: document.getElementById("plan-runtime-units"),
     planVerification: document.getElementById("plan-verification"),
     planUnresolved: document.getElementById("plan-unresolved"),
     recentEvent: document.getElementById("recent-event"),
@@ -701,7 +705,9 @@
     const turns = (state.sharedUnderstanding && state.sharedUnderstanding.turns) || [];
     const turnStatus = state.streamingAssistantMessage ? state.streamingAssistantMessage.status
       : turns.length ? turns[turns.length - 1].status : "IDLE";
-    elements.interactionProcessingStatus.textContent = turnStatus;
+    elements.interactionProcessingStatus.textContent = (
+      state.streamingAssistantMessage?.searchStatus || turnStatus
+    );
     elements.interactionProcessingStatus.className = `status-badge ${turnStatus === "FAILED" ? "status-attention" : turnStatus === "COMPLETED" ? "status-completed" : "status-draft"}`;
   }
 
@@ -1088,8 +1094,24 @@
 
   function renderProductionPlan(work) {
     const plan = work.production_plan;
+    const runtime = work.production_plan_runtime;
     elements.productionPlanPanel.hidden = !plan;
     elements.planSteps.replaceChildren();
+    if (elements.planRuntime) {
+      elements.planRuntime.hidden = !runtime;
+      elements.planRuntimeUnits.replaceChildren();
+      if (runtime) {
+        elements.planRuntimeSummary.textContent = `Revision ${runtime.revision_number} · Integrated baseline ${runtime.integrated_revision?.slice(0, 12) || "pending"}`;
+        (runtime.pwus || []).forEach((unit) => {
+          const dependencies = unit.dependency_ids?.length
+            ? ` · after ${unit.dependency_ids.join(", ")}` : " · ready from Work baseline";
+          const reason = unit.blocked_reason ? ` · ${unit.blocked_reason}` : "";
+          elements.planRuntimeUnits.append(createElement(
+            "li", "", `${unit.kind === "JOIN" ? "Integration: " : ""}${unit.objective} · ${unit.state}${dependencies}${reason}`,
+          ));
+        });
+      }
+    }
     if (!plan) {
       return;
     }
@@ -1436,11 +1458,12 @@
   function renderSelfRefine() {
     const events = state.selfRefineEvents;
     const current = events.filter((event) => event.work_id === state.selectedWorkId);
-    const active = current.filter((event) => event.status === "OPEN").length;
-    const recovered = current.filter((event) => event.final_result === "RECOVERED").length;
+    const visible = state.selfRefineScope === "platform" ? events : current;
+    const active = visible.filter((event) => event.status === "OPEN").length;
+    const systemic = visible.filter((event) => event.refinement_class === "SYSTEMIC_OR_NON_CONVERGING_INCIDENT" || event.refinement_class === "LEGACY_EXECUTION_INCIDENT").length;
     const metrics = state.selfRefineMetrics;
-    elements.selfRefineSummary.textContent = `${current.length} Work incident(s) · ${active} active · ${recovered} recovered` + (
-      metrics ? ` · ${metrics.self_refine_events}/${metrics.native_attempts} Native attempts triggered recovery (${(metrics.self_refine_rate * 100).toFixed(1)}%)` : ""
+    elements.selfRefineSummary.textContent = `${state.selfRefineScope === "platform" ? "Platform" : "Work"}: ${visible.length} refinement event(s) · ${systemic} incident(s) · ${active} active` + (
+      metrics ? ` · ${metrics.recovered} recovered · ${metrics.escalated} escalated · ${(metrics.improvement_candidates || []).length} improvement candidate(s) · Native retry rate ${(metrics.self_refine_rate * 100).toFixed(1)}%` : ""
     );
     elements.selfRefineFilters.hidden = state.selfRefineScope !== "platform";
     elements.selfRefineList.replaceChildren();
@@ -1451,7 +1474,7 @@
     }
     events.forEach((event) => {
       const row = createElement("li", "", "");
-      const button = createElement("button", "secondary", `${event.failure_family} · ${event.status} · ${event.final_result || "IN PROGRESS"}`);
+      const button = createElement("button", "secondary", `${event.signal_kind || event.failure_family} · ${event.refinement_class || "LEGACY_EXECUTION_INCIDENT"} · ${event.final_result || "IN PROGRESS"}`);
       button.type = "button";
       button.addEventListener("click", async () => {
         try {
@@ -1478,6 +1501,7 @@
   function selfRefineEndpoint(workId) {
     if (state.selfRefineScope === "work") return `/api/works/${workId}/self-refine`;
     const params = new URLSearchParams();
+    if (elements.selfRefineClassFilter.value) params.set("refinement_class", elements.selfRefineClassFilter.value);
     if (elements.selfRefineFamilyFilter.value.trim()) params.set("failure_family", elements.selfRefineFamilyFilter.value.trim());
     if (elements.selfRefineComponentFilter.value.trim()) params.set("component", elements.selfRefineComponentFilter.value.trim());
     if (elements.selfRefineResultFilter.value) params.set("result", elements.selfRefineResultFilter.value);
@@ -2712,6 +2736,35 @@
       if (!current()) return;
       markBrowserEvent("browserTurnStatusReceived");
       state.streamingAssistantMessage.status = JSON.parse(event.data).status;
+      scheduleStreamRender();
+    });
+    source.addEventListener("search.started", (event) => {
+      if (!current()) return;
+      const payload = JSON.parse(event.data);
+      if (!acceptResponseEvent(payload)) return;
+      state.streamingAssistantMessage.searchStatus = "SEARCHING";
+      if (!streamed) {
+        streamed = "正在检索公开来源并核查结果…";
+        state.streamingAssistantMessage.content = streamed;
+      }
+      scheduleStreamRender();
+    });
+    source.addEventListener("search.failed", (event) => {
+      if (!current()) return;
+      const payload = JSON.parse(event.data);
+      if (!acceptResponseEvent(payload)) return;
+      state.streamingAssistantMessage.searchStatus = "SEARCH LIMITED";
+      scheduleStreamRender();
+    });
+    source.addEventListener("search.completed", (event) => {
+      if (!current()) return;
+      const payload = JSON.parse(event.data);
+      if (!acceptResponseEvent(payload)) return;
+      const metrics = payload.metadata?.metrics || {};
+      state.streamingAssistantMessage.searchStatus = metrics.result_count
+        ? (metrics.failure_categories?.length ? "SEARCH PARTIAL" : "SEARCH COMPLETE")
+        : (metrics.failure_categories?.includes("CREDENTIAL_REQUIRED")
+          ? "SEARCH BLOCKED" : "SEARCH FAILED");
       scheduleStreamRender();
     });
     source.addEventListener("message.delta", (event) => {

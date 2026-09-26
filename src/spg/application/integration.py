@@ -13,6 +13,7 @@ from spg.domain.governance import (
     CandidateCondition,
     HumanAuthorizationRecord,
 )
+from spg.application.multi_pwu_lineage import completed_graph
 from spg.domain.integration import (
     RepositoryEffectState,
     RepositoryEffectType,
@@ -330,6 +331,13 @@ class RepositoryIntegrationService:
             raise RuntimeInvariantViolation(
                 "Repository Integration production lineage is incomplete"
             )
+        graph_units = ()
+        final_input_id = candidate.source_baseline_id
+        if plan.graph is not None:
+            graph_units, final_input = completed_graph(store, run, plan, proposed)
+            final_input_id = final_input.id
+            if set(candidate.satisfied_work_unit_ids) != {item.id for item in graph_units}:
+                raise RuntimeInvariantViolation("Candidate omits verified graph PWUs")
         if (
             pointer.snapshot_id != candidate.source_baseline_id
             or source_baseline.repository_identity != candidate.repository_identity
@@ -342,7 +350,7 @@ class RepositoryIntegrationService:
             or plan.source_baseline_id != candidate.source_baseline_id
             or proposed.production_run_id != candidate.production_run_id
             or proposed.plan_revision_id != candidate.plan_revision_id
-            or proposed.source_baseline_id != candidate.source_baseline_id
+            or proposed.source_baseline_id != final_input_id
             or proposed.repository_identity != candidate.repository_identity
             or proposed.repository_ref != candidate.target_authoritative_ref
             or proposed.authoritative_ref_revision
@@ -367,7 +375,8 @@ class RepositoryIntegrationService:
                 or work_unit.condition is not WorkUnitCondition.SATISFIED
                 or work_unit.production_run_id != candidate.production_run_id
                 or work_unit.plan_revision_id != candidate.plan_revision_id
-                or work_unit.source_baseline_id != candidate.source_baseline_id
+                or (plan.graph is None and work_unit.source_baseline_id != candidate.source_baseline_id)
+                or (plan.graph is not None and work_unit.verified_output_baseline_id is None)
             ):
                 raise RuntimeInvariantViolation(
                     "Repository Integration requires current SATISFIED PWU lineage"
@@ -383,7 +392,7 @@ class RepositoryIntegrationService:
                 != candidate.proposed_commit_identity
                 or verification.tree_identity != candidate.proposed_tree_identity
                 or verification.plan_revision_id != candidate.plan_revision_id
-                or verification.source_baseline_id != candidate.source_baseline_id
+                or verification.source_baseline_id != final_input_id
             ):
                 raise RuntimeInvariantViolation(
                     "Repository Integration Verification basis is stale or wrong"

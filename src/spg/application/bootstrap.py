@@ -353,9 +353,30 @@ class Application:
         """Compose pre-Work interpretation without composing Work or production."""
 
         selected_database = database or self.persistence()
+        from spg.application.connectors import ConnectorResolver
+        from spg.application.external_research import GovernedExternalResearch
+        from spg.providers.external_search import (
+            BoundedPublicHttp, BraveWebSearchProvider, GitHubPublicSearchProvider,
+        )
+        capability = self.interaction_capability()
+        http = BoundedPublicHttp()
+        github_key = self.settings.github_read_token
+        web_key = self.settings.web_search_api_key
+        research = GovernedExternalResearch(
+            ConnectorResolver(selected_database),
+            github=GitHubPublicSearchProvider(
+                http, token=None if github_key is None else github_key.get_secret_value(),
+            ),
+            web=BraveWebSearchProvider(
+                http, api_key=None if web_key is None else web_key.get_secret_value(),
+            ),
+            http=http,
+            model=getattr(capability, "runtime", None),
+        )
         return WorkInteractionService(
             selected_database,
-            capability=self.interaction_capability(),
+            capability=capability,
+            external_research=research,
             runtime_mode=WicRuntimeMode(self.settings.wic_runtime_mode),
             fast_reception=(
                 ShadowFastReceptionRuntime(
@@ -435,6 +456,15 @@ class Application:
                         max_output_tokens=(
                             self.settings.collaboration_provider_max_output_tokens
                         ),
+                    ),
+                    ModelPurpose.EXTERNAL_RESEARCH: ModelProfile(
+                        purpose=ModelPurpose.EXTERNAL_RESEARCH,
+                        provider=ModelProvider.DEEPSEEK,
+                        model=(self.settings.conversation_provider_model
+                               or self.settings.wic_provider_model or "deepseek-flash"),
+                        reasoning_effort=self.settings.conversation_provider_reasoning_effort,
+                        timeout_seconds=min(timeout, 25),
+                        max_output_tokens=4096,
                     ),
                     ModelPurpose.EXECUTOR_PRODUCTION: ModelProfile(
                         purpose=ModelPurpose.EXECUTOR_PRODUCTION,

@@ -194,7 +194,9 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
     assert 'id="work-tags"' not in html
     assert "placement rationale" in combined
     assert "production plan" in combined
-    assert "single-pwu approach" in combined
+    assert "production approach" in combined
+    assert 'id="plan-runtime-units"' in html
+    assert "production_plan_runtime" in javascript
     assert 'id="plan-steps"' in html
     assert "plan.fit_classification" in javascript
     assert "expected_artifact_path" in javascript
@@ -541,6 +543,7 @@ def test_self_refine_work_and_platform_views_are_wired_to_durable_api() -> None:
     for identifier in (
         "self-refine-summary", "self-refine-work-view", "self-refine-platform-view",
         "self-refine-list", "self-refine-detail", "self-refine-family-filter",
+        "self-refine-class-filter",
         "self-refine-component-filter", "self-refine-result-filter",
     ):
         assert f'id="{identifier}"' in html

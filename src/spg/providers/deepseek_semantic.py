@@ -154,6 +154,31 @@ class DeepSeekSemanticStepCapability:
             payload = SemanticStepWireContract._parse_payload_ignoring_annotations(
                 result.output_text
             )
+        return self._candidate(input, payload, result)
+
+    def refine(
+        self, input: SemanticStepInput, *, validation_feedback: str,
+    ) -> SemanticStepResultCandidate:
+        """One correction against the same immutable basis and admission contract."""
+        result = self.runtime.generate(
+            purpose=ModelPurpose.STEERING_SEMANTIC,
+            instructions=SemanticStepWireContract._instruction(input),
+            input_text=(
+                "The previous candidate was rejected by the governed semantic "
+                "admission boundary: " + validation_feedback + "\n"
+                "Return a revised candidate for the SAME Step and Reality basis. "
+                "Do not add Human constraints, permissions, credentials, or scope. "
+                "If the evidence cannot support completion, state the unresolved "
+                "decision truthfully."
+            ),
+            output_schema=SemanticStepWireContract.output_schema(),
+        )
+        payload = SemanticStepWireContract._parse_payload_ignoring_annotations(
+            result.output_text
+        )
+        return self._candidate(input, payload, result)
+
+    def _candidate(self, input, payload, result) -> SemanticStepResultCandidate:
         self.last_result = result
         self.last_usage = asdict(result.usage)
         kind = (

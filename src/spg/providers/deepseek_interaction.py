@@ -504,6 +504,7 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
             semantic_usage=self.semantic_capability.last_usage,
             semantic_retry_count=(self.semantic_capability.last_retry_count or 0)
             + self.semantic_capability.last_structured_repair_count,
+            semantic_structured_repair_count=self.semantic_capability.last_structured_repair_count,
             semantic_seconds=monotonic() - started_at,
             semantic_prompt_characters=self.semantic_capability.last_prompt_characters,
             semantic_model=self.semantic_capability.model,
@@ -692,5 +693,6 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
             provider_stage_seconds=dict(stages),
             coalesced_usage=_usage(result),
             coalesced_retry_count=result.retry_count + repair_count,
+            coalesced_structured_repair_count=repair_count,
         )
         return candidate

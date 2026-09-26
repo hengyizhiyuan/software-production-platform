@@ -16,6 +16,17 @@ context.globalThis = context;
 vm.runInNewContext(source, context, { filename: "control-room.js" });
 const controlRoom = context.WattControlRoom;
 
+test("external research shows current search and credential-blocked state in Interaction", () => {
+  assert.match(app, /addEventListener\("search\.started"/);
+  assert.match(app, /searchStatus = "SEARCHING"/);
+  assert.match(app, /addEventListener\("search\.failed"/);
+  assert.match(app, /searchStatus = "SEARCH LIMITED"/);
+  assert.match(app, /addEventListener\("search\.completed"/);
+  assert.match(app, /"SEARCH PARTIAL" : "SEARCH COMPLETE"/);
+  assert.match(app, /"SEARCH BLOCKED" : "SEARCH FAILED"/);
+  assert.match(app, /state\.streamingAssistantMessage\?\.searchStatus \|\| turnStatus/);
+});
+
 test("early Workspace projects a candidate without fabricating Work or production", () => {
   const projection = {
     interpreted_motive: "做一个五年级课程表网页",
@@ -491,7 +502,7 @@ test("Self-Refine provides Work and platform incident lists with evidence detail
   for (const id of [
     "self-refine-summary", "self-refine-work-view", "self-refine-platform-view",
     "self-refine-list", "self-refine-detail", "self-refine-detail-body",
-    "self-refine-family-filter", "self-refine-component-filter", "self-refine-result-filter",
+    "self-refine-class-filter", "self-refine-family-filter", "self-refine-component-filter", "self-refine-result-filter",
   ]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
@@ -501,4 +512,6 @@ test("Self-Refine provides Work and platform incident lists with evidence detail
   assert.match(app, /detail\.actions\.forEach/);
   assert.match(app, /known_failure_match/);
   assert.match(app, /self_refine_rate/);
+  assert.match(app, /refinement_class/);
+  assert.match(app, /improvement_candidates/);
 });

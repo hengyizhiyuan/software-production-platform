@@ -1,0 +1,31 @@
+# Watt Self-Refine architecture calibration qualification
+
+Date: 2026-09-25. Repository basis: `3953f0cb0240559bd2d6b92a216f9becfbb54253` on `feature/production-environment-foundation`. This document records the working-tree candidate; it is not a commit or Human acceptance.
+
+## Implemented reality
+
+The former durable Self-Refine episode was centered on native execution failure and Steering Provider recovery. WIC already performed minimum-sufficient clarification and structured-result repair; semantic Step admission and deterministic contract checks rejected candidates, but a rejected semantic Step candidate had no local bounded correction. The calibration keeps those owners. `refinement_contract.py` supplies shared signal/class semantics, not a new coordinator.
+
+Model-mediated WIC and semantic Step outputs are candidates. WIC's bounded structured repair is now durable on the owning assessment or failed Turn across runtime modes. A semantic Step admission rejection from a narrow allowlist can request one revised model candidate against the same input fingerprint and then reruns admission. Changed Reality and authority violations are not automatically retried. Native Executor retains its Adaptive Autonomy Budget and Self-Converge decision; repeat signatures, evidence and cost determine whether to continue. Deterministic Git, schema, Connector, exact-revision and effect checks remain evidence producers, not model owners. Human authority, exact Candidate authorization, Guardian's independent assurance bar and Delivery authority are unchanged.
+
+Version 2 durable Self-Refine observations distinguish routine convergence, degrading/recurring friction and systemic/nonconverging incidents. Prior rows remain semantic version 1 legacy execution incidents; migrations 48 and 49 are additive and reversible. Successful routine events have `OBSERVED_SUCCESS`, superseded candidates have `INCONCLUSIVE`, and confirmed unsuccessful events retain failure confidence. Cross-Work recurrence can create a stable Improvement Candidate reference without making each successful Work an incident. The Admin/Work history and metrics separate events from incidents; explicit Human escalation observations exclude unclassified legacy records from the denominator. Routine corrections do not create Human-facing warning toasts.
+
+Task Contract and PWU planning consume admitted Steering and Work facts; they are not independent model generators in this repository. Verification currently rejects a PASS on the wrong exact revision through deterministic evidence. Model-mediated Verification and Guardian candidate correction remain owner-specific seams, not newly implemented model loops.
+
+## Qualification evidence
+
+- Focused Self-Refine classification, semantic admission, WIC, persistence/API and migration checks: passed in the local PostgreSQL test database.
+- WIC assessment/Turn refinement evidence and restart reconstruction: passed in focused integration tests.
+- Frontend: 74 Node tests passed; JavaScript syntax check passed.
+- Python compile check, Git whitespace check, Alembic head and migration 49 downgrade/upgrade: passed. Current head is `20260925_49`.
+- Real DeepSeek transport probe: `deepseek-flash` returned canonical `CREATE_AND_SWITCH_BRANCH` with target `feat_test` from a variable branch representation; request ID `bb25ed61-a53c-4ddb-9f03-a1c8c9c3ead6`, 308 observed tokens. This probes the real model/provider candidate boundary; governed Git side effects are separately exercised by the GJ/SR-Q1 container test.
+- Full backend regression: **PASS**. `pytest -q --disable-warnings -rs` collected 1,364 cases: 1,361 passed, 3 skipped, 0 failed. Two skipped real-container cases require the unavailable `watt-engineering-semantic-human-retest-app:latest` image. One cross-repository Preview Reality case requires `PreviewRealityV1` and `PreviewRealityState`, which are absent from the sibling ECF revision used for this run. These three cases are not counted as passing. The earlier four Git-acquisition failures were test-fixture URL-to-path errors; after retaining the leading slash of `file:///private/...`, all four passed in the full run. The real-container Self-Refine qualification uses `watt-native-executor-runtime:local` and passed separately in the release corpus.
+- Release evaluation corpus, including SR-Q1 through SR-Q10 and existing 8+1 selectors: **PASS** ([machine-readable report](watt-self-refine-release-gate-20260925.json)). All 32 selected cases passed with zero failures and zero skips across Interaction, Production, Resilience and Assurance. SR-Q1 ran four branch variants; SR-Q5 ran the real-container repair path. The first run had two skips because the local ECF/Guardian checkouts did not expose runtime packages. The required packages came from temporary test snapshots of ECF `1a8e75ebba73ee02cf2a39f09902919263f1fe66` and Guardian `371dfa7345e9804d6c3a7d110ac55ca6cce0e492` on their existing `feature/production-environment-foundation` remote branches; the original checkouts were not switched. The previously skipped real-container repair selector then passed in isolation and in the full corpus rerun.
+
+The previous 8+1 and Reliability Hardening evidence remains historical automated/runtime qualification. It is not rewritten as Human acceptance. Human acceptance of the combined calibration candidate is **PENDING**.
+
+## Remaining limits and decision
+
+The sibling ECF revision used for cross-repository qualification does not yet expose the Preview Reality contract, and two optional historical real-container tests lack their separately named retest image on this computer. These remain explicitly skipped in the full backend run; they are not failures of the Self-Refine calibration and are not represented as passing tests. Current Verification uses exact-revision deterministic evidence; Guardian remains an independent assurance owner. No new model-mediated Guardian or Verification loop is claimed.
+
+The calibration candidate satisfies the current automated/runtime qualification, with the above coverage limits. Combined Human acceptance remains pending. Temporary sibling source mounts and test containers were removed after verification; neither sibling checkout was switched. The application working tree remains intentionally uncommitted for review.

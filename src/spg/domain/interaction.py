@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Literal, Protocol
+from typing import Any, Literal, Protocol
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -176,6 +176,7 @@ class InteractionTurn(BaseModel):
     status: InteractionTurnStatus
     failure_code: str | None = None
     failure_message: str | None = None
+    refinement_observation: dict[str, Any] | None = None
     created_at: datetime
     started_at: datetime | None = None
     completed_at: datetime | None = None
@@ -353,6 +354,7 @@ class InteractionAssessment(BaseModel):
     basis_steering_step_id: UUID | None = None
     basis_active_runtime_binding_id: UUID | None = None
     supporting_references: tuple[str, ...] = ()
+    refinement_observation: dict[str, Any] | None = None
     natural_response: str
     readiness: WorkAdmissionReadiness
     progressive_semantics: ProgressiveSemanticStructure | None = None

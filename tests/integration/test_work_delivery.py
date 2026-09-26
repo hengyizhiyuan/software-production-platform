@@ -259,10 +259,16 @@ def test_namespace_migration_preserves_legacy_baseline_and_refuses_lossy_downgra
     with postgres_database.engine.connect() as connection:
         assert connection.execute(text("SELECT singleton_id FROM current_trusted_baseline_pointer")).scalar_one() == 1
     command.upgrade(config, "head")
-    assert runtime.current_baseline().model_dump(mode="json") == before
+    after = runtime.current_baseline().model_dump(mode="json")
+    # The old schema cannot retain the later optional Git tree identity.
+    # Its authoritative legacy revision, namespace and pointer must survive.
+    assert {key: value for key, value in after.items() if key != "repository_tree_identity"} == {
+        key: value for key, value in before.items() if key != "repository_tree_identity"
+    }
+    assert after["repository_tree_identity"] is None
     assets = RepositoryAssetService(postgres_database, tmp_path / "assets", tmp_path / "imports")
     create_asset(assets, "Second namespace after legacy upgrade")
     with pytest.raises(RuntimeError, match="Cannot collapse multiple"):
         command.downgrade(config, "20260909_29")
     # PostgreSQL rolls back the entire failed schema migration transaction.
-    assert runtime.current_baseline(repository_identity="test://legacy-migration", repository_ref="refs/heads/main").model_dump(mode="json") == before
+    assert runtime.current_baseline(repository_identity="test://legacy-migration", repository_ref="refs/heads/main").model_dump(mode="json") == after

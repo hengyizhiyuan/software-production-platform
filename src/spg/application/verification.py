@@ -7,6 +7,7 @@ import json
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.preparation import completion_contract_fingerprint
+from spg.domain.planning import ProductionNodeKind
 from spg.domain.completion import CompletionEvaluationOutcome, CompletionEvaluationRecord
 from spg.domain.execution import ExecutionDispatchRecord, RepositoryObservationRecord
 from spg.domain.runtime import (
@@ -341,9 +342,19 @@ class VerificationService:
                 self._admissibility_for_obligation(obligation, records, snapshot_basis)
                 for obligation in required
             )
+            join_unresolved = False
+            if snapshot_basis.basis.plan.graph is not None:
+                node = next((item for item in snapshot_basis.basis.plan.graph.nodes
+                             if item.node_id == locked_work_unit.node_id), None)
+                evidence = locked_work_unit.reconciliation_evidence
+                join_unresolved = bool(
+                    node is not None and node.kind is ProductionNodeKind.JOIN
+                    and evidence is not None and evidence.get("conflicts")
+                    and evidence.get("candidate_tree") == snapshot_basis.proposed_snapshot.tree_identity
+                )
             outcome = (
                 ProductionAdmissibilityOutcome.ADMISSIBLE
-                if all(item.admissible for item in obligation_results)
+                if all(item.admissible for item in obligation_results) and not join_unresolved
                 else ProductionAdmissibilityOutcome.NOT_ADMISSIBLE
             )
             required_fingerprint = _fingerprint(required)
@@ -355,6 +366,7 @@ class VerificationService:
                     "plan_revision_id": str(snapshot_basis.basis.plan.id),
                     "source_baseline_id": str(snapshot_basis.basis.source_baseline.id),
                     "required_obligations_fingerprint": required_fingerprint,
+                    **({"join_conflict_unresolved": True} if join_unresolved else {}),
                     "verification_records": [
                         {
                             "id": str(record.id),
@@ -494,9 +506,9 @@ class VerificationService:
             or dispatch.source_baseline_id != source_baseline.id
             or run.id != work_unit.production_run_id
             or run.current_plan_revision_id != plan.id
-            or run.source_baseline_id != source_baseline.id
+            or (plan.graph is None and run.source_baseline_id != source_baseline.id)
             or plan.production_run_id != run.id
-            or plan.source_baseline_id != source_baseline.id
+            or (plan.graph is None and plan.source_baseline_id != source_baseline.id)
         ):
             raise RuntimeInvariantViolation("S3-B basis is not an exact Produced lineage")
         return _VerificationBasis(

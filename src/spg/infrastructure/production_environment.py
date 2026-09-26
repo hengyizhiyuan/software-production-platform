@@ -510,6 +510,19 @@ class GitIsolatedWorkspacePreparer:
                     asset.source,
                     str(destination),
                 )
+                # A verified PWU output may be a detached, unreferenced commit
+                # in the source object database. The selected branch clone does
+                # not necessarily include it; fetch that exact object only.
+                probe = subprocess.run(
+                    ["git", "-C", str(destination), "cat-file", "-e",
+                     f"{asset.source_revision}^{{commit}}"],
+                    check=False, capture_output=True,
+                )
+                if probe.returncode != 0:
+                    self._git(
+                        destination, "fetch", "--no-tags", "--no-write-fetch-head",
+                        asset.source, asset.source_revision,
+                    )
                 self._git(destination, "checkout", "--detach", asset.source_revision)
                 revision = self._git(destination, "rev-parse", "HEAD^{commit}")
                 tree = self._git(destination, "rev-parse", "HEAD^{tree}")

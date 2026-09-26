@@ -15,7 +15,7 @@ def test_system_capability_reality_contains_truthful_executable_inventory() -> N
         "package", "build", "test", "quality", "container", "preview",
         "browser", "database", "migration", "artifact", "secret", "ssh",
         "ci", "deployment", "object_storage", "observability", "issue",
-        "mini_program",
+        "mini_program", "web",
     }
     assert entries["git.branch.create"].availability is ConnectorAvailability.AVAILABLE
     assert entries["git.branch.create"].execution_provider == "native-tool:git.operation"
@@ -24,6 +24,15 @@ def test_system_capability_reality_contains_truthful_executable_inventory() -> N
     assert entries["github.push"].side_effect_level is SideEffectLevel.EXTERNAL_WRITE
     assert "delivery.authorize" in entries["github.push"].permissions_required
     assert entries["http.request"].availability is ConnectorAvailability.UNAVAILABLE
+    assert entries["github.repository.search"].availability is ConnectorAvailability.AVAILABLE
+    assert entries["github.resource.fetch"].availability is ConnectorAvailability.AVAILABLE
+    assert entries["github.code.search"].credential_requirements == ("github.read",)
+    assert entries["web.search"].credential_requirements == ("brave.search",)
+    assert entries["web.resource.fetch"].availability is ConnectorAvailability.AVAILABLE
+    assert all(entries[name].side_effect_level is SideEffectLevel.READ for name in (
+        "github.repository.search", "github.code.search", "github.issue.search",
+        "github.resource.fetch", "web.search", "web.resource.fetch",
+    ))
     assert all(
         item.execution_provider != "unbound"
         for item in entries.values()

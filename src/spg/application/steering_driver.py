@@ -21,6 +21,7 @@ from spg.application.repository_branch_authority import governed_branch_creation
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.steering import SteeringApplicationService
 from spg.application.semantic_steps import SemanticStepApplicationService
+from spg.domain.refinement_contract import RefinementSignalKind, classify_refinement
 from spg.application.steering_decision import (
     DeterministicPlanSteeringCapability,
     PlanFrameAssembler,
@@ -1153,7 +1154,7 @@ class PlanSteeringDriver:
             resource = product.resource_for_work(work_id)
             if (work is None or resource is None
                     or work.production_plan is None
-                    or work.production_plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT
+                    or work.production_plan.fit_classification not in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}
                     or product.runtime_binding_for_step(result.step_id) is not None):
                 return False
             admitted = runtime.governance_for_subject(str(work_id))
@@ -1420,6 +1421,14 @@ class PlanSteeringDriver:
                     id=event_id, work_id=work_id, operation_id=work_id,
                     created_at=now, failure_family=family,
                     failure_signature=signature, affected_component="steering/provider",
+                    signal_kind=RefinementSignalKind.PROVIDER_TRANSPORT,
+                    refinement_class=classify_refinement(
+                        converged=False,
+                        prior_occurrences=store.prior_self_refine_matches(
+                            signature, before_event_id=event_id,
+                        ),
+                        budget_exhausted=not error.retryable,
+                    ),
                     expected_reality={"outcome": "GOVERNED_STEERING_PROGRESSION", "work_revision_id": revision_id},
                     observed_reality={"provider_kind": error.kind.value, "retryable": error.retryable},
                     diagnosis_summary="Steering Provider did not return an admissible result.",

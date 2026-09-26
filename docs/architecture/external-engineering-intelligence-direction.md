@@ -1,12 +1,18 @@
 # External Engineering Intelligence Direction
 
-Status: **RECORDED / DEFERRED — valuable future product capability, not current implementation priority**
+Status: **RECORDED DIRECTION — broader external engineering intelligence remains unimplemented**
 
-Implementation: **NOT STARTED / NOT AUTHORIZED BY THIS RECORD**
+Implementation: **Public GitHub/Web evidence acquisition is implemented separately; the broader research/adaptation workflow described here is not complete or authorized by this record.**
 
 Document role: **ARCHITECTURE DIRECTION MEMO / HUMAN-VISIBLE PRODUCT CAPABILITY**
 
 Recorded: **2026-09-09**
+
+Current implementation boundary (2026-09-25): read-only external Search and
+Fetch now enter the existing Interaction, Task Contract, Connector, and Evidence
+path. See [Public external search and retrieval](watt-ai-native-software-production-architecture.md#public-external-search-and-retrieval-2026-09-25).
+The historical non-goals below describe the 2026-09-09 documentation mission,
+not the current availability of public search.
 
 This document preserves a future product direction in the repository Source of
 Truth. It defines intent and responsibility boundaries, not an implementation
@@ -288,9 +294,10 @@ The product direction extends a Requirement → Generate Code workflow toward:
 Problem -> Discover -> Understand -> Compare -> Adapt -> Govern -> Produce -> Verify
 ```
 
-This is a potential differentiating capability. It is not a verified
-competitive advantage, a claim that other tools lack research, or an already
-available Watt feature.
+This broader direction is a potential differentiating capability. It is not a
+verified competitive advantage or a claim that other tools lack research.
+Current public Search/Fetch covers evidence acquisition, not the full
+comparison, adaptation, and governed production journey described here.
 
 ## 9. Related Internal Reference Engineering
 

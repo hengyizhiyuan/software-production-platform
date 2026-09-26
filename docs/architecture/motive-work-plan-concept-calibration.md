@@ -129,11 +129,12 @@ repeat until the Work outcome is achieved
 The Plan maintains direction while allowing the path to evolve from evidence.
 Dynamic adjustment remains governed, attributable, and explainable.
 
-MVP-PLAN-1B is a narrow implementation subset: it creates one durable,
-provider-neutral single-PWU Production Plan Proposal for the currently admitted
-production step. Its ordered steps are not the complete long-lived Plan
-Steering capability described here. PLAN-1B remains CLOSED / PASS and is not
-reopened by this calibration.
+At its closure, MVP-PLAN-1B was a narrow implementation subset: it created one
+durable, provider-neutral single-PWU Production Plan Proposal for the admitted
+production step. Its ordered steps were not the complete long-lived Plan
+Steering capability described here. Current production planning can admit a
+versioned multi-PWU DAG within the governed Run. PLAN-1B remains CLOSED / PASS
+and is not reopened by this calibration.
 
 ## SPG Boundary
 

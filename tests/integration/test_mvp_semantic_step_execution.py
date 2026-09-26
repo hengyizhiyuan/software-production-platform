@@ -60,6 +60,7 @@ from spg.infrastructure.persistence.runtime_schema import (
 from spg.infrastructure.persistence.steering_schema import semantic_step_results
 from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
 from spg.providers.semantic_wire import SemanticStepWireContract
+from spg.domain.refinement_contract import RefinementClass, RefinementSignalKind
 
 
 pytestmark = pytest.mark.postgresql
@@ -596,6 +597,97 @@ def test_sem_07_stale_semantic_candidate_is_rejected(
         assert connection.execute(
             select(func.count()).select_from(semantic_step_results)
         ).scalar_one() == 0
+
+
+def test_semantic_admission_conflict_refines_once_on_same_basis_and_records_routine(
+    postgres_database: Database, product,
+) -> None:
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+
+    class RefiningCapability(_SemanticCapability):
+        def __init__(self) -> None:
+            super().__init__(step_type=SteeringStepType.DESIGN)
+            self.feedback: str | None = None
+
+        def refine(self, input: SemanticStepInput, *, validation_feedback: str):
+            self.feedback = validation_feedback
+            self.proposed_production = True
+            return self.execute(input)
+
+    capability = RefiningCapability()
+    service = SemanticStepApplicationService(postgres_database, capability)
+    admitted_result = service.execute(admitted.work_id)
+    assert admitted_result.completion_satisfied
+    assert len(capability.inputs) == 2
+    assert capability.inputs[0].basis_fingerprint == capability.inputs[1].basis_fingerprint
+    assert capability.feedback is not None and "production proposal" in capability.feedback
+    with postgres_database.unit_of_work() as uow:
+        events = NativeExecutionStore(uow.session).list_self_refine_events(
+            work_id=admitted.work_id, component="steering/semantic-step",
+        )
+        assert len(events) == 1
+        assert events[0].refinement_class is RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT
+        assert events[0].signal_kind is RefinementSignalKind.CONTRACT_MISMATCH
+        assert events[0].final_result == "RECOVERED"
+        assert events[0].budget_decision["attempt_count"] == 2
+
+
+def test_semantic_authority_expansion_does_not_receive_automatic_refinement(
+    postgres_database: Database, product,
+) -> None:
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+
+    class AuthorityCandidate(_SemanticCapability):
+        def __init__(self) -> None:
+            super().__init__(step_type=SteeringStepType.DESIGN, proposed_production=True)
+            self.refine_called = False
+
+        def execute(self, input: SemanticStepInput):
+            candidate = super().execute(input)
+            return candidate.model_copy(update={
+                "derived_constraints": (*input.constraints, "Broaden Human-approved scope"),
+            })
+
+        def refine(self, input: SemanticStepInput, *, validation_feedback: str):
+            self.refine_called = True
+            return super().execute(input)
+
+    capability = AuthorityCandidate()
+    with pytest.raises(SteeringInvariantViolation, match="cannot silently add"):
+        SemanticStepApplicationService(postgres_database, capability).execute(admitted.work_id)
+    assert not capability.refine_called
+
+
+def test_semantic_nonconvergence_stops_after_one_feedback_and_retains_diagnostics(
+    postgres_database: Database, product,
+) -> None:
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+
+    class UnchangedCandidate(_SemanticCapability):
+        def __init__(self) -> None:
+            super().__init__(step_type=SteeringStepType.DESIGN)
+            self.refinements = 0
+
+        def refine(self, input: SemanticStepInput, *, validation_feedback: str):
+            self.refinements += 1
+            return self.execute(input)
+
+    capability = UnchangedCandidate()
+    with pytest.raises(SteeringInvariantViolation, match="production proposal"):
+        SemanticStepApplicationService(postgres_database, capability).execute(admitted.work_id)
+    assert capability.refinements == 1
+    with postgres_database.unit_of_work() as uow:
+        events = NativeExecutionStore(uow.session).list_self_refine_events(
+            work_id=admitted.work_id, component="steering/semantic-step",
+        )
+        assert len(events) == 1
+        assert events[0].refinement_class is RefinementClass.SYSTEMIC_OR_NON_CONVERGING_INCIDENT
+        assert events[0].final_result == "ESCALATED"
+        assert events[0].diagnostic_evidence["basis_fingerprint"]
+        assert events[0].diagnostic_evidence["second_error_type"] == "SteeringInvariantViolation"
 
 
 def test_sem_13_derived_constraint_cannot_silently_expand_work_authority(

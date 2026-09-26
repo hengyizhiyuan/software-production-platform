@@ -79,6 +79,9 @@ from spg.application.wic_reception import (
     neutral_fast_provisional_message,
 )
 from spg.application.wic_intelligence import build_progressive_semantics
+from spg.application.external_research import (
+    GovernedExternalResearch, potential_external_research,
+)
 from spg.domain.wic_intelligence import GovernanceCandidateKind
 from spg.application.wic_response import (
     DeterministicGovernedResponseRealizer,
@@ -526,6 +529,17 @@ def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailur
                 "validation_issue": error.validation_issue,
                 "request_id": error.request_id,
                 "repair_attempted": error.repair_attempted,
+                "refinement_observation": (
+                    {
+                        "semantic_version": 2,
+                        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+                        "signal_kind": "SCHEMA_INVALID",
+                        "component": "wic/semantic-provider",
+                        "attempt_count": 2,
+                        "converged": False,
+                        "human_escalation": False,
+                    } if error.repair_attempted else None
+                ),
                 "timestamp": failed_at.isoformat(),
                 "retryable": True,
                 "provisional_is_not_final": True,
@@ -543,6 +557,29 @@ def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailur
     )
 
 
+def _pipeline_refinement_observation(evidence: object) -> dict[str, object] | None:
+    if evidence is None:
+        return None
+    def count(name: str) -> int:
+        value = evidence.get(name) if isinstance(evidence, dict) else getattr(evidence, name, None)
+        return int(value or 0)
+
+    repairs = count("semantic_structured_repair_count") + count(
+        "coalesced_structured_repair_count"
+    )
+    if not repairs:
+        return None
+    return {
+        "semantic_version": 2,
+        "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "signal_kind": "SCHEMA_INVALID",
+        "component": "wic/semantic-provider",
+        "attempt_count": repairs + 1,
+        "converged": True,
+        "human_escalation": False,
+    }
+
+
 class WorkInteractionService:
     def __init__(
         self,
@@ -552,6 +589,7 @@ class WorkInteractionService:
         fast_reception: ShadowFastReceptionRuntime | None = None,
         runtime_mode: WicRuntimeMode = WicRuntimeMode.LEGACY_WIC,
         response_realizer: GovernedResponseRealizer | None = None,
+        external_research: GovernedExternalResearch | None = None,
     ) -> None:
         self.database = database
         self.capability = capability
@@ -562,6 +600,7 @@ class WorkInteractionService:
             or getattr(capability, "governed_response_realizer", None)
             or DeterministicGovernedResponseRealizer()
         )
+        self.external_research = external_research
         self._turn_executor = ThreadPoolExecutor(
             max_workers=1,
             thread_name_prefix="watt-interaction",
@@ -1773,6 +1812,9 @@ class WorkInteractionService:
             def start_fast_reception(basis: InteractionInterpretationInput) -> None:
                 if self.fast_reception is None:
                     return
+                if (self.external_research is not None
+                        and potential_external_research(basis.records[-1].content)):
+                    return
                 if _repository_branch_status_question(basis.records[-1].content):
                     return
                 self._mark_turn_timing(turn_id, "fast_path_started")
@@ -1871,11 +1913,15 @@ class WorkInteractionService:
 
             controlled = turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED
             branch_status_query = _repository_branch_status_question(request_record.content)
+            research_candidate = bool(
+                self.external_research is not None
+                and potential_external_research(request_record.content)
+            )
             assessment = self._assess_current(
                 turn.interaction_id,
                 on_response_delta=(
                     (lambda _delta: None)
-                    if controlled or branch_status_query
+                    if controlled or branch_status_query or research_candidate
                     else lambda delta: self._publish_turn_response_delta(turn_id, delta)
                 ),
                 on_pipeline_stage=lambda stage: self._mark_turn_timing(turn_id, stage),
@@ -1907,9 +1953,42 @@ class WorkInteractionService:
                 pipeline_evidence, dict
             ):
                 pipeline_evidence = {"type": type(pipeline_evidence).__name__}
+            refinement_observation = assessment.refinement_observation
             response_content = self._human_facing_response(
                 assessment.natural_response
             )
+            research_result = None
+            if self.external_research is not None:
+                requests = self.external_research.requests_for_turn(
+                    request_record.content, response_content,
+                )
+                if requests:
+                    search_progress_published = False
+                    def record_search_event(name: str, details: dict) -> None:
+                        nonlocal search_progress_published
+                        self._record_response_event(
+                            turn_id, WicResponseEventType(name),
+                            basis_fingerprint=assessment.basis_fingerprint,
+                            metadata=details,
+                            only_while_processing=True,
+                        )
+                        if (name == "SEARCH_STARTED" and not controlled
+                                and not search_progress_published):
+                            self._publish_turn_response_delta(
+                                turn_id, "正在检索公开来源并核查结果…"
+                            )
+                            search_progress_published = True
+                    research_result = self.external_research.run(
+                        turn_id=turn_id,
+                        interaction_id=turn.interaction_id,
+                        work_id=self.get_shared_understanding(turn.interaction_id).governed_work_id,
+                        user_id=request_record.source,
+                        text=request_record.content,
+                        requests=requests,
+                        on_event=record_search_event,
+                        steering_step_id=assessment.basis_steering_step_id,
+                    )
+                    response_content = research_result.answer
             if branch_status_query and not controlled:
                 branch_status_answer = _repository_branch_status_answer(
                     request_record.content,
@@ -1917,7 +1996,7 @@ class WorkInteractionService:
                 )
                 if branch_status_answer is not None:
                     response_content = branch_status_answer
-            if controlled:
+            if controlled and research_result is None:
                 (
                     response_content,
                     realization,
@@ -1929,7 +2008,7 @@ class WorkInteractionService:
                     assessment,
                     latest_human_input=request_record.content,
                 )
-            if branch_action_answer is not None:
+            if branch_action_answer is not None and research_result is None:
                 response_content = branch_action_answer
             self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
@@ -1971,7 +2050,13 @@ class WorkInteractionService:
                                 "realizer_usage": None if realization is None else realization.usage,
                                 "realizer_timing": None if realization is None else realization.timing,
                                 "semantic_provider_evidence": pipeline_evidence,
+                                "refinement_observation": refinement_observation,
                                 "interaction_strategy": interaction_strategy,
+                                "external_research": None if research_result is None else {
+                                    "task_contract_id": str(research_result.task_contract_id),
+                                    "metrics": research_result.metrics.model_dump(mode="json"),
+                                    "evidence_ids": [item.evidence_id for item in research_result.evidence],
+                                },
                             },
                             "created_at": completed_at,
                         })
@@ -1989,10 +2074,14 @@ class WorkInteractionService:
                             "interpretation_assessment_id": assessment.id,
                             "design_result_references": list(design_refs),
                             "governance_event_references": list(
-                                assessment.supporting_references
+                                (*assessment.supporting_references,
+                                 *((item.evidence_id for item in research_result.evidence)
+                                   if research_result is not None else ()))
                             ),
                             "supporting_references": list(
-                                assessment.supporting_references
+                                (*assessment.supporting_references,
+                                 *((item.evidence_id for item in research_result.evidence)
+                                   if research_result is not None else ()))
                             ),
                             "created_at": completed_at,
                             "updated_at": completed_at,
@@ -2040,6 +2129,7 @@ class WorkInteractionService:
                     updated_at=failed_at,
                     failure_code=failure.code,
                     failure_message=failure.message,
+                    refinement_observation=failure.metadata.get("refinement_observation"),
                     completed_at=failed_at,
                 )
                 store.update_turn_messages_status(
@@ -2153,6 +2243,9 @@ class WorkInteractionService:
             interaction_id,
             basis_fingerprint=basis.basis_fingerprint,
             candidate=candidate,
+            refinement_observation=_pipeline_refinement_observation(
+                getattr(self.capability, "last_pipeline_evidence", None)
+            ),
             on_pipeline_stage=on_pipeline_stage,
             policy_governed=policy_governed,
         )
@@ -2169,6 +2262,7 @@ class WorkInteractionService:
         *,
         basis_fingerprint: str,
         candidate: InteractionAssessmentCandidate,
+        refinement_observation: dict[str, object] | None = None,
         on_pipeline_stage: Callable[[str], None] | None = None,
         policy_governed: bool = False,
     ) -> InteractionAssessment:
@@ -2399,6 +2493,7 @@ class WorkInteractionService:
                         else active_context.active_production_binding_id
                     ),
                     "supporting_references": list(supporting_references),
+                    "refinement_observation": refinement_observation,
                     "natural_response": candidate.natural_response,
                     "readiness": readiness.model_dump(mode="json"),
                     "progressive_semantics": progressive_semantics.model_dump(mode="json"),

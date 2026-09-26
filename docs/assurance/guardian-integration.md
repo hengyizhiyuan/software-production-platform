@@ -16,6 +16,14 @@ each Executor move or replace the Executor's autonomy inside an admitted
 production envelope. See the
 [Work-centric Production and Responsibility Principles](../architecture/work-centric-production-and-responsibility-principles.md).
 
+Model-mediated assurance judgments, where present, are candidates subject to
+Guardian's own evidence and exact-subject validation. Watt's governed
+Self-Refine semantics may support a bounded re-evaluation after contradiction;
+they do not turn a wrong-revision PASS into truth, lower Guardian's evidence
+bar, or transfer Assurance ownership to the Executor. Current exact-revision
+Verification remains a deterministic rejection boundary; no new Guardian
+reasoning runtime is claimed by this calibration.
+
 Guardian is:
 
 - Not an AI Code Reviewer
@@ -31,4 +39,3 @@ Evidence for the governed Work/PWU; it does not own a Project lifecycle, Work,
 Plan, or attached Assets.
 
 This document does not design Guardian Core.
-

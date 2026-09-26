@@ -56,7 +56,7 @@ eight independent engines. Current production follows this bounded loop:
 | Self-Check | Steering, Task Contract, Connector Resolver and Tool Host enforce prerequisites, executable capability, resource and authority scope before a side effect. |
 | Self-Execute | Steering admits a PWU/Attempt; the Queue allocates a Watt Native Executor Worker, which invokes API-key inference and scoped Tool Host operations in a Production Environment. |
 | Self-Observe | Durable steps, effect receipts, independent repository observations, Completion and Verification compare the admitted obligation with the observed result. A model statement is not a side-effect receipt. |
-| Self-Refine | A failed provider attempt or rejected canonical decision creates an append-only, Work-linked incident and bounded repair actions. Recovery resumes the same admitted contract without granting additional authority. |
+| Self-Refine | Existing model-mediated owners validate candidates and use bounded feedback to converge. Native execution repair and Steering Provider recovery remain subtypes; a refinement signal is not automatically a failure or incident. No retry grants additional authority. |
 | Self-Converge | Configurable attempt, repeated-signature, elapsed-time and inference budgets stop nonconverging same-layer retries; evidence remains historical. |
 | Self-Resume | PostgreSQL Queue, lease epochs, checkpoints and effect receipts distinguish safe replay from uncertain effects after Worker interruption. |
 | Self-Evaluate | The executable domain-separated evaluation corpus checks accepted interaction, production, resilience and assurance behaviors and fails on a critical regression. |
@@ -68,19 +68,58 @@ runtime, alternate executor or hidden fallback. Provider/model identity and a
 secret reference travel through infrastructure configuration; raw API keys do
 not enter prompts, Work Reality, Production Records or Self-Refine evidence.
 
-Self-Refine incidents are durable in `self_refine_events` with append-only
-`self_refine_actions`. An incident records its operation/Work identity, failure
-signature, expected and observed Reality, safe diagnosis, repair hypothesis,
-evidence references, overhead and known-failure match. `OPEN` denotes ongoing
-repair; `MITIGATED` records a stopped or escalated execution-level episode;
-`VERIFIED` denotes a successfully re-observed repair outcome. An Executor
-`RESULT_READY` is still only a claim for downstream Completion and independent
-Verification, never Human Acceptance. Work and cross-Work list/detail/metrics
-are projected through `/api/works/{work_id}/self-refine` and `/api/self-refine`.
+Self-Refine is **governed iterative convergence for stochastic model-mediated
+production**. Generation produces a candidate; its owning boundary validates
+that candidate against the exact current intent, Reality, contract and
+evidence. A rejected candidate may receive bounded feedback and be regenerated
+on the same basis. Only a revalidated result may be admitted. Probabilistic
+paths do not weaken deterministic production state. The existing failure →
+diagnosis → repair → verification → resume loop is one subtype.
 
-The event structure supports later frequency analysis, clustering and proposed
-Platform Improvement Work. It does not authorize automatic platform-code
-mutation or widen Work authority. The evaluation command is
+Three boundary types preserve ownership:
+
+| Boundary | Current owner and rule |
+|---|---|
+| Stochastic | WIC already uses intent hypotheses, minimum-sufficient clarification and structured-result repair; Steering semantic Step now retries one rejected candidate against unchanged governed input. Native Executor already performs bounded structural and effect repair. The candidate never becomes Truth by generation alone. |
+| Deterministic | Git, filesystem, schema, Connector Resolver, queue, state transition and Verification's exact-revision checks return structured evidence or reject a transition. They do not run an independent LLM reflection loop. |
+| Governance | Human Product Intent, permissions, credentials, destructive scope, exact Candidate authorization, Delivery and release remain Human-owned. Self-Refine can change an interpretation or method, never authority. Guardian keeps independent Assurance judgment and cannot lower its evidence bar to obtain convergence. |
+
+Task Contract and PWU planning project **admitted** Steering/Work facts; they
+are not independent model generators today. A capability gap returns to
+Steering/Connector resolution rather than letting a Task Contract invent an
+available capability. Verification rejects a PASS for the wrong exact revision;
+model-mediated verification or Guardian candidate refinement is a governed
+seam, not a second assurance engine implemented by this calibration.
+
+Version 2 Self-Refine events distinguish `ROUTINE_STOCHASTIC_REFINEMENT`,
+`DEGRADING_OR_RECURRING_REFINEMENT` and
+`SYSTEMIC_OR_NON_CONVERGING_INCIDENT`. A bounded successful correction with a
+clear oracle is routine and normally silent to Human. Repeated successful
+corrections of one signature become an aggregate cost/quality signal with a
+stable Improvement Candidate reference. Exhausted budget, unchanged repeated
+outcomes or required authority become systemic and retain full diagnostic
+evidence. A candidate superseded by a changed exact basis is recorded as
+`SUPERSEDED` and reoriented to current Reality, without being called a success
+or incident. `Self-Converge` still decides whether another attempt has meaningful
+Reality/evidence progress within the existing attempt, elapsed, token, compute
+and risk budget. Authority is a hard stop, not a budget value.
+
+Native and Steering observations remain durable in `self_refine_events` with
+append-only `self_refine_actions`; routine semantic-Step corrections use the
+same store with lightweight fields. WIC structured-repair observations remain
+on the owning assessment or failed Turn across runtime modes, with controlled
+response events also carrying the summary; PRE_WORK has no Work or native
+operation. No raw chain-of-thought is stored. The APIs expose class,
+signal, recurrence, observed cost and outcome metrics; the Work view summarizes
+routine history without raising an incident notice. `OPEN` means ongoing,
+`MITIGATED` stopped/escalated, and `VERIFIED` successfully re-observed. An
+Executor `RESULT_READY` remains only a claim for independent Completion and
+Verification, never Human Acceptance. Rows predating version 2 retain
+`LEGACY_EXECUTION_INCIDENT`; migration does not relabel historical evidence.
+
+Platform Improvement consumes aggregate signature/component and cost evidence;
+the stable candidate reference does not itself admit a new Work or mutate
+platform code. The evaluation command is
 `python -m spg.evaluation.release_gate`; it requires a real PostgreSQL test
 database and reports domain-level results, not one aggregate coding score.
 

@@ -1,5 +1,9 @@
 # SPG FVS-1 — Governed Documentation Production Loop Implementation Contract
 
+> Historical FVS-1 slice contract. Its single-PWU boundary applies to that
+> original slice; current governed production supports a versioned multi-PWU
+> DAG within a Run, as described in the active system architecture.
+
 ## 1. Authority, status, and interpretation
 
 This document is the single authoritative implementation contract for **FVS-1 — Governed Documentation Production Loop** under **Architecture Baseline v0.1**.

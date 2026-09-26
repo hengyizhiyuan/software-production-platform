@@ -54,7 +54,8 @@ Only `ADMIT_WORK_DRAFT` converts the then-current proposal into the
 authoritative `CodeChangeContract`. Admission includes only required targets,
 retains the exact allowed/forbidden boundaries and supported typed obligations,
 and records the source Proposal ID and fingerprint. It then regenerates the
-single-PWU Production Plan from that admitted contract. A proposal whose
+Production Plan from that admitted contract; the current planner may admit a
+versioned multi-PWU DAG when the work requires it. A proposal whose
 Resource, Baseline ID, ref, or revision differs from current Reality is rejected
 as stale; it is never silently rebased.
 

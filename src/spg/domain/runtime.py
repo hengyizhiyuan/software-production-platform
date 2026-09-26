@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from spg.domain.change import CodeChangeContract
 from spg.domain.engineering_semantics import SemanticFactReference
 from spg.domain.production_intelligence import TaskContract
-from spg.domain.planning import ProductionPlanProposal
+from spg.domain.planning import ProductionPlanGraph, ProductionPlanProposal
 
 
 class SnapshotCondition(StrEnum):
@@ -200,6 +200,7 @@ class SnapshotRecord(BaseModel):
     repository_identity: str
     repository_ref: str
     repository_revision: str
+    repository_tree_identity: str | None = None
     source_baseline_id: UUID | None
     created_at: datetime
 
@@ -233,6 +234,7 @@ class ProductionRunRecord(BaseModel):
     goal: str
     production_horizon: ProductionHorizon
     source_baseline_id: UUID
+    integrated_baseline_id: UUID | None = None
     current_plan_revision_id: UUID
     condition: RunCondition
     version: int
@@ -246,6 +248,8 @@ class PlanRevisionRecord(BaseModel):
     production_run_id: UUID
     revision_number: int
     source_baseline_id: UUID
+    graph: ProductionPlanGraph | None = None
+    supersedes_plan_revision_id: UUID | None = None
     condition: PlanCondition
     version: int
     created_at: datetime
@@ -257,7 +261,11 @@ class WorkUnitRecord(BaseModel):
     id: UUID
     production_run_id: UUID
     plan_revision_id: UUID
-    source_baseline_id: UUID
+    source_baseline_id: UUID | None
+    node_id: str | None = None
+    parent_baseline_ids: tuple[UUID, ...] | None = None
+    verified_output_baseline_id: UUID | None = None
+    reconciliation_evidence: dict[str, Any] | None = None
     objective: str
     completion_contract: CompletionContract
     condition: WorkUnitCondition

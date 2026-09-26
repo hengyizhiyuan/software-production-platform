@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 import subprocess
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from alembic import command
 from alembic.config import Config
@@ -12,6 +12,7 @@ from sqlalchemy import func, inspect, select
 
 from spg.application.control_state import project_next_owner
 from spg.application.runtime import RuntimeService
+from spg.api.http import create_http_application
 from spg.application.materialization import ExecutionInputMaterializationService
 from spg.application.orchestration import OrchestrationProgress
 from spg.application.work import WorkApplicationService
@@ -30,7 +31,9 @@ from spg.domain.product import (
     WorkStatus,
 )
 from spg.domain.runtime import BootstrapRequest
-from spg.domain.verification import VerificationResultValue
+from spg.domain.verification import (
+    VerificationCapabilityResult, VerificationEvidence, VerificationResultValue,
+)
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
 from spg.infrastructure.persistence.product_schema import product_works
 from spg.infrastructure.persistence.product_store import ProductStore
@@ -55,12 +58,223 @@ from spg.providers.deterministic_verifier import DeterministicVerificationProvid
 from spg.infrastructure.configured_executor import render_governed_instruction
 from spg.providers.repository_markdown_verifier import RepositoryArtifactVerifier
 from spg.providers.contract_verifier import ContractDrivenRepositoryVerifier
+from fastapi.testclient import TestClient
 
 
 pytestmark = pytest.mark.postgresql
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PRODUCT_TABLE_NAMES = {table.name for table in product_tables}
 ALL_TABLE_NAMES = {table.name for table in (*product_tables, *runtime_tables)}
+
+
+def test_multi_pwu_work_automatically_starts_both_ready_roots(app_facts: "AppFacts") -> None:
+    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
+    ))
+    assert draft.production_plan is not None
+    assert draft.production_plan.fit_classification.value == "MULTI_PWU_FIT"
+    approved = app_facts.service.approve_work(
+        draft.work_id, authority_identity="human:multi-pwu",
+    )
+    assert approved.production_plan_runtime is not None
+    for _ in range(5):
+        app_facts.service.advance_work(draft.work_id)
+    with app_facts.database.unit_of_work() as uow:
+        product = ProductStore(uow.session)
+        binding = product.runtime_binding(draft.work_id)
+        runtime = RuntimeStore(uow.session)
+        units = runtime.work_units_for_plan(binding.plan_revision_id)
+        root_attempts = tuple(runtime.attempts_for_work_unit(item.id) for item in units if item.node_id in {"pwu:1", "pwu:2"})
+        roots = tuple(item for item in units if item.node_id in {"pwu:1", "pwu:2"})
+    assert len(root_attempts) == 2
+    assert all(item for item in root_attempts)
+    assert {tuple(target.path for target in item.completion_contract.change_contract.exact_targets)
+            for item in roots} == {("src/spg_example.py",), ("src/spg/web/app.js",)}
+    assert all(not item.completion_contract.change_contract.allowed_areas for item in roots)
+    assert all(tuple(item.completion_contract.task_contract.scope) == tuple(
+        next(node.authority_scope for node in approved.production_plan.graph.nodes if node.node_id == item.node_id)
+    ) for item in roots)
+    projection = app_facts.service.get_work(draft.work_id)
+    assert projection.production_plan_runtime is not None
+    assert sum(item["state"] in {"READY", "RUNNING"} for item in projection.production_plan_runtime["pwus"]) >= 2
+
+
+def test_multi_pwu_replan_api_replaces_active_revision_without_widening_scope(app_facts: "AppFacts") -> None:
+    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
+    ))
+    approved = app_facts.service.approve_work(draft.work_id, authority_identity="human:multi-pwu")
+    plan = approved.production_plan
+    assert plan is not None and plan.graph is not None
+    replacement = plan.model_copy(update={
+        "proposal_id": uuid4(), "objective": "Reassess two admitted capabilities",
+    })
+    client = TestClient(create_http_application(
+        database=app_facts.database, work_service=app_facts.service,
+    ), raise_server_exceptions=False)
+    response = client.post(f"/api/works/{draft.work_id}/replan", json={
+        "plan": replacement.model_dump(mode="json"),
+        "reason": "observed Reality invalidated the previous future order",
+    })
+    assert response.status_code == 200, response.text
+    actual = response.json()
+    assert actual["production_plan_runtime"]["revision_number"] == 2
+    assert actual["production_plan_runtime"]["plan_revision_id"] != approved.production_plan_runtime["plan_revision_id"]
+    assert len(actual["production_plan_runtime"]["pwus"]) == 3
+
+
+def test_multi_pwu_work_runs_two_code_units_join_and_human_delivery(app_facts: "AppFacts") -> None:
+    """One admitted Work reaches Candidate, authorization, and trusted commit."""
+
+    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
+    ))
+    app_facts.service.approve_work(draft.work_id, authority_identity="human:multi-e2e")
+
+    class ScopedExecutor:
+        def dispatch(self, request):
+            with app_facts.database.unit_of_work() as uow:
+                unit = RuntimeStore(uow.session).work_unit(request.execution.work_unit_id)
+            if unit.node_id == "pwu:join":
+                operations = ()
+            else:
+                target = unit.completion_contract.required_changes[0]
+                content = (
+                    'def value() -> str:\n    return "multi"\n'
+                    if target.endswith(".py") else
+                    'const composer = { expanded: false, multi: true };\n'
+                )
+                operations = (DeterministicFileOperation(
+                    operation=DeterministicFileOperationType.MODIFY,
+                    repository_relative_path=target, content=content,
+                ),)
+            return DeterministicTestExecutor(DeterministicExecutionSpecification(
+                operations=operations, reported_outcome=ProviderReportedOutcome.SUCCESS,
+            )).dispatch(request)
+
+    service = WorkApplicationService(
+        app_facts.database, workspace_root=app_facts.workspace_root,
+        executor=ScopedExecutor(),
+        verifier=ContractDrivenRepositoryVerifier(app_facts.database),
+    )
+    projection = service.get_work(draft.work_id)
+    for _ in range(100):
+        projection = service.advance_work(draft.work_id)
+        attention = service.list_attention(work_id=draft.work_id)
+        if attention and attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION:
+            break
+        if projection.status is WorkStatus.BLOCKED:
+            break
+    assert projection.status is WorkStatus.NEEDS_ATTENTION, (
+        projection.most_recent_meaningful_event,
+        projection.what_happens_next,
+        [(item["node_id"], item["state"], item["blocked_reason"])
+         for item in projection.production_plan_runtime["pwus"]],
+    )
+    assert attention and attention[0].kind is AttentionKind.CANDIDATE_AUTHORIZATION
+    assert all(item["state"] == "VERIFIED" for item in projection.production_plan_runtime["pwus"])
+    service.resolve_attention(attention[0].id, AttentionResolutionRequest(
+        action=AttentionAction.AUTHORIZE, authority_identity="human:multi-e2e",
+        rationale="accept exact integrated code Candidate",
+    ))
+    for _ in range(8):
+        projection = service.advance_work(draft.work_id)
+        if projection.status is WorkStatus.COMPLETED:
+            break
+    assert projection.status is WorkStatus.COMPLETED
+    assert 'return "multi"' in (app_facts.repository / "src/spg_example.py").read_text()
+    assert "multi: true" in (app_facts.repository / "src/spg/web/app.js").read_text()
+
+
+def test_multi_pwu_semantic_join_conflict_reenters_human_steering(app_facts: "AppFacts") -> None:
+    """Q6: a clean Git composition cannot decide incompatible product meaning."""
+
+    submitted = app_facts.service.submit_work("Define the guest checkout policy across Python and web")
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
+    ))
+    approved = app_facts.service.approve_work(draft.work_id, authority_identity="human:semantic-join")
+
+    class DivergentExecutor:
+        def dispatch(self, request):
+            with app_facts.database.unit_of_work() as uow:
+                unit = RuntimeStore(uow.session).work_unit(request.execution.work_unit_id)
+            if unit.node_id == "pwu:join":
+                operations = ()
+            else:
+                target = unit.completion_contract.required_changes[0]
+                content = (
+                    "def allow_guest_checkout() -> bool:\n    return True\n"
+                    if target.endswith(".py") else
+                    "const policy = { allowGuestCheckout: false };\n"
+                )
+                operations = (DeterministicFileOperation(
+                    operation=DeterministicFileOperationType.MODIFY,
+                    repository_relative_path=target, content=content,
+                ),)
+            return DeterministicTestExecutor(DeterministicExecutionSpecification(
+                operations=operations, reported_outcome=ProviderReportedOutcome.SUCCESS,
+            )).dispatch(request)
+
+    class SemanticConflictVerifier:
+        def __init__(self):
+            self.base = ContractDrivenRepositoryVerifier(app_facts.database)
+            self.binding = self.base.binding
+
+        def verify(self, request):
+            with app_facts.database.unit_of_work() as uow:
+                store = RuntimeStore(uow.session)
+                proposed = store.proposed_snapshot(request.snapshot_id)
+                unit = store.work_unit(proposed.work_unit_id)
+            if unit.node_id != "pwu:join":
+                return self.base.verify(request)
+            return VerificationCapabilityResult(
+                result=VerificationResultValue.FAIL,
+                evidence=VerificationEvidence(
+                    obligation=request.obligation,
+                    subject_commit_identity=request.proposed_commit_identity,
+                    subject_tree_identity=request.tree_identity,
+                    expected="One governed guest checkout policy",
+                    observed="Python permits guests while web policy prohibits guests",
+                    metadata={
+                        "human_decision_required": True,
+                        "conflict_domain": "PRODUCT_INTENT",
+                    },
+                ),
+            )
+
+    service = WorkApplicationService(
+        app_facts.database, workspace_root=app_facts.workspace_root,
+        executor=DivergentExecutor(), verifier=SemanticConflictVerifier(),
+    )
+    for _ in range(100):
+        projection = service.advance_work(draft.work_id)
+        join = next(item for item in projection.production_plan_runtime["pwus"] if item["kind"] == "JOIN")
+        if join["semantic_conflict_domain"]:
+            break
+    assert projection.status is WorkStatus.NEEDS_ATTENTION
+    assert join["state"] == "BLOCKED"
+    assert join["conflict_count"] == 0
+    assert join["semantic_conflict_domain"] == "PRODUCT_INTENT"
+    assert not join["autonomous_retry_available"]
+    attention = service.list_attention(work_id=draft.work_id)
+    assert len(attention) == 1
+    assert attention[0].kind is AttentionKind.STEERING_DECISION_REQUIRED
+    assert attention[0].conversation_prompt
+    with app_facts.database.unit_of_work() as uow:
+        store = RuntimeStore(uow.session)
+        run = store.run(approved.current_production_run_id)
+        join_unit = store.work_unit_for_node(UUID(approved.production_plan_runtime["plan_revision_id"]), "pwu:join")
+        attempts_before = len(store.attempts_for_work_unit(join_unit.id))
+    assert run.integrated_baseline_id == run.source_baseline_id
+    service.advance_work(draft.work_id)
+    with app_facts.database.unit_of_work() as uow:
+        store = RuntimeStore(uow.session)
+        assert len(store.attempts_for_work_unit(join_unit.id)) == attempts_before
+        assert store.run(run.id).integrated_baseline_id == run.source_baseline_id
 
 
 def test_orchestration_progress_is_observational_and_allows_unknown_total() -> None:

@@ -21,7 +21,7 @@ from spg.domain.product import (
     WorkResultProjection,
     WorkStatus,
 )
-from spg.domain.planning import ProductionPlanProposal
+from spg.domain.planning import ProductionPlanGraph, ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
 from spg.domain.runtime_activation import RuntimeActivationProjection
 from spg.domain.native_execution import (
@@ -836,6 +836,7 @@ class ProductionPlanResponse(ApiDto):
     objective: str
     desired_outcome: str
     ordered_steps: tuple[ProductionPlanStepResponse, ...]
+    graph: ProductionPlanGraph | None = None
     artifact_targets: tuple[str, ...]
     change_proposal: RepositoryChangeProposalResponse | None
     change_contract: CodeChangeContractResponse | None
@@ -863,6 +864,7 @@ class ProductionPlanResponse(ApiDto):
                 )
                 for step in plan.ordered_steps
             ),
+            graph=plan.graph,
             artifact_targets=tuple(
                 f"{target.operation.value} {target.path}"
                 for target in plan.artifact_targets
@@ -1012,6 +1014,7 @@ class WorkResponse(ApiDto):
     change_proposal: RepositoryChangeProposalResponse | None
     change_contract: CodeChangeContractResponse | None
     production_plan: ProductionPlanResponse | None
+    production_plan_runtime: dict | None = None
     tags: tuple[str, ...]
     engineering_scope: EngineeringScopeResponse | None
     status: WorkStatus
@@ -1077,6 +1080,7 @@ class WorkResponse(ApiDto):
                 if work.production_plan is None
                 else ProductionPlanResponse.from_proposal(work.production_plan)
             ),
+            production_plan_runtime=work.production_plan_runtime,
             tags=work.tags,
             engineering_scope=(
                 None
@@ -1297,6 +1301,11 @@ class WorkRefineRequest(ApiDto):
     code_allowed_areas: tuple[str, ...] | None = None
     code_forbidden_areas: tuple[str, ...] | None = None
     code_verification_obligations: tuple[CodeVerificationObligation, ...] | None = None
+
+
+class WorkReplanRequest(ApiDto):
+    plan: ProductionPlanProposal
+    reason: str = Field(min_length=1)
 
 
 class HumanDecisionRequest(ApiDto):

@@ -40,6 +40,15 @@ ignored local environment. Human-facing realization remains independently
 configurable through `SPG_CONVERSATION_PROVIDER_ADAPTER=deepseek` and
 `SPG_CONVERSATION_PROVIDER_MODEL`. There is no coding-agent SDK fallback.
 
+Public GitHub repository/issue search and README inspection are read-only and
+need no GitHub credential. GitHub code search can use the optional server-side
+`SPG_GITHUB_READ_TOKEN`. Public Web search uses the Brave Search API and requires
+`SPG_WEB_SEARCH_API_KEY` in the ignored local environment; without it Watt
+reports `CREDENTIAL_REQUIRED` and does not claim to have searched the Web.
+The Compose application services pass these optional values to Watt; no secret
+is sent to the browser. Search evidence is visible through the Interaction
+reply and `/api/interactions/{interaction_id}/turns/{turn_id}/external-evidence`.
+
 Human collaboration retains WIC interpretation (including Design Intent Framing)
 and Conversation expression as separate responsibilities. Pre-Work conversations
 use one model call when model and reasoning settings match; active Work or

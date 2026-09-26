@@ -581,9 +581,11 @@ automatically in this Slice.
 
 MVP-PLAN-STEER-1E connects an admitted current `PRODUCE` Step to one existing
 governed SPG production cycle. A long-lived Work may own multiple cycle
-bindings, but each binding remains an independent Run with one runtime Plan
-Revision and one PWU. Each later cycle binds the Current Trusted Baseline at
-its own admission; this is not successor-PWU rebasing. The bridge validates the
+bindings. At the original MVP closure each binding admitted one Run, one Plan
+Revision and one PWU. The current Production Plan can contain a versioned PWU
+DAG within that Run, with verified successor baselines and explicit Join
+reconciliation. Each later cycle binds the Current Trusted Baseline at its own
+admission. The bridge validates the
 materialized request against the persisted Work objective, exact Engineering
 Scope and Resource, constraints, target/change boundary, forbidden areas, and
 Verification boundary before creating a Run. A mismatch records typed

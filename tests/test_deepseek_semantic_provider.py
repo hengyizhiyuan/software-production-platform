@@ -99,6 +99,26 @@ def test_deepseek_semantic_executes_the_governed_steering_purpose() -> None:
     assert runtime.closed is True
 
 
+def test_semantic_refinement_uses_same_input_and_explicit_validation_feedback() -> None:
+    runtime = _Runtime()
+    capability = DeepSeekSemanticStepCapability(runtime)
+    input_value = SimpleNamespace(
+        work_id=UUID(int=1), steering_plan_revision_id=UUID(int=2),
+        step=SimpleNamespace(id=UUID(int=3), type=SteeringStepType.DESIGN),
+        basis_fingerprint="a" * 64, constraints=(),
+        reality_refs=(RealityReference(kind=RealityReferenceKind.WORK, identity=UUID(int=1)),),
+        model_dump=lambda **_options: {"step": {"type": "DESIGN"}},
+    )
+    candidate = capability.refine(
+        input_value,
+        validation_feedback="DESIGN cannot close toward PRODUCE without a current production proposal",
+    )
+    assert candidate.basis_fingerprint == input_value.basis_fingerprint
+    assert candidate.step_id == input_value.step.id
+    assert "previous candidate was rejected" in runtime.calls[0]["input_text"]
+    assert "Do not add Human constraints, permissions" in runtime.calls[0]["input_text"]
+
+
 def test_missing_disposition_gets_one_typed_repair_without_loose_admission() -> None:
     class Runtime(_Runtime):
         def generate(self, **options):

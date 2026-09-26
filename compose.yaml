@@ -28,6 +28,8 @@ services:
       SPG_DATABASE_URL: postgresql+psycopg://spg:spg-local-dev@postgres:5432/spg_dev?sslmode=disable&connect_timeout=5
       SPG_REPOSITORY_PATH: /var/lib/spg/repository
       SPG_RUNTIME_PROFILE: local-docker-mvp
+      SPG_GITHUB_READ_TOKEN: ${SPG_GITHUB_READ_TOKEN:-}
+      SPG_WEB_SEARCH_API_KEY: ${SPG_WEB_SEARCH_API_KEY:-}
       SPG_WORKSPACE_ROOT: /var/lib/spg/workspaces
     init: true
     ports:

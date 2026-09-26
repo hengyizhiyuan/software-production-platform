@@ -624,6 +624,9 @@ self_refine_events = Table(
     Column("created_at", DateTime(timezone=True), nullable=False),
     Column("failure_family", String(64), nullable=False),
     Column("failure_signature", String(64), nullable=False),
+    Column("semantic_version", Integer, nullable=False, server_default="1"),
+    Column("refinement_class", String(64), nullable=False, server_default="LEGACY_EXECUTION_INCIDENT"),
+    Column("signal_kind", String(64), nullable=False, server_default="EXECUTION_FAILURE"),
     Column("affected_component", String(255), nullable=False),
     Column("expected_reality", JSONB, nullable=False),
     Column("observed_reality", JSONB, nullable=False),
@@ -648,6 +651,7 @@ self_refine_events = Table(
 Index("ix_self_refine_events_work_created", self_refine_events.c.work_id, self_refine_events.c.created_at)
 Index("ix_self_refine_events_signature", self_refine_events.c.failure_signature)
 Index("ix_self_refine_events_status", self_refine_events.c.status)
+Index("ix_self_refine_events_class_created", self_refine_events.c.refinement_class, self_refine_events.c.created_at)
 
 self_refine_actions = Table(
     "self_refine_actions",

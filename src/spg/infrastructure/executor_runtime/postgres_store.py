@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timedelta, timezone
+from hashlib import sha256
+from math import ceil
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -30,6 +32,7 @@ from spg.domain.native_execution import (
     NativeAttemptStateRecord,
     NativeExecutionConflict,
     NativeExecutionNotFound,
+    ObservationConfidence,
     PWUContractVersionRecord,
     QueueCondition,
     RepairabilityClassification,
@@ -49,6 +52,9 @@ from spg.domain.native_execution import (
     WorkerRegistrationRecord,
     WorkspaceManifest,
     canonical_digest,
+)
+from spg.domain.refinement_contract import (
+    RefinementClass, RefinementSignalKind, classify_refinement,
 )
 from spg.infrastructure.persistence.concurrency import update_versioned_row
 from spg.infrastructure.persistence.native_execution_schema import (
@@ -89,6 +95,10 @@ def _json(model: Any) -> Any:
     if hasattr(model, "model_dump"):
         return model.model_dump(mode="json", exclude_none=False)
     return model
+
+
+def _p95(values: list[int]) -> int:
+    return sorted(values)[ceil(0.95 * len(values)) - 1] if values else 0
 
 
 class NativeExecutionStore:
@@ -813,6 +823,85 @@ class NativeExecutionStore:
     def insert_self_refine_event(self, event: SelfRefineEventRecord) -> None:
         self.session.execute(insert(self_refine_events).values(**event.model_dump(mode="json")))
 
+    def record_bounded_refinement(
+        self, *, work_id: UUID, operation_id: UUID, component: str,
+        signal_kind: RefinementSignalKind, signature_basis: str,
+        evidence_references: tuple[str, ...], converged: bool,
+        attempt_count: int, elapsed_seconds: int = 0,
+        model_token_usage: dict[str, Any] | None = None,
+        authority_required: bool = False,
+        diagnostic_evidence: dict[str, Any] | None = None,
+        superseded: bool = False,
+    ) -> SelfRefineEventRecord:
+        """Persist a completed candidate correction without inventing an incident.
+
+        The caller retains its candidate, validator and authority policy. Only
+        bounded diagnostic metadata crosses into the shared observation store.
+        """
+        if attempt_count < 2:
+            raise ValueError("A refinement observation requires at least two candidate attempts")
+        now = _utcnow()
+        event_id = uuid4()
+        signature = sha256(
+            f"{component}:{signal_kind.value}:{signature_basis}".encode("utf-8")
+        ).hexdigest()
+        prior = self.prior_self_refine_matches(signature, before_event_id=event_id)
+        refinement_class = classify_refinement(
+            converged=converged, same_signature_count=1,
+            prior_occurrences=prior, budget_exhausted=not converged and not superseded,
+            authority_required=authority_required,
+        )
+        event = SelfRefineEventRecord(
+            id=event_id, work_id=work_id, operation_id=operation_id,
+            created_at=now, updated_at=now,
+            failure_family=signal_kind.value,
+            failure_signature=signature,
+            refinement_class=refinement_class, signal_kind=signal_kind,
+            affected_component=component,
+            expected_reality={}, observed_reality={},
+            diagnosis_summary="A model candidate required bounded validation feedback.",
+            root_cause_classification=signal_kind.value,
+            repair_hypothesis="Revalidate a revised candidate against the unchanged governed basis.",
+            evidence_references=evidence_references,
+            repairability=(
+                RepairabilityClassification.REQUIRES_HUMAN_DECISION
+                if authority_required else RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+            ),
+            observation_confidence=(
+                ObservationConfidence.OBSERVED_SUCCESS if converged else
+                ObservationConfidence.INCONCLUSIVE if superseded else
+                ObservationConfidence.CONFIRMED_FAILURE
+            ),
+            diagnostic_evidence=diagnostic_evidence or {},
+            known_failure_match=prior > 0,
+            final_result="RECOVERED" if converged else "SUPERSEDED" if superseded else "ESCALATED",
+            work_resume_result="RESUMED" if converged else "REORIENTED" if superseded else "NOT_RESUMED",
+            extra_elapsed_seconds=max(0, elapsed_seconds),
+            budget_decision={
+                "attempt_count": attempt_count, "bounded": True,
+                "human_escalated": authority_required and not converged,
+            },
+            model_token_usage=model_token_usage or {}, compute_overhead={},
+            platform_improvement_candidate_ref=(
+                f"refinement-signature:{signature}"
+                if refinement_class in {
+                    RefinementClass.DEGRADING_OR_RECURRING_REFINEMENT,
+                    RefinementClass.SYSTEMIC_OR_NON_CONVERGING_INCIDENT,
+                }
+                else None
+            ),
+            status="VERIFIED" if converged else "MITIGATED",
+        )
+        self.insert_self_refine_event(event)
+        self.append_self_refine_action(SelfRefineActionRecord(
+            id=uuid4(), event_id=event_id, sequence=1, created_at=now,
+            repair_action="Attempt bounded candidate refinement against the same input",
+            observed_reality={"attempt_count": attempt_count, "signal_kind": signal_kind.value},
+            evidence_references=evidence_references,
+            outcome="RECOVERED" if converged else "SUPERSEDED" if superseded else "ESCALATED",
+        ))
+        return event
+
     def prior_self_refine_matches(self, signature: str, *, before_event_id: UUID) -> int:
         return int(self.session.scalar(
             select(func.count())
@@ -864,6 +953,7 @@ class NativeExecutionStore:
         compute_overhead: dict[str, Any],
         model_token_usage: dict[str, Any] | None = None,
     ) -> None:
+        event = self.self_refine_event(event_id)
         values: dict[str, Any] = {
             "final_result": result,
             "work_resume_result": resume_result,
@@ -874,6 +964,42 @@ class NativeExecutionStore:
         }
         if model_token_usage is not None:
             values["model_token_usage"] = model_token_usage
+        if event.semantic_version >= 2:
+            actions = self.self_refine_actions(event_id)
+            same_signature_count = max(
+                (int(action.observed_reality.get("same_failure_count", 1))
+                 for action in actions), default=1,
+            )
+            same_signature_count = max(
+                same_signature_count,
+                sum(action.observed_reality.get("failure_signature") == event.failure_signature
+                    for action in actions),
+            )
+            prior_occurrences = self.prior_self_refine_matches(
+                event.failure_signature, before_event_id=event_id,
+            )
+            refinement_class = classify_refinement(
+                converged=result == "RECOVERED",
+                same_signature_count=same_signature_count,
+                prior_occurrences=prior_occurrences,
+                budget_exhausted=result in {"ESCALATED", "FAILED"},
+                nonconvergence_threshold=int(
+                    event.budget_decision.get("limits", {}).get("same_signature", 2)
+                ),
+                authority_required=event.repairability in {
+                    RepairabilityClassification.REQUIRES_HUMAN_INPUT,
+                    RepairabilityClassification.REQUIRES_HUMAN_DECISION,
+                    RepairabilityClassification.UNSAFE_TO_AUTOREPAIR,
+                },
+            )
+            values["refinement_class"] = refinement_class.value
+            if refinement_class in {
+                RefinementClass.DEGRADING_OR_RECURRING_REFINEMENT,
+                RefinementClass.SYSTEMIC_OR_NON_CONVERGING_INCIDENT,
+            }:
+                values["platform_improvement_candidate_ref"] = (
+                    f"refinement-signature:{event.failure_signature}"
+                )
         changed = self.session.execute(
             update(self_refine_events)
             .where(self_refine_events.c.id == event_id)
@@ -916,6 +1042,7 @@ class NativeExecutionStore:
         failure_family: str | None = None,
         component: str | None = None,
         result: str | None = None,
+        refinement_class: RefinementClass | None = None,
         limit: int = 100,
     ) -> tuple[SelfRefineEventRecord, ...]:
         query = select(self_refine_events)
@@ -927,6 +1054,8 @@ class NativeExecutionStore:
             query = query.where(self_refine_events.c.affected_component == component)
         if result is not None:
             query = query.where(self_refine_events.c.final_result == result)
+        if refinement_class is not None:
+            query = query.where(self_refine_events.c.refinement_class == refinement_class.value)
         rows = self.session.execute(
             query.order_by(self_refine_events.c.created_at.desc()).limit(limit)
         ).mappings().all()
@@ -942,23 +1071,93 @@ class NativeExecutionStore:
 
     def self_refine_metrics(self, *, work_id: UUID | None = None) -> dict[str, Any]:
         attempts_query = select(func.count(func.distinct(executor_queue.c.attempt_id)))
-        events_query = select(
-            self_refine_events.c.final_result,
-        )
+        events_query = select(self_refine_events)
         if work_id is not None:
             attempts_query = attempts_query.where(executor_queue.c.work_id == work_id)
             events_query = events_query.where(self_refine_events.c.work_id == work_id)
         attempts = int(self.session.scalar(attempts_query) or 0)
-        results = [row[0] for row in self.session.execute(events_query).all()]
+        attempt_outcomes_query = select(
+            executor_queue.c.attempt_id, native_attempt_states.c.terminal_outcome,
+        ).join(native_attempt_states,
+               native_attempt_states.c.attempt_id == executor_queue.c.attempt_id).distinct()
+        if work_id is not None:
+            attempt_outcomes_query = attempt_outcomes_query.where(executor_queue.c.work_id == work_id)
+        attempt_outcomes = self.session.execute(attempt_outcomes_query).all()
+        records = [SelfRefineEventRecord.model_validate(dict(row)) for row in
+                   self.session.execute(events_query).mappings().all()]
+        results = [record.final_result for record in records]
         count = len(results)
+        native_count = sum(record.affected_component.startswith("native-executor/") for record in records)
+        refined_native_attempts = {
+            record.operation_id for record in records
+            if record.affected_component.startswith("native-executor/")
+        }
+        completed_attempts = [(attempt_id, outcome) for attempt_id, outcome in attempt_outcomes if outcome]
+        first_pass_successes = sum(
+            outcome == "RESULT_READY" and attempt_id not in refined_native_attempts
+            for attempt_id, outcome in completed_attempts
+        )
+        completed = [record for record in records if record.final_result is not None]
+        settled = [record for record in completed if record.final_result != "SUPERSEDED"]
+        human_escalation_observations = [
+            record for record in settled
+            if "human_escalated" in record.budget_decision
+        ]
+        durations = sorted(record.extra_elapsed_seconds or 0 for record in completed)
+        action_counts = [int(record.budget_decision.get("attempt_count") or
+            self.session.scalar(select(func.count()).select_from(self_refine_actions).where(
+                self_refine_actions.c.event_id == record.id,
+            )) or 0) for record in completed]
+        signature_counts: dict[str, int] = {}
+        for record in records:
+            signature_counts[record.failure_signature] = signature_counts.get(record.failure_signature, 0) + 1
+        improvement_candidates = []
+        for signature in sorted({
+            record.failure_signature for record in records
+            if record.platform_improvement_candidate_ref
+        }):
+            cluster = [record for record in records if record.failure_signature == signature]
+            improvement_candidates.append({
+                "reference": f"refinement-signature:{signature}",
+                "signature": signature,
+                "component": cluster[-1].affected_component,
+                "occurrences": len(cluster),
+                "affected_works": len({record.work_id for record in cluster}),
+                "observed_tokens": sum(int(record.model_token_usage.get("total_tokens", 0)) for record in cluster),
+                "observed_seconds": sum(record.extra_elapsed_seconds or 0 for record in cluster),
+                "systemic": any(record.refinement_class is RefinementClass.SYSTEMIC_OR_NON_CONVERGING_INCIDENT for record in cluster),
+                "status": "PROPOSED",
+            })
         return {
             "native_attempts": attempts,
+            "native_self_refine_events": native_count,
             "self_refine_events": count,
-            "self_refine_rate": count / attempts if attempts else 0.0,
+            "self_refine_rate": len(refined_native_attempts) / attempts if attempts else 0.0,
+            "first_pass_success_rate": first_pass_successes / len(completed_attempts) if completed_attempts else 0.0,
             "recovered": results.count("RECOVERED"),
             "escalated": results.count("ESCALATED"),
             "failed": results.count("FAILED"),
             "active": results.count(None),
+            "classification_counts": {
+                item.value: sum(record.refinement_class is item for record in records)
+                for item in RefinementClass
+            },
+            "convergence_success_rate": results.count("RECOVERED") / len(settled) if settled else 0.0,
+            "average_refinement_attempts": sum(action_counts) / len(action_counts) if action_counts else 0.0,
+            "p95_refinement_attempts": _p95(action_counts),
+            "average_refinement_seconds": sum(durations) / len(durations) if durations else 0.0,
+            "p95_refinement_seconds": _p95(durations),
+            "observed_refinement_tokens": sum(int(record.model_token_usage.get("total_tokens", 0)) for record in records),
+            "observed_refinement_tool_effects": sum(int(record.compute_overhead.get("tool_effects", 0)) for record in records),
+            "unsafe_repair_blocks": sum(record.repairability is RepairabilityClassification.UNSAFE_TO_AUTOREPAIR for record in records),
+            "recurring_signatures": {signature: occurrences for signature, occurrences in signature_counts.items() if occurrences > 1},
+            "improvement_candidates": improvement_candidates,
+            "human_escalation_observation_count": len(human_escalation_observations),
+            "human_escalation_rate": sum(
+                record.budget_decision["human_escalated"] is True
+                for record in human_escalation_observations
+            ) / len(human_escalation_observations) if human_escalation_observations else None,
+            "systemic_incident_rate": sum(record.refinement_class is RefinementClass.SYSTEMIC_OR_NON_CONVERGING_INCIDENT for record in records) / count if count else 0.0,
         }
 
     def append_event(self, record: ExecutionEventRecord) -> None:

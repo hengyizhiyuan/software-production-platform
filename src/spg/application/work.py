@@ -67,9 +67,11 @@ from spg.domain.preparation import (
 )
 from spg.domain.planning import (
     OnePwuFitClassification,
+    ProductionNodeKind,
     PlannedArtifactOperation,
     ProductionPlanArtifactTarget,
     ProductionPlanProposal,
+    ProductionPlanGraph,
     ProductionPlanner,
     ProductionPlanningRequest,
 )
@@ -1418,7 +1420,7 @@ class WorkApplicationService:
                 if long_lived
                 else WorkCondition.AWAITING_APPROVAL
                 if plan is not None
-                and plan.fit_classification is OnePwuFitClassification.ONE_PWU_FIT
+                and plan.fit_classification in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}
                 else WorkCondition.NEEDS_REFINEMENT
             )
             scope_id = uuid4()
@@ -1579,9 +1581,9 @@ class WorkApplicationService:
             raise ProductInvariantViolation(
                 "Engineering Resource does not match current governed Baseline"
             )
-        if plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT:
+        if plan.fit_classification not in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}:
             raise ProductInvariantViolation(
-                "Work Production Plan is not fit for the single-PWU MVP"
+                "Work Production Plan has no executable PWU boundary"
             )
         if sum(
             (
@@ -1652,9 +1654,9 @@ class WorkApplicationService:
                     ),
                 )
             )
-            if plan.fit_classification is not OnePwuFitClassification.ONE_PWU_FIT:
+            if plan.fit_classification not in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}:
                 raise ProductInvariantViolation(
-                    "Admitted Code Change Contract did not produce a one-PWU Plan"
+                    "Admitted Code Change Contract has no executable PWU boundary"
                 )
         if change_contract is not None and (
             change_contract.engineering_resource_id != resource.id
@@ -2150,13 +2152,23 @@ class WorkApplicationService:
                 preparation_identity = (
                     None if preparation is None else str(preparation.attempt_id)
                 )
+                plan = runtime.plan_revision(binding.plan_revision_id)
+                multi_units = (
+                    tuple((
+                        unit.model_dump(mode="json"),
+                        product.runtime_summary(binding.model_copy(update={"work_unit_id": unit.id})).model_dump(mode="json"),
+                    ) for unit in runtime.work_units_for_plan(plan.id))
+                    if plan is not None and plan.graph is not None else ()
+                )
             if binding is None:
                 preparation_identity = None
+                multi_units = ()
         return self._fingerprint(
             {
                 "work_condition": work.condition.value,
                 "runtime_facts": facts.model_dump(mode="json"),
                 "attempt_preparation_identity": preparation_identity,
+                "multi_pwu_units": multi_units,
             }
         )
 
@@ -2225,6 +2237,52 @@ class WorkApplicationService:
             ),
         )
 
+    def replan_work(
+        self, work_id: UUID, new_plan: ProductionPlanProposal, *, reason: str,
+    ) -> WorkProjection:
+        """Re-enter planning within the admitted path boundary at a verified checkpoint."""
+
+        if new_plan.graph is None or new_plan.fit_classification is not OnePwuFitClassification.MULTI_PWU_FIT:
+            raise ProductInvariantViolation("revised Work needs an executable multi-PWU Plan")
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            runtime = RuntimeStore(uow.session)
+            work = self._required_work(product, work_id)
+            binding = self._runtime_binding_for_current_context(product, work_id)
+            if binding is None or work.production_plan is None or work.production_plan.graph is None:
+                raise ProductInvariantViolation("Work has no admitted multi-PWU cycle to revise")
+            old = runtime.work_unit(binding.work_unit_id)
+            run = runtime.run(binding.production_run_id)
+            if old is None or run is None:
+                raise ProductInvariantViolation("Work runtime lineage is incomplete")
+            contract = old.completion_contract
+            if new_plan.source_baseline_id != run.source_baseline_id:
+                raise ProductInvariantViolation("revised Plan changed the original Work source")
+            old_paths = {path for node in work.production_plan.graph.nodes for path in node.writable_paths}
+            new_paths = {path for node in new_plan.graph.nodes for path in node.writable_paths}
+            if not new_paths.issubset(old_paths):
+                raise ProductInvariantViolation("revised Plan exceeds admitted path scope")
+            full_contract = contract.model_copy(update={
+                "required_outputs": tuple(dict.fromkeys((*contract.required_outputs, *sorted(new_paths)))),
+                "required_changes": tuple(dict.fromkeys((*contract.required_changes, *sorted(new_paths)))),
+                "change_contract": new_plan.change_contract,
+                "production_plan": new_plan,
+            })
+        spine = self.runtime.revise_production_plan(
+            binding.production_run_id, full_contract, reason=reason,
+        )
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            product.rebind_runtime_plan(binding.id, spine.plan_revision.id, spine.work_unit.id)
+            product.update_work(work_id, {
+                "production_plan_proposal": new_plan.model_copy(update={
+                    "graph": spine.plan_revision.graph,
+                }).model_dump(mode="json"),
+                "updated_at": datetime.now(UTC),
+            })
+            uow.commit()
+        return self.get_work(work_id)
+
     def advance_work(self, work_id: UUID) -> WorkProjection:
         """Perform at most one currently legal governed production action."""
 
@@ -2235,6 +2293,14 @@ class WorkApplicationService:
             binding = self._runtime_binding_for_current_context(product, work_id)
             if binding is None:
                 return self._projection(product, work)
+            plan_revision = runtime_store.plan_revision(binding.plan_revision_id)
+            if plan_revision is not None and plan_revision.graph is not None:
+                selected = self._select_multi_pwu(
+                    product, runtime_store, binding, plan_revision.graph,
+                )
+                if selected is None:
+                    return self._projection(product, work)
+                binding = binding.model_copy(update={"work_unit_id": selected.id})
             resource = product.resource(binding.resource_id)
             if resource is None:
                 raise ProductInvariantViolation("Bound Engineering Resource is missing")
@@ -2247,6 +2313,16 @@ class WorkApplicationService:
             if self.production_recorder is not None:
                 self.production_recorder.record_authorized_work(work_id)
             return self.get_work(work_id)
+        if plan_revision is not None and plan_revision.graph is not None and summary.attempt_id is not None and (
+            summary.completion_outcome == "NOT_PRODUCED"
+            or (summary.admissibility_outcome is not None
+                and summary.admissibility_outcome != ProductionAdmissibilityOutcome.ADMISSIBLE.value)
+        ):
+            with self.database.unit_of_work() as uow:
+                current_attempt = RuntimeStore(uow.session).attempt(summary.attempt_id)
+            if current_attempt is not None and current_attempt.generation < 3:
+                self.runtime.retry_attempt(summary.attempt_id)
+            return self.get_work(work_id)
         if summary.attempt_id is None:
             self.runtime.create_initial_attempt(binding.work_unit_id)
             return self.get_work(work_id)
@@ -2258,6 +2334,14 @@ class WorkApplicationService:
         if preparation is None:
             repository_path = Path(resource.location_ref).resolve()
             if package is None:
+                context_refs = resource.context_references
+                if plan_revision is not None and plan_revision.graph is not None:
+                    node = next((item for item in plan_revision.graph.nodes if item.node_id == work_unit.node_id), None)
+                    if node is not None:
+                        context_refs = tuple(
+                            item for item in resource.context_references
+                            if item.repository_relative_path in node.context_references
+                        ) or resource.context_references[:1]
                 package = self.preparation.assemble_context_package(
                     binding.work_unit_id,
                     repository_path,
@@ -2267,7 +2351,7 @@ class WorkApplicationService:
                                 semantic_role=item.semantic_role,
                                 repository_relative_path=item.repository_relative_path,
                             )
-                            for item in resource.context_references
+                            for item in context_refs
                         )
                     ),
                 )
@@ -2281,6 +2365,10 @@ class WorkApplicationService:
             return self.get_work(work_id)
 
         if summary.dispatch_id is None:
+            if plan_revision is not None and plan_revision.graph is not None:
+                node = next((item for item in plan_revision.graph.nodes if item.node_id == work_unit.node_id), None)
+                if node is not None and node.kind is ProductionNodeKind.JOIN:
+                    self.runtime.reconcile_join_attempt(summary.attempt_id)
             if self.executor is None:
                 return self.get_work(work_id)
             self.execution.dispatch_and_observe(summary.attempt_id, self.executor)
@@ -2329,6 +2417,17 @@ class WorkApplicationService:
         if summary.admissibility_outcome != ProductionAdmissibilityOutcome.ADMISSIBLE.value:
             return self.get_work(work_id)
 
+        if plan_revision is not None and plan_revision.graph is not None:
+            if work_unit.verified_output_baseline_id is None:
+                self.runtime.publish_verified_pwu_output(
+                    work_unit.id, summary.proposed_snapshot_id,
+                )
+                return self.get_work(work_id)
+            with self.database.unit_of_work() as unit_of_work:
+                units = RuntimeStore(unit_of_work.session).work_units_for_plan(plan_revision.id)
+            if any(item.verified_output_baseline_id is None for item in units):
+                return self.get_work(work_id)
+
         if summary.candidate_id is None:
             with self.database.unit_of_work() as unit_of_work:
                 current = RuntimeStore(unit_of_work.session).work_unit(
@@ -2370,6 +2469,68 @@ class WorkApplicationService:
         if self.production_recorder is not None:
             self.production_recorder.record_authorized_work(work_id)
         return self.get_work(work_id)
+
+    @staticmethod
+    def _join_human_decision_domain(runtime: RuntimeStore, facts: RuntimeFactSummary) -> str | None:
+        """Read an independent failed Verification's explicit semantic decision signal."""
+
+        if facts.proposed_snapshot_id is None:
+            return None
+        for record in runtime.verification_records_for_snapshot(facts.proposed_snapshot_id):
+            metadata = record.evidence.metadata
+            domain = metadata.get("conflict_domain")
+            if (
+                record.result is VerificationResultValue.FAIL
+                and metadata.get("human_decision_required") is True
+                and domain in {"PRODUCT_INTENT", "ARCHITECTURE_DECISION", "AUTHORITY", "MATERIAL_RISK"}
+            ):
+                return domain
+        return None
+
+    @staticmethod
+    def _select_multi_pwu(product, runtime, binding, graph):
+        units = {item.node_id: item for item in runtime.work_units_for_plan(binding.plan_revision_id)}
+        executable = tuple(node for node in graph.nodes if node.kind is not ProductionNodeKind.GROUP)
+        if all(units[node.node_id].verified_output_baseline_id is not None for node in executable):
+            terminal = set(units) - {dependency for node in executable for dependency in node.dependency_ids}
+            return units[next(iter(terminal))]
+        candidates = []
+        for node in executable:
+            unit = units[node.node_id]
+            if unit.source_baseline_id is None or unit.verified_output_baseline_id is not None:
+                continue
+            facts = product.runtime_summary(binding.model_copy(update={"work_unit_id": unit.id}))
+            failed = facts.completion_outcome == "NOT_PRODUCED" or (
+                facts.admissibility_outcome is not None
+                and facts.admissibility_outcome != ProductionAdmissibilityOutcome.ADMISSIBLE.value
+            )
+            if failed:
+                if node.kind is ProductionNodeKind.JOIN and WorkApplicationService._join_human_decision_domain(runtime, facts):
+                    continue
+                attempt = None if facts.attempt_id is None else runtime.attempt(facts.attempt_id)
+                if attempt is None or attempt.generation >= 3:
+                    continue
+                stage = 8
+            elif facts.attempt_id is None:
+                stage = 0
+            elif runtime.attempt_preparation(facts.attempt_id) is None:
+                stage = 1
+            elif facts.dispatch_id is None:
+                stage = 2
+            elif facts.observation_id is None:
+                stage = 9
+            elif facts.completion_id is None:
+                stage = 3
+            elif facts.proposed_snapshot_id is None:
+                stage = 4
+            elif facts.admissibility_id is None:
+                stage = 5
+            else:
+                stage = 6
+            candidates.append((stage, node.node_id, unit))
+        if not candidates:
+            return None
+        return min(candidates, key=lambda item: (item[0], item[1]))[2]
 
     def list_attention(
         self,
@@ -2624,6 +2785,38 @@ class WorkApplicationService:
                         steering_step_id=decision.current_step_id,
                     )
                 )
+                continue
+            join_decision = next((
+                item for item in (projection.production_plan_runtime or {}).get("pwus", ())
+                if projection.status is WorkStatus.NEEDS_ATTENTION
+                and item["kind"] == "JOIN" and item["state"] == "BLOCKED"
+                and (item.get("semantic_conflict_domain") or (
+                    item.get("conflict_count", 0) > 0
+                    and not item.get("autonomous_retry_available", False)
+                ))
+            ), None)
+            if join_decision is not None:
+                semantic = join_decision.get("semantic_conflict_domain")
+                prompt = (
+                    "Which Product or Architecture meaning should govern the integrated result?"
+                    if semantic else
+                    "How should the unresolved Join conflict be resolved?"
+                )
+                items.append(AttentionItem(
+                    id=uuid5(NAMESPACE_URL, f"spg:join-decision:{join_decision['pwu_id']}"),
+                    work_id=projection.work_id,
+                    kind=AttentionKind.STEERING_DECISION_REQUIRED,
+                    decision="Clarify the integrated result",
+                    reason=(
+                        f"Independent Verification found a {semantic} conflict. "
+                        "The branch outputs remain separate and the Work baseline has not advanced."
+                        if semantic else
+                        "Bounded Join recovery ended without a verified integrated baseline."
+                    ),
+                    available_actions=(), recommended_action=None,
+                    governed_subject_ref=f"production-work-unit:{join_decision['pwu_id']}",
+                    conversation_prompt=prompt,
+                ))
                 continue
             with self.database.unit_of_work() as unit_of_work:
                 store = ProductStore(unit_of_work.session)
@@ -3061,6 +3254,42 @@ class WorkApplicationService:
             )
         if current_steering_step is not None:
             step = current_steering_step.type.value
+        multi_runtime = None
+        if binding is not None and not revision_reassessment_pending:
+            multi_runtime = self._multi_pwu_projection(store, binding)
+        if (
+            multi_runtime is not None
+            and summary.candidate_id is None
+            and not steering_attention
+        ):
+            pwu_states = [item["state"] for item in multi_runtime["pwus"]]
+            semantic_attention = next((
+                item for item in multi_runtime["pwus"]
+                if item["kind"] == "JOIN" and item["state"] == "BLOCKED"
+                and item.get("semantic_conflict_domain")
+            ), None)
+            conflict_attention = any(
+                item["kind"] == "JOIN" and item["state"] == "BLOCKED"
+                and item.get("conflict_count", 0) > 0
+                and not item.get("autonomous_retry_available", False)
+                for item in multi_runtime["pwus"]
+            )
+            event = "MULTI_PWU_PRODUCTION_ACTIVE"
+            if semantic_attention is not None:
+                status = WorkStatus.NEEDS_ATTENTION
+                event = "JOIN_SEMANTIC_DECISION_REQUIRED"
+                next_action = "Clarify the incompatible Product or Architecture meaning before Join can continue"
+            elif conflict_attention:
+                status = WorkStatus.NEEDS_ATTENTION
+                next_action = "Review the unresolved Join conflict and re-enter Steering if its meaning is ambiguous"
+            elif pwu_states and all(item in {"BLOCKED", "DEPENDENCIES_PENDING"} for item in pwu_states) and not any(
+                item.get("autonomous_retry_available", False) for item in multi_runtime["pwus"]
+            ):
+                status = WorkStatus.BLOCKED
+                next_action = "Resolve the recorded PWU blocker or re-enter Steering"
+            else:
+                status = WorkStatus.RUNNING
+                next_action = "Continue eligible PWUs; verified outputs activate successors automatically"
         bindings = store.runtime_bindings(work.id)
         latest_trusted_commit_id = next(
             (
@@ -3100,6 +3329,7 @@ class WorkApplicationService:
                 else work.production_plan.change_contract
             ),
             production_plan=work.production_plan,
+            production_plan_runtime=multi_runtime,
             tags=work.tags,
             engineering_scope=scope,
             status=status,
@@ -3142,6 +3372,79 @@ class WorkApplicationService:
             latest_trusted_runtime_commit_id=latest_trusted_commit_id,
             work_complete=status is WorkStatus.COMPLETED,
         )
+
+    @staticmethod
+    def _multi_pwu_projection(store: ProductStore, binding) -> dict[str, object] | None:
+        runtime = RuntimeStore(store.session)
+        plan = runtime.plan_revision(binding.plan_revision_id)
+        run = runtime.run(binding.production_run_id)
+        if plan is None or plan.graph is None or run is None:
+            return None
+        units = {unit.node_id: unit for unit in runtime.work_units_for_plan(plan.id)}
+        rows = []
+        for node in plan.graph.nodes:
+            if node.kind is ProductionNodeKind.GROUP:
+                continue
+            unit = units[node.node_id]
+            facts = store.runtime_summary(binding.model_copy(update={"work_unit_id": unit.id}))
+            semantic_conflict = (
+                WorkApplicationService._join_human_decision_domain(runtime, facts)
+                if node.kind is ProductionNodeKind.JOIN
+                and facts.admissibility_outcome is not None
+                and facts.admissibility_outcome != ProductionAdmissibilityOutcome.ADMISSIBLE.value
+                else None
+            )
+            if unit.verified_output_baseline_id is not None:
+                state, reason = "VERIFIED", None
+            elif unit.source_baseline_id is None:
+                state, reason = "DEPENDENCIES_PENDING", "Waiting for verified predecessor baselines"
+            elif facts.completion_outcome == "NOT_PRODUCED" or (
+                facts.admissibility_outcome is not None
+                and facts.admissibility_outcome != ProductionAdmissibilityOutcome.ADMISSIBLE.value
+            ):
+                state, reason = "BLOCKED", (
+                    "Join requires a Human Product/Architecture decision"
+                    if semantic_conflict else "Join conflict remains unresolved"
+                    if node.kind is ProductionNodeKind.JOIN and unit.reconciliation_evidence
+                    and unit.reconciliation_evidence.get("conflicts")
+                    else "Completion or Verification did not pass"
+                )
+            elif facts.dispatch_id is not None and facts.observation_id is None:
+                state, reason = "RUNNING", None
+            elif facts.observation_id is not None:
+                state, reason = "VERIFYING", None
+            else:
+                state, reason = "READY", None
+            source = None if unit.source_baseline_id is None else runtime.snapshot(unit.source_baseline_id)
+            output = None if unit.verified_output_baseline_id is None else runtime.snapshot(unit.verified_output_baseline_id)
+            current_attempt = None if facts.attempt_id is None else runtime.attempt(facts.attempt_id)
+            rows.append({
+                "node_id": node.node_id, "pwu_id": str(unit.id),
+                "kind": node.kind.value, "objective": node.objective,
+                "group_id": node.parent_id,
+                "dependency_ids": list(node.dependency_ids),
+                "state": state, "blocked_reason": reason,
+                "conflict_count": len(unit.reconciliation_evidence.get("conflicts", ()))
+                if unit.reconciliation_evidence else 0,
+                "semantic_conflict_domain": semantic_conflict,
+                "autonomous_retry_available": state == "BLOCKED" and current_attempt is not None
+                and current_attempt.generation < 3 and semantic_conflict is None,
+                "input_baseline_id": None if source is None else str(source.id),
+                "input_revision": None if source is None else source.repository_revision,
+                "verified_output_baseline_id": None if output is None else str(output.id),
+                "verified_output_revision": None if output is None else output.repository_revision,
+                "workspace_attempt_id": None if facts.attempt_id is None else str(facts.attempt_id),
+            })
+        integrated = runtime.snapshot(run.integrated_baseline_id or run.source_baseline_id)
+        return {
+            "plan_revision_id": str(plan.id), "revision_number": plan.revision_number,
+            "groups": [{"node_id": node.node_id, "objective": node.objective,
+                        "parent_id": node.parent_id} for node in plan.graph.nodes
+                       if node.kind is ProductionNodeKind.GROUP],
+            "pwus": rows,
+            "integrated_baseline_id": None if integrated is None else str(integrated.id),
+            "integrated_revision": None if integrated is None else integrated.repository_revision,
+        }
 
     def _projection_state(
         self,
@@ -3391,21 +3694,32 @@ class WorkApplicationService:
         steering = SteeringStore(store.session)
         plan = steering.plan_for_work(work_id)
         if plan is None:
-            return store.runtime_binding(work_id)
-        revision = steering.active_revision(plan.id)
-        if revision is None:
+            binding = store.runtime_binding(work_id)
+        else:
+            revision = steering.active_revision(plan.id)
+            if revision is None:
+                return None
+            current = next(
+                (step for step in steering.steps(revision.id) if step.state.value == "CURRENT"),
+                None,
+            )
+            if current is None or current.type.value != "PRODUCE":
+                return None
+            binding = store.runtime_binding_for_step(current.id)
+        if binding is None:
             return None
-        current = next(
-            (
-                step
-                for step in steering.steps(revision.id)
-                if step.state.value == "CURRENT"
-            ),
-            None,
-        )
-        if current is None or current.type.value != "PRODUCE":
-            return None
-        return store.runtime_binding_for_step(current.id)
+        runtime = RuntimeStore(store.session)
+        run = runtime.run(binding.production_run_id)
+        if run is None or run.current_plan_revision_id == binding.plan_revision_id:
+            return binding
+        active = runtime.plan_revision(run.current_plan_revision_id)
+        units = () if active is None else runtime.work_units_for_plan(active.id)
+        root = next((unit for unit in units if unit.source_baseline_id is not None), None)
+        if active is None or root is None:
+            raise ProductInvariantViolation("re-planned Work has no recoverable active PWU")
+        return binding.model_copy(update={
+            "plan_revision_id": active.id, "work_unit_id": root.id,
+        })
 
     @staticmethod
     def _require_mvp_scope(bindings) -> None:

@@ -1,5 +1,10 @@
 # Duration & Capacity Semantic Foundation
 
+> Historical DCP-1/DCP-2 authority scope. Its statements that PLAN-1A and
+> multi-PWU execution are deferred describe the state when those slices closed.
+> Current production lineage is described in
+> [Watt AI-Native Software Production Architecture](watt-ai-native-software-production-architecture.md#versioned-multi-pwu-production).
+
 ## Status and Authority
 
 **DCP-1: CLOSED / PASS**

@@ -1,0 +1,392 @@
+[
+  {
+    "case": "explicit",
+    "interaction_id": "4be7dcca-54d9-4351-9001-5133fce15f3b",
+    "turn_id": "fc462f1d-678a-4b1b-911c-b4de6aa26b2f",
+    "status": "COMPLETED",
+    "failure_message": null,
+    "queries": [
+      "python asyncio task queue library"
+    ],
+    "metrics": {
+      "providers": [
+        "github-rest-public"
+      ],
+      "latency_ms": 28068,
+      "sufficient": true,
+      "fetch_count": 3,
+      "query_count": 1,
+      "model_tokens": null,
+      "result_count": 4,
+      "search_types": [
+        "SEARCH_GITHUB_REPOSITORIES"
+      ],
+      "provider_cost": "UNREPORTED",
+      "refinement_count": 0,
+      "failure_categories": []
+    },
+    "evidence": [
+      {
+        "id": "external-search:f3ddc6a12fd3cace596d2a55",
+        "url": "https://github.com/mjwestcott/fennel",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:154283c24d244cee68f2c494",
+        "url": "https://github.com/alttch/neotasker",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:32f1acc8041adb574656ec7a",
+        "url": "https://github.com/jjacobson93/aioqueue",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:124113d3a06be8101f10310a",
+        "url": "https://github.com/krylosov-aa/scheduled-py-pg-tasks",
+        "completeness": "SEARCH_RESULT"
+      }
+    ],
+    "answer_excerpt": "实际检索到 4 个不同来源，重点参考：\n- mjwestcott/fennel：A task queue library for Python and Redis；GitHub stars 36（已检查原文）\n- alttch/neotasker：Lightweight workers and task management library for Python；GitHub stars 4（已检查原文）\n- jjacobson93/aioqueue：A Python Task Queue library using RabbitMQ (aioamqp) and asyncio；GitHub stars 0（已检查原文）\n\n来源：\n- [mjwestcott/fennel](https://github.com/mjwestcott/fennel) · github-rest-public · INSPECTED · external-search:f3ddc6a12fd3cace596d2a55\n- [alttch/neotasker](https://github.com/alttch/neotasker) · github-rest-public · INSPECTED · external-search:154283c24d244cee68f2c494\n- [jjacobson93/aioqueue](https://github.com/jjacobson93/aioqueue) · github-rest-public · INSPECTED · external-search:32f1acc8041adb574656ec7a"
+  },
+  {
+    "case": "model_initiated",
+    "interaction_id": "db64349f-d8e2-4263-b0dd-c62b74112322",
+    "turn_id": "12bfa39c-9219-4946-aaef-05495ae623de",
+    "status": "COMPLETED",
+    "failure_message": null,
+    "queries": [
+      "Python async task queue actively maintained libraries GitHub Taskiq ARQ SAQ Celery",
+      "Python async task queue Taskiq ARQ SAQ Celery"
+    ],
+    "metrics": {
+      "providers": [
+        "github-rest-public"
+      ],
+      "latency_ms": 2433,
+      "sufficient": false,
+      "fetch_count": 0,
+      "query_count": 2,
+      "model_tokens": null,
+      "result_count": 0,
+      "search_types": [
+        "SEARCH_GITHUB_REPOSITORIES",
+        "SEARCH_WEB"
+      ],
+      "provider_cost": "UNREPORTED",
+      "refinement_count": 1,
+      "failure_categories": [
+        "NO_RESULTS",
+        "CREDENTIAL_REQUIRED"
+      ]
+    },
+    "evidence": [],
+    "answer_excerpt": "这次没有取得可核查的外部检索结果。当前查询未返回结果，不能推断实现不存在（NO_RESULTS）；部分来源需要配置只读检索凭据（CREDENTIAL_REQUIRED）。我不能据此断言相关实现不存在。"
+  },
+  {
+    "case": "explicit_after_refinement",
+    "interaction_id": "63820d5c-84b2-4b66-8df1-36614d9487c2",
+    "turn_id": "e267d693-6d0e-461e-927d-fc9f376859ba",
+    "status": "COMPLETED",
+    "failure_message": null,
+    "queries": [
+      "python asyncio task queue library",
+      "python asyncio task queue"
+    ],
+    "metrics": {
+      "providers": [
+        "github-rest-public"
+      ],
+      "latency_ms": 36039,
+      "sufficient": true,
+      "fetch_count": 3,
+      "query_count": 2,
+      "model_tokens": null,
+      "result_count": 10,
+      "search_types": [
+        "SEARCH_GITHUB_REPOSITORIES"
+      ],
+      "provider_cost": "UNREPORTED",
+      "refinement_count": 1,
+      "failure_categories": []
+    },
+    "evidence": [
+      {
+        "id": "external-search:f3ddc6a12fd3cace596d2a55",
+        "url": "https://github.com/mjwestcott/fennel",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:154283c24d244cee68f2c494",
+        "url": "https://github.com/alttch/neotasker",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:32f1acc8041adb574656ec7a",
+        "url": "https://github.com/jjacobson93/aioqueue",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:124113d3a06be8101f10310a",
+        "url": "https://github.com/krylosov-aa/scheduled-py-pg-tasks",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:ec103839ad1c77c9b5ef04cc",
+        "url": "https://github.com/taskiq-python/taskiq",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:78d7f5af66ba1938cc54c0ca",
+        "url": "https://github.com/janbjorge/pgqueuer",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:f89d4da4083b4248a61814c0",
+        "url": "https://github.com/quantmind/pulsar-queue",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:6c0e258aa8a94da08fa9fcd0",
+        "url": "https://github.com/decentfox/aintq",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:f5bd996535f89fa48c20a649",
+        "url": "https://github.com/NicolasLM/spinach",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:7be6d15bf183a054d8fac959",
+        "url": "https://github.com/justrach/kew",
+        "completeness": "SEARCH_RESULT"
+      }
+    ],
+    "answer_excerpt": "实际检索到 10 个不同来源，重点参考：\n- mjwestcott/fennel：A task queue library for Python and Redis；GitHub stars 36（已检查原文）\n- taskiq-python/taskiq：Distributed task queue with full async support；GitHub stars 2340（已检查原文）\n- alttch/neotasker：Lightweight workers and task management library for Python；GitHub stars 4（已检查原文）\n\n来源：\n- [mjwestcott/fennel](https://github.com/mjwestcott/fennel) · github-rest-public · INSPECTED · external-search:f3ddc6a12fd3cace596d2a55\n- [taskiq-python/taskiq](https://github.com/taskiq-python/taskiq) · github-rest-public · INSPECTED · external-search:ec103839ad1c77c9b5ef04cc\n- [alttch/neotasker](https://github.com/alttch/neotasker) · github-rest-public · INSPECTED · external-search:154283c24d244cee68f2c494"
+  },
+  {
+    "case": "model_initiated_after_refinement",
+    "interaction_id": "12792696-42ab-4125-86e5-8cf644a18513",
+    "turn_id": "acac0595-c59f-4844-ae68-5a6d7b3e8fc4",
+    "status": "COMPLETED",
+    "failure_message": null,
+    "queries": [
+      "Python async task queue libraries actively maintained",
+      "Python async task queue"
+    ],
+    "metrics": {
+      "providers": [
+        "github-rest-public"
+      ],
+      "latency_ms": 29282,
+      "sufficient": true,
+      "fetch_count": 3,
+      "query_count": 2,
+      "model_tokens": null,
+      "result_count": 6,
+      "search_types": [
+        "SEARCH_WEB",
+        "SEARCH_GITHUB_REPOSITORIES"
+      ],
+      "provider_cost": "UNREPORTED",
+      "refinement_count": 1,
+      "failure_categories": [
+        "CREDENTIAL_REQUIRED"
+      ]
+    },
+    "evidence": [
+      {
+        "id": "external-search:b13c19aaa667fe61ae783fcd",
+        "url": "https://github.com/rq/rq",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:ec103839ad1c77c9b5ef04cc",
+        "url": "https://github.com/taskiq-python/taskiq",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:c21b62d8c5ee8b5327bdbc49",
+        "url": "https://github.com/procrastinate-org/procrastinate",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:0985be2289a3cbb5a105155f",
+        "url": "https://github.com/vjanz/python-asynchronous-tasks",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:2ad71aa821649e46fea407d3",
+        "url": "https://github.com/everydo/ztq",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:5110e2c1ddaf3a1e45aa541a",
+        "url": "https://github.com/wakatime/wakaq",
+        "completeness": "SEARCH_RESULT"
+      }
+    ],
+    "answer_excerpt": "实际检索到 6 个不同来源，重点参考：\n- rq/rq：Simple job queues for Python；GitHub stars 10694（已检查原文）\n- taskiq-python/taskiq：Distributed task queue with full async support；GitHub stars 2340（已检查原文）\n- procrastinate-org/procrastinate：PostgreSQL-based Task Queue for Python；GitHub stars 1395（已检查原文）\n\n未完成的检索/检查：部分来源需要配置只读检索凭据（CREDENTIAL_REQUIRED）\n\n来源：\n- [rq/rq](https://github.com/rq/rq) · github-rest-public · INSPECTED · external-search:b13c19aaa667fe61ae783fcd\n- [taskiq-python/taskiq](https://github.com/taskiq-python/taskiq) · github-rest-public · INSPECTED · external-search:ec103839ad1c77c9b5ef04cc\n- [procrastinate-org/procrastinate](https://github.com/procrastinate-org/procrastinate) · github-rest-public · INSPECTED · external-search:c21b62d8c5ee8b5327bdbc49"
+  },
+  {
+    "case": "model_initiated_final",
+    "interaction_id": "342316c0-1211-4466-95b7-163ab12cdeba",
+    "turn_id": "7f00958f-2f31-428f-8d4e-7c67682f1fde",
+    "status": "COMPLETED",
+    "failure_message": null,
+    "queries": [
+      "Python async task queue maintained libraries GitHub"
+    ],
+    "metrics": {
+      "providers": [],
+      "latency_ms": 3757,
+      "sufficient": false,
+      "fetch_count": 0,
+      "query_count": 1,
+      "model_tokens": null,
+      "result_count": 0,
+      "search_types": [
+        "SEARCH_GITHUB_REPOSITORIES",
+        "SEARCH_WEB"
+      ],
+      "provider_cost": "UNREPORTED",
+      "refinement_count": 0,
+      "failure_categories": [
+        "RATE_LIMITED",
+        "CREDENTIAL_REQUIRED"
+      ]
+    },
+    "evidence": [],
+    "answer_excerpt": "这次没有取得可核查的外部检索结果。检索提供方限流，可稍后重试（RATE_LIMITED）；部分来源需要配置只读检索凭据（CREDENTIAL_REQUIRED）。我不能据此断言相关实现不存在。"
+  },
+  {
+    "case": "explicit_final",
+    "interaction_id": "3eba431c-f5a9-467f-9a18-68ee7cac4844",
+    "turn_id": "7fde86d3-2600-4301-87dc-23ced1395ffd",
+    "status": "COMPLETED",
+    "failure_message": null,
+    "queries": [
+      "python asyncio task queue production ready",
+      "python asyncio task queue"
+    ],
+    "metrics": {
+      "providers": [
+        "github-rest-public"
+      ],
+      "latency_ms": 33218,
+      "sufficient": true,
+      "fetch_count": 3,
+      "query_count": 2,
+      "model_tokens": 3986,
+      "result_count": 7,
+      "search_types": [
+        "SEARCH_GITHUB_REPOSITORIES"
+      ],
+      "provider_cost": "UNREPORTED",
+      "refinement_count": 1,
+      "failure_categories": []
+    },
+    "evidence": [
+      {
+        "id": "external-search:7a42eb30398413726fc3c833",
+        "url": "https://github.com/N556-prog/async-task-queue",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:ec103839ad1c77c9b5ef04cc",
+        "url": "https://github.com/taskiq-python/taskiq",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:78d7f5af66ba1938cc54c0ca",
+        "url": "https://github.com/janbjorge/pgqueuer",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:f89d4da4083b4248a61814c0",
+        "url": "https://github.com/quantmind/pulsar-queue",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:6c0e258aa8a94da08fa9fcd0",
+        "url": "https://github.com/decentfox/aintq",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:f5bd996535f89fa48c20a649",
+        "url": "https://github.com/NicolasLM/spinach",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:7be6d15bf183a054d8fac959",
+        "url": "https://github.com/justrach/kew",
+        "completeness": "INSPECTED"
+      }
+    ],
+    "answer_excerpt": "- 来源事实 [external-search:ec103839ad1c77c9b5ef04cc]：仓库元数据显示 2,340 stars、146 forks、Python、MIT，最近更新 2026-09-25；README 称其为异步分布式任务队列，可发送/运行同步与异步函数，并集成 FastAPI/AioHTTP。\n- 来源事实 [external-search:78d7f5af66ba1938cc54c0ca]：仓库元数据显示 1,526 stars、35 forks、Python、MIT，最近更新 2026-09-24；README 称其把 PostgreSQL 作为后台任务队列，任务与业务数据同库，无需独立消息代理。\n- 来源事实 [external-search:7be6d15bf183a054d8fac959]：仓库元数据显示 68 stars、6 forks、Python、MIT，最近更新 2026-09-17；README 称其为 Redis 支持的高性能现代异步任务队列，任务运行在现有异步进程中。\n比较与判断：若仅看证据中的 star 数与最近更新，taskiq 和 pgqueuer 的社区指标明显高于 kew；三者均为 Python 任务队列，但 taskiq 定位为异步分布式队列，pgqueuer 走 PostgreSQL 同库方案，kew 走 Redis 并强调进程内运行。\n局限：证据仅为仓库元数据和 README 片段，未审查全部源码、issue、发布历史、维护者活跃度、生产案例或基准测试内容；因此“成熟度”只能参考 stars/最近更新等指标，不能从现有证据下最终结论。\n\n来源：\n- [taskiq-python/taskiq](https://github.com/taskiq-python/taskiq) · github-rest-public · INSPECTED · external-search:ec103839ad1c77c9b5ef04cc\n- [janbjorge/pgqueuer](https://github.co"
+  },
+  {
+    "case": "model_initiated_final_after_cooldown",
+    "interaction_id": "f2b92a88-29ad-42b6-a427-4ad1afe7ae03",
+    "turn_id": "aa34c89e-d213-496e-8c77-f96b4f29891b",
+    "status": "COMPLETED",
+    "failure_message": null,
+    "queries": [
+      "actively maintained Python async task queue libraries",
+      "Python async task queue"
+    ],
+    "metrics": {
+      "providers": [
+        "github-rest-public"
+      ],
+      "latency_ms": 26175,
+      "sufficient": true,
+      "fetch_count": 3,
+      "query_count": 2,
+      "model_tokens": 3422,
+      "result_count": 6,
+      "search_types": [
+        "SEARCH_GITHUB_REPOSITORIES",
+        "SEARCH_WEB"
+      ],
+      "provider_cost": "UNREPORTED",
+      "refinement_count": 1,
+      "failure_categories": [
+        "CREDENTIAL_REQUIRED"
+      ]
+    },
+    "evidence": [
+      {
+        "id": "external-search:b13c19aaa667fe61ae783fcd",
+        "url": "https://github.com/rq/rq",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:ec103839ad1c77c9b5ef04cc",
+        "url": "https://github.com/taskiq-python/taskiq",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:c21b62d8c5ee8b5327bdbc49",
+        "url": "https://github.com/procrastinate-org/procrastinate",
+        "completeness": "INSPECTED"
+      },
+      {
+        "id": "external-search:0985be2289a3cbb5a105155f",
+        "url": "https://github.com/vjanz/python-asynchronous-tasks",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:2ad71aa821649e46fea407d3",
+        "url": "https://github.com/everydo/ztq",
+        "completeness": "SEARCH_RESULT"
+      },
+      {
+        "id": "external-search:5110e2c1ddaf3a1e45aa541a",
+        "url": "https://github.com/wakatime/wakaq",
+        "completeness": "SEARCH_RESULT"
+      }
+    ],
+    "answer_excerpt": "- 来源事实 [external-search:b13c19aaa667fe61ae783fcd]：README 称 RQ（Redis Queue）是用于排队作业并由 worker 在后台处理的简单 Python 库，后端为 Redis/Valkey。\n- 来源事实 [external-search:ec103839ad1c77c9b5ef04cc]：README 称 taskiq 是异步分布式任务队列，支持发送和运行同步与异步函数。\n- 来源事实 [external-search:c21b62d8c5ee8b5327bdbc49]：README 标题称 Procrastinate 是 PostgreSQL-based Task Queue for Python。\n比较与判断：在给定证据中，只有 taskiq 明确以 full async support/异步分布式任务队列描述自身；RQ 和 Procrastinate 未在证据里明确标注异步。三者的仓库元数据 updated_at 均为 2026-09-25，但仅凭该字段不足以单独断言维护活跃度。\n局限：仅基于三个仓库的元数据和 README 片段，未检查提交历史、发布记录或长期维护指标；RQ/Procrastinate 的异步支持需另行核实。\n\n未完成的检索/检查：部分来源需要配置只读检索凭据（CREDENTIAL_REQUIRED）\n\n来源：\n- [rq/rq](https://github.com/rq/rq) · github-rest-public · INSPECTED · external-search:b13c19aaa667fe61ae783fcd\n- [taskiq-python/taskiq](https://github.com/taskiq-python/taskiq) · github-rest-public · INSPECTED · external-search:ec103839ad1c77c9b5ef04cc\n- [procrastinate-org/procrastinate](h"
+  }
+]

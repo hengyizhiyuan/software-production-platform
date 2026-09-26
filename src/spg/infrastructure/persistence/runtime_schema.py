@@ -30,6 +30,7 @@ production_snapshots = Table(
     Column("repository_identity", String(255), nullable=False),
     Column("repository_ref", String(512), nullable=False),
     Column("repository_revision", String(64), nullable=False),
+    Column("repository_tree_identity", String(64), nullable=True),
     Column(
         "source_baseline_id",
         Uuid(as_uuid=True),
@@ -86,6 +87,8 @@ production_runs = Table(
         ForeignKey("production_snapshots.id", name="fk_runs_source_baseline"),
         nullable=False,
     ),
+    Column("integrated_baseline_id", Uuid(as_uuid=True),
+           ForeignKey("production_snapshots.id", name="fk_runs_integrated_baseline"), nullable=True),
     Column(
         "current_plan_revision_id",
         Uuid(as_uuid=True),
@@ -117,6 +120,9 @@ plan_revisions = Table(
         nullable=False,
     ),
     Column("revision_number", Integer, nullable=False),
+    Column("graph", JSONB, nullable=True),
+    Column("supersedes_plan_revision_id", Uuid(as_uuid=True),
+           ForeignKey("plan_revisions.id", name="fk_plan_revision_supersedes"), nullable=True),
     Column(
         "source_baseline_id",
         Uuid(as_uuid=True),
@@ -165,8 +171,13 @@ production_work_units = Table(
         "source_baseline_id",
         Uuid(as_uuid=True),
         ForeignKey("production_snapshots.id", name="fk_work_units_baseline"),
-        nullable=False,
+        nullable=True,
     ),
+    Column("node_id", String(128), nullable=True),
+    Column("parent_baseline_ids", JSONB, nullable=True),
+    Column("verified_output_baseline_id", Uuid(as_uuid=True),
+           ForeignKey("production_snapshots.id", name="fk_work_units_verified_output"), nullable=True),
+    Column("reconciliation_evidence", JSONB, nullable=True),
     Column("objective", Text, nullable=False),
     Column("completion_contract", JSONB, nullable=False),
     Column("condition", String(32), nullable=False),
@@ -178,6 +189,7 @@ production_work_units = Table(
         nullable=False,
         server_default=func.now(),
     ),
+    UniqueConstraint("plan_revision_id", "node_id", name="uq_work_units_plan_node"),
 )
 
 execution_attempts = Table(

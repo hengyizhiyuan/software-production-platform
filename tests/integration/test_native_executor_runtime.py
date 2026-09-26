@@ -10,14 +10,17 @@ import shutil
 import subprocess
 import sys
 from threading import Barrier
+from types import SimpleNamespace
 from uuid import UUID, uuid4
 
 from alembic import command
 from alembic.config import Config
 import pytest
-from sqlalchemy import func, inspect, select, update
+from fastapi.testclient import TestClient
+from sqlalchemy import func, inspect, insert, select, update
 
 from spg.application.executor_runtime import NativeExecutorRuntimeService
+from spg.api.http import create_http_application
 from spg.application.native_vector import NativeCandidateVectorService
 from spg.application.native_retention import NativeRetentionService
 from spg.application.runtime import RuntimeService
@@ -78,6 +81,8 @@ from spg.domain.runtime import (
     InitialRunRequest,
     ProductionHorizon,
 )
+from spg.domain.planning import PlannedArtifactOperation, ProductionPlanArtifactTarget, ProductionPlanningRequest
+from spg.providers.rule_based_planner import RuleBasedProductionPlanner
 from spg.infrastructure.executor_runtime.local_storage import (
     ContentAddressedStorage,
     WorkspaceArchiveStore,
@@ -110,7 +115,9 @@ from spg.infrastructure.persistence.native_execution_schema import (
     native_execution_tables,
     native_trusted_source_pointers,
     result_ready_claims,
+    self_refine_events,
 )
+from spg.domain.refinement_contract import RefinementClass, RefinementSignalKind
 from spg.infrastructure.persistence.runtime_schema import runtime_tables
 
 
@@ -197,8 +204,9 @@ def _authority(database: Database, repository: Path):
 def _admission(
     database: Database, repository: Path, *, command_id=None, actor="human:test",
     contract_payload: dict | None = None,
+    spine_attempt=None, work_id=None,
 ):
-    spine, attempt = _authority(database, repository)
+    spine, attempt = spine_attempt or _authority(database, repository)
     commit = _git(repository, "rev-parse", "HEAD")
     tree = _git(repository, "rev-parse", "HEAD^{tree}")
     vector = SourceVector(
@@ -216,7 +224,7 @@ def _admission(
             ),
         )
     )
-    work_id = uuid4()
+    work_id = work_id or uuid4()
     workspace = WorkspaceManifest(
         workspace_id=uuid4(), work_id=work_id, pwu_id=spine.work_unit.id,
         attempt_id=attempt.id, source_vector_digest=vector.digest or "",
@@ -1270,6 +1278,7 @@ def test_self_refine_records_failure_repair_and_verified_resume(
         store = NativeExecutionStore(uow.session)
         completed = store.self_refine_event(event.id)
         assert completed.final_result == "RECOVERED"
+        assert completed.refinement_class is RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT
         assert completed.status == "VERIFIED"
         assert completed.work_resume_result == "RESUMED"
         assert [action.outcome for action in store.self_refine_actions(event.id)] == [
@@ -1280,6 +1289,177 @@ def test_self_refine_records_failure_repair_and_verified_resume(
         assert metrics["self_refine_events"] == 1
         assert metrics["recovered"] == 1
         assert metrics["self_refine_rate"] == 1.0
+
+
+def test_routine_refinement_recurrence_promotes_economic_signal_without_incident(
+    postgres_database: Database,
+) -> None:
+    signature_basis = f"repeatable-schema-variance:{uuid4()}"
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        events = [store.record_bounded_refinement(
+            work_id=uuid4(), operation_id=uuid4(),
+            component="steering/semantic-step",
+            signal_kind=RefinementSignalKind.SCHEMA_INVALID,
+            signature_basis=signature_basis,
+            evidence_references=("semantic-test:bounded",),
+            converged=True, attempt_count=2, elapsed_seconds=3,
+            model_token_usage={"total_tokens": 7},
+        ) for _ in range(4)]
+        assert [event.refinement_class for event in events] == [
+            RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT,
+            RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT,
+            RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT,
+            RefinementClass.DEGRADING_OR_RECURRING_REFINEMENT,
+        ]
+        assert all(event.observation_confidence is ObservationConfidence.OBSERVED_SUCCESS
+                   for event in events)
+        assert events[-1].platform_improvement_candidate_ref == (
+            f"refinement-signature:{events[-1].failure_signature}"
+        )
+        metrics = store.self_refine_metrics()
+        assert metrics["recurring_signatures"][events[-1].failure_signature] == 4
+        assert metrics["observed_refinement_tokens"] >= 28
+        assert any(candidate["reference"] == events[-1].platform_improvement_candidate_ref
+                   and candidate["affected_works"] == 4
+                   and candidate["status"] == "PROPOSED"
+                   for candidate in metrics["improvement_candidates"])
+        assert metrics["classification_counts"]["SYSTEMIC_OR_NON_CONVERGING_INCIDENT"] == 0
+        assert metrics["human_escalation_rate"] == 0
+        uow.commit()
+
+
+def test_changed_reality_supersedes_refinement_without_false_incident(
+    postgres_database: Database,
+) -> None:
+    with postgres_database.unit_of_work() as uow:
+        event = NativeExecutionStore(uow.session).record_bounded_refinement(
+            work_id=uuid4(), operation_id=uuid4(), component="steering/semantic-step",
+            signal_kind=RefinementSignalKind.REALITY_MISMATCH,
+            signature_basis=str(uuid4()), evidence_references=("step:stale",),
+            converged=False, superseded=True, attempt_count=2,
+        )
+        assert event.final_result == "SUPERSEDED"
+        assert event.refinement_class is RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT
+        assert event.observation_confidence is ObservationConfidence.INCONCLUSIVE
+        uow.commit()
+
+
+def test_human_escalation_metric_requires_explicit_human_boundary(
+    postgres_database: Database,
+) -> None:
+    work_id = uuid4()
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        events = []
+        for requires_human in (False, True):
+            event = store.record_bounded_refinement(
+                work_id=work_id, operation_id=uuid4(), component="semantic-test",
+                signal_kind=RefinementSignalKind.CONTRACT_MISMATCH,
+                signature_basis=str(uuid4()), evidence_references=("semantic-test:boundary",),
+                converged=False, authority_required=requires_human, attempt_count=2,
+            )
+            assert event.budget_decision["human_escalated"] is requires_human
+            events.append(event)
+        store.insert_self_refine_event(events[0].model_copy(update={
+            "id": uuid4(), "operation_id": uuid4(), "semantic_version": 1,
+            "refinement_class": RefinementClass.LEGACY_EXECUTION_INCIDENT,
+            "budget_decision": {},
+        }))
+        metrics = store.self_refine_metrics(work_id=work_id)
+        assert metrics["human_escalation_observation_count"] == 2
+        assert metrics["human_escalation_rate"] == 0.5
+        uow.commit()
+
+
+def test_legacy_refinement_row_keeps_historical_incident_meaning(
+    postgres_database: Database,
+) -> None:
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        template = store.record_bounded_refinement(
+            work_id=uuid4(), operation_id=uuid4(), component="legacy-test",
+            signal_kind=RefinementSignalKind.EXECUTION_FAILURE,
+            signature_basis=str(uuid4()), evidence_references=("legacy-test:1",),
+            converged=True, attempt_count=2,
+        )
+        values = template.model_dump(mode="json")
+        values.update(id=uuid4(), operation_id=uuid4(), status="OPEN",
+                      final_result=None, work_resume_result=None)
+        for field in ("semantic_version", "refinement_class", "signal_kind"):
+            values.pop(field)
+        uow.session.execute(insert(self_refine_events).values(**values))
+        historical = store.self_refine_event(values["id"])
+        assert historical.semantic_version == 1
+        assert historical.refinement_class is RefinementClass.LEGACY_EXECUTION_INCIDENT
+        store.complete_self_refine_event(
+            historical.id, result="RECOVERED", resume_result="RESUMED",
+            status="VERIFIED", elapsed_seconds=1,
+            updated_at=datetime.now(timezone.utc), compute_overhead={},
+        )
+        assert store.self_refine_event(historical.id).refinement_class is (
+            RefinementClass.LEGACY_EXECUTION_INCIDENT
+        )
+        uow.commit()
+
+
+def test_refinement_semantic_migration_preserves_preexisting_failure_record(
+    postgres_database: Database,
+) -> None:
+    with postgres_database.unit_of_work() as uow:
+        template = NativeExecutionStore(uow.session).record_bounded_refinement(
+            work_id=uuid4(), operation_id=uuid4(), component="native-executor/provider",
+            signal_kind=RefinementSignalKind.EXECUTION_FAILURE,
+            signature_basis=str(uuid4()), evidence_references=("attempt:historical",),
+            converged=True, attempt_count=2,
+        )
+        uow.commit()
+    config = _migration_config(postgres_database)
+    command.downgrade(config, "20260925_47")
+    assert "semantic_version" not in {
+        column["name"] for column in inspect(postgres_database.engine).get_columns("self_refine_events")
+    }
+    values = template.model_dump(mode="json")
+    values.update(id=uuid4(), operation_id=uuid4(), status="OPEN",
+                  final_result=None, work_resume_result=None)
+    for field in ("semantic_version", "refinement_class", "signal_kind"):
+        values.pop(field)
+    with postgres_database.unit_of_work() as uow:
+        uow.session.execute(insert(self_refine_events).values(**values))
+        uow.commit()
+    command.upgrade(config, "head")
+    with postgres_database.unit_of_work() as uow:
+        restored = NativeExecutionStore(uow.session).self_refine_event(values["id"])
+        assert restored.semantic_version == 1
+        assert restored.refinement_class is RefinementClass.LEGACY_EXECUTION_INCIDENT
+
+
+def test_self_refine_api_filters_by_semantic_class_without_rewriting_records(
+    postgres_database: Database,
+) -> None:
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        event = store.record_bounded_refinement(
+            work_id=uuid4(), operation_id=uuid4(), component="steering/semantic-step",
+            signal_kind=RefinementSignalKind.CONTRACT_MISMATCH,
+            signature_basis=str(uuid4()), evidence_references=("step:bounded",),
+            converged=True, attempt_count=2,
+        )
+        uow.commit()
+    app = create_http_application(
+        application=object(), database=postgres_database,
+        work_service=SimpleNamespace(database=postgres_database),
+        orchestrator=SimpleNamespace(shutdown=lambda: None),
+        steering_driver=SimpleNamespace(shutdown=lambda: None),
+        runtime_activation=SimpleNamespace(project=lambda: None),
+    )
+    client = TestClient(app)
+    response = client.get("/api/self-refine", params={
+        "refinement_class": RefinementClass.ROUTINE_STOCHASTIC_REFINEMENT.value,
+    })
+    assert response.status_code == 200
+    assert any(item["id"] == str(event.id) for item in response.json()["events"])
+    assert client.get("/api/self-refine", params={"refinement_class": "INVALID"}).status_code == 422
 
 
 def test_self_converge_stops_repeated_unchanged_failure(
@@ -1310,6 +1490,10 @@ def test_self_converge_stops_repeated_unchanged_failure(
         store = NativeExecutionStore(uow.session)
         event = store.list_self_refine_events(work_id=admission.binding.work_id)[0]
         assert event.final_result == "ESCALATED"
+        assert event.refinement_class is RefinementClass.SYSTEMIC_OR_NON_CONVERGING_INCIDENT
+        assert event.platform_improvement_candidate_ref == (
+            f"refinement-signature:{event.failure_signature}"
+        )
         assert event.work_resume_result == "NOT_RESUMED"
         assert event.status == "MITIGATED"
         assert event.budget_decision["policy_version"] == "adaptive-self-converge-v1"
@@ -1772,6 +1956,65 @@ def test_live_busy_worker_is_real_capacity_wait_and_release_advances_next_item(
     next_grant = service.allocate(_offer())
     assert next_grant is not None
     assert next_grant.queue_entry.id == pending_queue.id
+
+
+def test_two_ready_pwus_of_one_work_receive_distinct_concurrent_worker_leases(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    """MPWU-Q2: the existing capacity scheduler actually leases both DAG roots."""
+
+    runtime = RuntimeService(postgres_database)
+    baseline = runtime.bootstrap_trusted_baseline(BootstrapRequest(
+        repository_path=git_repository, repository_identity=str(git_repository),
+        repository_ref="refs/heads/main", authority_identity="human:test",
+    )).snapshot
+    shared_work_id = uuid4()
+    targets = tuple(ProductionPlanArtifactTarget(
+        path=f"docs/{name}.md", operation=PlannedArtifactOperation.CREATE,
+    ) for name in ("alpha", "beta"))
+    plan = RuleBasedProductionPlanner().propose(ProductionPlanningRequest(
+        work_id=shared_work_id, admitted_requirement="Produce independent alpha and beta",
+        desired_outcome="Both outputs", production_objective="Produce both outputs",
+        artifact_targets=targets, verification_expectation="targeted test",
+        engineering_scope_summary="one repository", engineering_resource_id=uuid4(),
+        repository_identity=str(git_repository), source_baseline_id=baseline.id,
+        source_revision=baseline.repository_revision,
+    ))
+    spine = runtime.create_initial_runtime_spine(InitialRunRequest(
+        intent_ref=f"work:{shared_work_id}", goal="Both outputs",
+        production_horizon=ProductionHorizon.DOCUMENTATION,
+        initial_work_unit_objective="Produce both outputs",
+        completion_contract=CompletionContract(
+            required_outputs=tuple(item.path for item in targets),
+            required_changes=tuple(item.path for item in targets),
+            verification_obligations=("targeted test",), production_plan=plan,
+        ),
+    ))
+    with postgres_database.unit_of_work() as uow:
+        units = RuntimeStore(uow.session).work_units_for_plan(spine.plan_revision.id)
+    roots = tuple(item for item in units if item.node_id in {"pwu:1", "pwu:2"})
+    assert len(roots) == 2 and {item.source_baseline_id for item in roots} == {baseline.id}
+    admissions = []
+    service = NativeExecutorRuntimeService(postgres_database)
+    for unit in roots:
+        attempt = runtime.create_initial_attempt(unit.id)
+        admissions.append(_admission(
+            postgres_database, git_repository,
+            spine_attempt=(spine.model_copy(update={"work_unit": unit}), attempt),
+            work_id=shared_work_id,
+        ))
+    for admission in admissions:
+        service.admit(admission)
+    first = service.allocate(_offer())
+    assert first is not None
+    service.activate_allocation(first)
+    second_offer = _offer().model_copy(update={"worker_id": "worker:parallel-two"})
+    second = service.allocate(second_offer)
+    assert second is not None
+    service.activate_allocation(second)
+    assert first.allocation.pwu_id != second.allocation.pwu_id
+    assert first.queue_entry.work_id == second.queue_entry.work_id == shared_work_id
+    assert admissions[0].binding.source_vector.digest == admissions[1].binding.source_vector.digest
 
 
 def test_retryable_provider_failure_stops_at_adaptive_small_task_budget(

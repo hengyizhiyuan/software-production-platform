@@ -39,6 +39,7 @@ from spg.api.dto import (
     RuntimeActivationResponse,
     SteeringPlanResponse,
     WorkRefineRequest,
+    WorkReplanRequest,
     WorkResponse,
     WorkResultResponse,
     WorkSubmitRequest,
@@ -97,6 +98,7 @@ from spg.domain.native_execution import (
     NativeExecutionAdmission,
     NativeExecutionError,
 )
+from spg.domain.refinement_contract import RefinementClass
 from spg.domain.native_vector import (
     CandidateVectorAuthorizationRequest,
     CandidateVectorSealRequest,
@@ -682,6 +684,41 @@ def create_http_application(
             raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
         return InteractionTurnResponse.from_turn(turn)
 
+    @api.get("/api/interactions/{interaction_id}/turns/{turn_id}/external-evidence")
+    def get_external_evidence(interaction_id: UUID, turn_id: UUID) -> dict[str, object]:
+        """Expose the exact stored public-source evidence and bounded search state."""
+
+        service = required_interaction_service()
+        turn = service.get_turn(turn_id)
+        if turn.interaction_id != interaction_id:
+            raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
+        observed = service.response_events(turn_id)
+        evidence: dict[str, dict] = {}
+        state = "NOT_REQUESTED"
+        metrics = None
+        failures = []
+        for event in observed:
+            if event.event_type.value == "SEARCH_STARTED":
+                state = "IN_PROGRESS"
+            elif event.event_type.value == "SEARCH_EVIDENCE":
+                item = event.metadata
+                if isinstance(item.get("evidence_id"), str):
+                    evidence[item["evidence_id"]] = item
+            elif event.event_type.value == "SEARCH_FAILED":
+                failures.append(event.metadata)
+            elif event.event_type.value == "SEARCH_COMPLETED":
+                metrics = event.metadata.get("metrics")
+                state = (
+                    "PARTIAL" if evidence and failures else
+                    "COMPLETED" if evidence else
+                    "BLOCKED" if any(item.get("category") == "CREDENTIAL_REQUIRED" for item in failures)
+                    else "FAILED"
+                )
+        if state == "IN_PROGRESS" and turn.status.value == "FAILED":
+            state = "FAILED"
+        return {"state": state, "evidence": list(evidence.values()),
+                "metrics": metrics, "failures": failures}
+
     @api.post(
         "/api/interactions/{interaction_id}/turns/{turn_id}/retry",
         response_model=InteractionTurnResponse,
@@ -760,6 +797,10 @@ def create_http_application(
                     "TURN_COMPLETED": "message.completed",
                     "TURN_FAILED": "turn.failed",
                     "TURN_RECOVERY_STARTED": "turn.recovery.started",
+                    "SEARCH_STARTED": "search.started",
+                    "SEARCH_EVIDENCE": "search.evidence",
+                    "SEARCH_FAILED": "search.failed",
+                    "SEARCH_COMPLETED": "search.completed",
                 }
                 while True:
                     if await request.is_disconnected():
@@ -1114,11 +1155,13 @@ def create_http_application(
         failure_family: str | None = None,
         component: str | None = None,
         result: str | None = None,
+        refinement_class: RefinementClass | None = None,
     ) -> dict:
         with selected_database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
             records = store.list_self_refine_events(
                 failure_family=failure_family, component=component, result=result,
+                refinement_class=refinement_class,
             )
             metrics = store.self_refine_metrics()
         return {
@@ -1511,6 +1554,12 @@ def create_http_application(
     @api.post("/api/works/{work_id}/advance", response_model=WorkResponse)
     def advance_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.advance_work(work_id))
+
+    @api.post("/api/works/{work_id}/replan", response_model=WorkResponse)
+    def replan_work(work_id: UUID, request: WorkReplanRequest) -> WorkResponse:
+        return work_response(work_service.replan_work(
+            work_id, request.plan, reason=request.reason,
+        ))
 
     @api.post("/api/works/{work_id}/retry-production", response_model=WorkResponse)
     def retry_failed_production(

@@ -7,6 +7,7 @@ import json
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.preparation import completion_contract_fingerprint
+from spg.application.multi_pwu_lineage import completed_graph
 from spg.domain.completion import CompletionEvaluationOutcome, CompletionEvaluationRecord
 from spg.domain.execution import (
     ExecutionDispatchRecord,
@@ -52,6 +53,7 @@ class _CandidateBasis:
     plan: PlanRevisionRecord
     work_unit: WorkUnitRecord
     source_baseline: SnapshotRecord
+    pwu_input_baseline: SnapshotRecord
     pointer: BaselinePointerRecord
     completion: CompletionEvaluationRecord
     proposed_snapshot: ProposedRepositorySnapshotRecord
@@ -111,15 +113,18 @@ class CandidateGovernanceService:
                     "source_baseline_id": basis.source_baseline.id,
                     "repository_identity": basis.proposed_snapshot.repository_identity,
                     "target_authoritative_ref": basis.proposed_snapshot.repository_ref,
-                    "expected_source_repository_revision": (
-                        basis.proposed_snapshot.authoritative_ref_revision
-                    ),
+                    "expected_source_repository_revision": basis.source_baseline.repository_revision,
                     "proposed_snapshot_id": basis.proposed_snapshot.id,
                     "proposed_commit_identity": (
                         basis.proposed_snapshot.proposed_commit_identity
                     ),
                     "proposed_tree_identity": basis.proposed_snapshot.tree_identity,
-                    "satisfied_work_unit_ids": [str(basis.work_unit.id)],
+                    "satisfied_work_unit_ids": [
+                        str(item.id) for item in (
+                            completed_graph(store, basis.run, basis.plan, basis.proposed_snapshot)[0]
+                            if basis.plan.graph is not None else (basis.work_unit,)
+                        )
+                    ],
                     "completion_evaluation_ids": [str(basis.completion.id)],
                     "work_product_reference_ids": [
                         str(item.id) for item in basis.work_products
@@ -287,11 +292,12 @@ class CandidateGovernanceService:
                 f"Production Admissibility not found: {request.production_admissibility_id}"
             )
         completion = store.completion_evaluation(proposed.completion_evaluation_id)
-        pointer = store.current_pointer(source_baseline_id=proposed.source_baseline_id, for_update=True)
         work_unit = store.work_unit(proposed.work_unit_id, for_update=True)
         run = store.run(proposed.production_run_id, for_update=True)
         plan = store.plan_revision(proposed.plan_revision_id)
-        source_baseline = store.snapshot(proposed.source_baseline_id)
+        pwu_input_baseline = store.snapshot(proposed.source_baseline_id)
+        source_baseline = store.snapshot(run.source_baseline_id) if run is not None else None
+        pointer = store.current_pointer(source_baseline_id=run.source_baseline_id, for_update=True) if run is not None else None
         observation = store.repository_observation_by_id(
             proposed.repository_observation_id
         )
@@ -303,6 +309,7 @@ class CandidateGovernanceService:
                 run,
                 plan,
                 source_baseline,
+                pwu_input_baseline,
                 pointer,
                 observation,
             )
@@ -327,6 +334,11 @@ class CandidateGovernanceService:
                 )
             verifications.append(record)
 
+        graph_units = (
+            completed_graph(store, run, plan, proposed)[0]
+            if plan.graph is not None else (work_unit,)
+        )
+
         fingerprint = cls._candidate_fingerprint(
             run=run,
             plan=plan,
@@ -337,12 +349,14 @@ class CandidateGovernanceService:
             work_products=work_products,
             verifications=tuple(verifications),
             admissibility=admissibility,
+            graph_units=graph_units,
         )
         return _CandidateBasis(
             run=run,
             plan=plan,
             work_unit=work_unit,
             source_baseline=source_baseline,
+            pwu_input_baseline=pwu_input_baseline,
             pointer=pointer,
             completion=completion,
             proposed_snapshot=proposed,
@@ -386,7 +400,7 @@ class CandidateGovernanceService:
             or basis.plan.source_baseline_id != basis.source_baseline.id
             or basis.work_unit.production_run_id != basis.run.id
             or basis.work_unit.plan_revision_id != basis.plan.id
-            or basis.work_unit.source_baseline_id != basis.source_baseline.id
+            or basis.work_unit.source_baseline_id != basis.pwu_input_baseline.id
             or basis.work_unit.current_execution_generation != basis.completion.generation
         ):
             raise RuntimeInvariantViolation("Candidate production lineage is stale")
@@ -398,14 +412,14 @@ class CandidateGovernanceService:
             proposed.production_run_id != basis.run.id
             or proposed.work_unit_id != basis.work_unit.id
             or proposed.plan_revision_id != basis.plan.id
-            or proposed.source_baseline_id != basis.source_baseline.id
+            or proposed.source_baseline_id != basis.pwu_input_baseline.id
             or proposed.completion_evaluation_id != completion.id
             or proposed.repository_observation_id != observation.id
             or proposed.generation != completion.generation
             or completion.production_run_id != basis.run.id
             or completion.work_unit_id != basis.work_unit.id
             or completion.plan_revision_id != basis.plan.id
-            or completion.source_baseline_id != basis.source_baseline.id
+            or completion.source_baseline_id != basis.pwu_input_baseline.id
             or completion.repository_observation_id != observation.id
             or completion.repository_observation_fingerprint
             != observation.observation_fingerprint
@@ -424,7 +438,7 @@ class CandidateGovernanceService:
             admissibility.production_run_id != basis.run.id
             or admissibility.work_unit_id != basis.work_unit.id
             or admissibility.plan_revision_id != basis.plan.id
-            or admissibility.source_baseline_id != basis.source_baseline.id
+            or admissibility.source_baseline_id != basis.pwu_input_baseline.id
             or admissibility.completion_evaluation_id != completion.id
             or admissibility.proposed_snapshot_id != proposed.id
         ):
@@ -466,7 +480,7 @@ class CandidateGovernanceService:
                 or record.tree_identity != proposed.tree_identity
                 or record.completion_evaluation_id != completion.id
                 or record.plan_revision_id != basis.plan.id
-                or record.source_baseline_id != basis.source_baseline.id
+                or record.source_baseline_id != basis.pwu_input_baseline.id
                 or record.work_unit_id != basis.work_unit.id
             ):
                 raise RuntimeInvariantViolation(
@@ -485,6 +499,7 @@ class CandidateGovernanceService:
         work_products: tuple[WorkProductReferenceRecord, ...],
         verifications: tuple[VerificationRecord, ...],
         admissibility: ProductionAdmissibilityRecord,
+        graph_units: tuple[WorkUnitRecord, ...],
     ) -> str:
         return _fingerprint(
             {
@@ -510,7 +525,11 @@ class CandidateGovernanceService:
                     "commit": proposed.proposed_commit_identity,
                     "tree": proposed.tree_identity,
                 },
-                "satisfied_work_unit_ids": [str(work_unit.id)],
+                "satisfied_work_unit_ids": [str(item.id) for item in graph_units],
+                "verified_graph_outputs": [
+                    [str(item.id), str(item.source_baseline_id), str(item.verified_output_baseline_id)]
+                    for item in graph_units
+                ] if plan.graph is not None else [],
                 "completion_evaluations": [
                     {
                         "id": str(completion.id),

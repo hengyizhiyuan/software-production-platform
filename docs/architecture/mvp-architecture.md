@@ -1,5 +1,8 @@
 # MVP Architecture
 
+> Historical MVP architecture baseline. The current Production Plan can contain
+> multiple governed PWUs; see [versioned multi-PWU production](watt-ai-native-software-production-architecture.md#versioned-multi-pwu-production).
+
 The current SPG Lite domain objects and logical capability contracts are consolidated in [SPG Lite Domain Model and Contract Boundary Baseline](spg-lite-domain-contract-baseline.md). That baseline guides semantic alignment; it does not add MVP modules, APIs, schemas, or integrations.
 
 This document records the intended MVP architecture. It is an architecture baseline, not a runtime implementation specification.
@@ -48,8 +51,9 @@ attached to Work.
 
 A conceptual Plan may span a long-lived Work and repeatedly choose the next
 appropriate refinement, design, Human-decision, or governed-production step
-from current Reality. The current PLAN-1B single-PWU proposal implements only a
-narrow subset. Reality-driven Plan Steering remains a material core capability
+from current Reality. The historical PLAN-1B single-PWU proposal implemented a
+narrow subset; current governed production may use a versioned multi-PWU DAG.
+Reality-driven Plan Steering remains a material core capability
 and is **MVP CLOSED / PASS**: persisted Steering truth, governed semantic
 DESIGN/REFINE, automatic progression, the authority-checked SPG bridge,
 independent Verification, exact Human Candidate Authorization, Runtime Commit,

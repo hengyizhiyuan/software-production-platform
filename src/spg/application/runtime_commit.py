@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
+from spg.application.multi_pwu_lineage import completed_graph
 from spg.domain.completion import CompletionEvaluationOutcome
 from spg.domain.governance import (
     BaselineCandidateRecord,
@@ -148,6 +149,7 @@ class RuntimeCommitService:
                     "repository_identity": candidate.repository_identity,
                     "repository_ref": candidate.target_authoritative_ref,
                     "repository_revision": candidate.proposed_commit_identity,
+                    "repository_tree_identity": candidate.proposed_tree_identity,
                     "source_baseline_id": candidate.source_baseline_id,
                     "created_at": timestamp,
                 }
@@ -303,6 +305,12 @@ class RuntimeCommitService:
             for item in (pointer, source_baseline, run, plan, proposed, admissibility)
         ):
             raise RuntimeInvariantViolation("Runtime Commit production lineage is incomplete")
+        final_input_id = candidate.source_baseline_id
+        if plan.graph is not None:
+            graph_units, final_input = completed_graph(store, run, plan, proposed)
+            final_input_id = final_input.id
+            if set(candidate.satisfied_work_unit_ids) != {item.id for item in graph_units}:
+                raise RuntimeInvariantViolation("Candidate omits verified graph PWUs")
         if (
             source_baseline.condition is not SnapshotCondition.TRUSTED
             or source_baseline.id != candidate.source_baseline_id
@@ -316,7 +324,7 @@ class RuntimeCommitService:
             or plan.source_baseline_id != candidate.source_baseline_id
             or proposed.production_run_id != candidate.production_run_id
             or proposed.plan_revision_id != candidate.plan_revision_id
-            or proposed.source_baseline_id != candidate.source_baseline_id
+            or proposed.source_baseline_id != final_input_id
             or proposed.repository_identity != candidate.repository_identity
             or proposed.repository_ref != candidate.target_authoritative_ref
             or proposed.authoritative_ref_revision
@@ -333,7 +341,7 @@ class RuntimeCommitService:
             is not ProductionAdmissibilityOutcome.ADMISSIBLE
             or admissibility.production_run_id != candidate.production_run_id
             or admissibility.plan_revision_id != candidate.plan_revision_id
-            or admissibility.source_baseline_id != candidate.source_baseline_id
+            or admissibility.source_baseline_id != final_input_id
             or admissibility.proposed_snapshot_id != candidate.proposed_snapshot_id
             or admissibility.completion_evaluation_id
             not in candidate.completion_evaluation_ids
@@ -344,9 +352,9 @@ class RuntimeCommitService:
                 "Runtime Commit Candidate production basis is stale or inconsistent"
             )
 
-        self._require_satisfied_work_units(store, candidate)
-        self._require_completion_and_work_products(store, candidate, proposed)
-        self._require_verification(store, candidate)
+        self._require_satisfied_work_units(store, candidate, multi=plan.graph is not None)
+        self._require_completion_and_work_products(store, candidate, proposed, final_input_id)
+        self._require_verification(store, candidate, final_input_id)
 
         observation = store.repository_observation_by_id(
             proposed.repository_observation_id
@@ -360,8 +368,8 @@ class RuntimeCommitService:
             observation is None
             or dispatch is None
             or observation.repository_identity != candidate.repository_identity
-            or observation.source_baseline_id != candidate.source_baseline_id
-            or dispatch.source_baseline_id != candidate.source_baseline_id
+            or observation.source_baseline_id != final_input_id
+            or dispatch.source_baseline_id != final_input_id
             or dispatch.workspace.repository_identity != candidate.repository_identity
         ):
             raise RuntimeInvariantViolation(
@@ -473,6 +481,7 @@ class RuntimeCommitService:
     def _require_satisfied_work_units(
         store: RuntimeStore,
         candidate: BaselineCandidateRecord,
+        *, multi: bool = False,
     ) -> None:
         if not candidate.satisfied_work_unit_ids:
             raise RuntimeInvariantViolation("Runtime Commit requires SATISFIED PWUs")
@@ -483,7 +492,8 @@ class RuntimeCommitService:
                 or work_unit.condition is not WorkUnitCondition.SATISFIED
                 or work_unit.production_run_id != candidate.production_run_id
                 or work_unit.plan_revision_id != candidate.plan_revision_id
-                or work_unit.source_baseline_id != candidate.source_baseline_id
+                or (not multi and work_unit.source_baseline_id != candidate.source_baseline_id)
+                or (multi and work_unit.verified_output_baseline_id is None)
             ):
                 raise RuntimeInvariantViolation(
                     "Runtime Commit requires exact current SATISFIED PWU lineage"
@@ -494,6 +504,7 @@ class RuntimeCommitService:
         store: RuntimeStore,
         candidate: BaselineCandidateRecord,
         proposed,
+        final_input_id: UUID,
     ) -> None:
         if not candidate.completion_evaluation_ids:
             raise RuntimeInvariantViolation(
@@ -508,7 +519,7 @@ class RuntimeCommitService:
                 or evaluation.production_run_id != candidate.production_run_id
                 or evaluation.work_unit_id not in candidate.satisfied_work_unit_ids
                 or evaluation.plan_revision_id != candidate.plan_revision_id
-                or evaluation.source_baseline_id != candidate.source_baseline_id
+                or evaluation.source_baseline_id != final_input_id
                 or evaluation.repository_observation_id
                 != proposed.repository_observation_id
             ):
@@ -529,7 +540,7 @@ class RuntimeCommitService:
                 item.production_run_id != candidate.production_run_id
                 or item.work_unit_id not in candidate.satisfied_work_unit_ids
                 or item.plan_revision_id != candidate.plan_revision_id
-                or item.source_baseline_id != candidate.source_baseline_id
+                or item.source_baseline_id != final_input_id
                 for item in work_products
             )
         ):
@@ -541,6 +552,7 @@ class RuntimeCommitService:
     def _require_verification(
         store: RuntimeStore,
         candidate: BaselineCandidateRecord,
+        final_input_id: UUID,
     ) -> None:
         if not candidate.verification_record_ids:
             raise RuntimeInvariantViolation(
@@ -555,7 +567,7 @@ class RuntimeCommitService:
                 or verification.work_unit_id
                 not in candidate.satisfied_work_unit_ids
                 or verification.plan_revision_id != candidate.plan_revision_id
-                or verification.source_baseline_id != candidate.source_baseline_id
+                or verification.source_baseline_id != final_input_id
                 or verification.completion_evaluation_id
                 not in candidate.completion_evaluation_ids
                 or verification.proposed_snapshot_id

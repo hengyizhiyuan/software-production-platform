@@ -156,7 +156,13 @@ class ProductionOrchestrator:
         """Drive fresh Reality through one legal transition at a time."""
 
         transitions = 0
-        while transitions < self.max_automatic_transitions:
+        initial = self.work_service.get_work(work_id)
+        pwu_count = len((initial.production_plan_runtime or {}).get("pwus", ()))
+        transition_limit = max(
+            self.max_automatic_transitions,
+            self.max_automatic_transitions * pwu_count,
+        )
+        while transitions < transition_limit:
             if self._stopping.is_set():
                 return OrchestrationOutcome(
                     work_id,

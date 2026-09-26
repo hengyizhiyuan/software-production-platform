@@ -569,6 +569,37 @@ def test_pre_work_progression_is_reconstructable_and_never_creates_work(
     assert capability.calls == 2
 
 
+def test_wic_structured_candidate_refinement_persists_on_assessment_without_turn(
+    postgres_database: Database,
+) -> None:
+    class StructuredRepairCapability(_ProgressiveCapability):
+        last_pipeline_evidence = {"semantic_structured_repair_count": 1}
+
+    service = WorkInteractionService(
+        postgres_database, capability=StructuredRepairCapability(),
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_SHADOW,
+    )
+    interaction = service.create_interaction(human_identity="human:refinement")
+    result = service.append_and_assess(
+        interaction.id, "I am exploring better execution visibility.",
+        human_identity="human:refinement",
+    )
+    observation = result.latest_assessment.refinement_observation
+    assert observation == {
+        "semantic_version": 2,
+        "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "signal_kind": "SCHEMA_INVALID",
+        "component": "wic/semantic-provider",
+        "attempt_count": 2,
+        "converged": True,
+        "human_escalation": False,
+    }
+    restarted = WorkInteractionService(
+        postgres_database, capability=StructuredRepairCapability(),
+    )
+    assert restarted.get_shared_understanding(interaction.id).latest_assessment.refinement_observation == observation
+
+
 def test_design_intent_correction_reframes_schema_and_reconstructs_history(
     postgres_database: Database,
 ) -> None:
@@ -1284,6 +1315,7 @@ def test_failed_turn_retries_preserved_input_and_retains_diagnostic_evidence(
     assert failed.status is InteractionTurnStatus.FAILED
     assert failed.failure_code == "SCHEMA_VIOLATION"
     failure_event = service.response_events(submitted.id)[-1]
+    assert failed.refinement_observation == failure_event.metadata["refinement_observation"]
     assert failure_event.event_type is WicResponseEventType.TURN_FAILED
     assert failure_event.metadata == {
         "failure_class": "SCHEMA_VIOLATION",
@@ -1291,6 +1323,15 @@ def test_failed_turn_retries_preserved_input_and_retains_diagnostic_evidence(
         "validation_issue": "design_intent_frame.confidence_note:extra_forbidden",
         "request_id": "request-schema-1",
         "repair_attempted": True,
+        "refinement_observation": {
+            "semantic_version": 2,
+            "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+            "signal_kind": "SCHEMA_INVALID",
+            "component": "wic/semantic-provider",
+            "attempt_count": 2,
+            "converged": False,
+            "human_escalation": False,
+        },
         "timestamp": failure_event.metadata["timestamp"],
         "retryable": True,
         "provisional_is_not_final": True,

@@ -295,6 +295,15 @@ class ProductStore:
     def insert_runtime_binding(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(work_runtime_bindings).values(**values))
 
+    def rebind_runtime_plan(self, binding_id: UUID, plan_id: UUID, root_pwu_id: UUID) -> None:
+        result = self.session.execute(
+            update(work_runtime_bindings)
+            .where(work_runtime_bindings.c.id == binding_id)
+            .values(plan_revision_id=plan_id, work_unit_id=root_pwu_id)
+        )
+        if result.rowcount != 1:
+            raise LookupError(f"Production cycle binding not found: {binding_id}")
+
     def runtime_binding(self, work_id: UUID) -> WorkRuntimeBindingRecord | None:
         row = self.session.execute(
             select(work_runtime_bindings)
