@@ -3212,6 +3212,11 @@ class WorkInteractionService:
             current_steering_step_type=(
                 None if current_step is None else current_step.type.value
             ),
+            pending_human_question=(latest_decision.reason if latest_decision is not None
+                and latest_decision.human_required and current_step is not None
+                and latest_decision.current_step_id == current_step.id
+                and current_step.type in {SteeringStepType.DESIGN, SteeringStepType.REFINE}
+                else None),
             active_production_binding_id=(
                 None if active_binding is None else active_binding.id
             ),
@@ -3362,6 +3367,16 @@ class WorkInteractionService:
             )
             and not _nonmutating_question(latest_human_input)
         )
+        governed_question_answer = bool(
+            getattr(active, "pending_human_question", None)
+            and latest_human_input and new_requests
+            and not _nonmutating_question(latest_human_input)
+            and candidate.turn_intent is ConversationTurnIntent.HUMAN_DECISION
+            and any(meaning.kind is InterpretationMeaningKind.DECISION_INPUT
+                and latest_human_record_id in meaning.source_record_ids
+                for meaning in candidate.meanings)
+        )
+        explicit_current_work_change = explicit_current_work_change or governed_question_answer
         if candidate.response_intent is not None and candidate.response_intent.interaction_mode in {
             InteractionMode.EXPLORE, InteractionMode.ANALYZE, InteractionMode.DESIGN,
             InteractionMode.DECIDE, InteractionMode.ANSWER, InteractionMode.STATUS,

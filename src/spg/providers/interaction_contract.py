@@ -413,8 +413,14 @@ class InteractionSemanticContract:
             "semantics only and do not write the Human-facing response. "
         )
         active_work_instruction = (
-            "When active_work_context exists, preserve its governed Motive, outcome, "
-            "context, constraints, and requests unless the latest input actually proposes "
+            "When active_work_context exists, its scope and authority remain governed. "
+            "If pending_human_question is present and the latest Human input "
+            "answers that question with a definite choice, classify HUMAN_DECISION, include a "
+            "DECISION_INPUT meaning grounded in that latest record, and retain the verbatim answer "
+            "in current_requests. This answer belongs to the current Work; an ANSWER or DECIDE "
+            "response posture must not turn it into a side question. An unrelated comment, request "
+            "for explanation or unresolved answer remains conversation and grants no authority. "
+            "Preserve the governed Motive, outcome, context, constraints, and requests unless the latest input actually proposes "
             "change. Classify focus and production impact without silently rewriting Work "
             "or injecting input into an active cycle. Regardless of satisfaction state, "
             "an explicit addition, removal or correction of a constraint applying to the "

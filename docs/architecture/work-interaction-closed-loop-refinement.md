@@ -731,3 +731,23 @@ Candidate. Restart reconciliation re-publishes a persisted final failure without
 creating another refinement event for the same Preview evidence. Runtime loss
 uses the same failure boundary. Neither local runtime recovery nor automation
 constitutes Human Acceptance or Delivery Authorization.
+
+### Evidence and governed question continuation
+
+Semantic proposal context includes observed source for a small repository within
+the existing byte limits. Scope proofs bind exact excerpts to observed source or
+raw Human authority records; advisory outcome summaries are separately labelled
+and cannot supply Human authority. Preview and delivery acceptance obligations do
+not create new required source files. A semantic owner exhausting its validation
+repair budget propagates that terminal outcome to Work convergence and diagnostic
+attention, including invalid structured output after a bounded repair.
+
+When Steering asks a genuine product or architecture question, WIC receives that
+pending question. A source-bound Human decision answering it can revise the current
+Work and schedule ordinary Steering automatically. The decision must match the
+current revision and question; side questions and stale answers cannot trigger
+this transition. Candidate integration and delivery authorization remain separate.
+
+Preview state compare-and-swap uses the persisted JSON contract. Transport log
+tuples round-trip as JSON arrays; that representation change is not a concurrent
+state mutation. Actual lineage or state differences still reject stale updates.

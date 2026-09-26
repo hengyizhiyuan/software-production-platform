@@ -3325,6 +3325,797 @@
         "final_outcome": "READY"
       },
       "preview_failure": null
+    },
+    {
+      "case": "GC-EX-05",
+      "trial": 3,
+      "signal": "CONTRACT_MISMATCH / MISSING_CONVERGENCE_WIRING",
+      "cause": "Scope validator misclassified Preview lifecycle acceptance as missing repository file scope; the second ValueError was persisted as ESCALATED but not propagated into Work convergence.",
+      "architecture_owner": "Semantic scope validator; Steering same-basis owner budget",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": "f148f055-8174-5c1f-b543-81b700cb255b",
+      "refinement_events": [
+        {
+          "id": "09425b26-26d9-45f2-96b2-9961d82efe1d",
+          "work_id": "f148f055-8174-5c1f-b543-81b700cb255b",
+          "operation_id": "01e89b5e-2f05-43d8-9d6b-17d0cc9cfe73",
+          "created_at": "2026-09-26T20:11:58.293530Z",
+          "failure_family": "CONTRACT_MISMATCH",
+          "failure_signature": "6b80fbbf9132dce89c7355f43ca1108a6745310040eb47efe2810271ae889d99",
+          "semantic_version": 2,
+          "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+          "signal_kind": "CONTRACT_MISMATCH",
+          "affected_component": "steering/semantic-step",
+          "expected_reality": {},
+          "observed_reality": {},
+          "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+          "root_cause_classification": "CONTRACT_MISMATCH",
+          "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+          "evidence_references": [
+            "steering-step:01e89b5e-2f05-43d8-9d6b-17d0cc9cfe73"
+          ],
+          "repairability": "AUTONOMOUSLY_REPAIRABLE",
+          "observation_confidence": "CONFIRMED_FAILURE",
+          "budget_decision": {
+            "bounded": true,
+            "attempt_count": 2,
+            "human_escalated": false
+          },
+          "diagnostic_evidence": {
+            "basis_fingerprint": "c0fb5dcecd40eadd26ce6792880742625cef4ba114685fd117ff94b39b901122",
+            "second_error_type": "ValueError",
+            "first_validation_feedback": "Task Contract candidate failed validation: INTENT_COMPLETENESS_MISMATCH: 可查看的预览: the explicit preview acceptance clause has no repository file candidate in candidate_paths and cannot be satisfied by inventing a new source file; it must be fulfilled by the preview lifecycle outside repository target validation."
+          },
+          "final_result": "ESCALATED",
+          "work_resume_result": "NOT_RESUMED",
+          "extra_elapsed_seconds": 67,
+          "model_token_usage": {
+            "total_tokens": 22282
+          },
+          "compute_overhead": {},
+          "known_failure_match": false,
+          "platform_improvement_candidate_ref": "refinement-signature:6b80fbbf9132dce89c7355f43ca1108a6745310040eb47efe2810271ae889d99",
+          "status": "MITIGATED",
+          "updated_at": "2026-09-26T20:11:58.293530Z"
+        }
+      ],
+      "economics": {
+        "work_id": "f148f055-8174-5c1f-b543-81b700cb255b",
+        "product_id": "de89f6c1-b4a7-443e-9b67-1ccde0c52485",
+        "pwu_count": 0,
+        "join_count": 0,
+        "pwu": [],
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "amount": null
+        },
+        "wall_elapsed_seconds": null,
+        "execution_seconds": 0,
+        "queue_wait_seconds": 0,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": null,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "self_refine_event_count": 0,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {},
+        "final_outcome": "READY"
+      }
+    },
+    {
+      "case": "GC-EX-09",
+      "trial": 1,
+      "signal": "EXPLICIT_PRODUCTION_REQUEST_NOT_ADMITTED",
+      "cause": "Chinese bounded display command was absent from action grammar.",
+      "architecture_owner": "WIC production intent routing",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": null,
+      "attention": null,
+      "economics": null
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 1,
+      "signal": "REPOSITORY_EVIDENCE_NOT_ACQUIRED_BEFORE_HUMAN_QUESTION",
+      "cause": "Semantic proposal requested Human build output despite a small, locally acquired repository containing the actual syntax error.",
+      "architecture_owner": "Semantic evidence acquisition",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": "acc76108-037a-54f4-a14d-9caab7900dbe",
+      "attention": [
+        {
+          "attention_id": "b1a03731-e3e2-59da-9072-231756b64ebd",
+          "work_id": "acc76108-037a-54f4-a14d-9caab7900dbe",
+          "kind": "STEERING_DECISION_REQUIRED",
+          "decision": "Answer the current Work question",
+          "reason": "What is the exact current build error (the failing command, its output, and the failing file and line) for the repository at http://qualified-git:8080/compiler-error.git?",
+          "available_actions": [],
+          "recommended_action": null,
+          "governed_subject_ref": "steering-decision:a0e58677-810a-4fbc-bc61-614edf248918",
+          "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+          "recommendation": "Provide the build error output (the failing command and its stderr) and/or admit the full repository contents for the affected build and entry files so an exact bounded fix can be designed and reviewed.",
+          "conversation_prompt": "What is the exact current build error (the failing command, its output, and the failing file and line) for the repository at http://qualified-git:8080/compiler-error.git?",
+          "alternatives": [],
+          "trade_offs": [],
+          "expected_impact": "The decision will govern subsequent design and production.",
+          "reality_refs": [
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "03981d54-edc3-5b13-86a1-262b95e6b9dd"
+            },
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "ad74c0d2-b544-4a0d-8bb4-b1221306df8b"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "11fe259d-2128-4331-b1fc-a413e517f7f8"
+            },
+            {
+              "kind": "TRUSTED_BASELINE",
+              "identity": "f8e518b2-3a72-4df4-beff-c3f905cb1f1d"
+            },
+            {
+              "kind": "WORK",
+              "identity": "acc76108-037a-54f4-a14d-9caab7900dbe"
+            },
+            {
+              "kind": "WORK_REALITY_REVISION",
+              "identity": "145cc526-5981-5c09-9f42-ea411db8f553"
+            }
+          ],
+          "steering_plan_revision_id": "061fdad5-b0af-4d44-8600-3b68d04e6995",
+          "steering_step_id": "ddc23952-ec98-493f-9bd1-5d9a81a9f0ba",
+          "interaction_id": null,
+          "interaction_assessment_id": null,
+          "expected_work_reality_revision_id": null
+        }
+      ],
+      "economics": {
+        "work_id": "acc76108-037a-54f4-a14d-9caab7900dbe",
+        "product_id": "713f1f7d-4ea7-4c33-a0df-78185ec23d3e",
+        "pwu_count": 0,
+        "join_count": 0,
+        "pwu": [],
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "amount": null
+        },
+        "wall_elapsed_seconds": null,
+        "execution_seconds": 0,
+        "queue_wait_seconds": 0,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": null,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "self_refine_event_count": 0,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {},
+        "final_outcome": "READY"
+      }
+    },
+    {
+      "case": "GC-IP-05",
+      "trial": 1,
+      "signal": "ALREADY_DECIDED_HUMAN_FACT_REASKED / DESIGN_SCHEMA_MISMATCH",
+      "cause": "The finite requested website behavior was routed into existing-product feedback analysis and asked for observed complaints instead of building feedback submission.",
+      "architecture_owner": "Guided Design eligibility",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": "9f8749a4-bd4b-52ab-99ee-ca1d23bf460c",
+      "attention": [
+        {
+          "attention_id": "7da54f2e-803f-5568-a248-f1a887b75336",
+          "work_id": "9f8749a4-bd4b-52ab-99ee-ca1d23bf460c",
+          "kind": "STEERING_DECISION_REQUIRED",
+          "decision": "Answer the current Work question",
+          "reason": "What observed user feedback (from real end users, support channels, or the Human's own observations) should be connected to the current Reality for the user-feedback issue on business-app at revision f629ed74d0afbcb8b5974e546c007eb5bf36663d?",
+          "available_actions": [],
+          "recommended_action": null,
+          "governed_subject_ref": "steering-decision:fd505a44-51b0-45fc-9534-ac5df0f10d7e",
+          "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+          "recommendation": "Supply the observed user feedback for the business-app site (or identify which feedback sources/channels may be treated as evidence for this evolution), and confirm whether the owner's explicit request alone is admissible as the user-feedback basis. If no observed feedback currently exists, confirm that the evolution should instead proceed by first instrumenting feedback capture with no pre-existing observed feedback assumed.",
+          "conversation_prompt": "What observed user feedback (from real end users, support channels, or the Human's own observations) should be connected to the current Reality for the user-feedback issue on business-app at revision f629ed74d0afbcb8b5974e546c007eb5bf36663d?",
+          "alternatives": [],
+          "trade_offs": [],
+          "expected_impact": "The decision will govern subsequent design and production.",
+          "reality_refs": [
+            {
+              "kind": "DESIGN_AGENDA_REVISION",
+              "identity": "19aa103c-80c2-4b64-9d67-e22d2df530da"
+            },
+            {
+              "kind": "DESIGN_PROCESS",
+              "identity": "2956c298-2c73-50f2-8ab7-d3336583c48d"
+            },
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "1b213866-3520-4737-b1e5-62bd8a931793"
+            },
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "f5c66c81-3ff7-5fca-9c46-c8e5a62ed149"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "47e6bcf4-3f29-4eaa-8000-cc8c5c104d39"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "927cef43-e43e-411a-9b1a-b253ec796f74"
+            },
+            {
+              "kind": "TRUSTED_BASELINE",
+              "identity": "d2b02b8f-296d-4dd2-9049-a1199e02af21"
+            },
+            {
+              "kind": "WORK",
+              "identity": "9f8749a4-bd4b-52ab-99ee-ca1d23bf460c"
+            },
+            {
+              "kind": "WORK_REALITY_REVISION",
+              "identity": "03095051-91d5-5c2e-8919-6e66f730ae1f"
+            }
+          ],
+          "steering_plan_revision_id": "e35728b8-1716-40a3-a73c-c0365f567b4d",
+          "steering_step_id": "7dd8f36e-97a1-4e8a-8624-787cbdd18033",
+          "interaction_id": null,
+          "interaction_assessment_id": null,
+          "expected_work_reality_revision_id": null
+        }
+      ],
+      "economics": {
+        "work_id": "9f8749a4-bd4b-52ab-99ee-ca1d23bf460c",
+        "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+        "pwu_count": 0,
+        "join_count": 0,
+        "pwu": [],
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "amount": null
+        },
+        "wall_elapsed_seconds": null,
+        "execution_seconds": 0,
+        "queue_wait_seconds": 0,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": null,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "self_refine_event_count": 0,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {},
+        "final_outcome": "READY"
+      }
+    },
+    {
+      "case": "GC-EX-08",
+      "trial": 1,
+      "signal": "DESIGN_SCHEMA_MISMATCH / MISSING_CONVERGENCE_WIRING",
+      "cause": "Second scope validation returned malformed JSON after one bounded feedback; terminal ValueError did not publish a Work convergence stop.",
+      "architecture_owner": "Semantic structured output; Steering owner budget",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": "ce8e7da9-bef4-589a-bda6-953c3e0f90c7",
+      "attention": [],
+      "refinement_events": [
+        {
+          "id": "b1f76c29-e457-48f0-ab8d-77a9d21862f9",
+          "work_id": "ce8e7da9-bef4-589a-bda6-953c3e0f90c7",
+          "operation_id": "9d5c6f4b-ed86-4440-8ea1-cb5519621a83",
+          "created_at": "2026-09-26T20:18:33.295866Z",
+          "failure_family": "CONTRACT_MISMATCH",
+          "failure_signature": "51160d42c94df1b348e3160f5af73e65fe075af82434e2ea9cdc8c7f414d61fb",
+          "semantic_version": 2,
+          "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+          "signal_kind": "CONTRACT_MISMATCH",
+          "affected_component": "steering/semantic-step",
+          "expected_reality": {},
+          "observed_reality": {},
+          "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+          "root_cause_classification": "CONTRACT_MISMATCH",
+          "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+          "evidence_references": [
+            "steering-step:9d5c6f4b-ed86-4440-8ea1-cb5519621a83"
+          ],
+          "repairability": "AUTONOMOUSLY_REPAIRABLE",
+          "observation_confidence": "CONFIRMED_FAILURE",
+          "budget_decision": {
+            "bounded": true,
+            "attempt_count": 2,
+            "human_escalated": false
+          },
+          "diagnostic_evidence": {
+            "basis_fingerprint": "b9d417f9fb7eb65f69b419d5212f08c2c166ccaaf24f4e75802086ec691e65a5",
+            "second_error_type": "ValidationError",
+            "first_validation_feedback": "Task Contract candidate failed validation: Scope necessity proof has no exact repository/Human witness"
+          },
+          "final_result": "ESCALATED",
+          "work_resume_result": "NOT_RESUMED",
+          "extra_elapsed_seconds": 317,
+          "model_token_usage": {
+            "total_tokens": 47390
+          },
+          "compute_overhead": {},
+          "known_failure_match": true,
+          "platform_improvement_candidate_ref": "refinement-signature:51160d42c94df1b348e3160f5af73e65fe075af82434e2ea9cdc8c7f414d61fb",
+          "status": "MITIGATED",
+          "updated_at": "2026-09-26T20:18:33.295866Z"
+        }
+      ],
+      "economics": {
+        "work_id": "ce8e7da9-bef4-589a-bda6-953c3e0f90c7",
+        "product_id": "d5c13fe3-d954-4c91-a513-d625a827d171",
+        "pwu_count": 0,
+        "join_count": 0,
+        "pwu": [],
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "amount": null
+        },
+        "wall_elapsed_seconds": null,
+        "execution_seconds": 0,
+        "queue_wait_seconds": 0,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": null,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "self_refine_event_count": 0,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {},
+        "final_outcome": "READY"
+      }
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 3,
+      "signal": "CONTRACT_MISMATCH / MISSING_CONVERGENCE_WIRING",
+      "cause": "Second scope necessity proof lacked a verbatim Human/source witness; advisory summary was presented ambiguously alongside Human authority.",
+      "architecture_owner": "Semantic scope evidence contract; Steering owner budget",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": "b63e3119-99a3-5f47-ae13-47099c74cc44",
+      "attention": [],
+      "refinement_events": [
+        {
+          "id": "19566a85-1d1c-4f9c-a90b-e599e6fae24e",
+          "work_id": "b63e3119-99a3-5f47-ae13-47099c74cc44",
+          "operation_id": "21b5084c-c66d-4d9d-b697-0dcff62a7acd",
+          "created_at": "2026-09-26T20:15:42.004676Z",
+          "failure_family": "CONTRACT_MISMATCH",
+          "failure_signature": "51160d42c94df1b348e3160f5af73e65fe075af82434e2ea9cdc8c7f414d61fb",
+          "semantic_version": 2,
+          "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+          "signal_kind": "CONTRACT_MISMATCH",
+          "affected_component": "steering/semantic-step",
+          "expected_reality": {},
+          "observed_reality": {},
+          "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+          "root_cause_classification": "CONTRACT_MISMATCH",
+          "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+          "evidence_references": [
+            "steering-step:21b5084c-c66d-4d9d-b697-0dcff62a7acd"
+          ],
+          "repairability": "AUTONOMOUSLY_REPAIRABLE",
+          "observation_confidence": "CONFIRMED_FAILURE",
+          "budget_decision": {
+            "bounded": true,
+            "attempt_count": 2,
+            "human_escalated": false
+          },
+          "diagnostic_evidence": {
+            "basis_fingerprint": "97f126fc4f1c4fe385257969cfb87549c17df45451f75fe85a43f97f2bd093d5",
+            "second_error_type": "ValueError",
+            "first_validation_feedback": "Task Contract candidate failed validation: Scope necessity proof has no exact repository/Human witness"
+          },
+          "final_result": "ESCALATED",
+          "work_resume_result": "NOT_RESUMED",
+          "extra_elapsed_seconds": 172,
+          "model_token_usage": {
+            "total_tokens": 38025
+          },
+          "compute_overhead": {},
+          "known_failure_match": false,
+          "platform_improvement_candidate_ref": "refinement-signature:51160d42c94df1b348e3160f5af73e65fe075af82434e2ea9cdc8c7f414d61fb",
+          "status": "MITIGATED",
+          "updated_at": "2026-09-26T20:15:42.004676Z"
+        }
+      ],
+      "economics": {
+        "work_id": "b63e3119-99a3-5f47-ae13-47099c74cc44",
+        "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+        "pwu_count": 0,
+        "join_count": 0,
+        "pwu": [],
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "amount": null
+        },
+        "wall_elapsed_seconds": null,
+        "execution_seconds": 0,
+        "queue_wait_seconds": 0,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": null,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "self_refine_event_count": 0,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {},
+        "final_outcome": "READY"
+      }
+    },
+    {
+      "case": "GC-IP-06",
+      "trial": 1,
+      "signal": "ALREADY_DECIDED_HUMAN_FACT_REASKED / DESIGN_SCHEMA_MISMATCH",
+      "cause": "The selected business overview was routed to broad feedback prioritization instead of the existing bounded implementation flow.",
+      "architecture_owner": "Guided Design eligibility",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": "5ea801c8-482f-5e66-9dd0-eca6f315264d",
+      "attention": [
+        {
+          "attention_id": "9ea7e3aa-ed99-5f2b-8ca5-087aa86bd706",
+          "work_id": "5ea801c8-482f-5e66-9dd0-eca6f315264d",
+          "kind": "STEERING_DECISION_REQUIRED",
+          "decision": "Answer the current Work question",
+          "reason": "Which of the problems visible in current Reality is worth changing first, and why — the Human owner/operator must supply the governed prioritization verdict and its rationale, since this Step's required_output is GOVERNED_HUMAN_DECISION and Watt holds no admitted authority to rank business problems. Candidate problems presented for that verdict: (a) no consolidated operational view across /, /users, /customers, /orders; (b) existing operational data in SQLite already exposed via /api/users, /api/customers, /api/orders but not surfaced as an at-a-glance overview; (c) user `status` and customer name/email already modeled but not leveraged for operational visibility; (d) absence of customer notes, feedback records or CRM workflows — is that a problem in scope, out of scope, or not a problem at all?",
+          "available_actions": [],
+          "recommended_action": null,
+          "governed_subject_ref": "steering-decision:c208e7eb-c9be-45ea-88a9-5926f5219f5b",
+          "steering_reason": "SCOPE_OR_AUTHORITY_EXPANSION",
+          "recommendation": "Request a governed Human decision on problem prioritization from the Human owner/operator. Ratify, in the owner's own words: (1) the ordered list of problems worth changing (candidate set offered: no consolidated operational view; existing SQLite operational data already exposed via /api/users, /api/customers, /api/orders but not surfaced at a glance; unused user `status` and customer name/email for operational visibility; and an explicit in-scope/out-of-scope call on customer notes, feedback records and CRM workflows, which do not exist in the baseline); and (2) the rationale for that order, tying it to the stated desired outcome of seeing operations at a glance. This decision is required because the agenda declares the issue's required_output to be a GOVERNED_HUMAN_DECISION with MATERIAL_HUMAN_DECISION authority relevance, and because the ordering materially determines the scope, cost, sequence and acceptance of every downstream issue (solution-options, impact-assessment, validation, evolution-plan) and of the eventual production proposal. Watt will not author that ranking. No production proposal, artifact, or repository change is formed or authorized by this Step, and the repository URL confers no remote, write, branch, or push authority.",
+          "conversation_prompt": "Which of the problems visible in current Reality is worth changing first, and why — the Human owner/operator must supply the governed prioritization verdict and its rationale, since this Step's required_output is GOVERNED_HUMAN_DECISION and Watt holds no admitted authority to rank business problems. Candidate problems presented for that verdict: (a) no consolidated operational view across /, /users, /customers, /orders; (b) existing operational data in SQLite already exposed via /api/users, /api/customers, /api/orders but not surfaced as an at-a-glance overview; (c) user `status` and customer name/email already modeled but not leveraged for operational visibility; (d) absence of customer notes, feedback records or CRM workflows — is that a problem in scope, out of scope, or not a problem at all?",
+          "alternatives": [],
+          "trade_offs": [],
+          "expected_impact": "No out-of-scope production will occur before the decision.",
+          "reality_refs": [
+            {
+              "kind": "DESIGN_AGENDA_REVISION",
+              "identity": "7a4486c2-6166-4e13-936c-4cea9dae143f"
+            },
+            {
+              "kind": "DESIGN_AGENDA_REVISION",
+              "identity": "d0f06a68-2610-4acb-8dd8-a5b53eb27aae"
+            },
+            {
+              "kind": "DESIGN_PROCESS",
+              "identity": "5dda3e6f-c642-59ae-a2f2-80e2566bbfe7"
+            },
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "7c2c0016-93ae-401f-b14d-181013f211d0"
+            },
+            {
+              "kind": "GOVERNANCE_DECISION",
+              "identity": "f8a9aaab-e5f4-5c9e-87ca-af393bdb22a1"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "1d46dd28-28c3-4be4-8a88-3000bcc029f9"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "6a7151fa-0537-48c8-beeb-ad07e20f0454"
+            },
+            {
+              "kind": "SEMANTIC_RESULT",
+              "identity": "8c93f966-89dc-4f0b-9062-43d30846f3b4"
+            },
+            {
+              "kind": "TRUSTED_BASELINE",
+              "identity": "d2b02b8f-296d-4dd2-9049-a1199e02af21"
+            },
+            {
+              "kind": "WORK",
+              "identity": "5ea801c8-482f-5e66-9dd0-eca6f315264d"
+            },
+            {
+              "kind": "WORK_REALITY_REVISION",
+              "identity": "1b8e1bca-e573-5565-afdc-e9bede69c185"
+            }
+          ],
+          "steering_plan_revision_id": "72bc1319-ab34-4b3d-a261-400c3ae79c9c",
+          "steering_step_id": "0291d7c2-f216-44fe-837f-0a5b2a3e8244",
+          "interaction_id": null,
+          "interaction_assessment_id": null,
+          "expected_work_reality_revision_id": null
+        }
+      ],
+      "refinement_events": [],
+      "economics": {
+        "work_id": "5ea801c8-482f-5e66-9dd0-eca6f315264d",
+        "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+        "pwu_count": 0,
+        "join_count": 0,
+        "pwu": [],
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "amount": null
+        },
+        "wall_elapsed_seconds": null,
+        "execution_seconds": 0,
+        "queue_wait_seconds": 0,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": null,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "self_refine_event_count": 0,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {},
+        "final_outcome": "READY"
+      }
+    },
+    {
+      "case": "GC-IP-03",
+      "trial": 1,
+      "signal": "PREVIEW_NOT_READY / CONTRACT_MISMATCH",
+      "cause": "Docker network-capacity failure cleanup contained tuple evidence; JSON persistence converted it to arrays, and Python object equality rejected the next retry transition as a concurrent update. No Work failure callback was emitted.",
+      "architecture_owner": "Production Environment Candidate Preview persistence CAS contract",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": "9e4272d8-f864-514c-90c0-a7bc22b8475f",
+      "economics": {
+        "work_id": "9e4272d8-f864-514c-90c0-a7bc22b8475f",
+        "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+        "pwu_count": 1,
+        "join_count": 0,
+        "pwu": [
+          {
+            "pwu_id": "1f3ba747-b90e-486f-b780-c02df7180c93",
+            "node_id": null,
+            "run_id": "fb07e7a7-93d4-4bb1-bde4-8bdce745d662",
+            "condition": "SATISFIED",
+            "attempt_count": 1,
+            "outcomes": [
+              "RESULT_READY"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:9a4094ba-f8bd-4b05-b89a-54238379493f"
+            ],
+            "execution_seconds": 145.369104,
+            "duration_observed": true,
+            "queue_wait_seconds": 0.878071,
+            "token_usage": {
+              "input_tokens": 68353,
+              "output_tokens": 34104,
+              "total_tokens": 102457,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 5,
+              "tool_effect": 11
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 68353,
+          "output_tokens": 34104,
+          "total_tokens": 102457,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1,
+          "amount": null
+        },
+        "execution_seconds": 145.369104,
+        "queue_wait_seconds": 0.878071,
+        "wall_elapsed_seconds": 151.70353,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 1,
+        "first_pass_pwu_count": 1,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {
+          "inference_submission": 5,
+          "tool_effect": 11
+        },
+        "final_outcome": "READY"
+      }
+    },
+    {
+      "case": "GC-IP-07",
+      "trial": 1,
+      "signal": "PREVIEW_NOT_READY / CONTRACT_MISMATCH",
+      "cause": "Docker network-capacity failure cleanup contained tuple evidence; JSON persistence converted it to arrays, and Python object equality rejected the next retry transition as a concurrent update. No Work failure callback was emitted.",
+      "architecture_owner": "Production Environment Candidate Preview persistence CAS contract",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": "98edf043-00ec-5df0-9998-5262f4f9cb7f",
+      "economics": {
+        "work_id": "98edf043-00ec-5df0-9998-5262f4f9cb7f",
+        "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+        "pwu_count": 3,
+        "join_count": 1,
+        "pwu": [
+          {
+            "pwu_id": "4c1e13f3-439d-506c-aa7e-0e8fa30860bb",
+            "node_id": "pwu:1",
+            "run_id": "ed007cc2-3f28-4904-b057-9f80035c6617",
+            "condition": "SATISFIED",
+            "attempt_count": 1,
+            "outcomes": [
+              "RESULT_READY"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:83a24787-93d0-41db-9641-4f8b797881e3"
+            ],
+            "execution_seconds": 124.325259,
+            "duration_observed": true,
+            "queue_wait_seconds": 0.373872,
+            "token_usage": {
+              "input_tokens": 74267,
+              "output_tokens": 26307,
+              "total_tokens": 100574,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 5,
+              "tool_effect": 12
+            }
+          },
+          {
+            "pwu_id": "a67b70ad-6c2d-53fa-b2a7-124d4a3c8265",
+            "node_id": "pwu:2",
+            "run_id": "ed007cc2-3f28-4904-b057-9f80035c6617",
+            "condition": "SATISFIED",
+            "attempt_count": 1,
+            "outcomes": [
+              "RESULT_READY"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:6a85bbb1-57c4-4dbb-b4e8-77b928651465"
+            ],
+            "execution_seconds": 59.768225,
+            "duration_observed": true,
+            "queue_wait_seconds": 0.436431,
+            "token_usage": {
+              "input_tokens": 78509,
+              "output_tokens": 12069,
+              "total_tokens": 90578,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 5,
+              "tool_effect": 13
+            }
+          },
+          {
+            "pwu_id": "4919a11f-e58f-5207-b478-94a907f316f8",
+            "node_id": "pwu:join",
+            "run_id": "ed007cc2-3f28-4904-b057-9f80035c6617",
+            "condition": "SATISFIED",
+            "attempt_count": 1,
+            "outcomes": [
+              "RESULT_READY"
+            ],
+            "providers": [
+              "deepseek",
+              "watt-native:16c3c310-d22e-4520-99d9-b0b8d338aca4"
+            ],
+            "execution_seconds": 61.321728,
+            "duration_observed": true,
+            "queue_wait_seconds": 0.838766,
+            "token_usage": {
+              "input_tokens": 56578,
+              "output_tokens": 12488,
+              "total_tokens": 69066,
+              "status": "OBSERVED"
+            },
+            "resource_units": {
+              "inference_submission": 4,
+              "tool_effect": 8
+            }
+          }
+        ],
+        "token_usage": {
+          "input_tokens": 209354,
+          "output_tokens": 50864,
+          "total_tokens": 260218,
+          "status": "OBSERVED"
+        },
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 3,
+          "amount": null
+        },
+        "execution_seconds": 245.415212,
+        "queue_wait_seconds": 1.649069,
+        "wall_elapsed_seconds": 282.216254,
+        "critical_path_seconds": 185.646987,
+        "parallelism_effect_seconds": 0.0,
+        "self_refine_event_count": 2,
+        "first_pass_pwu_count": 3,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 360,
+        "resource_units": {
+          "inference_submission": 14,
+          "tool_effect": 33
+        },
+        "final_outcome": "READY"
+      }
+    },
+    {
+      "case": "GC-IP-04",
+      "trial": 1,
+      "signal": "RESPONSE_REALITY_CONTRADICTION / MISSING_REFINEMENT_WIRING",
+      "cause": "A legitimate Human identity choice was interpreted but ANSWER/DECIDE posture normalized it into a side question; the active Work was never revised or resumed.",
+      "architecture_owner": "WIC active Work question grounding; Production Admission explicit Human governance",
+      "allowed_human_intervention": "Select currently selected user; no source/tool/implementation hint supplied.",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "work_id": "218cb154-1a13-56df-a021-bd5356974cf8",
+      "economics": {
+        "work_id": "218cb154-1a13-56df-a021-bd5356974cf8",
+        "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+        "pwu_count": 0,
+        "join_count": 0,
+        "pwu": [],
+        "observed_provider_spend": {
+          "status": "UNREPORTED",
+          "amount": null
+        },
+        "wall_elapsed_seconds": null,
+        "execution_seconds": 0,
+        "queue_wait_seconds": 0,
+        "critical_path_seconds": null,
+        "parallelism_effect_seconds": null,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "self_refine_event_count": 0,
+        "first_pass_pwu_count": 0,
+        "retried_pwu_count": 0,
+        "human_escalation_count": 0,
+        "refinement_extra_seconds": 0,
+        "resource_units": {},
+        "final_outcome": "READY"
+      }
+    },
+    {
+      "case": "GC-IP-01",
+      "trial": 1,
+      "signal": "PROPOSED_BEHAVIOR_NOT_ENTAILED_BY_HUMAN_INTENT_OR_REPOSITORY_NECESSITY",
+      "cause": "Actual served About content directs visitors to a site contact channel absent from observed repository Reality. Preview readiness did not validate factual business copy.",
+      "architecture_owner": "Native Executor content grounding; Semantic source necessity; business acceptance qualification",
+      "business_oracle": "FAIL",
+      "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-01/trial-1",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
     }
   ]
 }

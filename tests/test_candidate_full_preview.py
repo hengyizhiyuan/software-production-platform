@@ -482,6 +482,9 @@ def test_final_preview_failure_records_first_or_exhausted_owner_budget(tmp_path,
     class FailedProvider(RuntimeProvider):
         def start(self, *_args, **_kwargs):
             raise EnvironmentProviderError(failure)
+        def stop(self, preview_id):
+            super().stop(preview_id)
+            return {"service_logs": ()}
     service = CandidatePreviewApplicationService(source,
         JsonProductionEnvironmentStore(tmp_path / "failed-preview"), FailedProvider())
     service.outcome_listener = lambda work_id, failed: outcomes.append((work_id, failed))

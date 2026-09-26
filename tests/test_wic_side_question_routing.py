@@ -152,3 +152,25 @@ def test_explicit_feature_request_survives_design_response_posture() -> None:
     )
     assert advisory_impact is WorkImpactDisposition.NO_GOVERNED_CHANGE
     assert advisory_change is None
+
+
+def test_source_bound_human_answer_is_work_change_only_with_pending_question():
+    record_id = uuid4()
+    active = SimpleNamespace(work_revision=SimpleNamespace(motive="Edit profile",
+        desired_outcome="Saved profile", context_facts=(), constraints=(), requests=(),
+        engineering_semantic_facts=()), active_production_binding_id=None,
+        satisfaction_state=WorkSatisfactionState.IN_PROGRESS,
+        pending_human_question="Which user is the edit target?")
+    answer = "Use the currently selected user"
+    candidate = InteractionAssessmentCandidate(turn_intent=ConversationTurnIntent.HUMAN_DECISION,
+        response_intent=ResponseIntent(interaction_mode=InteractionMode.DECIDE, rationale="Record the selected target"),
+        current_requests=(answer,), meanings=(InterpretationMeaning(kind=InterpretationMeaningKind.DECISION_INPUT,
+            statement=answer, source_record_ids=(record_id,), confidence=1, rationale="Human selected target"),),
+        natural_response="Selection recorded", provider_identity="test")
+    focus, _, change = WorkInteractionService._normalize_active_candidate(candidate, active,
+        latest_human_input=answer, latest_human_record_id=record_id)
+    assert focus is WorkFocusClassification.ON_TOPIC and change.requests == (answer,)
+    active.pending_human_question = None
+    _, impact, change = WorkInteractionService._normalize_active_candidate(candidate, active,
+        latest_human_input=answer, latest_human_record_id=record_id)
+    assert impact is WorkImpactDisposition.NO_GOVERNED_CHANGE and change is None

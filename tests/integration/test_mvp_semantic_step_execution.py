@@ -990,3 +990,29 @@ def test_preview_terminal_owner_failure_stops_only_matching_candidate(
     finally:
         driver.shutdown()
         orchestrator.shutdown()
+
+
+def test_exhausted_semantic_validation_is_work_incident(postgres_database, product):
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+    class IncompleteCapability(_SemanticCapability):
+        def __init__(self):
+            super().__init__(step_type=SteeringStepType.DESIGN)
+        def refine(self, input, *, validation_feedback):
+            return self.execute(input)
+    capability = IncompleteCapability()
+    orchestrator = ProductionOrchestrator(works)
+    driver = PlanSteeringDriver(postgres_database, works, orchestrator, semantic_capability=capability)
+    try:
+        assert driver.activate(admitted.work_id).stop_reason is SteeringDriverStopReason.BLOCKED
+        assert works.get_work(admitted.work_id).human_attention_required
+        with postgres_database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            assert store.work_convergence_history(admitted.work_id)[-1].condition == "NON_CONVERGING"
+            assert store.list_self_refine_events(work_id=admitted.work_id,
+                component="steering/semantic-step")[0].final_result == "ESCALATED"
+        assert driver.activate(admitted.work_id).stop_reason is SteeringDriverStopReason.BLOCKED
+        assert len(capability.inputs) == 2
+    finally:
+        driver.shutdown()
+        orchestrator.shutdown()

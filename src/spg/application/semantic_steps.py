@@ -62,7 +62,7 @@ from spg.providers.rule_based_planner import RuleBasedProductionPlanner
 
 
 MAX_TREE_PATHS = 1_000
-MAX_CONTEXT_FILES = 8
+MAX_CONTEXT_FILES = 16
 MAX_CONTEXT_CHARS_PER_FILE = 8_000
 MAX_CONTEXT_CHARS_TOTAL = 24_000
 REFINABLE_ADMISSION_FEEDBACK = (
@@ -76,6 +76,10 @@ REFINABLE_ADMISSION_FEEDBACK = (
     "Semantic production proposal has no executable PWU boundary",
     "Task Contract candidate failed validation",
 )
+
+
+class SemanticStepRefinementExhausted(SteeringInvariantViolation):
+    """Same-basis owner validation exhausted its admissible correction budget."""
 
 
 class SemanticStepApplicationService:
@@ -156,8 +160,14 @@ class SemanticStepApplicationService:
         if baseline is not None:
             source_tree = self._git(repository, "rev-parse", f"{baseline.repository_revision}^{{tree}}")
             paths = tuple(self._git(repository, "ls-tree", "-r", "--name-only", baseline.repository_revision).splitlines()[:MAX_TREE_PATHS])
+            configured_paths = tuple(item.repository_relative_path for item in resource.context_references)
+            # Small repositories fit the existing bounded observation budget.
+            # Inspect their implementation before requesting diagnostics from Human.
+            observed_paths = tuple(path for path in paths if Path(path).suffix in {
+                ".py", ".js", ".ts", ".tsx", ".jsx", ".html", ".css", ".sql", ".json", ".toml",
+            } or Path(path).name in {"Dockerfile", "Makefile"})
             materials = self._context_materials(repository, baseline.repository_revision,
-                tuple(item.repository_relative_path for item in resource.context_references))
+                configured_paths + observed_paths if len(observed_paths) <= MAX_CONTEXT_FILES else configured_paths)
         refs = tuple(item.reference for item in frame.basis.resolved_reality)
         next_step = frame.reconstruction.next_step
         design_context = self.guided_design.semantic_context(work.id, step.id)
@@ -288,6 +298,10 @@ class SemanticStepApplicationService:
                     converged=False, second_error=second_error,
                     superseded=isinstance(second_error, StaleSemanticStepCandidate),
                 )
+                if isinstance(second_error, StaleSemanticStepCandidate):
+                    raise
+                if isinstance(second_error, (SteeringInvariantViolation, ValueError)):
+                    raise SemanticStepRefinementExhausted(str(second_error)) from second_error
                 raise
             self._record_semantic_refinement(
                 semantic_input, str(error), started, first_usage,

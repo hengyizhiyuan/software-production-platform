@@ -818,3 +818,15 @@ def test_a_watt_message_cannot_manufacture_a_new_human_priority():
         ),
     )
     assert not result.judgment_change_accepted
+
+
+@pytest.mark.parametrize("human_request", [
+    "这是项目仓库：https://github.com/example/project.git。请在客户表格中显示余额，给我实际预览。",
+    "这是项目仓库：https://github.com/example/project.git。在订单页面展示后端订单状态。",
+])
+def test_existing_data_display_is_explicit_repository_change(human_request):
+    assert production_intent_evidence(human_request).production_request
+
+
+def test_advisory_display_question_does_not_admit_production():
+    assert not production_intent_evidence("如何在客户列表显示余额？").production_request

@@ -447,10 +447,13 @@ class GuidedDesignApplicationService:
             human_scope = re.sub(r"https?://[^\s<>()，。；]+", "", human_text)
             bounded_feature = bool(re.search(
                 r"页面|表单|按钮|字段|列表|搜索|链接|功能|能力|"
+                r"(?:网站|应用|系统).{0,12}(?:支持|提供).{1,24}|"
+                r"(?:^|[\n。！？])\s*(?:请\s*)?(?:新增|增加|添加|加(?:一个|一项|个)).{1,32}(?:[，。！？\n]|$)|"
                 r"\b(?:page|form|button|field|list|search|link|feature|capability)\b",
                 human_scope, re.IGNORECASE))
             systemic_design = bool(re.search(
                 r"(?:设计|重构|搭建|重新规划).{0,24}(?:系统|平台|架构)|"
+                r"(?:新建|创建|开发|新增|增加).{0,12}(?:系统|平台|网站|应用)(?:[，。！？\n]|$)|"
                 r"(?:完整|整个|整套).{0,12}(?:系统|平台|网站)|"
                 r"\b(?:design|redesign|rearchitect|build|create).{0,32}\b(?:system|platform|architecture)\b",
                 human_scope, re.IGNORECASE))

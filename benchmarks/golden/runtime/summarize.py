@@ -37,6 +37,10 @@ def main():
                     'evidence_directory': str(directory),
                     'runtime_activation': read(directory/'runtime-activation.json', {'status': 'NOT_CAPTURED_AT_SUBMISSION'}),
                     'observer_result': result, 'failure_classification': diagnosis,
+                    'continuation_observations': {path.name: read(path)
+                        for path in sorted(directory.glob('result-after-*.json'))},
+                    'human_clarification': read(directory/'human-clarification.json'),
+                    'runtime_retirement': read(directory/'runtime-retirement.json'),
                     'business_oracles': oracles,
                     'business_status': oracles[-1]['status'] if oracles else 'NOT_EVALUATED',
                     'work_id': state.get('work', {}).get('work_id'),

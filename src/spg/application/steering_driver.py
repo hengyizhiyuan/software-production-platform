@@ -20,7 +20,7 @@ from spg.application.assets import RepositoryAssetService
 from spg.application.repository_branch_authority import governed_branch_creation_target
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.steering import SteeringApplicationService
-from spg.application.semantic_steps import SemanticStepApplicationService
+from spg.application.semantic_steps import SemanticStepApplicationService, SemanticStepRefinementExhausted
 from spg.domain.refinement_contract import RefinementSignalKind, classify_refinement
 from spg.application.steering_decision import (
     DeterministicPlanSteeringCapability,
@@ -572,6 +572,7 @@ class PlanSteeringDriver:
                 result = self.iterate(work_id)
             except (SteeringInvariantViolation, ProductInvariantViolation) as error:
                 self._observe_convergence(work_id, failed=True,
+                    owner_budget_exhausted=isinstance(error, SemanticStepRefinementExhausted),
                     failure_signature=canonical_digest({"boundary": "STEERING",
                         "error_type": type(error).__name__, "reason": str(error)}))
                 LOGGER.exception("Steering stopped on governed invariant Work=%s", work_id)

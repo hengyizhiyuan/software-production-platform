@@ -50,3 +50,5 @@ SQLite persistence checks for customer create/edit notes (three branch PWUs plus
 verified Join) and user information collection. These are automated business
 oracles; Human Acceptance remains PENDING. Full regression and remaining Golden
 qualification remain PENDING.
+
+Further owner qualification: 88 Semantic/WIC/Response Contract checks passed; 49 real PostgreSQL bounded-feature, governed-question continuation and semantic validation checks passed; 16 real Docker Preview checks passed after retiring completed qualification runtimes. Invalid semantic output after the owner repair budget now stops Work; a source-bound answer to the current genuine Steering question revises the same Work and resumes Steering. JSON round-trip representation no longer falsely rejects Preview failure/retry state updates. These are targeted qualification results, not Full Regression or Human Acceptance.

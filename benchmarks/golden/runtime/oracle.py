@@ -93,10 +93,27 @@ def main():
                 and event['diagnostic_evidence'].get('final_condition') == 'READY'
                 and event['diagnostic_evidence'].get('attempt_budget') == 3
                 for event in acquisition)
+        if identity == 'GC-EX-04':
+            baseline = (Path(__file__).resolve().parents[3]/'.spg/stability-runtime'
+                /'fixture-sources/large-file/web/index.html').read_bytes()
+            attempt_record = root/'native-attempt.json'
+            attempt = json.loads(attempt_record.read_text()) if attempt_record.exists() else {}
+            writes = [effect for effect in attempt.get('effects', [])
+                if effect['tool_identity'] == 'file.write' and effect['condition'] == 'SETTLED']
+            checks.update(source_exceeds_32k=len(baseline) > 32768,
+                unrelated_bytes_preserved=body.encode() == baseline.replace('开始使用'.encode(), '立即体验'.encode()),
+                exact_bounded_replace=len(writes) == 1 and all(
+                    'old_text' in effect['semantic_input'] and 'new_text' in effect['semantic_input']
+                    and 'content' not in effect['semantic_input'] for effect in writes))
     elif identity in {'GC-EX-03','GC-EX-05'}:
         checks.update(browser_dialog_oracle=(root/'browser-oracle.json').exists())
         if checks['browser_dialog_oracle']:
             checks['actual_cancel_closes_dialog']=json.loads((root/'browser-oracle.json').read_text()).get('cancel_closes') is True
+    elif identity == 'GC-IP-01':
+        browser_record = root/'browser-oracle.json'
+        browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}
+        checks.update(about_page_observed=browser.get('about_page_reachable') is True,
+            no_unsupported_content_claims=browser.get('unsupported_contact_reference') is False)
     elif identity in {'GC-EX-13', 'GC-IP-02'}:
         browser_record = root/'browser-oracle.json'
         database_record = root/'persistence-oracle.json'

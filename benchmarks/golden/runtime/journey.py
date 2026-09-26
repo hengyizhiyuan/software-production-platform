@@ -41,6 +41,7 @@ def main():
     parser.add_argument('--evidence-root', type=Path, required=True)
     parser.add_argument('--fixture-base', default='http://qualified-git:8080')
     parser.add_argument('--interaction-id', help='Observe an already submitted /app journey')
+    parser.add_argument('--observation-phase', choices=('initial', 'after-clarification', 'after-reassessment'), default='initial')
     parser.add_argument('--timeout', type=int, default=1800)
     args = parser.parse_args()
     env = dict(line.split('=', 1) for line in args.env_file.read_text().splitlines() if '=' in line)
@@ -49,7 +50,9 @@ def main():
     case = next(item for item in corpus['cases'] if item['id'] == args.case)
     directory = args.evidence_root/args.case/f'trial-{args.trial}'
     directory.mkdir(parents=True, exist_ok=True)
-    if (directory/'result.json').exists():
+    result_path = directory/('result.json' if args.observation_phase == 'initial'
+        else f'result-{args.observation_phase}.json')
+    if result_path.exists():
         raise SystemExit('Existing attempt result is immutable; choose a new trial identity')
     runtime_record = directory/'runtime-activation.json'
     if not runtime_record.exists():
@@ -66,7 +69,12 @@ def main():
         receipt = client.request('/api/interactions/'+interaction_id+'/turns', {
             'content': intent, 'human_identity': 'human:golden-operator'})
         (directory/'submission.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2))
-    (directory/'journey.json').write_text(json.dumps({'case': case['id'],
+    journey_path = directory/'journey.json'
+    if journey_path.exists():
+        if json.loads(journey_path.read_text())['interaction_id'] != interaction_id:
+            raise SystemExit('Existing trial belongs to a different interaction')
+    else:
+        journey_path.write_text(json.dumps({'case': case['id'],
         'corpus_version': corpus['corpus_version'], 'trial': args.trial,
         'interaction_id': interaction_id, 'human_input': intent,
         'tester_implementation': False, 'manual_rescue_actions': [],
@@ -100,7 +108,8 @@ def main():
         if status == 'PREVIEW_READY':
             result['status'] = 'REVIEW_READY_AWAITING_BUSINESS_ORACLE'
             break
-        if state.get('attention') or status in {'BLOCKED', 'FAILED'}:
+        pending_turn = (interaction.get('turns') or [{}])[-1].get('status') in {'RECEIVED', 'PROCESSING'}
+        if not pending_turn and (state.get('attention') or status in {'BLOCKED', 'FAILED'}):
             result['status'] = 'ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION'
             break
         if (not work_id and status == 'COMPLETED'
@@ -122,7 +131,7 @@ def main():
     result.update(work_id=work_id, elapsed_seconds=int(time.monotonic()-started),
         human_acceptance='PENDING', automatic_delivery_authorization=False,
         business_oracle='NOT_YET_EVALUATED')
-    (directory/'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2))
+    result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2))
     print(json.dumps(result, ensure_ascii=False), flush=True)
 
 

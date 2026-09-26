@@ -157,7 +157,10 @@ class JsonProductionEnvironmentStore:
         if before.id != after.id or after.version != before.version + 1:
             raise ProductionEnvironmentStoreConflict("Candidate Preview transition has invalid lineage")
         with self._lock:
-            if self.get_candidate_preview(before.id) != before:
+            persisted = self.get_candidate_preview(before.id)
+            # Evidence dictionaries contain provider tuples which JSON persists
+            # as arrays. Compare the persisted contract, not Python containers.
+            if persisted is None or persisted.model_dump(mode="json") != before.model_dump(mode="json"):
                 raise ProductionEnvironmentStoreConflict("Candidate Preview changed before transition")
             self._write_candidate_preview(after)
         return after

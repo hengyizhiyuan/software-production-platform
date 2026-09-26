@@ -1339,6 +1339,7 @@ def test_admission_bootstraps_revision_bound_steering_without_production(
     assert _count(postgres_database, steering_plans) == 1
 
 
+@pytest.mark.parametrize("human_request", ["请在现有网站顶部导航栏加一个关于我们链接到 /about，先给我预览。", "我想让网站支持用户反馈。", "我想让应用提供业务概览。", "增加业务概览，让我一眼看出运营情况。"] )
 @pytest.mark.parametrize("mode", [DesignCollaborationMode.EXECUTION, DesignCollaborationMode.DESIGN])
 @pytest.mark.parametrize("constraints", [(), ("Keep the existing behavior outside the request",)])
 @pytest.mark.parametrize("framed_scope", ["implementation", "capability", "product"])
@@ -1348,6 +1349,7 @@ def test_bounded_feature_execution_uses_steering_without_product_questionnaire(
     mode,
     constraints,
     framed_scope,
+    human_request,
 ) -> None:
     work, _ = services
     class FeatureCapability(_BoundedFeatureExecutionCapability):
@@ -1366,7 +1368,7 @@ def test_bounded_feature_execution_uses_steering_without_product_questionnaire(
     interaction = interactions.create_interaction(human_identity="human:test")
     ready = interactions.append_and_assess(
         interaction.id,
-        "请在现有网站顶部导航栏加一个关于我们链接到 /about，先给我预览。",
+        human_request,
         human_identity="human:test",
     )
     admitted = _admit(work, ready)
@@ -4511,3 +4513,59 @@ def _git(repository: Path, *args: str) -> str:
         capture_output=True,
         text=True,
     ).stdout.strip()
+
+
+def test_human_answer_to_current_design_question_admits_once_and_schedules(postgres_database, services):
+    from spg.infrastructure.persistence.interaction_store import InteractionStore
+    from spg.domain.steering import NextStepCandidate, SteeringAuthorityAssessment, SteeringAttentionReason
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    driver = PlanSteeringDriver(postgres_database, work, ProductionOrchestrator(work))
+    frame = driver.frames.assemble(admitted.work_id)
+    decision = driver.decisions.admit(admitted.work_id, NextStepCandidate(
+        type=SteeringStepType.HUMAN_DECISION, objective="Choose the target",
+        reason="Which existing user should the edit target?", human_required=True,
+        reality_refs=tuple(item.reference for item in frame.basis.resolved_reality),
+        completion_condition="Human selects the user", proposed_outcome=SteeringOutcome.HUMAN_ATTENTION,
+        basis_fingerprint=frame.basis.fingerprint,
+        authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+        proposed_engineering_scope_fingerprint=frame.engineering_scope_fingerprint,
+        attention_reason=SteeringAttentionReason.MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION,
+        recommendation="Select the currently selected user or another explicitly identified user",
+        expected_impact="The selected profile is edited"))
+    class AnswerCapability:
+        def interpret(self, basis):
+            active = basis.active_work_context
+            assert active.pending_human_question == decision.reason
+            record = basis.records[-1]
+            return InteractionAssessmentCandidate(turn_intent=ConversationTurnIntent.HUMAN_DECISION,
+                response_intent=ResponseIntent(interaction_mode=InteractionMode.DECIDE, rationale="Human answered the target question"),
+                interpreted_motive=active.work_revision.motive, desired_outcome=active.work_revision.desired_outcome,
+                candidate_context=active.work_revision.context_facts, candidate_constraints=active.work_revision.constraints,
+                current_requests=(*active.work_revision.requests, record.content),
+                meanings=(InterpretationMeaning(kind=InterpretationMeaningKind.DECISION_INPUT,
+                    statement=record.content, source_record_ids=(record.id,), confidence=1, rationale="Human target choice"),),
+                natural_response="Your choice is recorded", provider_identity="test:human-answer")
+    answering = WorkInteractionService(postgres_database, capability=AnswerCapability())
+    answering.append_human_input(ready.interaction.id, "Use the currently selected user", human_identity="human:test")
+    assessment = answering.assess_current(ready.interaction.id)
+    scheduled = []
+    post = SimpleNamespace(steering_driver=SimpleNamespace(schedule=lambda work_id: scheduled.append(work_id)))
+    trigger = ProductionAdmissionTrigger(answering, work, None, post)
+    with postgres_database.unit_of_work() as uow:
+        record = InteractionStore(uow.session).records(ready.interaction.id)[-1]
+    try:
+        assert trigger.execute_governed_turn(ready.interaction.id, assessment, record)
+        assert scheduled == [admitted.work_id]
+        with postgres_database.unit_of_work() as uow:
+            assert "Use the currently selected user" in ProductStore(uow.session).current_work_reality_revision(admitted.work_id).requests
+        assert trigger.execute_governed_turn(ready.interaction.id, assessment, record) is None
+        assert scheduled == [admitted.work_id]
+        assert _count(postgres_database, work_reality_revisions) == 2
+        assert _count(postgres_database, human_authorizations) == 0
+        assert _count(postgres_database, production_runs) == 0
+    finally:
+        driver.shutdown()
+        driver.production_orchestrator.shutdown()

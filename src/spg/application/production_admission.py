@@ -22,6 +22,9 @@ from spg.domain.assets import (
 from spg.domain.interaction import (
     InteractionAssessment,
     InteractionRecord,
+    InteractionActor,
+    InterpretationMeaningKind,
+    WorkFocusClassification,
     ProductionAdmissionExecutionState,
     RepositoryAcquisitionState,
     WorkAdmissionReadinessStatus,
@@ -33,6 +36,8 @@ from spg.domain.response_contract import (
 )
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.interaction_store import InteractionStore
+from spg.infrastructure.persistence.steering_store import SteeringStore
+from spg.domain.steering import SteeringStepType, SteeringAttentionReason
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.domain.refinement_contract import RefinementSignalKind
 
@@ -334,6 +339,45 @@ class ProductionAdmissionTrigger:
             authority_identity=authority_identity,
             rationale="Bind the Human-requested branch to current Work Reality.",
         )
+
+    def execute_governed_turn(self, interaction_id: UUID,
+        assessment: InteractionAssessment, request_record: InteractionRecord) -> str | None:
+        branch_answer = self.execute_explicit_branch_turn(interaction_id, assessment, request_record)
+        if branch_answer is not None:
+            return branch_answer
+        if (request_record.actor is not InteractionActor.HUMAN
+            or assessment.candidate_change is None
+            or assessment.basis_work_revision_id is None
+            or assessment.focus_classification is not WorkFocusClassification.ON_TOPIC
+            or request_record.content.strip() not in assessment.current_requests
+            or not any(meaning.kind is InterpretationMeaningKind.DECISION_INPUT
+                and request_record.id in meaning.source_record_ids for meaning in assessment.meanings)):
+            return None
+        with self.work.database.unit_of_work() as uow:
+            interaction = InteractionStore(uow.session).interaction(interaction_id)
+            if interaction is None or interaction.current_work_id is None:
+                return None
+            work_id = interaction.current_work_id
+            current = ProductStore(uow.session).current_work_reality_revision(work_id)
+            steering = SteeringStore(uow.session)
+            plan = steering.plan_for_work(work_id)
+            revision = None if plan is None else steering.active_revision(plan.id)
+            decision = None if revision is None else steering.latest_decision(revision.id)
+            step = next((item for item in steering.steps(revision.id)
+                if item.state.value == "CURRENT"), None) if revision else None
+            if (current is None or current.id != assessment.basis_work_revision_id
+                or decision is None or not decision.human_required or step is None
+                or decision.current_step_id != step.id
+                or step.type not in {SteeringStepType.DESIGN, SteeringStepType.REFINE}
+                or decision.attention_reason is not SteeringAttentionReason.MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION):
+                return None
+        self.work.decide_interaction_work_revision(interaction_id,
+            assessment_id=assessment.id, basis_fingerprint=assessment.basis_fingerprint,
+            expected_previous_revision_id=assessment.basis_work_revision_id,
+            action=AttentionAction.APPROVE, authority_identity=request_record.source,
+            rationale=f"Human answered the current governed question: steering-decision:{decision.id}")
+        self.post_admission.steering_driver.schedule(work_id)
+        return "你的选择已写入当前 Work，Watt 将按这项决定继续推进。"
 
     def execute_explicit_branch_turn(
         self,

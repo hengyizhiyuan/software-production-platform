@@ -117,6 +117,7 @@ _REPOSITORY_SIGNAL = re.compile(
 )
 _PRODUCTION_ACTION = re.compile(
     r"(?:拉取|克隆|开发|修改|修复|新增|增加|添加|加(?:一个|一项|一条|个|条)|实现|改造|接入|升级|重构|改为|改成|替换|调整|启动|"
+    r"在.{0,32}(?:列表|页面|界面|表格).{0,12}(?:显示|展示)|"
     r"\b(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b)",
     re.IGNORECASE,
 )

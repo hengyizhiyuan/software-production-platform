@@ -323,7 +323,7 @@ def create_http_application(
             reality_provider=production_admission_trigger.projection,
         )
         selected_interaction.configure_governed_branch_handler(
-            production_admission_trigger.execute_explicit_branch_turn
+            production_admission_trigger.execute_governed_turn
         )
 
         def execution_reality(work_id: UUID) -> tuple[str | None, str | None]:

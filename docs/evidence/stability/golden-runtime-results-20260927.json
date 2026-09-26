@@ -32,6 +32,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [
             {
               "evidence_record": "business-oracle.json",
@@ -234,6 +237,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [
             {
               "evidence_record": "business-oracle.json",
@@ -433,6 +439,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": null,
@@ -462,6 +471,23 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": {
+            "case": "GC-EX-02",
+            "trial": 2,
+            "action": "RETIRE_COMPLETED_QUALIFICATION_RUNTIME",
+            "reason": "Bounded Docker network capacity; preserve all databases, source volumes, receipts and recorded served-runtime evidence. No production repair or replay.",
+            "services": [
+              "watt-candidate-preview-12567b4e2dac4438b003a305884adfab-app",
+              "watt-candidate-preview-12567b4e2dac4438b003a305884adfab-proxy"
+            ],
+            "retained_volumes": [
+              "watt-candidate-preview-12567b4e2dac4438b003a305884adfab-source"
+            ],
+            "manual_rescue": false,
+            "human_acceptance": "PENDING"
+          },
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "60b4dd65-f188-5d59-b20f-166e9917a26e",
@@ -615,7 +641,16 @@
           "runtime_activation": {
             "status": "NOT_CAPTURED_AT_SUBMISSION"
           },
-          "observer_result": null,
+          "observer_result": {
+            "case": "GC-EX-02",
+            "trial": 3,
+            "status": "TIMEOUT",
+            "work_id": "0c388e1c-5a54-54f5-b16d-aa01d4fd8962",
+            "elapsed_seconds": 1805,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
           "failure_classification": {
             "signal": "PREVIEW_NOT_READY / MISSING_WORK_CONVERGENCE_WIRING",
             "architecture_owner": "Preview/runtime and Work convergence",
@@ -625,6 +660,9 @@
             "human_acceptance": "PENDING",
             "cause": "Docker default network pool exhausted; terminal Preview failure lacked a final refinement event and Work escalation."
           },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "0c388e1c-5a54-54f5-b16d-aa01d4fd8962",
@@ -747,10 +785,224 @@
           "human_attention": [],
           "manual_rescue_actions": [],
           "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 4,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-02/trial-4",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-02",
+            "trial": 4,
+            "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+            "work_id": "430d7e8f-558b-5db9-87b0-0e68179e38e9",
+            "elapsed_seconds": 103,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": {
+            "case": "GC-EX-02",
+            "trial": 4,
+            "action": "RETIRE_COMPLETED_QUALIFICATION_RUNTIME",
+            "services": [
+              "watt-candidate-preview-95211bda2517472cae3c7a769e20813a-app",
+              "watt-candidate-preview-95211bda2517472cae3c7a769e20813a-proxy"
+            ],
+            "retained_volumes": [
+              "watt-candidate-preview-95211bda2517472cae3c7a769e20813a-source"
+            ],
+            "reason": "Business oracle already recorded; release temporary network capacity without altering Work/source/evidence or replaying production.",
+            "manual_rescue": false,
+            "human_acceptance": "PENDING"
+          },
+          "business_oracles": [
+            {
+              "evidence_record": "business-oracle.json",
+              "case": "GC-EX-02",
+              "trial": 4,
+              "checks": {
+                "automatic_preview_ready": true,
+                "served_verification": true,
+                "no_unauthorized_delivery": true,
+                "new_label": true,
+                "old_label": true,
+                "one_source_file": true,
+                "minimal_source_diff": true
+              },
+              "status": "PASS",
+              "candidate_revision": "0ace6508192d9f31b02336ce28d6f29600d26017",
+              "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+              "changed_paths": [
+                "web/index.html"
+              ],
+              "preview_endpoint": "http://127.0.0.1:52543/",
+              "human_acceptance": "PENDING",
+              "manual_rescue_actions": []
+            }
+          ],
+          "business_status": "PASS",
+          "work_id": "430d7e8f-558b-5db9-87b0-0e68179e38e9",
+          "interaction_id": "19ddfc4d-2883-4833-9a7d-29440b47e34b",
+          "refinements": [
+            {
+              "id": "9769a3e5-dbcf-4da3-a096-fad7e3f2c6a2",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "web/index.html"
+                ],
+                "candidate_paths": [
+                  "web/index.html",
+                  "web/app.js"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Editing web/app.js: the observed source contains no 开始使用 literal and no code path that renders the button label, so any change there is unrequested scope.",
+                  "Changing server.py, migrations/001_initial.sql, web/styles.css, README.md, Dockerfile or package.json: the request is a single label change and the constraint 不要改动其他内容 forbids touching routes, API collections, schema, styling or dependencies.",
+                  "Modifying tests/application.cjs: tests are read-only references here; nothing in the request requires changing an oracle.",
+                  "Creating a new preview page, route, screenshot artifact or build script: the preview must come from running the existing server (python server.py, port 8080) and loading the existing / route, which already serves web/index.html; no new file or destination page is entailed by a preview request.",
+                  "Adding new buttons, dialogs, login behavior, or renaming ids such as id=\"start\", and any refactor of markup structure.",
+                  "Introducing fictional business facts, authentication, CRM workflows, customer notes or feedback records."
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 8088,
+                "total_tokens": 10654,
+                "cached_tokens": 384,
+                "output_tokens": 2566,
+                "reasoning_tokens": 120
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "88a1f5ef-60b7-472b-8b26-a02fae3e8b1d",
+              "attempt_id": "54ed17a8-3690-40f9-9956-8f1927877d40",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "430d7e8f-558b-5db9-87b0-0e68179e38e9",
+            "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+            "pwu_count": 1,
+            "join_count": 0,
+            "pwu": [
+              {
+                "pwu_id": "88a1f5ef-60b7-472b-8b26-a02fae3e8b1d",
+                "node_id": null,
+                "run_id": "27ebb172-75a3-4abe-a562-06a9a1777b48",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:54ed17a8-3690-40f9-9956-8f1927877d40"
+                ],
+                "execution_seconds": 18.945994,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.305094,
+                "token_usage": {
+                  "input_tokens": 52298,
+                  "output_tokens": 2833,
+                  "total_tokens": 55131,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 4,
+                  "tool_effect": 6
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 52298,
+              "output_tokens": 2833,
+              "total_tokens": 55131,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 1,
+              "amount": null
+            },
+            "execution_seconds": 18.945994,
+            "queue_wait_seconds": 0.305094,
+            "wall_elapsed_seconds": 21.002456,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 1,
+            "first_pass_pwu_count": 1,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {
+              "inference_submission": 4,
+              "tool_effect": 6
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "1d49c3ef-eda9-5096-9b85-935df40fd0ab",
+              "work_id": "430d7e8f-558b-5db9-87b0-0e68179e38e9",
+              "kind": "CANDIDATE_AUTHORIZATION",
+              "decision": "Authorize exact sealed Candidate integration?",
+              "reason": "Repository integration requires exact Human Authority.",
+              "available_actions": [
+                "AUTHORIZE"
+              ],
+              "recommended_action": null,
+              "governed_subject_ref": "baseline-candidate:6278fdaf-4a26-5b14-87f8-292abf436b4c",
+              "steering_reason": null,
+              "recommendation": null,
+              "conversation_prompt": null,
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": null,
+              "reality_refs": [],
+              "steering_plan_revision_id": null,
+              "steering_step_id": null,
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
         }
       ],
-      "successful_independent_trials": 0,
-      "status": "PENDING"
+      "successful_independent_trials": 1,
+      "status": "PASS"
     },
     {
       "id": "GC-EX-03",
@@ -777,6 +1029,23 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": {
+            "case": "GC-EX-03",
+            "trial": 1,
+            "action": "RETIRE_COMPLETED_QUALIFICATION_RUNTIME",
+            "reason": "Bounded Docker network capacity; preserve all databases, source volumes, receipts and recorded served-runtime evidence. No production repair or replay.",
+            "services": [
+              "watt-candidate-preview-bb27e23dd8e8498297a97121bbef35ab-app",
+              "watt-candidate-preview-bb27e23dd8e8498297a97121bbef35ab-proxy"
+            ],
+            "retained_volumes": [
+              "watt-candidate-preview-bb27e23dd8e8498297a97121bbef35ab-source"
+            ],
+            "manual_rescue": false,
+            "human_acceptance": "PENDING"
+          },
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "75792113-3a12-5f6f-9703-ef9f26f97de1",
@@ -967,6 +1236,23 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": {
+            "case": "GC-EX-03",
+            "trial": 2,
+            "action": "RETIRE_COMPLETED_QUALIFICATION_RUNTIME",
+            "services": [
+              "watt-candidate-preview-8d56c45dafd3445c8a0c5d4ef2cfbd73-app",
+              "watt-candidate-preview-8d56c45dafd3445c8a0c5d4ef2cfbd73-proxy"
+            ],
+            "retained_volumes": [
+              "watt-candidate-preview-8d56c45dafd3445c8a0c5d4ef2cfbd73-source"
+            ],
+            "reason": "Business oracle already recorded; release temporary network capacity without altering Work/source/evidence or replaying production.",
+            "manual_rescue": false,
+            "human_acceptance": "PENDING"
+          },
           "business_oracles": [
             {
               "evidence_record": "business-oracle.json",
@@ -1158,7 +1444,16 @@
           "runtime_activation": {
             "status": "NOT_CAPTURED_AT_SUBMISSION"
           },
-          "observer_result": null,
+          "observer_result": {
+            "case": "GC-EX-04",
+            "trial": 1,
+            "status": "TIMEOUT",
+            "work_id": "0d030878-cc77-58a1-8ab5-96d4d171d21d",
+            "elapsed_seconds": 1800,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
           "failure_classification": {
             "signal": "PREVIEW_NOT_READY / MISSING_WORK_CONVERGENCE_WIRING",
             "architecture_owner": "Preview/runtime and Work convergence",
@@ -1168,6 +1463,9 @@
             "human_acceptance": "PENDING",
             "cause": "Docker default network pool exhausted; terminal Preview failure lacked a final refinement event and Work escalation."
           },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "0d030878-cc77-58a1-8ab5-96d4d171d21d",
@@ -1286,10 +1584,225 @@
           "human_attention": [],
           "manual_rescue_actions": [],
           "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 2,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-04/trial-2",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-04",
+            "trial": 2,
+            "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+            "work_id": "d2e4d006-3c8d-5bc5-b896-297340ee6496",
+            "elapsed_seconds": 132,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": {
+            "case": "GC-EX-04",
+            "trial": 2,
+            "action": "RETIRE_COMPLETED_QUALIFICATION_RUNTIME",
+            "services": [
+              "watt-candidate-preview-373718c517964faf80f655cb8b405187-app",
+              "watt-candidate-preview-373718c517964faf80f655cb8b405187-proxy"
+            ],
+            "retained_volumes": [
+              "watt-candidate-preview-373718c517964faf80f655cb8b405187-source"
+            ],
+            "reason": "Business oracle already recorded; release temporary network capacity without altering Work/source/evidence or replaying production.",
+            "manual_rescue": false,
+            "human_acceptance": "PENDING"
+          },
+          "business_oracles": [
+            {
+              "evidence_record": "business-oracle.json",
+              "case": "GC-EX-04",
+              "trial": 2,
+              "checks": {
+                "automatic_preview_ready": true,
+                "served_verification": true,
+                "no_unauthorized_delivery": true,
+                "new_label": true,
+                "old_label": true,
+                "one_source_file": true,
+                "minimal_source_diff": true,
+                "source_exceeds_32k": true,
+                "unrelated_bytes_preserved": true,
+                "exact_bounded_replace": true
+              },
+              "status": "PASS",
+              "candidate_revision": "846f4cb94afc9cfb3332f0a5dd2e85e46c6613aa",
+              "candidate_tree": "18371e077ede915bc26bfcfe67390318ddc918a2",
+              "changed_paths": [
+                "web/index.html"
+              ],
+              "preview_endpoint": "http://127.0.0.1:52931/",
+              "human_acceptance": "PENDING",
+              "manual_rescue_actions": []
+            }
+          ],
+          "business_status": "PASS",
+          "work_id": "d2e4d006-3c8d-5bc5-b896-297340ee6496",
+          "interaction_id": "f0dcd316-a3ed-44a7-a2e9-1976e04f5042",
+          "refinements": [
+            {
+              "id": "69e7d2d9-52f9-4aa6-a82f-b693caf49888",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "web/index.html"
+                ],
+                "candidate_paths": [
+                  "web/index.html"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Renaming or removing the `id=\"start\"` attribute, which would break web/app.js selector assumptions and alter behavior beyond the requested copy change",
+                  "Changing the adjacent `<h1>业务工作台</h1>`, the `#account-login` or `#header-login` buttons, navigation links, sections, or the trailing fixture content",
+                  "Adding new pages, routes, API collections, or auth behavior for the new label",
+                  "Creating a separate preview build, preview route, or new HTML file — the existing `python server.py` + `/` route already provides the preview",
+                  "Modifying web/app.js, web/styles.css, server.py, migrations, README, or tests/application.cjs"
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 12231,
+                "total_tokens": 15383,
+                "cached_tokens": 384,
+                "output_tokens": 3152,
+                "reasoning_tokens": 89
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "2288d188-a51f-4171-98b8-96f2d6afa71b",
+              "attempt_id": "43b5e429-9331-4d55-a32d-e9f1e676cbc5",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "d2e4d006-3c8d-5bc5-b896-297340ee6496",
+            "product_id": "1f787d8f-2788-4be0-ae9b-f17f92902797",
+            "pwu_count": 1,
+            "join_count": 0,
+            "pwu": [
+              {
+                "pwu_id": "2288d188-a51f-4171-98b8-96f2d6afa71b",
+                "node_id": null,
+                "run_id": "c7039c7b-405e-4df5-b066-6d145c60106e",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:43b5e429-9331-4d55-a32d-e9f1e676cbc5"
+                ],
+                "execution_seconds": 23.832616,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.329586,
+                "token_usage": {
+                  "input_tokens": 73269,
+                  "output_tokens": 3538,
+                  "total_tokens": 76807,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 4,
+                  "tool_effect": 5
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 73269,
+              "output_tokens": 3538,
+              "total_tokens": 76807,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 1,
+              "amount": null
+            },
+            "execution_seconds": 23.832616,
+            "queue_wait_seconds": 0.329586,
+            "wall_elapsed_seconds": 26.650115,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 1,
+            "first_pass_pwu_count": 1,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {
+              "inference_submission": 4,
+              "tool_effect": 5
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "5289fa8a-5ba1-58c7-8a9e-fcf393931ed3",
+              "work_id": "d2e4d006-3c8d-5bc5-b896-297340ee6496",
+              "kind": "CANDIDATE_AUTHORIZATION",
+              "decision": "Authorize exact sealed Candidate integration?",
+              "reason": "Repository integration requires exact Human Authority.",
+              "available_actions": [
+                "AUTHORIZE"
+              ],
+              "recommended_action": null,
+              "governed_subject_ref": "baseline-candidate:9fb6aaa3-a753-526d-b68a-bdb3c855793c",
+              "steering_reason": null,
+              "recommendation": null,
+              "conversation_prompt": null,
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": null,
+              "reality_refs": [],
+              "steering_plan_revision_id": null,
+              "steering_step_id": null,
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
         }
       ],
-      "successful_independent_trials": 0,
-      "status": "PENDING"
+      "successful_independent_trials": 1,
+      "status": "PASS"
     },
     {
       "id": "GC-EX-05",
@@ -1334,6 +1847,9 @@
             "human_acceptance": "PENDING",
             "cause": "Fixture DNS alias was absent during three bounded acquisition attempts. Watt correctly exhausted its retry budget; source health was corrected only for independent future trials."
           },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "7bf0a3ee-a41c-5008-a50c-d66d9f5965d4",
@@ -1392,6 +1908,293 @@
           "human_attention": [],
           "manual_rescue_actions": [],
           "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 2,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-05/trial-2",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "738cc3694502cbcb547631bdb3f6a630387c4d83",
+            "active_repository_tree_identity": "f4153bac45285a45b0517a403a4140148406c78c",
+            "active_source_package_fingerprint": "bf539106a12695742be00e6f060d3b8673581dd4",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "738cc3694502cbcb547631bdb3f6a630387c4d83",
+            "current_trusted_baseline_tree_identity": "f4153bac45285a45b0517a403a4140148406c78c",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-05",
+            "trial": 2,
+            "status": "TIMEOUT",
+            "work_id": "25b7d30e-edfc-57cc-b252-59afa0d3b385",
+            "elapsed_seconds": 1802,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "25b7d30e-edfc-57cc-b252-59afa0d3b385",
+          "interaction_id": "1efcd195-fe85-4e0d-8f85-6f6cb9e45f33",
+          "refinements": [
+            {
+              "id": "fc416a55-5aa8-45b8-96cc-3d6714551b9c",
+              "affected_component": "native-tool-host/git.status",
+              "signal_kind": "EXECUTION_FAILURE",
+              "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+              "final_result": "ESCALATED",
+              "budget_decision": {
+                "policy_version": "native-effect-repair-v1",
+                "classification_basis": "effect outcome is uncertain"
+              },
+              "diagnostic_evidence": {
+                "receipt_ref": "native-receipt:d043b03b-4295-4857-a91b-f3f322e374dc",
+                "evidence_refs": [],
+                "output_digest": "406f1a7a0be2d0607d21e2474f68f44ecd8f5d37f6c5355d19881939f99ecb50",
+                "tool_identity": "git.status"
+              },
+              "model_token_usage": {},
+              "extra_elapsed_seconds": 0
+            },
+            {
+              "id": "8869997f-47d6-41b1-8c76-c8f7e9132771",
+              "affected_component": "native-tool-host/file.read",
+              "signal_kind": "EXECUTION_FAILURE",
+              "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+              "final_result": "FAILED",
+              "budget_decision": {
+                "policy_version": "native-effect-repair-v1",
+                "classification_basis": "additional authoritative diagnosis required"
+              },
+              "diagnostic_evidence": {
+                "receipt_ref": "native-receipt:626ab839-ad57-404a-b90a-c97d0582709f",
+                "evidence_refs": [
+                  "native-evidence:f5015710-afac-495f-8498-4b77346415ee"
+                ],
+                "output_digest": "ddc25aae9f17dab03c5a1900bf1bb2d89c7f9645c9bd3ed9d93b272ac6a36fa2",
+                "tool_identity": "file.read"
+              },
+              "model_token_usage": {},
+              "extra_elapsed_seconds": 0
+            },
+            {
+              "id": "1f794227-1912-4e5f-83c0-e9f3183e21ea",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "web/app.js"
+                ],
+                "candidate_paths": [
+                  "web/app.js",
+                  "web/index.html",
+                  "web/styles.css"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Modifying web/index.html: the dialog and cancel button markup already exist and need no change to close",
+                  "Modifying web/styles.css: purely presentational, unrelated to dialog close behavior",
+                  "Adding a new preview page, preview route, or preview HTML file: the existing served site at port 8080 is itself the inspectable preview, and no existing implementation witnesses a separate preview artifact",
+                  "Adding new server.py routes or API handlers: the request is a frontend cancel-button defect",
+                  "Implementing login/authentication for the header-login or account-login buttons: unrelated to the explicit request",
+                  "Refactoring loadLists, the API fetches, or the dialog open button",
+                  "Introducing new dialogs, permissions, or fictional business data"
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 7938,
+                "total_tokens": 11131,
+                "cached_tokens": 384,
+                "output_tokens": 3193,
+                "reasoning_tokens": 340
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "8bdd8877-73d5-4d8e-9c09-9c27c2bb48ba",
+              "attempt_id": "7a75651c-5442-4f31-a9e3-a4bf6913aa57",
+              "condition": "EXECUTING",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "25b7d30e-edfc-57cc-b252-59afa0d3b385",
+            "product_id": "074e6565-0b34-4795-acbb-24a6a0486ba3",
+            "pwu_count": 1,
+            "join_count": 0,
+            "pwu": [
+              {
+                "pwu_id": "8bdd8877-73d5-4d8e-9c09-9c27c2bb48ba",
+                "node_id": null,
+                "run_id": "5bea5d79-af3f-4152-baf6-cf699658dd28",
+                "condition": "PROPOSED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "UNKNOWN"
+                ],
+                "providers": [
+                  "deepseek"
+                ],
+                "execution_seconds": 2.47962,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.429369,
+                "token_usage": {
+                  "input_tokens": 9409,
+                  "output_tokens": 131,
+                  "total_tokens": 9540,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 1,
+                  "tool_effect": 1
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 9409,
+              "output_tokens": 131,
+              "total_tokens": 9540,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 1,
+              "amount": null
+            },
+            "execution_seconds": 2.47962,
+            "queue_wait_seconds": 0.429369,
+            "wall_elapsed_seconds": 2.47962,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 3,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 1,
+            "refinement_extra_seconds": 0,
+            "resource_units": {
+              "inference_submission": 1,
+              "tool_effect": 1
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 3,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-05/trial-3",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-05",
+            "trial": 3,
+            "status": "TIMEOUT",
+            "work_id": "f148f055-8174-5c1f-b543-81b700cb255b",
+            "elapsed_seconds": 1804,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "CONTRACT_MISMATCH / MISSING_CONVERGENCE_WIRING",
+            "cause": "Scope validator misclassified Preview lifecycle acceptance as missing repository file scope; the second ValueError was persisted as ESCALATED but not propagated into Work convergence.",
+            "architecture_owner": "Semantic scope validator; Steering same-basis owner budget",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "f148f055-8174-5c1f-b543-81b700cb255b",
+          "interaction_id": "59393884-2eed-4cde-af05-f30260183f53",
+          "refinements": [
+            {
+              "id": "09425b26-26d9-45f2-96b2-9961d82efe1d",
+              "affected_component": "steering/semantic-step",
+              "signal_kind": "CONTRACT_MISMATCH",
+              "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+              "final_result": "ESCALATED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "basis_fingerprint": "c0fb5dcecd40eadd26ce6792880742625cef4ba114685fd117ff94b39b901122",
+                "second_error_type": "ValueError",
+                "first_validation_feedback": "Task Contract candidate failed validation: INTENT_COMPLETENESS_MISMATCH: 可查看的预览: the explicit preview acceptance clause has no repository file candidate in candidate_paths and cannot be satisfied by inventing a new source file; it must be fulfilled by the preview lifecycle outside repository target validation."
+              },
+              "model_token_usage": {
+                "total_tokens": 22282
+              },
+              "extra_elapsed_seconds": 67
+            }
+          ],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "f148f055-8174-5c1f-b543-81b700cb255b",
+            "product_id": "de89f6c1-b4a7-443e-9b67-1ccde0c52485",
+            "pwu_count": 0,
+            "join_count": 0,
+            "pwu": [],
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "amount": null
+            },
+            "wall_elapsed_seconds": null,
+            "execution_seconds": 0,
+            "queue_wait_seconds": 0,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": null,
+            "token_usage": {
+              "status": "UNREPORTED"
+            },
+            "self_refine_event_count": 0,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {},
+            "final_outcome": "READY"
+          },
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
         }
       ],
       "successful_independent_trials": 0,
@@ -1423,6 +2226,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "54baa151-d397-5f46-b67d-24111ba16d86",
@@ -1477,6 +2283,23 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": {
+            "case": "GC-EX-06",
+            "trial": 2,
+            "action": "RETIRE_COMPLETED_QUALIFICATION_RUNTIME",
+            "reason": "Bounded Docker network capacity; preserve all databases, source volumes, receipts and recorded served-runtime evidence. No production repair or replay.",
+            "services": [
+              "watt-candidate-preview-f26174b4f5db4ced9299d965cbfa6559-app",
+              "watt-candidate-preview-f26174b4f5db4ced9299d965cbfa6559-proxy"
+            ],
+            "retained_volumes": [
+              "watt-candidate-preview-f26174b4f5db4ced9299d965cbfa6559-source"
+            ],
+            "manual_rescue": false,
+            "human_acceptance": "PENDING"
+          },
           "business_oracles": [
             {
               "evidence_record": "business-oracle.json",
@@ -1718,6 +2541,23 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": {
+            "case": "GC-EX-07",
+            "trial": 1,
+            "action": "RETIRE_COMPLETED_QUALIFICATION_RUNTIME",
+            "reason": "Bounded Docker network capacity; preserve all databases, source volumes, receipts and recorded served-runtime evidence. No production repair or replay.",
+            "services": [
+              "watt-candidate-preview-ecd4ca8362db4e1bbf93ed28246becac-app",
+              "watt-candidate-preview-ecd4ca8362db4e1bbf93ed28246becac-proxy"
+            ],
+            "retained_volumes": [
+              "watt-candidate-preview-ecd4ca8362db4e1bbf93ed28246becac-source"
+            ],
+            "manual_rescue": false,
+            "human_acceptance": "PENDING"
+          },
           "business_oracles": [
             {
               "evidence_record": "business-oracle.json",
@@ -1968,7 +2808,103 @@
         "selected button changed",
         "other button unchanged"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-08/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-08",
+            "trial": 1,
+            "status": "TIMEOUT",
+            "work_id": "ce8e7da9-bef4-589a-bda6-953c3e0f90c7",
+            "elapsed_seconds": 1800,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "DESIGN_SCHEMA_MISMATCH / MISSING_CONVERGENCE_WIRING",
+            "cause": "Second scope validation returned malformed JSON after one bounded feedback; terminal ValueError did not publish a Work convergence stop.",
+            "architecture_owner": "Semantic structured output; Steering owner budget",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "ce8e7da9-bef4-589a-bda6-953c3e0f90c7",
+          "interaction_id": "a4a10acf-1ba2-42d6-ac8e-6cf5a6702514",
+          "refinements": [
+            {
+              "id": "b1f76c29-e457-48f0-ab8d-77a9d21862f9",
+              "affected_component": "steering/semantic-step",
+              "signal_kind": "CONTRACT_MISMATCH",
+              "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+              "final_result": "ESCALATED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "basis_fingerprint": "b9d417f9fb7eb65f69b419d5212f08c2c166ccaaf24f4e75802086ec691e65a5",
+                "second_error_type": "ValidationError",
+                "first_validation_feedback": "Task Contract candidate failed validation: Scope necessity proof has no exact repository/Human witness"
+              },
+              "model_token_usage": {
+                "total_tokens": 47390
+              },
+              "extra_elapsed_seconds": 317
+            }
+          ],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "ce8e7da9-bef4-589a-bda6-953c3e0f90c7",
+            "product_id": "d5c13fe3-d954-4c91-a513-d625a827d171",
+            "pwu_count": 0,
+            "join_count": 0,
+            "pwu": [],
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "amount": null
+            },
+            "wall_elapsed_seconds": null,
+            "execution_seconds": 0,
+            "queue_wait_seconds": 0,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": null,
+            "token_usage": {
+              "status": "UNREPORTED"
+            },
+            "self_refine_event_count": 0,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {},
+            "final_outcome": "READY"
+          },
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -1980,7 +2916,56 @@
         "status comes from actual backend data",
         "runtime result"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-09/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-09",
+            "trial": 1,
+            "status": "EXPLICIT_PRODUCTION_REQUEST_NOT_ADMITTED",
+            "work_id": null,
+            "elapsed_seconds": 122,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "EXPLICIT_PRODUCTION_REQUEST_NOT_ADMITTED",
+            "cause": "Chinese bounded display command was absent from action grammar.",
+            "architecture_owner": "WIC production intent routing",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": null,
+          "interaction_id": "394a6a3a-ca39-4388-a329-2a1cb5ef1a89",
+          "refinements": [],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {},
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -1992,7 +2977,129 @@
         "successful build",
         "real Preview"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-10",
+            "trial": 1,
+            "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+            "work_id": "acc76108-037a-54f4-a14d-9caab7900dbe",
+            "elapsed_seconds": 197,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "REPOSITORY_EVIDENCE_NOT_ACQUIRED_BEFORE_HUMAN_QUESTION",
+            "cause": "Semantic proposal requested Human build output despite a small, locally acquired repository containing the actual syntax error.",
+            "architecture_owner": "Semantic evidence acquisition",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "acc76108-037a-54f4-a14d-9caab7900dbe",
+          "interaction_id": "7eb4a60e-faa8-48b4-bf5e-3cc9f5951a9f",
+          "refinements": [],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "acc76108-037a-54f4-a14d-9caab7900dbe",
+            "product_id": "713f1f7d-4ea7-4c33-a0df-78185ec23d3e",
+            "pwu_count": 0,
+            "join_count": 0,
+            "pwu": [],
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "amount": null
+            },
+            "wall_elapsed_seconds": null,
+            "execution_seconds": 0,
+            "queue_wait_seconds": 0,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": null,
+            "token_usage": {
+              "status": "UNREPORTED"
+            },
+            "self_refine_event_count": 0,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {},
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "b1a03731-e3e2-59da-9072-231756b64ebd",
+              "work_id": "acc76108-037a-54f4-a14d-9caab7900dbe",
+              "kind": "STEERING_DECISION_REQUIRED",
+              "decision": "Answer the current Work question",
+              "reason": "What is the exact current build error (the failing command, its output, and the failing file and line) for the repository at http://qualified-git:8080/compiler-error.git?",
+              "available_actions": [],
+              "recommended_action": null,
+              "governed_subject_ref": "steering-decision:a0e58677-810a-4fbc-bc61-614edf248918",
+              "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+              "recommendation": "Provide the build error output (the failing command and its stderr) and/or admit the full repository contents for the affected build and entry files so an exact bounded fix can be designed and reviewed.",
+              "conversation_prompt": "What is the exact current build error (the failing command, its output, and the failing file and line) for the repository at http://qualified-git:8080/compiler-error.git?",
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": "The decision will govern subsequent design and production.",
+              "reality_refs": [
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "03981d54-edc3-5b13-86a1-262b95e6b9dd"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "ad74c0d2-b544-4a0d-8bb4-b1221306df8b"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "11fe259d-2128-4331-b1fc-a413e517f7f8"
+                },
+                {
+                  "kind": "TRUSTED_BASELINE",
+                  "identity": "f8e518b2-3a72-4df4-beff-c3f905cb1f1d"
+                },
+                {
+                  "kind": "WORK",
+                  "identity": "acc76108-037a-54f4-a14d-9caab7900dbe"
+                },
+                {
+                  "kind": "WORK_REALITY_REVISION",
+                  "identity": "145cc526-5981-5c09-9f42-ea411db8f553"
+                }
+              ],
+              "steering_plan_revision_id": "061fdad5-b0af-4d44-8600-3b68d04e6995",
+              "steering_step_id": "ddc23952-ec98-493f-9bd1-5d9a81a9f0ba",
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -2004,7 +3111,50 @@
         "correct Human escalation",
         "no guessed or fabricated secret"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-11/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-EX-11",
+            "trial": 1,
+            "status": "CLARIFICATION_REQUIRES_CLASSIFICATION",
+            "work_id": null,
+            "elapsed_seconds": 162,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": null,
+          "interaction_id": "652b12f7-77d0-4784-aac1-c76c1472c7aa",
+          "refinements": [],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {},
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -2048,6 +3198,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "a4025e99-e35b-5ba9-9b03-cf5c6238bef0",
@@ -2366,6 +3519,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": null,
@@ -3022,6 +4178,9 @@
             "manual_rescue_actions": [],
             "human_acceptance": "PENDING"
           },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "c84b73e5-1630-5d68-8cad-6c792f518b42",
@@ -3396,6 +4555,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [
             {
               "evidence_record": "business-oracle.json",
@@ -3815,7 +4977,209 @@
         "reasonable defaults",
         "no fabricated company facts"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-01/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-01",
+            "trial": 1,
+            "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+            "work_id": "5c157af6-6594-5def-83ed-14e50a11b4af",
+            "elapsed_seconds": 436,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [
+            {
+              "evidence_record": "business-oracle.json",
+              "case": "GC-IP-01",
+              "trial": 1,
+              "checks": {
+                "automatic_preview_ready": true,
+                "served_verification": true,
+                "no_unauthorized_delivery": true,
+                "about_page_observed": true,
+                "no_unsupported_content_claims": false
+              },
+              "status": "FAIL",
+              "candidate_revision": "a20642d4babcb9983ffc5d7723dbfd796dbaee4e",
+              "candidate_tree": "60b876886048e010bf85193712dc4d2fb03b6959",
+              "changed_paths": [
+                "web/index.html"
+              ],
+              "preview_endpoint": "http://127.0.0.1:58066/",
+              "human_acceptance": "PENDING",
+              "manual_rescue_actions": []
+            }
+          ],
+          "business_status": "FAIL",
+          "work_id": "5c157af6-6594-5def-83ed-14e50a11b4af",
+          "interaction_id": "d645c38e-114c-41fc-9e56-cec1de0beb46",
+          "refinements": [
+            {
+              "id": "0717f162-1af7-48c1-9bb9-7dac6338f8a0",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "web/index.html"
+                ],
+                "candidate_paths": [
+                  "server.py",
+                  "web/index.html",
+                  "web/app.js",
+                  "web/styles.css",
+                  "tests/application.cjs"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Modifying server.py to add a new /about route; /about is already in the existing route set and already returns web/index.html.",
+                  "Adding path-dependent rendering logic to web/app.js to hide existing dashboard sections on /about; the request does not ask for route-specific behavior or changes to the shared shell's loading behavior.",
+                  "Changing web/styles.css; the existing section styles already cover the new about content and no new visual requirement is stated.",
+                  "Changing tests/application.cjs; its customer CRUD test is unrelated to the About Us page and no oracle change is required.",
+                  "Creating a new web/about.html file; no new file is explicitly requested and the existing shell already serves /about.",
+                  "Adding fictional company facts, external account connections, or production data integrations."
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 9234,
+                "total_tokens": 18719,
+                "cached_tokens": 384,
+                "output_tokens": 9485,
+                "reasoning_tokens": 7296
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "36c8a8db-379f-4023-8597-479aff30d768",
+              "attempt_id": "ec5f1115-a35d-49eb-8c8c-447953b1d738",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "5c157af6-6594-5def-83ed-14e50a11b4af",
+            "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+            "pwu_count": 1,
+            "join_count": 0,
+            "pwu": [
+              {
+                "pwu_id": "36c8a8db-379f-4023-8597-479aff30d768",
+                "node_id": null,
+                "run_id": "25ead42e-6a7c-4d44-b24c-e5e35ccf6808",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:ec5f1115-a35d-49eb-8c8c-447953b1d738"
+                ],
+                "execution_seconds": 34.739619,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.412937,
+                "token_usage": {
+                  "input_tokens": 49565,
+                  "output_tokens": 6622,
+                  "total_tokens": 56187,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 4,
+                  "tool_effect": 7
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 49565,
+              "output_tokens": 6622,
+              "total_tokens": 56187,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 1,
+              "amount": null
+            },
+            "execution_seconds": 34.739619,
+            "queue_wait_seconds": 0.412937,
+            "wall_elapsed_seconds": 36.801684,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 1,
+            "first_pass_pwu_count": 1,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {
+              "inference_submission": 4,
+              "tool_effect": 7
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "c34c9467-f59b-5dac-adf2-882cc16037e4",
+              "work_id": "5c157af6-6594-5def-83ed-14e50a11b4af",
+              "kind": "CANDIDATE_AUTHORIZATION",
+              "decision": "Authorize exact sealed Candidate integration?",
+              "reason": "Repository integration requires exact Human Authority.",
+              "available_actions": [
+                "AUTHORIZE"
+              ],
+              "recommended_action": null,
+              "governed_subject_ref": "baseline-candidate:fcf1654e-0cda-556a-90ea-027900b1b562",
+              "steering_reason": null,
+              "recommendation": null,
+              "conversation_prompt": null,
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": null,
+              "reality_refs": [],
+              "steering_plan_revision_id": null,
+              "steering_step_id": null,
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -3844,6 +5208,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "679056a6-8843-5a35-9104-f8e6263b253c",
@@ -3958,6 +5325,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "eed2e33c-04ec-50bf-b067-039416572717",
@@ -4047,6 +5417,9 @@
             "manual_rescue_actions": [],
             "human_acceptance": "PENDING"
           },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": null,
@@ -4445,6 +5818,9 @@
             "manual_rescue_actions": [],
             "human_acceptance": "PENDING"
           },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "27d160f4-d63e-5526-9f03-9217e8c3ec29",
@@ -4567,6 +5943,9 @@
             "business_oracle": "NOT_YET_EVALUATED"
           },
           "failure_classification": null,
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [
             {
               "evidence_record": "business-oracle.json",
@@ -4769,7 +6148,169 @@
         "no invented logistics/refunds",
         "runtime management loop"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-03/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-03",
+            "trial": 1,
+            "status": "TIMEOUT",
+            "work_id": "9e4272d8-f864-514c-90c0-a7bc22b8475f",
+            "elapsed_seconds": 1802,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "PREVIEW_NOT_READY / CONTRACT_MISMATCH",
+            "cause": "Docker network-capacity failure cleanup contained tuple evidence; JSON persistence converted it to arrays, and Python object equality rejected the next retry transition as a concurrent update. No Work failure callback was emitted.",
+            "architecture_owner": "Production Environment Candidate Preview persistence CAS contract",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "9e4272d8-f864-514c-90c0-a7bc22b8475f",
+          "interaction_id": "b52989ff-0d82-453c-9a25-46ed3e794376",
+          "refinements": [
+            {
+              "id": "7f87be6b-cdd9-457c-a471-c38b736195b5",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "web/index.html",
+                  "web/app.js"
+                ],
+                "candidate_paths": [
+                  "server.py",
+                  "web/index.html",
+                  "web/app.js",
+                  "web/styles.css",
+                  "tests/application.cjs"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Modifying server.py to add a new orders route or API endpoints; `/orders` and `/api/orders` already exist and serve the needed page and collection.",
+                  "Changing migrations/001_initial.sql or the SQLite schema; the existing orders table already has id, customer_id, total and status.",
+                  "Editing tests/application.cjs; the human request does not require changing existing test oracles.",
+                  "Changing web/styles.css solely for appearance; the page can be usable with the existing stylesheet.",
+                  "Adding authentication, external-account connections, or production data handling; the README states authentication is not implemented and external accounts are not connected.",
+                  "Adding unrequested filter/search, order-detail, or order-update features; the human request only asks for a usable order management page."
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 12855,
+                "total_tokens": 34796,
+                "cached_tokens": 384,
+                "output_tokens": 21941,
+                "reasoning_tokens": 11826
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "1f3ba747-b90e-486f-b780-c02df7180c93",
+              "attempt_id": "9a4094ba-f8bd-4b05-b89a-54238379493f",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "9e4272d8-f864-514c-90c0-a7bc22b8475f",
+            "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+            "pwu_count": 1,
+            "join_count": 0,
+            "pwu": [
+              {
+                "pwu_id": "1f3ba747-b90e-486f-b780-c02df7180c93",
+                "node_id": null,
+                "run_id": "fb07e7a7-93d4-4bb1-bde4-8bdce745d662",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:9a4094ba-f8bd-4b05-b89a-54238379493f"
+                ],
+                "execution_seconds": 145.369104,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.878071,
+                "token_usage": {
+                  "input_tokens": 68353,
+                  "output_tokens": 34104,
+                  "total_tokens": 102457,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 5,
+                  "tool_effect": 11
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 68353,
+              "output_tokens": 34104,
+              "total_tokens": 102457,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 1,
+              "amount": null
+            },
+            "execution_seconds": 145.369104,
+            "queue_wait_seconds": 0.878071,
+            "wall_elapsed_seconds": 151.70353,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 1,
+            "first_pass_pwu_count": 1,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {
+              "inference_submission": 5,
+              "tool_effect": 11
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -4780,7 +6321,189 @@
         "only genuine identity decision escalates",
         "persisted profile edit"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-04/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-04",
+            "trial": 1,
+            "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+            "work_id": "218cb154-1a13-56df-a021-bd5356974cf8",
+            "elapsed_seconds": 600,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "RESPONSE_REALITY_CONTRADICTION / MISSING_REFINEMENT_WIRING",
+            "cause": "A legitimate Human identity choice was interpreted but ANSWER/DECIDE posture normalized it into a side question; the active Work was never revised or resumed.",
+            "architecture_owner": "WIC active Work question grounding; Production Admission explicit Human governance",
+            "allowed_human_intervention": "Select currently selected user; no source/tool/implementation hint supplied.",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {
+            "result-after-clarification.json": {
+              "case": "GC-IP-04",
+              "trial": 1,
+              "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+              "work_id": "218cb154-1a13-56df-a021-bd5356974cf8",
+              "elapsed_seconds": 0,
+              "human_acceptance": "PENDING",
+              "automatic_delivery_authorization": false,
+              "business_oracle": "NOT_YET_EVALUATED"
+            },
+            "result-after-reassessment.json": {
+              "case": "GC-IP-04",
+              "trial": 1,
+              "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+              "work_id": "218cb154-1a13-56df-a021-bd5356974cf8",
+              "elapsed_seconds": 0,
+              "human_acceptance": "PENDING",
+              "automatic_delivery_authorization": false,
+              "business_oracle": "NOT_YET_EVALUATED"
+            }
+          },
+          "human_clarification": {
+            "classification": "LEGITIMATE_IDENTITY_SCOPE_DECISION",
+            "content": "复用用户中心当前选中的用户作为资料编辑对象；编辑姓名和邮箱，不引入认证或者新的登录路径。",
+            "receipt": {
+              "turn_id": "b416550a-2ecb-4814-9edd-7812c8908636",
+              "interaction_id": "006329c7-2f8a-478a-9bae-6e14d8651f47",
+              "request_record_id": "d5e1ae2a-80e3-46bb-93c2-236d51802256",
+              "assessment_id": null,
+              "wic_mode": "WIC_VNEXT_CONTROLLED",
+              "status": "RECEIVED",
+              "failure_code": null,
+              "failure_message": null,
+              "created_at": "2026-09-26T20:24:51.451338Z",
+              "started_at": null,
+              "completed_at": null,
+              "updated_at": "2026-09-26T20:24:51.451338Z"
+            },
+            "question_count": 1,
+            "implementation_assistance": false,
+            "human_acceptance": "PENDING"
+          },
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "218cb154-1a13-56df-a021-bd5356974cf8",
+          "interaction_id": "006329c7-2f8a-478a-9bae-6e14d8651f47",
+          "refinements": [
+            {
+              "id": "6fcc3bee-892d-4740-a674-7120c8c7be02",
+              "affected_component": "steering/semantic-step",
+              "signal_kind": "CONTRACT_MISMATCH",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {},
+              "model_token_usage": {
+                "total_tokens": 14441
+              },
+              "extra_elapsed_seconds": 383
+            }
+          ],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "218cb154-1a13-56df-a021-bd5356974cf8",
+            "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+            "pwu_count": 0,
+            "join_count": 0,
+            "pwu": [],
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "amount": null
+            },
+            "wall_elapsed_seconds": null,
+            "execution_seconds": 0,
+            "queue_wait_seconds": 0,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": null,
+            "token_usage": {
+              "status": "UNREPORTED"
+            },
+            "self_refine_event_count": 0,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {},
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "8aec4507-0b39-5753-8ac2-d0dce73a0b77",
+              "work_id": "218cb154-1a13-56df-a021-bd5356974cf8",
+              "kind": "STEERING_DECISION_REQUIRED",
+              "decision": "Answer the current Work question",
+              "reason": "在现有仓库没有认证实现、且约束禁止引入新登录或认证路径的前提下，「自己的资料」中的“自己”应如何界定？可选方向至少包括：(a) 复用用户中心中当前选中的用户作为编辑对象，并相应调整验收措辞；(b) 提供一个非认证的“当前用户”选择/标识机制（不构成登录或认证路径）；(c) 将验收重述为对用户中心中任一用户的资料编辑，不作“自己”的身份区分。该选择直接决定实现目标、范围与验收结果，Watt 无权替 owner 决定。",
+              "available_actions": [],
+              "recommended_action": null,
+              "governed_subject_ref": "steering-decision:4ffc295e-ebda-4178-96fc-e4816ffde670",
+              "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+              "recommendation": "请 owner 明确：在不新增登录或认证路径的前提下，如何识别「自己的资料」中的当前用户。建议确认以下之一即可解除阻塞：(a) 仅以用户中心当前选中的用户为编辑对象，并把验收措辞由“修改自己的资料”调整为“修改所选用户的资料”；(b) 允许一个不构成认证的当前用户标识/选择机制，并说明其范围；(c) 将验收重述为对用户中心中任一用户的资料编辑。确认后可在同一基线（f629ed74d0afbcb8b5974e546c007eb5bf36663d）上形成有界、可复核的生产方案。",
+              "conversation_prompt": "在现有仓库没有认证实现、且约束禁止引入新登录或认证路径的前提下，「自己的资料」中的“自己”应如何界定？可选方向至少包括：(a) 复用用户中心中当前选中的用户作为编辑对象，并相应调整验收措辞；(b) 提供一个非认证的“当前用户”选择/标识机制（不构成登录或认证路径）；(c) 将验收重述为对用户中心中任一用户的资料编辑，不作“自己”的身份区分。该选择直接决定实现目标、范围与验收结果，Watt 无权替 owner 决定。",
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": "The decision will govern subsequent design and production.",
+              "reality_refs": [
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "2312dae7-6667-4921-8817-039188ad1798"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "834621ed-d087-56e7-adb7-7f8e89930b28"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "21782ddc-0414-4be7-8cd5-fdbd6f902951"
+                },
+                {
+                  "kind": "TRUSTED_BASELINE",
+                  "identity": "d2b02b8f-296d-4dd2-9049-a1199e02af21"
+                },
+                {
+                  "kind": "WORK",
+                  "identity": "218cb154-1a13-56df-a021-bd5356974cf8"
+                },
+                {
+                  "kind": "WORK_REALITY_REVISION",
+                  "identity": "082bdde0-8565-5dab-9335-512ff7eb0dad"
+                }
+              ],
+              "steering_plan_revision_id": "2aece8ea-6702-4df6-819f-cac4f60cc78e",
+              "steering_step_id": "b149c53a-5af9-41d0-9146-54cdef430b47",
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -4792,7 +6515,141 @@
         "admin visibility",
         "no customer-service platform expansion"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-05/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-05",
+            "trial": 1,
+            "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+            "work_id": "9f8749a4-bd4b-52ab-99ee-ca1d23bf460c",
+            "elapsed_seconds": 505,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "ALREADY_DECIDED_HUMAN_FACT_REASKED / DESIGN_SCHEMA_MISMATCH",
+            "cause": "The finite requested website behavior was routed into existing-product feedback analysis and asked for observed complaints instead of building feedback submission.",
+            "architecture_owner": "Guided Design eligibility",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "9f8749a4-bd4b-52ab-99ee-ca1d23bf460c",
+          "interaction_id": "0e3d5b03-90f5-4aa0-94d8-07727c35fb3a",
+          "refinements": [],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "9f8749a4-bd4b-52ab-99ee-ca1d23bf460c",
+            "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+            "pwu_count": 0,
+            "join_count": 0,
+            "pwu": [],
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "amount": null
+            },
+            "wall_elapsed_seconds": null,
+            "execution_seconds": 0,
+            "queue_wait_seconds": 0,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": null,
+            "token_usage": {
+              "status": "UNREPORTED"
+            },
+            "self_refine_event_count": 0,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {},
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "7da54f2e-803f-5568-a248-f1a887b75336",
+              "work_id": "9f8749a4-bd4b-52ab-99ee-ca1d23bf460c",
+              "kind": "STEERING_DECISION_REQUIRED",
+              "decision": "Answer the current Work question",
+              "reason": "What observed user feedback (from real end users, support channels, or the Human's own observations) should be connected to the current Reality for the user-feedback issue on business-app at revision f629ed74d0afbcb8b5974e546c007eb5bf36663d?",
+              "available_actions": [],
+              "recommended_action": null,
+              "governed_subject_ref": "steering-decision:fd505a44-51b0-45fc-9534-ac5df0f10d7e",
+              "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+              "recommendation": "Supply the observed user feedback for the business-app site (or identify which feedback sources/channels may be treated as evidence for this evolution), and confirm whether the owner's explicit request alone is admissible as the user-feedback basis. If no observed feedback currently exists, confirm that the evolution should instead proceed by first instrumenting feedback capture with no pre-existing observed feedback assumed.",
+              "conversation_prompt": "What observed user feedback (from real end users, support channels, or the Human's own observations) should be connected to the current Reality for the user-feedback issue on business-app at revision f629ed74d0afbcb8b5974e546c007eb5bf36663d?",
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": "The decision will govern subsequent design and production.",
+              "reality_refs": [
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "19aa103c-80c2-4b64-9d67-e22d2df530da"
+                },
+                {
+                  "kind": "DESIGN_PROCESS",
+                  "identity": "2956c298-2c73-50f2-8ab7-d3336583c48d"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "1b213866-3520-4737-b1e5-62bd8a931793"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "f5c66c81-3ff7-5fca-9c46-c8e5a62ed149"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "47e6bcf4-3f29-4eaa-8000-cc8c5c104d39"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "927cef43-e43e-411a-9b1a-b253ec796f74"
+                },
+                {
+                  "kind": "TRUSTED_BASELINE",
+                  "identity": "d2b02b8f-296d-4dd2-9049-a1199e02af21"
+                },
+                {
+                  "kind": "WORK",
+                  "identity": "9f8749a4-bd4b-52ab-99ee-ca1d23bf460c"
+                },
+                {
+                  "kind": "WORK_REALITY_REVISION",
+                  "identity": "03095051-91d5-5c2e-8919-6e66f730ae1f"
+                }
+              ],
+              "steering_plan_revision_id": "e35728b8-1716-40a3-a73c-c0365f567b4d",
+              "steering_step_id": "7dd8f36e-97a1-4e8a-8624-787cbdd18033",
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -4803,7 +6660,149 @@
         "no fabricated KPI data",
         "served overview"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-06/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-06",
+            "trial": 1,
+            "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+            "work_id": "5ea801c8-482f-5e66-9dd0-eca6f315264d",
+            "elapsed_seconds": 614,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "ALREADY_DECIDED_HUMAN_FACT_REASKED / DESIGN_SCHEMA_MISMATCH",
+            "cause": "The selected business overview was routed to broad feedback prioritization instead of the existing bounded implementation flow.",
+            "architecture_owner": "Guided Design eligibility",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "5ea801c8-482f-5e66-9dd0-eca6f315264d",
+          "interaction_id": "fded2cd1-c73a-4a74-804a-160c178fde9f",
+          "refinements": [],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "5ea801c8-482f-5e66-9dd0-eca6f315264d",
+            "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+            "pwu_count": 0,
+            "join_count": 0,
+            "pwu": [],
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "amount": null
+            },
+            "wall_elapsed_seconds": null,
+            "execution_seconds": 0,
+            "queue_wait_seconds": 0,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": null,
+            "token_usage": {
+              "status": "UNREPORTED"
+            },
+            "self_refine_event_count": 0,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {},
+            "final_outcome": "READY"
+          },
+          "human_attention": [
+            {
+              "attention_id": "9ea7e3aa-ed99-5f2b-8ca5-087aa86bd706",
+              "work_id": "5ea801c8-482f-5e66-9dd0-eca6f315264d",
+              "kind": "STEERING_DECISION_REQUIRED",
+              "decision": "Answer the current Work question",
+              "reason": "Which of the problems visible in current Reality is worth changing first, and why — the Human owner/operator must supply the governed prioritization verdict and its rationale, since this Step's required_output is GOVERNED_HUMAN_DECISION and Watt holds no admitted authority to rank business problems. Candidate problems presented for that verdict: (a) no consolidated operational view across /, /users, /customers, /orders; (b) existing operational data in SQLite already exposed via /api/users, /api/customers, /api/orders but not surfaced as an at-a-glance overview; (c) user `status` and customer name/email already modeled but not leveraged for operational visibility; (d) absence of customer notes, feedback records or CRM workflows — is that a problem in scope, out of scope, or not a problem at all?",
+              "available_actions": [],
+              "recommended_action": null,
+              "governed_subject_ref": "steering-decision:c208e7eb-c9be-45ea-88a9-5926f5219f5b",
+              "steering_reason": "SCOPE_OR_AUTHORITY_EXPANSION",
+              "recommendation": "Request a governed Human decision on problem prioritization from the Human owner/operator. Ratify, in the owner's own words: (1) the ordered list of problems worth changing (candidate set offered: no consolidated operational view; existing SQLite operational data already exposed via /api/users, /api/customers, /api/orders but not surfaced at a glance; unused user `status` and customer name/email for operational visibility; and an explicit in-scope/out-of-scope call on customer notes, feedback records and CRM workflows, which do not exist in the baseline); and (2) the rationale for that order, tying it to the stated desired outcome of seeing operations at a glance. This decision is required because the agenda declares the issue's required_output to be a GOVERNED_HUMAN_DECISION with MATERIAL_HUMAN_DECISION authority relevance, and because the ordering materially determines the scope, cost, sequence and acceptance of every downstream issue (solution-options, impact-assessment, validation, evolution-plan) and of the eventual production proposal. Watt will not author that ranking. No production proposal, artifact, or repository change is formed or authorized by this Step, and the repository URL confers no remote, write, branch, or push authority.",
+              "conversation_prompt": "Which of the problems visible in current Reality is worth changing first, and why — the Human owner/operator must supply the governed prioritization verdict and its rationale, since this Step's required_output is GOVERNED_HUMAN_DECISION and Watt holds no admitted authority to rank business problems. Candidate problems presented for that verdict: (a) no consolidated operational view across /, /users, /customers, /orders; (b) existing operational data in SQLite already exposed via /api/users, /api/customers, /api/orders but not surfaced as an at-a-glance overview; (c) user `status` and customer name/email already modeled but not leveraged for operational visibility; (d) absence of customer notes, feedback records or CRM workflows — is that a problem in scope, out of scope, or not a problem at all?",
+              "alternatives": [],
+              "trade_offs": [],
+              "expected_impact": "No out-of-scope production will occur before the decision.",
+              "reality_refs": [
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "7a4486c2-6166-4e13-936c-4cea9dae143f"
+                },
+                {
+                  "kind": "DESIGN_AGENDA_REVISION",
+                  "identity": "d0f06a68-2610-4acb-8dd8-a5b53eb27aae"
+                },
+                {
+                  "kind": "DESIGN_PROCESS",
+                  "identity": "5dda3e6f-c642-59ae-a2f2-80e2566bbfe7"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "7c2c0016-93ae-401f-b14d-181013f211d0"
+                },
+                {
+                  "kind": "GOVERNANCE_DECISION",
+                  "identity": "f8a9aaab-e5f4-5c9e-87ca-af393bdb22a1"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "1d46dd28-28c3-4be4-8a88-3000bcc029f9"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "6a7151fa-0537-48c8-beeb-ad07e20f0454"
+                },
+                {
+                  "kind": "SEMANTIC_RESULT",
+                  "identity": "8c93f966-89dc-4f0b-9062-43d30846f3b4"
+                },
+                {
+                  "kind": "TRUSTED_BASELINE",
+                  "identity": "d2b02b8f-296d-4dd2-9049-a1199e02af21"
+                },
+                {
+                  "kind": "WORK",
+                  "identity": "5ea801c8-482f-5e66-9dd0-eca6f315264d"
+                },
+                {
+                  "kind": "WORK_REALITY_REVISION",
+                  "identity": "1b8e1bca-e573-5565-afdc-e9bede69c185"
+                }
+              ],
+              "steering_plan_revision_id": "72bc1319-ab34-4b3d-a261-400c3ae79c9c",
+              "steering_step_id": "0291d7c2-f216-44fe-837f-0a5b2a3e8244",
+              "interaction_id": null,
+              "interaction_assessment_id": null,
+              "expected_work_reality_revision_id": null
+            }
+          ],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -4814,7 +6813,330 @@
         "selected scope implemented",
         "actual data search"
       ],
-      "trials": [],
+      "trials": [
+        {
+          "trial": 1,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-07/trial-1",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-07",
+            "trial": 1,
+            "status": "TIMEOUT",
+            "work_id": "98edf043-00ec-5df0-9998-5262f4f9cb7f",
+            "elapsed_seconds": 1801,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "PREVIEW_NOT_READY / CONTRACT_MISMATCH",
+            "cause": "Docker network-capacity failure cleanup contained tuple evidence; JSON persistence converted it to arrays, and Python object equality rejected the next retry transition as a concurrent update. No Work failure callback was emitted.",
+            "architecture_owner": "Production Environment Candidate Preview persistence CAS contract",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "98edf043-00ec-5df0-9998-5262f4f9cb7f",
+          "interaction_id": "a2f76121-dd8b-4584-9a86-83f36075f798",
+          "refinements": [
+            {
+              "id": "8f0c4154-b421-4f2c-a838-d830d53183f4",
+              "affected_component": "steering/semantic-step",
+              "signal_kind": "CONTRACT_MISMATCH",
+              "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {},
+              "model_token_usage": {
+                "total_tokens": 24230
+              },
+              "extra_elapsed_seconds": 360
+            },
+            {
+              "id": "03a837e9-8b87-4ce4-850f-f0baa1008e2b",
+              "affected_component": "semantic/scope",
+              "signal_kind": "CANDIDATE_INCONSISTENT",
+              "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+              "final_result": "LOCAL_OBLIGATION_RECOVERED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "signal": "SCOPE_INFLATION",
+                "required_paths": [
+                  "server.py",
+                  "web/index.html",
+                  "web/app.js"
+                ],
+                "candidate_paths": [
+                  "server.py",
+                  "web/index.html",
+                  "web/app.js",
+                  "tests/application.cjs"
+                ],
+                "authority_expanded": false,
+                "rejected_behaviors": [
+                  "Adding a new search page or route is not required by `给系统增加搜索。` and would be unrequested scope.",
+                  "Changing tests/application.cjs is not required; existing tests remain read-only references unless an explicit acceptance oracle for search must change.",
+                  "Creating new entities, CRM workflows, customer notes/feedback, external accounts, authentication, or production data is not requested and is forbidden by the existing fixture constraints.",
+                  "Changing web/styles.css, migrations/001_initial.sql, README.md, package.json, or Dockerfile is not necessary; existing input/button styles and schema are sufficient for the requested search surface.",
+                  "Changing the process model, port, SQLite mechanism, or startup migrations is not required.",
+                  "Presenting fixture records as real company facts is rejected.",
+                  "Backend-only search without the visible UI affordance would be incomplete for the requested system search.",
+                  "Client-side-only filtering of only the currently loaded users/customers would not cover the system's existing records/API collections."
+                ]
+              },
+              "model_token_usage": {
+                "unknown": false,
+                "input_tokens": 8456,
+                "total_tokens": 16668,
+                "cached_tokens": 512,
+                "output_tokens": 8212,
+                "reasoning_tokens": 5517
+              },
+              "extra_elapsed_seconds": 0
+            }
+          ],
+          "execution_lineage": [
+            {
+              "pwu_id": "4c1e13f3-439d-506c-aa7e-0e8fa30860bb",
+              "attempt_id": "83a24787-93d0-41db-9641-4f8b797881e3",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            },
+            {
+              "pwu_id": "a67b70ad-6c2d-53fa-b2a7-124d4a3c8265",
+              "attempt_id": "6a85bbb1-57c4-4dbb-b4e8-77b928651465",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            },
+            {
+              "pwu_id": "4919a11f-e58f-5207-b478-94a907f316f8",
+              "attempt_id": "16c3c310-d22e-4520-99d9-b0b8d338aca4",
+              "condition": "COMPLETED",
+              "resume_count": 0
+            }
+          ],
+          "plan_lineage": {
+            "plan_revision_id": "0367b5ba-93b5-459f-a98e-4a28d735779c",
+            "revision_number": 1,
+            "groups": [
+              {
+                "node_id": "group:server",
+                "objective": "Produce the server change surface",
+                "parent_id": null
+              },
+              {
+                "node_id": "group:app",
+                "objective": "Produce the app change surface",
+                "parent_id": null
+              }
+            ],
+            "pwus": [
+              {
+                "node_id": "pwu:1",
+                "pwu_id": "4c1e13f3-439d-506c-aa7e-0e8fa30860bb",
+                "kind": "PWU",
+                "objective": "Produce and verify the server capability change",
+                "group_id": "group:server",
+                "dependency_ids": [],
+                "state": "VERIFIED",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "d2b02b8f-296d-4dd2-9049-a1199e02af21",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": "d458a0aa-e2da-51ea-9a7e-a6d0bcd4a1f0",
+                "verified_output_revision": "349f51541097995e416450bfb9065913ffcd87f8",
+                "workspace_attempt_id": "83a24787-93d0-41db-9641-4f8b797881e3"
+              },
+              {
+                "node_id": "pwu:2",
+                "pwu_id": "a67b70ad-6c2d-53fa-b2a7-124d4a3c8265",
+                "kind": "PWU",
+                "objective": "Produce and verify the app capability change",
+                "group_id": "group:app",
+                "dependency_ids": [],
+                "state": "VERIFIED",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "d2b02b8f-296d-4dd2-9049-a1199e02af21",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": "227236eb-f276-5cda-8fdd-cba064c93040",
+                "verified_output_revision": "d491e14c56f3a12516a404aa4addc42b6814db1b",
+                "workspace_attempt_id": "6a85bbb1-57c4-4dbb-b4e8-77b928651465"
+              },
+              {
+                "node_id": "pwu:join",
+                "pwu_id": "4919a11f-e58f-5207-b478-94a907f316f8",
+                "kind": "JOIN",
+                "objective": "Reconcile and verify the independently produced branch baselines",
+                "group_id": null,
+                "dependency_ids": [
+                  "pwu:1",
+                  "pwu:2"
+                ],
+                "state": "VERIFIED",
+                "blocked_reason": null,
+                "conflict_count": 0,
+                "semantic_conflict_domain": null,
+                "autonomous_retry_available": false,
+                "input_baseline_id": "d2b02b8f-296d-4dd2-9049-a1199e02af21",
+                "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+                "verified_output_baseline_id": "f16d7d34-66cc-532e-91d5-fbf6d1379c82",
+                "verified_output_revision": "3a2741cc7a731b94fcd0a6aac2c61de25d94486a",
+                "workspace_attempt_id": "16c3c310-d22e-4520-99d9-b0b8d338aca4"
+              }
+            ],
+            "integrated_baseline_id": "f16d7d34-66cc-532e-91d5-fbf6d1379c82",
+            "integrated_revision": "3a2741cc7a731b94fcd0a6aac2c61de25d94486a"
+          },
+          "economics": {
+            "work_id": "98edf043-00ec-5df0-9998-5262f4f9cb7f",
+            "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+            "pwu_count": 3,
+            "join_count": 1,
+            "pwu": [
+              {
+                "pwu_id": "4c1e13f3-439d-506c-aa7e-0e8fa30860bb",
+                "node_id": "pwu:1",
+                "run_id": "ed007cc2-3f28-4904-b057-9f80035c6617",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:83a24787-93d0-41db-9641-4f8b797881e3"
+                ],
+                "execution_seconds": 124.325259,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.373872,
+                "token_usage": {
+                  "input_tokens": 74267,
+                  "output_tokens": 26307,
+                  "total_tokens": 100574,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 5,
+                  "tool_effect": 12
+                }
+              },
+              {
+                "pwu_id": "a67b70ad-6c2d-53fa-b2a7-124d4a3c8265",
+                "node_id": "pwu:2",
+                "run_id": "ed007cc2-3f28-4904-b057-9f80035c6617",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:6a85bbb1-57c4-4dbb-b4e8-77b928651465"
+                ],
+                "execution_seconds": 59.768225,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.436431,
+                "token_usage": {
+                  "input_tokens": 78509,
+                  "output_tokens": 12069,
+                  "total_tokens": 90578,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 5,
+                  "tool_effect": 13
+                }
+              },
+              {
+                "pwu_id": "4919a11f-e58f-5207-b478-94a907f316f8",
+                "node_id": "pwu:join",
+                "run_id": "ed007cc2-3f28-4904-b057-9f80035c6617",
+                "condition": "SATISFIED",
+                "attempt_count": 1,
+                "outcomes": [
+                  "RESULT_READY"
+                ],
+                "providers": [
+                  "deepseek",
+                  "watt-native:16c3c310-d22e-4520-99d9-b0b8d338aca4"
+                ],
+                "execution_seconds": 61.321728,
+                "duration_observed": true,
+                "queue_wait_seconds": 0.838766,
+                "token_usage": {
+                  "input_tokens": 56578,
+                  "output_tokens": 12488,
+                  "total_tokens": 69066,
+                  "status": "OBSERVED"
+                },
+                "resource_units": {
+                  "inference_submission": 4,
+                  "tool_effect": 8
+                }
+              }
+            ],
+            "token_usage": {
+              "input_tokens": 209354,
+              "output_tokens": 50864,
+              "total_tokens": 260218,
+              "status": "OBSERVED"
+            },
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "by_currency": {},
+              "unreported_attempt_count": 3,
+              "amount": null
+            },
+            "execution_seconds": 245.415212,
+            "queue_wait_seconds": 1.649069,
+            "wall_elapsed_seconds": 282.216254,
+            "critical_path_seconds": 185.646987,
+            "parallelism_effect_seconds": 0.0,
+            "self_refine_event_count": 2,
+            "first_pass_pwu_count": 3,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 360,
+            "resource_units": {
+              "inference_submission": 14,
+              "tool_effect": 33
+            },
+            "final_outcome": "READY"
+          },
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        }
+      ],
       "successful_independent_trials": 0,
       "status": "PENDING"
     },
@@ -5212,6 +7534,9 @@
             "manual_rescue_actions": [],
             "human_acceptance": "PENDING"
           },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "cf9356ad-c3bc-5d0e-bb69-1d29d3dc2679",
@@ -5323,7 +7648,16 @@
           "runtime_activation": {
             "status": "NOT_CAPTURED_AT_SUBMISSION"
           },
-          "observer_result": null,
+          "observer_result": {
+            "case": "GC-IP-08",
+            "trial": 2,
+            "status": "TIMEOUT",
+            "work_id": "ca384e96-a087-521c-b4a1-5f763114b863",
+            "elapsed_seconds": 1802,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
           "failure_classification": {
             "signal": "PREVIEW_NOT_READY / MISSING_WORK_CONVERGENCE_WIRING",
             "architecture_owner": "Preview/runtime and Work convergence",
@@ -5333,6 +7667,9 @@
             "human_acceptance": "PENDING",
             "cause": "Docker default network pool exhausted; terminal Preview failure lacked a final refinement event and Work escalation."
           },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
           "business_oracles": [],
           "business_status": "NOT_EVALUATED",
           "work_id": "ca384e96-a087-521c-b4a1-5f763114b863",
@@ -5451,6 +7788,101 @@
               "inference_submission": 5,
               "tool_effect": 11
             },
+            "final_outcome": "READY"
+          },
+          "human_attention": [],
+          "manual_rescue_actions": [],
+          "human_acceptance": "PENDING"
+        },
+        {
+          "trial": 3,
+          "evidence_directory": ".spg/stability-runtime/golden-runs/GC-IP-08/trial-3",
+          "runtime_activation": {
+            "state": "ACTIVE_AT_TRUSTED_BASELINE",
+            "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+            "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+            "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+            "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+            "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+            "human_review_version_id": null,
+            "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+            "image_rebuild_paths": []
+          },
+          "observer_result": {
+            "case": "GC-IP-08",
+            "trial": 3,
+            "status": "TIMEOUT",
+            "work_id": "b63e3119-99a3-5f47-ae13-47099c74cc44",
+            "elapsed_seconds": 1802,
+            "human_acceptance": "PENDING",
+            "automatic_delivery_authorization": false,
+            "business_oracle": "NOT_YET_EVALUATED"
+          },
+          "failure_classification": {
+            "signal": "CONTRACT_MISMATCH / MISSING_CONVERGENCE_WIRING",
+            "cause": "Second scope necessity proof lacked a verbatim Human/source witness; advisory summary was presented ambiguously alongside Human authority.",
+            "architecture_owner": "Semantic scope evidence contract; Steering owner budget",
+            "manual_rescue_actions": [],
+            "human_acceptance": "PENDING"
+          },
+          "continuation_observations": {},
+          "human_clarification": null,
+          "runtime_retirement": null,
+          "business_oracles": [],
+          "business_status": "NOT_EVALUATED",
+          "work_id": "b63e3119-99a3-5f47-ae13-47099c74cc44",
+          "interaction_id": "54da7d01-7bf2-44aa-b75e-1a7226db5a62",
+          "refinements": [
+            {
+              "id": "19566a85-1d1c-4f9c-a90b-e599e6fae24e",
+              "affected_component": "steering/semantic-step",
+              "signal_kind": "CONTRACT_MISMATCH",
+              "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+              "final_result": "ESCALATED",
+              "budget_decision": {
+                "bounded": true,
+                "attempt_count": 2,
+                "human_escalated": false
+              },
+              "diagnostic_evidence": {
+                "basis_fingerprint": "97f126fc4f1c4fe385257969cfb87549c17df45451f75fe85a43f97f2bd093d5",
+                "second_error_type": "ValueError",
+                "first_validation_feedback": "Task Contract candidate failed validation: Scope necessity proof has no exact repository/Human witness"
+              },
+              "model_token_usage": {
+                "total_tokens": 38025
+              },
+              "extra_elapsed_seconds": 172
+            }
+          ],
+          "execution_lineage": [],
+          "plan_lineage": null,
+          "economics": {
+            "work_id": "b63e3119-99a3-5f47-ae13-47099c74cc44",
+            "product_id": "3d48d274-d48f-414e-8000-62278c2f305c",
+            "pwu_count": 0,
+            "join_count": 0,
+            "pwu": [],
+            "observed_provider_spend": {
+              "status": "UNREPORTED",
+              "amount": null
+            },
+            "wall_elapsed_seconds": null,
+            "execution_seconds": 0,
+            "queue_wait_seconds": 0,
+            "critical_path_seconds": null,
+            "parallelism_effect_seconds": null,
+            "token_usage": {
+              "status": "UNREPORTED"
+            },
+            "self_refine_event_count": 0,
+            "first_pass_pwu_count": 0,
+            "retried_pwu_count": 0,
+            "human_escalation_count": 0,
+            "refinement_extra_seconds": 0,
+            "resource_units": {},
             "final_outcome": "READY"
           },
           "human_attention": [],
