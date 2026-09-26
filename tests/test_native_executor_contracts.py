@@ -570,6 +570,37 @@ def test_kernel_keeps_tools_after_continue_clears_residuals() -> None:
     assert inference.requests[1].available_tools
 
 
+def test_kernel_advertises_only_attempt_granted_tools() -> None:
+    binding, contract = _binding()
+
+    async def unused(request: ToolExecutionRequest) -> ToolExecutionResult:
+        raise AssertionError("No tool effect should be submitted")
+
+    inference = ScriptedInferenceAdapter((
+        InferenceResponse(
+            action=InferenceAction.UNABLE_TO_COMPLETE,
+            summary="No work submitted", working_plan=_plan(),
+            residual_obligations=(),
+        ),
+    ))
+    kernel = NativeExecutorKernel(
+        inference=inference,
+        tools=NativeToolRegistry((
+            ToolDefinition("file.write", "1", "write", {}, "LOCAL_MUTATION", unused),
+            ToolDefinition("filesystem.operation", "1", "search", {}, "READ", unused),
+        )),
+        checkpoints=_Checkpoints(),
+    )
+
+    asyncio.run(kernel.run(
+        binding=binding, contract=contract, worker_epoch=1, working_plan=_plan(),
+    ))
+
+    assert [tool["identity"] for tool in inference.requests[0].available_tools] == [
+        "file.write"
+    ]
+
+
 def test_kernel_requires_terminal_decision_after_three_ineffective_rounds() -> None:
     binding, contract = _binding()
     binding = binding.model_copy(update={
@@ -999,6 +1030,18 @@ def test_repairability_requires_exact_oracle_and_admitted_write_scope() -> None:
         output={"diagnostic_code": "E0425", "path": "src/main.rs"},
     )
     assert classification is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+
+
+def test_rejected_process_recipe_can_be_corrected_without_human() -> None:
+    binding, _ = _binding()
+    classification, basis = DurableKernelAudit._classify_repairability(
+        {}, binding=binding, tool="process.run",
+        condition=EffectCondition.FAILED,
+        output={"error_type": "ValueError", "effect_observed": False,
+                "message": "process executable is not allowlisted: wc"},
+    )
+    assert classification is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+    assert "no effect" in basis
 
 
 def test_repair_orientation_is_compacted_before_exact_contract_reality() -> None:

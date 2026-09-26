@@ -194,11 +194,13 @@ def test_repository_action_claims_follow_persisted_acquisition_state() -> None:
         latest_human_input="把仓库拉下来。",
         response_contract=_contract(InteractionMode.EXECUTE),
         repository_acquisition_state="RUNNING",
+        production_admission_state="WORK_CREATED",
     )
 
     assert "正在拉取仓库" in requested.forbidden_claims
     assert "正在拉取仓库" not in running.forbidden_claims
     assert "代码已经拉取完成" in running.forbidden_claims
+    assert "下一步就是接纳这项改动" in running.forbidden_claims
 
 
 def test_identity_question_requires_system_capability_reality_context() -> None:

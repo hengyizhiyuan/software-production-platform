@@ -5,6 +5,7 @@ from __future__ import annotations
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 from spg.application.assets import RepositoryAssetService
+from spg.application.product_assets import ProductAssetService
 from spg.application.interaction import WorkInteractionService
 from spg.application.post_admission import WorkPostAdmissionService
 from spg.application.repository_branch_authority import (
@@ -236,6 +237,12 @@ class ProductionAdmissionTrigger:
                     ),
                     observation,
                 )
+            ProductAssetService(self.work.database).ensure_repository_work(
+                work_id, UUID(observation["resource_id"]), authority_identity,
+                revision=observation["revision"],
+                repository_ref=observation["repository_ref"],
+                tree=observation.get("tree"),
+            )
             if not current.steering_enabled:
                 self.post_admission.activate(work_id)
             return observation

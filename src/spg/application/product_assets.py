@@ -1,6 +1,8 @@
 """Long-lived software Product ownership over Works and engineering assets."""
 
 from datetime import UTC, datetime
+from pathlib import PurePosixPath
+from urllib.parse import urlparse
 from uuid import UUID, uuid4
 
 from sqlalchemy import insert, select, update
@@ -109,6 +111,80 @@ class ProductAssetService:
                 ).values(product_id=product_id))
             uow.commit()
         return self.get(product_id, owner_id)
+
+    def ensure_repository_work(
+        self, work_id: UUID, resource_id: UUID, owner_id: str,
+        *, revision: str, repository_ref: str, tree: str | None,
+    ) -> UUID:
+        """Retain an acquired source as Product Reality for the admitted Work.
+
+        The Engineering Resource row serializes concurrent admissions of the
+        same repository. An existing owner Product is reused, while an already
+        bound Work keeps its explicit Product choice.
+        """
+
+        now = datetime.now(UTC)
+        with self.database.unit_of_work() as uow:
+            session = uow.session
+            resource = session.execute(select(engineering_resources).where(
+                engineering_resources.c.id == resource_id,
+            ).with_for_update()).mappings().one_or_none()
+            if resource is None:
+                raise ProductRecordNotFound(f"Engineering Resource not found: {resource_id}")
+            work = session.execute(select(product_works.c.product_id).where(
+                product_works.c.id == work_id,
+            ).with_for_update()).one_or_none()
+            if work is None:
+                raise ProductRecordNotFound(f"Work not found: {work_id}")
+            identity = resource["repository_identity"]
+            product_id = work.product_id
+            if product_id is None:
+                product_id = session.execute(
+                    select(software_product_assets.c.product_id)
+                    .join(software_products,
+                          software_products.c.id == software_product_assets.c.product_id)
+                    .where(
+                        software_products.c.owner_id == owner_id,
+                        software_products.c.lifecycle == "ACTIVE",
+                        software_product_assets.c.asset_kind == "REPOSITORY",
+                        software_product_assets.c.reference == identity,
+                    )
+                    .order_by(software_product_assets.c.created_at,
+                              software_product_assets.c.id)
+                    .limit(1)
+                ).scalar_one_or_none()
+                if product_id is None:
+                    path = urlparse(identity).path or identity
+                    name = PurePosixPath(path.rstrip("/")).name.removesuffix(".git")
+                    product_id = uuid4()
+                    session.execute(insert(software_products).values(
+                        id=product_id, owner_id=owner_id,
+                        name=(name or "Repository Product")[:255],
+                        description=f"Watt-managed Product for {identity}",
+                        lifecycle="ACTIVE", created_at=now, updated_at=now,
+                    ))
+                session.execute(update(product_works).where(
+                    product_works.c.id == work_id,
+                ).values(product_id=product_id))
+            else:
+                product = self._owned(session, product_id, owner_id)
+                if product["lifecycle"] != "ACTIVE":
+                    raise ProductInvariantViolation("Inactive Product cannot receive a repository")
+            existing = session.execute(select(software_product_assets.c.id).where(
+                software_product_assets.c.product_id == product_id,
+                software_product_assets.c.asset_kind == "REPOSITORY",
+                software_product_assets.c.reference == identity,
+            )).scalar_one_or_none()
+            if existing is None:
+                session.execute(insert(software_product_assets).values(
+                    id=uuid4(), product_id=product_id, asset_kind="REPOSITORY",
+                    reference=identity, resource_id=resource_id,
+                    metadata={"revision": revision, "repository_ref": repository_ref,
+                              "tree": tree, "source": "WORK_REPOSITORY_ACQUISITION"},
+                    created_at=now,
+                ))
+            uow.commit()
+        return product_id
 
     def history(self, product_id: UUID, owner_id: str) -> dict:
         product = self.get(product_id, owner_id)

@@ -194,7 +194,10 @@ class NativeExecutorKernel:
                 available_tools=(
                     tuple(
                         item for item in self.tools.contracts()
-                        if not evidence_required or item.get("identity") in self._DIAGNOSTIC_TOOLS
+                        if item.get("identity") in {
+                            grant.identity for grant in binding.capability_grants
+                        }
+                        and (not evidence_required or item.get("identity") in self._DIAGNOSTIC_TOOLS)
                     )
                     if ineffective_rounds < 3
                     else ()

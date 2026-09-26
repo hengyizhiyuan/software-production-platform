@@ -42,6 +42,50 @@ def _git(root: Path, *args: str) -> str:
                           capture_output=True, text=True).stdout.strip()
 
 
+def test_acquired_repository_creates_and_reuses_owner_product(
+    postgres_database, tmp_path: Path,
+) -> None:
+    repository = tmp_path / "imports" / "sample-product"
+    repository.mkdir(parents=True)
+    _git(repository, "init", "-b", "main")
+    _git(repository, "config", "user.name", "P1 Qualification")
+    _git(repository, "config", "user.email", "p1@example.invalid")
+    (repository / "README.md").write_text("# Sample\n", encoding="utf-8")
+    _git(repository, "add", ".")
+    _git(repository, "commit", "-m", "baseline")
+    assets = RepositoryAssetService(
+        postgres_database, tmp_path / "assets", tmp_path / "imports",
+    )
+    observation = assets.intake(RepositoryIntakeRequest(
+        request_id=uuid4(), source=str(repository), title="Sample",
+        description="Brownfield source", authority_identity="human:owner",
+    ))
+    assert observation["condition"] == "READY"
+    products = ProductAssetService(postgres_database)
+    work_service = WorkApplicationService(
+        postgres_database, workspace_root=tmp_path / "workspaces",
+    )
+    first = work_service.submit_work("Add one nav link")
+    second = work_service.submit_work("Adjust nav link")
+    first_product_id = products.ensure_repository_work(
+        first.work_id, UUID(observation["resource_id"]), "human:owner",
+        revision=observation["revision"],
+        repository_ref=observation["repository_ref"],
+        tree=observation.get("tree"),
+    )
+    second_product_id = products.ensure_repository_work(
+        second.work_id, UUID(observation["resource_id"]), "human:owner",
+        revision=observation["revision"],
+        repository_ref=observation["repository_ref"],
+        tree=observation.get("tree"),
+    )
+    assert second_product_id == first_product_id
+    product = products.get(first_product_id, "human:owner")
+    assert len(product["works"]) == 2
+    assert len(product["assets"]) == 1
+    assert product["assets"][0]["reference"] == observation["repository_identity"]
+
+
 def test_p1_q4_brownfield_intake_product_work_and_delivery_boundary(
     postgres_database, tmp_path: Path,
 ) -> None:

@@ -595,6 +595,17 @@ class DurableKernelAudit:
             return RepairabilityClassification.REQUIRES_HUMAN_DECISION, "multiple valid product outcomes"
         if output.get("product_intent_change") is True:
             return RepairabilityClassification.REQUIRES_HUMAN_DECISION, "repair would change Product Intent"
+        if (
+            condition is EffectCondition.FAILED
+            and output.get("effect_observed") is False
+            and output.get("error_type") == "ValueError"
+            and isinstance(output.get("message"), str)
+            and output["message"].startswith("process executable is not allowlisted:")
+        ):
+            # The rejected command never ran. Choosing a permitted inspection
+            # recipe stays inside the existing Task Contract and needs no new
+            # Human authority or acceptance oracle.
+            return RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE, "rejected process recipe had no effect"
         assertion = output.get("assertion")
         task = contract_payload.get("task_contract")
         if not isinstance(task, dict):

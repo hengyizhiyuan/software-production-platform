@@ -379,6 +379,11 @@ def governed_response_envelope(
     )
     if repository_acquisition_state != "RUNNING":
         forbidden.extend(("正在拉取仓库", "正在获取仓库", "acquiring repository"))
+    if production_admission_state == "WORK_CREATED":
+        forbidden.extend((
+            "下一步就是接纳这项改动", "请先接纳这项改动",
+            "你把这个小改动作为一项 Work 接纳", "等待你接纳 Work",
+        ))
     if repository_acquisition_state != "READY":
         forbidden.extend(("仓库已经准备完成", "代码已经拉取完成", "repository ready"))
     if repository_acquisition_state != "WAITING_FOR_AUTHORIZATION":
