@@ -1,0 +1,26 @@
+{
+  "case": "GC-EX-05",
+  "trial": 3,
+  "checks": {
+    "automatic_preview_ready": true,
+    "served_verification": true,
+    "no_unauthorized_delivery": true,
+    "browser_dialog_oracle": true,
+    "actual_cancel_closes_dialog": true,
+    "actual_no_effect_tool_failure": true,
+    "bounded_source_repair": true,
+    "autonomous_refinement_signal": true
+  },
+  "status": "PASS",
+  "candidate_revision": "f8076c79e7721ace7a95e22d560f2509397c8004",
+  "candidate_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+  "browser_evidence_record": "browser-oracle.json",
+  "persistence_evidence_record": "persistence-oracle.json",
+  "historical_runtime_evidence": false,
+  "changed_paths": [
+    "web/app.js"
+  ],
+  "preview_endpoint": "http://127.0.0.1:54439/",
+  "human_acceptance": "PENDING",
+  "manual_rescue_actions": []
+}

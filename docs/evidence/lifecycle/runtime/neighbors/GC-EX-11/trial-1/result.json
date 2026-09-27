@@ -1,0 +1,10 @@
+{
+  "case": "GC-EX-11",
+  "trial": 1,
+  "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+  "work_id": "049680fe-03e6-56ac-84fd-3d345710e0cb",
+  "elapsed_seconds": 94,
+  "human_acceptance": "PENDING",
+  "automatic_delivery_authorization": false,
+  "business_oracle": "NOT_YET_EVALUATED"
+}

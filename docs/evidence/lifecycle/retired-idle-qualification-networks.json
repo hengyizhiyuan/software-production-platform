@@ -1,0 +1,32 @@
+[
+  {
+    "name": "watt-branch-e2e_control",
+    "id": "63f4775856996c81d2581e266492233f7b45e6d57dd7b8019a312f90bee88438",
+    "endpoints_before": 0,
+    "scope": "IDLE_PRIOR_QUALIFICATION_NETWORK_ONLY"
+  },
+  {
+    "name": "watt-branch-e2e_executor",
+    "id": "1373b228be10bd4d9c7924380c8448f5feaf3b215a223be86267084b8cf25838",
+    "endpoints_before": 0,
+    "scope": "IDLE_PRIOR_QUALIFICATION_NETWORK_ONLY"
+  },
+  {
+    "name": "watt-stability-golden-v13_control",
+    "id": "60f7cebec4258f19961459246a589c34d71df8ab9c522b076206cc171b50d660",
+    "endpoints_before": 0,
+    "scope": "IDLE_PRIOR_QUALIFICATION_NETWORK_ONLY"
+  },
+  {
+    "name": "watt-stability-golden-v13_executor",
+    "id": "9112497f570ad707d3992b75c877cd2bacdac27f705332dd711512dfd90a15cd",
+    "endpoints_before": 0,
+    "scope": "IDLE_PRIOR_QUALIFICATION_NETWORK_ONLY"
+  },
+  {
+    "name": "watt-stability-golden_control",
+    "id": "5177ddcbb471b7d67648e4a5646ac83115ba64048990256cc4f4cdf165d6d0da",
+    "endpoints_before": 0,
+    "scope": "IDLE_PRIOR_QUALIFICATION_NETWORK_ONLY"
+  }
+]

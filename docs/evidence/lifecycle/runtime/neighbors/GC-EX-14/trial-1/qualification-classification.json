@@ -1,0 +1,7 @@
+{
+  "status": "UNQUALIFIED_FAULT",
+  "reason": "Read-then-kill race crossed the declared settled-effect frontier: a file.write INTENDED was observed at worker loss. Runtime correctly fences uncertain effects; this is not a qualified safe-checkpoint replay trial.",
+  "no_manual_uncertainty_clear": true,
+  "no_human_work_rescue": true,
+  "replacement": "fresh trial-2 with frozen frontier verification"
+}

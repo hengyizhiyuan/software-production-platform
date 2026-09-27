@@ -1,0 +1,14 @@
+{
+  "case": "GC-LC-09",
+  "trial": 1,
+  "status": "FAIL",
+  "reason": "Historical-result question reached conversational realization and denied actual completed production; fixed through existing read-only Work Reality owner, separately qualified in trial 2.",
+  "completed_work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+  "evidence": [
+    "latest.json",
+    "journey.json",
+    "../trial-2/result.json"
+  ],
+  "historical_result_preserved": true,
+  "counted_as_pass": false
+}

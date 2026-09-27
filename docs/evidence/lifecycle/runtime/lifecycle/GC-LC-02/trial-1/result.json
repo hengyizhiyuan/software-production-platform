@@ -1,0 +1,16 @@
+{
+  "case": "GC-LC-02",
+  "trial": 1,
+  "status": "PASS",
+  "checks": {
+    "no_production_work": true,
+    "all_turns_completed": true,
+    "repository_ready": true,
+    "exact_source": true,
+    "exact_revision_tree": true,
+    "product_continuity": true,
+    "local_branch": true
+  },
+  "interaction_id": "74c9eac2-2937-488c-b6d3-f214dc2a024f",
+  "human_acceptance": "PENDING"
+}

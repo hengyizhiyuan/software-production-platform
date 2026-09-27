@@ -1,2 +1,6 @@
 benchmarks/open_wic/corpus-v1.json text eol=lf
 docs/evidence/open-wic-baseline-runs/2026-09-15-deepseek-flash-low.json text eol=lf
+# Preserve captured protocol separators and diagnostic bytes verbatim.
+docs/evidence/lifecycle/browser-sse/*.sse -whitespace
+docs/evidence/lifecycle/verification-logs/*.log -whitespace
+docs/evidence/lifecycle/verification-logs/*.xml -whitespace

@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.469" timestamp="2026-09-27T14:04:55.118623+08:00" hostname="MacBookPro"><testcase classname="tests.integration.test_postgresql_persistence" name="test_db_01_connectivity" time="0.277" /></testsuite></testsuites>

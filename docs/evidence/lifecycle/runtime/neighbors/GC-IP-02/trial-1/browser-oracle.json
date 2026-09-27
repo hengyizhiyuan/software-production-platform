@@ -1,0 +1,6 @@
+{
+  "form_submitted": true,
+  "reload_preserves_collected_user": true,
+  "evidence": "browser-final-dom.txt",
+  "method": "REAL_BROWSER_FORM_SUBMISSION_AND_RELOAD"
+}

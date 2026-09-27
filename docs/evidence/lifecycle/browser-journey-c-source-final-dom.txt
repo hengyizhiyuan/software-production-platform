@@ -1,0 +1,259 @@
+- link "Skip to selected Work":
+  - /url: "#work-surface"
+- banner:
+  - generic "Watt Software Production":
+    - generic: W
+    - heading "Watt / 工律" [level=1]
+    - paragraph: From intent to production.
+  - link "Deliveries":
+    - /url: /delivery
+  - paragraph: Production Environment
+  - generic "Appearance preferences":
+    - text: Global appearance
+    - combobox "Global appearance":
+      - option "Light" [selected]
+      - option "Dark"
+  - button "Refresh service health":
+    - generic: Ready
+  - paragraph:
+    - text: System online
+    - text: Build a more capable team
+- main:
+  - complementary "Goal and Work navigation":
+    - region "⌂ Products":
+      - paragraph: Long-lived asset
+      - heading "⌂ Products" [level=2]
+      - button "software-production-platform · 1 Works" [pressed]
+      - button "missing-secret · 1 Works"
+      - button "tool-path-fault · 2 Works"
+      - button "business-app · 4 Works"
+      - button "transient-acquisition · 1 Works"
+      - button "worker-interruption · 1 Works"
+      - button "business-app · 1 Works"
+      - generic: New Product
+      - textbox "New Product":
+        - /placeholder: Finance Management
+      - button "Create"
+      - paragraph: ACTIVE · 8 assets · 1 Works · 8 repository sources
+      - paragraph: Source · https://github.com/hengyizhiyuan/software-production-platform.git · refs/heads/main · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: Source · watt://work-branches/e8864482-7975-444d-9451-ade934aac0d3/906cd04113a76ad81d78 · refs/heads/feat_test · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: Source · watt://work-branches/4fc3c523-625e-4cca-bda9-81827fa915f5/906cd04113a76ad81d78 · refs/heads/feat_test · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: Source · watt://work-branches/74c9eac2-2937-488c-b6d3-f214dc2a024f/906cd04113a76ad81d78 · refs/heads/feat_test · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: Source · watt://work-branches/c1304a4d-68f7-43cb-854f-2d613495770e/906cd04113a76ad81d78 · refs/heads/feat_test · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: Source · watt://work-branches/45a7f6f0-5e1c-458b-a0be-02aa68be14b8/906cd04113a76ad81d78 · refs/heads/feat_test · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: Source · watt://work-branches/28386f82-bc54-4cf3-b3e9-921816967613/906cd04113a76ad81d78 · refs/heads/feat_test · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: Source · watt://work-branches/0a98d131-eec3-4069-bc51-da3c6628359d/906cd04113a76ad81d78 · refs/heads/feat_test · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: undefined · https://github.com/hengyizhiyuan/software-production-platform.git
+      - paragraph: undefined · watt://work-branches/e8864482-7975-444d-9451-ade934aac0d3/906cd04113a76ad81d78
+      - paragraph: undefined · watt://work-branches/4fc3c523-625e-4cca-bda9-81827fa915f5/906cd04113a76ad81d78
+      - paragraph: undefined · watt://work-branches/74c9eac2-2937-488c-b6d3-f214dc2a024f/906cd04113a76ad81d78
+      - paragraph: undefined · watt://work-branches/c1304a4d-68f7-43cb-854f-2d613495770e/906cd04113a76ad81d78
+      - paragraph: undefined · watt://work-branches/45a7f6f0-5e1c-458b-a0be-02aa68be14b8/906cd04113a76ad81d78
+      - paragraph: undefined · watt://work-branches/28386f82-bc54-4cf3-b3e9-921816967613/906cd04113a76ad81d78
+      - paragraph: undefined · watt://work-branches/0a98d131-eec3-4069-bc51-da3c6628359d/906cd04113a76ad81d78
+      - generic: Import an existing Git HTTPS repository
+      - textbox "Import an existing Git HTTPS repository":
+        - /placeholder: https://github.com/owner/repo.git
+      - button "Import into Product"
+    - region "⌂ Goals":
+      - paragraph: Navigation horizon
+      - heading "⌂ Goals" [level=2]
+      - button "Create Goal": +
+      - navigation "Goals":
+        - button "All Works 11":
+          - text: All Works
+          - generic: "11"
+    - region "▣ Works":
+      - paragraph: Things to get done
+      - heading "▣ Works" [level=2]
+      - button "Refresh"
+      - generic: Status
+      - combobox "Status":
+        - option "All statuses" [selected]
+        - option "PRE-WORK / 未开工"
+        - option "Draft"
+        - option "Needs refinement"
+        - option "Awaiting approval"
+        - option "Ready"
+        - option "Running"
+        - option "Production paused"
+        - option "Blocked"
+        - option "Completed"
+      - 'button "Open Work: 这个仓库以后可能会用到。"':
+        - generic: 这个仓库以后可能会用到。
+        - generic: PRE-WORK / 未开工
+        - generic: No Goal
+        - generic: CONVERSATION_DURABLE
+      - 'button "Discard PRE-WORK: 这个仓库以后可能会用到。"': Discard
+      - 'button "Open Work: 修改首页“开始使用”文案为“立即体验”，并生成预览。"':
+        - generic: 修改首页“开始使用”文案为“立即体验”，并生成预览。
+        - generic: Watt is working
+        - generic: No Goal
+        - generic: OUTPUT_OBLIGATIONS_EVALUATED
+      - 'button "Open Work: 修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。"':
+        - generic: 修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。
+        - generic: Completed
+        - generic: No Goal
+        - generic: OUTPUT_OBLIGATIONS_EVALUATED
+      - 'button "Open Work: 在既有业务应用系统中加入搜索能力"':
+        - generic: 在既有业务应用系统中加入搜索能力
+        - generic: Production paused
+        - generic: No Goal
+        - generic: ATTEMPT_WORKSPACE_OBSERVED
+      - 'button "Open Work: 对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。"':
+        - generic: 对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。
+        - generic: Production paused
+        - generic: No Goal
+        - generic: OUTPUT_OBLIGATIONS_EVALUATED
+      - 'button "Open Work: 在现有 business-app 项目中提供一个用于收集用户信息的页面"':
+        - generic: 在现有 business-app 项目中提供一个用于收集用户信息的页面
+        - generic: Production paused
+        - generic: No Goal
+        - generic: OUTPUT_OBLIGATIONS_EVALUATED
+      - 'button "Open Work: 在现有项目中以最小改动向用户暴露已有的帮助入口"':
+        - generic: 在现有项目中以最小改动向用户暴露已有的帮助入口
+        - generic: Production paused
+        - generic: No Goal
+        - generic: OUTPUT_OBLIGATIONS_EVALUATED
+      - 'button "Open Work: 修复 tool-path-fault 项目中取消按钮导致对话框无法关闭的缺陷，并给出可预览的修复结果"':
+        - generic: 修复 tool-path-fault 项目中取消按钮导致对话框无法关闭的缺陷，并给出可预览的修复结果
+        - generic: Production paused
+        - generic: No Goal
+        - generic: OUTPUT_OBLIGATIONS_EVALUATED
+      - 'button "Open Work: 让 Watt 把已有的项目仓库跑起来，并给出可实际查看的运行预览。"':
+        - generic: 让 Watt 把已有的项目仓库跑起来，并给出可实际查看的运行预览。
+        - generic: Production paused
+        - generic: No Goal
+        - generic: STEERING_HUMAN_ATTENTION
+      - 'button "Open Work: 在现有网站的顶部导航栏中增加一个指向 /about 的“关于我们”文字链接，并在完成后提供一个可实际查看的预览供确认。"':
+        - generic: 在现有网站的顶部导航栏中增加一个指向 /about 的“关于我们”文字链接，并在完成后提供一个可实际查看的预览供确认。
+        - generic: Production paused
+        - generic: No Goal
+        - generic: OUTPUT_OBLIGATIONS_EVALUATED
+      - 'button "Open Work: 我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-plat..."':
+        - generic: 我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-plat...
+        - generic: PRE-WORK / 未开工
+        - generic: No Goal
+        - generic: CONVERSATION_DURABLE
+      - 'button "Discard PRE-WORK: 我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-plat..."': Discard
+    - generic "Operations · Connectors · Evaluation"
+    - option "Read" [selected]
+    - option "Write"
+  - region "Selected Work":
+    - region "Conversation workspace":
+      - complementary "Conversation History":
+        - paragraph: Provenance
+        - heading "Conversation History" [level=3]
+        - article:
+          - paragraph: You
+          - paragraph: 我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-platform.git，把它clone下来，我要改个需求
+          - paragraph: 13:28:40 · COMPLETED
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：main；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 生产 Work 尚未准入；没有修改源码或推送远端。
+          - paragraph: 13:29:39 · COMPLETED
+        - article:
+          - paragraph: You
+          - paragraph: 切一个 feat_test 分支
+          - paragraph: 13:29:59 · COMPLETED
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：feat_test；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 生产 Work 尚未准入；没有修改源码或推送远端。
+          - paragraph: 13:30:48 · COMPLETED
+        - article:
+          - paragraph: You
+          - paragraph: 我现在在哪个分支？
+          - paragraph: 13:31:43 · COMPLETED
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：feat_test；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 生产 Work 尚未准入；没有修改源码或推送远端。
+          - paragraph: 13:31:59 · COMPLETED
+        - text: INTELLIGENCE IN SERVICE OF PEOPLE
+    - article:
+      - paragraph: Selected Work
+      - heading "获取 software-production-platform 仓库作为工作基础，建立用于需求变更的工作分支，先弄清仓库现有技术栈，再决定并完成其中一项需求修改。" [level=2]
+      - generic: PRE-WORK · Repository READY · Production not started
+      - region "Product and production continuity":
+        - generic: Product
+        - combobox "Product":
+          - option "Select Product"
+          - option "software-production-platform" [selected]
+          - option "missing-secret"
+          - option "tool-path-fault"
+          - option "business-app"
+          - option "transient-acquisition"
+          - option "worker-interruption"
+          - option "business-app"
+        - button "Bind Work" [disabled]
+        - paragraph: Repository belongs to software-production-platform. Production Work is not admitted.
+        - generic "Production diagnosis, PWU economics and history"
+      - region "Stable Work Workspace":
+        - region "Reality":
+          - generic: "01"
+          - heading "Reality" [level=3]
+          - paragraph: Engineering sources for this Work
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: "Conversation: PRE-WORK · Repository: READY · Production Work: NOT ADMITTED"
+          - generic "Work-relevant engineering sources":
+            - paragraph: "Source: https://github.com/hengyizhiyuan/software-production-platform.git · Branch: refs/heads/feat_test · Revision: 0b535f63302fe45e88d0b3e203ae991868ced079 · Tree: 753564ba0a09c0bed999dff17b540b09e581e8d9"
+            - generic "Source tree · 200 observed paths"
+        - region "Agenda":
+          - generic: "02"
+          - heading "Agenda" [level=3]
+          - paragraph: Governed path and working agreements
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: Understanding request…
+          - list "Governed execution path":
+            - listitem: Understand
+            - listitem: Shape
+            - listitem: Produce
+            - listitem: Verify
+            - listitem: Deliver
+        - region "Production":
+          - generic: "03"
+          - heading "Production" [level=3]
+          - paragraph: What Watt is doing now
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: IDLE · Production has not started.
+          - paragraph:
+            - generic: IDLE
+          - paragraph: No PWU or Executor is running.
+          - paragraph: Work admission is a separate Human decision.
+        - region "Actions":
+          - generic: "04"
+          - heading "Actions" [level=3]
+          - paragraph: Human control plane
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: Repository is ready. Describe the change when you are ready.
+          - paragraph: You can inspect the source or describe a change. Production authority remains separate.
+          - button "继续对话"
+    - region "What would you like Watt to understand?":
+      - region "Current Interaction":
+        - paragraph: Active Work communication
+        - heading "Current Interaction" [level=3]
+        - article:
+          - paragraph: You
+          - generic: 先帮我看看这个仓库使用什么框架，我再决定改什么。
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：feat_test；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 证据 0b535f63302fe45e88d0b3e203ae991868ced079:pyproject.toml（SHA256 0168a0d3d9b20db9475110260aadfe09758a0175af085298423a1de63b02e4ad）： [build-system] requires = ["setuptools>=68"] build-backend = "setuptools.build_meta"
+          - paragraph: "[project] name = \"spg-runtime\" version = \"0.1.0\" description = \"Software Production Governor runtime foundation\" readme = \"README.md\" requires-python = \">=3.12\" dependencies = [ \"alembic>=1,<2\", \"fastapi>=0.115,<1\", \"httpx2>=2,<3\", \"psycopg[binary]>=3,<4\", \"pydantic>=2,<3\", \"pydantic-settings>=2,<3\", \"sqlalchemy>=2,<3\", \"uvicorn>=0.30,<1\", ]"
+          - paragraph: "[project.optional-dependencies] codex-executor = [ \"openai-codex==0.147.0\", \"openai-codex-cli-bin==0.147.0\", ] test = [ \"pytest>=8,<10\", ]"
+          - paragraph: "[project.scripts] spg = \"spg.cli:main\""
+          - paragraph: "[tool.pytest.ini_options] addopts = \"-q\" testpaths = [\"tests\"] pythonpath = [\".\"] markers = [ \"postgresql: requires the explicitly configured real PostgreSQL test database\", \"real_codex: requires explicit authorization for one real Codex SDK execution\", ]"
+          - paragraph: "[tool.setuptools.packages.find] where = [\"src\"]"
+          - paragraph: "[tool.setuptools.package-data] \"spg.web\" = [\"*.html\", \"*.css\", \"*.js\"]"
+          - paragraph: 生产 Work 尚未准入；没有修改源码或推送远端。
+      - generic: Continuing Interaction
+      - button "New Work"
+      - button "Expand composer"
+      - generic: What would you like Watt to understand?
+      - textbox "What would you like Watt to understand?":
+        - /placeholder: Share an idea, context, question, outcome, or constraint…
+      - paragraph: Share a question, idea, or next step.
+      - button "Send➤" [active]
+- status: Watt completed the reply. You can continue the conversation.

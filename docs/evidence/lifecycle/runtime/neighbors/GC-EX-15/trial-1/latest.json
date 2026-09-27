@@ -1,0 +1,1587 @@
+{
+  "interaction": {
+    "interaction_id": "f8115db8-71ad-4595-924f-15f4267b78bf",
+    "condition": "OPEN",
+    "current_work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+    "created_at": "2026-09-27T04:33:34.088799Z",
+    "updated_at": "2026-09-27T04:37:31.865548Z",
+    "records": [
+      {
+        "record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+        "work_focus_id": null,
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:33:34.799292Z"
+      }
+    ],
+    "conversation_messages": [
+      {
+        "message_id": "16056181-60a4-4185-9f4a-17fd764bc13a",
+        "turn_id": "df33e55e-b7b9-4ae4-b48b-7bf75fefe759",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:33:34.799292Z",
+        "updated_at": "2026-09-27T04:37:43.106187Z"
+      },
+      {
+        "message_id": "8f4cb49e-6d4a-4aad-9434-40cdb0910e79",
+        "turn_id": "df33e55e-b7b9-4ae4-b48b-7bf75fefe759",
+        "sequence": 2,
+        "actor": "WATT",
+        "content": "已按你的要求把这次改动立为一项 Work：仓库 http://qualified-git:8080/business-app.git，首页的“开始使用”改为“立即体验”。当前仓库获取请求已登记，接下来会启动对该仓库的只读获取，我会在获取完成后继续推进，无需你再确认一次。改好后先给你预览，是否交付等你看过预览再定。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "2524ba00-74d4-4659-a866-2856b595bfea",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:37:43.106187Z",
+        "updated_at": "2026-09-27T04:37:43.106187Z"
+      }
+    ],
+    "turns": [
+      {
+        "turn_id": "df33e55e-b7b9-4ae4-b48b-7bf75fefe759",
+        "interaction_id": "f8115db8-71ad-4595-924f-15f4267b78bf",
+        "request_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+        "assessment_id": "2524ba00-74d4-4659-a866-2856b595bfea",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T04:33:34.799292Z",
+        "started_at": "2026-09-27T04:36:40.382134Z",
+        "completed_at": "2026-09-27T04:37:43.106187Z",
+        "updated_at": "2026-09-27T04:37:43.106187Z"
+      }
+    ],
+    "human_said": [
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+    ],
+    "latest_assessment": {
+      "assessment_id": "2524ba00-74d4-4659-a866-2856b595bfea",
+      "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+      "basis_last_sequence": 1,
+      "interpreted_motive": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+      "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+      "design_intent_frame": {
+        "design_subject": "business-app 项目首页主行动按钮的文案修改",
+        "object_type": "FEATURE",
+        "business_context": "面向访问者的既有 Web 项目首页",
+        "desired_outcome": "首页按钮文案由“开始使用”更正为“立即体验”，并给出可供人类确认的预览，未确认前不交付",
+        "scope_level": "implementation",
+        "collaboration_mode": "execution",
+        "candidate_assumptions": [
+          "首页是对外展示的入口页面",
+          "该按钮文案集中在单一页面或模板入口中，属小范围替换"
+        ],
+        "ambiguities": [
+          "“首页”对应的具体产物文件与入口需经仓库准备确认",
+          "预览的呈现形式（页面预览、截图或其他）尚未指定"
+        ],
+        "confidence": 0.72
+      },
+      "candidate_context": [
+        "当前项目仓库：http://qualified-git:8080/business-app.git",
+        "目标对象是既有项目的首页",
+        "人类保留是否交付的最终决定"
+      ],
+      "candidate_constraints": [
+        "在人类确认之前不得交付",
+        "需要先提供预览"
+      ],
+      "current_requests": [
+        "把首页“开始使用”改为“立即体验”",
+        "给我预览",
+        "我确认以后再决定是否交付",
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+      ],
+      "unresolved_material_questions": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "e1",
+          "kind": "ORDERED_VALUES",
+          "values": [
+            "开始使用",
+            "立即体验"
+          ],
+          "unit": null,
+          "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+          "source_text": "把首页“开始使用”改为“立即体验”",
+          "explicit_roles": [
+            "current",
+            "target"
+          ]
+        },
+        {
+          "extraction_id": "e2",
+          "kind": "SCOPE",
+          "values": [
+            "首页"
+          ],
+          "unit": null,
+          "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+          "source_text": "把首页“开始使用”改为“立即体验”",
+          "explicit_roles": [
+            "scope"
+          ]
+        },
+        {
+          "extraction_id": "e3",
+          "kind": "REFERENCE",
+          "values": [
+            "http://qualified-git:8080/business-app.git"
+          ],
+          "unit": null,
+          "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+          "source_text": "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+          "explicit_roles": [
+            "repository_reference"
+          ]
+        },
+        {
+          "extraction_id": "e4",
+          "kind": "BEHAVIOR",
+          "values": [
+            "预览"
+          ],
+          "unit": null,
+          "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+          "source_text": "给我预览",
+          "explicit_roles": [
+            null
+          ]
+        },
+        {
+          "extraction_id": "e5",
+          "kind": "SCOPE",
+          "values": [
+            "是否交付"
+          ],
+          "unit": null,
+          "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+          "source_text": "我确认以后再决定是否交付",
+          "explicit_roles": [
+            "delivery_decision"
+          ]
+        }
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "feda5634-9591-52dc-8b8f-ec31d50e55dd",
+          "subject": "homepage.cta.label",
+          "relation": "STATE_TRANSITION",
+          "value": "立即体验",
+          "unit": null,
+          "scope": "首页",
+          "qualifiers": {
+            "to": "立即体验",
+            "from": "开始使用"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+            ],
+            "source_text": "把首页“开始使用”改为“立即体验”",
+            "source_extraction_ids": [
+              "e1",
+              "e2"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "df6f2439-dfb7-5fa1-9b3b-59f198c7321b",
+          "subject": "repository.location",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/business-app.git",
+          "unit": null,
+          "scope": "当前项目",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+            ],
+            "source_text": "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+            "source_extraction_ids": [
+              "e3"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "1b2cf60c-74b7-5e06-be67-42d04a0c22ef",
+          "subject": "change.deliverable",
+          "relation": "PRECEDENCE",
+          "value": "预览先于交付决定",
+          "unit": null,
+          "scope": "首页文案修改",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+            ],
+            "source_text": "我确认以后再决定是否交付",
+            "source_extraction_ids": [
+              "e4",
+              "e5"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONTEXT",
+          "statement": "人类指定当前项目仓库地址为 http://qualified-git:8080/business-app.git。",
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "confidence": 0.95,
+          "rationale": "记录中人类明确给出仓库地址作为当前项目仓库。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "把首页按钮文案“开始使用”改为“立即体验”。",
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "confidence": 0.97,
+          "rationale": "记录中人类明确提出该文案修改。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "在交付前先提供该修改的预览。",
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "confidence": 0.95,
+          "rationale": "记录中人类要求“给我预览”。",
+          "clarification_required": false
+        },
+        {
+          "kind": "DECISION_INPUT",
+          "statement": "人类保留交付决策权：确认预览之后再决定是否交付。",
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "confidence": 0.9,
+          "rationale": "记录中人类明确表示确认后才决定是否交付。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "candidate_change": null,
+      "basis_work_revision_id": null,
+      "basis_steering_plan_revision_id": null,
+      "basis_steering_step_id": null,
+      "basis_active_runtime_binding_id": null,
+      "supporting_references": [],
+      "natural_response": "先按受治理的仓库准备路径确认首页入口与按钮文案所在位置，然后只产出包含“开始使用”→“立即体验”这一处替换的预览结果，暂不交付。",
+      "readiness": {
+        "status": "READY",
+        "profile": "LONG_LIVED_STEERING",
+        "profile_version": "v0",
+        "satisfied_requirements": [
+          "MOTIVE",
+          "DESIRED_OUTCOME"
+        ],
+        "missing_information": [],
+        "unresolved_material_questions": [],
+        "reasons": [
+          "Motive and desired outcome are clear enough to form governed Work."
+        ],
+        "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5"
+      },
+      "progressive_semantics": {
+        "turn_intent": "ACTION_REQUEST",
+        "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+        "source_record_ids": [
+          "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+        ],
+        "reception_meanings": [
+          "DEEP_WIC_WORKING_UNDERSTANDING"
+        ],
+        "working_motive": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+        "working_desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+        "working_facts": [
+          "当前项目仓库：http://qualified-git:8080/business-app.git",
+          "目标对象是既有项目的首页",
+          "人类保留是否交付的最终决定"
+        ],
+        "working_constraints": [
+          "在人类确认之前不得交付",
+          "需要先提供预览"
+        ],
+        "working_requests": [
+          "把首页“开始使用”改为“立即体验”",
+          "给我预览",
+          "我确认以后再决定是否交付",
+          "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+        ],
+        "explicit_assumptions": [],
+        "unresolved_human_decisions": [],
+        "deltas": [
+          {
+            "id": "1fe86038-d152-519e-81ba-9469108951ee",
+            "category": "MOTIVE",
+            "operation": "ADDED",
+            "value": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+            "prior_value": null,
+            "source_record_ids": [
+              "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+            ],
+            "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "5e170f40-1a07-5ef0-a0d1-c522e8a54b5d",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "在人类确认之前不得交付",
+            "prior_value": null,
+            "source_record_ids": [
+              "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+            ],
+            "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "1c3f7e74-8bfb-546b-bb7a-a25a9f1e41dd",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "需要先提供预览",
+            "prior_value": null,
+            "source_record_ids": [
+              "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+            ],
+            "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          }
+        ],
+        "pattern_signals": [
+          "BOUNDED_CHANGE",
+          "PRODUCTION_REQUEST",
+          "REPOSITORY_SOURCE"
+        ],
+        "inference_disposition": "NO_INFERENCE",
+        "questions": [],
+        "selected_question": null,
+        "governance_candidate": "WORK_FORMATION_PROPOSAL",
+        "readiness": [
+          {
+            "target": "WORK_FORMATION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "WORK_REVISION",
+            "status": "NOT_APPLICABLE",
+            "satisfied_evidence": [],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "DESIGN_PROGRESSION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "CURRENT_FOCUS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "artifact_recommendation": null,
+        "factual_contradictions": [],
+        "semantic_policy_revision": "wic-semantic-policy-v1",
+        "question_policy_revision": "wic-question-value-v1"
+      },
+      "provider_identity": "deepseek-responses:semantic:request:d9a59519-2838-4116-a707-0550e5b5d0d9",
+      "model_identity": "deepseek-flash",
+      "schema_version": "wic-assessment-v6",
+      "created_at": "2026-09-27T04:37:01.083300Z"
+    },
+    "latest_assessment_current": false,
+    "interpreted_motive": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+    "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+    "design_intent_frame": {
+      "design_subject": "business-app 项目首页主行动按钮的文案修改",
+      "object_type": "FEATURE",
+      "business_context": "面向访问者的既有 Web 项目首页",
+      "desired_outcome": "首页按钮文案由“开始使用”更正为“立即体验”，并给出可供人类确认的预览，未确认前不交付",
+      "scope_level": "implementation",
+      "collaboration_mode": "execution",
+      "candidate_assumptions": [
+        "首页是对外展示的入口页面",
+        "该按钮文案集中在单一页面或模板入口中，属小范围替换"
+      ],
+      "ambiguities": [
+        "“首页”对应的具体产物文件与入口需经仓库准备确认",
+        "预览的呈现形式（页面预览、截图或其他）尚未指定"
+      ],
+      "confidence": 0.72
+    },
+    "candidate_context": [
+      "当前项目仓库：http://qualified-git:8080/business-app.git",
+      "目标对象是既有项目的首页",
+      "人类保留是否交付的最终决定"
+    ],
+    "candidate_constraints": [
+      "在人类确认之前不得交付",
+      "需要先提供预览"
+    ],
+    "current_requests": [
+      "把首页“开始使用”改为“立即体验”",
+      "给我预览",
+      "我确认以后再决定是否交付",
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+    ],
+    "unresolved_material_questions": [],
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5"
+    },
+    "candidate_engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "candidate_repository_identity": "http://qualified-git:8080/business-app.git",
+    "candidate_repository_ref": "refs/heads/main",
+    "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git:8080/business-app.git at refs/heads/main",
+    "governed_work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+    "governed_revision": {
+      "revision_id": "de93c872-f872-5d9b-b061-c5e66da7ce0a",
+      "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+      "revision_number": 2,
+      "previous_revision_id": "ac54c874-6a6e-5318-9957-08db11de743e",
+      "basis_fingerprint": "1901385330986ff01f24735a2d5268495bd774951d1cee3a7d695d341bf7e806",
+      "revision_fingerprint": "3c157b50b3666e04c3df3bab98d639f608b6171f741ab1361a90c691002ec80f",
+      "source_interaction_id": "f8115db8-71ad-4595-924f-15f4267b78bf",
+      "source_kind": "ASSET_SCOPE_ADMISSION",
+      "source_assessment_id": null,
+      "source_record_ids": [
+        "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+      ],
+      "motive": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+      "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+      "context_facts": [
+        "当前项目仓库：http://qualified-git:8080/business-app.git",
+        "目标对象是既有项目的首页",
+        "人类保留是否交付的最终决定"
+      ],
+      "constraints": [
+        "在人类确认之前不得交付",
+        "需要先提供预览"
+      ],
+      "requests": [
+        "把首页“开始使用”改为“立即体验”",
+        "给我预览",
+        "我确认以后再决定是否交付",
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "feda5634-9591-52dc-8b8f-ec31d50e55dd",
+          "subject": "homepage.cta.label",
+          "relation": "STATE_TRANSITION",
+          "value": "立即体验",
+          "unit": null,
+          "scope": "首页",
+          "qualifiers": {
+            "to": "立即体验",
+            "from": "开始使用"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+            ],
+            "source_text": "把首页“开始使用”改为“立即体验”",
+            "source_extraction_ids": [
+              "e1",
+              "e2"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "ac54c874-6a6e-5318-9957-08db11de743e"
+        },
+        {
+          "id": "df6f2439-dfb7-5fa1-9b3b-59f198c7321b",
+          "subject": "repository.location",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/business-app.git",
+          "unit": null,
+          "scope": "当前项目",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+            ],
+            "source_text": "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+            "source_extraction_ids": [
+              "e3"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "ac54c874-6a6e-5318-9957-08db11de743e"
+        },
+        {
+          "id": "1b2cf60c-74b7-5e06-be67-42d04a0c22ef",
+          "subject": "change.deliverable",
+          "relation": "PRECEDENCE",
+          "value": "预览先于交付决定",
+          "unit": null,
+          "scope": "首页文案修改",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+            ],
+            "source_text": "我确认以后再决定是否交付",
+            "source_extraction_ids": [
+              "e4",
+              "e5"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "ac54c874-6a6e-5318-9957-08db11de743e"
+        }
+      ],
+      "engineering_scope_id": "9fc68bc8-dddb-4228-9fee-fe0b58d71fff",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "scope_basis_fingerprint": "ac2c26f241c384cf3bf66b0d522112b6a5b7f9522f006a8089aee72c7e8e568a",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "repository_ref": "refs/heads/main",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "governance_record_id": "c59268ce-7b9f-4136-aa51-87d9c8ee4c95",
+      "supporting_references": [
+        "INTERACTION_RECORD:e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+        "REPOSITORY_OBSERVATION:9321135ac475d920a34bb70c8d1567b11eba305e880a9c5b39ac7b9386fa4175"
+      ],
+      "change_set": [
+        "asset:PRODUCTION_TARGET_ADMITTED"
+      ],
+      "rationale": "Bind the exact repository Reality acquired from the Human-supplied source before Steering begins.",
+      "admitted_by": "human:owner",
+      "schema_version": "wic-work-reality-v3",
+      "created_at": "2026-09-27T04:37:47.398800Z"
+    },
+    "current_work_focus": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。 → 首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "work_revision_admission_status": "NOT_APPLICABLE",
+    "active_cycle_work_revision_id": "de93c872-f872-5d9b-b061-c5e66da7ce0a",
+    "active_cycle_impact_disposition": null,
+    "work_satisfaction_state": "IN_PROGRESS",
+    "interaction_relationship_state": "OPEN",
+    "work_focus_history": [
+      "04b8db03-0514-5ef5-8d6b-aa1419bfc611"
+    ],
+    "latest_work_transition": null,
+    "new_work_formation_pending": false,
+    "production_request_detected": true,
+    "repository_source": "http://qualified-git:8080/business-app.git",
+    "production_admission_state": "WORK_CREATED",
+    "repository_acquisition_state": "READY",
+    "repository_observation": {
+      "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+      "paths": [
+        ".gitignore",
+        "Dockerfile",
+        "README.md",
+        "migrations/001_initial.sql",
+        "package.json",
+        "server.py",
+        "tests/application.cjs",
+        "web/app.js",
+        "web/index.html",
+        "web/styles.css"
+      ],
+      "title": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+      "source": "http://qualified-git:8080/business-app.git",
+      "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+      "revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "condition": "READY",
+      "description": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+      "fingerprint": "9321135ac475d920a34bb70c8d1567b11eba305e880a9c5b39ac7b9386fa4175",
+      "observed_at": "2026-09-27T04:35:00.768236+00:00",
+      "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "context_path": "README.md",
+      "human_message": "Repository is ready.",
+      "target_branch": null,
+      "attempt_number": 1,
+      "interaction_id": "f8115db8-71ad-4595-924f-15f4267b78bf",
+      "operation_kind": "ACQUIRE",
+      "repository_ref": "refs/heads/main",
+      "base_resource_id": null,
+      "failure_category": null,
+      "intake_request_id": "e0fd6893-5b56-5449-a386-132b10a3bb6a",
+      "operation_evidence": {
+        "verified": true,
+        "connector_id": "builtin:git",
+        "capability_id": "git.repository.acquire",
+        "operation_ref": "repository-intake:29cff86f-2035-5b1c-8ac6-3d517256d34e",
+        "resulting_branch": "refs/heads/main",
+        "resulting_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "workspace_reference": "/var/lib/spg/repository-assets/29cff86f-2035-5b1c-8ac6-3d517256d34e"
+      },
+      "previous_attempt_id": null,
+      "repository_identity": "http://qualified-git:8080/business-app.git"
+    },
+    "production_next_step": "Continue Steering against the acquired repository Reality.",
+    "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+    "selected_design_schema_version": "0.1",
+    "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+    "design_stage": "Current Reality",
+    "design_next_focus": "Establish the trusted current product and runtime reality.",
+    "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+    "design_facilitation_strategy": "CLARIFY",
+    "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+  },
+  "observed_at": "2026-09-27T04:43:50.985784+00:00",
+  "work": {
+    "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+    "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+    "goal_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "raw_user_requirement": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+    "title": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+    "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+    "constraints": [
+      "在人类确认之前不得交付",
+      "需要先提供预览"
+    ],
+    "target_kind": "CODE_WORK",
+    "artifact_target": null,
+    "change_proposal": {
+      "proposal_id": "3652dbe7-d268-5d17-9e44-6bbc04ff79ed",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_ref": "refs/heads/main",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "proposed_targets": [
+        {
+          "path": "web/index.html",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The home page HTML served at `/` is the single surface that renders the primary action button; the literal label “开始使用” appears only here, so the requested label change to “立即体验” can only be realized by editing this file. This is the sole rendered surface of the explicitly requested change.",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <button id=\"start\">开始使用</button>",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [
+        "migrations/**",
+        "server.py"
+      ],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "8a40d6dd6fc814aaf98bd7cb21bb7c72e61c4481b46a80c87e4a0f26a2d9fa59"
+    },
+    "change_contract": null,
+    "production_plan": {
+      "proposal_id": "158cd725-3768-59c0-9964-0a3189b7c99c",
+      "target_kind": "CODE_WORK",
+      "objective": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+      "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Prepare the repository-inspected code targets: web/index.html."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": null,
+      "artifact_targets": [],
+      "change_proposal": {
+        "proposal_id": "3652dbe7-d268-5d17-9e44-6bbc04ff79ed",
+        "target_kind": "CODE_WORK",
+        "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+        "repository_identity": "http://qualified-git:8080/business-app.git",
+        "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+        "source_ref": "refs/heads/main",
+        "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "proposed_targets": [
+          {
+            "path": "web/index.html",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "The home page HTML served at `/` is the single surface that renders the primary action button; the literal label “开始使用” appears only here, so the requested label change to “立即体验” can only be realized by editing this file. This is the sole rendered surface of the explicitly requested change.",
+            "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <button id=\"start\">开始使用</button>",
+            "confidence": "HIGH"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [
+          "migrations/**",
+          "server.py"
+        ],
+        "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+        "confidence": "MEDIUM",
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null,
+            "identity": "PATH_SCOPE"
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null,
+            "identity": "GIT_DIFF_CHECK"
+          }
+        ],
+        "provenance": {
+          "provider_identity": "provider:repository-aware-change-proposal-lite",
+          "provider_version": "v1",
+          "inspection_method": "git-object-read-only:path-enumeration+text-search"
+        },
+        "unresolved_scope_questions": [],
+        "proposal_fingerprint": "8a40d6dd6fc814aaf98bd7cb21bb7c72e61c4481b46a80c87e4a0f26a2d9fa59"
+      },
+      "change_contract": null,
+      "inherited_constraints": [
+        "在人类确认之前不得交付",
+        "需要先提供预览"
+      ],
+      "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+      "assumptions": [
+        "The admitted Work can be executed through one governed PWU and Attempt lineage."
+      ],
+      "unresolved_questions": [],
+      "fit_classification": "ONE_PWU_FIT",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+    },
+    "production_plan_runtime": null,
+    "tags": [],
+    "engineering_scope": {
+      "engineering_scope_id": "9fc68bc8-dddb-4228-9fee-fe0b58d71fff",
+      "summary": "Work assets; production target http://qualified-git:8080/business-app.git",
+      "condition": "ADMITTED",
+      "resources": [
+        {
+          "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+          "condition": "ACTIVE"
+        }
+      ]
+    },
+    "status": "NEEDS_ATTENTION",
+    "current_production_step": "PRODUCE",
+    "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "what_happens_next": "Human must authorize the exact Candidate",
+    "human_attention_required": true,
+    "result_summary": "1 independently observed artifact change(s)",
+    "current_work_reality_revision_id": "de93c872-f872-5d9b-b061-c5e66da7ce0a",
+    "steering_enabled": true,
+    "current_steering_step_id": "6ddf3722-a4f3-423f-8f7a-e280adc05427",
+    "current_steering_step_type": "PRODUCE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "329873e5-9dee-4e56-8bca-577f0ebcf72b",
+    "current_production_cycle_trusted": false,
+    "latest_trusted_runtime_commit_id": null,
+    "work_complete": false,
+    "automatic_progression_state": "ACTIVE",
+    "last_stop_reason": "HUMAN_ATTENTION",
+    "execution_progress": {
+      "phase": "RUNNING",
+      "activity": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required.",
+      "transitions_completed": 10,
+      "transitions_total": null,
+      "percent_complete": null,
+      "started_at": "2026-09-27T04:39:36.721561Z",
+      "updated_at": "2026-09-27T04:42:57.083989Z",
+      "elapsed_seconds": 200.362428,
+      "still_working": false,
+      "blocked_reason": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required."
+    },
+    "guided_design": null,
+    "next_owner": "HUMAN",
+    "control_state_valid": true,
+    "control_state_violations": []
+  },
+  "steering": {
+    "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+    "work_objective": "In the bound existing site baseline (repository refs/heads/main, revision f629ed74d0afbcb8b5974e546c007eb5bf36663d), change only the home-page primary action button label from “开始使用” to “立即体验” in web/index.html. Preserve the existing runtime form and entrypoint: python server.py serving HTTP on port 8080, container image as defined by Dockerfile, SQLite migrations applied on startup. Preserve the button's id `start`, surrounding DOM, the stylesheet surface and all existing JavaScript behavior. Do not alter the API collections, database schema or migrations. Produce a runnable preview of the updated site as the artifact for Human confirmation; no delivery occurs before Human confirmation. Fixture records must not be presented as real company facts.",
+    "steering_enabled": true,
+    "steering_plan_id": "f94b9316-7cfe-47de-9490-0aed16a33605",
+    "active_revision_id": "b8a6a1c5-2e09-47f1-964e-042fc48937fe",
+    "active_revision_number": 1,
+    "completed_steps": [
+      {
+        "step_id": "ec611c2d-e8b0-45dc-86fd-831a51c3120f",
+        "type": "DESIGN",
+        "objective": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+        "completion_condition": "A bounded design direction is supported by current Reality",
+        "position": 1,
+        "state": "CLOSED",
+        "design_issue_key": null
+      }
+    ],
+    "current_step": {
+      "step_id": "6ddf3722-a4f3-423f-8f7a-e280adc05427",
+      "type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "completion_condition": "The exact bounded production cycle reaches trusted Runtime Commit",
+      "position": 2,
+      "state": "CURRENT",
+      "design_issue_key": null
+    },
+    "known_next_steps": [
+      {
+        "step_id": "22cd6112-4153-4ae1-adaa-7c634a47da2b",
+        "type": "VERIFY_ACCEPT",
+        "objective": "Assess the trusted result against the long-lived outcome",
+        "completion_condition": "Governed evidence supports product acceptance",
+        "position": 3,
+        "state": "KNOWN",
+        "design_issue_key": null
+      },
+      {
+        "step_id": "db8357be-7686-437f-9bea-653465bef159",
+        "type": "COMPLETE",
+        "objective": "Complete the admitted long-lived Work",
+        "completion_condition": "The admitted Work outcome is satisfied",
+        "position": 4,
+        "state": "KNOWN",
+        "design_issue_key": null
+      }
+    ],
+    "plan_changes": [],
+    "latest_decision": {
+      "decision_id": "f280bc0b-9752-4ed3-997e-4de5315c4f5a",
+      "next_step_type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "reason": "The current governed Step is ready to yield to the next admitted ordered Step",
+      "outcome": "AUTO_CONTINUE",
+      "human_required": false,
+      "attention_reason": null,
+      "reality_refs": [
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "c59268ce-7b9f-4136-aa51-87d9c8ee4c95"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "d7a8f783-becf-594f-a519-dc6b0e0d6ca0"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "30be15be-f435-46fc-8677-0976ca6710b0"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "f5c27b10-f35d-478c-a662-ab57564dfb33"
+        },
+        {
+          "kind": "WORK",
+          "identity": "04b8db03-0514-5ef5-8d6b-aa1419bfc611"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "de93c872-f872-5d9b-b061-c5e66da7ce0a"
+        }
+      ]
+    },
+    "selection_rationale": "The current governed Step is ready to yield to the next admitted ordered Step",
+    "steering_outcome": "AUTO_CONTINUE",
+    "automatic_progression_state": "STOPPED",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "329873e5-9dee-4e56-8bca-577f0ebcf72b",
+    "current_production_cycle_trusted": false,
+    "human_attention_required": true,
+    "last_stop_reason": "HUMAN_ATTENTION"
+  },
+  "refinement": {
+    "count": 2,
+    "events": [
+      {
+        "id": "ceb54b1b-7d46-4d9a-9b1f-48bcf4e5d179",
+        "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+        "operation_id": "721b5fb6-bc9c-452b-b9ef-cec2bf094562",
+        "created_at": "2026-09-27T04:40:44.551717Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+        "semantic_version": 2,
+        "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "signal_kind": "EXECUTION_FAILURE",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": 1,
+          "output_digest": "c57cfd8277c9b4875104571870015255621f1224e21ba46e1a56df29e367e9ab",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:3fa3ddd0-78cc-47ce-b2e2-0314296eb742",
+          "native-receipt:5cc7ff4d-3e39-48df-971e-1f6b48234654",
+          "native-evidence:9ca172c0-6fdf-4ca5-bf8d-0b64032f18f7"
+        ],
+        "repairability": "REPAIRABLE_WITH_SUFFICIENT_EVIDENCE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "additional authoritative diagnosis required"
+        },
+        "diagnostic_evidence": {
+          "returncode": 1,
+          "stderr_ref": "native-receipt:5cc7ff4d-3e39-48df-971e-1f6b48234654#stderr",
+          "stdout_ref": "native-receipt:5cc7ff4d-3e39-48df-971e-1f6b48234654#stdout",
+          "receipt_ref": "native-receipt:5cc7ff4d-3e39-48df-971e-1f6b48234654",
+          "stderr_bytes": 83,
+          "stdout_bytes": 0,
+          "evidence_refs": [
+            "native-evidence:9ca172c0-6fdf-4ca5-bf8d-0b64032f18f7"
+          ],
+          "output_digest": "c57cfd8277c9b4875104571870015255621f1224e21ba46e1a56df29e367e9ab",
+          "tool_identity": "test.run",
+          "verification_evidence": "FAILED",
+          "test_environment_readiness": "OBSERVED_EXECUTION"
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 91,
+        "model_token_usage": {
+          "input_tokens": 81238,
+          "total_tokens": 94728,
+          "output_tokens": 13490,
+          "reasoning_tokens": 11971,
+          "cached_input_tokens": 6656,
+          "observed_response_count": 5
+        },
+        "compute_overhead": {
+          "tool_effects": 13,
+          "inference_submissions": 8
+        },
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": null,
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T04:42:15.567150Z"
+      },
+      {
+        "id": "c2a29885-129c-4a44-aedb-186a2b00303f",
+        "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+        "operation_id": "ec611c2d-e8b0-45dc-86fd-831a51c3120f",
+        "created_at": "2026-09-27T04:38:56.627452Z",
+        "failure_family": "CANDIDATE_INCONSISTENT",
+        "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "semantic_version": 2,
+        "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "signal_kind": "CANDIDATE_INCONSISTENT",
+        "affected_component": "semantic/scope",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "CANDIDATE_INCONSISTENT",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "source-baseline:f5c27b10-f35d-478c-a662-ab57564dfb33"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "OBSERVED_SUCCESS",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 2,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "SCOPE_INFLATION",
+          "required_paths": [
+            "web/index.html"
+          ],
+          "candidate_paths": [
+            "web/index.html"
+          ],
+          "authority_expanded": false,
+          "rejected_behaviors": [
+            "Editing web/app.js: no JavaScript behavior is requested; the label is static markup and the button's id `start` is preserved.",
+            "Editing web/styles.css: no styling change is requested.",
+            "Editing server.py: routing/entrypoint behavior is unchanged; index.html is already served for `/`.",
+            "Editing migrations/001_initial.sql or any database/schema surface: no persistence or data change is requested.",
+            "Editing Dockerfile or package.json: build/test surfaces are untouched by a label change.",
+            "Editing tests/application.cjs: no oracle change is requested; tests remain read-only references.",
+            "Creating any new file, page, route, or documentation artifact: the request is a modification of an existing label, and adding a link/page/destination is not requested.",
+            "Altering the button id `start`, surrounding DOM, navigation links, or other buttons (`header-login`, `account-login`, `open-dialog`): preservation is implied by a label-only change.",
+            "Treating preview generation, served-runtime verification, Human confirmation, or delivery authorization as source scope: these belong to downstream lifecycle owners."
+          ]
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 0,
+        "model_token_usage": {
+          "unknown": false,
+          "input_tokens": 10905,
+          "total_tokens": 13982,
+          "cached_tokens": 512,
+          "output_tokens": 3077,
+          "reasoning_tokens": 124
+        },
+        "compute_overhead": {},
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T04:38:56.627452Z"
+      }
+    ],
+    "metrics": {
+      "native_attempts": 1,
+      "native_self_refine_events": 0,
+      "self_refine_events": 2,
+      "self_refine_rate": 0.0,
+      "first_pass_success_rate": 1.0,
+      "recovered": 0,
+      "local_obligation_recovered": 2,
+      "recovery_scope": "LOCAL_OBLIGATION; Work convergence is independently observed",
+      "escalated": 0,
+      "failed": 0,
+      "active": 0,
+      "classification_counts": {
+        "ROUTINE_STOCHASTIC_REFINEMENT": 1,
+        "DEGRADING_OR_RECURRING_REFINEMENT": 1,
+        "SYSTEMIC_OR_NON_CONVERGING_INCIDENT": 0,
+        "LEGACY_EXECUTION_INCIDENT": 0
+      },
+      "convergence_success_rate": 1.0,
+      "average_refinement_attempts": 2.0,
+      "p95_refinement_attempts": 2,
+      "average_refinement_seconds": 45.5,
+      "p95_refinement_seconds": 91,
+      "observed_refinement_tokens": 108710,
+      "observed_refinement_tool_effects": 13,
+      "unsafe_repair_blocks": 0,
+      "recurring_signatures": {},
+      "improvement_candidates": [
+        {
+          "reference": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "component": "semantic/scope",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 13982,
+          "observed_seconds": 0,
+          "systemic": false,
+          "status": "PROPOSED"
+        }
+      ],
+      "human_escalation_observation_count": 1,
+      "human_escalation_rate": 0.0,
+      "systemic_incident_rate": 0.0
+    },
+    "work_convergence": [
+      {
+        "id": "2df6c3fb-ad58-45b3-abb7-a68b5af6f1c8",
+        "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+        "intent_identity": "e0acd3cc38104f974480eb18a86ebf7f1b49868af362c3bcfb8b5aff6e459051",
+        "predecessor_id": null,
+        "sequence": 1,
+        "boundary": "SEMANTIC_RESULT_ADMISSION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "90d72489ab75dbc78f1e175b8a6db7697efd8ef5bf92aaaec0e0cfa5554c5f0d",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:39:01.932228Z"
+      },
+      {
+        "id": "4f3a5805-6480-4e54-96d0-7c5553735f65",
+        "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+        "intent_identity": "e0acd3cc38104f974480eb18a86ebf7f1b49868af362c3bcfb8b5aff6e459051",
+        "predecessor_id": "2df6c3fb-ad58-45b3-abb7-a68b5af6f1c8",
+        "sequence": 2,
+        "boundary": "STEP_TRANSITION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "90d72489ab75dbc78f1e175b8a6db7697efd8ef5bf92aaaec0e0cfa5554c5f0d",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 2,
+        "no_progress_count": 0,
+        "elapsed_seconds": 20,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:39:21.956822Z"
+      },
+      {
+        "id": "5be3615d-b89f-44d7-88bd-530e4c4ff1e0",
+        "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+        "intent_identity": "e0acd3cc38104f974480eb18a86ebf7f1b49868af362c3bcfb8b5aff6e459051",
+        "predecessor_id": "4f3a5805-6480-4e54-96d0-7c5553735f65",
+        "sequence": 3,
+        "boundary": "PRODUCTION_CYCLE_ADMISSION",
+        "failure_signature": "55aace645e56bf76dbff41e8f14eb53f17cab59fa84b37f74f8120e5170fbcf3",
+        "candidate_identity": null,
+        "reality_identity": "90d72489ab75dbc78f1e175b8a6db7697efd8ef5bf92aaaec0e0cfa5554c5f0d",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 3,
+        "no_progress_count": 0,
+        "elapsed_seconds": 40,
+        "token_usage": {
+          "status": "UNREPORTED",
+          "input_tokens": 0,
+          "total_tokens": 0,
+          "output_tokens": 0
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 0
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {},
+          "execution_seconds": 0.0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:39:42.175772Z"
+      },
+      {
+        "id": "ecbcf024-6fd1-440f-9bf0-bff697dc9485",
+        "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+        "intent_identity": "e0acd3cc38104f974480eb18a86ebf7f1b49868af362c3bcfb8b5aff6e459051",
+        "predecessor_id": "5be3615d-b89f-44d7-88bd-530e4c4ff1e0",
+        "sequence": 4,
+        "boundary": "PREVIEW",
+        "failure_signature": null,
+        "candidate_identity": "431148021a6a26c7419fcd7d4cc786c3cc763352b882cb25ff02a4828ae13173",
+        "reality_identity": "89aa8a9ac2855824a2d6f340e426dea8573ebfb1050f15f0204c662ad5ee1cb7",
+        "missing_acceptance": [],
+        "attempts": 4,
+        "no_progress_count": 0,
+        "elapsed_seconds": 288,
+        "token_usage": {
+          "status": "OBSERVED",
+          "input_tokens": 117002,
+          "total_tokens": 131625,
+          "output_tokens": 14623
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {
+            "tool_effect": 12,
+            "inference_submission": 8
+          },
+          "execution_seconds": 84.271439
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "CONVERGED_FOR_REVIEW",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:43:50.774287Z"
+      }
+    ]
+  },
+  "queue": [
+    {
+      "queue_entry_id": "97ec89b9-979b-49b9-83e4-c7231b91f02e",
+      "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+      "pwu_id": "993ab9ce-c99d-4870-b9be-d990138f025c",
+      "attempt_id": "721b5fb6-bc9c-452b-b9ef-cec2bf094562",
+      "fairness_group": "work:04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T04:40:23.172640Z",
+      "available_at": "2026-09-27T04:40:23.147537Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 1,
+      "capacity_observed_at": "2026-09-27T04:44:00.863454Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "de93c872-f872-5d9b-b061-c5e66da7ce0a"
+    }
+  ],
+  "preview": {
+    "mode": "FRONTEND_RUNTIME",
+    "status": "READY",
+    "candidate_revision": "3d31ed65075daa30cca8820a40d750790f7898ba",
+    "candidate_fingerprint": "431148021a6a26c7419fcd7d4cc786c3cc763352b882cb25ff02a4828ae13173",
+    "session": {
+      "id": "7f64edeb-6ae8-41ad-9ad0-16f0934fc9de",
+      "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+      "candidate_id": "efa8e807-f0b0-5e74-bad2-dc44603347ab",
+      "candidate_fingerprint": "431148021a6a26c7419fcd7d4cc786c3cc763352b882cb25ff02a4828ae13173",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "repository_revision": "3d31ed65075daa30cca8820a40d750790f7898ba",
+      "repository_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+      "workspace_id": "b184f16d-feb5-4fb3-83b9-067daef385c0",
+      "environment_id": "63ce14dc-c212-4438-9849-7aed75402f53",
+      "mode": "FRONTEND_RUNTIME",
+      "status": "READY",
+      "definition_version": "frontend-docker-runtime-v1",
+      "endpoint": "http://127.0.0.1:62149/",
+      "image_reference": "sha256:71210210bc00ee15c330f81ccdde10be61cc9612af8c9134f1f051d68b5d6ccd",
+      "service_identities": [
+        "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-app",
+        "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-proxy"
+      ],
+      "resource_references": [
+        "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-internal",
+        "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-gateway",
+        "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-source"
+      ],
+      "evidence": [
+        {
+          "kind": "WORKSPACE",
+          "workspace": "/var/lib/spg/production-environments/candidate-preview-runtime/7f64edeb-6ae8-41ad-9ad0-16f0934fc9de/workspace",
+          "revision": "3d31ed65075daa30cca8820a40d750790f7898ba",
+          "tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+          "topology_preflight": {
+            "verifier_namespace": "candidate-gateway-network",
+            "verifier_image": "watt-lifecycle:qualification",
+            "public_endpoint_namespace": "docker-host"
+          },
+          "dockerfile_sha256": "abd36acd96f3e4485d6e9d4826a540e65a9608f5e9eb0e479de9581d5a8d5f44"
+        },
+        {
+          "kind": "BUILD",
+          "image": "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de:candidate",
+          "image_id": "sha256:71210210bc00ee15c330f81ccdde10be61cc9612af8c9134f1f051d68b5d6ccd",
+          "verified_image_files": 0,
+          "build_log": "/var/lib/spg/production-environments/candidate-preview-runtime/evidence/7f64edeb-6ae8-41ad-9ad0-16f0934fc9de/build.log",
+          "build_log_sha256": "f769cc8ccdbfbef631803efc63bedaaa0b637bad121731bf532c1f350c1a7c31"
+        },
+        {
+          "kind": "SERVED_VERIFICATION",
+          "candidate_revision": "3d31ed65075daa30cca8820a40d750790f7898ba",
+          "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+          "gateway": "http://watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-proxy",
+          "public_gateway": "http://127.0.0.1:62149",
+          "verifier_namespace": "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-gateway",
+          "mode": "FRONTEND_RUNTIME",
+          "frontend": {
+            "path": "/",
+            "status": 200,
+            "body_sha256": "9cc9c410695bbaae448fbb371852a6cc683bc6c2cf75692b5cd8c856cb1e4188"
+          },
+          "result": "PASS"
+        },
+        {
+          "kind": "RUNTIME",
+          "endpoint": "http://127.0.0.1:62149/",
+          "services": [
+            "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-app",
+            "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-proxy"
+          ],
+          "resources": [
+            "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-internal",
+            "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-gateway",
+            "watt-candidate-preview-7f64edeb6ae841ad9ad016f0934fc9de-source"
+          ],
+          "health": {
+            "database": "NOT_REQUIRED",
+            "application": "READY",
+            "gateway": "READY",
+            "repository_revision": "3d31ed65075daa30cca8820a40d750790f7898ba",
+            "repository_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f"
+          },
+          "topology": {
+            "frontend": "app",
+            "backend": "app",
+            "database": null,
+            "supporting_services": []
+          }
+        },
+        {
+          "kind": "PRODUCTION_RECORD",
+          "reference": "production-record:624678cc-297c-5f85-9a6a-a99dde5f042b",
+          "digest": "f261b9fdd5bc1de4b412cc64e0fcd8388d726651c2323f2518f4cb30b747e3ec"
+        }
+      ],
+      "failure_code": null,
+      "failure_reason": null,
+      "version": 6,
+      "created_at": "2026-09-27T04:42:50.590826Z",
+      "updated_at": "2026-09-27T04:43:49.704377Z"
+    }
+  },
+  "attention": [
+    {
+      "attention_id": "32e9c8ce-4b06-5ae4-927a-57732da9c8ff",
+      "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+      "kind": "CANDIDATE_AUTHORIZATION",
+      "decision": "Authorize exact sealed Candidate integration?",
+      "reason": "Repository integration requires exact Human Authority.",
+      "available_actions": [
+        "AUTHORIZE"
+      ],
+      "recommended_action": null,
+      "governed_subject_ref": "baseline-candidate:efa8e807-f0b0-5e74-bad2-dc44603347ab",
+      "steering_reason": null,
+      "recommendation": null,
+      "conversation_prompt": null,
+      "alternatives": [],
+      "trade_offs": [],
+      "expected_impact": null,
+      "reality_refs": [],
+      "steering_plan_revision_id": null,
+      "steering_step_id": null,
+      "interaction_id": null,
+      "interaction_assessment_id": null,
+      "expected_work_reality_revision_id": null
+    }
+  ],
+  "economics": {
+    "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+    "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+    "pwu_count": 1,
+    "join_count": 0,
+    "pwu": [
+      {
+        "pwu_id": "993ab9ce-c99d-4870-b9be-d990138f025c",
+        "node_id": null,
+        "run_id": "329873e5-9dee-4e56-8bca-577f0ebcf72b",
+        "condition": "SATISFIED",
+        "attempt_count": 1,
+        "outcomes": [
+          "RESULT_READY"
+        ],
+        "providers": [
+          "deepseek",
+          "watt-native:721b5fb6-bc9c-452b-b9ef-cec2bf094562"
+        ],
+        "execution_seconds": 84.271439,
+        "duration_observed": true,
+        "queue_wait_seconds": 1.046922,
+        "token_usage": {
+          "input_tokens": 117002,
+          "output_tokens": 14623,
+          "total_tokens": 131625,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 8,
+          "tool_effect": 12
+        }
+      }
+    ],
+    "token_usage": {
+      "input_tokens": 117002,
+      "output_tokens": 14623,
+      "total_tokens": 131625,
+      "status": "OBSERVED"
+    },
+    "observed_provider_spend": {
+      "status": "UNREPORTED",
+      "by_currency": {},
+      "unreported_attempt_count": 1,
+      "amount": null
+    },
+    "execution_seconds": 84.271439,
+    "queue_wait_seconds": 1.046922,
+    "wall_elapsed_seconds": 110.696992,
+    "critical_path_seconds": null,
+    "parallelism_effect_seconds": 0.0,
+    "self_refine_event_count": 2,
+    "first_pass_pwu_count": 1,
+    "retried_pwu_count": 0,
+    "human_escalation_count": 0,
+    "refinement_extra_seconds": 91,
+    "resource_units": {
+      "inference_submission": 8,
+      "tool_effect": 12
+    },
+    "final_outcome": "READY"
+  },
+  "delivery": {
+    "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+    "target": null,
+    "supported_target_kinds": [
+      "DOCUMENT_PACKAGE",
+      "SOFTWARE_ARTIFACT"
+    ],
+    "deliveries": []
+  }
+}

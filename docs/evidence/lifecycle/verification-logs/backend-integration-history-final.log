@@ -1,0 +1,192 @@
+........................................................................ [  9%]
+........................................................................ [ 19%]
+.......................................................................F [ 28%]
+........................................................................ [ 38%]
+........................................................................ [ 48%]
+........................................................................ [ 57%]
+........................................................................ [ 67%]
+........................................................................ [ 77%]
+........................................................................ [ 86%]
+........................................................................ [ 96%]
+...........EEEEEEEEE.......                                              [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_pre_work_contract_replays_after_reload_without_becoming_semantic_truth _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    @pytest.fixture(autouse=True)
+    def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
+        # Never use the Human Review database: the shared PostgreSQL fixture points
+        # at the explicitly configured disposable test database.
+>       assert postgres_database.engine.url.database == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_wic_response_contract.py:77: AssertionError
+_ ERROR at setup of test_active_exploration_does_not_promote_proposed_design_to_work_truth _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    @pytest.fixture(autouse=True)
+    def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
+        # Never use the Human Review database: the shared PostgreSQL fixture points
+        # at the explicitly configured disposable test database.
+>       assert postgres_database.engine.url.database == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_wic_response_contract.py:77: AssertionError
+_ ERROR at setup of test_active_reality_questions_are_provider_free_and_do_not_mutate_work[\u73b0\u5728\u505a\u5230\u54ea\u4e86\uff1f-STATUS-\u5f53\u524d Work \u5c1a\u672a\u8fdb\u5165\u751f\u4ea7\u6267\u884c] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    @pytest.fixture(autouse=True)
+    def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
+        # Never use the Human Review database: the shared PostgreSQL fixture points
+        # at the explicitly configured disposable test database.
+>       assert postgres_database.engine.url.database == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_wic_response_contract.py:77: AssertionError
+_ ERROR at setup of test_active_reality_questions_are_provider_free_and_do_not_mutate_work[\u4e3a\u4ec0\u4e48\u4e00\u76f4\u5361\u5728 QUEUED\uff1f-DIAGNOSE-\u5f53\u524d\u751f\u4ea7\u5468\u671f\u6ca1\u6709\u5bf9\u5e94\u7684\u6267\u884c\u961f\u5217\u8bb0\u5f55] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    @pytest.fixture(autouse=True)
+    def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
+        # Never use the Human Review database: the shared PostgreSQL fixture points
+        # at the explicitly configured disposable test database.
+>       assert postgres_database.engine.url.database == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_wic_response_contract.py:77: AssertionError
+_ ERROR at setup of test_execution_contract_uses_existing_admission_without_granting_authority _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    @pytest.fixture(autouse=True)
+    def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
+        # Never use the Human Review database: the shared PostgreSQL fixture points
+        # at the explicitly configured disposable test database.
+>       assert postgres_database.engine.url.database == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_wic_response_contract.py:77: AssertionError
+_ ERROR at setup of test_contract_is_durable_before_first_delta_and_streams_before_terminal[False] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    @pytest.fixture(autouse=True)
+    def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
+        # Never use the Human Review database: the shared PostgreSQL fixture points
+        # at the explicitly configured disposable test database.
+>       assert postgres_database.engine.url.database == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_wic_response_contract.py:77: AssertionError
+_ ERROR at setup of test_contract_is_durable_before_first_delta_and_streams_before_terminal[True] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    @pytest.fixture(autouse=True)
+    def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
+        # Never use the Human Review database: the shared PostgreSQL fixture points
+        # at the explicitly configured disposable test database.
+>       assert postgres_database.engine.url.database == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_wic_response_contract.py:77: AssertionError
+_ ERROR at setup of test_failed_realization_contract_is_evidence_not_next_turn_trajectory _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    @pytest.fixture(autouse=True)
+    def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
+        # Never use the Human Review database: the shared PostgreSQL fixture points
+        # at the explicitly configured disposable test database.
+>       assert postgres_database.engine.url.database == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_wic_response_contract.py:77: AssertionError
+_ ERROR at setup of test_human_sse_skips_internal_contract_event_and_replays_without_model_recall _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    @pytest.fixture(autouse=True)
+    def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
+        # Never use the Human Review database: the shared PostgreSQL fixture points
+        # at the explicitly configured disposable test database.
+>       assert postgres_database.engine.url.database == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_wic_response_contract.py:77: AssertionError
+=================================== FAILURES ===================================
+___________________________ test_db_01_connectivity ____________________________
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), session_factory=s...postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_integration), autoflush=False, expire_on_commit=False))
+
+    def test_db_01_connectivity(postgres_database: Database) -> None:
+        health = postgres_database.check()
+    
+>       assert health.database_name == "spg_test"
+E       AssertionError: assert 'spg_lifecycle_integration' == 'spg_test'
+E         
+E         - spg_test
+E         + spg_lifecycle_integration
+
+tests/integration/test_postgresql_persistence.py:31: AssertionError
+=============================== warnings summary ===============================
+tests/integration/test_mvp_app_work_flow.py::test_work_03_and_08_work_is_not_resource_or_project
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1294: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "project_id" not in record.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_03_and_08_work_is_not_resource_or_project
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1295: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "resource_id" not in record.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_11_draft_cannot_execute_and_work_13_projection_is_not_authority
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1421: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "status" in before.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_11_draft_cannot_execute_and_work_13_projection_is_not_authority
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1422: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "condition" not in before.model_fields
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_postgresql_persistence.py::test_db_01_connectivity
+ERROR tests/integration/test_wic_response_contract.py::test_pre_work_contract_replays_after_reload_without_becoming_semantic_truth
+ERROR tests/integration/test_wic_response_contract.py::test_active_exploration_does_not_promote_proposed_design_to_work_truth
+ERROR tests/integration/test_wic_response_contract.py::test_active_reality_questions_are_provider_free_and_do_not_mutate_work[\u73b0\u5728\u505a\u5230\u54ea\u4e86\uff1f-STATUS-\u5f53\u524d Work \u5c1a\u672a\u8fdb\u5165\u751f\u4ea7\u6267\u884c]
+ERROR tests/integration/test_wic_response_contract.py::test_active_reality_questions_are_provider_free_and_do_not_mutate_work[\u4e3a\u4ec0\u4e48\u4e00\u76f4\u5361\u5728 QUEUED\uff1f-DIAGNOSE-\u5f53\u524d\u751f\u4ea7\u5468\u671f\u6ca1\u6709\u5bf9\u5e94\u7684\u6267\u884c\u961f\u5217\u8bb0\u5f55]
+ERROR tests/integration/test_wic_response_contract.py::test_execution_contract_uses_existing_admission_without_granting_authority
+ERROR tests/integration/test_wic_response_contract.py::test_contract_is_durable_before_first_delta_and_streams_before_terminal[False]
+ERROR tests/integration/test_wic_response_contract.py::test_contract_is_durable_before_first_delta_and_streams_before_terminal[True]
+ERROR tests/integration/test_wic_response_contract.py::test_failed_realization_contract_is_evidence_not_next_turn_trajectory
+ERROR tests/integration/test_wic_response_contract.py::test_human_sse_skips_internal_contract_event_and_replays_without_model_recall
+1 failed, 737 passed, 4 warnings, 9 errors in 3334.04s (0:55:34)

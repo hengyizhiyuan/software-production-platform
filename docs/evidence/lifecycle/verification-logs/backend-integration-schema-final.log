@@ -1,0 +1,8 @@
+........................................................................ [  9%]
+....INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+psycopg_binary/_psycopg/waiting.pyx:222: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+76 passed in 809.47s (0:13:29)

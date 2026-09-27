@@ -1,0 +1,13 @@
+{
+  "name_search_selected_user_only": true,
+  "email_search_selected_user_only": true,
+  "no_matches_empty": true,
+  "customer_domain_unchanged": true,
+  "evidence": [
+    "browser-name-dom.txt",
+    "browser-email-dom.txt",
+    "browser-empty-dom.txt"
+  ],
+  "endpoint": "http://127.0.0.1:57688/",
+  "method": "Actual in-app Browser interactions on automatically served Preview"
+}

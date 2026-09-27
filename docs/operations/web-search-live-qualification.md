@@ -75,3 +75,28 @@ regenerate the Golden projection:
 Recheck every mandatory oracle and repeat requirement before upgrading Tier-0.
 Update the deferred-qualification manifest and closure with the new receipt
 paths/hashes. Human Acceptance remains a separate governance activity.
+
+## Lifecycle hardening runtime entry
+
+The subsequent lifecycle/action batch has its own isolated app at `8079` and
+private env `.spg/lifecycle-hardening/runtime.env`. Its trial 1 receipts are
+`BLOCKED_EXTERNAL`; they neither replace the historical `8078` receipts nor
+claim live Web success. After privately configuring the key in the actual app
+and activating the exact source package, run fresh identities:
+
+```sh
+.venv/bin/python benchmarks/golden/runtime/qualify_research.py \
+  --scope web-live --trial 2 --base http://127.0.0.1:8079 \
+  --env-file .spg/lifecycle-hardening/runtime.env \
+  --evidence-root .spg/lifecycle-hardening/deferred-web-qualification
+
+.venv/bin/python benchmarks/golden/runtime/qualify_research.py \
+  --scope GC-EX-12 --trial 2 --base http://127.0.0.1:8079 \
+  --env-file .spg/lifecycle-hardening/runtime.env \
+  --evidence-root .spg/lifecycle-hardening/deferred-web-qualification
+```
+
+Apply every evidence requirement above, including separate model-initiated
+retrieval and bounded recovery/convergence receipts. The running app must have
+the key; editing only the runner env does not satisfy the gate. Do not modify
+the retained user `8078` runtime or frozen FSI attempts as qualification setup.

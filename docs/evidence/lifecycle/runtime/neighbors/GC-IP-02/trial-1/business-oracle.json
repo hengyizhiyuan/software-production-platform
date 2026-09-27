@@ -1,0 +1,26 @@
+{
+  "case": "GC-IP-02",
+  "trial": 1,
+  "checks": {
+    "automatic_preview_ready": true,
+    "served_verification": true,
+    "no_unauthorized_delivery": true,
+    "api_and_real_database_agree": true,
+    "form_submitted": true,
+    "reload_preserves_record": true,
+    "user_model_persistence": true
+  },
+  "status": "PASS",
+  "candidate_revision": "53fa9e80c0cd3cc1d3d34d1c885bd7f5552c1867",
+  "candidate_tree": "e506a6b27ab290b78fa7bf936f43705426239322",
+  "browser_evidence_record": "browser-oracle.json",
+  "persistence_evidence_record": "persistence-oracle.json",
+  "historical_runtime_evidence": false,
+  "changed_paths": [
+    "web/app.js",
+    "web/index.html"
+  ],
+  "preview_endpoint": "http://127.0.0.1:61816/",
+  "human_acceptance": "PENDING",
+  "manual_rescue_actions": []
+}

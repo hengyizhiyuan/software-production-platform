@@ -1,0 +1,9 @@
+{
+  "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+  "target": null,
+  "supported_target_kinds": [
+    "DOCUMENT_PACKAGE",
+    "SOFTWARE_ARTIFACT"
+  ],
+  "deliveries": []
+}

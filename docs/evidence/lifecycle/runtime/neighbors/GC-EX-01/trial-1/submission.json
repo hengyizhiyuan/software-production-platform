@@ -1,0 +1,14 @@
+{
+  "turn_id": "0c4fe76a-214f-486d-9253-36861b37a108",
+  "interaction_id": "89f48864-798b-448f-878f-913b670209ec",
+  "request_record_id": "01886861-2170-46ba-8535-b6aa3d3bbce3",
+  "assessment_id": null,
+  "wic_mode": "WIC_VNEXT_CONTROLLED",
+  "status": "RECEIVED",
+  "failure_code": null,
+  "failure_message": null,
+  "created_at": "2026-09-27T04:33:34.166645Z",
+  "started_at": null,
+  "completed_at": null,
+  "updated_at": "2026-09-27T04:33:34.166645Z"
+}

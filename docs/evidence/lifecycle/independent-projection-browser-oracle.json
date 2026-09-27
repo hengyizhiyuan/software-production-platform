@@ -1,0 +1,49 @@
+{
+  "case": "GC-LC-15",
+  "status": "PASS",
+  "checks": {
+    "repository_ready": true,
+    "product_known": true,
+    "production_unadmitted": true,
+    "local_branch_feat_test": true,
+    "exact_source_ref_revision_tree": true,
+    "ui_repository_ready": true,
+    "vague_future_no_repository_no_work": true,
+    "all_four_streams_completed": true
+  },
+  "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b",
+  "streams": [
+    {
+      "path": "browser-sse/journey-a-c-turn-1.sse",
+      "response_final": true,
+      "message_completed": true
+    },
+    {
+      "path": "browser-sse/journey-a-c-turn-2.sse",
+      "response_final": true,
+      "message_completed": true
+    },
+    {
+      "path": "browser-sse/journey-a-c-turn-3.sse",
+      "response_final": true,
+      "message_completed": true
+    },
+    {
+      "path": "browser-sse/journey-a-c-turn-4.sse",
+      "response_final": true,
+      "message_completed": true
+    }
+  ],
+  "exact_repository_observation": {
+    "source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+    "repository_ref": "refs/heads/feat_test",
+    "revision": "0b535f63302fe45e88d0b3e203ae991868ced079",
+    "tree": "753564ba0a09c0bed999dff17b540b09e581e8d9",
+    "product_id": "0571e6a7-1ab4-41c1-a7b8-9258e1173590"
+  },
+  "browser_evidence": [
+    "browser-journey-a-source-final-dom.txt",
+    "browser-journey-b-final-dom.txt",
+    "browser-journey-c-source-final-dom.txt"
+  ]
+}

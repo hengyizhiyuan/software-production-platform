@@ -1,0 +1,1444 @@
+{
+  "interaction": {
+    "interaction_id": "30f3b3d1-a0d1-4b5b-bea0-5db0c5db24e7",
+    "condition": "OPEN",
+    "current_work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+    "created_at": "2026-09-27T04:33:34.076562Z",
+    "updated_at": "2026-09-27T04:35:45.476689Z",
+    "records": [
+      {
+        "record_id": "a226effe-82bd-4670-b14a-061143a4953c",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+        "work_focus_id": null,
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:33:34.553517Z"
+      }
+    ],
+    "conversation_messages": [
+      {
+        "message_id": "3712d613-d196-4815-9b1f-d6a920bcd9c0",
+        "turn_id": "8aaadf94-e6cc-4ef1-8f6f-7d8d0fd0e55a",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "content": "这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "a226effe-82bd-4670-b14a-061143a4953c",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:33:34.553517Z",
+        "updated_at": "2026-09-27T04:35:52.543123Z"
+      },
+      {
+        "message_id": "2d5b2b94-d98b-4f8a-9b65-b73ed25538c8",
+        "turn_id": "8aaadf94-e6cc-4ef1-8f6f-7d8d0fd0e55a",
+        "sequence": 2,
+        "actor": "WATT",
+        "content": "已收到仓库地址，以及把首页“开始使用”改为“立即体验”的要求；这项 Work 已经建立。仓库获取目前处于已请求、尚未开始的状态，Watt 会自动接着推进，无需你再确认。获取完成后我会检查项目结构，改好首页文案，并给你实际预览。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "4a090453-f513-413c-8ec5-6b146702f491",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:35:52.543123Z",
+        "updated_at": "2026-09-27T04:35:52.543123Z"
+      }
+    ],
+    "turns": [
+      {
+        "turn_id": "8aaadf94-e6cc-4ef1-8f6f-7d8d0fd0e55a",
+        "interaction_id": "30f3b3d1-a0d1-4b5b-bea0-5db0c5db24e7",
+        "request_record_id": "a226effe-82bd-4670-b14a-061143a4953c",
+        "assessment_id": "4a090453-f513-413c-8ec5-6b146702f491",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T04:33:34.553517Z",
+        "started_at": "2026-09-27T04:35:24.480911Z",
+        "completed_at": "2026-09-27T04:35:52.543123Z",
+        "updated_at": "2026-09-27T04:35:52.543123Z"
+      }
+    ],
+    "human_said": [
+      "这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。"
+    ],
+    "latest_assessment": {
+      "assessment_id": "4a090453-f513-413c-8ec5-6b146702f491",
+      "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71",
+      "basis_last_sequence": 1,
+      "interpreted_motive": "对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。",
+      "desired_outcome": "首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+      "design_intent_frame": {
+        "design_subject": "现有项目首页的主行动按钮文案",
+        "object_type": "FEATURE",
+        "business_context": "首页引导访客开始体验产品",
+        "desired_outcome": "首页按钮文案由“开始使用”更新为“立即体验”，并可看到实际渲染效果",
+        "scope_level": "implementation",
+        "collaboration_mode": "execution",
+        "candidate_assumptions": [
+          "该文案位于首页主视觉区域的行动按钮",
+          "首页存在唯一一处“开始使用”文案"
+        ],
+        "ambiguities": [
+          "“实际预览”的形式（本地运行页面、渲染截图或其他可见结果）尚未指定"
+        ],
+        "confidence": 0.72
+      },
+      "candidate_context": [
+        "当前项目仓库地址：http://qualified-git:8080/transient-acquisition.git",
+        "当前讨论尚未绑定到任何进行中的 Work"
+      ],
+      "candidate_constraints": [
+        "目标文案必须准确为“立即体验”（替换原“开始使用”）",
+        "预览须为实际效果，而非描述性说明"
+      ],
+      "current_requests": [
+        "拉取 http://qualified-git:8080/transient-acquisition.git 并检查当前结构",
+        "把首页“开始使用”改为“立即体验”",
+        "给出实际预览",
+        "这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。"
+      ],
+      "unresolved_material_questions": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "e1",
+          "kind": "REFERENCE",
+          "values": [
+            "http://qualified-git:8080/transient-acquisition.git"
+          ],
+          "unit": null,
+          "source_record_id": "a226effe-82bd-4670-b14a-061143a4953c",
+          "source_text": "http://qualified-git:8080/transient-acquisition.git",
+          "explicit_roles": [
+            "repository"
+          ]
+        },
+        {
+          "extraction_id": "e2",
+          "kind": "ORDERED_VALUES",
+          "values": [
+            "拉取这个项目",
+            "检查当前结构",
+            "把首页“开始使用”改为“立即体验”",
+            "给我实际预览"
+          ],
+          "unit": null,
+          "source_record_id": "a226effe-82bd-4670-b14a-061143a4953c",
+          "source_text": "请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+          "explicit_roles": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "extraction_id": "e3",
+          "kind": "STATE_CHANGE",
+          "values": [
+            "开始使用",
+            "立即体验"
+          ],
+          "unit": null,
+          "source_record_id": "a226effe-82bd-4670-b14a-061143a4953c",
+          "source_text": "把首页“开始使用”改为“立即体验”",
+          "explicit_roles": [
+            "current_label",
+            "target_label"
+          ]
+        }
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "9b0796b9-bb9a-589e-8953-f58ff2693626",
+          "subject": "repository.url",
+          "relation": "EQUALITY",
+          "value": "http://qualified-git:8080/transient-acquisition.git",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "a226effe-82bd-4670-b14a-061143a4953c"
+            ],
+            "source_text": "http://qualified-git:8080/transient-acquisition.git",
+            "source_extraction_ids": [
+              "e1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "df75d764-65cf-5ec7-abb0-45371e0b7c23",
+          "subject": "homepage.cta.label",
+          "relation": "MAPPING",
+          "value": "立即体验",
+          "unit": null,
+          "scope": "homepage",
+          "qualifiers": {
+            "previous": "开始使用"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "a226effe-82bd-4670-b14a-061143a4953c"
+            ],
+            "source_text": "把首页“开始使用”改为“立即体验”",
+            "source_extraction_ids": [
+              "e3"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONTEXT",
+          "statement": "当前项目仓库为 http://qualified-git:8080/transient-acquisition.git。",
+          "source_record_ids": [
+            "a226effe-82bd-4670-b14a-061143a4953c"
+          ],
+          "confidence": 0.95,
+          "rationale": "人类明确标注该地址为当前项目仓库。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "拉取该仓库并检查其当前结构。",
+          "source_record_ids": [
+            "a226effe-82bd-4670-b14a-061143a4953c"
+          ],
+          "confidence": 0.95,
+          "rationale": "“请拉取这个项目并检查当前结构”为显式请求。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "把首页“开始使用”改为“立即体验”。",
+          "source_record_ids": [
+            "a226effe-82bd-4670-b14a-061143a4953c"
+          ],
+          "confidence": 0.97,
+          "rationale": "人类给出明确的文案替换目标。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "提供修改后的实际预览。",
+          "source_record_ids": [
+            "a226effe-82bd-4670-b14a-061143a4953c"
+          ],
+          "confidence": 0.9,
+          "rationale": "“给我实际预览”明确要求可观察结果。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "candidate_change": null,
+      "basis_work_revision_id": null,
+      "basis_steering_plan_revision_id": null,
+      "basis_steering_step_id": null,
+      "basis_active_runtime_binding_id": null,
+      "supporting_references": [],
+      "natural_response": "先拉取并检查仓库结构与首页文件，定位“开始使用”所在位置后做最小文案替换，再以可观察方式呈现修改后的首页。",
+      "readiness": {
+        "status": "READY",
+        "profile": "LONG_LIVED_STEERING",
+        "profile_version": "v0",
+        "satisfied_requirements": [
+          "MOTIVE",
+          "DESIRED_OUTCOME"
+        ],
+        "missing_information": [],
+        "unresolved_material_questions": [],
+        "reasons": [
+          "Motive and desired outcome are clear enough to form governed Work."
+        ],
+        "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71"
+      },
+      "progressive_semantics": {
+        "turn_intent": "ACTION_REQUEST",
+        "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71",
+        "source_record_ids": [
+          "a226effe-82bd-4670-b14a-061143a4953c"
+        ],
+        "reception_meanings": [
+          "DEEP_WIC_WORKING_UNDERSTANDING"
+        ],
+        "working_motive": "对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。",
+        "working_desired_outcome": "首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+        "working_facts": [
+          "当前项目仓库地址：http://qualified-git:8080/transient-acquisition.git",
+          "当前讨论尚未绑定到任何进行中的 Work"
+        ],
+        "working_constraints": [
+          "目标文案必须准确为“立即体验”（替换原“开始使用”）",
+          "预览须为实际效果，而非描述性说明"
+        ],
+        "working_requests": [
+          "拉取 http://qualified-git:8080/transient-acquisition.git 并检查当前结构",
+          "把首页“开始使用”改为“立即体验”",
+          "给出实际预览",
+          "这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。"
+        ],
+        "explicit_assumptions": [],
+        "unresolved_human_decisions": [],
+        "deltas": [
+          {
+            "id": "b90791a2-0d3f-55a4-b6ae-7a9e7e006df9",
+            "category": "MOTIVE",
+            "operation": "ADDED",
+            "value": "对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。",
+            "prior_value": null,
+            "source_record_ids": [
+              "a226effe-82bd-4670-b14a-061143a4953c"
+            ],
+            "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "12a10b98-0d20-55e7-94fe-3e881b14d249",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "目标文案必须准确为“立即体验”（替换原“开始使用”）",
+            "prior_value": null,
+            "source_record_ids": [
+              "a226effe-82bd-4670-b14a-061143a4953c"
+            ],
+            "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "0bd61237-e456-51ba-9050-8c047bbcab2c",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "预览须为实际效果，而非描述性说明",
+            "prior_value": null,
+            "source_record_ids": [
+              "a226effe-82bd-4670-b14a-061143a4953c"
+            ],
+            "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          }
+        ],
+        "pattern_signals": [
+          "BOUNDED_CHANGE",
+          "PRODUCTION_REQUEST",
+          "REPOSITORY_SOURCE"
+        ],
+        "inference_disposition": "NO_INFERENCE",
+        "questions": [],
+        "selected_question": null,
+        "governance_candidate": "WORK_FORMATION_PROPOSAL",
+        "readiness": [
+          {
+            "target": "WORK_FORMATION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "WORK_REVISION",
+            "status": "NOT_APPLICABLE",
+            "satisfied_evidence": [],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "DESIGN_PROGRESSION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "CURRENT_FOCUS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "artifact_recommendation": null,
+        "factual_contradictions": [],
+        "semantic_policy_revision": "wic-semantic-policy-v1",
+        "question_policy_revision": "wic-question-value-v1"
+      },
+      "provider_identity": "deepseek-responses:semantic:request:965e2905-c59b-43ce-93cc-db2104cc8638",
+      "model_identity": "deepseek-flash",
+      "schema_version": "wic-assessment-v6",
+      "created_at": "2026-09-27T04:35:39.046409Z"
+    },
+    "latest_assessment_current": false,
+    "interpreted_motive": "对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。",
+    "desired_outcome": "首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+    "design_intent_frame": {
+      "design_subject": "现有项目首页的主行动按钮文案",
+      "object_type": "FEATURE",
+      "business_context": "首页引导访客开始体验产品",
+      "desired_outcome": "首页按钮文案由“开始使用”更新为“立即体验”，并可看到实际渲染效果",
+      "scope_level": "implementation",
+      "collaboration_mode": "execution",
+      "candidate_assumptions": [
+        "该文案位于首页主视觉区域的行动按钮",
+        "首页存在唯一一处“开始使用”文案"
+      ],
+      "ambiguities": [
+        "“实际预览”的形式（本地运行页面、渲染截图或其他可见结果）尚未指定"
+      ],
+      "confidence": 0.72
+    },
+    "candidate_context": [
+      "当前项目仓库地址：http://qualified-git:8080/transient-acquisition.git",
+      "当前讨论尚未绑定到任何进行中的 Work"
+    ],
+    "candidate_constraints": [
+      "目标文案必须准确为“立即体验”（替换原“开始使用”）",
+      "预览须为实际效果，而非描述性说明"
+    ],
+    "current_requests": [
+      "拉取 http://qualified-git:8080/transient-acquisition.git 并检查当前结构",
+      "把首页“开始使用”改为“立即体验”",
+      "给出实际预览",
+      "这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。"
+    ],
+    "unresolved_material_questions": [],
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "4b3a314d612cb4eeeb04c2e8a1ed24ac215cec5c4f320c8cf10f5ecc7ed13e71"
+    },
+    "candidate_engineering_resource_id": "cc480051-0e41-4741-b1ec-53656bdcb3f7",
+    "candidate_repository_identity": "http://qualified-git:8080/transient-acquisition.git",
+    "candidate_repository_ref": "refs/heads/main",
+    "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git:8080/transient-acquisition.git at refs/heads/main",
+    "governed_work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+    "governed_revision": {
+      "revision_id": "d9590d57-8fe3-537d-8566-d0dadfe7bacf",
+      "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+      "revision_number": 2,
+      "previous_revision_id": "74e78f5d-d5a5-5dd5-b5d6-cfc47ff7f838",
+      "basis_fingerprint": "c1e1cdbcbec683898c16849502bb1aed9063c2454bf027caf48920fcb00d8890",
+      "revision_fingerprint": "1bf67c1733c8ecc6d035ae9a133c263aa3565aa5700de8a6fceafc3205815b3f",
+      "source_interaction_id": "30f3b3d1-a0d1-4b5b-bea0-5db0c5db24e7",
+      "source_kind": "ASSET_SCOPE_ADMISSION",
+      "source_assessment_id": null,
+      "source_record_ids": [
+        "a226effe-82bd-4670-b14a-061143a4953c"
+      ],
+      "motive": "对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。",
+      "desired_outcome": "首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+      "context_facts": [
+        "当前项目仓库地址：http://qualified-git:8080/transient-acquisition.git",
+        "当前讨论尚未绑定到任何进行中的 Work"
+      ],
+      "constraints": [
+        "目标文案必须准确为“立即体验”（替换原“开始使用”）",
+        "预览须为实际效果，而非描述性说明"
+      ],
+      "requests": [
+        "拉取 http://qualified-git:8080/transient-acquisition.git 并检查当前结构",
+        "把首页“开始使用”改为“立即体验”",
+        "给出实际预览",
+        "这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。"
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "9b0796b9-bb9a-589e-8953-f58ff2693626",
+          "subject": "repository.url",
+          "relation": "EQUALITY",
+          "value": "http://qualified-git:8080/transient-acquisition.git",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "a226effe-82bd-4670-b14a-061143a4953c"
+            ],
+            "source_text": "http://qualified-git:8080/transient-acquisition.git",
+            "source_extraction_ids": [
+              "e1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "74e78f5d-d5a5-5dd5-b5d6-cfc47ff7f838"
+        },
+        {
+          "id": "df75d764-65cf-5ec7-abb0-45371e0b7c23",
+          "subject": "homepage.cta.label",
+          "relation": "MAPPING",
+          "value": "立即体验",
+          "unit": null,
+          "scope": "homepage",
+          "qualifiers": {
+            "previous": "开始使用"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "a226effe-82bd-4670-b14a-061143a4953c"
+            ],
+            "source_text": "把首页“开始使用”改为“立即体验”",
+            "source_extraction_ids": [
+              "e3"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "74e78f5d-d5a5-5dd5-b5d6-cfc47ff7f838"
+        }
+      ],
+      "engineering_scope_id": "0d0ce66d-1c71-4a4e-b2f5-a0b5420d758f",
+      "engineering_resource_id": "cc480051-0e41-4741-b1ec-53656bdcb3f7",
+      "scope_basis_fingerprint": "ba80f72afd2176641c42089a98d55e1985518e9d7fee6d586e3701a3334ce728",
+      "repository_identity": "http://qualified-git:8080/transient-acquisition.git",
+      "repository_ref": "refs/heads/main",
+      "source_baseline_id": "224135cb-61e4-491e-9d26-f252af4f6867",
+      "source_revision": "988ab416592fcde30ac619fb7664da2a35b5c4f9",
+      "governance_record_id": "c21f602f-ecfe-4518-b4e8-7e1c4e6e06b0",
+      "supporting_references": [
+        "INTERACTION_RECORD:a226effe-82bd-4670-b14a-061143a4953c",
+        "REPOSITORY_OBSERVATION:48b662c07330ea7d1502fea3a21822e9b4974c80f1805c119e3d91d35200bced"
+      ],
+      "change_set": [
+        "asset:PRODUCTION_TARGET_ADMITTED"
+      ],
+      "rationale": "Bind the exact repository Reality acquired from the Human-supplied source before Steering begins.",
+      "admitted_by": "human:owner",
+      "schema_version": "wic-work-reality-v3",
+      "created_at": "2026-09-27T04:35:56.684368Z"
+    },
+    "current_work_focus": "对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。 → 首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "work_revision_admission_status": "NOT_APPLICABLE",
+    "active_cycle_work_revision_id": "d9590d57-8fe3-537d-8566-d0dadfe7bacf",
+    "active_cycle_impact_disposition": null,
+    "work_satisfaction_state": "IN_PROGRESS",
+    "interaction_relationship_state": "OPEN",
+    "work_focus_history": [
+      "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72"
+    ],
+    "latest_work_transition": null,
+    "new_work_formation_pending": false,
+    "production_request_detected": true,
+    "repository_source": "http://qualified-git:8080/transient-acquisition.git",
+    "production_admission_state": "WORK_CREATED",
+    "repository_acquisition_state": "READY",
+    "repository_observation": {
+      "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+      "paths": [
+        ".gitignore",
+        "Dockerfile",
+        "README.md",
+        "migrations/001_initial.sql",
+        "package.json",
+        "server.py",
+        "tests/application.cjs",
+        "web/app.js",
+        "web/index.html",
+        "web/styles.css"
+      ],
+      "title": "对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。",
+      "source": "http://qualified-git:8080/transient-acquisition.git",
+      "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+      "revision": "988ab416592fcde30ac619fb7664da2a35b5c4f9",
+      "condition": "READY",
+      "description": "首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+      "fingerprint": "48b662c07330ea7d1502fea3a21822e9b4974c80f1805c119e3d91d35200bced",
+      "observed_at": "2026-09-27T04:35:56.011860+00:00",
+      "resource_id": "cc480051-0e41-4741-b1ec-53656bdcb3f7",
+      "context_path": "README.md",
+      "human_message": "Repository is ready.",
+      "target_branch": null,
+      "attempt_number": 2,
+      "interaction_id": "30f3b3d1-a0d1-4b5b-bea0-5db0c5db24e7",
+      "operation_kind": "ACQUIRE",
+      "repository_ref": "refs/heads/main",
+      "base_resource_id": null,
+      "failure_category": null,
+      "intake_request_id": "7cfdd70e-62b3-59fb-a967-bc75019b2c89",
+      "operation_evidence": {
+        "verified": true,
+        "connector_id": "builtin:git",
+        "capability_id": "git.repository.acquire",
+        "operation_ref": "repository-intake:7cfdd70e-62b3-59fb-a967-bc75019b2c89",
+        "resulting_branch": "refs/heads/main",
+        "resulting_revision": "988ab416592fcde30ac619fb7664da2a35b5c4f9",
+        "workspace_reference": "/var/lib/spg/repository-assets/7cfdd70e-62b3-59fb-a967-bc75019b2c89"
+      },
+      "previous_attempt_id": "8fd8382d-3da6-5477-93ac-fd795bdab63f",
+      "repository_identity": "http://qualified-git:8080/transient-acquisition.git"
+    },
+    "production_next_step": "Continue Steering against the acquired repository Reality.",
+    "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+    "selected_design_schema_version": "0.1",
+    "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+    "design_stage": "Current Reality",
+    "design_next_focus": "Establish the trusted current product and runtime reality.",
+    "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+    "design_facilitation_strategy": "CLARIFY",
+    "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+  },
+  "observed_at": "2026-09-27T04:41:58.364085+00:00",
+  "work": {
+    "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+    "product_id": "b6d12f8c-093b-4670-a555-8f4d5355473e",
+    "goal_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "raw_user_requirement": "对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。",
+    "title": "对已指定的现有项目进行小范围文案修改，并看到修改后的实际效果。",
+    "desired_outcome": "首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+    "constraints": [
+      "目标文案必须准确为“立即体验”（替换原“开始使用”）",
+      "预览须为实际效果，而非描述性说明"
+    ],
+    "target_kind": "CODE_WORK",
+    "artifact_target": null,
+    "change_proposal": {
+      "proposal_id": "462ab296-b57c-5864-9dbf-aa610b7ab869",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "cc480051-0e41-4741-b1ec-53656bdcb3f7",
+      "repository_identity": "http://qualified-git:8080/transient-acquisition.git",
+      "source_baseline_id": "224135cb-61e4-491e-9d26-f252af4f6867",
+      "source_ref": "refs/heads/main",
+      "source_revision": "988ab416592fcde30ac619fb7664da2a35b5c4f9",
+      "proposed_targets": [
+        {
+          "path": "web/index.html",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The homepage is rendered by server.py from web/index.html for `/` (and every other page route), and this is the only observed occurrence of the literal text 开始使用. The requested change is exactly the label of this existing button, so this file is the single minimum surface that must change; nothing else in the file (ids, other buttons, dialog) is affected.",
+          "evidence": "Exact 988ab416592fcde30ac619fb7664da2a35b5c4f9:web/index.html witness: <button id=\"start\">开始使用</button>",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [
+        "migrations/001_initial.sql",
+        "server.py",
+        "web/app.js",
+        "web/styles.css",
+        "README.md",
+        "Dockerfile",
+        "package.json"
+      ],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "c82bbc576ee1a62fe34157d4b06ab67c69675c7751b0ccd129baa63cb58b03a0"
+    },
+    "change_contract": null,
+    "production_plan": {
+      "proposal_id": "f4aac0fc-d57e-5342-8e4b-b4b005135424",
+      "target_kind": "CODE_WORK",
+      "objective": "首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+      "desired_outcome": "首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Prepare the repository-inspected code targets: web/index.html."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": null,
+      "artifact_targets": [],
+      "change_proposal": {
+        "proposal_id": "462ab296-b57c-5864-9dbf-aa610b7ab869",
+        "target_kind": "CODE_WORK",
+        "engineering_resource_id": "cc480051-0e41-4741-b1ec-53656bdcb3f7",
+        "repository_identity": "http://qualified-git:8080/transient-acquisition.git",
+        "source_baseline_id": "224135cb-61e4-491e-9d26-f252af4f6867",
+        "source_ref": "refs/heads/main",
+        "source_revision": "988ab416592fcde30ac619fb7664da2a35b5c4f9",
+        "proposed_targets": [
+          {
+            "path": "web/index.html",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "The homepage is rendered by server.py from web/index.html for `/` (and every other page route), and this is the only observed occurrence of the literal text 开始使用. The requested change is exactly the label of this existing button, so this file is the single minimum surface that must change; nothing else in the file (ids, other buttons, dialog) is affected.",
+            "evidence": "Exact 988ab416592fcde30ac619fb7664da2a35b5c4f9:web/index.html witness: <button id=\"start\">开始使用</button>",
+            "confidence": "HIGH"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [
+          "migrations/001_initial.sql",
+          "server.py",
+          "web/app.js",
+          "web/styles.css",
+          "README.md",
+          "Dockerfile",
+          "package.json"
+        ],
+        "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+        "confidence": "MEDIUM",
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null,
+            "identity": "PATH_SCOPE"
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null,
+            "identity": "GIT_DIFF_CHECK"
+          }
+        ],
+        "provenance": {
+          "provider_identity": "provider:repository-aware-change-proposal-lite",
+          "provider_version": "v1",
+          "inspection_method": "git-object-read-only:path-enumeration+text-search"
+        },
+        "unresolved_scope_questions": [],
+        "proposal_fingerprint": "c82bbc576ee1a62fe34157d4b06ab67c69675c7751b0ccd129baa63cb58b03a0"
+      },
+      "change_contract": null,
+      "inherited_constraints": [
+        "目标文案必须准确为“立即体验”（替换原“开始使用”）",
+        "预览须为实际效果，而非描述性说明"
+      ],
+      "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+      "assumptions": [
+        "The admitted Work can be executed through one governed PWU and Attempt lineage."
+      ],
+      "unresolved_questions": [],
+      "fit_classification": "ONE_PWU_FIT",
+      "engineering_resource_id": "cc480051-0e41-4741-b1ec-53656bdcb3f7",
+      "repository_identity": "http://qualified-git:8080/transient-acquisition.git",
+      "source_baseline_id": "224135cb-61e4-491e-9d26-f252af4f6867",
+      "source_revision": "988ab416592fcde30ac619fb7664da2a35b5c4f9"
+    },
+    "production_plan_runtime": null,
+    "tags": [],
+    "engineering_scope": {
+      "engineering_scope_id": "0d0ce66d-1c71-4a4e-b2f5-a0b5420d758f",
+      "summary": "Work assets; production target http://qualified-git:8080/transient-acquisition.git",
+      "condition": "ADMITTED",
+      "resources": [
+        {
+          "resource_id": "cc480051-0e41-4741-b1ec-53656bdcb3f7",
+          "condition": "ACTIVE"
+        }
+      ]
+    },
+    "status": "RUNNING",
+    "current_production_step": "PRODUCE",
+    "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "what_happens_next": "Watt prepares and verifies the exact Candidate Preview before Human review",
+    "human_attention_required": false,
+    "result_summary": "1 independently observed artifact change(s)",
+    "current_work_reality_revision_id": "d9590d57-8fe3-537d-8566-d0dadfe7bacf",
+    "steering_enabled": true,
+    "current_steering_step_id": "c68ea493-ed35-4383-82f6-eb0e26e06574",
+    "current_steering_step_type": "PRODUCE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "042cae3d-4ead-4902-9800-cdeb6a0fedba",
+    "current_production_cycle_trusted": false,
+    "latest_trusted_runtime_commit_id": null,
+    "work_complete": false,
+    "automatic_progression_state": "ACTIVE",
+    "last_stop_reason": null,
+    "execution_progress": {
+      "phase": "RUNNING",
+      "activity": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required.",
+      "transitions_completed": 10,
+      "transitions_total": null,
+      "percent_complete": null,
+      "started_at": "2026-09-27T04:37:14.312644Z",
+      "updated_at": "2026-09-27T04:41:40.722184Z",
+      "elapsed_seconds": 266.40954,
+      "still_working": false,
+      "blocked_reason": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required."
+    },
+    "guided_design": null,
+    "next_owner": "EXECUTOR",
+    "control_state_valid": true,
+    "control_state_violations": []
+  },
+  "steering": {
+    "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+    "work_objective": "In the admitted repository (source_revision 988ab416592fcde30ac619fb7664da2a35b5c4f9, refs/heads/main), update the existing homepage template `web/index.html` so the primary action button currently rendered as `<button id=\"start\">开始使用</button>` reads exactly `<button id=\"start\">立即体验</button>`. Change nothing else: keep the existing runtime form and entrypoint (`python server.py`, migrations applied on startup, HTTP service on port 8080, routes `/`, `/users`, `/customers`, `/orders`, `/help`, `/about`, API collections `/api/users`, `/api/customers`, `/api/orders`), keep the two existing login buttons and the edit dialog intact, and leave schema, migrations and seed fixture data untouched. Then produce an actual, inspectable preview of the running site so the Human can observe the changed button rather than a description of it.",
+    "steering_enabled": true,
+    "steering_plan_id": "d7e1f39b-cc36-40d1-a48f-0ff95fe2dd48",
+    "active_revision_id": "2fb77c04-e1d0-4c4a-97b7-be860d47af1e",
+    "active_revision_number": 1,
+    "completed_steps": [
+      {
+        "step_id": "c451cfbe-8c8f-41f1-ab98-ec6672704c5e",
+        "type": "DESIGN",
+        "objective": "首页“开始使用”按钮文案改为“立即体验”，并给出可观察的实际预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+        "completion_condition": "A bounded design direction is supported by current Reality",
+        "position": 1,
+        "state": "CLOSED",
+        "design_issue_key": null
+      }
+    ],
+    "current_step": {
+      "step_id": "c68ea493-ed35-4383-82f6-eb0e26e06574",
+      "type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "completion_condition": "The exact bounded production cycle reaches trusted Runtime Commit",
+      "position": 2,
+      "state": "CURRENT",
+      "design_issue_key": null
+    },
+    "known_next_steps": [
+      {
+        "step_id": "ed1050a9-a852-4713-8a6b-886311c5ab6f",
+        "type": "VERIFY_ACCEPT",
+        "objective": "Assess the trusted result against the long-lived outcome",
+        "completion_condition": "Governed evidence supports product acceptance",
+        "position": 3,
+        "state": "KNOWN",
+        "design_issue_key": null
+      },
+      {
+        "step_id": "e381ddb1-02e1-4a04-9298-6882cc6fd627",
+        "type": "COMPLETE",
+        "objective": "Complete the admitted long-lived Work",
+        "completion_condition": "The admitted Work outcome is satisfied",
+        "position": 4,
+        "state": "KNOWN",
+        "design_issue_key": null
+      }
+    ],
+    "plan_changes": [],
+    "latest_decision": {
+      "decision_id": "c4e180bb-ad0b-46b0-89b7-21842ab3395d",
+      "next_step_type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "reason": "The current governed Step is ready to yield to the next admitted ordered Step",
+      "outcome": "AUTO_CONTINUE",
+      "human_required": false,
+      "attention_reason": null,
+      "reality_refs": [
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "b6a52fd4-2ed8-586c-ae9f-5f840a65f394"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "c21f602f-ecfe-4518-b4e8-7e1c4e6e06b0"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "64b63f1b-9280-46f4-9c73-6225e89aa79e"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "224135cb-61e4-491e-9d26-f252af4f6867"
+        },
+        {
+          "kind": "WORK",
+          "identity": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "d9590d57-8fe3-537d-8566-d0dadfe7bacf"
+        }
+      ]
+    },
+    "selection_rationale": "The current governed Step is ready to yield to the next admitted ordered Step",
+    "steering_outcome": "AUTO_CONTINUE",
+    "automatic_progression_state": "ACTIVE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "042cae3d-4ead-4902-9800-cdeb6a0fedba",
+    "current_production_cycle_trusted": false,
+    "human_attention_required": false,
+    "last_stop_reason": null
+  },
+  "refinement": {
+    "count": 2,
+    "events": [
+      {
+        "id": "b26d0687-240c-49ac-84d1-fef0e479baba",
+        "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+        "operation_id": "c451cfbe-8c8f-41f1-ab98-ec6672704c5e",
+        "created_at": "2026-09-27T04:36:44.367617Z",
+        "failure_family": "CANDIDATE_INCONSISTENT",
+        "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "semantic_version": 2,
+        "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "signal_kind": "CANDIDATE_INCONSISTENT",
+        "affected_component": "semantic/scope",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "CANDIDATE_INCONSISTENT",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "source-baseline:224135cb-61e4-491e-9d26-f252af4f6867"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "OBSERVED_SUCCESS",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 2,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "SCOPE_INFLATION",
+          "required_paths": [
+            "web/index.html"
+          ],
+          "candidate_paths": [
+            "web/index.html"
+          ],
+          "authority_expanded": false,
+          "rejected_behaviors": [
+            "Creating new files: no witness of any new page, route, asset or module is required by the request, and adding a label change never entails creating destinations.",
+            "Editing web/app.js, web/styles.css, server.py, migrations/001_initial.sql, package.json, Dockerfile, README.md or .gitignore: none of them contain the string 开始使用 or the button markup, so changing them would be unrequested refactoring.",
+            "Adding preview/verification scaffolding (screenshots, preview scripts, CI jobs): the human's '实际预览' is a downstream lifecycle concern, not a repository artifact the request authorizes inventing.",
+            "Introducing new login, authentication, CRM, note or feedback behavior: README states authentication is not implemented and no such workflows exist; the request asks only for a label change.",
+            "Reporting the served-runtime preview or Human review as missing repository scope."
+          ]
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 0,
+        "model_token_usage": {
+          "unknown": false,
+          "input_tokens": 14418,
+          "total_tokens": 21414,
+          "cached_tokens": 512,
+          "output_tokens": 6996,
+          "reasoning_tokens": 156
+        },
+        "compute_overhead": {},
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T04:36:44.367617Z"
+      },
+      {
+        "id": "b1550935-5772-4213-8283-35361893311e",
+        "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+        "operation_id": "8fd8382d-3da6-5477-93ac-fd795bdab63f",
+        "created_at": "2026-09-27T04:35:56.094853Z",
+        "failure_family": "REALITY_MISMATCH",
+        "failure_signature": "3fab0cefdee0a0a961ce8464fbd251d0e21aefb5fc2a3b1d6ac1923d8247be7e",
+        "semantic_version": 2,
+        "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "signal_kind": "REALITY_MISMATCH",
+        "affected_component": "repository/acquisition",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "REALITY_MISMATCH",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "repository-intake:8fd8382d-3da6-5477-93ac-fd795bdab63f",
+          "repository-intake:7cfdd70e-62b3-59fb-a967-bc75019b2c89"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "OBSERVED_SUCCESS",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 2,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "TRANSIENT_INFRASTRUCTURE_FAILURE",
+          "attempt_budget": 3,
+          "final_condition": "READY",
+          "failure_category": null,
+          "time_budget_seconds": 120
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 2,
+        "model_token_usage": {},
+        "compute_overhead": {},
+        "known_failure_match": false,
+        "platform_improvement_candidate_ref": null,
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T04:35:56.094853Z"
+      }
+    ],
+    "metrics": {
+      "native_attempts": 1,
+      "native_self_refine_events": 0,
+      "self_refine_events": 2,
+      "self_refine_rate": 0.0,
+      "first_pass_success_rate": 1.0,
+      "recovered": 0,
+      "local_obligation_recovered": 2,
+      "recovery_scope": "LOCAL_OBLIGATION; Work convergence is independently observed",
+      "escalated": 0,
+      "failed": 0,
+      "active": 0,
+      "classification_counts": {
+        "ROUTINE_STOCHASTIC_REFINEMENT": 1,
+        "DEGRADING_OR_RECURRING_REFINEMENT": 1,
+        "SYSTEMIC_OR_NON_CONVERGING_INCIDENT": 0,
+        "LEGACY_EXECUTION_INCIDENT": 0
+      },
+      "convergence_success_rate": 1.0,
+      "average_refinement_attempts": 2.0,
+      "p95_refinement_attempts": 2,
+      "average_refinement_seconds": 1.0,
+      "p95_refinement_seconds": 2,
+      "observed_refinement_tokens": 21414,
+      "observed_refinement_tool_effects": 0,
+      "unsafe_repair_blocks": 0,
+      "recurring_signatures": {},
+      "improvement_candidates": [
+        {
+          "reference": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "component": "semantic/scope",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 21414,
+          "observed_seconds": 0,
+          "systemic": false,
+          "status": "PROPOSED"
+        }
+      ],
+      "human_escalation_observation_count": 2,
+      "human_escalation_rate": 0.0,
+      "systemic_incident_rate": 0.0
+    },
+    "work_convergence": [
+      {
+        "id": "1fc825cb-689c-4ddb-be04-c50c3dc87402",
+        "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+        "intent_identity": "5f0bf771429dde367566417b374695d6ad2531bfe9f2c1682f75c40a51283fc5",
+        "predecessor_id": null,
+        "sequence": 1,
+        "boundary": "SEMANTIC_RESULT_ADMISSION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "b70e27af8b3fe8fa0ca7f9c62661f570edfb7276e732e65696fae21aa3b379c5",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b6d12f8c-093b-4670-a555-8f4d5355473e",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:36:46.958413Z"
+      },
+      {
+        "id": "c15e17d1-a3de-4cbe-aa59-8b31ef60342a",
+        "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+        "intent_identity": "5f0bf771429dde367566417b374695d6ad2531bfe9f2c1682f75c40a51283fc5",
+        "predecessor_id": "1fc825cb-689c-4ddb-be04-c50c3dc87402",
+        "sequence": 2,
+        "boundary": "STEP_TRANSITION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "b70e27af8b3fe8fa0ca7f9c62661f570edfb7276e732e65696fae21aa3b379c5",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 2,
+        "no_progress_count": 0,
+        "elapsed_seconds": 15,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b6d12f8c-093b-4670-a555-8f4d5355473e",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:37:02.127166Z"
+      },
+      {
+        "id": "2b95e8ae-270c-46a3-b392-0ee5c49321e5",
+        "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+        "intent_identity": "5f0bf771429dde367566417b374695d6ad2531bfe9f2c1682f75c40a51283fc5",
+        "predecessor_id": "c15e17d1-a3de-4cbe-aa59-8b31ef60342a",
+        "sequence": 3,
+        "boundary": "PRODUCTION_CYCLE_ADMISSION",
+        "failure_signature": "55aace645e56bf76dbff41e8f14eb53f17cab59fa84b37f74f8120e5170fbcf3",
+        "candidate_identity": null,
+        "reality_identity": "b70e27af8b3fe8fa0ca7f9c62661f570edfb7276e732e65696fae21aa3b379c5",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 3,
+        "no_progress_count": 0,
+        "elapsed_seconds": 34,
+        "token_usage": {
+          "status": "UNREPORTED",
+          "input_tokens": 0,
+          "total_tokens": 0,
+          "output_tokens": 0
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 0
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {},
+          "execution_seconds": 0.0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b6d12f8c-093b-4670-a555-8f4d5355473e",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:37:21.233961Z"
+      }
+    ]
+  },
+  "queue": [
+    {
+      "queue_entry_id": "dc50717a-f73f-4c88-989d-5a1fdec248d8",
+      "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+      "pwu_id": "e89b5ab8-628c-464e-bfb8-9c6ff0454a33",
+      "attempt_id": "a310c178-da9b-49c6-997a-8bcfee34a581",
+      "fairness_group": "work:7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T04:37:51.425276Z",
+      "available_at": "2026-09-27T04:37:51.345427Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T04:42:25.089582Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "d9590d57-8fe3-537d-8566-d0dadfe7bacf"
+    }
+  ],
+  "preview": {
+    "mode": "FRONTEND_RUNTIME",
+    "status": "READY",
+    "candidate_revision": "d77886fba932e48158a15b9177e24e3ad56ab386",
+    "candidate_fingerprint": "2237f49d30e291821ae76cc50e165971fa2928b5652c637933252f38cd230850",
+    "session": {
+      "id": "5e00fd92-1623-415a-b4eb-742d0345885d",
+      "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+      "candidate_id": "e8dcc397-a4e7-59fc-8ec6-49ca1ca8666b",
+      "candidate_fingerprint": "2237f49d30e291821ae76cc50e165971fa2928b5652c637933252f38cd230850",
+      "repository_identity": "http://qualified-git:8080/transient-acquisition.git",
+      "repository_revision": "d77886fba932e48158a15b9177e24e3ad56ab386",
+      "repository_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+      "workspace_id": "1bba52d6-d77b-4c4e-bf6c-db74ea28e4d1",
+      "environment_id": "9e2e102d-2600-432a-9e19-424c8a71d25d",
+      "mode": "FRONTEND_RUNTIME",
+      "status": "READY",
+      "definition_version": "frontend-docker-runtime-v1",
+      "endpoint": "http://127.0.0.1:61818/",
+      "image_reference": "sha256:da6f3349cc7f3a6e4ade7d8f158afe29e720923940cfd87577645ab2e0bcb0a7",
+      "service_identities": [
+        "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-app",
+        "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-proxy"
+      ],
+      "resource_references": [
+        "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-internal",
+        "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-gateway",
+        "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-source"
+      ],
+      "evidence": [
+        {
+          "kind": "WORKSPACE",
+          "workspace": "/var/lib/spg/production-environments/candidate-preview-runtime/5e00fd92-1623-415a-b4eb-742d0345885d/workspace",
+          "revision": "d77886fba932e48158a15b9177e24e3ad56ab386",
+          "tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+          "topology_preflight": {
+            "verifier_namespace": "candidate-gateway-network",
+            "verifier_image": "watt-lifecycle:qualification",
+            "public_endpoint_namespace": "docker-host"
+          },
+          "dockerfile_sha256": "abd36acd96f3e4485d6e9d4826a540e65a9608f5e9eb0e479de9581d5a8d5f44"
+        },
+        {
+          "kind": "BUILD",
+          "image": "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d:candidate",
+          "image_id": "sha256:da6f3349cc7f3a6e4ade7d8f158afe29e720923940cfd87577645ab2e0bcb0a7",
+          "verified_image_files": 0,
+          "build_log": "/var/lib/spg/production-environments/candidate-preview-runtime/evidence/5e00fd92-1623-415a-b4eb-742d0345885d/build.log",
+          "build_log_sha256": "cfb10b0b34e2fcd406880e0fad5e21ed76910a300666bbccf68125a2505e7255"
+        },
+        {
+          "kind": "SERVED_VERIFICATION",
+          "candidate_revision": "d77886fba932e48158a15b9177e24e3ad56ab386",
+          "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+          "gateway": "http://watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-proxy",
+          "public_gateway": "http://127.0.0.1:61818",
+          "verifier_namespace": "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-gateway",
+          "mode": "FRONTEND_RUNTIME",
+          "frontend": {
+            "path": "/",
+            "status": 200,
+            "body_sha256": "9cc9c410695bbaae448fbb371852a6cc683bc6c2cf75692b5cd8c856cb1e4188"
+          },
+          "result": "PASS"
+        },
+        {
+          "kind": "RUNTIME",
+          "endpoint": "http://127.0.0.1:61818/",
+          "services": [
+            "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-app",
+            "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-proxy"
+          ],
+          "resources": [
+            "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-internal",
+            "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-gateway",
+            "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-source"
+          ],
+          "health": {
+            "database": "NOT_REQUIRED",
+            "application": "READY",
+            "gateway": "READY",
+            "repository_revision": "d77886fba932e48158a15b9177e24e3ad56ab386",
+            "repository_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f"
+          },
+          "topology": {
+            "frontend": "app",
+            "backend": "app",
+            "database": null,
+            "supporting_services": []
+          }
+        },
+        {
+          "kind": "PRODUCTION_RECORD",
+          "reference": "production-record:51be9dbf-7247-5f11-b460-e1e974fd42ef",
+          "digest": "77824f19c633f641b84421eb751c9b3cf4d15d9b13057f88aa6b7a73cbea4fed"
+        }
+      ],
+      "failure_code": null,
+      "failure_reason": null,
+      "version": 6,
+      "created_at": "2026-09-27T04:40:41.420352Z",
+      "updated_at": "2026-09-27T04:42:26.102479Z"
+    }
+  },
+  "attention": [
+    {
+      "attention_id": "5fe0d3ae-2e25-523c-9879-c5c8df82eb04",
+      "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+      "kind": "CANDIDATE_AUTHORIZATION",
+      "decision": "Authorize exact sealed Candidate integration?",
+      "reason": "Repository integration requires exact Human Authority.",
+      "available_actions": [
+        "AUTHORIZE"
+      ],
+      "recommended_action": null,
+      "governed_subject_ref": "baseline-candidate:e8dcc397-a4e7-59fc-8ec6-49ca1ca8666b",
+      "steering_reason": null,
+      "recommendation": null,
+      "conversation_prompt": null,
+      "alternatives": [],
+      "trade_offs": [],
+      "expected_impact": null,
+      "reality_refs": [],
+      "steering_plan_revision_id": null,
+      "steering_step_id": null,
+      "interaction_id": null,
+      "interaction_assessment_id": null,
+      "expected_work_reality_revision_id": null
+    }
+  ],
+  "economics": {
+    "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+    "product_id": "b6d12f8c-093b-4670-a555-8f4d5355473e",
+    "pwu_count": 1,
+    "join_count": 0,
+    "pwu": [
+      {
+        "pwu_id": "e89b5ab8-628c-464e-bfb8-9c6ff0454a33",
+        "node_id": null,
+        "run_id": "042cae3d-4ead-4902-9800-cdeb6a0fedba",
+        "condition": "SATISFIED",
+        "attempt_count": 1,
+        "outcomes": [
+          "RESULT_READY"
+        ],
+        "providers": [
+          "deepseek",
+          "watt-native:a310c178-da9b-49c6-997a-8bcfee34a581"
+        ],
+        "execution_seconds": 42.454702,
+        "duration_observed": true,
+        "queue_wait_seconds": 2.481486,
+        "token_usage": {
+          "input_tokens": 49864,
+          "output_tokens": 7420,
+          "total_tokens": 57284,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 4,
+          "tool_effect": 7
+        }
+      }
+    ],
+    "token_usage": {
+      "input_tokens": 49864,
+      "output_tokens": 7420,
+      "total_tokens": 57284,
+      "status": "OBSERVED"
+    },
+    "observed_provider_spend": {
+      "status": "UNREPORTED",
+      "by_currency": {},
+      "unreported_attempt_count": 1,
+      "amount": null
+    },
+    "execution_seconds": 42.454702,
+    "queue_wait_seconds": 2.481486,
+    "wall_elapsed_seconds": 55.059733,
+    "critical_path_seconds": null,
+    "parallelism_effect_seconds": 0.0,
+    "self_refine_event_count": 2,
+    "first_pass_pwu_count": 1,
+    "retried_pwu_count": 0,
+    "human_escalation_count": 0,
+    "refinement_extra_seconds": 2,
+    "resource_units": {
+      "inference_submission": 4,
+      "tool_effect": 7
+    },
+    "final_outcome": "READY"
+  },
+  "delivery": {
+    "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+    "target": null,
+    "supported_target_kinds": [
+      "DOCUMENT_PACKAGE",
+      "SOFTWARE_ARTIFACT"
+    ],
+    "deliveries": []
+  }
+}

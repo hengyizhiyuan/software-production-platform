@@ -1,0 +1,14 @@
+{
+  "starting_commit": "17ebfb74374659ee9b0c376d6f8cf6f5b7508199",
+  "immutable_inputs": {
+    "docs/evidence/dogfood/fsi-hd-01-cross-boundary-failure-map-20260927.md": "ae310fdb6630bad284f0d4ac6d0fc8e3cb3606e8606346f90288a8dfbf7b3b05",
+    "docs/evidence/stability/system-wide-stability-closure-20260927.md": "9a6f0bd195a0a2efa04138ee0c7f7159fbaa3539090d00bfade0f8cfdfd4a569",
+    "benchmarks/golden/tier0-v1.json": "91668ccc12e3de36b30902e3960ba3a238548c3e3760f2ac965197f9d06cb78b",
+    "docs/architecture/work-interaction-closed-loop-refinement.md": "6a71374504c7444ab12a2c22c129831ef8c61cb1bf3cc177c9bfc81de717eb3f",
+    "docs/architecture/spg-completion-trust.md": "e823f4b2970571bbaf07bc0f486193bffdddeb159d645789bca92fbf52c5c529",
+    "docs/architecture/repository-asset-and-managed-execution-workspace.md": "579d1288898196bec29f43689730ac3e7a07eaf0e2d384c2c6e63856658b9f1a",
+    "docs/architecture/watt-production-environment-architecture.md": "fe2d8fb60e217fb18010cc2381fa8cef41961e9e797ae56b3f257867eba6c796"
+  },
+  "frozen_failure_map_policy": "DO_NOT_MUTATE",
+  "web_qualification": "BLOCKED_EXTERNAL"
+}

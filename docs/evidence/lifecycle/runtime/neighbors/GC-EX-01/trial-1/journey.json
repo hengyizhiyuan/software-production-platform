@@ -1,0 +1,10 @@
+{
+  "case": "GC-EX-01",
+  "corpus_version": "watt-golden-tier0-v1",
+  "trial": 1,
+  "interaction_id": "89f48864-798b-448f-878f-913b670209ec",
+  "human_input": "这是项目仓库：https://github.com/hengyizhiyuan/software-production-platform.git\n请在现有网站顶部导航栏增加一个“关于我们”的文字链接，链接到 /about。\n完成后给我一个可以实际查看的预览。我确认以后再决定是否交付。",
+  "tester_implementation": false,
+  "manual_rescue_actions": [],
+  "human_acceptance": "PENDING"
+}

@@ -1,0 +1,10 @@
+{
+  "case": "GC-IP-07",
+  "trial": 3,
+  "status": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+  "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+  "elapsed_seconds": 89,
+  "human_acceptance": "PENDING",
+  "automatic_delivery_authorization": false,
+  "business_oracle": "NOT_YET_EVALUATED"
+}

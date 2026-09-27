@@ -1,0 +1,122 @@
+{
+  "preview_id": "5e00fd92-1623-415a-b4eb-742d0345885d",
+  "completed_qualification": true,
+  "prior_status": "READY",
+  "preserve_all_volumes": true,
+  "work_or_database_changes": false,
+  "containers": [
+    {
+      "name": "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-proxy",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 18055,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-27T04:41:50.211916299Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "mounts": [],
+      "networks": {
+        "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-gateway": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "37f8518674cd9b3608c1072c2927eb5a7acc925e6dc510492bb8e23679337c35",
+          "EndpointID": "9a484bdff425fd2a35fbe850cb8cea48349994be43fc6557f199c71ce5742f0a",
+          "Gateway": "192.168.112.1",
+          "IPAddress": "192.168.112.2",
+          "MacAddress": "f6:fd:cd:6a:96:90",
+          "IPPrefixLen": 20,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-proxy",
+            "a90d571711eb"
+          ]
+        },
+        "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-internal": {
+          "IPAMConfig": {},
+          "Links": null,
+          "Aliases": [],
+          "DriverOpts": {},
+          "GwPriority": 0,
+          "NetworkID": "e5600a74da3e494b06f899caedc5dae4541ce1030bead81ad85c20d8fc5655b6",
+          "EndpointID": "99743ccc52dab2d427e163d909909e0b20010bcc6f6c05329707c34008684675",
+          "Gateway": "",
+          "IPAddress": "192.168.80.3",
+          "MacAddress": "52:b9:5b:17:f1:e5",
+          "IPPrefixLen": 20,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-proxy",
+            "a90d571711eb"
+          ]
+        }
+      }
+    },
+    {
+      "name": "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-app",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 17662,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-27T04:41:45.982031233Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-source",
+          "Source": "/var/lib/docker/volumes/watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-source/_data",
+          "Destination": "/source",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": false,
+          "Propagation": ""
+        }
+      ],
+      "networks": {
+        "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-internal": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "app"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "e5600a74da3e494b06f899caedc5dae4541ce1030bead81ad85c20d8fc5655b6",
+          "EndpointID": "1b79dcdf3a6fd51074d25a64ce8c2cae99f7b2dae64688478e75aae5f4e66274",
+          "Gateway": "",
+          "IPAddress": "192.168.80.2",
+          "MacAddress": "72:06:eb:5a:e9:4e",
+          "IPPrefixLen": 20,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "watt-candidate-preview-5e00fd921623415ab4eb742d0345885d-app",
+            "app",
+            "f5197aa32fce"
+          ]
+        }
+      }
+    }
+  ],
+  "endpoint_available_after_retirement": false
+}

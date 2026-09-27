@@ -1,0 +1,8 @@
+{
+  "cancel_closes": true,
+  "method": "REAL_BROWSER_OPEN_AND_CANCEL",
+  "evidence": [
+    "browser-opened-dom.txt",
+    "browser-closed-dom.txt"
+  ]
+}

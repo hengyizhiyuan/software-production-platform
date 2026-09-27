@@ -1,0 +1,14 @@
+{
+  "case": "GC-LC-01",
+  "trial": 1,
+  "interaction_id": "4fc3c523-625e-4cca-bda9-81827fa915f5",
+  "human_inputs": [
+    "我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-platform.git，把它clone下来，我要改个需求",
+    "切一个 feat_test 分支",
+    "我现在在哪个分支？"
+  ],
+  "tester_git": false,
+  "manual_rescue_actions": [],
+  "source_modification": false,
+  "human_acceptance": "PENDING"
+}

@@ -1,0 +1,3406 @@
+{
+  "interaction": {
+    "interaction_id": "af1dfb6a-c53d-420e-b126-19b37883e5a0",
+    "condition": "OPEN",
+    "current_work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+    "created_at": "2026-09-27T05:42:54.441914Z",
+    "updated_at": "2026-09-27T05:45:04.101079Z",
+    "records": [
+      {
+        "record_id": "fb439f5f-7ccd-4293-8788-cce101bdbd5f",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "work_focus_id": null,
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:42:54.675421Z"
+      },
+      {
+        "record_id": "257ddd3d-2830-4d8b-8ec4-246678ad3b25",
+        "sequence": 2,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+        "work_focus_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:45:04.101079Z"
+      }
+    ],
+    "conversation_messages": [
+      {
+        "message_id": "2df9e9c7-020d-438e-a2f7-b698746dd0c1",
+        "turn_id": "37818c4e-5e15-4947-a5ba-1c95eefabffa",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "content": "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "fb439f5f-7ccd-4293-8788-cce101bdbd5f",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:42:54.675421Z",
+        "updated_at": "2026-09-27T05:43:38.392614Z"
+      },
+      {
+        "message_id": "27c5062a-429a-453b-b190-cd765ade7ced",
+        "turn_id": "37818c4e-5e15-4947-a5ba-1c95eefabffa",
+        "sequence": 2,
+        "actor": "WATT",
+        "content": "已收到当前项目仓库 http://qualified-git-isolated:8080/business-app.git，以及为系统增加搜索能力的目标；这项 Work 已按你的要求建立，无需再次确认。仓库获取请求已登记，接下来我会启动该获取操作，并在获取可用后继续推进 business-app 内的搜索能力相关工作，改动范围保持在 business-app 之内。进展我会在获取结果可用时告知你。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "5802e5bc-3e9d-4a5d-be50-9a36af06d543",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:43:38.392614Z",
+        "updated_at": "2026-09-27T05:43:38.392614Z"
+      },
+      {
+        "message_id": "057f9a1f-0516-44d7-bf48-3edb01dde3cd",
+        "turn_id": "019c0791-e341-4fe2-b859-730704588ce0",
+        "sequence": 3,
+        "actor": "HUMAN",
+        "content": "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "257ddd3d-2830-4d8b-8ec4-246678ad3b25",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:45:04.101079Z",
+        "updated_at": "2026-09-27T05:45:53.949502Z"
+      },
+      {
+        "message_id": "2ad17b21-fa7b-4069-ab83-f700fa2d6918",
+        "turn_id": "019c0791-e341-4fe2-b859-730704588ce0",
+        "sequence": 4,
+        "actor": "WATT",
+        "content": "你的选择已写入当前 Work，Watt 将按这项决定继续推进。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "b3dbc4f4-45f6-4cb9-b851-2e06279c2744",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:45:53.949502Z",
+        "updated_at": "2026-09-27T05:45:53.949502Z"
+      }
+    ],
+    "turns": [
+      {
+        "turn_id": "37818c4e-5e15-4947-a5ba-1c95eefabffa",
+        "interaction_id": "af1dfb6a-c53d-420e-b126-19b37883e5a0",
+        "request_record_id": "fb439f5f-7ccd-4293-8788-cce101bdbd5f",
+        "assessment_id": "5802e5bc-3e9d-4a5d-be50-9a36af06d543",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T05:42:54.675421Z",
+        "started_at": "2026-09-27T05:42:54.844059Z",
+        "completed_at": "2026-09-27T05:43:38.392614Z",
+        "updated_at": "2026-09-27T05:43:38.392614Z"
+      },
+      {
+        "turn_id": "019c0791-e341-4fe2-b859-730704588ce0",
+        "interaction_id": "af1dfb6a-c53d-420e-b126-19b37883e5a0",
+        "request_record_id": "257ddd3d-2830-4d8b-8ec4-246678ad3b25",
+        "assessment_id": "b3dbc4f4-45f6-4cb9-b851-2e06279c2744",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T05:45:04.101079Z",
+        "started_at": "2026-09-27T05:45:04.450478Z",
+        "completed_at": "2026-09-27T05:45:53.949502Z",
+        "updated_at": "2026-09-27T05:45:53.949502Z"
+      }
+    ],
+    "human_said": [
+      "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+      "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。"
+    ],
+    "latest_assessment": {
+      "assessment_id": "b3dbc4f4-45f6-4cb9-b851-2e06279c2744",
+      "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e",
+      "basis_last_sequence": 2,
+      "interpreted_motive": "在指定的当前项目仓库 business-app 中给系统增加搜索功能。",
+      "desired_outcome": "business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+      "design_intent_frame": {
+        "design_subject": "business-app 系统的用户搜索功能",
+        "object_type": "FEATURE",
+        "business_context": null,
+        "desired_outcome": "用户可在 business-app 中按姓名或邮箱检索用户，页面展示结果与用户查询接口返回一致",
+        "scope_level": "capability",
+        "collaboration_mode": "design",
+        "candidate_assumptions": [
+          "搜索复用现有 /api/users 集合，不新增独立数据存储",
+          "搜索入口嵌入现有页面（如 /users 页面）",
+          "姓名与邮箱为包含式匹配而非精确匹配"
+        ],
+        "ambiguities": [
+          "匹配方式（包含匹配/前缀匹配）与是否区分大小写尚未确定",
+          "搜索入口在页面中的具体位置与呈现形式尚未确定",
+          "是否需要结果数量上限或分页尚未确定"
+        ],
+        "confidence": 0.7
+      },
+      "candidate_context": [
+        "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+        "目标是已存在的系统，而非新建产品",
+        "现有 API 集合：/api/users、/api/customers、/api/orders",
+        "现有页面路由：/, /users, /customers, /orders, /help, /about"
+      ],
+      "candidate_constraints": [
+        "改动应发生在当前项目仓库 business-app 内",
+        "搜索范围仅限用户，不改动客户、订单等其他部分",
+        "匹配字段为姓名与邮箱",
+        "页面查询结果需与用户查询接口一致"
+      ],
+      "current_requests": [
+        "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。"
+      ],
+      "unresolved_material_questions": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne1",
+          "kind": "SCOPE",
+          "values": [
+            "只搜索用户"
+          ],
+          "unit": null,
+          "source_record_id": "257ddd3d-2830-4d8b-8ec4-246678ad3b25",
+          "source_text": "只搜索用户",
+          "explicit_roles": [
+            "search_scope"
+          ]
+        },
+        {
+          "extraction_id": "ne2",
+          "kind": "ORDERED_VALUES",
+          "values": [
+            "姓名",
+            "邮箱"
+          ],
+          "unit": null,
+          "source_record_id": "257ddd3d-2830-4d8b-8ec4-246678ad3b25",
+          "source_text": "按姓名和邮箱查找",
+          "explicit_roles": [
+            "search_field",
+            "search_field"
+          ]
+        },
+        {
+          "extraction_id": "ne3",
+          "kind": "COMPARISON",
+          "values": [
+            "页面查询结果",
+            "用户查询接口"
+          ],
+          "unit": null,
+          "source_record_id": "257ddd3d-2830-4d8b-8ec4-246678ad3b25",
+          "source_text": "页面查询结果要与用户查询接口一致",
+          "explicit_roles": [
+            "page_query_result",
+            "user_query_api"
+          ]
+        },
+        {
+          "extraction_id": "ne4",
+          "kind": "SCOPE",
+          "values": [
+            "客户",
+            "订单"
+          ],
+          "unit": null,
+          "source_record_id": "257ddd3d-2830-4d8b-8ec4-246678ad3b25",
+          "source_text": "客户、订单等其他部分保持原样",
+          "explicit_roles": [
+            "unchanged_scope",
+            "unchanged_scope"
+          ]
+        }
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "2d9e5ab5-4c14-5e8d-b1f1-c0745ffe59a5",
+          "subject": "business-app.repository",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git-isolated:8080/business-app.git",
+          "unit": null,
+          "scope": "current project",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "fb439f5f-7ccd-4293-8788-cce101bdbd5f"
+            ],
+            "source_text": "http://qualified-git-isolated:8080/business-app.git",
+            "source_extraction_ids": [
+              "ne1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "6709334e-4076-5445-b4f0-ba8a00a92f84"
+        },
+        {
+          "id": "789a9f8f-e00c-5356-af58-d82119d82661",
+          "subject": "business-app.capability.search",
+          "relation": "BEHAVIOR",
+          "value": "add search capability",
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "fb439f5f-7ccd-4293-8788-cce101bdbd5f"
+            ],
+            "source_text": "给系统增加搜索。",
+            "source_extraction_ids": [
+              "ne2"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "6709334e-4076-5445-b4f0-ba8a00a92f84"
+        },
+        {
+          "id": "3d5a9bf3-b35d-5720-9b94-43ac531ef81e",
+          "subject": "business-app.search.scope",
+          "relation": "SCOPE",
+          "value": "users",
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "只搜索用户",
+            "source_extraction_ids": [
+              "ne1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "85e98309-85a7-57be-80a0-a2177099be6d",
+          "subject": "business-app.search.match_fields",
+          "relation": "ORDERED_COMPONENT",
+          "value": [
+            "name",
+            "email"
+          ],
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "按姓名和邮箱查找",
+            "source_extraction_ids": [
+              "ne2"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "ce5e69ba-52ae-5205-ad30-4ba260c9c62b",
+          "subject": "business-app.search.page_result",
+          "relation": "ACCEPTANCE_ASSERTION",
+          "value": "consistent with users query API result",
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "页面查询结果要与用户查询接口一致",
+            "source_extraction_ids": [
+              "ne3"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "715c1ec2-ea4b-50f0-b8df-1a8ad81149ef",
+          "subject": "business-app.change.excluded_scope",
+          "relation": "SCOPE",
+          "value": [
+            "customers",
+            "orders"
+          ],
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "客户、订单等其他部分保持原样",
+            "source_extraction_ids": [
+              "ne4"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "DECISION_INPUT",
+          "statement": "搜索对象确定为用户，匹配字段为姓名和邮箱；页面查询结果需与用户查询接口一致；客户、订单等其他部分保持不变。",
+          "source_record_ids": [
+            "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+          ],
+          "confidence": 0.95,
+          "rationale": "人类直接给出确定的搜索范围与匹配字段，构成对当前 Work 范围的产品决策。",
+          "clarification_required": false
+        },
+        {
+          "kind": "CONSTRAINT",
+          "statement": "本轮改动被限定在用户搜索：按姓名和邮箱查找，页面结果与用户查询接口一致，客户与订单等其他部分保持原样。",
+          "source_record_ids": [
+            "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+          ],
+          "confidence": 0.95,
+          "rationale": "人类显式收窄范围并加入一致性要求与不变范围。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "在 business-app 中实现按姓名和邮箱的用户搜索，并使页面查询结果与用户查询接口一致。",
+          "source_record_ids": [
+            "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+          ],
+          "confidence": 0.95,
+          "rationale": "人类对本次生产的直接请求。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": "ON_TOPIC",
+      "impact_disposition": "HUMAN_GOVERNANCE_REQUIRED",
+      "candidate_change": {
+        "changed_fields": [
+          "desired_outcome",
+          "context_facts",
+          "constraints",
+          "requests",
+          "semantic_facts"
+        ],
+        "motive": "在指定的当前项目仓库 business-app 中给系统增加搜索功能。",
+        "desired_outcome": "business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+        "context_facts": [
+          "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+          "目标是已存在的系统，而非新建产品",
+          "现有 API 集合：/api/users、/api/customers、/api/orders",
+          "现有页面路由：/, /users, /customers, /orders, /help, /about"
+        ],
+        "constraints": [
+          "改动应发生在当前项目仓库 business-app 内",
+          "搜索范围仅限用户，不改动客户、订单等其他部分",
+          "匹配字段为姓名与邮箱",
+          "页面查询结果需与用户查询接口一致"
+        ],
+        "requests": [
+          "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+          "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。"
+        ],
+        "semantic_facts": [
+          {
+            "id": "2d9e5ab5-4c14-5e8d-b1f1-c0745ffe59a5",
+            "subject": "business-app.repository",
+            "relation": "REFERENCE",
+            "value": "http://qualified-git-isolated:8080/business-app.git",
+            "unit": null,
+            "scope": "current project",
+            "qualifiers": {},
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "fb439f5f-7ccd-4293-8788-cce101bdbd5f"
+              ],
+              "source_text": "http://qualified-git-isolated:8080/business-app.git",
+              "source_extraction_ids": [
+                "ne1"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": "6709334e-4076-5445-b4f0-ba8a00a92f84"
+          },
+          {
+            "id": "789a9f8f-e00c-5356-af58-d82119d82661",
+            "subject": "business-app.capability.search",
+            "relation": "BEHAVIOR",
+            "value": "add search capability",
+            "unit": null,
+            "scope": "business-app system",
+            "qualifiers": {},
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "fb439f5f-7ccd-4293-8788-cce101bdbd5f"
+              ],
+              "source_text": "给系统增加搜索。",
+              "source_extraction_ids": [
+                "ne2"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": "6709334e-4076-5445-b4f0-ba8a00a92f84"
+          },
+          {
+            "id": "3d5a9bf3-b35d-5720-9b94-43ac531ef81e",
+            "subject": "business-app.search.scope",
+            "relation": "SCOPE",
+            "value": "users",
+            "unit": null,
+            "scope": "business-app system",
+            "qualifiers": {},
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+              ],
+              "source_text": "只搜索用户",
+              "source_extraction_ids": [
+                "ne1"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": null
+          },
+          {
+            "id": "85e98309-85a7-57be-80a0-a2177099be6d",
+            "subject": "business-app.search.match_fields",
+            "relation": "ORDERED_COMPONENT",
+            "value": [
+              "name",
+              "email"
+            ],
+            "unit": null,
+            "scope": "business-app system",
+            "qualifiers": {},
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+              ],
+              "source_text": "按姓名和邮箱查找",
+              "source_extraction_ids": [
+                "ne2"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": null
+          },
+          {
+            "id": "ce5e69ba-52ae-5205-ad30-4ba260c9c62b",
+            "subject": "business-app.search.page_result",
+            "relation": "ACCEPTANCE_ASSERTION",
+            "value": "consistent with users query API result",
+            "unit": null,
+            "scope": "business-app system",
+            "qualifiers": {},
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+              ],
+              "source_text": "页面查询结果要与用户查询接口一致",
+              "source_extraction_ids": [
+                "ne3"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": null
+          },
+          {
+            "id": "715c1ec2-ea4b-50f0-b8df-1a8ad81149ef",
+            "subject": "business-app.change.excluded_scope",
+            "relation": "SCOPE",
+            "value": [
+              "customers",
+              "orders"
+            ],
+            "unit": null,
+            "scope": "business-app system",
+            "qualifiers": {},
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+              ],
+              "source_text": "客户、订单等其他部分保持原样",
+              "source_extraction_ids": [
+                "ne4"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": null
+          }
+        ],
+        "scope_change_required": true
+      },
+      "basis_work_revision_id": "2a855ed8-4066-55d1-9f19-698aaa715968",
+      "basis_steering_plan_revision_id": "902f8088-08e0-457a-8a06-10fe6b0322b6",
+      "basis_steering_step_id": "1d12c016-c156-420a-931f-a51d3e51daa5",
+      "basis_active_runtime_binding_id": null,
+      "supporting_references": [],
+      "natural_response": "先读取 /api/users 现有查询实现与 /users 页面的渲染方式，确定可以共用的查询路径，再以同一查询逻辑实现搜索框与姓名/邮箱匹配，保证页面结果与接口返回一致且客户、订单页面无改动。",
+      "readiness": {
+        "status": "READY",
+        "profile": "LONG_LIVED_STEERING",
+        "profile_version": "v0",
+        "satisfied_requirements": [
+          "MOTIVE",
+          "DESIRED_OUTCOME"
+        ],
+        "missing_information": [],
+        "unresolved_material_questions": [],
+        "reasons": [
+          "Motive and desired outcome are clear enough to form governed Work."
+        ],
+        "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e"
+      },
+      "progressive_semantics": {
+        "turn_intent": "HUMAN_DECISION",
+        "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e",
+        "source_record_ids": [
+          "fb439f5f-7ccd-4293-8788-cce101bdbd5f",
+          "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+        ],
+        "reception_meanings": [
+          "DEEP_WIC_WORKING_UNDERSTANDING"
+        ],
+        "working_motive": "在指定的当前项目仓库 business-app 中给系统增加搜索功能。",
+        "working_desired_outcome": "business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+        "working_facts": [
+          "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+          "目标是已存在的系统，而非新建产品",
+          "现有 API 集合：/api/users、/api/customers、/api/orders",
+          "现有页面路由：/, /users, /customers, /orders, /help, /about"
+        ],
+        "working_constraints": [
+          "改动应发生在当前项目仓库 business-app 内",
+          "搜索范围仅限用户，不改动客户、订单等其他部分",
+          "匹配字段为姓名与邮箱",
+          "页面查询结果需与用户查询接口一致"
+        ],
+        "working_requests": [
+          "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+          "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。"
+        ],
+        "explicit_assumptions": [],
+        "unresolved_human_decisions": [],
+        "deltas": [
+          {
+            "id": "b8885ebc-7e4e-5c13-b5d7-b010af233afd",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "搜索范围仅限用户，不改动客户、订单等其他部分",
+            "prior_value": null,
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "c9dd69eb-f6df-5e6b-a65a-c8ddb92d7e55",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "匹配字段为姓名与邮箱",
+            "prior_value": null,
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "cf1ece1d-985c-5de4-bf2e-45281e170fb8",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "页面查询结果需与用户查询接口一致",
+            "prior_value": null,
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          }
+        ],
+        "pattern_signals": [],
+        "inference_disposition": "NO_INFERENCE",
+        "questions": [],
+        "selected_question": null,
+        "governance_candidate": "WORK_REVISION_PROPOSAL",
+        "readiness": [
+          {
+            "target": "WORK_FORMATION",
+            "status": "NOT_APPLICABLE",
+            "satisfied_evidence": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "WORK_REVISION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "ACTIVE_WORK_BASIS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "DESIGN_PROGRESSION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "CURRENT_FOCUS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "artifact_recommendation": null,
+        "factual_contradictions": [],
+        "semantic_policy_revision": "wic-semantic-policy-v1",
+        "question_policy_revision": "wic-question-value-v1"
+      },
+      "provider_identity": "deepseek-responses:semantic:request:047458db-9295-4ef6-874f-7d33f1b02d5e",
+      "model_identity": "deepseek-flash",
+      "schema_version": "wic-assessment-v6",
+      "created_at": "2026-09-27T05:45:29.048117Z"
+    },
+    "latest_assessment_current": false,
+    "interpreted_motive": "在指定的当前项目仓库 business-app 中给系统增加搜索功能。",
+    "desired_outcome": "business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+    "design_intent_frame": {
+      "design_subject": "business-app 系统的用户搜索功能",
+      "object_type": "FEATURE",
+      "business_context": null,
+      "desired_outcome": "用户可在 business-app 中按姓名或邮箱检索用户，页面展示结果与用户查询接口返回一致",
+      "scope_level": "capability",
+      "collaboration_mode": "design",
+      "candidate_assumptions": [
+        "搜索复用现有 /api/users 集合，不新增独立数据存储",
+        "搜索入口嵌入现有页面（如 /users 页面）",
+        "姓名与邮箱为包含式匹配而非精确匹配"
+      ],
+      "ambiguities": [
+        "匹配方式（包含匹配/前缀匹配）与是否区分大小写尚未确定",
+        "搜索入口在页面中的具体位置与呈现形式尚未确定",
+        "是否需要结果数量上限或分页尚未确定"
+      ],
+      "confidence": 0.7
+    },
+    "candidate_context": [
+      "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+      "目标是已存在的系统，而非新建产品",
+      "现有 API 集合：/api/users、/api/customers、/api/orders",
+      "现有页面路由：/, /users, /customers, /orders, /help, /about"
+    ],
+    "candidate_constraints": [
+      "改动应发生在当前项目仓库 business-app 内",
+      "搜索范围仅限用户，不改动客户、订单等其他部分",
+      "匹配字段为姓名与邮箱",
+      "页面查询结果需与用户查询接口一致"
+    ],
+    "current_requests": [
+      "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+      "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。"
+    ],
+    "unresolved_material_questions": [],
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e"
+    },
+    "candidate_engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+    "candidate_repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+    "candidate_repository_ref": "refs/heads/main",
+    "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git-isolated:8080/business-app.git at refs/heads/main",
+    "governed_work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+    "governed_revision": {
+      "revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319",
+      "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "revision_number": 3,
+      "previous_revision_id": "2a855ed8-4066-55d1-9f19-698aaa715968",
+      "basis_fingerprint": "1606328a2794ba3694699d968caa0f8dd26126f4052222b405d387d8a8c21b7e",
+      "revision_fingerprint": "36a0d2476743b327f7145b6bde814f0f8e15402b3dd0948613660ea8b849fc4a",
+      "source_interaction_id": "af1dfb6a-c53d-420e-b126-19b37883e5a0",
+      "source_kind": "INTERACTION_ASSESSMENT",
+      "source_assessment_id": "b3dbc4f4-45f6-4cb9-b851-2e06279c2744",
+      "source_record_ids": [
+        "fb439f5f-7ccd-4293-8788-cce101bdbd5f",
+        "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+      ],
+      "motive": "在指定的当前项目仓库 business-app 中给系统增加搜索功能。",
+      "desired_outcome": "business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+      "context_facts": [
+        "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+        "目标是已存在的系统，而非新建产品",
+        "现有 API 集合：/api/users、/api/customers、/api/orders",
+        "现有页面路由：/, /users, /customers, /orders, /help, /about"
+      ],
+      "constraints": [
+        "改动应发生在当前项目仓库 business-app 内",
+        "搜索范围仅限用户，不改动客户、订单等其他部分",
+        "匹配字段为姓名与邮箱",
+        "页面查询结果需与用户查询接口一致"
+      ],
+      "requests": [
+        "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。"
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "2d9e5ab5-4c14-5e8d-b1f1-c0745ffe59a5",
+          "subject": "business-app.repository",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git-isolated:8080/business-app.git",
+          "unit": null,
+          "scope": "current project",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "fb439f5f-7ccd-4293-8788-cce101bdbd5f"
+            ],
+            "source_text": "http://qualified-git-isolated:8080/business-app.git",
+            "source_extraction_ids": [
+              "ne1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "6709334e-4076-5445-b4f0-ba8a00a92f84"
+        },
+        {
+          "id": "789a9f8f-e00c-5356-af58-d82119d82661",
+          "subject": "business-app.capability.search",
+          "relation": "BEHAVIOR",
+          "value": "add search capability",
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "fb439f5f-7ccd-4293-8788-cce101bdbd5f"
+            ],
+            "source_text": "给系统增加搜索。",
+            "source_extraction_ids": [
+              "ne2"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "6709334e-4076-5445-b4f0-ba8a00a92f84"
+        },
+        {
+          "id": "3d5a9bf3-b35d-5720-9b94-43ac531ef81e",
+          "subject": "business-app.search.scope",
+          "relation": "SCOPE",
+          "value": "users",
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "只搜索用户",
+            "source_extraction_ids": [
+              "ne1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+        },
+        {
+          "id": "85e98309-85a7-57be-80a0-a2177099be6d",
+          "subject": "business-app.search.match_fields",
+          "relation": "ORDERED_COMPONENT",
+          "value": [
+            "name",
+            "email"
+          ],
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "按姓名和邮箱查找",
+            "source_extraction_ids": [
+              "ne2"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+        },
+        {
+          "id": "ce5e69ba-52ae-5205-ad30-4ba260c9c62b",
+          "subject": "business-app.search.page_result",
+          "relation": "ACCEPTANCE_ASSERTION",
+          "value": "consistent with users query API result",
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "页面查询结果要与用户查询接口一致",
+            "source_extraction_ids": [
+              "ne3"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+        },
+        {
+          "id": "715c1ec2-ea4b-50f0-b8df-1a8ad81149ef",
+          "subject": "business-app.change.excluded_scope",
+          "relation": "SCOPE",
+          "value": [
+            "customers",
+            "orders"
+          ],
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "客户、订单等其他部分保持原样",
+            "source_extraction_ids": [
+              "ne4"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+        }
+      ],
+      "engineering_scope_id": "12eac454-ff39-5490-bf7c-eaea1ce198d2",
+      "engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+      "scope_basis_fingerprint": "c61672d03a6669d77bb37f73ec948d0a054ab70ac7358a979819f68671aef4b4",
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+      "repository_ref": "refs/heads/main",
+      "source_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "governance_record_id": "a8f9af9a-3f26-5ec0-aaf1-8f89db169f22",
+      "supporting_references": [
+        "INTERACTION_RECORD:fb439f5f-7ccd-4293-8788-cce101bdbd5f",
+        "INTERACTION_RECORD:257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+      ],
+      "change_set": [
+        "desired_outcome",
+        "context_facts",
+        "constraints",
+        "requests",
+        "semantic_facts",
+        "impact:HUMAN_GOVERNANCE_REQUIRED"
+      ],
+      "rationale": "Human answered the current governed question: steering-decision:853f64d9-62ce-4832-9cdd-5296d86de2b0",
+      "admitted_by": "human:owner",
+      "schema_version": "wic-work-reality-v3",
+      "created_at": "2026-09-27T05:45:41.968293Z"
+    },
+    "current_work_focus": "在指定的当前项目仓库 business-app 中给系统增加搜索功能。 → business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+    "focus_classification": "ON_TOPIC",
+    "impact_disposition": "HUMAN_GOVERNANCE_REQUIRED",
+    "candidate_change": {
+      "changed_fields": [
+        "desired_outcome",
+        "context_facts",
+        "constraints",
+        "requests",
+        "semantic_facts"
+      ],
+      "motive": "在指定的当前项目仓库 business-app 中给系统增加搜索功能。",
+      "desired_outcome": "business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+      "context_facts": [
+        "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+        "目标是已存在的系统，而非新建产品",
+        "现有 API 集合：/api/users、/api/customers、/api/orders",
+        "现有页面路由：/, /users, /customers, /orders, /help, /about"
+      ],
+      "constraints": [
+        "改动应发生在当前项目仓库 business-app 内",
+        "搜索范围仅限用户，不改动客户、订单等其他部分",
+        "匹配字段为姓名与邮箱",
+        "页面查询结果需与用户查询接口一致"
+      ],
+      "requests": [
+        "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。"
+      ],
+      "semantic_facts": [
+        {
+          "id": "2d9e5ab5-4c14-5e8d-b1f1-c0745ffe59a5",
+          "subject": "business-app.repository",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git-isolated:8080/business-app.git",
+          "unit": null,
+          "scope": "current project",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "fb439f5f-7ccd-4293-8788-cce101bdbd5f"
+            ],
+            "source_text": "http://qualified-git-isolated:8080/business-app.git",
+            "source_extraction_ids": [
+              "ne1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "6709334e-4076-5445-b4f0-ba8a00a92f84"
+        },
+        {
+          "id": "789a9f8f-e00c-5356-af58-d82119d82661",
+          "subject": "business-app.capability.search",
+          "relation": "BEHAVIOR",
+          "value": "add search capability",
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "fb439f5f-7ccd-4293-8788-cce101bdbd5f"
+            ],
+            "source_text": "给系统增加搜索。",
+            "source_extraction_ids": [
+              "ne2"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "6709334e-4076-5445-b4f0-ba8a00a92f84"
+        },
+        {
+          "id": "3d5a9bf3-b35d-5720-9b94-43ac531ef81e",
+          "subject": "business-app.search.scope",
+          "relation": "SCOPE",
+          "value": "users",
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "只搜索用户",
+            "source_extraction_ids": [
+              "ne1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "85e98309-85a7-57be-80a0-a2177099be6d",
+          "subject": "business-app.search.match_fields",
+          "relation": "ORDERED_COMPONENT",
+          "value": [
+            "name",
+            "email"
+          ],
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "按姓名和邮箱查找",
+            "source_extraction_ids": [
+              "ne2"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "ce5e69ba-52ae-5205-ad30-4ba260c9c62b",
+          "subject": "business-app.search.page_result",
+          "relation": "ACCEPTANCE_ASSERTION",
+          "value": "consistent with users query API result",
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "页面查询结果要与用户查询接口一致",
+            "source_extraction_ids": [
+              "ne3"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "715c1ec2-ea4b-50f0-b8df-1a8ad81149ef",
+          "subject": "business-app.change.excluded_scope",
+          "relation": "SCOPE",
+          "value": [
+            "customers",
+            "orders"
+          ],
+          "unit": null,
+          "scope": "business-app system",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "257ddd3d-2830-4d8b-8ec4-246678ad3b25"
+            ],
+            "source_text": "客户、订单等其他部分保持原样",
+            "source_extraction_ids": [
+              "ne4"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "scope_change_required": true
+    },
+    "work_revision_admission_status": "ADMITTED",
+    "active_cycle_work_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319",
+    "active_cycle_impact_disposition": null,
+    "work_satisfaction_state": "IN_PROGRESS",
+    "interaction_relationship_state": "OPEN",
+    "work_focus_history": [
+      "71d57c25-373e-5a29-b91f-95ff9b1c4db9"
+    ],
+    "latest_work_transition": null,
+    "new_work_formation_pending": false,
+    "production_request_detected": true,
+    "repository_source": "http://qualified-git-isolated:8080/business-app.git",
+    "production_admission_state": "WORK_CREATED",
+    "repository_acquisition_state": "READY",
+    "repository_observation": {
+      "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+      "paths": [
+        ".gitignore",
+        "Dockerfile",
+        "README.md",
+        "migrations/001_initial.sql",
+        "package.json",
+        "server.py",
+        "tests/application.cjs",
+        "web/app.js",
+        "web/index.html",
+        "web/styles.css"
+      ],
+      "title": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+      "source": "http://qualified-git-isolated:8080/business-app.git",
+      "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "condition": "READY",
+      "description": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+      "fingerprint": "7d6e11d857bd1144258cde02b69f873466342aedd63cbfc6810faa321aa4fd68",
+      "observed_at": "2026-09-27T05:29:01.163695+00:00",
+      "resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+      "context_path": "README.md",
+      "human_message": "Repository is ready.",
+      "target_branch": null,
+      "attempt_number": 1,
+      "interaction_id": "af1dfb6a-c53d-420e-b126-19b37883e5a0",
+      "operation_kind": "ACQUIRE",
+      "repository_ref": "refs/heads/main",
+      "base_resource_id": null,
+      "failure_category": null,
+      "intake_request_id": "ceed0e73-ab3b-515e-b8f0-003bb630dea8",
+      "operation_evidence": {
+        "verified": true,
+        "connector_id": "builtin:git",
+        "capability_id": "git.repository.acquire",
+        "operation_ref": "repository-intake:fcca793d-b57f-5f5e-bc2c-255f10477f4e",
+        "resulting_branch": "refs/heads/main",
+        "resulting_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "workspace_reference": "/var/lib/spg/repository-assets/fcca793d-b57f-5f5e-bc2c-255f10477f4e"
+      },
+      "previous_attempt_id": null,
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git"
+    },
+    "production_next_step": "Continue Steering against the acquired repository Reality.",
+    "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+    "selected_design_schema_version": "0.1",
+    "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+    "design_stage": "Current Reality",
+    "design_next_focus": "Establish the trusted current product and runtime reality.",
+    "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+    "design_facilitation_strategy": "CLARIFY",
+    "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+  },
+  "observed_at": "2026-09-27T06:04:16.421484+00:00",
+  "work": {
+    "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+    "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+    "goal_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "raw_user_requirement": "在指定的当前项目仓库 business-app 中给系统增加搜索功能。",
+    "title": "在指定的当前项目仓库 business-app 中给系统增加搜索功能。",
+    "desired_outcome": "business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+    "constraints": [
+      "改动应发生在当前项目仓库 business-app 内",
+      "搜索范围仅限用户，不改动客户、订单等其他部分",
+      "匹配字段为姓名与邮箱",
+      "页面查询结果需与用户查询接口一致"
+    ],
+    "target_kind": "CODE_WORK",
+    "artifact_target": null,
+    "change_proposal": {
+      "proposal_id": "2c65aa06-f19d-589c-972e-0997f7842d3a",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+      "source_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+      "source_ref": "refs/heads/main",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "proposed_targets": [
+        {
+          "path": "server.py",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The existing user collection endpoint returns every row with no filtering. The human requires user-only search by name and email, so GET /api/users must support optional name and email filters while leaving /api/customers and /api/orders unchanged.",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:server.py witness: return self.reply([dict(row) for row in connection.execute(f\"SELECT * FROM {table}\")])",
+          "confidence": "HIGH"
+        },
+        {
+          "path": "web/index.html",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The page must let users search users by name and email. The existing users section only has a heading and result container, with no search inputs, so the users section needs the requested name/email search controls; customer and order sections remain untouched.",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <section id=\"users\"><h2>用户列表</h2><div id=\"user-list\"></div></section>",
+          "confidence": "HIGH"
+        },
+        {
+          "path": "web/app.js",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The page query result must match the user query API. Existing client code fetches /api/users without filters, so app.js must read the name/email controls, call the same /api/users endpoint with query parameters, and render the returned user results.",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/app.js witness: const users = await fetch('/api/users').then(response => response.json());",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        },
+        {
+          "kind": "PYTHON_COMPILE",
+          "target": null,
+          "identity": "PYTHON_COMPILE"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "cbddc9f0e9199c9ef6f56c4f560d1c32762c29b66515e4c17bc7e7a71cde8b84"
+    },
+    "change_contract": null,
+    "production_plan": {
+      "proposal_id": "ad04ee01-8b9e-5cfe-95d2-aa0d92194166",
+      "target_kind": "CODE_WORK",
+      "objective": "business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+      "desired_outcome": "business-app 系统具备可用的搜索能力：用户可按姓名和邮箱检索用户，页面查询结果与用户查询接口一致；客户、订单等其他部分保持原样。\n\nHuman explicit request:\n只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Prepare the repository-inspected code targets: server.py, web/index.html, web/app.js."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": {
+        "nodes": [
+          {
+            "node_id": "group:server",
+            "kind": "GROUP",
+            "objective": "Produce the server change surface",
+            "parent_id": null,
+            "dependency_ids": [],
+            "writable_paths": [],
+            "context_references": [],
+            "required_capabilities": [],
+            "authority_scope": [],
+            "responsibility_boundary": null,
+            "acceptance_criteria": [],
+            "verification_requirements": [],
+            "estimated_duration_seconds": 900,
+            "model_token_budget": 20000,
+            "compute_budget_seconds": 1800,
+            "atomicity_rationale": null
+          },
+          {
+            "node_id": "group:app",
+            "kind": "GROUP",
+            "objective": "Produce the app change surface",
+            "parent_id": null,
+            "dependency_ids": [],
+            "writable_paths": [],
+            "context_references": [],
+            "required_capabilities": [],
+            "authority_scope": [],
+            "responsibility_boundary": null,
+            "acceptance_criteria": [],
+            "verification_requirements": [],
+            "estimated_duration_seconds": 900,
+            "model_token_budget": 20000,
+            "compute_budget_seconds": 1800,
+            "atomicity_rationale": null
+          },
+          {
+            "node_id": "pwu:1",
+            "kind": "PWU",
+            "objective": "Produce and verify the server capability change",
+            "parent_id": "group:server",
+            "dependency_ids": [],
+            "writable_paths": [
+              "server.py"
+            ],
+            "context_references": [
+              "README.md",
+              "server.py"
+            ],
+            "required_capabilities": [
+              "filesystem.read",
+              "filesystem.write",
+              "test.run"
+            ],
+            "authority_scope": [
+              "WRITE:server.py"
+            ],
+            "responsibility_boundary": "Only the server capability and its scoped verification",
+            "acceptance_criteria": [
+              "The admitted server capability is independently verified"
+            ],
+            "verification_requirements": [
+              "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization."
+            ],
+            "estimated_duration_seconds": 900,
+            "model_token_budget": 20000,
+            "compute_budget_seconds": 1800,
+            "atomicity_rationale": null
+          },
+          {
+            "node_id": "pwu:2",
+            "kind": "PWU",
+            "objective": "Produce and verify the app capability change",
+            "parent_id": "group:app",
+            "dependency_ids": [
+              "pwu:1"
+            ],
+            "writable_paths": [
+              "web/index.html",
+              "web/app.js"
+            ],
+            "context_references": [
+              "README.md",
+              "web/app.js",
+              "web/index.html"
+            ],
+            "required_capabilities": [
+              "filesystem.read",
+              "filesystem.write",
+              "test.run"
+            ],
+            "authority_scope": [
+              "WRITE:web/index.html",
+              "WRITE:web/app.js"
+            ],
+            "responsibility_boundary": "Only the app capability and its scoped verification",
+            "acceptance_criteria": [
+              "The admitted app capability is independently verified"
+            ],
+            "verification_requirements": [
+              "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization."
+            ],
+            "estimated_duration_seconds": 1800,
+            "model_token_budget": 20000,
+            "compute_budget_seconds": 1800,
+            "atomicity_rationale": null
+          }
+        ],
+        "planning_rationale": "Coupled change surfaces share an area and advance the baseline serially.",
+        "starting_baseline_id": null,
+        "parallel_overlap_policy": "FORBID"
+      },
+      "artifact_targets": [],
+      "change_proposal": {
+        "proposal_id": "2c65aa06-f19d-589c-972e-0997f7842d3a",
+        "target_kind": "CODE_WORK",
+        "engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+        "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+        "source_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+        "source_ref": "refs/heads/main",
+        "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "proposed_targets": [
+          {
+            "path": "server.py",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "The existing user collection endpoint returns every row with no filtering. The human requires user-only search by name and email, so GET /api/users must support optional name and email filters while leaving /api/customers and /api/orders unchanged.",
+            "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:server.py witness: return self.reply([dict(row) for row in connection.execute(f\"SELECT * FROM {table}\")])",
+            "confidence": "HIGH"
+          },
+          {
+            "path": "web/index.html",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "The page must let users search users by name and email. The existing users section only has a heading and result container, with no search inputs, so the users section needs the requested name/email search controls; customer and order sections remain untouched.",
+            "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <section id=\"users\"><h2>用户列表</h2><div id=\"user-list\"></div></section>",
+            "confidence": "HIGH"
+          },
+          {
+            "path": "web/app.js",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "The page query result must match the user query API. Existing client code fetches /api/users without filters, so app.js must read the name/email controls, call the same /api/users endpoint with query parameters, and render the returned user results.",
+            "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/app.js witness: const users = await fetch('/api/users').then(response => response.json());",
+            "confidence": "HIGH"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [],
+        "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+        "confidence": "MEDIUM",
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null,
+            "identity": "PATH_SCOPE"
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null,
+            "identity": "GIT_DIFF_CHECK"
+          },
+          {
+            "kind": "PYTHON_COMPILE",
+            "target": null,
+            "identity": "PYTHON_COMPILE"
+          }
+        ],
+        "provenance": {
+          "provider_identity": "provider:repository-aware-change-proposal-lite",
+          "provider_version": "v1",
+          "inspection_method": "git-object-read-only:path-enumeration+text-search"
+        },
+        "unresolved_scope_questions": [],
+        "proposal_fingerprint": "cbddc9f0e9199c9ef6f56c4f560d1c32762c29b66515e4c17bc7e7a71cde8b84"
+      },
+      "change_contract": null,
+      "inherited_constraints": [
+        "改动应发生在当前项目仓库 business-app 内",
+        "搜索范围仅限用户，不改动客户、订单等其他部分",
+        "匹配字段为姓名与邮箱",
+        "页面查询结果需与用户查询接口一致"
+      ],
+      "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+      "assumptions": [],
+      "unresolved_questions": [],
+      "fit_classification": "MULTI_PWU_FIT",
+      "engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+      "source_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+    },
+    "production_plan_runtime": {
+      "plan_revision_id": "a4f5fc90-d9c7-4833-a2fd-45831149954c",
+      "revision_number": 1,
+      "groups": [
+        {
+          "node_id": "group:server",
+          "objective": "Produce the server change surface",
+          "parent_id": null
+        },
+        {
+          "node_id": "group:app",
+          "objective": "Produce the app change surface",
+          "parent_id": null
+        }
+      ],
+      "pwus": [
+        {
+          "node_id": "pwu:1",
+          "pwu_id": "6629f7bc-800f-526e-a05c-87e4058896ba",
+          "kind": "PWU",
+          "objective": "Produce and verify the server capability change",
+          "group_id": "group:server",
+          "dependency_ids": [],
+          "state": "VERIFIED",
+          "blocked_reason": null,
+          "conflict_count": 0,
+          "semantic_conflict_domain": null,
+          "autonomous_retry_available": false,
+          "input_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+          "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+          "verified_output_baseline_id": "d8c27d61-c7fa-527d-9c88-246353e193cf",
+          "verified_output_revision": "60eaa629db33b83d1be009437269dba1d9a317e9",
+          "workspace_attempt_id": "ccd32347-489e-4490-b746-67b2228dc1c3"
+        },
+        {
+          "node_id": "pwu:2",
+          "pwu_id": "511a0355-d12d-5e03-8115-d503ba5fde9c",
+          "kind": "PWU",
+          "objective": "Produce and verify the app capability change",
+          "group_id": "group:app",
+          "dependency_ids": [],
+          "state": "VERIFIED",
+          "blocked_reason": null,
+          "conflict_count": 0,
+          "semantic_conflict_domain": null,
+          "autonomous_retry_available": false,
+          "input_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+          "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+          "verified_output_baseline_id": "ac297b3d-c32f-5d15-9db2-63b63abf2418",
+          "verified_output_revision": "88dbf98e1582124e1148f5a0b09a5e559d60e2a5",
+          "workspace_attempt_id": "45528e2f-9b70-4afb-afde-2f27ad9f1cba"
+        },
+        {
+          "node_id": "pwu:join",
+          "pwu_id": "fd339f0c-7c61-561c-b355-693c80f655ca",
+          "kind": "JOIN",
+          "objective": "Reconcile and verify the independently produced branch baselines",
+          "group_id": null,
+          "dependency_ids": [
+            "pwu:1",
+            "pwu:2"
+          ],
+          "state": "VERIFIED",
+          "blocked_reason": null,
+          "conflict_count": 0,
+          "semantic_conflict_domain": null,
+          "autonomous_retry_available": false,
+          "input_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+          "input_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+          "verified_output_baseline_id": "3dc0ba25-ff57-5c7d-95dd-ee3973a1e73a",
+          "verified_output_revision": "837f3590b79e64ea1115484e4ae8a39279ceb80a",
+          "workspace_attempt_id": "29c91a04-c4a5-48f2-9c2a-b3b3fb8f46bd"
+        }
+      ],
+      "integrated_baseline_id": "3dc0ba25-ff57-5c7d-95dd-ee3973a1e73a",
+      "integrated_revision": "837f3590b79e64ea1115484e4ae8a39279ceb80a"
+    },
+    "tags": [],
+    "engineering_scope": {
+      "engineering_scope_id": "12eac454-ff39-5490-bf7c-eaea1ce198d2",
+      "summary": "Long-lived Work revision 3 authority envelope for http://qualified-git-isolated:8080/business-app.git at refs/heads/main",
+      "condition": "ADMITTED",
+      "resources": [
+        {
+          "resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+          "condition": "ACTIVE"
+        }
+      ]
+    },
+    "status": "NEEDS_ATTENTION",
+    "current_production_step": "PRODUCE",
+    "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "what_happens_next": "Human must authorize the exact Candidate",
+    "human_attention_required": true,
+    "result_summary": "2 independently observed artifact change(s)",
+    "current_work_reality_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319",
+    "steering_enabled": true,
+    "current_steering_step_id": "c12e323e-1224-4df7-96f6-92babe920a78",
+    "current_steering_step_type": "PRODUCE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "9b344699-467e-4b71-bae7-cc51fe201024",
+    "current_production_cycle_trusted": false,
+    "latest_trusted_runtime_commit_id": null,
+    "work_complete": false,
+    "automatic_progression_state": "STOPPED",
+    "last_stop_reason": "HUMAN_ATTENTION",
+    "execution_progress": {
+      "phase": "RUNNING",
+      "activity": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required.",
+      "transitions_completed": 8,
+      "transitions_total": null,
+      "percent_complete": null,
+      "started_at": "2026-09-27T06:03:43.185357Z",
+      "updated_at": "2026-09-27T06:03:51.669467Z",
+      "elapsed_seconds": 8.48411,
+      "still_working": false,
+      "blocked_reason": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required."
+    },
+    "guided_design": null,
+    "next_owner": "HUMAN",
+    "control_state_valid": true,
+    "control_state_violations": []
+  },
+  "steering": {
+    "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+    "work_objective": "Add user-only search to the existing business-app runtime (python server.py, port 8080) by extending GET /api/users with optional name and email filters, adding name/email search controls to the users section of the existing web UI, and rendering page results from that same /api/users endpoint; preserve customers, orders, the SQLite schema, and all other existing routes and behaviors.",
+    "steering_enabled": true,
+    "steering_plan_id": "c65544b0-30b6-4565-82ac-3f31642c197a",
+    "active_revision_id": "e6ccbf1f-1581-416e-9d74-8ae2c89cc4cc",
+    "active_revision_number": 2,
+    "completed_steps": [
+      {
+        "step_id": "1007f34d-f794-440a-8936-b0b2e4f4b41a",
+        "type": "DESIGN",
+        "objective": "Reassess the latest admitted change against existing design and production Reality",
+        "completion_condition": "The latest Work Reality has a bounded production direction",
+        "position": 1,
+        "state": "CLOSED",
+        "design_issue_key": null
+      }
+    ],
+    "current_step": {
+      "step_id": "c12e323e-1224-4df7-96f6-92babe920a78",
+      "type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from the latest Work Reality",
+      "completion_condition": "The new bounded production cycle reaches trusted Runtime Commit",
+      "position": 2,
+      "state": "CURRENT",
+      "design_issue_key": null
+    },
+    "known_next_steps": [
+      {
+        "step_id": "1e6f9fdf-6ee0-4f6c-8f11-3346883fd9b0",
+        "type": "VERIFY_ACCEPT",
+        "objective": "Assess the new production evidence against the latest Work outcome",
+        "completion_condition": "Governed evidence supports acceptance or further reassessment",
+        "position": 3,
+        "state": "KNOWN",
+        "design_issue_key": null
+      },
+      {
+        "step_id": "8651f9ef-0476-406f-9580-8e14ad1190df",
+        "type": "COMPLETE",
+        "objective": "Complete the latest admitted Work outcome",
+        "completion_condition": "The latest admitted Work Reality is truthfully satisfied",
+        "position": 4,
+        "state": "KNOWN",
+        "design_issue_key": null
+      }
+    ],
+    "plan_changes": [
+      {
+        "change_id": "de8c6c45-94ab-4311-b5b1-07637d757cea",
+        "from_revision_id": "902f8088-08e0-457a-8a06-10fe6b0322b6",
+        "to_revision_id": "e6ccbf1f-1581-416e-9d74-8ae2c89cc4cc",
+        "reason": "Reassess the admitted Work Reality revision without treating the prior production cycle as the current result.",
+        "affected_step_ids": [],
+        "affected_reality_refs": [
+          {
+            "kind": "GOVERNANCE_DECISION",
+            "identity": "7b33788f-5bb5-4fdf-a80d-8133fd2a4430"
+          },
+          {
+            "kind": "GOVERNANCE_DECISION",
+            "identity": "c3576b9f-b9de-5539-936d-f0958994f56f"
+          },
+          {
+            "kind": "SEMANTIC_RESULT",
+            "identity": "66769a21-082a-4969-a488-2a14b9495687"
+          },
+          {
+            "kind": "TRUSTED_BASELINE",
+            "identity": "627fcc1d-d41c-4e6d-b528-1a360496c313"
+          },
+          {
+            "kind": "WORK",
+            "identity": "71d57c25-373e-5a29-b91f-95ff9b1c4db9"
+          },
+          {
+            "kind": "WORK_REALITY_REVISION",
+            "identity": "2a855ed8-4066-55d1-9f19-698aaa715968"
+          },
+          {
+            "kind": "WORK_REALITY_REVISION",
+            "identity": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+          }
+        ],
+        "changed_at": "2026-09-27T05:45:43.490919Z"
+      }
+    ],
+    "latest_decision": {
+      "decision_id": "89b3266d-47dd-4eed-acba-b2dade7c08c2",
+      "next_step_type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from the latest Work Reality",
+      "reason": "The current governed Step is ready to yield to the next admitted ordered Step",
+      "outcome": "AUTO_CONTINUE",
+      "human_required": false,
+      "attention_reason": null,
+      "reality_refs": [
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "7b33788f-5bb5-4fdf-a80d-8133fd2a4430"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "c3576b9f-b9de-5539-936d-f0958994f56f"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "66769a21-082a-4969-a488-2a14b9495687"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "cbc6ce11-011f-4b73-8807-88340004a282"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "627fcc1d-d41c-4e6d-b528-1a360496c313"
+        },
+        {
+          "kind": "WORK",
+          "identity": "71d57c25-373e-5a29-b91f-95ff9b1c4db9"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "2a855ed8-4066-55d1-9f19-698aaa715968"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+        }
+      ]
+    },
+    "selection_rationale": "The current governed Step is ready to yield to the next admitted ordered Step",
+    "steering_outcome": "AUTO_CONTINUE",
+    "automatic_progression_state": "STOPPED",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "9b344699-467e-4b71-bae7-cc51fe201024",
+    "current_production_cycle_trusted": false,
+    "human_attention_required": true,
+    "last_stop_reason": "HUMAN_ATTENTION"
+  },
+  "refinement": {
+    "count": 12,
+    "events": [
+      {
+        "id": "14a4ed68-ec3e-44ba-96c7-1741cfedc7bb",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "29c91a04-c4a5-48f2-9c2a-b3b3fb8f46bd",
+        "created_at": "2026-09-27T06:02:40.945469Z",
+        "failure_family": "PROVIDER_TRANSPORT",
+        "failure_signature": "1a8a8d818295b59bb3c3a665dd953ce19316f1df7c770070fb025afda2abeb6e",
+        "semantic_version": 2,
+        "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "signal_kind": "EXECUTION_FAILURE",
+        "affected_component": "native-executor/provider",
+        "expected_reality": {
+          "outcome": "RESULT_READY",
+          "contract_digest": "f544feb767075b305edb3914b050c746e8a8a9f10664943f71c6111590483a4b"
+        },
+        "observed_reality": {
+          "runtime_mode": "WAITING_RESOURCE",
+          "checkpoint_id": "e8dad985-1ce9-4bae-b9b7-337994b37f04",
+          "failure_signature": "1a8a8d818295b59bb3c3a665dd953ce19316f1df7c770070fb025afda2abeb6e",
+          "observation_evidence": {},
+          "material_reality_digest": "10341ad26d3a853bb0075045807de7137f23e322ef1e604fbb4fb8484ce8e2a7"
+        },
+        "diagnosis_summary": "The admitted Native Attempt did not reach its expected result.",
+        "root_cause_classification": "PROVIDER_TRANSPORT",
+        "repair_hypothesis": "Reconcile the durable checkpoint and retry the same admitted contract only while current authority and adaptive budget permit.",
+        "evidence_references": [
+          "native-attempt:29c91a04-c4a5-48f2-9c2a-b3b3fb8f46bd"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "risk": "NORMAL",
+          "limits": {
+            "attempts": 2,
+            "cost_units": null,
+            "model_tokens": 20000,
+            "tool_effects": 400,
+            "active_seconds": 300,
+            "same_signature": 2,
+            "inference_submissions": 12
+          },
+          "observed": {
+            "model_tokens": 0,
+            "tool_effects": 0,
+            "prior_retries": 0,
+            "elapsed_seconds": 0,
+            "inference_submissions": 0,
+            "same_signature_failures": 1
+          },
+          "remaining": {
+            "attempts": 2,
+            "model_tokens": 20000,
+            "tool_effects": 400,
+            "active_seconds": 300,
+            "same_signature": 1,
+            "inference_submissions": 12
+          },
+          "complexity": "SMALL",
+          "reversible": true,
+          "allow_retry": true,
+          "risk_factors": [],
+          "repairability": "AUTONOMOUSLY_REPAIRABLE",
+          "failure_family": "PROVIDER_TRANSPORT",
+          "policy_version": "adaptive-self-converge-v1",
+          "human_escalated": false,
+          "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+          "complexity_points": 10
+        },
+        "diagnostic_evidence": {
+          "checkpoint_ref": "native-checkpoint:e8dad985-1ce9-4bae-b9b7-337994b37f04",
+          "failure_family": "PROVIDER_TRANSPORT",
+          "failure_signature": "1a8a8d818295b59bb3c3a665dd953ce19316f1df7c770070fb025afda2abeb6e",
+          "native_attempt_ref": "native-attempt:29c91a04-c4a5-48f2-9c2a-b3b3fb8f46bd"
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 56,
+        "model_token_usage": {
+          "input_tokens": 74769,
+          "total_tokens": 85152,
+          "output_tokens": 10383,
+          "reasoning_tokens": 9028,
+          "cached_input_tokens": 5760,
+          "observed_response_count": 3
+        },
+        "compute_overhead": {
+          "tool_effects": 5,
+          "inference_submissions": 3
+        },
+        "known_failure_match": false,
+        "platform_improvement_candidate_ref": null,
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T06:03:37.501000Z"
+      },
+      {
+        "id": "5fc74273-64e4-4549-a6b0-de2ccc40e55d",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "29c91a04-c4a5-48f2-9c2a-b3b3fb8f46bd",
+        "created_at": "2026-09-27T06:02:24.269913Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "14c2c16dff8b33a8e75e73aee29c1783517f01025367c038e08b041137627aa1",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "CAPABILITY_MISMATCH",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": "ValueError",
+          "output_digest": "7acce5c968b9719edb66518923e543770eeadd6e97fa77e70caa7120821593e8",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:a8a68966-8d89-4929-bab9-7daea39dacb7",
+          "native-receipt:8f25087b-ae40-422a-8880-d1d5fc855aff",
+          "native-evidence:052cd6d7-e475-4f64-8fac-1ef792b1889c"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "rejected tool recipe had no effect"
+        },
+        "diagnostic_evidence": {
+          "receipt_ref": "native-receipt:8f25087b-ae40-422a-8880-d1d5fc855aff",
+          "evidence_refs": [
+            "native-evidence:052cd6d7-e475-4f64-8fac-1ef792b1889c"
+          ],
+          "output_digest": "7acce5c968b9719edb66518923e543770eeadd6e97fa77e70caa7120821593e8",
+          "tool_identity": "test.run"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 16,
+        "model_token_usage": {},
+        "compute_overhead": {
+          "tool_effects": 1
+        },
+        "known_failure_match": false,
+        "platform_improvement_candidate_ref": "refinement-signature:14c2c16dff8b33a8e75e73aee29c1783517f01025367c038e08b041137627aa1",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T06:02:40.945469Z"
+      },
+      {
+        "id": "9756eff7-bed3-42ca-a6db-c72caf37a898",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "29c91a04-c4a5-48f2-9c2a-b3b3fb8f46bd",
+        "created_at": "2026-09-27T06:01:47.366220Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "EXECUTION_FAILURE",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": 1,
+          "output_digest": "ad6cae684e845b5458fb3d645fe1ffed3a0e48406cb53368d538ddd5b0b1364d",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:17b9cb31-c9d1-461b-9fe8-e9a699815b91",
+          "native-receipt:e6582629-9e47-4e64-b68e-d13aa4e32554",
+          "native-evidence:0014f9d2-b82e-4e1d-82e4-af3619439a59"
+        ],
+        "repairability": "REPAIRABLE_WITH_SUFFICIENT_EVIDENCE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "additional authoritative diagnosis required"
+        },
+        "diagnostic_evidence": {
+          "returncode": 1,
+          "stderr_ref": "native-receipt:e6582629-9e47-4e64-b68e-d13aa4e32554#stderr",
+          "stdout_ref": "native-receipt:e6582629-9e47-4e64-b68e-d13aa4e32554#stdout",
+          "receipt_ref": "native-receipt:e6582629-9e47-4e64-b68e-d13aa4e32554",
+          "stderr_bytes": 83,
+          "stdout_bytes": 0,
+          "evidence_refs": [
+            "native-evidence:0014f9d2-b82e-4e1d-82e4-af3619439a59"
+          ],
+          "output_digest": "ad6cae684e845b5458fb3d645fe1ffed3a0e48406cb53368d538ddd5b0b1364d",
+          "tool_identity": "test.run",
+          "verification_evidence": "FAILED",
+          "test_environment_readiness": "OBSERVED_EXECUTION"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 36,
+        "model_token_usage": {},
+        "compute_overhead": {
+          "tool_effects": 1
+        },
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T06:02:24.269913Z"
+      },
+      {
+        "id": "76069a00-99f5-407f-9e07-77fe9012a571",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "29c91a04-c4a5-48f2-9c2a-b3b3fb8f46bd",
+        "created_at": "2026-09-27T06:01:22.332422Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "EVIDENCE_INSUFFICIENT",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": "TEST_ENVIRONMENT_NOT_READY",
+          "output_digest": "abdc0707c3a9b711a925fad8675278abf06cad4093ba53fddbfbe8a8e256fc72",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:3f6617ca-4dda-48fa-84aa-393051aaed5d",
+          "native-receipt:f7013ce8-a93e-4c8b-a945-725696ea03a1",
+          "native-evidence:afe6ef27-d3a3-4b3e-abc8-03c8e57df10b"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "Use the granted locked dependency synchronization or an equivalent admitted test path; do not add dependencies or change the acceptance oracle"
+        },
+        "diagnostic_evidence": {
+          "returncode": 127,
+          "stderr_ref": "native-receipt:f7013ce8-a93e-4c8b-a945-725696ea03a1#stderr",
+          "stdout_ref": "native-receipt:f7013ce8-a93e-4c8b-a945-725696ea03a1#stdout",
+          "receipt_ref": "native-receipt:f7013ce8-a93e-4c8b-a945-725696ea03a1",
+          "stderr_bytes": 0,
+          "stdout_bytes": 121,
+          "evidence_refs": [
+            "native-evidence:afe6ef27-d3a3-4b3e-abc8-03c8e57df10b"
+          ],
+          "output_digest": "abdc0707c3a9b711a925fad8675278abf06cad4093ba53fddbfbe8a8e256fc72",
+          "tool_identity": "test.run",
+          "diagnostic_code": "TEST_ENVIRONMENT_NOT_READY",
+          "verification_evidence": "INCOMPLETE",
+          "test_environment_readiness": "NOT_READY"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 25,
+        "model_token_usage": {},
+        "compute_overhead": {
+          "tool_effects": 1
+        },
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T06:01:47.366220Z"
+      },
+      {
+        "id": "39e2f366-7055-4da7-8f78-5c7fb217189c",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "61400440-27cf-4d0a-bf6f-f8af0b8a7928",
+        "created_at": "2026-09-27T05:54:54.775205Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "EXECUTION_FAILURE",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": 1,
+          "output_digest": "d543abc5f84c2d3c28ef5c6caeaab9eec7a2a0db7a12f7e64db061e607feb778",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:8663bca5-02ed-4f22-bff9-a0fc11b1ba24",
+          "native-receipt:3a4c7938-a607-49a3-a4b7-9fc231e5e9e4",
+          "native-evidence:617a62ca-6b36-40b7-9a01-2e27570f0165"
+        ],
+        "repairability": "REPAIRABLE_WITH_SUFFICIENT_EVIDENCE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "additional authoritative diagnosis required"
+        },
+        "diagnostic_evidence": {
+          "returncode": 1,
+          "stderr_ref": "native-receipt:3a4c7938-a607-49a3-a4b7-9fc231e5e9e4#stderr",
+          "stdout_ref": "native-receipt:3a4c7938-a607-49a3-a4b7-9fc231e5e9e4#stdout",
+          "receipt_ref": "native-receipt:3a4c7938-a607-49a3-a4b7-9fc231e5e9e4",
+          "stderr_bytes": 83,
+          "stdout_bytes": 0,
+          "evidence_refs": [
+            "native-evidence:617a62ca-6b36-40b7-9a01-2e27570f0165"
+          ],
+          "output_digest": "d543abc5f84c2d3c28ef5c6caeaab9eec7a2a0db7a12f7e64db061e607feb778",
+          "tool_identity": "test.run",
+          "verification_evidence": "FAILED",
+          "test_environment_readiness": "OBSERVED_EXECUTION"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 46,
+        "model_token_usage": {
+          "input_tokens": 60045,
+          "total_tokens": 68728,
+          "output_tokens": 8683,
+          "reasoning_tokens": 8059,
+          "cached_input_tokens": 3584,
+          "observed_response_count": 3
+        },
+        "compute_overhead": {
+          "tool_effects": 11,
+          "inference_submissions": 6
+        },
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T05:55:41.710100Z"
+      },
+      {
+        "id": "5c45e18b-8831-471a-93e1-cbc0b6bfc9b2",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "61400440-27cf-4d0a-bf6f-f8af0b8a7928",
+        "created_at": "2026-09-27T05:54:31.622091Z",
+        "failure_family": "RUNTIME_PROCESS_FAILURE",
+        "failure_signature": "582fa47663e07d20d344c34de2c80ce34cf32d0269ef30f3c607e06d886b6725",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "CAPABILITY_MISMATCH",
+        "affected_component": "native-tool-host/process.run",
+        "expected_reality": {
+          "tool_identity": "process.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": "ValueError",
+          "output_digest": "0931d5c7a4e3c896ac0ba6f49d8297fe88363f605f77344eb6303f7c8a60c586",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "RUNTIME_PROCESS_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:651e0074-4e25-43fc-b2ca-1aef754af9bc",
+          "native-receipt:1dd3a093-95e2-44e2-8a01-ed61ac784d24",
+          "native-evidence:40e9615a-3c12-46b4-94c8-7a8f6172ce0d"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "rejected tool recipe had no effect"
+        },
+        "diagnostic_evidence": {
+          "receipt_ref": "native-receipt:1dd3a093-95e2-44e2-8a01-ed61ac784d24",
+          "evidence_refs": [
+            "native-evidence:40e9615a-3c12-46b4-94c8-7a8f6172ce0d"
+          ],
+          "output_digest": "0931d5c7a4e3c896ac0ba6f49d8297fe88363f605f77344eb6303f7c8a60c586",
+          "tool_identity": "process.run"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 23,
+        "model_token_usage": {},
+        "compute_overhead": {
+          "tool_effects": 1
+        },
+        "known_failure_match": false,
+        "platform_improvement_candidate_ref": "refinement-signature:582fa47663e07d20d344c34de2c80ce34cf32d0269ef30f3c607e06d886b6725",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T05:54:54.775205Z"
+      },
+      {
+        "id": "d0b8c6d5-61ba-4058-871f-1d47e7653717",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "45528e2f-9b70-4afb-afde-2f27ad9f1cba",
+        "created_at": "2026-09-27T05:53:08.370335Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+        "semantic_version": 2,
+        "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "signal_kind": "EXECUTION_FAILURE",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": 1,
+          "output_digest": "56da2129f1df035aaa893faf19adb171d54fe701f9abe2c874474f774a41ae0e",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:a8c53ad7-0367-42fd-88f7-acd89d570e36",
+          "native-receipt:4aa45431-736f-4d06-86de-50ef63899dc2",
+          "native-evidence:fca58caf-b5ce-4e62-9a80-d33068b529ae"
+        ],
+        "repairability": "REPAIRABLE_WITH_SUFFICIENT_EVIDENCE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "additional authoritative diagnosis required"
+        },
+        "diagnostic_evidence": {
+          "returncode": 1,
+          "stderr_ref": "native-receipt:4aa45431-736f-4d06-86de-50ef63899dc2#stderr",
+          "stdout_ref": "native-receipt:4aa45431-736f-4d06-86de-50ef63899dc2#stdout",
+          "receipt_ref": "native-receipt:4aa45431-736f-4d06-86de-50ef63899dc2",
+          "stderr_bytes": 83,
+          "stdout_bytes": 0,
+          "evidence_refs": [
+            "native-evidence:fca58caf-b5ce-4e62-9a80-d33068b529ae"
+          ],
+          "output_digest": "56da2129f1df035aaa893faf19adb171d54fe701f9abe2c874474f774a41ae0e",
+          "tool_identity": "test.run",
+          "verification_evidence": "FAILED",
+          "test_environment_readiness": "OBSERVED_EXECUTION"
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 41,
+        "model_token_usage": {
+          "input_tokens": 47297,
+          "total_tokens": 54571,
+          "output_tokens": 7274,
+          "reasoning_tokens": 6094,
+          "cached_input_tokens": 2048,
+          "observed_response_count": 2
+        },
+        "compute_overhead": {
+          "tool_effects": 17,
+          "inference_submissions": 8
+        },
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T05:53:49.430500Z"
+      },
+      {
+        "id": "6417a158-886f-4ca0-ab06-8153012c24ce",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "45528e2f-9b70-4afb-afde-2f27ad9f1cba",
+        "created_at": "2026-09-27T05:52:57.109644Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "EVIDENCE_INSUFFICIENT",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": "TEST_ENVIRONMENT_NOT_READY",
+          "output_digest": "68578f4588a28939da8c6dcc7169352c141fdf02db9e8d73ec33d9b0f55a4f22",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:52294402-cbe9-48dd-b519-b1bc4b7b1963",
+          "native-receipt:e7d73e97-8bf8-4eed-a0a2-7f8d12319c2f",
+          "native-evidence:c2f649d1-1ffb-4403-93de-eafad2d16242"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "Use the granted locked dependency synchronization or an equivalent admitted test path; do not add dependencies or change the acceptance oracle"
+        },
+        "diagnostic_evidence": {
+          "returncode": 127,
+          "stderr_ref": "native-receipt:e7d73e97-8bf8-4eed-a0a2-7f8d12319c2f#stderr",
+          "stdout_ref": "native-receipt:e7d73e97-8bf8-4eed-a0a2-7f8d12319c2f#stdout",
+          "receipt_ref": "native-receipt:e7d73e97-8bf8-4eed-a0a2-7f8d12319c2f",
+          "stderr_bytes": 0,
+          "stdout_bytes": 121,
+          "evidence_refs": [
+            "native-evidence:c2f649d1-1ffb-4403-93de-eafad2d16242"
+          ],
+          "output_digest": "68578f4588a28939da8c6dcc7169352c141fdf02db9e8d73ec33d9b0f55a4f22",
+          "tool_identity": "test.run",
+          "diagnostic_code": "TEST_ENVIRONMENT_NOT_READY",
+          "verification_evidence": "INCOMPLETE",
+          "test_environment_readiness": "NOT_READY"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 11,
+        "model_token_usage": {},
+        "compute_overhead": {
+          "tool_effects": 1
+        },
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T05:53:08.370335Z"
+      },
+      {
+        "id": "53204550-5656-4bb0-b494-b9267aff6004",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "c96a671c-52ef-44d9-98d4-44638c9f2e0e",
+        "created_at": "2026-09-27T05:49:24.137173Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "EXECUTION_FAILURE",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": 1,
+          "output_digest": "8990f11e2c635fd62d0ebf9e26fc4310b5026dab0f5d60c662b6074ccbede517",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:0ee96b35-3fc9-43f1-9c63-68c3932a0856",
+          "native-receipt:8b1832a0-22f0-4e06-8b63-5949ca8dbb71",
+          "native-evidence:3cb48508-8bca-46cd-b3ea-b0856a4b6904"
+        ],
+        "repairability": "REPAIRABLE_WITH_SUFFICIENT_EVIDENCE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "additional authoritative diagnosis required"
+        },
+        "diagnostic_evidence": {
+          "returncode": 1,
+          "stderr_ref": "native-receipt:8b1832a0-22f0-4e06-8b63-5949ca8dbb71#stderr",
+          "stdout_ref": "native-receipt:8b1832a0-22f0-4e06-8b63-5949ca8dbb71#stdout",
+          "receipt_ref": "native-receipt:8b1832a0-22f0-4e06-8b63-5949ca8dbb71",
+          "stderr_bytes": 0,
+          "stdout_bytes": 1142,
+          "evidence_refs": [
+            "native-evidence:3cb48508-8bca-46cd-b3ea-b0856a4b6904"
+          ],
+          "output_digest": "8990f11e2c635fd62d0ebf9e26fc4310b5026dab0f5d60c662b6074ccbede517",
+          "tool_identity": "test.run",
+          "verification_evidence": "FAILED",
+          "test_environment_readiness": "OBSERVED_EXECUTION"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 133,
+        "model_token_usage": {
+          "input_tokens": 119112,
+          "total_tokens": 145074,
+          "output_tokens": 25962,
+          "reasoning_tokens": 25140,
+          "cached_input_tokens": 5120,
+          "observed_response_count": 4
+        },
+        "compute_overhead": {
+          "tool_effects": 20,
+          "inference_submissions": 11
+        },
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T05:51:37.841043Z"
+      },
+      {
+        "id": "e265cef9-dc3b-4f44-9a32-ee4a26c3c96c",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "c96a671c-52ef-44d9-98d4-44638c9f2e0e",
+        "created_at": "2026-09-27T05:49:20.198358Z",
+        "failure_family": "DEPENDENCY_BUILD_FAILURE",
+        "failure_signature": "e69d1de7d498ae409bfb3002be14f02a87024e06f0badc667a99ad32e07bd28f",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "EXECUTION_FAILURE",
+        "affected_component": "native-tool-host/process.run",
+        "expected_reality": {
+          "tool_identity": "process.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": "PYTHON_SYNTAX_ERROR",
+          "output_digest": "d28a653417c3f52376f98566f44c9535261a716eed687accad04be866eb9ce1c",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "DEPENDENCY_BUILD_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:ea137690-be1a-4bf5-83c1-37a9e1127bb1",
+          "native-receipt:333a234c-ef0d-4e21-86f0-bc5bd53680ef",
+          "native-evidence:542cbdab-5e39-4e1f-9829-a3470254a867"
+        ],
+        "repairability": "REPAIRABLE_WITH_SUFFICIENT_EVIDENCE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "additional authoritative diagnosis required"
+        },
+        "diagnostic_evidence": {
+          "path": "server.py",
+          "returncode": 1,
+          "stderr_ref": "native-receipt:333a234c-ef0d-4e21-86f0-bc5bd53680ef#stderr",
+          "stdout_ref": "native-receipt:333a234c-ef0d-4e21-86f0-bc5bd53680ef#stdout",
+          "receipt_ref": "native-receipt:333a234c-ef0d-4e21-86f0-bc5bd53680ef",
+          "stderr_bytes": 225,
+          "stdout_bytes": 0,
+          "evidence_refs": [
+            "native-evidence:542cbdab-5e39-4e1f-9829-a3470254a867"
+          ],
+          "output_digest": "d28a653417c3f52376f98566f44c9535261a716eed687accad04be866eb9ce1c",
+          "tool_identity": "process.run",
+          "diagnostic_code": "PYTHON_SYNTAX_ERROR"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 3,
+        "model_token_usage": {},
+        "compute_overhead": {
+          "tool_effects": 1
+        },
+        "known_failure_match": false,
+        "platform_improvement_candidate_ref": "refinement-signature:e69d1de7d498ae409bfb3002be14f02a87024e06f0badc667a99ad32e07bd28f",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T05:49:24.137173Z"
+      },
+      {
+        "id": "21a3a482-49bc-4ccb-8cc7-d418891ca4bc",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "1007f34d-f794-440a-8936-b0b2e4f4b41a",
+        "created_at": "2026-09-27T05:46:35.360057Z",
+        "failure_family": "CANDIDATE_INCONSISTENT",
+        "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "semantic_version": 2,
+        "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "signal_kind": "CANDIDATE_INCONSISTENT",
+        "affected_component": "semantic/scope",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "CANDIDATE_INCONSISTENT",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "source-baseline:627fcc1d-d41c-4e6d-b528-1a360496c313"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "OBSERVED_SUCCESS",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 2,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "SCOPE_INFLATION",
+          "required_paths": [
+            "server.py",
+            "web/index.html",
+            "web/app.js"
+          ],
+          "candidate_paths": [
+            "server.py",
+            "web/index.html",
+            "web/app.js",
+            "tests/application.cjs"
+          ],
+          "authority_expanded": false,
+          "rejected_behaviors": [
+            "Adding search or filters to customer or order APIs or pages",
+            "Changing the SQLite schema or migrations/001_initial.sql",
+            "Creating new pages, routes, files, or search-specific endpoints",
+            "Modifying tests/application.cjs or adding tests as required source scope",
+            "Adding authentication, login behavior, or external integrations",
+            "Refactoring unrelated server routes, UI, or existing customer/order sections",
+            "Changing README.md, Dockerfile, package.json, or web/styles.css for this requested behavior"
+          ]
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 0,
+        "model_token_usage": {
+          "unknown": false,
+          "input_tokens": 11516,
+          "total_tokens": 17496,
+          "cached_tokens": 512,
+          "output_tokens": 5980,
+          "reasoning_tokens": 2349
+        },
+        "compute_overhead": {},
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T05:46:35.360057Z"
+      },
+      {
+        "id": "a6bfdff9-cc4b-4d79-b533-90856b868e77",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "operation_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "created_at": "2026-09-27T05:45:53.700389Z",
+        "failure_family": "PROVIDER_TIMEOUT_OR_NETWORK",
+        "failure_signature": "300e34f51a22f453bb4fb31b45cea48dec784abd6a277974a82ad8d52d3776d9",
+        "semantic_version": 2,
+        "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "signal_kind": "PROVIDER_TRANSPORT",
+        "affected_component": "steering/provider",
+        "expected_reality": {
+          "outcome": "GOVERNED_STEERING_PROGRESSION",
+          "work_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+        },
+        "observed_reality": {
+          "retryable": true,
+          "request_id": null,
+          "provider_kind": "TIMEOUT_OR_NETWORK",
+          "usage_unknown": true,
+          "provider_status": null,
+          "termination_reason": null
+        },
+        "diagnosis_summary": "Steering Provider did not return an admissible result.",
+        "root_cause_classification": "PROVIDER_TIMEOUT_OR_NETWORK",
+        "repair_hypothesis": "Retry the same governed semantic basis after bounded backoff without changing Human authority.",
+        "evidence_references": [
+          "work:71d57c25-373e-5a29-b91f-95ff9b1c4db9"
+        ],
+        "repairability": "REPAIRABLE_WITH_SUFFICIENT_EVIDENCE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {},
+        "diagnostic_evidence": {},
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 42,
+        "model_token_usage": {},
+        "compute_overhead": {
+          "provider_attempts": 2
+        },
+        "known_failure_match": false,
+        "platform_improvement_candidate_ref": null,
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T05:46:36.231325Z"
+      }
+    ],
+    "metrics": {
+      "native_attempts": 5,
+      "native_self_refine_events": 1,
+      "self_refine_events": 12,
+      "self_refine_rate": 0.2,
+      "first_pass_success_rate": 0.4,
+      "recovered": 0,
+      "local_obligation_recovered": 4,
+      "recovery_scope": "LOCAL_OBLIGATION; Work convergence is independently observed",
+      "escalated": 0,
+      "failed": 8,
+      "active": 0,
+      "classification_counts": {
+        "ROUTINE_STOCHASTIC_REFINEMENT": 2,
+        "DEGRADING_OR_RECURRING_REFINEMENT": 2,
+        "SYSTEMIC_OR_NON_CONVERGING_INCIDENT": 8,
+        "LEGACY_EXECUTION_INCIDENT": 0
+      },
+      "convergence_success_rate": 0.3333333333333333,
+      "average_refinement_attempts": 2.0,
+      "p95_refinement_attempts": 2,
+      "average_refinement_seconds": 36.0,
+      "p95_refinement_seconds": 133,
+      "observed_refinement_tokens": 371021,
+      "observed_refinement_tool_effects": 59,
+      "unsafe_repair_blocks": 0,
+      "recurring_signatures": {
+        "5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940": 4,
+        "5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8": 2
+      },
+      "improvement_candidates": [
+        {
+          "reference": "refinement-signature:14c2c16dff8b33a8e75e73aee29c1783517f01025367c038e08b041137627aa1",
+          "signature": "14c2c16dff8b33a8e75e73aee29c1783517f01025367c038e08b041137627aa1",
+          "component": "native-tool-host/test.run",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 0,
+          "observed_seconds": 16,
+          "systemic": true,
+          "status": "PROPOSED"
+        },
+        {
+          "reference": "refinement-signature:5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+          "signature": "5757d36405d2135ca39554d5613761af54adc153246a689aab2cbbdccfee6940",
+          "component": "native-tool-host/test.run",
+          "occurrences": 4,
+          "affected_works": 1,
+          "observed_tokens": 268373,
+          "observed_seconds": 256,
+          "systemic": true,
+          "status": "PROPOSED"
+        },
+        {
+          "reference": "refinement-signature:582fa47663e07d20d344c34de2c80ce34cf32d0269ef30f3c607e06d886b6725",
+          "signature": "582fa47663e07d20d344c34de2c80ce34cf32d0269ef30f3c607e06d886b6725",
+          "component": "native-tool-host/process.run",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 0,
+          "observed_seconds": 23,
+          "systemic": true,
+          "status": "PROPOSED"
+        },
+        {
+          "reference": "refinement-signature:5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+          "signature": "5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+          "component": "native-tool-host/test.run",
+          "occurrences": 2,
+          "affected_works": 1,
+          "observed_tokens": 0,
+          "observed_seconds": 36,
+          "systemic": true,
+          "status": "PROPOSED"
+        },
+        {
+          "reference": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "component": "semantic/scope",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 17496,
+          "observed_seconds": 0,
+          "systemic": false,
+          "status": "PROPOSED"
+        },
+        {
+          "reference": "refinement-signature:e69d1de7d498ae409bfb3002be14f02a87024e06f0badc667a99ad32e07bd28f",
+          "signature": "e69d1de7d498ae409bfb3002be14f02a87024e06f0badc667a99ad32e07bd28f",
+          "component": "native-tool-host/process.run",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 0,
+          "observed_seconds": 3,
+          "systemic": true,
+          "status": "PROPOSED"
+        }
+      ],
+      "human_escalation_observation_count": 2,
+      "human_escalation_rate": 0.0,
+      "systemic_incident_rate": 0.6666666666666666
+    },
+    "work_convergence": [
+      {
+        "id": "a4173837-b01d-4ff9-833a-ccf922ae0e62",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "intent_identity": "bde5766ebd3ae8fc3f142a2f2a3acfa749cc310f9cefbf203b50338b445e9dcf",
+        "predecessor_id": null,
+        "sequence": 1,
+        "boundary": "HUMAN_ATTENTION",
+        "failure_signature": "34d2faebd2bdbefe3e3e784347ebf17de5a2507ec39ce1b6ce42600fde5b79cd",
+        "candidate_identity": null,
+        "reality_identity": "0eaf482481bec3ad479fa8dc095292c9a14b24200e1cf9879bb41f3dc23febb1",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "PRODUCTION_PLAN_ADMITTED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": null,
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:44:17.422397Z"
+      },
+      {
+        "id": "5188eacc-f511-4b10-b61e-432b1c4abc37",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "intent_identity": "d7f11ac2c7751de1ed0ac2868c84ec30d6a4f6d1fcd32f669b8d8e99cdac004d",
+        "predecessor_id": "a4173837-b01d-4ff9-833a-ccf922ae0e62",
+        "sequence": 2,
+        "boundary": "PLAN_REVISION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "0eaf482481bec3ad479fa8dc095292c9a14b24200e1cf9879bb41f3dc23febb1",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "PRODUCTION_PLAN_ADMITTED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": null,
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:45:43.877520Z"
+      },
+      {
+        "id": "24a6ad44-e291-4599-b806-dbcce3027b60",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "intent_identity": "d7f11ac2c7751de1ed0ac2868c84ec30d6a4f6d1fcd32f669b8d8e99cdac004d",
+        "predecessor_id": "5188eacc-f511-4b10-b61e-432b1c4abc37",
+        "sequence": 3,
+        "boundary": "PROVIDER",
+        "failure_signature": "3e6fe52bebea6f64b19fed399feeeccd164941cca9f4a4c7940b415334ca96e2",
+        "candidate_identity": null,
+        "reality_identity": "0eaf482481bec3ad479fa8dc095292c9a14b24200e1cf9879bb41f3dc23febb1",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "PRODUCTION_PLAN_ADMITTED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 2,
+        "no_progress_count": 1,
+        "elapsed_seconds": 10,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:45:54.329337Z"
+      },
+      {
+        "id": "3e475800-f892-4432-9da2-d98d634b0fb9",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "intent_identity": "d7f11ac2c7751de1ed0ac2868c84ec30d6a4f6d1fcd32f669b8d8e99cdac004d",
+        "predecessor_id": "24a6ad44-e291-4599-b806-dbcce3027b60",
+        "sequence": 4,
+        "boundary": "SEMANTIC_RESULT_ADMISSION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "20dee316f4f51df75cb01b92be88e32b1fca2cc7968e2475324fb0e1d554130a",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 3,
+        "no_progress_count": 0,
+        "elapsed_seconds": 52,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:46:36.634234Z"
+      },
+      {
+        "id": "7ca62657-0192-4108-a2a8-537f09e9261a",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "intent_identity": "d7f11ac2c7751de1ed0ac2868c84ec30d6a4f6d1fcd32f669b8d8e99cdac004d",
+        "predecessor_id": "3e475800-f892-4432-9da2-d98d634b0fb9",
+        "sequence": 5,
+        "boundary": "STEP_TRANSITION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "20dee316f4f51df75cb01b92be88e32b1fca2cc7968e2475324fb0e1d554130a",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 4,
+        "no_progress_count": 0,
+        "elapsed_seconds": 58,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:46:42.148625Z"
+      },
+      {
+        "id": "51569638-d261-4e9e-a8ac-da3e294924d1",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "intent_identity": "d7f11ac2c7751de1ed0ac2868c84ec30d6a4f6d1fcd32f669b8d8e99cdac004d",
+        "predecessor_id": "7ca62657-0192-4108-a2a8-537f09e9261a",
+        "sequence": 6,
+        "boundary": "PRODUCTION_CYCLE_ADMISSION",
+        "failure_signature": "55aace645e56bf76dbff41e8f14eb53f17cab59fa84b37f74f8120e5170fbcf3",
+        "candidate_identity": null,
+        "reality_identity": "20dee316f4f51df75cb01b92be88e32b1fca2cc7968e2475324fb0e1d554130a",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 5,
+        "no_progress_count": 0,
+        "elapsed_seconds": 65,
+        "token_usage": {
+          "status": "UNREPORTED",
+          "input_tokens": 0,
+          "total_tokens": 0,
+          "output_tokens": 0
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 0
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {},
+          "execution_seconds": 0.0
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:46:48.888405Z"
+      },
+      {
+        "id": "901faf64-e5c6-467e-87e2-c81beb2f5497",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "intent_identity": "d7f11ac2c7751de1ed0ac2868c84ec30d6a4f6d1fcd32f669b8d8e99cdac004d",
+        "predecessor_id": "51569638-d261-4e9e-a8ac-da3e294924d1",
+        "sequence": 7,
+        "boundary": "PRODUCTION_SCHEDULE",
+        "failure_signature": "55aace645e56bf76dbff41e8f14eb53f17cab59fa84b37f74f8120e5170fbcf3",
+        "candidate_identity": null,
+        "reality_identity": "90b3dad720296d19099bdba744dfd110bb71d22b25ce20dd049067285b6cd0a9",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY"
+        ],
+        "attempts": 6,
+        "no_progress_count": 0,
+        "elapsed_seconds": 1079,
+        "token_usage": {
+          "status": "OBSERVED",
+          "input_tokens": 1003434,
+          "total_tokens": 1169943,
+          "output_tokens": 166509
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 5
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {
+            "tool_effect": 86,
+            "inference_submission": 45
+          },
+          "execution_seconds": 857.19386
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T06:03:43.446418Z"
+      },
+      {
+        "id": "92e95db6-799e-4beb-a8a2-e22efd24bf7c",
+        "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+        "intent_identity": "d7f11ac2c7751de1ed0ac2868c84ec30d6a4f6d1fcd32f669b8d8e99cdac004d",
+        "predecessor_id": "901faf64-e5c6-467e-87e2-c81beb2f5497",
+        "sequence": 8,
+        "boundary": "PREVIEW",
+        "failure_signature": null,
+        "candidate_identity": "f7631a7e2639c3a8e58b7c2d6fc933b5285061ea121b1ecb052a1af38ba5a3e2",
+        "reality_identity": "c49c2e198bf96f2adf0dd11aaad178cd03913fa82885cb3feec170100a95b146",
+        "missing_acceptance": [],
+        "attempts": 7,
+        "no_progress_count": 0,
+        "elapsed_seconds": 1111,
+        "token_usage": {
+          "status": "OBSERVED",
+          "input_tokens": 1003434,
+          "total_tokens": 1169943,
+          "output_tokens": 166509
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 5
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {
+            "tool_effect": 86,
+            "inference_submission": 45
+          },
+          "execution_seconds": 857.19386
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "CONVERGED_FOR_REVIEW",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T06:04:15.436225Z"
+      }
+    ]
+  },
+  "queue": [
+    {
+      "queue_entry_id": "13e21dcc-41fb-41db-ae3c-9dd5e641cb91",
+      "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "pwu_id": "6629f7bc-800f-526e-a05c-87e4058896ba",
+      "attempt_id": "c96a671c-52ef-44d9-98d4-44638c9f2e0e",
+      "fairness_group": "work:71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T05:47:15.540474Z",
+      "available_at": "2026-09-27T05:47:15.516607Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T06:04:18.419322Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+    },
+    {
+      "queue_entry_id": "3230bfc2-5c02-4655-a586-a35aa9f6ff64",
+      "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "pwu_id": "511a0355-d12d-5e03-8115-d503ba5fde9c",
+      "attempt_id": "45528e2f-9b70-4afb-afde-2f27ad9f1cba",
+      "fairness_group": "work:71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T05:51:42.431821Z",
+      "available_at": "2026-09-27T05:51:42.429727Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T06:04:18.419322Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+    },
+    {
+      "queue_entry_id": "ecacc2f8-a114-4619-8c1c-215060b28fd4",
+      "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "pwu_id": "6629f7bc-800f-526e-a05c-87e4058896ba",
+      "attempt_id": "61400440-27cf-4d0a-bf6f-f8af0b8a7928",
+      "fairness_group": "work:71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T05:54:11.948277Z",
+      "available_at": "2026-09-27T05:54:11.945780Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T06:04:18.419322Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+    },
+    {
+      "queue_entry_id": "bc5b79bd-cac0-49a3-88ce-b9579364de21",
+      "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "pwu_id": "6629f7bc-800f-526e-a05c-87e4058896ba",
+      "attempt_id": "ccd32347-489e-4490-b746-67b2228dc1c3",
+      "fairness_group": "work:71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T05:55:49.064490Z",
+      "available_at": "2026-09-27T05:55:49.061158Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T06:04:18.419322Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+    },
+    {
+      "queue_entry_id": "d8fd88c8-bda0-4717-8a0f-d0f61aca5065",
+      "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "pwu_id": "fd339f0c-7c61-561c-b355-693c80f655ca",
+      "attempt_id": "29c91a04-c4a5-48f2-9c2a-b3b3fb8f46bd",
+      "fairness_group": "work:71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T06:01:08.991052Z",
+      "available_at": "2026-09-27T06:02:41.970878Z",
+      "resume_count": 1,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T06:04:18.419322Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "41f0a982-00b5-55c1-8be2-d161a9e34319"
+    }
+  ],
+  "preview": {
+    "mode": "FRONTEND_RUNTIME",
+    "status": "READY",
+    "candidate_revision": "837f3590b79e64ea1115484e4ae8a39279ceb80a",
+    "candidate_fingerprint": "f7631a7e2639c3a8e58b7c2d6fc933b5285061ea121b1ecb052a1af38ba5a3e2",
+    "session": {
+      "id": "072f9fcf-a95e-4fc8-a283-a7405a44a77c",
+      "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "candidate_id": "c007ffbb-aeb1-5a64-99d2-e19b988c50ca",
+      "candidate_fingerprint": "f7631a7e2639c3a8e58b7c2d6fc933b5285061ea121b1ecb052a1af38ba5a3e2",
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+      "repository_revision": "837f3590b79e64ea1115484e4ae8a39279ceb80a",
+      "repository_tree": "ad464d79fd166530cb6174fb61064b9e095aa826",
+      "workspace_id": "49448f5e-b1aa-4094-b835-a4f3ccc08b5b",
+      "environment_id": "dc26f164-df90-4b7a-b53a-bf6bdb4b516d",
+      "mode": "FRONTEND_RUNTIME",
+      "status": "READY",
+      "definition_version": "frontend-docker-runtime-v1",
+      "endpoint": "http://127.0.0.1:57688/",
+      "image_reference": "sha256:04c1833014f6c11291a8da69a1fe1cdf9198aa680baa6fa769223748b8c0118f",
+      "service_identities": [
+        "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-app",
+        "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-proxy"
+      ],
+      "resource_references": [
+        "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-internal",
+        "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-gateway",
+        "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-source"
+      ],
+      "evidence": [
+        {
+          "kind": "WORKSPACE",
+          "workspace": "/var/lib/spg/production-environments/candidate-preview-runtime/072f9fcf-a95e-4fc8-a283-a7405a44a77c/workspace",
+          "revision": "837f3590b79e64ea1115484e4ae8a39279ceb80a",
+          "tree": "ad464d79fd166530cb6174fb61064b9e095aa826",
+          "topology_preflight": {
+            "verifier_namespace": "candidate-gateway-network",
+            "verifier_image": "watt-lifecycle:qualification",
+            "public_endpoint_namespace": "docker-host"
+          },
+          "dockerfile_sha256": "abd36acd96f3e4485d6e9d4826a540e65a9608f5e9eb0e479de9581d5a8d5f44"
+        },
+        {
+          "kind": "BUILD",
+          "image": "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c:candidate",
+          "image_id": "sha256:04c1833014f6c11291a8da69a1fe1cdf9198aa680baa6fa769223748b8c0118f",
+          "verified_image_files": 0,
+          "build_log": "/var/lib/spg/production-environments/candidate-preview-runtime/evidence/072f9fcf-a95e-4fc8-a283-a7405a44a77c/build.log",
+          "build_log_sha256": "b4c9711568466fcbac84469a3ec979672f51ef0d924c6852e10411c1d182d593"
+        },
+        {
+          "kind": "SERVED_VERIFICATION",
+          "candidate_revision": "837f3590b79e64ea1115484e4ae8a39279ceb80a",
+          "candidate_tree": "ad464d79fd166530cb6174fb61064b9e095aa826",
+          "gateway": "http://watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-proxy",
+          "public_gateway": "http://127.0.0.1:57688",
+          "verifier_namespace": "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-gateway",
+          "mode": "FRONTEND_RUNTIME",
+          "frontend": {
+            "path": "/",
+            "status": 200,
+            "body_sha256": "ac4d2e364c4d94e7b2865954eae81809a6bb98a3feb68b6b34d78e9ca9df0df7"
+          },
+          "result": "PASS"
+        },
+        {
+          "kind": "RUNTIME",
+          "endpoint": "http://127.0.0.1:57688/",
+          "services": [
+            "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-app",
+            "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-proxy"
+          ],
+          "resources": [
+            "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-internal",
+            "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-gateway",
+            "watt-candidate-preview-072f9fcfa95e4fc8a283a7405a44a77c-source"
+          ],
+          "health": {
+            "database": "NOT_REQUIRED",
+            "application": "READY",
+            "gateway": "READY",
+            "repository_revision": "837f3590b79e64ea1115484e4ae8a39279ceb80a",
+            "repository_tree": "ad464d79fd166530cb6174fb61064b9e095aa826"
+          },
+          "topology": {
+            "frontend": "app",
+            "backend": "app",
+            "database": null,
+            "supporting_services": []
+          }
+        },
+        {
+          "kind": "PRODUCTION_RECORD",
+          "reference": "production-record:410b1365-5477-54fc-a38f-920562a8ac05",
+          "digest": "4991bd9fefbb78b90d2cb4b0ca40f8da5ce0b339e6cfa7d2eb0e8e786eec75b8"
+        }
+      ],
+      "failure_code": null,
+      "failure_reason": null,
+      "version": 6,
+      "created_at": "2026-09-27T06:03:48.826678Z",
+      "updated_at": "2026-09-27T06:04:15.048369Z"
+    }
+  },
+  "attention": [
+    {
+      "attention_id": "0fa9e6d9-7a1f-52a9-bee9-5a5945c92c54",
+      "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+      "kind": "CANDIDATE_AUTHORIZATION",
+      "decision": "Authorize exact sealed Candidate integration?",
+      "reason": "Repository integration requires exact Human Authority.",
+      "available_actions": [
+        "AUTHORIZE"
+      ],
+      "recommended_action": null,
+      "governed_subject_ref": "baseline-candidate:c007ffbb-aeb1-5a64-99d2-e19b988c50ca",
+      "steering_reason": null,
+      "recommendation": null,
+      "conversation_prompt": null,
+      "alternatives": [],
+      "trade_offs": [],
+      "expected_impact": null,
+      "reality_refs": [],
+      "steering_plan_revision_id": null,
+      "steering_step_id": null,
+      "interaction_id": null,
+      "interaction_assessment_id": null,
+      "expected_work_reality_revision_id": null
+    }
+  ],
+  "economics": {
+    "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+    "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+    "pwu_count": 3,
+    "join_count": 1,
+    "pwu": [
+      {
+        "pwu_id": "fd339f0c-7c61-561c-b355-693c80f655ca",
+        "node_id": "pwu:join",
+        "run_id": "9b344699-467e-4b71-bae7-cc51fe201024",
+        "condition": "SATISFIED",
+        "attempt_count": 1,
+        "outcomes": [
+          "RESULT_READY"
+        ],
+        "providers": [
+          "deepseek",
+          "watt-native:29c91a04-c4a5-48f2-9c2a-b3b3fb8f46bd"
+        ],
+        "execution_seconds": 139.606496,
+        "duration_observed": true,
+        "queue_wait_seconds": 93.711067,
+        "token_usage": {
+          "input_tokens": 171868,
+          "output_tokens": 23677,
+          "total_tokens": 195545,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 8,
+          "tool_effect": 18
+        }
+      },
+      {
+        "pwu_id": "511a0355-d12d-5e03-8115-d503ba5fde9c",
+        "node_id": "pwu:2",
+        "run_id": "9b344699-467e-4b71-bae7-cc51fe201024",
+        "condition": "SATISFIED",
+        "attempt_count": 1,
+        "outcomes": [
+          "RESULT_READY"
+        ],
+        "providers": [
+          "deepseek",
+          "watt-native:45528e2f-9b70-4afb-afde-2f27ad9f1cba"
+        ],
+        "execution_seconds": 115.189704,
+        "duration_observed": true,
+        "queue_wait_seconds": 0.302072,
+        "token_usage": {
+          "input_tokens": 165526,
+          "output_tokens": 21934,
+          "total_tokens": 187460,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 8,
+          "tool_effect": 16
+        }
+      },
+      {
+        "pwu_id": "6629f7bc-800f-526e-a05c-87e4058896ba",
+        "node_id": "pwu:1",
+        "run_id": "9b344699-467e-4b71-bae7-cc51fe201024",
+        "condition": "SATISFIED",
+        "attempt_count": 3,
+        "outcomes": [
+          "UNABLE_TO_COMPLETE",
+          "UNABLE_TO_COMPLETE",
+          "RESULT_READY"
+        ],
+        "providers": [
+          "deepseek",
+          "watt-native:61400440-27cf-4d0a-bf6f-f8af0b8a7928",
+          "watt-native:c96a671c-52ef-44d9-98d4-44638c9f2e0e",
+          "watt-native:ccd32347-489e-4490-b746-67b2228dc1c3"
+        ],
+        "execution_seconds": 602.39766,
+        "duration_observed": true,
+        "queue_wait_seconds": 1.999746,
+        "token_usage": {
+          "input_tokens": 666040,
+          "output_tokens": 120898,
+          "total_tokens": 786938,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 29,
+          "tool_effect": 52
+        }
+      }
+    ],
+    "token_usage": {
+      "input_tokens": 1003434,
+      "output_tokens": 166509,
+      "total_tokens": 1169943,
+      "status": "OBSERVED"
+    },
+    "observed_provider_spend": {
+      "status": "UNREPORTED",
+      "by_currency": {},
+      "unreported_attempt_count": 5,
+      "amount": null
+    },
+    "execution_seconds": 857.19386,
+    "queue_wait_seconds": 96.012885,
+    "wall_elapsed_seconds": 981.189408,
+    "critical_path_seconds": 742.004156,
+    "parallelism_effect_seconds": 0.0,
+    "self_refine_event_count": 12,
+    "first_pass_pwu_count": 2,
+    "retried_pwu_count": 1,
+    "human_escalation_count": 0,
+    "refinement_extra_seconds": 432,
+    "resource_units": {
+      "inference_submission": 45,
+      "tool_effect": 86
+    },
+    "final_outcome": "READY"
+  },
+  "delivery": {
+    "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+    "target": null,
+    "supported_target_kinds": [
+      "DOCUMENT_PACKAGE",
+      "SOFTWARE_ARTIFACT"
+    ],
+    "deliveries": []
+  }
+}

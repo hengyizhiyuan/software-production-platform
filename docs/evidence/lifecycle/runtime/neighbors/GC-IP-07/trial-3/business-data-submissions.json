@@ -1,0 +1,28 @@
+[
+  {
+    "payload": {
+      "name": "Golden search target",
+      "email": "golden-search@example.invalid",
+      "status": "active"
+    },
+    "response": {
+      "id": 2,
+      "name": "Golden search target",
+      "email": "golden-search@example.invalid",
+      "status": "active"
+    }
+  },
+  {
+    "payload": {
+      "name": "Unrelated user",
+      "email": "unrelated@example.invalid",
+      "status": "active"
+    },
+    "response": {
+      "id": 3,
+      "name": "Unrelated user",
+      "email": "unrelated@example.invalid",
+      "status": "active"
+    }
+  }
+]

@@ -1,0 +1,719 @@
+{
+  "interaction_id": "f8115db8-71ad-4595-924f-15f4267b78bf",
+  "condition": "OPEN",
+  "current_work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+  "created_at": "2026-09-27T04:33:34.088799Z",
+  "updated_at": "2026-09-27T04:37:31.865548Z",
+  "records": [
+    {
+      "record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T04:33:34.799292Z"
+    }
+  ],
+  "conversation_messages": [
+    {
+      "message_id": "16056181-60a4-4185-9f4a-17fd764bc13a",
+      "turn_id": "df33e55e-b7b9-4ae4-b48b-7bf75fefe759",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T04:33:34.799292Z",
+      "updated_at": "2026-09-27T04:37:43.106187Z"
+    },
+    {
+      "message_id": "8f4cb49e-6d4a-4aad-9434-40cdb0910e79",
+      "turn_id": "df33e55e-b7b9-4ae4-b48b-7bf75fefe759",
+      "sequence": 2,
+      "actor": "WATT",
+      "content": "已按你的要求把这次改动立为一项 Work：仓库 http://qualified-git:8080/business-app.git，首页的“开始使用”改为“立即体验”。当前仓库获取请求已登记，接下来会启动对该仓库的只读获取，我会在获取完成后继续推进，无需你再确认一次。改好后先给你预览，是否交付等你看过预览再定。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "2524ba00-74d4-4659-a866-2856b595bfea",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T04:37:43.106187Z",
+      "updated_at": "2026-09-27T04:37:43.106187Z"
+    }
+  ],
+  "turns": [
+    {
+      "turn_id": "df33e55e-b7b9-4ae4-b48b-7bf75fefe759",
+      "interaction_id": "f8115db8-71ad-4595-924f-15f4267b78bf",
+      "request_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+      "assessment_id": "2524ba00-74d4-4659-a866-2856b595bfea",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T04:33:34.799292Z",
+      "started_at": "2026-09-27T04:36:40.382134Z",
+      "completed_at": "2026-09-27T04:37:43.106187Z",
+      "updated_at": "2026-09-27T04:37:43.106187Z"
+    }
+  ],
+  "human_said": [
+    "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+  ],
+  "latest_assessment": {
+    "assessment_id": "2524ba00-74d4-4659-a866-2856b595bfea",
+    "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+    "basis_last_sequence": 1,
+    "interpreted_motive": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+    "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+    "design_intent_frame": {
+      "design_subject": "business-app 项目首页主行动按钮的文案修改",
+      "object_type": "FEATURE",
+      "business_context": "面向访问者的既有 Web 项目首页",
+      "desired_outcome": "首页按钮文案由“开始使用”更正为“立即体验”，并给出可供人类确认的预览，未确认前不交付",
+      "scope_level": "implementation",
+      "collaboration_mode": "execution",
+      "candidate_assumptions": [
+        "首页是对外展示的入口页面",
+        "该按钮文案集中在单一页面或模板入口中，属小范围替换"
+      ],
+      "ambiguities": [
+        "“首页”对应的具体产物文件与入口需经仓库准备确认",
+        "预览的呈现形式（页面预览、截图或其他）尚未指定"
+      ],
+      "confidence": 0.72
+    },
+    "candidate_context": [
+      "当前项目仓库：http://qualified-git:8080/business-app.git",
+      "目标对象是既有项目的首页",
+      "人类保留是否交付的最终决定"
+    ],
+    "candidate_constraints": [
+      "在人类确认之前不得交付",
+      "需要先提供预览"
+    ],
+    "current_requests": [
+      "把首页“开始使用”改为“立即体验”",
+      "给我预览",
+      "我确认以后再决定是否交付",
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+    ],
+    "unresolved_material_questions": [],
+    "neutral_semantic_extractions": [
+      {
+        "extraction_id": "e1",
+        "kind": "ORDERED_VALUES",
+        "values": [
+          "开始使用",
+          "立即体验"
+        ],
+        "unit": null,
+        "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+        "source_text": "把首页“开始使用”改为“立即体验”",
+        "explicit_roles": [
+          "current",
+          "target"
+        ]
+      },
+      {
+        "extraction_id": "e2",
+        "kind": "SCOPE",
+        "values": [
+          "首页"
+        ],
+        "unit": null,
+        "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+        "source_text": "把首页“开始使用”改为“立即体验”",
+        "explicit_roles": [
+          "scope"
+        ]
+      },
+      {
+        "extraction_id": "e3",
+        "kind": "REFERENCE",
+        "values": [
+          "http://qualified-git:8080/business-app.git"
+        ],
+        "unit": null,
+        "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+        "source_text": "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+        "explicit_roles": [
+          "repository_reference"
+        ]
+      },
+      {
+        "extraction_id": "e4",
+        "kind": "BEHAVIOR",
+        "values": [
+          "预览"
+        ],
+        "unit": null,
+        "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+        "source_text": "给我预览",
+        "explicit_roles": [
+          null
+        ]
+      },
+      {
+        "extraction_id": "e5",
+        "kind": "SCOPE",
+        "values": [
+          "是否交付"
+        ],
+        "unit": null,
+        "source_record_id": "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+        "source_text": "我确认以后再决定是否交付",
+        "explicit_roles": [
+          "delivery_decision"
+        ]
+      }
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "feda5634-9591-52dc-8b8f-ec31d50e55dd",
+        "subject": "homepage.cta.label",
+        "relation": "STATE_TRANSITION",
+        "value": "立即体验",
+        "unit": null,
+        "scope": "首页",
+        "qualifiers": {
+          "to": "立即体验",
+          "from": "开始使用"
+        },
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "source_text": "把首页“开始使用”改为“立即体验”",
+          "source_extraction_ids": [
+            "e1",
+            "e2"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "df6f2439-dfb7-5fa1-9b3b-59f198c7321b",
+        "subject": "repository.location",
+        "relation": "REFERENCE",
+        "value": "http://qualified-git:8080/business-app.git",
+        "unit": null,
+        "scope": "当前项目",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "source_text": "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+          "source_extraction_ids": [
+            "e3"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "1b2cf60c-74b7-5e06-be67-42d04a0c22ef",
+        "subject": "change.deliverable",
+        "relation": "PRECEDENCE",
+        "value": "预览先于交付决定",
+        "unit": null,
+        "scope": "首页文案修改",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "source_text": "我确认以后再决定是否交付",
+          "source_extraction_ids": [
+            "e4",
+            "e5"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      }
+    ],
+    "meanings": [
+      {
+        "kind": "CONTEXT",
+        "statement": "人类指定当前项目仓库地址为 http://qualified-git:8080/business-app.git。",
+        "source_record_ids": [
+          "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+        ],
+        "confidence": 0.95,
+        "rationale": "记录中人类明确给出仓库地址作为当前项目仓库。",
+        "clarification_required": false
+      },
+      {
+        "kind": "REQUEST",
+        "statement": "把首页按钮文案“开始使用”改为“立即体验”。",
+        "source_record_ids": [
+          "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+        ],
+        "confidence": 0.97,
+        "rationale": "记录中人类明确提出该文案修改。",
+        "clarification_required": false
+      },
+      {
+        "kind": "REQUEST",
+        "statement": "在交付前先提供该修改的预览。",
+        "source_record_ids": [
+          "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+        ],
+        "confidence": 0.95,
+        "rationale": "记录中人类要求“给我预览”。",
+        "clarification_required": false
+      },
+      {
+        "kind": "DECISION_INPUT",
+        "statement": "人类保留交付决策权：确认预览之后再决定是否交付。",
+        "source_record_ids": [
+          "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+        ],
+        "confidence": 0.9,
+        "rationale": "记录中人类明确表示确认后才决定是否交付。",
+        "clarification_required": false
+      }
+    ],
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "basis_work_revision_id": null,
+    "basis_steering_plan_revision_id": null,
+    "basis_steering_step_id": null,
+    "basis_active_runtime_binding_id": null,
+    "supporting_references": [],
+    "natural_response": "先按受治理的仓库准备路径确认首页入口与按钮文案所在位置，然后只产出包含“开始使用”→“立即体验”这一处替换的预览结果，暂不交付。",
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5"
+    },
+    "progressive_semantics": {
+      "turn_intent": "ACTION_REQUEST",
+      "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+      "source_record_ids": [
+        "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+      ],
+      "reception_meanings": [
+        "DEEP_WIC_WORKING_UNDERSTANDING"
+      ],
+      "working_motive": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+      "working_desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+      "working_facts": [
+        "当前项目仓库：http://qualified-git:8080/business-app.git",
+        "目标对象是既有项目的首页",
+        "人类保留是否交付的最终决定"
+      ],
+      "working_constraints": [
+        "在人类确认之前不得交付",
+        "需要先提供预览"
+      ],
+      "working_requests": [
+        "把首页“开始使用”改为“立即体验”",
+        "给我预览",
+        "我确认以后再决定是否交付",
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+      ],
+      "explicit_assumptions": [],
+      "unresolved_human_decisions": [],
+      "deltas": [
+        {
+          "id": "1fe86038-d152-519e-81ba-9469108951ee",
+          "category": "MOTIVE",
+          "operation": "ADDED",
+          "value": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+          "prior_value": null,
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+          "authority": "ADVISORY"
+        },
+        {
+          "id": "5e170f40-1a07-5ef0-a0d1-c522e8a54b5d",
+          "category": "CONSTRAINT",
+          "operation": "ADDED",
+          "value": "在人类确认之前不得交付",
+          "prior_value": null,
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+          "authority": "ADVISORY"
+        },
+        {
+          "id": "1c3f7e74-8bfb-546b-bb7a-a25a9f1e41dd",
+          "category": "CONSTRAINT",
+          "operation": "ADDED",
+          "value": "需要先提供预览",
+          "prior_value": null,
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+          "authority": "ADVISORY"
+        }
+      ],
+      "pattern_signals": [
+        "BOUNDED_CHANGE",
+        "PRODUCTION_REQUEST",
+        "REPOSITORY_SOURCE"
+      ],
+      "inference_disposition": "NO_INFERENCE",
+      "questions": [],
+      "selected_question": null,
+      "governance_candidate": "WORK_FORMATION_PROPOSAL",
+      "readiness": [
+        {
+          "target": "WORK_FORMATION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "MOTIVE",
+            "DESIRED_OUTCOME"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "WORK_REVISION",
+          "status": "NOT_APPLICABLE",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "DESIGN_PROGRESSION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "CURRENT_FOCUS"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        }
+      ],
+      "artifact_recommendation": null,
+      "factual_contradictions": [],
+      "semantic_policy_revision": "wic-semantic-policy-v1",
+      "question_policy_revision": "wic-question-value-v1"
+    },
+    "provider_identity": "deepseek-responses:semantic:request:d9a59519-2838-4116-a707-0550e5b5d0d9",
+    "model_identity": "deepseek-flash",
+    "schema_version": "wic-assessment-v6",
+    "created_at": "2026-09-27T04:37:01.083300Z"
+  },
+  "latest_assessment_current": false,
+  "interpreted_motive": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+  "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+  "design_intent_frame": {
+    "design_subject": "business-app 项目首页主行动按钮的文案修改",
+    "object_type": "FEATURE",
+    "business_context": "面向访问者的既有 Web 项目首页",
+    "desired_outcome": "首页按钮文案由“开始使用”更正为“立即体验”，并给出可供人类确认的预览，未确认前不交付",
+    "scope_level": "implementation",
+    "collaboration_mode": "execution",
+    "candidate_assumptions": [
+      "首页是对外展示的入口页面",
+      "该按钮文案集中在单一页面或模板入口中，属小范围替换"
+    ],
+    "ambiguities": [
+      "“首页”对应的具体产物文件与入口需经仓库准备确认",
+      "预览的呈现形式（页面预览、截图或其他）尚未指定"
+    ],
+    "confidence": 0.72
+  },
+  "candidate_context": [
+    "当前项目仓库：http://qualified-git:8080/business-app.git",
+    "目标对象是既有项目的首页",
+    "人类保留是否交付的最终决定"
+  ],
+  "candidate_constraints": [
+    "在人类确认之前不得交付",
+    "需要先提供预览"
+  ],
+  "current_requests": [
+    "把首页“开始使用”改为“立即体验”",
+    "给我预览",
+    "我确认以后再决定是否交付",
+    "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+  ],
+  "unresolved_material_questions": [],
+  "readiness": {
+    "status": "READY",
+    "profile": "LONG_LIVED_STEERING",
+    "profile_version": "v0",
+    "satisfied_requirements": [
+      "MOTIVE",
+      "DESIRED_OUTCOME"
+    ],
+    "missing_information": [],
+    "unresolved_material_questions": [],
+    "reasons": [
+      "Motive and desired outcome are clear enough to form governed Work."
+    ],
+    "basis_fingerprint": "a67e304edcd7bdc1176f779d9471d53f7619cecee6b11011d8a1a7a7dc9e55f5"
+  },
+  "candidate_engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+  "candidate_repository_identity": "http://qualified-git:8080/business-app.git",
+  "candidate_repository_ref": "refs/heads/main",
+  "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git:8080/business-app.git at refs/heads/main",
+  "governed_work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+  "governed_revision": {
+    "revision_id": "de93c872-f872-5d9b-b061-c5e66da7ce0a",
+    "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+    "revision_number": 2,
+    "previous_revision_id": "ac54c874-6a6e-5318-9957-08db11de743e",
+    "basis_fingerprint": "1901385330986ff01f24735a2d5268495bd774951d1cee3a7d695d341bf7e806",
+    "revision_fingerprint": "3c157b50b3666e04c3df3bab98d639f608b6171f741ab1361a90c691002ec80f",
+    "source_interaction_id": "f8115db8-71ad-4595-924f-15f4267b78bf",
+    "source_kind": "ASSET_SCOPE_ADMISSION",
+    "source_assessment_id": null,
+    "source_record_ids": [
+      "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+    ],
+    "motive": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+    "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+    "context_facts": [
+      "当前项目仓库：http://qualified-git:8080/business-app.git",
+      "目标对象是既有项目的首页",
+      "人类保留是否交付的最终决定"
+    ],
+    "constraints": [
+      "在人类确认之前不得交付",
+      "需要先提供预览"
+    ],
+    "requests": [
+      "把首页“开始使用”改为“立即体验”",
+      "给我预览",
+      "我确认以后再决定是否交付",
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。"
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "feda5634-9591-52dc-8b8f-ec31d50e55dd",
+        "subject": "homepage.cta.label",
+        "relation": "STATE_TRANSITION",
+        "value": "立即体验",
+        "unit": null,
+        "scope": "首页",
+        "qualifiers": {
+          "to": "立即体验",
+          "from": "开始使用"
+        },
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "source_text": "把首页“开始使用”改为“立即体验”",
+          "source_extraction_ids": [
+            "e1",
+            "e2"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "ac54c874-6a6e-5318-9957-08db11de743e"
+      },
+      {
+        "id": "df6f2439-dfb7-5fa1-9b3b-59f198c7321b",
+        "subject": "repository.location",
+        "relation": "REFERENCE",
+        "value": "http://qualified-git:8080/business-app.git",
+        "unit": null,
+        "scope": "当前项目",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "source_text": "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+          "source_extraction_ids": [
+            "e3"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "ac54c874-6a6e-5318-9957-08db11de743e"
+      },
+      {
+        "id": "1b2cf60c-74b7-5e06-be67-42d04a0c22ef",
+        "subject": "change.deliverable",
+        "relation": "PRECEDENCE",
+        "value": "预览先于交付决定",
+        "unit": null,
+        "scope": "首页文案修改",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1"
+          ],
+          "source_text": "我确认以后再决定是否交付",
+          "source_extraction_ids": [
+            "e4",
+            "e5"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "ac54c874-6a6e-5318-9957-08db11de743e"
+      }
+    ],
+    "engineering_scope_id": "9fc68bc8-dddb-4228-9fee-fe0b58d71fff",
+    "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "scope_basis_fingerprint": "ac2c26f241c384cf3bf66b0d522112b6a5b7f9522f006a8089aee72c7e8e568a",
+    "repository_identity": "http://qualified-git:8080/business-app.git",
+    "repository_ref": "refs/heads/main",
+    "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+    "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+    "governance_record_id": "c59268ce-7b9f-4136-aa51-87d9c8ee4c95",
+    "supporting_references": [
+      "INTERACTION_RECORD:e6c3bf3f-b8a1-4ad5-b56d-414daa71cda1",
+      "REPOSITORY_OBSERVATION:9321135ac475d920a34bb70c8d1567b11eba305e880a9c5b39ac7b9386fa4175"
+    ],
+    "change_set": [
+      "asset:PRODUCTION_TARGET_ADMITTED"
+    ],
+    "rationale": "Bind the exact repository Reality acquired from the Human-supplied source before Steering begins.",
+    "admitted_by": "human:owner",
+    "schema_version": "wic-work-reality-v3",
+    "created_at": "2026-09-27T04:37:47.398800Z"
+  },
+  "current_work_focus": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。 → 首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+  "focus_classification": null,
+  "impact_disposition": null,
+  "candidate_change": null,
+  "work_revision_admission_status": "NOT_APPLICABLE",
+  "active_cycle_work_revision_id": null,
+  "active_cycle_impact_disposition": null,
+  "work_satisfaction_state": "CURRENTLY_SATISFIED",
+  "interaction_relationship_state": "OPEN",
+  "work_focus_history": [
+    "04b8db03-0514-5ef5-8d6b-aa1419bfc611"
+  ],
+  "latest_work_transition": null,
+  "new_work_formation_pending": false,
+  "production_request_detected": true,
+  "repository_source": "http://qualified-git:8080/business-app.git",
+  "production_admission_state": "WORK_CREATED",
+  "repository_acquisition_state": "READY",
+  "repository_observation": {
+    "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+    "paths": [
+      ".gitignore",
+      "Dockerfile",
+      "README.md",
+      "migrations/001_initial.sql",
+      "package.json",
+      "server.py",
+      "tests/application.cjs",
+      "web/app.js",
+      "web/index.html",
+      "web/styles.css"
+    ],
+    "title": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+    "source": "http://qualified-git:8080/business-app.git",
+    "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+    "revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+    "condition": "READY",
+    "description": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+    "fingerprint": "9321135ac475d920a34bb70c8d1567b11eba305e880a9c5b39ac7b9386fa4175",
+    "observed_at": "2026-09-27T04:35:00.768236+00:00",
+    "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "context_path": "README.md",
+    "human_message": "Repository is ready.",
+    "target_branch": null,
+    "attempt_number": 1,
+    "interaction_id": "f8115db8-71ad-4595-924f-15f4267b78bf",
+    "operation_kind": "ACQUIRE",
+    "repository_ref": "refs/heads/main",
+    "base_resource_id": null,
+    "failure_category": null,
+    "intake_request_id": "e0fd6893-5b56-5449-a386-132b10a3bb6a",
+    "operation_evidence": {
+      "verified": true,
+      "connector_id": "builtin:git",
+      "capability_id": "git.repository.acquire",
+      "operation_ref": "repository-intake:29cff86f-2035-5b1c-8ac6-3d517256d34e",
+      "resulting_branch": "refs/heads/main",
+      "resulting_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "workspace_reference": "/var/lib/spg/repository-assets/29cff86f-2035-5b1c-8ac6-3d517256d34e"
+    },
+    "previous_attempt_id": null,
+    "repository_identity": "http://qualified-git:8080/business-app.git"
+  },
+  "production_next_step": "Continue Steering against the acquired repository Reality.",
+  "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+  "selected_design_schema_version": "0.1",
+  "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+  "design_stage": "Current Reality",
+  "design_next_focus": "Establish the trusted current product and runtime reality.",
+  "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+  "design_facilitation_strategy": "CLARIFY",
+  "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+}

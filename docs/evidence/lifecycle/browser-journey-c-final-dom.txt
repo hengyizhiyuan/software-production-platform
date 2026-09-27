@@ -1,0 +1,184 @@
+- link "Skip to selected Work":
+  - /url: "#work-surface"
+- banner:
+  - generic "Watt Software Production":
+    - generic: W
+    - heading "Watt / 工律" [level=1]
+    - paragraph: From intent to production.
+  - link "Deliveries":
+    - /url: /delivery
+  - paragraph: Production Environment
+  - generic "Appearance preferences":
+    - text: Global appearance
+    - combobox "Global appearance":
+      - option "Light" [selected]
+      - option "Dark"
+  - button "Refresh service health":
+    - generic: Ready
+  - paragraph:
+    - text: System online
+    - text: Build a more capable team
+- main:
+  - complementary "Goal and Work navigation":
+    - region "⌂ Products":
+      - paragraph: Long-lived asset
+      - heading "⌂ Products" [level=2]
+      - button "software-production-platform · 0 Works" [pressed]
+      - generic: New Product
+      - textbox "New Product":
+        - /placeholder: Finance Management
+      - button "Create"
+      - paragraph: ACTIVE · 2 assets · 0 Works · 2 repository sources
+      - paragraph: Source · https://github.com/hengyizhiyuan/software-production-platform.git · refs/heads/main · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: Source · watt://work-branches/e8864482-7975-444d-9451-ade934aac0d3/906cd04113a76ad81d78 · refs/heads/feat_test · 0b535f63302fe45e88d0b3e203ae991868ced079
+      - paragraph: undefined · https://github.com/hengyizhiyuan/software-production-platform.git
+      - paragraph: undefined · watt://work-branches/e8864482-7975-444d-9451-ade934aac0d3/906cd04113a76ad81d78
+      - generic: Import an existing Git HTTPS repository
+      - textbox "Import an existing Git HTTPS repository":
+        - /placeholder: https://github.com/owner/repo.git
+      - button "Import into Product"
+    - region "⌂ Goals":
+      - paragraph: Navigation horizon
+      - heading "⌂ Goals" [level=2]
+      - button "Create Goal": +
+      - navigation "Goals":
+        - button "All Works 1":
+          - text: All Works
+          - generic: "1"
+    - region "▣ Works":
+      - paragraph: Things to get done
+      - heading "▣ Works" [level=2]
+      - button "Refresh"
+      - generic: Status
+      - combobox "Status":
+        - option "All statuses" [selected]
+        - option "PRE-WORK / 未开工"
+        - option "Draft"
+        - option "Needs refinement"
+        - option "Awaiting approval"
+        - option "Ready"
+        - option "Running"
+        - option "Production paused"
+        - option "Blocked"
+        - option "Completed"
+      - 'button "Open Work: 我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-plat..."':
+        - generic: 我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-plat...
+        - generic: PRE-WORK / 未开工
+        - generic: No Goal
+        - generic: CONVERSATION_DURABLE
+      - 'button "Discard PRE-WORK: 我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-plat..."': Discard
+    - generic "Operations · Connectors · Evaluation"
+    - option "Read" [selected]
+    - option "Write"
+  - region "Selected Work":
+    - region "Conversation workspace":
+      - complementary "Conversation History":
+        - paragraph: Provenance
+        - heading "Conversation History" [level=3]
+        - article:
+          - paragraph: You
+          - paragraph: 我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-platform.git，把它clone下来，我要改个需求
+          - paragraph: 12:10:26 · COMPLETED
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：main；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 生产 Work 尚未准入；没有修改源码或推送远端。
+          - paragraph: 12:10:57 · COMPLETED
+        - article:
+          - paragraph: You
+          - paragraph: 切一个 feat_test 分支
+          - paragraph: 12:12:28 · COMPLETED
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：feat_test；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 生产 Work 尚未准入；没有修改源码或推送远端。
+          - paragraph: 12:12:49 · COMPLETED
+        - article:
+          - paragraph: You
+          - paragraph: 我现在在哪个分支？
+          - paragraph: 12:14:43 · COMPLETED
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：feat_test；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 生产 Work 尚未准入；没有修改源码或推送远端。
+          - paragraph: 12:14:59 · COMPLETED
+        - text: INTELLIGENCE IN SERVICE OF PEOPLE
+    - article:
+      - paragraph: Selected Work
+      - heading "在该 GitHub 仓库上实施需求变更，当前先在 feat_test 工作分支上进行。" [level=2]
+      - generic: PRE-WORK · Repository READY · Production not started
+      - region "Product and production continuity":
+        - generic: Product
+        - combobox "Product":
+          - option "Select Product"
+          - option "software-production-platform" [selected]
+        - button "Bind Work" [disabled]
+        - paragraph: Repository belongs to software-production-platform. Production Work is not admitted.
+        - generic "Production diagnosis, PWU economics and history"
+      - region "Stable Work Workspace":
+        - region "Reality":
+          - generic: "01"
+          - heading "Reality" [level=3]
+          - paragraph: Engineering sources for this Work
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: "Conversation: PRE-WORK · Repository: READY · Production Work: NOT ADMITTED"
+          - generic "Work-relevant engineering sources":
+            - paragraph: "Source: https://github.com/hengyizhiyuan/software-production-platform.git · Branch: refs/heads/feat_test · Revision: 0b535f63302fe45e88d0b3e203ae991868ced079 · Tree: 753564ba0a09c0bed999dff17b540b09e581e8d9"
+            - generic "Source tree · 200 observed paths"
+        - region "Agenda":
+          - generic: "02"
+          - heading "Agenda" [level=3]
+          - paragraph: Governed path and working agreements
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: Understanding request…
+          - list "Governed execution path":
+            - listitem: Understand
+            - listitem: Shape
+            - listitem: Produce
+            - listitem: Verify
+            - listitem: Deliver
+        - region "Production":
+          - generic: "03"
+          - heading "Production" [level=3]
+          - paragraph: What Watt is doing now
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: IDLE · Production has not started.
+          - paragraph:
+            - generic: IDLE
+          - paragraph: No PWU or Executor is running.
+          - paragraph: Work admission is a separate Human decision.
+        - region "Actions":
+          - generic: "04"
+          - heading "Actions" [level=3]
+          - paragraph: Human control plane
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: Repository is ready. Describe the change when you are ready.
+          - paragraph: You can inspect the source or describe a change. Production authority remains separate.
+          - button "继续完善"
+    - region "What would you like Watt to understand?":
+      - region "Current Interaction":
+        - paragraph: Active Work communication
+        - heading "Current Interaction" [level=3]
+        - article:
+          - paragraph: You
+          - generic: 先帮我看看这个仓库使用什么框架，我再决定改什么。
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：feat_test；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 证据 0b535f63302fe45e88d0b3e203ae991868ced079:pyproject.toml（SHA256 0168a0d3d9b20db9475110260aadfe09758a0175af085298423a1de63b02e4ad）： [build-system] requires = ["setuptools>=68"] build-backend = "setuptools.build_meta"
+          - paragraph: "[project] name = \"spg-runtime\" version = \"0.1.0\" description = \"Software Production Governor runtime foundation\" readme = \"README.md\" requires-python = \">=3.12\" dependencies = [ \"alembic>=1,<2\", \"fastapi>=0.115,<1\", \"httpx2>=2,<3\", \"psycopg[binary]>=3,<4\", \"pydantic>=2,<3\", \"pydantic-settings>=2,<3\", \"sqlalchemy>=2,<3\", \"uvicorn>=0.30,<1\", ]"
+          - paragraph: "[project.optional-dependencies] codex-executor = [ \"openai-codex==0.147.0\", \"openai-codex-cli-bin==0.147.0\", ] test = [ \"pytest>=8,<10\", ]"
+          - paragraph: "[project.scripts] spg = \"spg.cli:main\""
+          - paragraph: "[tool.pytest.ini_options] addopts = \"-q\" testpaths = [\"tests\"] pythonpath = [\".\"] markers = [ \"postgresql: requires the explicitly configured real PostgreSQL test database\", \"real_codex: requires explicit authorization for one real Codex SDK execution\", ]"
+          - paragraph: "[tool.setuptools.packages.find] where = [\"src\"]"
+          - paragraph: "[tool.setuptools.package-data] \"spg.web\" = [\"*.html\", \"*.css\", \"*.js\"]"
+          - paragraph: 生产 Work 尚未准入；没有修改源码或推送远端。
+      - generic: Continuing Interaction
+      - button "New Work"
+      - button "Expand composer"
+      - generic: What would you like Watt to understand?
+      - textbox "What would you like Watt to understand?":
+        - /placeholder: Share an idea, context, question, outcome, or constraint…
+      - paragraph: Share a question, idea, or next step.
+      - button "Send➤" [active]
+- status: Watt completed the reply. You can continue the conversation.

@@ -1,0 +1,10 @@
+{
+  "case": "GC-EX-05",
+  "corpus_version": "watt-golden-tier0-v1",
+  "trial": 1,
+  "interaction_id": "295a9c00-2ffe-4eec-9638-8915d1dfce87",
+  "human_input": "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+  "tester_implementation": false,
+  "manual_rescue_actions": [],
+  "human_acceptance": "PENDING"
+}

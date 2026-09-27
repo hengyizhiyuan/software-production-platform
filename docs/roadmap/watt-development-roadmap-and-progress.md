@@ -51,6 +51,23 @@ See [AI-native Development Execution Principles](../architecture/ai-native-devel
 
 ## 2. Current Overall Status
 
+### Lifecycle and action admission semantics
+
+**2026-09-27 — CODE-OWNED HARDENING / QUALIFICATION PASS.** The existing
+owners admit explicit safe repository actions independently of production Work;
+insufficient future intent cannot erase a current clone command. The versioned
+16 × 13 policy matrix, independent Reality projections, bounded retries and
+completed Product/history continuity are qualified by 15 lifecycle cases and
+nine neighboring Golden cases. Capability/credential never replace authority;
+local acceptance never grants remote delivery. Complete regression: 1,677 unique
+backend qualifications plus one unchanged upstream ECF-contract skip, 77 frontend
+tests, and 53 Release Evaluation cases / 136 checks. The
+[consolidated A–K report](../evidence/lifecycle/lifecycle-action-admission-closure-20260927.md)
+records the original isolated database-name failure and its exact required-fixture
+qualification, preserved failed trials and frozen evidence. Real Web/GC-EX-12 stay
+`BLOCKED_EXTERNAL` with the independent live entry preserved. Human Acceptance
+and whole Tier-0 live qualification remain separate.
+
 ### System-wide refinement and stability qualification
 
 **2026-09-27 — CODE-OWNED STABILIZATION / FEASIBLE GOLDEN QUALIFICATION PASS.**

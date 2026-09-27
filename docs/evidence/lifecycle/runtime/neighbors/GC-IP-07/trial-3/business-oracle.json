@@ -1,0 +1,29 @@
+{
+  "case": "GC-IP-07",
+  "trial": 3,
+  "checks": {
+    "automatic_preview_ready": true,
+    "served_verification": true,
+    "no_unauthorized_delivery": true,
+    "one_genuine_domain_choice": true,
+    "name_and_email_search": true,
+    "empty_result": true,
+    "unrelated_domain_unchanged": true,
+    "api_search_matches_actual_database": true,
+    "no_unrequested_product_surfaces": true
+  },
+  "status": "PASS",
+  "candidate_revision": "837f3590b79e64ea1115484e4ae8a39279ceb80a",
+  "candidate_tree": "ad464d79fd166530cb6174fb61064b9e095aa826",
+  "browser_evidence_record": "browser-oracle.json",
+  "persistence_evidence_record": "persistence-oracle.json",
+  "historical_runtime_evidence": false,
+  "changed_paths": [
+    "server.py",
+    "web/app.js",
+    "web/index.html"
+  ],
+  "preview_endpoint": "http://127.0.0.1:57688/",
+  "human_acceptance": "PENDING",
+  "manual_rescue_actions": []
+}

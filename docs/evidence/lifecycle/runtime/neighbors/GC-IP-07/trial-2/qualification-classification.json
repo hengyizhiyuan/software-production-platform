@@ -1,0 +1,41 @@
+{
+  "case": "GC-IP-07",
+  "trial": 2,
+  "status": "FAIL",
+  "qualification": "BOUNDED_ACTUAL_API_SEARCH_ORACLE",
+  "reason": "Actual backend query does not filter an unmatched user search; frontend-only search does not satisfy the declared API/database oracle.",
+  "retained_original_evidence": [
+    "persistence-oracle.json",
+    "browser-oracle.json"
+  ],
+  "proper_name_email_query_reobservation": {
+    "name": [
+      {
+        "id": 1,
+        "name": "Fixture User",
+        "email": "user@example.invalid",
+        "status": "active"
+      }
+    ],
+    "email": [
+      {
+        "id": 1,
+        "name": "Fixture User",
+        "email": "user@example.invalid",
+        "status": "active"
+      }
+    ],
+    "no_match": [
+      {
+        "id": 1,
+        "name": "Fixture User",
+        "email": "user@example.invalid",
+        "status": "active"
+      }
+    ]
+  },
+  "aggregate_oracle_runner": "ABORTED_REMOTE_DISCONNECTED; original log retained, not a completed aggregate PASS",
+  "original_aggregate_runner_log": "verification-logs/GC-IP-07-oracle-trial-2.log",
+  "counted_as_pass": false,
+  "runner_log_reference_base": "docs/evidence/lifecycle"
+}

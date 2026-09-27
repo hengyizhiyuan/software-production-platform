@@ -1,0 +1,137 @@
+{
+  "recorded_at": "2026-09-27T06:39:09.676721+00:00",
+  "qualification_scope": "CODE_OWNED_LIFECYCLE_ACTION_HARDENING",
+  "status": "PASS_WITH_EXPLICIT_EXTERNAL_QUALIFICATION_EXCLUSIONS",
+  "implementation": {
+    "implementation_commit": "d585c2009284d7ab35cc027ab9a485148f96253b",
+    "implementation_tree": "1eae9bb47912f90d6741d491c1d15be0da87b3d5",
+    "parent_commit": "17ebfb74374659ee9b0c376d6f8cf6f5b7508199",
+    "source_fingerprint": "af8bc7d790ca6df9acff7ce95e447ccb41685b7f5c6b3bf18950b6b396512df6",
+    "source_file_count": 431,
+    "source_matches_frozen_qualification": true,
+    "note": "Runtime was activated for isolated source qualification before this local implementation commit. No runtime activation as Trusted Baseline is inferred."
+  },
+  "backend": {
+    "collected_unique": 1678,
+    "qualified_unique_passed": 1677,
+    "known_external_skipped": 1,
+    "remaining_failed": 0,
+    "unit_primary": {
+      "PASS": 930,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 1
+    },
+    "integration_primary": {
+      "PASS": 737,
+      "FAIL": 1,
+      "ERROR": 9,
+      "SKIP": 0
+    },
+    "required_database_fixture_supplement": {
+      "PASS": 10,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 0
+    },
+    "same_case_requalified": [
+      "tests.integration.test_postgresql_persistence::test_db_01_connectivity",
+      "tests.integration.test_wic_response_contract::test_pre_work_contract_replays_after_reload_without_becoming_semantic_truth",
+      "tests.integration.test_wic_response_contract::test_active_exploration_does_not_promote_proposed_design_to_work_truth",
+      "tests.integration.test_wic_response_contract::test_active_reality_questions_are_provider_free_and_do_not_mutate_work[\\u73b0\\u5728\\u505a\\u5230\\u54ea\\u4e86\\uff1f-STATUS-\\u5f53\\u524d Work \\u5c1a\\u672a\\u8fdb\\u5165\\u751f\\u4ea7\\u6267\\u884c]",
+      "tests.integration.test_wic_response_contract::test_active_reality_questions_are_provider_free_and_do_not_mutate_work[\\u4e3a\\u4ec0\\u4e48\\u4e00\\u76f4\\u5361\\u5728 QUEUED\\uff1f-DIAGNOSE-\\u5f53\\u524d\\u751f\\u4ea7\\u5468\\u671f\\u6ca1\\u6709\\u5bf9\\u5e94\\u7684\\u6267\\u884c\\u961f\\u5217\\u8bb0\\u5f55]",
+      "tests.integration.test_wic_response_contract::test_execution_contract_uses_existing_admission_without_granting_authority",
+      "tests.integration.test_wic_response_contract::test_contract_is_durable_before_first_delta_and_streams_before_terminal[False]",
+      "tests.integration.test_wic_response_contract::test_contract_is_durable_before_first_delta_and_streams_before_terminal[True]",
+      "tests.integration.test_wic_response_contract::test_failed_realization_contract_is_evidence_not_next_turn_trajectory",
+      "tests.integration.test_wic_response_contract::test_human_sse_skips_internal_contract_event_and_replays_without_model_recall"
+    ],
+    "complete_collection_exactly_matches_partition_union": true,
+    "collection_receipt": "verification-logs/backend-complete-collection-final.log",
+    "primary_run_was_all_green": false,
+    "counting": "Disjoint complete partitions; exact ten failed/setup-blocked fixture-dependent cases requalified under unchanged assertions and required spg_test database. Supplements are never extra unique tests.",
+    "known_unqualified": [
+      {
+        "test": "tests.test_production_environment_cross_repository::test_candidate_preview_current_and_stale_reality_is_ecf_admissible",
+        "reason": "sibling ECF preview contract is unavailable at its checked-out revision"
+      }
+    ],
+    "receipts": [
+      "verification-logs/backend-units-history-final.xml",
+      "verification-logs/backend-integration-history-final.xml",
+      "verification-logs/backend-required-database-name.xml",
+      "verification-logs/backend-required-database-contract.xml"
+    ]
+  },
+  "frontend": {
+    "passed": 77,
+    "failures": 0,
+    "receipt": "verification-logs/frontend-owner-final.log"
+  },
+  "migrations": {
+    "head": "20260927_58",
+    "fresh_database": "PASS",
+    "alembic_check": "PASS"
+  },
+  "release_evaluation": {
+    "cases": 53,
+    "selected_checks": 136,
+    "failures": 0,
+    "real_container_cases": 4,
+    "real_container_failures": 0,
+    "receipt": "release-evaluation-source-final.json",
+    "real_web_qualification": "BLOCKED_EXTERNAL"
+  },
+  "golden": {
+    "lifecycle": 15,
+    "neighbor": 9,
+    "status": "PASS",
+    "receipt": "lifecycle-golden-qualification-20260927.json",
+    "whole_tier0_live_claim": false
+  },
+  "live_web_qualifications": {
+    "SEARCH-Q2_LIVE": "BLOCKED_EXTERNAL",
+    "SEARCH-Q3_WEB_LIVE": "BLOCKED_EXTERNAL",
+    "MODEL_INITIATED_WEB_LIVE": "BLOCKED_EXTERNAL",
+    "WEB_PROVENANCE_REFINEMENT_CONVERGENCE_LIVE": "BLOCKED_EXTERNAL",
+    "GC-EX-12": "BLOCKED_EXTERNAL"
+  },
+  "frozen_fsi": {
+    "failure_map_sha256": "ae310fdb6630bad284f0d4ac6d0fc8e3cb3606e8606346f90288a8dfbf7b3b05",
+    "preserved_volumes": 28,
+    "status": "PASS"
+  },
+  "completion_invariants": {
+    "NO_WORK_ADMITTED_DOES_NOT_MEAN_NO_ACTION_ALLOWED": "PASS",
+    "WORK_COMPLETED_DOES_NOT_MEAN_NO_FURTHER_PRODUCT_ACTION": "PASS",
+    "WORK_ADMISSION_AND_ACTION_ADMISSION_ARE_DISTINCT": "PASS",
+    "LIFECYCLE_STATE_AND_ACTION_ELIGIBILITY_ARE_DISTINCT": "PASS",
+    "CAPABILITY_CREDENTIAL_AUTHORITY_ARE_DISTINCT": "PASS",
+    "HUMAN_ACCEPTANCE_AND_DELIVERY_AUTHORIZATION_ARE_DISTINCT": "PASS",
+    "LOCAL_RECOVERY_AND_WORK_RECOVERY_ARE_DISTINCT": "PASS",
+    "EXPLICIT_SAFE_PRE_WORK_ACTION_CAN_EXECUTE": "PASS",
+    "IMPLIED_FUTURE_ACTION_DOES_NOT_EXECUTE": "PASS",
+    "PRE_WORK_REPOSITORY_ACQUISITION": "PASS",
+    "PRE_WORK_LOCAL_BRANCH_OPERATION": "PASS",
+    "PRE_WORK_READ_ONLY_INSPECTION": "PASS",
+    "PRODUCTION_MUTATION_REQUIRES_SUFFICIENT_WORK_INTENT": "PASS",
+    "REMOTE_DELIVERY_REQUIRES_EXPLICIT_AUTHORIZATION": "PASS",
+    "CANDIDATE_PREVIEW_DOES_NOT_REQUIRE_HUMAN_START": "PASS",
+    "WAITING_FOR_HUMAN_ONLY_MEANS_REAL_HUMAN_DEPENDENCY": "PASS",
+    "TRANSIENT_ACTION_FAILURE_SELF_REFINES": "PASS",
+    "TERMINAL_ACTION_FAILURE_DOES_NOT_BLINDLY_RETRY": "PASS",
+    "LIFECYCLE_NON_CONVERGENCE_IS_BOUNDED": "PASS",
+    "INDEPENDENT_REALITY_PROJECTIONS_ARE_TRUTHFUL": "PASS",
+    "GC_LC_01_TO_15": "PASS",
+    "NEIGHBOR_GOLDEN_REGRESSION": "PASS",
+    "SYSTEM_WIDE_SELF_REFINE_REGRESSION": "PASS",
+    "WORK_LEVEL_SELF_CONVERGE_REGRESSION": "PASS",
+    "FULL_BACKEND_REGRESSION": "PASS",
+    "FULL_FRONTEND_REGRESSION": "PASS",
+    "RELEASE_EVALUATION": "PASS",
+    "ALEMBIC_CHECK": "PASS",
+    "FINAL_WORKING_TREE_CLEAN": "PASS"
+  },
+  "final_tree_receipt": ".spg/lifecycle-hardening/final-working-tree.json; read after evidence commit",
+  "human_product_acceptance": "PENDING"
+}

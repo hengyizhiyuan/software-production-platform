@@ -1,0 +1,10 @@
+{
+  "case": "GC-IP-07",
+  "corpus_version": "watt-golden-tier0-v1",
+  "trial": 1,
+  "interaction_id": "c68e4529-22e4-4068-9ddb-a9fb1253d893",
+  "human_input": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n给系统增加搜索。",
+  "tester_implementation": false,
+  "manual_rescue_actions": [],
+  "human_acceptance": "PENDING"
+}

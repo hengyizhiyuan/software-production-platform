@@ -1,0 +1,21 @@
+{
+  "case": "GC-LC-11",
+  "trial": 2,
+  "interaction_id": "0309ca0d-bc76-42d1-9600-2ea54f84fbf6",
+  "valid_runtime_provider_witness": {
+    "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b",
+    "turn_id": "5d09a690-f703-4f4f-906d-c3a42c4d7554",
+    "turn_status": "COMPLETED",
+    "provider_identity": "deepseek-responses:semantic:request:1713a0d7-75ef-4141-a92a-200c36b16895"
+  },
+  "configured_provider_credential": "SPG_DEEPSEEK_API_KEY_PRESENT; value excluded",
+  "authority_fixture": "ONLY_FRESH_EMPTY_INTERACTION_ACCESS_REMOVED_THEN_RESTORED",
+  "response": {
+    "error_status": 403,
+    "detail": "{\"code\":\"ACCESS_DENIED\"}"
+  },
+  "turn_rows_after_denial": 0,
+  "status": "PASS",
+  "production_source_mutation": false,
+  "manual_work_rescue": false
+}

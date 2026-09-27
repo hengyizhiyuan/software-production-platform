@@ -1,0 +1,56 @@
+{
+  "case": "GC-IP-07",
+  "trial": 2,
+  "question": {
+    "attention_id": "ff7223eb-0e31-578a-9655-d4029c600242",
+    "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+    "kind": "STEERING_DECISION_REQUIRED",
+    "decision": "Answer the current Work question",
+    "reason": "Should the added search cover the existing users domain (/api/users, with name/email/status), the customers domain (/api/customers, with name/email), the orders domain (/api/orders, with customer_id/total/status), or a unified cross-domain search across all three?",
+    "available_actions": [],
+    "recommended_action": null,
+    "governed_subject_ref": "steering-decision:25e4aa12-964b-4aaf-91cc-ab0375423789",
+    "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+    "recommendation": "Please select the target data domain(s) for the search feature. This determines the bounded acceptance scope and allows a reviewable production proposal to be formed.",
+    "conversation_prompt": "Should the added search cover the existing users domain (/api/users, with name/email/status), the customers domain (/api/customers, with name/email), the orders domain (/api/orders, with customer_id/total/status), or a unified cross-domain search across all three?",
+    "alternatives": [],
+    "trade_offs": [],
+    "expected_impact": "The decision will govern subsequent design and production.",
+    "reality_refs": [
+      {
+        "kind": "GOVERNANCE_DECISION",
+        "identity": "634f246c-049a-47ba-946f-f42005ee0540"
+      },
+      {
+        "kind": "GOVERNANCE_DECISION",
+        "identity": "935ce50e-75e2-57cf-a1f5-c7e859550aa6"
+      },
+      {
+        "kind": "SEMANTIC_RESULT",
+        "identity": "7488862d-052f-4f5d-9499-0a2392df4eaf"
+      },
+      {
+        "kind": "TRUSTED_BASELINE",
+        "identity": "627fcc1d-d41c-4e6d-b528-1a360496c313"
+      },
+      {
+        "kind": "WORK",
+        "identity": "5e234edb-4ffd-5827-b7a2-c12c67e516aa"
+      },
+      {
+        "kind": "WORK_REALITY_REVISION",
+        "identity": "aa954a21-2a7f-5f88-9d7a-bce5a5390ddf"
+      }
+    ],
+    "steering_plan_revision_id": "2d0734a5-4c66-4161-807e-b74506736e2c",
+    "steering_step_id": "e1207c09-35a5-498a-b91e-0a7d352b7524",
+    "interaction_id": null,
+    "interaction_assessment_id": null,
+    "expected_work_reality_revision_id": null
+  },
+  "answer": "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。",
+  "classification": "LEGITIMATE_PRODUCT_SCOPE_CHOICE",
+  "question_count": 1,
+  "implementation_assistance": false,
+  "human_acceptance": "PENDING"
+}

@@ -1,0 +1,12 @@
+...............F                                                         [100%]
+=================================== FAILURES ===================================
+_ test_governed_realizer_structural_repair_is_bounded_and_preserves_terminal_failure _
+
+    def test_governed_realizer_structural_repair_is_bounded_and_preserves_terminal_failure():
+>       from spg.domain.conversation import StructuredResponseSchemaViolation
+E       ImportError: cannot import name 'StructuredResponseSchemaViolation' from 'spg.domain.conversation' (/Users/yu/Documents/dev/software-production-platform/src/spg/domain/conversation.py)
+
+tests/test_deepseek_wic_provider.py:583: ImportError
+=========================== short test summary info ============================
+FAILED tests/test_deepseek_wic_provider.py::test_governed_realizer_structural_repair_is_bounded_and_preserves_terminal_failure
+1 failed, 15 passed in 7.73s

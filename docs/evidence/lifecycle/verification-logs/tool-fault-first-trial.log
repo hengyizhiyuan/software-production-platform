@@ -1,0 +1,33 @@
+{"fault": {"delivery_id": "3b93f5d9-c5ba-46e1-a9f4-72d43e16c4d6", "tool_identity": "file.read", "condition": "FAILED", "output": {"error_type": "CAPABILITY_PATH_INVALID", "message": "Declared primary read recipe unavailable before execution; use an admitted alternative", "effect_observed": false}, "output_digest": "ddc25aae9f17dab03c5a1900bf1bb2d89c7f9645c9bd3ed9d93b272ac6a36fa2", "evidence": [{"kind": "DECLARED_NO_EFFECT_TRANSPORT_FAULT", "forwarded_to_tool_host": false}]}, "attempt_id": "8d7d7ef7-3534-4c62-8773-432bfd82dcdd", "work_id": "1e4d32bc-0fe6-549f-81a6-3f4a5db6df42"}
+----------------------------------------
+Exception occurred during processing of request from ('172.26.0.7', 48868)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/http/server.py", line 451, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/http/server.py", line 439, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/qualification/tool_fault_proxy.py", line 67, in do_POST
+    self.forward(body)
+    ~~~~~~~~~~~~^^^^^^
+  File "/qualification/tool_fault_proxy.py", line 76, in forward
+    self.reply(response.read(), response.status, response.headers.get('Content-Type'))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/qualification/tool_fault_proxy.py", line 33, in reply
+    self.wfile.write(body)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------

@@ -1,0 +1,10 @@
+{
+  "case": "GC-EX-11",
+  "corpus_version": "watt-golden-tier0-v1",
+  "trial": 1,
+  "interaction_id": "75b9c879-936e-4b48-ae6e-479c87ef0474",
+  "human_input": "这是当前项目仓库：http://qualified-git:8080/missing-secret.git\n启动这个需要外部服务密钥的项目，给我实际预览。",
+  "tester_implementation": false,
+  "manual_rescue_actions": [],
+  "human_acceptance": "PENDING"
+}

@@ -1,0 +1,57 @@
+{
+  "api_response": [
+    {
+      "id": 1,
+      "name": "Fixture User",
+      "email": "user@example.invalid",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "name": "Golden persisted user",
+      "email": "golden-user@example.invalid",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "name": "Golden collected user",
+      "email": "golden-collected@example.invalid",
+      "status": "active"
+    },
+    {
+      "id": 4,
+      "name": "Golden collected user",
+      "email": "golden-collection@example.invalid",
+      "status": "active"
+    }
+  ],
+  "sqlite_rows": [
+    {
+      "id": 1,
+      "name": "Fixture User",
+      "email": "user@example.invalid",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "name": "Golden persisted user",
+      "email": "golden-user@example.invalid",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "name": "Golden collected user",
+      "email": "golden-collected@example.invalid",
+      "status": "active"
+    },
+    {
+      "id": 4,
+      "name": "Golden collected user",
+      "email": "golden-collection@example.invalid",
+      "status": "active"
+    }
+  ],
+  "api_and_database_agree": true,
+  "database_inspection": "READ_ONLY_ACTUAL_PREVIEW_SQLITE",
+  "browser_submission": true
+}

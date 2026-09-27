@@ -1,0 +1,46 @@
+{
+  "sqlite_rows": [
+    {
+      "id": 1,
+      "name": "Fixture User",
+      "email": "user@example.invalid",
+      "status": "active"
+    }
+  ],
+  "api_response": [
+    {
+      "id": 1,
+      "name": "Fixture User",
+      "email": "user@example.invalid",
+      "status": "active"
+    }
+  ],
+  "api_name_search": [
+    {
+      "id": 1,
+      "name": "Fixture User",
+      "email": "user@example.invalid",
+      "status": "active"
+    }
+  ],
+  "api_email_search": [
+    {
+      "id": 1,
+      "name": "Fixture User",
+      "email": "user@example.invalid",
+      "status": "active"
+    }
+  ],
+  "api_empty_search": [
+    {
+      "id": 1,
+      "name": "Fixture User",
+      "email": "user@example.invalid",
+      "status": "active"
+    }
+  ],
+  "api_and_database_agree": true,
+  "api_name_and_email_search": true,
+  "empty_search_has_no_results": false,
+  "database_inspection": "READ_ONLY_ACTUAL_PREVIEW_SQLITE"
+}

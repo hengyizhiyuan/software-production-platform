@@ -1,0 +1,183 @@
+{
+  "work_id": "94dfaa83-9d84-5fd1-a58a-df7706055903",
+  "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+  "goal_id": null,
+  "mode": "LONG_LIVED_STEERING",
+  "raw_user_requirement": "调整业务工作台应用首页标题，并以预览方式确认改动效果，同时保持其余功能与交付动作不变。",
+  "title": "调整业务工作台应用首页标题，并以预览方式确认改动效果，同时保持其余功能与交付动作不变。",
+  "desired_outcome": "首页标题显示为“新业务工作台”的可查看预览，其他功能保持原样且未推送。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+  "constraints": [
+    "其他功能保持原样",
+    "不推送"
+  ],
+  "target_kind": "CODE_WORK",
+  "artifact_target": null,
+  "change_proposal": {
+    "proposal_id": "f3031983-9efe-5be7-8b43-5b189ed64d62",
+    "target_kind": "CODE_WORK",
+    "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "repository_identity": "http://qualified-git:8080/business-app.git",
+    "source_baseline_id": "d9d97bc7-4a1d-5cee-bcdb-430965ce6f38",
+    "source_ref": "refs/heads/main",
+    "source_revision": "3d31ed65075daa30cca8820a40d750790f7898ba",
+    "proposed_targets": [
+      {
+        "path": "web/index.html",
+        "operation": "UPDATE",
+        "disposition": "REQUIRED",
+        "rationale": "The only rendered homepage heading is the `<h1>业务工作台</h1>` element in web/index.html; changing the homepage title to “新业务工作台” requires editing exactly this element. No other file renders the heading, and server.py already serves this file for `/`.",
+        "evidence": "Exact 3d31ed65075daa30cca8820a40d750790f7898ba:web/index.html witness: <main><h1>业务工作台</h1>",
+        "confidence": "HIGH"
+      }
+    ],
+    "allowed_areas": [],
+    "forbidden_areas": [],
+    "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+    "confidence": "MEDIUM",
+    "verification_obligations": [
+      {
+        "kind": "PATH_SCOPE",
+        "target": null,
+        "identity": "PATH_SCOPE"
+      },
+      {
+        "kind": "GIT_DIFF_CHECK",
+        "target": null,
+        "identity": "GIT_DIFF_CHECK"
+      }
+    ],
+    "provenance": {
+      "provider_identity": "provider:repository-aware-change-proposal-lite",
+      "provider_version": "v1",
+      "inspection_method": "git-object-read-only:path-enumeration+text-search"
+    },
+    "unresolved_scope_questions": [],
+    "proposal_fingerprint": "8d438949a9cedf318bb216f7b29ea4dd5a3ade588497c409698e15e8bd4d9377"
+  },
+  "change_contract": null,
+  "production_plan": {
+    "proposal_id": "038e57f1-e145-55b5-8f20-a64d100c1101",
+    "target_kind": "CODE_WORK",
+    "objective": "首页标题显示为“新业务工作台”的可查看预览，其他功能保持原样且未推送。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+    "desired_outcome": "首页标题显示为“新业务工作台”的可查看预览，其他功能保持原样且未推送。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+    "ordered_steps": [
+      {
+        "position": 1,
+        "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+      },
+      {
+        "position": 2,
+        "instruction": "Prepare the repository-inspected code targets: web/index.html."
+      },
+      {
+        "position": 3,
+        "instruction": "Run the admitted targeted verification and report the resulting evidence."
+      }
+    ],
+    "graph": null,
+    "artifact_targets": [],
+    "change_proposal": {
+      "proposal_id": "f3031983-9efe-5be7-8b43-5b189ed64d62",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "source_baseline_id": "d9d97bc7-4a1d-5cee-bcdb-430965ce6f38",
+      "source_ref": "refs/heads/main",
+      "source_revision": "3d31ed65075daa30cca8820a40d750790f7898ba",
+      "proposed_targets": [
+        {
+          "path": "web/index.html",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The only rendered homepage heading is the `<h1>业务工作台</h1>` element in web/index.html; changing the homepage title to “新业务工作台” requires editing exactly this element. No other file renders the heading, and server.py already serves this file for `/`.",
+          "evidence": "Exact 3d31ed65075daa30cca8820a40d750790f7898ba:web/index.html witness: <main><h1>业务工作台</h1>",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "8d438949a9cedf318bb216f7b29ea4dd5a3ade588497c409698e15e8bd4d9377"
+    },
+    "change_contract": null,
+    "inherited_constraints": [
+      "其他功能保持原样",
+      "不推送"
+    ],
+    "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+    "assumptions": [
+      "The admitted Work can be executed through one governed PWU and Attempt lineage."
+    ],
+    "unresolved_questions": [],
+    "fit_classification": "ONE_PWU_FIT",
+    "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "repository_identity": "http://qualified-git:8080/business-app.git",
+    "source_baseline_id": "d9d97bc7-4a1d-5cee-bcdb-430965ce6f38",
+    "source_revision": "3d31ed65075daa30cca8820a40d750790f7898ba"
+  },
+  "production_plan_runtime": null,
+  "tags": [],
+  "engineering_scope": {
+    "engineering_scope_id": "75b1f075-978d-403d-a174-ef66dcdfd8fe",
+    "summary": "Work assets; production target http://qualified-git:8080/business-app.git",
+    "condition": "ADMITTED",
+    "resources": [
+      {
+        "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+        "condition": "ACTIVE"
+      }
+    ]
+  },
+  "status": "RUNNING",
+  "current_production_step": "PRODUCE",
+  "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+  "what_happens_next": "Watt prepares and verifies the exact Candidate Preview before Human review",
+  "human_attention_required": false,
+  "result_summary": "1 independently observed artifact change(s)",
+  "current_work_reality_revision_id": "5cac6e1e-bbc3-5935-9f6e-d281d5ead65e",
+  "steering_enabled": true,
+  "current_steering_step_id": "47af082c-4e85-443b-bde0-011a92a29611",
+  "current_steering_step_type": "PRODUCE",
+  "current_production_cycle_number": 1,
+  "current_production_run_id": "0869c83c-0fac-4003-9ca8-26c68204273d",
+  "current_production_cycle_trusted": false,
+  "latest_trusted_runtime_commit_id": null,
+  "work_complete": false,
+  "automatic_progression_state": "STOPPED",
+  "last_stop_reason": "PRODUCTION_RUNNING",
+  "execution_progress": {
+    "phase": "RUNNING",
+    "activity": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required.",
+    "transitions_completed": 10,
+    "transitions_total": null,
+    "percent_complete": null,
+    "started_at": "2026-09-27T05:45:01.525581Z",
+    "updated_at": "2026-09-27T05:46:12.974617Z",
+    "elapsed_seconds": 71.449036,
+    "still_working": false,
+    "blocked_reason": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required."
+  },
+  "guided_design": null,
+  "next_owner": "EXECUTOR",
+  "control_state_valid": true,
+  "control_state_violations": []
+}

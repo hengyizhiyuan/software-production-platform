@@ -1,0 +1,185 @@
+{
+  "preview_id": "1a5dea12-db62-4181-a3ad-4e0719a2940a",
+  "completed_qualification": true,
+  "prior_status": "READY",
+  "preserve_all_volumes": true,
+  "work_or_database_changes": false,
+  "containers": [
+    {
+      "name": "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-proxy",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 14207,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-27T04:41:04.651666217Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "mounts": [],
+      "networks": {
+        "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-gateway": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "ad29dbd0842389718fde98beb4ca68fcb66590348511622f37dc8e42d683daf6",
+          "EndpointID": "a42946f1277b5604652773689944482e4caf69618a0ea33b791514d310a908bb",
+          "Gateway": "192.168.0.1",
+          "IPAddress": "192.168.0.2",
+          "MacAddress": "22:46:e6:9c:24:07",
+          "IPPrefixLen": 20,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-proxy",
+            "7fe7f3d633e1"
+          ]
+        },
+        "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-internal": {
+          "IPAMConfig": {},
+          "Links": null,
+          "Aliases": [],
+          "DriverOpts": {},
+          "GwPriority": 0,
+          "NetworkID": "a2a563f1378ea34f9a55302f397158d53b3f91927e44196101ed962b62e4b2b1",
+          "EndpointID": "92463c04d1fa47c6711be3443d48a5674208b9745faddd39e010042810866aa3",
+          "Gateway": "",
+          "IPAddress": "172.31.0.4",
+          "MacAddress": "7e:31:c5:ac:35:18",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-proxy",
+            "7fe7f3d633e1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-app",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 9597,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-27T04:40:03.75619431Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-source",
+          "Source": "/var/lib/docker/volumes/watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-source/_data",
+          "Destination": "/source",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": false,
+          "Propagation": ""
+        },
+        {
+          "Type": "volume",
+          "Name": "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-data",
+          "Source": "/var/lib/docker/volumes/watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-data/_data",
+          "Destination": "/var/lib/spg",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        }
+      ],
+      "networks": {
+        "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-internal": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "app"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "a2a563f1378ea34f9a55302f397158d53b3f91927e44196101ed962b62e4b2b1",
+          "EndpointID": "2ac9facbd60e86156913602c5098d44ed465af0f854dd620e8d482d6af2746ed",
+          "Gateway": "",
+          "IPAddress": "172.31.0.3",
+          "MacAddress": "26:1f:27:6c:45:d3",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-app",
+            "app",
+            "5e8e2aafe377"
+          ]
+        }
+      }
+    },
+    {
+      "name": "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-postgres",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 8272,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-27T04:39:45.913883843Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-database",
+          "Source": "/var/lib/docker/volumes/watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-database/_data",
+          "Destination": "/var/lib/postgresql/data",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        }
+      ],
+      "networks": {
+        "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-internal": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "db"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "a2a563f1378ea34f9a55302f397158d53b3f91927e44196101ed962b62e4b2b1",
+          "EndpointID": "2deaef32c5f449a063f99db6be9b63a76fe779f194a39311c876da585780f8c1",
+          "Gateway": "",
+          "IPAddress": "172.31.0.2",
+          "MacAddress": "5e:3d:34:17:79:c4",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "watt-candidate-preview-1a5dea12db624181a3ad4e0719a2940a-postgres",
+            "db",
+            "11f6bc306c67"
+          ]
+        }
+      }
+    }
+  ],
+  "endpoint_available_after_retirement": false
+}

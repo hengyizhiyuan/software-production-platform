@@ -1,0 +1,10 @@
+{
+  "case": "GC-IP-02",
+  "trial": 1,
+  "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+  "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+  "elapsed_seconds": 543,
+  "human_acceptance": "PENDING",
+  "automatic_delivery_authorization": false,
+  "business_oracle": "NOT_YET_EVALUATED"
+}

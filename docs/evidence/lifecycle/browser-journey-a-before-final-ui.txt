@@ -1,0 +1,353 @@
+- link "Skip to selected Work":
+  - /url: "#work-surface"
+- banner:
+  - generic "Watt Software Production":
+    - generic: W
+    - heading "Watt / 工律" [level=1]
+    - paragraph: From intent to production.
+  - link "Deliveries":
+    - /url: /delivery
+  - paragraph: Production Environment
+  - generic "Appearance preferences":
+    - text: Global appearance
+    - combobox "Global appearance":
+      - option "Light" [selected]
+      - option "Dark"
+  - button "Refresh service health":
+    - generic: Ready
+  - paragraph:
+    - text: System online
+    - text: Build a more capable team
+- main:
+  - complementary "Goal and Work navigation":
+    - region "⌂ Products":
+      - paragraph: Long-lived asset
+      - heading "⌂ Products" [level=2]
+      - paragraph: No Product yet. Create one to retain source continuity.
+      - generic: New Product
+      - textbox "New Product":
+        - /placeholder: Finance Management
+      - button "Create"
+    - region "⌂ Goals":
+      - paragraph: Navigation horizon
+      - heading "⌂ Goals" [level=2]
+      - button "Create Goal": +
+      - navigation "Goals":
+        - button "All Works 0":
+          - text: All Works
+          - generic: "0"
+    - region "▣ Works":
+      - paragraph: Things to get done
+      - heading "▣ Works" [level=2]
+      - button "Refresh"
+      - generic: Status
+      - combobox "Status":
+        - option "All statuses" [selected]
+        - option "PRE-WORK / 未开工"
+        - option "Draft"
+        - option "Needs refinement"
+        - option "Awaiting approval"
+        - option "Ready"
+        - option "Running"
+        - option "Production paused"
+        - option "Blocked"
+        - option "Completed"
+      - paragraph: No Works in this view yet.
+    - generic "Operations · Connectors · Evaluation"
+    - option "Read" [selected]
+    - option "Write"
+  - region "Selected Work":
+    - region "Conversation workspace":
+      - complementary "Conversation History":
+        - paragraph: Provenance
+        - heading "Conversation History" [level=3]
+        - article:
+          - paragraph: You
+          - paragraph: 我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-platform.git，把它clone下来，我要改个需求
+          - paragraph: 12:10:26 · COMPLETED
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：main；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 生产 Work 尚未准入；没有修改源码或推送远端。
+          - paragraph: 12:10:57 · COMPLETED
+        - article:
+          - paragraph: You
+          - paragraph: 切一个 feat_test 分支
+          - paragraph: 12:12:28 · COMPLETED
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：feat_test；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 生产 Work 尚未准入；没有修改源码或推送远端。
+          - paragraph: 12:12:49 · COMPLETED
+        - text: INTELLIGENCE IN SERVICE OF PEOPLE
+    - article:
+      - paragraph: Selected Work
+      - heading "在该 GitHub 仓库上实施需求变更，当前先在 feat_test 工作分支上进行。" [level=2]
+      - generic: Understanding in progress · no Work admitted
+      - region "Product and production continuity":
+        - generic: Product
+        - combobox "Product":
+          - option "Select Product" [selected]
+        - button "Bind Work"
+        - paragraph: This Work is not yet assigned to a long-lived Product.
+        - generic "Production diagnosis, PWU economics and history"
+      - region "Stable Work Workspace":
+        - region "Reality":
+          - generic: "01"
+          - heading "Reality" [level=3]
+          - paragraph: Engineering sources for this Work
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: "Conversation: PRE-WORK · Repository: READY · Production Work: NOT ADMITTED"
+          - generic "Work-relevant engineering sources":
+            - paragraph: "Source: https://github.com/hengyizhiyuan/software-production-platform.git · Branch: refs/heads/feat_test · Revision: 0b535f63302fe45e88d0b3e203ae991868ced079 · Tree: 753564ba0a09c0bed999dff17b540b09e581e8d9"
+            - paragraph: .dockerignore
+            - paragraph: .env.example
+            - paragraph: .gitattributes
+            - paragraph: .gitignore
+            - paragraph: AI_context.md
+            - paragraph: Dockerfile
+            - paragraph: README.md
+            - paragraph: alembic.ini
+            - paragraph: benchmarks/conversation_quality/README.md
+            - paragraph: benchmarks/conversation_quality/corpus.json
+            - paragraph: benchmarks/conversation_quality/interaction_intelligence_cases.json
+            - paragraph: benchmarks/conversation_quality/interaction_intelligence_probe.py
+            - paragraph: benchmarks/conversation_quality/pipeline_probe.py
+            - paragraph: benchmarks/conversation_quality/replay_probe.py
+            - paragraph: benchmarks/native_executor_continuity/__init__.py
+            - paragraph: benchmarks/native_executor_continuity/report.py
+            - paragraph: benchmarks/native_executor_continuity/runner.py
+            - paragraph: benchmarks/native_executor_continuity/spec.json
+            - paragraph: benchmarks/native_executor_continuity_v2/__init__.py
+            - paragraph: benchmarks/native_executor_continuity_v2/evaluator.py
+            - paragraph: benchmarks/native_executor_continuity_v2/report.py
+            - paragraph: benchmarks/native_executor_continuity_v2/runner.py
+            - paragraph: benchmarks/native_executor_continuity_v2/spec.json
+            - paragraph: benchmarks/native_executor_continuity_v3/__init__.py
+            - paragraph: benchmarks/native_executor_continuity_v3/evaluator.py
+            - paragraph: benchmarks/native_executor_continuity_v3/report.py
+            - paragraph: benchmarks/native_executor_continuity_v3/runner.py
+            - paragraph: benchmarks/native_executor_continuity_v3/spec.json
+            - paragraph: benchmarks/native_executor_continuity_v4/__init__.py
+            - paragraph: benchmarks/native_executor_continuity_v4/evaluator.py
+            - paragraph: benchmarks/native_executor_continuity_v4/report.py
+            - paragraph: benchmarks/native_executor_continuity_v4/runner.py
+            - paragraph: benchmarks/native_executor_continuity_v4/spec.json
+            - paragraph: benchmarks/native_executor_continuity_v5/__init__.py
+            - paragraph: benchmarks/native_executor_continuity_v5/evaluator.py
+            - paragraph: benchmarks/native_executor_continuity_v5/report.py
+            - paragraph: benchmarks/native_executor_continuity_v5/runner.py
+            - paragraph: benchmarks/native_executor_continuity_v5/spec.json
+            - paragraph: benchmarks/native_executor_continuity_v6/__init__.py
+            - paragraph: benchmarks/native_executor_continuity_v6/evaluator.py
+            - paragraph: benchmarks/native_executor_continuity_v6/report.py
+            - paragraph: benchmarks/native_executor_continuity_v6/runner.py
+            - paragraph: benchmarks/native_executor_continuity_v6/spec.json
+            - paragraph: benchmarks/native_executor_continuity_v7/__init__.py
+            - paragraph: benchmarks/native_executor_continuity_v7/evaluator.py
+            - paragraph: benchmarks/native_executor_continuity_v7/report.py
+            - paragraph: benchmarks/native_executor_continuity_v7/runner.py
+            - paragraph: benchmarks/native_executor_continuity_v7/spec.json
+            - paragraph: benchmarks/native_executor_continuity_v8/__init__.py
+            - paragraph: benchmarks/native_executor_continuity_v8/evaluator.py
+            - paragraph: benchmarks/native_executor_continuity_v8/report.py
+            - paragraph: benchmarks/native_executor_continuity_v8/runner.py
+            - paragraph: benchmarks/native_executor_continuity_v8/spec.json
+            - paragraph: benchmarks/native_executor_qualification/isolation_probe.py
+            - paragraph: benchmarks/native_executor_qualification/performance.py
+            - paragraph: benchmarks/native_executor_qualification/reboot_probe.py
+            - paragraph: benchmarks/native_executor_qualification/slow_subscriber_probe.py
+            - paragraph: benchmarks/native_executor_qualification/tool_spool_probe.py
+            - paragraph: benchmarks/open_wic/corpus-v1.json
+            - paragraph: benchmarks/open_wic/fast_reception_qualification.py
+            - paragraph: benchmarks/open_wic/human_visible_evaluator.py
+            - paragraph: benchmarks/open_wic/progressive_evaluator.py
+            - paragraph: benchmarks/open_wic/slice2-corpus-v1.json
+            - paragraph: compose.delivery.yaml
+            - paragraph: compose.e2e.yaml
+            - paragraph: compose.native-executor.continuity-v2.yaml
+            - paragraph: compose.native-executor.continuity-v3.yaml
+            - paragraph: compose.native-executor.continuity-v4.yaml
+            - paragraph: compose.native-executor.continuity-v5.yaml
+            - paragraph: compose.native-executor.continuity-v6.yaml
+            - paragraph: compose.native-executor.continuity-v7.yaml
+            - paragraph: compose.native-executor.continuity-v8.yaml
+            - paragraph: compose.native-executor.continuity.yaml
+            - paragraph: compose.native-executor.human-acceptance.yaml
+            - paragraph: compose.native-executor.yaml
+            - paragraph: compose.wic-governed-streaming.yaml
+            - paragraph: compose.wic-slice3.yaml
+            - paragraph: compose.yaml
+            - paragraph: docker/e2e_preflight.py
+            - paragraph: docker/start_app.py
+            - paragraph: docker/start_delivery.py
+            - paragraph: docker/start_human_acceptance.py
+            - paragraph: docs/architecture/SPG_Core_Architecture_Model.md
+            - paragraph: docs/architecture/ai-native-development-execution-principles.md
+            - paragraph: docs/architecture/architecture-principles.md
+            - paragraph: docs/architecture/bounded-single-pwu-code-work.md
+            - paragraph: docs/architecture/case-studies/course-table-domain-grounding-and-semantic-boundary.md
+            - paragraph: docs/architecture/case-studies/waterfall-demo-csp-loop-and-guardian-recovery.md
+            - paragraph: docs/architecture/design-intelligence-evolution.md
+            - paragraph: docs/architecture/design-intent-framing-layer.md
+            - paragraph: docs/architecture/duration-capacity-semantic-foundation.md
+            - paragraph: docs/architecture/early-workspace-progressive-work-admission.md
+            - paragraph: docs/architecture/engineering-semantic-truth.md
+            - paragraph: docs/architecture/engineering-state-management.md
+            - paragraph: docs/architecture/executor-autonomy-envelope-attempt-granularity-mvp-contract.md
+            - paragraph: docs/architecture/external-design-intake-capability-direction.md
+            - paragraph: docs/architecture/external-engineering-intelligence-direction.md
+            - paragraph: docs/architecture/future-capabilities.md
+            - paragraph: docs/architecture/guided-design-core.md
+            - paragraph: docs/architecture/guided-design-facilitation-layer.md
+            - paragraph: docs/architecture/human-collaboration-experience-v32-assessment.md
+            - paragraph: docs/architecture/human-collaboration-pipeline-review.md
+            - paragraph: docs/architecture/human-collaboration-pipeline-v31-assessment.md
+            - paragraph: docs/architecture/human-watt-collaboration-layer.md
+            - paragraph: docs/architecture/human-watt-conversation-intelligence.md
+            - paragraph: docs/architecture/integration-boundary.md
+            - paragraph: docs/architecture/interpretation-externalization-and-multimodal-alignment.md
+            - paragraph: docs/architecture/motive-work-plan-concept-calibration.md
+            - paragraph: docs/architecture/mvp-architecture.md
+            - paragraph: docs/architecture/plane-model.md
+            - paragraph: docs/architecture/production-benchmarks.md
+            - paragraph: docs/architecture/production-execution-package-direction.md
+            - paragraph: docs/architecture/production-intelligence-architecture.md
+            - paragraph: docs/architecture/production-measurement-v0.md
+            - paragraph: docs/architecture/production-orchestration-lite.md
+            - paragraph: docs/architecture/program-architecture-decisions.md
+            - paragraph: docs/architecture/reality-driven-plan-steering-mvp-contract.md
+            - paragraph: docs/architecture/reality-driven-plan-steering-principles.md
+            - paragraph: docs/architecture/repository-acquisition-sandbox-and-remote-integration-direction.md
+            - paragraph: docs/architecture/repository-asset-and-managed-execution-workspace.md
+            - paragraph: docs/architecture/repository-aware-code-change-proposal-lite.md
+            - paragraph: docs/architecture/runtime-profile-provider-deployment.md
+            - paragraph: docs/architecture/single-pwu-production-planner-lite.md
+            - paragraph: docs/architecture/software-production-control-room-slice-1-implementation-contract.md
+            - paragraph: docs/architecture/software-production-control-room-slice-2-implementation-contract.md
+            - paragraph: docs/architecture/software-production-control-room-slice-3-implementation-contract.md
+            - paragraph: docs/architecture/software-production-control-room-slice-4-implementation-contract.md
+            - paragraph: docs/architecture/software-production-system-differentiation-and-barriers.md
+            - paragraph: docs/architecture/spg-completion-trust.md
+            - paragraph: docs/architecture/spg-fvs-1-implementation-contract.md
+            - paragraph: docs/architecture/spg-lite-domain-contract-baseline.md
+            - paragraph: docs/architecture/spg-lite-runtime-implementation-contract.md
+            - paragraph: docs/architecture/spg-reconciliation-recovery.md
+            - paragraph: docs/architecture/spg-runtime-architecture-readiness.md
+            - paragraph: docs/architecture/spg-runtime-findings-review.md
+            - paragraph: docs/architecture/spg-runtime-verification-benchmarks.md
+            - paragraph: docs/architecture/spg-side-effect-governance.md
+            - paragraph: docs/architecture/spg-state-foundation.md
+            - paragraph: docs/architecture/system-architecture-baseline-v0.1.md
+            - paragraph: docs/architecture/system-overview.md
+            - paragraph: docs/architecture/trusted-baseline-active-runtime-convergence-lite.md
+            - paragraph: docs/architecture/typed-node-test-verification-lite.md
+            - paragraph: docs/architecture/watt-ai-native-software-production-architecture.md
+            - paragraph: docs/architecture/watt-ai-software-production-evaluation-framework.md
+            - paragraph: docs/architecture/watt-decision-evidence-architecture.md
+            - paragraph: docs/architecture/watt-formal-ui-appearance-and-skin-library.md
+            - paragraph: docs/architecture/watt-native-executor-blueprint.md
+            - paragraph: docs/architecture/watt-native-executor-capacity-scheduling.md
+            - paragraph: docs/architecture/watt-native-executor-lifecycle.md
+            - paragraph: docs/architecture/watt-native-executor-qualification-amendment-v2.md
+            - paragraph: docs/architecture/watt-native-executor-qualification-amendment-v3.md
+            - paragraph: docs/architecture/watt-native-executor-qualification-amendment-v4.md
+            - paragraph: docs/architecture/watt-native-executor-qualification-amendment-v5.md
+            - paragraph: docs/architecture/watt-native-executor-qualification-amendment-v6.md
+            - paragraph: docs/architecture/watt-native-executor-qualification-amendment-v7.md
+            - paragraph: docs/architecture/watt-native-executor-qualification-amendment-v8.md
+            - paragraph: docs/architecture/watt-native-executor-qualification.md
+            - paragraph: docs/architecture/watt-product-north-star.md
+            - paragraph: docs/architecture/watt-regression-protection-and-golden-journey-governance.md
+            - paragraph: docs/architecture/watt-wic-intelligence-architecture-closure.md
+            - paragraph: docs/architecture/wic-context-orchestration.md
+            - paragraph: docs/architecture/wic-decision-evidence-architecture.md
+            - paragraph: docs/architecture/wic-intelligence-reconstruction-blueprint.md
+            - paragraph: docs/architecture/wic-response-contract.md
+            - paragraph: docs/architecture/wic-software-domain-grounding.md
+            - paragraph: docs/architecture/wic-software-production-sop-and-llm-direction.md
+            - paragraph: docs/architecture/work-centric-production-and-responsibility-principles.md
+            - paragraph: docs/architecture/work-centric-production-model.md
+            - paragraph: docs/architecture/work-identity-closure-and-archive-invariants.md
+            - paragraph: docs/architecture/work-interaction-closed-loop-refinement.md
+            - paragraph: docs/architecture/work-to-delivery-multi-repository-spg-proposal.md
+            - paragraph: docs/assets/ui-skins/01-industrial-cyan.png
+            - paragraph: docs/assets/ui-skins/02-executive-amber.png
+            - paragraph: docs/assets/ui-skins/03-technical-graphite.png
+            - paragraph: docs/assets/ui-skins/04-precision-silver.png
+            - paragraph: docs/assets/ui-skins/05-warm-professional.png
+            - paragraph: docs/assets/ui-skins/06-futuristic-studio.png
+            - paragraph: docs/assets/ui-skins/README.md
+            - paragraph: docs/assurance/guardian-integration.md
+            - paragraph: docs/context/ecf-integration.md
+            - paragraph: docs/evidence/control-room-slice-4-human-acceptance-preparation.md
+            - paragraph: docs/evidence/control-room-slice-4-human-product-acceptance.md
+            - paragraph: docs/evidence/deepseek-long-running-transport-boundary-qualification.md
+            - paragraph: docs/evidence/design-intent-framing-focused-validation.md
+            - paragraph: docs/evidence/dogfood/assets/executor-authority-drift-branch-creation.png
+            - paragraph: docs/evidence/dogfood/code-dogfood-1-repository-aware-change-proposal-gap.md
+            - paragraph: docs/evidence/dogfood/code-dogfood-2-trusted-baseline-active-runtime-divergence.md
+            - paragraph: docs/evidence/dogfood/executor-authority-drift-branch-creation.md
+            - paragraph: docs/evidence/dogfood/intake-dogfood-3-trusted-completion.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-1-admission-coupling.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-10-human-acceptance.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-2-post-admission-activation-gap.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-3-semantic-design-execution-gap.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-4-semantic-structured-output-gap.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-5-semantic-provider-schema-requiredness-gap.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-6-semantic-provider-ref-sibling-gap.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-7-semantic-wire-coherence-gap.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-8-self-refine-closure.md
+            - paragraph: docs/evidence/dogfood/long-lived-motive-dogfood-9-production-loop-closure.md
+            - paragraph: docs/evidence/dogfood/orch-dogfood-1-verification-contract-mismatch.md
+        - region "Agenda":
+          - generic: "02"
+          - heading "Agenda" [level=3]
+          - paragraph: Governed path and working agreements
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: Understanding request…
+          - list "Governed execution path":
+            - listitem: Understand
+            - listitem: Shape
+            - listitem: Produce
+            - listitem: Verify
+            - listitem: Deliver
+        - region "Production":
+          - generic: "03"
+          - heading "Production" [level=3]
+          - paragraph: What Watt is doing now
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: IDLE · Production has not started.
+          - paragraph:
+            - generic: IDLE
+          - paragraph: No PWU or Executor is running.
+          - paragraph: Work admission is a separate Human decision.
+        - region "Actions":
+          - generic: "04"
+          - heading "Actions" [level=3]
+          - paragraph: Human control plane
+          - button "Collapse" [expanded]
+          - button "Focus"
+          - paragraph: Repository is ready. Describe the change when you are ready.
+          - paragraph: The next governed step is sufficiently understood; remaining reversible details can be refined later.
+          - button "继续完善"
+    - region "What would you like Watt to understand?":
+      - region "Current Interaction":
+        - paragraph: Active Work communication
+        - heading "Current Interaction" [level=3]
+        - article:
+          - paragraph: You
+          - generic: 我现在在哪个分支？
+        - article:
+          - paragraph: Watt
+          - paragraph: 仓库已就绪，本地分支：feat_test；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。 生产 Work 尚未准入；没有修改源码或推送远端。
+      - generic: Continuing Interaction
+      - button "New Work"
+      - button "Expand composer"
+      - generic: What would you like Watt to understand?
+      - textbox "What would you like Watt to understand?":
+        - /placeholder: Share an idea, context, question, outcome, or constraint…
+      - paragraph: Share a question, idea, or next step.
+      - button "Send➤" [active]
+- status: Watt completed the reply. You can continue the conversation.

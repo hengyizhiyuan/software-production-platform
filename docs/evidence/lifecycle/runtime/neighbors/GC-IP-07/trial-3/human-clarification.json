@@ -1,0 +1,56 @@
+{
+  "case": "GC-IP-07",
+  "trial": 3,
+  "question": {
+    "attention_id": "3d469cae-2c92-5d89-8a11-701367382c57",
+    "work_id": "71d57c25-373e-5a29-b91f-95ff9b1c4db9",
+    "kind": "STEERING_DECISION_REQUIRED",
+    "decision": "Answer the current Work question",
+    "reason": "搜索应覆盖哪些内容域？当前业务系统中存在三个彼此独立且同等的可检索数据域——用户（/api/users）、客户（/api/customers）、订单（/api/orders），另有 /、/users、/customers、/orders、/help、/about 页面内容；请指定搜索范围是其中之一、若干组合，还是全部三个数据域（以及是否包含页面内容）。",
+    "available_actions": [],
+    "recommended_action": null,
+    "governed_subject_ref": "steering-decision:853f64d9-62ce-4832-9cdd-5296d86de2b0",
+    "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+    "recommendation": "请 Human 就上述问题选定搜索覆盖的内容域（单一域、若干域或全部），以便下一个 Step 形成有界的生产目标与验收范围；在选定之前不提出生产改动。",
+    "conversation_prompt": "搜索应覆盖哪些内容域？当前业务系统中存在三个彼此独立且同等的可检索数据域——用户（/api/users）、客户（/api/customers）、订单（/api/orders），另有 /、/users、/customers、/orders、/help、/about 页面内容；请指定搜索范围是其中之一、若干组合，还是全部三个数据域（以及是否包含页面内容）。",
+    "alternatives": [],
+    "trade_offs": [],
+    "expected_impact": "The decision will govern subsequent design and production.",
+    "reality_refs": [
+      {
+        "kind": "GOVERNANCE_DECISION",
+        "identity": "7b33788f-5bb5-4fdf-a80d-8133fd2a4430"
+      },
+      {
+        "kind": "GOVERNANCE_DECISION",
+        "identity": "c3576b9f-b9de-5539-936d-f0958994f56f"
+      },
+      {
+        "kind": "SEMANTIC_RESULT",
+        "identity": "66769a21-082a-4969-a488-2a14b9495687"
+      },
+      {
+        "kind": "TRUSTED_BASELINE",
+        "identity": "627fcc1d-d41c-4e6d-b528-1a360496c313"
+      },
+      {
+        "kind": "WORK",
+        "identity": "71d57c25-373e-5a29-b91f-95ff9b1c4db9"
+      },
+      {
+        "kind": "WORK_REALITY_REVISION",
+        "identity": "2a855ed8-4066-55d1-9f19-698aaa715968"
+      }
+    ],
+    "steering_plan_revision_id": "902f8088-08e0-457a-8a06-10fe6b0322b6",
+    "steering_step_id": "1d12c016-c156-420a-931f-a51d3e51daa5",
+    "interaction_id": null,
+    "interaction_assessment_id": null,
+    "expected_work_reality_revision_id": null
+  },
+  "answer": "只搜索用户，按姓名和邮箱查找；页面查询结果要与用户查询接口一致。客户、订单等其他部分保持原样。",
+  "classification": "LEGITIMATE_PRODUCT_SCOPE_CHOICE",
+  "question_count": 1,
+  "implementation_assistance": false,
+  "human_acceptance": "PENDING"
+}

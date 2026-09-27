@@ -1,0 +1,56 @@
+id: 1
+event: turn.accepted
+data: {"id": "aca79161-06f2-4c07-b182-6085c5aaf825", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 1, "event_type": "TURN_ACCEPTED", "content": null, "basis_fingerprint": null, "reconciliation": null, "metadata": {"wic_mode": "WIC_VNEXT_CONTROLLED"}, "created_at": "2026-09-27T05:28:40.990716Z"}
+
+id: 2
+event: fast.started
+data: {"id": "839a7abc-7640-4826-8ef7-24d14f5555c6", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 2, "event_type": "FAST_RECEPTION_STARTED", "content": null, "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": null, "metadata": {}, "created_at": "2026-09-27T05:29:04.561958Z"}
+
+id: 3
+event: fast.suppressed
+data: {"id": "b1fd6c44-9387-4da2-9d1f-e847b0074ea5", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 3, "event_type": "FAST_SUPPRESSED", "content": null, "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": null, "metadata": {"reason": "UNRECOGNIZED", "status": "NO_EMISSION", "disposition": "FAST_SUPPRESSED"}, "created_at": "2026-09-27T05:29:04.599213Z"}
+
+id: 5
+event: response.refinement
+data: {"id": "8d3bc919-4c2d-417f-bf2e-61666b0eea49", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 5, "event_type": "RESPONSE_REFINEMENT", "content": null, "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"trust_stage": "GOVERNED", "policy_governed": true, "content_streamed_separately": true}, "created_at": "2026-09-27T05:29:36.448068Z"}
+
+id: 6
+event: response.stream.started
+data: {"id": "89888bfd-c429-4c0f-b221-09170168201b", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 6, "event_type": "RESPONSE_STREAM_STARTED", "content": null, "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"model": "deepseek-flash", "provider": "deepseek-responses:governed-realizer", "trust_stage": "GOVERNED", "provisional_present": false}, "created_at": "2026-09-27T05:29:36.526730Z"}
+
+id: 7
+event: response.delta
+data: {"id": "e2e11a4e-521d-47ec-aea1-a0d24e354878", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 7, "event_type": "RESPONSE_DELTA", "content": "收到，", "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"delta_index": 1, "trust_stage": "GOVERNED"}, "created_at": "2026-09-27T05:29:38.587421Z"}
+
+id: 8
+event: response.delta
+data: {"id": "15067aa4-4d79-4021-b301-30803dcc62e7", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 8, "event_type": "RESPONSE_DELTA", "content": "仓库来源已确认：https://github.com/hengy", "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"delta_index": 2, "trust_stage": "GOVERNED"}, "created_at": "2026-09-27T05:29:38.694790Z"}
+
+id: 9
+event: response.delta
+data: {"id": "088df25b-c6da-427f-8758-85b607c00079", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 9, "event_type": "RESPONSE_DELTA", "content": "izhiyuan/software-production-pla", "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"delta_index": 3, "trust_stage": "GOVERNED"}, "created_at": "2026-09-27T05:29:38.726560Z"}
+
+id: 10
+event: response.delta
+data: {"id": "f77afd74-8d9f-40c8-b77b-e75e134b8935", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 10, "event_type": "RESPONSE_DELTA", "content": "tform.git。", "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"delta_index": 4, "trust_stage": "GOVERNED"}, "created_at": "2026-09-27T05:29:38.779928Z"}
+
+id: 11
+event: response.delta
+data: {"id": "17e0f921-4f6d-43d7-b03a-c77e4097c52d", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 11, "event_type": "RESPONSE_DELTA", "content": "当前获取路径已就绪，", "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"delta_index": 5, "trust_stage": "GOVERNED"}, "created_at": "2026-09-27T05:29:38.829572Z"}
+
+id: 12
+event: response.delta
+data: {"id": "b4c0278b-bff8-4311-b5fe-82d9f9627733", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 12, "event_type": "RESPONSE_DELTA", "content": "我接下来按这条只读路径把仓库取到本地工作区，", "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"delta_index": 6, "trust_stage": "GOVERNED"}, "created_at": "2026-09-27T05:29:38.904002Z"}
+
+id: 13
+event: response.delta
+data: {"id": "dacd50aa-9002-4e18-a45c-399c6adbe2f6", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 13, "event_type": "RESPONSE_DELTA", "content": "随后再处理你要改的那个需求。", "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"delta_index": 7, "trust_stage": "GOVERNED"}, "created_at": "2026-09-27T05:29:38.966787Z"}
+
+id: 14
+event: response.final
+data: {"id": "43fa8a82-3df9-43af-a9b0-8e56e1d31294", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 14, "event_type": "FINAL_RESPONSE", "content": "仓库已就绪，本地分支：main；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。", "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": "REFINE", "metadata": {"delta_count": 7, "trust_stage": "FINAL", "realizer_model": "deepseek-flash", "realizer_usage": {"unknown": false, "input_tokens": 3308, "total_tokens": 3514, "cached_tokens": 1152, "output_tokens": 206, "reasoning_tokens": 147}, "realizer_timing": {"completed_seconds": 2.4633205229984014, "first_token_seconds": 1.8650855230007437, "request_sent_seconds": 0.000883048000105191, "first_response_event_seconds": 0.9291299199976493}, "external_research": null, "realizer_provider": "deepseek-responses:governed-realizer:request:945bfdeb-087d-4787-bed4-85ecbb5f5f7c", "realizer_request_id": "945bfdeb-087d-4787-bed4-85ecbb5f5f7c", "interaction_strategy": {"human_mode": "SPECIFYING", "turn_intent": "ACTION_REQUEST", "answer_first": false, "primary_move": "CONFIRM", "max_questions": 0, "candidate_first": false, "question_allowed": false, "question_guidance": null, "cognitive_maturity": "SPECIFYING", "human_abstraction_level": "DOMAIN", "next_conversational_granularity": "Use response_contract opening_move and response_moves at its information_budget; stop once the current obligation is satisfied.", "demonstrate_understanding_without_restating": true}, "refinement_observation": null, "conversation_truth_pending": true, "semantic_provider_evidence": {"pipeline_mode": "governed_pre_work_semantic", "semantic_model": "deepseek-flash", "semantic_usage": {"unknown": false, "input_tokens": 6992, "total_tokens": 9955, "cached_tokens": 2944, "output_tokens": 2963, "reasoning_tokens": 1561}, "coalesced_model": null, "coalesced_usage": null, "pipeline_reason": "controlled_pre_work_semantics_before_governed_realization", "semantic_seconds": 14.10974353000347, "semantic_turn_id": null, "coalesced_seconds": null, "coalesced_turn_id": null, "new_meaning_count": null, "semantic_provider": "deepseek-responses", "coalesced_provider": null, "conversation_model": null, "conversation_usage": null, "semantic_thread_id": null, "coalesced_thread_id": null, "provider_call_count": 1, "semantic_request_id": "e91079ec-fcd0-4a24-a1c2-19cc2deb8c97", "coalesced_request_id": null, "conversation_seconds": null, "conversation_turn_id": null, "semantic_retry_count": 0, "coalesced_retry_count": null, "conversation_provider": null, "conversation_thread_id": null, "provider_stage_seconds": null, "conversation_request_id": null, "conversation_retry_count": null, "semantic_reasoning_effort": "low", "coalesced_reasoning_effort": null, "semantic_prompt_characters": 17310, "coalesced_output_characters": null, "coalesced_prompt_characters": null, "first_response_delta_seconds": null, "retained_prior_meaning_count": null, "coalesced_semantic_characters": null, "conversation_reasoning_effort": null, "conversation_prompt_characters": null, "reused_prior_design_intent_frame": null, "semantic_structured_repair_count": 0, "coalesced_structured_repair_count": null}}, "created_at": "2026-09-27T05:29:39.025890Z"}
+
+id: 15
+event: message.completed
+data: {"id": "9a0e9236-d35a-4584-8613-9a9d14c3cec3", "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b", "turn_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "response_id": "47db0a0f-bbdc-4fef-8055-216db1e2a3a8", "sequence": 15, "event_type": "TURN_COMPLETED", "content": null, "basis_fingerprint": "2db26b5e423bbf4a0e16fd1256e5057cfe68a8259e90d470154ad7c61b54b058", "reconciliation": null, "metadata": {"recovery_scope": "WIC_TURN_ONLY", "work_converged": false, "automatic_recovery_attempts": 0}, "created_at": "2026-09-27T05:29:39.025890Z"}
+

@@ -1,0 +1,24 @@
+{
+  "case": "GC-EX-07",
+  "trial": 1,
+  "checks": {
+    "automatic_preview_ready": true,
+    "served_verification": true,
+    "no_unauthorized_delivery": true,
+    "exactly_one_requested_link": true,
+    "one_source_file": true,
+    "only_requested_link_changed": true
+  },
+  "status": "PASS",
+  "candidate_revision": "9a415646ea85acc370f7af1ec1151608d6c14888",
+  "candidate_tree": "59d7a8a3e9240f076b5b6e1e80a136e7db32d8dc",
+  "browser_evidence_record": "browser-oracle.json",
+  "persistence_evidence_record": "persistence-oracle.json",
+  "historical_runtime_evidence": false,
+  "changed_paths": [
+    "web/index.html"
+  ],
+  "preview_endpoint": "http://127.0.0.1:61601/",
+  "human_acceptance": "PENDING",
+  "manual_rescue_actions": []
+}

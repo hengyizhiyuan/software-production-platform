@@ -1,0 +1,12 @@
+{
+  "case": "GC-LC-03",
+  "trial": 2,
+  "interaction_id": "ca01ee1e-f3fc-42bb-9ad5-de3a2f042a08",
+  "human_inputs": [
+    "先帮我看看这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git 使用什么框架，我再决定改什么。"
+  ],
+  "tester_git": false,
+  "manual_rescue_actions": [],
+  "source_modification": false,
+  "human_acceptance": "PENDING"
+}

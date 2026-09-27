@@ -1,0 +1,2048 @@
+{
+  "interaction": {
+    "interaction_id": "2a7323d1-2c63-42b0-b30c-5b6a2979c127",
+    "condition": "OPEN",
+    "current_work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+    "created_at": "2026-09-27T05:28:17.827046Z",
+    "updated_at": "2026-09-27T05:30:56.115088Z",
+    "records": [
+      {
+        "record_id": "1c0f51a6-1bb8-4038-93b0-205110267a98",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "work_focus_id": null,
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:28:18.294256Z"
+      },
+      {
+        "record_id": "163383e0-8b91-4b09-921b-0c7cfabd1531",
+        "sequence": 2,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。",
+        "work_focus_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:30:56.115088Z"
+      }
+    ],
+    "conversation_messages": [
+      {
+        "message_id": "7c255ef5-33d9-4ee4-8d5c-cea10d81c375",
+        "turn_id": "882d04fa-3ecc-4acc-9f26-e259ec4f3606",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "content": "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "1c0f51a6-1bb8-4038-93b0-205110267a98",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:28:18.294256Z",
+        "updated_at": "2026-09-27T05:28:59.921187Z"
+      },
+      {
+        "message_id": "21a79090-eabe-4a06-b66f-3780f05f71f3",
+        "turn_id": "882d04fa-3ecc-4acc-9f26-e259ec4f3606",
+        "sequence": 2,
+        "actor": "WATT",
+        "content": "已收到：在 http://qualified-git-isolated:8080/business-app.git 这个仓库上为系统增加搜索功能，对应的工作已经建立。下一步是启动该仓库的读取获取操作；状态为已请求、尚未开始，获取完成后我会自动继续。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "f70146c6-4403-4009-ba14-87b60bfca894",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:28:59.921187Z",
+        "updated_at": "2026-09-27T05:28:59.921187Z"
+      },
+      {
+        "message_id": "483ee4f9-b16d-4816-812e-576251e142be",
+        "turn_id": "c02af77e-78f3-4361-9954-8b5d67456468",
+        "sequence": 3,
+        "actor": "HUMAN",
+        "content": "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "163383e0-8b91-4b09-921b-0c7cfabd1531",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:30:56.115088Z",
+        "updated_at": "2026-09-27T05:31:29.825868Z"
+      },
+      {
+        "message_id": "eaf13685-56ef-47c8-91ff-659ab3442846",
+        "turn_id": "c02af77e-78f3-4361-9954-8b5d67456468",
+        "sequence": 4,
+        "actor": "WATT",
+        "content": "你的选择已写入当前 Work，Watt 将按这项决定继续推进。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "ea76d8d8-120c-491a-b189-6a07aed1c7c3",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:31:29.825868Z",
+        "updated_at": "2026-09-27T05:31:29.825868Z"
+      }
+    ],
+    "turns": [
+      {
+        "turn_id": "882d04fa-3ecc-4acc-9f26-e259ec4f3606",
+        "interaction_id": "2a7323d1-2c63-42b0-b30c-5b6a2979c127",
+        "request_record_id": "1c0f51a6-1bb8-4038-93b0-205110267a98",
+        "assessment_id": "f70146c6-4403-4009-ba14-87b60bfca894",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T05:28:18.294256Z",
+        "started_at": "2026-09-27T05:28:18.688395Z",
+        "completed_at": "2026-09-27T05:28:59.921187Z",
+        "updated_at": "2026-09-27T05:28:59.921187Z"
+      },
+      {
+        "turn_id": "c02af77e-78f3-4361-9954-8b5d67456468",
+        "interaction_id": "2a7323d1-2c63-42b0-b30c-5b6a2979c127",
+        "request_record_id": "163383e0-8b91-4b09-921b-0c7cfabd1531",
+        "assessment_id": "ea76d8d8-120c-491a-b189-6a07aed1c7c3",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T05:30:56.115088Z",
+        "started_at": "2026-09-27T05:30:56.302582Z",
+        "completed_at": "2026-09-27T05:31:29.825868Z",
+        "updated_at": "2026-09-27T05:31:29.825868Z"
+      }
+    ],
+    "human_said": [
+      "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+      "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。"
+    ],
+    "latest_assessment": {
+      "assessment_id": "ea76d8d8-120c-491a-b189-6a07aed1c7c3",
+      "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627",
+      "basis_last_sequence": 2,
+      "interpreted_motive": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+      "desired_outcome": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+      "design_intent_frame": {
+        "design_subject": "business-app 系统的用户搜索功能",
+        "object_type": "FEATURE",
+        "business_context": null,
+        "desired_outcome": "用户可在 business-app 内按姓名或邮箱检索到目标用户记录，且客户、订单等其他部分行为不变",
+        "scope_level": "capability",
+        "collaboration_mode": "design",
+        "candidate_assumptions": [
+          "搜索入口置于用户列表页顶部或全局导航（沿用现有界面结构）",
+          "姓名与邮箱采用包含式关键词匹配，忽略大小写",
+          "结果沿用现有用户列表的展示方式，必要时沿用现有分页"
+        ],
+        "ambiguities": [
+          "精确匹配还是部分匹配、结果排序规则未指定，可按现有代码惯例选定",
+          "是否需要加权限过滤或分页沿用现状，将由仓库发现后决定"
+        ],
+        "confidence": 0.78
+      },
+      "candidate_context": [
+        "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+        "搜索将加入现有 business-app 系统，而非新建独立应用",
+        "搜索范围限定为系统中的用户数据"
+      ],
+      "candidate_constraints": [
+        "搜索只覆盖用户（users），不覆盖客户、订单等其他数据域",
+        "匹配字段为姓名和邮箱",
+        "客户、订单等其他部分保持原样，不因本次改动而变更"
+      ],
+      "current_requests": [
+        "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git",
+        "给系统增加搜索。",
+        "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。"
+      ],
+      "unresolved_material_questions": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne-repo-url",
+          "kind": "REFERENCE",
+          "values": [
+            "http://qualified-git-isolated:8080/business-app.git"
+          ],
+          "unit": null,
+          "source_record_id": "1c0f51a6-1bb8-4038-93b0-205110267a98",
+          "source_text": "http://qualified-git-isolated:8080/business-app.git",
+          "explicit_roles": [
+            null
+          ]
+        },
+        {
+          "extraction_id": "ne-search-scope-users",
+          "kind": "SCOPE",
+          "values": [
+            "用户"
+          ],
+          "unit": null,
+          "source_record_id": "163383e0-8b91-4b09-921b-0c7cfabd1531",
+          "source_text": "只搜索用户",
+          "explicit_roles": [
+            "search_target"
+          ]
+        },
+        {
+          "extraction_id": "ne-match-fields",
+          "kind": "ORDERED_VALUES",
+          "values": [
+            "姓名",
+            "邮箱"
+          ],
+          "unit": null,
+          "source_record_id": "163383e0-8b91-4b09-921b-0c7cfabd1531",
+          "source_text": "按姓名和邮箱查找",
+          "explicit_roles": [
+            "match_field",
+            "match_field"
+          ]
+        },
+        {
+          "extraction_id": "ne-excluded-scope",
+          "kind": "SCOPE",
+          "values": [
+            "客户",
+            "订单"
+          ],
+          "unit": null,
+          "source_record_id": "163383e0-8b91-4b09-921b-0c7cfabd1531",
+          "source_text": "客户、订单等其他部分保持原样",
+          "explicit_roles": [
+            "excluded_scope",
+            "excluded_scope"
+          ]
+        }
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "aaf0a528-2c92-5fc1-85e9-21923088272f",
+          "subject": "repository.url",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git-isolated:8080/business-app.git",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "1c0f51a6-1bb8-4038-93b0-205110267a98"
+            ],
+            "source_text": "http://qualified-git-isolated:8080/business-app.git",
+            "source_extraction_ids": [
+              "ne-repo-url"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "40b37cdb-9f0d-520e-acbd-b9a37a5d6d1c"
+        },
+        {
+          "id": "f24cc226-c1ba-50d3-a6d1-093aa1a3d1c9",
+          "subject": "search.scope",
+          "relation": "SCOPE",
+          "value": [
+            "用户"
+          ],
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "source_text": "只搜索用户",
+            "source_extraction_ids": [
+              "ne-search-scope-users"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "bad1443d-afab-52d1-90e2-320f82d19e7f",
+          "subject": "search.match_fields",
+          "relation": "ORDERED_COMPONENT",
+          "value": [
+            "姓名",
+            "邮箱"
+          ],
+          "unit": null,
+          "scope": "business-app.user",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "source_text": "按姓名和邮箱查找",
+            "source_extraction_ids": [
+              "ne-match-fields"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "4db293cb-dd4e-50f8-95bf-ed62e1681d0d",
+          "subject": "search.excluded_scope",
+          "relation": "SCOPE",
+          "value": [
+            "客户",
+            "订单"
+          ],
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "source_text": "客户、订单等其他部分保持原样",
+            "source_extraction_ids": [
+              "ne-excluded-scope"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "DECISION_INPUT",
+          "statement": "Human 选定搜索范围仅为用户，匹配字段为姓名和邮箱，客户与订单等其他部分保持原样。",
+          "source_record_ids": [
+            "163383e0-8b91-4b09-921b-0c7cfabd1531"
+          ],
+          "confidence": 0.97,
+          "rationale": "该输入直接回应了此前关于搜索覆盖哪个数据域的待决问题，给出了明确的限定选择。",
+          "clarification_required": false
+        },
+        {
+          "kind": "CONSTRAINT",
+          "statement": "搜索不得扩展到客户、订单等其他数据域，这些部分的行为应保持原样。",
+          "source_record_ids": [
+            "163383e0-8b91-4b09-921b-0c7cfabd1531"
+          ],
+          "confidence": 0.96,
+          "rationale": "“客户、订单等其他部分保持原样”是对本次改动边界的显式限制。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": "ON_TOPIC",
+      "impact_disposition": "HUMAN_GOVERNANCE_REQUIRED",
+      "candidate_change": {
+        "changed_fields": [
+          "desired_outcome",
+          "context_facts",
+          "constraints",
+          "requests",
+          "semantic_facts"
+        ],
+        "motive": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+        "desired_outcome": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+        "context_facts": [
+          "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+          "搜索将加入现有 business-app 系统，而非新建独立应用",
+          "搜索范围限定为系统中的用户数据"
+        ],
+        "constraints": [
+          "搜索只覆盖用户（users），不覆盖客户、订单等其他数据域",
+          "匹配字段为姓名和邮箱",
+          "客户、订单等其他部分保持原样，不因本次改动而变更"
+        ],
+        "requests": [
+          "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git",
+          "给系统增加搜索。",
+          "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+          "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。"
+        ],
+        "semantic_facts": [
+          {
+            "id": "aaf0a528-2c92-5fc1-85e9-21923088272f",
+            "subject": "repository.url",
+            "relation": "REFERENCE",
+            "value": "http://qualified-git-isolated:8080/business-app.git",
+            "unit": null,
+            "scope": "business-app",
+            "qualifiers": {
+              "source": "human"
+            },
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "1c0f51a6-1bb8-4038-93b0-205110267a98"
+              ],
+              "source_text": "http://qualified-git-isolated:8080/business-app.git",
+              "source_extraction_ids": [
+                "ne-repo-url"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": "40b37cdb-9f0d-520e-acbd-b9a37a5d6d1c"
+          },
+          {
+            "id": "f24cc226-c1ba-50d3-a6d1-093aa1a3d1c9",
+            "subject": "search.scope",
+            "relation": "SCOPE",
+            "value": [
+              "用户"
+            ],
+            "unit": null,
+            "scope": "business-app",
+            "qualifiers": {
+              "source": "human"
+            },
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "163383e0-8b91-4b09-921b-0c7cfabd1531"
+              ],
+              "source_text": "只搜索用户",
+              "source_extraction_ids": [
+                "ne-search-scope-users"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": null
+          },
+          {
+            "id": "bad1443d-afab-52d1-90e2-320f82d19e7f",
+            "subject": "search.match_fields",
+            "relation": "ORDERED_COMPONENT",
+            "value": [
+              "姓名",
+              "邮箱"
+            ],
+            "unit": null,
+            "scope": "business-app.user",
+            "qualifiers": {
+              "source": "human"
+            },
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "163383e0-8b91-4b09-921b-0c7cfabd1531"
+              ],
+              "source_text": "按姓名和邮箱查找",
+              "source_extraction_ids": [
+                "ne-match-fields"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": null
+          },
+          {
+            "id": "4db293cb-dd4e-50f8-95bf-ed62e1681d0d",
+            "subject": "search.excluded_scope",
+            "relation": "SCOPE",
+            "value": [
+              "客户",
+              "订单"
+            ],
+            "unit": null,
+            "scope": "business-app",
+            "qualifiers": {
+              "source": "human"
+            },
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "provenance": {
+              "source_record_ids": [
+                "163383e0-8b91-4b09-921b-0c7cfabd1531"
+              ],
+              "source_text": "客户、订单等其他部分保持原样",
+              "source_extraction_ids": [
+                "ne-excluded-scope"
+              ],
+              "role_origin": "EXPLICIT"
+            },
+            "supersedes_fact_ids": [],
+            "admitted_work_revision_id": null
+          }
+        ],
+        "scope_change_required": true
+      },
+      "basis_work_revision_id": "aa954a21-2a7f-5f88-9d7a-bce5a5390ddf",
+      "basis_steering_plan_revision_id": "2d0734a5-4c66-4161-807e-b74506736e2c",
+      "basis_steering_step_id": "e1207c09-35a5-498a-b91e-0a7d352b7524",
+      "basis_active_runtime_binding_id": null,
+      "supporting_references": [],
+      "natural_response": "沿既有仓库准备路径确认 users 的现有接口与用户列表页面，据此形成仅覆盖姓名/邮箱搜索的最小改动方案（入口、查询参数、结果渲染），再进入实现。",
+      "readiness": {
+        "status": "READY",
+        "profile": "LONG_LIVED_STEERING",
+        "profile_version": "v0",
+        "satisfied_requirements": [
+          "MOTIVE",
+          "DESIRED_OUTCOME"
+        ],
+        "missing_information": [],
+        "unresolved_material_questions": [],
+        "reasons": [
+          "Motive and desired outcome are clear enough to form governed Work."
+        ],
+        "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627"
+      },
+      "progressive_semantics": {
+        "turn_intent": "HUMAN_DECISION",
+        "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627",
+        "source_record_ids": [
+          "1c0f51a6-1bb8-4038-93b0-205110267a98",
+          "163383e0-8b91-4b09-921b-0c7cfabd1531"
+        ],
+        "reception_meanings": [
+          "DEEP_WIC_WORKING_UNDERSTANDING"
+        ],
+        "working_motive": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+        "working_desired_outcome": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+        "working_facts": [
+          "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+          "搜索将加入现有 business-app 系统，而非新建独立应用",
+          "搜索范围限定为系统中的用户数据"
+        ],
+        "working_constraints": [
+          "搜索只覆盖用户（users），不覆盖客户、订单等其他数据域",
+          "匹配字段为姓名和邮箱",
+          "客户、订单等其他部分保持原样，不因本次改动而变更"
+        ],
+        "working_requests": [
+          "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git",
+          "给系统增加搜索。",
+          "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+          "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。"
+        ],
+        "explicit_assumptions": [],
+        "unresolved_human_decisions": [],
+        "deltas": [
+          {
+            "id": "26b4e5c6-39ee-531d-b19a-0093a8fc5061",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "搜索只覆盖用户（users），不覆盖客户、订单等其他数据域",
+            "prior_value": null,
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "505d90f1-c7c9-5b40-9004-cde23aef2d35",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "匹配字段为姓名和邮箱",
+            "prior_value": null,
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "998898a1-58c5-5290-992a-39cb74dee329",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "客户、订单等其他部分保持原样，不因本次改动而变更",
+            "prior_value": null,
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          }
+        ],
+        "pattern_signals": [],
+        "inference_disposition": "NO_INFERENCE",
+        "questions": [],
+        "selected_question": null,
+        "governance_candidate": "WORK_REVISION_PROPOSAL",
+        "readiness": [
+          {
+            "target": "WORK_FORMATION",
+            "status": "NOT_APPLICABLE",
+            "satisfied_evidence": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "WORK_REVISION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "ACTIVE_WORK_BASIS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "DESIGN_PROGRESSION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "CURRENT_FOCUS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "artifact_recommendation": null,
+        "factual_contradictions": [],
+        "semantic_policy_revision": "wic-semantic-policy-v1",
+        "question_policy_revision": "wic-question-value-v1"
+      },
+      "provider_identity": "deepseek-responses:semantic:request:1f1aef56-3bf3-453f-aa7b-fa9758c4f30d",
+      "model_identity": "deepseek-flash",
+      "schema_version": "wic-assessment-v6",
+      "created_at": "2026-09-27T05:31:16.561486Z"
+    },
+    "latest_assessment_current": false,
+    "interpreted_motive": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+    "desired_outcome": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+    "design_intent_frame": {
+      "design_subject": "business-app 系统的用户搜索功能",
+      "object_type": "FEATURE",
+      "business_context": null,
+      "desired_outcome": "用户可在 business-app 内按姓名或邮箱检索到目标用户记录，且客户、订单等其他部分行为不变",
+      "scope_level": "capability",
+      "collaboration_mode": "design",
+      "candidate_assumptions": [
+        "搜索入口置于用户列表页顶部或全局导航（沿用现有界面结构）",
+        "姓名与邮箱采用包含式关键词匹配，忽略大小写",
+        "结果沿用现有用户列表的展示方式，必要时沿用现有分页"
+      ],
+      "ambiguities": [
+        "精确匹配还是部分匹配、结果排序规则未指定，可按现有代码惯例选定",
+        "是否需要加权限过滤或分页沿用现状，将由仓库发现后决定"
+      ],
+      "confidence": 0.78
+    },
+    "candidate_context": [
+      "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+      "搜索将加入现有 business-app 系统，而非新建独立应用",
+      "搜索范围限定为系统中的用户数据"
+    ],
+    "candidate_constraints": [
+      "搜索只覆盖用户（users），不覆盖客户、订单等其他数据域",
+      "匹配字段为姓名和邮箱",
+      "客户、订单等其他部分保持原样，不因本次改动而变更"
+    ],
+    "current_requests": [
+      "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git",
+      "给系统增加搜索。",
+      "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+      "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。"
+    ],
+    "unresolved_material_questions": [],
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627"
+    },
+    "candidate_engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+    "candidate_repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+    "candidate_repository_ref": "refs/heads/main",
+    "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git-isolated:8080/business-app.git at refs/heads/main",
+    "governed_work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+    "governed_revision": {
+      "revision_id": "0ad61587-30e4-5949-8acc-a0b00a9c6e88",
+      "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+      "revision_number": 3,
+      "previous_revision_id": "aa954a21-2a7f-5f88-9d7a-bce5a5390ddf",
+      "basis_fingerprint": "6ea75a94484c38be8ba561199ed76be9bd87b109fa3fb2e04c92760e11956627",
+      "revision_fingerprint": "d68fbb9e667135f445fa45d0d94a113b4fb2c1d324a58d2c0f10f141df855cb1",
+      "source_interaction_id": "2a7323d1-2c63-42b0-b30c-5b6a2979c127",
+      "source_kind": "INTERACTION_ASSESSMENT",
+      "source_assessment_id": "ea76d8d8-120c-491a-b189-6a07aed1c7c3",
+      "source_record_ids": [
+        "1c0f51a6-1bb8-4038-93b0-205110267a98",
+        "163383e0-8b91-4b09-921b-0c7cfabd1531"
+      ],
+      "motive": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+      "desired_outcome": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+      "context_facts": [
+        "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+        "搜索将加入现有 business-app 系统，而非新建独立应用",
+        "搜索范围限定为系统中的用户数据"
+      ],
+      "constraints": [
+        "搜索只覆盖用户（users），不覆盖客户、订单等其他数据域",
+        "匹配字段为姓名和邮箱",
+        "客户、订单等其他部分保持原样，不因本次改动而变更"
+      ],
+      "requests": [
+        "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git",
+        "给系统增加搜索。",
+        "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。"
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "aaf0a528-2c92-5fc1-85e9-21923088272f",
+          "subject": "repository.url",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git-isolated:8080/business-app.git",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "1c0f51a6-1bb8-4038-93b0-205110267a98"
+            ],
+            "source_text": "http://qualified-git-isolated:8080/business-app.git",
+            "source_extraction_ids": [
+              "ne-repo-url"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "40b37cdb-9f0d-520e-acbd-b9a37a5d6d1c"
+        },
+        {
+          "id": "f24cc226-c1ba-50d3-a6d1-093aa1a3d1c9",
+          "subject": "search.scope",
+          "relation": "SCOPE",
+          "value": [
+            "用户"
+          ],
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "source_text": "只搜索用户",
+            "source_extraction_ids": [
+              "ne-search-scope-users"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "0ad61587-30e4-5949-8acc-a0b00a9c6e88"
+        },
+        {
+          "id": "bad1443d-afab-52d1-90e2-320f82d19e7f",
+          "subject": "search.match_fields",
+          "relation": "ORDERED_COMPONENT",
+          "value": [
+            "姓名",
+            "邮箱"
+          ],
+          "unit": null,
+          "scope": "business-app.user",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "source_text": "按姓名和邮箱查找",
+            "source_extraction_ids": [
+              "ne-match-fields"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "0ad61587-30e4-5949-8acc-a0b00a9c6e88"
+        },
+        {
+          "id": "4db293cb-dd4e-50f8-95bf-ed62e1681d0d",
+          "subject": "search.excluded_scope",
+          "relation": "SCOPE",
+          "value": [
+            "客户",
+            "订单"
+          ],
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "source_text": "客户、订单等其他部分保持原样",
+            "source_extraction_ids": [
+              "ne-excluded-scope"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "0ad61587-30e4-5949-8acc-a0b00a9c6e88"
+        }
+      ],
+      "engineering_scope_id": "390a6bf5-2896-50aa-9044-573b5c0cc9c9",
+      "engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+      "scope_basis_fingerprint": "fdeaf26534f8d40b51ebfdd67569dadc805161ddf416f215e654d73cfd642334",
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+      "repository_ref": "refs/heads/main",
+      "source_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "governance_record_id": "15fa8a4b-5738-5f6c-95a3-cdaef376c620",
+      "supporting_references": [
+        "INTERACTION_RECORD:1c0f51a6-1bb8-4038-93b0-205110267a98",
+        "INTERACTION_RECORD:163383e0-8b91-4b09-921b-0c7cfabd1531"
+      ],
+      "change_set": [
+        "desired_outcome",
+        "context_facts",
+        "constraints",
+        "requests",
+        "semantic_facts",
+        "impact:HUMAN_GOVERNANCE_REQUIRED"
+      ],
+      "rationale": "Human answered the current governed question: steering-decision:25e4aa12-964b-4aaf-91cc-ab0375423789",
+      "admitted_by": "human:owner",
+      "schema_version": "wic-work-reality-v3",
+      "created_at": "2026-09-27T05:31:22.964129Z"
+    },
+    "current_work_focus": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。 → business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+    "focus_classification": "ON_TOPIC",
+    "impact_disposition": "HUMAN_GOVERNANCE_REQUIRED",
+    "candidate_change": {
+      "changed_fields": [
+        "desired_outcome",
+        "context_facts",
+        "constraints",
+        "requests",
+        "semantic_facts"
+      ],
+      "motive": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+      "desired_outcome": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+      "context_facts": [
+        "当前项目仓库为 http://qualified-git-isolated:8080/business-app.git",
+        "搜索将加入现有 business-app 系统，而非新建独立应用",
+        "搜索范围限定为系统中的用户数据"
+      ],
+      "constraints": [
+        "搜索只覆盖用户（users），不覆盖客户、订单等其他数据域",
+        "匹配字段为姓名和邮箱",
+        "客户、订单等其他部分保持原样，不因本次改动而变更"
+      ],
+      "requests": [
+        "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git",
+        "给系统增加搜索。",
+        "这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+        "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。"
+      ],
+      "semantic_facts": [
+        {
+          "id": "aaf0a528-2c92-5fc1-85e9-21923088272f",
+          "subject": "repository.url",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git-isolated:8080/business-app.git",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "1c0f51a6-1bb8-4038-93b0-205110267a98"
+            ],
+            "source_text": "http://qualified-git-isolated:8080/business-app.git",
+            "source_extraction_ids": [
+              "ne-repo-url"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "40b37cdb-9f0d-520e-acbd-b9a37a5d6d1c"
+        },
+        {
+          "id": "f24cc226-c1ba-50d3-a6d1-093aa1a3d1c9",
+          "subject": "search.scope",
+          "relation": "SCOPE",
+          "value": [
+            "用户"
+          ],
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "source_text": "只搜索用户",
+            "source_extraction_ids": [
+              "ne-search-scope-users"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "bad1443d-afab-52d1-90e2-320f82d19e7f",
+          "subject": "search.match_fields",
+          "relation": "ORDERED_COMPONENT",
+          "value": [
+            "姓名",
+            "邮箱"
+          ],
+          "unit": null,
+          "scope": "business-app.user",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "source_text": "按姓名和邮箱查找",
+            "source_extraction_ids": [
+              "ne-match-fields"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "4db293cb-dd4e-50f8-95bf-ed62e1681d0d",
+          "subject": "search.excluded_scope",
+          "relation": "SCOPE",
+          "value": [
+            "客户",
+            "订单"
+          ],
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "source": "human"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "163383e0-8b91-4b09-921b-0c7cfabd1531"
+            ],
+            "source_text": "客户、订单等其他部分保持原样",
+            "source_extraction_ids": [
+              "ne-excluded-scope"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "scope_change_required": true
+    },
+    "work_revision_admission_status": "ADMITTED",
+    "active_cycle_work_revision_id": "0ad61587-30e4-5949-8acc-a0b00a9c6e88",
+    "active_cycle_impact_disposition": null,
+    "work_satisfaction_state": "IN_PROGRESS",
+    "interaction_relationship_state": "OPEN",
+    "work_focus_history": [
+      "5e234edb-4ffd-5827-b7a2-c12c67e516aa"
+    ],
+    "latest_work_transition": null,
+    "new_work_formation_pending": false,
+    "production_request_detected": true,
+    "repository_source": "http://qualified-git-isolated:8080/business-app.git",
+    "production_admission_state": "WORK_CREATED",
+    "repository_acquisition_state": "READY",
+    "repository_observation": {
+      "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+      "paths": [
+        ".gitignore",
+        "Dockerfile",
+        "README.md",
+        "migrations/001_initial.sql",
+        "package.json",
+        "server.py",
+        "tests/application.cjs",
+        "web/app.js",
+        "web/index.html",
+        "web/styles.css"
+      ],
+      "title": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+      "source": "http://qualified-git-isolated:8080/business-app.git",
+      "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+      "revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "condition": "READY",
+      "description": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git-isolated:8080/business-app.git\n给系统增加搜索。",
+      "fingerprint": "fbe804ea30210ffab3676fc75ad0ad326f37945bcce077dffd0ea00db37c5edd",
+      "observed_at": "2026-09-27T05:29:01.163695+00:00",
+      "resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+      "context_path": "README.md",
+      "human_message": "Repository is ready.",
+      "target_branch": null,
+      "attempt_number": 1,
+      "interaction_id": "2a7323d1-2c63-42b0-b30c-5b6a2979c127",
+      "operation_kind": "ACQUIRE",
+      "repository_ref": "refs/heads/main",
+      "base_resource_id": null,
+      "failure_category": null,
+      "intake_request_id": "fcca793d-b57f-5f5e-bc2c-255f10477f4e",
+      "operation_evidence": {
+        "verified": true,
+        "connector_id": "builtin:git",
+        "capability_id": "git.repository.acquire",
+        "operation_ref": "repository-intake:fcca793d-b57f-5f5e-bc2c-255f10477f4e",
+        "resulting_branch": "refs/heads/main",
+        "resulting_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "workspace_reference": "/var/lib/spg/repository-assets/fcca793d-b57f-5f5e-bc2c-255f10477f4e"
+      },
+      "previous_attempt_id": null,
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git"
+    },
+    "production_next_step": "Continue Steering against the acquired repository Reality.",
+    "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+    "selected_design_schema_version": "0.1",
+    "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+    "design_stage": "Current Reality",
+    "design_next_focus": "Establish the trusted current product and runtime reality.",
+    "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+    "design_facilitation_strategy": "CLARIFY",
+    "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+  },
+  "observed_at": "2026-09-27T05:34:41.494534+00:00",
+  "work": {
+    "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+    "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+    "goal_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "raw_user_requirement": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+    "title": "让 business-app 系统具备搜索能力，使用户能检索系统中的内容。",
+    "desired_outcome": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+    "constraints": [
+      "搜索只覆盖用户（users），不覆盖客户、订单等其他数据域",
+      "匹配字段为姓名和邮箱",
+      "客户、订单等其他部分保持原样，不因本次改动而变更"
+    ],
+    "target_kind": "CODE_WORK",
+    "artifact_target": null,
+    "change_proposal": {
+      "proposal_id": "6a418a7b-1ea5-54f0-ba47-2db66bebb818",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+      "source_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+      "source_ref": "refs/heads/main",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "proposed_targets": [
+        {
+          "path": "web/index.html",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "现有 UI 的用户区只有用户列表容器，没有搜索输入或搜索控件；要满足“给系统增加搜索”并让用户在现有界面中按姓名/邮箱查找用户，必须在此新增用户搜索控件。",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <section id=\"users\"><h2>用户列表</h2><div id=\"user-list\"></div></section>",
+          "confidence": "HIGH"
+        },
+        {
+          "path": "web/app.js",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "现有脚本只从 /api/users 取回全部用户并把 name 拼接展示，没有搜索、过滤或按 email 匹配的逻辑；前端搜索必须在这里接收查询并过滤已加载用户，同时不得改变客户列表行为。",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/app.js witness: async function loadLists() {\n  const users = await fetch('/api/users').then(response => response.json());\n  document.querySelector('#user-list').textContent = users.map(user => user.name).join(', ');",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [
+        "migrations/**",
+        "Dockerfile"
+      ],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "cb7d81c96a7c051f494fe50f6d7a3db238037e910eafde2f4d03b7f8a1da405b"
+    },
+    "change_contract": null,
+    "production_plan": {
+      "proposal_id": "20506893-1d77-5312-9d8b-55777dcc4860",
+      "target_kind": "CODE_WORK",
+      "objective": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+      "desired_outcome": "business-app 用户在现有系统界面中可通过搜索找到所需数据或记录；当前已明确限定为按姓名和邮箱查找用户。",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Prepare the repository-inspected code targets: web/index.html, web/app.js."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": null,
+      "artifact_targets": [],
+      "change_proposal": {
+        "proposal_id": "6a418a7b-1ea5-54f0-ba47-2db66bebb818",
+        "target_kind": "CODE_WORK",
+        "engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+        "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+        "source_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+        "source_ref": "refs/heads/main",
+        "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "proposed_targets": [
+          {
+            "path": "web/index.html",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "现有 UI 的用户区只有用户列表容器，没有搜索输入或搜索控件；要满足“给系统增加搜索”并让用户在现有界面中按姓名/邮箱查找用户，必须在此新增用户搜索控件。",
+            "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <section id=\"users\"><h2>用户列表</h2><div id=\"user-list\"></div></section>",
+            "confidence": "HIGH"
+          },
+          {
+            "path": "web/app.js",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "现有脚本只从 /api/users 取回全部用户并把 name 拼接展示，没有搜索、过滤或按 email 匹配的逻辑；前端搜索必须在这里接收查询并过滤已加载用户，同时不得改变客户列表行为。",
+            "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/app.js witness: async function loadLists() {\n  const users = await fetch('/api/users').then(response => response.json());\n  document.querySelector('#user-list').textContent = users.map(user => user.name).join(', ');",
+            "confidence": "HIGH"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [
+          "migrations/**",
+          "Dockerfile"
+        ],
+        "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+        "confidence": "MEDIUM",
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null,
+            "identity": "PATH_SCOPE"
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null,
+            "identity": "GIT_DIFF_CHECK"
+          }
+        ],
+        "provenance": {
+          "provider_identity": "provider:repository-aware-change-proposal-lite",
+          "provider_version": "v1",
+          "inspection_method": "git-object-read-only:path-enumeration+text-search"
+        },
+        "unresolved_scope_questions": [],
+        "proposal_fingerprint": "cb7d81c96a7c051f494fe50f6d7a3db238037e910eafde2f4d03b7f8a1da405b"
+      },
+      "change_contract": null,
+      "inherited_constraints": [
+        "搜索只覆盖用户（users），不覆盖客户、订单等其他数据域",
+        "匹配字段为姓名和邮箱",
+        "客户、订单等其他部分保持原样，不因本次改动而变更"
+      ],
+      "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+      "assumptions": [
+        "The admitted Work can be executed through one governed PWU and Attempt lineage."
+      ],
+      "unresolved_questions": [],
+      "fit_classification": "ONE_PWU_FIT",
+      "engineering_resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+      "source_baseline_id": "627fcc1d-d41c-4e6d-b528-1a360496c313",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+    },
+    "production_plan_runtime": null,
+    "tags": [],
+    "engineering_scope": {
+      "engineering_scope_id": "390a6bf5-2896-50aa-9044-573b5c0cc9c9",
+      "summary": "Long-lived Work revision 3 authority envelope for http://qualified-git-isolated:8080/business-app.git at refs/heads/main",
+      "condition": "ADMITTED",
+      "resources": [
+        {
+          "resource_id": "3646cbfa-5446-429f-a1eb-f13bb951855a",
+          "condition": "ACTIVE"
+        }
+      ]
+    },
+    "status": "NEEDS_ATTENTION",
+    "current_production_step": "PRODUCE",
+    "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "what_happens_next": "Human must authorize the exact Candidate",
+    "human_attention_required": true,
+    "result_summary": "2 independently observed artifact change(s)",
+    "current_work_reality_revision_id": "0ad61587-30e4-5949-8acc-a0b00a9c6e88",
+    "steering_enabled": true,
+    "current_steering_step_id": "4b12f726-9cff-4b75-a7ca-4c64956c4529",
+    "current_steering_step_type": "PRODUCE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "3afd3f6e-eac1-4900-9eab-22405737c58b",
+    "current_production_cycle_trusted": false,
+    "latest_trusted_runtime_commit_id": null,
+    "work_complete": false,
+    "automatic_progression_state": "ACTIVE",
+    "last_stop_reason": "HUMAN_ATTENTION",
+    "execution_progress": {
+      "phase": "RUNNING",
+      "activity": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required.",
+      "transitions_completed": 10,
+      "transitions_total": null,
+      "percent_complete": null,
+      "started_at": "2026-09-27T05:32:34.665055Z",
+      "updated_at": "2026-09-27T05:34:00.647582Z",
+      "elapsed_seconds": 85.982527,
+      "still_working": false,
+      "blocked_reason": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required."
+    },
+    "guided_design": null,
+    "next_owner": "HUMAN",
+    "control_state_valid": true,
+    "control_state_violations": []
+  },
+  "steering": {
+    "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+    "work_objective": "Add bounded user search to the existing business-app. The existing UI must provide a search control for users, and the existing server must support filtering users by name or email through GET /api/users, while preserving the admitted runtime entrypoint `python server.py` on port 8080 with SQLite persistence. Do not alter customers, orders, database schema, or unrelated routes.",
+    "steering_enabled": true,
+    "steering_plan_id": "7bbd53ca-bd06-4526-bb7b-daea91a0e1c7",
+    "active_revision_id": "2d9e3388-2735-406b-9dbb-fb22f22618ec",
+    "active_revision_number": 2,
+    "completed_steps": [
+      {
+        "step_id": "6b4cd1bc-689c-466b-abc7-9846a6ac7790",
+        "type": "DESIGN",
+        "objective": "Reassess the latest admitted change against existing design and production Reality",
+        "completion_condition": "The latest Work Reality has a bounded production direction",
+        "position": 1,
+        "state": "CLOSED",
+        "design_issue_key": null
+      }
+    ],
+    "current_step": {
+      "step_id": "4b12f726-9cff-4b75-a7ca-4c64956c4529",
+      "type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from the latest Work Reality",
+      "completion_condition": "The new bounded production cycle reaches trusted Runtime Commit",
+      "position": 2,
+      "state": "CURRENT",
+      "design_issue_key": null
+    },
+    "known_next_steps": [
+      {
+        "step_id": "a1454362-161a-4584-b71e-cb785dfc24e0",
+        "type": "VERIFY_ACCEPT",
+        "objective": "Assess the new production evidence against the latest Work outcome",
+        "completion_condition": "Governed evidence supports acceptance or further reassessment",
+        "position": 3,
+        "state": "KNOWN",
+        "design_issue_key": null
+      },
+      {
+        "step_id": "1c8504c6-cea0-49d9-aadd-5b1b9b1b3812",
+        "type": "COMPLETE",
+        "objective": "Complete the latest admitted Work outcome",
+        "completion_condition": "The latest admitted Work Reality is truthfully satisfied",
+        "position": 4,
+        "state": "KNOWN",
+        "design_issue_key": null
+      }
+    ],
+    "plan_changes": [
+      {
+        "change_id": "23f628e5-8a5c-4da9-b943-0e760bea74cf",
+        "from_revision_id": "2d0734a5-4c66-4161-807e-b74506736e2c",
+        "to_revision_id": "2d9e3388-2735-406b-9dbb-fb22f22618ec",
+        "reason": "Reassess the admitted Work Reality revision without treating the prior production cycle as the current result.",
+        "affected_step_ids": [],
+        "affected_reality_refs": [
+          {
+            "kind": "GOVERNANCE_DECISION",
+            "identity": "634f246c-049a-47ba-946f-f42005ee0540"
+          },
+          {
+            "kind": "GOVERNANCE_DECISION",
+            "identity": "935ce50e-75e2-57cf-a1f5-c7e859550aa6"
+          },
+          {
+            "kind": "SEMANTIC_RESULT",
+            "identity": "7488862d-052f-4f5d-9499-0a2392df4eaf"
+          },
+          {
+            "kind": "TRUSTED_BASELINE",
+            "identity": "627fcc1d-d41c-4e6d-b528-1a360496c313"
+          },
+          {
+            "kind": "WORK",
+            "identity": "5e234edb-4ffd-5827-b7a2-c12c67e516aa"
+          },
+          {
+            "kind": "WORK_REALITY_REVISION",
+            "identity": "0ad61587-30e4-5949-8acc-a0b00a9c6e88"
+          },
+          {
+            "kind": "WORK_REALITY_REVISION",
+            "identity": "aa954a21-2a7f-5f88-9d7a-bce5a5390ddf"
+          }
+        ],
+        "changed_at": "2026-09-27T05:31:23.444113Z"
+      }
+    ],
+    "latest_decision": {
+      "decision_id": "d08ad17c-67b1-42c3-b884-d54efea39964",
+      "next_step_type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from the latest Work Reality",
+      "reason": "The current governed Step is ready to yield to the next admitted ordered Step",
+      "outcome": "AUTO_CONTINUE",
+      "human_required": false,
+      "attention_reason": null,
+      "reality_refs": [
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "634f246c-049a-47ba-946f-f42005ee0540"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "935ce50e-75e2-57cf-a1f5-c7e859550aa6"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "0c6dd2c1-50d2-45f0-88d5-bb9b638a5cb8"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "7488862d-052f-4f5d-9499-0a2392df4eaf"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "627fcc1d-d41c-4e6d-b528-1a360496c313"
+        },
+        {
+          "kind": "WORK",
+          "identity": "5e234edb-4ffd-5827-b7a2-c12c67e516aa"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "0ad61587-30e4-5949-8acc-a0b00a9c6e88"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "aa954a21-2a7f-5f88-9d7a-bce5a5390ddf"
+        }
+      ]
+    },
+    "selection_rationale": "The current governed Step is ready to yield to the next admitted ordered Step",
+    "steering_outcome": "AUTO_CONTINUE",
+    "automatic_progression_state": "ACTIVE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "3afd3f6e-eac1-4900-9eab-22405737c58b",
+    "current_production_cycle_trusted": false,
+    "human_attention_required": true,
+    "last_stop_reason": "HUMAN_ATTENTION"
+  },
+  "refinement": {
+    "count": 1,
+    "events": [
+      {
+        "id": "3adaf683-1042-4290-bc42-4c36afd4fc16",
+        "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+        "operation_id": "6b4cd1bc-689c-466b-abc7-9846a6ac7790",
+        "created_at": "2026-09-27T05:32:29.712917Z",
+        "failure_family": "CANDIDATE_INCONSISTENT",
+        "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "semantic_version": 2,
+        "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "signal_kind": "CANDIDATE_INCONSISTENT",
+        "affected_component": "semantic/scope",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "CANDIDATE_INCONSISTENT",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "source-baseline:627fcc1d-d41c-4e6d-b528-1a360496c313"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "OBSERVED_SUCCESS",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 2,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "SCOPE_INFLATION",
+          "required_paths": [
+            "web/index.html",
+            "web/app.js"
+          ],
+          "candidate_paths": [
+            "server.py",
+            "web/index.html",
+            "web/app.js",
+            "tests/application.cjs"
+          ],
+          "authority_expanded": false,
+          "rejected_behaviors": [
+            "不要求修改 server.py 的 /api/users 以增加服务端搜索过滤；现有 API 已返回 users 的 name/email，前端可对已加载用户做最小搜索。",
+            "不修改 customers、orders 的路由、表结构、迁移或任何相关行为。",
+            "不新增用户搜索之外的数据域、认证、权限或外部集成。",
+            "不将 tests/application.cjs 列为必需改动；现有测试是客户 CRUD 的只读参考，不是本次搜索的强制变更面。",
+            "不新增 README、Dockerfile、package.json 等非搜索行为改动。"
+          ]
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 0,
+        "model_token_usage": {
+          "unknown": false,
+          "input_tokens": 11385,
+          "total_tokens": 24837,
+          "cached_tokens": 512,
+          "output_tokens": 13452,
+          "reasoning_tokens": 9843
+        },
+        "compute_overhead": {},
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T05:32:29.712917Z"
+      }
+    ],
+    "metrics": {
+      "native_attempts": 1,
+      "native_self_refine_events": 0,
+      "self_refine_events": 1,
+      "self_refine_rate": 0.0,
+      "first_pass_success_rate": 1.0,
+      "recovered": 0,
+      "local_obligation_recovered": 1,
+      "recovery_scope": "LOCAL_OBLIGATION; Work convergence is independently observed",
+      "escalated": 0,
+      "failed": 0,
+      "active": 0,
+      "classification_counts": {
+        "ROUTINE_STOCHASTIC_REFINEMENT": 0,
+        "DEGRADING_OR_RECURRING_REFINEMENT": 1,
+        "SYSTEMIC_OR_NON_CONVERGING_INCIDENT": 0,
+        "LEGACY_EXECUTION_INCIDENT": 0
+      },
+      "convergence_success_rate": 1.0,
+      "average_refinement_attempts": 2.0,
+      "p95_refinement_attempts": 2,
+      "average_refinement_seconds": 0.0,
+      "p95_refinement_seconds": 0,
+      "observed_refinement_tokens": 24837,
+      "observed_refinement_tool_effects": 0,
+      "unsafe_repair_blocks": 0,
+      "recurring_signatures": {},
+      "improvement_candidates": [
+        {
+          "reference": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "component": "semantic/scope",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 24837,
+          "observed_seconds": 0,
+          "systemic": false,
+          "status": "PROPOSED"
+        }
+      ],
+      "human_escalation_observation_count": 1,
+      "human_escalation_rate": 0.0,
+      "systemic_incident_rate": 0.0
+    },
+    "work_convergence": [
+      {
+        "id": "6d77bc6a-f651-474d-82ba-1552b1f71769",
+        "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+        "intent_identity": "9647022862a8344068490f02fd876495278d87f8695f830500bb57d2b8149346",
+        "predecessor_id": null,
+        "sequence": 1,
+        "boundary": "HUMAN_ATTENTION",
+        "failure_signature": "34d2faebd2bdbefe3e3e784347ebf17de5a2507ec39ce1b6ce42600fde5b79cd",
+        "candidate_identity": null,
+        "reality_identity": "0eaf482481bec3ad479fa8dc095292c9a14b24200e1cf9879bb41f3dc23febb1",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "PRODUCTION_PLAN_ADMITTED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": null,
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:29:30.138644Z"
+      },
+      {
+        "id": "c24384f4-80c7-4c7d-8a76-6aabbaf5d7ac",
+        "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+        "intent_identity": "09b3058e7b18cd8b2108194362e63c281b232c61a69ad69ef22e90819c8f9528",
+        "predecessor_id": "6d77bc6a-f651-474d-82ba-1552b1f71769",
+        "sequence": 2,
+        "boundary": "PLAN_REVISION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "0eaf482481bec3ad479fa8dc095292c9a14b24200e1cf9879bb41f3dc23febb1",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "PRODUCTION_PLAN_ADMITTED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": null,
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:31:23.627568Z"
+      },
+      {
+        "id": "8516ee0d-92cc-4657-8278-56d3b57ad43e",
+        "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+        "intent_identity": "09b3058e7b18cd8b2108194362e63c281b232c61a69ad69ef22e90819c8f9528",
+        "predecessor_id": "c24384f4-80c7-4c7d-8a76-6aabbaf5d7ac",
+        "sequence": 3,
+        "boundary": "SEMANTIC_RESULT_ADMISSION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "20dee316f4f51df75cb01b92be88e32b1fca2cc7968e2475324fb0e1d554130a",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 2,
+        "no_progress_count": 0,
+        "elapsed_seconds": 66,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:32:30.174763Z"
+      },
+      {
+        "id": "b8f2fdf3-48a4-476d-82d9-e2b7627c6186",
+        "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+        "intent_identity": "09b3058e7b18cd8b2108194362e63c281b232c61a69ad69ef22e90819c8f9528",
+        "predecessor_id": "8516ee0d-92cc-4657-8278-56d3b57ad43e",
+        "sequence": 4,
+        "boundary": "STEP_TRANSITION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "20dee316f4f51df75cb01b92be88e32b1fca2cc7968e2475324fb0e1d554130a",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 3,
+        "no_progress_count": 0,
+        "elapsed_seconds": 68,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:32:32.399702Z"
+      },
+      {
+        "id": "713f2f2a-e6e8-449a-a2fc-30874bda113f",
+        "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+        "intent_identity": "09b3058e7b18cd8b2108194362e63c281b232c61a69ad69ef22e90819c8f9528",
+        "predecessor_id": "b8f2fdf3-48a4-476d-82d9-e2b7627c6186",
+        "sequence": 5,
+        "boundary": "PRODUCTION_CYCLE_ADMISSION",
+        "failure_signature": "55aace645e56bf76dbff41e8f14eb53f17cab59fa84b37f74f8120e5170fbcf3",
+        "candidate_identity": null,
+        "reality_identity": "20dee316f4f51df75cb01b92be88e32b1fca2cc7968e2475324fb0e1d554130a",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 4,
+        "no_progress_count": 0,
+        "elapsed_seconds": 71,
+        "token_usage": {
+          "status": "UNREPORTED",
+          "input_tokens": 0,
+          "total_tokens": 0,
+          "output_tokens": 0
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 0
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {},
+          "execution_seconds": 0.0
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:32:35.306119Z"
+      },
+      {
+        "id": "81a72dac-705a-4891-aefb-3fcdddced4ac",
+        "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+        "intent_identity": "09b3058e7b18cd8b2108194362e63c281b232c61a69ad69ef22e90819c8f9528",
+        "predecessor_id": "713f2f2a-e6e8-449a-a2fc-30874bda113f",
+        "sequence": 6,
+        "boundary": "PREVIEW",
+        "failure_signature": null,
+        "candidate_identity": "1bfb8eab585eba60cc0be43eaf1cfd640a5565e7b2e85b3489cbf5ba3c94cf60",
+        "reality_identity": "2ac743a0c23cf47710e7700838d2bf38e23b7fd07632d61471920c41dca1294d",
+        "missing_acceptance": [],
+        "attempts": 5,
+        "no_progress_count": 0,
+        "elapsed_seconds": 199,
+        "token_usage": {
+          "status": "OBSERVED",
+          "input_tokens": 71144,
+          "total_tokens": 75813,
+          "output_tokens": 4669
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {
+            "tool_effect": 9,
+            "inference_submission": 5
+          },
+          "execution_seconds": 28.832881999999998
+        },
+        "human_intervention_count": 1,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "CONVERGED_FOR_REVIEW",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:34:42.727448Z"
+      }
+    ]
+  },
+  "queue": [
+    {
+      "queue_entry_id": "787dcf26-b70f-41b9-ae45-620e03e91a26",
+      "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+      "pwu_id": "f7afd4d0-f9dc-48e1-bd67-4bcb5d576cbd",
+      "attempt_id": "0371b88c-425e-4a64-9ac0-dddcba0a626d",
+      "fairness_group": "work:5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T05:32:41.769936Z",
+      "available_at": "2026-09-27T05:32:41.751625Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 1,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T05:34:46.091673Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "0ad61587-30e4-5949-8acc-a0b00a9c6e88"
+    }
+  ],
+  "preview": {
+    "mode": "FRONTEND_RUNTIME",
+    "status": "READY",
+    "candidate_revision": "c042fd01b179802e3b7ed3777fc5194393396ce0",
+    "candidate_fingerprint": "1bfb8eab585eba60cc0be43eaf1cfd640a5565e7b2e85b3489cbf5ba3c94cf60",
+    "session": {
+      "id": "20694610-4e9f-4dee-8868-e1c0b5fbca8e",
+      "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+      "candidate_id": "1143fa3e-734e-59ed-ad97-7301955bcf5d",
+      "candidate_fingerprint": "1bfb8eab585eba60cc0be43eaf1cfd640a5565e7b2e85b3489cbf5ba3c94cf60",
+      "repository_identity": "http://qualified-git-isolated:8080/business-app.git",
+      "repository_revision": "c042fd01b179802e3b7ed3777fc5194393396ce0",
+      "repository_tree": "17bdf936d07c22aff1ddffb4fdcca2257d0e30fb",
+      "workspace_id": "41bf5c65-5f1b-40f6-b93f-86ba169a3698",
+      "environment_id": "c9e687cb-0af4-4fd3-ae18-f1f9cc6e48cb",
+      "mode": "FRONTEND_RUNTIME",
+      "status": "READY",
+      "definition_version": "frontend-docker-runtime-v1",
+      "endpoint": "http://127.0.0.1:53286/",
+      "image_reference": "sha256:c0fae0d97c476a90ab7e617d1dc1767709e3000d0d53cabb72b7c02aa27521b0",
+      "service_identities": [
+        "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-app",
+        "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-proxy"
+      ],
+      "resource_references": [
+        "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-internal",
+        "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-gateway",
+        "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-source"
+      ],
+      "evidence": [
+        {
+          "kind": "WORKSPACE",
+          "workspace": "/var/lib/spg/production-environments/candidate-preview-runtime/20694610-4e9f-4dee-8868-e1c0b5fbca8e/workspace",
+          "revision": "c042fd01b179802e3b7ed3777fc5194393396ce0",
+          "tree": "17bdf936d07c22aff1ddffb4fdcca2257d0e30fb",
+          "topology_preflight": {
+            "verifier_namespace": "candidate-gateway-network",
+            "verifier_image": "watt-lifecycle:qualification",
+            "public_endpoint_namespace": "docker-host"
+          },
+          "dockerfile_sha256": "abd36acd96f3e4485d6e9d4826a540e65a9608f5e9eb0e479de9581d5a8d5f44"
+        },
+        {
+          "kind": "BUILD",
+          "image": "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e:candidate",
+          "image_id": "sha256:c0fae0d97c476a90ab7e617d1dc1767709e3000d0d53cabb72b7c02aa27521b0",
+          "verified_image_files": 0,
+          "build_log": "/var/lib/spg/production-environments/candidate-preview-runtime/evidence/20694610-4e9f-4dee-8868-e1c0b5fbca8e/build.log",
+          "build_log_sha256": "fd3933bfdb3452fb3526e6dbfe7b2186e89b00a98c90b6e2f313c2ded7bff77e"
+        },
+        {
+          "kind": "SERVED_VERIFICATION",
+          "candidate_revision": "c042fd01b179802e3b7ed3777fc5194393396ce0",
+          "candidate_tree": "17bdf936d07c22aff1ddffb4fdcca2257d0e30fb",
+          "gateway": "http://watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-proxy",
+          "public_gateway": "http://127.0.0.1:53286",
+          "verifier_namespace": "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-gateway",
+          "mode": "FRONTEND_RUNTIME",
+          "frontend": {
+            "path": "/",
+            "status": 200,
+            "body_sha256": "e20c619e50eb3426b7ac067a759aeb28ad34e3c29bf023eb258f2e6bb0fb3f46"
+          },
+          "result": "PASS"
+        },
+        {
+          "kind": "RUNTIME",
+          "endpoint": "http://127.0.0.1:53286/",
+          "services": [
+            "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-app",
+            "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-proxy"
+          ],
+          "resources": [
+            "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-internal",
+            "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-gateway",
+            "watt-candidate-preview-206946104e9f4dee8868e1c0b5fbca8e-source"
+          ],
+          "health": {
+            "database": "NOT_REQUIRED",
+            "application": "READY",
+            "gateway": "READY",
+            "repository_revision": "c042fd01b179802e3b7ed3777fc5194393396ce0",
+            "repository_tree": "17bdf936d07c22aff1ddffb4fdcca2257d0e30fb"
+          },
+          "topology": {
+            "frontend": "app",
+            "backend": "app",
+            "database": null,
+            "supporting_services": []
+          }
+        },
+        {
+          "kind": "PRODUCTION_RECORD",
+          "reference": "production-record:a7a8b8b2-0242-51c3-b694-dffe2c661e1b",
+          "digest": "be290e067cc4b763bac3af03ad0f87f1fabc7c04841dcfe7907fa7a981d2d648"
+        }
+      ],
+      "failure_code": null,
+      "failure_reason": null,
+      "version": 6,
+      "created_at": "2026-09-27T05:33:43.841565Z",
+      "updated_at": "2026-09-27T05:34:42.013060Z"
+    }
+  },
+  "attention": [
+    {
+      "attention_id": "141182e9-de44-52f3-b619-85f76c855a71",
+      "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+      "kind": "CANDIDATE_AUTHORIZATION",
+      "decision": "Authorize exact sealed Candidate integration?",
+      "reason": "Repository integration requires exact Human Authority.",
+      "available_actions": [
+        "AUTHORIZE"
+      ],
+      "recommended_action": null,
+      "governed_subject_ref": "baseline-candidate:1143fa3e-734e-59ed-ad97-7301955bcf5d",
+      "steering_reason": null,
+      "recommendation": null,
+      "conversation_prompt": null,
+      "alternatives": [],
+      "trade_offs": [],
+      "expected_impact": null,
+      "reality_refs": [],
+      "steering_plan_revision_id": null,
+      "steering_step_id": null,
+      "interaction_id": null,
+      "interaction_assessment_id": null,
+      "expected_work_reality_revision_id": null
+    }
+  ],
+  "economics": {
+    "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+    "product_id": "e8c7ae76-0ce3-441c-945a-aca7ad78820a",
+    "pwu_count": 1,
+    "join_count": 0,
+    "pwu": [
+      {
+        "pwu_id": "f7afd4d0-f9dc-48e1-bd67-4bcb5d576cbd",
+        "node_id": null,
+        "run_id": "3afd3f6e-eac1-4900-9eab-22405737c58b",
+        "condition": "SATISFIED",
+        "attempt_count": 1,
+        "outcomes": [
+          "RESULT_READY"
+        ],
+        "providers": [
+          "deepseek",
+          "watt-native:0371b88c-425e-4a64-9ac0-dddcba0a626d"
+        ],
+        "execution_seconds": 28.832881999999998,
+        "duration_observed": true,
+        "queue_wait_seconds": 0.77471,
+        "token_usage": {
+          "input_tokens": 71144,
+          "output_tokens": 4669,
+          "total_tokens": 75813,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 5,
+          "tool_effect": 9
+        }
+      }
+    ],
+    "token_usage": {
+      "input_tokens": 71144,
+      "output_tokens": 4669,
+      "total_tokens": 75813,
+      "status": "OBSERVED"
+    },
+    "observed_provider_spend": {
+      "status": "UNREPORTED",
+      "by_currency": {},
+      "unreported_attempt_count": 1,
+      "amount": null
+    },
+    "execution_seconds": 28.832881999999998,
+    "queue_wait_seconds": 0.77471,
+    "wall_elapsed_seconds": 43.804269,
+    "critical_path_seconds": null,
+    "parallelism_effect_seconds": 0.0,
+    "self_refine_event_count": 1,
+    "first_pass_pwu_count": 1,
+    "retried_pwu_count": 0,
+    "human_escalation_count": 0,
+    "refinement_extra_seconds": 0,
+    "resource_units": {
+      "inference_submission": 5,
+      "tool_effect": 9
+    },
+    "final_outcome": "READY"
+  },
+  "delivery": {
+    "work_id": "5e234edb-4ffd-5827-b7a2-c12c67e516aa",
+    "target": null,
+    "supported_target_kinds": [
+      "DOCUMENT_PACKAGE",
+      "SOFTWARE_ARTIFACT"
+    ],
+    "deliveries": []
+  }
+}

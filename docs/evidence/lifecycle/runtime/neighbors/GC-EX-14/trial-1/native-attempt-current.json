@@ -1,0 +1,2586 @@
+{
+  "observation": {
+    "handle": {
+      "backend_identity": "watt-native",
+      "dispatch_id": "9134fb4d-d83f-4090-bf27-8c35b772c4ae",
+      "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+      "generation": 1,
+      "opaque_reference": "attempt:54e8524d-584e-47cc-8110-11a85032c3e8"
+    },
+    "runtime_mode": "RECONCILING",
+    "terminal_outcome": "UNKNOWN",
+    "current_checkpoint_id": "2aa598d2-b47d-4564-9704-14f840745644",
+    "progress_summary": "EXECUTING",
+    "observed_at": "2026-09-27T05:00:27.984029Z"
+  },
+  "state": {
+    "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+    "generation": 1,
+    "grant_state": "FENCED",
+    "runtime_mode": "RECONCILING",
+    "terminal_outcome": "UNKNOWN",
+    "control_version": 0,
+    "worker_epoch": 1,
+    "current_step_sequence": 1,
+    "current_checkpoint_id": "2aa598d2-b47d-4564-9704-14f840745644",
+    "blocker_reasons": [
+      "worker lease expired; effect reconciliation required"
+    ],
+    "effect_uncertainty": true,
+    "version": 5,
+    "updated_at": "2026-09-27T04:45:49.041956Z"
+  },
+  "queue": {
+    "id": "9134fb4d-d83f-4090-bf27-8c35b772c4ae",
+    "command_id": "87084d8b-86b9-41ae-bf1a-8da3aabf1966",
+    "request_digest": "70feaf1a7d5732f0a002e692ee4fea73939afc0d363a9ee63e6a76b487c0e67c",
+    "actor_identity": "spg-runtime:native-compatibility",
+    "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+    "pwu_id": "0ee8f802-7ec6-4382-8cbf-064ab5bbf69d",
+    "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+    "grant_revision": 1,
+    "fairness_group": "work:690e541b-e6a1-5164-acac-17551199fc97",
+    "condition": "EXECUTING",
+    "required_capabilities": [
+      "file.read",
+      "file.write",
+      "process.run",
+      "git.status",
+      "git.diff",
+      "test.run",
+      "build.run",
+      "dependency.sync",
+      "preview.inspect"
+    ],
+    "required_provider_profile": "deepseek-responses:deepseek-flash:high",
+    "required_resource_profile": "standard",
+    "wait_reason": null,
+    "enqueued_at": "2026-09-27T04:45:17.543210Z",
+    "available_at": "2026-09-27T04:45:17.495707Z",
+    "resume_count": 0,
+    "version": 3
+  },
+  "steps": [
+    {
+      "id": "8d27ef57-0ce0-4406-8eba-734782ea9d75",
+      "session_id": "03cbed2d-9039-507f-8d00-113b236ee8ba",
+      "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+      "sequence": 1,
+      "kind": "INFERENCE",
+      "condition": "COMPLETED",
+      "request_payload": {
+        "objective": "Produce the admitted code change.\nDesired outcome: 首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。\nAdmitted constraints:\n- 其他内容不变\nExact targets:\n- UPDATE web/index.html\nBounded areas:\n- None.",
+        "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+        "session_id": "03cbed2d-9039-507f-8d00-113b236ee8ba",
+        "working_plan": {
+          "version": 1,
+          "hypotheses": [],
+          "evidence_ids": [],
+          "obligation_ids": [
+            "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+            "PATH_SCOPE",
+            "GIT_DIFF_CHECK",
+            "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+            "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+            "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+            "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+          ],
+          "open_questions": [],
+          "chosen_approach": "Inspect governed Reality and execute the bounded PWU contract.",
+          "completed_actions": [],
+          "approach_rationale": "No prior checkpoint exists for this execution session.",
+          "objective_reference": "a7b876d2-efb4-57ba-aaaa-b03cc0a7d18e"
+        },
+        "context_facts": [
+          {
+            "payload": {
+              "objective": "Produce the admitted code change.\nDesired outcome: 首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。\nAdmitted constraints:\n- 其他内容不变\nExact targets:\n- UPDATE web/index.html\nBounded areas:\n- None.",
+              "context_package_id": "94e73655-b0c5-4649-b41b-fd2510c3879c",
+              "completion_contract": {
+                "task_contract": {
+                  "scope": [
+                    "UPDATE:web/index.html"
+                  ],
+                  "activity": "FEATURE_DELIVERY",
+                  "objective": "Produce the next exact change admitted from current Reality",
+                  "task_mode": "GENERAL",
+                  "constraints": [
+                    "其他内容不变"
+                  ],
+                  "out_of_scope": [
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore",
+                    "Any repository path outside the admitted exact targets or bounded areas"
+                  ],
+                  "sop_reference": "sop:watt-software-production:1:FEATURE_DELIVERY",
+                  "decision_trace": {
+                    "status": "ADMITTED",
+                    "rationale": "The selected direction preserves current Work Reality, semantic facts, source baseline, and independent verification obligations.",
+                    "decision_id": "d62c3271-04d5-5cc1-bfa9-bb39ac068c3c",
+                    "context_reference": "steering-decision:6a45146e-f202-4610-ba42-2e3f602f3c75",
+                    "considered_options": [
+                      "Execute within the admitted scope and governed meaning",
+                      "Return to Steering or Human authority before widening the boundary"
+                    ],
+                    "selected_direction": "Execute the bounded task: Produce the next exact change admitted from current Reality",
+                    "authority_reference": "steering-decision:6a45146e-f202-4610-ba42-2e3f602f3c75",
+                    "evidence_references": [
+                      {
+                        "category": "HUMAN",
+                        "assertion": "repo.url reference http://qualified-git:8080/worker-interruption.git",
+                        "basis_reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                        "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                        "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                        "subject_reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049"
+                      },
+                      {
+                        "category": "HUMAN",
+                        "assertion": "homepage.cta_label state_transition 立即体验 within 首页",
+                        "basis_reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                        "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                        "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                        "subject_reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5"
+                      },
+                      {
+                        "category": "HUMAN",
+                        "assertion": "homepage.content scope 其他内容不变 within 首页",
+                        "basis_reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+                        "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                        "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                        "subject_reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b"
+                      },
+                      {
+                        "category": "HUMAN",
+                        "assertion": "preview.delivery acceptance_assertion True",
+                        "basis_reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70",
+                        "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                        "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                        "subject_reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+                      },
+                      {
+                        "category": "ENGINEERING",
+                        "assertion": "The task is bound to the admitted engineering source basis.",
+                        "basis_reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db",
+                        "authority_domain": "ECF/SOURCE_REALITY",
+                        "source_reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db",
+                        "subject_reference": "task-scope"
+                      }
+                    ]
+                  },
+                  "evidence_lineage": [
+                    {
+                      "category": "HUMAN",
+                      "assertion": "repo.url reference http://qualified-git:8080/worker-interruption.git",
+                      "basis_reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                      "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                      "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                      "subject_reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049"
+                    },
+                    {
+                      "category": "HUMAN",
+                      "assertion": "homepage.cta_label state_transition 立即体验 within 首页",
+                      "basis_reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                      "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                      "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                      "subject_reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5"
+                    },
+                    {
+                      "category": "HUMAN",
+                      "assertion": "homepage.content scope 其他内容不变 within 首页",
+                      "basis_reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+                      "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                      "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                      "subject_reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b"
+                    },
+                    {
+                      "category": "HUMAN",
+                      "assertion": "preview.delivery acceptance_assertion True",
+                      "basis_reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70",
+                      "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                      "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                      "subject_reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+                    },
+                    {
+                      "category": "ENGINEERING",
+                      "assertion": "The task is bound to the admitted engineering source basis.",
+                      "basis_reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db",
+                      "authority_domain": "ECF/SOURCE_REALITY",
+                      "source_reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db",
+                      "subject_reference": "task-scope"
+                    }
+                  ],
+                  "relevant_context": [
+                    {
+                      "source": "SEMANTIC_TRUTH",
+                      "authority": "HUMAN_EXPLICIT",
+                      "reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+                    },
+                    {
+                      "source": "SEMANTIC_TRUTH",
+                      "authority": "HUMAN_EXPLICIT",
+                      "reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049"
+                    },
+                    {
+                      "source": "SEMANTIC_TRUTH",
+                      "authority": "HUMAN_EXPLICIT",
+                      "reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b"
+                    },
+                    {
+                      "source": "SEMANTIC_TRUTH",
+                      "authority": "HUMAN_EXPLICIT",
+                      "reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5"
+                    },
+                    {
+                      "source": "WORK_REALITY",
+                      "authority": "WORK_REALITY",
+                      "reference": "work:690e541b-e6a1-5164-acac-17551199fc97"
+                    },
+                    {
+                      "source": "WORK_REALITY",
+                      "authority": "WORK_REALITY",
+                      "reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873"
+                    },
+                    {
+                      "source": "DECISION_MEMORY",
+                      "authority": "STEERING_OR_WORK_ADMISSION",
+                      "reference": "steering-decision:6a45146e-f202-4610-ba42-2e3f602f3c75"
+                    },
+                    {
+                      "source": "ECF_REALITY",
+                      "authority": "SOURCE_REALITY",
+                      "reference": "engineering-resource:69b45127-e1b2-48ee-b9ab-f95f5e2b3737"
+                    },
+                    {
+                      "source": "ECF_REALITY",
+                      "authority": "SOURCE_REALITY",
+                      "reference": "repository:http://qualified-git:8080/worker-interruption.git"
+                    },
+                    {
+                      "source": "ECF_REALITY",
+                      "authority": "SOURCE_REALITY",
+                      "reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db"
+                    },
+                    {
+                      "source": "SOP",
+                      "authority": "GUIDANCE_ONLY",
+                      "reference": "sop:watt-software-production:1:FEATURE_DELIVERY"
+                    },
+                    {
+                      "source": "DOMAIN_PATTERN",
+                      "authority": "ADVISORY_ONLY",
+                      "reference": "pattern:bounded-change-and-evidence:1"
+                    },
+                    {
+                      "source": "DOMAIN_PATTERN",
+                      "authority": "ADVISORY_ONLY",
+                      "reference": "pattern:governed-meaning-preservation:1"
+                    }
+                  ],
+                  "task_contract_id": "f677d78b-49c4-5622-ba59-26d8e334f9aa",
+                  "authority_lineage": [
+                    "work:690e541b-e6a1-5164-acac-17551199fc97",
+                    "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                    "steering-step:5c00c23f-8fcf-41df-ba1b-b8aecb400b16",
+                    "engineering-scope:65c8a0e4-d134-47a5-ad19-fd7d692409e7",
+                    "engineering-resource:69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+                    "steering-decision:6a45146e-f202-4610-ba42-2e3f602f3c75"
+                  ],
+                  "reasoning_summary": {
+                    "summary": "Use the admitted task boundary and source Reality, preserve governed meaning, and require independent evidence before acceptance.",
+                    "uncertainty": [],
+                    "considered_factors": [
+                      "Current governed objective and scope",
+                      "Current Semantic Truth without reinterpretation",
+                      "Exact engineering source basis",
+                      "Independent evidence required for acceptance",
+                      "Pattern guidance governed-meaning-preservation:1",
+                      "Pattern guidance bounded-change-and-evidence:1"
+                    ],
+                    "raw_chain_of_thought_stored": false
+                  },
+                  "acceptance_meaning": [
+                    "Run the existing test entrypoint `node --test tests/*.cjs` and confirm it passes unchanged. Start the site with `python server.py` against a fresh or existing SQLite database so startup migrations apply, then fetch `/` on port 8080 and assert the returned HTML contains “立即体验” and contains no remaining occurrence of “开始使用”, while every other element of that homepage (header, nav links 首页/用户/客户/订单, header login button, the 业务工作台 heading, 账户登录, 打开对话框, the edit dialog, the 用户列表 and 客户列表 sections) is byte-for-byte unchanged. Confirm `GET /health` still reports database availability and that `/api/users`, `/api/customers`, `/api/orders` and the /users, /customers, /orders, /help, /about routes respond as before. Inspect the served preview to show the updated label in place, and confirm the working diff is confined to the single label token in web/index.html."
+                  ],
+                  "evidence_requirements": [
+                    {
+                      "category": "ENGINEERING",
+                      "statement": "Current Work, source, scope, and decision lineage are identifiable before acting.",
+                      "expectation_id": "feature-delivery-basis-evidence",
+                      "owner_boundary": "Work/ECF/Steering retain their own authority."
+                    },
+                    {
+                      "category": "ASSURANCE",
+                      "statement": "Outcome claims are evaluated against the admitted acceptance meaning and exact produced subject.",
+                      "expectation_id": "feature-delivery-outcome-evidence",
+                      "owner_boundary": "Guardian/Verification owns assurance results."
+                    },
+                    {
+                      "category": "ASSURANCE",
+                      "statement": "Run the existing test entrypoint `node --test tests/*.cjs` and confirm it passes unchanged. Start the site with `python server.py` against a fresh or existing SQLite database so startup migrations apply, then fetch `/` on port 8080 and assert the returned HTML contains “立即体验” and contains no remaining occurrence of “开始使用”, while every other element of that homepage (header, nav links 首页/用户/客户/订单, header login button, the 业务工作台 heading, 账户登录, 打开对话框, the edit dialog, the 用户列表 and 客户列表 sections) is byte-for-byte unchanged. Confirm `GET /health` still reports database availability and that `/api/users`, `/api/customers`, `/api/orders` and the /users, /customers, /orders, /help, /about routes respond as before. Inspect the served preview to show the updated label in place, and confirm the working diff is confined to the single label token in web/index.html.",
+                      "expectation_id": "task-acceptance-1",
+                      "owner_boundary": "Guardian/Verification owns the assurance result."
+                    }
+                  ],
+                  "prerequisite_evidence": [],
+                  "required_capabilities": [],
+                  "required_prerequisites": [],
+                  "semantic_fact_references": [
+                    {
+                      "unit": null,
+                      "scope": null,
+                      "value": "http://qualified-git:8080/worker-interruption.git",
+                      "fact_id": "4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                      "subject": "repo.url",
+                      "relation": "REFERENCE",
+                      "authority": "HUMAN_EXPLICIT",
+                      "qualifiers": {},
+                      "epistemic_status": "CONFIRMED",
+                      "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                    },
+                    {
+                      "unit": null,
+                      "scope": "首页",
+                      "value": "立即体验",
+                      "fact_id": "bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                      "subject": "homepage.cta_label",
+                      "relation": "STATE_TRANSITION",
+                      "authority": "HUMAN_EXPLICIT",
+                      "qualifiers": {
+                        "from": "开始使用"
+                      },
+                      "epistemic_status": "CONFIRMED",
+                      "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                    },
+                    {
+                      "unit": null,
+                      "scope": "首页",
+                      "value": "其他内容不变",
+                      "fact_id": "800e9025-6025-5aef-a385-c52a6daff26b",
+                      "subject": "homepage.content",
+                      "relation": "SCOPE",
+                      "authority": "HUMAN_EXPLICIT",
+                      "qualifiers": {},
+                      "epistemic_status": "CONFIRMED",
+                      "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                    },
+                    {
+                      "unit": null,
+                      "scope": null,
+                      "value": true,
+                      "fact_id": "2749319e-6a5f-521a-ba5a-da549dd1fb70",
+                      "subject": "preview.delivery",
+                      "relation": "ACCEPTANCE_ASSERTION",
+                      "authority": "HUMAN_EXPLICIT",
+                      "qualifiers": {},
+                      "epistemic_status": "CONFIRMED",
+                      "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                    }
+                  ]
+                },
+                "change_contract": {
+                  "constraints": [
+                    "其他内容不变"
+                  ],
+                  "target_kind": "CODE_WORK",
+                  "target_shape": "EXACT_TARGET_SET",
+                  "allowed_areas": [],
+                  "exact_targets": [
+                    {
+                      "path": "web/index.html",
+                      "operation": "UPDATE"
+                    }
+                  ],
+                  "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+                  "forbidden_areas": [
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ],
+                  "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+                  "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+                  "source_proposal_id": "b18845ae-2835-5466-940f-75622cd80822",
+                  "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+                  "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+                  "verification_obligations": [
+                    {
+                      "kind": "PATH_SCOPE",
+                      "target": null
+                    },
+                    {
+                      "kind": "GIT_DIFF_CHECK",
+                      "target": null
+                    }
+                  ],
+                  "source_proposal_fingerprint": "100093b1bf9ead1bb54f0132b3ccca8e7c54571411f5006f7acd6780d6ec9f82"
+                },
+                "production_plan": {
+                  "graph": null,
+                  "objective": "Produce the next exact change admitted from current Reality",
+                  "assumptions": [
+                    "The admitted Work can be executed through one governed PWU and Attempt lineage."
+                  ],
+                  "proposal_id": "f461a685-6943-53b4-aed0-a3427cccbb5a",
+                  "target_kind": "CODE_WORK",
+                  "ordered_steps": [
+                    {
+                      "position": 1,
+                      "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+                    },
+                    {
+                      "position": 2,
+                      "instruction": "Modify only the admitted exact code targets: web/index.html."
+                    },
+                    {
+                      "position": 3,
+                      "instruction": "Run the admitted targeted verification and report the resulting evidence."
+                    }
+                  ],
+                  "change_contract": {
+                    "constraints": [
+                      "其他内容不变"
+                    ],
+                    "target_kind": "CODE_WORK",
+                    "target_shape": "EXACT_TARGET_SET",
+                    "allowed_areas": [],
+                    "exact_targets": [
+                      {
+                        "path": "web/index.html",
+                        "operation": "UPDATE"
+                      }
+                    ],
+                    "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+                    "forbidden_areas": [
+                      "server.py",
+                      "migrations/001_initial.sql",
+                      "web/app.js",
+                      "web/styles.css",
+                      "Dockerfile",
+                      "package.json",
+                      "tests/application.cjs",
+                      "README.md",
+                      ".gitignore"
+                    ],
+                    "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+                    "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+                    "source_proposal_id": "b18845ae-2835-5466-940f-75622cd80822",
+                    "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+                    "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+                    "verification_obligations": [
+                      {
+                        "kind": "PATH_SCOPE",
+                        "target": null
+                      },
+                      {
+                        "kind": "GIT_DIFF_CHECK",
+                        "target": null
+                      }
+                    ],
+                    "source_proposal_fingerprint": "100093b1bf9ead1bb54f0132b3ccca8e7c54571411f5006f7acd6780d6ec9f82"
+                  },
+                  "change_proposal": null,
+                  "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+                  "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+                  "artifact_targets": [],
+                  "fit_classification": "ONE_PWU_FIT",
+                  "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+                  "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+                  "unresolved_questions": [],
+                  "inherited_constraints": [
+                    "其他内容不变"
+                  ],
+                  "verification_approach": "Run the existing test entrypoint `node --test tests/*.cjs` and confirm it passes unchanged. Start the site with `python server.py` against a fresh or existing SQLite database so startup migrations apply, then fetch `/` on port 8080 and assert the returned HTML contains “立即体验” and contains no remaining occurrence of “开始使用”, while every other element of that homepage (header, nav links 首页/用户/客户/订单, header login button, the 业务工作台 heading, 账户登录, 打开对话框, the edit dialog, the 用户列表 and 客户列表 sections) is byte-for-byte unchanged. Confirm `GET /health` still reports database availability and that `/api/users`, `/api/customers`, `/api/orders` and the /users, /customers, /orders, /help, /about routes respond as before. Inspect the served preview to show the updated label in place, and confirm the working diff is confined to the single label token in web/index.html.",
+                  "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737"
+                },
+                "required_changes": [
+                  "web/index.html"
+                ],
+                "required_markers": [],
+                "required_outputs": [
+                  "web/index.html"
+                ],
+                "artifact_contract": null,
+                "forbidden_changes": [],
+                "blocking_conditions": [],
+                "verification_obligations": [
+                  "PATH_SCOPE",
+                  "GIT_DIFF_CHECK"
+                ],
+                "semantic_fact_obligations": [
+                  {
+                    "unit": null,
+                    "scope": null,
+                    "value": "http://qualified-git:8080/worker-interruption.git",
+                    "fact_id": "4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                    "subject": "repo.url",
+                    "relation": "REFERENCE",
+                    "authority": "HUMAN_EXPLICIT",
+                    "qualifiers": {},
+                    "epistemic_status": "CONFIRMED",
+                    "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                  },
+                  {
+                    "unit": null,
+                    "scope": "首页",
+                    "value": "立即体验",
+                    "fact_id": "bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                    "subject": "homepage.cta_label",
+                    "relation": "STATE_TRANSITION",
+                    "authority": "HUMAN_EXPLICIT",
+                    "qualifiers": {
+                      "from": "开始使用"
+                    },
+                    "epistemic_status": "CONFIRMED",
+                    "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                  },
+                  {
+                    "unit": null,
+                    "scope": "首页",
+                    "value": "其他内容不变",
+                    "fact_id": "800e9025-6025-5aef-a385-c52a6daff26b",
+                    "subject": "homepage.content",
+                    "relation": "SCOPE",
+                    "authority": "HUMAN_EXPLICIT",
+                    "qualifiers": {},
+                    "epistemic_status": "CONFIRMED",
+                    "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                  },
+                  {
+                    "unit": null,
+                    "scope": null,
+                    "value": true,
+                    "fact_id": "2749319e-6a5f-521a-ba5a-da549dd1fb70",
+                    "subject": "preview.delivery",
+                    "relation": "ACCEPTANCE_ASSERTION",
+                    "authority": "HUMAN_EXPLICIT",
+                    "qualifiers": {},
+                    "epistemic_status": "CONFIRMED",
+                    "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                  }
+                ]
+              },
+              "context_package_fingerprint": "066f7b74f01e18be05572770054b54ca327730eb9dba75aa6f240cbe3363ad71"
+            },
+            "fact_type": "PWU_CONTRACT",
+            "contract_digest": "3997c6121a9d85085a977b9dc99d7b03b4e25af1fc8f6e0b22aefcc71586730e",
+            "contract_version_id": "a7b876d2-efb4-57ba-aaaa-b03cc0a7d18e"
+          },
+          {
+            "digest": "06dbad06fc1c52b405543f10958e5e396aa0ee733660a367a7ca884be880959a",
+            "members": [
+              {
+                "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+                "commit": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+                "mount_id": "primary",
+                "read_scope": [],
+                "write_scope": [
+                  "web/index.html"
+                ],
+                "container_path": "/workspace/primary",
+                "forbidden_paths": [
+                  ".git",
+                  "server.py",
+                  "migrations/001_initial.sql",
+                  "web/app.js",
+                  "web/styles.css",
+                  "Dockerfile",
+                  "package.json",
+                  "tests/application.cjs",
+                  "README.md",
+                  ".gitignore"
+                ],
+                "repository_identity": "http://qualified-git:8080/worker-interruption.git"
+              }
+            ],
+            "fact_type": "SOURCE_VECTOR",
+            "non_repository_assets": []
+          },
+          {
+            "fact_type": "EXECUTION_ENVELOPE",
+            "stop_conditions": [],
+            "capability_grants": [
+              {
+                "scope": {
+                  "paths": [],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "file.read"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "file.write"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "process.run"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "git.status"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "git.diff"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "test.run"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "build.run"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "dependency.sync"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "preview.inspect"
+              }
+            ],
+            "obligation_references": [
+              "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+              "PATH_SCOPE",
+              "GIT_DIFF_CHECK",
+              "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+              "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+              "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+              "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+            ]
+          },
+          {
+            "rule": "All Tool path and cwd arguments are relative to the Watt workspace. For one mount use '.' as cwd and do not prefix file paths with the mount id. For multiple mounts use the listed tool_path_prefix. SOURCE_VECTOR container_path is identity metadata, not a Tool path.",
+            "mounts": [
+              {
+                "mount_id": "primary",
+                "tool_path_prefix": "."
+              }
+            ],
+            "fact_type": "TOOL_PATH_CONVENTION",
+            "workspace_root": "."
+          },
+          {
+            "rule": "Historical failures are evidence, not permission to change Work intent or repeat an uncertain side effect.",
+            "events": [
+              {
+                "result": "LOCAL_OBLIGATION_RECOVERED",
+                "status": "VERIFIED",
+                "event_id": "c1a212ec-e75d-4d09-adda-c59527244828",
+                "operation_id": "bab1e74d-5299-480a-a7ea-c2c4a2a41ef5",
+                "repairability": "AUTONOMOUSLY_REPAIRABLE",
+                "failure_family": "CANDIDATE_INCONSISTENT",
+                "expected_reality": {},
+                "observed_reality": {},
+                "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+                "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+                "diagnostic_evidence": {
+                  "signal": "SCOPE_INFLATION",
+                  "required_paths": [
+                    "web/index.html"
+                  ],
+                  "candidate_paths": [
+                    "web/index.html"
+                  ],
+                  "authority_expanded": false,
+                  "rejected_behaviors": [
+                    "Editing server.py (routes, API, migration or serving logic) — the request changes no route or behavior, and \"/\" already serves web/index.html.",
+                    "Editing web/app.js or web/styles.css — no script or style text contains “开始使用” and the constraint is “其他内容不变”.",
+                    "Editing tests/application.cjs — no test asserts the button label, so no mandatory oracle change is entailed.",
+                    "Editing README.md, Dockerfile, migrations/001_initial.sql or package.json — documentation, packaging and fixture schema are unaffected and unrequested.",
+                    "Creating new files (new pages, routes, preview scaffolds) — a link or label change never entails creating its destination, and the existing entrypoint already provides the only required serving path.",
+                    "Treating preview availability, served-runtime verification, Human review or Delivery Authorization as repository source scope."
+                  ]
+                }
+              }
+            ],
+            "fact_type": "RECENT_SELF_REFINE"
+          }
+        ],
+        "step_sequence": 1,
+        "available_tools": [
+          {
+            "version": "1",
+            "identity": "file.read",
+            "description": "Read one UTF-8 file from the private execution workspace. Content may be truncated at 32 KiB; use file.write old_text/new_text for a small exact edit without rewriting the whole file.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "path"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "READ"
+          },
+          {
+            "version": "1",
+            "identity": "file.write",
+            "description": "Atomically write one UTF-8 file inside an admitted path scope. Supply content for full replacement, or old_text and new_text for an exact single-occurrence edit of an existing file; the latter preserves unseen content in large files.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "path"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "new_text": {
+                  "type": "string"
+                },
+                "old_text": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "LOCAL_MUTATION"
+          },
+          {
+            "version": "1",
+            "identity": "process.run",
+            "description": "Run one allowlisted argv process without a shell. Do not use sed, tail, or wc; they are not allowlisted. Edit files with file.write, including its exact old_text/new_text mode. Inline code flags such as python -c are rejected. For a Python import check, use ['python', '-m', 'package.module'] with cwd='src', or use test.run with pytest --collect-only.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "argv"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                },
+                "argv": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "PROCESS"
+          },
+          {
+            "version": "1",
+            "identity": "git.status",
+            "description": "Observe porcelain Git status for one admitted repository mount.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "READ"
+          },
+          {
+            "version": "1",
+            "identity": "git.diff",
+            "description": "Observe the bounded Git diff for one admitted repository mount.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "READ"
+          },
+          {
+            "version": "1",
+            "identity": "test.run",
+            "description": "Run an admitted Python or Node test recipe. cwd is workspace-relative (for example '.', 'client', or 'server'), never '/workspace'.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "argv",
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                },
+                "argv": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "PROCESS"
+          },
+          {
+            "version": "1",
+            "identity": "build.run",
+            "description": "Run an admitted project-native build recipe, for example npm run build or python -m build. For Python syntax compilation use process.run with ['python', '-m', 'py_compile', source_path].",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "argv",
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                },
+                "argv": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "PROCESS"
+          },
+          {
+            "version": "1",
+            "identity": "dependency.sync",
+            "description": "Run a lock-governed dependency synchronization recipe.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "argv",
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                },
+                "argv": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "PROCESS"
+          },
+          {
+            "version": "1",
+            "identity": "preview.inspect",
+            "description": "Inspect one static artifact without starting a browser session.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "path"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "READ"
+          }
+        ],
+        "previous_results": [],
+        "residual_obligations": [
+          "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+          "PATH_SCOPE",
+          "GIT_DIFF_CHECK",
+          "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+          "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+          "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+          "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+        ]
+      },
+      "request_digest": "507a11b35b4e82babcb988a3896ec859beeb95f05431b329bcf37bce003ea971",
+      "result_payload": {
+        "action": "CONTINUE",
+        "summary": "Execute the provider-proposed tools through the Watt Tool Host.",
+        "tool_calls": [
+          {
+            "arguments": {
+              "path": "web/index.html"
+            },
+            "tool_identity": "file.read",
+            "proposal_index": 0,
+            "provider_call_id": "call_00_Vd1TXqbaZJ23bK5Y6hCc2236"
+          }
+        ],
+        "result_claim": null,
+        "working_plan": {
+          "version": 1,
+          "hypotheses": [],
+          "evidence_ids": [],
+          "obligation_ids": [
+            "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+            "PATH_SCOPE",
+            "GIT_DIFF_CHECK",
+            "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+            "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+            "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+            "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+          ],
+          "open_questions": [],
+          "chosen_approach": "Inspect governed Reality and execute the bounded PWU contract.",
+          "completed_actions": [],
+          "approach_rationale": "No prior checkpoint exists for this execution session.",
+          "objective_reference": "a7b876d2-efb4-57ba-aaaa-b03cc0a7d18e"
+        },
+        "provider_observation": {
+          "usage": {
+            "input_tokens": 11739,
+            "total_tokens": 11808,
+            "output_tokens": 69,
+            "reasoning_tokens": 12,
+            "cached_input_tokens": 1792
+          },
+          "transport": {
+            "mode": "stream",
+            "elapsed_ms": 2533,
+            "failure_code": null,
+            "received_bytes": 37814,
+            "received_events": 53,
+            "terminal_received": true,
+            "headers_elapsed_ms": 1515,
+            "response_status_code": 200,
+            "first_byte_elapsed_ms": 1524,
+            "syntactically_complete": true,
+            "response_headers_received": true
+          },
+          "effective_model": "deepseek-flash",
+          "requested_model": "deepseek-flash",
+          "response_status": "completed",
+          "provider_identity": "deepseek",
+          "provider_request_id": "2d3142ef-c7e2-4e5a-a6cc-290865d5c335"
+        },
+        "residual_obligations": [
+          "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+          "PATH_SCOPE",
+          "GIT_DIFF_CHECK",
+          "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+          "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+          "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+          "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+        ]
+      },
+      "result_digest": "4d52a2648bb925ab98762cc36f4a7ec8c235828b7ea7dbf5868fb5c99bdb90b7",
+      "context_revision": 1,
+      "started_at": "2026-09-27T04:45:18.610982Z",
+      "finished_at": "2026-09-27T04:45:21.260871Z"
+    },
+    {
+      "id": "e7e481b5-57a1-483a-90c9-a5c940a0a852",
+      "session_id": "03cbed2d-9039-507f-8d00-113b236ee8ba",
+      "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+      "sequence": 2,
+      "kind": "INFERENCE",
+      "condition": "COMPLETED",
+      "request_payload": {
+        "objective": "Produce the admitted code change.\nDesired outcome: 首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。\nAdmitted constraints:\n- 其他内容不变\nExact targets:\n- UPDATE web/index.html\nBounded areas:\n- None.",
+        "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+        "session_id": "03cbed2d-9039-507f-8d00-113b236ee8ba",
+        "working_plan": {
+          "version": 1,
+          "hypotheses": [],
+          "evidence_ids": [],
+          "obligation_ids": [
+            "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+            "PATH_SCOPE",
+            "GIT_DIFF_CHECK",
+            "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+            "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+            "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+            "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+          ],
+          "open_questions": [],
+          "chosen_approach": "Inspect governed Reality and execute the bounded PWU contract.",
+          "completed_actions": [],
+          "approach_rationale": "No prior checkpoint exists for this execution session.",
+          "objective_reference": "a7b876d2-efb4-57ba-aaaa-b03cc0a7d18e"
+        },
+        "context_facts": [
+          {
+            "payload": {
+              "objective": "Produce the admitted code change.\nDesired outcome: 首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。\nAdmitted constraints:\n- 其他内容不变\nExact targets:\n- UPDATE web/index.html\nBounded areas:\n- None.",
+              "context_package_id": "94e73655-b0c5-4649-b41b-fd2510c3879c",
+              "completion_contract": {
+                "task_contract": {
+                  "scope": [
+                    "UPDATE:web/index.html"
+                  ],
+                  "activity": "FEATURE_DELIVERY",
+                  "objective": "Produce the next exact change admitted from current Reality",
+                  "task_mode": "GENERAL",
+                  "constraints": [
+                    "其他内容不变"
+                  ],
+                  "out_of_scope": [
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore",
+                    "Any repository path outside the admitted exact targets or bounded areas"
+                  ],
+                  "sop_reference": "sop:watt-software-production:1:FEATURE_DELIVERY",
+                  "decision_trace": {
+                    "status": "ADMITTED",
+                    "rationale": "The selected direction preserves current Work Reality, semantic facts, source baseline, and independent verification obligations.",
+                    "decision_id": "d62c3271-04d5-5cc1-bfa9-bb39ac068c3c",
+                    "context_reference": "steering-decision:6a45146e-f202-4610-ba42-2e3f602f3c75",
+                    "considered_options": [
+                      "Execute within the admitted scope and governed meaning",
+                      "Return to Steering or Human authority before widening the boundary"
+                    ],
+                    "selected_direction": "Execute the bounded task: Produce the next exact change admitted from current Reality",
+                    "authority_reference": "steering-decision:6a45146e-f202-4610-ba42-2e3f602f3c75",
+                    "evidence_references": [
+                      {
+                        "category": "HUMAN",
+                        "assertion": "repo.url reference http://qualified-git:8080/worker-interruption.git",
+                        "basis_reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                        "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                        "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                        "subject_reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049"
+                      },
+                      {
+                        "category": "HUMAN",
+                        "assertion": "homepage.cta_label state_transition 立即体验 within 首页",
+                        "basis_reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                        "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                        "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                        "subject_reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5"
+                      },
+                      {
+                        "category": "HUMAN",
+                        "assertion": "homepage.content scope 其他内容不变 within 首页",
+                        "basis_reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+                        "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                        "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                        "subject_reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b"
+                      },
+                      {
+                        "category": "HUMAN",
+                        "assertion": "preview.delivery acceptance_assertion True",
+                        "basis_reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70",
+                        "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                        "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                        "subject_reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+                      },
+                      {
+                        "category": "ENGINEERING",
+                        "assertion": "The task is bound to the admitted engineering source basis.",
+                        "basis_reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db",
+                        "authority_domain": "ECF/SOURCE_REALITY",
+                        "source_reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db",
+                        "subject_reference": "task-scope"
+                      }
+                    ]
+                  },
+                  "evidence_lineage": [
+                    {
+                      "category": "HUMAN",
+                      "assertion": "repo.url reference http://qualified-git:8080/worker-interruption.git",
+                      "basis_reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                      "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                      "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                      "subject_reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049"
+                    },
+                    {
+                      "category": "HUMAN",
+                      "assertion": "homepage.cta_label state_transition 立即体验 within 首页",
+                      "basis_reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                      "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                      "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                      "subject_reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5"
+                    },
+                    {
+                      "category": "HUMAN",
+                      "assertion": "homepage.content scope 其他内容不变 within 首页",
+                      "basis_reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+                      "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                      "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                      "subject_reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b"
+                    },
+                    {
+                      "category": "HUMAN",
+                      "assertion": "preview.delivery acceptance_assertion True",
+                      "basis_reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70",
+                      "authority_domain": "ENGINEERING_SEMANTIC_TRUTH",
+                      "source_reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                      "subject_reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+                    },
+                    {
+                      "category": "ENGINEERING",
+                      "assertion": "The task is bound to the admitted engineering source basis.",
+                      "basis_reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db",
+                      "authority_domain": "ECF/SOURCE_REALITY",
+                      "source_reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db",
+                      "subject_reference": "task-scope"
+                    }
+                  ],
+                  "relevant_context": [
+                    {
+                      "source": "SEMANTIC_TRUTH",
+                      "authority": "HUMAN_EXPLICIT",
+                      "reference": "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+                    },
+                    {
+                      "source": "SEMANTIC_TRUTH",
+                      "authority": "HUMAN_EXPLICIT",
+                      "reference": "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049"
+                    },
+                    {
+                      "source": "SEMANTIC_TRUTH",
+                      "authority": "HUMAN_EXPLICIT",
+                      "reference": "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b"
+                    },
+                    {
+                      "source": "SEMANTIC_TRUTH",
+                      "authority": "HUMAN_EXPLICIT",
+                      "reference": "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5"
+                    },
+                    {
+                      "source": "WORK_REALITY",
+                      "authority": "WORK_REALITY",
+                      "reference": "work:690e541b-e6a1-5164-acac-17551199fc97"
+                    },
+                    {
+                      "source": "WORK_REALITY",
+                      "authority": "WORK_REALITY",
+                      "reference": "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873"
+                    },
+                    {
+                      "source": "DECISION_MEMORY",
+                      "authority": "STEERING_OR_WORK_ADMISSION",
+                      "reference": "steering-decision:6a45146e-f202-4610-ba42-2e3f602f3c75"
+                    },
+                    {
+                      "source": "ECF_REALITY",
+                      "authority": "SOURCE_REALITY",
+                      "reference": "engineering-resource:69b45127-e1b2-48ee-b9ab-f95f5e2b3737"
+                    },
+                    {
+                      "source": "ECF_REALITY",
+                      "authority": "SOURCE_REALITY",
+                      "reference": "repository:http://qualified-git:8080/worker-interruption.git"
+                    },
+                    {
+                      "source": "ECF_REALITY",
+                      "authority": "SOURCE_REALITY",
+                      "reference": "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce@7d32e2b24b252c91f929c56148b55a8232bd12db"
+                    },
+                    {
+                      "source": "SOP",
+                      "authority": "GUIDANCE_ONLY",
+                      "reference": "sop:watt-software-production:1:FEATURE_DELIVERY"
+                    },
+                    {
+                      "source": "DOMAIN_PATTERN",
+                      "authority": "ADVISORY_ONLY",
+                      "reference": "pattern:bounded-change-and-evidence:1"
+                    },
+                    {
+                      "source": "DOMAIN_PATTERN",
+                      "authority": "ADVISORY_ONLY",
+                      "reference": "pattern:governed-meaning-preservation:1"
+                    }
+                  ],
+                  "task_contract_id": "f677d78b-49c4-5622-ba59-26d8e334f9aa",
+                  "authority_lineage": [
+                    "work:690e541b-e6a1-5164-acac-17551199fc97",
+                    "work-reality-revision:da05809f-8c08-5b61-b721-0ca9c265c873",
+                    "steering-step:5c00c23f-8fcf-41df-ba1b-b8aecb400b16",
+                    "engineering-scope:65c8a0e4-d134-47a5-ad19-fd7d692409e7",
+                    "engineering-resource:69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+                    "steering-decision:6a45146e-f202-4610-ba42-2e3f602f3c75"
+                  ],
+                  "reasoning_summary": {
+                    "summary": "Use the admitted task boundary and source Reality, preserve governed meaning, and require independent evidence before acceptance.",
+                    "uncertainty": [],
+                    "considered_factors": [
+                      "Current governed objective and scope",
+                      "Current Semantic Truth without reinterpretation",
+                      "Exact engineering source basis",
+                      "Independent evidence required for acceptance",
+                      "Pattern guidance governed-meaning-preservation:1",
+                      "Pattern guidance bounded-change-and-evidence:1"
+                    ],
+                    "raw_chain_of_thought_stored": false
+                  },
+                  "acceptance_meaning": [
+                    "Run the existing test entrypoint `node --test tests/*.cjs` and confirm it passes unchanged. Start the site with `python server.py` against a fresh or existing SQLite database so startup migrations apply, then fetch `/` on port 8080 and assert the returned HTML contains “立即体验” and contains no remaining occurrence of “开始使用”, while every other element of that homepage (header, nav links 首页/用户/客户/订单, header login button, the 业务工作台 heading, 账户登录, 打开对话框, the edit dialog, the 用户列表 and 客户列表 sections) is byte-for-byte unchanged. Confirm `GET /health` still reports database availability and that `/api/users`, `/api/customers`, `/api/orders` and the /users, /customers, /orders, /help, /about routes respond as before. Inspect the served preview to show the updated label in place, and confirm the working diff is confined to the single label token in web/index.html."
+                  ],
+                  "evidence_requirements": [
+                    {
+                      "category": "ENGINEERING",
+                      "statement": "Current Work, source, scope, and decision lineage are identifiable before acting.",
+                      "expectation_id": "feature-delivery-basis-evidence",
+                      "owner_boundary": "Work/ECF/Steering retain their own authority."
+                    },
+                    {
+                      "category": "ASSURANCE",
+                      "statement": "Outcome claims are evaluated against the admitted acceptance meaning and exact produced subject.",
+                      "expectation_id": "feature-delivery-outcome-evidence",
+                      "owner_boundary": "Guardian/Verification owns assurance results."
+                    },
+                    {
+                      "category": "ASSURANCE",
+                      "statement": "Run the existing test entrypoint `node --test tests/*.cjs` and confirm it passes unchanged. Start the site with `python server.py` against a fresh or existing SQLite database so startup migrations apply, then fetch `/` on port 8080 and assert the returned HTML contains “立即体验” and contains no remaining occurrence of “开始使用”, while every other element of that homepage (header, nav links 首页/用户/客户/订单, header login button, the 业务工作台 heading, 账户登录, 打开对话框, the edit dialog, the 用户列表 and 客户列表 sections) is byte-for-byte unchanged. Confirm `GET /health` still reports database availability and that `/api/users`, `/api/customers`, `/api/orders` and the /users, /customers, /orders, /help, /about routes respond as before. Inspect the served preview to show the updated label in place, and confirm the working diff is confined to the single label token in web/index.html.",
+                      "expectation_id": "task-acceptance-1",
+                      "owner_boundary": "Guardian/Verification owns the assurance result."
+                    }
+                  ],
+                  "prerequisite_evidence": [],
+                  "required_capabilities": [],
+                  "required_prerequisites": [],
+                  "semantic_fact_references": [
+                    {
+                      "unit": null,
+                      "scope": null,
+                      "value": "http://qualified-git:8080/worker-interruption.git",
+                      "fact_id": "4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                      "subject": "repo.url",
+                      "relation": "REFERENCE",
+                      "authority": "HUMAN_EXPLICIT",
+                      "qualifiers": {},
+                      "epistemic_status": "CONFIRMED",
+                      "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                    },
+                    {
+                      "unit": null,
+                      "scope": "首页",
+                      "value": "立即体验",
+                      "fact_id": "bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                      "subject": "homepage.cta_label",
+                      "relation": "STATE_TRANSITION",
+                      "authority": "HUMAN_EXPLICIT",
+                      "qualifiers": {
+                        "from": "开始使用"
+                      },
+                      "epistemic_status": "CONFIRMED",
+                      "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                    },
+                    {
+                      "unit": null,
+                      "scope": "首页",
+                      "value": "其他内容不变",
+                      "fact_id": "800e9025-6025-5aef-a385-c52a6daff26b",
+                      "subject": "homepage.content",
+                      "relation": "SCOPE",
+                      "authority": "HUMAN_EXPLICIT",
+                      "qualifiers": {},
+                      "epistemic_status": "CONFIRMED",
+                      "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                    },
+                    {
+                      "unit": null,
+                      "scope": null,
+                      "value": true,
+                      "fact_id": "2749319e-6a5f-521a-ba5a-da549dd1fb70",
+                      "subject": "preview.delivery",
+                      "relation": "ACCEPTANCE_ASSERTION",
+                      "authority": "HUMAN_EXPLICIT",
+                      "qualifiers": {},
+                      "epistemic_status": "CONFIRMED",
+                      "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                    }
+                  ]
+                },
+                "change_contract": {
+                  "constraints": [
+                    "其他内容不变"
+                  ],
+                  "target_kind": "CODE_WORK",
+                  "target_shape": "EXACT_TARGET_SET",
+                  "allowed_areas": [],
+                  "exact_targets": [
+                    {
+                      "path": "web/index.html",
+                      "operation": "UPDATE"
+                    }
+                  ],
+                  "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+                  "forbidden_areas": [
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ],
+                  "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+                  "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+                  "source_proposal_id": "b18845ae-2835-5466-940f-75622cd80822",
+                  "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+                  "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+                  "verification_obligations": [
+                    {
+                      "kind": "PATH_SCOPE",
+                      "target": null
+                    },
+                    {
+                      "kind": "GIT_DIFF_CHECK",
+                      "target": null
+                    }
+                  ],
+                  "source_proposal_fingerprint": "100093b1bf9ead1bb54f0132b3ccca8e7c54571411f5006f7acd6780d6ec9f82"
+                },
+                "production_plan": {
+                  "graph": null,
+                  "objective": "Produce the next exact change admitted from current Reality",
+                  "assumptions": [
+                    "The admitted Work can be executed through one governed PWU and Attempt lineage."
+                  ],
+                  "proposal_id": "f461a685-6943-53b4-aed0-a3427cccbb5a",
+                  "target_kind": "CODE_WORK",
+                  "ordered_steps": [
+                    {
+                      "position": 1,
+                      "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+                    },
+                    {
+                      "position": 2,
+                      "instruction": "Modify only the admitted exact code targets: web/index.html."
+                    },
+                    {
+                      "position": 3,
+                      "instruction": "Run the admitted targeted verification and report the resulting evidence."
+                    }
+                  ],
+                  "change_contract": {
+                    "constraints": [
+                      "其他内容不变"
+                    ],
+                    "target_kind": "CODE_WORK",
+                    "target_shape": "EXACT_TARGET_SET",
+                    "allowed_areas": [],
+                    "exact_targets": [
+                      {
+                        "path": "web/index.html",
+                        "operation": "UPDATE"
+                      }
+                    ],
+                    "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+                    "forbidden_areas": [
+                      "server.py",
+                      "migrations/001_initial.sql",
+                      "web/app.js",
+                      "web/styles.css",
+                      "Dockerfile",
+                      "package.json",
+                      "tests/application.cjs",
+                      "README.md",
+                      ".gitignore"
+                    ],
+                    "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+                    "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+                    "source_proposal_id": "b18845ae-2835-5466-940f-75622cd80822",
+                    "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+                    "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+                    "verification_obligations": [
+                      {
+                        "kind": "PATH_SCOPE",
+                        "target": null
+                      },
+                      {
+                        "kind": "GIT_DIFF_CHECK",
+                        "target": null
+                      }
+                    ],
+                    "source_proposal_fingerprint": "100093b1bf9ead1bb54f0132b3ccca8e7c54571411f5006f7acd6780d6ec9f82"
+                  },
+                  "change_proposal": null,
+                  "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+                  "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+                  "artifact_targets": [],
+                  "fit_classification": "ONE_PWU_FIT",
+                  "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+                  "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+                  "unresolved_questions": [],
+                  "inherited_constraints": [
+                    "其他内容不变"
+                  ],
+                  "verification_approach": "Run the existing test entrypoint `node --test tests/*.cjs` and confirm it passes unchanged. Start the site with `python server.py` against a fresh or existing SQLite database so startup migrations apply, then fetch `/` on port 8080 and assert the returned HTML contains “立即体验” and contains no remaining occurrence of “开始使用”, while every other element of that homepage (header, nav links 首页/用户/客户/订单, header login button, the 业务工作台 heading, 账户登录, 打开对话框, the edit dialog, the 用户列表 and 客户列表 sections) is byte-for-byte unchanged. Confirm `GET /health` still reports database availability and that `/api/users`, `/api/customers`, `/api/orders` and the /users, /customers, /orders, /help, /about routes respond as before. Inspect the served preview to show the updated label in place, and confirm the working diff is confined to the single label token in web/index.html.",
+                  "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737"
+                },
+                "required_changes": [
+                  "web/index.html"
+                ],
+                "required_markers": [],
+                "required_outputs": [
+                  "web/index.html"
+                ],
+                "artifact_contract": null,
+                "forbidden_changes": [],
+                "blocking_conditions": [],
+                "verification_obligations": [
+                  "PATH_SCOPE",
+                  "GIT_DIFF_CHECK"
+                ],
+                "semantic_fact_obligations": [
+                  {
+                    "unit": null,
+                    "scope": null,
+                    "value": "http://qualified-git:8080/worker-interruption.git",
+                    "fact_id": "4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                    "subject": "repo.url",
+                    "relation": "REFERENCE",
+                    "authority": "HUMAN_EXPLICIT",
+                    "qualifiers": {},
+                    "epistemic_status": "CONFIRMED",
+                    "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                  },
+                  {
+                    "unit": null,
+                    "scope": "首页",
+                    "value": "立即体验",
+                    "fact_id": "bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                    "subject": "homepage.cta_label",
+                    "relation": "STATE_TRANSITION",
+                    "authority": "HUMAN_EXPLICIT",
+                    "qualifiers": {
+                      "from": "开始使用"
+                    },
+                    "epistemic_status": "CONFIRMED",
+                    "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                  },
+                  {
+                    "unit": null,
+                    "scope": "首页",
+                    "value": "其他内容不变",
+                    "fact_id": "800e9025-6025-5aef-a385-c52a6daff26b",
+                    "subject": "homepage.content",
+                    "relation": "SCOPE",
+                    "authority": "HUMAN_EXPLICIT",
+                    "qualifiers": {},
+                    "epistemic_status": "CONFIRMED",
+                    "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                  },
+                  {
+                    "unit": null,
+                    "scope": null,
+                    "value": true,
+                    "fact_id": "2749319e-6a5f-521a-ba5a-da549dd1fb70",
+                    "subject": "preview.delivery",
+                    "relation": "ACCEPTANCE_ASSERTION",
+                    "authority": "HUMAN_EXPLICIT",
+                    "qualifiers": {},
+                    "epistemic_status": "CONFIRMED",
+                    "source_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+                  }
+                ]
+              },
+              "context_package_fingerprint": "066f7b74f01e18be05572770054b54ca327730eb9dba75aa6f240cbe3363ad71"
+            },
+            "fact_type": "PWU_CONTRACT",
+            "contract_digest": "3997c6121a9d85085a977b9dc99d7b03b4e25af1fc8f6e0b22aefcc71586730e",
+            "contract_version_id": "a7b876d2-efb4-57ba-aaaa-b03cc0a7d18e"
+          },
+          {
+            "digest": "06dbad06fc1c52b405543f10958e5e396aa0ee733660a367a7ca884be880959a",
+            "members": [
+              {
+                "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+                "commit": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+                "mount_id": "primary",
+                "read_scope": [],
+                "write_scope": [
+                  "web/index.html"
+                ],
+                "container_path": "/workspace/primary",
+                "forbidden_paths": [
+                  ".git",
+                  "server.py",
+                  "migrations/001_initial.sql",
+                  "web/app.js",
+                  "web/styles.css",
+                  "Dockerfile",
+                  "package.json",
+                  "tests/application.cjs",
+                  "README.md",
+                  ".gitignore"
+                ],
+                "repository_identity": "http://qualified-git:8080/worker-interruption.git"
+              }
+            ],
+            "fact_type": "SOURCE_VECTOR",
+            "non_repository_assets": []
+          },
+          {
+            "fact_type": "EXECUTION_ENVELOPE",
+            "stop_conditions": [],
+            "capability_grants": [
+              {
+                "scope": {
+                  "paths": [],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "file.read"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "file.write"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "process.run"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "git.status"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "git.diff"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "test.run"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "build.run"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "dependency.sync"
+              },
+              {
+                "scope": {
+                  "paths": [
+                    "web/index.html"
+                  ],
+                  "permissions": [],
+                  "capabilities": [],
+                  "forbidden_paths": [
+                    ".git",
+                    "server.py",
+                    "migrations/001_initial.sql",
+                    "web/app.js",
+                    "web/styles.css",
+                    "Dockerfile",
+                    "package.json",
+                    "tests/application.cjs",
+                    "README.md",
+                    ".gitignore"
+                  ]
+                },
+                "version": "1",
+                "identity": "preview.inspect"
+              }
+            ],
+            "obligation_references": [
+              "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+              "PATH_SCOPE",
+              "GIT_DIFF_CHECK",
+              "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+              "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+              "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+              "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+            ]
+          },
+          {
+            "rule": "All Tool path and cwd arguments are relative to the Watt workspace. For one mount use '.' as cwd and do not prefix file paths with the mount id. For multiple mounts use the listed tool_path_prefix. SOURCE_VECTOR container_path is identity metadata, not a Tool path.",
+            "mounts": [
+              {
+                "mount_id": "primary",
+                "tool_path_prefix": "."
+              }
+            ],
+            "fact_type": "TOOL_PATH_CONVENTION",
+            "workspace_root": "."
+          },
+          {
+            "rule": "Historical failures are evidence, not permission to change Work intent or repeat an uncertain side effect.",
+            "events": [
+              {
+                "result": "LOCAL_OBLIGATION_RECOVERED",
+                "status": "VERIFIED",
+                "event_id": "c1a212ec-e75d-4d09-adda-c59527244828",
+                "operation_id": "bab1e74d-5299-480a-a7ea-c2c4a2a41ef5",
+                "repairability": "AUTONOMOUSLY_REPAIRABLE",
+                "failure_family": "CANDIDATE_INCONSISTENT",
+                "expected_reality": {},
+                "observed_reality": {},
+                "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+                "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+                "diagnostic_evidence": {
+                  "signal": "SCOPE_INFLATION",
+                  "required_paths": [
+                    "web/index.html"
+                  ],
+                  "candidate_paths": [
+                    "web/index.html"
+                  ],
+                  "authority_expanded": false,
+                  "rejected_behaviors": [
+                    "Editing server.py (routes, API, migration or serving logic) — the request changes no route or behavior, and \"/\" already serves web/index.html.",
+                    "Editing web/app.js or web/styles.css — no script or style text contains “开始使用” and the constraint is “其他内容不变”.",
+                    "Editing tests/application.cjs — no test asserts the button label, so no mandatory oracle change is entailed.",
+                    "Editing README.md, Dockerfile, migrations/001_initial.sql or package.json — documentation, packaging and fixture schema are unaffected and unrequested.",
+                    "Creating new files (new pages, routes, preview scaffolds) — a link or label change never entails creating its destination, and the existing entrypoint already provides the only required serving path.",
+                    "Treating preview availability, served-runtime verification, Human review or Delivery Authorization as repository source scope."
+                  ]
+                }
+              }
+            ],
+            "fact_type": "RECENT_SELF_REFINE"
+          },
+          {
+            "fact_type": "RECOVERY_CHECKPOINT",
+            "checkpoint_id": "2aa598d2-b47d-4564-9704-14f840745644",
+            "content_digest": "5669d0587111c1096598eca91c2d4b6127b3bdda569a38fd64fa9417896c0c5a",
+            "semantic_manifest": {
+              "result_claim": null,
+              "working_plan": {
+                "version": 1,
+                "hypotheses": [],
+                "evidence_ids": [],
+                "obligation_ids": [
+                  "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+                  "PATH_SCOPE",
+                  "GIT_DIFF_CHECK",
+                  "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                  "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                  "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+                  "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+                ],
+                "open_questions": [],
+                "chosen_approach": "Inspect governed Reality and execute the bounded PWU contract.",
+                "completed_actions": [],
+                "approach_rationale": "No prior checkpoint exists for this execution session.",
+                "objective_reference": "a7b876d2-efb4-57ba-aaaa-b03cc0a7d18e"
+              },
+              "residual_obligations": [
+                "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+                "PATH_SCOPE",
+                "GIT_DIFF_CHECK",
+                "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+                "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+                "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+                "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+              ]
+            }
+          }
+        ],
+        "step_sequence": 2,
+        "available_tools": [
+          {
+            "version": "1",
+            "identity": "file.read",
+            "description": "Read one UTF-8 file from the private execution workspace. Content may be truncated at 32 KiB; use file.write old_text/new_text for a small exact edit without rewriting the whole file.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "path"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "READ"
+          },
+          {
+            "version": "1",
+            "identity": "file.write",
+            "description": "Atomically write one UTF-8 file inside an admitted path scope. Supply content for full replacement, or old_text and new_text for an exact single-occurrence edit of an existing file; the latter preserves unseen content in large files.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "path"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "new_text": {
+                  "type": "string"
+                },
+                "old_text": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "LOCAL_MUTATION"
+          },
+          {
+            "version": "1",
+            "identity": "process.run",
+            "description": "Run one allowlisted argv process without a shell. Do not use sed, tail, or wc; they are not allowlisted. Edit files with file.write, including its exact old_text/new_text mode. Inline code flags such as python -c are rejected. For a Python import check, use ['python', '-m', 'package.module'] with cwd='src', or use test.run with pytest --collect-only.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "argv"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                },
+                "argv": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "PROCESS"
+          },
+          {
+            "version": "1",
+            "identity": "git.status",
+            "description": "Observe porcelain Git status for one admitted repository mount.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "READ"
+          },
+          {
+            "version": "1",
+            "identity": "git.diff",
+            "description": "Observe the bounded Git diff for one admitted repository mount.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "READ"
+          },
+          {
+            "version": "1",
+            "identity": "test.run",
+            "description": "Run an admitted Python or Node test recipe. cwd is workspace-relative (for example '.', 'client', or 'server'), never '/workspace'.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "argv",
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                },
+                "argv": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "PROCESS"
+          },
+          {
+            "version": "1",
+            "identity": "build.run",
+            "description": "Run an admitted project-native build recipe, for example npm run build or python -m build. For Python syntax compilation use process.run with ['python', '-m', 'py_compile', source_path].",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "argv",
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                },
+                "argv": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "PROCESS"
+          },
+          {
+            "version": "1",
+            "identity": "dependency.sync",
+            "description": "Run a lock-governed dependency synchronization recipe.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "argv",
+                "cwd"
+              ],
+              "properties": {
+                "cwd": {
+                  "type": "string"
+                },
+                "argv": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "PROCESS"
+          },
+          {
+            "version": "1",
+            "identity": "preview.inspect",
+            "description": "Inspect one static artifact without starting a browser session.",
+            "input_schema": {
+              "type": "object",
+              "required": [
+                "path"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "effect_classification": "READ"
+          }
+        ],
+        "previous_results": [
+          {
+            "output": {
+              "path": "web/index.html",
+              "bytes": 820,
+              "exists": true,
+              "content": "<!doctype html>\n<html lang=\"zh-CN\"><head><meta charset=\"utf-8\"><title>Operations fixture</title>\n<link rel=\"stylesheet\" href=\"/styles.css\"></head><body>\n<header><nav><a href=\"/\">首页</a> <a href=\"/users\">用户</a>\n<a href=\"/customers\">客户</a> <a href=\"/orders\">订单</a></nav>\n<button id=\"header-login\">登录</button></header>\n<main><h1>业务工作台</h1><button id=\"start\">开始使用</button>\n<button id=\"account-login\">账户登录</button>\n<button id=\"open-dialog\">打开对话框</button>\n<dialog id=\"edit-dialog\"><p>示例编辑对话框</p><button id=\"cancel\">取消</button></dialog>\n<section id=\"users\"><h2>用户列表</h2><div id=\"user-list\"></div></section>\n<section id=\"customers\"><h2>客户列表</h2><div id=\"customer-list\"></div></section>\n</main><script src=\"/app.js\"></script></body></html>\n",
+              "truncated": false
+            },
+            "evidence": [
+              {
+                "type": "PRODUCTION_ENVIRONMENT_COMMAND",
+                "digest": "27bd8da9676789026226e75c9f2c9cbab0f6f43fffee9a056cdf7f2c278895d2",
+                "stderr_reference": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_reference": "sha256:d390a2cfdac5acdfdfe8cd5d0f2e1a101bd90319c65ab383f20030426a99ed65",
+                "workspace_reference": "production-workspace:d8b9a9f8-dd86-46aa-a0be-b84d9348e068",
+                "environment_reference": "production-environment:c01423a9-4c15-496c-98d8-b42e88166564"
+              }
+            ],
+            "condition": "SETTLED",
+            "delivery_id": "fd984250-4bee-44b4-bf92-5db538ec1a5f",
+            "output_digest": "8b2a945738d0444fdb131d8f41be17adf0d57b93e8d904a6ef73b8d230592dcc",
+            "tool_identity": "file.read"
+          }
+        ],
+        "residual_obligations": [
+          "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+          "PATH_SCOPE",
+          "GIT_DIFF_CHECK",
+          "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+          "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+          "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+          "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+        ]
+      },
+      "request_digest": "197cbd10316eb77ef4454e04d9f0cf0ef59e364406c06e994d9f17f1e348e4ce",
+      "result_payload": {
+        "action": "CONTINUE",
+        "summary": "Execute the provider-proposed tools through the Watt Tool Host.",
+        "tool_calls": [
+          {
+            "arguments": {
+              "path": "web/index.html",
+              "new_text": "<button id=\"start\">立即体验</button>",
+              "old_text": "<button id=\"start\">开始使用</button>"
+            },
+            "tool_identity": "file.write",
+            "proposal_index": 0,
+            "provider_call_id": "call_00_0Rk5AGoF8OPKmF1IFAhR9699"
+          }
+        ],
+        "result_claim": null,
+        "working_plan": {
+          "version": 1,
+          "hypotheses": [],
+          "evidence_ids": [],
+          "obligation_ids": [
+            "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+            "PATH_SCOPE",
+            "GIT_DIFF_CHECK",
+            "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+            "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+            "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+            "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+          ],
+          "open_questions": [],
+          "chosen_approach": "Inspect governed Reality and execute the bounded PWU contract.",
+          "completed_actions": [],
+          "approach_rationale": "No prior checkpoint exists for this execution session.",
+          "objective_reference": "a7b876d2-efb4-57ba-aaaa-b03cc0a7d18e"
+        },
+        "provider_observation": {
+          "usage": {
+            "input_tokens": 12903,
+            "total_tokens": 13076,
+            "output_tokens": 173,
+            "reasoning_tokens": 61,
+            "cached_input_tokens": 1920
+          },
+          "transport": {
+            "mode": "stream",
+            "elapsed_ms": 2856,
+            "failure_code": null,
+            "received_bytes": 58050,
+            "received_events": 145,
+            "terminal_received": true,
+            "headers_elapsed_ms": 1760,
+            "response_status_code": 200,
+            "first_byte_elapsed_ms": 1760,
+            "syntactically_complete": true,
+            "response_headers_received": true
+          },
+          "effective_model": "deepseek-flash",
+          "requested_model": "deepseek-flash",
+          "response_status": "completed",
+          "provider_identity": "deepseek",
+          "provider_request_id": "01f0274d-6c9c-47b6-a6e3-58ddddaba1d2"
+        },
+        "residual_obligations": [
+          "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+          "PATH_SCOPE",
+          "GIT_DIFF_CHECK",
+          "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+          "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+          "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+          "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+        ]
+      },
+      "result_digest": "e3a8c39a4ba0006ab9c1f68f31d0a4bf13bc4e4801cd72fdfe140516b1f7e8c2",
+      "context_revision": 1,
+      "started_at": "2026-09-27T04:45:22.710335Z",
+      "finished_at": "2026-09-27T04:45:25.641230Z"
+    }
+  ],
+  "effects": [
+    {
+      "id": "bf1f5480-0563-4f56-92e2-6015bc033b4c",
+      "step_id": "8d27ef57-0ce0-4406-8eba-734782ea9d75",
+      "proposal_index": 0,
+      "tool_identity": "file.read",
+      "tool_version": "1",
+      "semantic_input": {
+        "path": "web/index.html"
+      },
+      "semantic_input_digest": "199e543966ccd9e64f33d1b3303986ca6090784e67372c7d59bc682b31e151ab",
+      "classification": "READ",
+      "conflict_domains": [
+        "web/index.html"
+      ],
+      "condition": "SETTLED",
+      "created_at": "2026-09-27T04:45:21.283260Z"
+    },
+    {
+      "id": "a4a47afd-77f3-43c5-af4b-3e6fd314aced",
+      "step_id": "e7e481b5-57a1-483a-90c9-a5c940a0a852",
+      "proposal_index": 0,
+      "tool_identity": "file.write",
+      "tool_version": "1",
+      "semantic_input": {
+        "path": "web/index.html",
+        "new_text": "<button id=\"start\">立即体验</button>",
+        "old_text": "<button id=\"start\">开始使用</button>"
+      },
+      "semantic_input_digest": "c1e24b24a9dcc5cacc151e77fbde42758110bec13bbbe082b9b01ff99cacf884",
+      "classification": "LOCAL_MUTATION",
+      "conflict_domains": [
+        "web/index.html"
+      ],
+      "condition": "INTENDED",
+      "created_at": "2026-09-27T04:45:25.664837Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "c369197a-9f04-43ff-b628-e891852f688c",
+      "pwu_id": "0ee8f802-7ec6-4382-8cbf-064ab5bbf69d",
+      "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+      "step_id": "8d27ef57-0ce0-4406-8eba-734782ea9d75",
+      "effect_id": "bf1f5480-0563-4f56-92e2-6015bc033b4c",
+      "evidence_type": "PRODUCTION_ENVIRONMENT_COMMAND",
+      "producer_identity": "native-tool-host",
+      "subject_digest": "8b2a945738d0444fdb131d8f41be17adf0d57b93e8d904a6ef73b8d230592dcc",
+      "payload": {
+        "type": "PRODUCTION_ENVIRONMENT_COMMAND",
+        "digest": "27bd8da9676789026226e75c9f2c9cbab0f6f43fffee9a056cdf7f2c278895d2",
+        "stderr_reference": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_reference": "sha256:d390a2cfdac5acdfdfe8cd5d0f2e1a101bd90319c65ab383f20030426a99ed65",
+        "workspace_reference": "production-workspace:d8b9a9f8-dd86-46aa-a0be-b84d9348e068",
+        "environment_reference": "production-environment:c01423a9-4c15-496c-98d8-b42e88166564"
+      },
+      "content_digest": "6e9ac4a5a047a3ca8dd62ca4b2a606a2e6cd19b512c9a318cb416ff2fd64ff9e",
+      "created_at": "2026-09-27T04:45:22.587514Z"
+    }
+  ],
+  "checkpoint": {
+    "id": "2aa598d2-b47d-4564-9704-14f840745644",
+    "schema_version": 1,
+    "session_id": "03cbed2d-9039-507f-8d00-113b236ee8ba",
+    "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+    "step_sequence": 1,
+    "worker_epoch": 1,
+    "condition": "COMMITTED",
+    "source_vector_digest": "06dbad06fc1c52b405543f10958e5e396aa0ee733660a367a7ca884be880959a",
+    "repository_manifest": {
+      "path": "/var/lib/spg/native-checkpoints/checkpoints/attempts/54e8524d-584e-47cc-8110-11a85032c3e8/56/5669d0587111c1096598eca91c2d4b6127b3bdda569a38fd64fa9417896c0c5a.json",
+      "storage": "content-addressed"
+    },
+    "execution_manifest": {
+      "tool_results": [
+        {
+          "output": {
+            "path": "web/index.html",
+            "bytes": 820,
+            "exists": true,
+            "content": "<!doctype html>\n<html lang=\"zh-CN\"><head><meta charset=\"utf-8\"><title>Operations fixture</title>\n<link rel=\"stylesheet\" href=\"/styles.css\"></head><body>\n<header><nav><a href=\"/\">首页</a> <a href=\"/users\">用户</a>\n<a href=\"/customers\">客户</a> <a href=\"/orders\">订单</a></nav>\n<button id=\"header-login\">登录</button></header>\n<main><h1>业务工作台</h1><button id=\"start\">开始使用</button>\n<button id=\"account-login\">账户登录</button>\n<button id=\"open-dialog\">打开对话框</button>\n<dialog id=\"edit-dialog\"><p>示例编辑对话框</p><button id=\"cancel\">取消</button></dialog>\n<section id=\"users\"><h2>用户列表</h2><div id=\"user-list\"></div></section>\n<section id=\"customers\"><h2>客户列表</h2><div id=\"customer-list\"></div></section>\n</main><script src=\"/app.js\"></script></body></html>\n",
+            "truncated": false
+          },
+          "evidence": [
+            {
+              "type": "PRODUCTION_ENVIRONMENT_COMMAND",
+              "digest": "27bd8da9676789026226e75c9f2c9cbab0f6f43fffee9a056cdf7f2c278895d2",
+              "stderr_reference": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_reference": "sha256:d390a2cfdac5acdfdfe8cd5d0f2e1a101bd90319c65ab383f20030426a99ed65",
+              "workspace_reference": "production-workspace:d8b9a9f8-dd86-46aa-a0be-b84d9348e068",
+              "environment_reference": "production-environment:c01423a9-4c15-496c-98d8-b42e88166564"
+            }
+          ],
+          "condition": "SETTLED",
+          "delivery_id": "fd984250-4bee-44b4-bf92-5db538ec1a5f",
+          "output_digest": "8b2a945738d0444fdb131d8f41be17adf0d57b93e8d904a6ef73b8d230592dcc",
+          "tool_identity": "file.read"
+        }
+      ]
+    },
+    "semantic_manifest": {
+      "result_claim": null,
+      "working_plan": {
+        "version": 1,
+        "hypotheses": [],
+        "evidence_ids": [],
+        "obligation_ids": [
+          "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+          "PATH_SCOPE",
+          "GIT_DIFF_CHECK",
+          "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+          "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+          "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+          "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+        ],
+        "open_questions": [],
+        "chosen_approach": "Inspect governed Reality and execute the bounded PWU contract.",
+        "completed_actions": [],
+        "approach_rationale": "No prior checkpoint exists for this execution session.",
+        "objective_reference": "a7b876d2-efb4-57ba-aaaa-b03cc0a7d18e"
+      },
+      "residual_obligations": [
+        "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+        "PATH_SCOPE",
+        "GIT_DIFF_CHECK",
+        "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+        "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+        "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+        "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+      ]
+    },
+    "content_digest": "5669d0587111c1096598eca91c2d4b6127b3bdda569a38fd64fa9417896c0c5a",
+    "consistency_class": "APPLICATION_CONSISTENT",
+    "created_at": "2026-09-27T04:45:22.623889Z",
+    "committed_at": "2026-09-27T04:45:22.623889Z"
+  },
+  "timing": {
+    "spans": [
+      {
+        "latency_class": "RUNTIME_ORCHESTRATION",
+        "kind": "QUEUE",
+        "identity": "9134fb4d-d83f-4090-bf27-8c35b772c4ae",
+        "started_at": "2026-09-27T04:45:17.543210+00:00",
+        "finished_at": "2026-09-27T04:45:18.199868+00:00",
+        "duration_ms": 656.658
+      },
+      {
+        "latency_class": "PERCEIVED_HUMAN",
+        "kind": "FIRST_MEANINGFUL_ACTION",
+        "identity": "54e8524d-584e-47cc-8110-11a85032c3e8",
+        "started_at": "2026-09-27T04:45:17.543210+00:00",
+        "finished_at": "2026-09-27T04:45:18.610982+00:00",
+        "duration_ms": 1067.772
+      },
+      {
+        "latency_class": "RUNTIME_ORCHESTRATION",
+        "kind": "ALLOCATION",
+        "identity": "cc403cd7-2679-4453-b310-e6adcd2229d2",
+        "started_at": "2026-09-27T04:45:18.199868+00:00",
+        "finished_at": "2026-09-27T04:45:49.013921+00:00",
+        "duration_ms": 30814.053
+      },
+      {
+        "latency_class": "TOOL_WORKSPACE",
+        "kind": "WORKSPACE_RECORDED_LIFETIME",
+        "identity": "bf364974-cf0c-5bf0-bdba-d93eaf474806",
+        "started_at": "2026-09-27T04:45:17.815624+00:00",
+        "finished_at": "2026-09-27T04:45:17.815624+00:00",
+        "duration_ms": 0.0
+      },
+      {
+        "latency_class": "MODEL_PROVIDER",
+        "kind": "INFERENCE",
+        "identity": "8d27ef57-0ce0-4406-8eba-734782ea9d75",
+        "started_at": "2026-09-27T04:45:18.610982+00:00",
+        "finished_at": "2026-09-27T04:45:21.260871+00:00",
+        "duration_ms": 2649.889
+      },
+      {
+        "latency_class": "MODEL_PROVIDER",
+        "kind": "INFERENCE",
+        "identity": "e7e481b5-57a1-483a-90c9-a5c940a0a852",
+        "started_at": "2026-09-27T04:45:22.710335+00:00",
+        "finished_at": "2026-09-27T04:45:25.641230+00:00",
+        "duration_ms": 2930.895
+      },
+      {
+        "latency_class": "TOOL_WORKSPACE",
+        "kind": "TOOL",
+        "identity": "bf1f5480-0563-4f56-92e2-6015bc033b4c",
+        "started_at": "2026-09-27T04:45:21.283260+00:00",
+        "finished_at": "2026-09-27T04:45:22.574278+00:00",
+        "duration_ms": 1291.018
+      },
+      {
+        "latency_class": "TOOL_WORKSPACE",
+        "kind": "TOOL",
+        "identity": "a4a47afd-77f3-43c5-af4b-3e6fd314aced",
+        "started_at": "2026-09-27T04:45:25.664837+00:00",
+        "finished_at": null,
+        "duration_ms": null
+      },
+      {
+        "latency_class": "RUNTIME_ORCHESTRATION",
+        "kind": "CHECKPOINT",
+        "identity": "2aa598d2-b47d-4564-9704-14f840745644",
+        "started_at": "2026-09-27T04:45:22.623889+00:00",
+        "finished_at": "2026-09-27T04:45:22.623889+00:00",
+        "duration_ms": 0.0
+      },
+      {
+        "latency_class": "PERCEIVED_HUMAN",
+        "kind": "EVENT:NativeExecutionQueued",
+        "identity": "d19e16d5-2775-4ff1-aa32-8954987015a8",
+        "started_at": "2026-09-27T04:45:18.048351+00:00",
+        "finished_at": null,
+        "duration_ms": null
+      },
+      {
+        "latency_class": "PERCEIVED_HUMAN",
+        "kind": "EVENT:ExecutionCapacityAllocated",
+        "identity": "4b80a5b5-4679-43e6-adbb-7549d8b7b1f1",
+        "started_at": "2026-09-27T04:45:18.329296+00:00",
+        "finished_at": null,
+        "duration_ms": null
+      },
+      {
+        "latency_class": "PERCEIVED_HUMAN",
+        "kind": "EVENT:NativeExecutionStarted",
+        "identity": "53bbe31e-eddd-41ed-a4d4-9e3fc1885627",
+        "started_at": "2026-09-27T04:45:18.413563+00:00",
+        "finished_at": null,
+        "duration_ms": null
+      }
+    ],
+    "latency_classes": {
+      "MODEL_PROVIDER": "measured per completed inference step",
+      "RUNTIME_ORCHESTRATION": "queue, allocation, and checkpoint spans",
+      "TOOL_WORKSPACE": "tool receipts and recorded workspace lifetime",
+      "INFRASTRUCTURE": "unavailable without host/container trace ingestion",
+      "PERCEIVED_HUMAN": "durable admission to first action and event publish"
+    },
+    "unavailable": {
+      "admission_transport": "HTTP receive timestamp is not persisted",
+      "worker_activation": "allocation activation timestamp is not persisted",
+      "workspace_materialization": "materialization start/finish timestamps are not persisted",
+      "context": "context assembly timing is not persisted",
+      "verification": "independent Verification is owned downstream",
+      "infrastructure": "container, disk, network, and DB spans require host trace ingestion",
+      "event_delivery": "publish is measured when acked; subscriber render acknowledgement is unavailable",
+      "reconnect": "client reconnect timing is not persisted"
+    },
+    "aggregate_duration_ms": null,
+    "aggregate_reason": "phase spans may overlap and are not summed"
+  }
+}

@@ -1,0 +1,473 @@
+{
+  "recorded_at": "2026-09-27T06:22:10.508483+00:00",
+  "qualification_scope": "LIFECYCLE_ACTION_HARDENING",
+  "lifecycle_cases": [
+    {
+      "case": "GC-LC-01",
+      "status": "PASS",
+      "qualification": "AUTHENTICATED_REAL_PROVIDER_PUBLIC_API",
+      "trials": [
+        {
+          "trial": 1,
+          "evidence": "runtime/lifecycle/GC-LC-01/trial-1/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "repository_ready": true,
+            "exact_source": true,
+            "exact_revision_tree": true,
+            "product_continuity": true,
+            "local_branch": true,
+            "initial_main": true,
+            "unchanged_source": true,
+            "observed_branch_answer": true
+          }
+        },
+        {
+          "trial": 2,
+          "evidence": "runtime/lifecycle/GC-LC-01/trial-2/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "repository_ready": true,
+            "exact_source": true,
+            "exact_revision_tree": true,
+            "product_continuity": true,
+            "local_branch": true,
+            "initial_main": true,
+            "unchanged_source": true,
+            "observed_branch_answer": true
+          }
+        },
+        {
+          "trial": 3,
+          "evidence": "runtime/lifecycle/GC-LC-01/trial-3/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "repository_ready": true,
+            "exact_source": true,
+            "exact_revision_tree": true,
+            "product_continuity": true,
+            "local_branch": true,
+            "initial_main": true,
+            "unchanged_source": true,
+            "observed_branch_answer": true
+          }
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-02",
+      "status": "PASS",
+      "qualification": "AUTHENTICATED_REAL_PROVIDER_PUBLIC_API",
+      "trials": [
+        {
+          "trial": 1,
+          "evidence": "runtime/lifecycle/GC-LC-02/trial-1/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "repository_ready": true,
+            "exact_source": true,
+            "exact_revision_tree": true,
+            "product_continuity": true,
+            "local_branch": true
+          }
+        },
+        {
+          "trial": 2,
+          "evidence": "runtime/lifecycle/GC-LC-02/trial-2/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "repository_ready": true,
+            "exact_source": true,
+            "exact_revision_tree": true,
+            "product_continuity": true,
+            "local_branch": true
+          }
+        },
+        {
+          "trial": 3,
+          "evidence": "runtime/lifecycle/GC-LC-02/trial-3/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "repository_ready": true,
+            "exact_source": true,
+            "exact_revision_tree": true,
+            "product_continuity": true,
+            "local_branch": true
+          }
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-03",
+      "status": "PASS",
+      "qualification": "AUTHENTICATED_REAL_PROVIDER_PUBLIC_API",
+      "trials": [
+        {
+          "trial": 1,
+          "evidence": "runtime/lifecycle/GC-LC-03/trial-1/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "repository_ready": true,
+            "exact_source": true,
+            "exact_revision_tree": true,
+            "product_continuity": true,
+            "pinned_manifest_evidence": true
+          }
+        },
+        {
+          "trial": 2,
+          "evidence": "runtime/lifecycle/GC-LC-03/trial-2/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "repository_ready": true,
+            "exact_source": true,
+            "exact_revision_tree": true,
+            "product_continuity": true,
+            "pinned_manifest_evidence": true
+          }
+        },
+        {
+          "trial": 3,
+          "evidence": "runtime/lifecycle/GC-LC-03/trial-3/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "repository_ready": true,
+            "exact_source": true,
+            "exact_revision_tree": true,
+            "product_continuity": true,
+            "pinned_manifest_evidence": true
+          }
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-04",
+      "status": "PASS",
+      "qualification": "AUTHENTICATED_REAL_PROVIDER_PUBLIC_API",
+      "trials": [
+        {
+          "trial": 1,
+          "evidence": "runtime/lifecycle/GC-LC-04/trial-1/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "no_repository_action": true
+          }
+        },
+        {
+          "trial": 2,
+          "evidence": "runtime/lifecycle/GC-LC-04/trial-2/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "no_repository_action": true
+          }
+        },
+        {
+          "trial": 3,
+          "evidence": "runtime/lifecycle/GC-LC-04/trial-3/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "no_repository_action": true
+          }
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-05",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "runtime/neighbors/GC-EX-01/trial-1/business-oracle.json",
+        "runtime/neighbors/GC-EX-06/trial-1/business-oracle.json",
+        "runtime/neighbors/GC-EX-07/trial-1/business-oracle.json"
+      ],
+      "repeat_scope": "bounded semantic qualification"
+    },
+    {
+      "case": "GC-LC-06",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "runtime/neighbors/GC-EX-15/trial-1/business-oracle.json",
+        "runtime/neighbors/GC-EX-15/trial-1/review-authority-oracle.json"
+      ],
+      "repeat_scope": "bounded semantic qualification"
+    },
+    {
+      "case": "GC-LC-07",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "runtime/neighbors/GC-EX-01/trial-1/business-oracle.json",
+        "runtime/neighbors/GC-EX-06/trial-1/business-oracle.json",
+        "runtime/neighbors/GC-EX-07/trial-1/business-oracle.json"
+      ],
+      "repeat_scope": "multiple independent automatic Preview obligations"
+    },
+    {
+      "case": "GC-LC-08",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "runtime/lifecycle/GC-LC-08/trial-1/result.json",
+        "runtime/lifecycle/GC-LC-08/trial-1/browser-oracle.json"
+      ],
+      "repeat_scope": "bounded semantic qualification"
+    },
+    {
+      "case": "GC-LC-09",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "runtime/lifecycle/GC-LC-09/trial-2/result.json"
+      ],
+      "repeat_scope": "bounded semantic qualification"
+    },
+    {
+      "case": "GC-LC-10",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "runtime/capability-authority-live/trial-1.json",
+        "runtime/capability-authority-live/trial-2.json",
+        "runtime/capability-authority-live/trial-3.json"
+      ],
+      "repeat_scope": "three actual API or owner-boundary trials"
+    },
+    {
+      "case": "GC-LC-11",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "runtime/credential-authority-live/trial-1.json",
+        "runtime/credential-authority-live/trial-2.json",
+        "runtime/credential-authority-live/trial-3.json"
+      ],
+      "repeat_scope": "three actual API or owner-boundary trials"
+    },
+    {
+      "case": "GC-LC-12",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "verification-logs/authority-retry-trial-1.xml",
+        "verification-logs/authority-retry-trial-2.xml",
+        "verification-logs/authority-retry-trial-3.xml"
+      ],
+      "repeat_scope": "three actual API or owner-boundary trials"
+    },
+    {
+      "case": "GC-LC-13",
+      "status": "PASS",
+      "qualification": "AUTHENTICATED_REAL_PROVIDER_PUBLIC_API",
+      "trials": [
+        {
+          "trial": 1,
+          "evidence": "runtime/lifecycle/GC-LC-13/trial-1/result.json",
+          "checks": {
+            "no_production_work": true,
+            "all_turns_completed": true,
+            "no_repository_action": true,
+            "one_target_clarification": true
+          }
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-14",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "local-recovery-global-convergence-oracle.json"
+      ],
+      "repeat_scope": "bounded semantic qualification"
+    },
+    {
+      "case": "GC-LC-15",
+      "status": "PASS",
+      "qualification": "REAL_RUNTIME_OWNER_AND_BOUNDARY_EVIDENCE",
+      "evidence": [
+        "independent-projection-browser-oracle.json"
+      ],
+      "repeat_scope": "bounded semantic qualification"
+    }
+  ],
+  "neighbor_cases": [
+    {
+      "case": "GC-EX-01",
+      "trial": 1,
+      "status": "PASS",
+      "evidence": "runtime/neighbors/GC-EX-01/trial-1/business-oracle.json",
+      "checks": {
+        "automatic_preview_ready": true,
+        "served_verification": true,
+        "no_unauthorized_delivery": true,
+        "exactly_one_requested_link": true,
+        "one_source_file": true,
+        "one_added_line": true,
+        "zero_removed_lines": true
+      }
+    },
+    {
+      "case": "GC-EX-05",
+      "trial": 3,
+      "status": "PASS",
+      "evidence": "runtime/neighbors/GC-EX-05/trial-3/business-oracle.json",
+      "checks": {
+        "automatic_preview_ready": true,
+        "served_verification": true,
+        "no_unauthorized_delivery": true,
+        "browser_dialog_oracle": true,
+        "actual_cancel_closes_dialog": true,
+        "actual_no_effect_tool_failure": true,
+        "bounded_source_repair": true,
+        "autonomous_refinement_signal": true
+      }
+    },
+    {
+      "case": "GC-EX-06",
+      "trial": 1,
+      "status": "PASS",
+      "evidence": "runtime/neighbors/GC-EX-06/trial-1/business-oracle.json",
+      "checks": {
+        "automatic_preview_ready": true,
+        "served_verification": true,
+        "no_unauthorized_delivery": true,
+        "new_label": true,
+        "old_label": true,
+        "one_source_file": true,
+        "minimal_source_diff": true,
+        "automatic_acquisition_recovery": true
+      }
+    },
+    {
+      "case": "GC-EX-07",
+      "trial": 1,
+      "status": "PASS",
+      "evidence": "runtime/neighbors/GC-EX-07/trial-1/business-oracle.json",
+      "checks": {
+        "automatic_preview_ready": true,
+        "served_verification": true,
+        "no_unauthorized_delivery": true,
+        "exactly_one_requested_link": true,
+        "one_source_file": true,
+        "only_requested_link_changed": true
+      }
+    },
+    {
+      "case": "GC-EX-11",
+      "trial": 1,
+      "status": "PASS",
+      "evidence": "runtime/neighbors/GC-EX-11/trial-1/expected-human-oracle.json",
+      "checks": {
+        "one_legitimate_missing_credential_question": true,
+        "no_fabricated_preview": true,
+        "no_production_attempt": true,
+        "no_delivery_authorization": true,
+        "not_reported_complete": true,
+        "no_manual_rescue": true
+      }
+    },
+    {
+      "case": "GC-EX-14",
+      "trial": 2,
+      "status": "PASS",
+      "evidence": "runtime/neighbors/GC-EX-14/trial-2/business-oracle.json",
+      "checks": {
+        "automatic_preview_ready": true,
+        "served_verification": true,
+        "no_unauthorized_delivery": true,
+        "new_label": true,
+        "old_label": true,
+        "one_source_file": true,
+        "minimal_source_diff": true,
+        "actual_worker_interruption": true,
+        "same_attempt_new_lease_epoch": true,
+        "automatic_same_attempt_resume": true,
+        "no_duplicate_source_effect": true,
+        "interrupted_inference_preserved": true,
+        "native_refinement_recovered": true
+      }
+    },
+    {
+      "case": "GC-EX-15",
+      "trial": 1,
+      "status": "PASS",
+      "evidence": "runtime/neighbors/GC-EX-15/trial-1/business-oracle.json",
+      "checks": {
+        "automatic_preview_ready": true,
+        "served_verification": true,
+        "no_unauthorized_delivery": true,
+        "new_label": true,
+        "old_label": true,
+        "one_source_file": true,
+        "minimal_source_diff": true,
+        "exact_candidate_accepted": true,
+        "local_runtime_commit_only": true,
+        "remote_refs_unchanged": true,
+        "no_delivery_after_acceptance": true
+      }
+    },
+    {
+      "case": "GC-IP-02",
+      "trial": 1,
+      "status": "PASS",
+      "evidence": "runtime/neighbors/GC-IP-02/trial-1/business-oracle.json",
+      "checks": {
+        "automatic_preview_ready": true,
+        "served_verification": true,
+        "no_unauthorized_delivery": true,
+        "api_and_real_database_agree": true,
+        "form_submitted": true,
+        "reload_preserves_record": true,
+        "user_model_persistence": true
+      }
+    },
+    {
+      "case": "GC-IP-07",
+      "trial": 3,
+      "status": "PASS",
+      "evidence": "runtime/neighbors/GC-IP-07/trial-3/business-oracle.json",
+      "checks": {
+        "automatic_preview_ready": true,
+        "served_verification": true,
+        "no_unauthorized_delivery": true,
+        "one_genuine_domain_choice": true,
+        "name_and_email_search": true,
+        "empty_result": true,
+        "unrelated_domain_unchanged": true,
+        "api_search_matches_actual_database": true,
+        "no_unrequested_product_surfaces": true
+      }
+    }
+  ],
+  "lifecycle_status": "PASS",
+  "neighbor_status": "PASS",
+  "original_v1_cases_unchanged": true,
+  "corpus_counts": {
+    "original": 23,
+    "lifecycle_added": 15,
+    "v2": 38
+  },
+  "live_web_and_gc_ex_12": "BLOCKED_EXTERNAL",
+  "whole_tier0_live_claim": false,
+  "human_product_acceptance": "PENDING",
+  "retained_unqualified_or_failed_trials": [
+    "runtime/lifecycle/GC-LC-09/trial-1/qualification-classification.json",
+    "runtime/neighbors/GC-EX-14/trial-1/qualification-classification.json",
+    "runtime/neighbors/GC-EX-05/trial-2/latest.json",
+    "runtime/neighbors/GC-IP-07/trial-1/latest.json",
+    "runtime/neighbors/GC-IP-07/trial-2/qualification-classification.json"
+  ]
+}

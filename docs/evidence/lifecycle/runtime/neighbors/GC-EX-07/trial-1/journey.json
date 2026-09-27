@@ -1,0 +1,10 @@
+{
+  "case": "GC-EX-07",
+  "corpus_version": "watt-golden-tier0-v1",
+  "trial": 1,
+  "interaction_id": "44fcfb2b-527b-4c73-a23e-8c69c97fd805",
+  "human_input": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+  "tester_implementation": false,
+  "manual_rescue_actions": [],
+  "human_acceptance": "PENDING"
+}

@@ -1,0 +1,14 @@
+{
+  "case": "GC-LC-09",
+  "trial": 2,
+  "status": "PASS",
+  "checks": {
+    "completed_work_available": true,
+    "same_work_no_production_admission": true,
+    "turn_completed": true,
+    "actual_file_observation": true,
+    "exact_runtime_commit": true,
+    "no_new_production_claim": true
+  },
+  "answer": "当前聚焦 Work 04b8db03-0514-5ef5-8d6b-aa1419bfc611 的持久化历史：独立观察到变更文件：web/index.html。候选结果：efa8e807-f0b0-5e74-bad2-dc44603347ab；验证结果：PASS, PASS。已接受并形成本地可信提交 6365afa2-41a9-52a3-9c48-9e68ee60bef7；源提交 f629ed74d0afbcb8b5974e546c007eb5bf36663d → 3d31ed65075daa30cca8820a40d750790f7898ba；文件树 f7e4becd3b4ec197c9e86f362d415ab69707845f。此查询只读取历史，没有创建生产 Work；本地验收不代表已授权或执行远端交付。"
+}

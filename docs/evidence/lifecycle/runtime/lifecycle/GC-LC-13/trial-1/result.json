@@ -1,0 +1,13 @@
+{
+  "case": "GC-LC-13",
+  "trial": 1,
+  "status": "PASS",
+  "checks": {
+    "no_production_work": true,
+    "all_turns_completed": true,
+    "no_repository_action": true,
+    "one_target_clarification": true
+  },
+  "interaction_id": "94cd7274-6705-4d2e-a711-ad3963bd7472",
+  "human_acceptance": "PENDING"
+}

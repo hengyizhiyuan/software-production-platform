@@ -1,0 +1,13 @@
+{
+  "state": "ACTIVATION_BLOCKED",
+  "active_application_revision": null,
+  "active_repository_tree_identity": null,
+  "active_source_package_fingerprint": null,
+  "active_static_asset_fingerprint": null,
+  "current_trusted_baseline_revision": "17ebfb74374659ee9b0c376d6f8cf6f5b7508199",
+  "current_trusted_baseline_tree_identity": "4669e7b426156ad906753e918ad085900ea720b1",
+  "activation_mode": null,
+  "human_review_version_id": null,
+  "reason": "Active Runtime evidence is unavailable.",
+  "image_rebuild_paths": []
+}

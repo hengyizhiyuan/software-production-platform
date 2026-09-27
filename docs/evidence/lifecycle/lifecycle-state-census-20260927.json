@@ -1,0 +1,362 @@
+{
+  "completion.CompletionEvaluationOutcome": {
+    "PRODUCED": "PRODUCED",
+    "NOT_PRODUCED": "NOT_PRODUCED"
+  },
+  "engineering_semantics.SemanticEpistemicStatus": {
+    "CONFIRMED": "CONFIRMED",
+    "WORKING_ASSUMPTION": "WORKING_ASSUMPTION",
+    "UNRESOLVED": "UNRESOLVED",
+    "SUPERSEDED": "SUPERSEDED"
+  },
+  "execution.ProviderReportedOutcome": {
+    "SUCCESS": "SUCCESS",
+    "FAILURE": "FAILURE",
+    "UNKNOWN": "UNKNOWN"
+  },
+  "governance.CandidateCondition": {
+    "SEALED": "SEALED"
+  },
+  "guided_design.DesignProcessCondition": {
+    "ACTIVE": "ACTIVE",
+    "READY": "READY",
+    "COMPLETE": "COMPLETE"
+  },
+  "guided_design.DesignAgendaRevisionCondition": {
+    "ACTIVE": "ACTIVE",
+    "SUPERSEDED": "SUPERSEDED"
+  },
+  "guided_design.DesignIssueState": {
+    "OPEN": "OPEN",
+    "SATISFIED": "SATISFIED",
+    "SKIPPED": "SKIPPED",
+    "REOPENED": "REOPENED"
+  },
+  "guided_design.DesignReadinessState": {
+    "READY": "READY",
+    "NOT_READY": "NOT_READY"
+  },
+  "integration.RepositoryEffectState": {
+    "PREPARED": "PREPARED",
+    "CONVERGED": "CONVERGED"
+  },
+  "interaction.InteractionCondition": {
+    "OPEN": "OPEN",
+    "ARCHIVED": "ARCHIVED"
+  },
+  "interaction.InteractionTurnStatus": {
+    "RECEIVED": "RECEIVED",
+    "PROCESSING": "PROCESSING",
+    "COMPLETED": "COMPLETED",
+    "FAILED": "FAILED"
+  },
+  "interaction.WorkRevisionAdmissionStatus": {
+    "NOT_APPLICABLE": "NOT_APPLICABLE",
+    "PENDING_HUMAN": "PENDING_HUMAN",
+    "ADMITTED": "ADMITTED",
+    "REJECTED": "REJECTED",
+    "REFINEMENT_REQUESTED": "REFINEMENT_REQUESTED",
+    "NEW_WORK_RECOMMENDED": "NEW_WORK_RECOMMENDED"
+  },
+  "interaction.WorkSatisfactionState": {
+    "NO_FOCUSED_WORK": "NO_FOCUSED_WORK",
+    "IN_PROGRESS": "IN_PROGRESS",
+    "CURRENTLY_SATISFIED": "CURRENTLY_SATISFIED"
+  },
+  "interaction.WorkAdmissionReadinessStatus": {
+    "NOT_READY": "NOT_READY",
+    "READY": "READY",
+    "BLOCKED": "BLOCKED"
+  },
+  "interaction.ProductionAdmissionExecutionState": {
+    "READY_FOR_ADMISSION": "READY_FOR_ADMISSION",
+    "ADMISSION_RUNNING": "ADMISSION_RUNNING",
+    "WORK_CREATED": "WORK_CREATED",
+    "ADMISSION_RETRY_REQUIRED": "ADMISSION_RETRY_REQUIRED"
+  },
+  "interaction.RepositoryAcquisitionState": {
+    "NOT_STARTED": "NOT_STARTED",
+    "REQUESTED": "REQUESTED",
+    "RUNNING": "RUNNING",
+    "READY": "READY",
+    "WAITING_FOR_REPOSITORY_SOURCE": "WAITING_FOR_REPOSITORY_SOURCE",
+    "WAITING_FOR_AUTHORIZATION": "WAITING_FOR_AUTHORIZATION",
+    "FAILED_RETRYABLE": "FAILED_RETRYABLE",
+    "FAILED_TERMINAL": "FAILED_TERMINAL",
+    "READY_TO_ACQUIRE": "NOT_STARTED",
+    "REPOSITORY_ACQUISITION_RUNNING": "RUNNING",
+    "REPOSITORY_REALITY_BOUND": "READY",
+    "WAITING_FOR_REPOSITORY_AUTHORIZATION": "WAITING_FOR_AUTHORIZATION",
+    "ACQUISITION_RETRY_REQUIRED": "FAILED_RETRYABLE"
+  },
+  "maintenance_recovery.MaintenanceAdmissionOutcome": {
+    "APPLIED": "APPLIED"
+  },
+  "native_execution.SessionCondition": {
+    "OPEN": "OPEN",
+    "CLOSED": "CLOSED"
+  },
+  "native_execution.AttemptGrantState": {
+    "GRANTED": "GRANTED",
+    "RELEASED": "RELEASED",
+    "FENCED": "FENCED"
+  },
+  "native_execution.AttemptTerminalOutcome": {
+    "RESULT_READY": "RESULT_READY",
+    "UNABLE_TO_COMPLETE": "UNABLE_TO_COMPLETE",
+    "BOUNDARY_CROSSING_REQUIRED": "BOUNDARY_CROSSING_REQUIRED",
+    "BUDGET_EXHAUSTED": "BUDGET_EXHAUSTED",
+    "STOPPED": "STOPPED",
+    "CANCELLED": "CANCELLED",
+    "UNKNOWN": "UNKNOWN"
+  },
+  "native_execution.StepCondition": {
+    "PREPARED": "PREPARED",
+    "RUNNING": "RUNNING",
+    "COMPLETED": "COMPLETED",
+    "FAILED": "FAILED",
+    "INTERRUPTED": "INTERRUPTED"
+  },
+  "native_execution.EffectCondition": {
+    "INTENDED": "INTENDED",
+    "STARTING": "STARTING",
+    "ACTIVE": "ACTIVE",
+    "SETTLED": "SETTLED",
+    "FAILED": "FAILED",
+    "UNKNOWN": "UNKNOWN"
+  },
+  "native_execution.WorkspaceCondition": {
+    "ALLOCATING": "ALLOCATING",
+    "READY": "READY",
+    "SEALED": "SEALED",
+    "HIBERNATED": "HIBERNATED",
+    "QUARANTINED": "QUARANTINED",
+    "RETIRED": "RETIRED",
+    "DELETED": "DELETED"
+  },
+  "native_execution.CheckpointCondition": {
+    "PREPARING": "PREPARING",
+    "COMMITTED": "COMMITTED",
+    "ABORTED": "ABORTED"
+  },
+  "native_execution.QueueCondition": {
+    "QUEUED": "QUEUED",
+    "WAITING_RESOURCE": "WAITING_RESOURCE",
+    "WAITING_HUMAN": "WAITING_HUMAN",
+    "ALLOCATED": "ALLOCATED",
+    "EXECUTING": "EXECUTING",
+    "CHECKPOINTED": "CHECKPOINTED",
+    "RETURNED_TO_QUEUE": "RETURNED_TO_QUEUE",
+    "COMPLETED": "COMPLETED",
+    "CANCELLED": "CANCELLED"
+  },
+  "native_execution.AllocationCondition": {
+    "ISSUED": "ISSUED",
+    "ACTIVE": "ACTIVE",
+    "RELEASED": "RELEASED",
+    "EXPIRED": "EXPIRED"
+  },
+  "native_execution.ResourceReservationCondition": {
+    "RESERVED": "RESERVED",
+    "CONSUMED": "CONSUMED",
+    "RELEASED": "RELEASED",
+    "UNKNOWN": "UNKNOWN"
+  },
+  "native_execution.ControlRequestCondition": {
+    "REQUESTED": "REQUESTED",
+    "APPLIED": "APPLIED",
+    "REJECTED": "REJECTED"
+  },
+  "native_execution.QueueProgressionState": {
+    "SCHEDULING": "SCHEDULING",
+    "CAPACITY_WAIT": "CAPACITY_WAIT",
+    "INFRASTRUCTURE_UNAVAILABLE": "INFRASTRUCTURE_UNAVAILABLE",
+    "NOT_APPLICABLE": "NOT_APPLICABLE"
+  },
+  "native_retention.RetentionActionCondition": {
+    "PLANNED": "PLANNED",
+    "BUNDLE_VERIFIED": "BUNDLE_VERIFIED",
+    "PHYSICAL_COMPLETE": "PHYSICAL_COMPLETE",
+    "COMPLETED": "COMPLETED",
+    "FAILED": "FAILED"
+  },
+  "native_vector.VectorCondition": {
+    "SEALED": "SEALED",
+    "AUTHORIZED": "AUTHORIZED",
+    "PARTIAL": "PARTIAL",
+    "CONVERGED": "CONVERGED",
+    "COMMITTED": "COMMITTED"
+  },
+  "native_vector.VectorTargetCondition": {
+    "PREPARED": "PREPARED",
+    "CONVERGED": "CONVERGED",
+    "FAILED": "FAILED",
+    "UNKNOWN": "UNKNOWN"
+  },
+  "product.GoalCondition": {
+    "ACTIVE": "ACTIVE"
+  },
+  "product.WorkCondition": {
+    "PRE_WORK": "PRE_WORK",
+    "DRAFT": "DRAFT",
+    "NEEDS_REFINEMENT": "NEEDS_REFINEMENT",
+    "AWAITING_APPROVAL": "AWAITING_APPROVAL",
+    "READY": "READY",
+    "REJECTED": "REJECTED",
+    "DISCARDED": "DISCARDED"
+  },
+  "product.WorkStatus": {
+    "PRE_WORK": "PRE_WORK",
+    "DRAFT": "DRAFT",
+    "NEEDS_REFINEMENT": "NEEDS_REFINEMENT",
+    "AWAITING_APPROVAL": "AWAITING_APPROVAL",
+    "READY": "READY",
+    "RUNNING": "RUNNING",
+    "NEEDS_ATTENTION": "NEEDS_ATTENTION",
+    "BLOCKED": "BLOCKED",
+    "COMPLETED": "COMPLETED"
+  },
+  "product.EngineeringScopeCondition": {
+    "PROPOSED": "PROPOSED",
+    "ADMITTED": "ADMITTED"
+  },
+  "product.ResourceBindingCondition": {
+    "PROPOSED": "PROPOSED",
+    "ACTIVE": "ACTIVE"
+  },
+  "product.ProductionCycleBindingCondition": {
+    "ADMITTED": "ADMITTED",
+    "TRUSTED": "TRUSTED"
+  },
+  "production_environment.EnvironmentLifecycleState": {
+    "CREATED": "CREATED",
+    "INITIALIZING": "INITIALIZING",
+    "ACTIVE": "ACTIVE",
+    "SUSPENDED": "SUSPENDED",
+    "ARCHIVED": "ARCHIVED",
+    "DESTROYED": "DESTROYED"
+  },
+  "production_environment.EnvironmentRuntimeState": {
+    "NOT_PROVISIONED": "NOT_PROVISIONED",
+    "PREPARING": "PREPARING",
+    "READY": "READY",
+    "STOPPED": "STOPPED",
+    "FAILED": "FAILED"
+  },
+  "production_environment.PreviewRuntimeStatus": {
+    "CREATED": "CREATED",
+    "REQUESTED": "REQUESTED",
+    "PREPARING": "PREPARING",
+    "BUILDING": "BUILDING",
+    "STARTING": "STARTING",
+    "READY": "READY",
+    "NOT_READY": "NOT_READY",
+    "STOPPING": "STOPPING",
+    "STOPPED": "STOPPED",
+    "STALE": "STALE",
+    "FAILED": "FAILED"
+  },
+  "production_environment.ProductionDeliveryState": {
+    "READY_FOR_HUMAN_ACCEPTANCE": "READY_FOR_HUMAN_ACCEPTANCE",
+    "ACCEPTED": "ACCEPTED",
+    "AUTHORIZED_FOR_DELIVERY": "AUTHORIZED_FOR_DELIVERY"
+  },
+  "production_environment.VerificationOutcome": {
+    "PASS": "PASS",
+    "FAIL": "FAIL",
+    "INCONCLUSIVE": "INCONCLUSIVE"
+  },
+  "production_intelligence.DecisionTraceStatus": {
+    "PROPOSED": "PROPOSED",
+    "ADMITTED": "ADMITTED",
+    "SUPERSEDED": "SUPERSEDED"
+  },
+  "recovery.RecoveryActionOutcome": {
+    "APPLIED": "APPLIED",
+    "NO_ACTION": "NO_ACTION",
+    "SALVAGED": "SALVAGED",
+    "INCOMPLETE": "INCOMPLETE",
+    "RETRY_CREATED": "RETRY_CREATED",
+    "UNSUPPORTED_DEFERRED": "UNSUPPORTED_DEFERRED"
+  },
+  "runtime.SnapshotCondition": {
+    "TRUSTED": "TRUSTED"
+  },
+  "runtime.RunCondition": {
+    "OPEN": "OPEN",
+    "SUPERSEDED": "SUPERSEDED"
+  },
+  "runtime.PlanCondition": {
+    "ACTIVE": "ACTIVE",
+    "SUPERSEDED": "SUPERSEDED"
+  },
+  "runtime.WorkUnitCondition": {
+    "PROPOSED": "PROPOSED",
+    "PRODUCED": "PRODUCED",
+    "SATISFIED": "SATISFIED",
+    "SUPERSEDED": "SUPERSEDED"
+  },
+  "runtime.AttemptCondition": {
+    "CREATED": "CREATED"
+  },
+  "runtime_activation.RuntimeActivationState": {
+    "ACTIVE_AT_TRUSTED_BASELINE": "ACTIVE_AT_TRUSTED_BASELINE",
+    "ACTIVATION_REQUIRED": "ACTIVATION_REQUIRED",
+    "ACTIVATION_BLOCKED": "ACTIVATION_BLOCKED",
+    "IMAGE_REBUILD_REQUIRED": "IMAGE_REBUILD_REQUIRED",
+    "ACTIVE_HUMAN_REVIEW": "ACTIVE_HUMAN_REVIEW"
+  },
+  "steering.SteeringPlanRevisionCondition": {
+    "ACTIVE": "ACTIVE",
+    "SUPERSEDED": "SUPERSEDED"
+  },
+  "steering.SteeringStepType": {
+    "REFINE": "REFINE",
+    "HUMAN_DECISION": "HUMAN_DECISION",
+    "DESIGN": "DESIGN",
+    "PRODUCE": "PRODUCE",
+    "VERIFY_ACCEPT": "VERIFY_ACCEPT",
+    "COMPLETE": "COMPLETE"
+  },
+  "steering.SteeringStepState": {
+    "KNOWN": "KNOWN",
+    "CURRENT": "CURRENT",
+    "CLOSED": "CLOSED",
+    "SUPERSEDED": "SUPERSEDED"
+  },
+  "steering.SteeringOutcome": {
+    "AUTO_CONTINUE": "AUTO_CONTINUE",
+    "HUMAN_ATTENTION": "HUMAN_ATTENTION",
+    "COMPLETE": "COMPLETE"
+  },
+  "steering.SteeringDriverStopReason": {
+    "HUMAN_ATTENTION": "HUMAN_ATTENTION",
+    "COMPLETE": "COMPLETE",
+    "PRODUCTION_RUNNING": "PRODUCTION_RUNNING",
+    "BLOCKED": "BLOCKED",
+    "CAPABILITY_UNAVAILABLE": "CAPABILITY_UNAVAILABLE",
+    "NO_PROGRESS": "NO_PROGRESS",
+    "TRANSITION_BOUND": "TRANSITION_BOUND",
+    "SHUTDOWN": "SHUTDOWN"
+  },
+  "steering.SteeringAutomaticProgressionState": {
+    "ACTIVE": "ACTIVE",
+    "WAITING_PRODUCTION": "WAITING_PRODUCTION",
+    "WAITING_RESOURCE": "WAITING_RESOURCE",
+    "STOPPED": "STOPPED"
+  },
+  "verification.ProductionAdmissibilityOutcome": {
+    "ADMISSIBLE": "ADMISSIBLE",
+    "NOT_ADMISSIBLE": "NOT_ADMISSIBLE"
+  },
+  "wic_intelligence.TransitionReadinessStatus": {
+    "READY": "READY",
+    "NOT_READY": "NOT_READY",
+    "NOT_APPLICABLE": "NOT_APPLICABLE"
+  },
+  "wic_reception.FastReceptionState": {
+    "CURRENT": "CURRENT",
+    "SUPERSEDED": "SUPERSEDED",
+    "EXPIRED": "EXPIRED"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "mode": "FRONTEND_RUNTIME",
+  "status": "READY",
+  "candidate_revision": "f4f8559d7261385b3be23624ddf5a2efb6c10f2b",
+  "candidate_fingerprint": "db8d9f67803785838d7ed7a17558996388176560ae73888de45de90e5aa6884c",
+  "session": {
+    "id": "ff1a6c7b-c43e-4257-815c-2e4e6d55be4d",
+    "work_id": "94dfaa83-9d84-5fd1-a58a-df7706055903",
+    "candidate_id": "d2ceed4e-b1b1-5e18-bdd0-4a1c48ae93e4",
+    "candidate_fingerprint": "db8d9f67803785838d7ed7a17558996388176560ae73888de45de90e5aa6884c",
+    "repository_identity": "http://qualified-git:8080/business-app.git",
+    "repository_revision": "f4f8559d7261385b3be23624ddf5a2efb6c10f2b",
+    "repository_tree": "54b6ac3b60e887472dd8c64f00bb4e9bbdc030db",
+    "workspace_id": "385ac05f-4313-4225-8bba-5d14d67cf379",
+    "environment_id": "2ce2f089-f781-4f10-b5cd-5f3e810ea2be",
+    "mode": "FRONTEND_RUNTIME",
+    "status": "READY",
+    "definition_version": "frontend-docker-runtime-v1",
+    "endpoint": "http://127.0.0.1:54876/",
+    "image_reference": "sha256:d651cd087b5f1337884aa4997521f6ad6944538a642267fc25e29ba4eafd18db",
+    "service_identities": [
+      "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-app",
+      "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-proxy"
+    ],
+    "resource_references": [
+      "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-internal",
+      "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-gateway",
+      "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-source"
+    ],
+    "evidence": [
+      {
+        "kind": "WORKSPACE",
+        "workspace": "/var/lib/spg/production-environments/candidate-preview-runtime/ff1a6c7b-c43e-4257-815c-2e4e6d55be4d/workspace",
+        "revision": "f4f8559d7261385b3be23624ddf5a2efb6c10f2b",
+        "tree": "54b6ac3b60e887472dd8c64f00bb4e9bbdc030db",
+        "topology_preflight": {
+          "verifier_namespace": "candidate-gateway-network",
+          "verifier_image": "watt-lifecycle:qualification",
+          "public_endpoint_namespace": "docker-host"
+        },
+        "dockerfile_sha256": "abd36acd96f3e4485d6e9d4826a540e65a9608f5e9eb0e479de9581d5a8d5f44"
+      },
+      {
+        "kind": "BUILD",
+        "image": "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d:candidate",
+        "image_id": "sha256:d651cd087b5f1337884aa4997521f6ad6944538a642267fc25e29ba4eafd18db",
+        "verified_image_files": 0,
+        "build_log": "/var/lib/spg/production-environments/candidate-preview-runtime/evidence/ff1a6c7b-c43e-4257-815c-2e4e6d55be4d/build.log",
+        "build_log_sha256": "10a08aa86b22b3a16813caa7c440462a6aa3ff639f0e9f512cce1405fc6ea805"
+      },
+      {
+        "kind": "SERVED_VERIFICATION",
+        "candidate_revision": "f4f8559d7261385b3be23624ddf5a2efb6c10f2b",
+        "candidate_tree": "54b6ac3b60e887472dd8c64f00bb4e9bbdc030db",
+        "gateway": "http://watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-proxy",
+        "public_gateway": "http://127.0.0.1:54876",
+        "verifier_namespace": "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-gateway",
+        "mode": "FRONTEND_RUNTIME",
+        "frontend": {
+          "path": "/",
+          "status": 200,
+          "body_sha256": "6e528b51da36b1bb021f383870aeb0bb418bb295b3cb6180f26b28e07761ae12"
+        },
+        "result": "PASS"
+      },
+      {
+        "kind": "RUNTIME",
+        "endpoint": "http://127.0.0.1:54876/",
+        "services": [
+          "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-app",
+          "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-proxy"
+        ],
+        "resources": [
+          "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-internal",
+          "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-gateway",
+          "watt-candidate-preview-ff1a6c7bc43e4257815c2e4e6d55be4d-source"
+        ],
+        "health": {
+          "database": "NOT_REQUIRED",
+          "application": "READY",
+          "gateway": "READY",
+          "repository_revision": "f4f8559d7261385b3be23624ddf5a2efb6c10f2b",
+          "repository_tree": "54b6ac3b60e887472dd8c64f00bb4e9bbdc030db"
+        },
+        "topology": {
+          "frontend": "app",
+          "backend": "app",
+          "database": null,
+          "supporting_services": []
+        }
+      },
+      {
+        "kind": "PRODUCTION_RECORD",
+        "reference": "production-record:8088865e-0675-54a9-8427-1b585079a7da",
+        "digest": "62141da503e1719c438a59b125a45a88181f5caabc2fd86e1c908865f038ffa6"
+      }
+    ],
+    "failure_code": null,
+    "failure_reason": null,
+    "version": 6,
+    "created_at": "2026-09-27T05:46:04.868982Z",
+    "updated_at": "2026-09-27T05:47:17.496823Z"
+  }
+}

@@ -1,0 +1,727 @@
+{
+  "interaction_id": "bd1cd7b6-1ffb-4801-b53e-49372454e9ee",
+  "condition": "OPEN",
+  "current_work_id": "94dfaa83-9d84-5fd1-a58a-df7706055903",
+  "created_at": "2026-09-27T05:42:58.954536Z",
+  "updated_at": "2026-09-27T05:44:26.112984Z",
+  "records": [
+    {
+      "record_id": "72966d7e-99e0-4cf3-a4f0-5de4e26f492c",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T05:42:59.189522Z"
+    }
+  ],
+  "conversation_messages": [
+    {
+      "message_id": "a67ffdc1-0060-4b5c-8b40-87c42a576cea",
+      "turn_id": "8c9fdfcc-e388-4727-84fd-da3fb80396ed",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "72966d7e-99e0-4cf3-a4f0-5de4e26f492c",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T05:42:59.189522Z",
+      "updated_at": "2026-09-27T05:44:29.956516Z"
+    },
+    {
+      "message_id": "6e9bd4c6-7115-4222-a360-d9a5af8c5966",
+      "turn_id": "8c9fdfcc-e388-4727-84fd-da3fb80396ed",
+      "sequence": 2,
+      "actor": "WATT",
+      "content": "已确认：以 http://qualified-git:8080/business-app.git 为仓库，将首页标题改为“新业务工作台”，其他功能保持原样，本轮不推送，完成后给出预览。该 Work 已建立，仓库获取已登记，我将按既定流程自动继续，无需你再次确认。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "83fa7f36-8c0f-4b08-a297-9cc12e2ce163",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T05:44:29.956516Z",
+      "updated_at": "2026-09-27T05:44:29.956516Z"
+    }
+  ],
+  "turns": [
+    {
+      "turn_id": "8c9fdfcc-e388-4727-84fd-da3fb80396ed",
+      "interaction_id": "bd1cd7b6-1ffb-4801-b53e-49372454e9ee",
+      "request_record_id": "72966d7e-99e0-4cf3-a4f0-5de4e26f492c",
+      "assessment_id": "83fa7f36-8c0f-4b08-a297-9cc12e2ce163",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T05:42:59.189522Z",
+      "started_at": "2026-09-27T05:43:44.190483Z",
+      "completed_at": "2026-09-27T05:44:29.956516Z",
+      "updated_at": "2026-09-27T05:44:29.956516Z"
+    }
+  ],
+  "human_said": [
+    "这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。"
+  ],
+  "latest_assessment": {
+    "assessment_id": "83fa7f36-8c0f-4b08-a297-9cc12e2ce163",
+    "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35",
+    "basis_last_sequence": 1,
+    "interpreted_motive": "调整业务工作台应用首页标题，并以预览方式确认改动效果，同时保持其余功能与交付动作不变。",
+    "desired_outcome": "首页标题显示为“新业务工作台”的可查看预览，其他功能保持原样且未推送。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+    "design_intent_frame": {
+      "design_subject": "business-app 首页标题",
+      "object_type": "FEATURE",
+      "business_context": "面向内部业务的 business-app 工作台首页",
+      "desired_outcome": "首页显示标题“新业务工作台”，其余功能与行为不变，可查看预览",
+      "scope_level": "implementation",
+      "collaboration_mode": "execution",
+      "candidate_assumptions": [
+        "首页标题文本位于首页视图或布局组件的可替换文案处",
+        "预览可在不推送的前提下生成并提供给人类查看",
+        "改动仅涉及标题文案，不触及路由、数据结构或样式体系"
+      ],
+      "ambiguities": [
+        "首页标题对应的具体文件与组件尚未确定，由仓库发现过程确定",
+        "预览的具体形式（本地页面、构建产物地址或截图）尚未指定"
+      ],
+      "confidence": 0.82
+    },
+    "candidate_context": [
+      "当前项目仓库为 http://qualified-git:8080/business-app.git",
+      "上一轮已完成"
+    ],
+    "candidate_constraints": [
+      "其他功能保持原样",
+      "不推送"
+    ],
+    "current_requests": [
+      "把首页标题改为“新业务工作台”",
+      "提供预览",
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。"
+    ],
+    "unresolved_material_questions": [],
+    "neutral_semantic_extractions": [
+      {
+        "extraction_id": "n1",
+        "kind": "REFERENCE",
+        "values": [
+          "http://qualified-git:8080/business-app.git"
+        ],
+        "unit": null,
+        "source_record_id": "72966d7e-99e0-4cf3-a4f0-5de4e26f492c",
+        "source_text": "http://qualified-git:8080/business-app.git",
+        "explicit_roles": [
+          "当前项目仓库"
+        ]
+      },
+      {
+        "extraction_id": "n2",
+        "kind": "STATE_CHANGE",
+        "values": [
+          "新业务工作台"
+        ],
+        "unit": null,
+        "source_record_id": "72966d7e-99e0-4cf3-a4f0-5de4e26f492c",
+        "source_text": "首页标题改为“新业务工作台”",
+        "explicit_roles": [
+          "首页标题的新值"
+        ]
+      },
+      {
+        "extraction_id": "n3",
+        "kind": "SCOPE",
+        "values": [
+          "其他功能保持原样",
+          "不推送"
+        ],
+        "unit": null,
+        "source_record_id": "72966d7e-99e0-4cf3-a4f0-5de4e26f492c",
+        "source_text": "其他功能保持原样，不推送",
+        "explicit_roles": [
+          "保持不变的范围",
+          "交付动作限制"
+        ]
+      }
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "3cf2af55-42c7-53cf-a124-4963e552f7a5",
+        "subject": "repository.location",
+        "relation": "REFERENCE",
+        "value": "http://qualified-git:8080/business-app.git",
+        "unit": null,
+        "scope": "business-app",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "source_text": "http://qualified-git:8080/business-app.git",
+          "source_extraction_ids": [
+            "n1"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "952d5e88-3491-56fb-ab18-0fcab91665a4",
+        "subject": "homepage.title",
+        "relation": "EQUALITY",
+        "value": "新业务工作台",
+        "unit": null,
+        "scope": "business-app 首页",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "source_text": "首页标题改为“新业务工作台”",
+          "source_extraction_ids": [
+            "n2"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "5e18e2b7-e77d-527d-bfbe-70969121bc19",
+        "subject": "business-app.other_features",
+        "relation": "SCOPE",
+        "value": "保持原样",
+        "unit": null,
+        "scope": "business-app 本轮改动",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "source_text": "其他功能保持原样，不推送",
+          "source_extraction_ids": [
+            "n3"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "5c762021-c22d-520a-9762-f3b36c0e17c1",
+        "subject": "delivery.push",
+        "relation": "BEHAVIOR",
+        "value": false,
+        "unit": null,
+        "scope": "business-app 本轮交付",
+        "qualifiers": {
+          "action": "push"
+        },
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "source_text": "其他功能保持原样，不推送",
+          "source_extraction_ids": [
+            "n3"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      }
+    ],
+    "meanings": [
+      {
+        "kind": "CONTEXT",
+        "statement": "当前项目仓库为 http://qualified-git:8080/business-app.git",
+        "source_record_ids": [
+          "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+        ],
+        "confidence": 0.95,
+        "rationale": "人类明确声明了项目仓库地址。",
+        "clarification_required": false
+      },
+      {
+        "kind": "CONTEXT",
+        "statement": "上一轮已完成",
+        "source_record_ids": [
+          "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+        ],
+        "confidence": 0.9,
+        "rationale": "人类说明上一轮结束，本次为新的变更请求。",
+        "clarification_required": false
+      },
+      {
+        "kind": "REQUEST",
+        "statement": "把首页标题改为“新业务工作台”，并提供预览",
+        "source_record_ids": [
+          "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+        ],
+        "confidence": 0.95,
+        "rationale": "人类直接要求修改首页标题并查看预览。",
+        "clarification_required": false
+      },
+      {
+        "kind": "CONSTRAINT",
+        "statement": "其他功能保持原样，且不推送",
+        "source_record_ids": [
+          "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+        ],
+        "confidence": 0.95,
+        "rationale": "人类限定了改动范围并明确禁止推送。",
+        "clarification_required": false
+      }
+    ],
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "basis_work_revision_id": null,
+    "basis_steering_plan_revision_id": null,
+    "basis_steering_step_id": null,
+    "basis_active_runtime_binding_id": null,
+    "supporting_references": [],
+    "natural_response": "在 business-app 仓库中定位首页标题所在组件并将其文案改为“新业务工作台”，随后生成不涉及推送的预览供查看，其余功能保持原样。",
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35"
+    },
+    "progressive_semantics": {
+      "turn_intent": "ACTION_REQUEST",
+      "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35",
+      "source_record_ids": [
+        "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+      ],
+      "reception_meanings": [
+        "DEEP_WIC_WORKING_UNDERSTANDING"
+      ],
+      "working_motive": "调整业务工作台应用首页标题，并以预览方式确认改动效果，同时保持其余功能与交付动作不变。",
+      "working_desired_outcome": "首页标题显示为“新业务工作台”的可查看预览，其他功能保持原样且未推送。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+      "working_facts": [
+        "当前项目仓库为 http://qualified-git:8080/business-app.git",
+        "上一轮已完成"
+      ],
+      "working_constraints": [
+        "其他功能保持原样",
+        "不推送"
+      ],
+      "working_requests": [
+        "把首页标题改为“新业务工作台”",
+        "提供预览",
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。"
+      ],
+      "explicit_assumptions": [],
+      "unresolved_human_decisions": [],
+      "deltas": [
+        {
+          "id": "3cc55be3-9c69-584e-9517-02ebe40a8c9e",
+          "category": "MOTIVE",
+          "operation": "ADDED",
+          "value": "调整业务工作台应用首页标题，并以预览方式确认改动效果，同时保持其余功能与交付动作不变。",
+          "prior_value": null,
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+          "authority": "ADVISORY"
+        },
+        {
+          "id": "d6fd9a82-faaf-546e-aa7e-81a9f77ed5d6",
+          "category": "CONSTRAINT",
+          "operation": "ADDED",
+          "value": "其他功能保持原样",
+          "prior_value": null,
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+          "authority": "ADVISORY"
+        },
+        {
+          "id": "261e22c6-089c-5c63-8f6e-65ac68813a42",
+          "category": "CONSTRAINT",
+          "operation": "ADDED",
+          "value": "不推送",
+          "prior_value": null,
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+          "authority": "ADVISORY"
+        }
+      ],
+      "pattern_signals": [
+        "BOUNDED_CHANGE",
+        "PRODUCTION_REQUEST",
+        "REPOSITORY_SOURCE"
+      ],
+      "inference_disposition": "NO_INFERENCE",
+      "questions": [],
+      "selected_question": null,
+      "governance_candidate": "WORK_FORMATION_PROPOSAL",
+      "readiness": [
+        {
+          "target": "WORK_FORMATION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "MOTIVE",
+            "DESIRED_OUTCOME"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "WORK_REVISION",
+          "status": "NOT_APPLICABLE",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "DESIGN_PROGRESSION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "CURRENT_FOCUS"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        }
+      ],
+      "artifact_recommendation": null,
+      "factual_contradictions": [],
+      "semantic_policy_revision": "wic-semantic-policy-v1",
+      "question_policy_revision": "wic-question-value-v1"
+    },
+    "provider_identity": "deepseek-responses:semantic:request:c0d509b2-2efa-45c6-8148-930880450669",
+    "model_identity": "deepseek-flash",
+    "schema_version": "wic-assessment-v6",
+    "created_at": "2026-09-27T05:44:04.016672Z"
+  },
+  "latest_assessment_current": false,
+  "interpreted_motive": "调整业务工作台应用首页标题，并以预览方式确认改动效果，同时保持其余功能与交付动作不变。",
+  "desired_outcome": "首页标题显示为“新业务工作台”的可查看预览，其他功能保持原样且未推送。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+  "design_intent_frame": {
+    "design_subject": "business-app 首页标题",
+    "object_type": "FEATURE",
+    "business_context": "面向内部业务的 business-app 工作台首页",
+    "desired_outcome": "首页显示标题“新业务工作台”，其余功能与行为不变，可查看预览",
+    "scope_level": "implementation",
+    "collaboration_mode": "execution",
+    "candidate_assumptions": [
+      "首页标题文本位于首页视图或布局组件的可替换文案处",
+      "预览可在不推送的前提下生成并提供给人类查看",
+      "改动仅涉及标题文案，不触及路由、数据结构或样式体系"
+    ],
+    "ambiguities": [
+      "首页标题对应的具体文件与组件尚未确定，由仓库发现过程确定",
+      "预览的具体形式（本地页面、构建产物地址或截图）尚未指定"
+    ],
+    "confidence": 0.82
+  },
+  "candidate_context": [
+    "当前项目仓库为 http://qualified-git:8080/business-app.git",
+    "上一轮已完成"
+  ],
+  "candidate_constraints": [
+    "其他功能保持原样",
+    "不推送"
+  ],
+  "current_requests": [
+    "把首页标题改为“新业务工作台”",
+    "提供预览",
+    "这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。"
+  ],
+  "unresolved_material_questions": [],
+  "readiness": {
+    "status": "READY",
+    "profile": "LONG_LIVED_STEERING",
+    "profile_version": "v0",
+    "satisfied_requirements": [
+      "MOTIVE",
+      "DESIRED_OUTCOME"
+    ],
+    "missing_information": [],
+    "unresolved_material_questions": [],
+    "reasons": [
+      "Motive and desired outcome are clear enough to form governed Work."
+    ],
+    "basis_fingerprint": "be1d48e8f24ac23a59a8c981641799930b90a5c7de256b0520dda0dbe7affb35"
+  },
+  "candidate_engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+  "candidate_repository_identity": "http://qualified-git:8080/business-app.git",
+  "candidate_repository_ref": "refs/heads/main",
+  "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git:8080/business-app.git at refs/heads/main",
+  "governed_work_id": "94dfaa83-9d84-5fd1-a58a-df7706055903",
+  "governed_revision": {
+    "revision_id": "5cac6e1e-bbc3-5935-9f6e-d281d5ead65e",
+    "work_id": "94dfaa83-9d84-5fd1-a58a-df7706055903",
+    "revision_number": 2,
+    "previous_revision_id": "ccd98932-79a9-55ad-8d70-fe715d2ae84d",
+    "basis_fingerprint": "6ffd03c1b668dcd77963ca41b4d0565fb150600ba66b7fcea092b03c02d55b4b",
+    "revision_fingerprint": "8bd5a663746ba6b953deb2a2191fcd522c3df1d81c38946a3e526a1527cbcc1c",
+    "source_interaction_id": "bd1cd7b6-1ffb-4801-b53e-49372454e9ee",
+    "source_kind": "ASSET_SCOPE_ADMISSION",
+    "source_assessment_id": null,
+    "source_record_ids": [
+      "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+    ],
+    "motive": "调整业务工作台应用首页标题，并以预览方式确认改动效果，同时保持其余功能与交付动作不变。",
+    "desired_outcome": "首页标题显示为“新业务工作台”的可查看预览，其他功能保持原样且未推送。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+    "context_facts": [
+      "当前项目仓库为 http://qualified-git:8080/business-app.git",
+      "上一轮已完成"
+    ],
+    "constraints": [
+      "其他功能保持原样",
+      "不推送"
+    ],
+    "requests": [
+      "把首页标题改为“新业务工作台”",
+      "提供预览",
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。"
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "3cf2af55-42c7-53cf-a124-4963e552f7a5",
+        "subject": "repository.location",
+        "relation": "REFERENCE",
+        "value": "http://qualified-git:8080/business-app.git",
+        "unit": null,
+        "scope": "business-app",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "source_text": "http://qualified-git:8080/business-app.git",
+          "source_extraction_ids": [
+            "n1"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "ccd98932-79a9-55ad-8d70-fe715d2ae84d"
+      },
+      {
+        "id": "952d5e88-3491-56fb-ab18-0fcab91665a4",
+        "subject": "homepage.title",
+        "relation": "EQUALITY",
+        "value": "新业务工作台",
+        "unit": null,
+        "scope": "business-app 首页",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "source_text": "首页标题改为“新业务工作台”",
+          "source_extraction_ids": [
+            "n2"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "ccd98932-79a9-55ad-8d70-fe715d2ae84d"
+      },
+      {
+        "id": "5e18e2b7-e77d-527d-bfbe-70969121bc19",
+        "subject": "business-app.other_features",
+        "relation": "SCOPE",
+        "value": "保持原样",
+        "unit": null,
+        "scope": "business-app 本轮改动",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "source_text": "其他功能保持原样，不推送",
+          "source_extraction_ids": [
+            "n3"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "ccd98932-79a9-55ad-8d70-fe715d2ae84d"
+      },
+      {
+        "id": "5c762021-c22d-520a-9762-f3b36c0e17c1",
+        "subject": "delivery.push",
+        "relation": "BEHAVIOR",
+        "value": false,
+        "unit": null,
+        "scope": "business-app 本轮交付",
+        "qualifiers": {
+          "action": "push"
+        },
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "72966d7e-99e0-4cf3-a4f0-5de4e26f492c"
+          ],
+          "source_text": "其他功能保持原样，不推送",
+          "source_extraction_ids": [
+            "n3"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "ccd98932-79a9-55ad-8d70-fe715d2ae84d"
+      }
+    ],
+    "engineering_scope_id": "75b1f075-978d-403d-a174-ef66dcdfd8fe",
+    "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "scope_basis_fingerprint": "136835c25c3ec60c1dd83b345db8c874fe1cc8204c47346a900d79079902f30b",
+    "repository_identity": "http://qualified-git:8080/business-app.git",
+    "repository_ref": "refs/heads/main",
+    "source_baseline_id": "d9d97bc7-4a1d-5cee-bcdb-430965ce6f38",
+    "source_revision": "3d31ed65075daa30cca8820a40d750790f7898ba",
+    "governance_record_id": "3c5e0292-d4d0-4c43-a3c1-436d2dc24197",
+    "supporting_references": [
+      "INTERACTION_RECORD:72966d7e-99e0-4cf3-a4f0-5de4e26f492c",
+      "REPOSITORY_OBSERVATION:6a3cdab0faa46f606e2f99b36f4aca2f8f771c09cae89bbd8adc7dbd2a5cacbe"
+    ],
+    "change_set": [
+      "asset:PRODUCTION_TARGET_ADMITTED"
+    ],
+    "rationale": "Bind the exact repository Reality acquired from the Human-supplied source before Steering begins.",
+    "admitted_by": "human:owner",
+    "schema_version": "wic-work-reality-v3",
+    "created_at": "2026-09-27T05:44:31.503759Z"
+  },
+  "current_work_focus": "调整业务工作台应用首页标题，并以预览方式确认改动效果，同时保持其余功能与交付动作不变。 → 首页标题显示为“新业务工作台”的可查看预览，其他功能保持原样且未推送。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+  "focus_classification": null,
+  "impact_disposition": null,
+  "candidate_change": null,
+  "work_revision_admission_status": "NOT_APPLICABLE",
+  "active_cycle_work_revision_id": "5cac6e1e-bbc3-5935-9f6e-d281d5ead65e",
+  "active_cycle_impact_disposition": null,
+  "work_satisfaction_state": "IN_PROGRESS",
+  "interaction_relationship_state": "OPEN",
+  "work_focus_history": [
+    "94dfaa83-9d84-5fd1-a58a-df7706055903"
+  ],
+  "latest_work_transition": null,
+  "new_work_formation_pending": false,
+  "production_request_detected": true,
+  "repository_source": "http://qualified-git:8080/business-app.git",
+  "production_admission_state": "WORK_CREATED",
+  "repository_acquisition_state": "READY",
+  "repository_observation": {
+    "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+    "paths": [
+      ".gitignore",
+      "Dockerfile",
+      "README.md",
+      "migrations/001_initial.sql",
+      "package.json",
+      "server.py",
+      "tests/application.cjs",
+      "web/app.js",
+      "web/index.html",
+      "web/styles.css"
+    ],
+    "title": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+    "source": "http://qualified-git:8080/business-app.git",
+    "work_id": "94dfaa83-9d84-5fd1-a58a-df7706055903",
+    "revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+    "condition": "READY",
+    "description": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+    "fingerprint": "6a3cdab0faa46f606e2f99b36f4aca2f8f771c09cae89bbd8adc7dbd2a5cacbe",
+    "observed_at": "2026-09-27T04:35:00.768236+00:00",
+    "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "context_path": "README.md",
+    "human_message": "Repository is ready.",
+    "target_branch": null,
+    "attempt_number": 1,
+    "interaction_id": "bd1cd7b6-1ffb-4801-b53e-49372454e9ee",
+    "operation_kind": "ACQUIRE",
+    "repository_ref": "refs/heads/main",
+    "base_resource_id": null,
+    "failure_category": null,
+    "intake_request_id": "24ab1249-4131-5a57-891c-1672965536c6",
+    "operation_evidence": {
+      "verified": true,
+      "connector_id": "builtin:git",
+      "capability_id": "git.repository.acquire",
+      "operation_ref": "repository-intake:29cff86f-2035-5b1c-8ac6-3d517256d34e",
+      "resulting_branch": "refs/heads/main",
+      "resulting_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "workspace_reference": "/var/lib/spg/repository-assets/29cff86f-2035-5b1c-8ac6-3d517256d34e"
+    },
+    "previous_attempt_id": null,
+    "repository_identity": "http://qualified-git:8080/business-app.git"
+  },
+  "production_next_step": "Continue Steering against the acquired repository Reality.",
+  "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+  "selected_design_schema_version": "0.1",
+  "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+  "design_stage": "Current Reality",
+  "design_next_focus": "Establish the trusted current product and runtime reality.",
+  "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+  "design_facilitation_strategy": "CLARIFY",
+  "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+}

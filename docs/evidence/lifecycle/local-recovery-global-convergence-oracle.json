@@ -1,0 +1,16 @@
+{
+  "case": "GC-LC-14",
+  "status": "PASS",
+  "checks": {
+    "actual_local_obligation_recovered": true,
+    "preview_still_failed": true,
+    "not_reported_work_complete": true,
+    "global_non_converging": true,
+    "global_missing_preview": true,
+    "owner_budget_exhausted": true
+  },
+  "source_trial_work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+  "evidence": "runtime/neighbors/GC-EX-05/trial-2/latest.json",
+  "source_work_success": false,
+  "note": "PASS qualifies separation, not the unsuccessful production Work."
+}

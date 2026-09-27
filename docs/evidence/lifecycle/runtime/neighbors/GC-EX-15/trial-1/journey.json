@@ -1,0 +1,10 @@
+{
+  "case": "GC-EX-15",
+  "corpus_version": "watt-golden-tier0-v1",
+  "trial": 1,
+  "interaction_id": "f8115db8-71ad-4595-924f-15f4267b78bf",
+  "human_input": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+  "tester_implementation": false,
+  "manual_rescue_actions": [],
+  "human_acceptance": "PENDING"
+}

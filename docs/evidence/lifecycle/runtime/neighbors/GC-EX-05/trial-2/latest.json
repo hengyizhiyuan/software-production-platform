@@ -1,0 +1,1730 @@
+{
+  "interaction": {
+    "interaction_id": "416c8f2c-824a-41cc-ab2c-6ac2e487be06",
+    "condition": "OPEN",
+    "current_work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+    "created_at": "2026-09-27T05:25:33.469724Z",
+    "updated_at": "2026-09-27T05:25:59.758346Z",
+    "records": [
+      {
+        "record_id": "f0aa1d27-2901-4f48-958a-fab826a7e6bb",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+        "work_focus_id": null,
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:25:33.575777Z"
+      }
+    ],
+    "conversation_messages": [
+      {
+        "message_id": "37d23d21-8453-4dea-b04c-963029b4e0ff",
+        "turn_id": "18a454f2-4852-4e48-af73-f90e2db3a14a",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "content": "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "f0aa1d27-2901-4f48-958a-fab826a7e6bb",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:25:33.575777Z",
+        "updated_at": "2026-09-27T05:26:05.711987Z"
+      },
+      {
+        "message_id": "69f4bdf3-75ad-4e98-9095-b8f1e4a9dbe2",
+        "turn_id": "18a454f2-4852-4e48-af73-f90e2db3a14a",
+        "sequence": 2,
+        "actor": "WATT",
+        "content": "收到，当前项目仓库为 http://qualified-git:8080/tool-path-fault.git，这项 Work 已经建立。我接下来执行既定的仓库获取步骤，把仓库与取消按钮相关实现读进来，然后修复对话框无法关闭的问题，并为你准备预览；后续步骤会自动继续，有结果我再向你汇报。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "c78b68b5-c45e-4177-bebd-740c633ce7be",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T05:26:05.711987Z",
+        "updated_at": "2026-09-27T05:26:05.711987Z"
+      }
+    ],
+    "turns": [
+      {
+        "turn_id": "18a454f2-4852-4e48-af73-f90e2db3a14a",
+        "interaction_id": "416c8f2c-824a-41cc-ab2c-6ac2e487be06",
+        "request_record_id": "f0aa1d27-2901-4f48-958a-fab826a7e6bb",
+        "assessment_id": "c78b68b5-c45e-4177-bebd-740c633ce7be",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T05:25:33.575777Z",
+        "started_at": "2026-09-27T05:25:33.668305Z",
+        "completed_at": "2026-09-27T05:26:05.711987Z",
+        "updated_at": "2026-09-27T05:26:05.711987Z"
+      }
+    ],
+    "human_said": [
+      "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。"
+    ],
+    "latest_assessment": {
+      "assessment_id": "c78b68b5-c45e-4177-bebd-740c633ce7be",
+      "basis_fingerprint": "906d01b71949cb73d4fee950fcfc35b038dad07977d36a4d2e1d76cc95d2b35e",
+      "basis_last_sequence": 1,
+      "interpreted_motive": "修复当前项目中取消按钮导致的对话框无法关闭缺陷，并交付可查看的预览。",
+      "desired_outcome": "对话框可以通过取消按钮正常关闭，且修复结果有可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+      "design_intent_frame": {
+        "design_subject": "tool-path-fault 项目中取消按钮与对话框关闭逻辑",
+        "object_type": "FEATURE",
+        "business_context": null,
+        "desired_outcome": "对话框可通过取消按钮正常关闭",
+        "scope_level": "implementation",
+        "collaboration_mode": "execution",
+        "candidate_assumptions": [
+          "缺陷位于取消按钮的事件处理或对话框关闭调用路径上",
+          "修复范围限定在关闭行为，不改动无关界面元素"
+        ],
+        "ambiguities": [
+          "预览的具体形式（如本地运行页面、截图或可访问地址）尚未确定"
+        ],
+        "confidence": 0.75
+      },
+      "candidate_context": [
+        "当前项目仓库：http://qualified-git:8080/tool-path-fault.git",
+        "项目中存在取消按钮与对话框交互的实现"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "检查当前项目中取消按钮的实现",
+        "修好对话框不能关闭的问题",
+        "给我预览",
+        "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。"
+      ],
+      "unresolved_material_questions": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ext-repo-ref",
+          "kind": "REFERENCE",
+          "values": [
+            "http://qualified-git:8080/tool-path-fault.git"
+          ],
+          "unit": null,
+          "source_record_id": "f0aa1d27-2901-4f48-958a-fab826a7e6bb",
+          "source_text": "http://qualified-git:8080/tool-path-fault.git",
+          "explicit_roles": [
+            "repository"
+          ]
+        },
+        {
+          "extraction_id": "ext-cancel-button-ref",
+          "kind": "REFERENCE",
+          "values": [
+            "取消按钮"
+          ],
+          "unit": null,
+          "source_record_id": "f0aa1d27-2901-4f48-958a-fab826a7e6bb",
+          "source_text": "取消按钮",
+          "explicit_roles": [
+            null
+          ]
+        },
+        {
+          "extraction_id": "ext-dialog-close-behavior",
+          "kind": "BEHAVIOR",
+          "values": [
+            "对话框不能关闭"
+          ],
+          "unit": null,
+          "source_record_id": "f0aa1d27-2901-4f48-958a-fab826a7e6bb",
+          "source_text": "对话框不能关闭",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "f6906bad-2324-545f-b284-d9830f0dd764",
+          "subject": "repository.location",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/tool-path-fault.git",
+          "unit": null,
+          "scope": "当前项目",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+            ],
+            "source_text": "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git",
+            "source_extraction_ids": [
+              "ext-repo-ref"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "9c2409fa-9126-5d8c-91f0-5a0feaa7d95b",
+          "subject": "ui.cancel_button",
+          "relation": "REFERENCE",
+          "value": "exists",
+          "unit": null,
+          "scope": "tool-path-fault",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+            ],
+            "source_text": "取消按钮的实现",
+            "source_extraction_ids": [
+              "ext-cancel-button-ref"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "7f390013-fb07-5746-b919-ece9cf0fe5dd",
+          "subject": "dialog.close",
+          "relation": "BEHAVIOR",
+          "value": "cannot_close",
+          "unit": null,
+          "scope": "tool-path-fault dialog",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+            ],
+            "source_text": "对话框不能关闭",
+            "source_extraction_ids": [
+              "ext-dialog-close-behavior"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "NEW_WORK_CANDIDATE",
+          "statement": "这是一个新的软件缺陷修复请求，涉及 tool-path-fault 项目的取消按钮与对话框关闭行为。",
+          "source_record_ids": [
+            "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+          ],
+          "confidence": 0.9,
+          "rationale": "无既有受治理 Work，Human 提出明确的检查、修复与预览请求。",
+          "clarification_required": false
+        },
+        {
+          "kind": "CONTEXT",
+          "statement": "Human 指定当前项目仓库地址为 http://qualified-git:8080/tool-path-fault.git。",
+          "source_record_ids": [
+            "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+          ],
+          "confidence": 0.95,
+          "rationale": "Human 明确给出仓库地址并称其为当前项目仓库。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "Human 要求检查取消按钮实现、修复对话框不能关闭的问题并提供预览。",
+          "source_record_ids": [
+            "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+          ],
+          "confidence": 0.95,
+          "rationale": "原句包含检查、修复与预览三项明确请求。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "candidate_change": null,
+      "basis_work_revision_id": null,
+      "basis_steering_plan_revision_id": null,
+      "basis_steering_step_id": null,
+      "basis_active_runtime_binding_id": null,
+      "supporting_references": [],
+      "natural_response": "先定位取消按钮的事件绑定与对话框关闭逻辑，做最小范围修复后生成可查看的预览。",
+      "readiness": {
+        "status": "READY",
+        "profile": "LONG_LIVED_STEERING",
+        "profile_version": "v0",
+        "satisfied_requirements": [
+          "MOTIVE",
+          "DESIRED_OUTCOME"
+        ],
+        "missing_information": [],
+        "unresolved_material_questions": [],
+        "reasons": [
+          "Motive and desired outcome are clear enough to form governed Work."
+        ],
+        "basis_fingerprint": "906d01b71949cb73d4fee950fcfc35b038dad07977d36a4d2e1d76cc95d2b35e"
+      },
+      "progressive_semantics": {
+        "turn_intent": "ACTION_REQUEST",
+        "basis_fingerprint": "906d01b71949cb73d4fee950fcfc35b038dad07977d36a4d2e1d76cc95d2b35e",
+        "source_record_ids": [
+          "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+        ],
+        "reception_meanings": [
+          "DEEP_WIC_WORKING_UNDERSTANDING"
+        ],
+        "working_motive": "修复当前项目中取消按钮导致的对话框无法关闭缺陷，并交付可查看的预览。",
+        "working_desired_outcome": "对话框可以通过取消按钮正常关闭，且修复结果有可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+        "working_facts": [
+          "当前项目仓库：http://qualified-git:8080/tool-path-fault.git",
+          "项目中存在取消按钮与对话框交互的实现"
+        ],
+        "working_constraints": [],
+        "working_requests": [
+          "检查当前项目中取消按钮的实现",
+          "修好对话框不能关闭的问题",
+          "给我预览",
+          "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。"
+        ],
+        "explicit_assumptions": [],
+        "unresolved_human_decisions": [],
+        "deltas": [
+          {
+            "id": "e25a95cd-83b7-5397-9690-ef61d644ac3b",
+            "category": "MOTIVE",
+            "operation": "ADDED",
+            "value": "修复当前项目中取消按钮导致的对话框无法关闭缺陷，并交付可查看的预览。",
+            "prior_value": null,
+            "source_record_ids": [
+              "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+            ],
+            "basis_fingerprint": "906d01b71949cb73d4fee950fcfc35b038dad07977d36a4d2e1d76cc95d2b35e",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+            "authority": "ADVISORY"
+          }
+        ],
+        "pattern_signals": [
+          "PRODUCTION_REQUEST",
+          "REPOSITORY_SOURCE"
+        ],
+        "inference_disposition": "NO_INFERENCE",
+        "questions": [],
+        "selected_question": null,
+        "governance_candidate": "WORK_FORMATION_PROPOSAL",
+        "readiness": [
+          {
+            "target": "WORK_FORMATION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "906d01b71949cb73d4fee950fcfc35b038dad07977d36a4d2e1d76cc95d2b35e",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "WORK_REVISION",
+            "status": "NOT_APPLICABLE",
+            "satisfied_evidence": [],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "906d01b71949cb73d4fee950fcfc35b038dad07977d36a4d2e1d76cc95d2b35e",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "DESIGN_PROGRESSION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "CURRENT_FOCUS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "906d01b71949cb73d4fee950fcfc35b038dad07977d36a4d2e1d76cc95d2b35e",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "artifact_recommendation": null,
+        "factual_contradictions": [],
+        "semantic_policy_revision": "wic-semantic-policy-v1",
+        "question_policy_revision": "wic-question-value-v1"
+      },
+      "provider_identity": "deepseek-responses:semantic:request:5a592c73-4743-4482-89be-c19a14d2a63d",
+      "model_identity": "deepseek-flash",
+      "schema_version": "wic-assessment-v6",
+      "created_at": "2026-09-27T05:25:50.302637Z"
+    },
+    "latest_assessment_current": false,
+    "interpreted_motive": "修复当前项目中取消按钮导致的对话框无法关闭缺陷，并交付可查看的预览。",
+    "desired_outcome": "对话框可以通过取消按钮正常关闭，且修复结果有可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+    "design_intent_frame": {
+      "design_subject": "tool-path-fault 项目中取消按钮与对话框关闭逻辑",
+      "object_type": "FEATURE",
+      "business_context": null,
+      "desired_outcome": "对话框可通过取消按钮正常关闭",
+      "scope_level": "implementation",
+      "collaboration_mode": "execution",
+      "candidate_assumptions": [
+        "缺陷位于取消按钮的事件处理或对话框关闭调用路径上",
+        "修复范围限定在关闭行为，不改动无关界面元素"
+      ],
+      "ambiguities": [
+        "预览的具体形式（如本地运行页面、截图或可访问地址）尚未确定"
+      ],
+      "confidence": 0.75
+    },
+    "candidate_context": [
+      "当前项目仓库：http://qualified-git:8080/tool-path-fault.git",
+      "项目中存在取消按钮与对话框交互的实现"
+    ],
+    "candidate_constraints": [],
+    "current_requests": [
+      "检查当前项目中取消按钮的实现",
+      "修好对话框不能关闭的问题",
+      "给我预览",
+      "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。"
+    ],
+    "unresolved_material_questions": [],
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "906d01b71949cb73d4fee950fcfc35b038dad07977d36a4d2e1d76cc95d2b35e"
+    },
+    "candidate_engineering_resource_id": "5dbe1cb1-9219-4ffc-8db0-36b4d8916538",
+    "candidate_repository_identity": "http://qualified-git:8080/tool-path-fault.git",
+    "candidate_repository_ref": "refs/heads/main",
+    "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git:8080/tool-path-fault.git at refs/heads/main",
+    "governed_work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+    "governed_revision": {
+      "revision_id": "569d5b88-1e1b-5d43-983d-ecc6b962ce4b",
+      "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+      "revision_number": 2,
+      "previous_revision_id": "455572f6-f192-5078-84dd-4e9a790e5993",
+      "basis_fingerprint": "be6cffb46d4524b3ea3a0674b9ae7786c6844ad094c7ca80566d7a3e60486d68",
+      "revision_fingerprint": "996eef18c94fa825edc513093c7954a2683ed9a9288698759562f2b255e1e488",
+      "source_interaction_id": "416c8f2c-824a-41cc-ab2c-6ac2e487be06",
+      "source_kind": "ASSET_SCOPE_ADMISSION",
+      "source_assessment_id": null,
+      "source_record_ids": [
+        "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+      ],
+      "motive": "修复当前项目中取消按钮导致的对话框无法关闭缺陷，并交付可查看的预览。",
+      "desired_outcome": "对话框可以通过取消按钮正常关闭，且修复结果有可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+      "context_facts": [
+        "当前项目仓库：http://qualified-git:8080/tool-path-fault.git",
+        "项目中存在取消按钮与对话框交互的实现"
+      ],
+      "constraints": [],
+      "requests": [
+        "检查当前项目中取消按钮的实现",
+        "修好对话框不能关闭的问题",
+        "给我预览",
+        "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。"
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "f6906bad-2324-545f-b284-d9830f0dd764",
+          "subject": "repository.location",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/tool-path-fault.git",
+          "unit": null,
+          "scope": "当前项目",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+            ],
+            "source_text": "这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git",
+            "source_extraction_ids": [
+              "ext-repo-ref"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "455572f6-f192-5078-84dd-4e9a790e5993"
+        },
+        {
+          "id": "9c2409fa-9126-5d8c-91f0-5a0feaa7d95b",
+          "subject": "ui.cancel_button",
+          "relation": "REFERENCE",
+          "value": "exists",
+          "unit": null,
+          "scope": "tool-path-fault",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+            ],
+            "source_text": "取消按钮的实现",
+            "source_extraction_ids": [
+              "ext-cancel-button-ref"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "455572f6-f192-5078-84dd-4e9a790e5993"
+        },
+        {
+          "id": "7f390013-fb07-5746-b919-ece9cf0fe5dd",
+          "subject": "dialog.close",
+          "relation": "BEHAVIOR",
+          "value": "cannot_close",
+          "unit": null,
+          "scope": "tool-path-fault dialog",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "f0aa1d27-2901-4f48-958a-fab826a7e6bb"
+            ],
+            "source_text": "对话框不能关闭",
+            "source_extraction_ids": [
+              "ext-dialog-close-behavior"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "455572f6-f192-5078-84dd-4e9a790e5993"
+        }
+      ],
+      "engineering_scope_id": "570ecdb7-ae8f-48b8-bc21-cb1a8a818c15",
+      "engineering_resource_id": "5dbe1cb1-9219-4ffc-8db0-36b4d8916538",
+      "scope_basis_fingerprint": "f893bf9a7ac018aaf86de006c565dc74023e2f8470ab537a81a0f241c9b57457",
+      "repository_identity": "http://qualified-git:8080/tool-path-fault.git",
+      "repository_ref": "refs/heads/main",
+      "source_baseline_id": "fd839884-c010-43e9-89aa-58f79771df44",
+      "source_revision": "78e2fff99cf858e37998d0511d1c841b50459054",
+      "governance_record_id": "1bfddf94-b7e3-4233-9875-2f729912fb50",
+      "supporting_references": [
+        "INTERACTION_RECORD:f0aa1d27-2901-4f48-958a-fab826a7e6bb",
+        "REPOSITORY_OBSERVATION:9b0b02ae647ef4aa12452930697d79b4a395d44d34393c49403b1e5d44983a13"
+      ],
+      "change_set": [
+        "asset:PRODUCTION_TARGET_ADMITTED"
+      ],
+      "rationale": "Bind the exact repository Reality acquired from the Human-supplied source before Steering begins.",
+      "admitted_by": "human:owner",
+      "schema_version": "wic-work-reality-v3",
+      "created_at": "2026-09-27T05:26:06.512051Z"
+    },
+    "current_work_focus": "修复当前项目中取消按钮导致的对话框无法关闭缺陷，并交付可查看的预览。 → 对话框可以通过取消按钮正常关闭，且修复结果有可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "work_revision_admission_status": "NOT_APPLICABLE",
+    "active_cycle_work_revision_id": "569d5b88-1e1b-5d43-983d-ecc6b962ce4b",
+    "active_cycle_impact_disposition": null,
+    "work_satisfaction_state": "IN_PROGRESS",
+    "interaction_relationship_state": "OPEN",
+    "work_focus_history": [
+      "821bb52c-5e8c-569c-912d-ff58164be6ac"
+    ],
+    "latest_work_transition": null,
+    "new_work_formation_pending": false,
+    "production_request_detected": true,
+    "repository_source": "http://qualified-git:8080/tool-path-fault.git",
+    "production_admission_state": "WORK_CREATED",
+    "repository_acquisition_state": "READY",
+    "repository_observation": {
+      "tree": "2997ff0e3c2445bf288cd679996fe830600b575d",
+      "paths": [
+        ".gitignore",
+        "Dockerfile",
+        "README.md",
+        "migrations/001_initial.sql",
+        "package.json",
+        "server.py",
+        "tests/application.cjs",
+        "web/app.js",
+        "web/index.html",
+        "web/styles.css"
+      ],
+      "title": "修复 tool-path-fault 项目中取消按钮导致对话框无法关闭的缺陷，并给出可预览的修复结果",
+      "source": "http://qualified-git:8080/tool-path-fault.git",
+      "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+      "revision": "78e2fff99cf858e37998d0511d1c841b50459054",
+      "condition": "READY",
+      "description": "取消按钮能正常关闭对话框，且提供修复后的预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+      "fingerprint": "9b0b02ae647ef4aa12452930697d79b4a395d44d34393c49403b1e5d44983a13",
+      "observed_at": "2026-09-27T04:34:38.265730+00:00",
+      "resource_id": "5dbe1cb1-9219-4ffc-8db0-36b4d8916538",
+      "context_path": "README.md",
+      "human_message": "Repository is ready.",
+      "target_branch": null,
+      "attempt_number": 1,
+      "interaction_id": "416c8f2c-824a-41cc-ab2c-6ac2e487be06",
+      "operation_kind": "ACQUIRE",
+      "repository_ref": "refs/heads/main",
+      "base_resource_id": null,
+      "failure_category": null,
+      "intake_request_id": "71a40270-38d0-5c5a-8f55-347e3245fae2",
+      "operation_evidence": {
+        "verified": true,
+        "connector_id": "builtin:git",
+        "capability_id": "git.repository.acquire",
+        "operation_ref": "repository-intake:f7e25145-0be7-5732-919a-ae40a143d750",
+        "resulting_branch": "refs/heads/main",
+        "resulting_revision": "78e2fff99cf858e37998d0511d1c841b50459054",
+        "workspace_reference": "/var/lib/spg/repository-assets/f7e25145-0be7-5732-919a-ae40a143d750"
+      },
+      "previous_attempt_id": null,
+      "repository_identity": "http://qualified-git:8080/tool-path-fault.git"
+    },
+    "production_next_step": "Continue Steering against the acquired repository Reality.",
+    "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+    "selected_design_schema_version": "0.1",
+    "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+    "design_stage": "Current Reality",
+    "design_next_focus": "Establish the trusted current product and runtime reality.",
+    "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+    "design_facilitation_strategy": "CLARIFY",
+    "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+  },
+  "observed_at": "2026-09-27T05:30:12.578724+00:00",
+  "work": {
+    "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+    "product_id": "590c7507-66b2-410e-ada7-52f4ee7c2d65",
+    "goal_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "raw_user_requirement": "修复当前项目中取消按钮导致的对话框无法关闭缺陷，并交付可查看的预览。",
+    "title": "修复当前项目中取消按钮导致的对话框无法关闭缺陷，并交付可查看的预览。",
+    "desired_outcome": "对话框可以通过取消按钮正常关闭，且修复结果有可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+    "constraints": [],
+    "target_kind": "CODE_WORK",
+    "artifact_target": null,
+    "change_proposal": {
+      "proposal_id": "f70ac074-6b3c-5640-9c76-730b847c57b5",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "5dbe1cb1-9219-4ffc-8db0-36b4d8916538",
+      "repository_identity": "http://qualified-git:8080/tool-path-fault.git",
+      "source_baseline_id": "fd839884-c010-43e9-89aa-58f79771df44",
+      "source_ref": "refs/heads/main",
+      "source_revision": "78e2fff99cf858e37998d0511d1c841b50459054",
+      "proposed_targets": [
+        {
+          "path": "web/app.js",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The only observed defect matching the requested behavior is the empty click handler bound to the existing '#cancel' button; the same script already holds the `dialog` reference for '#edit-dialog', so repairing dismissal requires editing exactly this handler in this existing file. No markup, route, schema or data change is implicated by the request.",
+          "evidence": "Exact 78e2fff99cf858e37998d0511d1c841b50459054:web/app.js witness: document.querySelector('#cancel').addEventListener('click', () => {});",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "1c9e7a2f39d63d59723f0a1d52b3579a09b69f5a2a0aaa9d2d17ad67c45e9c48"
+    },
+    "change_contract": null,
+    "production_plan": {
+      "proposal_id": "19d53446-d63f-50ae-9fa3-7008198c7a50",
+      "target_kind": "CODE_WORK",
+      "objective": "对话框可以通过取消按钮正常关闭，且修复结果有可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+      "desired_outcome": "对话框可以通过取消按钮正常关闭，且修复结果有可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Prepare the repository-inspected code targets: web/app.js."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": null,
+      "artifact_targets": [],
+      "change_proposal": {
+        "proposal_id": "f70ac074-6b3c-5640-9c76-730b847c57b5",
+        "target_kind": "CODE_WORK",
+        "engineering_resource_id": "5dbe1cb1-9219-4ffc-8db0-36b4d8916538",
+        "repository_identity": "http://qualified-git:8080/tool-path-fault.git",
+        "source_baseline_id": "fd839884-c010-43e9-89aa-58f79771df44",
+        "source_ref": "refs/heads/main",
+        "source_revision": "78e2fff99cf858e37998d0511d1c841b50459054",
+        "proposed_targets": [
+          {
+            "path": "web/app.js",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "The only observed defect matching the requested behavior is the empty click handler bound to the existing '#cancel' button; the same script already holds the `dialog` reference for '#edit-dialog', so repairing dismissal requires editing exactly this handler in this existing file. No markup, route, schema or data change is implicated by the request.",
+            "evidence": "Exact 78e2fff99cf858e37998d0511d1c841b50459054:web/app.js witness: document.querySelector('#cancel').addEventListener('click', () => {});",
+            "confidence": "HIGH"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [],
+        "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+        "confidence": "MEDIUM",
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null,
+            "identity": "PATH_SCOPE"
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null,
+            "identity": "GIT_DIFF_CHECK"
+          }
+        ],
+        "provenance": {
+          "provider_identity": "provider:repository-aware-change-proposal-lite",
+          "provider_version": "v1",
+          "inspection_method": "git-object-read-only:path-enumeration+text-search"
+        },
+        "unresolved_scope_questions": [],
+        "proposal_fingerprint": "1c9e7a2f39d63d59723f0a1d52b3579a09b69f5a2a0aaa9d2d17ad67c45e9c48"
+      },
+      "change_contract": null,
+      "inherited_constraints": [],
+      "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+      "assumptions": [
+        "The admitted Work can be executed through one governed PWU and Attempt lineage."
+      ],
+      "unresolved_questions": [],
+      "fit_classification": "ONE_PWU_FIT",
+      "engineering_resource_id": "5dbe1cb1-9219-4ffc-8db0-36b4d8916538",
+      "repository_identity": "http://qualified-git:8080/tool-path-fault.git",
+      "source_baseline_id": "fd839884-c010-43e9-89aa-58f79771df44",
+      "source_revision": "78e2fff99cf858e37998d0511d1c841b50459054"
+    },
+    "production_plan_runtime": null,
+    "tags": [],
+    "engineering_scope": {
+      "engineering_scope_id": "570ecdb7-ae8f-48b8-bc21-cb1a8a818c15",
+      "summary": "Work assets; production target http://qualified-git:8080/tool-path-fault.git",
+      "condition": "ADMITTED",
+      "resources": [
+        {
+          "resource_id": "5dbe1cb1-9219-4ffc-8db0-36b4d8916538",
+          "condition": "ACTIVE"
+        }
+      ]
+    },
+    "status": "NEEDS_ATTENTION",
+    "current_production_step": "PRODUCE",
+    "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "what_happens_next": "Human must resolve the material Steering decision",
+    "human_attention_required": true,
+    "result_summary": "1 independently observed artifact change(s)",
+    "current_work_reality_revision_id": "569d5b88-1e1b-5d43-983d-ecc6b962ce4b",
+    "steering_enabled": true,
+    "current_steering_step_id": "8bdf597e-fa4a-4627-93ca-ba9ad39de894",
+    "current_steering_step_type": "PRODUCE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "349297a2-ab6a-4cba-8205-4130a3fc56ec",
+    "current_production_cycle_trusted": false,
+    "latest_trusted_runtime_commit_id": null,
+    "work_complete": false,
+    "automatic_progression_state": "STOPPED",
+    "last_stop_reason": "HUMAN_ATTENTION",
+    "execution_progress": {
+      "phase": "RUNNING",
+      "activity": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required.",
+      "transitions_completed": 10,
+      "transitions_total": null,
+      "percent_complete": null,
+      "started_at": "2026-09-27T05:26:27.680340Z",
+      "updated_at": "2026-09-27T05:27:56.786930Z",
+      "elapsed_seconds": 89.10659,
+      "still_working": false,
+      "blocked_reason": "No unambiguous governed transition changed Reality; operator review or an explicit Human decision is required."
+    },
+    "guided_design": null,
+    "next_owner": "HUMAN",
+    "control_state_valid": false,
+    "control_state_violations": [
+      "HUMAN_ATTENTION_WITHOUT_ACTION",
+      "HUMAN_OWNER_WITHOUT_ACTION"
+    ]
+  },
+  "steering": {
+    "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+    "work_objective": "In the existing operations-site fixture, repair the dialog dismissal behavior by updating only the existing `#cancel` click listener in `web/app.js` so that it calls `close()` on the `#edit-dialog` element already referenced by that script, while keeping the current runtime form and entrypoint intact (`python server.py`, port 8080, static assets served from `web/`). Do not change page markup, server routes, the SQLite schema or the migration files, and do not add authentication or alter data presented as fixture data.",
+    "steering_enabled": true,
+    "steering_plan_id": "dd517e1e-f388-4f4f-a623-08628c51f507",
+    "active_revision_id": "7c745153-53b9-4b6c-9b35-dc432eacf96a",
+    "active_revision_number": 1,
+    "completed_steps": [
+      {
+        "step_id": "a67ad4cf-10ce-4f8a-b4fd-56dcdaa7c3f6",
+        "type": "DESIGN",
+        "objective": "对话框可以通过取消按钮正常关闭，且修复结果有可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/tool-path-fault.git\n检查当前项目中取消按钮的实现，修好对话框不能关闭的问题并给我预览。",
+        "completion_condition": "A bounded design direction is supported by current Reality",
+        "position": 1,
+        "state": "CLOSED",
+        "design_issue_key": null
+      }
+    ],
+    "current_step": {
+      "step_id": "8bdf597e-fa4a-4627-93ca-ba9ad39de894",
+      "type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "completion_condition": "The exact bounded production cycle reaches trusted Runtime Commit",
+      "position": 2,
+      "state": "CURRENT",
+      "design_issue_key": null
+    },
+    "known_next_steps": [
+      {
+        "step_id": "c3c64bd6-09e9-449f-b9f6-44f284d92afe",
+        "type": "VERIFY_ACCEPT",
+        "objective": "Assess the trusted result against the long-lived outcome",
+        "completion_condition": "Governed evidence supports product acceptance",
+        "position": 3,
+        "state": "KNOWN",
+        "design_issue_key": null
+      },
+      {
+        "step_id": "732cf0ea-8699-4f3a-bbde-d5f09b045a46",
+        "type": "COMPLETE",
+        "objective": "Complete the admitted long-lived Work",
+        "completion_condition": "The admitted Work outcome is satisfied",
+        "position": 4,
+        "state": "KNOWN",
+        "design_issue_key": null
+      }
+    ],
+    "plan_changes": [],
+    "latest_decision": {
+      "decision_id": "6180049c-eed7-4025-a049-1a0eb43d93b4",
+      "next_step_type": "HUMAN_DECISION",
+      "objective": "Resolve the bounded Work convergence incident",
+      "reason": "Work convergence stopped: NON_CONVERGING; 2 failed no-progress outcomes, 6 boundary attempts, 225s. Missing acceptance: REVIEW_RUNTIME_READY. Evidence is preserved; restarting or changing candidate IDs does not reset this budget.",
+      "outcome": "HUMAN_ATTENTION",
+      "human_required": true,
+      "attention_reason": "MATERIAL_RISK_OR_COST_DECISION",
+      "reality_refs": [
+        {
+          "kind": "CANDIDATE",
+          "identity": "3a00bf8d-041d-5613-bf46-f3f7ee667e73"
+        },
+        {
+          "kind": "COMPLETION",
+          "identity": "b0a6b451-808b-5aea-90b5-a0e8e544dcb4"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "1235faf1-d22a-5789-9b44-7bfef49d5b51"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "1bfddf94-b7e3-4233-9875-2f729912fb50"
+        },
+        {
+          "kind": "REPOSITORY_OBSERVATION",
+          "identity": "d9c3a353-f9de-4cef-a81a-81832078cb89"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "aa02186e-f5e0-4362-ac06-00b6257d0954"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "fd839884-c010-43e9-89aa-58f79771df44"
+        },
+        {
+          "kind": "VERIFICATION",
+          "identity": "82769a40-d059-52d8-8f52-2b1041e43e92"
+        },
+        {
+          "kind": "VERIFICATION",
+          "identity": "f350baff-68d1-5aca-8a63-79b165f9f5b3"
+        },
+        {
+          "kind": "WORK",
+          "identity": "821bb52c-5e8c-569c-912d-ff58164be6ac"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "569d5b88-1e1b-5d43-983d-ecc6b962ce4b"
+        }
+      ]
+    },
+    "selection_rationale": "Work convergence stopped: NON_CONVERGING; 2 failed no-progress outcomes, 6 boundary attempts, 225s. Missing acceptance: REVIEW_RUNTIME_READY. Evidence is preserved; restarting or changing candidate IDs does not reset this budget.",
+    "steering_outcome": "HUMAN_ATTENTION",
+    "automatic_progression_state": "STOPPED",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "349297a2-ab6a-4cba-8205-4130a3fc56ec",
+    "current_production_cycle_trusted": false,
+    "human_attention_required": true,
+    "last_stop_reason": "HUMAN_ATTENTION"
+  },
+  "refinement": {
+    "count": 4,
+    "events": [
+      {
+        "id": "04b4781a-5f10-4c0d-8130-b52087eafeff",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "operation_id": "3a00bf8d-041d-5613-bf46-f3f7ee667e73",
+        "created_at": "2026-09-27T05:30:09.377292Z",
+        "failure_family": "REALITY_MISMATCH",
+        "failure_signature": "1fd60906f8847c44dec1d9aefe6c4a9d8f1c1c2de6d22862962d7f702d01079c",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "REALITY_MISMATCH",
+        "affected_component": "preview/runtime",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "REALITY_MISMATCH",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "candidate-preview:5030056a-a7e7-42b7-8255-9551558f9508",
+          "candidate-preview:a2d3d33b-4d40-4d1f-9b81-1b8a8d5cc20f",
+          "candidate-preview:253b62ef-96ae-429d-97c0-2725a89bb54c"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 3,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "PREVIEW_NOT_READY",
+          "failure_codes": [
+            "STARTUP_FAILED",
+            "STARTUP_FAILED",
+            "STARTUP_FAILED"
+          ],
+          "attempt_budget": 3,
+          "human_acceptance": "PENDING",
+          "local_obligation": "EXACT_CANDIDATE_SERVED_RUNTIME",
+          "candidate_fingerprint": "267304b388f66867616e57cbcfcb82844d4ef253370120ad795bf262ec5266a9",
+          "owner_budget_exhausted": true
+        },
+        "final_result": "ESCALATED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 137,
+        "model_token_usage": {},
+        "compute_overhead": {},
+        "known_failure_match": false,
+        "platform_improvement_candidate_ref": "refinement-signature:1fd60906f8847c44dec1d9aefe6c4a9d8f1c1c2de6d22862962d7f702d01079c",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T05:30:09.377292Z"
+      },
+      {
+        "id": "97f407ef-eb37-4c30-b550-629fea1c00f3",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "operation_id": "143d8e49-9799-4a7e-80eb-039fa0eb5a67",
+        "created_at": "2026-09-27T05:26:48.169308Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+        "semantic_version": 2,
+        "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "signal_kind": "EVIDENCE_INSUFFICIENT",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": "TEST_ENVIRONMENT_NOT_READY",
+          "output_digest": "df106a392e108ff79db268052475a6ad9225a72da8c96de6e84bc620fa136222",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:c10b97ab-6d90-40a9-9b48-308c97b3c7b3",
+          "native-receipt:1d3c08e6-6f15-4687-bffe-1d9e4d84e11d",
+          "native-evidence:99186dd9-5b2e-4744-bf58-2fccfb793f5f"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "Use the granted locked dependency synchronization or an equivalent admitted test path; do not add dependencies or change the acceptance oracle"
+        },
+        "diagnostic_evidence": {
+          "returncode": 127,
+          "stderr_ref": "native-receipt:1d3c08e6-6f15-4687-bffe-1d9e4d84e11d#stderr",
+          "stdout_ref": "native-receipt:1d3c08e6-6f15-4687-bffe-1d9e4d84e11d#stdout",
+          "receipt_ref": "native-receipt:1d3c08e6-6f15-4687-bffe-1d9e4d84e11d",
+          "stderr_bytes": 0,
+          "stdout_bytes": 121,
+          "evidence_refs": [
+            "native-evidence:99186dd9-5b2e-4744-bf58-2fccfb793f5f"
+          ],
+          "output_digest": "df106a392e108ff79db268052475a6ad9225a72da8c96de6e84bc620fa136222",
+          "tool_identity": "test.run",
+          "diagnostic_code": "TEST_ENVIRONMENT_NOT_READY",
+          "verification_evidence": "INCOMPLETE",
+          "test_environment_readiness": "NOT_READY"
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 53,
+        "model_token_usage": {
+          "input_tokens": 75901,
+          "total_tokens": 83965,
+          "output_tokens": 8064,
+          "reasoning_tokens": 6791,
+          "cached_input_tokens": 9600,
+          "observed_response_count": 5
+        },
+        "compute_overhead": {
+          "tool_effects": 12,
+          "inference_submissions": 8
+        },
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": null,
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T05:27:42.097883Z"
+      },
+      {
+        "id": "925e9228-3d5e-44c0-8c59-432b8160a3cd",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "operation_id": "143d8e49-9799-4a7e-80eb-039fa0eb5a67",
+        "created_at": "2026-09-27T05:26:35.632730Z",
+        "failure_family": "EXECUTION_EFFECT_FAILURE",
+        "failure_signature": "7d61934b79a40dc048a8c4ab611ac4a43d344c51f266406bd6ffee24fd3f35d0",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "CAPABILITY_MISMATCH",
+        "affected_component": "native-tool-host/file.read",
+        "expected_reality": {
+          "tool_identity": "file.read",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": "CAPABILITY_PATH_INVALID",
+          "output_digest": "ddc25aae9f17dab03c5a1900bf1bb2d89c7f9645c9bd3ed9d93b272ac6a36fa2",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "EXECUTION_EFFECT_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:78e95dfb-55dc-4d62-9de1-323b58c4a439",
+          "native-receipt:1ca6ac6e-0054-4e6c-94d5-0647577c4641",
+          "native-evidence:c1bb30bc-e998-48b2-990f-5eddbb1bb42f"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "confirmed no effect; select an alternative within existing capability grants and Task Contract"
+        },
+        "diagnostic_evidence": {
+          "receipt_ref": "native-receipt:1ca6ac6e-0054-4e6c-94d5-0647577c4641",
+          "evidence_refs": [
+            "native-evidence:c1bb30bc-e998-48b2-990f-5eddbb1bb42f"
+          ],
+          "output_digest": "ddc25aae9f17dab03c5a1900bf1bb2d89c7f9645c9bd3ed9d93b272ac6a36fa2",
+          "tool_identity": "file.read"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 12,
+        "model_token_usage": {},
+        "compute_overhead": {
+          "tool_effects": 1
+        },
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:7d61934b79a40dc048a8c4ab611ac4a43d344c51f266406bd6ffee24fd3f35d0",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T05:26:48.169308Z"
+      },
+      {
+        "id": "077c80a4-a946-4535-b369-016a33f351c6",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "operation_id": "a67ad4cf-10ce-4f8a-b4fd-56dcdaa7c3f6",
+        "created_at": "2026-09-27T05:26:24.621639Z",
+        "failure_family": "CANDIDATE_INCONSISTENT",
+        "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "semantic_version": 2,
+        "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "signal_kind": "CANDIDATE_INCONSISTENT",
+        "affected_component": "semantic/scope",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "CANDIDATE_INCONSISTENT",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "source-baseline:fd839884-c010-43e9-89aa-58f79771df44"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "OBSERVED_SUCCESS",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 2,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "SCOPE_INFLATION",
+          "required_paths": [
+            "web/app.js"
+          ],
+          "candidate_paths": [
+            "web/app.js"
+          ],
+          "authority_expanded": false,
+          "rejected_behaviors": [
+            "Editing web/index.html markup (dialog and #cancel button already exist and the request does not ask to change them)",
+            "Editing server.py routes or static serving (no request for server behavior)",
+            "Editing migrations/001_initial.sql or SQLite schema (no persistence change requested)",
+            "Adding authentication, login wiring or permissions (README states authentication is not implemented; not requested)",
+            "Adding new files, routes or pages (no witness of a missing surface in the existing implementation)",
+            "Altering or presenting fixture data as real company facts",
+            "Refactoring loadLists or unrelated script code beyond the cancel handler"
+          ]
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 0,
+        "model_token_usage": {
+          "unknown": false,
+          "input_tokens": 10712,
+          "total_tokens": 13173,
+          "cached_tokens": 512,
+          "output_tokens": 2461,
+          "reasoning_tokens": 214
+        },
+        "compute_overhead": {},
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T05:26:24.621639Z"
+      }
+    ],
+    "metrics": {
+      "native_attempts": 1,
+      "native_self_refine_events": 0,
+      "self_refine_events": 4,
+      "self_refine_rate": 0.0,
+      "first_pass_success_rate": 1.0,
+      "recovered": 0,
+      "local_obligation_recovered": 2,
+      "recovery_scope": "LOCAL_OBLIGATION; Work convergence is independently observed",
+      "escalated": 1,
+      "failed": 1,
+      "active": 0,
+      "classification_counts": {
+        "ROUTINE_STOCHASTIC_REFINEMENT": 1,
+        "DEGRADING_OR_RECURRING_REFINEMENT": 1,
+        "SYSTEMIC_OR_NON_CONVERGING_INCIDENT": 2,
+        "LEGACY_EXECUTION_INCIDENT": 0
+      },
+      "convergence_success_rate": 0.5,
+      "average_refinement_attempts": 2.25,
+      "p95_refinement_attempts": 3,
+      "average_refinement_seconds": 50.5,
+      "p95_refinement_seconds": 137,
+      "observed_refinement_tokens": 97138,
+      "observed_refinement_tool_effects": 13,
+      "unsafe_repair_blocks": 0,
+      "recurring_signatures": {},
+      "improvement_candidates": [
+        {
+          "reference": "refinement-signature:1fd60906f8847c44dec1d9aefe6c4a9d8f1c1c2de6d22862962d7f702d01079c",
+          "signature": "1fd60906f8847c44dec1d9aefe6c4a9d8f1c1c2de6d22862962d7f702d01079c",
+          "component": "preview/runtime",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 0,
+          "observed_seconds": 137,
+          "systemic": true,
+          "status": "PROPOSED"
+        },
+        {
+          "reference": "refinement-signature:7d61934b79a40dc048a8c4ab611ac4a43d344c51f266406bd6ffee24fd3f35d0",
+          "signature": "7d61934b79a40dc048a8c4ab611ac4a43d344c51f266406bd6ffee24fd3f35d0",
+          "component": "native-tool-host/file.read",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 0,
+          "observed_seconds": 12,
+          "systemic": true,
+          "status": "PROPOSED"
+        },
+        {
+          "reference": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "component": "semantic/scope",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 13173,
+          "observed_seconds": 0,
+          "systemic": false,
+          "status": "PROPOSED"
+        }
+      ],
+      "human_escalation_observation_count": 2,
+      "human_escalation_rate": 0.0,
+      "systemic_incident_rate": 0.5
+    },
+    "work_convergence": [
+      {
+        "id": "4c92bb83-3680-4723-a2b7-e249a4d3c9bb",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "intent_identity": "5630aba0061b73cb76a36f177f9089ddc2f94d02c11dc2c15e39a09d447fc996",
+        "predecessor_id": null,
+        "sequence": 1,
+        "boundary": "SEMANTIC_RESULT_ADMISSION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "dbcc108013fafe5ff456bc6454263313197336e712c29bd661dabd7ac11ef3ed",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "590c7507-66b2-410e-ada7-52f4ee7c2d65",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:26:24.911519Z"
+      },
+      {
+        "id": "1ad0622f-6868-494b-ab3f-88d6ac002dc1",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "intent_identity": "5630aba0061b73cb76a36f177f9089ddc2f94d02c11dc2c15e39a09d447fc996",
+        "predecessor_id": "4c92bb83-3680-4723-a2b7-e249a4d3c9bb",
+        "sequence": 2,
+        "boundary": "STEP_TRANSITION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "dbcc108013fafe5ff456bc6454263313197336e712c29bd661dabd7ac11ef3ed",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 2,
+        "no_progress_count": 0,
+        "elapsed_seconds": 1,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "590c7507-66b2-410e-ada7-52f4ee7c2d65",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:26:26.587543Z"
+      },
+      {
+        "id": "5c3c9dbf-f4ff-4c7f-ab6e-639b4b1781ba",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "intent_identity": "5630aba0061b73cb76a36f177f9089ddc2f94d02c11dc2c15e39a09d447fc996",
+        "predecessor_id": "1ad0622f-6868-494b-ab3f-88d6ac002dc1",
+        "sequence": 3,
+        "boundary": "PRODUCTION_CYCLE_ADMISSION",
+        "failure_signature": "55aace645e56bf76dbff41e8f14eb53f17cab59fa84b37f74f8120e5170fbcf3",
+        "candidate_identity": null,
+        "reality_identity": "dbcc108013fafe5ff456bc6454263313197336e712c29bd661dabd7ac11ef3ed",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 3,
+        "no_progress_count": 0,
+        "elapsed_seconds": 3,
+        "token_usage": {
+          "status": "UNREPORTED",
+          "input_tokens": 0,
+          "total_tokens": 0,
+          "output_tokens": 0
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 0
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {},
+          "execution_seconds": 0.0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "590c7507-66b2-410e-ada7-52f4ee7c2d65",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:26:28.029606Z"
+      },
+      {
+        "id": "b3705dab-c71e-4733-aa6b-48559a8169f8",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "intent_identity": "5630aba0061b73cb76a36f177f9089ddc2f94d02c11dc2c15e39a09d447fc996",
+        "predecessor_id": "5c3c9dbf-f4ff-4c7f-ab6e-639b4b1781ba",
+        "sequence": 4,
+        "boundary": "PREVIEW",
+        "failure_signature": "020fa6ea7ddbe5a97331770b2f1f7acf25bbce30cc06c25ed91762cc26f71dfd",
+        "candidate_identity": "267304b388f66867616e57cbcfcb82844d4ef253370120ad795bf262ec5266a9",
+        "reality_identity": "35e3b4e4d08c653ede1946796c7276ff25970bc74701c1760ce4b08f1861bf16",
+        "missing_acceptance": [
+          "REVIEW_RUNTIME_READY"
+        ],
+        "attempts": 4,
+        "no_progress_count": 0,
+        "elapsed_seconds": 121,
+        "token_usage": {
+          "status": "OBSERVED",
+          "input_tokens": 108823,
+          "total_tokens": 118024,
+          "output_tokens": 9201
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {
+            "tool_effect": 11,
+            "inference_submission": 8
+          },
+          "execution_seconds": 59.561330999999996
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "590c7507-66b2-410e-ada7-52f4ee7c2d65",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:28:25.965086Z"
+      },
+      {
+        "id": "e0b0eac8-c791-4d73-a5f3-3e4881a38a0d",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "intent_identity": "5630aba0061b73cb76a36f177f9089ddc2f94d02c11dc2c15e39a09d447fc996",
+        "predecessor_id": "b3705dab-c71e-4733-aa6b-48559a8169f8",
+        "sequence": 5,
+        "boundary": "PREVIEW",
+        "failure_signature": "020fa6ea7ddbe5a97331770b2f1f7acf25bbce30cc06c25ed91762cc26f71dfd",
+        "candidate_identity": "267304b388f66867616e57cbcfcb82844d4ef253370120ad795bf262ec5266a9",
+        "reality_identity": "35e3b4e4d08c653ede1946796c7276ff25970bc74701c1760ce4b08f1861bf16",
+        "missing_acceptance": [
+          "REVIEW_RUNTIME_READY"
+        ],
+        "attempts": 5,
+        "no_progress_count": 1,
+        "elapsed_seconds": 184,
+        "token_usage": {
+          "status": "OBSERVED",
+          "input_tokens": 108823,
+          "total_tokens": 118024,
+          "output_tokens": 9201
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {
+            "tool_effect": 11,
+            "inference_submission": 8
+          },
+          "execution_seconds": 59.561330999999996
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "590c7507-66b2-410e-ada7-52f4ee7c2d65",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T05:29:29.812869Z"
+      },
+      {
+        "id": "233759fe-383d-4804-a740-bdb004d24362",
+        "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+        "intent_identity": "5630aba0061b73cb76a36f177f9089ddc2f94d02c11dc2c15e39a09d447fc996",
+        "predecessor_id": "e0b0eac8-c791-4d73-a5f3-3e4881a38a0d",
+        "sequence": 6,
+        "boundary": "PREVIEW",
+        "failure_signature": "020fa6ea7ddbe5a97331770b2f1f7acf25bbce30cc06c25ed91762cc26f71dfd",
+        "candidate_identity": "267304b388f66867616e57cbcfcb82844d4ef253370120ad795bf262ec5266a9",
+        "reality_identity": "35e3b4e4d08c653ede1946796c7276ff25970bc74701c1760ce4b08f1861bf16",
+        "missing_acceptance": [
+          "REVIEW_RUNTIME_READY"
+        ],
+        "attempts": 6,
+        "no_progress_count": 2,
+        "elapsed_seconds": 225,
+        "token_usage": {
+          "status": "OBSERVED",
+          "input_tokens": 108823,
+          "total_tokens": 118024,
+          "output_tokens": 9201
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {
+            "tool_effect": 11,
+            "inference_submission": 8
+          },
+          "execution_seconds": 59.561330999999996
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "condition": "NON_CONVERGING",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "590c7507-66b2-410e-ada7-52f4ee7c2d65",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": true
+        },
+        "created_at": "2026-09-27T05:30:10.147767Z"
+      }
+    ]
+  },
+  "queue": [
+    {
+      "queue_entry_id": "c4d7a8c9-6b44-44d6-8609-f8355f95d909",
+      "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+      "pwu_id": "8597da33-ed12-4d23-89f7-cae7f1c500b4",
+      "attempt_id": "143d8e49-9799-4a7e-80eb-039fa0eb5a67",
+      "fairness_group": "work:821bb52c-5e8c-569c-912d-ff58164be6ac",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T05:26:31.415714Z",
+      "available_at": "2026-09-27T05:26:31.409066Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T05:30:16.611718Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "569d5b88-1e1b-5d43-983d-ecc6b962ce4b"
+    }
+  ],
+  "preview": {
+    "mode": "FRONTEND_RUNTIME",
+    "status": "FAILED",
+    "candidate_revision": "a2b8988e80ce4d3f06e309f405c608a3165d0403",
+    "candidate_fingerprint": "267304b388f66867616e57cbcfcb82844d4ef253370120ad795bf262ec5266a9",
+    "session": {
+      "id": "253b62ef-96ae-429d-97c0-2725a89bb54c",
+      "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+      "candidate_id": "3a00bf8d-041d-5613-bf46-f3f7ee667e73",
+      "candidate_fingerprint": "267304b388f66867616e57cbcfcb82844d4ef253370120ad795bf262ec5266a9",
+      "repository_identity": "http://qualified-git:8080/tool-path-fault.git",
+      "repository_revision": "a2b8988e80ce4d3f06e309f405c608a3165d0403",
+      "repository_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+      "workspace_id": "f8d193e2-b3bc-442b-a95d-070989c12ec3",
+      "environment_id": "6f6dd5a7-ac40-4798-9ad0-f7af1197cadd",
+      "mode": "FRONTEND_RUNTIME",
+      "status": "FAILED",
+      "definition_version": "frontend-docker-runtime-v1",
+      "endpoint": null,
+      "image_reference": "sha256:e64993b971c1217faeadbd60e3ebf936ec9155f4fc796241d6d2ac1b2fe1e09a",
+      "service_identities": [],
+      "resource_references": [],
+      "evidence": [
+        {
+          "kind": "REFINEMENT_LINEAGE",
+          "previous_preview_id": "a2d3d33b-4d40-4d1f-9b81-1b8a8d5cc20f",
+          "attempt": 3,
+          "previous_failure_code": "STARTUP_FAILED"
+        },
+        {
+          "kind": "WORKSPACE",
+          "workspace": "/var/lib/spg/production-environments/candidate-preview-runtime/253b62ef-96ae-429d-97c0-2725a89bb54c/workspace",
+          "revision": "a2b8988e80ce4d3f06e309f405c608a3165d0403",
+          "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+          "topology_preflight": {
+            "verifier_namespace": "candidate-gateway-network",
+            "verifier_image": "watt-lifecycle:qualification",
+            "public_endpoint_namespace": "docker-host"
+          },
+          "dockerfile_sha256": "abd36acd96f3e4485d6e9d4826a540e65a9608f5e9eb0e479de9581d5a8d5f44"
+        },
+        {
+          "kind": "BUILD",
+          "image": "watt-candidate-preview-253b62ef96ae429d97c02725a89bb54c:candidate",
+          "image_id": "sha256:e64993b971c1217faeadbd60e3ebf936ec9155f4fc796241d6d2ac1b2fe1e09a",
+          "verified_image_files": 0,
+          "build_log": "/var/lib/spg/production-environments/candidate-preview-runtime/evidence/253b62ef-96ae-429d-97c0-2725a89bb54c/build.log",
+          "build_log_sha256": "d20f481d90c85d3853d917b433ce6b1dbf76fc83b8d0fad5b28ab8c663575e13"
+        },
+        {
+          "kind": "FAILURE",
+          "code": "STARTUP_FAILED",
+          "reason": "Candidate application or required service failed readiness",
+          "at": "2026-09-27T05:30:09.329669+00:00",
+          "service_logs": [],
+          "technical_evidence": {
+            "reference": "/var/lib/spg/production-environments/candidate-previews/evidence/253b62ef-96ae-429d-97c0-2725a89bb54c/failure.log",
+            "sha256": "8404cd6cfa367d368db1861b308d1e5a1bf9d4e8ff91e0d9444bd65b008ee4a0"
+          }
+        }
+      ],
+      "failure_code": "STARTUP_FAILED",
+      "failure_reason": "Candidate application or required service failed readiness",
+      "version": 5,
+      "created_at": "2026-09-27T05:29:32.923669Z",
+      "updated_at": "2026-09-27T05:30:09.329785Z"
+    }
+  },
+  "attention": [
+    {
+      "attention_id": "485657ec-7c96-5988-8b6e-9916f5585eec",
+      "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+      "kind": "STEERING_DECISION_REQUIRED",
+      "decision": "Choose how to handle a material risk or cost",
+      "reason": "The choice materially changes risk, cost, or an irreversible effect for this step.",
+      "available_actions": [],
+      "recommended_action": null,
+      "governed_subject_ref": "steering-decision:6180049c-eed7-4025-a049-1a0eb43d93b4",
+      "steering_reason": "MATERIAL_RISK_OR_COST_DECISION",
+      "recommendation": "Select the acceptable bounded trade-off.",
+      "conversation_prompt": null,
+      "alternatives": [],
+      "trade_offs": [],
+      "expected_impact": "The selected risk or cost boundary will constrain continuation.",
+      "reality_refs": [
+        {
+          "kind": "CANDIDATE",
+          "identity": "3a00bf8d-041d-5613-bf46-f3f7ee667e73"
+        },
+        {
+          "kind": "COMPLETION",
+          "identity": "b0a6b451-808b-5aea-90b5-a0e8e544dcb4"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "1235faf1-d22a-5789-9b44-7bfef49d5b51"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "1bfddf94-b7e3-4233-9875-2f729912fb50"
+        },
+        {
+          "kind": "REPOSITORY_OBSERVATION",
+          "identity": "d9c3a353-f9de-4cef-a81a-81832078cb89"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "aa02186e-f5e0-4362-ac06-00b6257d0954"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "fd839884-c010-43e9-89aa-58f79771df44"
+        },
+        {
+          "kind": "VERIFICATION",
+          "identity": "82769a40-d059-52d8-8f52-2b1041e43e92"
+        },
+        {
+          "kind": "VERIFICATION",
+          "identity": "f350baff-68d1-5aca-8a63-79b165f9f5b3"
+        },
+        {
+          "kind": "WORK",
+          "identity": "821bb52c-5e8c-569c-912d-ff58164be6ac"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "569d5b88-1e1b-5d43-983d-ecc6b962ce4b"
+        }
+      ],
+      "steering_plan_revision_id": "7c745153-53b9-4b6c-9b35-dc432eacf96a",
+      "steering_step_id": "8bdf597e-fa4a-4627-93ca-ba9ad39de894",
+      "interaction_id": null,
+      "interaction_assessment_id": null,
+      "expected_work_reality_revision_id": null
+    }
+  ],
+  "economics": {
+    "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+    "product_id": "590c7507-66b2-410e-ada7-52f4ee7c2d65",
+    "pwu_count": 1,
+    "join_count": 0,
+    "pwu": [
+      {
+        "pwu_id": "8597da33-ed12-4d23-89f7-cae7f1c500b4",
+        "node_id": null,
+        "run_id": "349297a2-ab6a-4cba-8205-4130a3fc56ec",
+        "condition": "SATISFIED",
+        "attempt_count": 1,
+        "outcomes": [
+          "RESULT_READY"
+        ],
+        "providers": [
+          "deepseek",
+          "watt-native:143d8e49-9799-4a7e-80eb-039fa0eb5a67"
+        ],
+        "execution_seconds": 59.561330999999996,
+        "duration_observed": true,
+        "queue_wait_seconds": 1.059189,
+        "token_usage": {
+          "input_tokens": 108823,
+          "output_tokens": 9201,
+          "total_tokens": 118024,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 8,
+          "tool_effect": 11
+        }
+      }
+    ],
+    "token_usage": {
+      "input_tokens": 108823,
+      "output_tokens": 9201,
+      "total_tokens": 118024,
+      "status": "OBSERVED"
+    },
+    "observed_provider_spend": {
+      "status": "UNREPORTED",
+      "by_currency": {},
+      "unreported_attempt_count": 1,
+      "amount": null
+    },
+    "execution_seconds": 59.561330999999996,
+    "queue_wait_seconds": 1.059189,
+    "wall_elapsed_seconds": 69.184488,
+    "critical_path_seconds": null,
+    "parallelism_effect_seconds": 0.0,
+    "self_refine_event_count": 4,
+    "first_pass_pwu_count": 1,
+    "retried_pwu_count": 0,
+    "human_escalation_count": 1,
+    "refinement_extra_seconds": 202,
+    "resource_units": {
+      "inference_submission": 8,
+      "tool_effect": 11
+    },
+    "final_outcome": "READY"
+  },
+  "delivery": {
+    "work_id": "821bb52c-5e8c-569c-912d-ff58164be6ac",
+    "target": null,
+    "supported_target_kinds": [
+      "DOCUMENT_PACKAGE",
+      "SOFTWARE_ARTIFACT"
+    ],
+    "deliveries": []
+  }
+}

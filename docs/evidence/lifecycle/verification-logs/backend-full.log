@@ -1,0 +1,165 @@
+........................................................................ [  4%]
+.................................................................FF..... [  8%]
+..............
+=================================== FAILURES ===================================
+___ test_retryable_semantic_provider_failure_waits_and_resumes_automatically ___
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_full), session_factory=sessionm...Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_full), autoflush=False, expire_on_commit=False))
+product = (<spg.application.work.WorkApplicationService object at 0x1197467b0>, PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-903/test_retryable_semantic_provid0/semantic-repository'))
+
+    def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
+        postgres_database: Database,
+        product,
+    ) -> None:
+        works, _repository = product
+        admitted, plan = _admitted_plan(works)
+        assert plan.current_step is not None
+        capability = _TransientProviderFailureCapability(
+            step_type=SteeringStepType.DESIGN
+        )
+        orchestrator = ProductionOrchestrator(works)
+        driver = PlanSteeringDriver(
+            postgres_database,
+            works,
+            orchestrator,
+            semantic_capability=capability,
+            max_automatic_transitions=1,
+            provider_retry_base_delay_seconds=1,
+            provider_retry_max_delay_seconds=1,
+        )
+        try:
+            assert driver.schedule(admitted.work_id) is True
+            deadline = monotonic() + 10
+            waiting = None
+            while monotonic() < deadline:
+                waiting = driver.project(admitted.work_id)
+                if (
+                    waiting.automatic_progression_state
+                    is SteeringAutomaticProgressionState.WAITING_RESOURCE
+                ):
+                    break
+                sleep(0.01)
+            assert waiting is not None
+            assert (
+                waiting.automatic_progression_state
+                is SteeringAutomaticProgressionState.WAITING_RESOURCE
+            )
+            assert waiting.last_stop_reason is SteeringDriverStopReason.CAPABILITY_UNAVAILABLE
+    
+            # The first phase may spend most of its deadline observing the initial
+            # failure under a loaded integration DB. Give the bounded retry its own
+            # observation window rather than racing the first phase's deadline.
+            deadline = monotonic() + 10
+            while monotonic() < deadline:
+                if (
+                    capability.calls == 2
+                    and SteeringApplicationService(postgres_database)
+                    .reconstruct(admitted.work_id)
+                    .semantic_results
+                ):
+                    break
+                sleep(0.01)
+            assert capability.calls == 2
+            assert driver.wait_until_idle(admitted.work_id, 2)
+            with postgres_database.unit_of_work() as uow:
+                store = NativeExecutionStore(uow.session)
+                recovery = store.list_self_refine_events(
+                    work_id=admitted.work_id, component="steering/provider",
+                )
+                assert len(recovery) == 1
+                assert recovery[0].final_result == "LOCAL_OBLIGATION_RECOVERED"
+                assert recovery[0].work_resume_result == "RESUMED"
+                assert [action.outcome for action in store.self_refine_actions(recovery[0].id)] == [
+                    "RETRY_SCHEDULED", "LOCAL_OBLIGATION_RECOVERED",
+                ]
+            result = driver.last_outcome(admitted.work_id)
+            assert result is not None
+            assert result.last_action is SteeringActionType.SEMANTIC_RESULT_ADMISSION
+            assert result.stop_reason is SteeringDriverStopReason.TRANSITION_BOUND
+    
+            reconstructed = SteeringApplicationService(postgres_database).reconstruct(
+                admitted.work_id
+            )
+            assert len(reconstructed.semantic_results) == 1
+            semantic_result = reconstructed.semantic_results[0]
+            assert semantic_result.completion_satisfied is True
+            assert semantic_result.proposed_production is not None
+            assert reconstructed.current_step is not None
+            assert reconstructed.current_step.type is SteeringStepType.DESIGN
+    
+            assert driver.schedule(admitted.work_id) is True
+>           assert driver.wait_until_idle(admitted.work_id, 2)
+E           AssertionError: assert False
+E            +  where False = wait_until_idle(UUID('3132cd89-27d8-410c-83ba-b4d8006d48bd'), 2)
+E            +    where wait_until_idle = <spg.application.steering_driver.PlanSteeringDriver object at 0x118c9afd0>.wait_until_idle
+E            +    and   UUID('3132cd89-27d8-410c-83ba-b4d8006d48bd') = WorkProjection(work_id=UUID('3132cd89-27d8-410c-83ba-b4d8006d48bd'), goal_id=None, mode=<WorkMode.LONG_LIVED_STEERING:...uction_run_id=None, current_production_cycle_trusted=False, latest_trusted_runtime_commit_id=None, work_complete=False).work_id
+
+tests/integration/test_mvp_semantic_step_execution.py:537: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+___ test_repeated_steering_provider_failure_converges_to_durable_escalation ____
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_full), session_factory=sessionm...Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_lifecycle_full), autoflush=False, expire_on_commit=False))
+product = (<spg.application.work.WorkApplicationService object at 0x1197e85f0>, PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-903/test_repeated_steering_provide0/semantic-repository'))
+
+    def test_repeated_steering_provider_failure_converges_to_durable_escalation(
+        postgres_database: Database, product,
+    ) -> None:
+        works, _repository = product
+        admitted, _plan = _admitted_plan(works)
+        capability = _RepeatedProviderFailureCapability()
+        orchestrator = ProductionOrchestrator(works)
+        driver = PlanSteeringDriver(
+            postgres_database, works, orchestrator,
+            semantic_capability=capability,
+            max_automatic_transitions=1,
+            provider_retry_base_delay_seconds=0.05,
+            provider_retry_max_delay_seconds=0.05,
+            provider_retry_same_failure_threshold=2,
+        )
+        try:
+            assert driver.schedule(admitted.work_id)
+            deadline = monotonic() + 4
+            while monotonic() < deadline:
+                with postgres_database.unit_of_work() as uow:
+                    store = NativeExecutionStore(uow.session)
+                    records = store.list_self_refine_events(
+                        work_id=admitted.work_id, component="steering/provider",
+                    )
+                if records and records[0].final_result == "ESCALATED":
+                    break
+                sleep(0.02)
+>           assert capability.calls == 2
+E           assert 1 == 2
+E            +  where 1 = <test_mvp_semantic_step_execution._RepeatedProviderFailureCapability object at 0x1121eba10>.calls
+
+tests/integration/test_mvp_semantic_step_execution.py:582: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+=============================== warnings summary ===============================
+tests/integration/test_mvp_app_work_flow.py::test_work_03_and_08_work_is_not_resource_or_project
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1294: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "project_id" not in record.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_03_and_08_work_is_not_resource_or_project
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1295: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "resource_id" not in record.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_11_draft_cannot_execute_and_work_13_projection_is_not_authority
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1421: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "status" in before.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_11_draft_cannot_execute_and_work_13_projection_is_not_authority
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1422: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "condition" not in before.model_fields
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_mvp_semantic_step_execution.py::test_retryable_semantic_provider_failure_waits_and_resumes_automatically
+FAILED tests/integration/test_mvp_semantic_step_execution.py::test_repeated_steering_provider_failure_converges_to_durable_escalation
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/Users/yu/Documents/dev/software-production-platform/.venv/lib/python3.13/site-packages/psycopg/cursor.py:117: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+2 failed, 156 passed, 4 warnings in 1439.16s (0:23:59)

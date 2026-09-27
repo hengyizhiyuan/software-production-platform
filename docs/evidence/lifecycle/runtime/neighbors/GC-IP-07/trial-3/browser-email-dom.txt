@@ -1,0 +1,25 @@
+- banner:
+  - navigation:
+    - link "首页":
+      - /url: /
+    - link "用户":
+      - /url: /users
+    - link "客户":
+      - /url: /customers
+    - link "订单":
+      - /url: /orders
+  - button "登录"
+- main:
+  - heading "业务工作台" [level=1]
+  - button "开始使用"
+  - button "账户登录"
+  - button "打开对话框"
+  - heading "用户列表" [level=2]
+  - text: 姓名
+  - textbox "姓名"
+  - text: 邮箱
+  - textbox "邮箱"
+  - button "搜索" [active]
+  - generic: Golden search target
+  - heading "客户列表" [level=2]
+  - generic: Fixture Customer

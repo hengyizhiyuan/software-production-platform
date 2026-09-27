@@ -1,0 +1,178 @@
+{
+  "work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+  "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+  "goal_id": null,
+  "mode": "LONG_LIVED_STEERING",
+  "raw_user_requirement": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+  "title": "修改既有 Web 项目首页的主行动按钮文案，并先取得可视化预览，交付与否保留给人类确认。",
+  "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+  "constraints": [
+    "在人类确认之前不得交付",
+    "需要先提供预览"
+  ],
+  "target_kind": "CODE_WORK",
+  "artifact_target": null,
+  "change_proposal": {
+    "proposal_id": "3652dbe7-d268-5d17-9e44-6bbc04ff79ed",
+    "target_kind": "CODE_WORK",
+    "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "repository_identity": "http://qualified-git:8080/business-app.git",
+    "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+    "source_ref": "refs/heads/main",
+    "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+    "proposed_targets": [
+      {
+        "path": "web/index.html",
+        "operation": "UPDATE",
+        "disposition": "REQUIRED",
+        "rationale": "The home page HTML served at `/` is the single surface that renders the primary action button; the literal label “开始使用” appears only here, so the requested label change to “立即体验” can only be realized by editing this file. This is the sole rendered surface of the explicitly requested change.",
+        "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <button id=\"start\">开始使用</button>",
+        "confidence": "HIGH"
+      }
+    ],
+    "allowed_areas": [],
+    "forbidden_areas": [
+      "migrations/**",
+      "server.py"
+    ],
+    "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+    "confidence": "MEDIUM",
+    "verification_obligations": [
+      {
+        "kind": "PATH_SCOPE",
+        "target": null,
+        "identity": "PATH_SCOPE"
+      },
+      {
+        "kind": "GIT_DIFF_CHECK",
+        "target": null,
+        "identity": "GIT_DIFF_CHECK"
+      }
+    ],
+    "provenance": {
+      "provider_identity": "provider:repository-aware-change-proposal-lite",
+      "provider_version": "v1",
+      "inspection_method": "git-object-read-only:path-enumeration+text-search"
+    },
+    "unresolved_scope_questions": [],
+    "proposal_fingerprint": "8a40d6dd6fc814aaf98bd7cb21bb7c72e61c4481b46a80c87e4a0f26a2d9fa59"
+  },
+  "change_contract": null,
+  "production_plan": {
+    "proposal_id": "158cd725-3768-59c0-9964-0a3189b7c99c",
+    "target_kind": "CODE_WORK",
+    "objective": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+    "desired_outcome": "首页按钮文案由“开始使用”变为“立即体验”，并给出可供人类确认的预览结果，未确认前不交付。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+    "ordered_steps": [
+      {
+        "position": 1,
+        "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+      },
+      {
+        "position": 2,
+        "instruction": "Prepare the repository-inspected code targets: web/index.html."
+      },
+      {
+        "position": 3,
+        "instruction": "Run the admitted targeted verification and report the resulting evidence."
+      }
+    ],
+    "graph": null,
+    "artifact_targets": [],
+    "change_proposal": {
+      "proposal_id": "3652dbe7-d268-5d17-9e44-6bbc04ff79ed",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_ref": "refs/heads/main",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "proposed_targets": [
+        {
+          "path": "web/index.html",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The home page HTML served at `/` is the single surface that renders the primary action button; the literal label “开始使用” appears only here, so the requested label change to “立即体验” can only be realized by editing this file. This is the sole rendered surface of the explicitly requested change.",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <button id=\"start\">开始使用</button>",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [
+        "migrations/**",
+        "server.py"
+      ],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "8a40d6dd6fc814aaf98bd7cb21bb7c72e61c4481b46a80c87e4a0f26a2d9fa59"
+    },
+    "change_contract": null,
+    "inherited_constraints": [
+      "在人类确认之前不得交付",
+      "需要先提供预览"
+    ],
+    "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+    "assumptions": [
+      "The admitted Work can be executed through one governed PWU and Attempt lineage."
+    ],
+    "unresolved_questions": [],
+    "fit_classification": "ONE_PWU_FIT",
+    "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "repository_identity": "http://qualified-git:8080/business-app.git",
+    "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+    "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+  },
+  "production_plan_runtime": null,
+  "tags": [],
+  "engineering_scope": {
+    "engineering_scope_id": "9fc68bc8-dddb-4228-9fee-fe0b58d71fff",
+    "summary": "Work assets; production target http://qualified-git:8080/business-app.git",
+    "condition": "ADMITTED",
+    "resources": [
+      {
+        "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+        "condition": "ACTIVE"
+      }
+    ]
+  },
+  "status": "COMPLETED",
+  "current_production_step": "COMPLETE",
+  "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+  "what_happens_next": "Work is complete",
+  "human_attention_required": false,
+  "result_summary": "Trusted Runtime Commit recorded",
+  "current_work_reality_revision_id": "de93c872-f872-5d9b-b061-c5e66da7ce0a",
+  "steering_enabled": true,
+  "current_steering_step_id": "db8357be-7686-437f-9bea-653465bef159",
+  "current_steering_step_type": "COMPLETE",
+  "current_production_cycle_number": null,
+  "current_production_run_id": null,
+  "current_production_cycle_trusted": false,
+  "latest_trusted_runtime_commit_id": "6365afa2-41a9-52a3-9c48-9e68ee60bef7",
+  "work_complete": true,
+  "automatic_progression_state": "STOPPED",
+  "last_stop_reason": "COMPLETE",
+  "execution_progress": null,
+  "guided_design": null,
+  "next_owner": null,
+  "control_state_valid": true,
+  "control_state_violations": []
+}

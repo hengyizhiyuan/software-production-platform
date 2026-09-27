@@ -1,0 +1,31 @@
+{
+  "case": "GC-EX-14",
+  "trial": 2,
+  "checks": {
+    "automatic_preview_ready": true,
+    "served_verification": true,
+    "no_unauthorized_delivery": true,
+    "new_label": true,
+    "old_label": true,
+    "one_source_file": true,
+    "minimal_source_diff": true,
+    "actual_worker_interruption": true,
+    "same_attempt_new_lease_epoch": true,
+    "automatic_same_attempt_resume": true,
+    "no_duplicate_source_effect": true,
+    "interrupted_inference_preserved": true,
+    "native_refinement_recovered": true
+  },
+  "status": "PASS",
+  "candidate_revision": "3b0e1da5b4a47e3a668cd79de5fbb9a9a69c4463",
+  "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f",
+  "browser_evidence_record": "browser-oracle.json",
+  "persistence_evidence_record": "persistence-oracle.json",
+  "historical_runtime_evidence": false,
+  "changed_paths": [
+    "web/index.html"
+  ],
+  "preview_endpoint": "http://127.0.0.1:53022/",
+  "human_acceptance": "PENDING",
+  "manual_rescue_actions": []
+}

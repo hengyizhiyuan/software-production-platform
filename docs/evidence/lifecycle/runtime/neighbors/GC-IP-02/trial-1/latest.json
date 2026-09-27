@@ -1,0 +1,1357 @@
+{
+  "interaction": {
+    "interaction_id": "b24eae6f-270d-4f92-be1f-d03379b1f767",
+    "condition": "OPEN",
+    "current_work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+    "created_at": "2026-09-27T04:33:34.094163Z",
+    "updated_at": "2026-09-27T04:35:20.841392Z",
+    "records": [
+      {
+        "record_id": "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+        "work_focus_id": null,
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:33:34.554028Z"
+      }
+    ],
+    "conversation_messages": [
+      {
+        "message_id": "7344ead2-4dd0-41af-b835-0d8bb04cd1bd",
+        "turn_id": "f222a6a2-fd81-4888-a297-3bb32751f4da",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:33:34.554028Z",
+        "updated_at": "2026-09-27T04:35:23.598523Z"
+      },
+      {
+        "message_id": "28c6820d-35e2-4a83-a396-70224be6eeb7",
+        "turn_id": "f222a6a2-fd81-4888-a297-3bb32751f4da",
+        "sequence": 2,
+        "actor": "WATT",
+        "content": "收到，仓库 http://qualified-git:8080/business-app.git 和“用户信息收集页面”这一目标都已记录为 business-app 下的既有工作。接下来我将启动该仓库的获取操作，获取完成后自动继续推进，无需你再确认。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "8c6f4546-9372-4370-814f-308ed9c71d1a",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:35:23.598523Z",
+        "updated_at": "2026-09-27T04:35:23.598523Z"
+      }
+    ],
+    "turns": [
+      {
+        "turn_id": "f222a6a2-fd81-4888-a297-3bb32751f4da",
+        "interaction_id": "b24eae6f-270d-4f92-be1f-d03379b1f767",
+        "request_record_id": "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610",
+        "assessment_id": "8c6f4546-9372-4370-814f-308ed9c71d1a",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T04:33:34.554028Z",
+        "started_at": "2026-09-27T04:35:01.353305Z",
+        "completed_at": "2026-09-27T04:35:23.598523Z",
+        "updated_at": "2026-09-27T04:35:23.598523Z"
+      }
+    ],
+    "human_said": [
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。"
+    ],
+    "latest_assessment": {
+      "assessment_id": "8c6f4546-9372-4370-814f-308ed9c71d1a",
+      "basis_fingerprint": "28b5036adfae2815089203d7e275702e9d80066c3d2a1f638c3ae95e80427196",
+      "basis_last_sequence": 1,
+      "interpreted_motive": "在现有 business-app 项目中提供一个用于收集用户信息的页面",
+      "desired_outcome": "用户可在该页面填写并提交其信息，信息被系统收集\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+      "design_intent_frame": {
+        "design_subject": "business-app 项目内的用户信息收集页面",
+        "object_type": "FEATURE",
+        "business_context": null,
+        "desired_outcome": "用户可以填写并提交个人信息，提交内容被系统收集留存",
+        "scope_level": "implementation",
+        "collaboration_mode": "design",
+        "candidate_assumptions": [
+          "按仓库既有技术栈与既有路由方式实现该页面",
+          "复用仓库已有的数据存储与接口方式，而不是新建一套存储",
+          "字段先假定为姓名、联系方式等最小基础信息集",
+          "页面先提供一个简单的访问入口，暂不接入复杂权限"
+        ],
+        "ambiguities": [
+          "需要收集哪些具体字段，哪些必填",
+          "提交后的数据存在哪里、谁能查看",
+          "页面入口位置与基本样式风格"
+        ],
+        "confidence": 0.6
+      },
+      "candidate_context": [
+        "当前项目仓库：http://qualified-git:8080/business-app.git"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "以 http://qualified-git:8080/business-app.git 作为当前项目仓库",
+        "创建一个用户信息收集页面",
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。"
+      ],
+      "unresolved_material_questions": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne-1",
+          "kind": "REFERENCE",
+          "values": [
+            "http://qualified-git:8080/business-app.git"
+          ],
+          "unit": null,
+          "source_record_id": "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610",
+          "source_text": "http://qualified-git:8080/business-app.git",
+          "explicit_roles": [
+            "current project repository"
+          ]
+        },
+        {
+          "extraction_id": "ne-2",
+          "kind": "SCOPE",
+          "values": [
+            "用户信息收集页面"
+          ],
+          "unit": null,
+          "source_record_id": "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610",
+          "source_text": "我想要一个用户信息收集页面",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "79a01b83-8a32-53ff-8adc-82100d5a7281",
+          "subject": "project.repository",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/business-app.git",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "designation": "current"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610"
+            ],
+            "source_text": "http://qualified-git:8080/business-app.git",
+            "source_extraction_ids": [
+              "ne-1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "e90b8ddb-75b3-5ffc-8b3e-68f62cd738a7",
+          "subject": "page.user_info_collection",
+          "relation": "BEHAVIOR",
+          "value": "collect user information",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610"
+            ],
+            "source_text": "我想要一个用户信息收集页面",
+            "source_extraction_ids": [
+              "ne-2"
+            ],
+            "role_origin": "INFERRED"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONTEXT",
+          "statement": "当前项目仓库为 http://qualified-git:8080/business-app.git",
+          "source_record_ids": [
+            "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610"
+          ],
+          "confidence": 0.95,
+          "rationale": "Human 明确给出仓库地址并标记为当前项目仓库。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "在该项目中创建一个用户信息收集页面",
+          "source_record_ids": [
+            "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610"
+          ],
+          "confidence": 0.95,
+          "rationale": "Human 直接表达了想要的产出物。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "candidate_change": null,
+      "basis_work_revision_id": null,
+      "basis_steering_plan_revision_id": null,
+      "basis_steering_step_id": null,
+      "basis_active_runtime_binding_id": null,
+      "supporting_references": [],
+      "natural_response": "先按最小可用范围推进：在 business-app 中按现有路由与数据存储方式落地这个信息收集页，字段先假定为姓名、联系方式等基础项，技术栈与存储细节在执行前由仓库现状确认后定稿。",
+      "readiness": {
+        "status": "READY",
+        "profile": "LONG_LIVED_STEERING",
+        "profile_version": "v0",
+        "satisfied_requirements": [
+          "MOTIVE",
+          "DESIRED_OUTCOME"
+        ],
+        "missing_information": [],
+        "unresolved_material_questions": [],
+        "reasons": [
+          "Motive and desired outcome are clear enough to form governed Work."
+        ],
+        "basis_fingerprint": "28b5036adfae2815089203d7e275702e9d80066c3d2a1f638c3ae95e80427196"
+      },
+      "progressive_semantics": {
+        "turn_intent": "ACTION_REQUEST",
+        "basis_fingerprint": "28b5036adfae2815089203d7e275702e9d80066c3d2a1f638c3ae95e80427196",
+        "source_record_ids": [
+          "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610"
+        ],
+        "reception_meanings": [
+          "DEEP_WIC_WORKING_UNDERSTANDING"
+        ],
+        "working_motive": "在现有 business-app 项目中提供一个用于收集用户信息的页面",
+        "working_desired_outcome": "用户可在该页面填写并提交其信息，信息被系统收集\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+        "working_facts": [
+          "当前项目仓库：http://qualified-git:8080/business-app.git"
+        ],
+        "working_constraints": [],
+        "working_requests": [
+          "以 http://qualified-git:8080/business-app.git 作为当前项目仓库",
+          "创建一个用户信息收集页面",
+          "这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。"
+        ],
+        "explicit_assumptions": [],
+        "unresolved_human_decisions": [],
+        "deltas": [
+          {
+            "id": "89a19d1b-317c-50a5-8960-8b79b230ae78",
+            "category": "MOTIVE",
+            "operation": "ADDED",
+            "value": "在现有 business-app 项目中提供一个用于收集用户信息的页面",
+            "prior_value": null,
+            "source_record_ids": [
+              "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610"
+            ],
+            "basis_fingerprint": "28b5036adfae2815089203d7e275702e9d80066c3d2a1f638c3ae95e80427196",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+            "authority": "ADVISORY"
+          }
+        ],
+        "pattern_signals": [
+          "PRODUCTION_REQUEST",
+          "REPOSITORY_SOURCE"
+        ],
+        "inference_disposition": "NO_INFERENCE",
+        "questions": [],
+        "selected_question": null,
+        "governance_candidate": "WORK_FORMATION_PROPOSAL",
+        "readiness": [
+          {
+            "target": "WORK_FORMATION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "28b5036adfae2815089203d7e275702e9d80066c3d2a1f638c3ae95e80427196",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "WORK_REVISION",
+            "status": "NOT_APPLICABLE",
+            "satisfied_evidence": [],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "28b5036adfae2815089203d7e275702e9d80066c3d2a1f638c3ae95e80427196",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "DESIGN_PROGRESSION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "CURRENT_FOCUS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "28b5036adfae2815089203d7e275702e9d80066c3d2a1f638c3ae95e80427196",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "artifact_recommendation": null,
+        "factual_contradictions": [],
+        "semantic_policy_revision": "wic-semantic-policy-v1",
+        "question_policy_revision": "wic-question-value-v1"
+      },
+      "provider_identity": "deepseek-responses:semantic:request:da4ebeb8-b9d9-425f-b59e-2a176460d021",
+      "model_identity": "deepseek-flash",
+      "schema_version": "wic-assessment-v6",
+      "created_at": "2026-09-27T04:35:19.720397Z"
+    },
+    "latest_assessment_current": false,
+    "interpreted_motive": "在现有 business-app 项目中提供一个用于收集用户信息的页面",
+    "desired_outcome": "用户可在该页面填写并提交其信息，信息被系统收集\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+    "design_intent_frame": {
+      "design_subject": "business-app 项目内的用户信息收集页面",
+      "object_type": "FEATURE",
+      "business_context": null,
+      "desired_outcome": "用户可以填写并提交个人信息，提交内容被系统收集留存",
+      "scope_level": "implementation",
+      "collaboration_mode": "design",
+      "candidate_assumptions": [
+        "按仓库既有技术栈与既有路由方式实现该页面",
+        "复用仓库已有的数据存储与接口方式，而不是新建一套存储",
+        "字段先假定为姓名、联系方式等最小基础信息集",
+        "页面先提供一个简单的访问入口，暂不接入复杂权限"
+      ],
+      "ambiguities": [
+        "需要收集哪些具体字段，哪些必填",
+        "提交后的数据存在哪里、谁能查看",
+        "页面入口位置与基本样式风格"
+      ],
+      "confidence": 0.6
+    },
+    "candidate_context": [
+      "当前项目仓库：http://qualified-git:8080/business-app.git"
+    ],
+    "candidate_constraints": [],
+    "current_requests": [
+      "以 http://qualified-git:8080/business-app.git 作为当前项目仓库",
+      "创建一个用户信息收集页面",
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。"
+    ],
+    "unresolved_material_questions": [],
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "28b5036adfae2815089203d7e275702e9d80066c3d2a1f638c3ae95e80427196"
+    },
+    "candidate_engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "candidate_repository_identity": "http://qualified-git:8080/business-app.git",
+    "candidate_repository_ref": "refs/heads/main",
+    "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git:8080/business-app.git at refs/heads/main",
+    "governed_work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+    "governed_revision": {
+      "revision_id": "d2311268-0e88-5295-917c-1b15678f011f",
+      "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+      "revision_number": 2,
+      "previous_revision_id": "32c2f474-9b60-569c-9ada-dafdff6b500c",
+      "basis_fingerprint": "833a73e6be9ba31eea9c1eaac1b78ed8789d65e3367e2f7345c542f511c402c6",
+      "revision_fingerprint": "459683d0d14201b2698893325957b8e05a1685c1d2dba2f5344d7d4e91cb4528",
+      "source_interaction_id": "b24eae6f-270d-4f92-be1f-d03379b1f767",
+      "source_kind": "ASSET_SCOPE_ADMISSION",
+      "source_assessment_id": null,
+      "source_record_ids": [
+        "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610"
+      ],
+      "motive": "在现有 business-app 项目中提供一个用于收集用户信息的页面",
+      "desired_outcome": "用户可在该页面填写并提交其信息，信息被系统收集\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+      "context_facts": [
+        "当前项目仓库：http://qualified-git:8080/business-app.git"
+      ],
+      "constraints": [],
+      "requests": [
+        "以 http://qualified-git:8080/business-app.git 作为当前项目仓库",
+        "创建一个用户信息收集页面",
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。"
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "79a01b83-8a32-53ff-8adc-82100d5a7281",
+          "subject": "project.repository",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/business-app.git",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {
+            "designation": "current"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610"
+            ],
+            "source_text": "http://qualified-git:8080/business-app.git",
+            "source_extraction_ids": [
+              "ne-1"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "32c2f474-9b60-569c-9ada-dafdff6b500c"
+        },
+        {
+          "id": "e90b8ddb-75b3-5ffc-8b3e-68f62cd738a7",
+          "subject": "page.user_info_collection",
+          "relation": "BEHAVIOR",
+          "value": "collect user information",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610"
+            ],
+            "source_text": "我想要一个用户信息收集页面",
+            "source_extraction_ids": [
+              "ne-2"
+            ],
+            "role_origin": "INFERRED"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "32c2f474-9b60-569c-9ada-dafdff6b500c"
+        }
+      ],
+      "engineering_scope_id": "cec59e28-6246-4b17-9a5e-cbae7ce1b3fe",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "scope_basis_fingerprint": "90d8dc13516772cf8b90637460306995a3ff6e0979f48c699846eae2931dc156",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "repository_ref": "refs/heads/main",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "governance_record_id": "9758ad93-51a7-43f4-932f-d8d1f60ee7e7",
+      "supporting_references": [
+        "INTERACTION_RECORD:e1ecf25a-16ce-47c3-94c7-a9e3ad8fa610",
+        "REPOSITORY_OBSERVATION:e69292e9374b891d051721aa1cf6c45b0c41bd4fc271bf245b01b9c7fc0a1015"
+      ],
+      "change_set": [
+        "asset:PRODUCTION_TARGET_ADMITTED"
+      ],
+      "rationale": "Bind the exact repository Reality acquired from the Human-supplied source before Steering begins.",
+      "admitted_by": "human:owner",
+      "schema_version": "wic-work-reality-v3",
+      "created_at": "2026-09-27T04:35:24.090274Z"
+    },
+    "current_work_focus": "在现有 business-app 项目中提供一个用于收集用户信息的页面 → 用户可在该页面填写并提交其信息，信息被系统收集\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "work_revision_admission_status": "NOT_APPLICABLE",
+    "active_cycle_work_revision_id": "d2311268-0e88-5295-917c-1b15678f011f",
+    "active_cycle_impact_disposition": null,
+    "work_satisfaction_state": "IN_PROGRESS",
+    "interaction_relationship_state": "OPEN",
+    "work_focus_history": [
+      "fb03a36f-8598-539d-930d-a2b6bcf1237c"
+    ],
+    "latest_work_transition": null,
+    "new_work_formation_pending": false,
+    "production_request_detected": true,
+    "repository_source": "http://qualified-git:8080/business-app.git",
+    "production_admission_state": "WORK_CREATED",
+    "repository_acquisition_state": "READY",
+    "repository_observation": {
+      "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+      "paths": [
+        ".gitignore",
+        "Dockerfile",
+        "README.md",
+        "migrations/001_initial.sql",
+        "package.json",
+        "server.py",
+        "tests/application.cjs",
+        "web/app.js",
+        "web/index.html",
+        "web/styles.css"
+      ],
+      "title": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+      "source": "http://qualified-git:8080/business-app.git",
+      "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+      "revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "condition": "READY",
+      "description": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+      "fingerprint": "e69292e9374b891d051721aa1cf6c45b0c41bd4fc271bf245b01b9c7fc0a1015",
+      "observed_at": "2026-09-27T04:35:00.768236+00:00",
+      "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "context_path": "README.md",
+      "human_message": "Repository is ready.",
+      "target_branch": null,
+      "attempt_number": 1,
+      "interaction_id": "b24eae6f-270d-4f92-be1f-d03379b1f767",
+      "operation_kind": "ACQUIRE",
+      "repository_ref": "refs/heads/main",
+      "base_resource_id": null,
+      "failure_category": null,
+      "intake_request_id": "2a6b81cb-5204-55bb-9cbe-93f92f2078ed",
+      "operation_evidence": {
+        "verified": true,
+        "connector_id": "builtin:git",
+        "capability_id": "git.repository.acquire",
+        "operation_ref": "repository-intake:29cff86f-2035-5b1c-8ac6-3d517256d34e",
+        "resulting_branch": "refs/heads/main",
+        "resulting_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "workspace_reference": "/var/lib/spg/repository-assets/29cff86f-2035-5b1c-8ac6-3d517256d34e"
+      },
+      "previous_attempt_id": null,
+      "repository_identity": "http://qualified-git:8080/business-app.git"
+    },
+    "production_next_step": "Continue Steering against the acquired repository Reality.",
+    "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+    "selected_design_schema_version": "0.1",
+    "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+    "design_stage": "Current Reality",
+    "design_next_focus": "Establish the trusted current product and runtime reality.",
+    "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+    "design_facilitation_strategy": "CLARIFY",
+    "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+  },
+  "observed_at": "2026-09-27T05:28:19.300338+00:00",
+  "work": {
+    "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+    "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+    "goal_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "raw_user_requirement": "在现有 business-app 项目中提供一个用于收集用户信息的页面",
+    "title": "在现有 business-app 项目中提供一个用于收集用户信息的页面",
+    "desired_outcome": "用户可在该页面填写并提交其信息，信息被系统收集\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+    "constraints": [],
+    "target_kind": "CODE_WORK",
+    "artifact_target": null,
+    "change_proposal": {
+      "proposal_id": "c7cdbf26-4070-50f4-8df4-c99fc5f05c7b",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_ref": "refs/heads/main",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "proposed_targets": [
+        {
+          "path": "web/index.html",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The human-requested user-information collection page needs a form surface in the HTML document served by the existing routes. web/index.html is the shared document served for `/`, `/users`, `/customers`, `/orders`, `/help`, and `/about`, so the collection form and submit control must be added here rather than via a new route or new page file.",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <main><h1>业务工作台</h1><button id=\"start\">开始使用</button>\n<button id=\"account-login\">账户登录</button>\n<button id=\"open-dialog\">打开对话框</button>",
+          "confidence": "HIGH"
+        },
+        {
+          "path": "web/app.js",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "The collection page must submit entered user information to the existing collection mechanism and reflect success/error to the user. web/app.js is the existing browser script loaded by the page and already talks to `/api/users` and refreshes the displayed user list, so form submit handling, JSON POST to the existing endpoint, inline result message, and list refresh belong in this existing script. No new server endpoint is needed because POST /api/users already accepts name/email and inserts with the schema-default status.",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/app.js witness: async function loadLists() {\n  const users = await fetch('/api/users').then(response => response.json());",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [
+        "server.py",
+        "migrations/**",
+        "Dockerfile",
+        "package.json"
+      ],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "a692605677fea15669c46f28a2ac8436a63fc7756e3af1fc62fed137f7fb6bb7"
+    },
+    "change_contract": null,
+    "production_plan": {
+      "proposal_id": "7e620c8b-dfa4-5aba-99d0-bb73c356b830",
+      "target_kind": "CODE_WORK",
+      "objective": "用户可在该页面填写并提交其信息，信息被系统收集\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+      "desired_outcome": "用户可在该页面填写并提交其信息，信息被系统收集\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Prepare the repository-inspected code targets: web/index.html, web/app.js."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": null,
+      "artifact_targets": [],
+      "change_proposal": {
+        "proposal_id": "c7cdbf26-4070-50f4-8df4-c99fc5f05c7b",
+        "target_kind": "CODE_WORK",
+        "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+        "repository_identity": "http://qualified-git:8080/business-app.git",
+        "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+        "source_ref": "refs/heads/main",
+        "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "proposed_targets": [
+          {
+            "path": "web/index.html",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "The human-requested user-information collection page needs a form surface in the HTML document served by the existing routes. web/index.html is the shared document served for `/`, `/users`, `/customers`, `/orders`, `/help`, and `/about`, so the collection form and submit control must be added here rather than via a new route or new page file.",
+            "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <main><h1>业务工作台</h1><button id=\"start\">开始使用</button>\n<button id=\"account-login\">账户登录</button>\n<button id=\"open-dialog\">打开对话框</button>",
+            "confidence": "HIGH"
+          },
+          {
+            "path": "web/app.js",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "The collection page must submit entered user information to the existing collection mechanism and reflect success/error to the user. web/app.js is the existing browser script loaded by the page and already talks to `/api/users` and refreshes the displayed user list, so form submit handling, JSON POST to the existing endpoint, inline result message, and list refresh belong in this existing script. No new server endpoint is needed because POST /api/users already accepts name/email and inserts with the schema-default status.",
+            "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/app.js witness: async function loadLists() {\n  const users = await fetch('/api/users').then(response => response.json());",
+            "confidence": "HIGH"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [
+          "server.py",
+          "migrations/**",
+          "Dockerfile",
+          "package.json"
+        ],
+        "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+        "confidence": "MEDIUM",
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null,
+            "identity": "PATH_SCOPE"
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null,
+            "identity": "GIT_DIFF_CHECK"
+          }
+        ],
+        "provenance": {
+          "provider_identity": "provider:repository-aware-change-proposal-lite",
+          "provider_version": "v1",
+          "inspection_method": "git-object-read-only:path-enumeration+text-search"
+        },
+        "unresolved_scope_questions": [],
+        "proposal_fingerprint": "a692605677fea15669c46f28a2ac8436a63fc7756e3af1fc62fed137f7fb6bb7"
+      },
+      "change_contract": null,
+      "inherited_constraints": [],
+      "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+      "assumptions": [
+        "The admitted Work can be executed through one governed PWU and Attempt lineage."
+      ],
+      "unresolved_questions": [],
+      "fit_classification": "ONE_PWU_FIT",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+    },
+    "production_plan_runtime": null,
+    "tags": [],
+    "engineering_scope": {
+      "engineering_scope_id": "cec59e28-6246-4b17-9a5e-cbae7ce1b3fe",
+      "summary": "Work assets; production target http://qualified-git:8080/business-app.git",
+      "condition": "ADMITTED",
+      "resources": [
+        {
+          "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+          "condition": "ACTIVE"
+        }
+      ]
+    },
+    "status": "NEEDS_ATTENTION",
+    "current_production_step": "PRODUCE",
+    "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "what_happens_next": "Human must authorize the exact Candidate",
+    "human_attention_required": true,
+    "result_summary": "2 independently observed artifact change(s)",
+    "current_work_reality_revision_id": "d2311268-0e88-5295-917c-1b15678f011f",
+    "steering_enabled": true,
+    "current_steering_step_id": "632f9d46-aff6-47d1-b9fc-9a0359bcb47b",
+    "current_steering_step_type": "PRODUCE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "70c65284-dfff-4ee4-8c29-499094d67536",
+    "current_production_cycle_trusted": false,
+    "latest_trusted_runtime_commit_id": null,
+    "work_complete": false,
+    "automatic_progression_state": "STOPPED",
+    "last_stop_reason": "HUMAN_ATTENTION",
+    "execution_progress": null,
+    "guided_design": null,
+    "next_owner": "HUMAN",
+    "control_state_valid": true,
+    "control_state_violations": []
+  },
+  "steering": {
+    "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+    "work_objective": "On the existing small operations site, add a 用户信息收集 page surface where a user can fill in and submit their information and the system collects it. Concretely: add a collection form (required 姓名/name and 邮箱/email inputs, with client-side validation and a submit control) to the existing shared `web/index.html` document, wire its submission in `web/app.js` to the existing `POST /api/users` JSON endpoint so the record is persisted in the existing SQLite `users` table with schema-default `status`, show an inline confirmation or error message on the page, refresh the existing lists after a successful submission, and add form styling in `web/styles.css`. Preserve the admitted runtime form and entrypoint exactly: the application continues to run as `python server.py` on port 8080 (SITE_PORT/SITE_DATABASE_PATH overrides intact), serving the existing routes `/`, `/users`, `/customers`, `/orders`, `/help`, `/about`, the existing static assets, and the existing `/api/users`, `/api/customers`, `/api/orders` behaviors unchanged. No new route, endpoint, table, migration, container change, or authentication/authorization mechanism is introduced, and no external accounts or production data are connected.",
+    "steering_enabled": true,
+    "steering_plan_id": "10122a69-6887-43ff-9952-237ad00d94d3",
+    "active_revision_id": "a6859a9f-df1b-4d06-9fb1-62c4db3f7093",
+    "active_revision_number": 1,
+    "completed_steps": [
+      {
+        "step_id": "fa6eee9c-f969-4df0-89e8-6d114eab0b7a",
+        "type": "DESIGN",
+        "objective": "用户可在该页面填写并提交其信息，信息被系统收集\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n我想要一个用户信息收集页面。",
+        "completion_condition": "A bounded design direction is supported by current Reality",
+        "position": 1,
+        "state": "CLOSED",
+        "design_issue_key": null
+      }
+    ],
+    "current_step": {
+      "step_id": "632f9d46-aff6-47d1-b9fc-9a0359bcb47b",
+      "type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "completion_condition": "The exact bounded production cycle reaches trusted Runtime Commit",
+      "position": 2,
+      "state": "CURRENT",
+      "design_issue_key": null
+    },
+    "known_next_steps": [
+      {
+        "step_id": "4bc92270-94a8-4c95-bace-3660f0e5d8d6",
+        "type": "VERIFY_ACCEPT",
+        "objective": "Assess the trusted result against the long-lived outcome",
+        "completion_condition": "Governed evidence supports product acceptance",
+        "position": 3,
+        "state": "KNOWN",
+        "design_issue_key": null
+      },
+      {
+        "step_id": "c40bca8c-d6f6-4f11-b889-fde263bb245e",
+        "type": "COMPLETE",
+        "objective": "Complete the admitted long-lived Work",
+        "completion_condition": "The admitted Work outcome is satisfied",
+        "position": 4,
+        "state": "KNOWN",
+        "design_issue_key": null
+      }
+    ],
+    "plan_changes": [],
+    "latest_decision": {
+      "decision_id": "5d9f667e-2365-45dc-965a-b6fa298523da",
+      "next_step_type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "reason": "The current governed Step is ready to yield to the next admitted ordered Step",
+      "outcome": "AUTO_CONTINUE",
+      "human_required": false,
+      "attention_reason": null,
+      "reality_refs": [
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "9758ad93-51a7-43f4-932f-d8d1f60ee7e7"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "b7651585-6fb5-5b26-870e-bf6084db9093"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "e3c118b9-b14c-4ca8-8149-11717f21306a"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "f5c27b10-f35d-478c-a662-ab57564dfb33"
+        },
+        {
+          "kind": "WORK",
+          "identity": "fb03a36f-8598-539d-930d-a2b6bcf1237c"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "d2311268-0e88-5295-917c-1b15678f011f"
+        }
+      ]
+    },
+    "selection_rationale": "The current governed Step is ready to yield to the next admitted ordered Step",
+    "steering_outcome": "AUTO_CONTINUE",
+    "automatic_progression_state": "STOPPED",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "70c65284-dfff-4ee4-8c29-499094d67536",
+    "current_production_cycle_trusted": false,
+    "human_attention_required": true,
+    "last_stop_reason": "HUMAN_ATTENTION"
+  },
+  "refinement": {
+    "count": 1,
+    "events": [
+      {
+        "id": "e0dccee1-1a9e-4ea5-974d-1206c267ac55",
+        "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+        "operation_id": "fa6eee9c-f969-4df0-89e8-6d114eab0b7a",
+        "created_at": "2026-09-27T04:36:39.986778Z",
+        "failure_family": "CANDIDATE_INCONSISTENT",
+        "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "semantic_version": 2,
+        "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "signal_kind": "CANDIDATE_INCONSISTENT",
+        "affected_component": "semantic/scope",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "CANDIDATE_INCONSISTENT",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "source-baseline:f5c27b10-f35d-478c-a662-ab57564dfb33"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "OBSERVED_SUCCESS",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 2,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "SCOPE_INFLATION",
+          "required_paths": [
+            "web/index.html",
+            "web/app.js"
+          ],
+          "candidate_paths": [
+            "web/index.html",
+            "web/app.js",
+            "web/styles.css",
+            "tests/collection.cjs"
+          ],
+          "authority_expanded": false,
+          "rejected_behaviors": [
+            "Adding a new HTML page, route, or navigation destination for the collection page instead of extending the existing shared web/index.html served by the existing routes.",
+            "Adding a new API endpoint, database table, migration, server.py behavior, or Dockerfile change; the existing POST /api/users and users table already persist name/email with the schema-default status.",
+            "Creating tests/collection.cjs or changing tests/application.cjs; the human request does not include a test oracle change, and related tests remain read-only references.",
+            "Making web/styles.css form styling mandatory scope; the human request does not require new styling, and existing input/button styling is sufficient for the requested working collection page.",
+            "Introducing authentication, authorization, external accounts, production data, or fictional customer/user business facts."
+          ]
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 0,
+        "model_token_usage": {
+          "unknown": false,
+          "input_tokens": 11015,
+          "total_tokens": 17336,
+          "cached_tokens": 512,
+          "output_tokens": 6321,
+          "reasoning_tokens": 4164
+        },
+        "compute_overhead": {},
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T04:36:39.986778Z"
+      }
+    ],
+    "metrics": {
+      "native_attempts": 1,
+      "native_self_refine_events": 0,
+      "self_refine_events": 1,
+      "self_refine_rate": 0.0,
+      "first_pass_success_rate": 1.0,
+      "recovered": 0,
+      "local_obligation_recovered": 1,
+      "recovery_scope": "LOCAL_OBLIGATION; Work convergence is independently observed",
+      "escalated": 0,
+      "failed": 0,
+      "active": 0,
+      "classification_counts": {
+        "ROUTINE_STOCHASTIC_REFINEMENT": 0,
+        "DEGRADING_OR_RECURRING_REFINEMENT": 1,
+        "SYSTEMIC_OR_NON_CONVERGING_INCIDENT": 0,
+        "LEGACY_EXECUTION_INCIDENT": 0
+      },
+      "convergence_success_rate": 1.0,
+      "average_refinement_attempts": 2.0,
+      "p95_refinement_attempts": 2,
+      "average_refinement_seconds": 0.0,
+      "p95_refinement_seconds": 0,
+      "observed_refinement_tokens": 17336,
+      "observed_refinement_tool_effects": 0,
+      "unsafe_repair_blocks": 0,
+      "recurring_signatures": {},
+      "improvement_candidates": [
+        {
+          "reference": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "component": "semantic/scope",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 17336,
+          "observed_seconds": 0,
+          "systemic": false,
+          "status": "PROPOSED"
+        }
+      ],
+      "human_escalation_observation_count": 1,
+      "human_escalation_rate": 0.0,
+      "systemic_incident_rate": 0.0
+    },
+    "work_convergence": [
+      {
+        "id": "cc9a906a-7fed-498e-bb84-e0db909359ff",
+        "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+        "intent_identity": "aee51041b944fc17ec28e3af7df0df6e17c82931a57bfd3242a919510eb6e64a",
+        "predecessor_id": null,
+        "sequence": 1,
+        "boundary": "SEMANTIC_RESULT_ADMISSION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "90d72489ab75dbc78f1e175b8a6db7697efd8ef5bf92aaaec0e0cfa5554c5f0d",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:36:42.893790Z"
+      },
+      {
+        "id": "54d290bd-8fc9-4e5c-a5a7-3105d80d851d",
+        "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+        "intent_identity": "aee51041b944fc17ec28e3af7df0df6e17c82931a57bfd3242a919510eb6e64a",
+        "predecessor_id": "cc9a906a-7fed-498e-bb84-e0db909359ff",
+        "sequence": 2,
+        "boundary": "STEP_TRANSITION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "90d72489ab75dbc78f1e175b8a6db7697efd8ef5bf92aaaec0e0cfa5554c5f0d",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 2,
+        "no_progress_count": 0,
+        "elapsed_seconds": 14,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:36:57.387266Z"
+      },
+      {
+        "id": "7ae40b87-5845-4f66-a22d-d3d19b594a3e",
+        "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+        "intent_identity": "aee51041b944fc17ec28e3af7df0df6e17c82931a57bfd3242a919510eb6e64a",
+        "predecessor_id": "54d290bd-8fc9-4e5c-a5a7-3105d80d851d",
+        "sequence": 3,
+        "boundary": "PRODUCTION_CYCLE_ADMISSION",
+        "failure_signature": "55aace645e56bf76dbff41e8f14eb53f17cab59fa84b37f74f8120e5170fbcf3",
+        "candidate_identity": null,
+        "reality_identity": "90d72489ab75dbc78f1e175b8a6db7697efd8ef5bf92aaaec0e0cfa5554c5f0d",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 3,
+        "no_progress_count": 0,
+        "elapsed_seconds": 30,
+        "token_usage": {
+          "status": "UNREPORTED",
+          "input_tokens": 0,
+          "total_tokens": 0,
+          "output_tokens": 0
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 0
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {},
+          "execution_seconds": 0.0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:37:13.015927Z"
+      },
+      {
+        "id": "c61d886b-a829-45f4-a99c-e584e6f52358",
+        "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+        "intent_identity": "aee51041b944fc17ec28e3af7df0df6e17c82931a57bfd3242a919510eb6e64a",
+        "predecessor_id": "7ae40b87-5845-4f66-a22d-d3d19b594a3e",
+        "sequence": 4,
+        "boundary": "PREVIEW",
+        "failure_signature": null,
+        "candidate_identity": "59b16f587a53121ce0a5eae329120b21a600ce044d629cac65728c865c69ff30",
+        "reality_identity": "36f90e85fdda734849ec1b5551f2213fe0c46a83e5dce85589288701171ca665",
+        "missing_acceptance": [],
+        "attempts": 4,
+        "no_progress_count": 0,
+        "elapsed_seconds": 337,
+        "token_usage": {
+          "status": "OBSERVED",
+          "input_tokens": 69582,
+          "total_tokens": 77393,
+          "output_tokens": 7811
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {
+            "tool_effect": 10,
+            "inference_submission": 5
+          },
+          "execution_seconds": 41.633574
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "CONVERGED_FOR_REVIEW",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:42:20.270627Z"
+      }
+    ]
+  },
+  "queue": [
+    {
+      "queue_entry_id": "b1bc7eae-d26b-49b6-8d2a-d5faf93414ea",
+      "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+      "pwu_id": "f4ef24ed-0dd8-4ead-adf0-da377f32e2ba",
+      "attempt_id": "ffe3a78a-90ff-4dec-9072-d112651f6160",
+      "fairness_group": "work:fb03a36f-8598-539d-930d-a2b6bcf1237c",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T04:37:46.495297Z",
+      "available_at": "2026-09-27T04:37:46.456135Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T05:28:28.825317Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "d2311268-0e88-5295-917c-1b15678f011f"
+    }
+  ],
+  "preview": {
+    "mode": "FRONTEND_RUNTIME",
+    "status": "READY",
+    "candidate_revision": "53fa9e80c0cd3cc1d3d34d1c885bd7f5552c1867",
+    "candidate_fingerprint": "59b16f587a53121ce0a5eae329120b21a600ce044d629cac65728c865c69ff30",
+    "session": {
+      "id": "93a8de9f-4db4-4329-a1cd-0f8fc6e1f3cd",
+      "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+      "candidate_id": "c4df9c57-acb6-553d-b3aa-fe7d0c350e11",
+      "candidate_fingerprint": "59b16f587a53121ce0a5eae329120b21a600ce044d629cac65728c865c69ff30",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "repository_revision": "53fa9e80c0cd3cc1d3d34d1c885bd7f5552c1867",
+      "repository_tree": "e506a6b27ab290b78fa7bf936f43705426239322",
+      "workspace_id": "e6cdee39-4d97-4207-8c3b-a615b8a43cba",
+      "environment_id": "cb5dc8c1-ef5a-4ad0-be2b-9e10a59634b4",
+      "mode": "FRONTEND_RUNTIME",
+      "status": "READY",
+      "definition_version": "frontend-docker-runtime-v1",
+      "endpoint": "http://127.0.0.1:61816/",
+      "image_reference": "sha256:454446a167aa9de35da0cf1e933f2b2cd9a08e67202250d6dbcb2e40d1a206b6",
+      "service_identities": [
+        "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-app",
+        "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-proxy"
+      ],
+      "resource_references": [
+        "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-internal",
+        "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-gateway",
+        "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-source"
+      ],
+      "evidence": [
+        {
+          "kind": "WORKSPACE",
+          "workspace": "/var/lib/spg/production-environments/candidate-preview-runtime/93a8de9f-4db4-4329-a1cd-0f8fc6e1f3cd/workspace",
+          "revision": "53fa9e80c0cd3cc1d3d34d1c885bd7f5552c1867",
+          "tree": "e506a6b27ab290b78fa7bf936f43705426239322",
+          "topology_preflight": {
+            "verifier_namespace": "candidate-gateway-network",
+            "verifier_image": "watt-lifecycle:qualification",
+            "public_endpoint_namespace": "docker-host"
+          },
+          "dockerfile_sha256": "abd36acd96f3e4485d6e9d4826a540e65a9608f5e9eb0e479de9581d5a8d5f44"
+        },
+        {
+          "kind": "BUILD",
+          "image": "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd:candidate",
+          "image_id": "sha256:454446a167aa9de35da0cf1e933f2b2cd9a08e67202250d6dbcb2e40d1a206b6",
+          "verified_image_files": 0,
+          "build_log": "/var/lib/spg/production-environments/candidate-preview-runtime/evidence/93a8de9f-4db4-4329-a1cd-0f8fc6e1f3cd/build.log",
+          "build_log_sha256": "97c980ca0d35996ace41f1663c58027fc933f3a07374628859e575ca15274ba7"
+        },
+        {
+          "kind": "SERVED_VERIFICATION",
+          "candidate_revision": "53fa9e80c0cd3cc1d3d34d1c885bd7f5552c1867",
+          "candidate_tree": "e506a6b27ab290b78fa7bf936f43705426239322",
+          "gateway": "http://watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-proxy",
+          "public_gateway": "http://127.0.0.1:61816",
+          "verifier_namespace": "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-gateway",
+          "mode": "FRONTEND_RUNTIME",
+          "frontend": {
+            "path": "/",
+            "status": 200,
+            "body_sha256": "09859ba79d7167921ba176f1600dbbfa1fdb5e384605e01a1fb59b989d1120cc"
+          },
+          "result": "PASS"
+        },
+        {
+          "kind": "RUNTIME",
+          "endpoint": "http://127.0.0.1:61816/",
+          "services": [
+            "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-app",
+            "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-proxy"
+          ],
+          "resources": [
+            "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-internal",
+            "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-gateway",
+            "watt-candidate-preview-93a8de9f4db44329a1cd0f8fc6e1f3cd-source"
+          ],
+          "health": {
+            "database": "NOT_REQUIRED",
+            "application": "READY",
+            "gateway": "READY",
+            "repository_revision": "53fa9e80c0cd3cc1d3d34d1c885bd7f5552c1867",
+            "repository_tree": "e506a6b27ab290b78fa7bf936f43705426239322"
+          },
+          "topology": {
+            "frontend": "app",
+            "backend": "app",
+            "database": null,
+            "supporting_services": []
+          }
+        },
+        {
+          "kind": "PRODUCTION_RECORD",
+          "reference": "production-record:30679a5b-92f9-576d-b614-307a31e6d1a0",
+          "digest": "3f0a03ed8b4377e4ed917c3f675fa91d368c6e1fc0b29b5635a73c480947db04"
+        }
+      ],
+      "failure_code": null,
+      "failure_reason": null,
+      "version": 6,
+      "created_at": "2026-09-27T04:40:38.989689Z",
+      "updated_at": "2026-09-27T04:42:16.098632Z"
+    }
+  },
+  "attention": [
+    {
+      "attention_id": "a03bf367-e649-574f-86a2-31946b2bb230",
+      "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+      "kind": "CANDIDATE_AUTHORIZATION",
+      "decision": "Authorize exact sealed Candidate integration?",
+      "reason": "Repository integration requires exact Human Authority.",
+      "available_actions": [
+        "AUTHORIZE"
+      ],
+      "recommended_action": null,
+      "governed_subject_ref": "baseline-candidate:c4df9c57-acb6-553d-b3aa-fe7d0c350e11",
+      "steering_reason": null,
+      "recommendation": null,
+      "conversation_prompt": null,
+      "alternatives": [],
+      "trade_offs": [],
+      "expected_impact": null,
+      "reality_refs": [],
+      "steering_plan_revision_id": null,
+      "steering_step_id": null,
+      "interaction_id": null,
+      "interaction_assessment_id": null,
+      "expected_work_reality_revision_id": null
+    }
+  ],
+  "economics": {
+    "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+    "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+    "pwu_count": 1,
+    "join_count": 0,
+    "pwu": [
+      {
+        "pwu_id": "f4ef24ed-0dd8-4ead-adf0-da377f32e2ba",
+        "node_id": null,
+        "run_id": "70c65284-dfff-4ee4-8c29-499094d67536",
+        "condition": "SATISFIED",
+        "attempt_count": 1,
+        "outcomes": [
+          "RESULT_READY"
+        ],
+        "providers": [
+          "deepseek",
+          "watt-native:ffe3a78a-90ff-4dec-9072-d112651f6160"
+        ],
+        "execution_seconds": 41.633574,
+        "duration_observed": true,
+        "queue_wait_seconds": 0.889104,
+        "token_usage": {
+          "input_tokens": 69582,
+          "output_tokens": 7811,
+          "total_tokens": 77393,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 5,
+          "tool_effect": 10
+        }
+      }
+    ],
+    "token_usage": {
+      "input_tokens": 69582,
+      "output_tokens": 7811,
+      "total_tokens": 77393,
+      "status": "OBSERVED"
+    },
+    "observed_provider_spend": {
+      "status": "UNREPORTED",
+      "by_currency": {},
+      "unreported_attempt_count": 1,
+      "amount": null
+    },
+    "execution_seconds": 41.633574,
+    "queue_wait_seconds": 0.889104,
+    "wall_elapsed_seconds": 59.121365,
+    "critical_path_seconds": null,
+    "parallelism_effect_seconds": 0.0,
+    "self_refine_event_count": 1,
+    "first_pass_pwu_count": 1,
+    "retried_pwu_count": 0,
+    "human_escalation_count": 0,
+    "refinement_extra_seconds": 0,
+    "resource_units": {
+      "inference_submission": 5,
+      "tool_effect": 10
+    },
+    "final_outcome": "READY"
+  },
+  "delivery": {
+    "work_id": "fb03a36f-8598-539d-930d-a2b6bcf1237c",
+    "target": null,
+    "supported_target_kinds": [
+      "DOCUMENT_PACKAGE",
+      "SOFTWARE_ARTIFACT"
+    ],
+    "deliveries": []
+  }
+}

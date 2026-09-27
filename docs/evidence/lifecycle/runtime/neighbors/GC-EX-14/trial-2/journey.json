@@ -1,0 +1,10 @@
+{
+  "case": "GC-EX-14",
+  "corpus_version": "watt-golden-tier0-v1",
+  "trial": 2,
+  "interaction_id": "c0e52dbf-063a-44a7-a246-0f8838fb20d9",
+  "human_input": "这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+  "tester_implementation": false,
+  "manual_rescue_actions": [],
+  "human_acceptance": "PENDING"
+}

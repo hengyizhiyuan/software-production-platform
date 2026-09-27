@@ -1,0 +1,1709 @@
+{
+  "interaction": {
+    "interaction_id": "44fcfb2b-527b-4c73-a23e-8c69c97fd805",
+    "condition": "OPEN",
+    "current_work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+    "created_at": "2026-09-27T04:33:33.924998Z",
+    "updated_at": "2026-09-27T04:34:56.893381Z",
+    "records": [
+      {
+        "record_id": "bf81e6b0-fae8-4049-9206-a396419e69c8",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+        "work_focus_id": null,
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:33:34.361032Z"
+      }
+    ],
+    "conversation_messages": [
+      {
+        "message_id": "10ed1a3d-e4b3-4626-9a49-c2cb16ba73c0",
+        "turn_id": "20ec1243-bdca-4780-8393-5ab74b599873",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "content": "这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "bf81e6b0-fae8-4049-9206-a396419e69c8",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:33:34.361032Z",
+        "updated_at": "2026-09-27T04:35:00.256159Z"
+      },
+      {
+        "message_id": "af672cb4-317c-41cf-9a40-321002ab498b",
+        "turn_id": "20ec1243-bdca-4780-8393-5ab74b599873",
+        "sequence": 2,
+        "actor": "WATT",
+        "content": "收到，仓库地址 http://qualified-git:8080/business-app.git 已登记，仓库获取请求已发出，Watt 会继续推进，不需要你再确认一次。获取完成后，我会按“仅添加导航‘使用帮助’链接、指向已有 /help 路由、不新增页面、不改动其他功能”的范围给出预览。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "6bbcedfa-e22f-4776-81cb-ae71d07727aa",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:35:00.256159Z",
+        "updated_at": "2026-09-27T04:35:00.256159Z"
+      }
+    ],
+    "turns": [
+      {
+        "turn_id": "20ec1243-bdca-4780-8393-5ab74b599873",
+        "interaction_id": "44fcfb2b-527b-4c73-a23e-8c69c97fd805",
+        "request_record_id": "bf81e6b0-fae8-4049-9206-a396419e69c8",
+        "assessment_id": "6bbcedfa-e22f-4776-81cb-ae71d07727aa",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T04:33:34.361032Z",
+        "started_at": "2026-09-27T04:34:38.831993Z",
+        "completed_at": "2026-09-27T04:35:00.256159Z",
+        "updated_at": "2026-09-27T04:35:00.256159Z"
+      }
+    ],
+    "human_said": [
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。"
+    ],
+    "latest_assessment": {
+      "assessment_id": "6bbcedfa-e22f-4776-81cb-ae71d07727aa",
+      "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+      "basis_last_sequence": 1,
+      "interpreted_motive": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+      "desired_outcome": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+      "design_intent_frame": {
+        "design_subject": "business-app 现有导航中的“使用帮助”链接",
+        "object_type": "FEATURE",
+        "business_context": "已有 business-app 项目及其 /help 帮助路由",
+        "desired_outcome": "导航中新增“使用帮助”链接并指向已有 /help 路由，无新页面、无其他功能变化，可先查看预览",
+        "scope_level": "implementation",
+        "collaboration_mode": "execution",
+        "candidate_assumptions": [
+          "导航组件的文件位置与实现方式需通过仓库准备路径发现，不作预先设定",
+          "链接的可视文本采用“使用帮助”",
+          "具体插入位置与展示样式属可调整的候选默认值",
+          "现有 /help 路由可直接跳转"
+        ],
+        "ambiguities": [
+          "导航的实现方式与插入位置尚未发现",
+          "链接在导航中的顺序与样式未定"
+        ],
+        "confidence": 0.78
+      },
+      "candidate_context": [
+        "当前项目仓库为 http://qualified-git:8080/business-app.git",
+        "项目中已存在 /help 路由",
+        "改动对象是现有导航"
+      ],
+      "candidate_constraints": [
+        "链接指向已有的 /help 路由",
+        "不要新增页面",
+        "不要改动其他功能"
+      ],
+      "current_requests": [
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+        "在导航中添加一个“使用帮助”链接，指向已有的 /help 路由",
+        "不要新增页面或改动其他功能",
+        "给我预览",
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。"
+      ],
+      "unresolved_material_questions": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ext-repo",
+          "kind": "REFERENCE",
+          "values": [
+            "http://qualified-git:8080/business-app.git"
+          ],
+          "unit": null,
+          "source_record_id": "bf81e6b0-fae8-4049-9206-a396419e69c8",
+          "source_text": "http://qualified-git:8080/business-app.git",
+          "explicit_roles": [
+            "当前项目仓库"
+          ]
+        },
+        {
+          "extraction_id": "ext-label",
+          "kind": "REFERENCE",
+          "values": [
+            "使用帮助"
+          ],
+          "unit": null,
+          "source_record_id": "bf81e6b0-fae8-4049-9206-a396419e69c8",
+          "source_text": "使用帮助",
+          "explicit_roles": [
+            "链接名称"
+          ]
+        },
+        {
+          "extraction_id": "ext-target",
+          "kind": "REFERENCE",
+          "values": [
+            "/help"
+          ],
+          "unit": null,
+          "source_record_id": "bf81e6b0-fae8-4049-9206-a396419e69c8",
+          "source_text": "/help",
+          "explicit_roles": [
+            "已有的路由"
+          ]
+        },
+        {
+          "extraction_id": "ext-behavior",
+          "kind": "BEHAVIOR",
+          "values": [
+            "指向已有的 /help 路由"
+          ],
+          "unit": null,
+          "source_record_id": "bf81e6b0-fae8-4049-9206-a396419e69c8",
+          "source_text": "指向已有的 /help 路由",
+          "explicit_roles": [
+            "链接目标"
+          ]
+        },
+        {
+          "extraction_id": "ext-scope",
+          "kind": "SCOPE",
+          "values": [
+            "不要新增页面或改动其他功能"
+          ],
+          "unit": null,
+          "source_record_id": "bf81e6b0-fae8-4049-9206-a396419e69c8",
+          "source_text": "不要新增页面或改动其他功能",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "59eb6fde-0b65-51f0-ac61-15cbc2d19cc0",
+          "subject": "project.repository",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/business-app.git",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "source_text": "http://qualified-git:8080/business-app.git",
+            "source_extraction_ids": [
+              "ext-repo"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "3e2b723d-915a-5f94-a560-4187708bb26c",
+          "subject": "navigation.help_link.label",
+          "relation": "EQUALITY",
+          "value": "使用帮助",
+          "unit": null,
+          "scope": "business-app navigation",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "source_text": "使用帮助",
+            "source_extraction_ids": [
+              "ext-label"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "0a110a5d-8336-54d2-ab1f-63545a2e440c",
+          "subject": "navigation.help_link.target_route",
+          "relation": "REFERENCE",
+          "value": "/help",
+          "unit": null,
+          "scope": "business-app navigation",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "source_text": "指向已有的 /help 路由",
+            "source_extraction_ids": [
+              "ext-behavior",
+              "ext-target"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "7019d193-ce07-5589-8cc9-9af7e63575b7",
+          "subject": "navigation.help_link.change_scope",
+          "relation": "SCOPE",
+          "value": "仅添加导航链接，不新增页面、不改动其他功能",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "source_text": "不要新增页面或改动其他功能",
+            "source_extraction_ids": [
+              "ext-scope"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONTEXT",
+          "statement": "当前项目仓库为 http://qualified-git:8080/business-app.git。",
+          "source_record_ids": [
+            "bf81e6b0-fae8-4049-9206-a396419e69c8"
+          ],
+          "confidence": 0.95,
+          "rationale": "Human 明确给出仓库地址。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "在导航中添加“使用帮助”链接，指向已有的 /help 路由。",
+          "source_record_ids": [
+            "bf81e6b0-fae8-4049-9206-a396419e69c8"
+          ],
+          "confidence": 0.97,
+          "rationale": "明确的改动请求。",
+          "clarification_required": false
+        },
+        {
+          "kind": "CONSTRAINT",
+          "statement": "不要新增页面或改动其他功能。",
+          "source_record_ids": [
+            "bf81e6b0-fae8-4049-9206-a396419e69c8"
+          ],
+          "confidence": 0.97,
+          "rationale": "Human 显式限定改动范围。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "先给出预览。",
+          "source_record_ids": [
+            "bf81e6b0-fae8-4049-9206-a396419e69c8"
+          ],
+          "confidence": 0.9,
+          "rationale": "Human 要求改动前查看效果。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "candidate_change": null,
+      "basis_work_revision_id": null,
+      "basis_steering_plan_revision_id": null,
+      "basis_steering_step_id": null,
+      "basis_active_runtime_binding_id": null,
+      "supporting_references": [],
+      "natural_response": "新增约束已纳入：链接指向已有的 /help 路由；不要新增页面；不要改动其他功能；http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。当前目标和范围保持不变。",
+      "readiness": {
+        "status": "READY",
+        "profile": "LONG_LIVED_STEERING",
+        "profile_version": "v0",
+        "satisfied_requirements": [
+          "MOTIVE",
+          "DESIRED_OUTCOME"
+        ],
+        "missing_information": [],
+        "unresolved_material_questions": [],
+        "reasons": [
+          "Motive and desired outcome are clear enough to form governed Work."
+        ],
+        "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a"
+      },
+      "progressive_semantics": {
+        "turn_intent": "ACTION_REQUEST",
+        "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+        "source_record_ids": [
+          "bf81e6b0-fae8-4049-9206-a396419e69c8"
+        ],
+        "reception_meanings": [
+          "CONSTRAINT:http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览"
+        ],
+        "working_motive": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+        "working_desired_outcome": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+        "working_facts": [
+          "当前项目仓库为 http://qualified-git:8080/business-app.git",
+          "项目中已存在 /help 路由",
+          "改动对象是现有导航"
+        ],
+        "working_constraints": [
+          "链接指向已有的 /help 路由",
+          "不要新增页面",
+          "不要改动其他功能",
+          "http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览"
+        ],
+        "working_requests": [
+          "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+          "在导航中添加一个“使用帮助”链接，指向已有的 /help 路由",
+          "不要新增页面或改动其他功能",
+          "给我预览",
+          "这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。"
+        ],
+        "explicit_assumptions": [],
+        "unresolved_human_decisions": [],
+        "deltas": [
+          {
+            "id": "cad54117-dde5-5d6c-867d-73e9859bf4f2",
+            "category": "MOTIVE",
+            "operation": "ADDED",
+            "value": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+            "prior_value": null,
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "b5a96fd4-ea28-533c-8808-3b7ff700628d",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "链接指向已有的 /help 路由",
+            "prior_value": null,
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "6f2f5861-2129-5744-b0ed-e85e392d8840",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "不要新增页面",
+            "prior_value": null,
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "51ff0b16-8953-5ee3-8370-3839b4868d79",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "不要改动其他功能",
+            "prior_value": null,
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "a9124222-0895-57b6-8af9-bcd70767808d",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览",
+            "prior_value": null,
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          }
+        ],
+        "pattern_signals": [
+          "CONSTRAINT_ADDITION",
+          "PRODUCTION_REQUEST",
+          "REPOSITORY_SOURCE"
+        ],
+        "inference_disposition": "NO_INFERENCE",
+        "questions": [],
+        "selected_question": null,
+        "governance_candidate": "WORK_FORMATION_PROPOSAL",
+        "readiness": [
+          {
+            "target": "WORK_FORMATION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "WORK_REVISION",
+            "status": "NOT_APPLICABLE",
+            "satisfied_evidence": [],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "DESIGN_PROGRESSION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "CURRENT_FOCUS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "artifact_recommendation": null,
+        "factual_contradictions": [],
+        "semantic_policy_revision": "wic-semantic-policy-v1",
+        "question_policy_revision": "wic-question-value-v1"
+      },
+      "provider_identity": "deepseek-responses:semantic:request:5c431f83-60a0-4ef6-abfe-841b44a088c7",
+      "model_identity": "deepseek-flash",
+      "schema_version": "wic-assessment-v6",
+      "created_at": "2026-09-27T04:34:55.628907Z"
+    },
+    "latest_assessment_current": false,
+    "interpreted_motive": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+    "desired_outcome": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+    "design_intent_frame": {
+      "design_subject": "business-app 现有导航中的“使用帮助”链接",
+      "object_type": "FEATURE",
+      "business_context": "已有 business-app 项目及其 /help 帮助路由",
+      "desired_outcome": "导航中新增“使用帮助”链接并指向已有 /help 路由，无新页面、无其他功能变化，可先查看预览",
+      "scope_level": "implementation",
+      "collaboration_mode": "execution",
+      "candidate_assumptions": [
+        "导航组件的文件位置与实现方式需通过仓库准备路径发现，不作预先设定",
+        "链接的可视文本采用“使用帮助”",
+        "具体插入位置与展示样式属可调整的候选默认值",
+        "现有 /help 路由可直接跳转"
+      ],
+      "ambiguities": [
+        "导航的实现方式与插入位置尚未发现",
+        "链接在导航中的顺序与样式未定"
+      ],
+      "confidence": 0.78
+    },
+    "candidate_context": [
+      "当前项目仓库为 http://qualified-git:8080/business-app.git",
+      "项目中已存在 /help 路由",
+      "改动对象是现有导航"
+    ],
+    "candidate_constraints": [
+      "链接指向已有的 /help 路由",
+      "不要新增页面",
+      "不要改动其他功能"
+    ],
+    "current_requests": [
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+      "在导航中添加一个“使用帮助”链接，指向已有的 /help 路由",
+      "不要新增页面或改动其他功能",
+      "给我预览",
+      "这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。"
+    ],
+    "unresolved_material_questions": [],
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "d4cc595a546ffd722ca192128a056f38f8d9402a02df778e59a530b58dfa3d7a"
+    },
+    "candidate_engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+    "candidate_repository_identity": "http://qualified-git:8080/business-app.git",
+    "candidate_repository_ref": "refs/heads/main",
+    "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git:8080/business-app.git at refs/heads/main",
+    "governed_work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+    "governed_revision": {
+      "revision_id": "2b316ec5-a983-5156-9690-67bc2159cfd4",
+      "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+      "revision_number": 2,
+      "previous_revision_id": "2705dc9a-b26b-56b8-aded-1dee087793c2",
+      "basis_fingerprint": "dd2f411cac8c6c70dcf18a886bb2214eda73e36b8b5da3ae83ac0f3dae74622e",
+      "revision_fingerprint": "374e36b7d819e33fdf74387f4763ff05878e6fe241d68d2f035882deeb643a83",
+      "source_interaction_id": "44fcfb2b-527b-4c73-a23e-8c69c97fd805",
+      "source_kind": "ASSET_SCOPE_ADMISSION",
+      "source_assessment_id": null,
+      "source_record_ids": [
+        "bf81e6b0-fae8-4049-9206-a396419e69c8"
+      ],
+      "motive": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+      "desired_outcome": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+      "context_facts": [
+        "当前项目仓库为 http://qualified-git:8080/business-app.git",
+        "项目中已存在 /help 路由",
+        "改动对象是现有导航"
+      ],
+      "constraints": [
+        "链接指向已有的 /help 路由",
+        "不要新增页面",
+        "不要改动其他功能"
+      ],
+      "requests": [
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git",
+        "在导航中添加一个“使用帮助”链接，指向已有的 /help 路由",
+        "不要新增页面或改动其他功能",
+        "给我预览",
+        "这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。"
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "59eb6fde-0b65-51f0-ac61-15cbc2d19cc0",
+          "subject": "project.repository",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/business-app.git",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "source_text": "http://qualified-git:8080/business-app.git",
+            "source_extraction_ids": [
+              "ext-repo"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "2705dc9a-b26b-56b8-aded-1dee087793c2"
+        },
+        {
+          "id": "3e2b723d-915a-5f94-a560-4187708bb26c",
+          "subject": "navigation.help_link.label",
+          "relation": "EQUALITY",
+          "value": "使用帮助",
+          "unit": null,
+          "scope": "business-app navigation",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "source_text": "使用帮助",
+            "source_extraction_ids": [
+              "ext-label"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "2705dc9a-b26b-56b8-aded-1dee087793c2"
+        },
+        {
+          "id": "0a110a5d-8336-54d2-ab1f-63545a2e440c",
+          "subject": "navigation.help_link.target_route",
+          "relation": "REFERENCE",
+          "value": "/help",
+          "unit": null,
+          "scope": "business-app navigation",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "source_text": "指向已有的 /help 路由",
+            "source_extraction_ids": [
+              "ext-behavior",
+              "ext-target"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "2705dc9a-b26b-56b8-aded-1dee087793c2"
+        },
+        {
+          "id": "7019d193-ce07-5589-8cc9-9af7e63575b7",
+          "subject": "navigation.help_link.change_scope",
+          "relation": "SCOPE",
+          "value": "仅添加导航链接，不新增页面、不改动其他功能",
+          "unit": null,
+          "scope": "business-app",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "bf81e6b0-fae8-4049-9206-a396419e69c8"
+            ],
+            "source_text": "不要新增页面或改动其他功能",
+            "source_extraction_ids": [
+              "ext-scope"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "2705dc9a-b26b-56b8-aded-1dee087793c2"
+        }
+      ],
+      "engineering_scope_id": "f300f86d-aa93-4a1c-8b9d-2faa7056d6dd",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "scope_basis_fingerprint": "76f7a7f8e89943e619b609932dcc3465ffe709c8aa210b088e72e67c040be461",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "repository_ref": "refs/heads/main",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "governance_record_id": "67352ee3-8899-4deb-a937-dd859ec6b412",
+      "supporting_references": [
+        "INTERACTION_RECORD:bf81e6b0-fae8-4049-9206-a396419e69c8",
+        "REPOSITORY_OBSERVATION:27a40ebe0b054e63da0f23f1af738f0c76b481dd965a4229f4e5b9eeaa96d2e9"
+      ],
+      "change_set": [
+        "asset:PRODUCTION_TARGET_ADMITTED"
+      ],
+      "rationale": "Bind the exact repository Reality acquired from the Human-supplied source before Steering begins.",
+      "admitted_by": "human:owner",
+      "schema_version": "wic-work-reality-v3",
+      "created_at": "2026-09-27T04:35:01.002557Z"
+    },
+    "current_work_focus": "在现有项目中以最小改动向用户暴露已有的帮助入口 → 导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "work_revision_admission_status": "NOT_APPLICABLE",
+    "active_cycle_work_revision_id": "2b316ec5-a983-5156-9690-67bc2159cfd4",
+    "active_cycle_impact_disposition": null,
+    "work_satisfaction_state": "IN_PROGRESS",
+    "interaction_relationship_state": "OPEN",
+    "work_focus_history": [
+      "c6cf4415-6782-54c2-b171-fdbebabb98be"
+    ],
+    "latest_work_transition": null,
+    "new_work_formation_pending": false,
+    "production_request_detected": true,
+    "repository_source": "http://qualified-git:8080/business-app.git",
+    "production_admission_state": "WORK_CREATED",
+    "repository_acquisition_state": "READY",
+    "repository_observation": {
+      "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+      "paths": [
+        ".gitignore",
+        "Dockerfile",
+        "README.md",
+        "migrations/001_initial.sql",
+        "package.json",
+        "server.py",
+        "tests/application.cjs",
+        "web/app.js",
+        "web/index.html",
+        "web/styles.css"
+      ],
+      "title": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+      "source": "http://qualified-git:8080/business-app.git",
+      "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+      "revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "condition": "READY",
+      "description": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+      "fingerprint": "27a40ebe0b054e63da0f23f1af738f0c76b481dd965a4229f4e5b9eeaa96d2e9",
+      "observed_at": "2026-09-27T04:35:00.768236+00:00",
+      "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "context_path": "README.md",
+      "human_message": "Repository is ready.",
+      "target_branch": null,
+      "attempt_number": 1,
+      "interaction_id": "44fcfb2b-527b-4c73-a23e-8c69c97fd805",
+      "operation_kind": "ACQUIRE",
+      "repository_ref": "refs/heads/main",
+      "base_resource_id": null,
+      "failure_category": null,
+      "intake_request_id": "29cff86f-2035-5b1c-8ac6-3d517256d34e",
+      "operation_evidence": {
+        "verified": true,
+        "connector_id": "builtin:git",
+        "capability_id": "git.repository.acquire",
+        "operation_ref": "repository-intake:29cff86f-2035-5b1c-8ac6-3d517256d34e",
+        "resulting_branch": "refs/heads/main",
+        "resulting_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "workspace_reference": "/var/lib/spg/repository-assets/29cff86f-2035-5b1c-8ac6-3d517256d34e"
+      },
+      "previous_attempt_id": null,
+      "repository_identity": "http://qualified-git:8080/business-app.git"
+    },
+    "production_next_step": "Continue Steering against the acquired repository Reality.",
+    "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+    "selected_design_schema_version": "0.1",
+    "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+    "design_stage": "Current Reality",
+    "design_next_focus": "Establish the trusted current product and runtime reality.",
+    "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+    "design_facilitation_strategy": "CLARIFY",
+    "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+  },
+  "observed_at": "2026-09-27T05:28:18.803511+00:00",
+  "work": {
+    "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+    "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+    "goal_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "raw_user_requirement": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+    "title": "在现有项目中以最小改动向用户暴露已有的帮助入口",
+    "desired_outcome": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+    "constraints": [
+      "链接指向已有的 /help 路由",
+      "不要新增页面",
+      "不要改动其他功能"
+    ],
+    "target_kind": "CODE_WORK",
+    "artifact_target": null,
+    "change_proposal": {
+      "proposal_id": "ffbbf89f-0935-54a3-ab25-8bb0561f7c07",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_ref": "refs/heads/main",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+      "proposed_targets": [
+        {
+          "path": "web/index.html",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "This is the only place the header navigation markup exists (inside <header><nav>), so the requested nav link must be added here; no other file renders or composes the nav.",
+          "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <header><nav><a href=\"/\">首页</a> <a href=\"/users\">用户</a>",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [
+        "migrations/**"
+      ],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "817514eefb0aefa3f162ad1e8804a90295cea1d370030050a72d7763f0f15555"
+    },
+    "change_contract": null,
+    "production_plan": {
+      "proposal_id": "0c8105f4-2d35-5e07-8de1-b89adb85a780",
+      "target_kind": "CODE_WORK",
+      "objective": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+      "desired_outcome": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Prepare the repository-inspected code targets: web/index.html."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": null,
+      "artifact_targets": [],
+      "change_proposal": {
+        "proposal_id": "ffbbf89f-0935-54a3-ab25-8bb0561f7c07",
+        "target_kind": "CODE_WORK",
+        "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+        "repository_identity": "http://qualified-git:8080/business-app.git",
+        "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+        "source_ref": "refs/heads/main",
+        "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d",
+        "proposed_targets": [
+          {
+            "path": "web/index.html",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "This is the only place the header navigation markup exists (inside <header><nav>), so the requested nav link must be added here; no other file renders or composes the nav.",
+            "evidence": "Exact f629ed74d0afbcb8b5974e546c007eb5bf36663d:web/index.html witness: <header><nav><a href=\"/\">首页</a> <a href=\"/users\">用户</a>",
+            "confidence": "HIGH"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [
+          "migrations/**"
+        ],
+        "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+        "confidence": "MEDIUM",
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null,
+            "identity": "PATH_SCOPE"
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null,
+            "identity": "GIT_DIFF_CHECK"
+          }
+        ],
+        "provenance": {
+          "provider_identity": "provider:repository-aware-change-proposal-lite",
+          "provider_version": "v1",
+          "inspection_method": "git-object-read-only:path-enumeration+text-search"
+        },
+        "unresolved_scope_questions": [],
+        "proposal_fingerprint": "817514eefb0aefa3f162ad1e8804a90295cea1d370030050a72d7763f0f15555"
+      },
+      "change_contract": null,
+      "inherited_constraints": [
+        "链接指向已有的 /help 路由",
+        "不要新增页面",
+        "不要改动其他功能"
+      ],
+      "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+      "assumptions": [
+        "The admitted Work can be executed through one governed PWU and Attempt lineage."
+      ],
+      "unresolved_questions": [],
+      "fit_classification": "ONE_PWU_FIT",
+      "engineering_resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "source_baseline_id": "f5c27b10-f35d-478c-a662-ab57564dfb33",
+      "source_revision": "f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+    },
+    "production_plan_runtime": null,
+    "tags": [],
+    "engineering_scope": {
+      "engineering_scope_id": "f300f86d-aa93-4a1c-8b9d-2faa7056d6dd",
+      "summary": "Work assets; production target http://qualified-git:8080/business-app.git",
+      "condition": "ADMITTED",
+      "resources": [
+        {
+          "resource_id": "26352a7e-1a29-4eb2-a7e7-6198304bbba5",
+          "condition": "ACTIVE"
+        }
+      ]
+    },
+    "status": "NEEDS_ATTENTION",
+    "current_production_step": "PRODUCE",
+    "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "what_happens_next": "Human must authorize the exact Candidate",
+    "human_attention_required": true,
+    "result_summary": "1 independently observed artifact change(s)",
+    "current_work_reality_revision_id": "2b316ec5-a983-5156-9690-67bc2159cfd4",
+    "steering_enabled": true,
+    "current_steering_step_id": "12d58fa7-90f0-445c-afeb-3cbe041685b3",
+    "current_steering_step_type": "PRODUCE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "25ad6866-1f3c-4280-8960-ef9c93ada609",
+    "current_production_cycle_trusted": false,
+    "latest_trusted_runtime_commit_id": null,
+    "work_complete": false,
+    "automatic_progression_state": "STOPPED",
+    "last_stop_reason": "HUMAN_ATTENTION",
+    "execution_progress": null,
+    "guided_design": null,
+    "next_owner": "HUMAN",
+    "control_state_valid": true,
+    "control_state_violations": []
+  },
+  "steering": {
+    "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+    "work_objective": "Add a “使用帮助” link to the existing header navigation in web/index.html, pointing to the already-existing /help route. Edit only that nav element: insert an anchor labeled “使用帮助” with href=\"/help\" alongside the existing 首页/用户/客户/订单 links, matching the surrounding markup. Do not add new pages, routes, or files, and do not alter any other functionality. Preserve the admitted runtime form and entrypoint: the site continues to run as `python server.py` on port 8080 with SQLite migrations applied on startup, and /help continues to be served as today.",
+    "steering_enabled": true,
+    "steering_plan_id": "f1c8ee87-639b-4480-91af-d13a1cf7dabf",
+    "active_revision_id": "bee87a65-e76e-4b46-a94a-5898b90ef537",
+    "active_revision_number": 1,
+    "completed_steps": [
+      {
+        "step_id": "098b7f45-a264-4256-ac38-dc839496c88a",
+        "type": "DESIGN",
+        "objective": "导航中出现“使用帮助”链接并指向已有 /help 路由，且不引入新页面或其他功能变更，可先行查看预览\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/business-app.git\n在导航中添加一个“使用帮助”链接，指向已有的 /help 路由。不要新增页面或改动其他功能，给我预览。",
+        "completion_condition": "A bounded design direction is supported by current Reality",
+        "position": 1,
+        "state": "CLOSED",
+        "design_issue_key": null
+      }
+    ],
+    "current_step": {
+      "step_id": "12d58fa7-90f0-445c-afeb-3cbe041685b3",
+      "type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "completion_condition": "The exact bounded production cycle reaches trusted Runtime Commit",
+      "position": 2,
+      "state": "CURRENT",
+      "design_issue_key": null
+    },
+    "known_next_steps": [
+      {
+        "step_id": "728e01b5-2901-4869-bf06-ca535f283449",
+        "type": "VERIFY_ACCEPT",
+        "objective": "Assess the trusted result against the long-lived outcome",
+        "completion_condition": "Governed evidence supports product acceptance",
+        "position": 3,
+        "state": "KNOWN",
+        "design_issue_key": null
+      },
+      {
+        "step_id": "b053c80f-5701-4367-98ba-f272c09ce22c",
+        "type": "COMPLETE",
+        "objective": "Complete the admitted long-lived Work",
+        "completion_condition": "The admitted Work outcome is satisfied",
+        "position": 4,
+        "state": "KNOWN",
+        "design_issue_key": null
+      }
+    ],
+    "plan_changes": [],
+    "latest_decision": {
+      "decision_id": "4f4de048-22e8-4065-ac15-7b78e4760828",
+      "next_step_type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "reason": "The current governed Step is ready to yield to the next admitted ordered Step",
+      "outcome": "AUTO_CONTINUE",
+      "human_required": false,
+      "attention_reason": null,
+      "reality_refs": [
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "67352ee3-8899-4deb-a937-dd859ec6b412"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "d8c2a702-14c6-5ac9-a5ea-09691eb8096c"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "116fc718-bbf2-4ca6-a168-f419a61c8b73"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "f5c27b10-f35d-478c-a662-ab57564dfb33"
+        },
+        {
+          "kind": "WORK",
+          "identity": "c6cf4415-6782-54c2-b171-fdbebabb98be"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "2b316ec5-a983-5156-9690-67bc2159cfd4"
+        }
+      ]
+    },
+    "selection_rationale": "The current governed Step is ready to yield to the next admitted ordered Step",
+    "steering_outcome": "AUTO_CONTINUE",
+    "automatic_progression_state": "STOPPED",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "25ad6866-1f3c-4280-8960-ef9c93ada609",
+    "current_production_cycle_trusted": false,
+    "human_attention_required": true,
+    "last_stop_reason": "HUMAN_ATTENTION"
+  },
+  "refinement": {
+    "count": 3,
+    "events": [
+      {
+        "id": "80c4cc57-e992-4cf2-bdd3-2650cd0b007a",
+        "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+        "operation_id": "53da5f25-3703-42fb-9623-3da61592b4b5",
+        "created_at": "2026-09-27T04:37:35.417116Z",
+        "failure_family": "DEPENDENCY_BUILD_FAILURE",
+        "failure_signature": "a364140beb91babd34db49d8ce6d6a0442287e203bdbe25fa8b2cf7f19f1a3e3",
+        "semantic_version": 2,
+        "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "signal_kind": "CAPABILITY_MISMATCH",
+        "affected_component": "native-tool-host/build.run",
+        "expected_reality": {
+          "tool_identity": "build.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": "ValueError",
+          "output_digest": "fa4ea6c26ea48168f0ee08f5b8112d5acf5d272ef9b1efc95bb8bbce4dcaeee1",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "DEPENDENCY_BUILD_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:c341b45c-24c5-4f3f-95ee-125fea772901",
+          "native-receipt:5c6a2629-f10a-4f64-a66a-584eb1666c01",
+          "native-evidence:70fa957f-5048-459b-92ad-bfcfe107c4ba"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "rejected tool recipe had no effect"
+        },
+        "diagnostic_evidence": {
+          "receipt_ref": "native-receipt:5c6a2629-f10a-4f64-a66a-584eb1666c01",
+          "evidence_refs": [
+            "native-evidence:70fa957f-5048-459b-92ad-bfcfe107c4ba"
+          ],
+          "output_digest": "fa4ea6c26ea48168f0ee08f5b8112d5acf5d272ef9b1efc95bb8bbce4dcaeee1",
+          "tool_identity": "build.run"
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 9,
+        "model_token_usage": {
+          "input_tokens": 19246,
+          "total_tokens": 20902,
+          "output_tokens": 1656,
+          "reasoning_tokens": 1200,
+          "cached_input_tokens": 1920,
+          "observed_response_count": 1
+        },
+        "compute_overhead": {
+          "tool_effects": 11,
+          "inference_submissions": 8
+        },
+        "known_failure_match": false,
+        "platform_improvement_candidate_ref": null,
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T04:37:45.178980Z"
+      },
+      {
+        "id": "c98ba1ee-c86e-480e-a1ce-9a2ae5feb95a",
+        "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+        "operation_id": "53da5f25-3703-42fb-9623-3da61592b4b5",
+        "created_at": "2026-09-27T04:37:06.740862Z",
+        "failure_family": "VERIFICATION_FAILURE",
+        "failure_signature": "5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+        "semantic_version": 2,
+        "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+        "signal_kind": "EVIDENCE_INSUFFICIENT",
+        "affected_component": "native-tool-host/test.run",
+        "expected_reality": {
+          "tool_identity": "test.run",
+          "effect_condition": "SETTLED"
+        },
+        "observed_reality": {
+          "failure_code": "TEST_ENVIRONMENT_NOT_READY",
+          "output_digest": "e2dd0e1006b8c3cad2f832dec7d36a00caada583126e2963345ed24347c3936b",
+          "effect_condition": "FAILED"
+        },
+        "diagnosis_summary": "The observed tool effect did not satisfy its admitted operation.",
+        "root_cause_classification": "VERIFICATION_FAILURE",
+        "repair_hypothesis": "Use the failed effect receipt to diagnose and repair within the same admitted Task Contract; do not replay an uncertain side effect.",
+        "evidence_references": [
+          "native-effect:0c5db2ab-6841-4b15-8cb2-380ae9efa4d3",
+          "native-receipt:68496b61-c472-4826-8982-7cd06dc00e76",
+          "native-evidence:153f9c63-7109-4570-8c52-90d1c4da35f5"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "CONFIRMED_FAILURE",
+        "budget_decision": {
+          "policy_version": "native-effect-repair-v1",
+          "classification_basis": "Use the granted locked dependency synchronization or an equivalent admitted test path; do not add dependencies or change the acceptance oracle"
+        },
+        "diagnostic_evidence": {
+          "returncode": 127,
+          "stderr_ref": "native-receipt:68496b61-c472-4826-8982-7cd06dc00e76#stderr",
+          "stdout_ref": "native-receipt:68496b61-c472-4826-8982-7cd06dc00e76#stdout",
+          "receipt_ref": "native-receipt:68496b61-c472-4826-8982-7cd06dc00e76",
+          "stderr_bytes": 0,
+          "stdout_bytes": 121,
+          "evidence_refs": [
+            "native-evidence:153f9c63-7109-4570-8c52-90d1c4da35f5"
+          ],
+          "output_digest": "e2dd0e1006b8c3cad2f832dec7d36a00caada583126e2963345ed24347c3936b",
+          "tool_identity": "test.run",
+          "diagnostic_code": "TEST_ENVIRONMENT_NOT_READY",
+          "verification_evidence": "INCOMPLETE",
+          "test_environment_readiness": "NOT_READY"
+        },
+        "final_result": "FAILED",
+        "work_resume_result": "NOT_RESUMED",
+        "extra_elapsed_seconds": 28,
+        "model_token_usage": {},
+        "compute_overhead": {
+          "tool_effects": 1
+        },
+        "known_failure_match": false,
+        "platform_improvement_candidate_ref": "refinement-signature:5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+        "status": "MITIGATED",
+        "updated_at": "2026-09-27T04:37:35.417116Z"
+      },
+      {
+        "id": "e0561eb6-7e2f-42b9-8bee-75f69a9bdeec",
+        "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+        "operation_id": "098b7f45-a264-4256-ac38-dc839496c88a",
+        "created_at": "2026-09-27T04:36:05.417062Z",
+        "failure_family": "CANDIDATE_INCONSISTENT",
+        "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "semantic_version": 2,
+        "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "signal_kind": "CANDIDATE_INCONSISTENT",
+        "affected_component": "semantic/scope",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "CANDIDATE_INCONSISTENT",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "source-baseline:f5c27b10-f35d-478c-a662-ab57564dfb33"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "OBSERVED_SUCCESS",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 2,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "SCOPE_INFLATION",
+          "required_paths": [
+            "web/index.html"
+          ],
+          "candidate_paths": [
+            "web/index.html"
+          ],
+          "authority_expanded": false,
+          "rejected_behaviors": [
+            "Creating any new page or route (e.g. new HTML view or new path handler in server.py) — explicitly forbidden by 不要新增页面 and the /help route already exists in server.py's route set.",
+            "Adding or modifying /help handling in server.py — the route already exists (path in {…\"/help\"…}), so server changes are unrequested behavior.",
+            "Modifying web/app.js or web/styles.css — no functional or styling change is requested.",
+            "Modifying tests/application.cjs — read-only reference; no mandatory oracle change is implied by a static nav link edit.",
+            "Editing README.md, Dockerfile, package.json, migrations/001_initial.sql — no documentation, build, dependency, or schema change is requested.",
+            "Introducing authentication, login behavior, or other nav items — not requested and explicitly excluded by 不要改动其他功能."
+          ]
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 0,
+        "model_token_usage": {
+          "unknown": false,
+          "input_tokens": 10709,
+          "total_tokens": 16752,
+          "cached_tokens": 512,
+          "output_tokens": 6043,
+          "reasoning_tokens": 280
+        },
+        "compute_overhead": {},
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": null,
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T04:36:05.417062Z"
+      }
+    ],
+    "metrics": {
+      "native_attempts": 1,
+      "native_self_refine_events": 0,
+      "self_refine_events": 3,
+      "self_refine_rate": 0.0,
+      "first_pass_success_rate": 1.0,
+      "recovered": 0,
+      "local_obligation_recovered": 2,
+      "recovery_scope": "LOCAL_OBLIGATION; Work convergence is independently observed",
+      "escalated": 0,
+      "failed": 1,
+      "active": 0,
+      "classification_counts": {
+        "ROUTINE_STOCHASTIC_REFINEMENT": 2,
+        "DEGRADING_OR_RECURRING_REFINEMENT": 0,
+        "SYSTEMIC_OR_NON_CONVERGING_INCIDENT": 1,
+        "LEGACY_EXECUTION_INCIDENT": 0
+      },
+      "convergence_success_rate": 0.6666666666666666,
+      "average_refinement_attempts": 2.0,
+      "p95_refinement_attempts": 2,
+      "average_refinement_seconds": 12.333333333333334,
+      "p95_refinement_seconds": 28,
+      "observed_refinement_tokens": 37654,
+      "observed_refinement_tool_effects": 12,
+      "unsafe_repair_blocks": 0,
+      "recurring_signatures": {},
+      "improvement_candidates": [
+        {
+          "reference": "refinement-signature:5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+          "signature": "5ab83d2e898de2cc9baaaae80df4ee4e0870108d4cdcdb2142ca1d3187f09ee8",
+          "component": "native-tool-host/test.run",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 0,
+          "observed_seconds": 28,
+          "systemic": true,
+          "status": "PROPOSED"
+        }
+      ],
+      "human_escalation_observation_count": 1,
+      "human_escalation_rate": 0.0,
+      "systemic_incident_rate": 0.3333333333333333
+    },
+    "work_convergence": [
+      {
+        "id": "0a78efda-f64c-4d5d-91d4-4f5966da7815",
+        "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+        "intent_identity": "58b0dcf75bdba6a9e94e3ddc56a852f8940e17140551331de68877f6239e5c03",
+        "predecessor_id": null,
+        "sequence": 1,
+        "boundary": "SEMANTIC_RESULT_ADMISSION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "90d72489ab75dbc78f1e175b8a6db7697efd8ef5bf92aaaec0e0cfa5554c5f0d",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:36:06.785652Z"
+      },
+      {
+        "id": "a32967f0-c3ee-4357-978a-4420fcd38a6c",
+        "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+        "intent_identity": "58b0dcf75bdba6a9e94e3ddc56a852f8940e17140551331de68877f6239e5c03",
+        "predecessor_id": "0a78efda-f64c-4d5d-91d4-4f5966da7815",
+        "sequence": 2,
+        "boundary": "STEP_TRANSITION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "90d72489ab75dbc78f1e175b8a6db7697efd8ef5bf92aaaec0e0cfa5554c5f0d",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 2,
+        "no_progress_count": 0,
+        "elapsed_seconds": 6,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:36:12.926240Z"
+      },
+      {
+        "id": "1532c750-e41c-41aa-aeaa-069f1ddd71f2",
+        "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+        "intent_identity": "58b0dcf75bdba6a9e94e3ddc56a852f8940e17140551331de68877f6239e5c03",
+        "predecessor_id": "a32967f0-c3ee-4357-978a-4420fcd38a6c",
+        "sequence": 3,
+        "boundary": "PRODUCTION_CYCLE_ADMISSION",
+        "failure_signature": "55aace645e56bf76dbff41e8f14eb53f17cab59fa84b37f74f8120e5170fbcf3",
+        "candidate_identity": null,
+        "reality_identity": "90d72489ab75dbc78f1e175b8a6db7697efd8ef5bf92aaaec0e0cfa5554c5f0d",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 3,
+        "no_progress_count": 0,
+        "elapsed_seconds": 13,
+        "token_usage": {
+          "status": "UNREPORTED",
+          "input_tokens": 0,
+          "total_tokens": 0,
+          "output_tokens": 0
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 0
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {},
+          "execution_seconds": 0.0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:36:20.501521Z"
+      },
+      {
+        "id": "1ec72f33-bd6e-465d-a94d-5b254d988bdd",
+        "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+        "intent_identity": "58b0dcf75bdba6a9e94e3ddc56a852f8940e17140551331de68877f6239e5c03",
+        "predecessor_id": "1532c750-e41c-41aa-aeaa-069f1ddd71f2",
+        "sequence": 4,
+        "boundary": "PREVIEW",
+        "failure_signature": null,
+        "candidate_identity": "86e320c11f0a84a21ae572ebdf71949c8f7b08e94b71abcd4ff26f55a6134f11",
+        "reality_identity": "f7e315b0f9d6c39f48e5a38dc73ebbd5a6b3fc092947eeb95905ded0931e36bc",
+        "missing_acceptance": [],
+        "attempts": 4,
+        "no_progress_count": 0,
+        "elapsed_seconds": 311,
+        "token_usage": {
+          "status": "OBSERVED",
+          "input_tokens": 122268,
+          "total_tokens": 128683,
+          "output_tokens": 6415
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 1
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {
+            "tool_effect": 10,
+            "inference_submission": 8
+          },
+          "execution_seconds": 46.60797
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+        "condition": "CONVERGED_FOR_REVIEW",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:41:18.315992Z"
+      }
+    ]
+  },
+  "queue": [
+    {
+      "queue_entry_id": "0ec2e8cb-f433-4aa5-913b-4d181e0645ac",
+      "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+      "pwu_id": "ca15caa6-90ea-4037-a2dc-cd97c092f5c6",
+      "attempt_id": "53da5f25-3703-42fb-9623-3da61592b4b5",
+      "fairness_group": "work:c6cf4415-6782-54c2-b171-fdbebabb98be",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T04:36:41.339366Z",
+      "available_at": "2026-09-27T04:36:41.235679Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T05:28:28.309346Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "2b316ec5-a983-5156-9690-67bc2159cfd4"
+    }
+  ],
+  "preview": {
+    "mode": "FRONTEND_RUNTIME",
+    "status": "READY",
+    "candidate_revision": "9a415646ea85acc370f7af1ec1151608d6c14888",
+    "candidate_fingerprint": "86e320c11f0a84a21ae572ebdf71949c8f7b08e94b71abcd4ff26f55a6134f11",
+    "session": {
+      "id": "d5e841a2-1ff1-4e47-ace4-f8e4bf125f62",
+      "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+      "candidate_id": "8b65bcc2-a0d0-5d29-99ba-46abe67d2b53",
+      "candidate_fingerprint": "86e320c11f0a84a21ae572ebdf71949c8f7b08e94b71abcd4ff26f55a6134f11",
+      "repository_identity": "http://qualified-git:8080/business-app.git",
+      "repository_revision": "9a415646ea85acc370f7af1ec1151608d6c14888",
+      "repository_tree": "59d7a8a3e9240f076b5b6e1e80a136e7db32d8dc",
+      "workspace_id": "d7db20a7-8a63-4268-b0ff-8661b2bb1586",
+      "environment_id": "cfc37162-5cf8-4629-93a0-f2ef55005a5f",
+      "mode": "FRONTEND_RUNTIME",
+      "status": "READY",
+      "definition_version": "frontend-docker-runtime-v1",
+      "endpoint": "http://127.0.0.1:61601/",
+      "image_reference": "sha256:71cf98bc959a210e908d7c54a62563a21aba19c657bf3a335522c2af396950b7",
+      "service_identities": [
+        "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-app",
+        "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-proxy"
+      ],
+      "resource_references": [
+        "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-internal",
+        "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-gateway",
+        "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-source"
+      ],
+      "evidence": [
+        {
+          "kind": "WORKSPACE",
+          "workspace": "/var/lib/spg/production-environments/candidate-preview-runtime/d5e841a2-1ff1-4e47-ace4-f8e4bf125f62/workspace",
+          "revision": "9a415646ea85acc370f7af1ec1151608d6c14888",
+          "tree": "59d7a8a3e9240f076b5b6e1e80a136e7db32d8dc",
+          "topology_preflight": {
+            "verifier_namespace": "candidate-gateway-network",
+            "verifier_image": "watt-lifecycle:qualification",
+            "public_endpoint_namespace": "docker-host"
+          },
+          "dockerfile_sha256": "abd36acd96f3e4485d6e9d4826a540e65a9608f5e9eb0e479de9581d5a8d5f44"
+        },
+        {
+          "kind": "BUILD",
+          "image": "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62:candidate",
+          "image_id": "sha256:71cf98bc959a210e908d7c54a62563a21aba19c657bf3a335522c2af396950b7",
+          "verified_image_files": 0,
+          "build_log": "/var/lib/spg/production-environments/candidate-preview-runtime/evidence/d5e841a2-1ff1-4e47-ace4-f8e4bf125f62/build.log",
+          "build_log_sha256": "250c192f81b45870e715a048642874bfccf4d068855bf764427d7ae415ee0052"
+        },
+        {
+          "kind": "SERVED_VERIFICATION",
+          "candidate_revision": "9a415646ea85acc370f7af1ec1151608d6c14888",
+          "candidate_tree": "59d7a8a3e9240f076b5b6e1e80a136e7db32d8dc",
+          "gateway": "http://watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-proxy",
+          "public_gateway": "http://127.0.0.1:61601",
+          "verifier_namespace": "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-gateway",
+          "mode": "FRONTEND_RUNTIME",
+          "frontend": {
+            "path": "/",
+            "status": 200,
+            "body_sha256": "747fb42d0ed168acf971a1dcd2411014a304c305f43089bca3ad1b7f32e883c1"
+          },
+          "result": "PASS"
+        },
+        {
+          "kind": "RUNTIME",
+          "endpoint": "http://127.0.0.1:61601/",
+          "services": [
+            "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-app",
+            "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-proxy"
+          ],
+          "resources": [
+            "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-internal",
+            "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-gateway",
+            "watt-candidate-preview-d5e841a21ff14e47ace4f8e4bf125f62-source"
+          ],
+          "health": {
+            "database": "NOT_REQUIRED",
+            "application": "READY",
+            "gateway": "READY",
+            "repository_revision": "9a415646ea85acc370f7af1ec1151608d6c14888",
+            "repository_tree": "59d7a8a3e9240f076b5b6e1e80a136e7db32d8dc"
+          },
+          "topology": {
+            "frontend": "app",
+            "backend": "app",
+            "database": null,
+            "supporting_services": []
+          }
+        },
+        {
+          "kind": "PRODUCTION_RECORD",
+          "reference": "production-record:d1e762f2-65ce-5675-bce9-1e3f99e5cae1",
+          "digest": "54a051f2c8748bebe6018e5fdf9c9f6aa7da2ee66e49b3c50813350e8a355324"
+        }
+      ],
+      "failure_code": null,
+      "failure_reason": null,
+      "version": 6,
+      "created_at": "2026-09-27T04:39:30.848389Z",
+      "updated_at": "2026-09-27T04:41:15.789694Z"
+    }
+  },
+  "attention": [
+    {
+      "attention_id": "ac7b07f5-7c4d-5b38-a8b5-9a82b9a51dc7",
+      "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+      "kind": "CANDIDATE_AUTHORIZATION",
+      "decision": "Authorize exact sealed Candidate integration?",
+      "reason": "Repository integration requires exact Human Authority.",
+      "available_actions": [
+        "AUTHORIZE"
+      ],
+      "recommended_action": null,
+      "governed_subject_ref": "baseline-candidate:8b65bcc2-a0d0-5d29-99ba-46abe67d2b53",
+      "steering_reason": null,
+      "recommendation": null,
+      "conversation_prompt": null,
+      "alternatives": [],
+      "trade_offs": [],
+      "expected_impact": null,
+      "reality_refs": [],
+      "steering_plan_revision_id": null,
+      "steering_step_id": null,
+      "interaction_id": null,
+      "interaction_assessment_id": null,
+      "expected_work_reality_revision_id": null
+    }
+  ],
+  "economics": {
+    "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+    "product_id": "b3ee4a88-1911-4296-b008-0b3d74cfa0aa",
+    "pwu_count": 1,
+    "join_count": 0,
+    "pwu": [
+      {
+        "pwu_id": "ca15caa6-90ea-4037-a2dc-cd97c092f5c6",
+        "node_id": null,
+        "run_id": "25ad6866-1f3c-4280-8960-ef9c93ada609",
+        "condition": "SATISFIED",
+        "attempt_count": 1,
+        "outcomes": [
+          "RESULT_READY"
+        ],
+        "providers": [
+          "deepseek",
+          "watt-native:53da5f25-3703-42fb-9623-3da61592b4b5"
+        ],
+        "execution_seconds": 46.60797,
+        "duration_observed": true,
+        "queue_wait_seconds": 1.768757,
+        "token_usage": {
+          "input_tokens": 122268,
+          "output_tokens": 6415,
+          "total_tokens": 128683,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 8,
+          "tool_effect": 10
+        }
+      }
+    ],
+    "token_usage": {
+      "input_tokens": 122268,
+      "output_tokens": 6415,
+      "total_tokens": 128683,
+      "status": "OBSERVED"
+    },
+    "observed_provider_spend": {
+      "status": "UNREPORTED",
+      "by_currency": {},
+      "unreported_attempt_count": 1,
+      "amount": null
+    },
+    "execution_seconds": 46.60797,
+    "queue_wait_seconds": 1.768757,
+    "wall_elapsed_seconds": 61.714783,
+    "critical_path_seconds": null,
+    "parallelism_effect_seconds": 0.0,
+    "self_refine_event_count": 3,
+    "first_pass_pwu_count": 1,
+    "retried_pwu_count": 0,
+    "human_escalation_count": 0,
+    "refinement_extra_seconds": 37,
+    "resource_units": {
+      "inference_submission": 8,
+      "tool_effect": 10
+    },
+    "final_outcome": "READY"
+  },
+  "delivery": {
+    "work_id": "c6cf4415-6782-54c2-b171-fdbebabb98be",
+    "target": null,
+    "supported_target_kinds": [
+      "DOCUMENT_PACKAGE",
+      "SOFTWARE_ARTIFACT"
+    ],
+    "deliveries": []
+  }
+}

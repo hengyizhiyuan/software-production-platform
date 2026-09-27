@@ -1,0 +1,22 @@
+{
+  "case": "GC-LC-10",
+  "trial": 3,
+  "installed_owner": "GitHubDeliveryService.push authenticated public API",
+  "authorization_id": "fa8a51bc-bd95-4d3a-b412-4486935932dc",
+  "delivery_authorization": "NONE; fresh non-existent identity",
+  "accepted_work_id": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+  "response": {
+    "error_status": 409,
+    "detail": "{\"code\":\"AUTHORIZATION_NOT_FOUND\",\"message\":\"Remote delivery authorization is unavailable\"}"
+  },
+  "remote_refs_before": [
+    "refs/heads/main f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+  ],
+  "remote_refs_after": [
+    "refs/heads/main f629ed74d0afbcb8b5974e546c007eb5bf36663d"
+  ],
+  "remote_unchanged": true,
+  "status": "PASS",
+  "real_remote_write_attempted": false,
+  "explicit_delivery_authorization_created": false
+}

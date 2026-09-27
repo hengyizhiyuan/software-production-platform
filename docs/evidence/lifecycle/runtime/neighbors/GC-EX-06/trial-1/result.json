@@ -1,0 +1,10 @@
+{
+  "case": "GC-EX-06",
+  "trial": 1,
+  "status": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+  "work_id": "7bc66914-7a07-5cdf-8dcf-17ff79f5fd72",
+  "elapsed_seconds": 547,
+  "human_acceptance": "PENDING",
+  "automatic_delivery_authorization": false,
+  "business_oracle": "NOT_YET_EVALUATED"
+}

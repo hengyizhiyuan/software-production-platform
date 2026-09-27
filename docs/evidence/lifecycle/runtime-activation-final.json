@@ -1,0 +1,56 @@
+{
+  "observed_at": "2026-09-27T06:14:29.644600+00:00",
+  "base": "http://127.0.0.1:8079",
+  "compose_project": "watt-lifecycle-qualification",
+  "retained_user_runtime": "http://127.0.0.1:8078",
+  "qualified_source_fingerprint": "af8bc7d790ca6df9acff7ce95e447ccb41685b7f5c6b3bf18950b6b396512df6",
+  "source_file_count": 431,
+  "source_mismatches": [],
+  "components": [
+    {
+      "container": "watt-lifecycle-qualification-app-1",
+      "image_id": "sha256:f93d7fd62dc374ece56813b1396e5786202467e6d8d58db6de23f91ea8bebf4e",
+      "started_at": "2026-09-27T05:38:11.301232735Z",
+      "source_paths_compared": 222,
+      "differences_from_final_source": []
+    },
+    {
+      "container": "watt-lifecycle-qualification-native-worker-1",
+      "image_id": "sha256:2eceedcdca9619b8b0b37fc55e8b9c771f1750e6c052eab46ff4b4890eb234e3",
+      "started_at": "2026-09-27T05:40:34.550312735Z",
+      "source_paths_compared": 222,
+      "differences_from_final_source": [
+        "src/spg/application/interaction.py"
+      ]
+    },
+    {
+      "container": "watt-lifecycle-qualification-native-worker-secondary-1",
+      "image_id": "sha256:2eceedcdca9619b8b0b37fc55e8b9c771f1750e6c052eab46ff4b4890eb234e3",
+      "started_at": "2026-09-27T05:25:07.572450991Z",
+      "source_paths_compared": 222,
+      "differences_from_final_source": [
+        "src/spg/application/interaction.py"
+      ]
+    },
+    {
+      "container": "watt-lifecycle-qualification-native-coordinator-1",
+      "image_id": "sha256:2eceedcdca9619b8b0b37fc55e8b9c771f1750e6c052eab46ff4b4890eb234e3",
+      "started_at": "2026-09-27T05:25:07.529180465Z",
+      "source_paths_compared": 222,
+      "differences_from_final_source": [
+        "src/spg/application/interaction.py"
+      ]
+    },
+    {
+      "container": "watt-lifecycle-qualification-native-tool-host-1",
+      "image_id": "sha256:2eceedcdca9619b8b0b37fc55e8b9c771f1750e6c052eab46ff4b4890eb234e3",
+      "started_at": "2026-09-27T05:24:06.692660865Z",
+      "source_paths_compared": 222,
+      "differences_from_final_source": [
+        "src/spg/application/interaction.py"
+      ]
+    }
+  ],
+  "activation_scope": "ISOLATED_UNCOMMITTED_QUALIFICATION; no Trusted Baseline activation claim",
+  "history_delta": "app final image; other production components preserve already qualified implementation; exact differences recorded"
+}

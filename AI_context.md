@@ -28,6 +28,21 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 ## Current Stage
 
+**2026-09-27 — Lifecycle/action admission hardening — CODE-OWNED QUALIFICATION PASS.**
+Lifecycle and action eligibility are independent. Explicit repository acquisition,
+local branch and pinned source inspection can complete before Work admission;
+production mutation still requires sufficient intent and admitted Work/Task
+authority. Capability, credential, authority, local acceptance and remote delivery
+authorization remain distinct. Completed Product continuity/history remain usable.
+All 15 lifecycle cases and nine affected neighboring Golden cases qualified;
+complete backend 1,677 uniquely qualified / one unchanged upstream ECF-contract
+skip, frontend 77/77, Release Evaluation 53 cases / 136 checks. See the
+[canonical semantics](docs/architecture/lifecycle-and-action-admission-semantics.md)
+and the [single consolidated report](docs/evidence/lifecycle/lifecycle-action-admission-closure-20260927.md).
+Real Web Search/GC-EX-12 remain `BLOCKED_EXTERNAL`; frozen FSI evidence and
+the retained user runtime remain unchanged. Qualification does not grant Human
+product acceptance or delivery authorization.
+
 **2026-09-27 — System-wide stability closure.** Existing WIC, Semantic,
 Steering, Planning/Task Contract, Capability, Executor, Verification and Preview
 owners now participate in bounded refinement; durable Work-level convergence

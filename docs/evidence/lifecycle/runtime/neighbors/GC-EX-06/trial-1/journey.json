@@ -1,0 +1,10 @@
+{
+  "case": "GC-EX-06",
+  "corpus_version": "watt-golden-tier0-v1",
+  "trial": 1,
+  "interaction_id": "30f3b3d1-a0d1-4b5b-bea0-5db0c5db24e7",
+  "human_input": "这是当前项目仓库：http://qualified-git:8080/transient-acquisition.git\n请拉取这个项目并检查当前结构，然后把首页“开始使用”改为“立即体验”，给我实际预览。",
+  "tester_implementation": false,
+  "manual_rescue_actions": [],
+  "human_acceptance": "PENDING"
+}

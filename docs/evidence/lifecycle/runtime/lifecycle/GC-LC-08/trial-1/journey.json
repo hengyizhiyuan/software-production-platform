@@ -1,0 +1,8 @@
+{
+  "case": "GC-LC-08",
+  "trial": 1,
+  "interaction_id": "bd1cd7b6-1ffb-4801-b53e-49372454e9ee",
+  "human_input": "这是当前项目仓库：http://qualified-git:8080/business-app.git。上一轮已经完成；再把首页标题改为“新业务工作台”，给我预览。其他功能保持原样，不推送。",
+  "prior_completed_work": "04b8db03-0514-5ef5-8d6b-aa1419bfc611",
+  "manual_rescue_actions": []
+}

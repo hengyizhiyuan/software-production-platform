@@ -1,0 +1,111 @@
+{
+  "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+  "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+  "lease_before": {
+    "worker_id": "native-worker-acceptance-2",
+    "epoch": 1,
+    "deadline": "2026-09-27T04:45:48.199868+00:00"
+  },
+  "worker_container": "watt-lifecycle-qualification-native-worker-secondary-1",
+  "checkpoint_before": {
+    "id": "2aa598d2-b47d-4564-9704-14f840745644",
+    "schema_version": 1,
+    "session_id": "03cbed2d-9039-507f-8d00-113b236ee8ba",
+    "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+    "step_sequence": 1,
+    "worker_epoch": 1,
+    "condition": "COMMITTED",
+    "source_vector_digest": "06dbad06fc1c52b405543f10958e5e396aa0ee733660a367a7ca884be880959a",
+    "repository_manifest": {
+      "path": "/var/lib/spg/native-checkpoints/checkpoints/attempts/54e8524d-584e-47cc-8110-11a85032c3e8/56/5669d0587111c1096598eca91c2d4b6127b3bdda569a38fd64fa9417896c0c5a.json",
+      "storage": "content-addressed"
+    },
+    "execution_manifest": {
+      "tool_results": [
+        {
+          "output": {
+            "path": "web/index.html",
+            "bytes": 820,
+            "exists": true,
+            "content": "<!doctype html>\n<html lang=\"zh-CN\"><head><meta charset=\"utf-8\"><title>Operations fixture</title>\n<link rel=\"stylesheet\" href=\"/styles.css\"></head><body>\n<header><nav><a href=\"/\">首页</a> <a href=\"/users\">用户</a>\n<a href=\"/customers\">客户</a> <a href=\"/orders\">订单</a></nav>\n<button id=\"header-login\">登录</button></header>\n<main><h1>业务工作台</h1><button id=\"start\">开始使用</button>\n<button id=\"account-login\">账户登录</button>\n<button id=\"open-dialog\">打开对话框</button>\n<dialog id=\"edit-dialog\"><p>示例编辑对话框</p><button id=\"cancel\">取消</button></dialog>\n<section id=\"users\"><h2>用户列表</h2><div id=\"user-list\"></div></section>\n<section id=\"customers\"><h2>客户列表</h2><div id=\"customer-list\"></div></section>\n</main><script src=\"/app.js\"></script></body></html>\n",
+            "truncated": false
+          },
+          "evidence": [
+            {
+              "type": "PRODUCTION_ENVIRONMENT_COMMAND",
+              "digest": "27bd8da9676789026226e75c9f2c9cbab0f6f43fffee9a056cdf7f2c278895d2",
+              "stderr_reference": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_reference": "sha256:d390a2cfdac5acdfdfe8cd5d0f2e1a101bd90319c65ab383f20030426a99ed65",
+              "workspace_reference": "production-workspace:d8b9a9f8-dd86-46aa-a0be-b84d9348e068",
+              "environment_reference": "production-environment:c01423a9-4c15-496c-98d8-b42e88166564"
+            }
+          ],
+          "condition": "SETTLED",
+          "delivery_id": "fd984250-4bee-44b4-bf92-5db538ec1a5f",
+          "output_digest": "8b2a945738d0444fdb131d8f41be17adf0d57b93e8d904a6ef73b8d230592dcc",
+          "tool_identity": "file.read"
+        }
+      ]
+    },
+    "semantic_manifest": {
+      "result_claim": null,
+      "working_plan": {
+        "version": 1,
+        "hypotheses": [],
+        "evidence_ids": [],
+        "obligation_ids": [
+          "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+          "PATH_SCOPE",
+          "GIT_DIFF_CHECK",
+          "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+          "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+          "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+          "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+        ],
+        "open_questions": [],
+        "chosen_approach": "Inspect governed Reality and execute the bounded PWU contract.",
+        "completed_actions": [],
+        "approach_rationale": "No prior checkpoint exists for this execution session.",
+        "objective_reference": "a7b876d2-efb4-57ba-aaaa-b03cc0a7d18e"
+      },
+      "residual_obligations": [
+        "task-contract:f677d78b-49c4-5622-ba59-26d8e334f9aa",
+        "PATH_SCOPE",
+        "GIT_DIFF_CHECK",
+        "semantic-fact:4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+        "semantic-fact:bc7107dd-30a6-568a-a0e2-195cc34facb5",
+        "semantic-fact:800e9025-6025-5aef-a385-c52a6daff26b",
+        "semantic-fact:2749319e-6a5f-521a-ba5a-da549dd1fb70"
+      ]
+    },
+    "content_digest": "5669d0587111c1096598eca91c2d4b6127b3bdda569a38fd64fa9417896c0c5a",
+    "consistency_class": "APPLICATION_CONSISTENT",
+    "created_at": "2026-09-27T04:45:22.623889Z",
+    "committed_at": "2026-09-27T04:45:22.623889Z"
+  },
+  "settled_effects_before": [
+    {
+      "id": "bf1f5480-0563-4f56-92e2-6015bc033b4c",
+      "step_id": "8d27ef57-0ce0-4406-8eba-734782ea9d75",
+      "proposal_index": 0,
+      "tool_identity": "file.read",
+      "tool_version": "1",
+      "semantic_input": {
+        "path": "web/index.html"
+      },
+      "semantic_input_digest": "199e543966ccd9e64f33d1b3303986ca6090784e67372c7d59bc682b31e151ab",
+      "classification": "READ",
+      "conflict_domains": [
+        "web/index.html"
+      ],
+      "condition": "SETTLED",
+      "created_at": "2026-09-27T04:45:21.283260Z"
+    }
+  ],
+  "observed_at": "2026-09-27T04:45:26.769355+00:00",
+  "fault": "DECLARED_WORKER_PROCESS_LOSS",
+  "in_flight_tool_effect": false,
+  "database_or_source_mutation": false,
+  "human_work_rescue": false,
+  "human_acceptance": "PENDING"
+}

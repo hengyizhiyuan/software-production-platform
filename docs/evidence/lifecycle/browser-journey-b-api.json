@@ -1,0 +1,276 @@
+{
+  "interaction_id": "9dfe007c-82e9-4536-be5c-17e6019bf960",
+  "condition": "OPEN",
+  "current_work_id": "d2fac190-3593-4de2-8a74-e2148bd2baa2",
+  "created_at": "2026-09-27T04:44:18.795234Z",
+  "updated_at": "2026-09-27T04:44:19.146566Z",
+  "records": [
+    {
+      "record_id": "51c559fe-de7e-447d-a455-a41309d5bd3e",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "这个仓库以后可能会用到。",
+      "work_focus_id": "d2fac190-3593-4de2-8a74-e2148bd2baa2",
+      "supporting_references": [],
+      "created_at": "2026-09-27T04:44:19.146566Z"
+    }
+  ],
+  "conversation_messages": [
+    {
+      "message_id": "26de6cf3-0d3e-47f5-8158-8b0a65effe62",
+      "turn_id": "b74c0e3a-8850-473e-a2b3-f07fc987dfed",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "content": "这个仓库以后可能会用到。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "51c559fe-de7e-447d-a455-a41309d5bd3e",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T04:44:19.146566Z",
+      "updated_at": "2026-09-27T04:45:41.407267Z"
+    },
+    {
+      "message_id": "476a4579-b125-4617-922f-3f20e57df9b3",
+      "turn_id": "b74c0e3a-8850-473e-a2b3-f07fc987dfed",
+      "sequence": 2,
+      "actor": "WATT",
+      "content": "把它当成一条「备选素材」记下来，比当成已确定要用的东西更稳当。\n\n可记的内容其实有几个层次：一是识别信息——仓库地址、归属、默认分支；二是你设想它会派上用场的场景，比如将来做哪类项目、解决什么问题；三是当初吸引你的那条特性或做法；四是记录的日期和当时的理由。\n\n这几种东西的「保质期」不一样。位置信息基本不会变，属于硬事实；场景是你的推测，会随需求漂移；特性细节最容易过期，因为上游代码一直在动。所以分开写、别压成一句结论，以后回看时才分得清哪部分还需要重新核实。\n\n另一个值得分开的区分是「备注」和「承诺」。轻量备注只表示这是个候选；一旦进入真正的选型，它就要和其他候选放到一起比较——许可证、维护活跃度、依赖复杂度，以及私有仓可能需要的额外访问权限。私有仓还有个现实点：能不能用往往取决于授权，而不是仓库本身的质量。\n\n也可以换个归档方式，不按项目名记，而按「将来做哪类项目时用得上」打标签。这样它能和已有的候选清单归到一起，不至于积累成一堆脱离上下文的链接。\n\n等真的要用时，先确认它当前是否可访问、现在这个版本是否还满足当初记下它的理由，再决定要不要改动或换替代方案。在那之前，它只是一条随时可以撤销的线索。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "91344fc7-3d0a-4f9e-ac0f-6a2d7712513e",
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T04:45:41.407267Z",
+      "updated_at": "2026-09-27T04:45:41.407267Z"
+    }
+  ],
+  "turns": [
+    {
+      "turn_id": "b74c0e3a-8850-473e-a2b3-f07fc987dfed",
+      "interaction_id": "9dfe007c-82e9-4536-be5c-17e6019bf960",
+      "request_record_id": "51c559fe-de7e-447d-a455-a41309d5bd3e",
+      "assessment_id": "91344fc7-3d0a-4f9e-ac0f-6a2d7712513e",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T04:44:19.146566Z",
+      "started_at": "2026-09-27T04:45:07.604348Z",
+      "completed_at": "2026-09-27T04:45:41.407267Z",
+      "updated_at": "2026-09-27T04:45:41.407267Z"
+    }
+  ],
+  "human_said": [
+    "这个仓库以后可能会用到。"
+  ],
+  "latest_assessment": {
+    "assessment_id": "91344fc7-3d0a-4f9e-ac0f-6a2d7712513e",
+    "basis_fingerprint": "eaeff1876b3aa6ab044de76afc6672613fefb4f1a24c5c17617560a2f48a7e09",
+    "basis_last_sequence": 1,
+    "interpreted_motive": null,
+    "desired_outcome": null,
+    "design_intent_frame": null,
+    "candidate_context": [
+      "这个仓库以后可能会用到。"
+    ],
+    "candidate_constraints": [],
+    "current_requests": [],
+    "unresolved_material_questions": [],
+    "neutral_semantic_extractions": [
+      {
+        "extraction_id": "ext-repo-reference-1",
+        "kind": "REFERENCE",
+        "values": [
+          "这个仓库"
+        ],
+        "unit": null,
+        "source_record_id": "51c559fe-de7e-447d-a455-a41309d5bd3e",
+        "source_text": "这个仓库以后可能会用到。",
+        "explicit_roles": [
+          null
+        ]
+      }
+    ],
+    "engineering_semantic_facts": [],
+    "meanings": [
+      {
+        "kind": "CONTEXT",
+        "statement": "Human notes that a repository may be useful in the future; no use case, timing or action is specified.",
+        "source_record_ids": [
+          "51c559fe-de7e-447d-a455-a41309d5bd3e"
+        ],
+        "confidence": 0.9,
+        "rationale": "The record is a forward-looking note about a repository, with no request or change attached.",
+        "clarification_required": false
+      }
+    ],
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "basis_work_revision_id": null,
+    "basis_steering_plan_revision_id": null,
+    "basis_steering_step_id": null,
+    "basis_active_runtime_binding_id": null,
+    "supporting_references": [],
+    "natural_response": "记下这个仓库的位置和大概的使用场景（例如将来做哪类项目时用得上），先作为轻量备注保存；等到真的要用时，再通过仓库准备流程确认它是否可用、以及是否需要改动。",
+    "readiness": {
+      "status": "NOT_READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [],
+      "missing_information": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Material Work-admission information remains unresolved."
+      ],
+      "basis_fingerprint": "eaeff1876b3aa6ab044de76afc6672613fefb4f1a24c5c17617560a2f48a7e09"
+    },
+    "progressive_semantics": {
+      "turn_intent": "CONTEXT_ADDITION",
+      "basis_fingerprint": "eaeff1876b3aa6ab044de76afc6672613fefb4f1a24c5c17617560a2f48a7e09",
+      "source_record_ids": [
+        "51c559fe-de7e-447d-a455-a41309d5bd3e"
+      ],
+      "reception_meanings": [
+        "DEEP_WIC_WORKING_UNDERSTANDING"
+      ],
+      "working_motive": null,
+      "working_desired_outcome": null,
+      "working_facts": [
+        "这个仓库以后可能会用到。"
+      ],
+      "working_constraints": [],
+      "working_requests": [],
+      "explicit_assumptions": [],
+      "unresolved_human_decisions": [],
+      "deltas": [],
+      "pattern_signals": [
+        "REPOSITORY_SOURCE"
+      ],
+      "inference_disposition": "NO_INFERENCE",
+      "questions": [],
+      "selected_question": null,
+      "governance_candidate": "WORK_FORMATION_PROPOSAL",
+      "readiness": [
+        {
+          "target": "WORK_FORMATION",
+          "status": "NOT_READY",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [
+            "MOTIVE",
+            "DESIRED_OUTCOME"
+          ],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "eaeff1876b3aa6ab044de76afc6672613fefb4f1a24c5c17617560a2f48a7e09",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "WORK_REVISION",
+          "status": "NOT_APPLICABLE",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "eaeff1876b3aa6ab044de76afc6672613fefb4f1a24c5c17617560a2f48a7e09",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "DESIGN_PROGRESSION",
+          "status": "NOT_READY",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [
+            "CURRENT_FOCUS"
+          ],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "eaeff1876b3aa6ab044de76afc6672613fefb4f1a24c5c17617560a2f48a7e09",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        }
+      ],
+      "artifact_recommendation": null,
+      "factual_contradictions": [],
+      "semantic_policy_revision": "wic-semantic-policy-v1",
+      "question_policy_revision": "wic-question-value-v1"
+    },
+    "provider_identity": "deepseek-responses:semantic:request:714c0277-fe5a-4b6b-8837-db18d8526679",
+    "model_identity": "deepseek-flash",
+    "schema_version": "wic-assessment-v6",
+    "created_at": "2026-09-27T04:45:17.943893Z"
+  },
+  "latest_assessment_current": true,
+  "interpreted_motive": null,
+  "desired_outcome": null,
+  "design_intent_frame": null,
+  "candidate_context": [
+    "这个仓库以后可能会用到。"
+  ],
+  "candidate_constraints": [],
+  "current_requests": [],
+  "unresolved_material_questions": [],
+  "readiness": {
+    "status": "NOT_READY",
+    "profile": "LONG_LIVED_STEERING",
+    "profile_version": "v0",
+    "satisfied_requirements": [],
+    "missing_information": [
+      "MOTIVE",
+      "DESIRED_OUTCOME"
+    ],
+    "unresolved_material_questions": [],
+    "reasons": [
+      "Material Work-admission information remains unresolved."
+    ],
+    "basis_fingerprint": "eaeff1876b3aa6ab044de76afc6672613fefb4f1a24c5c17617560a2f48a7e09"
+  },
+  "candidate_engineering_resource_id": null,
+  "candidate_repository_identity": null,
+  "candidate_repository_ref": null,
+  "candidate_scope_summary": null,
+  "governed_work_id": null,
+  "governed_revision": null,
+  "current_work_focus": null,
+  "focus_classification": null,
+  "impact_disposition": null,
+  "candidate_change": null,
+  "work_revision_admission_status": "NOT_APPLICABLE",
+  "active_cycle_work_revision_id": null,
+  "active_cycle_impact_disposition": null,
+  "work_satisfaction_state": "NO_FOCUSED_WORK",
+  "interaction_relationship_state": "OPEN",
+  "work_focus_history": [
+    "d2fac190-3593-4de2-8a74-e2148bd2baa2"
+  ],
+  "latest_work_transition": null,
+  "new_work_formation_pending": true,
+  "production_request_detected": false,
+  "repository_source": null,
+  "production_admission_state": null,
+  "repository_acquisition_state": null,
+  "repository_observation": null,
+  "production_next_step": null,
+  "selected_design_schema_identity": null,
+  "selected_design_schema_version": null,
+  "design_schema_selection_rationale": null,
+  "design_stage": null,
+  "design_next_focus": null,
+  "design_focus_rationale": null,
+  "design_facilitation_strategy": null,
+  "design_progress_narrative": null
+}

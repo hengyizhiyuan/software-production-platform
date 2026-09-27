@@ -1,0 +1,1353 @@
+{
+  "interaction": {
+    "interaction_id": "ea83d4ec-ccc3-4b1a-826e-e47cb75ad839",
+    "condition": "OPEN",
+    "current_work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+    "created_at": "2026-09-27T04:43:32.288496Z",
+    "updated_at": "2026-09-27T04:44:15.170366Z",
+    "records": [
+      {
+        "record_id": "00ec7c88-09c7-4f0a-aff4-55a4905af835",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "source": "human:owner",
+        "content": "这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+        "work_focus_id": null,
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:43:33.070440Z"
+      }
+    ],
+    "conversation_messages": [
+      {
+        "message_id": "d550699e-2a13-43a6-bb8a-311941f6efff",
+        "turn_id": "ddbbd674-5cd7-4ff0-81b0-ca2f283a809d",
+        "sequence": 1,
+        "actor": "HUMAN",
+        "content": "这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": "00ec7c88-09c7-4f0a-aff4-55a4905af835",
+        "interpretation_assessment_id": null,
+        "design_result_references": [],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:43:33.070440Z",
+        "updated_at": "2026-09-27T04:44:17.950244Z"
+      },
+      {
+        "message_id": "05e4b6e1-96d7-4ddd-a64e-4e3af979e088",
+        "turn_id": "ddbbd674-5cd7-4ff0-81b0-ca2f283a809d",
+        "sequence": 2,
+        "actor": "WATT",
+        "content": "收到，仓库地址 http://qualified-git:8080/worker-interruption.git 已记录，改动目标就是首页把“开始使用”改为“立即体验”，其他内容保持不变，最后给你预览。接下来会启动仓库获取这一环节，完成后我会自动继续推进，不需要你再操作。",
+        "processing_status": "COMPLETED",
+        "interaction_record_id": null,
+        "interpretation_assessment_id": "ffd4261c-89e9-482e-a719-df5435bdeba6",
+        "design_result_references": [
+          "DESIGN_SCHEMA:watt:guided-design:existing-product-evolution@0.1"
+        ],
+        "governance_event_references": [],
+        "supporting_references": [],
+        "created_at": "2026-09-27T04:44:17.950244Z",
+        "updated_at": "2026-09-27T04:44:17.950244Z"
+      }
+    ],
+    "turns": [
+      {
+        "turn_id": "ddbbd674-5cd7-4ff0-81b0-ca2f283a809d",
+        "interaction_id": "ea83d4ec-ccc3-4b1a-826e-e47cb75ad839",
+        "request_record_id": "00ec7c88-09c7-4f0a-aff4-55a4905af835",
+        "assessment_id": "ffd4261c-89e9-482e-a719-df5435bdeba6",
+        "wic_mode": "WIC_VNEXT_CONTROLLED",
+        "status": "COMPLETED",
+        "failure_code": null,
+        "failure_message": null,
+        "created_at": "2026-09-27T04:43:33.070440Z",
+        "started_at": "2026-09-27T04:43:35.635027Z",
+        "completed_at": "2026-09-27T04:44:17.950244Z",
+        "updated_at": "2026-09-27T04:44:17.950244Z"
+      }
+    ],
+    "human_said": [
+      "这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。"
+    ],
+    "latest_assessment": {
+      "assessment_id": "ffd4261c-89e9-482e-a719-df5435bdeba6",
+      "basis_fingerprint": "c2d807dd9ca60a347fa9082254cb9cd558d37d90cc0e6ea86e0eb49f4453dcd3",
+      "basis_last_sequence": 1,
+      "interpreted_motive": "修改首页“开始使用”文案为“立即体验”，并生成预览。",
+      "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+      "design_intent_frame": {
+        "design_subject": "首页“开始使用”按钮文案",
+        "object_type": "FEATURE",
+        "business_context": null,
+        "desired_outcome": "首页按钮文案由“开始使用”改为“立即体验”，其他内容不变，并提供预览。",
+        "scope_level": "implementation",
+        "collaboration_mode": "execution",
+        "candidate_assumptions": [
+          "首页的“开始使用”是单一按钮或链接文案",
+          "替换文案不改变其链接、样式或交互",
+          "预览可在现有项目中生成"
+        ],
+        "ambiguities": [
+          "“开始使用”可能出现在多处，但请求语义指向首页该文案；具体位置由仓库发现确认",
+          "预览形式未指定"
+        ],
+        "confidence": 0.9
+      },
+      "candidate_context": [
+        "当前项目仓库：http://qualified-git:8080/worker-interruption.git"
+      ],
+      "candidate_constraints": [
+        "其他内容不变"
+      ],
+      "current_requests": [
+        "把首页“开始使用”改为“立即体验”",
+        "给我预览",
+        "这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。"
+      ],
+      "unresolved_material_questions": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ext_repo_url",
+          "kind": "REFERENCE",
+          "values": [
+            "http://qualified-git:8080/worker-interruption.git"
+          ],
+          "unit": null,
+          "source_record_id": "00ec7c88-09c7-4f0a-aff4-55a4905af835",
+          "source_text": "http://qualified-git:8080/worker-interruption.git",
+          "explicit_roles": [
+            "当前项目仓库"
+          ]
+        },
+        {
+          "extraction_id": "ext_cta_transition",
+          "kind": "STATE_CHANGE",
+          "values": [
+            "开始使用",
+            "立即体验"
+          ],
+          "unit": null,
+          "source_record_id": "00ec7c88-09c7-4f0a-aff4-55a4905af835",
+          "source_text": "把首页“开始使用”改为“立即体验”",
+          "explicit_roles": [
+            null,
+            null
+          ]
+        },
+        {
+          "extraction_id": "ext_scope_other_unchanged",
+          "kind": "SCOPE",
+          "values": [
+            "其他内容不变"
+          ],
+          "unit": null,
+          "source_record_id": "00ec7c88-09c7-4f0a-aff4-55a4905af835",
+          "source_text": "其他内容不变",
+          "explicit_roles": [
+            null
+          ]
+        },
+        {
+          "extraction_id": "ext_preview_request",
+          "kind": "BEHAVIOR",
+          "values": [
+            "给我预览"
+          ],
+          "unit": null,
+          "source_record_id": "00ec7c88-09c7-4f0a-aff4-55a4905af835",
+          "source_text": "给我预览",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+          "subject": "repo.url",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/worker-interruption.git",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "source_text": "http://qualified-git:8080/worker-interruption.git",
+            "source_extraction_ids": [
+              "ext_repo_url"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "bc7107dd-30a6-568a-a0e2-195cc34facb5",
+          "subject": "homepage.cta_label",
+          "relation": "STATE_TRANSITION",
+          "value": "立即体验",
+          "unit": null,
+          "scope": "首页",
+          "qualifiers": {
+            "from": "开始使用"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "source_text": "把首页“开始使用”改为“立即体验”",
+            "source_extraction_ids": [
+              "ext_cta_transition"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "800e9025-6025-5aef-a385-c52a6daff26b",
+          "subject": "homepage.content",
+          "relation": "SCOPE",
+          "value": "其他内容不变",
+          "unit": null,
+          "scope": "首页",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "source_text": "其他内容不变",
+            "source_extraction_ids": [
+              "ext_scope_other_unchanged"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        },
+        {
+          "id": "2749319e-6a5f-521a-ba5a-da549dd1fb70",
+          "subject": "preview.delivery",
+          "relation": "ACCEPTANCE_ASSERTION",
+          "value": true,
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "source_text": "给我预览",
+            "source_extraction_ids": [
+              "ext_preview_request"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": null
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONTEXT",
+          "statement": "当前项目仓库为 http://qualified-git:8080/worker-interruption.git",
+          "source_record_ids": [
+            "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+          ],
+          "confidence": 1.0,
+          "rationale": "Human 明确说明当前项目仓库地址。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "将首页“开始使用”改为“立即体验”",
+          "source_record_ids": [
+            "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+          ],
+          "confidence": 1.0,
+          "rationale": "Human 明确请求修改首页文案。",
+          "clarification_required": false
+        },
+        {
+          "kind": "CONSTRAINT",
+          "statement": "其他内容不变",
+          "source_record_ids": [
+            "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+          ],
+          "confidence": 1.0,
+          "rationale": "Human 明确限定修改范围，其他内容不得改变。",
+          "clarification_required": false
+        },
+        {
+          "kind": "REQUEST",
+          "statement": "提供预览",
+          "source_record_ids": [
+            "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+          ],
+          "confidence": 1.0,
+          "rationale": "Human 明确要求给出预览。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "candidate_change": null,
+      "basis_work_revision_id": null,
+      "basis_steering_plan_revision_id": null,
+      "basis_steering_step_id": null,
+      "basis_active_runtime_binding_id": null,
+      "supporting_references": [],
+      "natural_response": "在已给仓库中定位首页的“开始使用”文案，替换为“立即体验”，保持其他内容不变，并生成预览；若存在多处，仅处理首页该 CTA。",
+      "readiness": {
+        "status": "READY",
+        "profile": "LONG_LIVED_STEERING",
+        "profile_version": "v0",
+        "satisfied_requirements": [
+          "MOTIVE",
+          "DESIRED_OUTCOME"
+        ],
+        "missing_information": [],
+        "unresolved_material_questions": [],
+        "reasons": [
+          "Motive and desired outcome are clear enough to form governed Work."
+        ],
+        "basis_fingerprint": "c2d807dd9ca60a347fa9082254cb9cd558d37d90cc0e6ea86e0eb49f4453dcd3"
+      },
+      "progressive_semantics": {
+        "turn_intent": "ACTION_REQUEST",
+        "basis_fingerprint": "c2d807dd9ca60a347fa9082254cb9cd558d37d90cc0e6ea86e0eb49f4453dcd3",
+        "source_record_ids": [
+          "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+        ],
+        "reception_meanings": [
+          "DEEP_WIC_WORKING_UNDERSTANDING"
+        ],
+        "working_motive": "修改首页“开始使用”文案为“立即体验”，并生成预览。",
+        "working_desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+        "working_facts": [
+          "当前项目仓库：http://qualified-git:8080/worker-interruption.git"
+        ],
+        "working_constraints": [
+          "其他内容不变"
+        ],
+        "working_requests": [
+          "把首页“开始使用”改为“立即体验”",
+          "给我预览",
+          "这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。"
+        ],
+        "explicit_assumptions": [],
+        "unresolved_human_decisions": [],
+        "deltas": [
+          {
+            "id": "66e44e1d-ef92-553a-8709-0b287a0d7950",
+            "category": "MOTIVE",
+            "operation": "ADDED",
+            "value": "修改首页“开始使用”文案为“立即体验”，并生成预览。",
+            "prior_value": null,
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "basis_fingerprint": "c2d807dd9ca60a347fa9082254cb9cd558d37d90cc0e6ea86e0eb49f4453dcd3",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+            "authority": "ADVISORY"
+          },
+          {
+            "id": "d1b5e646-3c16-5e80-8dad-56a2a0568497",
+            "category": "CONSTRAINT",
+            "operation": "ADDED",
+            "value": "其他内容不变",
+            "prior_value": null,
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "basis_fingerprint": "c2d807dd9ca60a347fa9082254cb9cd558d37d90cc0e6ea86e0eb49f4453dcd3",
+            "prior_assessment_id": null,
+            "supersedes_delta_ids": [],
+            "confidence": 0.9,
+            "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+            "authority": "ADVISORY"
+          }
+        ],
+        "pattern_signals": [
+          "BOUNDED_CHANGE",
+          "PRODUCTION_REQUEST",
+          "REPOSITORY_SOURCE"
+        ],
+        "inference_disposition": "NO_INFERENCE",
+        "questions": [],
+        "selected_question": null,
+        "governance_candidate": "WORK_FORMATION_PROPOSAL",
+        "readiness": [
+          {
+            "target": "WORK_FORMATION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "c2d807dd9ca60a347fa9082254cb9cd558d37d90cc0e6ea86e0eb49f4453dcd3",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "WORK_REVISION",
+            "status": "NOT_APPLICABLE",
+            "satisfied_evidence": [],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "c2d807dd9ca60a347fa9082254cb9cd558d37d90cc0e6ea86e0eb49f4453dcd3",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "target": "DESIGN_PROGRESSION",
+            "status": "READY",
+            "satisfied_evidence": [
+              "CURRENT_FOCUS"
+            ],
+            "missing_material_evidence": [],
+            "unresolved_human_decisions": [],
+            "explicit_assumptions": [],
+            "material_risks": [],
+            "useful_work_may_continue": true,
+            "basis_fingerprint": "c2d807dd9ca60a347fa9082254cb9cd558d37d90cc0e6ea86e0eb49f4453dcd3",
+            "profile_revision": "wic-transition-readiness-v1",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "artifact_recommendation": null,
+        "factual_contradictions": [],
+        "semantic_policy_revision": "wic-semantic-policy-v1",
+        "question_policy_revision": "wic-question-value-v1"
+      },
+      "provider_identity": "deepseek-responses:semantic:request:a55e6baa-8223-4a4d-8b97-3b1aa897ecd8",
+      "model_identity": "deepseek-flash",
+      "schema_version": "wic-assessment-v6",
+      "created_at": "2026-09-27T04:44:07.117232Z"
+    },
+    "latest_assessment_current": false,
+    "interpreted_motive": "修改首页“开始使用”文案为“立即体验”，并生成预览。",
+    "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+    "design_intent_frame": {
+      "design_subject": "首页“开始使用”按钮文案",
+      "object_type": "FEATURE",
+      "business_context": null,
+      "desired_outcome": "首页按钮文案由“开始使用”改为“立即体验”，其他内容不变，并提供预览。",
+      "scope_level": "implementation",
+      "collaboration_mode": "execution",
+      "candidate_assumptions": [
+        "首页的“开始使用”是单一按钮或链接文案",
+        "替换文案不改变其链接、样式或交互",
+        "预览可在现有项目中生成"
+      ],
+      "ambiguities": [
+        "“开始使用”可能出现在多处，但请求语义指向首页该文案；具体位置由仓库发现确认",
+        "预览形式未指定"
+      ],
+      "confidence": 0.9
+    },
+    "candidate_context": [
+      "当前项目仓库：http://qualified-git:8080/worker-interruption.git"
+    ],
+    "candidate_constraints": [
+      "其他内容不变"
+    ],
+    "current_requests": [
+      "把首页“开始使用”改为“立即体验”",
+      "给我预览",
+      "这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。"
+    ],
+    "unresolved_material_questions": [],
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "c2d807dd9ca60a347fa9082254cb9cd558d37d90cc0e6ea86e0eb49f4453dcd3"
+    },
+    "candidate_engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+    "candidate_repository_identity": "http://qualified-git:8080/worker-interruption.git",
+    "candidate_repository_ref": "refs/heads/main",
+    "candidate_scope_summary": "Long-lived Work authority envelope for http://qualified-git:8080/worker-interruption.git at refs/heads/main",
+    "governed_work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+    "governed_revision": {
+      "revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873",
+      "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+      "revision_number": 2,
+      "previous_revision_id": "3e220d18-d987-5afb-9d5b-97fb61654786",
+      "basis_fingerprint": "81b8e486ca5c62a59c8b4f6f9adf111297ef40eafb22d28c4ec035e6f77ec7ea",
+      "revision_fingerprint": "60cb560a077cf9f026d2b9f177bbbc441da049d9c4941a328c04ec64c8b0c0b9",
+      "source_interaction_id": "ea83d4ec-ccc3-4b1a-826e-e47cb75ad839",
+      "source_kind": "ASSET_SCOPE_ADMISSION",
+      "source_assessment_id": null,
+      "source_record_ids": [
+        "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+      ],
+      "motive": "修改首页“开始使用”文案为“立即体验”，并生成预览。",
+      "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+      "context_facts": [
+        "当前项目仓库：http://qualified-git:8080/worker-interruption.git"
+      ],
+      "constraints": [
+        "其他内容不变"
+      ],
+      "requests": [
+        "把首页“开始使用”改为“立即体验”",
+        "给我预览",
+        "这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。"
+      ],
+      "engineering_semantic_facts": [
+        {
+          "id": "4fb45c6d-9c35-5c61-9cf7-4d0ff006f049",
+          "subject": "repo.url",
+          "relation": "REFERENCE",
+          "value": "http://qualified-git:8080/worker-interruption.git",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "source_text": "http://qualified-git:8080/worker-interruption.git",
+            "source_extraction_ids": [
+              "ext_repo_url"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "3e220d18-d987-5afb-9d5b-97fb61654786"
+        },
+        {
+          "id": "bc7107dd-30a6-568a-a0e2-195cc34facb5",
+          "subject": "homepage.cta_label",
+          "relation": "STATE_TRANSITION",
+          "value": "立即体验",
+          "unit": null,
+          "scope": "首页",
+          "qualifiers": {
+            "from": "开始使用"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "source_text": "把首页“开始使用”改为“立即体验”",
+            "source_extraction_ids": [
+              "ext_cta_transition"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "3e220d18-d987-5afb-9d5b-97fb61654786"
+        },
+        {
+          "id": "800e9025-6025-5aef-a385-c52a6daff26b",
+          "subject": "homepage.content",
+          "relation": "SCOPE",
+          "value": "其他内容不变",
+          "unit": null,
+          "scope": "首页",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "source_text": "其他内容不变",
+            "source_extraction_ids": [
+              "ext_scope_other_unchanged"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "3e220d18-d987-5afb-9d5b-97fb61654786"
+        },
+        {
+          "id": "2749319e-6a5f-521a-ba5a-da549dd1fb70",
+          "subject": "preview.delivery",
+          "relation": "ACCEPTANCE_ASSERTION",
+          "value": true,
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "provenance": {
+            "source_record_ids": [
+              "00ec7c88-09c7-4f0a-aff4-55a4905af835"
+            ],
+            "source_text": "给我预览",
+            "source_extraction_ids": [
+              "ext_preview_request"
+            ],
+            "role_origin": "EXPLICIT"
+          },
+          "supersedes_fact_ids": [],
+          "admitted_work_revision_id": "3e220d18-d987-5afb-9d5b-97fb61654786"
+        }
+      ],
+      "engineering_scope_id": "65c8a0e4-d134-47a5-ad19-fd7d692409e7",
+      "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+      "scope_basis_fingerprint": "11df7cf39577aaa0803c4e215119658a3e4e61c012293e26c179e134b74586ca",
+      "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+      "repository_ref": "refs/heads/main",
+      "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+      "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+      "governance_record_id": "f36e59e6-4b33-4d88-ad10-34eee44d84fc",
+      "supporting_references": [
+        "INTERACTION_RECORD:00ec7c88-09c7-4f0a-aff4-55a4905af835",
+        "REPOSITORY_OBSERVATION:1a0235579108d53aa4a937ccfdc8934a2cfcd295045437738e0316b625e72d5c"
+      ],
+      "change_set": [
+        "asset:PRODUCTION_TARGET_ADMITTED"
+      ],
+      "rationale": "Bind the exact repository Reality acquired from the Human-supplied source before Steering begins.",
+      "admitted_by": "human:owner",
+      "schema_version": "wic-work-reality-v3",
+      "created_at": "2026-09-27T04:44:21.151556Z"
+    },
+    "current_work_focus": "修改首页“开始使用”文案为“立即体验”，并生成预览。 → 首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "work_revision_admission_status": "NOT_APPLICABLE",
+    "active_cycle_work_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873",
+    "active_cycle_impact_disposition": null,
+    "work_satisfaction_state": "IN_PROGRESS",
+    "interaction_relationship_state": "OPEN",
+    "work_focus_history": [
+      "690e541b-e6a1-5164-acac-17551199fc97"
+    ],
+    "latest_work_transition": null,
+    "new_work_formation_pending": false,
+    "production_request_detected": true,
+    "repository_source": "http://qualified-git:8080/worker-interruption.git",
+    "production_admission_state": "WORK_CREATED",
+    "repository_acquisition_state": "READY",
+    "repository_observation": {
+      "tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671",
+      "paths": [
+        ".gitignore",
+        "Dockerfile",
+        "README.md",
+        "migrations/001_initial.sql",
+        "package.json",
+        "server.py",
+        "tests/application.cjs",
+        "web/app.js",
+        "web/index.html",
+        "web/styles.css"
+      ],
+      "title": "修改首页“开始使用”文案为“立即体验”，并生成预览。",
+      "source": "http://qualified-git:8080/worker-interruption.git",
+      "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+      "revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+      "condition": "READY",
+      "description": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+      "fingerprint": "1a0235579108d53aa4a937ccfdc8934a2cfcd295045437738e0316b625e72d5c",
+      "observed_at": "2026-09-27T04:44:20.534307+00:00",
+      "resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+      "context_path": "README.md",
+      "human_message": "Repository is ready.",
+      "target_branch": null,
+      "attempt_number": 1,
+      "interaction_id": "ea83d4ec-ccc3-4b1a-826e-e47cb75ad839",
+      "operation_kind": "ACQUIRE",
+      "repository_ref": "refs/heads/main",
+      "base_resource_id": null,
+      "failure_category": null,
+      "intake_request_id": "33923291-249b-5f19-9daa-1a1ccc69d2d0",
+      "operation_evidence": {
+        "verified": true,
+        "connector_id": "builtin:git",
+        "capability_id": "git.repository.acquire",
+        "operation_ref": "repository-intake:33923291-249b-5f19-9daa-1a1ccc69d2d0",
+        "resulting_branch": "refs/heads/main",
+        "resulting_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+        "workspace_reference": "/var/lib/spg/repository-assets/33923291-249b-5f19-9daa-1a1ccc69d2d0"
+      },
+      "previous_attempt_id": null,
+      "repository_identity": "http://qualified-git:8080/worker-interruption.git"
+    },
+    "production_next_step": "Continue Steering against the acquired repository Reality.",
+    "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+    "selected_design_schema_version": "0.1",
+    "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+    "design_stage": "Current Reality",
+    "design_next_focus": "Establish the trusted current product and runtime reality.",
+    "design_focus_rationale": "Current Reality prevents an existing product from evolving on unsupported assumptions.",
+    "design_facilitation_strategy": "CLARIFY",
+    "design_progress_narrative": "Selected Existing Product Evolution v0.1. Current stage: Current Reality. 0 of 7 design areas are resolved. Next, establish the trusted current product and runtime reality."
+  },
+  "observed_at": "2026-09-27T05:13:30.162076+00:00",
+  "work": {
+    "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+    "product_id": "3d0ea3ff-8a9d-47b2-a03d-4dd106daf679",
+    "goal_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "raw_user_requirement": "修改首页“开始使用”文案为“立即体验”，并生成预览。",
+    "title": "修改首页“开始使用”文案为“立即体验”，并生成预览。",
+    "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+    "constraints": [
+      "其他内容不变"
+    ],
+    "target_kind": "CODE_WORK",
+    "artifact_target": null,
+    "change_proposal": {
+      "proposal_id": "b18845ae-2835-5466-940f-75622cd80822",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+      "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+      "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+      "source_ref": "refs/heads/main",
+      "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+      "proposed_targets": [
+        {
+          "path": "web/index.html",
+          "operation": "UPDATE",
+          "disposition": "REQUIRED",
+          "rationale": "This is the only observed file containing the homepage button text “开始使用”; it is the single surface whose label token must change to “立即体验”. server.py already serves this exact file at \"/\", so no other source file is needed for the requested change.",
+          "evidence": "Exact 7d32e2b24b252c91f929c56148b55a8232bd12db:web/index.html witness: <button id=\"start\">开始使用</button>",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [
+        "server.py",
+        "migrations/001_initial.sql",
+        "web/app.js",
+        "web/styles.css",
+        "Dockerfile",
+        "package.json",
+        "tests/application.cjs",
+        "README.md",
+        ".gitignore"
+      ],
+      "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+      "confidence": "MEDIUM",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null,
+          "identity": "PATH_SCOPE"
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null,
+          "identity": "GIT_DIFF_CHECK"
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": [],
+      "proposal_fingerprint": "100093b1bf9ead1bb54f0132b3ccca8e7c54571411f5006f7acd6780d6ec9f82"
+    },
+    "change_contract": null,
+    "production_plan": {
+      "proposal_id": "3f15ff35-756b-5b40-a508-739a8c6ef5f8",
+      "target_kind": "CODE_WORK",
+      "objective": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+      "desired_outcome": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Prepare the repository-inspected code targets: web/index.html."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": null,
+      "artifact_targets": [],
+      "change_proposal": {
+        "proposal_id": "b18845ae-2835-5466-940f-75622cd80822",
+        "target_kind": "CODE_WORK",
+        "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+        "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+        "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+        "source_ref": "refs/heads/main",
+        "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db",
+        "proposed_targets": [
+          {
+            "path": "web/index.html",
+            "operation": "UPDATE",
+            "disposition": "REQUIRED",
+            "rationale": "This is the only observed file containing the homepage button text “开始使用”; it is the single surface whose label token must change to “立即体验”. server.py already serves this exact file at \"/\", so no other source file is needed for the requested change.",
+            "evidence": "Exact 7d32e2b24b252c91f929c56148b55a8232bd12db:web/index.html witness: <button id=\"start\">开始使用</button>",
+            "confidence": "HIGH"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [
+          "server.py",
+          "migrations/001_initial.sql",
+          "web/app.js",
+          "web/styles.css",
+          "Dockerfile",
+          "package.json",
+          "tests/application.cjs",
+          "README.md",
+          ".gitignore"
+        ],
+        "rationale": "Proposed from exact-baseline path, symbol, and adjacent-test evidence.",
+        "confidence": "MEDIUM",
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null,
+            "identity": "PATH_SCOPE"
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null,
+            "identity": "GIT_DIFF_CHECK"
+          }
+        ],
+        "provenance": {
+          "provider_identity": "provider:repository-aware-change-proposal-lite",
+          "provider_version": "v1",
+          "inspection_method": "git-object-read-only:path-enumeration+text-search"
+        },
+        "unresolved_scope_questions": [],
+        "proposal_fingerprint": "100093b1bf9ead1bb54f0132b3ccca8e7c54571411f5006f7acd6780d6ec9f82"
+      },
+      "change_contract": null,
+      "inherited_constraints": [
+        "其他内容不变"
+      ],
+      "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+      "assumptions": [
+        "The admitted Work can be executed through one governed PWU and Attempt lineage."
+      ],
+      "unresolved_questions": [],
+      "fit_classification": "ONE_PWU_FIT",
+      "engineering_resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+      "repository_identity": "http://qualified-git:8080/worker-interruption.git",
+      "source_baseline_id": "0c67af54-57cd-418a-a432-fb315580f2ce",
+      "source_revision": "7d32e2b24b252c91f929c56148b55a8232bd12db"
+    },
+    "production_plan_runtime": null,
+    "tags": [],
+    "engineering_scope": {
+      "engineering_scope_id": "65c8a0e4-d134-47a5-ad19-fd7d692409e7",
+      "summary": "Work assets; production target http://qualified-git:8080/worker-interruption.git",
+      "condition": "ADMITTED",
+      "resources": [
+        {
+          "resource_id": "69b45127-e1b2-48ee-b9ab-f95f5e2b3737",
+          "condition": "ACTIVE"
+        }
+      ]
+    },
+    "status": "RUNNING",
+    "current_production_step": "PRODUCE",
+    "most_recent_meaningful_event": "EXECUTOR_DISPATCH_RECORDED",
+    "what_happens_next": "Observe production Reality",
+    "human_attention_required": false,
+    "result_summary": null,
+    "current_work_reality_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873",
+    "steering_enabled": true,
+    "current_steering_step_id": "5c00c23f-8fcf-41df-ba1b-b8aecb400b16",
+    "current_steering_step_type": "PRODUCE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "cd179b0f-da34-4553-9629-d4ef220086fb",
+    "current_production_cycle_trusted": false,
+    "latest_trusted_runtime_commit_id": null,
+    "work_complete": false,
+    "automatic_progression_state": "WAITING_PRODUCTION",
+    "last_stop_reason": "PRODUCTION_RUNNING",
+    "execution_progress": {
+      "phase": "PRODUCE",
+      "activity": "Prepare or dispatch current Attempt",
+      "transitions_completed": 2,
+      "transitions_total": null,
+      "percent_complete": null,
+      "started_at": "2026-09-27T04:45:02.333731Z",
+      "updated_at": "2026-09-27T04:45:13.768302Z",
+      "elapsed_seconds": 1707.88699,
+      "still_working": true,
+      "blocked_reason": null
+    },
+    "guided_design": null,
+    "next_owner": "EXECUTOR",
+    "control_state_valid": true,
+    "control_state_violations": []
+  },
+  "steering": {
+    "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+    "work_objective": "In the existing small operations-site fixture, change the homepage primary button label from “开始使用” to “立即体验” with no other content change, then serve the site through its existing entrypoint `python server.py` on port 8080 so a viewable preview of the updated homepage is available to the Human. Only the button text token in web/index.html is altered; all routes, API behaviour, schema, seeded fixture data, styles, scripts, Dockerfile and package metadata remain exactly as at baseline revision 7d32e2b24b252c91f929c56148b55a8232bd12db.",
+    "steering_enabled": true,
+    "steering_plan_id": "4170b4ea-25dd-44e3-8a65-75978bfb6f50",
+    "active_revision_id": "8b38991f-c3ce-486a-804b-88b97c512d51",
+    "active_revision_number": 1,
+    "completed_steps": [
+      {
+        "step_id": "bab1e74d-5299-480a-a7ea-c2c4a2a41ef5",
+        "type": "DESIGN",
+        "objective": "首页显示“立即体验”，其他内容不变，且提供可查看的预览。\n\nHuman explicit request:\n这是当前项目仓库：http://qualified-git:8080/worker-interruption.git\n把首页“开始使用”改为“立即体验”，其他内容不变，给我预览。",
+        "completion_condition": "A bounded design direction is supported by current Reality",
+        "position": 1,
+        "state": "CLOSED",
+        "design_issue_key": null
+      }
+    ],
+    "current_step": {
+      "step_id": "5c00c23f-8fcf-41df-ba1b-b8aecb400b16",
+      "type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "completion_condition": "The exact bounded production cycle reaches trusted Runtime Commit",
+      "position": 2,
+      "state": "CURRENT",
+      "design_issue_key": null
+    },
+    "known_next_steps": [
+      {
+        "step_id": "9a406e6f-a380-48ec-b72c-4461d145f30a",
+        "type": "VERIFY_ACCEPT",
+        "objective": "Assess the trusted result against the long-lived outcome",
+        "completion_condition": "Governed evidence supports product acceptance",
+        "position": 3,
+        "state": "KNOWN",
+        "design_issue_key": null
+      },
+      {
+        "step_id": "89c255e6-79ea-4008-8f77-4df4d68845b7",
+        "type": "COMPLETE",
+        "objective": "Complete the admitted long-lived Work",
+        "completion_condition": "The admitted Work outcome is satisfied",
+        "position": 4,
+        "state": "KNOWN",
+        "design_issue_key": null
+      }
+    ],
+    "plan_changes": [],
+    "latest_decision": {
+      "decision_id": "6a45146e-f202-4610-ba42-2e3f602f3c75",
+      "next_step_type": "PRODUCE",
+      "objective": "Produce the next exact change admitted from current Reality",
+      "reason": "The current governed Step is ready to yield to the next admitted ordered Step",
+      "outcome": "AUTO_CONTINUE",
+      "human_required": false,
+      "attention_reason": null,
+      "reality_refs": [
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "bbcff938-8d3f-598b-bc7f-4adfe08c83a4"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "f36e59e6-4b33-4d88-ad10-34eee44d84fc"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "adbc8fdd-9df5-4b75-af68-39f00f0e0266"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "0c67af54-57cd-418a-a432-fb315580f2ce"
+        },
+        {
+          "kind": "WORK",
+          "identity": "690e541b-e6a1-5164-acac-17551199fc97"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "da05809f-8c08-5b61-b721-0ca9c265c873"
+        }
+      ]
+    },
+    "selection_rationale": "The current governed Step is ready to yield to the next admitted ordered Step",
+    "steering_outcome": "AUTO_CONTINUE",
+    "automatic_progression_state": "WAITING_PRODUCTION",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "cd179b0f-da34-4553-9629-d4ef220086fb",
+    "current_production_cycle_trusted": false,
+    "human_attention_required": false,
+    "last_stop_reason": "PRODUCTION_RUNNING"
+  },
+  "refinement": {
+    "count": 1,
+    "events": [
+      {
+        "id": "c1a212ec-e75d-4d09-adda-c59527244828",
+        "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+        "operation_id": "bab1e74d-5299-480a-a7ea-c2c4a2a41ef5",
+        "created_at": "2026-09-27T04:44:48.002559Z",
+        "failure_family": "CANDIDATE_INCONSISTENT",
+        "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "semantic_version": 2,
+        "refinement_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "signal_kind": "CANDIDATE_INCONSISTENT",
+        "affected_component": "semantic/scope",
+        "expected_reality": {},
+        "observed_reality": {},
+        "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+        "root_cause_classification": "CANDIDATE_INCONSISTENT",
+        "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+        "evidence_references": [
+          "source-baseline:0c67af54-57cd-418a-a432-fb315580f2ce"
+        ],
+        "repairability": "AUTONOMOUSLY_REPAIRABLE",
+        "observation_confidence": "OBSERVED_SUCCESS",
+        "budget_decision": {
+          "bounded": true,
+          "attempt_count": 2,
+          "human_escalated": false
+        },
+        "diagnostic_evidence": {
+          "signal": "SCOPE_INFLATION",
+          "required_paths": [
+            "web/index.html"
+          ],
+          "candidate_paths": [
+            "web/index.html"
+          ],
+          "authority_expanded": false,
+          "rejected_behaviors": [
+            "Editing server.py (routes, API, migration or serving logic) — the request changes no route or behavior, and \"/\" already serves web/index.html.",
+            "Editing web/app.js or web/styles.css — no script or style text contains “开始使用” and the constraint is “其他内容不变”.",
+            "Editing tests/application.cjs — no test asserts the button label, so no mandatory oracle change is entailed.",
+            "Editing README.md, Dockerfile, migrations/001_initial.sql or package.json — documentation, packaging and fixture schema are unaffected and unrequested.",
+            "Creating new files (new pages, routes, preview scaffolds) — a link or label change never entails creating its destination, and the existing entrypoint already provides the only required serving path.",
+            "Treating preview availability, served-runtime verification, Human review or Delivery Authorization as repository source scope."
+          ]
+        },
+        "final_result": "LOCAL_OBLIGATION_RECOVERED",
+        "work_resume_result": "RESUMED",
+        "extra_elapsed_seconds": 0,
+        "model_token_usage": {
+          "unknown": false,
+          "input_tokens": 10710,
+          "total_tokens": 13073,
+          "cached_tokens": 512,
+          "output_tokens": 2363,
+          "reasoning_tokens": 184
+        },
+        "compute_overhead": {},
+        "known_failure_match": true,
+        "platform_improvement_candidate_ref": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+        "status": "VERIFIED",
+        "updated_at": "2026-09-27T04:44:48.002559Z"
+      }
+    ],
+    "metrics": {
+      "native_attempts": 1,
+      "native_self_refine_events": 0,
+      "self_refine_events": 1,
+      "self_refine_rate": 0.0,
+      "first_pass_success_rate": 0.0,
+      "recovered": 0,
+      "local_obligation_recovered": 1,
+      "recovery_scope": "LOCAL_OBLIGATION; Work convergence is independently observed",
+      "escalated": 0,
+      "failed": 0,
+      "active": 0,
+      "classification_counts": {
+        "ROUTINE_STOCHASTIC_REFINEMENT": 0,
+        "DEGRADING_OR_RECURRING_REFINEMENT": 1,
+        "SYSTEMIC_OR_NON_CONVERGING_INCIDENT": 0,
+        "LEGACY_EXECUTION_INCIDENT": 0
+      },
+      "convergence_success_rate": 1.0,
+      "average_refinement_attempts": 2.0,
+      "p95_refinement_attempts": 2,
+      "average_refinement_seconds": 0.0,
+      "p95_refinement_seconds": 0,
+      "observed_refinement_tokens": 13073,
+      "observed_refinement_tool_effects": 0,
+      "unsafe_repair_blocks": 0,
+      "recurring_signatures": {},
+      "improvement_candidates": [
+        {
+          "reference": "refinement-signature:d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "component": "semantic/scope",
+          "occurrences": 1,
+          "affected_works": 1,
+          "observed_tokens": 13073,
+          "observed_seconds": 0,
+          "systemic": false,
+          "status": "PROPOSED"
+        }
+      ],
+      "human_escalation_observation_count": 1,
+      "human_escalation_rate": 0.0,
+      "systemic_incident_rate": 0.0
+    },
+    "work_convergence": [
+      {
+        "id": "72d25fb0-abda-478d-9474-08af9302501e",
+        "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+        "intent_identity": "514075397c8c6f62315d030c1acb7059a9aa9bd552deb164cc95ad2105610e10",
+        "predecessor_id": null,
+        "sequence": 1,
+        "boundary": "SEMANTIC_RESULT_ADMISSION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "6650a1384541fd3caead8a3fe987392bc116a72ff5819dae043dc615275df98a",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 1,
+        "no_progress_count": 0,
+        "elapsed_seconds": 0,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "3d0ea3ff-8a9d-47b2-a03d-4dd106daf679",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:44:48.736417Z"
+      },
+      {
+        "id": "38892bff-7a32-4a27-91ac-bc003b0d6a22",
+        "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+        "intent_identity": "514075397c8c6f62315d030c1acb7059a9aa9bd552deb164cc95ad2105610e10",
+        "predecessor_id": "72d25fb0-abda-478d-9474-08af9302501e",
+        "sequence": 2,
+        "boundary": "STEP_TRANSITION",
+        "failure_signature": null,
+        "candidate_identity": null,
+        "reality_identity": "6650a1384541fd3caead8a3fe987392bc116a72ff5819dae043dc615275df98a",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 2,
+        "no_progress_count": 0,
+        "elapsed_seconds": 8,
+        "token_usage": {
+          "status": "UNREPORTED"
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED"
+        },
+        "compute_cost": {
+          "status": "UNREPORTED",
+          "resource_units": {},
+          "execution_seconds": 0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "3d0ea3ff-8a9d-47b2-a03d-4dd106daf679",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:44:57.528388Z"
+      },
+      {
+        "id": "f76f8688-1420-4831-8547-47d25e9d741c",
+        "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+        "intent_identity": "514075397c8c6f62315d030c1acb7059a9aa9bd552deb164cc95ad2105610e10",
+        "predecessor_id": "38892bff-7a32-4a27-91ac-bc003b0d6a22",
+        "sequence": 3,
+        "boundary": "PRODUCTION_CYCLE_ADMISSION",
+        "failure_signature": "55aace645e56bf76dbff41e8f14eb53f17cab59fa84b37f74f8120e5170fbcf3",
+        "candidate_identity": null,
+        "reality_identity": "6650a1384541fd3caead8a3fe987392bc116a72ff5819dae043dc615275df98a",
+        "missing_acceptance": [
+          "CANDIDATE_SEALED",
+          "REVIEW_RUNTIME_READY",
+          "SOURCE_VERIFIED"
+        ],
+        "attempts": 3,
+        "no_progress_count": 0,
+        "elapsed_seconds": 16,
+        "token_usage": {
+          "status": "UNREPORTED",
+          "input_tokens": 0,
+          "total_tokens": 0,
+          "output_tokens": 0
+        },
+        "model_cost": {
+          "amount": null,
+          "status": "UNREPORTED",
+          "by_currency": {},
+          "unreported_attempt_count": 0
+        },
+        "compute_cost": {
+          "status": "OBSERVED",
+          "resource_units": {},
+          "execution_seconds": 0.0
+        },
+        "human_intervention_count": 0,
+        "previous_repair_class": "DEGRADING_OR_RECURRING_REFINEMENT",
+        "condition": "NOT_YET_CONVERGED",
+        "evidence": {
+          "source": "persisted Work/Runtime and Candidate Preview",
+          "product_id": "3d0ea3ff-8a9d-47b2-a03d-4dd106daf679",
+          "human_acceptance": "PENDING",
+          "delivery_authorized": false,
+          "owner_budget_exhausted": false
+        },
+        "created_at": "2026-09-27T04:45:04.802904Z"
+      }
+    ]
+  },
+  "queue": [
+    {
+      "queue_entry_id": "9134fb4d-d83f-4090-bf27-8c35b772c4ae",
+      "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+      "pwu_id": "0ee8f802-7ec6-4382-8cbf-064ab5bbf69d",
+      "attempt_id": "54e8524d-584e-47cc-8110-11a85032c3e8",
+      "fairness_group": "work:690e541b-e6a1-5164-acac-17551199fc97",
+      "condition": "EXECUTING",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-27T04:45:17.543210Z",
+      "available_at": "2026-09-27T04:45:17.495707Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 1,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-27T05:13:30.542901Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "da05809f-8c08-5b61-b721-0ca9c265c873"
+    }
+  ],
+  "preview": {
+    "mode": null,
+    "status": "NOT_READY",
+    "session": null
+  },
+  "attention": [],
+  "economics": {
+    "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+    "product_id": "3d0ea3ff-8a9d-47b2-a03d-4dd106daf679",
+    "pwu_count": 1,
+    "join_count": 0,
+    "pwu": [
+      {
+        "pwu_id": "0ee8f802-7ec6-4382-8cbf-064ab5bbf69d",
+        "node_id": null,
+        "run_id": "cd179b0f-da34-4553-9629-d4ef220086fb",
+        "condition": "PROPOSED",
+        "attempt_count": 1,
+        "outcomes": [
+          "UNKNOWN"
+        ],
+        "providers": [
+          "deepseek"
+        ],
+        "execution_seconds": 5.5807839999999995,
+        "duration_observed": true,
+        "queue_wait_seconds": 0.656658,
+        "token_usage": {
+          "input_tokens": 24642,
+          "output_tokens": 242,
+          "total_tokens": 24884,
+          "status": "OBSERVED"
+        },
+        "resource_units": {
+          "inference_submission": 2,
+          "tool_effect": 1
+        }
+      }
+    ],
+    "token_usage": {
+      "input_tokens": 24642,
+      "output_tokens": 242,
+      "total_tokens": 24884,
+      "status": "OBSERVED"
+    },
+    "observed_provider_spend": {
+      "status": "UNREPORTED",
+      "by_currency": {},
+      "unreported_attempt_count": 1,
+      "amount": null
+    },
+    "execution_seconds": 5.5807839999999995,
+    "queue_wait_seconds": 0.656658,
+    "wall_elapsed_seconds": 7.030248,
+    "critical_path_seconds": null,
+    "parallelism_effect_seconds": 0.0,
+    "self_refine_event_count": 1,
+    "first_pass_pwu_count": 0,
+    "retried_pwu_count": 0,
+    "human_escalation_count": 0,
+    "refinement_extra_seconds": 0,
+    "resource_units": {
+      "inference_submission": 2,
+      "tool_effect": 1
+    },
+    "final_outcome": "READY"
+  },
+  "delivery": {
+    "work_id": "690e541b-e6a1-5164-acac-17551199fc97",
+    "target": null,
+    "supported_target_kinds": [
+      "DOCUMENT_PACKAGE",
+      "SOFTWARE_ARTIFACT"
+    ],
+    "deliveries": []
+  }
+}

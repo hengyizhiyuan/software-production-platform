@@ -1,0 +1,25 @@
+{
+  "case": "GC-EX-01",
+  "trial": 1,
+  "checks": {
+    "automatic_preview_ready": true,
+    "served_verification": true,
+    "no_unauthorized_delivery": true,
+    "exactly_one_requested_link": true,
+    "one_source_file": true,
+    "one_added_line": true,
+    "zero_removed_lines": true
+  },
+  "status": "PASS",
+  "candidate_revision": "0d2513dd26ded8ad1cb523dac1c87fc27c43da97",
+  "candidate_tree": "a25ebb9d7dacf36454503e7a50b727a6adfbc196",
+  "browser_evidence_record": "browser-oracle.json",
+  "persistence_evidence_record": "persistence-oracle.json",
+  "historical_runtime_evidence": false,
+  "changed_paths": [
+    "src/spg/web/index.html"
+  ],
+  "preview_endpoint": "http://127.0.0.1:61665/app",
+  "human_acceptance": "PENDING",
+  "manual_rescue_actions": []
+}

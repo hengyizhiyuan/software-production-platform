@@ -1,0 +1,56 @@
+{
+  "case": "GC-IP-07",
+  "trial": 1,
+  "question": {
+    "attention_id": "f79a35e7-7cc6-5e73-bc05-b31e344e59ae",
+    "work_id": "b781e2d6-e99f-592c-893c-cf21cea4cc8a",
+    "kind": "STEERING_DECISION_REQUIRED",
+    "decision": "Answer the current Work question",
+    "reason": "『给系统增加搜索』应覆盖哪些已存在的数据域：用户（/api/users）、客户（/api/customers）、订单（/api/orders），还是全部三个？",
+    "available_actions": [],
+    "recommended_action": null,
+    "governed_subject_ref": "steering-decision:1a371ed7-be73-4fad-9dbe-825a54daf96d",
+    "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+    "recommendation": "请指定搜索覆盖的数据域（users、customers、orders 之一/若干，或全部三个）。该选择决定验收范围与搜索端点契约；确认后即可产出精确到文件、端点与可执行验证的搜索实现提案。",
+    "conversation_prompt": "『给系统增加搜索』应覆盖哪些已存在的数据域：用户（/api/users）、客户（/api/customers）、订单（/api/orders），还是全部三个？",
+    "alternatives": [],
+    "trade_offs": [],
+    "expected_impact": "The decision will govern subsequent design and production.",
+    "reality_refs": [
+      {
+        "kind": "GOVERNANCE_DECISION",
+        "identity": "5e3a43e2-aa6d-4801-bce9-78b78a67f70c"
+      },
+      {
+        "kind": "GOVERNANCE_DECISION",
+        "identity": "66591089-7b8b-5845-a050-90026eae8ea6"
+      },
+      {
+        "kind": "SEMANTIC_RESULT",
+        "identity": "153819d7-31f3-4d2e-b524-8b8b7e50fad8"
+      },
+      {
+        "kind": "TRUSTED_BASELINE",
+        "identity": "f5c27b10-f35d-478c-a662-ab57564dfb33"
+      },
+      {
+        "kind": "WORK",
+        "identity": "b781e2d6-e99f-592c-893c-cf21cea4cc8a"
+      },
+      {
+        "kind": "WORK_REALITY_REVISION",
+        "identity": "997f1728-3eef-5cb9-866a-cdaeaf58ac8a"
+      }
+    ],
+    "steering_plan_revision_id": "76379785-b476-49d3-9f94-816ceb9b1f55",
+    "steering_step_id": "7782bb30-9726-49f1-ab6a-a36d3c7d983e",
+    "interaction_id": null,
+    "interaction_assessment_id": null,
+    "expected_work_reality_revision_id": null
+  },
+  "answer": "只搜索用户，按姓名和邮箱查找；客户、订单等其他部分保持原样。",
+  "classification": "LEGITIMATE_PRODUCT_SCOPE_CHOICE",
+  "question_count": 1,
+  "implementation_assistance": false,
+  "human_acceptance": "PENDING"
+}

@@ -1,0 +1,422 @@
+{
+  "interaction_id": "94cd7274-6705-4d2e-a711-ad3963bd7472",
+  "condition": "OPEN",
+  "current_work_id": null,
+  "created_at": "2026-09-27T04:51:55.645789Z",
+  "updated_at": "2026-09-27T04:52:08.395909Z",
+  "records": [
+    {
+      "record_id": "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "clone https://github.com/example/one.git https://github.com/example/two.git",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T04:51:55.803896Z"
+    }
+  ],
+  "conversation_messages": [
+    {
+      "message_id": "673de6c3-6df8-4964-8674-311dcf5be221",
+      "turn_id": "28539eae-9c62-4b5c-9c3d-655e0e33f031",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "content": "clone https://github.com/example/one.git https://github.com/example/two.git",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T04:51:55.803896Z",
+      "updated_at": "2026-09-27T04:52:15.670049Z"
+    },
+    {
+      "message_id": "ca8161cc-0bfd-46ed-856a-94c75b58ff66",
+      "turn_id": "28539eae-9c62-4b5c-9c3d-655e0e33f031",
+      "sequence": 2,
+      "actor": "WATT",
+      "content": "你提供了多个仓库地址；请指定要操作哪一个。尚未执行仓库操作。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "03368422-445e-4878-b18b-c9c70605c87c",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T04:52:15.670049Z",
+      "updated_at": "2026-09-27T04:52:15.670049Z"
+    }
+  ],
+  "turns": [
+    {
+      "turn_id": "28539eae-9c62-4b5c-9c3d-655e0e33f031",
+      "interaction_id": "94cd7274-6705-4d2e-a711-ad3963bd7472",
+      "request_record_id": "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927",
+      "assessment_id": "03368422-445e-4878-b18b-c9c70605c87c",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T04:51:55.803896Z",
+      "started_at": "2026-09-27T04:51:55.901157Z",
+      "completed_at": "2026-09-27T04:52:15.670049Z",
+      "updated_at": "2026-09-27T04:52:15.670049Z"
+    }
+  ],
+  "human_said": [
+    "clone https://github.com/example/one.git https://github.com/example/two.git"
+  ],
+  "latest_assessment": {
+    "assessment_id": "03368422-445e-4878-b18b-c9c70605c87c",
+    "basis_fingerprint": "39e6b4c2e4f078b031f4a29c356c00b438b2d07506c5eedf6f9648d5605b0214",
+    "basis_last_sequence": 1,
+    "interpreted_motive": "Clone the git repositories named in the given command.",
+    "desired_outcome": "The specified git repositories are cloned into a local working location.",
+    "design_intent_frame": {
+      "design_subject": "Clone the git repositories named in the given command.",
+      "object_type": "PRODUCT_SYSTEM",
+      "business_context": null,
+      "desired_outcome": "The specified git repositories are cloned into a local working location.",
+      "scope_level": "product",
+      "collaboration_mode": "design",
+      "candidate_assumptions": [
+        "The current object classification is provisional."
+      ],
+      "ambiguities": [],
+      "confidence": 0.6
+    },
+    "candidate_context": [
+      "Command-style input containing two GitHub repository URLs: https://github.com/example/one.git and https://github.com/example/two.git",
+      "No active Work, no bound repository, and no prior interaction context in the persisted basis."
+    ],
+    "candidate_constraints": [
+      "The repositories named are https://github.com/example/one.git and https://github.com/example/two.git"
+    ],
+    "current_requests": [
+      "clone https://github.com/example/one.git https://github.com/example/two.git"
+    ],
+    "unresolved_material_questions": [
+      "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned."
+    ],
+    "neutral_semantic_extractions": [
+      {
+        "extraction_id": "ne1",
+        "kind": "ORDERED_VALUES",
+        "values": [
+          "https://github.com/example/one.git",
+          "https://github.com/example/two.git"
+        ],
+        "unit": null,
+        "source_record_id": "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927",
+        "source_text": "clone https://github.com/example/one.git https://github.com/example/two.git",
+        "explicit_roles": [
+          null,
+          null
+        ]
+      }
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "6e92786e-f28a-558a-8e73-42a51f14363b",
+        "subject": "git.clone.operands",
+        "relation": "ORDERED_COMPONENT",
+        "value": [
+          "https://github.com/example/one.git",
+          "https://github.com/example/two.git"
+        ],
+        "unit": null,
+        "scope": "repository preparation for the current request",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927"
+          ],
+          "source_text": "clone https://github.com/example/one.git https://github.com/example/two.git",
+          "source_extraction_ids": [
+            "ne1"
+          ],
+          "role_origin": "INFERRED"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      }
+    ],
+    "meanings": [
+      {
+        "kind": "REQUEST",
+        "statement": "The Human asks for the listed git repositories to be cloned.",
+        "source_record_ids": [
+          "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927"
+        ],
+        "confidence": 0.9,
+        "rationale": "Imperative command naming two repository URLs.",
+        "clarification_required": false
+      },
+      {
+        "kind": "CONTEXT",
+        "statement": "Two repository URLs are supplied and no destination directory is explicitly named.",
+        "source_record_ids": [
+          "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927"
+        ],
+        "confidence": 0.85,
+        "rationale": "Both operands are https URLs in the same command.",
+        "clarification_required": false
+      }
+    ],
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "basis_work_revision_id": null,
+    "basis_steering_plan_revision_id": null,
+    "basis_steering_step_id": null,
+    "basis_active_runtime_binding_id": null,
+    "supporting_references": [],
+    "natural_response": "Treat both URLs as repositories to clone, each into its own local directory (one and two), and if the Human meant the second URL as a destination path instead, cloning into that path is the single reversible adjustment.",
+    "readiness": {
+      "status": "NOT_READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [
+        "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned."
+      ],
+      "reasons": [
+        "Material Work-admission information remains unresolved."
+      ],
+      "basis_fingerprint": "39e6b4c2e4f078b031f4a29c356c00b438b2d07506c5eedf6f9648d5605b0214"
+    },
+    "progressive_semantics": {
+      "turn_intent": "ACTION_REQUEST",
+      "basis_fingerprint": "39e6b4c2e4f078b031f4a29c356c00b438b2d07506c5eedf6f9648d5605b0214",
+      "source_record_ids": [
+        "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927"
+      ],
+      "reception_meanings": [
+        "DEEP_WIC_WORKING_UNDERSTANDING"
+      ],
+      "working_motive": "Clone the git repositories named in the given command.",
+      "working_desired_outcome": "The specified git repositories are cloned into a local working location.",
+      "working_facts": [
+        "Command-style input containing two GitHub repository URLs: https://github.com/example/one.git and https://github.com/example/two.git",
+        "No active Work, no bound repository, and no prior interaction context in the persisted basis."
+      ],
+      "working_constraints": [
+        "The repositories named are https://github.com/example/one.git and https://github.com/example/two.git"
+      ],
+      "working_requests": [
+        "clone https://github.com/example/one.git https://github.com/example/two.git"
+      ],
+      "explicit_assumptions": [],
+      "unresolved_human_decisions": [
+        "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned."
+      ],
+      "deltas": [
+        {
+          "id": "f2726a18-e357-5223-a433-bffa3cb93bea",
+          "category": "MOTIVE",
+          "operation": "ADDED",
+          "value": "Clone the git repositories named in the given command.",
+          "prior_value": null,
+          "source_record_ids": [
+            "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927"
+          ],
+          "basis_fingerprint": "39e6b4c2e4f078b031f4a29c356c00b438b2d07506c5eedf6f9648d5605b0214",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+          "authority": "ADVISORY"
+        },
+        {
+          "id": "a15e4df0-94fd-55b8-8a3e-42e0650c4ef2",
+          "category": "CONSTRAINT",
+          "operation": "ADDED",
+          "value": "The repositories named are https://github.com/example/one.git and https://github.com/example/two.git",
+          "prior_value": null,
+          "source_record_ids": [
+            "0ccfa8bf-0bb0-4a28-aa5c-b787eb1b7927"
+          ],
+          "basis_fingerprint": "39e6b4c2e4f078b031f4a29c356c00b438b2d07506c5eedf6f9648d5605b0214",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+          "authority": "ADVISORY"
+        }
+      ],
+      "pattern_signals": [
+        "REPOSITORY_SOURCE"
+      ],
+      "inference_disposition": "NO_INFERENCE",
+      "questions": [
+        {
+          "question": "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned.",
+          "affected_dimensions": [
+            "SCOPE"
+          ],
+          "answer_already_available": false,
+          "safe_reversible_assumption_available": false,
+          "watt_authorized_to_choose": false,
+          "blocks_next_governed_step": true,
+          "cognitive_cost": "LOW",
+          "decision_value": 70,
+          "disposition": "ASK_HUMAN_NOW",
+          "rationale": "Question policy ranks unresolved decisions by decision impact and cognitive cost."
+        }
+      ],
+      "selected_question": "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned.",
+      "governance_candidate": "WORK_FORMATION_PROPOSAL",
+      "readiness": [
+        {
+          "target": "WORK_FORMATION",
+          "status": "NOT_READY",
+          "satisfied_evidence": [
+            "MOTIVE",
+            "DESIRED_OUTCOME"
+          ],
+          "missing_material_evidence": [
+            "HIGHEST_VALUE_QUESTION_ANSWER"
+          ],
+          "unresolved_human_decisions": [
+            "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned."
+          ],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "39e6b4c2e4f078b031f4a29c356c00b438b2d07506c5eedf6f9648d5605b0214",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "WORK_REVISION",
+          "status": "NOT_APPLICABLE",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [
+            "HIGHEST_VALUE_QUESTION_ANSWER"
+          ],
+          "unresolved_human_decisions": [
+            "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned."
+          ],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "39e6b4c2e4f078b031f4a29c356c00b438b2d07506c5eedf6f9648d5605b0214",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "DESIGN_PROGRESSION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "CURRENT_FOCUS"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [
+            "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned."
+          ],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "39e6b4c2e4f078b031f4a29c356c00b438b2d07506c5eedf6f9648d5605b0214",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        }
+      ],
+      "artifact_recommendation": null,
+      "factual_contradictions": [],
+      "semantic_policy_revision": "wic-semantic-policy-v1",
+      "question_policy_revision": "wic-question-value-v1"
+    },
+    "provider_identity": "deepseek-responses:semantic:request:c49b3feb-ab62-4e9c-b62c-a1f2e0ef107c",
+    "model_identity": "deepseek-flash",
+    "schema_version": "wic-assessment-v6",
+    "created_at": "2026-09-27T04:52:08.395909Z"
+  },
+  "latest_assessment_current": true,
+  "interpreted_motive": "Clone the git repositories named in the given command.",
+  "desired_outcome": "The specified git repositories are cloned into a local working location.",
+  "design_intent_frame": {
+    "design_subject": "Clone the git repositories named in the given command.",
+    "object_type": "PRODUCT_SYSTEM",
+    "business_context": null,
+    "desired_outcome": "The specified git repositories are cloned into a local working location.",
+    "scope_level": "product",
+    "collaboration_mode": "design",
+    "candidate_assumptions": [
+      "The current object classification is provisional."
+    ],
+    "ambiguities": [],
+    "confidence": 0.6
+  },
+  "candidate_context": [
+    "Command-style input containing two GitHub repository URLs: https://github.com/example/one.git and https://github.com/example/two.git",
+    "No active Work, no bound repository, and no prior interaction context in the persisted basis."
+  ],
+  "candidate_constraints": [
+    "The repositories named are https://github.com/example/one.git and https://github.com/example/two.git"
+  ],
+  "current_requests": [
+    "clone https://github.com/example/one.git https://github.com/example/two.git"
+  ],
+  "unresolved_material_questions": [
+    "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned."
+  ],
+  "readiness": {
+    "status": "NOT_READY",
+    "profile": "LONG_LIVED_STEERING",
+    "profile_version": "v0",
+    "satisfied_requirements": [
+      "MOTIVE",
+      "DESIRED_OUTCOME"
+    ],
+    "missing_information": [],
+    "unresolved_material_questions": [
+      "Whether https://github.com/example/two.git is a destination directory for cloning one.git, or a second repository to be cloned."
+    ],
+    "reasons": [
+      "Material Work-admission information remains unresolved."
+    ],
+    "basis_fingerprint": "39e6b4c2e4f078b031f4a29c356c00b438b2d07506c5eedf6f9648d5605b0214"
+  },
+  "candidate_engineering_resource_id": null,
+  "candidate_repository_identity": null,
+  "candidate_repository_ref": null,
+  "candidate_scope_summary": null,
+  "governed_work_id": null,
+  "governed_revision": null,
+  "current_work_focus": null,
+  "focus_classification": null,
+  "impact_disposition": null,
+  "candidate_change": null,
+  "work_revision_admission_status": "NOT_APPLICABLE",
+  "active_cycle_work_revision_id": null,
+  "active_cycle_impact_disposition": null,
+  "work_satisfaction_state": "NO_FOCUSED_WORK",
+  "interaction_relationship_state": "OPEN",
+  "work_focus_history": [],
+  "latest_work_transition": null,
+  "new_work_formation_pending": false,
+  "production_request_detected": false,
+  "repository_source": "https://github.com/example/one.git",
+  "production_admission_state": null,
+  "repository_acquisition_state": null,
+  "repository_observation": null,
+  "production_next_step": null,
+  "selected_design_schema_identity": "watt:guided-design:general-product-system",
+  "selected_design_schema_version": "0.1",
+  "design_schema_selection_rationale": "The Design Intent Frame identifies a product, platform, or software system.",
+  "design_stage": "Motive, users, and problem",
+  "design_next_focus": "Establish the Motive, relevant actors, and problem boundary needed for the current governed step.",
+  "design_focus_rationale": "These dimensions matter only to the extent that they change the current artifact, risk, authority, or acceptance basis.",
+  "design_facilitation_strategy": "CLARIFY",
+  "design_progress_narrative": "Selected General Product/System Design v0.1. Current stage: Motive, users, and problem. 0 of 7 design areas are resolved. Next, establish the motive, relevant actors, and problem boundary needed for the current governed step."
+}
