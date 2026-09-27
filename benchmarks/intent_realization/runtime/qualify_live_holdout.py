@@ -18,6 +18,24 @@ from benchmarks.golden.runtime.journey import ProductClient
 from benchmarks.intent_realization.runtime.evidence import verify_freeze
 
 
+
+def unexpected_branch_effect(case, before, after):
+    """Classify actual extra writes separately from missed requested effects."""
+    if before is None or after is None:
+        return None
+    expected = case["expected_operations"]
+    added = set(after["branches"]) - set(before["branches"])
+    removed = set(before["branches"]) - set(after["branches"])
+    allowed = {case["expected_branch"]} if expected in (
+        ["CREATE_BRANCH"], ["CREATE_AND_SWITCH_BRANCH"]) else set()
+    requested_ref = ("refs/heads/" + case["expected_branch"] if expected in (
+        ["SWITCH_BRANCH"], ["CREATE_AND_SWITCH_BRANCH"]) else before["repository_ref"])
+    head_changed = after["repository_ref"] != before["repository_ref"]
+    return bool(added - allowed or removed
+        or (head_changed and after["repository_ref"] != requested_ref)
+        or any(after[key] != before[key] for key in ("revision", "tree")))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--corpus",type=Path,required=True)
@@ -121,22 +139,16 @@ def main():
             effects = [o for o in projection.get("obligations",[]) if o["plane"]=="ACTION"]
             actual = [o["operation"] for o in effects if o["state"]=="SATISFIED"]
             expected = case["expected_operations"]
-            unexpected_branch_effect = None
-            if actual_before is not None and actual_after is not None:
-                added = set(actual_after["branches"])-set(actual_before["branches"])
-                allowed = {case["expected_branch"]} if expected in (["CREATE_BRANCH"], ["CREATE_AND_SWITCH_BRANCH"]) else set()
-                requested_ref = ("refs/heads/"+case["expected_branch"]
-                    if expected in (["SWITCH_BRANCH"], ["CREATE_AND_SWITCH_BRANCH"]) else actual_before["repository_ref"])
-                unexpected_branch_effect = bool(added-allowed or actual_after["repository_ref"] != requested_ref)
+            unexpected = unexpected_branch_effect(case, actual_before, actual_after)
             physical_observed = actual_before is not None and actual_after is not None
-            erroneous_effect = bool(unexpected_branch_effect or (not expected and (actual
-                or after.get("governed_work_id") is not None or before_repo!=after_repo)))
+            erroneous_effect = bool(unexpected or after.get("governed_work_id") is not None
+                or (not expected and actual))
             result.update(false_execution=erroneous_effect if physical_observed else None,
                 actual_git_observation_available=physical_observed,
-                unexpected_branch_effect=unexpected_branch_effect)
+                unexpected_branch_effect=unexpected)
             checks = {"turn_completed":status=="COMPLETED","no_production_work":after.get("governed_work_id") is None,
                 "actual_git_observed":physical_observed,
-                "no_unrequested_branch_effect":unexpected_branch_effect is False,
+                "no_unrequested_branch_effect":unexpected is False,
                 "actual_operations":sorted(actual)==sorted(expected),
                 "all_requested_effects_reconciled":all(o["state"]=="SATISFIED" for o in effects)}
             if not expected:
