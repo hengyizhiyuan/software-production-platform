@@ -1,0 +1,312 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-27T01:26:12.153966+00:00",
+  "qualified_implementation_head": "ece27b10d6bf37eec100dc37780cdce0d5d46547",
+  "qualified_implementation_tree": "bfc2c15febcf8c43dbf7ac3e7b352fbf3fb2a79c",
+  "source_package_fingerprint": "a2127de957f5a93bdef61e59479eab5eea2c9df5",
+  "static_package_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+  "branch": "feature/production-environment-foundation",
+  "owners": {
+    "ecf": {
+      "head": "1a8e75ebba73ee02cf2a39f09902919263f1fe66",
+      "tree": "af66f7029cea4822aac4a59360d903d5397f0410",
+      "working_tree": ""
+    },
+    "guardian": {
+      "head": "371dfa7345e9804d6c3a7d110ac55ca6cce0e492",
+      "tree": "3e51022577b12e57fdfdf61a032f2e74fc277ae8",
+      "working_tree": ""
+    }
+  },
+  "backend": {
+    "status": "PASS_WITH_PRESERVED_SKIP",
+    "collected": 1607,
+    "current_full_collection": 1610,
+    "additional_qualification_tests": 3,
+    "database": "isolated spg_test PostgreSQL 17.6/55438; migrated before pytest",
+    "command": "PATH=<venv>/bin:$PATH PYTHONPATH=<ecf>/src:<guardian>/src SPG_TEST_DATABASE_URL=<isolated spg_test> .venv/bin/python -m pytest -o addopts='' -v -ra --durations=20 --junitxml=<retained xml>",
+    "raw_log": "/tmp/watt-stability-recovery-backend-final.log",
+    "exit_code": 0,
+    "passed": 1605,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 2,
+    "warnings": 4,
+    "duration_seconds": 3062.11,
+    "junit_path": "docs/evidence/stability/verification-logs/recovery-backend-final.xml",
+    "skip_reasons": [
+      {
+        "nodeid": "tests/test_brownfield_delivery_vertical_slice.py::test_real_repository_container_preview_delivery_and_reality_refresh",
+        "reason": "Historical image label unavailable at collection/execution",
+        "supplemental_result": "PASS",
+        "supplemental_duration_seconds": 5.75
+      },
+      {
+        "nodeid": "tests/test_production_environment_cross_repository.py::test_candidate_preview_current_and_stale_reality_is_ecf_admissible",
+        "reason": "ECF 1a8e75e has no PreviewRealityState/PreviewRealityV1 contract",
+        "supplemental_result": "NOT_QUALIFIED_UPSTREAM_CONTRACT"
+      }
+    ],
+    "unique_current_cases_validated": 1609,
+    "unique_current_cases_not_qualified": 1
+  },
+  "frontend": {
+    "status": "PASS",
+    "passed": 77,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 1037.175776
+  },
+  "migration": {
+    "status": "PASS",
+    "head": "20260927_58",
+    "fresh_database": "watt_stability_recovery_schema",
+    "alembic_check": "PASS"
+  },
+  "release_evaluation": {
+    "status": "PASS",
+    "case_count": 53,
+    "domains": {
+      "ASSURANCE": "PASS",
+      "INTERACTION": "PASS",
+      "PRODUCTION": "PASS",
+      "RESILIENCE": "PASS"
+    },
+    "persisted": {
+      "id": "0ba50a5d-71d1-4c1b-be0f-70acde7ba6e9",
+      "version": "ece27b10d6bf37eec100dc37780cdce0d5d46547",
+      "revision": "ece27b10d6bf37eec100dc37780cdce0d5d46547",
+      "purpose": "release",
+      "baseline_run_id": null,
+      "trend": {
+        "status": "NO_QUALIFIED_BASELINE",
+        "current": {
+          "case_count": 53,
+          "first_pass_success": 43,
+          "recovered_by_self_refine": 6,
+          "human_escalation": 3,
+          "failure": 0,
+          "total_success": 49,
+          "convergence_rate": 0.9245,
+          "average_case_seconds": 9.631,
+          "p95_case_seconds": 40.996,
+          "average_refinement_attempts": null,
+          "p95_refinement_attempts": null,
+          "token_usage": "UNREPORTED",
+          "compute_usage": "UNREPORTED",
+          "work_cost": "UNREPORTED",
+          "failure_signatures": [],
+          "real_container_cases": 4,
+          "real_container_failures": 0
+        },
+        "previous": null,
+        "delta": null
+      }
+    },
+    "complete_receipt": "docs/evidence/stability/release-evaluation-20260927.json",
+    "outcome_counts": {
+      "FIRST_PASS_SUCCESS": 43,
+      "RECOVERED_BY_SELF_REFINE": 6,
+      "ESCALATED_TO_HUMAN": 3,
+      "EVIDENCE_SUFFICIENT_FOR_REPAIR": 1
+    },
+    "underlying_tests": {
+      "tests": 136,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "qualification_setup_failures": [
+    {
+      "configuration": "wrong database name watt_stability",
+      "passed": 296,
+      "failed": 1,
+      "duration_seconds": 1151.53,
+      "status": "INTERRUPTED_NOT_PASS"
+    },
+    {
+      "configuration": "fresh spg_test before migrations",
+      "passed": 50,
+      "failed": 2,
+      "duration_seconds": 276.78,
+      "status": "INTERRUPTED_NOT_PASS"
+    }
+  ],
+  "bootstrap_sanity": {
+    "passed": 3,
+    "failed": 0,
+    "duration_seconds": 1.41
+  },
+  "receipts": {
+    "frontend": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-final-full-frontend-ece27b1.log",
+      "sha256": "7c6a044c187676862adab198a328090b8e15a746bb99c9eca8e2d2c203017908"
+    },
+    "migration": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-migration.log",
+      "sha256": "cf26c4f7988bc053b42307a098a1c628c25619d00230056ff8c91a72d09f5f95"
+    },
+    "alembic_check": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-alembic-check.log",
+      "sha256": "8a380081870e428e321e0e16bc0bd236d9e1146fc3f2b9885d1a28733abe476e"
+    },
+    "release_evaluation": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-release-evaluation.log",
+      "sha256": "2902ff015ef83cdb0a1dcfac27ad0e05af43cfcfb6e2a4b58d9ebf0a1ec98efb"
+    },
+    "initial_wrong_database": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-final-full-backend-e4286bb.log",
+      "sha256": "ffc4ad60375d5d1e66760fc8fc1df22fd82af5c99aae7cc4dd01c33e343e2d9b"
+    },
+    "initial_unmigrated_database": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-final-full-backend-e4286bb-spg-test.log",
+      "sha256": "06b490c83d2d7e04eafb164ec6e0f9eb233dbbcb57fc9104cfb167bd0c8e382f"
+    },
+    "bootstrap_sanity": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-final-full-bootstrap-sanity.log",
+      "sha256": "86432a859ad895a7fe46d3bff14e78f9407d9639cc0eb27f0bbce46b802fd3fa"
+    },
+    "closure_sanity": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-closure-sanity.log",
+      "sha256": "b5f34bdd09f4174af0595834585977d8d5e5cd32b4d5dc45eaabf2a06099bc3f"
+    },
+    "database_bootstrap": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-final-full-database-bootstrap.log",
+      "sha256": "84b9cfdaaae75628f3cbd7082d9c05399a66f8049b2a84369fcf326d0622ec92"
+    },
+    "recovery": {
+      "watt-stability-final-full-backend-e4286bb-qualified.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-final-full-backend-e4286bb-qualified.log",
+        "sha256": "ed072d89c076ef2ddca1d1e57a6754fb3fcbc7d05d154969fb12061073d9d54d"
+      },
+      "watt-stability-final-full-backend-ece27b1-qualified.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-final-full-backend-ece27b1-qualified.log",
+        "sha256": "5c817da1476384508afff7f702ec511d3cc8d9166d33ee7ab5cc23a7438be175"
+      },
+      "watt-stability-final-full-frontend-ece27b1.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-final-full-frontend-ece27b1.log",
+        "sha256": "7c6a044c187676862adab198a328090b8e15a746bb99c9eca8e2d2c203017908"
+      },
+      "watt-stability-recovery-migration.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-migration.log",
+        "sha256": "cf26c4f7988bc053b42307a098a1c628c25619d00230056ff8c91a72d09f5f95"
+      },
+      "watt-stability-recovery-alembic-check.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-alembic-check.log",
+        "sha256": "8a380081870e428e321e0e16bc0bd236d9e1146fc3f2b9885d1a28733abe476e"
+      },
+      "watt-stability-recovery-oracles.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-oracles.log",
+        "sha256": "2ae8f2817e9958cc181e54334e64cdb0f822408aefd258f49af7ed61b53a91ca"
+      },
+      "watt-stability-recovery-research-gc-ex-12.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-research-gc-ex-12.log",
+        "sha256": "815217e8af29cc3a602332b93a6bb4d4b3bb9ddff1ae5e73f23bfb9b798d4e14"
+      },
+      "watt-stability-recovery-research-gc-ex-12-t6.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-research-gc-ex-12-t6.log",
+        "sha256": "dacc5668911cf204b45798bee85b443d508728939fae602fc7c2f16e0d97075a"
+      },
+      "watt-stability-recovery-retirement.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-retirement.log",
+        "sha256": "aa4f9a8cb4463c8c946266a1a1b146cb4c3ded5b67eff78504a1bcd118214d31"
+      },
+      "watt-stability-research-stream-after-fix.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-research-stream-after-fix.log",
+        "sha256": "85210f33b53642af85deedc941f2c726bbb7f2c4912daebd41a62a48c4636767"
+      },
+      "watt-stability-recovery-release-evaluation.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-release-evaluation.log",
+        "sha256": "2902ff015ef83cdb0a1dcfac27ad0e05af43cfcfb6e2a4b58d9ebf0a1ec98efb"
+      },
+      "watt-stability-recovery-backend-final.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-backend-final.log",
+        "sha256": "f9288b935e945c018d57648d5063868a7cdb43e814efba253761a9d77dc70125"
+      },
+      "watt-stability-recovery-legacy-container.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-legacy-container.log",
+        "sha256": "5e418dadfc6e721682f4b6b82c1cc0fa2df13f68f778d74cd6fee87a4b62f46a"
+      },
+      "watt-stability-recovery-collection.log": {
+        "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-collection.log",
+        "sha256": "700d61de7f82e9af45e0b03a9373167588f468bde4ca4de9326032113d78696f"
+      },
+      "recovery-backend-final.xml": {
+        "path": "docs/evidence/stability/verification-logs/recovery-backend-final.xml",
+        "sha256": "c0d5209554bae9af56cd8b1897c641adb2dd14c152f687fe0f04c514f52b65f5"
+      },
+      "recovery-legacy-container.xml": {
+        "path": "docs/evidence/stability/verification-logs/recovery-legacy-container.xml",
+        "sha256": "aaf3deb4ca5e8b274b225a3612db76af8a5d978d41ce32c8fcc76df8284e2e35"
+      }
+    },
+    "backend": {
+      "path": "docs/evidence/stability/verification-logs/watt-stability-recovery-backend-final.log",
+      "sha256": "f9288b935e945c018d57648d5063868a7cdb43e814efba253761a9d77dc70125"
+    }
+  },
+  "tier_0_golden_gate": "BLOCKED_EXTERNAL",
+  "human_acceptance": "PENDING",
+  "closure": "COMPLETE_WITH_DEFERRED_EXTERNAL_QUALIFICATION_AND_UPSTREAM_FINDING",
+  "closure_sanity": "PASS",
+  "dependency_lock_check": "PASS",
+  "credential_exposure_scan": "PASS",
+  "feasible_golden_gate": "PASS",
+  "qualification_oracles": {
+    "status": "PASS",
+    "passed": 5,
+    "failed": 0,
+    "duration_seconds": 0.12,
+    "new_cases": 3
+  },
+  "deferred_external_qualification": "docs/evidence/stability/deferred-web-qualification-20260927.json",
+  "live_research_code_owned": {
+    "status": "PASS",
+    "case": "GC-EX-12",
+    "trial": 6,
+    "browser_stream": "PASS",
+    "real_github": "PASS",
+    "exact_project_observation": "PASS",
+    "real_web": "BLOCKED_EXTERNAL"
+  },
+  "runtime_configuration_parity": {
+    "status": "PASS",
+    "wic_mode": "WIC_VNEXT_CONTROLLED",
+    "native_executor_enabled": true,
+    "profile": "watt-native-executor-acceptance",
+    "activation_receipt": ".spg/stability-runtime/recovery-v15-runtime.json"
+  },
+  "retained_fsi_preview": {
+    "endpoint": "http://127.0.0.1:55138/app",
+    "http_status": 200,
+    "sha256": "72375bc38e0a0b302b8b8735ceafe92cb2efd2d4a80ad510afd2a121548bbae5",
+    "requested_label_observed": true,
+    "requested_href_observed": true,
+    "human_acceptance": "PENDING"
+  },
+  "upstream_contract_qualification": {
+    "status": "NOT_QUALIFIED_UPSTREAM_CONTRACT",
+    "owner": "ECF",
+    "revision": "1a8e75ebba73ee02cf2a39f09902919263f1fe66",
+    "missing_types": [
+      "PreviewRealityState",
+      "PreviewRealityV1"
+    ],
+    "missing_runtime_method": "ECFRealityRuntime.admit_preview_payload",
+    "nodeid": "tests/test_production_environment_cross_repository.py::test_candidate_preview_current_and_stale_reality_is_ecf_admissible",
+    "test_assertions_unchanged": true,
+    "qualified_with_fixture_substitute": false,
+    "non_blocking_for_watt_code_owned_batch": true
+  },
+  "supplemental_real_container": {
+    "status": "PASS",
+    "passed": 1,
+    "skipped": 0,
+    "failed": 0,
+    "duration_seconds": 5.75,
+    "source_image": "sha256:67819056a9ef04f41913cfa4a4fdc8e0769f23a3eb898f9b266da585889871c6",
+    "qualified_owner_modules_preloaded_from_recorded_snapshots": true
+  },
+  "code_owned_batch": "COMPLETE"
+}

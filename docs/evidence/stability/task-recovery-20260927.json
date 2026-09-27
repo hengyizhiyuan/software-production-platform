@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-27T00:41:25.812024+00:00",
+  "resumed_task": {
+    "id": "01a0b4b6-d74d-7402-916a-bc5399ed9c65",
+    "title": "拉取远端代码更新",
+    "last_turn_id": "01a0dea5-2300-7cf3-9453-01a32e7228f5",
+    "last_turn_status": "interrupted",
+    "context_source": "Codex read_thread plus local persisted rollout; API omitted last-turn items, recovered from rollout",
+    "rollout_path": "/Users/yu/.codex/sessions/2026/09/18/rollout-2026-09-18T21-31-16-01a0b4b6-d74d-7402-916a-bc5399ed9c65.jsonl"
+  },
+  "recovered_implementation_head": "ece27b10d6bf37eec100dc37780cdce0d5d46547",
+  "recovered_implementation_tree": "bfc2c15febcf8c43dbf7ac3e7b352fbf3fb2a79c",
+  "initial_dirty_files_preserved": true,
+  "previous_backend_receipts": [
+    {
+      "head": "e4286bb015ac225acfb9c003be4c28a4f913a16b",
+      "status": "INTERRUPTED_NOT_PASS",
+      "passed_before_interrupt": 408,
+      "duration_seconds": 1894.29,
+      "path": "/tmp/watt-stability-final-full-backend-e4286bb-qualified.log"
+    },
+    {
+      "head": "ece27b10d6bf37eec100dc37780cdce0d5d46547",
+      "status": "INTERRUPTED_NO_FINAL_RECEIPT",
+      "path": "/tmp/watt-stability-final-full-backend-ece27b1-qualified.log"
+    }
+  ],
+  "recovery_full_regression": {
+    "status": "PASS_WITH_PRESERVED_SKIP",
+    "exit_code": 0,
+    "passed": 1605,
+    "failed": 0,
+    "skipped": 2,
+    "duration_seconds": 3062.11,
+    "receipt": "docs/evidence/stability/system-wide-stability-verification-20260927.json"
+  },
+  "web_credential_policy": {
+    "status": "BLOCKED_EXTERNAL",
+    "batch_continues": true,
+    "credential_not_requested": true,
+    "manifest": "docs/evidence/stability/deferred-web-qualification-20260927.json"
+  },
+  "frozen_failure_map_sha256": "ae310fdb6630bad284f0d4ac6d0fc8e3cb3606e8606346f90288a8dfbf7b3b05",
+  "human_acceptance": "PENDING",
+  "legacy_real_container_qualification": {
+    "historical_image_alias": "watt-engineering-semantic-human-retest-app:latest",
+    "actual_source_image": "watt-system-stability:qualification",
+    "implementation_head": "ece27b10d6bf37eec100dc37780cdce0d5d46547",
+    "reason": "Supply missing historical test label using qualified current production source; assertions and owner versions remain unchanged",
+    "alias_removed_after_qualification": true
+  },
+  "closure": "COMPLETE_WITH_DEFERRED_EXTERNAL_QUALIFICATION_AND_UPSTREAM_FINDING"
+}

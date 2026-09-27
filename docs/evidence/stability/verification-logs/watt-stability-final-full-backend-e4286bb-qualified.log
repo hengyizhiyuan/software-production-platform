@@ -1,0 +1,30 @@
+........................................................................ [  4%]
+........................................................................ [  8%]
+........................................................................ [ 13%]
+........................................................................ [ 17%]
+........................................................................ [ 22%]
+................................................INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+
+=============================== warnings summary ===============================
+tests/integration/test_mvp_app_work_flow.py::test_work_03_and_08_work_is_not_resource_or_project
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1294: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "project_id" not in record.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_03_and_08_work_is_not_resource_or_project
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1295: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "resource_id" not in record.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_11_draft_cannot_execute_and_work_13_projection_is_not_authority
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1421: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "status" in before.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_11_draft_cannot_execute_and_work_13_projection_is_not_authority
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1422: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "condition" not in before.model_fields
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/Users/yu/.local/share/uv/python/cpython-3.13.15-macos-x86_64-none/lib/python3.13/selectors.py:398: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+408 passed, 4 warnings in 1894.29s (0:31:34)

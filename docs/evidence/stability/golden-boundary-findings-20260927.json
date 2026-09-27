@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "4df7975 and earlier 79bbbfaa",
   "frozen_attempts_1_to_7_modified": false,
-  "closure": "PENDING",
+  "closure": "CODE_OWNED_STABILIZATION_PASS_WEB_QUALIFICATION_BLOCKED_EXTERNAL",
   "findings": [
     {
       "case": "GC-EX-02",
@@ -5126,6 +5126,171 @@
       "manual_rescue_actions": [],
       "human_acceptance": "PENDING",
       "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-12/trial-2"
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 7,
+      "signal": "PREVIEW_INFRASTRUCTURE_CAPACITY_EXHAUSTED",
+      "architecture_owner": "Candidate Preview / Docker namespace capacity",
+      "runtime_activation": {
+        "state": "ACTIVE_AT_TRUSTED_BASELINE",
+        "active_application_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+        "active_repository_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+        "active_source_package_fingerprint": "0d0f78d5189b17183463526f5aa8013ae8ac3fb3",
+        "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+        "current_trusted_baseline_revision": "f45750c11b2fefdca7d3aab7aefa96a166e1df97",
+        "current_trusted_baseline_tree_identity": "f63e3c5139b777e38c3a02c2d841acef3ec6f85b",
+        "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+        "human_review_version_id": null,
+        "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+        "image_rebuild_paths": []
+      },
+      "work_id": "edd228b0-92f5-5102-9fcb-809f864b65ee",
+      "interaction_id": "0068b671-0260-4bb5-9515-278ae6143df7",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-IP-08/trial-7"
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 9,
+      "signal": "PREVIEW_INFRASTRUCTURE_CAPACITY_EXHAUSTED",
+      "architecture_owner": "Candidate Preview / Docker namespace capacity",
+      "runtime_activation": {
+        "state": "ACTIVE_AT_TRUSTED_BASELINE",
+        "active_application_revision": "c4013bcb1b9b8a2d0cdd59a2f860e7fffd4b9b34",
+        "active_repository_tree_identity": "7092e417f5434559945bdc14d5870eeb248b748e",
+        "active_source_package_fingerprint": "b076a2cf7b5a5eaf2bc75bc0267384cb1c26c523",
+        "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+        "current_trusted_baseline_revision": "c4013bcb1b9b8a2d0cdd59a2f860e7fffd4b9b34",
+        "current_trusted_baseline_tree_identity": "7092e417f5434559945bdc14d5870eeb248b748e",
+        "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+        "human_review_version_id": null,
+        "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+        "image_rebuild_paths": []
+      },
+      "work_id": "7f99d549-7420-5158-9a3f-43ed26ae0750",
+      "interaction_id": "b8c3f7b7-d30b-4920-849c-d67f99b17a0c",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-9"
+    },
+    {
+      "case": "GC-EX-12",
+      "trial": 3,
+      "signal": "PROJECT_RESEARCH_SYNTHESIS_INCOMPLETE_FALLBACK",
+      "architecture_owner": "External research synthesis validator",
+      "runtime_activation": {
+        "state": "ACTIVE_AT_TRUSTED_BASELINE",
+        "active_application_revision": "c4013bcb1b9b8a2d0cdd59a2f860e7fffd4b9b34",
+        "active_repository_tree_identity": "7092e417f5434559945bdc14d5870eeb248b748e",
+        "active_source_package_fingerprint": "b076a2cf7b5a5eaf2bc75bc0267384cb1c26c523",
+        "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+        "current_trusted_baseline_revision": "c4013bcb1b9b8a2d0cdd59a2f860e7fffd4b9b34",
+        "current_trusted_baseline_tree_identity": "7092e417f5434559945bdc14d5870eeb248b748e",
+        "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+        "human_review_version_id": null,
+        "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+        "image_rebuild_paths": []
+      },
+      "work_id": null,
+      "interaction_id": "bef23dc4-bce2-4e6f-abfd-3885d6d325c7",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING",
+      "preserved_raw_evidence": ".spg/stability-runtime/golden-runs/GC-EX-12/trial-3"
+    },
+    {
+      "case": "GC-EX-05",
+      "trial": 2,
+      "signal": "QUALIFICATION_FAULT_PROTOCOL_MISMATCH / UNKNOWN_EFFECT_FENCED / LEGACY_WORK_TERMINAL_PROJECTION",
+      "cause": "The early fault proxy disconnected HTTP during git.status rather than returning a typed confirmed no-effect receipt. Native recorded UNKNOWN, correctly forbade blind replay, and escalated locally. The old Work projection remained RUNNING until the observer timeout (1802 seconds); this is not a tool-path recovery PASS.",
+      "architecture_owner": "Qualification fault protocol; Native effect certainty; Work terminal convergence projection",
+      "required_invariant": "Inject declared no-effect faults through typed receipts. Preserve UNKNOWN effects and prohibit blind replay; terminal unsafe outcomes must remain diagnostic Work evidence, not local recovery.",
+      "current_evidence": "Later independent typed no-effect fault trials 5, 6 and 7 passed. They do not retrospectively qualify this uncertain-effect trial.",
+      "runtime_activation": {
+        "state": "ACTIVE_AT_TRUSTED_BASELINE",
+        "active_application_revision": "738cc3694502cbcb547631bdb3f6a630387c4d83",
+        "active_repository_tree_identity": "f4153bac45285a45b0517a403a4140148406c78c",
+        "active_source_package_fingerprint": "bf539106a12695742be00e6f060d3b8673581dd4",
+        "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+        "current_trusted_baseline_revision": "738cc3694502cbcb547631bdb3f6a630387c4d83",
+        "current_trusted_baseline_tree_identity": "f4153bac45285a45b0517a403a4140148406c78c",
+        "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+        "human_review_version_id": null,
+        "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+        "image_rebuild_paths": []
+      },
+      "observer_result": {
+        "case": "GC-EX-05",
+        "trial": 2,
+        "status": "TIMEOUT",
+        "work_id": "25b7d30e-edfc-57cc-b252-59afa0d3b385",
+        "elapsed_seconds": 1802,
+        "human_acceptance": "PENDING",
+        "automatic_delivery_authorization": false,
+        "business_oracle": "NOT_YET_EVALUATED"
+      },
+      "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-05/trial-2",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-11",
+      "trial": 1,
+      "signal": "RUNTIME_PREREQUISITE_REASKED_BEFORE_REPOSITORY_OBSERVATION",
+      "cause": "The WIC response asked for secret ownership/injection and mentioned placeholder startup before observing repository startup source; no Work or prerequisite receipt had been created.",
+      "architecture_owner": "WIC progressive current-step sufficiency and source-prerequisite observation",
+      "required_invariant": "Observe repository-proven prerequisites before asking for an external secret; never substitute a fabricated secret or claim actual startup.",
+      "current_evidence": "Independent trial 5 observed exact source, legitimately escalated and stopped before impossible PWU dispatch; its negative oracle passes, not successful startup.",
+      "runtime_activation": {
+        "state": "ACTIVE_AT_TRUSTED_BASELINE",
+        "active_application_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+        "active_repository_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+        "active_source_package_fingerprint": "f4b5f5ed8fbedc7c1f5900386b32f31db79b30c9",
+        "active_static_asset_fingerprint": "17ce5d3f993aef633edceefeec9ea46dad8834be",
+        "current_trusted_baseline_revision": "897de2e410f9482c79c1e9459c2341253d5a68e4",
+        "current_trusted_baseline_tree_identity": "58df88f965a1f3f9dfa8f43535e2b04d9d4fe019",
+        "activation_mode": "LOCAL_DOCKER_EXACT_TRUSTED_SOURCE",
+        "human_review_version_id": null,
+        "reason": "Active Python package and Web assets match Current Trusted Baseline.",
+        "image_rebuild_paths": []
+      },
+      "observer_result": {
+        "case": "GC-EX-11",
+        "trial": 1,
+        "status": "CLARIFICATION_REQUIRES_CLASSIFICATION",
+        "work_id": null,
+        "elapsed_seconds": 162,
+        "human_acceptance": "PENDING",
+        "automatic_delivery_authorization": false,
+        "business_oracle": "NOT_YET_EVALUATED"
+      },
+      "evidence_directory": ".spg/stability-runtime/golden-runs/GC-EX-11/trial-1",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
+    },
+    {
+      "case": "GC-EX-12",
+      "trial": 5,
+      "signal": "QUALIFICATION_FIXTURE_NETWORK_NOT_ATTACHED",
+      "architecture_owner": "Qualification runtime fixture topology",
+      "cause": "New v15 runtime did not inherit qualified-git alias from the retired v14 networks; actual project observation retained NETWORK_FAILURE.",
+      "required_invariant": "Project fixture must be reachable from the actual application namespace before a research trial.",
+      "current_evidence": "Trial 6 after explicit network attachment passed real GitHub/project grounding and completed Human SSE; real Web remains BLOCKED_EXTERNAL.",
+      "manual_rescue_actions": [],
+      "human_acceptance": "PENDING"
     }
-  ]
+  ],
+  "final_qualification_note": "All feasible business or negative oracles and core repeat minima completed. Real Web retrieval still requires Human-supplied Brave credentials. Full backend/evaluation results remain pending until their actual completion.",
+  "post_completion_stream_finding": {
+    "case": "GC-EX-12",
+    "trial": 4,
+    "observed_result": "FAIL",
+    "owner": "Interaction event projection / browser SSE",
+    "receipt": ".spg/stability-runtime/golden-runs/GC-EX-12/trial-4/response-stream-before-fix.json",
+    "correction_commit": "ece27b10d6bf37eec100dc37780cdce0d5d46547",
+    "qualified_live_successor_trial": 6,
+    "independent_deterministic_regression": "tests/integration/test_external_search_interaction.py::test_project_research_observation_survives_real_turn_event_persistence",
+    "no_historical_receipt_rewritten": true
+  }
 }

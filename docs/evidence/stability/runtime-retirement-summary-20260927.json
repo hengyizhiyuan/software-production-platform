@@ -1,0 +1,750 @@
+{
+  "schema_version": 1,
+  "frozen_attempts_preservation": {
+    "failure_map_sha256": "ae310fdb6630bad284f0d4ac6d0fc8e3cb3606e8606346f90288a8dfbf7b3b05",
+    "unchanged_from_start": true,
+    "retained_volumes": {
+      "1": [
+        "watt-fsi-hd01_native-app-data",
+        "watt-fsi-hd01_native-checkpoints",
+        "watt-fsi-hd01_native-postgres-data",
+        "watt-fsi-hd01_native-tool-receipts"
+      ],
+      "2": [
+        "watt-fsi-hd01-r2_native-app-data",
+        "watt-fsi-hd01-r2_native-checkpoints",
+        "watt-fsi-hd01-r2_native-postgres-data",
+        "watt-fsi-hd01-r2_native-tool-receipts"
+      ],
+      "3": [
+        "watt-fsi-hd01-r3_native-app-data",
+        "watt-fsi-hd01-r3_native-checkpoints",
+        "watt-fsi-hd01-r3_native-postgres-data",
+        "watt-fsi-hd01-r3_native-tool-receipts"
+      ],
+      "4": [
+        "watt-fsi-hd01-r4_native-app-data",
+        "watt-fsi-hd01-r4_native-checkpoints",
+        "watt-fsi-hd01-r4_native-postgres-data",
+        "watt-fsi-hd01-r4_native-tool-receipts"
+      ],
+      "5": [
+        "watt-fsi-hd01-r5_native-app-data",
+        "watt-fsi-hd01-r5_native-checkpoints",
+        "watt-fsi-hd01-r5_native-postgres-data",
+        "watt-fsi-hd01-r5_native-tool-receipts"
+      ],
+      "6": [
+        "watt-fsi-hd01-r6_native-app-data",
+        "watt-fsi-hd01-r6_native-checkpoints",
+        "watt-fsi-hd01-r6_native-postgres-data",
+        "watt-fsi-hd01-r6_native-tool-receipts"
+      ],
+      "7": [
+        "watt-fsi-hd01-r7_native-app-data",
+        "watt-fsi-hd01-r7_native-checkpoints",
+        "watt-fsi-hd01-r7_native-postgres-data",
+        "watt-fsi-hd01-r7_native-tool-receipts"
+      ]
+    },
+    "volume_deletion": false
+  },
+  "removed_completed_candidate_image_tags": {
+    "at": "2026-09-26T23:57:20.334631+00:00",
+    "scope": "Only image tags of already retired new Golden qualification Previews; no frozen Attempts 1\u20137 or current regression images",
+    "volumes_deleted": false,
+    "images": [
+      {
+        "tag": "watt-candidate-preview-117f398df22d4e9e948eb1c885552406:candidate",
+        "image_id": "sha256:08cddc1576de9a54926f22d1a8af35ea3fc29d8288ef8a6c8941d07bd471ec76",
+        "repo_tags": [
+          "watt-candidate-preview-117f398df22d4e9e948eb1c885552406:candidate"
+        ],
+        "image_size": 44395535,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-08/trial-6/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-12567b4e2dac4438b003a305884adfab:candidate",
+        "image_id": "sha256:054ea4c21d1a232ec5a5a377dfa9085da03546f0a4ece12aff5a866d0dc2c8fd",
+        "repo_tags": [
+          "watt-candidate-preview-12567b4e2dac4438b003a305884adfab:candidate"
+        ],
+        "image_size": 44390027,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-02/trial-2/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-1be0fcb3c01344678009f0c31582a5e0:candidate",
+        "image_id": "sha256:a1210e225bc5e64687051bdb1de302fcca57208df40e76783697c6204b80ec30",
+        "repo_tags": [
+          "watt-candidate-preview-1be0fcb3c01344678009f0c31582a5e0:candidate"
+        ],
+        "image_size": 44414348,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-02/trial-6/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a:candidate",
+        "image_id": "sha256:f5a6e08cd657d41698e3d0956d4c73d7c6c2cbc33a0029d09d1f3cdc2fe08c1d",
+        "repo_tags": [
+          "watt-candidate-preview-29d9c36cc74444baa84592c1dca1ef4a:candidate"
+        ],
+        "image_size": 44390051,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-14/trial-2/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-2bffc295dffb4d379be81e9d066a81a2:candidate",
+        "image_id": "sha256:5a6f80f28d031ae664ea522a19d531876674ee33f7c89723c3d55fa17a0b956a",
+        "repo_tags": [
+          "watt-candidate-preview-2bffc295dffb4d379be81e9d066a81a2:candidate"
+        ],
+        "image_size": 44391572,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-04/trial-2/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4:candidate",
+        "image_id": "sha256:6ca021bcf8e987a5481cb5078a9be7e9852f65121665007a56982256de286547",
+        "repo_tags": [
+          "watt-candidate-preview-2cae692808e44ffb94bf27eb77b8fbc4:candidate"
+        ],
+        "image_size": 44390124,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-05/trial-7/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-2d2a09db5ec447fbae5d4bf41e02cdae:candidate",
+        "image_id": "sha256:00544c7ac59b0c632239458de4b165fafffa06fac091d1be957a7fa93c2da650",
+        "repo_tags": [
+          "watt-candidate-preview-2d2a09db5ec447fbae5d4bf41e02cdae:candidate"
+        ],
+        "image_size": 44402317,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-13/trial-4/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-2e930540951140e48278f4d3857cc507:candidate",
+        "image_id": "sha256:bbe61bd2a29af19f3939aad6fdd076f12c935b1d94dd29f492d5fe90b9805c6f",
+        "repo_tags": [
+          "watt-candidate-preview-2e930540951140e48278f4d3857cc507:candidate"
+        ],
+        "image_size": 44429732,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-07/trial-4/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-344bd7277e384c8e8b546ff04b845865:candidate",
+        "image_id": "sha256:46faf84b2e9ebc79c6252349705e0528892ead1c0b9600ea3f8192ea2813130a",
+        "repo_tags": [
+          "watt-candidate-preview-344bd7277e384c8e8b546ff04b845865:candidate"
+        ],
+        "image_size": 44414992,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-02/trial-7/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-3c59989b89f24f9dbe680eb9ef15e2a0:candidate",
+        "image_id": "sha256:b2df81b5dab1aae7843f8ed79d205f814d4d642de86f84fadf3d73061fda4f5c",
+        "repo_tags": [
+          "watt-candidate-preview-3c59989b89f24f9dbe680eb9ef15e2a0:candidate"
+        ],
+        "image_size": 44391117,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-8/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-436121a271f64034bbbc002ae8c5dcb7:candidate",
+        "image_id": "sha256:2be5fdc8857fa646507e4861d213506242faa824f208c1c5dd52f059aecdb20d",
+        "repo_tags": [
+          "watt-candidate-preview-436121a271f64034bbbc002ae8c5dcb7:candidate"
+        ],
+        "image_size": 44392104,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-08/trial-8/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-47f4cae90c414bf1bf5e849d9ab2a9c9:candidate",
+        "image_id": "sha256:117bf5f71efa976d5d5b4050c3870d557d892b71ca648094f36ee296522d7391",
+        "repo_tags": [
+          "watt-candidate-preview-47f4cae90c414bf1bf5e849d9ab2a9c9:candidate"
+        ],
+        "image_size": 44391436,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-01/trial-1/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-5146f99a252844a8b54d52fde7c85713:candidate",
+        "image_id": "sha256:e872eacb764a8622f3290cdf29bac01466f57f67c62d52a1090ea6aa33ebe732",
+        "repo_tags": [
+          "watt-candidate-preview-5146f99a252844a8b54d52fde7c85713:candidate"
+        ],
+        "image_size": 44389862,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-05/trial-6/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-51ee3bea735a4029b0e1f824b36652b9:candidate",
+        "image_id": "sha256:b80783c5ad2fdb7d493bb92b46520f888f35790b717d1dbfad3d04efb6c3c32e",
+        "repo_tags": [
+          "watt-candidate-preview-51ee3bea735a4029b0e1f824b36652b9:candidate"
+        ],
+        "image_size": 44391099,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-2/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-7e28feae780e4ddf8f07cf8330a4f9b2:candidate",
+        "image_id": "sha256:d06f7ecc1454083291f2b87a2c0094d8593f176380cf5ce0488c723848a8fc21",
+        "repo_tags": [
+          "watt-candidate-preview-7e28feae780e4ddf8f07cf8330a4f9b2:candidate"
+        ],
+        "image_size": 44391245,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-10/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-84096e1f3dc24a9bbda7d717d1f5028b:candidate",
+        "image_id": "sha256:e52c2f22056774bc3e69a8beba6bb2f983520a51ba82132aef7b9b342956779c",
+        "repo_tags": [
+          "watt-candidate-preview-84096e1f3dc24a9bbda7d717d1f5028b:candidate"
+        ],
+        "image_size": 44429541,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-07/trial-3/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4:candidate",
+        "image_id": "sha256:5280bf4b4d0c85cdc93a17267650efccb4c41a7ee2dc098cbdc4083f9a1c74f5",
+        "repo_tags": [
+          "watt-candidate-preview-8ef9dd5bf77942a1aac7afdc4b8bc2f4:candidate"
+        ],
+        "image_size": 44390032,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-06/trial-4/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-9bdf02da99b44dc8befe089b25553fc7:candidate",
+        "image_id": "sha256:cfa23a6f732eb5e4f2c6753444e349fbd451ebec59d809375cbd3d4ac1aad02a",
+        "repo_tags": [
+          "watt-candidate-preview-9bdf02da99b44dc8befe089b25553fc7:candidate"
+        ],
+        "image_size": 44390035,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-06/trial-3/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-aeda24fcf71a4def9e8a00a658a8a939:candidate",
+        "image_id": "sha256:84da0d95ecebd843095dadf0d6edc26633eb3e8f313f06f67cd6b41c9cd85513",
+        "repo_tags": [
+          "watt-candidate-preview-aeda24fcf71a4def9e8a00a658a8a939:candidate"
+        ],
+        "image_size": 44425327,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-13/trial-5/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-bb27e23dd8e8498297a97121bbef35ab:candidate",
+        "image_id": "sha256:a66348c463092044cefd95606932adab685575ff71720bdef93cde4853122277",
+        "repo_tags": [
+          "watt-candidate-preview-bb27e23dd8e8498297a97121bbef35ab:candidate"
+        ],
+        "image_size": 44389861,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-03/trial-1/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d:candidate",
+        "image_id": "sha256:fab3d3fc53c8c49a18487089ccc044578f8d9c722638342a7d3e9d7b821b2174",
+        "repo_tags": [
+          "watt-candidate-preview-bdd91612383b422c8b409f1af012b67d:candidate"
+        ],
+        "image_size": 44389991,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-03/trial-5/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-bfc6741d42044177be086680ca834352:candidate",
+        "image_id": "sha256:5bc5b1357dbe8736ff2ec72821332cae0b37d54a20127214b37d2bc1ca24316a",
+        "repo_tags": [
+          "watt-candidate-preview-bfc6741d42044177be086680ca834352:candidate"
+        ],
+        "image_size": 44389923,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-03/trial-4/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-cd3afeb8d9a348659b66fc1878f0d50b:candidate",
+        "image_id": "sha256:f47701381731f71229e30fbf0a633f0fd137604a899e2c8ec1d90b98186e1f17",
+        "repo_tags": [
+          "watt-candidate-preview-cd3afeb8d9a348659b66fc1878f0d50b:candidate"
+        ],
+        "image_size": 44392619,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-09/trial-2/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-cd6b05ef1ff54e148086e69a1c4cf893:candidate",
+        "image_id": "sha256:1133614718551f9db374399a8a76ef551952d2e1bd0b40bf4e13a3b5a114c4ad",
+        "repo_tags": [
+          "watt-candidate-preview-cd6b05ef1ff54e148086e69a1c4cf893:candidate"
+        ],
+        "image_size": 44391121,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-10/trial-5/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-d5331ed21bef4ca3880364b840132d88:candidate",
+        "image_id": "sha256:7c188dd1412816980854b385088ac24690eb2301600b229ba2230985757ca335",
+        "repo_tags": [
+          "watt-candidate-preview-d5331ed21bef4ca3880364b840132d88:candidate"
+        ],
+        "image_size": 44392687,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-03/trial-3/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-dbcc3d41d5f24be985cb154a55c6e2fa:candidate",
+        "image_id": "sha256:b358579d6615255a08702cdb3a6f7700d3e1543ab8c13fc8818b282140174bbb",
+        "repo_tags": [
+          "watt-candidate-preview-dbcc3d41d5f24be985cb154a55c6e2fa:candidate"
+        ],
+        "image_size": 175998654,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-01/trial-2/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-e43de58683da46308d6bac4e7b58eaf8:candidate",
+        "image_id": "sha256:aeef684f9655f26642be4b73ac06b566b14f95d5376efb9c193b5132ae5def27",
+        "repo_tags": [
+          "watt-candidate-preview-e43de58683da46308d6bac4e7b58eaf8:candidate"
+        ],
+        "image_size": 44390059,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-07/trial-3/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-ea722225337c42ddadb47c9a1b39fa78:candidate",
+        "image_id": "sha256:8326f9b763bfd5f48d0a103c2b093f2d1ac2b96f9765927dc2abf8cb89e85144",
+        "repo_tags": [
+          "watt-candidate-preview-ea722225337c42ddadb47c9a1b39fa78:candidate"
+        ],
+        "image_size": 44401938,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-IP-02/trial-5/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-ecd4ca8362db4e1bbf93ed28246becac:candidate",
+        "image_id": "sha256:7a52a02e19e53cbb0629840037da8e6e383ca6defaccdd43253ef16a6da31313",
+        "repo_tags": [
+          "watt-candidate-preview-ecd4ca8362db4e1bbf93ed28246becac:candidate"
+        ],
+        "image_size": 44390081,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-07/trial-1/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      },
+      {
+        "tag": "watt-candidate-preview-f26174b4f5db4ced9299d965cbfa6559:candidate",
+        "image_id": "sha256:26398facaf03661c074c9c6177d019d3686b2c8cd6be7d88aa076ab15664708b",
+        "repo_tags": [
+          "watt-candidate-preview-f26174b4f5db4ced9299d965cbfa6559:candidate"
+        ],
+        "image_size": 44390036,
+        "retired_runtime_receipt": ".spg/stability-runtime/golden-runs/GC-EX-06/trial-2/runtime-retirement.json",
+        "container_references": [],
+        "removed": true,
+        "volumes_deleted": false
+      }
+    ]
+  },
+  "retired_transient_fixture_names": [
+    "watt-stability-transient-fixtures-t2",
+    "watt-stability-transient-fixtures-t3",
+    "watt-stability-transient-fixtures-t4"
+  ],
+  "retired_prior_orphan_execution_runtimes": [
+    {
+      "name": "watt-pe-b0d8f8ff-7a19-4e69-81fd-cbd6abe09a3a",
+      "created_at": "2026-09-26T22:05:25.049512734Z",
+      "image_id": "sha256:d50c73232487e3db14de61fbe1eaef4fb21efbcc8fa36375426e827070c3fd2e",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 11766,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-26T22:05:25.223732728Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "watt-stability-golden-v11-workspaces",
+          "Source": "/var/lib/docker/volumes/watt-stability-golden-v11-workspaces/_data",
+          "Destination": "/watt-workspaces",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        }
+      ],
+      "labels": {
+        "watt.production-environment": "b0d8f8ff-7a19-4e69-81fd-cbd6abe09a3a"
+      },
+      "networks": {
+        "none": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "fe68500e5b568285a70052395d82c06341f011752e5932df63a1a60c93bc3ec1",
+          "EndpointID": "f62b447d27e9df46427534db3bdede95450d57d7cbd12c488f200a8f16743e94",
+          "Gateway": "",
+          "IPAddress": "",
+          "MacAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": null
+        }
+      },
+      "preserve_volumes": true,
+      "reason": "Old completed or fenced qualification runtime; not a live final-regression container"
+    },
+    {
+      "name": "watt-pe-6440dc5a-e77a-406f-be0d-d8a64336f817",
+      "created_at": "2026-09-26T20:01:21.532024972Z",
+      "image_id": "sha256:eca0cee8b5a47b03333293deb325656fa4f67265e5804ae5d4ea2114c82bc4f4",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 35003,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-26T20:01:21.672299704Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "watt-stability-golden-v3-workspaces",
+          "Source": "/var/lib/docker/volumes/watt-stability-golden-v3-workspaces/_data",
+          "Destination": "/watt-workspaces",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        }
+      ],
+      "labels": {
+        "watt.production-environment": "6440dc5a-e77a-406f-be0d-d8a64336f817"
+      },
+      "networks": {
+        "none": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "fe68500e5b568285a70052395d82c06341f011752e5932df63a1a60c93bc3ec1",
+          "EndpointID": "9c398f181c7324c67a563f7b64a88d73f6f2c2f782829be8ad166ba231eae281",
+          "Gateway": "",
+          "IPAddress": "",
+          "MacAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": null
+        }
+      },
+      "preserve_volumes": true,
+      "reason": "Old completed or fenced qualification runtime; not a live final-regression container"
+    },
+    {
+      "name": "watt-pe-d800a6c2-b701-429f-8967-f6e57c6f691f",
+      "created_at": "2026-09-26T19:02:23.993745037Z",
+      "image_id": "sha256:9bc813a25fd9812f057c9ffb0191041f32a035568e6cf53590fdcc379f873104",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 50893,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-26T19:02:24.145822381Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-762/test_governed_branch_operation1/native-git-workspaces/9f81d84a-15be-46d3-ac6f-309202a49eb4",
+          "Destination": "/workspace/primary",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "labels": {
+        "watt.production-environment": "d800a6c2-b701-429f-8967-f6e57c6f691f"
+      },
+      "networks": {
+        "none": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "fe68500e5b568285a70052395d82c06341f011752e5932df63a1a60c93bc3ec1",
+          "EndpointID": "3cff5e6102392ae88e1eb9cc288e86710715fb41d07fa8566de7559da7017ddd",
+          "Gateway": "",
+          "IPAddress": "",
+          "MacAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": null
+        }
+      },
+      "preserve_volumes": true,
+      "reason": "Old completed or fenced qualification runtime; not a live final-regression container"
+    },
+    {
+      "name": "watt-pe-90dfa566-2e1e-466d-be81-8cb6c5e34b6b",
+      "created_at": "2026-09-26T18:36:15.867417229Z",
+      "image_id": "sha256:9bc813a25fd9812f057c9ffb0191041f32a035568e6cf53590fdcc379f873104",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 40299,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-26T18:36:16.045795081Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-754/test_governed_branch_operation1/native-git-workspaces/646b71e0-c80a-4f01-baca-cf9c638f3d51",
+          "Destination": "/workspace/primary",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "labels": {
+        "watt.production-environment": "90dfa566-2e1e-466d-be81-8cb6c5e34b6b"
+      },
+      "networks": {
+        "none": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "fe68500e5b568285a70052395d82c06341f011752e5932df63a1a60c93bc3ec1",
+          "EndpointID": "05180b4273223e98ede344dcf3615cfc9b51535c6c3b21f403cbf6bbeb43a00f",
+          "Gateway": "",
+          "IPAddress": "",
+          "MacAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": null
+        }
+      },
+      "preserve_volumes": true,
+      "reason": "Old completed or fenced qualification runtime; not a live final-regression container"
+    }
+  ],
+  "v13_final_queue": [
+    {
+      "queue_entry_id": "043b8d50-2a81-492d-add2-a3736449f45e",
+      "work_id": "9d92523f-261d-5228-888a-73a88fe48bcc",
+      "pwu_id": "7fd9fa58-9b51-4ccb-90c4-3c2d00ea7380",
+      "attempt_id": "789a35c0-8e86-4723-a074-9462766be049",
+      "fairness_group": "work:9d92523f-261d-5228-888a-73a88fe48bcc",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-26T22:52:11.562972Z",
+      "available_at": "2026-09-26T22:52:11.549965Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-26T23:40:45.515532Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "11998946-1751-5bae-94f4-b61ddf506ac3"
+    },
+    {
+      "queue_entry_id": "32f7def8-6a07-4d0d-b78a-f4357aebe290",
+      "work_id": "7f99d549-7420-5158-9a3f-43ed26ae0750",
+      "pwu_id": "d0a41d23-6ad5-457f-8d61-26a4d6196386",
+      "attempt_id": "07500e01-d6d6-4392-b314-6e3c766a8c93",
+      "fairness_group": "work:7f99d549-7420-5158-9a3f-43ed26ae0750",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-26T22:52:43.921306Z",
+      "available_at": "2026-09-26T22:52:43.916711Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-26T23:40:45.515532Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "ab3ff5fd-2608-5bcf-bad2-4079b93d7071"
+    },
+    {
+      "queue_entry_id": "0f62f3d4-607d-4176-8c33-503825e5ed4b",
+      "work_id": "6bc332a3-7714-5d07-a293-ba97ad9c5ed6",
+      "pwu_id": "58fa60c4-12a8-41b4-8868-693e2668cb50",
+      "attempt_id": "af2fcbfa-c498-4fab-9f62-0587781a260b",
+      "fairness_group": "work:6bc332a3-7714-5d07-a293-ba97ad9c5ed6",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-26T23:11:57.803265Z",
+      "available_at": "2026-09-26T23:11:57.801865Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-26T23:40:45.515532Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "66d115b2-b64b-5108-81cc-8eda5c84c194"
+    },
+    {
+      "queue_entry_id": "ab378c00-1d8d-4fff-83f8-0b44644cffa5",
+      "work_id": "8c620db8-5f63-5c8e-9d90-20b98c8bbe73",
+      "pwu_id": "b1390879-6e16-4808-bee3-b9e217953532",
+      "attempt_id": "f82981d7-df6b-483a-b3c9-2200296cbdf0",
+      "fairness_group": "work:8c620db8-5f63-5c8e-9d90-20b98c8bbe73",
+      "condition": "COMPLETED",
+      "wait_reason": null,
+      "enqueued_at": "2026-09-26T23:13:10.283671Z",
+      "available_at": "2026-09-26T23:13:10.274679Z",
+      "resume_count": 0,
+      "progression_state": "NOT_APPLICABLE",
+      "progression_reason": "Queue allocation is not currently pending.",
+      "scheduler_alive": true,
+      "compatible_worker_count": 2,
+      "occupied_worker_count": 0,
+      "capacity_observed_at": "2026-09-26T23:40:45.515532Z",
+      "production_cycle_number": 1,
+      "work_reality_revision_id": "51e77b67-8800-58f3-94da-e8f1a5beb924"
+    }
+  ],
+  "active_qualified_application": {
+    "runtime": "watt-stability-golden-v15",
+    "endpoint": "http://127.0.0.1:8078/app",
+    "activation_receipt": ".spg/stability-runtime/recovery-v15-runtime.json",
+    "implementation_head": "ece27b10d6bf37eec100dc37780cdce0d5d46547"
+  },
+  "retained_human_review_preview": "0f35ce25-4f6b-43a7-b469-2774e1d55d38",
+  "volume_deletion": false,
+  "regression_containers_excluded": true,
+  "human_acceptance": "PENDING",
+  "recovery_retirement": {
+    "retired_runtime": "watt-stability-golden-v14",
+    "endpoint_availability": "ENDED",
+    "prior_queue_empty": true,
+    "preserved_state": ".spg/stability-runtime/recovery-v14-runtime.json",
+    "preserved_container_logs_and_mounts": ".spg/stability-runtime/recovery-retirement/before.json",
+    "removed_prior_orphans": [
+      "watt-pe-e7035191-9a27-43e0-a69b-1142eca6d693",
+      "watt-pe-6b73c7c9-0f0a-4b08-8923-92f3189e8971"
+    ],
+    "volume_deletion": false,
+    "image_reference_receipt": ".spg/stability-runtime/recovery-retirement/images.json",
+    "post_regression_removed_orphans": [
+      "watt-pe-e28e03da-0a12-4c0d-b68a-9ac65e1ff015",
+      "watt-pe-a1770559-b48f-4efe-9068-1dc3a390f7b7",
+      "watt-pe-7a17dd31-1fb7-4885-9c75-6c8e67ef2a9f"
+    ],
+    "post_regression_retained_receipt": ".spg/stability-runtime/recovery-retirement/post-regression-orphans.json",
+    "temporary_legacy_test_image_alias_removed": true
+  }
+}

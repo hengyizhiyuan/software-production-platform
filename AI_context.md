@@ -28,6 +28,21 @@ The platform is an AI-native Software Production System, not an AI Coding tool, 
 
 ## Current Stage
 
+**2026-09-27 — System-wide stability closure.** Existing WIC, Semantic,
+Steering, Planning/Task Contract, Capability, Executor, Verification and Preview
+owners now participate in bounded refinement; durable Work-level convergence
+distinguishes local recovery from review readiness. Candidate sealing schedules
+required Preview and served verification before Human review. The frozen
+Attempts 1–7 Failure Map remains unchanged. All 22 feasible Tier-0 Golden Cases
+and ten required repeated core cases are qualified. Real Web Search and
+GC-EX-12 remain `BLOCKED_EXTERNAL` without `SPG_WEB_SEARCH_API_KEY`; by Human
+instruction this does not stop the code-owned batch. Final regression receipts
+and exact baseline are recorded in the
+[consolidated closure](docs/evidence/stability/system-wide-stability-closure-20260927.md).
+[Independent Web/GC-EX-12 qualification](docs/operations/web-search-live-qualification.md)
+defines the deferred entry points and evidence requirements. Human Acceptance
+remains PENDING; no whole Tier-0 PASS is inferred from the feasible subset.
+
 **2026-09-22 — Production Environment Foundation v1 — IMPLEMENTED / FOCUSED
 VERIFICATION PASS.** Work-bound environment and multi-repository Workspace
 contracts, policy-driven lifecycle transitions, container-provider boundary,

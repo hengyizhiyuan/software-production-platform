@@ -2,7 +2,7 @@
 
 Status: **PROGRAM-LEVEL NAVIGATION / CURRENT REALITY**
 
-Last updated: **2026-09-13**
+Last updated: **2026-09-27**
 
 Runtime reality update (2026-09-24): Watt's active execution route is Native
 Executor plus API-key model providers. References below to a Codex SDK adapter
@@ -50,6 +50,23 @@ Product / Architecture Alignment
 See [AI-native Development Execution Principles](../architecture/ai-native-development-execution-principles.md).
 
 ## 2. Current Overall Status
+
+### System-wide refinement and stability qualification
+
+**2026-09-27 — CODE-OWNED STABILIZATION / FEASIBLE GOLDEN QUALIFICATION PASS.**
+The existing owners now refine across the Work lifecycle, with durable
+no-progress governance and automatic Candidate → Preview → served verification
+→ Human review. Attempts 1–7 remain frozen. Twenty-two feasible Tier-0 cases
+pass their business oracles and all ten required core cases have at least three
+independent successful interactions. The final regression/baseline receipts are
+in the [consolidated closure](../evidence/stability/system-wide-stability-closure-20260927.md).
+
+Real Web qualification and GC-EX-12 are `BLOCKED_EXTERNAL` because the Human
+has deferred `SPG_WEB_SEARCH_API_KEY`. The batch continues through all feasible
+implementation/regression/evidence/repository closure. The
+[independent qualification procedure](../operations/web-search-live-qualification.md)
+preserves entry points and required evidence. Whole Tier-0 and Human Acceptance
+remain distinct from the qualified feasible subset.
 
 ### First Human-validated end-to-end software production loop
 

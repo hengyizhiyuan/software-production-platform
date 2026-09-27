@@ -1,0 +1,46 @@
+........................................................................ [  4%]
+........................................................................ [  8%]
+.......................................................F................ [ 13%]
+........................................................................ [ 17%]
+.........INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+
+=================================== FAILURES ===================================
+___________________________ test_db_01_connectivity ____________________________
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/watt_stability), session_factory=sessionmaker...ind=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/watt_stability), autoflush=False, expire_on_commit=False))
+
+    def test_db_01_connectivity(postgres_database: Database) -> None:
+        health = postgres_database.check()
+    
+>       assert health.database_name == "spg_test"
+E       AssertionError: assert 'watt_stability' == 'spg_test'
+E         
+E         - spg_test
+E         + watt_stability
+
+tests/integration/test_postgresql_persistence.py:31: AssertionError
+=============================== warnings summary ===============================
+tests/integration/test_mvp_app_work_flow.py::test_work_03_and_08_work_is_not_resource_or_project
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1294: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "project_id" not in record.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_03_and_08_work_is_not_resource_or_project
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1295: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "resource_id" not in record.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_11_draft_cannot_execute_and_work_13_projection_is_not_authority
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1421: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "status" in before.model_fields
+
+tests/integration/test_mvp_app_work_flow.py::test_work_11_draft_cannot_execute_and_work_13_projection_is_not_authority
+  /Users/yu/Documents/dev/software-production-platform/tests/integration/test_mvp_app_work_flow.py:1422: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    assert "condition" not in before.model_fields
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_postgresql_persistence.py::test_db_01_connectivity
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/Users/yu/Documents/dev/software-production-platform/.venv/lib/python3.13/site-packages/psycopg/cursor.py:117: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+1 failed, 296 passed, 4 warnings in 1151.53s (0:19:11)

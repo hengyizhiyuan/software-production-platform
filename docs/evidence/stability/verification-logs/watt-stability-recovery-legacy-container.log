@@ -1,0 +1,12 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /Users/yu/Documents/dev/software-production-platform/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/yu/Documents/dev/software-production-platform
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collecting ... collected 1 item
+
+tests/test_brownfield_delivery_vertical_slice.py::test_real_repository_container_preview_delivery_and_reality_refresh PASSED [100%]
+
+- generated xml file: /Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/recovery-legacy-container.xml -
+============================== 1 passed in 5.75s ===============================

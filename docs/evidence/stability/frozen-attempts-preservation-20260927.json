@@ -1,0 +1,51 @@
+{
+  "failure_map_sha256": "ae310fdb6630bad284f0d4ac6d0fc8e3cb3606e8606346f90288a8dfbf7b3b05",
+  "unchanged_from_start": true,
+  "retained_volumes": {
+    "1": [
+      "watt-fsi-hd01_native-app-data",
+      "watt-fsi-hd01_native-checkpoints",
+      "watt-fsi-hd01_native-postgres-data",
+      "watt-fsi-hd01_native-tool-receipts"
+    ],
+    "2": [
+      "watt-fsi-hd01-r2_native-app-data",
+      "watt-fsi-hd01-r2_native-checkpoints",
+      "watt-fsi-hd01-r2_native-postgres-data",
+      "watt-fsi-hd01-r2_native-tool-receipts"
+    ],
+    "3": [
+      "watt-fsi-hd01-r3_native-app-data",
+      "watt-fsi-hd01-r3_native-checkpoints",
+      "watt-fsi-hd01-r3_native-postgres-data",
+      "watt-fsi-hd01-r3_native-tool-receipts"
+    ],
+    "4": [
+      "watt-fsi-hd01-r4_native-app-data",
+      "watt-fsi-hd01-r4_native-checkpoints",
+      "watt-fsi-hd01-r4_native-postgres-data",
+      "watt-fsi-hd01-r4_native-tool-receipts"
+    ],
+    "5": [
+      "watt-fsi-hd01-r5_native-app-data",
+      "watt-fsi-hd01-r5_native-checkpoints",
+      "watt-fsi-hd01-r5_native-postgres-data",
+      "watt-fsi-hd01-r5_native-tool-receipts"
+    ],
+    "6": [
+      "watt-fsi-hd01-r6_native-app-data",
+      "watt-fsi-hd01-r6_native-checkpoints",
+      "watt-fsi-hd01-r6_native-postgres-data",
+      "watt-fsi-hd01-r6_native-tool-receipts"
+    ],
+    "7": [
+      "watt-fsi-hd01-r7_native-app-data",
+      "watt-fsi-hd01-r7_native-checkpoints",
+      "watt-fsi-hd01-r7_native-postgres-data",
+      "watt-fsi-hd01-r7_native-tool-receipts"
+    ]
+  },
+  "volume_deletion": false,
+  "verified_during_recovery": true,
+  "all_28_named_volumes_present": true
+}

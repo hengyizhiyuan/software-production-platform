@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-27T00:38:32.923721+00:00",
+  "external_dependency": "SPG_WEB_SEARCH_API_KEY",
+  "status": "BLOCKED_EXTERNAL",
+  "batch_policy": "Continue all implementation, feasible Golden Cases and regression without requesting this credential.",
+  "qualification_entries": [
+    {
+      "id": "SEARCH-Q2/live-web",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "SEARCH-Q3/live-combined",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "SEARCH-Q4/live-model-initiated-web",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "SEARCH-Q5/live-web-refinement",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "SEARCH-Q8/live-web-provenance",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "SEARCH-Q6/live-web-provider-failure",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "SEARCH-Q9/live-web-convergence",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "GC-EX-12",
+      "status": "BLOCKED_EXTERNAL"
+    }
+  ],
+  "independent_entrypoint": "benchmarks/golden/runtime/qualify_research.py",
+  "evidence_requirements": "docs/operations/web-search-live-qualification.md",
+  "retained_receipts": [
+    {
+      "path": ".spg/stability-runtime/deferred-web-qualification/web-live/trial-1/qualification.json",
+      "sha256": "1a29c803a8c6ba1ea64c3b4a0ab313a30ca41a743a0d6a7a58261c9150071284",
+      "receipt": {
+        "scope": "web-live",
+        "trial": 1,
+        "status": "BLOCKED_EXTERNAL",
+        "external_dependency": "SPG_WEB_SEARCH_API_KEY",
+        "retrieval_attempted": false,
+        "recorded_at": "2026-09-27T00:34:12.565456+00:00",
+        "human_acceptance": "PENDING"
+      }
+    },
+    {
+      "path": ".spg/stability-runtime/deferred-web-qualification/GC-EX-12/trial-1/qualification.json",
+      "sha256": "5b156c236520e07a9b0b2bfc273ff76ce8242de0b4457f42a187212b1fd1012d",
+      "receipt": {
+        "scope": "GC-EX-12",
+        "trial": 1,
+        "status": "BLOCKED_EXTERNAL",
+        "external_dependency": "SPG_WEB_SEARCH_API_KEY",
+        "retrieval_attempted": false,
+        "recorded_at": "2026-09-27T00:34:12.678635+00:00",
+        "human_acceptance": "PENDING"
+      }
+    },
+    {
+      "path": ".spg/stability-runtime/golden-runs/GC-EX-12/trial-6/qualification.json",
+      "sha256": "b08efb0f86553151edc91fd19072f01d7d275f8d47357a18c90d77721e2caf31",
+      "receipt": {
+        "case": "GC-EX-12",
+        "trial": 6,
+        "status": "BLOCKED_EXTERNAL",
+        "checks": {
+          "source_provenance": true,
+          "inspected_source_cited": true,
+          "search_sufficient": true,
+          "browser_stream_completed": true,
+          "no_unrequested_production": true,
+          "real_web_retrieval": false,
+          "inspected_web_source_cited": false,
+          "real_github_retrieval": true,
+          "exact_project_observation": true,
+          "grounded_project_recommendation": true,
+          "project_packet_kept_off_human_stream": true
+        },
+        "qualified_code_owned_surface": "PASS",
+        "external_dependency": "SPG_WEB_SEARCH_API_KEY",
+        "elapsed_seconds": 48.802,
+        "observed_metrics": {
+          "providers": [
+            "github-rest-public"
+          ],
+          "latency_ms": 23543,
+          "sufficient": true,
+          "fetch_count": 3,
+          "query_count": 2,
+          "model_tokens": 6930,
+          "result_count": 6,
+          "search_types": [
+            "SEARCH_GITHUB_REPOSITORIES",
+            "SEARCH_WEB"
+          ],
+          "provider_cost": "UNREPORTED",
+          "refinement_count": 1,
+          "failure_categories": [
+            "CREDENTIAL_REQUIRED"
+          ]
+        },
+        "manual_rescue_actions": [],
+        "human_acceptance": "PENDING",
+        "recorded_at": "2026-09-27T00:36:42.260418+00:00"
+      }
+    }
+  ],
+  "human_acceptance": "PENDING",
+  "credential_boundary_regression": "PASS: actual missing-credential truth remains distinct from live-provider qualification"
+}
