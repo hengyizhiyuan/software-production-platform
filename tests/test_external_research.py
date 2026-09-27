@@ -96,6 +96,21 @@ def test_explicit_search_routing_is_canonical_and_not_production_mutation():
     assert not potential_external_research("帮我开发一个异步队列")
 
 
+@pytest.mark.parametrize("text", [
+    "不要搜索 GitHub，我只是聊聊任务队列的概念",
+    '文档里的例句是“搜索 GitHub 上的队列实现”',
+    "我在考虑要不要搜索一些队列库",
+])
+def test_recorded_no_action_cannot_reenter_legacy_search(text):
+    service, resolver = _research(_GitHub(()))
+    class UnexpectedModel:
+        def generate(self, **kwargs):
+            raise AssertionError("A recorded non-action must not be reinterpreted")
+    service.model = UnexpectedModel()
+    assert service.requests_for_turn(text, "Conceptual discussion only", action_candidates=()) == ()
+    assert resolver.calls == []
+
+
 def test_target_repository_and_viewable_preview_do_not_trigger_external_fetch():
     request = (
         "这是项目仓库：https://github.com/hengyizhiyuan/software-production-platform.git\n"

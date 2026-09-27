@@ -238,9 +238,10 @@ class GovernedExternalResearch:
                 return tuple(SearchRequest(intent=kind, query=query,
                     reason="Current Human semantic request for public external retrieval",
                     origin="HUMAN_EXPLICIT") for kind in explicit)
-            if any(item.operation in {*kinds, O.ACQUIRE_REPOSITORY, O.INSPECT_REPOSITORY,
-                    O.CREATE_AND_SWITCH_BRANCH, O.QUERY_BRANCH} for item in action_candidates):
-                return ()
+            # A recorded semantic decision is authoritative, including an empty
+            # action set after withdrawal. Do not reinterpret it as an explicit
+            # request through the legacy keyword or information-gap route.
+            return ()
         if production_intent_evidence(text).production_request and not _SEARCH_VERB.search(text):
             return ()
         url_match = _PUBLIC_URL.search(text)
