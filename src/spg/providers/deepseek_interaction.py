@@ -447,6 +447,11 @@ class DeepSeekGovernedResponseRealizer:
                     validation_issue=_safe_validation_summary(second_error),
                     repair_attempted=True,
                 ) from second_error
+            if extractor.complete and extractor.observed_content.strip():
+                # Structural repair may repair the envelope, but cannot rewrite
+                # a complete string already observed by the governed delta gate.
+                payload = payload.model_copy(update={
+                    'natural_response': extractor.observed_content})
         self.last_result = result
         return GovernedResponseRealization(
             content=payload.natural_response,

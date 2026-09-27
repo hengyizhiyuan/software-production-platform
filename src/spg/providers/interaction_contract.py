@@ -290,6 +290,10 @@ class _JsonStringFieldStream:
         self._emitted = ""
         self.complete = False
 
+    @property
+    def observed_content(self) -> str:
+        return self._emitted
+
     def feed(self, delta: str) -> str:
         if self.complete:
             return ""

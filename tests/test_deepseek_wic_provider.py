@@ -643,3 +643,16 @@ def test_semantic_cross_reference_failure_is_repaired_before_assessment_admissio
     assert adapter.calls == 2
     assert result.semantic_fact_candidates == ()
     assert 'unknown neutral extraction' in adapter.requests[1]['instructions']
+
+
+def test_structural_expression_repair_cannot_rewrite_observed_complete_string():
+    content = '这是讨论，尚未创建任何分支。'
+    invalid = json.dumps({'natural_response': content, 'additionalProperties': False})
+    rewritten = json.dumps({'natural_response': '我将创建分支。'})
+    runtime, adapter = _runtime(_Adapter([invalid, rewritten]))
+    realizer = DeepSeekWorkInteractionCapability(runtime=runtime).governed_response_realizer
+    deltas = []
+    result = realizer.realize_stream(_realizer_envelope(), on_response_delta=deltas.append)
+    assert adapter.calls == 2
+    assert result.content == ''.join(deltas) == content
+    assert result.structural_repair_count == 1
