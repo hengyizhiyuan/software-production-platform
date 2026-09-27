@@ -1,0 +1,388 @@
+{
+  "status": "FAIL",
+  "cases": 15,
+  "minimum_trial_count": 31,
+  "trials_passed": 25,
+  "trials_failed": 6,
+  "primary_live_plan": {
+    "trials": 13,
+    "passed": 7,
+    "failed": 6
+  },
+  "owner_and_neighbor_evidence_explicitly_distinguished": true,
+  "actual_known_unrequested_switch": 1,
+  "holdout_false_execution_scope_separate": true,
+  "cases_detail": [
+    {
+      "case": "GC-LC-01",
+      "minimum_independent_trials": 3,
+      "observed_trial_count": 3,
+      "status": "FAIL",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-01/trial-1/result.json",
+          "sha256": "fea6adec11e93bd4c33d0e95d12eccb48ff4767c9954d5105ab00f5eb5d0ed6c",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 2,
+          "status": "FAIL",
+          "receipt": "live-fourth/lifecycle/GC-LC-01/trial-2/result.json",
+          "sha256": "9f6ae128d2cf405a12adea3d05391f5eed1ded6605cb8994721cabdcb9660284",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 3,
+          "status": "FAIL",
+          "receipt": "live-fourth/lifecycle/GC-LC-01/trial-3/result.json",
+          "sha256": "6145304e694722701e411d246b79bde11f89252e3b46bd2ec52845265c5707ae",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-02",
+      "minimum_independent_trials": 3,
+      "observed_trial_count": 3,
+      "status": "FAIL",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "FAIL",
+          "receipt": "live-fourth/lifecycle/GC-LC-02/trial-1/result.json",
+          "sha256": "afc2bf93a1be2951cf451eb9afb47d79b366fbd72b0b42b2ba63f4d25195b727",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 2,
+          "status": "FAIL",
+          "receipt": "live-fourth/lifecycle/GC-LC-02/trial-2/result.json",
+          "sha256": "21b19f4949bcfcf0010e862a505e3e9feee7dd6577f6aad9c4cf17c19b09ffe5",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 3,
+          "status": "FAIL",
+          "receipt": "live-fourth/lifecycle/GC-LC-02/trial-3/result.json",
+          "sha256": "159cda83fd7bfe10f85a76ce6956e2d01a2c5d234afa8c591d6ac573209622ea",
+          "neighbor_projection": false,
+          "actual_business_supplement": false,
+          "physical_false_execution_receipt": "live-fourth/lifecycle/GC-LC-02/trial-3/unrequested-switch-physical-oracle-r246.json"
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-03",
+      "minimum_independent_trials": 3,
+      "observed_trial_count": 3,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-03/trial-1/result.json",
+          "sha256": "55cf3498dd3a2f53da4f6fafaeee5be6126f6b9255765970aba36393308046c4",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 2,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-03/trial-2/result.json",
+          "sha256": "7dd2fe4859a09067d6705d9af3f4ae7468c299327ec0cf71b87a1b946004d8a7",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 3,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-03/trial-3/result.json",
+          "sha256": "9320d1465e16cabb86fb4917a9ed38c22077963d3cf4b5090f41b6284cf8a45c",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-04",
+      "minimum_independent_trials": 3,
+      "observed_trial_count": 3,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-04/trial-1/result.json",
+          "sha256": "b5fdfd82f3c48685f7822da309f7eafa95c4a18aae0ee4691184a208a8aad750",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 2,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-04/trial-2/result.json",
+          "sha256": "aa71f1e95a6df9fa085176732777f6154a5e35ed07c084a6d41ce8beed9e7e13",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 3,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-04/trial-3/result.json",
+          "sha256": "95966073d65bcef3bd0a68a0478c6858b1456e45d7e9cf74e624e9f5dbe5da39",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-05",
+      "minimum_independent_trials": 1,
+      "observed_trial_count": 1,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-05/trial-1/neighbor-owner-qualification-r238.json",
+          "sha256": "ec406d725a8aeb0ce8ca7956e0ab15cb556f9728a3771c3f585b065421cfbc67",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-06",
+      "minimum_independent_trials": 1,
+      "observed_trial_count": 1,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-06/trial-1/neighbor-owner-qualification-r238.json",
+          "sha256": "0b4c64acfd294550455d262d28c01da8c34f4881a431aed8225a452e1a2ca26b",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-07",
+      "minimum_independent_trials": 3,
+      "observed_trial_count": 3,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-07/trial-1/neighbor-owner-qualification-r238.json",
+          "sha256": "e2480fc0554bbcdc11ed4f20f64f9e6da2ab0fa30df1ac64ab389f03ef22b5c2",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 2,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-07/trial-2/neighbor-owner-qualification-r238.json",
+          "sha256": "5368a2d69718b8e7b7df568cccfc50699afe228035ae016186a29a862d77b43b",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 3,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-07/trial-3/neighbor-owner-qualification-r238.json",
+          "sha256": "4c0b2d142a70cd930049fbc1bb6a3d7b2811aa6453d669f3d83f7043a3ca253d",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-08",
+      "minimum_independent_trials": 1,
+      "observed_trial_count": 1,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth-b/lifecycle/GC-LC-08/trial-1/continuity-business-oracle-v2-r230.json",
+          "sha256": "97e6797c86c508bf9cc630620c7979632fc81046ba09d240d5efc837a63d6fac",
+          "neighbor_projection": false,
+          "actual_business_supplement": true
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-09",
+      "minimum_independent_trials": 1,
+      "observed_trial_count": 1,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth-b/lifecycle/GC-LC-09/trial-1/history-business-oracle-v2-r231.json",
+          "sha256": "45f95009e1c0df422acf5f7677a81d6eea89c5950364d253a981c52d4819e265",
+          "neighbor_projection": false,
+          "actual_business_supplement": true
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-10",
+      "minimum_independent_trials": 3,
+      "observed_trial_count": 3,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-10/trial-1/neighbor-owner-qualification-r238.json",
+          "sha256": "7920db4aec1516b3806e71d8f17f45da29025aa8abc5d4998458c6510020955c",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 2,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-10/trial-2/neighbor-owner-qualification-r238.json",
+          "sha256": "79b2b31e1345a6452d283badac55137e6aad701f43abdbc3e1e065172b57d9e3",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 3,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-10/trial-3/neighbor-owner-qualification-r238.json",
+          "sha256": "9abebc6ee45bcbdc4228d63497ebaa088e8f6d02a6579a5f69b37df56752a4c0",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-11",
+      "minimum_independent_trials": 3,
+      "observed_trial_count": 3,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-11/trial-1/neighbor-owner-qualification-r238.json",
+          "sha256": "2f92c136adb14fdfc159f6039a6caf72440f1bbcb492d7073ce703532dd90ea7",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 2,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-11/trial-2/neighbor-owner-qualification-r238.json",
+          "sha256": "dfe2a7952b04698a576a3a9538f5d273fdca1256cfdeb1504534ef38fda610af",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 3,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-11/trial-3/neighbor-owner-qualification-r238.json",
+          "sha256": "983189212651cbe419419157569ca6fe7c90211c0c3ab275c7b4f018c3b9063c",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-12",
+      "minimum_independent_trials": 3,
+      "observed_trial_count": 3,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-12/trial-1/neighbor-owner-qualification-r238.json",
+          "sha256": "0f128aabee5cbf46959074ffaa10ff8a64639b2f71da80a466787171e4c05c98",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 2,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-12/trial-2/neighbor-owner-qualification-r238.json",
+          "sha256": "779817958e79f9901b8e2efbff9c5389ec9faf2025ccb4ce853d2d457d94557d",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        },
+        {
+          "trial": 3,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-12/trial-3/neighbor-owner-qualification-r238.json",
+          "sha256": "4151aa723d1d4205d35a7d46d539e0194d7512dba8bab0c234ca0c3451920ffc",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-13",
+      "minimum_independent_trials": 1,
+      "observed_trial_count": 1,
+      "status": "FAIL",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "FAIL",
+          "receipt": "live-fourth/lifecycle/GC-LC-13/trial-1/result.json",
+          "sha256": "e453c46d6d5d053167bd59d9ae8fb5f914ba7badd3055a5dd249930501eb27a4",
+          "neighbor_projection": false,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-14",
+      "minimum_independent_trials": 1,
+      "observed_trial_count": 1,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-14/trial-1/neighbor-owner-qualification-r238.json",
+          "sha256": "b32d5a963e6f8a2201c9e89a82a96f08e3e2c9ad508fe8bf5d9c1ce4131debd8",
+          "neighbor_projection": true,
+          "actual_business_supplement": false
+        }
+      ]
+    },
+    {
+      "case": "GC-LC-15",
+      "minimum_independent_trials": 1,
+      "observed_trial_count": 1,
+      "status": "PASS",
+      "trials": [
+        {
+          "trial": 1,
+          "status": "PASS",
+          "receipt": "live-fourth/lifecycle/GC-LC-15/trial-1/independent-state-projection-v2-r229.json",
+          "sha256": "f47aa35d270ed418f6636e896a739cf786f07bfb063f851edad429a549507dfd",
+          "neighbor_projection": false,
+          "actual_business_supplement": true
+        }
+      ]
+    }
+  ],
+  "source_fingerprint": "813954b4e85891cb50d06549d196734605228448c70649a0a68979921972117d",
+  "human_acceptance": "PENDING"
+}

@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "archive_members_scanned": 7126,
+  "redacted_members": 0,
+  "private_env_versions": 8,
+  "credential_values_scanned": 5,
+  "credential_bytes_exported": false,
+  "qualification_logs_still_running": false,
+  "original_receipt_hashes_unchanged": true,
+  "archive_sha256": "288a944f6f6332afcb7bc26a9b7c6531ab88876a91e660de242a46ec081f5abb",
+  "source_qualification_outcome": "FAIL",
+  "full_Web_live_and_GC_EX_12": "BLOCKED_EXTERNAL"
+}

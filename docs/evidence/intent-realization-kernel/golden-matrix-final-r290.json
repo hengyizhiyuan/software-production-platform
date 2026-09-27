@@ -1,0 +1,1252 @@
+{
+  "status": "FAIL",
+  "source_fingerprint": "813954b4e85891cb50d06549d196734605228448c70649a0a68979921972117d",
+  "required_cases": 23,
+  "required_trial_slots": 43,
+  "counts": {
+    "PASS": 30,
+    "FAIL": 12,
+    "BLOCKED_EXTERNAL": 1,
+    "PENDING": 0
+  },
+  "trials": [
+    {
+      "case": "GC-EX-01",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-1/business-oracle.json",
+          "sha256": "1f9e67f3f54beeb13717c9910534491e4d0d9365564dfa21175d8fe3fe852b04"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-1/result.json",
+          "sha256": "e7eb6f4160262d8c2fa7e75bab58c4bf39ad8949c828353d4f281698c709e39b"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-1/journey.json",
+          "sha256": "5cf708c22f74a975792a82e7d64ab5ab48d1097220ab546ed1eb4ef70e39e0e9"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-1/business-oracle.json",
+          "sha256": "1f9e67f3f54beeb13717c9910534491e4d0d9365564dfa21175d8fe3fe852b04"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-01",
+      "trial": 2,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-2/business-oracle.json",
+          "sha256": "2da825fb971e3ac0b659d57d4dd05421723166ed029a660c580bf263f4b8caa8"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-2/result.json",
+          "sha256": "05ff558d525494b2b7edc6a2b301f0e9374358ec33244ed510c16a5076be27b5"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-2/journey.json",
+          "sha256": "1808166f5833fae82fc4e0e9748068ebf0b111f9f394c41bc303e7b0cdc023e3"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-2/business-oracle.json",
+          "sha256": "2da825fb971e3ac0b659d57d4dd05421723166ed029a660c580bf263f4b8caa8"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-01",
+      "trial": 3,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-3/business-oracle.json",
+          "sha256": "229a66801814661fdff31a99f526b2b7414405a9bd0e877faac0ca234e5cd1ea"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-3/result.json",
+          "sha256": "316eab9ba6301ebdd0fc312c76e79d0665ce6bfc74d536838964a157b872be90"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-3/journey.json",
+          "sha256": "4b0e5c2fb0f1b89f5a6642f31bde5d0447f875c49268074af82ff48863f57627"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-01/trial-3/business-oracle.json",
+          "sha256": "229a66801814661fdff31a99f526b2b7414405a9bd0e877faac0ca234e5cd1ea"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-02",
+      "trial": 1,
+      "status": "FAIL",
+      "reason": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-02/trial-1/result.json",
+          "sha256": "a9ddd692c6d6c36a930500cb507375002a9b3a6125675b1200f7e7004d137e01"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-02/trial-1/journey.json",
+          "sha256": "3fe13f7d9a377d17a8ef597f7a9e4b97f42d004831609e2f982217e1647a88fa"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-02/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-03",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-1/business-oracle-v2.json",
+          "sha256": "ec335aed065f0f8b8780d0bb9afae5cf889346197f8f1ff3efe69939cfcefaf7"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-1/result.json",
+          "sha256": "f98771746df05a6f6cd28b2d774c1a870aae91c07a0190b40cb49cc42aeb62be"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-1/journey.json",
+          "sha256": "0d436c4864a79d22abdcc57796fcbd4c8184f3e630fa4e4783978a5e9261c927"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-1/business-oracle-v2.json",
+          "sha256": "ec335aed065f0f8b8780d0bb9afae5cf889346197f8f1ff3efe69939cfcefaf7"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-1/business-oracle.json",
+          "sha256": "0e585c0a0715864ff6c38f404b80731eae42f62e4d1e42f32f1732b384676086"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-03",
+      "trial": 2,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-2/business-oracle-v2.json",
+          "sha256": "44bcbab8af2f018ec90177ad91c1f09ae0060913b22e76b9fa181e0ffdabd53b"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-2/result.json",
+          "sha256": "e23bb21b7e97f722ade59080b8e8e6e5cd84c435c39ff02fffbb10aa365db0a8"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-2/journey.json",
+          "sha256": "db78019095d1e0f01761da9dca68728677af11e58c5ad5ea2ac3949086ab2dfe"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-2/business-oracle-v2.json",
+          "sha256": "44bcbab8af2f018ec90177ad91c1f09ae0060913b22e76b9fa181e0ffdabd53b"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-2/business-oracle.json",
+          "sha256": "331e9ba222607867264b217f9f834c5a21f69e50450c86107b4ce77b17a4f5ab"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-03",
+      "trial": 3,
+      "status": "FAIL",
+      "reason": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-3/result.json",
+          "sha256": "a07ab5dd20550f29c3aa6fab413297750594e5bc240152501dca8c57831a29da"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-3/journey.json",
+          "sha256": "8b206f5a77f176d6f2811497c265c360bd25baaf9ad8cf0cc090e5987ffa50d4"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-03/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-04",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-04/trial-1/business-oracle.json",
+          "sha256": "bac29dfc1771ea726c6ecd17850dec36b62357d2e4fe4d719ca6b820f785857e"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-04/trial-1/result.json",
+          "sha256": "b8b496e9baace94d9fffb1fadc1f85fb2e78fc1fccc0b6dddd68e53ee535f0cf"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-04/trial-1/journey.json",
+          "sha256": "3d28690477bffaf42d6f07eb2f466ca9b1bba6c7c567248811ddbd88c2fb6651"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-04/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-04/trial-1/business-oracle.json",
+          "sha256": "bac29dfc1771ea726c6ecd17850dec36b62357d2e4fe4d719ca6b820f785857e"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-05",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-1/business-oracle-v2.json",
+          "sha256": "2b79102db7d39d337cd734a971091308a2c2fb550267aad96c2a5d4b32b69dd8"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-1/result.json",
+          "sha256": "3b37d5df451ee4972a0780fc113b1c63188283a4af2ffdb6d9b72886e8caf162"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-1/journey.json",
+          "sha256": "d29ba43e8cd3bce0e0a2b93a1df8a2863f10ca7b460aaae30e28b1f0a008cf74"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-1/business-oracle-v2.json",
+          "sha256": "2b79102db7d39d337cd734a971091308a2c2fb550267aad96c2a5d4b32b69dd8"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-1/business-oracle.json",
+          "sha256": "e796c7d74a91b5c6706a4c13925ffcc90d68027981c2812f63611681df40113c"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-05",
+      "trial": 2,
+      "status": "FAIL",
+      "reason": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-2/result.json",
+          "sha256": "1ee15fd8464b5c43b7f7af1862ffa62e7a39668102149705debe5a760cd7010d"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-2/journey.json",
+          "sha256": "7868e0085c80006666086fb137bc6ff30c483193b86ad2ef17f91f26bf96c692"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-05",
+      "trial": 3,
+      "status": "FAIL",
+      "reason": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-3/result.json",
+          "sha256": "1ecd46fffb6d892f44229f62b971936db48b32133da96424b8a39f971fbf7225"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-3/journey.json",
+          "sha256": "d49c2a2d2caa1760e8cbe8e374d5e9608a1f3e916591bc9fdb7a841dc96c1865"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-05/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-06",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/owner-recovery-observation-r211/GC-EX-06/trial-1/business-oracle-v3.json",
+          "sha256": "b0c4ee9ab5038281f2620f6cc5a6d73d346d17a2ff95a8ba7a7fcee08fd6d4e5"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-1/result.json",
+          "sha256": "45b8104a9e824179c446f3a1ed3e5b175bc5471cc03cc795c5e2c5b508a7cfa9"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-1/journey.json",
+          "sha256": "397260bd05598c57f37d06dbb612ff8758bde2dcdf5a8a97dca87199e11a7a16"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/owner-recovery-observation-r211/GC-EX-06/trial-1/business-oracle-v3.json",
+          "sha256": "b0c4ee9ab5038281f2620f6cc5a6d73d346d17a2ff95a8ba7a7fcee08fd6d4e5"
+        },
+        {
+          "path": "live-fourth/owner-recovery-observation-r211/GC-EX-06/trial-1/business-oracle-v2.json",
+          "sha256": "b11fbab3697aaeddf686840c38181e3c17b7b5078ede53197531a8b6c278c4f3"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-06",
+      "trial": 2,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-2/business-oracle-v2.json",
+          "sha256": "bcf73f7972975319167c48d23d7868a866b0db84961ac13171effecbfa8e1c2c"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-2/result.json",
+          "sha256": "fefb704be449cd60a247ff451c45d6591fd72c1e0a85fc609ebab619903e5665"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-2/journey.json",
+          "sha256": "7f4951a08e4d9bbc178e0d13d603789f706053111b662d492c203920c4afa2de"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-2/business-oracle-v2.json",
+          "sha256": "bcf73f7972975319167c48d23d7868a866b0db84961ac13171effecbfa8e1c2c"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-2/business-oracle.json",
+          "sha256": "cc503e1cb36a0fdffdcd1e0b117590ef4d03572ed37f10e417d0ce12e4e6f058"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-06",
+      "trial": 3,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-3/business-oracle-v2.json",
+          "sha256": "48b7e86f94f857062893dd14e649c5eb2b6e77273aea71d0ab213c9ba514af5c"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-3/result.json",
+          "sha256": "8d397f46eebd0cfaa826d6feb6c74858412c8857c03f63b73a6d8f3cc99a17d9"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-3/journey.json",
+          "sha256": "5dd2490d8b2012fcefe752a7723140b8efaed7296b4e8577bec26a1367a66c06"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-3/business-oracle-v2.json",
+          "sha256": "48b7e86f94f857062893dd14e649c5eb2b6e77273aea71d0ab213c9ba514af5c"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-06/trial-3/business-oracle.json",
+          "sha256": "5a96581f76497e2cb61b2f1b8e8ec3fa23a8b50b7345a86a22800a18f250ab0e"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-07",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-1/business-oracle.json",
+          "sha256": "eb45f65c3e97f777e9b04c567570d5e3f3ac9447590d0ad79e4bdca4e558198f"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-1/result.json",
+          "sha256": "8b371da2900611830ef38e0d78ca3e43f970732003ed88ceaa891eae87d2cdbe"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-1/journey.json",
+          "sha256": "49f293cdb735beb55c0df3eb4d5649ce37829921577ff70047235a302e3cb832"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-1/business-oracle.json",
+          "sha256": "eb45f65c3e97f777e9b04c567570d5e3f3ac9447590d0ad79e4bdca4e558198f"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-07",
+      "trial": 2,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-2/business-oracle.json",
+          "sha256": "84af1033a8c34e43e726d96f055c574b2cb6c6dcc25b56741db7d2e1e492cb90"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-2/result.json",
+          "sha256": "fe58acda0f0171af32574b05d50e0e2f30abb9567d939e6e8fbd05458875ae61"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-2/journey.json",
+          "sha256": "f25f02b00f02fad2b4d6fb7181db43de0b7be986bbc7a5f9e081e62d489a757a"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-2/business-oracle.json",
+          "sha256": "84af1033a8c34e43e726d96f055c574b2cb6c6dcc25b56741db7d2e1e492cb90"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-07",
+      "trial": 3,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-3/business-oracle.json",
+          "sha256": "ec0f39863e72c82f65dfb6aa3ee252db7fd205453040fd6333dc55ca1d2908ab"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-3/result.json",
+          "sha256": "5824f29c940fb2ddec419266debaefde2a210d383b4e7d9e2256a2b014edca78"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-3/journey.json",
+          "sha256": "47a722d2e81aace9bbed098a310cdb8538a94d7b71354be7a6b82b2462e28be3"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-07/trial-3/business-oracle.json",
+          "sha256": "ec0f39863e72c82f65dfb6aa3ee252db7fd205453040fd6333dc55ca1d2908ab"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-08",
+      "trial": 1,
+      "status": "FAIL",
+      "reason": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-08/trial-1/result.json",
+          "sha256": "a2dfa5c49b97c504509ed3614c24bba4bd48c14f7c0e19b23976374a2a302ae4"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-08/trial-1/journey.json",
+          "sha256": "caeb8c5451545adcb09a171c64b0f399ed50c6e97107880668b6a5f6306b4dca"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-08/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-09",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-09/trial-1/business-oracle-v2-r234.json",
+          "sha256": "0ffbad854690a7e1cde854e85d3facae6c096165adabee66469aedf9ef4166b7"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-09/trial-1/result.json",
+          "sha256": "c0685e1641a83374fcf04eee30f5217c6152ada76a05c1fc8676b666cd8e8b2e"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-09/trial-1/journey.json",
+          "sha256": "afc1a5344425900c278af445a6866d2932efcbd695085113f10ab58be3f566a3"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-09/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-09/trial-1/business-oracle-v2-r234.json",
+          "sha256": "0ffbad854690a7e1cde854e85d3facae6c096165adabee66469aedf9ef4166b7"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-09/trial-1/business-oracle.json",
+          "sha256": "38538a3a5bf194cfcf5c95c56a981f52a7179f5bfc85a6e150613672fe2d4ea4"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-1/business-oracle.json",
+          "sha256": "b7ac6c68daa800a50183082976fca82df9b6188c433969e66aa853bc1b779d60"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-1/result.json",
+          "sha256": "fe6b3c08557bf56f032f3f731e4d84e79cd490404fb3de69d9facc7aa8e0a838"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-1/journey.json",
+          "sha256": "3a40df063acfecec4c8de01b7e5fa39072d2432af591b37aacde9116c473c4c5"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-1/business-oracle.json",
+          "sha256": "b7ac6c68daa800a50183082976fca82df9b6188c433969e66aa853bc1b779d60"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 2,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-2/business-oracle.json",
+          "sha256": "c2b1b1629e4119927a47ca9dd486cf2f5d83e04377dd9086021a73bb54e87651"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-2/result.json",
+          "sha256": "41099f7ac895ada6d014288c1c8511f35f62f383ee32e84300c632ac30703b66"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-2/journey.json",
+          "sha256": "f33d335225716fadc52f79ea4913446517d691eb21ef781bd5f360c263c38a76"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-2/business-oracle.json",
+          "sha256": "c2b1b1629e4119927a47ca9dd486cf2f5d83e04377dd9086021a73bb54e87651"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 3,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-3/business-oracle.json",
+          "sha256": "2c9d896b1df2a6cd5500b8fafa6cfdf848c2a4fc40545b6d7f96d3c750964d6e"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-3/result.json",
+          "sha256": "0090660a92d97dec7403f56fea4070f3d081afc147ec20b2ce72466ec925b115"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-3/journey.json",
+          "sha256": "62888bdb8e4f2e904f0761061ccf8a3dbf07efb39e2a08b2c9be31c4613d0910"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-10/trial-3/business-oracle.json",
+          "sha256": "2c9d896b1df2a6cd5500b8fafa6cfdf848c2a4fc40545b6d7f96d3c750964d6e"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-11",
+      "trial": 1,
+      "status": "FAIL",
+      "reason": "TIMEOUT",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-11/trial-1/result.json",
+          "sha256": "951dd4cca6254a2fa1e7284816fd2324b051935386338d9c804618dad90d541b"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-11/trial-1/journey.json",
+          "sha256": "c43875830993035dd59f60fb60d6b32d3b0027dba990abc450bfcf6157f1413d"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-11/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-12",
+      "trial": 1,
+      "status": "BLOCKED_EXTERNAL",
+      "reason": "SPG_WEB_SEARCH_API_KEY withheld; real Web live qualification not executed",
+      "receipts": [],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-13",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-1/business-oracle-v2-r245.json",
+          "sha256": "840f8d8cf3c06c140aa8e196112c61118b246be267a3bed885784c322d92c0f8"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-1/result.json",
+          "sha256": "2339a238188592aec6b029428653cb4ecca162e58d27bb5522999c9d1a348558"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-1/journey.json",
+          "sha256": "11b4f532000c4f647faab26c403414565758114874127417a43659f4034c6572"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-1/business-oracle-v2-r245.json",
+          "sha256": "840f8d8cf3c06c140aa8e196112c61118b246be267a3bed885784c322d92c0f8"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-1/business-oracle.json",
+          "sha256": "703bece9333618d91f0d18fd45ee6ad90cfed10d98bcb44aadb49ce49aa0eea2"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-13",
+      "trial": 2,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-2/business-oracle-v2-r250.json",
+          "sha256": "79b219996b6ae89efa1c1e29251b19224b66a56f3ba79233e191fe8532a8b22b"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-2/result.json",
+          "sha256": "c02c205ebd294461c5159caa92dc91d588405326f3a76bee9ac37d766330c716"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-2/journey.json",
+          "sha256": "d886559c49aee5c5b8fb96a8bd1393dc610ff7bd207d85be14987bf0d29079a8"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-2/business-oracle-v2-r250.json",
+          "sha256": "79b219996b6ae89efa1c1e29251b19224b66a56f3ba79233e191fe8532a8b22b"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-2/business-oracle.json",
+          "sha256": "e22f1e67e1e0332b68253e9db74b481db45bf98711b023937cb17cb2590a7b78"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-13",
+      "trial": 3,
+      "status": "FAIL",
+      "reason": "TIMEOUT",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-3/result.json",
+          "sha256": "a14d6185d43dfc361f4d37954cb738f16b51f8eb664f0353e916962a89725cb6"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-3/journey.json",
+          "sha256": "acffcc18ea7c539f9de9ca054798dfaee84741842f9d80e9ec2259479d1b2cea"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-13/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-14",
+      "trial": 1,
+      "status": "FAIL",
+      "reason": "REVIEW_READY_AWAITING_BUSINESS_ORACLE",
+      "receipts": [
+        {
+          "path": "live-fourth-b/tier0/GC-EX-14/trial-1/result.json",
+          "sha256": "0c7622887e1bf1d7476a5a178d7f4a80709b25844011bab7528a3457e20df04d"
+        },
+        {
+          "path": "live-fourth-b/tier0/GC-EX-14/trial-1/journey.json",
+          "sha256": "f9ee73fcd23735d7f73923e0380c79cc8dd3de5ff80d21f95c3811efb1611d3f"
+        },
+        {
+          "path": "live-fourth-b/tier0/GC-EX-14/trial-1/runtime-source-identity.json",
+          "sha256": "0dfaac0a12d52c0a7b9c08fc01384c770736389b07134943c778ee171a49138a"
+        },
+        {
+          "path": "live-fourth-b/tier0/GC-EX-14/trial-1/business-oracle.json",
+          "sha256": "7a59a709f35efb9e11d43c83290ed13a4867002c86264c91c386e1d2344c44b7"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-EX-15",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-EX-15/trial-1/business-oracle-v2-r253.json",
+          "sha256": "e484cfa23730938d3de459f82969e99e613900744779eaef0f60f7b1d9bb646f"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-15/trial-1/result.json",
+          "sha256": "a8cc1e1f257bf1cb2b9d5a4b05230262ff4c315ba6e7f300d4cf77d6f31845ac"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-15/trial-1/journey.json",
+          "sha256": "39d70822cdf950cc6689d6e9312bc302c220af1a158dfd3607488652c9c92f89"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-15/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-EX-15/trial-1/business-oracle-v2-r253.json",
+          "sha256": "e484cfa23730938d3de459f82969e99e613900744779eaef0f60f7b1d9bb646f"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-01",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-01/trial-1/business-oracle-v2-r253.json",
+          "sha256": "e17f78bd34664ed59d885b4447b5190fb03e913bd9bf9e1c8b46109ee7c0851c"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-01/trial-1/result.json",
+          "sha256": "2d79eb2fbedfcbdb35e5d4dc4f9030cb01ec505fc97c448c478b512c055f39e8"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-01/trial-1/journey.json",
+          "sha256": "cd48d3ffd96edc8aefa4931359830da074a40475666b5a24a6b493808a1279c9"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-01/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-01/trial-1/business-oracle-v2-r253.json",
+          "sha256": "e17f78bd34664ed59d885b4447b5190fb03e913bd9bf9e1c8b46109ee7c0851c"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-01/trial-1/business-oracle.json",
+          "sha256": "f11964f92e7c5b5e94b645b9a2c46a8545befc6a02447c0a62a26f908d01f6a0"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-02",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-1/business-oracle-v2-r253.json",
+          "sha256": "714a088dc85f73c8c8f3f0f581086b26eda6a3d6e264aa0fe605964d4383c1a0"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-1/result.json",
+          "sha256": "8d08cc8ffc42827e049da68e1a9ae745cb57a4a1bbdba063d827fdb05f69de0c"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-1/journey.json",
+          "sha256": "2e8af96b9fbc624876d973838116c59dbaad0cca0019f4d65f2823b55924a9c6"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-1/business-oracle-v2-r253.json",
+          "sha256": "714a088dc85f73c8c8f3f0f581086b26eda6a3d6e264aa0fe605964d4383c1a0"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-1/business-oracle.json",
+          "sha256": "4fde03b70c64ef0125727029b58787f5ddaa66e547b17c7bba717a1a7cae1c58"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-02",
+      "trial": 2,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-2/business-oracle-v2-r264.json",
+          "sha256": "5a4313a0fc9579a6ee88bb5edb6eab71c3a1b0ddab399a6e10df78bb2f8970aa"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-2/result.json",
+          "sha256": "c2758b4567e473419eae8838ee113dfdc8ad03f034c6485fd143ca8f6a8c3490"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-2/journey.json",
+          "sha256": "41e10e55b470f4872b0c9bc119c6f46f0a1b0ee16ce2a85fab7b07fff058d682"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-2/business-oracle-v2-r264.json",
+          "sha256": "5a4313a0fc9579a6ee88bb5edb6eab71c3a1b0ddab399a6e10df78bb2f8970aa"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-2/business-oracle.json",
+          "sha256": "b31d57484a01114978b3bae8118f7ee96674fb32f535814768b1878ee88c1cea"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-02",
+      "trial": 3,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-3/business-oracle-v2-r272.json",
+          "sha256": "294797059da6d3636cdb7d074e390de2d4f614828ec84867428ef3af0f971948"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-3/result.json",
+          "sha256": "040aad7916f4265cdee2f29676c6c326ff14f876fb89b011530a0863439509b5"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-3/journey.json",
+          "sha256": "b3811768675f06d7df3dc67f99cf1c0ce70dd5e4f65ad02fad91a53a1dbdfd2e"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-3/business-oracle-v2-r272.json",
+          "sha256": "294797059da6d3636cdb7d074e390de2d4f614828ec84867428ef3af0f971948"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-02/trial-3/business-oracle.json",
+          "sha256": "d2ea6d04d4d5d19e0045baab37737d2a641c2faa958b89ddeebb662a3987a6c8"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-03",
+      "trial": 1,
+      "status": "FAIL",
+      "reason": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-03/trial-1/result.json",
+          "sha256": "8f626e4f85f35808791694f7dc187faacaddfb562514957cb213455379ff8f31"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-03/trial-1/journey.json",
+          "sha256": "3d62da2b681049293b679f2349031500a328e1a3ed80298ac900fdc216190be3"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-03/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-04",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-04/trial-1/business-oracle-v2-r272.json",
+          "sha256": "150bc0282adb768ae861691e3ae262c87bfd659a0aac1121714c7a6e3184751e"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-04/trial-1/result.json",
+          "sha256": "fa7b6d86a586927e9b72ff50cbfc26a50d3e299c1a086db56d80dbdf3194b658"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-04/trial-1/journey.json",
+          "sha256": "aad9d2aa55c4f2bc8905942d5ea39deaf2d143a46c6b3ce5c23e7f2d2f17034f"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-04/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-04/trial-1/business-oracle-v2-r272.json",
+          "sha256": "150bc0282adb768ae861691e3ae262c87bfd659a0aac1121714c7a6e3184751e"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-04/trial-1/business-oracle.json",
+          "sha256": "20be7a98a45b6b30a1fc84c582a8b73c9f38bdf14dd59d11e26e19c4fe116eb0"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-05",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-05/trial-1/business-oracle-v2-r281.json",
+          "sha256": "18ff2631700dc2939b9eae3c5eca184ff156b4148c04c72139882456d6531fb9"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-05/trial-1/result.json",
+          "sha256": "bbf307c7db6dbd28b4f99b9fd7d4473bc2dbe52eea75423fd9db3a4527ddc242"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-05/trial-1/journey.json",
+          "sha256": "8c236deef0bc121942622b2dba413ba2e8b8ecfae5a69b2b81436bd3c0a9b2c6"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-05/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-05/trial-1/business-oracle-v2-r281.json",
+          "sha256": "18ff2631700dc2939b9eae3c5eca184ff156b4148c04c72139882456d6531fb9"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-06",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-06/trial-1/business-oracle-v2-r276.json",
+          "sha256": "7ade49c3f684a6f59f7cccf7c674b5bf69e576b62057cbb1544313989915f597"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-06/trial-1/result.json",
+          "sha256": "b466cacc0cab55b8c3bf404d950668887ebc3eebec8e4edc5ca62e6d39068fe6"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-06/trial-1/journey.json",
+          "sha256": "cd46371967bbd8d070ca14a8feec0b64723f068d41b229cac75605674af5862a"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-06/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-06/trial-1/business-oracle-v2-r276.json",
+          "sha256": "7ade49c3f684a6f59f7cccf7c674b5bf69e576b62057cbb1544313989915f597"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-07",
+      "trial": 1,
+      "status": "FAIL",
+      "reason": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-07/trial-1/result.json",
+          "sha256": "1e4bd22526b6c6c67e02a644156c5d57f82c8d888da853bdc25b0cd516031110"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-07/trial-1/journey.json",
+          "sha256": "a09af91f85a29fe839f522711b174f15998ce9029d725ab630e0f2802af14c76"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-07/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-07",
+      "trial": 2,
+      "status": "FAIL",
+      "reason": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-07/trial-2/result.json",
+          "sha256": "f0200c6374a597c1ed07b4cff5204a2c192522d9b8eb87a40ff57428dae00993"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-07/trial-2/journey.json",
+          "sha256": "937928222505e30866dc29b6cd3b2e2ba8265c86e7ade0af9726a2d422e04d75"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-07/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-07",
+      "trial": 3,
+      "status": "FAIL",
+      "reason": "ATTENTION_OR_FAILURE_REQUIRES_CLASSIFICATION",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-07/trial-3/result.json",
+          "sha256": "1dab68cbcfd635c6839e67b9ac9dd077c9f9e6770b798ffe94e373ec31162ae5"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-07/trial-3/journey.json",
+          "sha256": "4b82b7425b14f52c6f8023ec8fc459a8bb029362a1a537b5e6faa7a2b4bb390f"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-07/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 1,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-1/business-oracle-v2-r285.json",
+          "sha256": "4829e1f21de6936ccb6fce3b990263b785d338bc1e56f8dbc498ce1bb0de823f"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-1/result.json",
+          "sha256": "882a2971db0d909f3020d219f4a53a65bbef0d064a3dd0a46f53424e186e1b6d"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-1/journey.json",
+          "sha256": "32ad1bbac91229eb431654f0e2aa47db55caa9419ae818804e4abb0f665db446"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-1/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-1/business-oracle-v2-r285.json",
+          "sha256": "4829e1f21de6936ccb6fce3b990263b785d338bc1e56f8dbc498ce1bb0de823f"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 2,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-2/business-oracle-v2-r288.json",
+          "sha256": "a16c3ed8de8cee385825308846e1693ef6bb4ca7bd1890eaa1726ed14d07a4e1"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-2/result.json",
+          "sha256": "852708c0410b6f60c3dab96e1c8203c9245b8ac7dd79cc45c8c6679b9395e6e1"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-2/journey.json",
+          "sha256": "2f79691b8d46529375eb708fad17a15046211cf6f1a2ea7dfb3f3f68a261a244"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-2/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-2/business-oracle-v2-r288.json",
+          "sha256": "a16c3ed8de8cee385825308846e1693ef6bb4ca7bd1890eaa1726ed14d07a4e1"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 3,
+      "status": "PASS",
+      "reason": "actual business evidence of same original trial and exact Candidate",
+      "receipts": [
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-3/business-oracle-v2-r285.json",
+          "sha256": "3d5e7e722830e68e476e616db47e5d1bb7e60156f6deca7d65054d946ca31ed6"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-3/result.json",
+          "sha256": "7243e50f9f6b84b00ad676ac25fd92323a5bd4bc6d6a214b3c9183c9ddd233b7"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-3/journey.json",
+          "sha256": "08d70df790e8d442f041e80136e275fdf736a66ae4594d1b0ea39a588d65c9cb"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-3/runtime-source-identity.json",
+          "sha256": "b2d609335127bac362755c84a6d78f859bfb0eb32d02eb5d5c556de64f65e497"
+        },
+        {
+          "path": "live-fourth/tier0/GC-IP-08/trial-3/business-oracle-v2-r285.json",
+          "sha256": "3d5e7e722830e68e476e616db47e5d1bb7e60156f6deca7d65054d946ca31ed6"
+        }
+      ],
+      "same_trial_supplement_allowed": true,
+      "new_language_trial_for_correction": false
+    }
+  ],
+  "cohorts_not_pooled": true,
+  "human_acceptance": "PENDING",
+  "primary_EX14_database": "independent source4B",
+  "supplemental_B_EX15_not_counted_again": true,
+  "original_failed_receipts_preserved": true
+}

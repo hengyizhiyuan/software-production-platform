@@ -1,0 +1,69 @@
+{
+  "status": "FAIL",
+  "classification": "TYPED_SCOPE_CONSTRAINT_ACKNOWLEDGED_WITHOUT_PENDING_WORK_QUESTION_REALIZATION",
+  "same_original_work_id": "ecc942c8-e08a-580e-9159-54d5856d4145",
+  "scope_answer_turn_id": "eac9034e-c5b8-4abd-8b13-ac07eaff7c54",
+  "scope_answer_turn_status": "COMPLETED",
+  "actual_semantic_kinds": [
+    "CONSTRAINT",
+    "CONSTRAINT",
+    "CONSTRAINT"
+  ],
+  "actual_obligation_states": [],
+  "pending_owner_questions": [
+    {
+      "attention_id": "516b9e2d-5e09-5d56-bf8d-b31f8824ab60",
+      "work_id": "ecc942c8-e08a-580e-9159-54d5856d4145",
+      "kind": "STEERING_DECISION_REQUIRED",
+      "decision": "Answer the current Work question",
+      "reason": "搜索功能应覆盖哪个现有数据域：用户、客户、订单，还是全部？",
+      "available_actions": [],
+      "recommended_action": null,
+      "governed_subject_ref": "steering-decision:b9ab56fb-b45c-41ed-b298-49992efbd958",
+      "steering_reason": "MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION",
+      "recommendation": "请明确搜索覆盖的数据域（用户、客户、订单或全部），以便形成有界且可验证的生产提案。",
+      "conversation_prompt": "搜索功能应覆盖哪个现有数据域：用户、客户、订单，还是全部？",
+      "alternatives": [],
+      "trade_offs": [],
+      "expected_impact": "The decision will govern subsequent design and production.",
+      "reality_refs": [
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "13f097d2-b93e-4be0-bf64-44688140344b"
+        },
+        {
+          "kind": "GOVERNANCE_DECISION",
+          "identity": "457951ab-5d85-5650-a90b-f76e42e8d010"
+        },
+        {
+          "kind": "SEMANTIC_RESULT",
+          "identity": "d9d60214-d894-409c-b83d-abd5afcafe32"
+        },
+        {
+          "kind": "TRUSTED_BASELINE",
+          "identity": "5e48181f-7185-4914-9c55-20003ac9fec8"
+        },
+        {
+          "kind": "WORK",
+          "identity": "ecc942c8-e08a-580e-9159-54d5856d4145"
+        },
+        {
+          "kind": "WORK_REALITY_REVISION",
+          "identity": "ab3c63b0-7f6f-5d03-92c9-050c3cfae8c6"
+        }
+      ],
+      "steering_plan_revision_id": "c78c2613-f8f4-4faf-b6e7-381738c77e39",
+      "steering_step_id": "07c66b1c-ceb3-474f-b837-cee63d0471aa",
+      "interaction_id": null,
+      "interaction_assessment_id": null,
+      "expected_work_reality_revision_id": null
+    }
+  ],
+  "native_queue_empty": true,
+  "preview_status": "NOT_READY",
+  "one_actual_question_answered": true,
+  "additional_answers_or_retries": 0,
+  "web_credential_dependency": false,
+  "human_acceptance": "PENDING",
+  "meaning_correctly_retained_as_constraints": true
+}

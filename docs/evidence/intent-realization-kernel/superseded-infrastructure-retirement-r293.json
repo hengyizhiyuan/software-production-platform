@@ -1,0 +1,834 @@
+{
+  "status": "PASS",
+  "removed_containers": [
+    {
+      "name": "watt-irk-fourth-b-qualification-native-worker-1",
+      "image_id": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "964ed45a7302e1ea5e8e9551fb791c684af6786931c966d451c4acc79784136d",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "native-tool-host:service_healthy:false,qualified-tool-fault:service_started:false,app:service_healthy:false",
+        "com.docker.compose.image": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "native-worker",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-fourth-b-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-workspaces/_data",
+          "destination": "/var/lib/spg/native-workspaces",
+          "type": "volume"
+        },
+        {
+          "name": "watt-irk-fourth-b-qualification_native-checkpoints",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-qualification_native-checkpoints/_data",
+          "destination": "/var/lib/spg/native-checkpoints",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-fourth-b-qualification-native-coordinator-1",
+      "image_id": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "02fd38ecb05bfa55e2fda092ee3b8a8fba293e9c15a80fe1b66ce697603289b4",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "app:service_healthy:false",
+        "com.docker.compose.image": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "native-coordinator",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": []
+    },
+    {
+      "name": "watt-irk-fourth-b-qualification-native-worker-secondary-1",
+      "image_id": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "6665e8812fc7895ce7f1b2b40ec0ca412b3d3cd5f425ae4633ccae099dd9df30",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "qualified-tool-fault:service_started:false,native-tool-host:service_healthy:false,app:service_healthy:false",
+        "com.docker.compose.image": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "native-worker-secondary",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-fourth-b-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-workspaces/_data",
+          "destination": "/var/lib/spg/native-workspaces",
+          "type": "volume"
+        },
+        {
+          "name": "watt-irk-fourth-b-qualification_native-checkpoints",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-qualification_native-checkpoints/_data",
+          "destination": "/var/lib/spg/native-checkpoints",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-fourth-b-qualification-app-1",
+      "image_id": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "510d49db78dee86a88571f08349e5d113163fdf8ad04b3064e206e23b5df362a",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "postgres:service_healthy:false",
+        "com.docker.compose.image": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "app",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-fourth-b-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-workspaces/_data",
+          "destination": "/var/lib/spg/native-workspaces",
+          "type": "volume"
+        },
+        {
+          "name": null,
+          "source": "/run/host-services/docker.proxy.sock",
+          "destination": "/var/run/docker.sock",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/.git",
+          "destination": "/source/.git",
+          "type": "bind"
+        },
+        {
+          "name": "watt-irk-fourth-b-qualification_native-app-data",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-qualification_native-app-data/_data",
+          "destination": "/var/lib/spg",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-fourth-b-qualification-qualified-tool-fault-1",
+      "image_id": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "bc3e46409cb7cf5550349977a09dd45676e66aec92e13536760f75bd0c3fc7bf",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "native-tool-host:service_healthy:false",
+        "com.docker.compose.image": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "qualified-tool-fault",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-retained-receipts.json",
+          "destination": "/qualification/retained-receipts.json",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/tool_fault_proxy.py",
+          "destination": "/qualification/tool_fault_proxy.py",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-fourth-b-qualification-native-tool-host-1",
+      "image_id": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "d4422244d706481e484c900e3815ab0ae7aee45fde3ce7d9384f0f97daf32682",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "native-tool-host",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-fourth-b-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-workspaces/_data",
+          "destination": "/var/lib/spg/native-workspaces",
+          "type": "volume"
+        },
+        {
+          "name": "watt-irk-fourth-b-qualification_native-tool-receipts",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-qualification_native-tool-receipts/_data",
+          "destination": "/var/lib/spg/native-tool-receipts",
+          "type": "volume"
+        },
+        {
+          "name": null,
+          "source": "/run/host-services/docker.proxy.sock",
+          "destination": "/var/run/docker.sock",
+          "type": "bind"
+        },
+        {
+          "name": "watt-irk-fourth-b-qualification_native-app-data",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-qualification_native-app-data/_data",
+          "destination": "/var/lib/spg",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-fourth-b-qualification-postgres-1",
+      "image_id": "sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "873fc98066e44e1e53ea11ac2cefe0e0ad4afaa7f23a7de5914fd6d589dd92f5",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "postgres",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-fourth-b-qualification_native-postgres-data",
+          "source": "/var/lib/docker/volumes/watt-irk-fourth-b-qualification_native-postgres-data/_data",
+          "destination": "/var/lib/postgresql/data",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-fourth-b-qualification-qualified-git-isolated-1",
+      "image_id": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "713a1932805293b4d36dd7206235cc2e10caf02793a626bf0e1d5489bc44f745",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "qualified-git-isolated",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/git-fixtures",
+          "destination": "/fixtures",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/fixture_server.py",
+          "destination": "/qualification/fixture_server.py",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-fourth-b-qualification-qualified-git-independent-1",
+      "image_id": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "63ffef60d7e21ae5bcc19c4b5dd477c81ddd72936e47acabf0c07df029276750",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "qualified-git-independent",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/git-fixtures",
+          "destination": "/fixtures",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/fixture_server.py",
+          "destination": "/qualification/fixture_server.py",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-fourth-b-qualification-qualified-git-1",
+      "image_id": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "63ffef60d7e21ae5bcc19c4b5dd477c81ddd72936e47acabf0c07df029276750",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-fourth-b-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-fourth-b.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "qualified-git",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/git-fixtures",
+          "destination": "/fixtures",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/fixture_server.py",
+          "destination": "/qualification/fixture_server.py",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "watt-candidate-preview-398ba9c59b5442ee88941e0663a2761b-proxy",
+      "image_id": "sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10",
+      "prior_state": "running",
+      "labels": {
+        "maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>",
+        "watt.candidate-preview": "398ba9c5-9b54-42ee-8894-1e0663a2761b"
+      },
+      "mounts": []
+    },
+    {
+      "name": "watt-candidate-preview-398ba9c59b5442ee88941e0663a2761b-app",
+      "image_id": "sha256:8424be4e3b04a66cbad1f91ccbc63ac4e26bfcfa06e1234a952a1c460c058785",
+      "prior_state": "running",
+      "labels": {
+        "watt.candidate-preview": "398ba9c5-9b54-42ee-8894-1e0663a2761b",
+        "watt.candidate-revision": "999422ea9196d2ae35af5fece45692e11924ae7f",
+        "watt.candidate-tree": "0a8a45eee5d85c38dae3119a82fc0834e4931706",
+        "watt.preview-port": "8080"
+      },
+      "mounts": [
+        {
+          "name": "watt-candidate-preview-398ba9c59b5442ee88941e0663a2761b-source",
+          "source": "/var/lib/docker/volumes/watt-candidate-preview-398ba9c59b5442ee88941e0663a2761b-source/_data",
+          "destination": "/source",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-qualification-native-worker-secondary-1",
+      "image_id": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "789a32ee08d01cd5392419b2d36adaa7693acac23b368c1713398e6fdd1090bc",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "native-tool-host:service_healthy:false,app:service_healthy:false",
+        "com.docker.compose.image": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/second-worker.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-final.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.replace": "native-worker-secondary-1",
+        "com.docker.compose.service": "native-worker-secondary",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-qualification_native-checkpoints",
+          "source": "/var/lib/docker/volumes/watt-irk-qualification_native-checkpoints/_data",
+          "destination": "/var/lib/spg/native-checkpoints",
+          "type": "volume"
+        },
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/var/lib/spg/native-workspaces",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-qualification-native-worker-1",
+      "image_id": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "89e23b20fe664232cf4a634d16405baa1e6b2ac911f92c73cd9ccd37f1d21963",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "app:service_healthy:false,native-tool-host:service_healthy:false",
+        "com.docker.compose.image": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/second-worker.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-final.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.replace": "native-worker-1",
+        "com.docker.compose.service": "native-worker",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/var/lib/spg/native-workspaces",
+          "type": "volume"
+        },
+        {
+          "name": "watt-irk-qualification_native-checkpoints",
+          "source": "/var/lib/docker/volumes/watt-irk-qualification_native-checkpoints/_data",
+          "destination": "/var/lib/spg/native-checkpoints",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-qualification-native-coordinator-1",
+      "image_id": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "44d39a6743533c5d2805d4062fc7a6fc0bae9050fe5ef224fe33d4f6cccbd672",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "app:service_healthy:false",
+        "com.docker.compose.image": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/second-worker.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-final.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.replace": "native-coordinator-1",
+        "com.docker.compose.service": "native-coordinator",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": []
+    },
+    {
+      "name": "watt-irk-qualification-app-1",
+      "image_id": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "7337d986ea2dbc09630af55b39bef98ed76f9b73d4dfdf077bc35cab73161105",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/second-worker.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-final.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.replace": "app-1",
+        "com.docker.compose.service": "app",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/var/lib/spg/native-workspaces",
+          "type": "volume"
+        },
+        {
+          "name": null,
+          "source": "/run/host-services/docker.proxy.sock",
+          "destination": "/var/run/docker.sock",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/host_mnt/Users/yu/Documents/dev/software-production-platform/.git",
+          "destination": "/source/.git",
+          "type": "bind"
+        },
+        {
+          "name": "watt-irk-qualification_native-app-data",
+          "source": "/var/lib/docker/volumes/watt-irk-qualification_native-app-data/_data",
+          "destination": "/var/lib/spg",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-qualification-native-tool-host-1",
+      "image_id": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "926cc24c014834ffc3a58f2e04c94c35dddf012fafcf76dce6dbf188eaa6a6d2",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/second-worker.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime-final.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.replace": "native-tool-host-1",
+        "com.docker.compose.service": "native-tool-host",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-qualification_native-app-data",
+          "source": "/var/lib/docker/volumes/watt-irk-qualification_native-app-data/_data",
+          "destination": "/var/lib/spg",
+          "type": "volume"
+        },
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/var/lib/spg/native-workspaces",
+          "type": "volume"
+        },
+        {
+          "name": "watt-irk-qualification_native-tool-receipts",
+          "source": "/var/lib/docker/volumes/watt-irk-qualification_native-tool-receipts/_data",
+          "destination": "/var/lib/spg/native-tool-receipts",
+          "type": "volume"
+        },
+        {
+          "name": null,
+          "source": "/run/host-services/docker.proxy.sock",
+          "destination": "/var/run/docker.sock",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "watt-pe-5a523f7d-6af1-43cd-b065-6afd1db85b0d",
+      "image_id": "sha256:b5aa8568bf7d8400b372c5548159473d999174f093b1c89c1bb120855b9c2779",
+      "prior_state": "running",
+      "labels": {
+        "watt.production-environment": "5a523f7d-6af1-43cd-b065-6afd1db85b0d"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/watt-workspaces",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-pe-12fe5aab-9d7c-4df2-9549-1799ad82389b",
+      "image_id": "sha256:b5aa8568bf7d8400b372c5548159473d999174f093b1c89c1bb120855b9c2779",
+      "prior_state": "running",
+      "labels": {
+        "watt.production-environment": "12fe5aab-9d7c-4df2-9549-1799ad82389b"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/watt-workspaces",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-pe-938fb9dd-8c3a-445f-a5a2-ee4d30679a20",
+      "image_id": "sha256:b5aa8568bf7d8400b372c5548159473d999174f093b1c89c1bb120855b9c2779",
+      "prior_state": "running",
+      "labels": {
+        "watt.production-environment": "938fb9dd-8c3a-445f-a5a2-ee4d30679a20"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/watt-workspaces",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-pe-a3f0db60-4358-4b5b-8d3b-9c6f0ad4355b",
+      "image_id": "sha256:b5aa8568bf7d8400b372c5548159473d999174f093b1c89c1bb120855b9c2779",
+      "prior_state": "running",
+      "labels": {
+        "watt.production-environment": "a3f0db60-4358-4b5b-8d3b-9c6f0ad4355b"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/watt-workspaces",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-pe-dba1b856-3bac-42ac-84be-4ca74a326c20",
+      "image_id": "sha256:b5aa8568bf7d8400b372c5548159473d999174f093b1c89c1bb120855b9c2779",
+      "prior_state": "running",
+      "labels": {
+        "watt.production-environment": "dba1b856-3bac-42ac-84be-4ca74a326c20"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/watt-workspaces",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-pe-1eb3e645-8917-42fd-a6d0-5dce5c6a490d",
+      "image_id": "sha256:b5aa8568bf7d8400b372c5548159473d999174f093b1c89c1bb120855b9c2779",
+      "prior_state": "running",
+      "labels": {
+        "watt.production-environment": "1eb3e645-8917-42fd-a6d0-5dce5c6a490d"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-workspaces",
+          "source": "/var/lib/docker/volumes/watt-irk-workspaces/_data",
+          "destination": "/watt-workspaces",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-qualification-qualified-tool-fault-1",
+      "image_id": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "bc3e46409cb7cf5550349977a09dd45676e66aec92e13536760f75bd0c3fc7bf",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/second-worker.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-targeted.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.replace": "qualified-tool-fault-1",
+        "com.docker.compose.service": "qualified-tool-fault",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/tool_fault_proxy.py",
+          "destination": "/qualification/tool_fault_proxy.py",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/tool-fault-retained-receipts.json",
+          "destination": "/qualification/retained-receipts.json",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-qualification-qualified-git-independent-1",
+      "image_id": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "63ffef60d7e21ae5bcc19c4b5dd477c81ddd72936e47acabf0c07df029276750",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/second-worker.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/fixture-independent.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "qualified-git-independent",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/git-fixtures",
+          "destination": "/fixtures",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/fixture_server.py",
+          "destination": "/qualification/fixture_server.py",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-qualification-postgres-1",
+      "image_id": "sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "873fc98066e44e1e53ea11ac2cefe0e0ad4afaa7f23a7de5914fd6d589dd92f5",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "postgres",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": "watt-irk-qualification_native-postgres-data",
+          "source": "/var/lib/docker/volumes/watt-irk-qualification_native-postgres-data/_data",
+          "destination": "/var/lib/postgresql/data",
+          "type": "volume"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-qualification-qualified-git-isolated-1",
+      "image_id": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "713a1932805293b4d36dd7206235cc2e10caf02793a626bf0e1d5489bc44f745",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "qualified-git-isolated",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/fixture_server.py",
+          "destination": "/qualification/fixture_server.py",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/git-fixtures",
+          "destination": "/fixtures",
+          "type": "bind"
+        }
+      ]
+    },
+    {
+      "name": "watt-irk-qualification-qualified-git-1",
+      "image_id": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+      "prior_state": "exited",
+      "labels": {
+        "com.docker.compose.config-hash": "63ffef60d7e21ae5bcc19c4b5dd477c81ddd72936e47acabf0c07df029276750",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "watt-irk-qualification",
+        "com.docker.compose.project.config_files": "/Users/yu/Documents/dev/software-production-platform/compose.native-executor.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.yaml,/Users/yu/Documents/dev/software-production-platform/compose.uncommitted-qualification.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/lifecycle-hardening/fixture.yaml,/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/tool-fault.yaml",
+        "com.docker.compose.project.environment_file": "/Users/yu/Documents/dev/software-production-platform/.spg/irk/runtime.env",
+        "com.docker.compose.project.working_dir": "/Users/yu/Documents/dev/software-production-platform",
+        "com.docker.compose.service": "qualified-git",
+        "com.docker.compose.version": "5.3.1"
+      },
+      "mounts": [
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/.spg/stability-runtime/git-fixtures",
+          "destination": "/fixtures",
+          "type": "bind"
+        },
+        {
+          "name": null,
+          "source": "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/fixture_server.py",
+          "destination": "/qualification/fixture_server.py",
+          "type": "bind"
+        }
+      ]
+    }
+  ],
+  "removed_image_tags": [
+    {
+      "tag": "watt-irk:frozen-3ed29a6",
+      "exit_code": 0,
+      "stdout": "Untagged: watt-irk:frozen-3ed29a6\n",
+      "stderr": ""
+    },
+    {
+      "tag": "watt-irk:frozen-30cfb06",
+      "exit_code": 0,
+      "stdout": "Untagged: watt-irk:frozen-30cfb06\nDeleted: sha256:b5aa8568bf7d8400b372c5548159473d999174f093b1c89c1bb120855b9c2779\n",
+      "stderr": ""
+    },
+    {
+      "tag": "watt-irk:frozen-584e73d",
+      "exit_code": 0,
+      "stdout": "Untagged: watt-irk:frozen-584e73d\nDeleted: sha256:42eb1565bbedd8da4fcfadecea348ef36d05e1cab3564e062d8a54d69f54100d\n",
+      "stderr": ""
+    },
+    {
+      "tag": "watt-irk:base",
+      "exit_code": 0,
+      "stdout": "Untagged: watt-irk:base\nDeleted: sha256:1b792bb4848f1761f67c205e1251e0758442402d504ff87ccb91039ef2c57fda\n",
+      "stderr": ""
+    },
+    {
+      "tag": "watt-engineering-semantic-human-retest-app:latest",
+      "exit_code": 0,
+      "stdout": "Untagged: watt-engineering-semantic-human-retest-app:latest\nDeleted: sha256:ff4b95f9a3e194898d473056394a6a50b955e9a881bd8d470e11a67f9f2e213e\n",
+      "stderr": ""
+    },
+    {
+      "tag": "watt-candidate-preview-398ba9c59b5442ee88941e0663a2761b:candidate",
+      "exit_code": 0,
+      "stdout": "Untagged: watt-candidate-preview-398ba9c59b5442ee88941e0663a2761b:candidate\nDeleted: sha256:8424be4e3b04a66cbad1f91ccbc63ac4e26bfcfa06e1234a952a1c460c058785\n",
+      "stderr": ""
+    }
+  ],
+  "retained_current_image": "sha256:c950b761556ec4d1cb1401f24b8a1ebc6245ebcee210f4eebb447a44771511c9",
+  "current_aliases": [
+    "watt-irk:qualification",
+    "watt-native-executor-runtime:local"
+  ],
+  "deleted_named_volumes": false,
+  "deleted_workspace_files": false,
+  "unknown_write_unfenced_or_replayed": false,
+  "current_test_service_restarted": false,
+  "old_disposable_preview_sqlite_backed_up": true
+}

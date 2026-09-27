@@ -1,0 +1,75 @@
+{
+  "source_fingerprint": "813954b4e85891cb50d06549d196734605228448c70649a0a68979921972117d",
+  "backend_total": 774,
+  "backend_passed": 774,
+  "backend_skipped": 0,
+  "full_unit_command": {
+    "collected": 1001,
+    "passed": 1000,
+    "genuine_optional_skip": 1
+  },
+  "later_unique_helper_tests": {
+    "metrics": 3,
+    "owner_retry": 9,
+    "normative_receipt": 1
+  },
+  "unique_unit_union": {
+    "tests": 1014,
+    "passed": 1013,
+    "skipped": 1
+  },
+  "frontend_passed": 77,
+  "prototype_passed": 21,
+  "prototype_typecheck_and_build": "PASS",
+  "release_cases_passed": 56,
+  "release_domains_passed": [
+    "ASSURANCE",
+    "INTERACTION",
+    "PRODUCTION",
+    "RESILIENCE"
+  ],
+  "alembic_revision": "20260927_61",
+  "alembic_fresh_roundtrip_and_check": "PASS",
+  "receipts": [
+    {
+      "receipt": "backend-frozen-fourth-part0-r161.xml",
+      "tests": 427,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "elapsed_seconds": 2587.325
+    },
+    {
+      "receipt": "backend-frozen-fourth-part1-r162.xml",
+      "tests": 347,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "elapsed_seconds": 2027.535
+    },
+    {
+      "receipt": "unit-frozen-fourth-r164.xml",
+      "tests": 1001,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 1,
+      "elapsed_seconds": 342.383
+    },
+    {
+      "receipt": "owner-retry-oracle-r186.xml",
+      "tests": 9,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "elapsed_seconds": 0.099
+    },
+    {
+      "receipt": "source-receipt-r191.xml",
+      "tests": 1,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "elapsed_seconds": 0.089
+    }
+  ]
+}

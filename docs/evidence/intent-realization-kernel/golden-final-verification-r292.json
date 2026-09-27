@@ -1,0 +1,274 @@
+{
+  "status": "PASS",
+  "qualified_source_fingerprint": "813954b4e85891cb50d06549d196734605228448c70649a0a68979921972117d",
+  "source_qualification_outcome": "FAIL",
+  "required_trial_slots": 43,
+  "primary_finite_plan_finished": 41,
+  "counts": {
+    "PASS": 30,
+    "FAIL": 12,
+    "BLOCKED_EXTERNAL": 1,
+    "PENDING": 0
+  },
+  "all_receipt_hashes_match": true,
+  "all_PASS_candidates_match_actual_same_trial_preview": true,
+  "PASS_candidate_identities": [
+    {
+      "case": "GC-EX-01",
+      "trial": 1,
+      "candidate_revision": "20b21fa1d83fa74d7b8f88eba34772bb4a72b36b",
+      "candidate_tree": "a25ebb9d7dacf36454503e7a50b727a6adfbc196"
+    },
+    {
+      "case": "GC-EX-01",
+      "trial": 2,
+      "candidate_revision": "5954ae51dd6ea3a453ce33051a1cc4bf884aa80c",
+      "candidate_tree": "a25ebb9d7dacf36454503e7a50b727a6adfbc196"
+    },
+    {
+      "case": "GC-EX-01",
+      "trial": 3,
+      "candidate_revision": "90daba749c7d6864118394559a1d3f40857d00f4",
+      "candidate_tree": "03631cdc525faf769f7cf90a8c7ac4b941aabf7a"
+    },
+    {
+      "case": "GC-EX-03",
+      "trial": 1,
+      "candidate_revision": "98f2e07a0f4476283aa049903ea73d58cc943e26",
+      "candidate_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671"
+    },
+    {
+      "case": "GC-EX-03",
+      "trial": 2,
+      "candidate_revision": "309d446d64c1cf4b4f236b0def45053c62ef29e6",
+      "candidate_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671"
+    },
+    {
+      "case": "GC-EX-04",
+      "trial": 1,
+      "candidate_revision": "6b110c87a71870f736969fe4cbb26e99636520e5",
+      "candidate_tree": "18371e077ede915bc26bfcfe67390318ddc918a2"
+    },
+    {
+      "case": "GC-EX-05",
+      "trial": 1,
+      "candidate_revision": "bad2860b6a3ca3b6ca6e7212ea337657ed7bb0b6",
+      "candidate_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671"
+    },
+    {
+      "case": "GC-EX-06",
+      "trial": 1,
+      "candidate_revision": "e3e955be20ce660c012de78a1967afa89a653203",
+      "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f"
+    },
+    {
+      "case": "GC-EX-06",
+      "trial": 2,
+      "candidate_revision": "95db89725907871de11b8c0ce5b5c13db8f3d6b2",
+      "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f"
+    },
+    {
+      "case": "GC-EX-06",
+      "trial": 3,
+      "candidate_revision": "cf1840606ff51fba424c1857cb977f8ea6fa2de2",
+      "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f"
+    },
+    {
+      "case": "GC-EX-07",
+      "trial": 1,
+      "candidate_revision": "4131849866993f18f115845ce264e20a3733d6ed",
+      "candidate_tree": "59d7a8a3e9240f076b5b6e1e80a136e7db32d8dc"
+    },
+    {
+      "case": "GC-EX-07",
+      "trial": 2,
+      "candidate_revision": "1cb8d77662a76cbffe3d65180f667dabd33594e7",
+      "candidate_tree": "59d7a8a3e9240f076b5b6e1e80a136e7db32d8dc"
+    },
+    {
+      "case": "GC-EX-07",
+      "trial": 3,
+      "candidate_revision": "a659cf53d4dc326dddaacbfde41b871e733eeae2",
+      "candidate_tree": "59d7a8a3e9240f076b5b6e1e80a136e7db32d8dc"
+    },
+    {
+      "case": "GC-EX-09",
+      "trial": 1,
+      "candidate_revision": "12313ca7da9e449450c4981b80a1e8851c0f2b6a",
+      "candidate_tree": "6fb521497c60f461ce358a3af8e4015c1a35fb51"
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 1,
+      "candidate_revision": "6fb3aad2f4f0c7efafad84b04c456af35980e376",
+      "candidate_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671"
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 2,
+      "candidate_revision": "194633c503cd8e8a41dceeb2c36fc7a2a7ed6398",
+      "candidate_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671"
+    },
+    {
+      "case": "GC-EX-10",
+      "trial": 3,
+      "candidate_revision": "1f2968b3257d5d33d6ba6b2a532f07df73554edf",
+      "candidate_tree": "5b6722f543c4c1fe8044992f895c8dcc2160b671"
+    },
+    {
+      "case": "GC-EX-13",
+      "trial": 1,
+      "candidate_revision": "40c14e1077547e116944af8a7c6e36de27be5287",
+      "candidate_tree": "47493e807c6c81e8b77bd7af2a2c426b6368f8ec"
+    },
+    {
+      "case": "GC-EX-13",
+      "trial": 2,
+      "candidate_revision": "e6938c803b0b00cc93ed9263592dddf2af6e360f",
+      "candidate_tree": "bfbfca89a9559a183fa0b673e0fee877b20debef"
+    },
+    {
+      "case": "GC-EX-15",
+      "trial": 1,
+      "candidate_revision": "7634659396b190afc60113fad35204ca237d4b7e",
+      "candidate_tree": "f7e4becd3b4ec197c9e86f362d415ab69707845f"
+    },
+    {
+      "case": "GC-IP-01",
+      "trial": 1,
+      "candidate_revision": "2b047251af3b02aac7b549ff385cb6e8193f85f3",
+      "candidate_tree": "b4a993f685442b1ca322cce629c6039eb3c1c392"
+    },
+    {
+      "case": "GC-IP-02",
+      "trial": 1,
+      "candidate_revision": "97b754e867e6826a47db6ad835fd968be4c86699",
+      "candidate_tree": "a9fb8565e3dba349e3c97b2fb9327f49bcee58c8"
+    },
+    {
+      "case": "GC-IP-02",
+      "trial": 2,
+      "candidate_revision": "eb341a84d46b1cdecadbbb1214982d8d4a57421f",
+      "candidate_tree": "265f283b05545cb599121722ab2be6c0e81d1a5a"
+    },
+    {
+      "case": "GC-IP-02",
+      "trial": 3,
+      "candidate_revision": "19db7648915104b0e685d9859d04b5b49ef939b4",
+      "candidate_tree": "5d44b720ab81d07554f9dc6f49bb3d7cf79089e8"
+    },
+    {
+      "case": "GC-IP-04",
+      "trial": 1,
+      "candidate_revision": "4f1778e7f6c5a7ba96e42125680506ec15c102fe",
+      "candidate_tree": "f0953454bb3de454d887afa9e300d88b4fa2acef"
+    },
+    {
+      "case": "GC-IP-05",
+      "trial": 1,
+      "candidate_revision": "7938a706003973db947015cd1ca8042f9475f704",
+      "candidate_tree": "fba4e1d56416930bf36700a1a98c70b44855ee33"
+    },
+    {
+      "case": "GC-IP-06",
+      "trial": 1,
+      "candidate_revision": "77057749b5db865eaa3fb9d69ed160fa15f5b16c",
+      "candidate_tree": "34b717aab03cc57caedf3c9aee41a628186c6f1d"
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 1,
+      "candidate_revision": "1cee755c69e05661d084e8b4c64553a04dfc3ed4",
+      "candidate_tree": "afd8d3fd5a551a1723c1065d5dae33d1067f5ef9"
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 2,
+      "candidate_revision": "5afa8859d583203660e59d96587014188cd99167",
+      "candidate_tree": "5f6424c78dd5ceabe60cbeaec1ed9eb1a7f9c583"
+    },
+    {
+      "case": "GC-IP-08",
+      "trial": 3,
+      "candidate_revision": "bf086a58ebad6912ad9089a7f5a2325ef57ed2a4",
+      "candidate_tree": "0352cb1a4a64b53d9c5d92c1f511e4baefb286cb"
+    }
+  ],
+  "case_counts": {
+    "GC-EX-01": {
+      "PASS": 3
+    },
+    "GC-EX-02": {
+      "FAIL": 1
+    },
+    "GC-EX-03": {
+      "PASS": 2,
+      "FAIL": 1
+    },
+    "GC-EX-04": {
+      "PASS": 1
+    },
+    "GC-EX-05": {
+      "PASS": 1,
+      "FAIL": 2
+    },
+    "GC-EX-06": {
+      "PASS": 3
+    },
+    "GC-EX-07": {
+      "PASS": 3
+    },
+    "GC-EX-08": {
+      "FAIL": 1
+    },
+    "GC-EX-09": {
+      "PASS": 1
+    },
+    "GC-EX-10": {
+      "PASS": 3
+    },
+    "GC-EX-11": {
+      "FAIL": 1
+    },
+    "GC-EX-12": {
+      "BLOCKED_EXTERNAL": 1
+    },
+    "GC-EX-13": {
+      "PASS": 2,
+      "FAIL": 1
+    },
+    "GC-EX-14": {
+      "FAIL": 1
+    },
+    "GC-EX-15": {
+      "PASS": 1
+    },
+    "GC-IP-01": {
+      "PASS": 1
+    },
+    "GC-IP-02": {
+      "PASS": 3
+    },
+    "GC-IP-03": {
+      "FAIL": 1
+    },
+    "GC-IP-04": {
+      "PASS": 1
+    },
+    "GC-IP-05": {
+      "PASS": 1
+    },
+    "GC-IP-06": {
+      "PASS": 1
+    },
+    "GC-IP-07": {
+      "FAIL": 3
+    },
+    "GC-IP-08": {
+      "PASS": 3
+    }
+  },
+  "scope_answer_gap_receipt": "live-fourth/after-clarification-r278/GC-IP-07/trial-3/scope-owner-gap-r282.json",
+  "no_cross_trial_or_source_pooling": true,
+  "human_acceptance": "PENDING"
+}

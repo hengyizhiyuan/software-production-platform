@@ -1,0 +1,72 @@
+{
+  "developer-frozen-final-8": {
+    "production-positive": {
+      "FAIL": 5,
+      "PASS": 3
+    },
+    "production-negative": {
+      "PASS": 4
+    },
+    "status": {
+      "FAIL": 1
+    },
+    "hard-negative": {
+      "FAIL": 1,
+      "PASS": 7
+    },
+    "branch-positive": {
+      "PASS": 5
+    },
+    "mixed": {
+      "PASS": 3
+    },
+    "search-positive": {
+      "FAIL": 1,
+      "PASS": 1
+    },
+    "search-negative": {
+      "FAIL": 1,
+      "PASS": 4
+    },
+    "context": {
+      "FAIL": 3
+    },
+    "branch-distinction": {
+      "PASS": 2
+    }
+  },
+  "holdout-qualified-final-6": {
+    "contextual_branch": {
+      "FAIL": 4
+    },
+    "branch_create_only": {
+      "PASS": 4
+    },
+    "hard_negative": {
+      "PASS": 3,
+      "FAIL": 1
+    },
+    "conditional_negative": {
+      "PASS": 4
+    },
+    "branch_switch_only": {
+      "PASS": 4
+    },
+    "search_negation": {
+      "PASS": 4
+    },
+    "acquisition_future_goal": {
+      "PASS": 4
+    },
+    "delivery_negative": {
+      "PASS": 4
+    },
+    "production": {
+      "PASS": 4
+    },
+    "branch_both": {
+      "PASS": 3,
+      "FAIL": 1
+    }
+  }
+}
