@@ -12,6 +12,7 @@ select positive operational intent.
 | `ExternalResearchService.requests_for_turn` → `explicit_search_intents`, technical/current keyword routers, second information-gap interpretation | Removed from production dispatch. Consume IR SEARCH_GITHUB/SEARCH_WEB/FETCH_PUBLIC_RESOURCE. |
 | Raw `production_intent_evidence` in ProductionAdmissionTrigger | Removed. Current production is the structured IR goal. |
 | Raw repository-acquisition recovery intent in admission | Removed. Current typed ACQUIRE operation is required. |
+| Full repository routing repeated after obligation reconciliation | Removed. The ledger alone dispatches repository effects; a separate Work-only admission port consumes the same assessment afterward. Provisional PRE-WORK focus cannot bind Scope. |
 | Raw branch/current-Work status shortcuts before semantic compilation | Removed. Compile first; consume typed query/status and owner reality. |
 | Raw non-mutating side-question guard overriding candidate | Removed from canonical assessment normalization. |
 | Raw motive/primary-outcome rewrite and quoted-command guard | Removed from canonical assessment. Clause and speech-act/provenance contracts govern. |

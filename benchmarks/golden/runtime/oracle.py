@@ -11,6 +11,11 @@ import re
 from pathlib import Path
 import urllib.request
 
+if __package__:
+    from .owner_retry_oracle import observed_acquisition_recovery
+else:
+    from owner_retry_oracle import observed_acquisition_recovery
+
 
 class Links(HTMLParser):
     def __init__(self):
@@ -110,6 +115,13 @@ def main():
                 and event['diagnostic_evidence'].get('final_condition') == 'READY'
                 and event['diagnostic_evidence'].get('attempt_budget') == 3
                 for event in acquisition)
+            owner_rows = root/'acquisition-owner-attempts.json'
+            turns = state.get('interaction', {}).get('turns', [])
+            if owner_rows.exists() and len(turns) == 1:
+                checks['automatic_acquisition_recovery'] |= observed_acquisition_recovery(
+                    json.loads(owner_rows.read_text()),
+                    interaction_id=journey['interaction_id'],
+                    source_record_id=turns[0]['request_record_id'])
         if identity == 'GC-EX-15':
             review = json.loads((root/'review-authority-oracle.json').read_text())
             checks.update(exact_candidate_accepted=review.get('candidate_accepted') is True,
