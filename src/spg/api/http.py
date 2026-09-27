@@ -323,7 +323,8 @@ def create_http_application(
             reality_provider=production_admission_trigger.projection,
         )
         selected_interaction.configure_governed_branch_handler(
-            production_admission_trigger.execute_governed_turn
+            production_admission_trigger.execute_governed_turn,
+            work_handler=production_admission_trigger.execute_governed_work_turn,
         )
         execute_repository_actions = getattr(asset_service, "execute_interaction_actions", None)
         repository_observation = getattr(asset_service, "interaction_observation", None)

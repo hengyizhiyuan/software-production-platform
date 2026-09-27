@@ -24,7 +24,11 @@ flowchart LR
 IRK owns Human Turn → Governed Semantic IR → current obligations. It does not
 own Steering, PWU planning, native execution, Git semantics, Preview runtime,
 connector credentials or Human authorization. `IntentOwnerAdapters` are typed
-ports to those owners, not agents or language routers.
+ports to those owners, not agents or language routers. Repository actions are
+dispatched through their durable obligations. The separate Work port does not
+replay those operations. A provisional PRE-WORK UI focus has no admitted Work
+Reality revision and cannot bind engineering scope or activate production. A Work
+assessment already realized by its owner is observed rather than scheduled again.
 
 The normal DeepSeek path performs one semantic compilation. Coalesced response
 wording does not become execution truth. A malformed candidate may receive the
@@ -50,6 +54,10 @@ Candidate, manifest or authorization targets. Actual owner observations can bind
 one unambiguous exact repository baseline or Candidate. Ambiguity stays unresolved.
 A Human source must name an existing Human record and an exact contained span.
 An owner source must name evidence in the supplied governed basis.
+A supplemental `FACT` with exclusively owner provenance and exact `observed_facts`
+does not need a fabricated Human clause. Its key/value claims must still match the
+referenced owner observation. Every Human meaning and all executable items require
+current clause coverage; this exception cannot hide an action or a Human fact.
 
 `observed_facts` contains structured key/value claims. Each key and value must
 match the exact referenced observation. A valid citation does not promote model
@@ -74,7 +82,12 @@ can still proceed. A concrete broad business goal remains production intent.
 
 Current Asset observations may differ from historical acquisition receipts.
 Refresh requires actual Git ref/revision/tree matching the existing trusted
-Runtime pointer. Old intake records remain unchanged. An untrusted drift or
+Runtime pointer. Old intake records remain unchanged. A Work scope-binding failure can be separated
+from current repository readiness only when the actual Git baseline still matches
+the trusted Runtime owner pointer. Authentication failures remain blocking.
+Reused acquisitions project the current receipt and Interaction identity while
+retaining the unique original resource anchor; they never return another
+Interaction's acquisition identity. An untrusted drift or
 unavailable checkout blocks current readiness while preserving readable history.
 
 Final responses retain independently satisfied owner effects and each remaining

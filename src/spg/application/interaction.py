@@ -640,6 +640,7 @@ class WorkInteractionService:
         self._production_admission_handler: Callable[
             [UUID, InteractionAssessment, InteractionRecord], None
         ] | None = None
+        self._governed_work_handler = None
         self._governed_branch_handler: Callable[
             [UUID, InteractionAssessment, InteractionRecord], str | None
         ] | None = None
@@ -710,11 +711,13 @@ class WorkInteractionService:
         handler: Callable[
             [UUID, InteractionAssessment, InteractionRecord], str | None
         ] | None,
+        *, work_handler=None,
     ) -> None:
         """Attach the bounded branch action authorized by the current Human Turn."""
 
         with self._turn_lock:
             self._governed_branch_handler = handler
+            self._governed_work_handler = work_handler
 
     def configure_intent_observations(self, provider):
         self._intent_observation_providers.append(provider)
@@ -2184,8 +2187,8 @@ class WorkInteractionService:
             )
             independent_action_answer = self._dispatch_repository_obligations(turn, assessment, request_record)
             branch_action_answer = None
-            if assessment.semantic_ir.current_production and self._governed_branch_handler is not None:
-                branch_action_answer = self._governed_branch_handler(turn.interaction_id, assessment, request_record)
+            if assessment.semantic_ir.current_production and self._governed_work_handler is not None:
+                branch_action_answer = self._governed_work_handler(turn.interaction_id, assessment, request_record)
             admission_prepared = self._prepare_production_admission_if_ready(
                 turn.interaction_id, assessment, request_record)
             if admission_prepared:
@@ -3228,7 +3231,9 @@ class WorkInteractionService:
             if self._repository_observation_provider is not None else None
         )
         if independent_observation is not None and governed_revision is None:
-            repository_acquisition_state = RepositoryAcquisitionState(independent_observation['condition'])
+            repository_acquisition_state = (RepositoryAcquisitionState.FAILED_RETRYABLE
+                if independent_observation['condition'] == 'BLOCKED'
+                else RepositoryAcquisitionState(independent_observation['condition']))
             persisted_repository_source = independent_observation.get('source')
             production_next_step = (
                 "Repository Reality is ready; production Work remains unadmitted."

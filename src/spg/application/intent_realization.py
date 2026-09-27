@@ -93,7 +93,15 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
         while start >= 0:
             covered.update(range(start, start + len(clause.source_text)))
             start = latest.content.find(clause.source_text, start + 1)
-    if represented != ids or any(not c.isspace() and n not in covered for n, c in enumerate(latest.content)):
+    # Exact Human clause coverage does not require an independently observed
+    # owner fact to masquerade as a Human statement. Only typed, non-Human
+    # supplemental facts may be outside this map; their exact claims are
+    # validated against the supplied owner observations below.
+    supplemental = {item.item_id for item in candidate.items
+        if item.kind is SemanticKind.FACT and item.observed_facts
+        and all(p.origin is SemanticOrigin.REPOSITORY_OBSERVED for p in item.provenance)}
+    if (ids - represented - supplemental
+            or any(not c.isspace() and n not in covered for n, c in enumerate(latest.content))):
         raise IntentRealizationViolation("PRIMARY_INTENT_CLAUSE_LOST: compiler must account for the entire current source")
     normalized = []
     observations = {reference: observation for observation in getattr(basis, "observed_reality", ())

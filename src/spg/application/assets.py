@@ -223,7 +223,17 @@ class RepositoryAssetService:
             return None
         latest = history[-1]
         if latest.get("condition") == "READY" and latest.get("resource_id"):
-            return {**self.observation(UUID(latest["resource_id"])), "request": latest["request"]}
+            current = self.observation(UUID(latest["resource_id"]))
+            # resource_id uniquely identifies the original intake anchor. Reused
+            # acquisitions retain their own current receipt and Interaction identity.
+            current.update({key: latest.get(key) for key in (
+                "intake_request_id", "interaction_id", "work_id", "attempt_number",
+                "previous_attempt_id", "operation_kind", "target_branch",
+                "base_resource_id", "source", "title", "description", "request")})
+            current["fingerprint"] = canonical_fingerprint(
+                {key: value for key, value in current.items()
+                    if key not in {"fingerprint", "request"}})
+            return current
         return latest
 
     def attempts_for_interaction(self, interaction_id: UUID) -> tuple[dict, ...]:
@@ -1198,7 +1208,8 @@ class RepositoryAssetService:
             if row is None:
                 raise ProductRecordNotFound("Repository has no product intake observation")
             resource = ProductStore(uow.session).resource(resource_id)
-            if row.get("condition") != "READY" or resource is None:
+            binding_failure = (row.get("technical_evidence") or {}).get("phase") == "WORK_REALITY_BINDING"
+            if (row.get("condition") != "READY" and not binding_failure) or resource is None:
                 return row
             runtime = RuntimeStore(uow.session)
             pointer = runtime.current_pointer(repository_identity=resource.repository_identity,
@@ -1218,7 +1229,7 @@ class RepositoryAssetService:
         trusted = bool(snapshot and snapshot.condition is SnapshotCondition.TRUSTED
             and snapshot.repository_revision == revision
             and snapshot.repository_tree_identity == tree and branch == resource.authoritative_ref)
-        if (revision, tree, branch) == (row.get("revision"), row.get("tree"), row.get("repository_ref")):
+        if row.get("condition") == "READY" and (revision, tree, branch) == (row.get("revision"), row.get("tree"), row.get("repository_ref")):
             return row
         evidence = {"signal": "ACTION_REQUIRES_REALITY_REFRESH", "actual_revision": revision,
             "actual_tree": tree, "actual_ref": branch,

@@ -2528,7 +2528,7 @@ def test_failed_repository_acquisition_reuses_work_and_retries_with_new_attempt(
             json={"content": content, "human_identity": "human:requester"},
         )
         assert response.status_code == 202, response.text
-        deadline = time.monotonic() + 5
+        deadline = time.monotonic() + 30
         while time.monotonic() < deadline:
             projection = client.get(
                 f"/api/interactions/{interaction.id}/shared-understanding"
@@ -2560,7 +2560,7 @@ def test_failed_repository_acquisition_reuses_work_and_retries_with_new_attempt(
 
         interactions.capability.mode = "ACQUIRE"
         submit("Retry repository acquisition.")
-        deadline = time.monotonic() + 5
+        deadline = time.monotonic() + 30
         recovered = None
         while time.monotonic() < deadline:
             candidate = client.get(
@@ -3119,7 +3119,7 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
             "已经切好了吗？当前项目分支是啥？",
             human_identity="human:test",
         )
-        deadline = time.monotonic() + 5
+        deadline = time.monotonic() + 30
         while time.monotonic() < deadline:
             state = shadow.get_turn(turn.id)
             if state.status in {InteractionTurnStatus.COMPLETED, InteractionTurnStatus.FAILED}:

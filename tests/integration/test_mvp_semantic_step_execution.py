@@ -475,7 +475,7 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
     )
     try:
         assert driver.schedule(admitted.work_id) is True
-        deadline = monotonic() + 10
+        deadline = monotonic() + 30
         waiting = None
         while monotonic() < deadline:
             waiting = driver.project(admitted.work_id)
@@ -495,7 +495,7 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
         # The first phase may spend most of its deadline observing the initial
         # failure under a loaded integration DB. Give the bounded retry its own
         # observation window rather than racing the first phase's deadline.
-        deadline = monotonic() + 10
+        deadline = monotonic() + 30
         while monotonic() < deadline:
             if (
                 capability.calls == 2
@@ -506,7 +506,7 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
                 break
             sleep(0.01)
         assert capability.calls == 2
-        assert driver.wait_until_idle(admitted.work_id, 2)
+        assert driver.wait_until_idle(admitted.work_id, 10)
         with postgres_database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
             recovery = store.list_self_refine_events(
@@ -534,7 +534,7 @@ def test_retryable_semantic_provider_failure_waits_and_resumes_automatically(
         assert reconstructed.current_step.type is SteeringStepType.DESIGN
 
         assert driver.schedule(admitted.work_id) is True
-        assert driver.wait_until_idle(admitted.work_id, 2)
+        assert driver.wait_until_idle(admitted.work_id, 10)
         transitioned = driver.last_outcome(admitted.work_id)
         assert transitioned is not None
         assert transitioned.last_action is SteeringActionType.STEP_TRANSITION

@@ -71,6 +71,7 @@ class ProductionAdmissionTrigger:
                 RepositoryAcquisitionState.WAITING_FOR_AUTHORIZATION
             ),
             "FAILED_RETRYABLE": RepositoryAcquisitionState.FAILED_RETRYABLE,
+            "BLOCKED": RepositoryAcquisitionState.FAILED_RETRYABLE,
             "FAILED_TERMINAL": RepositoryAcquisitionState.FAILED_TERMINAL,
             "WAITING_FOR_REPOSITORY_SOURCE": (
                 RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
@@ -358,6 +359,10 @@ class ProductionAdmissionTrigger:
                 interaction = InteractionStore(uow.session).interaction(interaction_id)
                 work_id = None if interaction is None else interaction.current_work_id
                 current = None if work_id is None else ProductStore(uow.session).current_work_reality_revision(work_id)
+                if current is None:
+                    # The UI's provisional PRE-WORK focus is not an admitted
+                    # Work scope. Preparatory effects remain Interaction-owned.
+                    work_id = None
             if (assessment.candidate_change is not None and current is not None
                     and assessment.basis_work_revision_id == current.id):
                 self.work.decide_interaction_work_revision(interaction_id, assessment_id=assessment.id,
@@ -384,6 +389,11 @@ class ProductionAdmissionTrigger:
         branch_answer = self.execute_explicit_branch_turn(interaction_id, assessment, request_record)
         if branch_answer is not None:
             return branch_answer
+        return self.execute_governed_work_turn(interaction_id, assessment, request_record)
+
+    def execute_governed_work_turn(self, interaction_id: UUID,
+        assessment: InteractionAssessment, request_record: InteractionRecord) -> str | None:
+        """Realize current Work decisions without replaying Action obligations."""
         ir = assessment.semantic_ir
         explicit_goals = () if ir is None else ir.current_production
         if (explicit_goals and assessment.candidate_change is not None
@@ -393,6 +403,17 @@ class ProductionAdmissionTrigger:
                 and request_record.actor is InteractionActor.HUMAN
                 and all(goal.bounded_change and not goal.systemic_design for goal in explicit_goals)
                 and not any(item.requires_human for item in current_step_semantic_items(ir))):
+            with self.work.database.unit_of_work() as uow:
+                product = ProductStore(uow.session)
+                focus = InteractionStore(uow.session).interaction(interaction_id)
+                current = None if focus is None or focus.current_work_id is None else product.current_work_reality_revision(focus.current_work_id)
+                admitted = None if current is None else latest_assessment_revision(
+                    current, product.work_reality_revision)
+                if admitted is not None and admitted.source_assessment_id == assessment.id:
+                    # A preceding Action owner can already admit this same
+                    # assessment while binding its exact engineering scope.
+                    # The ledger observes that admission; do not schedule twice.
+                    return None
             # The current Human Turn is the decision; exact basis, scope and
             # immutable active-cycle checks remain in the existing Work owner.
             updated = self.work.decide_interaction_work_revision(interaction_id,
