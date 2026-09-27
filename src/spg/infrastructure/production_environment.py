@@ -175,6 +175,7 @@ class GitRepositoryAcquirer:
         source: str,
         destination: Path,
         target_branch: str,
+        *, expected_base_revision: str | None = None, expected_base_tree: str | None = None,
     ) -> None:
         """Create an isolated local branch from an acquired exact baseline."""
 
@@ -192,6 +193,9 @@ class GitRepositoryAcquirer:
         base_revision = GitContinuityInspector._git(
             base_repository, "rev-parse", "HEAD^{commit}"
         )
+        base_tree = GitContinuityInspector._git(base_repository, "rev-parse", "HEAD^{tree}")
+        if expected_base_revision is not None and (base_revision, base_tree) != (expected_base_revision, expected_base_tree):
+            raise EnvironmentProviderError("Exact governed branch baseline changed before any branch write")
         GitContinuityInspector._git(
             root,
             "clone", "--no-local", "--single-branch", "--branch", base_branch,
@@ -208,14 +212,18 @@ class GitRepositoryAcquirer:
             raise EnvironmentProviderError("Branch creation changed the baseline commit")
 
     def realize_local_branch(self, root, base_repository, base_branch, source,
-            destination, target_branch, *, operation):
+            destination, target_branch, *, operation, expected_base_revision=None, expected_base_tree=None):
         """Realize structured branch intent without adding an omitted effect."""
         if operation == "CREATE_BRANCH":
             return self.create_work_branch(root, base_repository, base_branch,
-                source, destination, target_branch)
+                source, destination, target_branch, expected_base_revision=expected_base_revision,
+                expected_base_tree=expected_base_tree)
         GitIsolatedWorkspacePreparer._validate_branch(target_branch)
         git = GitContinuityInspector._git
         base_revision = git(base_repository, "rev-parse", "HEAD^{commit}")
+        base_tree = git(base_repository, "rev-parse", "HEAD^{tree}")
+        if expected_base_revision is not None and (base_revision, base_tree) != (expected_base_revision, expected_base_tree):
+            raise EnvironmentProviderError("Exact governed branch baseline changed before any branch write")
         git(root, "clone", "--no-local", "--", str(base_repository), str(destination))
         # Clone preserves all branches as remote-tracking refs. Explicit local
         # refs are copied as observed facts, without contacting a remote host.
@@ -224,7 +232,8 @@ class GitRepositoryAcquirer:
             name, revision = line.split(" ", 1)
             if name != base_branch:
                 git(destination, "branch", "--", name, revision)
-        if git(destination, "rev-parse", "HEAD^{commit}") != base_revision:
+        if (git(destination, "rev-parse", "HEAD^{commit}"),
+                git(destination, "rev-parse", "HEAD^{tree}")) != (base_revision, base_tree):
             raise EnvironmentProviderError("Branch base differs from the observed owner baseline")
         if operation == "CREATE_BRANCH_ONLY":
             git(destination, "branch", "--", target_branch, base_revision)

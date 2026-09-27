@@ -1931,7 +1931,9 @@ class WorkInteractionService:
             if self._repository_observation_provider is not None else None)
         if observation is not None:
             observations.append(ObservedEffect(owner="repository-asset",
-            evidence_references=(f"repository-intake:{observation['intake_request_id']}",),
+            evidence_references=(f"repository-intake:{observation['intake_request_id']}",
+                *((f"runtime-snapshot:{observation['current_trusted_snapshot_id']}",)
+                    if observation.get("current_trusted_snapshot_id") else ())),
             facts={key: value for key, value in observation.items() if key not in {"request", "technical_evidence"}}))
         return tuple(observations)
 
@@ -1945,7 +1947,9 @@ class WorkInteractionService:
             # proof is the retained exact owner receipt, never response wording.
             if facts.get("condition") == "READY" and facts.get("tree"):
                 facts["inspected_references"] = (facts.get("repository_identity"), facts["tree"])
-            references = (f"repository-intake:{facts['intake_request_id']}",)
+            references = (f"repository-intake:{facts['intake_request_id']}",
+                *((f"runtime-snapshot:{facts['current_trusted_snapshot_id']}",)
+                    if facts.get("current_trusted_snapshot_id") else ()))
             revision = projection.governed_revision
             if projection.governed_work_id is not None and revision is not None:
                 # A new asset alone cannot claim to have switched an existing
@@ -2253,7 +2257,8 @@ class WorkInteractionService:
             self._settle_turn_obligations(turn_id, assessment, research_result=research_result)
             ledger_projection = self.realization_projection(turn_id)
             if (assessment.semantic_ir.items
-                    and all(item.kind is SemanticKind.CONSTRAINT for item in assessment.semantic_ir.items)
+                    and any(item.kind is SemanticKind.CONSTRAINT for item in assessment.semantic_ir.items)
+                    and all(item.kind in {SemanticKind.CONSTRAINT, SemanticKind.FACT} for item in assessment.semantic_ir.items)
                     and not any(item.requires_human for item in assessment.semantic_ir.items)
                     and not any(question.requires_human for question in assessment.semantic_ir.questions)
                     and all(item["plane"] == "INTERACTION" and item["state"] == "SATISFIED"
@@ -2261,12 +2266,10 @@ class WorkInteractionService:
                 # A constraint-only Turn owes a recorded boundary, not an
                 # invented retrospective description of earlier execution.
                 independent_action_answer = "已记录当前约束：" + "；".join(
-                    item.statement for item in assessment.semantic_ir.items)
+                    item.statement for item in assessment.semantic_ir.items if item.kind is SemanticKind.CONSTRAINT)
             work_effects = [item for item in ledger_projection["obligations"] if item["plane"] == "WORK"]
             if (registered_answer is None and work_effects
-                    and all(item["state"] == "SATISFIED" for item in work_effects)
-                    and all(item["state"] == "SATISFIED" for item in ledger_projection["obligations"]
-                        if item["plane"] == "ACTION")):
+                    and any(item["state"] == "SATISFIED" for item in work_effects)):
                 # Preparatory owner wording was captured before Work admission.
                 # Realize the combined current outcome from the final owner basis,
                 # rather than publishing that earlier snapshot as final truth.
@@ -2308,10 +2311,19 @@ class WorkInteractionService:
                 return
             blocked = [item for item in ledger_projection["obligations"]
                 if item["state"] in {"BLOCKED_WITH_EVIDENCE", "REQUIRES_HUMAN"}]
-            if blocked and independent_action_answer is None and research_result is None:
-                independent_action_answer = "当前请求尚未满足执行条件，没有可核查的完成效果。" + (
-                    "需要明确目标或处理当前权限与能力条件。" if any(item["state"] == "REQUIRES_HUMAN" for item in blocked)
-                    else "已保留阻塞证据；没有执行或承诺未经准入的操作。")
+            if blocked:
+                # Independently satisfied owner effects remain true while each
+                # unsatisfied current clause stays visible. No parent success is
+                # inferred from a local recovery, and no generic cause is invented.
+                by_item = {item.item_id: item for item in assessment.semantic_ir.items}
+                boundaries = []
+                for obligation in blocked:
+                    item = by_item[obligation["semantic_item_id"]]
+                    meaning = item.statement
+                    disposition = "需要确认" if obligation["state"] == "REQUIRES_HUMAN" else "已阻塞并保留证据"
+                    boundaries.append(f"尚未完成：{meaning}（{disposition}）。")
+                independent_action_answer = "\n".join(filter(None, (
+                    independent_action_answer, *boundaries)))
             if blocked and any(item["state"] == "REQUIRES_HUMAN" for item in blocked):
                 question = assessment.progressive_semantics.selected_question if assessment.progressive_semantics else None
                 if question and independent_action_answer:

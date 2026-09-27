@@ -863,6 +863,24 @@ class InferenceProviderObservation(NativeRecord):
     transport: InferenceTransportObservation | None = None
 
 
+def validate_result_claim_evidence(claim):
+    """Opaque evidence references must retain the existing UUID owner contract."""
+    if claim is None:
+        return
+    values = claim.get("evidence_ids", [])
+    if not isinstance(values, (list, tuple)):
+        raise ValueError("RESULT_CLAIM_EVIDENCE_INVALID: evidence_ids must be UUID references")
+    for value in values:
+        if not isinstance(value, (str, UUID)):
+            raise ValueError("RESULT_CLAIM_EVIDENCE_INVALID: evidence_ids must be UUID references")
+        try:
+            UUID(str(value))
+        except ValueError as error:
+            raise ValueError("RESULT_CLAIM_EVIDENCE_INVALID: evidence_ids must be UUID references") from error
+    if not isinstance(claim.get("output_vector", {}), dict):
+        raise ValueError("RESULT_CLAIM_EVIDENCE_INVALID: output_vector must be an object")
+
+
 class InferenceResponse(NativeRecord):
     action: InferenceAction
     summary: str = Field(min_length=1)
@@ -878,6 +896,7 @@ class InferenceResponse(NativeRecord):
             raise ValueError("CONTINUE requires at least one tool call")
         if self.action is InferenceAction.RESULT_READY and self.result_claim is None:
             raise ValueError("RESULT_READY requires a result claim")
+        validate_result_claim_evidence(self.result_claim)
         if self.action is not InferenceAction.CONTINUE and self.tool_calls:
             raise ValueError("terminal or waiting inference action cannot propose tools")
         return self

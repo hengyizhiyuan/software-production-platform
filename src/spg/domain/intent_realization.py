@@ -66,6 +66,7 @@ class ProductionIntent(FrozenContract):
     acceptance_required: bool = True
     delivery_authorized: bool = False
     unresolved: tuple[str, ...] = ()
+    unresolved_arguments: tuple[Literal["objective", "primary_change", "repository_reference"], ...] = ()
 
 
 class SemanticItem(FrozenContract):

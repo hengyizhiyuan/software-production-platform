@@ -20,6 +20,42 @@ from fastapi.testclient import TestClient
 from sqlalchemy import delete, func, inspect, insert, select, update
 
 from spg.application.executor_runtime import NativeExecutorRuntimeService
+
+
+def test_malformed_result_claim_terminalizes_attempt_without_crashing_worker_owner(
+    postgres_database, git_repository,
+):
+    service = NativeExecutorRuntimeService(postgres_database)
+    admission = _admission(postgres_database, git_repository)
+    service.admit(admission)
+    grant = service.allocate(_offer())
+    assert grant is not None
+    service.activate_allocation(grant)
+    service.finish_allocation(grant, KernelRunResult(
+        runtime_mode=ExecutionMode.FINISHED, terminal_outcome=AttemptTerminalOutcome.RESULT_READY,
+        final_checkpoint_id=None, step_count=1, inference_submissions=1, tool_effects=0,
+        summary="Malformed provider evidence claim",
+        result_claim={"evidence_ids": ["README.md"], "output_vector": {"files": ["README.md"]}},
+    ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        state = store.attempt_state(admission.binding.attempt_id)
+        assert state.terminal_outcome is AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+        assert state.runtime_mode is ExecutionMode.FINISHED
+        assert store.allocation(grant.allocation.id).condition.value == "RELEASED"
+        assert any(e.event_type == "NativeResultClaimRejected"
+            for e in store.events_since(admission.binding.pwu_id, after_sequence=0))
+    # A second independent allocation can still be admitted and finished.
+    next_admission = _admission(postgres_database, git_repository)
+    service.admit(next_admission)
+    next_grant = service.allocate(_offer())
+    assert next_grant is not None
+    service.activate_allocation(next_grant)
+    service.finish_allocation(next_grant, KernelRunResult(
+        runtime_mode=ExecutionMode.FINISHED, terminal_outcome=AttemptTerminalOutcome.STOPPED,
+        final_checkpoint_id=None, step_count=0, inference_submissions=0, tool_effects=0,
+        summary="Release independent validation fixture",
+    ))
 from spg.api.http import create_http_application
 from spg.application.native_vector import NativeCandidateVectorService
 from spg.application.native_retention import NativeRetentionService

@@ -111,12 +111,97 @@ def test_actual_branch_effect_and_single_compiler_call(runtime):
     assert [effect["predicate"] for effect in obligation["expected_effects"]] == ["BRANCH_EXISTS", "CURRENT_BRANCH"]
     assert obligation["observed_effect"]["facts"]["repository_ref"] == "refs/heads/feat_feedback"
     assert len(assets.attempts_for_interaction(interaction.id)) == 2
+    request = assets.attempts_for_interaction(interaction.id)[-1]["request"]
+    assert request["expected_base_revision"] == obligation["expected_effects"][0]["exact_revision"]
+    assert request["expected_base_tree"] == obligation["observed_effect"]["facts"]["tree"]
     assert service.get_shared_understanding(interaction.id).governed_work_id is None
     # Reconstruction is solely from the database, not a session/model memory.
     with service.database.unit_of_work() as uow:
         restored = IntentRealizationStore(uow.session)
         restored.validate_completion(turn.id)
         assert restored.projection(turn.id) == projection
+
+
+@pytest.mark.parametrize("operation", ["CREATE_BRANCH", "CREATE_AND_SWITCH_BRANCH", "SWITCH_BRANCH"])
+def test_persisted_exact_baseline_blocks_drift_before_branch_effect(runtime, operation):
+    from uuid import UUID
+    from spg.infrastructure.persistence.product_store import ProductStore
+    service, assets, compiler, interaction = acquired(runtime)
+    original_observation = assets.interaction_observation(interaction.id)
+    with service.database.unit_of_work() as uow:
+        resource = ProductStore(uow.session).resource(UUID(original_observation["resource_id"]))
+    repository = Path(resource.location_ref)
+    def git(*args):
+        return subprocess.run(["git", "-C", str(repository), *args],
+            check=True, capture_output=True, text=True).stdout.strip()
+    if operation == "SWITCH_BRANCH":
+        git("branch", "feat_drift")
+    original_start = assets.start_intake
+    captured = {}
+    def start_then_drift(request):
+        receipt = original_start(request)
+        if request.target_branch:
+            captured["request"] = request
+            (repository / "README.md").write_text("# Later repository version\n")
+            git("add", "README.md")
+            git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-m", "fixture baseline drift")
+            captured["refs"] = git("for-each-ref", "--format=%(refname) %(objectname)")
+        return receipt
+    assets.start_intake = start_then_drift
+    compiler.operation = operation
+    compiler.arguments = {"target_branch": "feat_drift"}
+    _, projection = settled(service, interaction, "Realize the requested local branch feat_drift")
+    assert captured["request"].expected_base_revision == original_observation["revision"]
+    assert captured["request"].expected_base_tree == original_observation["tree"]
+    failed = assets.attempts_for_interaction(interaction.id)[-1]
+    assert failed["technical_evidence"]["signal"] == "ACTION_REQUIRES_REALITY_REFRESH"
+    assert failed["technical_evidence"]["effect_observed"] is False
+    assert not (assets.asset_root / str(captured["request"].request_id)).exists()
+    assert git("for-each-ref", "--format=%(refname) %(objectname)") == captured["refs"]
+    assert projection["obligations"][0]["state"] == "BLOCKED_WITH_EVIDENCE"
+    # An untrusted Git change cannot be silently exposed as READY, and old
+    # acquisition evidence remains the original immutable observation.
+    assert assets.observation(resource.id)["condition"] == "BLOCKED"
+    assert assets.attempts_for_interaction(interaction.id)[0]["revision"] == original_observation["revision"]
+
+
+def test_fresh_asset_observation_requires_matching_trusted_runtime_pointer(runtime):
+    from uuid import UUID
+    from spg.infrastructure.persistence.product_store import ProductStore
+    from spg.infrastructure.persistence.runtime_store import RuntimeStore
+    service, assets, _, interaction = acquired(runtime)
+    before = assets.interaction_observation(interaction.id)
+    with service.database.unit_of_work() as uow:
+        resource = ProductStore(uow.session).resource(UUID(before["resource_id"]))
+        pointer = RuntimeStore(uow.session).current_pointer(
+            repository_identity=resource.repository_identity, repository_ref=resource.authoritative_ref)
+    repository = Path(resource.location_ref)
+    def git(*args):
+        return subprocess.run(["git", "-C", str(repository), *args],
+            check=True, capture_output=True, text=True).stdout.strip()
+    (repository / "README.md").write_text("# Current accepted fixture version\n")
+    git("add", "README.md")
+    git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-m", "later owner fixture")
+    revision, tree = git("rev-parse", "HEAD"), git("rev-parse", "HEAD^{tree}")
+    assert assets.observation(resource.id)["condition"] == "BLOCKED"
+    # The persistence fixture now supplies the existing Runtime owner's trusted
+    # pointer. This tests projection validation, not a Human acceptance claim.
+    snapshot_id = uuid4()
+    with service.database.unit_of_work() as uow:
+        runtime_store = RuntimeStore(uow.session)
+        runtime_store.insert_snapshot({"id": snapshot_id, "condition": "TRUSTED",
+            "repository_identity": resource.repository_identity, "repository_ref": resource.authoritative_ref,
+            "repository_revision": revision, "repository_tree_identity": tree,
+            "source_baseline_id": pointer.snapshot_id, "created_at": datetime.now(UTC)})
+        runtime_store.update_baseline_pointer(pointer.version, snapshot_id,
+            expected_snapshot_id=pointer.snapshot_id)
+        uow.commit()
+    refreshed = assets.observation(resource.id)
+    assert (refreshed["condition"], refreshed["revision"], refreshed["tree"]) == ("READY", revision, tree)
+    assert refreshed["technical_evidence"]["trusted_snapshot_id"] == str(snapshot_id)
+    assert assets.interaction_observation(interaction.id)["fingerprint"] == refreshed["fingerprint"]
+    assert assets.observation(resource.id) == refreshed
+    assert assets.attempts_for_interaction(interaction.id)[0]["revision"] == before["revision"]
 
 
 def test_negated_semantics_cannot_be_overridden_by_github_keywords(runtime):
@@ -129,7 +214,8 @@ def test_negated_semantics_cannot_be_overridden_by_github_keywords(runtime):
     assert compiler.calls == 1
 
 
-def test_constraint_acknowledgement_does_not_invent_prior_execution_history(runtime):
+@pytest.mark.parametrize("additional_human_fact", [False, True])
+def test_constraint_acknowledgement_does_not_invent_prior_execution_history(runtime, additional_human_fact):
     service, assets, compiler, interaction = acquired(runtime)
     before = assets.interaction_observation(interaction.id)
     original = compiler.interpret
@@ -138,9 +224,15 @@ def test_constraint_acknowledgement_does_not_invent_prior_execution_history(runt
         item = candidate.semantic_intent.items[0].model_copy(update={
             "kind": SemanticKind.CONSTRAINT, "action": None,
             "statement": "Keep the current Candidate for review; do not deliver"})
+        items = (item,)
+        if additional_human_fact:
+            items += (item.model_copy(update={"item_id": "review-fact", "kind": SemanticKind.FACT,
+                "statement": "Human wishes to review this version"}),)
+        clause = candidate.semantic_intent.clauses[0].model_copy(update={
+            "semantic_item_ids": tuple(i.item_id for i in items)})
         return candidate.model_copy(update={
-            "natural_response": "No acquisition has ever completed.",
-            "semantic_intent": candidate.semantic_intent.model_copy(update={"items": (item,)})})
+            "natural_response": "I will continue changing the product. No acquisition has ever completed.",
+            "semantic_intent": candidate.semantic_intent.model_copy(update={"items": items, "clauses": (clause,)})})
     compiler.interpret = compile_constraint
     _, projection = settled(service, interaction, "保留当前版本待审阅，暂不交付")
     assert projection["obligations"] == []  # Recorded constraints grant no execution.

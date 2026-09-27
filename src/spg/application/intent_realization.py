@@ -33,6 +33,27 @@ _OPERATION_BINDINGS = {
 }
 
 
+# Closed argument contracts are the keys consumed by qualified owner adapters.
+# Unknown structured fields cannot be silently discarded before an effect.
+_OPERATION_ARGUMENTS = {
+    CanonicalOperation.ACQUIRE_REPOSITORY: {"repository_source"},
+    CanonicalOperation.INSPECT_REPOSITORY: {"repository_source"},
+    CanonicalOperation.SEARCH_REPOSITORY: {"repository_source"},
+    CanonicalOperation.QUERY_CURRENT_BRANCH: {"repository_source"},
+    **{op: {"repository_source", "target_branch", "base_revision", "base_tree", "repository_identity"}
+        for op in (CanonicalOperation.CREATE_BRANCH, CanonicalOperation.SWITCH_BRANCH,
+            CanonicalOperation.CREATE_AND_SWITCH_BRANCH)},
+    CanonicalOperation.SEARCH_GITHUB: {"query", "search_kind"},
+    CanonicalOperation.SEARCH_WEB: {"query"},
+    CanonicalOperation.FETCH_PUBLIC_RESOURCE: {"url"},
+    CanonicalOperation.REQUEST_PREVIEW: {"candidate_revision"},
+    CanonicalOperation.ACCEPT_CANDIDATE: {"candidate_revision"},
+    CanonicalOperation.AUTHORIZE_DELIVERY: {"manifest_id", "candidate_revision", "target_branch", "expected_remote_revision"},
+    CanonicalOperation.PUSH_BRANCH: {"authorization_id", "candidate_revision"},
+    CanonicalOperation.CREATE_PR: {"authorization_id", "candidate_revision", "base_branch", "title", "body"},
+}
+
+
 def canonical_operation(value: str) -> CanonicalOperation:
     try:
         operation = _OPERATION_BINDINGS[value] if value in _OPERATION_BINDINGS else CanonicalOperation(value)
@@ -123,6 +144,16 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
         if item.action is not None:
             action = item.action
             operation = canonical_operation(action.operation)
+            unsupported = (set(action.arguments) | set(action.unresolved_arguments)) - _OPERATION_ARGUMENTS[operation]
+            if unsupported:
+                raise IntentRealizationViolation("SEMANTIC_TYPE_MISMATCH: unconsumed operational argument keys: " + ", ".join(sorted(unsupported)))
+            target = action.arguments.get("target_branch")
+            if (target is not None and operation in {CanonicalOperation.CREATE_BRANCH,
+                    CanonicalOperation.CREATE_AND_SWITCH_BRANCH}
+                    and target.provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}):
+                raise IntentRealizationViolation("ACTION_ARGUMENT_PROVENANCE_INVALID: a new branch target needs literal Human provenance")
+            if target is not None and target.value.startswith("refs/"):
+                raise IntentRealizationViolation("SEMANTIC_TYPE_MISMATCH: branch targets require a local branch name, not a Git reference")
             if action.speech_act is ActionSpeechAct.READ_ONLY_QUERY and operation not in {
                     CanonicalOperation.QUERY_CURRENT_BRANCH, CanonicalOperation.INSPECT_REPOSITORY,
                     CanonicalOperation.SEARCH_REPOSITORY, CanonicalOperation.SEARCH_GITHUB,
@@ -153,6 +184,8 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
             item = item.model_copy(update={"action": action.model_copy(update={"operation": operation.value})})
         if item.production is not None:
             production = item.production
+            if production.current and production.unresolved_arguments:
+                item = item.model_copy(update={"requires_human": True})
             if production.current and not any(s.origin in {SemanticOrigin.HUMAN_EXPLICIT,
                     SemanticOrigin.HUMAN_CORRECTION} and s.source_record_id == latest.id for s in item.provenance):
                 raise IntentRealizationViolation("PRODUCTION_INTENT_SCOPE_INFLATION: current goal needs current Human provenance")
@@ -247,7 +280,7 @@ class IntentRealizationKernel:
             bound = []
             for item in items:
                 if item.action is not None and canonical_operation(item.action.operation) in {
-                        CanonicalOperation.CREATE_BRANCH, CanonicalOperation.CREATE_AND_SWITCH_BRANCH}:
+                        CanonicalOperation.CREATE_BRANCH, CanonicalOperation.CREATE_AND_SWITCH_BRANCH, CanonicalOperation.SWITCH_BRANCH}:
                     args = dict(item.action.arguments)
                     for key, owner_key in (("base_revision", "revision"), ("base_tree", "tree"),
                             ("repository_identity", "repository_identity")):
@@ -308,7 +341,8 @@ class IntentRealizationKernel:
             else:
                 continue
             needs_human = item.requires_human or item.confidence < .8 or unresolved_dependency(item) or bool(
-                item.action and (item.action.conditional or blocking_action_arguments(item.action)))
+                item.action and (item.action.conditional or blocking_action_arguments(item.action))) or bool(
+                item.production and item.production.current and item.production.unresolved_arguments)
             obligations.append(TurnObligation(id=identities[item.item_id], turn_id=turn_id,
                 semantic_ir_id=ir.id, semantic_item_id=item.item_id, plane=plane,
                 operation=operation, expected_effects=effects,

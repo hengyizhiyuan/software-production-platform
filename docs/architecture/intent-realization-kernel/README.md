@@ -59,6 +59,29 @@ facts keep their original provenance without fabricated new origins.
 
 ## Current obligations
 
+Operational arguments use closed contracts for the qualified owner adapters.
+Unconsumed fields are rejected before persistence or dispatch. Branch targets
+are local names, and creating a new target requires literal Human provenance;
+an observed existing branch cannot supply authority for a new branch name.
+The exact revision/tree bound by IR travels through the durable intake request.
+The Asset owner and local Git provider check it before any target branch write.
+Baseline drift produces retained evidence, not a silently rebased operation.
+
+`ProductionIntent.unresolved_arguments` distinguishes a missing objective,
+primary change, or required repository reference from optional implementation
+details. Current missing goal arguments block that goal; independent acquisition
+can still proceed. A concrete broad business goal remains production intent.
+
+Current Asset observations may differ from historical acquisition receipts.
+Refresh requires actual Git ref/revision/tree matching the existing trusted
+Runtime pointer. Old intake records remain unchanged. An untrusted drift or
+unavailable checkout blocks current readiness while preserving readable history.
+
+Final responses retain independently satisfied owner effects and each remaining
+blocked clause. Work admission cannot erase an unresolved Action; that Action
+cannot erase actual Work admission. Constraint-only acknowledgements may include
+supporting facts without inventing further execution or retrospective history.
+
 IRK creates Action, Work and Interaction obligations only for current effects.
 A Work obligation means **admit the current goal**; its satisfaction never means
 that production, Work convergence, Human acceptance or delivery has completed.
@@ -94,6 +117,14 @@ requires the actual Human authorization receipt; push requires exact remote
 revision and target branch. A PR cannot silently supply an omitted push request.
 
 ## Recovery scopes
+
+Native result claims retain the existing UUID evidence-reference contract.
+Malformed provider evidence IDs or output vectors are rejected at inference
+validation. A defensive allocation boundary also rejects malformed historical
+or direct-port claims, preserves their checkpoints and tool effects, releases
+the allocation, and records `UNABLE_TO_COMPLETE`. It admits no result-ready
+claim and performs no blind tool replay. This protects the existing Worker
+process and downstream Completion/Verification owners.
 
 Turn recovery repairs compilation/schema/provenance against the unchanged
 input. Action recovery refreshes actual owner reality against expected effects;

@@ -42,6 +42,7 @@ from spg.domain.native_execution import (
     RecoveryClassification,
     RepairabilityClassification,
     ResultReadyClaimRecord,
+    validate_result_claim_evidence,
     SelfRefineActionRecord,
     SelfRefineEventRecord,
     SchedulingDecision,
@@ -694,6 +695,23 @@ class NativeExecutorRuntimeService:
             queue = store.queue_entry(allocation.queue_entry_id)
             if state.worker_epoch != allocation.lease_epoch:
                 raise NativeExecutionConflict("worker epoch was fenced before completion")
+            try:
+                validate_result_claim_evidence(result.result_claim)
+            except ValueError:
+                # Historical checkpoints and direct kernel ports must not crash
+                # the Worker or turn a malformed provider claim into RESULT_READY.
+                binding = store.attempt_binding(allocation.attempt_id)
+                self._append_event(store, pwu_id=allocation.pwu_id, attempt_id=allocation.attempt_id,
+                    event_type="NativeResultClaimRejected",
+                    payload={"signal": "RESULT_CLAIM_EVIDENCE_INVALID",
+                        "checkpoint_id": str(result.final_checkpoint_id) if result.final_checkpoint_id else None,
+                        "tool_effects_preserved": True, "blind_tool_replay": False})
+                result = result.model_copy(update={"runtime_mode": ExecutionMode.FINISHED,
+                    "terminal_outcome": AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
+                    "result_claim": None, "resource_retryable": True,
+                    "failure_family": "INVALID_PROVIDER_RESPONSE",
+                    "summary": "Native result claim has invalid evidence references or output vector; no result-ready claim was admitted.",
+                    "residual_obligations": tuple(binding.binding.obligation_references)})
             retry_terminal, observation_confidence = self._record_self_refine(
                 store, allocation=allocation, queue=queue, result=result,
             )
@@ -762,7 +780,7 @@ class NativeExecutorRuntimeService:
             ):
                 binding = store.attempt_binding(allocation.attempt_id)
                 raw_evidence = result.result_claim.get("evidence_ids", [])
-                evidence_ids = tuple(UUID(item) for item in raw_evidence)
+                evidence_ids = tuple(UUID(str(item)) for item in raw_evidence)
                 store.insert_result_ready_claim(
                     ResultReadyClaimRecord(
                         id=uuid4(),

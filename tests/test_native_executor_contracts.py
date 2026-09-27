@@ -19,6 +19,27 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
+
+@pytest.mark.parametrize("claim", [
+    {"evidence_ids": ["web/app.js"]},
+    {"evidence_ids": "a descriptive result"},
+    {"evidence_ids": [42]},
+    {"evidence_ids": None},
+    {"output_vector": ["file"]},
+])
+def test_invalid_native_result_claim_is_rejected_before_terminal_checkpoint(claim):
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError, match="RESULT_CLAIM_EVIDENCE_INVALID"):
+        InferenceResponse(action=InferenceAction.RESULT_READY, summary="Provider claim",
+            working_plan=_plan(), result_claim=claim)
+
+
+def test_native_result_claim_retains_real_uuid_evidence_references():
+    identity = uuid4()
+    response = InferenceResponse(action=InferenceAction.RESULT_READY, summary="Actual evidence",
+        working_plan=_plan(), result_claim={"evidence_ids": [str(identity)], "output_vector": {"files": ["web/app.js"]}})
+    assert response.result_claim["evidence_ids"] == [str(identity)]
+
 from spg.application.executor_runtime import FairCapacityScheduler
 from spg.domain.native_execution import (
     AttemptTerminalOutcome,

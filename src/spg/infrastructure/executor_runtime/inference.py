@@ -25,6 +25,7 @@ from spg.domain.native_execution import (
     InferenceResponse,
     InferenceTransportObservation,
     InferenceUsage,
+    validate_result_claim_evidence,
     ToolCallProposal,
 )
 
@@ -204,6 +205,7 @@ class _TerminalInferenceDecision(BaseModel):
             raise ValueError("CONTINUE must use an API function call")
         if self.action is InferenceAction.RESULT_READY and self.result_claim is None:
             raise ValueError("RESULT_READY requires a result claim")
+        validate_result_claim_evidence(self.result_claim)
         return self
 
 

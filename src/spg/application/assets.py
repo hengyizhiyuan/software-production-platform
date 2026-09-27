@@ -103,7 +103,9 @@ class RepositoryAssetService:
     def _identity(source: str | None, request: RepositoryIntakeRequest) -> str:
         if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
             branch_digest = sha256(
-                f"{source}:{request.operation_kind}:{request.target_branch}:{request.base_resource_id}".encode("utf-8")
+                (f"{source}:{request.operation_kind}:{request.target_branch}:{request.base_resource_id}"
+                 + (f":{request.expected_base_revision}:{request.expected_base_tree}"
+                    if request.expected_base_revision is not None else "")).encode("utf-8")
             ).hexdigest()[:20]
             return f"watt://work-branches/{request.work_id or request.interaction_id}/{branch_digest}"
         return source or f"watt://repositories/{request.request_id}"
@@ -217,7 +219,12 @@ class RepositoryAssetService:
 
     def interaction_observation(self, interaction_id: UUID) -> dict | None:
         history = self.attempts_for_interaction(interaction_id)
-        return history[-1] if history else None
+        if not history:
+            return None
+        latest = history[-1]
+        if latest.get("condition") == "READY" and latest.get("resource_id"):
+            return {**self.observation(UUID(latest["resource_id"])), "request": latest["request"]}
+        return latest
 
     def attempts_for_interaction(self, interaction_id: UUID) -> tuple[dict, ...]:
         with self.database.unit_of_work() as uow:
@@ -250,7 +257,9 @@ class RepositoryAssetService:
             actions.append(RepositoryAction(families[O(item.action.operation)],
                 None if "repository_source" not in args else args["repository_source"].value,
                 None if "target_branch" not in args else args["target_branch"].value,
-                operation=item.action.operation))
+                operation=item.action.operation,
+                expected_base_revision=None if "base_revision" not in args else args["base_revision"].value,
+                expected_base_tree=None if "base_tree" not in args else args["base_tree"].value))
         return tuple(dict.fromkeys(actions))
 
     def _require_interaction_authority(self, request: RepositoryIntakeRequest) -> None:
@@ -293,6 +302,9 @@ class RepositoryAssetService:
         ))
         if not matching:
             raise ProductInvariantViolation("Action is not explicitly authorized by its Human record")
+        if branch and not any((action.expected_base_revision, action.expected_base_tree) ==
+                (request.expected_base_revision, request.expected_base_tree) for action in matching):
+            raise ProductInvariantViolation("Action exact baseline differs from governed semantic IR")
         history = self.attempts_for_interaction(request.interaction_id)
         ready = tuple(item for item in history if item.get("condition") == "READY")
         if branch:
@@ -314,7 +326,7 @@ class RepositoryAssetService:
                 store = ProductStore(uow.session)
                 selected = store.resource_for_work(work_id)
             if selected is not None:
-                previous = {**self.observation(selected.id), "condition": "READY",
+                previous = {**self.observation(selected.id),
                     "source": (previous or {}).get("source") or selected.repository_identity,
                     "product_id": (previous or {}).get("product_id")}
         messages = []
@@ -386,6 +398,8 @@ class RepositoryAssetService:
                     operation_kind=operation,
                     base_resource_id=UUID(previous["resource_id"]) if operation in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"} else None,
                     target_branch=action.branch,
+                    expected_base_revision=action.expected_base_revision,
+                    expected_base_tree=action.expected_base_tree,
                 )
                 try:
                     previous = self.intake(request)
@@ -567,6 +581,22 @@ class RepositoryAssetService:
         source = self._source(request.source)
         identity = self._identity(source, request)
         with self._lock(identity):
+            if request.expected_base_revision is not None:
+                with self.database.unit_of_work() as uow:
+                    base = ProductStore(uow.session).resource(request.base_resource_id)
+                if base is None:
+                    raise ProductInvariantViolation("Bound repository baseline is missing")
+                actual_revision = self._git(Path(base.location_ref), "rev-parse", base.authoritative_ref + "^{commit}")
+                actual_tree = self._git(Path(base.location_ref), "rev-parse", base.authoritative_ref + "^{tree}")
+                if (actual_revision, actual_tree) != (request.expected_base_revision, request.expected_base_tree):
+                    return self.mark_attempt_failure(request.request_id,
+                        category=RepositoryAcquisitionFailureCategory.ACQUISITION_FAILED_TERMINAL,
+                        human_message="The repository baseline changed before the branch operation; no branch was written.",
+                        technical_evidence={"signal": "ACTION_REQUIRES_REALITY_REFRESH",
+                            "expected_revision": request.expected_base_revision,
+                            "expected_tree": request.expected_base_tree,
+                            "actual_revision": actual_revision, "actual_tree": actual_tree,
+                            "effect_observed": False}, retryable=False)
             with self.database.unit_of_work() as uow:
                 current = uow.session.execute(
                     select(repository_intakes.c.observation).where(
@@ -627,10 +657,6 @@ class RepositoryAssetService:
                         uow.commit()
                 observed = {
                     **self.observation(existing),
-                    "condition": "READY",
-                    "failure_category": None,
-                    "human_message": "Repository is ready.",
-                    "technical_evidence": None,
                     "intake_request_id": str(request.request_id),
                     **self._attempt_metadata(request),
                 }
@@ -678,6 +704,8 @@ class RepositoryAssetService:
                         self.asset_root, Path(base.location_ref),
                         base.authoritative_ref.removeprefix("refs/heads/"),
                         source, repository, request.target_branch, operation=request.operation_kind,
+                        expected_base_revision=request.expected_base_revision,
+                        expected_base_tree=request.expected_base_tree,
                     )
                 elif request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
                     requirement = CapabilityRequirement(
@@ -1160,11 +1188,54 @@ class RepositoryAssetService:
         )
 
     def observation(self, resource_id: UUID):
+        """Keep historical intake intact; refresh only against trusted owner truth."""
+        from spg.infrastructure.persistence.runtime_store import RuntimeStore
+        from spg.domain.runtime import SnapshotCondition
         with self.database.unit_of_work() as uow:
-            row = uow.session.execute(select(repository_intakes.c.observation).where(repository_intakes.c.resource_id == resource_id)).scalar_one_or_none()
+            row = uow.session.execute(select(repository_intakes.c.observation).where(
+                repository_intakes.c.resource_id == resource_id).order_by(
+                    repository_intakes.c.created_at.desc(), repository_intakes.c.id.desc()).limit(1)).scalar_one_or_none()
             if row is None:
                 raise ProductRecordNotFound("Repository has no product intake observation")
+            resource = ProductStore(uow.session).resource(resource_id)
+            if row.get("condition") != "READY" or resource is None:
+                return row
+            runtime = RuntimeStore(uow.session)
+            pointer = runtime.current_pointer(repository_identity=resource.repository_identity,
+                repository_ref=resource.authoritative_ref)
+            snapshot = None if pointer is None else runtime.snapshot(pointer.snapshot_id)
+        path = Path(resource.location_ref)
+        try:
+            revision = self._git(path, "rev-parse", resource.authoritative_ref + "^{commit}")
+            tree = self._git(path, "rev-parse", resource.authoritative_ref + "^{tree}")
+            branch = self._git(path, "symbolic-ref", "HEAD")
+        except ProductInvariantViolation:
+            unavailable = {**row, "condition": "BLOCKED",
+                "human_message": "Current repository observation is unavailable; historical evidence is preserved.",
+                "technical_evidence": {"signal": "ACTION_REQUIRES_REALITY_REFRESH", "actual_git_observed": False}}
+            unavailable["fingerprint"] = canonical_fingerprint({k:v for k,v in unavailable.items() if k != "fingerprint"})
+            return unavailable
+        trusted = bool(snapshot and snapshot.condition is SnapshotCondition.TRUSTED
+            and snapshot.repository_revision == revision
+            and snapshot.repository_tree_identity == tree and branch == resource.authoritative_ref)
+        if (revision, tree, branch) == (row.get("revision"), row.get("tree"), row.get("repository_ref")):
             return row
+        evidence = {"signal": "ACTION_REQUIRES_REALITY_REFRESH", "actual_revision": revision,
+            "actual_tree": tree, "actual_ref": branch,
+            "trusted_snapshot_id": None if snapshot is None else str(snapshot.id)}
+        paths = self._git(path, "ls-tree", "-r", "--name-only", revision).splitlines()
+        refreshed = {**row, "condition": "READY" if trusted else "BLOCKED",
+            "revision": revision, "tree": tree, "repository_ref": branch,
+            "branches": self._git(path, "for-each-ref", "--format=%(refname:short)", "refs/heads/").splitlines(),
+            "paths": paths[:200],
+            "technical_evidence": evidence,
+            "human_message": "Repository reflects the trusted current Runtime baseline." if trusted
+                else "Repository differs from its trusted owner baseline; no new action is authorized."}
+        if trusted:
+            refreshed["observed_at"] = pointer.updated_at.isoformat()
+            refreshed["current_trusted_snapshot_id"] = str(snapshot.id)
+        refreshed["fingerprint"] = canonical_fingerprint({k:v for k,v in refreshed.items() if k != "fingerprint"})
+        return refreshed
 
     def research_context(self, *, turn_id: UUID, interaction_id: UUID,
                          source: str, authority_identity: str, observation: dict | None = None) -> dict:

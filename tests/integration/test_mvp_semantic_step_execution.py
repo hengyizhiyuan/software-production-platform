@@ -569,7 +569,9 @@ def test_repeated_steering_provider_failure_converges_to_durable_escalation(
     )
     try:
         assert driver.schedule(admitted.work_id)
-        deadline = monotonic() + 4
+        # This verifies the durable retry budget, not a four-second throughput
+        # guarantee. Real PostgreSQL may contend with container qualification.
+        deadline = monotonic() + 30
         while monotonic() < deadline:
             with postgres_database.unit_of_work() as uow:
                 store = NativeExecutionStore(uow.session)
@@ -581,7 +583,7 @@ def test_repeated_steering_provider_failure_converges_to_durable_escalation(
             sleep(0.02)
         assert capability.calls == 2
         assert records[0].final_result == "ESCALATED"
-        assert driver.wait_until_idle(admitted.work_id, 2)
+        assert driver.wait_until_idle(admitted.work_id, 10)
         with postgres_database.unit_of_work() as uow:
             convergence = NativeExecutionStore(uow.session).work_convergence_history(admitted.work_id)
             assert convergence[-1].condition == "NON_CONVERGING"
@@ -590,7 +592,7 @@ def test_repeated_steering_provider_failure_converges_to_durable_escalation(
                 "RETRY_SCHEDULED", "ESCALATED",
             ]
         assert driver.schedule(admitted.work_id)
-        assert driver.wait_until_idle(admitted.work_id, 2)
+        assert driver.wait_until_idle(admitted.work_id, 10)
         assert capability.calls == 2
         reconstructed = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
         assert reconstructed.latest_decision.human_required is True

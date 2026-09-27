@@ -25,6 +25,8 @@ class RepositoryAction:
     branch: str | None = None
     target_ambiguous: bool = False
     operation: str | None = None
+    expected_base_revision: str | None = None
+    expected_base_tree: str | None = None
 
 
 def repository_actions(text: str) -> tuple[RepositoryAction, ...]:

@@ -166,14 +166,17 @@ def main():
     elif identity == 'GC-EX-08':
         browser = json.loads((root/args.browser_record).read_text())
         choice = json.loads((root/'human-clarification.json').read_text())
+        # Comments carry no CSS selector or style authority. Inspect the actual
+        # added rules, keeping every historical oracle result immutable.
+        added_css = re.sub(r'/\*.*?\*/', '', '\n'.join(added), flags=re.S)
         checks.update(header_only_prominent=browser.get('header_only_prominent') is True,
             one_genuine_scope_choice=choice.get('question_count') == 1,
             only_presentational_source=paths == ['web/styles.css'],
             selected_button_scoped=bool(added) and not removed
-                and bool(re.findall(r'([^{}]+)\{[^{}]*\}', '\n'.join(added)))
+                and bool(re.findall(r'([^{}]+)\{[^{}]*\}', added_css))
                 and all(all(selector.strip().startswith('#header-login')
                     for selector in block.split(','))
-                    for block in re.findall(r'([^{}]+)\{[^{}]*\}', '\n'.join(added))))
+                    for block in re.findall(r'([^{}]+)\{[^{}]*\}', added_css)))
     elif identity == 'GC-IP-06':
         browser = json.loads((root/args.browser_record).read_text())
         database = json.loads((root/args.database_record).read_text())

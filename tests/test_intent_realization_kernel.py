@@ -59,6 +59,55 @@ def test_unqualified_other_cannot_become_an_executable_semantic_operation():
         canonical_operation("OTHER")
 
 
+def test_parallel_unconsumed_argument_cannot_redirect_the_real_operation():
+    record = source("Create feat_kernel")
+    item = action(record)
+    args = {**item.action.arguments, "branch_name": item.action.arguments["target_branch"]}
+    item = item.model_copy(update={"action": item.action.model_copy(update={"arguments": args})})
+    with pytest.raises(IntentRealizationViolation, match="unconsumed operational argument"):
+        govern(record, (item,))
+
+
+def test_observed_existing_branch_cannot_authorize_a_new_branch_target():
+    record = source("Create a new branch")
+    item = action(record, branch=None)
+    argument = SemanticArgument(value="main", provenance=SemanticProvenance(
+        origin=Origin.REPOSITORY_OBSERVED, evidence_reference="intake:actual-baseline"))
+    item = item.model_copy(update={"action": item.action.model_copy(update={
+        "arguments": {"target_branch": argument}})})
+    with pytest.raises(IntentRealizationViolation, match="new branch target needs literal Human"):
+        govern(record, (item,))
+
+
+def test_missing_product_goal_blocks_only_that_goal_and_preserves_acquisition():
+    record = source("Acquire https://example.invalid/repo.git; the product change is still undecided")
+    acquire = action(record, op=O.ACQUIRE_REPOSITORY, branch=None)
+    acquire = acquire.model_copy(update={"action": acquire.action.model_copy(update={"arguments": {
+        "repository_source": SemanticArgument(value="https://example.invalid/repo.git",
+            provenance=provenance(record))}})})
+    goal = SemanticItem(item_id="goal", kind=K.PRODUCTION_INTENT,
+        statement="Unspecified product change", provenance=(provenance(record),), confidence=1,
+        production=ProductionIntent(objective="Unspecified change", primary_change="Unspecified change",
+            current=True, bounded_change=True, unresolved_arguments=("primary_change",)))
+    ir = govern(record, (acquire, goal))
+    obligations = IntentRealizationKernel().obligations(ir, uuid4())
+    assert ir.items[1].requires_human
+    assert obligations[1].state is ObligationState.REQUIRES_HUMAN
+    assert obligations[1].plane.value == "WORK"
+    assert obligations[0].operation is O.ACQUIRE_REPOSITORY
+    assert obligations[0].state is ObligationState.PENDING
+
+
+def test_optional_product_implementation_uncertainty_does_not_block_the_goal():
+    record = source("Build a user collection page")
+    goal = SemanticItem(item_id="goal", kind=K.PRODUCTION_INTENT,
+        statement="User collection page", provenance=(provenance(record),), confidence=1,
+        production=ProductionIntent(objective="Collect user information", primary_change="Build a collection page",
+            current=True, bounded_change=True, unresolved=("Choose implementation paths after inspection",)))
+    ir = govern(record, (goal,))
+    assert IntentRealizationKernel().obligations(ir, uuid4())[0].state is ObligationState.PENDING
+
+
 def test_business_scope_cannot_be_promoted_to_filesystem_write_area():
     record = source("调整首页；只允许 src/web/**")
     def goal(area):

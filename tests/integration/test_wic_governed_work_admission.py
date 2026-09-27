@@ -1998,9 +1998,11 @@ def test_admission_api_requires_human_action_and_preserves_same_interaction(
             assert _count(postgres_database, table) == 0, table.name
 
 
+@pytest.mark.parametrize("blocked_independent_action", [False, True])
 def test_explicit_repository_action_automatically_executes_governed_admission(
     postgres_database: Database,
     tmp_path: Path,
+    blocked_independent_action: bool,
 ) -> None:
     source = "https://github.com/acme/automatic-admission"
     work, interactions = _services_for_resource(
@@ -2011,7 +2013,22 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
     with postgres_database.unit_of_work() as uow:
         resource = ProductStore(uow.session).default_resource()
     assert resource is not None
-    interactions.capability = _DeclaredRepositoryIntent(source)
+    class MixedCompiler(_DeclaredRepositoryIntent):
+        def interpret(self, basis):
+            candidate = super().interpret(basis)
+            if not blocked_independent_action:
+                return candidate
+            record = basis.records[-1]
+            separate = semantic_candidate(record, operation="ACQUIRE_REPOSITORY",
+                arguments={"repository_source": source}).items[0].model_copy(update={
+                    "item_id": "independent-acquire", "statement": "Separate repository acquisition",
+                    "confidence": .7})
+            raw = candidate.semantic_intent
+            clause = raw.clauses[0].model_copy(update={
+                "semantic_item_ids": (*raw.clauses[0].semantic_item_ids, separate.item_id)})
+            return candidate.model_copy(update={"semantic_intent": raw.model_copy(update={
+                "items": (*raw.items, separate), "clauses": (clause,)})})
+    interactions.capability = MixedCompiler(source)
 
     class ExistingRepositoryIntake:
         def __init__(self) -> None:
@@ -2126,6 +2143,13 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
     assert "当前目标已准入生产 Work" in answer
     assert "尚未准入" not in answer
     assert "没有推送" not in answer
+    if blocked_independent_action:
+        assert "尚未完成：Separate repository acquisition" in answer
+        assert "需要确认" in answer
+        assert "没有可核查的完成效果" not in answer
+        ledger = interactions.realization_projection(turn_id)["obligations"]
+        assert any(item["plane"] == "WORK" and item["state"] == "SATISFIED" for item in ledger)
+        assert any(item["plane"] == "ACTION" and item["state"] == "REQUIRES_HUMAN" for item in ledger)
 
 
 def test_explicit_pull_recovers_admitted_work_that_has_no_prior_acquisition_attempt(

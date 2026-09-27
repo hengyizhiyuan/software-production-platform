@@ -46,11 +46,15 @@ class RepositoryIntakeRequest(BaseModel):
     base_resource_id: UUID | None = None
     target_branch: str | None = None
     source_record_id: UUID | None = None
+    expected_base_revision: str | None = Field(default=None, pattern=r"^[0-9a-f]{40}$")
+    expected_base_tree: str | None = Field(default=None, pattern=r"^[0-9a-f]{40}$")
 
     @model_validator(mode="after")
     def valid_operation(self):
+        if (self.expected_base_revision is None) != (self.expected_base_tree is None):
+            raise ValueError("Exact branch baseline requires both revision and tree")
         if self.operation_kind == "ACQUIRE":
-            if self.base_resource_id is not None or self.target_branch is not None:
+            if self.base_resource_id is not None or self.target_branch is not None or self.expected_base_revision is not None:
                 raise ValueError("Acquisition cannot contain branch creation fields")
         elif self.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
             if (

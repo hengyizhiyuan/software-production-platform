@@ -8,6 +8,26 @@ from spg.domain.production_environment import EnvironmentProviderError
 from spg.infrastructure.production_environment import GitContinuityInspector
 
 
+@pytest.mark.parametrize("operation", ["CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"])
+def test_exact_branch_baseline_drift_is_rejected_before_local_writes(tmp_path, operation):
+    from spg.infrastructure.production_environment import GitRepositoryAcquirer
+    repository = tmp_path / "source"
+    repository.mkdir()
+    git(repository, "init", "-b", "main")
+    baseline = commit(repository, "index.html", "original", "baseline")
+    tree = git(repository, "rev-parse", "HEAD^{tree}")
+    git(repository, "branch", "feat_target")
+    commit(repository, "index.html", "authorized later version", "later baseline")
+    before = git(repository, "for-each-ref", "--format=%(refname) %(objectname)")
+    destination = tmp_path / "isolated"
+    with pytest.raises(EnvironmentProviderError, match="baseline changed before any branch write"):
+        GitRepositoryAcquirer().realize_local_branch(tmp_path, repository, "main",
+            "https://example.invalid/source.git", destination, "feat_target",
+            operation=operation, expected_base_revision=baseline, expected_base_tree=tree)
+    assert not destination.exists()
+    assert git(repository, "for-each-ref", "--format=%(refname) %(objectname)") == before
+
+
 def git(repository: Path, *arguments: str) -> str:
     result = subprocess.run(
         ["git", "-C", str(repository), *arguments],
