@@ -59,6 +59,8 @@ def _safe_validation_summary(error: BaseException) -> str:
     """Expose schema locations/types without echoing Provider input or secrets."""
 
     if not isinstance(error, ValidationError):
+        if isinstance(error, ValueError) and str(error).startswith(('ACTION_', 'SEMANTIC_BINDING_INVALID:')):
+            return str(error)[:300]
         return type(error).__name__
     issues = []
     for issue in error.errors(include_url=False, include_input=False)[:5]:

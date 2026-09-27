@@ -548,9 +548,9 @@ def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailur
                     {
                         "semantic_version": 2,
                         "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
-                        "signal_kind": ((evidence.get("semantic_action_repair_signal")
-            if isinstance(evidence, dict) else getattr(evidence, "semantic_action_repair_signal", None))
-            or "SCHEMA_INVALID"),
+                        "signal_kind": ("EXPLICIT_ACTION_LOST_BEFORE_EXECUTION"
+                            if (error.validation_issue or '').startswith('ACTION_')
+                            else "SCHEMA_INVALID"),
                         "component": "wic/semantic-provider",
                         "attempt_count": 2,
                         "converged": False,
@@ -589,7 +589,9 @@ def _pipeline_refinement_observation(evidence: object) -> dict[str, object] | No
     return {
         "semantic_version": 2,
         "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
-        "signal_kind": "SCHEMA_INVALID",
+        "signal_kind": ((evidence.get("semantic_action_repair_signal")
+            if isinstance(evidence, dict) else getattr(evidence, "semantic_action_repair_signal", None))
+            or "SCHEMA_INVALID"),
         "component": "wic/semantic-provider",
         "attempt_count": repairs + 1,
         "converged": True,

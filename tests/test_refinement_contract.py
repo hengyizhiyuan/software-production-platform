@@ -55,3 +55,17 @@ def test_failed_bounded_wic_repair_is_observable_without_raw_candidate() -> None
     assert observation["refinement_class"] == "SYSTEMIC_OR_NON_CONVERGING_INCIDENT"
     assert observation["attempt_count"] == 2
     assert "candidate" not in observation
+
+
+def test_lost_action_refinement_retains_specific_signal_in_success_and_exhaustion():
+    from spg.application.interaction import _pipeline_refinement_observation
+    observation = _pipeline_refinement_observation({
+        'semantic_structured_repair_count': 1,
+        'semantic_action_repair_signal': 'EXPLICIT_ACTION_LOST_BEFORE_EXECUTION'})
+    assert observation['signal_kind'] == 'EXPLICIT_ACTION_LOST_BEFORE_EXECUTION'
+    assert observation['attempt_count'] == 2 and observation['converged'] is True
+    failure = _classify_turn_failure(StructuredResponseSchemaViolation(
+        'repair exhausted', validation_issue='ACTION_REQUEST_MISSING_CANONICAL_BINDING',
+        repair_attempted=True), datetime.now(UTC))
+    assert failure.metadata['refinement_observation']['signal_kind'] == 'EXPLICIT_ACTION_LOST_BEFORE_EXECUTION'
+    assert failure.metadata['refinement_observation']['converged'] is False
