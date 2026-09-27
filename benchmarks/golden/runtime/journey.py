@@ -32,6 +32,16 @@ class ProductClient:
             return {'error_status': error.code, 'detail': error.read().decode()}
 
 
+def stopped_owner_without_pending_effect(state):
+    """A READY Work can have a terminally stopped Steering owner."""
+    turns = state.get('interaction', {}).get('turns', [])
+    steering = state.get('steering') or {}
+    return (bool(turns) and turns[-1].get('status') in {'COMPLETED', 'FAILED'}
+        and steering.get('automatic_progression_state') == 'STOPPED'
+        and steering.get('last_stop_reason') == 'BLOCKED'
+        and not state.get('queue'))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--case', required=True)
@@ -124,6 +134,16 @@ def main():
         if (not work_id and status == 'COMPLETED'
                 and case['expected_governed_journey'][-1] == 'advisory response'):
             result['status'] = 'ADVISORY_COMPLETE_AWAITING_SOURCE_ORACLE'
+            break
+        if not work_id and status == 'COMPLETED':
+            obligations = projection.get('obligations', [])
+            if all(item.get('state') in {'SATISFIED', 'BLOCKED_WITH_EVIDENCE',
+                    'REQUIRES_HUMAN', 'SUPERSEDED'} for item in obligations):
+                result.update(status='NO_PRODUCTION_RESULT_AFTER_TERMINAL_TURN',
+                    obligation_states=[item['state'] for item in obligations])
+                break
+        if stopped_owner_without_pending_effect(state):
+            result['status'] = 'OWNER_CONVERGENCE_STOPPED_WITHOUT_RESULT'
             break
         pending_turn = (interaction.get('turns') or [{}])[-1].get('status') in {'RECEIVED', 'PROCESSING'}
         if not pending_turn and (state.get('attention') or status in {'BLOCKED', 'FAILED'}):
