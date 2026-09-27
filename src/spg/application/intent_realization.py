@@ -35,7 +35,10 @@ _OPERATION_BINDINGS = {
 
 def canonical_operation(value: str) -> CanonicalOperation:
     try:
-        return _OPERATION_BINDINGS[value] if value in _OPERATION_BINDINGS else CanonicalOperation(value)
+        operation = _OPERATION_BINDINGS[value] if value in _OPERATION_BINDINGS else CanonicalOperation(value)
+        if operation is CanonicalOperation.OTHER:
+            raise ValueError("No qualified operational ontology for OTHER")
+        return operation
     except ValueError as error:
         raise IntentRealizationViolation("SEMANTIC_TYPE_MISMATCH: unsupported structured operation") from error
 

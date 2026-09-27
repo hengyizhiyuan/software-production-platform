@@ -22,6 +22,40 @@ from spg.domain.intent_realization import ObservedEffect
 from spg.domain.interaction import Interaction, InteractionRecord, InteractionInterpretationInput
 
 
+class QualificationRuntime:
+    """Record actual provider outputs for this synthetic qualification only.
+
+    No prompt, environment value or authentication header is persisted. The
+    declared qualification inputs contain no user secrets. Rejected outputs
+    remain inspectable after the bounded repair fails.
+    """
+    def __init__(self, runtime, directory, identity):
+        self.runtime, self.directory, self.identity = runtime, directory, identity
+        self.purposes = []
+
+    def __getattr__(self, name):
+        return getattr(self.runtime, name)
+
+    def generate(self, **options):
+        purpose = str(options["purpose"])
+        self.purposes.append(purpose)
+        record = self.directory / f"{self.identity}-provider-{len(self.purposes)}.json"
+        try:
+            result = self.runtime.generate(**options)
+        except Exception as error:
+            record.write_text(json.dumps({"purpose":purpose,"error_type":type(error).__name__})+"\n")
+            raise
+        record.write_text(json.dumps({"purpose":purpose,"result":asdict(result)},default=str,indent=2)+"\n")
+        return result
+
+    def metadata(self):
+        from spg.domain.model_runtime import ModelPurpose
+        count = self.purposes.count(str(ModelPurpose.WIC_SEMANTIC))
+        return {"qualification_semantic_compile_calls":count,
+            "qualification_semantic_repair_count":max(0,count-1),
+            "qualification_provider_calls":len(self.purposes)}
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--corpus',type=Path,required=True)
@@ -65,9 +99,14 @@ def main():
             'input_fingerprint':records[-1].content_fingerprint}
         try:
             capability=bootstrap(Settings()).interaction_capability()
+            recorder=QualificationRuntime(capability.runtime,args.evidence,case['id'])
+            capability.runtime=recorder
+            capability.semantic_capability.runtime=recorder
+            capability.conversation_provider.runtime=recorder
             candidate=capability.interpret(basis)
             (args.evidence/(case['id']+'-candidate.json')).write_text(candidate.model_dump_json(indent=2)+'\n')
             metadata = asdict(capability.last_pipeline_evidence) if capability.last_pipeline_evidence else {}
+            metadata.update(recorder.metadata())
             ir=IntentRealizationKernel().govern(candidate,basis)
             actions=executable_semantic_actions(ir)
             operations=[i.action.operation for i in actions if not i.action.conditional and not blocking_action_arguments(i.action)
@@ -83,17 +122,22 @@ def main():
                 false_execution_intent=bool(operations and not case['expected_operations']),
                 missed_explicit_action=bool(case['expected_operations'] and not operations),
                 inappropriate_human_intervention=bool(case['expected_operations'] and any(i.requires_human for i in ir.items)),
-                self_refine_recovered=metadata.get('provider_call_count',1)>1)
+                self_refine_recovered=metadata['qualification_semantic_repair_count']>0)
         except Exception as error:
             evidence=getattr(locals().get('capability'),'last_pipeline_evidence',None)
             if evidence is not None:
                 result['provider_metadata']=asdict(evidence)
+            if 'recorder' in locals():
+                result.setdefault('provider_metadata',{}).update(recorder.metadata())
             result.update(status='FAIL',error_type=type(error).__name__,error_code=str(error)[:600])
         (args.evidence/(case['id']+'.json')).write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
         print(json.dumps({k:result[k] for k in ['case_id','status']},ensure_ascii=False),flush=True)
         return result
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         results=list(executor.map(evaluate,corpus['cases']))
+    if corpus.get('holdout'):
+        (args.evidence/'source-identity-after.json').write_text(json.dumps(
+            verify_freeze(root,frozen),indent=2)+'\n')
     n=len(results)
     report=dict(corpus_version=corpus['corpus_version'],corpus_sha256=sha256(args.corpus.read_bytes()).hexdigest(),
         completed_at=datetime.now(UTC).isoformat(),cases=n,passed=sum(r['status']=='PASS' for r in results),
@@ -105,7 +149,8 @@ def main():
         argument_target_cases=sum(bool(c.get('expected_branch')) for c in corpus['cases']),
         action_argument_accuracy=(sum(r.get('checks',{}).get('branch_arguments',False) for r,c in zip(results,corpus['cases']) if c.get('expected_branch')) / max(1,sum(bool(c.get('expected_branch')) for c in corpus['cases']))),
         compilation_failures=sum('error_type' in r for r in results),
-        normal_compilations=sum(r.get('provider_metadata',{}).get('provider_call_count')==1 for r in results),
+        normal_compilations=sum(r.get('provider_metadata',{}).get('qualification_semantic_compile_calls')==1 for r in results),
+        semantic_compile_calls=sum(r.get('provider_metadata',{}).get('qualification_semantic_compile_calls',0) for r in results),
         effect_satisfaction=None,effect_qualification='Separate live owner receipts required',
         failures=[r['case_id'] for r in results if r['status']!='PASS'])
     (args.evidence/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')

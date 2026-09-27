@@ -2254,6 +2254,8 @@ class WorkInteractionService:
             ledger_projection = self.realization_projection(turn_id)
             if (assessment.semantic_ir.items
                     and all(item.kind is SemanticKind.CONSTRAINT for item in assessment.semantic_ir.items)
+                    and not any(item.requires_human for item in assessment.semantic_ir.items)
+                    and not any(question.requires_human for question in assessment.semantic_ir.questions)
                     and all(item["plane"] == "INTERACTION" and item["state"] == "SATISFIED"
                         for item in ledger_projection["obligations"])):
                 # A constraint-only Turn owes a recorded boundary, not an

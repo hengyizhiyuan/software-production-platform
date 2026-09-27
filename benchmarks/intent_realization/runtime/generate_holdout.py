@@ -83,7 +83,9 @@ def main():
             "Use diverse colloquial Chinese, mixed Chinese/English, punctuation variation and contextual follow-ups. "
             "Do not write implementation hints, source filenames, command syntax, or additional operations. "
             "For contextual cases only generate the latest message; prior context is fixed. "
-            "For hard negatives make the absence of current execution clear. Return structured JSON only."),
+            "For hard negatives make the absence of current execution clear. "
+            "Return exactly one data object with only cases: [{id, text}, ...]. "
+            "Do not include JSON Schema definitions, $defs, properties or any schema metadata."),
         input_text=json.dumps(specifications,ensure_ascii=False),
         output_schema=WordingBatch.model_json_schema())
     (args.directory/"original-provider-output.json").write_text(result.output_text)

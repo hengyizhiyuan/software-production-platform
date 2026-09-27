@@ -54,6 +54,11 @@ def test_human_phrase_is_not_an_operation_alias():
         canonical_operation("切个新分支")
 
 
+def test_unqualified_other_cannot_become_an_executable_semantic_operation():
+    with pytest.raises(IntentRealizationViolation,match="unsupported structured operation"):
+        canonical_operation("OTHER")
+
+
 def test_business_scope_cannot_be_promoted_to_filesystem_write_area():
     record = source("调整首页；只允许 src/web/**")
     def goal(area):

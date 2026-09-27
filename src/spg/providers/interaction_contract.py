@@ -571,7 +571,7 @@ class InteractionSemanticContract:
             "Human intervention. Existing owners choose workspace paths and bind one observed exact "
             "baseline. Missing consent, multiple targets and irreversible decisions remain Human-owned. "
             "Supported operations are "
-            + ", ".join(operation.value for operation in CanonicalOperation) + ". "
+            + ", ".join(operation.value for operation in CanonicalOperation if operation is not CanonicalOperation.OTHER) + ". "
             "FETCH_PUBLIC_RESOURCE uses a url argument; SEARCH_GITHUB can use a typed "
             "search_kind argument for repository, code or issue retrieval. Negated, hypothetical, quoted "
             "or discussed commands do not authorize execution. Questions about capabilities are "
