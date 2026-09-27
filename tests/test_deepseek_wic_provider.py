@@ -589,3 +589,57 @@ def test_governed_realizer_structural_repair_is_bounded_and_preserves_terminal_f
         realizer.realize_stream(_realizer_envelope(), on_response_delta=lambda _:None)
     assert adapter.calls == 2
     assert realizer.last_structured_repair_count == 1
+
+
+def test_explicit_action_missing_binding_is_repaired_in_same_turn_without_visible_ack():
+    from spg.domain.interaction_actions import InteractionActionCandidate
+    basis = _basis()
+    human = basis.records[-1].model_copy(update={'content': '从当前代码切个 feature/semantic 出来'})
+    basis = basis.model_copy(update={'records': (human,)})
+    missing = json.loads(_semantics())
+    missing['collaboration']['turn_intent'] = 'ACTION_REQUEST'
+    missing['collaboration']['recommended_next_action'] = '我将推进创建'
+    repaired = dict(missing)
+    repaired['action_candidates'] = [InteractionActionCandidate(
+        operation='CREATE_AND_SWITCH_BRANCH', speech_act='EXPLICIT_REQUEST',
+        source_record_id=human.id, source_text=human.content,
+        target_branch='feature/semantic', confidence=.99).model_dump(mode='json')]
+    runtime, adapter = _runtime(_Adapter([json.dumps(missing), json.dumps(repaired)]))
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    visible = []
+    result = capability.interpret_controlled_stream_observed(basis,
+        on_response_delta=visible.append, on_pipeline_stage=lambda _: None)
+    assert adapter.calls == 2 and visible == []
+    assert result.action_candidates[0].target_branch == 'feature/semantic'
+    assert capability.last_pipeline_evidence.semantic_action_repair_signal == 'EXPLICIT_ACTION_LOST_BEFORE_EXECUTION'
+    assert 'original exact latest Human record' in adapter.requests[1]['instructions']
+
+
+def test_action_binding_repair_is_bounded_and_does_not_invent_human_argument():
+    from spg.domain.interaction import StructuredResponseSchemaViolation
+    missing = json.loads(_semantics())
+    missing['collaboration']['turn_intent'] = 'ACTION_REQUEST'
+    runtime, adapter = _runtime(_Adapter([json.dumps(missing), json.dumps(missing)]))
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    visible = []
+    with pytest.raises(StructuredResponseSchemaViolation, match='bounded_repair_exhausted'):
+        capability.interpret_controlled_stream_observed(_basis(),
+            on_response_delta=visible.append, on_pipeline_stage=lambda _: None)
+    assert adapter.calls == 2 and visible == []
+
+
+def test_semantic_cross_reference_failure_is_repaired_before_assessment_admission():
+    missing = json.loads(_semantics())
+    missing['semantic_fact_candidates'] = [{
+        'candidate_id': 'fact', 'subject': 'system.intent', 'relation': 'REFERENCE',
+        'value': '运营管理平台', 'source_record_ids': [str(_basis().records[-1].id)],
+        'source_text': _basis().records[-1].content, 'source_extraction_ids': ['missing'],
+        'authority': 'HUMAN_EXPLICIT', 'epistemic_status': 'CONFIRMED', 'role_origin': 'EXPLICIT'}]
+    runtime, adapter = _runtime(_Adapter([json.dumps(missing), _semantics()]))
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    result = capability.interpret_controlled_stream_observed(_basis(),
+        on_response_delta=lambda _: pytest.fail('Semantic repair exposed provisional acknowledgement'),
+        on_pipeline_stage=lambda _: None)
+    assert adapter.calls == 2
+    assert result.semantic_fact_candidates == ()
+    assert 'unknown neutral extraction' in adapter.requests[1]['instructions']

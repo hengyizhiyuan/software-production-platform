@@ -18,6 +18,7 @@ from spg.application.conversation import (
     conversation_response_policy,
 )
 from spg.application.guided_design import design_schema_by_identity, design_schema_registry
+from spg.domain.interaction_actions import InteractionActionCandidate
 from spg.domain.response_contract import ResponseIntent
 from spg.application.production_intelligence import default_system_capability_reality
 from spg.application.response_contract_expression import (
@@ -139,6 +140,7 @@ class _InteractionSemanticProviderPayload(BaseModel):
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
+    action_candidates: tuple[InteractionActionCandidate, ...] = ()
     neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
     semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[_InteractionProviderMeaning, ...]
@@ -234,6 +236,7 @@ class ConversationPipelineEvidence:
     coalesced_usage: dict[str, object] | None = None
     semantic_retry_count: int | None = None
     semantic_structured_repair_count: int | None = None
+    semantic_action_repair_signal: str | None = None
     conversation_retry_count: int | None = None
     coalesced_retry_count: int | None = None
     coalesced_structured_repair_count: int | None = None
@@ -524,6 +527,22 @@ class InteractionSemanticContract:
             "behavior, state change, or scope; it must not assign contextual roles that "
             "the Human did not explicitly name. Return exactly one explicit_roles entry "
             "for each values entry, using null when the Human named no role. "
+            "action_candidates interprets the latest Human speech act into canonical operations, "
+            "independently of surface wording. An explicit request to create a local branch "
+            "and make it current is CREATE_AND_SWITCH_BRANCH with the literal Human-supplied "
+            "target_branch. Repository acquisition/inspection, branch queries, Web/GitHub "
+            "search, Preview and delivery requests use their respective canonical operations. "
+            "Cite only the latest Human record and a verbatim source_text containing literal "
+            "arguments. Interpret the whole utterance: discussion, hypothetical suggestions, "
+            "quoted commands, negation, file checkout and topic changes are not execution "
+            "requests. Use DISCUSSION or UNRESOLVED, never EXPLICIT_REQUEST, for them. "
+            "A factual branch-status/existence/completion question is QUERY_BRANCH and "
+            "READ_ONLY_QUERY. Missing targets remain UNRESOLVED. Preserve multiple independently "
+            "requested operations in order. ACTION_REQUEST must have at least one action "
+            "candidate (OTHER for unsupported actions); never acknowledge future execution "
+            "without representing the requested action. Candidates are advisory: current "
+            "Human authority, resource Reality, acceptance and connector admission remain "
+            "owned by the application. Never infer delivery permission from credentials. "
             "semantic_fact_candidates then binds "
             "those observations to small reusable product-semantic relations and "
             "Work-scoped subjects. Use contextual subjects such as image.width or "
@@ -891,6 +910,7 @@ class WorkInteractionPipeline:
             unresolved_material_questions=semantic.unresolved_material_questions,
             neutral_semantic_extractions=semantic.neutral_semantic_extractions,
             semantic_fact_candidates=semantic.semantic_fact_candidates,
+            action_candidates=semantic.action_candidates,
             meanings=semantic.meanings,
             focus_classification=semantic.focus_classification,
             impact_disposition=semantic.impact_disposition,

@@ -1199,14 +1199,14 @@
     },
     {
       "id": "GC-LC-02",
-      "title": "Clone Then Local Branch",
+      "title": "Local Branch Semantic Equivalence and Negative Boundaries",
       "human_request": "clone 这个仓库，然后切 feat_test。",
       "fixture": "lifecycle-repository",
       "acceptance_oracle": [
-        "exact local branch feat_test",
-        "source tree unchanged",
-        "no push",
-        "no production Work"
+        "canonical CREATE_AND_SWITCH_BRANCH with literal Human target for every positive variation",
+        "observed current branch equals requested target",
+        "negative discussion/reference/query cases have no create/switch",
+        "source tree unchanged; no push; no production Work"
       ],
       "qualification_tier": "TIER_0",
       "minimum_independent_trials": 3,
@@ -1224,7 +1224,8 @@
         "fake production Work",
         "unauthorized remote mutation"
       ],
-      "qualification_evidence": "Real runtime journeys for acquisition, branch, inspection and no-op; existing real PostgreSQL/container boundaries plus live neighboring journeys for production/governance. Policy tests alone are insufficient."
+      "qualification_evidence": "Real runtime journeys for acquisition, branch, inspection and no-op; existing real PostgreSQL/container boundaries plus live neighboring journeys for production/governance. Policy tests alone are insufficient.",
+      "semantic_equivalence_corpus": "benchmarks/golden/interaction-action-equivalence-v1.json"
     },
     {
       "id": "GC-LC-03",

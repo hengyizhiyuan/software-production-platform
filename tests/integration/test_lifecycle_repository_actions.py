@@ -195,3 +195,58 @@ def test_preview_preparation_is_owned_before_human_attention(owner, preview_stat
     diagnosis = room.diagnosis(work_id)
     assert diagnosis['state'] == expected
     assert diagnosis['preview'] == [{'preview_id':str(preview_id),'status':preview_status}]
+
+
+def test_provider_semantic_action_survives_nonmatching_surface_and_persists_authority(owner):
+    from spg.domain.interaction_actions import InteractionActionCandidate
+    service, assets, source, revision, tree = owner
+    real = assets.repository_acquirer
+    class LocalRemote(GitRepositoryAcquirer):
+        def acquire(self, root, remote, destination, **kwargs):
+            return real.acquire(root, str(source), destination)
+    assets.repository_acquirer = LocalRemote()
+    interaction = service.create_interaction(human_identity='human:owner')
+    turn(service, interaction.id, f'clone https://github.com/acme/{uuid4().hex}.git')
+    original = service.capability
+    class SemanticPort:
+        provider_identity = 'deepseek-responses:test'
+        def interpret(self, basis):
+            human = basis.records[-1]
+            value = original.interpret(basis)
+            return value.model_copy(update={
+                'provider_identity': self.provider_identity,
+                'action_candidates': (InteractionActionCandidate(
+                    operation='CREATE_AND_SWITCH_BRANCH', speech_act='EXPLICIT_REQUEST',
+                    source_record_id=human.id, source_text=human.content,
+                    target_branch='feat_semantic_binding', confidence=.99),)})
+    service.capability = SemanticPort()
+    result = turn(service, interaction.id, '从当前代码切个 feat_semantic_binding 出来')
+    assert result.repository_observation['repository_ref'] == 'refs/heads/feat_semantic_binding'
+    assert (result.repository_observation['revision'], result.repository_observation['tree']) == (revision, tree)
+    assert 'feat_semantic_binding' in result.conversation_messages[-1].content
+    assert result.latest_assessment.action_candidates[0].target_branch == 'feat_semantic_binding'
+    # Execute authorization is rechecked from persisted semantics, not caller flags.
+    request = assets.attempts_for_interaction(interaction.id)[-1]['request']
+    from spg.domain.assets import RepositoryIntakeRequest
+    assets._require_interaction_authority(RepositoryIntakeRequest.model_validate(request))
+    assert result.governed_work_id is None
+
+
+def test_provider_discussion_cannot_fall_back_to_legacy_phrase_mutation(owner):
+    from spg.domain.interaction_actions import InteractionActionCandidate
+    service, assets, *_ = owner
+    original = service.capability
+    class DiscussionPort:
+        provider_identity = 'deepseek-responses:test'
+        def interpret(self, basis):
+            human = basis.records[-1]
+            return original.interpret(basis).model_copy(update={
+                'provider_identity': self.provider_identity,
+                'action_candidates': (InteractionActionCandidate(
+                    operation='CREATE_AND_SWITCH_BRANCH', speech_act='DISCUSSION',
+                    source_record_id=human.id, source_text=human.content,
+                    target_branch='feat_discussion', confidence=.99),)})
+    service.capability = DiscussionPort()
+    interaction = service.create_interaction(human_identity='human:owner')
+    turn(service, interaction.id, '切一个 feat_discussion 分支')
+    assert not assets.attempts_for_interaction(interaction.id)

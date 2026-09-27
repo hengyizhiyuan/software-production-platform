@@ -17,6 +17,7 @@ from spg.application.response_contract_expression import (
 )
 from spg.application.conversation import ConversationResponseComposer
 from spg.domain.conversation import (
+    ConversationTurnIntent,
     ConversationContext,
     ConversationResponseCandidate,
     StructuredCollaborationResult,
@@ -95,7 +96,11 @@ def _repair_structured_result(
             f"Repair one completed {contract_name} JSON result to the supplied exact "
             "schema. This is structural repair only. Preserve every existing business "
             "meaning and Human-facing statement exactly unless a change is strictly "
-            "required to satisfy the schema. Remove forbidden extra fields. Do not infer "
+            "required to satisfy the schema or the cited action-binding validation. "
+            "For ACTION_REQUEST_MISSING_CANONICAL_BINDING, recover the action meaning "
+            "from the original exact latest Human record into action_candidates; do not "
+            "reuse an older request, invent a target or turn discussion into consent. "
+            "Remove forbidden extra fields. Do not infer "
             "new facts, add recommendations, change authority, or create Semantic Truth. "
             "Return only the repaired JSON object.\n"
             f"Observed validation locations/types: {validation_feedback}\n"
@@ -130,6 +135,7 @@ class DeepSeekInteractionSemanticCapability:
         self.last_prompt_characters: int | None = None
         self.last_usage: dict[str, object] | None = None
         self.last_retry_count: int | None = None
+        self.last_action_repair_signal = None
         self.last_structured_repair_count = 0
         self.last_result: StructuredModelResult | None = None
 
@@ -148,14 +154,20 @@ class DeepSeekInteractionSemanticCapability:
             output_schema=InteractionSemanticContract.output_schema(),
             on_stage=on_stage,
         )
+        self.last_action_repair_signal = None
         self.last_structured_repair_count = 0
         schema = InteractionSemanticContract.output_schema()
         try:
             payload = _InteractionSemanticProviderPayload.model_validate_json(
                 _structured_json_text(result.output_text)
             )
+            self._validate_action_semantics(payload, basis)
         except (ValidationError, ValueError, TypeError) as first_error:
             first_issue = _safe_validation_summary(first_error)
+            if isinstance(first_error, ValueError) and str(first_error).startswith(('ACTION_', 'SEMANTIC_')):
+                if str(first_error).startswith('ACTION_'):
+                    self.last_action_repair_signal = "EXPLICIT_ACTION_LOST_BEFORE_EXECUTION"
+                first_issue = str(first_error)
             LOGGER.warning(
                 "WIC semantic validation failed request=%s model=%s status=completed "
                 "stage=payload_validation issue=%s %s repair=started",
@@ -177,6 +189,7 @@ class DeepSeekInteractionSemanticCapability:
                 payload = _InteractionSemanticProviderPayload.model_validate_json(
                     _structured_json_text(result.output_text)
                 )
+                self._validate_action_semantics(payload, basis)
             except (ValidationError, ValueError, TypeError) as second_error:
                 issue = _safe_validation_summary(second_error)
                 raise StructuredResponseSchemaViolation(
@@ -194,6 +207,29 @@ class DeepSeekInteractionSemanticCapability:
             provider_identity=self._result_identity(result, "semantic"),
             model_identity=result.effective_model or result.requested_model,
         )
+
+    @staticmethod
+    def _validate_action_semantics(payload, basis) -> None:
+        from spg.domain.interaction_actions import validate_action_binding
+        latest = next(record for record in reversed(basis.records)
+            if str(record.actor) == "HUMAN")
+        if (payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST
+                and not payload.action_candidates):
+            raise ValueError("ACTION_REQUEST_MISSING_CANONICAL_BINDING")
+        for candidate in payload.action_candidates:
+            validate_action_binding(candidate, latest)
+        # Cross-reference validity belongs to the same bounded structured-result
+        # repair. Do not discover a broken fact/extraction link after admission.
+        from spg.application.engineering_semantics import bind_engineering_semantic_facts
+        prior = (basis.active_work_context.work_revision.engineering_semantic_facts
+            if basis.active_work_context is not None else
+            (() if basis.prior_assessment is None else basis.prior_assessment.engineering_semantic_facts))
+        try:
+            bind_engineering_semantic_facts(basis_fingerprint=basis.basis_fingerprint,
+                records=basis.records, extractions=payload.neutral_semantic_extractions,
+                candidates=payload.semantic_fact_candidates, prior_facts=prior)
+        except InteractionInvariantViolation as error:
+            raise ValueError(f'SEMANTIC_BINDING_INVALID: {error}') from error
 
     def _observe(self, result: StructuredModelResult) -> None:
         self.last_result = result
@@ -535,6 +571,7 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
             semantic_retry_count=(self.semantic_capability.last_retry_count or 0)
             + self.semantic_capability.last_structured_repair_count,
             semantic_structured_repair_count=self.semantic_capability.last_structured_repair_count,
+            semantic_action_repair_signal=self.semantic_capability.last_action_repair_signal,
             semantic_seconds=monotonic() - started_at,
             semantic_prompt_characters=self.semantic_capability.last_prompt_characters,
             semantic_model=self.semantic_capability.model,
@@ -628,6 +665,7 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
             payload = _CoalescedInteractionProviderPayload.model_validate_json(
                 _structured_json_text(result.output_text)
             )
+            DeepSeekInteractionSemanticCapability._validate_action_semantics(payload.semantics, basis)
         except (ValidationError, ValueError, TypeError) as first_error:
             LOGGER.warning(
                 "Coalesced collaboration validation failed request=%s model=%s "
@@ -650,6 +688,7 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
                 payload = _CoalescedInteractionProviderPayload.model_validate_json(
                     _structured_json_text(result.output_text)
                 )
+                DeepSeekInteractionSemanticCapability._validate_action_semantics(payload.semantics, basis)
             except (ValidationError, ValueError, TypeError) as second_error:
                 issue = _safe_validation_summary(second_error)
                 raise StructuredResponseSchemaViolation(

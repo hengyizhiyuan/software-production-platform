@@ -385,6 +385,7 @@ interaction_assessments = Table(
     Column("candidate_constraints", JSONB, nullable=False),
     Column("current_requests", JSONB, nullable=False),
     Column("unresolved_material_questions", JSONB, nullable=False),
+    Column("action_candidates", JSONB, nullable=True),
     Column("neutral_semantic_extractions", JSONB, nullable=False),
     Column("engineering_semantic_facts", JSONB, nullable=False),
     Column("meanings", JSONB, nullable=False),

@@ -223,7 +223,24 @@ class GovernedExternalResearch:
         self.model = model
         self.budget = budget or SearchBudget()
 
-    def requests_for_turn(self, text: str, assessment_response: str) -> tuple[SearchRequest, ...]:
+    def requests_for_turn(self, text: str, assessment_response: str, *, action_candidates=None) -> tuple[SearchRequest, ...]:
+        if action_candidates is not None:
+            from spg.domain.interaction_actions import CanonicalOperation as O, ActionSpeechAct as S
+            kinds = {O.SEARCH_WEB: SearchIntent.SEARCH_WEB,
+                O.SEARCH_GITHUB: SearchIntent.SEARCH_GITHUB_REPOSITORIES}
+            explicit = tuple(dict.fromkeys(kinds[item.operation]
+                for item in action_candidates if item.operation in kinds
+                and item.speech_act in {S.EXPLICIT_REQUEST, S.READ_ONLY_QUERY}
+                and item.confidence >= .8))
+            if explicit:
+                decision = self._model_decision(text, assessment_response, explicit=True)
+                query = decision.query if decision is not None and decision.needed else _fallback_query(text)
+                return tuple(SearchRequest(intent=kind, query=query,
+                    reason="Current Human semantic request for public external retrieval",
+                    origin="HUMAN_EXPLICIT") for kind in explicit)
+            if any(item.operation in {*kinds, O.ACQUIRE_REPOSITORY, O.INSPECT_REPOSITORY,
+                    O.CREATE_AND_SWITCH_BRANCH, O.QUERY_BRANCH} for item in action_candidates):
+                return ()
         if production_intent_evidence(text).production_request and not _SEARCH_VERB.search(text):
             return ()
         url_match = _PUBLIC_URL.search(text)

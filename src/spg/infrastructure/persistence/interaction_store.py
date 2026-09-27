@@ -9,6 +9,7 @@ from uuid import UUID
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.orm import Session
 
+from spg.domain.interaction_actions import InteractionActionCandidate
 from spg.domain.design_intent import DesignIntentFrame
 from spg.domain.response_contract import ResponseContract
 from spg.domain.interaction import (
@@ -656,6 +657,8 @@ class InteractionStore:
             candidate_constraints=tuple(row["candidate_constraints"]),
             current_requests=tuple(row["current_requests"]),
             unresolved_material_questions=tuple(row["unresolved_material_questions"]),
+            action_candidates=(None if row["action_candidates"] is None or row["schema_version"] != "wic-assessment-v7" else
+                tuple(InteractionActionCandidate.model_validate(item) for item in row["action_candidates"])),
             neutral_semantic_extractions=tuple(
                 NeutralSemanticExtractionCandidate.model_validate(item)
                 for item in row["neutral_semantic_extractions"]

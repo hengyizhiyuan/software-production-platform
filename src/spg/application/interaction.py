@@ -123,7 +123,7 @@ from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 
 
-ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v6"
+ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v7"
 READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
 
@@ -548,7 +548,9 @@ def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailur
                     {
                         "semantic_version": 2,
                         "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
-                        "signal_kind": "SCHEMA_INVALID",
+                        "signal_kind": ((evidence.get("semantic_action_repair_signal")
+            if isinstance(evidence, dict) else getattr(evidence, "semantic_action_repair_signal", None))
+            or "SCHEMA_INVALID"),
                         "component": "wic/semantic-provider",
                         "attempt_count": 2,
                         "converged": False,
@@ -1594,6 +1596,7 @@ class WorkInteractionService:
         assessment: InteractionAssessment,
         *,
         latest_human_input: str,
+        observed_action_answer: str | None = None,
     ) -> tuple[
         str,
         GovernedResponseRealization,
@@ -1610,6 +1613,8 @@ class WorkInteractionService:
         branch_status_answer = _repository_branch_status_answer(
             latest_human_input, action_reality
         )
+        if observed_action_answer is not None:
+            branch_status_answer = observed_action_answer
         if branch_status_answer is not None:
             deep_content = branch_status_answer
         events = self.response_events(turn_id)
@@ -1996,6 +2001,45 @@ class WorkInteractionService:
                     turn.interaction_id, assessment, request_record
                 )
             )
+            from spg.domain.interaction_actions import CanonicalOperation, ActionSpeechAct
+            repository_requests = tuple(item for item in (assessment.action_candidates or ())
+                if item.operation in {CanonicalOperation.ACQUIRE_REPOSITORY,
+                    CanonicalOperation.INSPECT_REPOSITORY,
+                    CanonicalOperation.CREATE_AND_SWITCH_BRANCH,
+                    CanonicalOperation.QUERY_BRANCH, CanonicalOperation.OTHER}
+                and item.speech_act in {ActionSpeechAct.EXPLICIT_REQUEST,
+                    ActionSpeechAct.READ_ONLY_QUERY, ActionSpeechAct.UNRESOLVED})
+            if repository_requests and independent_action_answer is None and branch_action_answer is None:
+                independent_action_answer = (
+                    "尚未执行所请求的操作：当前动作缺少明确参数、可用执行能力或准入条件。"
+                    "没有创建或切换分支，也没有安排后台执行。"
+                )
+                self._record_response_event(turn_id, WicResponseEventType.RESPONSE_REFINEMENT,
+                    basis_fingerprint=assessment.basis_fingerprint,
+                    metadata={"component": "wic/action-binding",
+                        "signal": "EXPLICIT_ACTION_LOST_BEFORE_EXECUTION",
+                        "recovery_scope": "INTERACTION_ACTION_ONLY", "work_converged": False,
+                        "attempt_budget": 2, "attempt_count": 1,
+                        "final_condition": "BLOCKED", "authority_expanded": False},
+                    only_while_processing=True)
+            if (not admission_prepared and independent_action_answer is None and branch_action_answer is None
+                    and any(item.operation in {CanonicalOperation.REQUEST_PREVIEW,
+                        CanonicalOperation.REQUEST_DELIVERY}
+                        and item.speech_act is ActionSpeechAct.EXPLICIT_REQUEST
+                        for item in (assessment.action_candidates or ()))):
+                independent_action_answer = (
+                    "这项操作尚未准入或执行；当前没有可核查的完成记录。"
+                    "需要由现有候选预览或交付流程确认目标候选和执行条件。"
+                )
+            if (assessment.refinement_observation or {}).get('signal_kind') == 'EXPLICIT_ACTION_LOST_BEFORE_EXECUTION':
+                self._record_response_event(turn_id, WicResponseEventType.RESPONSE_REFINEMENT,
+                    basis_fingerprint=assessment.basis_fingerprint,
+                    metadata={"component": "wic/action-binding",
+                        "signal": "EXPLICIT_ACTION_LOST_BEFORE_EXECUTION",
+                        "recovery_scope": "INTERACTION_ACTION_ONLY", "work_converged": False,
+                        "attempt_budget": 2, "attempt_count": 2,
+                        "final_condition": "LOCAL_OBLIGATION_RECOVERED",
+                        "authority_expanded": False}, only_while_processing=True)
             realization: GovernedResponseRealization | None = None
             reconciliation: ResponseReconciliation | None = None
             delta_count = 0
@@ -2017,6 +2061,7 @@ class WorkInteractionService:
             if self.external_research is not None:
                 requests = self.external_research.requests_for_turn(
                     request_record.content, response_content,
+                    action_candidates=assessment.action_candidates,
                 )
                 if requests:
                     search_progress_published = False
@@ -2063,6 +2108,7 @@ class WorkInteractionService:
                     turn_id,
                     assessment,
                     latest_human_input=request_record.content,
+                    observed_action_answer=independent_action_answer or branch_action_answer,
                 )
             if branch_action_answer is not None and research_result is None:
                 response_content = branch_action_answer
@@ -2296,7 +2342,9 @@ class WorkInteractionService:
             )
         branch_name = (
             exact_branch_creation_command(basis.records[-1].content)
-            if basis.active_work_context is not None else None
+            if (basis.active_work_context is not None
+                and not getattr(self.capability, 'provider_identity', '').startswith('deepseek'))
+            else None
         )
         if branch_name is not None:
             return self.admit_candidate(
@@ -2407,6 +2455,9 @@ class WorkInteractionService:
                 if record.actor is InteractionActor.HUMAN
             )
             latest_human_input = latest_human_record.content
+            from spg.domain.interaction_actions import validate_action_binding
+            for action_candidate in candidate.action_candidates or ():
+                validate_action_binding(action_candidate, latest_human_record)
             if _declares_distinct_long_lived_object(
                 latest_human_input,
                 active_context,
@@ -2574,6 +2625,8 @@ class WorkInteractionService:
                     "unresolved_material_questions": list(
                         candidate.unresolved_material_questions
                     ),
+                    "action_candidates": (None if candidate.action_candidates is None else
+                        [item.model_dump(mode="json") for item in candidate.action_candidates]),
                     "neutral_semantic_extractions": [
                         item.model_dump(mode="json")
                         for item in candidate.neutral_semantic_extractions
@@ -3644,12 +3697,18 @@ class WorkInteractionService:
 
         normalized: list[EngineeringSemanticFactCandidate] = []
         explicit_branch = False
+        from spg.domain.interaction_actions import CanonicalOperation, ActionSpeechAct
+        targets = {action.target_branch for action in (candidate.action_candidates or ())
+            if action.operation is CanonicalOperation.CREATE_AND_SWITCH_BRANCH
+            and action.speech_act is ActionSpeechAct.EXPLICIT_REQUEST
+            and action.confidence >= .8 and action.source_record_id == latest.id}
         for fact in candidate.semantic_fact_candidates:
             if (
                 fact.subject in BRANCH_EXTRACTION_SUBJECTS
                 and isinstance(fact.value, str)
                 and latest.id in fact.source_record_ids
-                and explicit_human_branch_command(latest.content, fact.value)
+                and (fact.value in targets or (candidate.action_candidates is None
+                    and explicit_human_branch_command(latest.content, fact.value)))
             ):
                 normalized.append(fact.model_copy(update={
                     "subject": "repository.branch_name",
@@ -3664,6 +3723,18 @@ class WorkInteractionService:
                 explicit_branch = True
             else:
                 normalized.append(fact)
+        for target in targets:
+            if not any(fact.subject == "repository.branch_name" and fact.value == target
+                       for fact in normalized):
+                normalized.append(EngineeringSemanticFactCandidate(
+                    candidate_id="canonical-branch-target", subject="repository.branch_name",
+                    relation=SemanticRelation.REFERENCE, value=target,
+                    qualifiers={"state": "to_be_created"},
+                    authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                    epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                    source_record_ids=(latest.id,), source_text=latest.content,
+                    role_origin=SemanticRoleOrigin.EXPLICIT))
+            explicit_branch = True
         if explicit_branch and not any(
             fact.subject == "repository.branch_action"
             and fact.value == "创建新分支"

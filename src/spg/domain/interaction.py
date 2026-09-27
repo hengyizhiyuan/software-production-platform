@@ -9,6 +9,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from spg.domain.interaction_actions import InteractionActionCandidate
 from spg.domain.response_contract import ResponseContract, ResponseIntent
 from spg.domain.conversation import (
     ConversationContextMessage,
@@ -296,6 +297,7 @@ class InteractionAssessmentCandidate(BaseModel):
     candidate_constraints: tuple[str, ...] = ()
     current_requests: tuple[str, ...] = ()
     unresolved_material_questions: tuple[str, ...] = ()
+    action_candidates: tuple[InteractionActionCandidate, ...] | None = None
     neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
     semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[InterpretationMeaning, ...] = ()
@@ -319,6 +321,7 @@ class InteractionSemanticCandidate(BaseModel):
     candidate_constraints: tuple[str, ...] = ()
     current_requests: tuple[str, ...] = ()
     unresolved_material_questions: tuple[str, ...] = ()
+    action_candidates: tuple[InteractionActionCandidate, ...] = ()
     neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
     semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[InterpretationMeaning, ...] = ()
@@ -344,6 +347,7 @@ class InteractionAssessment(BaseModel):
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
+    action_candidates: tuple[InteractionActionCandidate, ...] | None = None
     neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
     engineering_semantic_facts: tuple[EngineeringSemanticFact, ...] = ()
     meanings: tuple[InterpretationMeaning, ...]

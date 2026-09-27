@@ -202,6 +202,7 @@ class InteractionAssessmentResponse(ApiDto):
     candidate_constraints: tuple[str, ...]
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
+    action_candidates: tuple[dict[str, object], ...] | None = None
     neutral_semantic_extractions: tuple[dict[str, object], ...]
     engineering_semantic_facts: tuple[dict[str, object], ...]
     meanings: tuple[InteractionMeaningResponse, ...]
@@ -401,6 +402,8 @@ class SharedUnderstandingResponse(ApiDto):
                     candidate_constraints=assessment.candidate_constraints,
                     current_requests=assessment.current_requests,
                     unresolved_material_questions=assessment.unresolved_material_questions,
+                    action_candidates=(None if assessment.action_candidates is None else
+                        tuple(item.model_dump(mode="json") for item in assessment.action_candidates)),
                     neutral_semantic_extractions=tuple(
                         item.model_dump(mode="json")
                         for item in assessment.neutral_semantic_extractions

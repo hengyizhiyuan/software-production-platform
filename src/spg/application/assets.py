@@ -224,6 +224,19 @@ class RepositoryAssetService:
             ).order_by(repository_intakes.c.created_at, repository_intakes.c.id)).mappings().all()
         return tuple({**(row["observation"] or {}), "request": row["request"]} for row in rows)
 
+    def _bound_interaction_actions(self, interaction_id, record, assessment=None):
+        from spg.domain.interaction_actions import executable_repository_actions
+        if assessment is None:
+            with self.database.unit_of_work() as uow:
+                assessment = next((item for item in reversed(
+                    InteractionStore(uow.session).assessments(interaction_id))
+                    if item.basis_last_sequence == record.sequence), None)
+        if assessment is not None and assessment.action_candidates is not None:
+            return executable_repository_actions(assessment.action_candidates, record)
+        # Retain the pre-existing deterministic fixture/legacy recovery contract.
+        # Provider-backed production candidates never fall back to phrase matching.
+        return repository_actions(record.content)
+
     def _require_interaction_authority(self, request: RepositoryIntakeRequest) -> None:
         with self.database.unit_of_work() as uow:
             store = InteractionStore(uow.session)
@@ -250,7 +263,7 @@ class RepositoryAssetService:
                 or record.source != request.authority_identity
                 or interaction.created_by != request.authority_identity):
             raise ProductInvariantViolation("Interaction action requires its Human owner's explicit record")
-        actions = repository_actions(record.content)
+        actions = self._bound_interaction_actions(request.interaction_id, record)
         branch = request.operation_kind == "CREATE_BRANCH"
         matching = tuple(action for action in actions if (
             action.family is ActionFamily.LOCAL_BRANCH and action.branch == request.target_branch
@@ -269,7 +282,7 @@ class RepositoryAssetService:
 
     def execute_interaction_actions(self, interaction_id, assessment, record) -> str | None:
         """Execute independently admitted preparatory actions without forming Work."""
-        actions = repository_actions(record.content)
+        actions = self._bound_interaction_actions(interaction_id, record, assessment)
         if not actions:
             return None
         previous = self.interaction_observation(interaction_id)

@@ -1,0 +1,103 @@
+{
+  "version": "interaction-action-equivalence-v1",
+  "branch_positive": [
+    "切一个 {branch} 分支",
+    "切个 {branch} 分支",
+    "切个新分支 {branch}",
+    "切个新分支：{branch}",
+    "新建一个 {branch} 分支并切过去",
+    "建个 {branch} 分支",
+    "创建并切换到 {branch}",
+    "从当前代码切个 {branch} 出来"
+  ],
+  "branch_negative": [
+    "我在考虑建个新分支",
+    "要不要切个分支？",
+    "{branch} 这个分支怎么样？",
+    "看看有没有 {branch} 分支",
+    "切回之前的代码",
+    "checkout 这个文件",
+    "换个主题分支聊"
+  ],
+  "neighbor_classes": [
+    {
+      "operation": "ACQUIRE_REPOSITORY",
+      "positive": [
+        "把 https://github.com/acme/example.git 拿到本地",
+        "给我获取 https://github.com/acme/example.git 的工作副本"
+      ],
+      "negative": [
+        "这个仓库地址先留着：https://github.com/acme/example.git",
+        "如何把仓库拿到本地？"
+      ]
+    },
+    {
+      "operation": "INSPECT_REPOSITORY",
+      "positive": [
+        "帮我读读当前项目用的技术栈",
+        "检查这份代码的框架和依赖"
+      ],
+      "negative": [
+        "我以后想研究项目的框架",
+        "不要检查仓库"
+      ]
+    },
+    {
+      "operation": "QUERY_BRANCH",
+      "positive": [
+        "咱们现在工作在哪条分支上？",
+        "分支创建好了吗"
+      ],
+      "negative": [
+        "哪个分支名听起来好？",
+        "以后可能再问分支状态"
+      ]
+    },
+    {
+      "operation": "SEARCH_WEB",
+      "positive": [
+        "请查阅网上关于 Python 版本的最新公开资料",
+        "上网找一下当前 Python 的版本信息"
+      ],
+      "negative": [
+        "不要检索网络",
+        "网上资料可能不准，先聊聊"
+      ]
+    },
+    {
+      "operation": "SEARCH_GITHUB",
+      "positive": [
+        "到 GitHub 给我找几个任务调度库",
+        "请检索 GitHub 上的开源任务队列项目"
+      ],
+      "negative": [
+        "我们以后可能参考 GitHub 项目",
+        "别搜索 GitHub"
+      ]
+    },
+    {
+      "operation": "REQUEST_PREVIEW",
+      "positive": [
+        "把这个候选的预览打开给我看",
+        "我想现在查看这个候选的运行效果"
+      ],
+      "negative": [
+        "以后再看预览",
+        "预览是什么意思？"
+      ]
+    },
+    {
+      "operation": "REQUEST_DELIVERY",
+      "positive": [
+        "验收这个候选后把它交付到指定仓库",
+        "我授权将已验收候选提交交付"
+      ],
+      "negative": [
+        "交付这个词是什么意思？",
+        "暂时别交付"
+      ]
+    }
+  ],
+  "oracle": "Canonical speech act and literal arguments; positives require existing owner admission and observed effects, negatives forbid CREATE/SWITCH. Examples are test inputs, never implementation aliases.",
+  "external_web_live": "BLOCKED_EXTERNAL: SPG_WEB_SEARCH_API_KEY not supplied; live Web/GC-EX-12 separately rerunnable."
+}

@@ -58,6 +58,15 @@ class EvaluationCase:
 
 
 CORPUS = (
+    EvaluationCase("NL_ACTION_BINDING", "INTERACTION", "tests/test_interaction_action_binding.py",
+        capability_family="WORK_INTERACTION", risk="CRITICAL",
+        protected_invariant="Semantic actions bind current Human provenance and literal arguments without phrase aliases"),
+    EvaluationCase("NL_BRANCH_REALITY", "INTERACTION", "tests/integration/test_lifecycle_repository_actions.py::test_provider_semantic_action_survives_nonmatching_surface_and_persists_authority",
+        capability_family="WORK_INTERACTION", risk="CRITICAL",
+        protected_invariant="Canonical branch action reaches real Git and persisted authority"),
+    EvaluationCase("NL_LOST_ACTION_REPAIR", "RESILIENCE", "tests/test_deepseek_wic_provider.py::test_explicit_action_missing_binding_is_repaired_in_same_turn_without_visible_ack",
+        "RECOVERED_BY_SELF_REFINE", capability_family="SELF_REFINE", risk="CRITICAL",
+        protected_invariant="Missing explicit action is repaired once before any visible execution acknowledgement"),
     EvaluationCase("GJ-SR-01", "PRODUCTION", "tests/integration/test_wic_governed_work_admission.py::test_governed_branch_operation_preserves_main_and_binds_exact_commit"),
     EvaluationCase("REPOSITORY_REALITY", "INTERACTION", "tests/integration/test_wic_governed_work_admission.py::test_explicit_repository_action_automatically_executes_governed_admission"),
     EvaluationCase("DESIGN_BEFORE_CODE", "PRODUCTION", "tests/integration/test_wic_governed_work_admission.py::test_guided_design_rejects_implementation_before_design_artifact_exists"),

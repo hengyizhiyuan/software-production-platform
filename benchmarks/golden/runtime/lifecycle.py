@@ -44,6 +44,15 @@ def main():
  save('journey.json',{'case':args.case,'trial':args.trial,'interaction_id':identity,
   'human_inputs':INTENTS[args.case],'tester_git':False,'manual_rescue_actions':[],
   'source_modification':False,'human_acceptance':'PENDING'})
+ if args.case=='GC-LC-02':
+  corpus=json.loads((Path(__file__).parents[1]/'interaction-action-equivalence-v1.json').read_text())
+  variants=[template.format(branch=f'feat_semantic_{args.trial}_{index}')
+            for index,template in enumerate(corpus['branch_positive'])]
+  negatives=[template.format(branch=f'feat_absent_{args.trial}')
+             for template in corpus['branch_negative']]
+  INTENTS[args.case]=[f'把这个仓库 {PUBLIC} clone下来。', *variants,
+    '分支创建好了吗', *negatives]
+  save('semantic-equivalence-inputs.json',{'positives':variants,'negatives':negatives})
  states=[]
  for index,content in enumerate(INTENTS[args.case]):
   receipt=client.request(f'/api/interactions/{identity}/turns',{'content':content,
@@ -73,7 +82,21 @@ def main():
    exact_revision_tree=bool(observation and len(observation['revision'])==40 and len(observation['tree'])==40),
    product_continuity=bool(observation and observation.get('product_id')))
   if args.case!='GC-LC-03':
-   checks['local_branch']=bool(observation and observation['repository_ref']=='refs/heads/feat_test')
+   expected_branch=f'feat_semantic_{args.trial}_7' if args.case=='GC-LC-02' else 'feat_test'
+   checks['local_branch']=bool(observation and observation['repository_ref']==f'refs/heads/{expected_branch}')
+  if args.case=='GC-LC-02':
+   checks['positive_semantic_equivalence']=all(
+    any(a['operation']=='CREATE_AND_SWITCH_BRANCH' and a['speech_act']=='EXPLICIT_REQUEST'
+        and a['target_branch']==f'feat_semantic_{args.trial}_{i}'
+        for a in (state.get('latest_assessment') or {}).get('action_candidates', []))
+    and state['repository_observation']['repository_ref']==f'refs/heads/feat_semantic_{args.trial}_{i}'
+    for i,state in enumerate(states[1:9])) and len(states)>=9
+   last=states[8]['repository_observation'] if len(states)>=9 else {}
+   checks['negative_no_git_effect']=all(
+    state['repository_observation']['intake_request_id']==last.get('intake_request_id')
+    and state['repository_observation']['repository_ref']==last.get('repository_ref')
+    for state in states[10:]) and len(states)==len(INTENTS[args.case])
+   checks['completion_query_from_reality']=len(states)>9 and expected_branch in states[9]['conversation_messages'][-1]['content']
   if args.case=='GC-LC-01':
    first=states[0].get('repository_observation') or {}
    checks['initial_main']=first.get('repository_ref')=='refs/heads/main'

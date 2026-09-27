@@ -142,6 +142,11 @@ def response_contract_expression_guidance(contract: ResponseContract | None) -> 
         "frames the interaction move only. Existing admission, authority and Steering "
         "decide and perform actual progression. Do not claim that an action started, "
         "completed or succeeded unless supplied Runtime evidence proves it.",
+        "An explicit action cannot degrade into narrative acknowledgement. Do not "
+        "promise future execution unless a corresponding governed action reference "
+        "is supplied as scheduled or executed. Without that evidence, state the "
+        "concrete blocker and that the action has not been executed; an advisory "
+        "recommendation or semantic candidate is never an executable action.",
         "Never expose contract field names, enum labels, budget numbers, policy revisions, "
         "or decision metadata in Human-facing text.",
     ]
