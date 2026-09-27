@@ -26,7 +26,7 @@ class ProductClient:
         request = urllib.request.Request(self.base + path, data=data, headers={
             'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'})
         try:
-            with urllib.request.urlopen(request, timeout=30) as response:
+            with urllib.request.urlopen(request, timeout=90) as response:
                 return json.load(response)
         except urllib.error.HTTPError as error:
             return {'error_status': error.code, 'detail': error.read().decode()}

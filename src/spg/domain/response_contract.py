@@ -121,6 +121,11 @@ _PRODUCTION_ACTION = re.compile(
     r"\b(?:pull|clone|develop|modify|fix|add|implement|change|update|refactor)\b)",
     re.IGNORECASE,
 )
+_PRODUCTION_EFFECT = re.compile(
+    r"开发|修改|修复|新增|增加|添加|加(?:一个|一项|一条|个|条)|实现|改造|接入|升级|重构|改为|改成|替换|调整|启动|"
+    r"在.{0,32}(?:列表|页面|界面|表格).{0,12}(?:显示|展示)|"
+    r"\b(?:develop|modify|fix|add|implement|change|update|refactor)\b", re.I,
+)
 _DIRECT_REQUEST = re.compile(
     r"(?:请|帮我|帮忙|需要你|给我|^给.{0,24}(?:加(?:一个|一项|一条|个|条)|新增|增加|添加)|直接|把|将|我想(?:要|让)|我要|我希望|"
     r"\b(?:please|help\s+me|can\s+you|could\s+you)\b)",
@@ -203,8 +208,11 @@ def production_intent_evidence(text: str) -> ProductionIntentEvidence:
     explicit_request = bool(
         _DIRECT_REQUEST.search(value) or _ACTION_OPENING.search(value)
     )
+    production_effect = any(_PRODUCTION_EFFECT.search(part) or _REQUESTED_SOFTWARE_OUTCOME.search(part)
+        for part in execution_clauses)
     production_request = bool(
         action_requested
+        and production_effect
         and (explicit_request or repository_relevant)
         and not advisory_question
     )
@@ -214,7 +222,7 @@ def production_intent_evidence(text: str) -> ProductionIntentEvidence:
     elif repository_relevant:
         evidence.append("HUMAN_REFERENCED_REPOSITORY")
     if action_requested:
-        evidence.append("HUMAN_REQUESTED_SOFTWARE_CHANGE")
+        evidence.append("HUMAN_REQUESTED_SOFTWARE_CHANGE" if production_effect else "HUMAN_REQUESTED_PREPARATORY_ACTION")
     if explicit_request:
         evidence.append("DIRECT_EXECUTION_LANGUAGE")
     if advisory_question:

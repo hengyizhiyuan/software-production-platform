@@ -963,7 +963,7 @@
       && assessment.progressive_semantics
       && assessment.progressive_semantics.turn_intent;
     const productionIntent = Boolean(projection.production_request_detected)
-      || ["BUILD", "ACTION_REQUEST", "MODIFY", "DEPLOY"].includes(turnIntent);
+      || ["BUILD", "MODIFY", "DEPLOY"].includes(turnIntent);
     elements.readinessAffordance.classList.toggle("production-intent-handoff", productionIntent && !governed);
     elements.readinessAffordance.textContent = projection.new_work_formation_pending
       ? projection.production_request_detected
@@ -1023,6 +1023,19 @@
     elements.attentionMarker.hidden = true;
     elements.workspaceRealitySummary.textContent = "PRE-WORK conversation is durable. No engineering source or production authority is bound yet.";
     elements.workSourceTree.replaceChildren(createElement("p", "empty-copy", "No repository bound. Watt-managed workspace may be available after admission."));
+    const repository = projection?.repository_observation;
+    elements.selectedWork.dataset.repositoryProductId = repository?.product_id || "";
+    if (repository) {
+      elements.workStatus.textContent = `PRE-WORK · Repository ${repository.condition} · Production not started`;
+      elements.workspaceRealitySummary.textContent = `Conversation: PRE-WORK · Repository: ${repository.condition} · Production Work: NOT ADMITTED`;
+      elements.workSourceTree.replaceChildren(createElement("p", "empty-copy",
+        `Source: ${repository.source || repository.repository_identity} · Branch: ${repository.repository_ref || "not established"} · Revision: ${repository.revision || "not established"} · Tree: ${repository.tree || "not established"}`));
+      const paths = repository.paths || [];
+      const sourcePaths = document.createElement("details");
+      sourcePaths.append(createElement("summary", "", `Source tree · ${paths.length} observed paths`));
+      paths.forEach((path) => sourcePaths.append(createElement("p", "source-tree-path", path)));
+      elements.workSourceTree.append(sourcePaths);
+    }
     elements.workspaceAgendaSummary.textContent = projection?.design_next_focus || "Understanding request…";
     elements.workspacePlanChange.hidden = true;
     elements.workspacePlanChange.textContent = "";
@@ -1047,10 +1060,24 @@
     elements.prospectiveStart.hidden = !ready || (
       Boolean(projection?.production_request_detected)
       && projection?.production_admission_state !== "ADMISSION_RETRY_REQUIRED"
-    );
+    ) || Boolean(repository);
+    if (repository) {
+      elements.workspaceActionsSummary.textContent = repository.condition === "READY"
+        ? "Repository is ready. Describe the change when you are ready."
+        : `Repository: ${repository.condition} · ${repository.human_message || ""}`;
+      elements.prospectiveDecision.textContent = repository.condition === "READY"
+        ? "You can inspect the source or describe a change. Production authority remains separate."
+        : repository.human_message || "Repository acquisition is in progress.";
+    } else if (!provisional && !projection?.production_request_detected) {
+      elements.workspaceActionsSummary.textContent = "No production action has been requested.";
+      elements.prospectiveDecision.textContent = "Continue the conversation when useful; no production admission or repository action is required.";
+      elements.prospectiveStart.hidden = true;
+    }
     elements.prospectiveRefine.hidden = provisional || state.workAdmissionPending;
-    elements.prospectiveRefine.textContent = ready ? "继续完善" : "回应当前问题";
-    document.getElementById("actions-surface").classList.toggle("requires-attention", Boolean(blocker));
+    const hasQuestion = Boolean(projection?.unresolved_material_questions?.length);
+    elements.prospectiveRefine.textContent = hasQuestion ? "回应当前问题" : "继续对话";
+    document.getElementById("actions-surface").classList.toggle("requires-attention",
+      Boolean(blocker && projection?.production_request_detected));
   }
 
   function renderChips(container, values, emptyLabel) {

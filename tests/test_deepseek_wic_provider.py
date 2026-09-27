@@ -545,3 +545,47 @@ def test_governed_realizer_uses_configured_conversation_profile_and_streams() ->
         "total_tokens": 50,
         "unknown": False,
     }
+
+
+def _realizer_envelope():
+    return GovernedResponseEnvelope(
+        basis_fingerprint='b'*64, governed_content='只搜索用户的姓名和邮箱。',
+        reconciliation=ResponseReconciliation.REFINE, governance_candidate='CONVERSATION_ONLY',
+        semantic_policy_revision='policy-v1', question_policy_revision='question-v1',
+        response_language='zh-CN', interaction_strategy=InteractionStrategy(
+            human_abstraction_level=HumanAbstractionLevel.SOLUTION,
+            cognitive_maturity=CognitiveMaturity.FRAMING,
+            human_mode=HumanConversationMode.EXPLORING,
+            primary_move=ConversationalMove.ORIENT,
+            next_conversational_granularity='Keep the admitted scope.',
+        ),
+    )
+
+
+def test_governed_realizer_repairs_closed_schema_without_changing_stream_or_authority():
+    content = '只搜索用户的姓名和邮箱；其他领域保持不变。'
+    runtime, adapter = _runtime(_Adapter([
+        json.dumps({'type':'answer','natural_response':content}),
+        json.dumps({'natural_response':content}),
+    ]))
+    realizer = DeepSeekWorkInteractionCapability(runtime=runtime).governed_response_realizer
+    deltas = []
+    result = realizer.realize_stream(_realizer_envelope(), on_response_delta=deltas.append)
+    assert adapter.calls == 2
+    assert realizer.last_structured_repair_count == 1
+    assert result.structural_repair_count == 1
+    assert result.content == ''.join(deltas) == content
+    assert adapter.requests[-1]['on_output_delta'] is None
+    assert 'Do not infer new facts' in adapter.requests[-1]['instructions']
+    assert 'Original governing contract and exact basis' in adapter.requests[-1]['instructions']
+
+
+def test_governed_realizer_structural_repair_is_bounded_and_preserves_terminal_failure():
+    from spg.domain.interaction import StructuredResponseSchemaViolation
+    invalid = json.dumps({'type':'answer','natural_response':'只搜索用户。'})
+    runtime, adapter = _runtime(_Adapter([invalid, invalid]))
+    realizer = DeepSeekWorkInteractionCapability(runtime=runtime).governed_response_realizer
+    with pytest.raises(StructuredResponseSchemaViolation, match='bounded_repair_exhausted'):
+        realizer.realize_stream(_realizer_envelope(), on_response_delta=lambda _:None)
+    assert adapter.calls == 2
+    assert realizer.last_structured_repair_count == 1

@@ -20,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import insert, select, text, update
 
 from spg.application.delivery import DeliveryApplicationService
+from spg.domain.action_admission import ActionFamily, ActionFacts, admit_action
 from spg.infrastructure.persistence.github_delivery_schema import (
     github_access_grants, remote_delivery_authorizations, remote_delivery_receipts,
 )
@@ -340,6 +341,13 @@ class GitHubDeliveryService:
         token = self.active_token(authorization["actor_id"], url, "WRITE")
         if token is None:
             raise GitHubDeliveryError("WRITE_GRANT_REQUIRED", "GitHub write grant is no longer active")
+        decision = admit_action(ActionFamily.DELIVERY, ActionFacts(
+            explicit=True, authority=authorization['actor_id'] == actor_id,
+            capability=True, credential=token is not None, candidate=True,
+            human_accepted=True, delivery_authorized=True,
+        ))
+        if not decision.execute:
+            raise GitHubDeliveryError(decision.signal, "Remote delivery action is not admitted")
         branch = authorization["target_branch"]
         revision = authorization["expected_revision"]
         remote_before = self._branch_revision(owner, repo, branch, token)

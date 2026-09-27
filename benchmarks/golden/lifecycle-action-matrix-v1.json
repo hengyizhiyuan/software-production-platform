@@ -1,0 +1,1197 @@
+{
+  "policy_version": "lifecycle-action-admission-v1",
+  "interpretation": "Rows describe one action subject, with explicit intent, actor authority, installed capability, and credential satisfied. Other subsystem actions use their own subject and facts; a terminal repository attempt cannot block reading historical Work or starting a new Work. No state grants authority.",
+  "rows": [
+    {
+      "observed_state": "WorkCondition.PRE_WORK",
+      "facts": {},
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "REPOSITORY_REALITY_REQUIRED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PLAN": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PRODUCE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "RepositoryAcquisitionState.RUNNING",
+      "facts": {},
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "REPOSITORY_REALITY_REQUIRED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PLAN": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PRODUCE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "RepositoryAcquisitionState.READY",
+      "facts": {
+        "repository_ready": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PLAN": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PRODUCE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "WorkStatus.READY",
+      "facts": {
+        "work_admitted": true,
+        "production_intent_sufficient": true,
+        "repository_ready": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PLAN": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PRODUCE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "SteeringStepType.DESIGN",
+      "facts": {
+        "work_admitted": true,
+        "production_intent_sufficient": true,
+        "repository_ready": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PLAN": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PRODUCE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "QueueCondition.EXECUTING",
+      "facts": {
+        "work_admitted": true,
+        "production_intent_sufficient": true,
+        "repository_ready": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PLAN": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PRODUCE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "baseline_candidates.sealed_at",
+      "facts": {
+        "work_admitted": true,
+        "production_intent_sufficient": true,
+        "repository_ready": true,
+        "candidate": true,
+        "candidate_sealed": true,
+        "preview_required": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PLAN": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PRODUCE": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "SEALED_CANDIDATE_REQUIRES_CORRECTION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "PREVIEW_NOT_VERIFIED"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_ACCEPTANCE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_HUMAN_ACCEPTANCE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_ACCEPTANCE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_HUMAN_ACCEPTANCE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "PreviewRuntimeStatus.PREPARING",
+      "facts": {
+        "work_admitted": true,
+        "production_intent_sufficient": true,
+        "repository_ready": true,
+        "candidate": true,
+        "candidate_sealed": true,
+        "preview_required": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PLAN": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PRODUCE": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "SEALED_CANDIDATE_REQUIRES_CORRECTION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "PREVIEW_NOT_VERIFIED"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_ACCEPTANCE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_HUMAN_ACCEPTANCE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_ACCEPTANCE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_HUMAN_ACCEPTANCE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "PreviewRuntimeStatus.READY + served verification",
+      "facts": {
+        "work_admitted": true,
+        "production_intent_sufficient": true,
+        "repository_ready": true,
+        "candidate": true,
+        "candidate_sealed": true,
+        "preview_required": true,
+        "served_verified": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PLAN": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PRODUCE": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "SEALED_CANDIDATE_REQUIRES_CORRECTION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_ACCEPTANCE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_HUMAN_ACCEPTANCE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_ACCEPTANCE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_HUMAN_ACCEPTANCE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "ProductionDeliveryState.ACCEPTED",
+      "facts": {
+        "candidate": true,
+        "candidate_sealed": true,
+        "repository_ready": true,
+        "human_accepted": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PLAN": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PRODUCE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_DELIVERY_AUTHORIZATION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_DELIVERY_AUTHORIZATION"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_DELIVERY_AUTHORIZATION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_DELIVERY_AUTHORIZATION"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "ProductionDeliveryState.AUTHORIZED_FOR_DELIVERY",
+      "facts": {
+        "candidate": true,
+        "human_accepted": true,
+        "delivery_authorized": true,
+        "repository_ready": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PLAN": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PRODUCE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "DELIVERY": {
+          "eligibility": "ALLOWED_IF_AUTHORIZED",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RELEASE": {
+          "eligibility": "ALLOWED_IF_AUTHORIZED",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "WorkStatus.COMPLETED",
+      "facts": {
+        "candidate": true,
+        "human_accepted": true,
+        "repository_ready": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PLAN": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PRODUCE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_DELIVERY_AUTHORIZATION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_DELIVERY_AUTHORIZATION"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_DELIVERY_AUTHORIZATION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_DELIVERY_AUTHORIZATION"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "RepositoryAcquisitionState.FAILED_RETRYABLE",
+      "facts": {
+        "retryable": true,
+        "attempts": 1
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_RETRYABLE"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "REPOSITORY_REALITY_REQUIRED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PLAN": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PRODUCE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_RETRYABLE"
+        },
+        "PREVIEW": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "RepositoryAcquisitionState.FAILED_TERMINAL",
+      "facts": {
+        "terminal": true
+      },
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "PLAN": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "PRODUCE": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "VERIFY": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "PREVIEW": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "DELIVERY": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "RELEASE": {
+          "eligibility": "BLOCKED",
+          "execute": false,
+          "signal": "ACTION_TERMINAL"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "WorkCondition.NEEDS_REFINEMENT",
+      "facts": {},
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "REPOSITORY_REALITY_REQUIRED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PLAN": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PRODUCE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    },
+    {
+      "observed_state": "SteeringAutomaticProgressionState.STOPPED",
+      "facts": {},
+      "actions": {
+        "INSPECT": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "ACQUIRE_REPOSITORY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "LOCAL_BRANCH": {
+          "eligibility": "SELF_REFINE_FIRST",
+          "execute": false,
+          "signal": "REPOSITORY_REALITY_REQUIRED"
+        },
+        "RESEARCH": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREPARE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PLAN": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "PRODUCE": {
+          "eligibility": "REQUIRES_WORK_ADMISSION",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_WORK_ADMISSION"
+        },
+        "VERIFY": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        },
+        "PREVIEW": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "HUMAN_ACCEPTANCE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "DELIVERY": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "RELEASE": {
+          "eligibility": "REQUIRES_CANDIDATE",
+          "execute": false,
+          "signal": "ACTION_REQUIRES_CANDIDATE"
+        },
+        "NEW_WORK": {
+          "eligibility": "ALLOWED_IF_EXPLICIT",
+          "execute": true,
+          "signal": "ACTION_ADMITTED"
+        }
+      }
+    }
+  ]
+}

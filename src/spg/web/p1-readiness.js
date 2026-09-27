@@ -71,20 +71,26 @@
     select.replaceChildren();
     select.append(new Option("Select Product", ""));
     for (const product of state.products) select.append(new Option(product.name, product.id));
-    select.value = selected.dataset.productId || state.productId || "";
+    select.value = selected.dataset.productId || selected.dataset.repositoryProductId || state.productId || "";
     const bound = Boolean(selected.dataset.productId);
     $("p1-bind-work").disabled = !state.workId || bound;
     $("p1-work-product-summary").textContent = bound
       ? `This Work changes ${state.products.find((item) => item.id === selected.dataset.productId)?.name || selected.dataset.productId}.`
-      : "This Work is not yet assigned to a long-lived Product.";
+      : selected.dataset.repositoryProductId
+        ? `Repository belongs to ${state.products.find((item) => item.id === selected.dataset.repositoryProductId)?.name || selected.dataset.repositoryProductId}. Production Work is not admitted.`
+        : "This Work is not yet assigned to a long-lived Product.";
   }
   async function refreshWorkContext(force = false) {
     const id = selected.dataset.workId || "";
-    const key = `${id}:${selected.dataset.productId || ""}`;
+    const key = `${id}:${selected.dataset.productId || ""}:${selected.dataset.repositoryProductId || ""}`;
     if (!force && key === state.observedKey) return;
     state.observedKey = key;
     state.workId = id;
-    if (!id) { renderProducts(); return; }
+    if (!id) {
+      ["p1-diagnosis", "p1-economics", "p1-history"].forEach((name) => $(name).replaceChildren());
+      if (selected.dataset.repositoryProductId) await loadProducts();
+      renderProducts(); return;
+    }
     if (selected.dataset.productId && state.products.some((item) => item.id === selected.dataset.productId)) {
       state.productId = selected.dataset.productId;
     }
@@ -124,7 +130,7 @@
     }
   }
   const observer = new MutationObserver(() => void refreshWorkContext());
-  observer.observe(selected, { attributes: true, attributeFilter: ["data-work-id", "data-product-id"] });
+  observer.observe(selected, { attributes: true, attributeFilter: ["data-work-id", "data-product-id", "data-repository-product-id"] });
   for (const id of ["refresh-control", "work-refresh-control"]) {
     $(id)?.addEventListener("click", () => {
       void loadProducts().catch((error) => report(error, $("p1-product-list")));

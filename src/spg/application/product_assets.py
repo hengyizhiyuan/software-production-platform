@@ -113,10 +113,10 @@ class ProductAssetService:
         return self.get(product_id, owner_id)
 
     def ensure_repository_work(
-        self, work_id: UUID, resource_id: UUID, owner_id: str,
+        self, work_id: UUID | None, resource_id: UUID, owner_id: str,
         *, revision: str, repository_ref: str, tree: str | None,
     ) -> UUID:
-        """Retain an acquired source as Product Reality for the admitted Work.
+        """Retain acquired Product Reality, independently of production admission.
 
         The Engineering Resource row serializes concurrent admissions of the
         same repository. An existing owner Product is reused, while an already
@@ -131,13 +131,13 @@ class ProductAssetService:
             ).with_for_update()).mappings().one_or_none()
             if resource is None:
                 raise ProductRecordNotFound(f"Engineering Resource not found: {resource_id}")
-            work = session.execute(select(product_works.c.product_id).where(
+            work = None if work_id is None else session.execute(select(product_works.c.product_id).where(
                 product_works.c.id == work_id,
             ).with_for_update()).one_or_none()
-            if work is None:
+            if work is None and work_id is not None:
                 raise ProductRecordNotFound(f"Work not found: {work_id}")
             identity = resource["repository_identity"]
-            product_id = work.product_id
+            product_id = None if work is None else work.product_id
             if product_id is None:
                 product_id = session.execute(
                     select(software_product_assets.c.product_id)
@@ -163,9 +163,10 @@ class ProductAssetService:
                         description=f"Watt-managed Product for {identity}",
                         lifecycle="ACTIVE", created_at=now, updated_at=now,
                     ))
-                session.execute(update(product_works).where(
-                    product_works.c.id == work_id,
-                ).values(product_id=product_id))
+                if work_id is not None:
+                    session.execute(update(product_works).where(
+                        product_works.c.id == work_id,
+                    ).values(product_id=product_id))
             else:
                 product = self._owned(session, product_id, owner_id)
                 if product["lifecycle"] != "ACTIVE":

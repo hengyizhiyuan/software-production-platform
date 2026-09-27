@@ -325,6 +325,12 @@ def create_http_application(
         selected_interaction.configure_governed_branch_handler(
             production_admission_trigger.execute_governed_turn
         )
+        execute_repository_actions = getattr(asset_service, "execute_interaction_actions", None)
+        repository_observation = getattr(asset_service, "interaction_observation", None)
+        if callable(execute_repository_actions) and callable(repository_observation):
+            selected_interaction.configure_repository_actions(
+                execute_repository_actions, repository_observation,
+            )
 
         def execution_reality(work_id: UUID) -> tuple[str | None, str | None]:
             projection = work_service.get_work(work_id)
@@ -345,6 +351,9 @@ def create_http_application(
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
+        restore_repository_actions = getattr(asset_service, "restore_interaction_actions", None)
+        if selected_interaction is not None and callable(restore_repository_actions):
+            restore_repository_actions()
         software_runtime.restore()
         if candidate_runtime_preview is not None:
             candidate_runtime_preview.restore()

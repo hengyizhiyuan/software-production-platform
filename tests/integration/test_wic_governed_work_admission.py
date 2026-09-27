@@ -1385,8 +1385,9 @@ def test_bounded_feature_execution_uses_steering_without_product_questionnaire(
     assert _count(postgres_database, steering_plans) == 1
 
 
+@pytest.mark.parametrize("question", ["目前执行到什么状态了？", "上一次到底改了什么？"])
 def test_work_status_question_is_read_only_and_independent_of_provider(
-    postgres_database: Database, services,
+    postgres_database: Database, services, question,
 ) -> None:
     work, interactions = services
     ready = _ready(interactions)
@@ -1402,12 +1403,16 @@ def test_work_status_question_is_read_only_and_independent_of_provider(
     before_runs = _count(postgres_database, production_runs)
     before_steps = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
     service.append_human_input(
-        ready.interaction.id, "目前执行到什么状态了？", human_identity="human:test",
+        ready.interaction.id, question, human_identity="human:test",
     )
     assessment = service.assess_current(ready.interaction.id)
     assert assessment.provider_identity == "watt-native:work-reality-query"
-    assert "当前 Work 尚未进入生产执行" in assessment.natural_response
-    assert "下一步由 Watt 按当前步骤继续推进" in assessment.natural_response
+    if question.startswith("上一次"):
+        assert "现有记录没有独立观察到的文件变更" in assessment.natural_response
+        assert "没有创建生产 Work" in assessment.natural_response
+    else:
+        assert "当前 Work 尚未进入生产执行" in assessment.natural_response
+        assert "下一步由 Watt 按当前步骤继续推进" in assessment.natural_response
     assert "PWU" not in assessment.natural_response
     assert "QUEUED" not in assessment.natural_response
     assert assessment.focus_classification is WorkFocusClassification.SIDE_QUESTION

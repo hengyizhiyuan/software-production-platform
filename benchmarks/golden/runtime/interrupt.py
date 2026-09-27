@@ -71,13 +71,36 @@ def main():
                     selected.append(worker)
             if len(selected) != 1:
                 raise SystemExit('Owning Worker must map to exactly one declared container')
-            record = {'work_id':work_id,'attempt_id':attempt_id,'lease_before':lease,
-                'worker_container':selected[0],'checkpoint_before':attempt['checkpoint'],
-                'settled_effects_before':attempt['effects'],'observed_at':datetime.now(UTC).isoformat(),
-                'fault':'DECLARED_WORKER_PROCESS_LOSS','in_flight_tool_effect':False,
-                'database_or_source_mutation':False,'human_work_rescue':False,'human_acceptance':'PENDING'}
-            output.write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\n')
-            subprocess.run(['docker','kill','--signal','KILL',selected[0]],check=True,capture_output=True)
+            # Freeze the declared process before checking the crash frontier.
+            # A read-then-kill race can otherwise cut a newly dispatched write,
+            # contradicting this case's settled-effect fault precondition.
+            subprocess.run(['docker','kill','--signal','STOP',selected[0]],
+                check=True,capture_output=True)
+            frozen = True
+            try:
+                exact = client.request('/api/native-execution/attempts/'+attempt_id)
+                if (exact['state']['worker_epoch'] != lease['epoch']
+                        or exact['state']['effect_uncertainty']
+                        or any(effect['condition'] not in {'SETTLED','FAILED'}
+                               for effect in exact.get('effects', []))
+                        or not any(step['kind'] == 'INFERENCE' and step['condition'] == 'RUNNING'
+                                   for step in exact.get('steps', []))):
+                    continue
+                attempt = exact
+                record = {'work_id':work_id,'attempt_id':attempt_id,'lease_before':lease,
+                    'worker_container':selected[0],'checkpoint_before':attempt['checkpoint'],
+                    'settled_effects_before':attempt['effects'],'observed_at':datetime.now(UTC).isoformat(),
+                    'fault':'DECLARED_WORKER_PROCESS_LOSS','in_flight_tool_effect':False,
+                    'frozen_frontier_verified':True,
+                    'database_or_source_mutation':False,'human_work_rescue':False,'human_acceptance':'PENDING'}
+                output.write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\n')
+                subprocess.run(['docker','kill','--signal','KILL',selected[0]],
+                    check=True,capture_output=True)
+                frozen = False
+            finally:
+                if frozen:
+                    subprocess.run(['docker','kill','--signal','CONT',selected[0]],
+                        check=True,capture_output=True)
             print(json.dumps({key:record[key] for key in ('work_id','attempt_id','worker_container','fault')}),flush=True)
             return
         time.sleep(.5)

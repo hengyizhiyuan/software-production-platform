@@ -233,6 +233,10 @@ class ControlRoomService:
         elif preview_unhealthy:
             cause, explanation = "PREVIEW_UNHEALTHY", "Delivery preview runtime is unhealthy"
             evidence = preview_unhealthy
+        elif any(row['status'] in {'CREATED', 'REQUESTED', 'PREPARING', 'BUILDING', 'STARTING'}
+                 for row in preview_status):
+            cause, explanation = "PREVIEW_PREPARING", "Preview owner is preparing the exact Candidate; Human review is not ready"
+            evidence = [f"candidate-preview:{row['preview_id']}" for row in preview_status if row.get('preview_id')]
         elif any(row["runtime_mode"] in {"RECONCILING", "RESUME_REQUESTED"} for row in states):
             cause, explanation = "RECOVERING", "Native Executor is reconciling an interrupted attempt"
             evidence = [f"execution-attempt:{row['attempt_id']}" for row in states]

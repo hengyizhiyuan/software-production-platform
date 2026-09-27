@@ -323,6 +323,7 @@ class DeepSeekGovernedResponseRealizer:
         self.model_identity = profile.model
         self.reasoning_effort = profile.reasoning_effort
         self.last_result: StructuredModelResult | None = None
+        self.last_structured_repair_count = 0
 
     def realize_stream(
         self,
@@ -330,6 +331,7 @@ class DeepSeekGovernedResponseRealizer:
         *,
         on_response_delta: Callable[[str], None],
     ) -> GovernedResponseRealization:
+        self.last_structured_repair_count = 0
         extractor = _JsonStringFieldStream("natural_response")
 
         def receive(delta: str) -> None:
@@ -388,12 +390,31 @@ class DeepSeekGovernedResponseRealizer:
                 result.request_id, _safe_validation_summary(error),
                 _safe_result_shape(result.output_text),
             )
-            raise InteractionInvariantViolation(
-                "Governed Response Realizer returned an invalid result"
-            ) from error
+            result = _repair_structured_result(
+                self.runtime, purpose=ModelPurpose.CONVERSATION_RESPONSE,
+                invalid_output=result.output_text,
+                output_schema=ConversationContract.output_schema(), on_stage=None,
+                contract_name="Governed Response Realizer",
+                original_instruction=instruction,
+                validation_feedback=_safe_validation_summary(error),
+            )
+            self.last_structured_repair_count = 1
+            try:
+                payload = _ConversationProviderPayload.model_validate_json(
+                    _structured_json_text(result.output_text)
+                )
+            except (ValidationError, ValueError, TypeError) as second_error:
+                raise StructuredResponseSchemaViolation(
+                    "Governed Response Realizer returned an invalid result after "
+                    "one bounded structural repair (bounded_repair_exhausted)",
+                    request_id=result.request_id,
+                    validation_issue=_safe_validation_summary(second_error),
+                    repair_attempted=True,
+                ) from second_error
         self.last_result = result
         return GovernedResponseRealization(
             content=payload.natural_response,
+            structural_repair_count=self.last_structured_repair_count,
             provider_identity=(
                 "deepseek-responses:governed-realizer:request:"
                 f"{result.request_id or 'unknown'}"

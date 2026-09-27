@@ -103,4 +103,16 @@ test("P1 Product/Work history and operator health render from persisted API fact
   await elements["p1-credential-list"].children[1].children[3].click();
   assert.match(elements["p1-credential-list"].children[1].children[4].textContent, /CREATED/);
   assert.ok(requests.includes("/api/operations/summary"));
+  elements["selected-work"].dataset = { repositoryProductId: "p1" };
+  const previousWorkReads = requests.filter((url) => url.startsWith("/api/works/")).length;
+  elements["refresh-control"].click();
+  for (let i = 0; i < 5; i++) await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(elements["p1-bind-work"].disabled, true);
+  assert.match(elements["p1-work-product-summary"].textContent,
+    /Repository belongs to Finance Product\. Production Work is not admitted/);
+  assert.equal(elements["p1-work-product"].value, "p1");
+  assert.equal(elements["p1-diagnosis"].children.length, 0);
+  assert.equal(elements["p1-economics"].children.length, 0);
+  assert.equal(elements["p1-history"].children.length, 0);
+  assert.equal(requests.filter((url) => url.startsWith("/api/works/")).length, previousWorkReads);
 });

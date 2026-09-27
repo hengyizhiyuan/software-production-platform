@@ -479,6 +479,7 @@ class SharedUnderstanding(BaseModel):
     repository_source: str | None = None
     production_admission_state: ProductionAdmissionExecutionState | None = None
     repository_acquisition_state: RepositoryAcquisitionState | None = None
+    repository_observation: dict[str, object] | None = None
     production_next_step: str | None = None
     selected_design_schema_identity: str | None = None
     selected_design_schema_version: str | None = None

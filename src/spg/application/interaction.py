@@ -146,6 +146,12 @@ def _repository_branch_status_answer(
 
     if not _repository_branch_status_question(content):
         return None
+    observation = getattr(reality, 'repository_observation', None)
+    if reality.governed_revision is None and observation is not None:
+        if observation.get('condition') != 'READY' or not observation.get('repository_ref'):
+            return f"仓库操作状态为 {observation.get('condition')}；尚不能确认本地分支。"
+        return (f"当前本地分支是 {observation['repository_ref'].removeprefix('refs/heads/')}，"
+            f"提交 {observation['revision']}。生产 Work 尚未准入；没有推送远端。")
     revision = reality.governed_revision
     if revision is None or revision.repository_ref is None:
         return "当前 Work 尚未绑定可确认的仓库分支；不能说分支已经切好。"
@@ -272,11 +278,20 @@ def _nonmutating_question(value: str) -> bool:
     return question and change is None
 
 
+def _work_history_question(value: str) -> bool:
+    """Read persisted results without turning a historical question into intent."""
+    text = value.strip().casefold()
+    return bool(_nonmutating_question(text) and re.search(
+        r"(?:上一次|上一轮|上个|之前|历史|last|previous).*"
+        r"(?:改了什么|修改|变更|结果|做了什么|changed|change|result|did)", text,
+    ))
+
+
 def _work_reality_status_question(value: str) -> bool:
     """Narrow read-only operational question, not a new intent taxonomy."""
 
     text = value.strip().casefold()
-    return bool(_nonmutating_question(text) and re.search(
+    return _work_history_question(text) or bool(_nonmutating_question(text) and re.search(
         r"(?:目前|现在|当前|执行|进度|等待|状态|running|progress|status)"
         r".*(?:状态|进度|做到|执行|等待|卡住|哪里|哪了|了吗|什么|how|why|running|progress|status)"
         r"|(?:为什么|怎么|why|how).*(?:等待|执行|进度|卡住|卡在|queued|waiting|running|progress)", text,
@@ -601,6 +616,8 @@ class WorkInteractionService:
             or DeterministicGovernedResponseRealizer()
         )
         self.external_research = external_research
+        self._repository_action_handler = None
+        self._repository_observation_provider = None
         self._turn_executor = ThreadPoolExecutor(
             max_workers=1,
             thread_name_prefix="watt-interaction",
@@ -688,6 +705,11 @@ class WorkInteractionService:
 
         with self._turn_lock:
             self._governed_branch_handler = handler
+
+    def configure_repository_actions(self, handler, observation_provider) -> None:
+        """Repository Asset retains independent Interaction action ownership."""
+        self._repository_action_handler = handler
+        self._repository_observation_provider = observation_provider
 
     def record_production_admission_progress(
         self,
@@ -1779,6 +1801,19 @@ class WorkInteractionService:
                     "Governed response delta sequence does not reconstruct the result"
                 )
             realization = realization.model_copy(update={"content": admitted_content})
+        if realization.structural_repair_count:
+            self._record_response_event(
+                turn_id, WicResponseEventType.RESPONSE_REFINEMENT,
+                basis_fingerprint=assessment.basis_fingerprint,
+                metadata={
+                    "component": "wic/governed-response-realizer",
+                    "signal": "PROVIDER_SCHEMA_MISMATCH", "automatic": True,
+                    "recovery_scope": "EXPRESSION_ONLY", "work_converged": False,
+                    "attempt_budget": 2, "attempt_count": 2,
+                    "final_condition": "LOCAL_OBLIGATION_RECOVERED",
+                    "evidence_reference": f"provider-request:{realization.request_id}",
+                }, only_while_processing=True,
+            )
         self._mark_turn_timing(turn_id, "realization_completed")
         response_content = (provisional or "") + admitted_content
         return (
@@ -1942,6 +1977,13 @@ class WorkInteractionService:
                 on_basis_ready=start_fast_reception,
                 policy_governed=controlled,
             )
+            independent_action_answer = None
+            action_projection = self.get_shared_understanding(turn.interaction_id)
+            if (self._repository_action_handler is not None
+                    and action_projection.governed_work_id is None
+                    and not production_intent_evidence(request_record.content).production_request):
+                independent_action_answer = self._repository_action_handler(
+                    turn.interaction_id, assessment, request_record)
             admission_prepared = self._prepare_production_admission_if_ready(
                 turn.interaction_id,
                 assessment,
@@ -2024,6 +2066,8 @@ class WorkInteractionService:
                 )
             if branch_action_answer is not None and research_result is None:
                 response_content = branch_action_answer
+            if independent_action_answer is not None and research_result is None:
+                response_content = independent_action_answer
             self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
             with self.database.unit_of_work() as uow:
@@ -2900,6 +2944,18 @@ class WorkInteractionService:
                     else None
                 )
                 production_next_step = "Execute governed Work admission."
+        independent_observation = (
+            self._repository_observation_provider(interaction_id)
+            if self._repository_observation_provider is not None else None
+        )
+        if independent_observation is not None and governed_revision is None:
+            repository_acquisition_state = RepositoryAcquisitionState(independent_observation['condition'])
+            persisted_repository_source = independent_observation.get('source')
+            production_next_step = (
+                "Repository Reality is ready; production Work remains unadmitted."
+                if independent_observation.get('condition') == 'READY'
+                else independent_observation.get('human_message')
+            )
         work_focus_history: list[UUID] = []
         for work_id in (
             *(record.work_focus_id for record in records),
@@ -3002,6 +3058,11 @@ class WorkInteractionService:
             ),
             production_admission_state=production_admission_state,
             repository_acquisition_state=repository_acquisition_state,
+            repository_observation=(
+                {key: value for key, value in independent_observation.items()
+                    if key not in {'request', 'technical_evidence'}}
+                if independent_observation is not None else None
+            ),
             production_next_step=production_next_step,
             selected_design_schema_identity=(
                 interaction.selected_design_schema_identity
@@ -3689,6 +3750,13 @@ class WorkInteractionService:
                 else steering.latest_semantic_result_for_step(decision.current_step_id)
             )
             queue_entries = NativeExecutionStore(uow.session).list_queue(work_id=revision.work_id)
+            history_query = _work_history_question(basis.records[-1].content)
+            commit = (RuntimeStore(uow.session).runtime_commit(summary.runtime_commit_id)
+                      if history_query and summary is not None and summary.runtime_commit_id
+                      else None)
+            observation = (RuntimeStore(uow.session).repository_observation_by_id(summary.observation_id)
+                           if history_query and summary is not None and summary.observation_id
+                           else None)
         phase = {"DESIGN": "整理解决方案", "REFINE": "澄清当前步骤", "PRODUCE": "生产", "VERIFY_ACCEPT": "验证与验收", "COMPLETE": "完成"}.get(
             None if current is None else current.type.value, "等待下一步")
         if summary is not None and summary.runtime_commit_id is not None:
@@ -3768,6 +3836,21 @@ class WorkInteractionService:
                 "重要限制：现有证据不足以确认你描述的原因。"
                 + next_step
             )
+        if history_query:
+            paths = tuple(change.repository_relative_path for change in observation.changes) if observation else (
+                summary.artifact_paths if summary is not None else ())
+            answer = f"当前聚焦 Work {revision.work_id} 的持久化历史："
+            if paths:
+                answer += "独立观察到变更文件：" + "、".join(paths) + "。"
+            else:
+                answer += "现有记录没有独立观察到的文件变更，不能据此声称已修改源码。"
+            if summary is not None and summary.candidate_id is not None:
+                answer += f"候选结果：{summary.candidate_id}；验证结果：{', '.join(summary.verification_results) or '尚无'}。"
+            if commit is not None:
+                answer += (f"已接受并形成本地可信提交 {commit.id}；"
+                           f"源提交 {commit.expected_source_repository_revision} → {commit.repository_revision}；"
+                           f"文件树 {commit.repository_tree_identity}。")
+            answer += "此查询只读取历史，没有创建生产 Work；本地验收不代表已授权或执行远端交付。"
         return InteractionAssessmentCandidate(
             turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
             interpreted_motive=revision.motive,

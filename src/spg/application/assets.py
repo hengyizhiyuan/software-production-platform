@@ -26,6 +26,9 @@ from spg.domain.assets import (
     RepositoryIntakeRequest,
 )
 from spg.domain.connectors import CapabilityRequirement
+from spg.domain.action_admission import ActionFacts, ActionFamily, admit_action
+from spg.domain.repository_actions import repository_actions
+from spg.domain.interaction import InteractionActor
 from spg.domain.engineering_semantics import current_semantic_facts
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import EngineeringContextReference, ProductInvariantViolation, ProductRecordNotFound
@@ -103,7 +106,7 @@ class RepositoryAssetService:
             branch_digest = sha256(
                 f"{source}:{request.target_branch}".encode("utf-8")
             ).hexdigest()[:20]
-            return f"watt://work-branches/{request.work_id}/{branch_digest}"
+            return f"watt://work-branches/{request.work_id or request.interaction_id}/{branch_digest}"
         return source or f"watt://repositories/{request.request_id}"
 
     @staticmethod
@@ -130,6 +133,8 @@ class RepositoryAssetService:
     def start_intake(self, request: RepositoryIntakeRequest) -> dict:
         """Persist an acquisition operation before any Git effect is attempted."""
 
+        if request.source_record_id is not None:
+            self._require_interaction_authority(request)
         if request.operation_kind == "CREATE_BRANCH":
             self._require_current_branch_authority(request)
         source = self._source(request.source)
@@ -139,7 +144,7 @@ class RepositoryAssetService:
             with self.database.unit_of_work() as uow:
                 row = uow.session.execute(select(repository_intakes).where(repository_intakes.c.id == request.request_id)).mappings().one_or_none()
                 if row is not None:
-                    if row["request"] != payload:
+                    if RepositoryIntakeRequest.model_validate(row["request"]) != request:
                         raise ProductInvariantViolation("Intake request identity already belongs to a different request")
                     if row["observation"] is not None:
                         return row["observation"]
@@ -186,6 +191,9 @@ class RepositoryAssetService:
     def _require_current_branch_authority(self, request: RepositoryIntakeRequest) -> None:
         """A branch request must be backed by current, admitted Human Work truth."""
 
+        if request.work_id is None and request.source_record_id is not None:
+            self._require_interaction_authority(request)
+            return
         if request.work_id is None or request.base_resource_id is None:
             raise ProductInvariantViolation("Branch creation requires a bound Work repository")
         with self.database.unit_of_work() as uow:
@@ -204,6 +212,232 @@ class RepositoryAssetService:
             raise ProductInvariantViolation("Branch creation authority differs from current Work Reality")
         if target != request.target_branch:
             raise ProductInvariantViolation("Branch creation requires the current Human-admitted branch action")
+
+    def interaction_observation(self, interaction_id: UUID) -> dict | None:
+        history = self.attempts_for_interaction(interaction_id)
+        return history[-1] if history else None
+
+    def attempts_for_interaction(self, interaction_id: UUID) -> tuple[dict, ...]:
+        with self.database.unit_of_work() as uow:
+            rows = uow.session.execute(select(repository_intakes).where(
+                repository_intakes.c.request["interaction_id"].astext == str(interaction_id)
+            ).order_by(repository_intakes.c.created_at, repository_intakes.c.id)).mappings().all()
+        return tuple({**(row["observation"] or {}), "request": row["request"]} for row in rows)
+
+    def _require_interaction_authority(self, request: RepositoryIntakeRequest) -> None:
+        with self.database.unit_of_work() as uow:
+            store = InteractionStore(uow.session)
+            interaction = store.interaction(request.interaction_id)
+            record = store.record(request.source_record_id)
+            records = store.records(request.interaction_id) if interaction else ()
+            if self.github_delivery.settings.auth_mode == 'required':
+                from spg.infrastructure.persistence.auth_schema import authority_memberships, authority_resource_access
+                membership = uow.session.execute(select(authority_memberships.c.role).where(
+                    authority_memberships.c.organization_id == 'organization:default',
+                    authority_memberships.c.actor_id == request.authority_identity,
+                )).scalar_one_or_none()
+                access = uow.session.execute(select(authority_resource_access.c.role).where(
+                    authority_resource_access.c.resource_kind == 'interaction',
+                    authority_resource_access.c.resource_id == str(request.interaction_id),
+                    authority_resource_access.c.actor_id == request.authority_identity,
+                )).scalar_one_or_none()
+                if membership != 'OWNER' or access != 'OWNER':
+                    raise RepositoryAcquisitionFailure(RepositoryAcquisitionFailureCategory.AUTH_REQUIRED,
+                        'Current actor authority is required for this Interaction action.',
+                        technical_evidence={'signal': 'ACTION_AUTHORITY_MISSING'}, retryable=False)
+        if (interaction is None or record is None or record not in records
+                or record.actor is not InteractionActor.HUMAN
+                or record.source != request.authority_identity
+                or interaction.created_by != request.authority_identity):
+            raise ProductInvariantViolation("Interaction action requires its Human owner's explicit record")
+        actions = repository_actions(record.content)
+        branch = request.operation_kind == "CREATE_BRANCH"
+        matching = tuple(action for action in actions if (
+            action.family is ActionFamily.LOCAL_BRANCH and action.branch == request.target_branch
+            if branch else action.family in {ActionFamily.ACQUIRE_REPOSITORY, ActionFamily.INSPECT}
+        ))
+        if not matching:
+            raise ProductInvariantViolation("Action is not explicitly authorized by its Human record")
+        history = self.attempts_for_interaction(request.interaction_id)
+        ready = tuple(item for item in history if item.get("condition") == "READY")
+        if branch:
+            if not any(item.get("resource_id") == str(request.base_resource_id) for item in ready):
+                raise ProductInvariantViolation("Branch source does not belong to this Interaction")
+        elif not any(action.source == request.source for action in matching):
+            if not any(item.get("source") == request.source for item in ready):
+                raise ProductInvariantViolation("Acquisition source differs from explicit Human authority")
+
+    def execute_interaction_actions(self, interaction_id, assessment, record) -> str | None:
+        """Execute independently admitted preparatory actions without forming Work."""
+        actions = repository_actions(record.content)
+        if not actions:
+            return None
+        previous = self.interaction_observation(interaction_id)
+        messages = []
+        for action in actions:
+            if action.target_ambiguous:
+                messages.append("你提供了多个仓库地址；请指定要操作哪一个。尚未执行仓库操作。")
+                break
+            prior_product_id = (previous or {}).get('product_id')
+            source = action.source or (previous or {}).get("source")
+            if action.family is ActionFamily.LOCAL_BRANCH:
+                if previous is None or previous.get("condition") != "READY":
+                    messages.append("尚无已获取的仓库；请指定要操作的仓库。")
+                    break
+                operation = "CREATE_BRANCH"
+                if previous.get("repository_ref") == f"refs/heads/{action.branch}":
+                    messages.append(f"当前本地分支已经是 {action.branch}；没有重复创建或推送。")
+                    continue
+            elif action.source is None and previous is not None and action.family is ActionFamily.INSPECT:
+                if previous.get("condition") == "READY":
+                    messages.append(self._inspection_answer(previous, branch_only="分支" in record.content or "branch" in record.content.lower()))
+                else:
+                    messages.append(f"仓库尚未就绪：{previous.get('condition')}。")
+                continue
+            else:
+                operation = "ACQUIRE"
+            if source is None:
+                messages.append("请指定一个仓库地址，以便获取或检查；尚未执行仓库操作。")
+                break
+            from time import monotonic
+            deadline = monotonic() + 300
+            count = 0
+            while count < 3:
+                history = self.attempts_for_interaction(interaction_id)
+                same = [item for item in history if item.get("request", {}).get("source_record_id") == str(record.id)
+                    and item.get("operation_kind") == operation
+                    and item.get("target_branch") == action.branch]
+                if same and same[-1].get("condition") not in {"REQUESTED", "RUNNING", "FAILED_RETRYABLE"}:
+                    previous = same[-1]
+                    break
+                if len(same) >= 3 or (same and monotonic() >= deadline):
+                    previous = same[-1]
+                    break
+                capability = ConnectorResolver(self.database).resolve(CapabilityRequirement(
+                    capability_id="git.branch.create" if operation == "CREATE_BRANCH" else "git.repository.acquire",
+                    work_id=None, user_id=record.source, operation_ref=f"interaction-record:{record.id}",
+                ))
+                decision = admit_action(action.family, ActionFacts(explicit=True,
+                    authority=True, capability=capability.executable,
+                    repository_ready=bool(previous and previous.get("condition") == "READY"),
+                    retryable=bool(same), attempts=len(same)))
+                if not decision.execute:
+                    messages.append(f"操作未执行：{decision.signal}；没有新增生产或远端写入授权。")
+                    return "\n".join(messages)
+                number = len(same) + 1
+                if same and same[-1].get("condition") in {"REQUESTED", "RUNNING"}:
+                    previous = self.execute_intake(UUID(same[-1]['intake_request_id']))
+                    count += 1
+                    if previous.get('condition') != 'FAILED_RETRYABLE' or previous.get('failure_category') != 'NETWORK_FAILURE':
+                        break
+                    continue
+                request = RepositoryIntakeRequest(
+                    request_id=uuid5(NAMESPACE_URL, f"interaction-action:{record.id}:{operation}:{action.branch}:{number}"),
+                    source=source, title=f"Interaction {operation}", description=record.content[:4000],
+                    authority_identity=record.source, interaction_id=interaction_id,
+                    source_record_id=record.id, attempt_number=number,
+                    previous_attempt_id=UUID(same[-1]["intake_request_id"]) if same else None,
+                    operation_kind=operation,
+                    base_resource_id=UUID(previous["resource_id"]) if operation == "CREATE_BRANCH" else None,
+                    target_branch=action.branch,
+                )
+                try:
+                    previous = self.intake(request)
+                except RepositoryAcquisitionFailure as failure:
+                    messages.append(f"操作被阻止：{failure.human_message}")
+                    return "\n".join(messages)
+                count += 1
+                if previous.get("failure_category") != "NETWORK_FAILURE" or previous.get("condition") != "FAILED_RETRYABLE":
+                    break
+                from time import sleep
+                sleep(min(2 ** (number - 1), 4))
+            if previous and previous.get('attempt_number', 1) > 1:
+                self._record_interaction_action_refinement(interaction_id, record, previous)
+            if previous is None or previous.get("condition") != "READY":
+                messages.append(f"仓库操作未成功：{(previous or {}).get('condition', 'BLOCKED')}；{(previous or {}).get('human_message', '')}")
+                break
+            from spg.application.product_assets import ProductAssetService
+            products = ProductAssetService(self.database)
+            if prior_product_id and operation == 'CREATE_BRANCH':
+                products.attach_asset(UUID(prior_product_id), record.source,
+                    kind='REPOSITORY', reference=previous['repository_identity'],
+                    resource_id=UUID(previous['resource_id']),
+                    metadata={key: previous[key] for key in ('repository_ref','revision','tree')})
+                product_id = UUID(prior_product_id)
+            else:
+                product_id = products.ensure_repository_work(None, UUID(previous['resource_id']),
+                    record.source, revision=previous['revision'],
+                    repository_ref=previous['repository_ref'], tree=previous['tree'])
+            previous = {**previous, 'product_id': str(product_id)}
+            previous['fingerprint'] = canonical_fingerprint({key: value for key, value in previous.items()
+                if key not in {'fingerprint','request'}})
+            with self.database.unit_of_work() as uow:
+                uow.session.execute(update(repository_intakes).where(
+                    repository_intakes.c.id == UUID(previous['intake_request_id'])).values(
+                        observation={key: value for key,value in previous.items() if key != 'request'}))
+                uow.commit()
+            messages.append(self._inspection_answer(previous,
+                branch_only=action.family is not ActionFamily.INSPECT))
+        return "\n".join(messages) + "\n生产 Work 尚未准入；没有修改源码或推送远端。" if messages else None
+
+    def _record_interaction_action_refinement(self, interaction_id, record, observation):
+        from spg.domain.wic_response import WicResponseEventType
+        from uuid import uuid4
+        with self.database.unit_of_work() as uow:
+            store = InteractionStore(uow.session)
+            turn = next((item for item in store.turns(interaction_id)
+                if item.request_record_id == record.id), None)
+            if turn is None:
+                return
+            evidence_reference = f"repository-intake:{observation['intake_request_id']}"
+            if any(event.metadata.get('evidence_reference') == evidence_reference
+                   for event in store.response_events(turn.id)):
+                return
+            store.insert_response_event({
+                'id': uuid4(), 'interaction_id': interaction_id, 'turn_id': turn.id,
+                'response_id': turn.id, 'sequence': store.next_response_event_sequence(turn.id),
+                'event_type': WicResponseEventType.RESPONSE_REFINEMENT.value,
+                'content': None, 'basis_fingerprint': None, 'reconciliation': None,
+                'event_metadata': {'component': 'repository/acquisition',
+                    'signal': 'ACTION_RETRYABLE', 'automatic': True,
+                    'recovery_scope': 'INTERACTION_ACTION_ONLY', 'work_converged': False,
+                    'attempt_budget': 3, 'time_budget_seconds': 300,
+                    'attempt_count': observation['attempt_number'],
+                    'final_condition': observation['condition'],
+                    'evidence_reference': f"repository-intake:{observation['intake_request_id']}"},
+                'created_at': datetime.now(UTC),
+            })
+            uow.commit()
+
+    def restore_interaction_actions(self):
+        """Resume durable requested operations without synthesizing Human intent."""
+        with self.database.unit_of_work() as uow:
+            rows = uow.session.execute(select(repository_intakes.c.request).where(
+                repository_intakes.c.observation['condition'].astext.in_(['REQUESTED', 'RUNNING', 'FAILED_RETRYABLE'])
+            )).scalars().all()
+        for payload in rows:
+            request = RepositoryIntakeRequest.model_validate(payload)
+            if request.work_id is not None or request.source_record_id is None:
+                continue
+            with self.database.unit_of_work() as uow:
+                record = InteractionStore(uow.session).record(request.source_record_id)
+            if record is not None:
+                self.execute_interaction_actions(request.interaction_id, None, record)
+
+    def _inspection_answer(self, observation, *, branch_only=False):
+        branch = observation['repository_ref'].removeprefix('refs/heads/')
+        answer = f"仓库已就绪，本地分支：{branch}；提交：{observation['revision']}；文件树：{observation['tree']}。"
+        if branch_only:
+            return answer
+        packet = self.research_context(turn_id=UUID(observation['intake_request_id']),
+            interaction_id=UUID(observation['interaction_id']), source=observation['source'],
+            authority_identity="unused", observation=observation)
+        for material in packet['materials']:
+            if Path(material['path']).name in {'package.json', 'pyproject.toml'}:
+                answer += f"\n证据 {observation['revision']}:{material['path']}（SHA256 {material['content_sha256']}）：\n{material['content'][:4000]}"
+        if not packet['materials']:
+            answer += "\n未发现可用于确认技术栈的材料，不能推断使用的框架。"
+        return answer
 
     def intake(self, request: RepositoryIntakeRequest):
         observation = self.start_intake(request)
@@ -238,6 +472,11 @@ class RepositoryAssetService:
             return self._execute_intake(request_id)
         except ProductRecordNotFound:
             raise
+        except RepositoryAcquisitionFailure as error:
+            return self.mark_attempt_failure(
+                request_id, category=error.category, human_message=error.human_message,
+                technical_evidence=error.technical_evidence, retryable=error.retryable,
+            )
         except Exception as error:
             # Once an Attempt exists, an unexpected adapter, observation, or
             # persistence failure must not leave durable Reality at RUNNING.
@@ -268,6 +507,8 @@ class RepositoryAssetService:
         if row is None:
             raise ProductRecordNotFound("Repository acquisition Attempt does not exist")
         request = RepositoryIntakeRequest.model_validate(row["request"])
+        if request.source_record_id is not None:
+            self._require_interaction_authority(request)
         if request.operation_kind == "CREATE_BRANCH":
             self._require_current_branch_authority(request)
         observation = row["observation"]
@@ -371,7 +612,27 @@ class RepositoryAssetService:
                         "watt://repositories/") or self.managed_source.has_source(
                             base_for_source.repository_identity)))
             if not repository.exists():
-                if request.operation_kind == "CREATE_BRANCH":
+                if request.operation_kind == "CREATE_BRANCH" and request.work_id is None:
+                    requirement = CapabilityRequirement(
+                        capability_id="git.branch.create", work_id=None,
+                        user_id=request.authority_identity,
+                        operation_ref=f"repository-intake:{request.request_id}",
+                    )
+                    resolution = ConnectorResolver(self.database).resolve(requirement)
+                    if not resolution.executable:
+                        return self.mark_attempt_failure(request.request_id,
+                            category=RepositoryAcquisitionFailureCategory.ACQUISITION_FAILED_TERMINAL,
+                            human_message="Local branch capability is unavailable.",
+                            technical_evidence={"signal": "CAPABILITY_MISSING"}, retryable=False)
+                    connector_capability = resolution.capability
+                    with self.database.unit_of_work() as uow:
+                        base = ProductStore(uow.session).resource(request.base_resource_id)
+                    self.repository_acquirer.create_work_branch(
+                        self.asset_root, Path(base.location_ref),
+                        base.authoritative_ref.removeprefix("refs/heads/"),
+                        source, repository, request.target_branch,
+                    )
+                elif request.operation_kind == "CREATE_BRANCH":
                     requirement = CapabilityRequirement(
                         capability_id="git.branch.create",
                         work_id=request.work_id,
@@ -501,7 +762,7 @@ class RepositoryAssetService:
                     self._git(repository, "add", "--", "README.md")
                     self._git(repository, "-c", "user.name=Watt", "-c", "user.email=watt@localhost", "commit", "-m", "Initialize repository asset")
                 else:
-                    if request.work_id is not None:
+                    if request.work_id is not None or request.source_record_id is not None:
                         requirement = CapabilityRequirement(
                             capability_id="git.repository.acquire",
                             work_id=request.work_id,
@@ -854,13 +1115,13 @@ class RepositoryAssetService:
             return row
 
     def research_context(self, *, turn_id: UUID, interaction_id: UUID,
-                         source: str, authority_identity: str) -> dict:
+                         source: str, authority_identity: str, observation: dict | None = None) -> dict:
         """Observe a Human-supplied repository for advice without admitting Work.
 
         Acquisition reuses durable Asset intake. Only committed, bounded text is
         supplied as untrusted Evidence; no branch, PWU or Delivery is created.
         """
-        observation = self.intake(RepositoryIntakeRequest(
+        observation = observation or self.intake(RepositoryIntakeRequest(
             request_id=uuid5(NAMESPACE_URL, f"interaction-research:{turn_id}:{source}"),
             source=source, title="Interaction repository research",
             description="Read committed project context for the Human's research request",
@@ -879,13 +1140,14 @@ class RepositoryAssetService:
         repository = Path(resource.location_ref)
         suffixes = {".md", ".py", ".js", ".cjs", ".mjs", ".ts", ".tsx",
                     ".html", ".css", ".json", ".toml", ".sql"}
-        paths = tuple(path for path in observation["paths"]
+        observed_paths = self._git(repository, 'ls-tree', '-r', '--name-only', observation['revision']).splitlines()
+        paths = tuple(path for path in observed_paths
             if Path(path).suffix.lower() in suffixes
             and not any(part.startswith('.') for part in Path(path).parts)
             and not any(part in {"node_modules", "vendor", "dist", "build"} for part in Path(path).parts))
         paths = sorted(paths, key=lambda path: (
-            not Path(path).name.lower().startswith('readme'),
-            Path(path).name not in {"package.json", "pyproject.toml"}, path))[:8]
+            path not in {"package.json", "pyproject.toml"},
+            not Path(path).name.lower().startswith('readme'), path))[:8]
         remaining = 24000
         for path in paths:
             raw = subprocess.run(["git", "-c", "core.hooksPath=/dev/null", "-C", str(repository),

@@ -297,3 +297,7 @@ FULL_REGRESSION = CLOSURE_OR_RELEASE_BOUNDARY
 GUARDIAN_RISK_TO_REQUIRED_EVIDENCE = FUTURE_DIRECTION
 IMPLEMENTATION_AUTHORIZED_BY_THIS_DOCUMENT = NO
 ```
+
+## Lifecycle/action hardening corpus
+
+`tier0-v2.json` extends the unchanged v1 cases with GC-LC-01 through GC-LC-15. The canonical owner/policy contract is [Lifecycle and Action Admission Semantics](lifecycle-and-action-admission-semantics.md); the versioned matrix is executable. Natural-language journeys and observed source/runtime receipts are separate from unit-policy evidence. Missing external credentials are BLOCKED_EXTERNAL, never PASS or a reason to abandon credential-independent cases. Existing v1 and historical FSI evidence are not rewritten.

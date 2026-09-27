@@ -139,6 +139,7 @@ class GovernedResponseRealization(BaseModel):
     request_id: str | None = None
     usage: dict[str, Any] | None = None
     timing: dict[str, Any] | None = None
+    structural_repair_count: int = Field(default=0, ge=0, le=1)
 
 
 class GovernedResponseRealizer(Protocol):

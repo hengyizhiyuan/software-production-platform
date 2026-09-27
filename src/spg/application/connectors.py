@@ -329,6 +329,8 @@ class ConnectorResolver:
         *,
         record_gap: bool = True,
     ) -> ConnectorResolution:
+        # Interaction actions have no Work-local gap/connector ownership.
+        record_gap = record_gap and requirement.work_id is not None
         built_ins = default_system_capability_reality().executable_capabilities
         matches = self._overlays(requirement) + tuple(
             item for item in built_ins if item.capability_id == requirement.capability_id

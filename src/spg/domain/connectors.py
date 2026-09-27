@@ -73,7 +73,7 @@ class CapabilityRequirement(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     capability_id: str = Field(min_length=1)
-    work_id: UUID
+    work_id: UUID | None
     user_id: str = Field(min_length=1)
     operation_ref: str = Field(min_length=1)
     resume_point: dict[str, str] = Field(default_factory=dict)

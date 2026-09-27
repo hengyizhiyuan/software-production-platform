@@ -45,6 +45,7 @@ class RepositoryIntakeRequest(BaseModel):
     operation_kind: str = "ACQUIRE"
     base_resource_id: UUID | None = None
     target_branch: str | None = None
+    source_record_id: UUID | None = None
 
     @model_validator(mode="after")
     def valid_operation(self):
@@ -53,12 +54,12 @@ class RepositoryIntakeRequest(BaseModel):
                 raise ValueError("Acquisition cannot contain branch creation fields")
         elif self.operation_kind == "CREATE_BRANCH":
             if (
-                self.work_id is None
+                (self.work_id is None and (self.interaction_id is None or self.source_record_id is None))
                 or self.base_resource_id is None
                 or self.target_branch is None
                 or self.source is None
             ):
-                raise ValueError("Branch creation requires Work, base Resource, source, and branch")
+                raise ValueError("Branch creation requires Work or explicit Interaction authority, base Resource, source, and branch")
         else:
             raise ValueError("Unknown repository operation")
         return self

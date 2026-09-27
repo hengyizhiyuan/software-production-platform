@@ -313,6 +313,7 @@ class SharedUnderstandingResponse(ApiDto):
     repository_source: str | None
     production_admission_state: str | None
     repository_acquisition_state: str | None
+    repository_observation: dict[str, object] | None = None
     production_next_step: str | None
     selected_design_schema_identity: str | None
     selected_design_schema_version: str | None
@@ -617,6 +618,7 @@ class SharedUnderstandingResponse(ApiDto):
             repository_source=projection.repository_source,
             production_admission_state=projection.production_admission_state,
             repository_acquisition_state=projection.repository_acquisition_state,
+            repository_observation=projection.repository_observation,
             production_next_step=projection.production_next_step,
             selected_design_schema_identity=(
                 projection.selected_design_schema_identity
