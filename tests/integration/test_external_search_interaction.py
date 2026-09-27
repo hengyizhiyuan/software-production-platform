@@ -5,6 +5,7 @@ import json
 from time import monotonic, sleep
 from types import SimpleNamespace
 from uuid import UUID
+import pytest
 
 from alembic import command
 from alembic.config import Config
@@ -198,15 +199,39 @@ def test_model_search_gap_suppresses_memory_provisional_in_shadow_mode(postgres_
     assert "https://github.com/owner/one" in answer
 
 
-def test_project_research_observation_survives_real_turn_event_persistence(postgres_database, monkeypatch):
+@pytest.mark.parametrize("invalid_first_synthesis", [False, True])
+def test_project_research_observation_survives_real_turn_event_persistence(
+    postgres_database, monkeypatch, invalid_first_synthesis,
+):
     monkeypatch.setenv("SPG_DATABASE_URL", os.environ["SPG_TEST_DATABASE_URL"])
     command.upgrade(Config("alembic.ini"), "head")
     packet = {"condition":"READY", "repository_identity":"https://github.com/owner/project.git",
         "revision":"a" * 40,"tree":"b" * 40,
         "materials":[{"path":"server.py","content":"from http.server import HTTPServer"}]}
+    class Model:
+        calls = 0
+
+        def generate(self, *, instructions, **_):
+            if instructions.startswith("Identify"):
+                return SimpleNamespace(output_text=json.dumps({
+                    "needed": True, "query": "python queue adapter",
+                    "sources": ["GITHUB"], "information_gap": "Inspect mature source implementations",
+                }), usage=SimpleNamespace(total_tokens=50))
+            self.calls += 1
+            valid = not invalid_first_synthesis or self.calls > 1
+            return SimpleNamespace(output_text=json.dumps({
+                "observations": [{"evidence_id": "external-search:one", "fact": "Observed queue API"}],
+                "comparison": "An inspected queue can integrate at the existing HTTP boundary.",
+                "limitations": "Only bounded project source was inspected.",
+                "cited_evidence_ids": ["external-search:one"],
+                "project_recommendation": "Use the existing Python HTTPServer boundary." if valid else "",
+                "project_evidence_paths": ["server.py"] if valid else [],
+            }), usage=SimpleNamespace(total_tokens=100))
+
+    model = Model()
     research = GovernedExternalResearch(ConnectorResolver(postgres_database),
         github=_GitHub(((_evidence("one"),_evidence("two",2)),)), web=_Web(),
-        http=BoundedPublicHttp(), project_repository=lambda **_: packet)
+        http=BoundedPublicHttp(), project_repository=lambda **_: packet, model=model)
     service = WorkInteractionService(postgres_database, capability=_Semantic(),
         runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED, external_research=research)
     interaction = service.create_interaction(human_identity="human:research-test")
@@ -226,7 +251,16 @@ def test_project_research_observation_survives_real_turn_event_persistence(postg
         database=postgres_database, interaction_service=service)
     with TestClient(app) as client:
         result = client.get(f"/api/interactions/{interaction.id}/turns/{turn.id}/external-evidence").json()
+        stream = client.get(f"/api/interactions/{interaction.id}/turns/{turn.id}/events")
+    assert stream.status_code == 200
+    assert "event: response.final" in stream.text
+    assert "event: message.completed" in stream.text
+    assert "from http.server import HTTPServer" not in stream.text
     assert result["project_observation"]["revision"] == "a" * 40
     assert result["project_observation"]["materials"][0]["path"] == "server.py"
     assert "content" not in result["project_observation"]["materials"][0]
-    assert result["synthesis_refinements"] == []
+    assert len(result["synthesis_refinements"]) == int(invalid_first_synthesis)
+    assert model.calls == 1 + int(invalid_first_synthesis)
+    if invalid_first_synthesis:
+        assert "event: search.refinement" in stream.text
+        assert result["synthesis_refinements"][0]["attempt_budget"] == 2

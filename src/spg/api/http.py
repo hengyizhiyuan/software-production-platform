@@ -887,6 +887,7 @@ def create_http_application(
                     "TURN_RECOVERY_STARTED": "turn.recovery.started",
                     "SEARCH_STARTED": "search.started",
                     "SEARCH_EVIDENCE": "search.evidence",
+                    "SEARCH_REFINEMENT": "search.refinement",
                     "SEARCH_FAILED": "search.failed",
                     "SEARCH_COMPLETED": "search.completed",
                 }
@@ -900,8 +901,11 @@ def create_http_application(
                     )
                     for response_event in response_events:
                         cursor = response_event.sequence
-                        if response_event.event_type.value == "RESPONSE_CONTRACT_READY":
-                            # Internal turn decision evidence is not a Human response event.
+                        if response_event.event_type.value in {
+                            "RESPONSE_CONTRACT_READY", "PROJECT_RESEARCH_EVIDENCE",
+                        }:
+                            # Internal decision/source packets are projected by
+                            # dedicated APIs, not streamed as Human responses.
                             continue
                         payload = response_event.model_dump(mode="json")
                         payload["response_id"] = str(response_event.response_id)

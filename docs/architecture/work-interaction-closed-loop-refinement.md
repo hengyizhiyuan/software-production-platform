@@ -821,3 +821,11 @@ Human-owned at the boundary where evidence proves they prevent execution.
 
 
 External research synthesis uses the same Candidate → boundary validation → bounded correction semantics. The owner validates exact retrieved-source citations and, for project-specific advice, an explicit recommendation supported by inspected committed project paths. One same-authority correction is allowed within the existing time/token budget. Exhaustion leaves the source records available but marks the recommendation incomplete; it never promotes a source list into completed advisory work. Turn evidence exposes bounded project identity/provenance and synthesis correction receipts separately from production authority.
+
+Project research observation packets remain internal grounding evidence and are
+projected through the dedicated provenance API; the Human SSE response stream
+must not publish raw project source or fail on that internal event. Research
+synthesis refinement is a registered typed event through persistence and SSE.
+A failed first synthesis can therefore record its same-authority correction and
+settle the final browser response after revalidation, rather than failing the
+Turn while trying to publish its own refinement signal.
