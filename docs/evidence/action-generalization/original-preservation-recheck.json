@@ -1,0 +1,50 @@
+[
+  {
+    "interaction_id": "44c3a727-4102-4dcc-9d15-122a0409fd0a",
+    "table": "interaction_assessments",
+    "rows": 5,
+    "original_fields_unchanged": true
+  },
+  {
+    "interaction_id": "44c3a727-4102-4dcc-9d15-122a0409fd0a",
+    "table": "interaction_turns",
+    "rows": 5,
+    "original_fields_unchanged": true
+  },
+  {
+    "interaction_id": "44c3a727-4102-4dcc-9d15-122a0409fd0a",
+    "table": "interaction_response_events",
+    "rows": 76,
+    "original_fields_unchanged": true
+  },
+  {
+    "interaction_id": "44c3a727-4102-4dcc-9d15-122a0409fd0a",
+    "table": "repository_intakes",
+    "rows": 1,
+    "original_fields_unchanged": true
+  },
+  {
+    "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b",
+    "table": "interaction_assessments",
+    "rows": 4,
+    "original_fields_unchanged": true
+  },
+  {
+    "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b",
+    "table": "interaction_turns",
+    "rows": 4,
+    "original_fields_unchanged": true
+  },
+  {
+    "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b",
+    "table": "interaction_response_events",
+    "rows": 58,
+    "original_fields_unchanged": true
+  },
+  {
+    "interaction_id": "50ae2542-a948-4342-8125-1fb2e7835a7b",
+    "table": "repository_intakes",
+    "rows": 2,
+    "original_fields_unchanged": true
+  }
+]

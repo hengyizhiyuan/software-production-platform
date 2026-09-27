@@ -1,0 +1,743 @@
+{
+  "interaction_id": "44bbeb41-7afd-4d55-bfeb-db3ffd373537",
+  "condition": "OPEN",
+  "current_work_id": null,
+  "created_at": "2026-09-27T08:56:05.801399Z",
+  "updated_at": "2026-09-27T08:59:06.391500Z",
+  "records": [
+    {
+      "record_id": "16da66e0-a511-422a-9296-f7225fac4409",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:56:05.939688Z"
+    },
+    {
+      "record_id": "086666e5-07b5-410c-af15-9c5d5113f8e6",
+      "sequence": 2,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "切一个 feat_semantic_5_0 分支",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:56:33.961936Z"
+    },
+    {
+      "record_id": "a70c2c4f-f680-4f17-814f-2b4a29ead270",
+      "sequence": 3,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "切个 feat_semantic_5_1 分支",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:57:45.468194Z"
+    }
+  ],
+  "conversation_messages": [
+    {
+      "message_id": "f4acba45-3306-47a9-97ae-86273745f740",
+      "turn_id": "1b2906d0-7d71-4e4b-a852-facf48e0be89",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "content": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "16da66e0-a511-422a-9296-f7225fac4409",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:56:05.939688Z",
+      "updated_at": "2026-09-27T08:56:33.294001Z"
+    },
+    {
+      "message_id": "a325a007-c134-44a7-904d-d138452e1a59",
+      "turn_id": "1b2906d0-7d71-4e4b-a852-facf48e0be89",
+      "sequence": 2,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：main；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "7f551770-b3b7-451b-ad79-1df0ba7415d9",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:56:33.294001Z",
+      "updated_at": "2026-09-27T08:56:33.294001Z"
+    },
+    {
+      "message_id": "c019b666-8ece-4ec8-b5f6-c1c36eb87666",
+      "turn_id": "4f1fe747-1d93-4bbf-9f30-8d126546f6b6",
+      "sequence": 3,
+      "actor": "HUMAN",
+      "content": "切一个 feat_semantic_5_0 分支",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "086666e5-07b5-410c-af15-9c5d5113f8e6",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:56:33.961936Z",
+      "updated_at": "2026-09-27T08:57:44.862392Z"
+    },
+    {
+      "message_id": "d0960df6-304a-40dc-960c-8fa15dd3f4a3",
+      "turn_id": "4f1fe747-1d93-4bbf-9f30-8d126546f6b6",
+      "sequence": 4,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：feat_semantic_5_0；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "b5d36ed6-4445-4b7b-a37a-3f91a68699ef",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:57:44.862392Z",
+      "updated_at": "2026-09-27T08:57:44.862392Z"
+    },
+    {
+      "message_id": "f1975334-4a90-4748-916f-266ef617cfaf",
+      "turn_id": "88323ca7-d117-486a-903f-9729182f93da",
+      "sequence": 5,
+      "actor": "HUMAN",
+      "content": "切个 feat_semantic_5_1 分支",
+      "processing_status": "PROCESSING",
+      "interaction_record_id": "a70c2c4f-f680-4f17-814f-2b4a29ead270",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:57:45.468194Z",
+      "updated_at": "2026-09-27T08:58:57.327599Z"
+    }
+  ],
+  "turns": [
+    {
+      "turn_id": "1b2906d0-7d71-4e4b-a852-facf48e0be89",
+      "interaction_id": "44bbeb41-7afd-4d55-bfeb-db3ffd373537",
+      "request_record_id": "16da66e0-a511-422a-9296-f7225fac4409",
+      "assessment_id": "7f551770-b3b7-451b-ad79-1df0ba7415d9",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:56:05.939688Z",
+      "started_at": "2026-09-27T08:56:06.093317Z",
+      "completed_at": "2026-09-27T08:56:33.294001Z",
+      "updated_at": "2026-09-27T08:56:33.294001Z"
+    },
+    {
+      "turn_id": "4f1fe747-1d93-4bbf-9f30-8d126546f6b6",
+      "interaction_id": "44bbeb41-7afd-4d55-bfeb-db3ffd373537",
+      "request_record_id": "086666e5-07b5-410c-af15-9c5d5113f8e6",
+      "assessment_id": "b5d36ed6-4445-4b7b-a37a-3f91a68699ef",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:56:33.961936Z",
+      "started_at": "2026-09-27T08:57:00.746325Z",
+      "completed_at": "2026-09-27T08:57:44.862392Z",
+      "updated_at": "2026-09-27T08:57:44.862392Z"
+    },
+    {
+      "turn_id": "88323ca7-d117-486a-903f-9729182f93da",
+      "interaction_id": "44bbeb41-7afd-4d55-bfeb-db3ffd373537",
+      "request_record_id": "a70c2c4f-f680-4f17-814f-2b4a29ead270",
+      "assessment_id": null,
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "PROCESSING",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:57:45.468194Z",
+      "started_at": "2026-09-27T08:58:57.327599Z",
+      "completed_at": null,
+      "updated_at": "2026-09-27T08:58:57.327599Z"
+    }
+  ],
+  "human_said": [
+    "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+    "切一个 feat_semantic_5_0 分支",
+    "切个 feat_semantic_5_1 分支"
+  ],
+  "latest_assessment": {
+    "assessment_id": "8bab4f00-ae57-4e8e-99b2-4dbf05619456",
+    "basis_fingerprint": "77dfab9d6ab7c161131fffb8fbbe4df24ed46fd4794eb0a4c531f86a1aec13b1",
+    "basis_last_sequence": 3,
+    "interpreted_motive": "把指定的 GitHub 仓库获取到本地并按需建立可用的工作分支，以便后续基于该仓库开展软件生产相关的工作。",
+    "desired_outcome": "本地仓库处于新建分支 feat_semantic_5_1 上，成为后续可检查、可继续生产的工作基础。",
+    "design_intent_frame": {
+      "design_subject": "在已获取的 software-production-platform 仓库上创建并切换到新分支 feat_semantic_5_1，作为后续生产工作的基线",
+      "object_type": "PRODUCT_SYSTEM",
+      "business_context": null,
+      "desired_outcome": "本地仓库处于新建分支 feat_semantic_5_1 上，可继续在其上开展生产工作",
+      "scope_level": "product",
+      "collaboration_mode": "execution",
+      "candidate_assumptions": [
+        "新分支以仓库当前所在分支作为起点",
+        "仓库已在本地可用，无需重新获取"
+      ],
+      "ambiguities": [],
+      "confidence": 0.85
+    },
+    "candidate_context": [
+      "人类提供了完整的仓库克隆地址：https://github.com/hengyizhiyuan/software-production-platform.git",
+      "当前没有已绑定的进行中工作（active_work_context 为空）",
+      "本条输入是同一仓库就绪准备动作的延续：feat_semantic_5_0 已创建并切换成功，现要求再建立 feat_semantic_5_1"
+    ],
+    "candidate_constraints": [
+      "操作对象限定为人类给出的那一个仓库地址，不含其他仓库"
+    ],
+    "current_requests": [
+      "切个 feat_semantic_5_1 分支"
+    ],
+    "unresolved_material_questions": [],
+    "action_candidates": [
+      {
+        "operation": "CREATE_AND_SWITCH_BRANCH",
+        "speech_act": "EXPLICIT_REQUEST",
+        "source_record_id": "a70c2c4f-f680-4f17-814f-2b4a29ead270",
+        "source_text": "切个 feat_semantic_5_1 分支",
+        "target_branch": "feat_semantic_5_1",
+        "repository_source": null,
+        "confidence": 0.95
+      }
+    ],
+    "neutral_semantic_extractions": [
+      {
+        "extraction_id": "ext-branch-name-1",
+        "kind": "REFERENCE",
+        "values": [
+          "feat_semantic_5_1"
+        ],
+        "unit": null,
+        "source_record_id": "a70c2c4f-f680-4f17-814f-2b4a29ead270",
+        "source_text": "切个 feat_semantic_5_1 分支",
+        "explicit_roles": [
+          "branch"
+        ]
+      }
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "73a88a9b-5f83-5c3f-adf9-3376027b22dd",
+        "subject": "repository.source",
+        "relation": "REFERENCE",
+        "value": "https://github.com/hengyizhiyuan/software-production-platform.git",
+        "unit": null,
+        "scope": "repository-acquisition",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "16da66e0-a511-422a-9296-f7225fac4409"
+          ],
+          "source_text": "https://github.com/hengyizhiyuan/software-production-platform.git",
+          "source_extraction_ids": [
+            "ext-repo-url-1"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "85cbc231-9baf-50ea-a1d0-f9e293e8d001",
+        "subject": "branch.name",
+        "relation": "REFERENCE",
+        "value": "feat_semantic_5_0",
+        "unit": null,
+        "scope": "repository-branch-creation",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "SUPERSEDED",
+        "provenance": {
+          "source_record_ids": [
+            "086666e5-07b5-410c-af15-9c5d5113f8e6"
+          ],
+          "source_text": "切一个 feat_semantic_5_0 分支",
+          "source_extraction_ids": [
+            "ext-branch-name-1"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "77056cd0-2d37-5fda-8e76-92547d58e03c",
+        "subject": "branch.name",
+        "relation": "REFERENCE",
+        "value": "feat_semantic_5_1",
+        "unit": null,
+        "scope": "repository-branch-creation",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "a70c2c4f-f680-4f17-814f-2b4a29ead270"
+          ],
+          "source_text": "切个 feat_semantic_5_1 分支",
+          "source_extraction_ids": [
+            "ext-branch-name-1"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [
+          "85cbc231-9baf-50ea-a1d0-f9e293e8d001"
+        ],
+        "admitted_work_revision_id": null
+      }
+    ],
+    "meanings": [
+      {
+        "kind": "REQUEST",
+        "statement": "人类要求创建并切换到名为 feat_semantic_5_1 的分支。",
+        "source_record_ids": [
+          "a70c2c4f-f680-4f17-814f-2b4a29ead270"
+        ],
+        "confidence": 0.95,
+        "rationale": "语句为祈使句，动词为“切”，宾语为具体分支名，构成对版本控制动作的显式请求。",
+        "clarification_required": false
+      }
+    ],
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "basis_work_revision_id": null,
+    "basis_steering_plan_revision_id": null,
+    "basis_steering_step_id": null,
+    "basis_active_runtime_binding_id": null,
+    "supporting_references": [],
+    "natural_response": "在既有的仓库操作路径上直接创建并切换到 feat_semantic_5_1 分支，随后回读当前所在分支与提交以确认结果。",
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "77dfab9d6ab7c161131fffb8fbbe4df24ed46fd4794eb0a4c531f86a1aec13b1"
+    },
+    "progressive_semantics": {
+      "turn_intent": "ACTION_REQUEST",
+      "basis_fingerprint": "77dfab9d6ab7c161131fffb8fbbe4df24ed46fd4794eb0a4c531f86a1aec13b1",
+      "source_record_ids": [
+        "16da66e0-a511-422a-9296-f7225fac4409",
+        "086666e5-07b5-410c-af15-9c5d5113f8e6",
+        "a70c2c4f-f680-4f17-814f-2b4a29ead270"
+      ],
+      "reception_meanings": [
+        "DEEP_WIC_WORKING_UNDERSTANDING"
+      ],
+      "working_motive": "把指定的 GitHub 仓库获取到本地并按需建立可用的工作分支，以便后续基于该仓库开展软件生产相关的工作。",
+      "working_desired_outcome": "本地仓库处于新建分支 feat_semantic_5_1 上，成为后续可检查、可继续生产的工作基础。",
+      "working_facts": [
+        "人类提供了完整的仓库克隆地址：https://github.com/hengyizhiyuan/software-production-platform.git",
+        "当前没有已绑定的进行中工作（active_work_context 为空）",
+        "本条输入是同一仓库的就绪准备动作的延续，目标是建立一个新的工作分支",
+        "本条输入是同一仓库就绪准备动作的延续：feat_semantic_5_0 已创建并切换成功，现要求再建立 feat_semantic_5_1"
+      ],
+      "working_constraints": [
+        "操作对象限定为人类给出的那一个仓库地址，不含其他仓库"
+      ],
+      "working_requests": [
+        "切个 feat_semantic_5_1 分支"
+      ],
+      "explicit_assumptions": [],
+      "unresolved_human_decisions": [],
+      "deltas": [],
+      "pattern_signals": [],
+      "inference_disposition": "NO_INFERENCE",
+      "questions": [],
+      "selected_question": null,
+      "governance_candidate": "WORK_FORMATION_PROPOSAL",
+      "readiness": [
+        {
+          "target": "WORK_FORMATION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "MOTIVE",
+            "DESIRED_OUTCOME"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "77dfab9d6ab7c161131fffb8fbbe4df24ed46fd4794eb0a4c531f86a1aec13b1",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "WORK_REVISION",
+          "status": "NOT_APPLICABLE",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "77dfab9d6ab7c161131fffb8fbbe4df24ed46fd4794eb0a4c531f86a1aec13b1",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "DESIGN_PROGRESSION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "CURRENT_FOCUS"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "77dfab9d6ab7c161131fffb8fbbe4df24ed46fd4794eb0a4c531f86a1aec13b1",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        }
+      ],
+      "artifact_recommendation": null,
+      "factual_contradictions": [],
+      "semantic_policy_revision": "wic-semantic-policy-v1",
+      "question_policy_revision": "wic-question-value-v1"
+    },
+    "provider_identity": "deepseek-responses:semantic:request:d9243ec8-5f6b-4ad4-80a4-edf33bc87acd",
+    "model_identity": "deepseek-flash",
+    "schema_version": "wic-assessment-v7",
+    "created_at": "2026-09-27T08:59:06.391500Z"
+  },
+  "latest_assessment_current": true,
+  "interpreted_motive": "把指定的 GitHub 仓库获取到本地并按需建立可用的工作分支，以便后续基于该仓库开展软件生产相关的工作。",
+  "desired_outcome": "本地仓库处于新建分支 feat_semantic_5_1 上，成为后续可检查、可继续生产的工作基础。",
+  "design_intent_frame": {
+    "design_subject": "在已获取的 software-production-platform 仓库上创建并切换到新分支 feat_semantic_5_1，作为后续生产工作的基线",
+    "object_type": "PRODUCT_SYSTEM",
+    "business_context": null,
+    "desired_outcome": "本地仓库处于新建分支 feat_semantic_5_1 上，可继续在其上开展生产工作",
+    "scope_level": "product",
+    "collaboration_mode": "execution",
+    "candidate_assumptions": [
+      "新分支以仓库当前所在分支作为起点",
+      "仓库已在本地可用，无需重新获取"
+    ],
+    "ambiguities": [],
+    "confidence": 0.85
+  },
+  "candidate_context": [
+    "人类提供了完整的仓库克隆地址：https://github.com/hengyizhiyuan/software-production-platform.git",
+    "当前没有已绑定的进行中工作（active_work_context 为空）",
+    "本条输入是同一仓库就绪准备动作的延续：feat_semantic_5_0 已创建并切换成功，现要求再建立 feat_semantic_5_1"
+  ],
+  "candidate_constraints": [
+    "操作对象限定为人类给出的那一个仓库地址，不含其他仓库"
+  ],
+  "current_requests": [
+    "切个 feat_semantic_5_1 分支"
+  ],
+  "unresolved_material_questions": [],
+  "readiness": {
+    "status": "READY",
+    "profile": "LONG_LIVED_STEERING",
+    "profile_version": "v0",
+    "satisfied_requirements": [
+      "MOTIVE",
+      "DESIRED_OUTCOME"
+    ],
+    "missing_information": [],
+    "unresolved_material_questions": [],
+    "reasons": [
+      "Motive and desired outcome are clear enough to form governed Work."
+    ],
+    "basis_fingerprint": "77dfab9d6ab7c161131fffb8fbbe4df24ed46fd4794eb0a4c531f86a1aec13b1"
+  },
+  "candidate_engineering_resource_id": null,
+  "candidate_repository_identity": null,
+  "candidate_repository_ref": null,
+  "candidate_scope_summary": null,
+  "governed_work_id": null,
+  "governed_revision": null,
+  "current_work_focus": null,
+  "focus_classification": null,
+  "impact_disposition": null,
+  "candidate_change": null,
+  "work_revision_admission_status": "NOT_APPLICABLE",
+  "active_cycle_work_revision_id": null,
+  "active_cycle_impact_disposition": null,
+  "work_satisfaction_state": "NO_FOCUSED_WORK",
+  "interaction_relationship_state": "OPEN",
+  "work_focus_history": [],
+  "latest_work_transition": null,
+  "new_work_formation_pending": false,
+  "production_request_detected": false,
+  "repository_source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+  "production_admission_state": null,
+  "repository_acquisition_state": "READY",
+  "repository_observation": {
+    "tree": "753564ba0a09c0bed999dff17b540b09e581e8d9",
+    "paths": [
+      ".dockerignore",
+      ".env.example",
+      ".gitattributes",
+      ".gitignore",
+      "AI_context.md",
+      "Dockerfile",
+      "README.md",
+      "alembic.ini",
+      "benchmarks/conversation_quality/README.md",
+      "benchmarks/conversation_quality/corpus.json",
+      "benchmarks/conversation_quality/interaction_intelligence_cases.json",
+      "benchmarks/conversation_quality/interaction_intelligence_probe.py",
+      "benchmarks/conversation_quality/pipeline_probe.py",
+      "benchmarks/conversation_quality/replay_probe.py",
+      "benchmarks/native_executor_continuity/__init__.py",
+      "benchmarks/native_executor_continuity/report.py",
+      "benchmarks/native_executor_continuity/runner.py",
+      "benchmarks/native_executor_continuity/spec.json",
+      "benchmarks/native_executor_continuity_v2/__init__.py",
+      "benchmarks/native_executor_continuity_v2/evaluator.py",
+      "benchmarks/native_executor_continuity_v2/report.py",
+      "benchmarks/native_executor_continuity_v2/runner.py",
+      "benchmarks/native_executor_continuity_v2/spec.json",
+      "benchmarks/native_executor_continuity_v3/__init__.py",
+      "benchmarks/native_executor_continuity_v3/evaluator.py",
+      "benchmarks/native_executor_continuity_v3/report.py",
+      "benchmarks/native_executor_continuity_v3/runner.py",
+      "benchmarks/native_executor_continuity_v3/spec.json",
+      "benchmarks/native_executor_continuity_v4/__init__.py",
+      "benchmarks/native_executor_continuity_v4/evaluator.py",
+      "benchmarks/native_executor_continuity_v4/report.py",
+      "benchmarks/native_executor_continuity_v4/runner.py",
+      "benchmarks/native_executor_continuity_v4/spec.json",
+      "benchmarks/native_executor_continuity_v5/__init__.py",
+      "benchmarks/native_executor_continuity_v5/evaluator.py",
+      "benchmarks/native_executor_continuity_v5/report.py",
+      "benchmarks/native_executor_continuity_v5/runner.py",
+      "benchmarks/native_executor_continuity_v5/spec.json",
+      "benchmarks/native_executor_continuity_v6/__init__.py",
+      "benchmarks/native_executor_continuity_v6/evaluator.py",
+      "benchmarks/native_executor_continuity_v6/report.py",
+      "benchmarks/native_executor_continuity_v6/runner.py",
+      "benchmarks/native_executor_continuity_v6/spec.json",
+      "benchmarks/native_executor_continuity_v7/__init__.py",
+      "benchmarks/native_executor_continuity_v7/evaluator.py",
+      "benchmarks/native_executor_continuity_v7/report.py",
+      "benchmarks/native_executor_continuity_v7/runner.py",
+      "benchmarks/native_executor_continuity_v7/spec.json",
+      "benchmarks/native_executor_continuity_v8/__init__.py",
+      "benchmarks/native_executor_continuity_v8/evaluator.py",
+      "benchmarks/native_executor_continuity_v8/report.py",
+      "benchmarks/native_executor_continuity_v8/runner.py",
+      "benchmarks/native_executor_continuity_v8/spec.json",
+      "benchmarks/native_executor_qualification/isolation_probe.py",
+      "benchmarks/native_executor_qualification/performance.py",
+      "benchmarks/native_executor_qualification/reboot_probe.py",
+      "benchmarks/native_executor_qualification/slow_subscriber_probe.py",
+      "benchmarks/native_executor_qualification/tool_spool_probe.py",
+      "benchmarks/open_wic/corpus-v1.json",
+      "benchmarks/open_wic/fast_reception_qualification.py",
+      "benchmarks/open_wic/human_visible_evaluator.py",
+      "benchmarks/open_wic/progressive_evaluator.py",
+      "benchmarks/open_wic/slice2-corpus-v1.json",
+      "compose.delivery.yaml",
+      "compose.e2e.yaml",
+      "compose.native-executor.continuity-v2.yaml",
+      "compose.native-executor.continuity-v3.yaml",
+      "compose.native-executor.continuity-v4.yaml",
+      "compose.native-executor.continuity-v5.yaml",
+      "compose.native-executor.continuity-v6.yaml",
+      "compose.native-executor.continuity-v7.yaml",
+      "compose.native-executor.continuity-v8.yaml",
+      "compose.native-executor.continuity.yaml",
+      "compose.native-executor.human-acceptance.yaml",
+      "compose.native-executor.yaml",
+      "compose.wic-governed-streaming.yaml",
+      "compose.wic-slice3.yaml",
+      "compose.yaml",
+      "docker/e2e_preflight.py",
+      "docker/start_app.py",
+      "docker/start_delivery.py",
+      "docker/start_human_acceptance.py",
+      "docs/architecture/SPG_Core_Architecture_Model.md",
+      "docs/architecture/ai-native-development-execution-principles.md",
+      "docs/architecture/architecture-principles.md",
+      "docs/architecture/bounded-single-pwu-code-work.md",
+      "docs/architecture/case-studies/course-table-domain-grounding-and-semantic-boundary.md",
+      "docs/architecture/case-studies/waterfall-demo-csp-loop-and-guardian-recovery.md",
+      "docs/architecture/design-intelligence-evolution.md",
+      "docs/architecture/design-intent-framing-layer.md",
+      "docs/architecture/duration-capacity-semantic-foundation.md",
+      "docs/architecture/early-workspace-progressive-work-admission.md",
+      "docs/architecture/engineering-semantic-truth.md",
+      "docs/architecture/engineering-state-management.md",
+      "docs/architecture/executor-autonomy-envelope-attempt-granularity-mvp-contract.md",
+      "docs/architecture/external-design-intake-capability-direction.md",
+      "docs/architecture/external-engineering-intelligence-direction.md",
+      "docs/architecture/future-capabilities.md",
+      "docs/architecture/guided-design-core.md",
+      "docs/architecture/guided-design-facilitation-layer.md",
+      "docs/architecture/human-collaboration-experience-v32-assessment.md",
+      "docs/architecture/human-collaboration-pipeline-review.md",
+      "docs/architecture/human-collaboration-pipeline-v31-assessment.md",
+      "docs/architecture/human-watt-collaboration-layer.md",
+      "docs/architecture/human-watt-conversation-intelligence.md",
+      "docs/architecture/integration-boundary.md",
+      "docs/architecture/interpretation-externalization-and-multimodal-alignment.md",
+      "docs/architecture/motive-work-plan-concept-calibration.md",
+      "docs/architecture/mvp-architecture.md",
+      "docs/architecture/plane-model.md",
+      "docs/architecture/production-benchmarks.md",
+      "docs/architecture/production-execution-package-direction.md",
+      "docs/architecture/production-intelligence-architecture.md",
+      "docs/architecture/production-measurement-v0.md",
+      "docs/architecture/production-orchestration-lite.md",
+      "docs/architecture/program-architecture-decisions.md",
+      "docs/architecture/reality-driven-plan-steering-mvp-contract.md",
+      "docs/architecture/reality-driven-plan-steering-principles.md",
+      "docs/architecture/repository-acquisition-sandbox-and-remote-integration-direction.md",
+      "docs/architecture/repository-asset-and-managed-execution-workspace.md",
+      "docs/architecture/repository-aware-code-change-proposal-lite.md",
+      "docs/architecture/runtime-profile-provider-deployment.md",
+      "docs/architecture/single-pwu-production-planner-lite.md",
+      "docs/architecture/software-production-control-room-slice-1-implementation-contract.md",
+      "docs/architecture/software-production-control-room-slice-2-implementation-contract.md",
+      "docs/architecture/software-production-control-room-slice-3-implementation-contract.md",
+      "docs/architecture/software-production-control-room-slice-4-implementation-contract.md",
+      "docs/architecture/software-production-system-differentiation-and-barriers.md",
+      "docs/architecture/spg-completion-trust.md",
+      "docs/architecture/spg-fvs-1-implementation-contract.md",
+      "docs/architecture/spg-lite-domain-contract-baseline.md",
+      "docs/architecture/spg-lite-runtime-implementation-contract.md",
+      "docs/architecture/spg-reconciliation-recovery.md",
+      "docs/architecture/spg-runtime-architecture-readiness.md",
+      "docs/architecture/spg-runtime-findings-review.md",
+      "docs/architecture/spg-runtime-verification-benchmarks.md",
+      "docs/architecture/spg-side-effect-governance.md",
+      "docs/architecture/spg-state-foundation.md",
+      "docs/architecture/system-architecture-baseline-v0.1.md",
+      "docs/architecture/system-overview.md",
+      "docs/architecture/trusted-baseline-active-runtime-convergence-lite.md",
+      "docs/architecture/typed-node-test-verification-lite.md",
+      "docs/architecture/watt-ai-native-software-production-architecture.md",
+      "docs/architecture/watt-ai-software-production-evaluation-framework.md",
+      "docs/architecture/watt-decision-evidence-architecture.md",
+      "docs/architecture/watt-formal-ui-appearance-and-skin-library.md",
+      "docs/architecture/watt-native-executor-blueprint.md",
+      "docs/architecture/watt-native-executor-capacity-scheduling.md",
+      "docs/architecture/watt-native-executor-lifecycle.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v2.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v3.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v4.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v5.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v6.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v7.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v8.md",
+      "docs/architecture/watt-native-executor-qualification.md",
+      "docs/architecture/watt-product-north-star.md",
+      "docs/architecture/watt-regression-protection-and-golden-journey-governance.md",
+      "docs/architecture/watt-wic-intelligence-architecture-closure.md",
+      "docs/architecture/wic-context-orchestration.md",
+      "docs/architecture/wic-decision-evidence-architecture.md",
+      "docs/architecture/wic-intelligence-reconstruction-blueprint.md",
+      "docs/architecture/wic-response-contract.md",
+      "docs/architecture/wic-software-domain-grounding.md",
+      "docs/architecture/wic-software-production-sop-and-llm-direction.md",
+      "docs/architecture/work-centric-production-and-responsibility-principles.md",
+      "docs/architecture/work-centric-production-model.md",
+      "docs/architecture/work-identity-closure-and-archive-invariants.md",
+      "docs/architecture/work-interaction-closed-loop-refinement.md",
+      "docs/architecture/work-to-delivery-multi-repository-spg-proposal.md",
+      "docs/assets/ui-skins/01-industrial-cyan.png",
+      "docs/assets/ui-skins/02-executive-amber.png",
+      "docs/assets/ui-skins/03-technical-graphite.png",
+      "docs/assets/ui-skins/04-precision-silver.png",
+      "docs/assets/ui-skins/05-warm-professional.png",
+      "docs/assets/ui-skins/06-futuristic-studio.png",
+      "docs/assets/ui-skins/README.md",
+      "docs/assurance/guardian-integration.md",
+      "docs/context/ecf-integration.md",
+      "docs/evidence/control-room-slice-4-human-acceptance-preparation.md",
+      "docs/evidence/control-room-slice-4-human-product-acceptance.md",
+      "docs/evidence/deepseek-long-running-transport-boundary-qualification.md",
+      "docs/evidence/design-intent-framing-focused-validation.md",
+      "docs/evidence/dogfood/assets/executor-authority-drift-branch-creation.png",
+      "docs/evidence/dogfood/code-dogfood-1-repository-aware-change-proposal-gap.md",
+      "docs/evidence/dogfood/code-dogfood-2-trusted-baseline-active-runtime-divergence.md",
+      "docs/evidence/dogfood/executor-authority-drift-branch-creation.md",
+      "docs/evidence/dogfood/intake-dogfood-3-trusted-completion.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-1-admission-coupling.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-10-human-acceptance.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-2-post-admission-activation-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-3-semantic-design-execution-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-4-semantic-structured-output-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-5-semantic-provider-schema-requiredness-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-6-semantic-provider-ref-sibling-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-7-semantic-wire-coherence-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-8-self-refine-closure.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-9-production-loop-closure.md",
+      "docs/evidence/dogfood/orch-dogfood-1-verification-contract-mismatch.md"
+    ],
+    "title": "Interaction CREATE_BRANCH",
+    "source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+    "work_id": null,
+    "revision": "0b535f63302fe45e88d0b3e203ae991868ced079",
+    "condition": "READY",
+    "product_id": "0571e6a7-1ab4-41c1-a7b8-9258e1173590",
+    "description": "切个 feat_semantic_5_1 分支",
+    "fingerprint": "5ca42046f5a951eb9e57633abbe6515647b9115ec7f55f2bbd5ca1e8e1fe29c1",
+    "observed_at": "2026-09-27T08:59:25.375763+00:00",
+    "resource_id": "33b1fe8e-4384-4ba4-bc19-83bec466dff2",
+    "context_path": "README.md",
+    "human_message": "Local branch feat_semantic_5_1 is ready.",
+    "target_branch": "feat_semantic_5_1",
+    "attempt_number": 1,
+    "interaction_id": "44bbeb41-7afd-4d55-bfeb-db3ffd373537",
+    "operation_kind": "CREATE_BRANCH",
+    "repository_ref": "refs/heads/feat_semantic_5_1",
+    "base_resource_id": "9a075021-2472-4f6c-ad04-28a6247c2dab",
+    "failure_category": null,
+    "intake_request_id": "e494fb1e-93e8-5494-ad22-13adde485f55",
+    "operation_evidence": {
+      "pwu_id": null,
+      "verified": true,
+      "connector_id": "builtin:git",
+      "capability_id": "git.branch.create",
+      "checkpoint_id": null,
+      "operation_ref": "repository-intake:e494fb1e-93e8-5494-ad22-13adde485f55",
+      "environment_id": null,
+      "base_resource_id": "9a075021-2472-4f6c-ad04-28a6247c2dab",
+      "resulting_branch": "refs/heads/feat_semantic_5_1",
+      "task_contract_id": null,
+      "native_attempt_id": null,
+      "resulting_revision": "0b535f63302fe45e88d0b3e203ae991868ced079",
+      "workspace_reference": "/var/lib/spg/repository-assets/e494fb1e-93e8-5494-ad22-13adde485f55",
+      "production_record_id": null
+    },
+    "previous_attempt_id": null,
+    "repository_identity": "watt://work-branches/44bbeb41-7afd-4d55-bfeb-db3ffd373537/a9cbdc163b02a7ecfe81"
+  },
+  "production_next_step": "Repository Reality is ready; production Work remains unadmitted.",
+  "selected_design_schema_identity": "watt:guided-design:general-product-system",
+  "selected_design_schema_version": "0.1",
+  "design_schema_selection_rationale": "The Design Intent Frame identifies a product, platform, or software system.",
+  "design_stage": "Motive, users, and problem",
+  "design_next_focus": "Establish the Motive, relevant actors, and problem boundary needed for the current governed step.",
+  "design_focus_rationale": "These dimensions matter only to the extent that they change the current artifact, risk, authority, or acceptance basis.",
+  "design_facilitation_strategy": "CLARIFY",
+  "design_progress_narrative": "Selected General Product/System Design v0.1. Current stage: Motive, users, and problem. 0 of 7 design areas are resolved. Next, establish the motive, relevant actors, and problem boundary needed for the current governed step."
+}

@@ -1,0 +1,605 @@
+{
+  "interaction_id": "917d3128-8669-45e7-9d93-18bc82e5e529",
+  "condition": "OPEN",
+  "current_work_id": null,
+  "created_at": "2026-09-27T08:20:19.711062Z",
+  "updated_at": "2026-09-27T08:20:28.772709Z",
+  "records": [
+    {
+      "record_id": "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:20:19.791015Z"
+    }
+  ],
+  "conversation_messages": [
+    {
+      "message_id": "6de7cdd0-7f20-438c-9cb7-29033bf6a9f0",
+      "turn_id": "2094fdc8-81d3-4fd9-82af-2981f442429a",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "content": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+      "processing_status": "PROCESSING",
+      "interaction_record_id": "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:20:19.791015Z",
+      "updated_at": "2026-09-27T08:20:19.881816Z"
+    }
+  ],
+  "turns": [
+    {
+      "turn_id": "2094fdc8-81d3-4fd9-82af-2981f442429a",
+      "interaction_id": "917d3128-8669-45e7-9d93-18bc82e5e529",
+      "request_record_id": "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196",
+      "assessment_id": null,
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "PROCESSING",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:20:19.791015Z",
+      "started_at": "2026-09-27T08:20:19.881816Z",
+      "completed_at": null,
+      "updated_at": "2026-09-27T08:20:19.881816Z"
+    }
+  ],
+  "human_said": [
+    "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。"
+  ],
+  "latest_assessment": {
+    "assessment_id": "f4dad6a5-97ce-4499-8954-8bffa6de0073",
+    "basis_fingerprint": "ba11d159c18f5505faceccf0f254398e57a0b54c6690f1601f5fcccabc798aa9",
+    "basis_last_sequence": 1,
+    "interpreted_motive": "Obtain a local working copy of the named GitHub repository so subsequent software-production work can proceed against its actual contents.",
+    "desired_outcome": "The repository hengyizhiyuan/software-production-platform is acquired locally and available as the working basis for further work.",
+    "design_intent_frame": {
+      "design_subject": "Obtain a local working copy of the named GitHub repository so subsequent software-production work can proceed against its actual contents.",
+      "object_type": "PRODUCT_SYSTEM",
+      "business_context": null,
+      "desired_outcome": "The repository hengyizhiyuan/software-production-platform is acquired locally and available as the working basis for further work.",
+      "scope_level": "product",
+      "collaboration_mode": "design",
+      "candidate_assumptions": [
+        "The current object classification is provisional."
+      ],
+      "ambiguities": [],
+      "confidence": 0.6
+    },
+    "candidate_context": [
+      "No active Work is bound in the persisted basis.",
+      "The repository source was supplied explicitly by the Human."
+    ],
+    "candidate_constraints": [
+      "Repository source is the exact URL https://github.com/hengyizhiyuan/software-production-platform.git"
+    ],
+    "current_requests": [
+      "Clone https://github.com/hengyizhiyuan/software-production-platform.git"
+    ],
+    "unresolved_material_questions": [],
+    "action_candidates": [
+      {
+        "operation": "ACQUIRE_REPOSITORY",
+        "speech_act": "EXPLICIT_REQUEST",
+        "source_record_id": "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196",
+        "source_text": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+        "target_branch": null,
+        "repository_source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+        "confidence": 0.96
+      }
+    ],
+    "neutral_semantic_extractions": [
+      {
+        "extraction_id": "ne_url",
+        "kind": "REFERENCE",
+        "values": [
+          "https://github.com/hengyizhiyuan/software-production-platform.git"
+        ],
+        "unit": null,
+        "source_record_id": "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196",
+        "source_text": "https://github.com/hengyizhiyuan/software-production-platform.git",
+        "explicit_roles": [
+          null
+        ]
+      }
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "5a013797-af52-50b6-9b99-fedb81634bf7",
+        "subject": "repository.source",
+        "relation": "REFERENCE",
+        "value": "https://github.com/hengyizhiyuan/software-production-platform.git",
+        "unit": null,
+        "scope": "repository acquisition request",
+        "qualifiers": {
+          "host": "github.com",
+          "name": "software-production-platform",
+          "owner": "hengyizhiyuan"
+        },
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196"
+          ],
+          "source_text": "https://github.com/hengyizhiyuan/software-production-platform.git",
+          "source_extraction_ids": [
+            "ne_url"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      }
+    ],
+    "meanings": [
+      {
+        "kind": "REQUEST",
+        "statement": "The Human requests that the named GitHub repository be cloned locally.",
+        "source_record_ids": [
+          "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196"
+        ],
+        "confidence": 0.96,
+        "rationale": "Imperative verb clone with an explicit repository URL.",
+        "clarification_required": false
+      }
+    ],
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "basis_work_revision_id": null,
+    "basis_steering_plan_revision_id": null,
+    "basis_steering_step_id": null,
+    "basis_active_runtime_binding_id": null,
+    "supporting_references": [],
+    "natural_response": "Proceed with governed repository acquisition for the supplied URL, then report what the actual contents allow next.",
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "ba11d159c18f5505faceccf0f254398e57a0b54c6690f1601f5fcccabc798aa9"
+    },
+    "progressive_semantics": {
+      "turn_intent": "ACTION_REQUEST",
+      "basis_fingerprint": "ba11d159c18f5505faceccf0f254398e57a0b54c6690f1601f5fcccabc798aa9",
+      "source_record_ids": [
+        "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196"
+      ],
+      "reception_meanings": [
+        "DEEP_WIC_WORKING_UNDERSTANDING"
+      ],
+      "working_motive": "Obtain a local working copy of the named GitHub repository so subsequent software-production work can proceed against its actual contents.",
+      "working_desired_outcome": "The repository hengyizhiyuan/software-production-platform is acquired locally and available as the working basis for further work.",
+      "working_facts": [
+        "No active Work is bound in the persisted basis.",
+        "The repository source was supplied explicitly by the Human."
+      ],
+      "working_constraints": [
+        "Repository source is the exact URL https://github.com/hengyizhiyuan/software-production-platform.git"
+      ],
+      "working_requests": [
+        "Clone https://github.com/hengyizhiyuan/software-production-platform.git"
+      ],
+      "explicit_assumptions": [],
+      "unresolved_human_decisions": [],
+      "deltas": [
+        {
+          "id": "e710c98c-e277-51f0-b130-768570fea71a",
+          "category": "MOTIVE",
+          "operation": "ADDED",
+          "value": "Obtain a local working copy of the named GitHub repository so subsequent software-production work can proceed against its actual contents.",
+          "prior_value": null,
+          "source_record_ids": [
+            "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196"
+          ],
+          "basis_fingerprint": "ba11d159c18f5505faceccf0f254398e57a0b54c6690f1601f5fcccabc798aa9",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+          "authority": "ADVISORY"
+        },
+        {
+          "id": "8606c4de-5a67-57af-9809-1e792780d330",
+          "category": "CONSTRAINT",
+          "operation": "ADDED",
+          "value": "Repository source is the exact URL https://github.com/hengyizhiyuan/software-production-platform.git",
+          "prior_value": null,
+          "source_record_ids": [
+            "e0b8dcfa-7a83-4cb5-a9a4-1f4e8da9d196"
+          ],
+          "basis_fingerprint": "ba11d159c18f5505faceccf0f254398e57a0b54c6690f1601f5fcccabc798aa9",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Constraint is explicit in the Human Turn or current candidate.",
+          "authority": "ADVISORY"
+        }
+      ],
+      "pattern_signals": [
+        "REPOSITORY_SOURCE"
+      ],
+      "inference_disposition": "NO_INFERENCE",
+      "questions": [],
+      "selected_question": null,
+      "governance_candidate": "WORK_FORMATION_PROPOSAL",
+      "readiness": [
+        {
+          "target": "WORK_FORMATION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "MOTIVE",
+            "DESIRED_OUTCOME"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "ba11d159c18f5505faceccf0f254398e57a0b54c6690f1601f5fcccabc798aa9",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "WORK_REVISION",
+          "status": "NOT_APPLICABLE",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "ba11d159c18f5505faceccf0f254398e57a0b54c6690f1601f5fcccabc798aa9",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "DESIGN_PROGRESSION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "CURRENT_FOCUS"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "ba11d159c18f5505faceccf0f254398e57a0b54c6690f1601f5fcccabc798aa9",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        }
+      ],
+      "artifact_recommendation": null,
+      "factual_contradictions": [],
+      "semantic_policy_revision": "wic-semantic-policy-v1",
+      "question_policy_revision": "wic-question-value-v1"
+    },
+    "provider_identity": "deepseek-responses:semantic:request:11f14a48-cc19-413d-9c93-bdf85d385b71",
+    "model_identity": "deepseek-flash",
+    "schema_version": "wic-assessment-v7",
+    "created_at": "2026-09-27T08:20:28.772709Z"
+  },
+  "latest_assessment_current": true,
+  "interpreted_motive": "Obtain a local working copy of the named GitHub repository so subsequent software-production work can proceed against its actual contents.",
+  "desired_outcome": "The repository hengyizhiyuan/software-production-platform is acquired locally and available as the working basis for further work.",
+  "design_intent_frame": {
+    "design_subject": "Obtain a local working copy of the named GitHub repository so subsequent software-production work can proceed against its actual contents.",
+    "object_type": "PRODUCT_SYSTEM",
+    "business_context": null,
+    "desired_outcome": "The repository hengyizhiyuan/software-production-platform is acquired locally and available as the working basis for further work.",
+    "scope_level": "product",
+    "collaboration_mode": "design",
+    "candidate_assumptions": [
+      "The current object classification is provisional."
+    ],
+    "ambiguities": [],
+    "confidence": 0.6
+  },
+  "candidate_context": [
+    "No active Work is bound in the persisted basis.",
+    "The repository source was supplied explicitly by the Human."
+  ],
+  "candidate_constraints": [
+    "Repository source is the exact URL https://github.com/hengyizhiyuan/software-production-platform.git"
+  ],
+  "current_requests": [
+    "Clone https://github.com/hengyizhiyuan/software-production-platform.git"
+  ],
+  "unresolved_material_questions": [],
+  "readiness": {
+    "status": "READY",
+    "profile": "LONG_LIVED_STEERING",
+    "profile_version": "v0",
+    "satisfied_requirements": [
+      "MOTIVE",
+      "DESIRED_OUTCOME"
+    ],
+    "missing_information": [],
+    "unresolved_material_questions": [],
+    "reasons": [
+      "Motive and desired outcome are clear enough to form governed Work."
+    ],
+    "basis_fingerprint": "ba11d159c18f5505faceccf0f254398e57a0b54c6690f1601f5fcccabc798aa9"
+  },
+  "candidate_engineering_resource_id": null,
+  "candidate_repository_identity": null,
+  "candidate_repository_ref": null,
+  "candidate_scope_summary": null,
+  "governed_work_id": null,
+  "governed_revision": null,
+  "current_work_focus": null,
+  "focus_classification": null,
+  "impact_disposition": null,
+  "candidate_change": null,
+  "work_revision_admission_status": "NOT_APPLICABLE",
+  "active_cycle_work_revision_id": null,
+  "active_cycle_impact_disposition": null,
+  "work_satisfaction_state": "NO_FOCUSED_WORK",
+  "interaction_relationship_state": "OPEN",
+  "work_focus_history": [],
+  "latest_work_transition": null,
+  "new_work_formation_pending": false,
+  "production_request_detected": false,
+  "repository_source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+  "production_admission_state": null,
+  "repository_acquisition_state": "READY",
+  "repository_observation": {
+    "tree": "753564ba0a09c0bed999dff17b540b09e581e8d9",
+    "paths": [
+      ".dockerignore",
+      ".env.example",
+      ".gitattributes",
+      ".gitignore",
+      "AI_context.md",
+      "Dockerfile",
+      "README.md",
+      "alembic.ini",
+      "benchmarks/conversation_quality/README.md",
+      "benchmarks/conversation_quality/corpus.json",
+      "benchmarks/conversation_quality/interaction_intelligence_cases.json",
+      "benchmarks/conversation_quality/interaction_intelligence_probe.py",
+      "benchmarks/conversation_quality/pipeline_probe.py",
+      "benchmarks/conversation_quality/replay_probe.py",
+      "benchmarks/native_executor_continuity/__init__.py",
+      "benchmarks/native_executor_continuity/report.py",
+      "benchmarks/native_executor_continuity/runner.py",
+      "benchmarks/native_executor_continuity/spec.json",
+      "benchmarks/native_executor_continuity_v2/__init__.py",
+      "benchmarks/native_executor_continuity_v2/evaluator.py",
+      "benchmarks/native_executor_continuity_v2/report.py",
+      "benchmarks/native_executor_continuity_v2/runner.py",
+      "benchmarks/native_executor_continuity_v2/spec.json",
+      "benchmarks/native_executor_continuity_v3/__init__.py",
+      "benchmarks/native_executor_continuity_v3/evaluator.py",
+      "benchmarks/native_executor_continuity_v3/report.py",
+      "benchmarks/native_executor_continuity_v3/runner.py",
+      "benchmarks/native_executor_continuity_v3/spec.json",
+      "benchmarks/native_executor_continuity_v4/__init__.py",
+      "benchmarks/native_executor_continuity_v4/evaluator.py",
+      "benchmarks/native_executor_continuity_v4/report.py",
+      "benchmarks/native_executor_continuity_v4/runner.py",
+      "benchmarks/native_executor_continuity_v4/spec.json",
+      "benchmarks/native_executor_continuity_v5/__init__.py",
+      "benchmarks/native_executor_continuity_v5/evaluator.py",
+      "benchmarks/native_executor_continuity_v5/report.py",
+      "benchmarks/native_executor_continuity_v5/runner.py",
+      "benchmarks/native_executor_continuity_v5/spec.json",
+      "benchmarks/native_executor_continuity_v6/__init__.py",
+      "benchmarks/native_executor_continuity_v6/evaluator.py",
+      "benchmarks/native_executor_continuity_v6/report.py",
+      "benchmarks/native_executor_continuity_v6/runner.py",
+      "benchmarks/native_executor_continuity_v6/spec.json",
+      "benchmarks/native_executor_continuity_v7/__init__.py",
+      "benchmarks/native_executor_continuity_v7/evaluator.py",
+      "benchmarks/native_executor_continuity_v7/report.py",
+      "benchmarks/native_executor_continuity_v7/runner.py",
+      "benchmarks/native_executor_continuity_v7/spec.json",
+      "benchmarks/native_executor_continuity_v8/__init__.py",
+      "benchmarks/native_executor_continuity_v8/evaluator.py",
+      "benchmarks/native_executor_continuity_v8/report.py",
+      "benchmarks/native_executor_continuity_v8/runner.py",
+      "benchmarks/native_executor_continuity_v8/spec.json",
+      "benchmarks/native_executor_qualification/isolation_probe.py",
+      "benchmarks/native_executor_qualification/performance.py",
+      "benchmarks/native_executor_qualification/reboot_probe.py",
+      "benchmarks/native_executor_qualification/slow_subscriber_probe.py",
+      "benchmarks/native_executor_qualification/tool_spool_probe.py",
+      "benchmarks/open_wic/corpus-v1.json",
+      "benchmarks/open_wic/fast_reception_qualification.py",
+      "benchmarks/open_wic/human_visible_evaluator.py",
+      "benchmarks/open_wic/progressive_evaluator.py",
+      "benchmarks/open_wic/slice2-corpus-v1.json",
+      "compose.delivery.yaml",
+      "compose.e2e.yaml",
+      "compose.native-executor.continuity-v2.yaml",
+      "compose.native-executor.continuity-v3.yaml",
+      "compose.native-executor.continuity-v4.yaml",
+      "compose.native-executor.continuity-v5.yaml",
+      "compose.native-executor.continuity-v6.yaml",
+      "compose.native-executor.continuity-v7.yaml",
+      "compose.native-executor.continuity-v8.yaml",
+      "compose.native-executor.continuity.yaml",
+      "compose.native-executor.human-acceptance.yaml",
+      "compose.native-executor.yaml",
+      "compose.wic-governed-streaming.yaml",
+      "compose.wic-slice3.yaml",
+      "compose.yaml",
+      "docker/e2e_preflight.py",
+      "docker/start_app.py",
+      "docker/start_delivery.py",
+      "docker/start_human_acceptance.py",
+      "docs/architecture/SPG_Core_Architecture_Model.md",
+      "docs/architecture/ai-native-development-execution-principles.md",
+      "docs/architecture/architecture-principles.md",
+      "docs/architecture/bounded-single-pwu-code-work.md",
+      "docs/architecture/case-studies/course-table-domain-grounding-and-semantic-boundary.md",
+      "docs/architecture/case-studies/waterfall-demo-csp-loop-and-guardian-recovery.md",
+      "docs/architecture/design-intelligence-evolution.md",
+      "docs/architecture/design-intent-framing-layer.md",
+      "docs/architecture/duration-capacity-semantic-foundation.md",
+      "docs/architecture/early-workspace-progressive-work-admission.md",
+      "docs/architecture/engineering-semantic-truth.md",
+      "docs/architecture/engineering-state-management.md",
+      "docs/architecture/executor-autonomy-envelope-attempt-granularity-mvp-contract.md",
+      "docs/architecture/external-design-intake-capability-direction.md",
+      "docs/architecture/external-engineering-intelligence-direction.md",
+      "docs/architecture/future-capabilities.md",
+      "docs/architecture/guided-design-core.md",
+      "docs/architecture/guided-design-facilitation-layer.md",
+      "docs/architecture/human-collaboration-experience-v32-assessment.md",
+      "docs/architecture/human-collaboration-pipeline-review.md",
+      "docs/architecture/human-collaboration-pipeline-v31-assessment.md",
+      "docs/architecture/human-watt-collaboration-layer.md",
+      "docs/architecture/human-watt-conversation-intelligence.md",
+      "docs/architecture/integration-boundary.md",
+      "docs/architecture/interpretation-externalization-and-multimodal-alignment.md",
+      "docs/architecture/motive-work-plan-concept-calibration.md",
+      "docs/architecture/mvp-architecture.md",
+      "docs/architecture/plane-model.md",
+      "docs/architecture/production-benchmarks.md",
+      "docs/architecture/production-execution-package-direction.md",
+      "docs/architecture/production-intelligence-architecture.md",
+      "docs/architecture/production-measurement-v0.md",
+      "docs/architecture/production-orchestration-lite.md",
+      "docs/architecture/program-architecture-decisions.md",
+      "docs/architecture/reality-driven-plan-steering-mvp-contract.md",
+      "docs/architecture/reality-driven-plan-steering-principles.md",
+      "docs/architecture/repository-acquisition-sandbox-and-remote-integration-direction.md",
+      "docs/architecture/repository-asset-and-managed-execution-workspace.md",
+      "docs/architecture/repository-aware-code-change-proposal-lite.md",
+      "docs/architecture/runtime-profile-provider-deployment.md",
+      "docs/architecture/single-pwu-production-planner-lite.md",
+      "docs/architecture/software-production-control-room-slice-1-implementation-contract.md",
+      "docs/architecture/software-production-control-room-slice-2-implementation-contract.md",
+      "docs/architecture/software-production-control-room-slice-3-implementation-contract.md",
+      "docs/architecture/software-production-control-room-slice-4-implementation-contract.md",
+      "docs/architecture/software-production-system-differentiation-and-barriers.md",
+      "docs/architecture/spg-completion-trust.md",
+      "docs/architecture/spg-fvs-1-implementation-contract.md",
+      "docs/architecture/spg-lite-domain-contract-baseline.md",
+      "docs/architecture/spg-lite-runtime-implementation-contract.md",
+      "docs/architecture/spg-reconciliation-recovery.md",
+      "docs/architecture/spg-runtime-architecture-readiness.md",
+      "docs/architecture/spg-runtime-findings-review.md",
+      "docs/architecture/spg-runtime-verification-benchmarks.md",
+      "docs/architecture/spg-side-effect-governance.md",
+      "docs/architecture/spg-state-foundation.md",
+      "docs/architecture/system-architecture-baseline-v0.1.md",
+      "docs/architecture/system-overview.md",
+      "docs/architecture/trusted-baseline-active-runtime-convergence-lite.md",
+      "docs/architecture/typed-node-test-verification-lite.md",
+      "docs/architecture/watt-ai-native-software-production-architecture.md",
+      "docs/architecture/watt-ai-software-production-evaluation-framework.md",
+      "docs/architecture/watt-decision-evidence-architecture.md",
+      "docs/architecture/watt-formal-ui-appearance-and-skin-library.md",
+      "docs/architecture/watt-native-executor-blueprint.md",
+      "docs/architecture/watt-native-executor-capacity-scheduling.md",
+      "docs/architecture/watt-native-executor-lifecycle.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v2.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v3.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v4.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v5.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v6.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v7.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v8.md",
+      "docs/architecture/watt-native-executor-qualification.md",
+      "docs/architecture/watt-product-north-star.md",
+      "docs/architecture/watt-regression-protection-and-golden-journey-governance.md",
+      "docs/architecture/watt-wic-intelligence-architecture-closure.md",
+      "docs/architecture/wic-context-orchestration.md",
+      "docs/architecture/wic-decision-evidence-architecture.md",
+      "docs/architecture/wic-intelligence-reconstruction-blueprint.md",
+      "docs/architecture/wic-response-contract.md",
+      "docs/architecture/wic-software-domain-grounding.md",
+      "docs/architecture/wic-software-production-sop-and-llm-direction.md",
+      "docs/architecture/work-centric-production-and-responsibility-principles.md",
+      "docs/architecture/work-centric-production-model.md",
+      "docs/architecture/work-identity-closure-and-archive-invariants.md",
+      "docs/architecture/work-interaction-closed-loop-refinement.md",
+      "docs/architecture/work-to-delivery-multi-repository-spg-proposal.md",
+      "docs/assets/ui-skins/01-industrial-cyan.png",
+      "docs/assets/ui-skins/02-executive-amber.png",
+      "docs/assets/ui-skins/03-technical-graphite.png",
+      "docs/assets/ui-skins/04-precision-silver.png",
+      "docs/assets/ui-skins/05-warm-professional.png",
+      "docs/assets/ui-skins/06-futuristic-studio.png",
+      "docs/assets/ui-skins/README.md",
+      "docs/assurance/guardian-integration.md",
+      "docs/context/ecf-integration.md",
+      "docs/evidence/control-room-slice-4-human-acceptance-preparation.md",
+      "docs/evidence/control-room-slice-4-human-product-acceptance.md",
+      "docs/evidence/deepseek-long-running-transport-boundary-qualification.md",
+      "docs/evidence/design-intent-framing-focused-validation.md",
+      "docs/evidence/dogfood/assets/executor-authority-drift-branch-creation.png",
+      "docs/evidence/dogfood/code-dogfood-1-repository-aware-change-proposal-gap.md",
+      "docs/evidence/dogfood/code-dogfood-2-trusted-baseline-active-runtime-divergence.md",
+      "docs/evidence/dogfood/executor-authority-drift-branch-creation.md",
+      "docs/evidence/dogfood/intake-dogfood-3-trusted-completion.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-1-admission-coupling.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-10-human-acceptance.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-2-post-admission-activation-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-3-semantic-design-execution-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-4-semantic-structured-output-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-5-semantic-provider-schema-requiredness-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-6-semantic-provider-ref-sibling-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-7-semantic-wire-coherence-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-8-self-refine-closure.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-9-production-loop-closure.md",
+      "docs/evidence/dogfood/orch-dogfood-1-verification-contract-mismatch.md"
+    ],
+    "title": "Interaction ACQUIRE",
+    "source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+    "work_id": null,
+    "revision": "0b535f63302fe45e88d0b3e203ae991868ced079",
+    "condition": "READY",
+    "product_id": "0571e6a7-1ab4-41c1-a7b8-9258e1173590",
+    "description": "我有个GitHub仓库：https://github.com/hengyizhiyuan/software-production-platform.git，把它clone下来，我要改个需求",
+    "fingerprint": "d2bde641896a714a1529f22f7f442f471d89f8d8862dfcb0c9ae28df187a5184",
+    "observed_at": "2026-09-27T04:10:54.943818+00:00",
+    "resource_id": "3920c22a-9feb-40b2-949a-c22756317d21",
+    "context_path": "README.md",
+    "human_message": "Repository is ready.",
+    "target_branch": null,
+    "attempt_number": 1,
+    "interaction_id": "917d3128-8669-45e7-9d93-18bc82e5e529",
+    "operation_kind": "ACQUIRE",
+    "repository_ref": "refs/heads/main",
+    "base_resource_id": null,
+    "failure_category": null,
+    "intake_request_id": "a338f624-2ac7-51b8-8960-c93952ff3a6c",
+    "operation_evidence": {
+      "verified": true,
+      "connector_id": "builtin:git",
+      "capability_id": "git.repository.acquire",
+      "operation_ref": "repository-intake:925a8313-b65a-57b5-a110-c85f116c3f88",
+      "resulting_branch": "refs/heads/main",
+      "resulting_revision": "0b535f63302fe45e88d0b3e203ae991868ced079",
+      "workspace_reference": "/var/lib/spg/repository-assets/925a8313-b65a-57b5-a110-c85f116c3f88"
+    },
+    "previous_attempt_id": null,
+    "repository_identity": "https://github.com/hengyizhiyuan/software-production-platform.git"
+  },
+  "production_next_step": "Repository Reality is ready; production Work remains unadmitted.",
+  "selected_design_schema_identity": "watt:guided-design:general-product-system",
+  "selected_design_schema_version": "0.1",
+  "design_schema_selection_rationale": "The Design Intent Frame identifies a product, platform, or software system.",
+  "design_stage": "Motive, users, and problem",
+  "design_next_focus": "Establish the Motive, relevant actors, and problem boundary needed for the current governed step.",
+  "design_focus_rationale": "These dimensions matter only to the extent that they change the current artifact, risk, authority, or acceptance basis.",
+  "design_facilitation_strategy": "CLARIFY",
+  "design_progress_narrative": "Selected General Product/System Design v0.1. Current stage: Motive, users, and problem. 0 of 7 design areas are resolved. Next, establish the motive, relevant actors, and problem boundary needed for the current governed step."
+}

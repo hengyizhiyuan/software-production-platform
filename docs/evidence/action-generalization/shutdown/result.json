@@ -1,0 +1,22 @@
+{
+  "completed_at": "2026-09-27T09:08:02.779629+00:00",
+  "containers_removed": 13,
+  "tagged_unique_images_removed": 7,
+  "additional_dangling_images_removed": 6,
+  "image_tags_removed": 8,
+  "build_cache_reclaimed": "17.08GB",
+  "image_prune_reclaimed": "856MB",
+  "containers_remaining": 0,
+  "images_remaining": 0,
+  "test_ports": [
+    8078,
+    8079,
+    55438
+  ],
+  "listeners_remaining": [],
+  "volumes_retained": 294,
+  "volume_inventory_unchanged": true,
+  "fsi_evidence_sha256": "ae310fdb6630bad284f0d4ac6d0fc8e3cb3606e8606346f90288a8dfbf7b3b05",
+  "unfinished_regression": "INTERRUPTED_BY_HUMAN; not represented as PASS",
+  "automatic_resume": false
+}

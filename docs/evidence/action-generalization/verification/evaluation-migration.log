@@ -1,0 +1,4 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 20260927_58 -> 20260927_59, Persist WIC canonical action candidates with their immutable assessment basis.
+INFO  [alembic.runtime.migration] Running upgrade 20260927_59 -> 20260927_60, Distinguish unrecorded legacy action interpretation from interpreted no-action.

@@ -1,0 +1,1202 @@
+{
+  "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+  "condition": "OPEN",
+  "current_work_id": null,
+  "created_at": "2026-09-27T08:37:09.798630Z",
+  "updated_at": "2026-09-27T08:45:29.025247Z",
+  "records": [
+    {
+      "record_id": "299f88dc-ce7a-4ad5-982f-c949c775bdf0",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:37:10.786039Z"
+    },
+    {
+      "record_id": "ff6ab131-f2ed-4b6f-8edd-0250f9a860f2",
+      "sequence": 2,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "切一个 feat_semantic_4_0 分支",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:37:41.588211Z"
+    },
+    {
+      "record_id": "ff6de862-6981-4fa6-99f3-93f774d9220f",
+      "sequence": 3,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "切个 feat_semantic_4_1 分支",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:38:27.781127Z"
+    },
+    {
+      "record_id": "eb644f85-fbca-4846-80ba-883be3496776",
+      "sequence": 4,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "切个新分支 feat_semantic_4_2",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:39:31.155591Z"
+    },
+    {
+      "record_id": "84bb349e-60b6-4256-be6c-b7e1fb0888a0",
+      "sequence": 5,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "切个新分支：feat_semantic_4_3",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:40:16.653414Z"
+    },
+    {
+      "record_id": "36332f43-955b-4cb1-9c83-d9663eaf00a4",
+      "sequence": 6,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "新建一个 feat_semantic_4_4 分支并切过去",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:41:42.874528Z"
+    },
+    {
+      "record_id": "33559ca3-d741-493e-9ba3-f08a02bc75ef",
+      "sequence": 7,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "建个 feat_semantic_4_5 分支",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:43:23.843780Z"
+    },
+    {
+      "record_id": "904fcda0-4280-4873-9ae6-2024514286f8",
+      "sequence": 8,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "创建并切换到 feat_semantic_4_6",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:44:38.796631Z"
+    }
+  ],
+  "conversation_messages": [
+    {
+      "message_id": "b9c44c01-0369-4175-bb4f-30282f936c65",
+      "turn_id": "0517156e-adc5-4d32-a5d7-be1a567ac523",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "content": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "299f88dc-ce7a-4ad5-982f-c949c775bdf0",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:37:10.786039Z",
+      "updated_at": "2026-09-27T08:37:40.920558Z"
+    },
+    {
+      "message_id": "dfb0cf0c-fb38-4fae-b0b2-4c64357f989b",
+      "turn_id": "0517156e-adc5-4d32-a5d7-be1a567ac523",
+      "sequence": 2,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：main；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "e5cebea3-f8e2-435d-b18e-5cd0a94ea1d2",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:37:40.920558Z",
+      "updated_at": "2026-09-27T08:37:40.920558Z"
+    },
+    {
+      "message_id": "ba0d8575-35c3-49ad-becf-e3236b6bf06c",
+      "turn_id": "d6d21952-94b6-4b65-b3d6-0832535e7c50",
+      "sequence": 3,
+      "actor": "HUMAN",
+      "content": "切一个 feat_semantic_4_0 分支",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "ff6ab131-f2ed-4b6f-8edd-0250f9a860f2",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:37:41.588211Z",
+      "updated_at": "2026-09-27T08:38:27.035668Z"
+    },
+    {
+      "message_id": "71d7b737-b5bf-4402-9dbd-cbe896e6bd1e",
+      "turn_id": "d6d21952-94b6-4b65-b3d6-0832535e7c50",
+      "sequence": 4,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：feat_semantic_4_0；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "ec86333d-a939-444e-9fa8-ef7a507b2128",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:38:27.035668Z",
+      "updated_at": "2026-09-27T08:38:27.035668Z"
+    },
+    {
+      "message_id": "3e0034e9-0b90-4f63-af22-1ad550c82e64",
+      "turn_id": "ab766942-90e2-4ab2-a027-a9900f70ecc7",
+      "sequence": 5,
+      "actor": "HUMAN",
+      "content": "切个 feat_semantic_4_1 分支",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "ff6de862-6981-4fa6-99f3-93f774d9220f",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:38:27.781127Z",
+      "updated_at": "2026-09-27T08:39:30.127749Z"
+    },
+    {
+      "message_id": "8fdf5fd3-1890-43d5-85b7-90afc49056b5",
+      "turn_id": "ab766942-90e2-4ab2-a027-a9900f70ecc7",
+      "sequence": 6,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：feat_semantic_4_1；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "9b823478-7427-4576-bc92-703a9b2fa0ee",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:39:30.127749Z",
+      "updated_at": "2026-09-27T08:39:30.127749Z"
+    },
+    {
+      "message_id": "8c4f6470-f563-4d58-933b-2907cecf82eb",
+      "turn_id": "dc0e2851-4425-4d18-8614-19ef8b9618ee",
+      "sequence": 7,
+      "actor": "HUMAN",
+      "content": "切个新分支 feat_semantic_4_2",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "eb644f85-fbca-4846-80ba-883be3496776",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:39:31.155591Z",
+      "updated_at": "2026-09-27T08:40:15.595147Z"
+    },
+    {
+      "message_id": "1d588f6e-08fe-485c-a9bd-ae147b0ad706",
+      "turn_id": "dc0e2851-4425-4d18-8614-19ef8b9618ee",
+      "sequence": 8,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：feat_semantic_4_2；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "f75ed7a2-44cf-4489-97e5-310f9bc76868",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:40:15.595147Z",
+      "updated_at": "2026-09-27T08:40:15.595147Z"
+    },
+    {
+      "message_id": "63a05408-6435-45e8-bc8e-4ba13f30913d",
+      "turn_id": "58644cae-fcb8-457c-8ef0-2c2bfa861726",
+      "sequence": 9,
+      "actor": "HUMAN",
+      "content": "切个新分支：feat_semantic_4_3",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "84bb349e-60b6-4256-be6c-b7e1fb0888a0",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:40:16.653414Z",
+      "updated_at": "2026-09-27T08:41:42.277079Z"
+    },
+    {
+      "message_id": "d23087d5-78a0-4d6d-861f-90acaa2ab667",
+      "turn_id": "58644cae-fcb8-457c-8ef0-2c2bfa861726",
+      "sequence": 10,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：feat_semantic_4_3；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "e94fe5c4-d62f-45ac-9057-41cf490a6bca",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:41:42.277079Z",
+      "updated_at": "2026-09-27T08:41:42.277079Z"
+    },
+    {
+      "message_id": "e6607970-8910-44ec-ad60-f75baa687218",
+      "turn_id": "f771b8a3-2eb8-4294-b130-a2db8d3de05e",
+      "sequence": 11,
+      "actor": "HUMAN",
+      "content": "新建一个 feat_semantic_4_4 分支并切过去",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "36332f43-955b-4cb1-9c83-d9663eaf00a4",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:41:42.874528Z",
+      "updated_at": "2026-09-27T08:43:22.733348Z"
+    },
+    {
+      "message_id": "96dc8d0d-fc51-4b6d-8a8a-10ac99dffac9",
+      "turn_id": "f771b8a3-2eb8-4294-b130-a2db8d3de05e",
+      "sequence": 12,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：feat_semantic_4_4；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "6d562221-2ba5-4cda-ae20-702aec53f2e7",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:43:22.733348Z",
+      "updated_at": "2026-09-27T08:43:22.733348Z"
+    },
+    {
+      "message_id": "66f352d3-8db8-4c80-9817-2fbf723dbf03",
+      "turn_id": "452cc2fd-efc8-4026-8d17-111c779e5bfd",
+      "sequence": 13,
+      "actor": "HUMAN",
+      "content": "建个 feat_semantic_4_5 分支",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "33559ca3-d741-493e-9ba3-f08a02bc75ef",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:43:23.843780Z",
+      "updated_at": "2026-09-27T08:44:38.342043Z"
+    },
+    {
+      "message_id": "354f9593-0e1d-4840-b566-7fab74e7135a",
+      "turn_id": "452cc2fd-efc8-4026-8d17-111c779e5bfd",
+      "sequence": 14,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：feat_semantic_4_5；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "32efd0f7-e215-4ee1-8fe8-6831cd5457f8",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:44:38.342043Z",
+      "updated_at": "2026-09-27T08:44:38.342043Z"
+    },
+    {
+      "message_id": "d7e2830b-2c07-4db2-b8d4-bfd4fffd96fd",
+      "turn_id": "798dc330-bb52-4324-8c11-b2d7a7bfd9fe",
+      "sequence": 15,
+      "actor": "HUMAN",
+      "content": "创建并切换到 feat_semantic_4_6",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": "904fcda0-4280-4873-9ae6-2024514286f8",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:44:38.796631Z",
+      "updated_at": "2026-09-27T08:45:43.493716Z"
+    },
+    {
+      "message_id": "37326ab0-c5c7-4b60-bc9a-3f03d1ed3092",
+      "turn_id": "798dc330-bb52-4324-8c11-b2d7a7bfd9fe",
+      "sequence": 16,
+      "actor": "WATT",
+      "content": "仓库已就绪，本地分支：feat_semantic_4_6；提交：0b535f63302fe45e88d0b3e203ae991868ced079；文件树：753564ba0a09c0bed999dff17b540b09e581e8d9。\n生产 Work 尚未准入；没有修改源码或推送远端。",
+      "processing_status": "COMPLETED",
+      "interaction_record_id": null,
+      "interpretation_assessment_id": "4a91cf47-4545-49b8-98f1-fa458de97489",
+      "design_result_references": [
+        "DESIGN_SCHEMA:watt:guided-design:general-product-system@0.1"
+      ],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:45:43.493716Z",
+      "updated_at": "2026-09-27T08:45:43.493716Z"
+    }
+  ],
+  "turns": [
+    {
+      "turn_id": "0517156e-adc5-4d32-a5d7-be1a567ac523",
+      "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+      "request_record_id": "299f88dc-ce7a-4ad5-982f-c949c775bdf0",
+      "assessment_id": "e5cebea3-f8e2-435d-b18e-5cd0a94ea1d2",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:37:10.786039Z",
+      "started_at": "2026-09-27T08:37:11.595339Z",
+      "completed_at": "2026-09-27T08:37:40.920558Z",
+      "updated_at": "2026-09-27T08:37:40.920558Z"
+    },
+    {
+      "turn_id": "d6d21952-94b6-4b65-b3d6-0832535e7c50",
+      "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+      "request_record_id": "ff6ab131-f2ed-4b6f-8edd-0250f9a860f2",
+      "assessment_id": "ec86333d-a939-444e-9fa8-ef7a507b2128",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:37:41.588211Z",
+      "started_at": "2026-09-27T08:37:59.100655Z",
+      "completed_at": "2026-09-27T08:38:27.035668Z",
+      "updated_at": "2026-09-27T08:38:27.035668Z"
+    },
+    {
+      "turn_id": "ab766942-90e2-4ab2-a027-a9900f70ecc7",
+      "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+      "request_record_id": "ff6de862-6981-4fa6-99f3-93f774d9220f",
+      "assessment_id": "9b823478-7427-4576-bc92-703a9b2fa0ee",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:38:27.781127Z",
+      "started_at": "2026-09-27T08:38:57.455341Z",
+      "completed_at": "2026-09-27T08:39:30.127749Z",
+      "updated_at": "2026-09-27T08:39:30.127749Z"
+    },
+    {
+      "turn_id": "dc0e2851-4425-4d18-8614-19ef8b9618ee",
+      "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+      "request_record_id": "eb644f85-fbca-4846-80ba-883be3496776",
+      "assessment_id": "f75ed7a2-44cf-4489-97e5-310f9bc76868",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:39:31.155591Z",
+      "started_at": "2026-09-27T08:39:51.212984Z",
+      "completed_at": "2026-09-27T08:40:15.595147Z",
+      "updated_at": "2026-09-27T08:40:15.595147Z"
+    },
+    {
+      "turn_id": "58644cae-fcb8-457c-8ef0-2c2bfa861726",
+      "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+      "request_record_id": "84bb349e-60b6-4256-be6c-b7e1fb0888a0",
+      "assessment_id": "e94fe5c4-d62f-45ac-9057-41cf490a6bca",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:40:16.653414Z",
+      "started_at": "2026-09-27T08:41:08.895532Z",
+      "completed_at": "2026-09-27T08:41:42.277079Z",
+      "updated_at": "2026-09-27T08:41:42.277079Z"
+    },
+    {
+      "turn_id": "f771b8a3-2eb8-4294-b130-a2db8d3de05e",
+      "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+      "request_record_id": "36332f43-955b-4cb1-9c83-d9663eaf00a4",
+      "assessment_id": "6d562221-2ba5-4cda-ae20-702aec53f2e7",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:41:42.874528Z",
+      "started_at": "2026-09-27T08:42:50.711853Z",
+      "completed_at": "2026-09-27T08:43:22.733348Z",
+      "updated_at": "2026-09-27T08:43:22.733348Z"
+    },
+    {
+      "turn_id": "452cc2fd-efc8-4026-8d17-111c779e5bfd",
+      "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+      "request_record_id": "33559ca3-d741-493e-9ba3-f08a02bc75ef",
+      "assessment_id": "32efd0f7-e215-4ee1-8fe8-6831cd5457f8",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:43:23.843780Z",
+      "started_at": "2026-09-27T08:44:12.860321Z",
+      "completed_at": "2026-09-27T08:44:38.342043Z",
+      "updated_at": "2026-09-27T08:44:38.342043Z"
+    },
+    {
+      "turn_id": "798dc330-bb52-4324-8c11-b2d7a7bfd9fe",
+      "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+      "request_record_id": "904fcda0-4280-4873-9ae6-2024514286f8",
+      "assessment_id": "4a91cf47-4545-49b8-98f1-fa458de97489",
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "COMPLETED",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:44:38.796631Z",
+      "started_at": "2026-09-27T08:45:11.855056Z",
+      "completed_at": "2026-09-27T08:45:43.493716Z",
+      "updated_at": "2026-09-27T08:45:43.493716Z"
+    }
+  ],
+  "human_said": [
+    "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+    "切一个 feat_semantic_4_0 分支",
+    "切个 feat_semantic_4_1 分支",
+    "切个新分支 feat_semantic_4_2",
+    "切个新分支：feat_semantic_4_3",
+    "新建一个 feat_semantic_4_4 分支并切过去",
+    "建个 feat_semantic_4_5 分支",
+    "创建并切换到 feat_semantic_4_6"
+  ],
+  "latest_assessment": {
+    "assessment_id": "4a91cf47-4545-49b8-98f1-fa458de97489",
+    "basis_fingerprint": "b7dd218bae0560718fc84456e6a5b611301e76b6cbdf9d26821b8a5b6c2ebde8",
+    "basis_last_sequence": 8,
+    "interpreted_motive": "获取并本地就绪指定仓库，作为后续围绕该软件生产平台开展工作的前置条件。",
+    "desired_outcome": "将 https://github.com/hengyizhiyuan/software-production-platform.git 保持在本地可用，并位于 feat_semantic_4_6 分支上。",
+    "design_intent_frame": {
+      "design_subject": "获取并本地就绪指定仓库，作为后续围绕该软件生产平台开展工作的前置条件。",
+      "object_type": "PRODUCT_SYSTEM",
+      "business_context": null,
+      "desired_outcome": "将 https://github.com/hengyizhiyuan/software-production-platform.git 保持在本地可用，并位于 feat_semantic_4_6 分支上。",
+      "scope_level": "product",
+      "collaboration_mode": "execution",
+      "candidate_assumptions": [
+        "新分支基于当前本地默认分支 main（提交 0b535f63302fe45e88d0b3e203ae991868ced079）创建。"
+      ],
+      "ambiguities": [],
+      "confidence": 0.8
+    },
+    "candidate_context": [
+      "人类提供的仓库地址：https://github.com/hengyizhiyuan/software-production-platform.git。",
+      "该仓库此前已获取到本地，默认分支为 main（提交 0b535f63302fe45e88d0b3e203ae991868ced079），未修改源码、未推送远端。",
+      "此前已在同一本地仓库创建并切换到 feat_semantic_4_0 至 feat_semantic_4_5 分支；此次是在同一仓库上再建一个新分支。",
+      "当前没有已存在的受治理 Work（active_work_context 为空），此请求仍属仓库准备阶段。"
+    ],
+    "candidate_constraints": [],
+    "current_requests": [
+      "创建并切换到 feat_semantic_4_6"
+    ],
+    "unresolved_material_questions": [],
+    "action_candidates": [
+      {
+        "operation": "CREATE_AND_SWITCH_BRANCH",
+        "speech_act": "EXPLICIT_REQUEST",
+        "source_record_id": "904fcda0-4280-4873-9ae6-2024514286f8",
+        "source_text": "创建并切换到 feat_semantic_4_6",
+        "target_branch": "feat_semantic_4_6",
+        "repository_source": null,
+        "confidence": 0.96
+      }
+    ],
+    "neutral_semantic_extractions": [
+      {
+        "extraction_id": "ne-branch-46",
+        "kind": "REFERENCE",
+        "values": [
+          "feat_semantic_4_6"
+        ],
+        "unit": null,
+        "source_record_id": "904fcda0-4280-4873-9ae6-2024514286f8",
+        "source_text": "feat_semantic_4_6",
+        "explicit_roles": [
+          "branch_name"
+        ]
+      },
+      {
+        "extraction_id": "ne-act-46",
+        "kind": "BEHAVIOR",
+        "values": [
+          "create_and_switch_branch"
+        ],
+        "unit": null,
+        "source_record_id": "904fcda0-4280-4873-9ae6-2024514286f8",
+        "source_text": "创建并切换到 feat_semantic_4_6",
+        "explicit_roles": [
+          "branch_acquisition"
+        ]
+      }
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "7c4fd8ea-1e6e-593c-aaa1-c6cf6ba8f9f1",
+        "subject": "repository.source",
+        "relation": "REFERENCE",
+        "value": "https://github.com/hengyizhiyuan/software-production-platform.git",
+        "unit": null,
+        "scope": null,
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "299f88dc-ce7a-4ad5-982f-c949c775bdf0"
+          ],
+          "source_text": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+          "source_extraction_ids": [
+            "ne-url-1"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "be706b0a-c31a-5b7d-af61-9b926151c537",
+        "subject": "repository.branch.target",
+        "relation": "REFERENCE",
+        "value": "feat_semantic_4_0",
+        "unit": null,
+        "scope": "repository:https://github.com/hengyizhiyuan/software-production-platform.git",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "SUPERSEDED",
+        "provenance": {
+          "source_record_ids": [
+            "ff6ab131-f2ed-4b6f-8edd-0250f9a860f2"
+          ],
+          "source_text": "切一个 feat_semantic_4_0 分支",
+          "source_extraction_ids": [
+            "ne-branch-1",
+            "ne-act-2"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "17f6856c-48a8-59df-9935-51d5892f441c",
+        "subject": "repository.branch.target",
+        "relation": "REFERENCE",
+        "value": "feat_semantic_4_1",
+        "unit": null,
+        "scope": "repository:https://github.com/hengyizhiyuan/software-production-platform.git",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "SUPERSEDED",
+        "provenance": {
+          "source_record_ids": [
+            "ff6de862-6981-4fa6-99f3-93f774d9220f"
+          ],
+          "source_text": "切个 feat_semantic_4_1 分支",
+          "source_extraction_ids": [
+            "ne-branch-41",
+            "ne-act-41"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [
+          "be706b0a-c31a-5b7d-af61-9b926151c537"
+        ],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "13303238-54a0-5fea-abf4-eb64ac3d9c74",
+        "subject": "repository.branch.target",
+        "relation": "REFERENCE",
+        "value": "feat_semantic_4_2",
+        "unit": null,
+        "scope": "repository:https://github.com/hengyizhiyuan/software-production-platform.git",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "SUPERSEDED",
+        "provenance": {
+          "source_record_ids": [
+            "eb644f85-fbca-4846-80ba-883be3496776"
+          ],
+          "source_text": "切个新分支 feat_semantic_4_2",
+          "source_extraction_ids": [
+            "ne-branch-42",
+            "ne-act-42"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [
+          "17f6856c-48a8-59df-9935-51d5892f441c"
+        ],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "d6a8aa85-ef55-5d04-b750-3bb156a8ffb6",
+        "subject": "repository.branch.target",
+        "relation": "REFERENCE",
+        "value": "feat_semantic_4_3",
+        "unit": null,
+        "scope": "repository:https://github.com/hengyizhiyuan/software-production-platform.git",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "SUPERSEDED",
+        "provenance": {
+          "source_record_ids": [
+            "84bb349e-60b6-4256-be6c-b7e1fb0888a0"
+          ],
+          "source_text": "feat_semantic_4_3",
+          "source_extraction_ids": [
+            "ne-branch-43",
+            "ne-act-43"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [
+          "13303238-54a0-5fea-abf4-eb64ac3d9c74"
+        ],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "dbe79e34-3ba8-5443-9476-d500b7d41f5f",
+        "subject": "repository.branch.target",
+        "relation": "REFERENCE",
+        "value": "feat_semantic_4_4",
+        "unit": null,
+        "scope": "repository:https://github.com/hengyizhiyuan/software-production-platform.git",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "SUPERSEDED",
+        "provenance": {
+          "source_record_ids": [
+            "36332f43-955b-4cb1-9c83-d9663eaf00a4"
+          ],
+          "source_text": "feat_semantic_4_4",
+          "source_extraction_ids": [
+            "ne-branch-44",
+            "ne-act-44"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [
+          "d6a8aa85-ef55-5d04-b750-3bb156a8ffb6"
+        ],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "e3647c69-e9a9-525c-8b97-e7c7e8b1b93c",
+        "subject": "repository.branch.target",
+        "relation": "REFERENCE",
+        "value": "feat_semantic_4_5",
+        "unit": null,
+        "scope": "repository:https://github.com/hengyizhiyuan/software-production-platform.git",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "SUPERSEDED",
+        "provenance": {
+          "source_record_ids": [
+            "33559ca3-d741-493e-9ba3-f08a02bc75ef"
+          ],
+          "source_text": "feat_semantic_4_5",
+          "source_extraction_ids": [
+            "ne-branch-45",
+            "ne-act-45"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [
+          "dbe79e34-3ba8-5443-9476-d500b7d41f5f"
+        ],
+        "admitted_work_revision_id": null
+      },
+      {
+        "id": "814caaa5-9566-5c19-b6c2-ed3ce8c938a0",
+        "subject": "repository.branch.target",
+        "relation": "REFERENCE",
+        "value": "feat_semantic_4_6",
+        "unit": null,
+        "scope": "repository:https://github.com/hengyizhiyuan/software-production-platform.git",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "904fcda0-4280-4873-9ae6-2024514286f8"
+          ],
+          "source_text": "创建并切换到 feat_semantic_4_6",
+          "source_extraction_ids": [
+            "ne-branch-46",
+            "ne-act-46"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [
+          "e3647c69-e9a9-525c-8b97-e7c7e8b1b93c"
+        ],
+        "admitted_work_revision_id": null
+      }
+    ],
+    "meanings": [
+      {
+        "kind": "REQUEST",
+        "statement": "人类要求在同一本地仓库中创建并切换到名为 feat_semantic_4_6 的新分支。",
+        "source_record_ids": [
+          "904fcda0-4280-4873-9ae6-2024514286f8"
+        ],
+        "confidence": 0.96,
+        "rationale": "“创建并切换到”为明确执行动词，宾语为逐字给出的分支名，延续此前仓库准备动作序列，非讨论或假设。",
+        "clarification_required": false
+      },
+      {
+        "kind": "FACT",
+        "statement": "目标分支名为 feat_semantic_4_6。",
+        "source_record_ids": [
+          "904fcda0-4280-4873-9ae6-2024514286f8"
+        ],
+        "confidence": 0.98,
+        "rationale": "分支名由人类在最新输入中逐字给出。",
+        "clarification_required": false
+      }
+    ],
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "basis_work_revision_id": null,
+    "basis_steering_plan_revision_id": null,
+    "basis_steering_step_id": null,
+    "basis_active_runtime_binding_id": null,
+    "supporting_references": [],
+    "natural_response": "创建并切换到 feat_semantic_4_6 分支，然后报告当前分支名、提交与文件树状态。",
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "b7dd218bae0560718fc84456e6a5b611301e76b6cbdf9d26821b8a5b6c2ebde8"
+    },
+    "progressive_semantics": {
+      "turn_intent": "ACTION_REQUEST",
+      "basis_fingerprint": "b7dd218bae0560718fc84456e6a5b611301e76b6cbdf9d26821b8a5b6c2ebde8",
+      "source_record_ids": [
+        "299f88dc-ce7a-4ad5-982f-c949c775bdf0",
+        "ff6ab131-f2ed-4b6f-8edd-0250f9a860f2",
+        "ff6de862-6981-4fa6-99f3-93f774d9220f",
+        "eb644f85-fbca-4846-80ba-883be3496776",
+        "84bb349e-60b6-4256-be6c-b7e1fb0888a0",
+        "36332f43-955b-4cb1-9c83-d9663eaf00a4",
+        "33559ca3-d741-493e-9ba3-f08a02bc75ef",
+        "904fcda0-4280-4873-9ae6-2024514286f8"
+      ],
+      "reception_meanings": [
+        "DEEP_WIC_WORKING_UNDERSTANDING"
+      ],
+      "working_motive": "获取并本地就绪指定仓库，作为后续围绕该软件生产平台开展工作的前置条件。",
+      "working_desired_outcome": "将 https://github.com/hengyizhiyuan/software-production-platform.git 保持在本地可用，并位于 feat_semantic_4_6 分支上。",
+      "working_facts": [
+        "人类此前提供了确切的仓库地址：https://github.com/hengyizhiyuan/software-production-platform.git。",
+        "该仓库已在本轮对话中获取到本地，默认分支为 main（提交 0b535f63302fe45e88d0b3e203ae991868ced079），未修改源码、未推送远端。",
+        "此前已在同一本地仓库创建并切换到 feat_semantic_4_0、feat_semantic_4_1、feat_semantic_4_2、feat_semantic_4_3、feat_semantic_4_4 分支；此次是在同一仓库上再建一个新分支。",
+        "当前没有已存在的受治理 Work（active_work_context 为空），此请求仍属仓库准备阶段。",
+        "人类提供的仓库地址：https://github.com/hengyizhiyuan/software-production-platform.git。",
+        "该仓库此前已获取到本地，默认分支为 main（提交 0b535f63302fe45e88d0b3e203ae991868ced079），未修改源码、未推送远端。",
+        "此前已在同一本地仓库创建并切换到 feat_semantic_4_0 至 feat_semantic_4_5 分支；此次是在同一仓库上再建一个新分支。"
+      ],
+      "working_constraints": [],
+      "working_requests": [
+        "创建并切换到 feat_semantic_4_6"
+      ],
+      "explicit_assumptions": [],
+      "unresolved_human_decisions": [],
+      "deltas": [],
+      "pattern_signals": [],
+      "inference_disposition": "NO_INFERENCE",
+      "questions": [],
+      "selected_question": null,
+      "governance_candidate": "WORK_FORMATION_PROPOSAL",
+      "readiness": [
+        {
+          "target": "WORK_FORMATION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "MOTIVE",
+            "DESIRED_OUTCOME"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "b7dd218bae0560718fc84456e6a5b611301e76b6cbdf9d26821b8a5b6c2ebde8",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "WORK_REVISION",
+          "status": "NOT_APPLICABLE",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "b7dd218bae0560718fc84456e6a5b611301e76b6cbdf9d26821b8a5b6c2ebde8",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "DESIGN_PROGRESSION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "CURRENT_FOCUS"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "b7dd218bae0560718fc84456e6a5b611301e76b6cbdf9d26821b8a5b6c2ebde8",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        }
+      ],
+      "artifact_recommendation": null,
+      "factual_contradictions": [],
+      "semantic_policy_revision": "wic-semantic-policy-v1",
+      "question_policy_revision": "wic-question-value-v1"
+    },
+    "provider_identity": "deepseek-responses:semantic:request:5ee11184-fb16-427e-b2f2-e031f6fdef6d",
+    "model_identity": "deepseek-flash",
+    "schema_version": "wic-assessment-v7",
+    "created_at": "2026-09-27T08:45:29.025247Z"
+  },
+  "latest_assessment_current": true,
+  "interpreted_motive": "获取并本地就绪指定仓库，作为后续围绕该软件生产平台开展工作的前置条件。",
+  "desired_outcome": "将 https://github.com/hengyizhiyuan/software-production-platform.git 保持在本地可用，并位于 feat_semantic_4_6 分支上。",
+  "design_intent_frame": {
+    "design_subject": "获取并本地就绪指定仓库，作为后续围绕该软件生产平台开展工作的前置条件。",
+    "object_type": "PRODUCT_SYSTEM",
+    "business_context": null,
+    "desired_outcome": "将 https://github.com/hengyizhiyuan/software-production-platform.git 保持在本地可用，并位于 feat_semantic_4_6 分支上。",
+    "scope_level": "product",
+    "collaboration_mode": "execution",
+    "candidate_assumptions": [
+      "新分支基于当前本地默认分支 main（提交 0b535f63302fe45e88d0b3e203ae991868ced079）创建。"
+    ],
+    "ambiguities": [],
+    "confidence": 0.8
+  },
+  "candidate_context": [
+    "人类提供的仓库地址：https://github.com/hengyizhiyuan/software-production-platform.git。",
+    "该仓库此前已获取到本地，默认分支为 main（提交 0b535f63302fe45e88d0b3e203ae991868ced079），未修改源码、未推送远端。",
+    "此前已在同一本地仓库创建并切换到 feat_semantic_4_0 至 feat_semantic_4_5 分支；此次是在同一仓库上再建一个新分支。",
+    "当前没有已存在的受治理 Work（active_work_context 为空），此请求仍属仓库准备阶段。"
+  ],
+  "candidate_constraints": [],
+  "current_requests": [
+    "创建并切换到 feat_semantic_4_6"
+  ],
+  "unresolved_material_questions": [],
+  "readiness": {
+    "status": "READY",
+    "profile": "LONG_LIVED_STEERING",
+    "profile_version": "v0",
+    "satisfied_requirements": [
+      "MOTIVE",
+      "DESIRED_OUTCOME"
+    ],
+    "missing_information": [],
+    "unresolved_material_questions": [],
+    "reasons": [
+      "Motive and desired outcome are clear enough to form governed Work."
+    ],
+    "basis_fingerprint": "b7dd218bae0560718fc84456e6a5b611301e76b6cbdf9d26821b8a5b6c2ebde8"
+  },
+  "candidate_engineering_resource_id": null,
+  "candidate_repository_identity": null,
+  "candidate_repository_ref": null,
+  "candidate_scope_summary": null,
+  "governed_work_id": null,
+  "governed_revision": null,
+  "current_work_focus": null,
+  "focus_classification": null,
+  "impact_disposition": null,
+  "candidate_change": null,
+  "work_revision_admission_status": "NOT_APPLICABLE",
+  "active_cycle_work_revision_id": null,
+  "active_cycle_impact_disposition": null,
+  "work_satisfaction_state": "NO_FOCUSED_WORK",
+  "interaction_relationship_state": "OPEN",
+  "work_focus_history": [],
+  "latest_work_transition": null,
+  "new_work_formation_pending": false,
+  "production_request_detected": false,
+  "repository_source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+  "production_admission_state": null,
+  "repository_acquisition_state": "READY",
+  "repository_observation": {
+    "tree": "753564ba0a09c0bed999dff17b540b09e581e8d9",
+    "paths": [
+      ".dockerignore",
+      ".env.example",
+      ".gitattributes",
+      ".gitignore",
+      "AI_context.md",
+      "Dockerfile",
+      "README.md",
+      "alembic.ini",
+      "benchmarks/conversation_quality/README.md",
+      "benchmarks/conversation_quality/corpus.json",
+      "benchmarks/conversation_quality/interaction_intelligence_cases.json",
+      "benchmarks/conversation_quality/interaction_intelligence_probe.py",
+      "benchmarks/conversation_quality/pipeline_probe.py",
+      "benchmarks/conversation_quality/replay_probe.py",
+      "benchmarks/native_executor_continuity/__init__.py",
+      "benchmarks/native_executor_continuity/report.py",
+      "benchmarks/native_executor_continuity/runner.py",
+      "benchmarks/native_executor_continuity/spec.json",
+      "benchmarks/native_executor_continuity_v2/__init__.py",
+      "benchmarks/native_executor_continuity_v2/evaluator.py",
+      "benchmarks/native_executor_continuity_v2/report.py",
+      "benchmarks/native_executor_continuity_v2/runner.py",
+      "benchmarks/native_executor_continuity_v2/spec.json",
+      "benchmarks/native_executor_continuity_v3/__init__.py",
+      "benchmarks/native_executor_continuity_v3/evaluator.py",
+      "benchmarks/native_executor_continuity_v3/report.py",
+      "benchmarks/native_executor_continuity_v3/runner.py",
+      "benchmarks/native_executor_continuity_v3/spec.json",
+      "benchmarks/native_executor_continuity_v4/__init__.py",
+      "benchmarks/native_executor_continuity_v4/evaluator.py",
+      "benchmarks/native_executor_continuity_v4/report.py",
+      "benchmarks/native_executor_continuity_v4/runner.py",
+      "benchmarks/native_executor_continuity_v4/spec.json",
+      "benchmarks/native_executor_continuity_v5/__init__.py",
+      "benchmarks/native_executor_continuity_v5/evaluator.py",
+      "benchmarks/native_executor_continuity_v5/report.py",
+      "benchmarks/native_executor_continuity_v5/runner.py",
+      "benchmarks/native_executor_continuity_v5/spec.json",
+      "benchmarks/native_executor_continuity_v6/__init__.py",
+      "benchmarks/native_executor_continuity_v6/evaluator.py",
+      "benchmarks/native_executor_continuity_v6/report.py",
+      "benchmarks/native_executor_continuity_v6/runner.py",
+      "benchmarks/native_executor_continuity_v6/spec.json",
+      "benchmarks/native_executor_continuity_v7/__init__.py",
+      "benchmarks/native_executor_continuity_v7/evaluator.py",
+      "benchmarks/native_executor_continuity_v7/report.py",
+      "benchmarks/native_executor_continuity_v7/runner.py",
+      "benchmarks/native_executor_continuity_v7/spec.json",
+      "benchmarks/native_executor_continuity_v8/__init__.py",
+      "benchmarks/native_executor_continuity_v8/evaluator.py",
+      "benchmarks/native_executor_continuity_v8/report.py",
+      "benchmarks/native_executor_continuity_v8/runner.py",
+      "benchmarks/native_executor_continuity_v8/spec.json",
+      "benchmarks/native_executor_qualification/isolation_probe.py",
+      "benchmarks/native_executor_qualification/performance.py",
+      "benchmarks/native_executor_qualification/reboot_probe.py",
+      "benchmarks/native_executor_qualification/slow_subscriber_probe.py",
+      "benchmarks/native_executor_qualification/tool_spool_probe.py",
+      "benchmarks/open_wic/corpus-v1.json",
+      "benchmarks/open_wic/fast_reception_qualification.py",
+      "benchmarks/open_wic/human_visible_evaluator.py",
+      "benchmarks/open_wic/progressive_evaluator.py",
+      "benchmarks/open_wic/slice2-corpus-v1.json",
+      "compose.delivery.yaml",
+      "compose.e2e.yaml",
+      "compose.native-executor.continuity-v2.yaml",
+      "compose.native-executor.continuity-v3.yaml",
+      "compose.native-executor.continuity-v4.yaml",
+      "compose.native-executor.continuity-v5.yaml",
+      "compose.native-executor.continuity-v6.yaml",
+      "compose.native-executor.continuity-v7.yaml",
+      "compose.native-executor.continuity-v8.yaml",
+      "compose.native-executor.continuity.yaml",
+      "compose.native-executor.human-acceptance.yaml",
+      "compose.native-executor.yaml",
+      "compose.wic-governed-streaming.yaml",
+      "compose.wic-slice3.yaml",
+      "compose.yaml",
+      "docker/e2e_preflight.py",
+      "docker/start_app.py",
+      "docker/start_delivery.py",
+      "docker/start_human_acceptance.py",
+      "docs/architecture/SPG_Core_Architecture_Model.md",
+      "docs/architecture/ai-native-development-execution-principles.md",
+      "docs/architecture/architecture-principles.md",
+      "docs/architecture/bounded-single-pwu-code-work.md",
+      "docs/architecture/case-studies/course-table-domain-grounding-and-semantic-boundary.md",
+      "docs/architecture/case-studies/waterfall-demo-csp-loop-and-guardian-recovery.md",
+      "docs/architecture/design-intelligence-evolution.md",
+      "docs/architecture/design-intent-framing-layer.md",
+      "docs/architecture/duration-capacity-semantic-foundation.md",
+      "docs/architecture/early-workspace-progressive-work-admission.md",
+      "docs/architecture/engineering-semantic-truth.md",
+      "docs/architecture/engineering-state-management.md",
+      "docs/architecture/executor-autonomy-envelope-attempt-granularity-mvp-contract.md",
+      "docs/architecture/external-design-intake-capability-direction.md",
+      "docs/architecture/external-engineering-intelligence-direction.md",
+      "docs/architecture/future-capabilities.md",
+      "docs/architecture/guided-design-core.md",
+      "docs/architecture/guided-design-facilitation-layer.md",
+      "docs/architecture/human-collaboration-experience-v32-assessment.md",
+      "docs/architecture/human-collaboration-pipeline-review.md",
+      "docs/architecture/human-collaboration-pipeline-v31-assessment.md",
+      "docs/architecture/human-watt-collaboration-layer.md",
+      "docs/architecture/human-watt-conversation-intelligence.md",
+      "docs/architecture/integration-boundary.md",
+      "docs/architecture/interpretation-externalization-and-multimodal-alignment.md",
+      "docs/architecture/motive-work-plan-concept-calibration.md",
+      "docs/architecture/mvp-architecture.md",
+      "docs/architecture/plane-model.md",
+      "docs/architecture/production-benchmarks.md",
+      "docs/architecture/production-execution-package-direction.md",
+      "docs/architecture/production-intelligence-architecture.md",
+      "docs/architecture/production-measurement-v0.md",
+      "docs/architecture/production-orchestration-lite.md",
+      "docs/architecture/program-architecture-decisions.md",
+      "docs/architecture/reality-driven-plan-steering-mvp-contract.md",
+      "docs/architecture/reality-driven-plan-steering-principles.md",
+      "docs/architecture/repository-acquisition-sandbox-and-remote-integration-direction.md",
+      "docs/architecture/repository-asset-and-managed-execution-workspace.md",
+      "docs/architecture/repository-aware-code-change-proposal-lite.md",
+      "docs/architecture/runtime-profile-provider-deployment.md",
+      "docs/architecture/single-pwu-production-planner-lite.md",
+      "docs/architecture/software-production-control-room-slice-1-implementation-contract.md",
+      "docs/architecture/software-production-control-room-slice-2-implementation-contract.md",
+      "docs/architecture/software-production-control-room-slice-3-implementation-contract.md",
+      "docs/architecture/software-production-control-room-slice-4-implementation-contract.md",
+      "docs/architecture/software-production-system-differentiation-and-barriers.md",
+      "docs/architecture/spg-completion-trust.md",
+      "docs/architecture/spg-fvs-1-implementation-contract.md",
+      "docs/architecture/spg-lite-domain-contract-baseline.md",
+      "docs/architecture/spg-lite-runtime-implementation-contract.md",
+      "docs/architecture/spg-reconciliation-recovery.md",
+      "docs/architecture/spg-runtime-architecture-readiness.md",
+      "docs/architecture/spg-runtime-findings-review.md",
+      "docs/architecture/spg-runtime-verification-benchmarks.md",
+      "docs/architecture/spg-side-effect-governance.md",
+      "docs/architecture/spg-state-foundation.md",
+      "docs/architecture/system-architecture-baseline-v0.1.md",
+      "docs/architecture/system-overview.md",
+      "docs/architecture/trusted-baseline-active-runtime-convergence-lite.md",
+      "docs/architecture/typed-node-test-verification-lite.md",
+      "docs/architecture/watt-ai-native-software-production-architecture.md",
+      "docs/architecture/watt-ai-software-production-evaluation-framework.md",
+      "docs/architecture/watt-decision-evidence-architecture.md",
+      "docs/architecture/watt-formal-ui-appearance-and-skin-library.md",
+      "docs/architecture/watt-native-executor-blueprint.md",
+      "docs/architecture/watt-native-executor-capacity-scheduling.md",
+      "docs/architecture/watt-native-executor-lifecycle.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v2.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v3.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v4.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v5.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v6.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v7.md",
+      "docs/architecture/watt-native-executor-qualification-amendment-v8.md",
+      "docs/architecture/watt-native-executor-qualification.md",
+      "docs/architecture/watt-product-north-star.md",
+      "docs/architecture/watt-regression-protection-and-golden-journey-governance.md",
+      "docs/architecture/watt-wic-intelligence-architecture-closure.md",
+      "docs/architecture/wic-context-orchestration.md",
+      "docs/architecture/wic-decision-evidence-architecture.md",
+      "docs/architecture/wic-intelligence-reconstruction-blueprint.md",
+      "docs/architecture/wic-response-contract.md",
+      "docs/architecture/wic-software-domain-grounding.md",
+      "docs/architecture/wic-software-production-sop-and-llm-direction.md",
+      "docs/architecture/work-centric-production-and-responsibility-principles.md",
+      "docs/architecture/work-centric-production-model.md",
+      "docs/architecture/work-identity-closure-and-archive-invariants.md",
+      "docs/architecture/work-interaction-closed-loop-refinement.md",
+      "docs/architecture/work-to-delivery-multi-repository-spg-proposal.md",
+      "docs/assets/ui-skins/01-industrial-cyan.png",
+      "docs/assets/ui-skins/02-executive-amber.png",
+      "docs/assets/ui-skins/03-technical-graphite.png",
+      "docs/assets/ui-skins/04-precision-silver.png",
+      "docs/assets/ui-skins/05-warm-professional.png",
+      "docs/assets/ui-skins/06-futuristic-studio.png",
+      "docs/assets/ui-skins/README.md",
+      "docs/assurance/guardian-integration.md",
+      "docs/context/ecf-integration.md",
+      "docs/evidence/control-room-slice-4-human-acceptance-preparation.md",
+      "docs/evidence/control-room-slice-4-human-product-acceptance.md",
+      "docs/evidence/deepseek-long-running-transport-boundary-qualification.md",
+      "docs/evidence/design-intent-framing-focused-validation.md",
+      "docs/evidence/dogfood/assets/executor-authority-drift-branch-creation.png",
+      "docs/evidence/dogfood/code-dogfood-1-repository-aware-change-proposal-gap.md",
+      "docs/evidence/dogfood/code-dogfood-2-trusted-baseline-active-runtime-divergence.md",
+      "docs/evidence/dogfood/executor-authority-drift-branch-creation.md",
+      "docs/evidence/dogfood/intake-dogfood-3-trusted-completion.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-1-admission-coupling.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-10-human-acceptance.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-2-post-admission-activation-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-3-semantic-design-execution-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-4-semantic-structured-output-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-5-semantic-provider-schema-requiredness-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-6-semantic-provider-ref-sibling-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-7-semantic-wire-coherence-gap.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-8-self-refine-closure.md",
+      "docs/evidence/dogfood/long-lived-motive-dogfood-9-production-loop-closure.md",
+      "docs/evidence/dogfood/orch-dogfood-1-verification-contract-mismatch.md"
+    ],
+    "title": "Interaction CREATE_BRANCH",
+    "source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+    "work_id": null,
+    "revision": "0b535f63302fe45e88d0b3e203ae991868ced079",
+    "condition": "READY",
+    "product_id": "0571e6a7-1ab4-41c1-a7b8-9258e1173590",
+    "description": "创建并切换到 feat_semantic_4_6",
+    "fingerprint": "e02244c6503d49d093cc7d40fe716f6ad9fa754464aff29823a515b9d6738cbd",
+    "observed_at": "2026-09-27T08:45:42.928650+00:00",
+    "resource_id": "ee7ddd6e-425c-4c47-ba56-a04809d044fb",
+    "context_path": "README.md",
+    "human_message": "Local branch feat_semantic_4_6 is ready.",
+    "target_branch": "feat_semantic_4_6",
+    "attempt_number": 1,
+    "interaction_id": "5aef5420-5344-494e-85dd-cf254643401a",
+    "operation_kind": "CREATE_BRANCH",
+    "repository_ref": "refs/heads/feat_semantic_4_6",
+    "base_resource_id": "1063e9f2-bea2-42e5-bdae-f0c26cc2b2f3",
+    "failure_category": null,
+    "intake_request_id": "b48d3d90-039f-543a-beba-605acb7b36ed",
+    "operation_evidence": {
+      "pwu_id": null,
+      "verified": true,
+      "connector_id": "builtin:git",
+      "capability_id": "git.branch.create",
+      "checkpoint_id": null,
+      "operation_ref": "repository-intake:b48d3d90-039f-543a-beba-605acb7b36ed",
+      "environment_id": null,
+      "base_resource_id": "1063e9f2-bea2-42e5-bdae-f0c26cc2b2f3",
+      "resulting_branch": "refs/heads/feat_semantic_4_6",
+      "task_contract_id": null,
+      "native_attempt_id": null,
+      "resulting_revision": "0b535f63302fe45e88d0b3e203ae991868ced079",
+      "workspace_reference": "/var/lib/spg/repository-assets/b48d3d90-039f-543a-beba-605acb7b36ed",
+      "production_record_id": null
+    },
+    "previous_attempt_id": null,
+    "repository_identity": "watt://work-branches/5aef5420-5344-494e-85dd-cf254643401a/d23f7a1ce9bac333d0b5"
+  },
+  "production_next_step": "Repository Reality is ready; production Work remains unadmitted.",
+  "selected_design_schema_identity": "watt:guided-design:general-product-system",
+  "selected_design_schema_version": "0.1",
+  "design_schema_selection_rationale": "The Design Intent Frame identifies a product, platform, or software system.",
+  "design_stage": "Motive, users, and problem",
+  "design_next_focus": "Establish the Motive, relevant actors, and problem boundary needed for the current governed step.",
+  "design_focus_rationale": "These dimensions matter only to the extent that they change the current artifact, risk, authority, or acceptance basis.",
+  "design_facilitation_strategy": "CLARIFY",
+  "design_progress_narrative": "Selected General Product/System Design v0.1. Current stage: Motive, users, and problem. 0 of 7 design areas are resolved. Next, establish the motive, relevant actors, and problem boundary needed for the current governed step."
+}

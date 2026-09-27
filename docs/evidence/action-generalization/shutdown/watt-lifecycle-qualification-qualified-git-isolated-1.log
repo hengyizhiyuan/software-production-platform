@@ -1,0 +1,17 @@
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/info/refs?service=git-upload-pack HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/HEAD HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/f6/29ed74d0afbcb8b5974e546c007eb5bf36663d HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/5b/6722f543c4c1fe8044992f895c8dcc2160b671 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/37/f1e9d50aa5183a0bdf913404b1c276d637b6a0 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/14/3edcd23f124dba374422dc399566a116303973 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/f8/8880707a8a932cc07a747e65600de48fd2e35f HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/f9/2dace7f27c80d4de1bb7e34dd076e8f6314586 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/b2/84c1ebe34b07400f69b589a58b486ca824c2d4 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/68/0554d84b872e63a34ebda9aa879c4f17da8155 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/60/694d53dafab2c33524e8f07ca9553939cd2aa2 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/99/519625723efc50c864596038ad0179aef76df6 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/3b/18abfe1fe759deb6a40f8cecfc6b393affe982 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/39/d435b3df9958b865ef850ccc4e4b4690f4aa4b HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/ee/c6e10fedeb8474121849f637d881fbce17bc20 HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/e4/e14f28fd3af30b17f0cc97420b2b3c39cdc98a HTTP/1.1" 200 -
+172.26.0.5 - - [27/Sep/2026 05:29:00] "GET /business-app.git/objects/43/09c75d71841ef42e2ebf8811582a458050d7c3 HTTP/1.1" 200 -

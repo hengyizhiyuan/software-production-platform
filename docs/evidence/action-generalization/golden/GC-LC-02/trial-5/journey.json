@@ -1,0 +1,12 @@
+{
+  "case": "GC-LC-02",
+  "trial": 5,
+  "interaction_id": "44bbeb41-7afd-4d55-bfeb-db3ffd373537",
+  "human_inputs": [
+    "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来，然后切 feat_test。"
+  ],
+  "tester_git": false,
+  "manual_rescue_actions": [],
+  "source_modification": false,
+  "human_acceptance": "PENDING"
+}

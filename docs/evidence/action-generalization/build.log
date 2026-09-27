@@ -1,0 +1,48 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 395B 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/watt-native-executor-runtime:local
+#2 DONE 0.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 175B 0.0s done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 487.19kB 0.3s done
+#4 DONE 0.4s
+
+#5 [1/6] FROM docker.io/library/watt-native-executor-runtime:local@sha256:9bc813a25fd9812f057c9ffb0191041f32a035568e6cf53590fdcc379f873104
+#5 resolve docker.io/library/watt-native-executor-runtime:local@sha256:9bc813a25fd9812f057c9ffb0191041f32a035568e6cf53590fdcc379f873104 0.3s done
+#5 DONE 0.3s
+
+#6 [2/6] RUN mkdir -p /var/lib/spg/native-tool-receipts /var/lib/spg/native-checkpoints /var/lib/spg/native-workspaces && chown -R spg:spg /var/lib/spg
+#6 CACHED
+
+#7 [3/6] COPY src /app/src
+#7 DONE 1.2s
+
+#8 [4/6] COPY migrations /app/migrations
+#8 DONE 0.3s
+
+#9 [5/6] COPY docker /app/docker
+#9 DONE 0.2s
+
+#10 [6/6] COPY alembic.ini pyproject.toml uv.lock README.md /app/
+#10 DONE 0.3s
+
+#11 exporting to image
+#11 exporting layers
+#11 exporting layers 2.9s done
+#11 exporting manifest sha256:3e75b147f113678df2e9958a9632fab9537afde5f0ab482fdc45bb3dba48ee06 0.1s done
+#11 exporting config sha256:fa1b8aeac8bceba5635be1c82fc399fb746a0fcce48a06b55a55362e62152baa 0.1s done
+#11 exporting attestation manifest sha256:0ff2c708c8c0e666cd5b789d6a231b765de4d685ec36e63d7a160438ec49f5d7 0.1s done
+#11 exporting manifest list sha256:74c3bf16a0e594cead288eef36a928c8b94d38015b87e0715de6a389c9608cf5
+#11 exporting manifest list sha256:74c3bf16a0e594cead288eef36a928c8b94d38015b87e0715de6a389c9608cf5 0.1s done
+#11 naming to docker.io/library/watt-lifecycle:qualification 0.0s done
+#11 unpacking to docker.io/library/watt-lifecycle:qualification
+#11 unpacking to docker.io/library/watt-lifecycle:qualification 0.9s done
+#11 DONE 4.6s

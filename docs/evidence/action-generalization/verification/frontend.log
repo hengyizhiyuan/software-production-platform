@@ -1,0 +1,36 @@
+
+> watt-human-journey-prototype@0.2.3 check
+> npm run test && npm run build
+
+
+> watt-human-journey-prototype@0.2.3 test
+> vitest run
+
+
+ RUN  v5.0.0 /Users/yu/Documents/dev/software-production-platform/prototype/human-journey
+
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  16:19:48
+   Duration  1.09s (transform 66%, import 17%, tests 14%, worker 3%)
+
+
+> watt-human-journey-prototype@0.2.3 build
+> tsc -b && vite build
+
+vite v8.3.0 building client environment for production...
+transforming...
+✓ 20 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.58 kB │ gzip:  0.38 kB
+dist/assets/index-CMxUdhQ0.css   61.18 kB │ gzip: 12.69 kB
+dist/assets/index-620EoLSS.js   308.13 kB │ gzip: 96.48 kB
+
+✓ built in 494ms
+npm notice
+npm notice New major version of npm available! 11.12.1 -> 12.1.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.1.0
+npm notice To update run: npm install -g npm@12.1.0
+npm notice

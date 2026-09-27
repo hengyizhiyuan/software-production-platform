@@ -1,0 +1,341 @@
+{
+  "interaction_id": "e24bbf9c-e3e8-4135-be6e-ac2d707c9d38",
+  "condition": "OPEN",
+  "current_work_id": null,
+  "created_at": "2026-09-27T08:11:57.628711Z",
+  "updated_at": "2026-09-27T08:12:05.246588Z",
+  "records": [
+    {
+      "record_id": "39e0bd66-6588-468a-ae6c-af0fee26f653",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "source": "human:owner",
+      "content": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+      "work_focus_id": null,
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:11:57.670531Z"
+    }
+  ],
+  "conversation_messages": [
+    {
+      "message_id": "f1443db4-1ad7-43d6-930d-5e071ed9c4ec",
+      "turn_id": "9f8dd61e-f0b7-412b-8a13-eded99467827",
+      "sequence": 1,
+      "actor": "HUMAN",
+      "content": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+      "processing_status": "PROCESSING",
+      "interaction_record_id": "39e0bd66-6588-468a-ae6c-af0fee26f653",
+      "interpretation_assessment_id": null,
+      "design_result_references": [],
+      "governance_event_references": [],
+      "supporting_references": [],
+      "created_at": "2026-09-27T08:11:57.670531Z",
+      "updated_at": "2026-09-27T08:11:57.707530Z"
+    }
+  ],
+  "turns": [
+    {
+      "turn_id": "9f8dd61e-f0b7-412b-8a13-eded99467827",
+      "interaction_id": "e24bbf9c-e3e8-4135-be6e-ac2d707c9d38",
+      "request_record_id": "39e0bd66-6588-468a-ae6c-af0fee26f653",
+      "assessment_id": null,
+      "wic_mode": "WIC_VNEXT_CONTROLLED",
+      "status": "PROCESSING",
+      "failure_code": null,
+      "failure_message": null,
+      "created_at": "2026-09-27T08:11:57.670531Z",
+      "started_at": "2026-09-27T08:11:57.707530Z",
+      "completed_at": null,
+      "updated_at": "2026-09-27T08:11:57.707530Z"
+    }
+  ],
+  "human_said": [
+    "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。"
+  ],
+  "latest_assessment": {
+    "assessment_id": "27f53240-6d6b-4e27-b58d-34fe3303393e",
+    "basis_fingerprint": "091fe887174153ba400d6b4c5a527fe3f67188ac14557249b53d9e1df0543d45",
+    "basis_last_sequence": 1,
+    "interpreted_motive": "获取指定 GitHub 仓库到本地工作环境，以便后续在该仓库基础上开展工作。",
+    "desired_outcome": "该仓库被 clone 到本地可供访问的工作副本。",
+    "design_intent_frame": {
+      "design_subject": "获取指定 GitHub 仓库到本地工作环境，以便后续在该仓库基础上开展工作。",
+      "object_type": "PRODUCT_SYSTEM",
+      "business_context": null,
+      "desired_outcome": "该仓库被 clone 到本地可供访问的工作副本。",
+      "scope_level": "product",
+      "collaboration_mode": "design",
+      "candidate_assumptions": [
+        "The current object classification is provisional."
+      ],
+      "ambiguities": [],
+      "confidence": 0.6
+    },
+    "candidate_context": [
+      "目标仓库来自 GitHub：hengyizhiyuan/software-production-platform"
+    ],
+    "candidate_constraints": [],
+    "current_requests": [
+      "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。"
+    ],
+    "unresolved_material_questions": [],
+    "action_candidates": [
+      {
+        "operation": "ACQUIRE_REPOSITORY",
+        "speech_act": "EXPLICIT_REQUEST",
+        "source_record_id": "39e0bd66-6588-468a-ae6c-af0fee26f653",
+        "source_text": "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。",
+        "target_branch": null,
+        "repository_source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+        "confidence": 0.95
+      }
+    ],
+    "neutral_semantic_extractions": [
+      {
+        "extraction_id": "ext-repo-url-1",
+        "kind": "REFERENCE",
+        "values": [
+          "https://github.com/hengyizhiyuan/software-production-platform.git"
+        ],
+        "unit": null,
+        "source_record_id": "39e0bd66-6588-468a-ae6c-af0fee26f653",
+        "source_text": "https://github.com/hengyizhiyuan/software-production-platform.git",
+        "explicit_roles": [
+          null
+        ]
+      }
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "5f722c68-ded0-57c6-acf4-8a14477b6130",
+        "subject": "repository.source",
+        "relation": "REFERENCE",
+        "value": "https://github.com/hengyizhiyuan/software-production-platform.git",
+        "unit": null,
+        "scope": "repository-acquisition-request",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "39e0bd66-6588-468a-ae6c-af0fee26f653"
+          ],
+          "source_text": "https://github.com/hengyizhiyuan/software-production-platform.git",
+          "source_extraction_ids": [
+            "ext-repo-url-1"
+          ],
+          "role_origin": "EXPLICIT"
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": null
+      }
+    ],
+    "meanings": [
+      {
+        "kind": "REQUEST",
+        "statement": "人类请求将指定 GitHub 仓库 clone 到本地工作环境。",
+        "source_record_ids": [
+          "39e0bd66-6588-468a-ae6c-af0fee26f653"
+        ],
+        "confidence": 0.95,
+        "rationale": "「clone下来」是对仓库获取的直接命令式请求，且附有明确的仓库地址。",
+        "clarification_required": false
+      }
+    ],
+    "focus_classification": null,
+    "impact_disposition": null,
+    "candidate_change": null,
+    "basis_work_revision_id": null,
+    "basis_steering_plan_revision_id": null,
+    "basis_steering_step_id": null,
+    "basis_active_runtime_binding_id": null,
+    "supporting_references": [],
+    "natural_response": "在受治理的仓库准备路径中执行对该仓库的获取，先确认是否已有同名本地副本以免覆盖，再 clone 并核对默认分支。",
+    "readiness": {
+      "status": "READY",
+      "profile": "LONG_LIVED_STEERING",
+      "profile_version": "v0",
+      "satisfied_requirements": [
+        "MOTIVE",
+        "DESIRED_OUTCOME"
+      ],
+      "missing_information": [],
+      "unresolved_material_questions": [],
+      "reasons": [
+        "Motive and desired outcome are clear enough to form governed Work."
+      ],
+      "basis_fingerprint": "091fe887174153ba400d6b4c5a527fe3f67188ac14557249b53d9e1df0543d45"
+    },
+    "progressive_semantics": {
+      "turn_intent": "ACTION_REQUEST",
+      "basis_fingerprint": "091fe887174153ba400d6b4c5a527fe3f67188ac14557249b53d9e1df0543d45",
+      "source_record_ids": [
+        "39e0bd66-6588-468a-ae6c-af0fee26f653"
+      ],
+      "reception_meanings": [
+        "DEEP_WIC_WORKING_UNDERSTANDING"
+      ],
+      "working_motive": "获取指定 GitHub 仓库到本地工作环境，以便后续在该仓库基础上开展工作。",
+      "working_desired_outcome": "该仓库被 clone 到本地可供访问的工作副本。",
+      "working_facts": [
+        "目标仓库来自 GitHub：hengyizhiyuan/software-production-platform"
+      ],
+      "working_constraints": [],
+      "working_requests": [
+        "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。"
+      ],
+      "explicit_assumptions": [],
+      "unresolved_human_decisions": [],
+      "deltas": [
+        {
+          "id": "3731bfc7-f98c-50ec-b02a-55c7ecf46dca",
+          "category": "MOTIVE",
+          "operation": "ADDED",
+          "value": "获取指定 GitHub 仓库到本地工作环境，以便后续在该仓库基础上开展工作。",
+          "prior_value": null,
+          "source_record_ids": [
+            "39e0bd66-6588-468a-ae6c-af0fee26f653"
+          ],
+          "basis_fingerprint": "091fe887174153ba400d6b4c5a527fe3f67188ac14557249b53d9e1df0543d45",
+          "prior_assessment_id": null,
+          "supersedes_delta_ids": [],
+          "confidence": 0.9,
+          "rationale": "Deep WIC proposed a Motive candidate on the current exact basis.",
+          "authority": "ADVISORY"
+        }
+      ],
+      "pattern_signals": [
+        "REPOSITORY_SOURCE"
+      ],
+      "inference_disposition": "NO_INFERENCE",
+      "questions": [],
+      "selected_question": null,
+      "governance_candidate": "WORK_FORMATION_PROPOSAL",
+      "readiness": [
+        {
+          "target": "WORK_FORMATION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "MOTIVE",
+            "DESIRED_OUTCOME"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "091fe887174153ba400d6b4c5a527fe3f67188ac14557249b53d9e1df0543d45",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "WORK_REVISION",
+          "status": "NOT_APPLICABLE",
+          "satisfied_evidence": [],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "091fe887174153ba400d6b4c5a527fe3f67188ac14557249b53d9e1df0543d45",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "target": "DESIGN_PROGRESSION",
+          "status": "READY",
+          "satisfied_evidence": [
+            "CURRENT_FOCUS"
+          ],
+          "missing_material_evidence": [],
+          "unresolved_human_decisions": [],
+          "explicit_assumptions": [],
+          "material_risks": [],
+          "useful_work_may_continue": true,
+          "basis_fingerprint": "091fe887174153ba400d6b4c5a527fe3f67188ac14557249b53d9e1df0543d45",
+          "profile_revision": "wic-transition-readiness-v1",
+          "authority": "ADVISORY_ONLY"
+        }
+      ],
+      "artifact_recommendation": null,
+      "factual_contradictions": [],
+      "semantic_policy_revision": "wic-semantic-policy-v1",
+      "question_policy_revision": "wic-question-value-v1"
+    },
+    "provider_identity": "deepseek-responses:semantic:request:59a36be3-42cf-4fda-b404-043059b2d573",
+    "model_identity": "deepseek-flash",
+    "schema_version": "wic-assessment-v7",
+    "created_at": "2026-09-27T08:12:05.246588Z"
+  },
+  "latest_assessment_current": true,
+  "interpreted_motive": "获取指定 GitHub 仓库到本地工作环境，以便后续在该仓库基础上开展工作。",
+  "desired_outcome": "该仓库被 clone 到本地可供访问的工作副本。",
+  "design_intent_frame": {
+    "design_subject": "获取指定 GitHub 仓库到本地工作环境，以便后续在该仓库基础上开展工作。",
+    "object_type": "PRODUCT_SYSTEM",
+    "business_context": null,
+    "desired_outcome": "该仓库被 clone 到本地可供访问的工作副本。",
+    "scope_level": "product",
+    "collaboration_mode": "design",
+    "candidate_assumptions": [
+      "The current object classification is provisional."
+    ],
+    "ambiguities": [],
+    "confidence": 0.6
+  },
+  "candidate_context": [
+    "目标仓库来自 GitHub：hengyizhiyuan/software-production-platform"
+  ],
+  "candidate_constraints": [],
+  "current_requests": [
+    "把这个仓库 https://github.com/hengyizhiyuan/software-production-platform.git clone下来。"
+  ],
+  "unresolved_material_questions": [],
+  "readiness": {
+    "status": "READY",
+    "profile": "LONG_LIVED_STEERING",
+    "profile_version": "v0",
+    "satisfied_requirements": [
+      "MOTIVE",
+      "DESIRED_OUTCOME"
+    ],
+    "missing_information": [],
+    "unresolved_material_questions": [],
+    "reasons": [
+      "Motive and desired outcome are clear enough to form governed Work."
+    ],
+    "basis_fingerprint": "091fe887174153ba400d6b4c5a527fe3f67188ac14557249b53d9e1df0543d45"
+  },
+  "candidate_engineering_resource_id": null,
+  "candidate_repository_identity": null,
+  "candidate_repository_ref": null,
+  "candidate_scope_summary": null,
+  "governed_work_id": null,
+  "governed_revision": null,
+  "current_work_focus": null,
+  "focus_classification": null,
+  "impact_disposition": null,
+  "candidate_change": null,
+  "work_revision_admission_status": "NOT_APPLICABLE",
+  "active_cycle_work_revision_id": null,
+  "active_cycle_impact_disposition": null,
+  "work_satisfaction_state": "NO_FOCUSED_WORK",
+  "interaction_relationship_state": "OPEN",
+  "work_focus_history": [],
+  "latest_work_transition": null,
+  "new_work_formation_pending": false,
+  "production_request_detected": false,
+  "repository_source": "https://github.com/hengyizhiyuan/software-production-platform.git",
+  "production_admission_state": null,
+  "repository_acquisition_state": null,
+  "repository_observation": null,
+  "production_next_step": null,
+  "selected_design_schema_identity": "watt:guided-design:general-product-system",
+  "selected_design_schema_version": "0.1",
+  "design_schema_selection_rationale": "The Design Intent Frame identifies a product, platform, or software system.",
+  "design_stage": "Motive, users, and problem",
+  "design_next_focus": "Establish the Motive, relevant actors, and problem boundary needed for the current governed step.",
+  "design_focus_rationale": "These dimensions matter only to the extent that they change the current artifact, risk, authority, or acceptance basis.",
+  "design_facilitation_strategy": "CLARIFY",
+  "design_progress_narrative": "Selected General Product/System Design v0.1. Current stage: Motive, users, and problem. 0 of 7 design areas are resolved. Next, establish the motive, relevant actors, and problem boundary needed for the current governed step."
+}

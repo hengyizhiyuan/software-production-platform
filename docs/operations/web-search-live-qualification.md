@@ -100,3 +100,33 @@ Apply every evidence requirement above, including separate model-initiated
 retrieval and bounded recovery/convergence receipts. The running app must have
 the key; editing only the runner env does not satisfy the gate. Do not modify
 the retained user `8078` runtime or frozen FSI attempts as qualification setup.
+
+## Natural-language action generalization follow-up (2026-09-27)
+
+The Human subsequently authorized retirement of unused services. Port `8078`
+has been stopped; the retained test runtime is `http://127.0.0.1:8079`.
+Earlier entries are historical qualification instructions, not a request to
+restart retired services. Frozen FSI attempts and volumes remain preserved.
+
+This batch records both Web live and GC-EX-12 as **BLOCKED_EXTERNAL** under
+`.spg/action-generalization/deferred-web`, with retrieval not attempted.
+After the credential is supplied and configured in the running test app,
+use independent fresh trials:
+
+```bash
+.venv/bin/python benchmarks/golden/runtime/qualify_research.py \
+  --scope web-live --trial 2 --base http://127.0.0.1:8079 \
+  --env-file .spg/lifecycle-hardening/runtime.env \
+  --evidence-root .spg/action-generalization/deferred-web
+
+.venv/bin/python benchmarks/golden/runtime/qualify_research.py \
+  --scope GC-EX-12 --trial 2 --base http://127.0.0.1:8079 \
+  --env-file .spg/lifecycle-hardening/runtime.env \
+  --evidence-root .spg/action-generalization/deferred-web
+```
+
+Preserve the raw Human input, canonical search intent and speech act, current
+authority/connector admission, live provider requests and provenance, raw SSE
+and persisted final response, bounded refinement history and convergence,
+and GC-EX-12 runtime/package evidence required above. Semantic-only recognition,
+deterministic providers and direct Fetch do not satisfy these live gates.

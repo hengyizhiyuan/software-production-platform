@@ -1,0 +1,42 @@
+[
+  {
+    "pid": 25965,
+    "signal": "SIGTERM"
+  },
+  {
+    "pid": 43036,
+    "status": "already exited"
+  },
+  {
+    "pid": 43187,
+    "signal": "SIGTERM"
+  },
+  {
+    "pid": 43209,
+    "signal": "SIGTERM"
+  },
+  {
+    "pid": 45976,
+    "signal": "SIGTERM"
+  },
+  {
+    "pid": 25975,
+    "signal": "SIGINT"
+  },
+  {
+    "pid": 25976,
+    "signal": "SIGINT"
+  },
+  {
+    "pid": 25977,
+    "signal": "SIGINT"
+  },
+  {
+    "pid": 43039,
+    "status": "already exited"
+  },
+  {
+    "pid": 50207,
+    "status": "already exited"
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "source_commit": "d56a5cefff51d00241169b61513d558c3629bc35",
+  "source_fingerprint": "f545b50311cdee171108bd61063c296bc63f718170469389e8185152b19895c0",
+  "containers": [
+    {
+      "name": "/watt-lifecycle-qualification-app-1",
+      "image": "sha256:74c3bf16a0e594cead288eef36a928c8b94d38015b87e0715de6a389c9608cf5",
+      "status": "running",
+      "health": "healthy"
+    },
+    {
+      "name": "/watt-lifecycle-qualification-native-coordinator-1",
+      "image": "sha256:74c3bf16a0e594cead288eef36a928c8b94d38015b87e0715de6a389c9608cf5",
+      "status": "running",
+      "health": null
+    },
+    {
+      "name": "/watt-lifecycle-qualification-native-tool-host-1",
+      "image": "sha256:74c3bf16a0e594cead288eef36a928c8b94d38015b87e0715de6a389c9608cf5",
+      "status": "running",
+      "health": "healthy"
+    },
+    {
+      "name": "/watt-lifecycle-qualification-native-worker-1",
+      "image": "sha256:74c3bf16a0e594cead288eef36a928c8b94d38015b87e0715de6a389c9608cf5",
+      "status": "running",
+      "health": null
+    },
+    {
+      "name": "/watt-lifecycle-qualification-native-worker-secondary-1",
+      "image": "sha256:74c3bf16a0e594cead288eef36a928c8b94d38015b87e0715de6a389c9608cf5",
+      "status": "running",
+      "health": null
+    }
+  ]
+}

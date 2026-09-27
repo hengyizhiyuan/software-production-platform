@@ -1,0 +1,22 @@
+[
+  {
+    "command": [
+      "docker",
+      "rm",
+      "watt-lifecycle-qualification-native-worker-1"
+    ],
+    "exit_code": 0,
+    "stdout": "watt-lifecycle-qualification-native-worker-1\nwatt-lifecycle-qualification-native-worker-secondary-1\nwatt-lifecycle-qualification-native-coordinator-1\nwatt-lifecycle-qualification-app-1\nwatt-lifecycle-qualification-native-tool-host-1\nwatt-pe-4c8c151f-2901-410a-81d9-88289d096d93\nwatt-pe-667fb461-a46d-44cf-9018-6301c804cb6c\nwatt-pe-c82c0ba0-818d-4318-8a4a-fa910eefe386\nwatt-lifecycle-qualification-qualified-tool-fault-1\nwatt-lifecycle-qualification-qualified-git-isolated-1\nwatt-lifecycle-qualification-qualified-git-1\nwatt-lifecycle-qualification-postgres-1\nwatt-stability-qualification-db\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "docker",
+      "image",
+      "rm"
+    ],
+    "exit_code": 0,
+    "stdout": "Untagged: watt-engineering-semantic-human-retest-app:latest\nUntagged: watt-lifecycle:qualification\nDeleted: sha256:74c3bf16a0e594cead288eef36a928c8b94d38015b87e0715de6a389c9608cf5\nUntagged: watt-native-executor-runtime:local\nDeleted: sha256:9bc813a25fd9812f057c9ffb0191041f32a035568e6cf53590fdcc379f873104\nUntagged: docker:29-cli\nDeleted: sha256:018edbc908e08fcc9dbf029c812c34251e9b4719e6f71ca0e5eae2a987d014ca\nUntagged: python:3.13-slim-bookworm\nDeleted: sha256:ed86c82274b3c69b52fb5820f358f0bd7df0b603332063cb5c6e32bd220c3e6e\nUntagged: ghcr.io/astral-sh/uv:0.12.5\nDeleted: sha256:e85be844203885286c60ffad8a858d48afb6c5a5c237ca0e67f12e74b8f174b1\nUntagged: postgres:17.6-alpine\nDeleted: sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94\nUntagged: nginx:1.27-alpine\nDeleted: sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "turn_id": "3a48b076-782b-49ad-ad8a-2fdbfee093f2",
+  "interaction_id": "44c3a727-4102-4dcc-9d15-122a0409fd0a",
+  "request_record_id": "a65b2517-990c-4ece-8b79-ea552b5e6fbc",
+  "assessment_id": "e5847273-2964-4a79-9c82-0fcc5e220f32",
+  "wic_mode": "WIC_VNEXT_CONTROLLED",
+  "status": "COMPLETED",
+  "failure_code": null,
+  "failure_message": null,
+  "created_at": "2026-09-27T07:45:03.240557Z",
+  "started_at": "2026-09-27T07:45:03.287081Z",
+  "completed_at": "2026-09-27T07:45:21.009812Z",
+  "updated_at": "2026-09-27T07:45:21.009812Z"
+}

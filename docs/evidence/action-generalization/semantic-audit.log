@@ -1,0 +1,31 @@
+{"index": 1, "operation": "ACQUIRE_REPOSITORY", "polarity": "positive", "status": "PASS"}
+{"index": 2, "operation": "ACQUIRE_REPOSITORY", "polarity": "positive", "status": "PASS"}
+{"index": 3, "operation": "ACQUIRE_REPOSITORY", "polarity": "negative", "status": "PASS"}
+{"index": 4, "operation": "ACQUIRE_REPOSITORY", "polarity": "negative", "status": "PASS"}
+{"index": 5, "operation": "INSPECT_REPOSITORY", "polarity": "positive", "status": "PASS"}
+{"index": 6, "operation": "INSPECT_REPOSITORY", "polarity": "positive", "status": "PASS"}
+WIC semantic validation failed request=44836979-932a-46ea-ae2f-5e25d244950a model=deepseek-flash status=completed stage=payload_validation issue=collaboration.policy_hints.0:enum fields=['action_candidates', 'candidate_constraints', 'candidate_context', 'collaboration', 'current_requests', 'desired_outcome', 'focus_classification', 'impact_disposition', 'interpreted_motive', 'meanings', 'neutral_semantic_extractions', 'response_intent', 'semantic_fact_candidates', 'supporting_references', 'unresolved_material_questions'] length=1975 repair=started
+{"index": 7, "operation": "INSPECT_REPOSITORY", "polarity": "negative", "status": "PASS"}
+WIC semantic validation failed request=adb617b5-ac53-4164-a333-e4c460cdf9a9 model=deepseek-flash status=completed stage=payload_validation issue=root:json_invalid fields=['invalid_json'] length=2405 repair=started
+{"index": 8, "operation": "INSPECT_REPOSITORY", "polarity": "negative", "status": "PASS"}
+{"index": 9, "operation": "QUERY_BRANCH", "polarity": "positive", "status": "PASS"}
+{"index": 10, "operation": "QUERY_BRANCH", "polarity": "positive", "status": "PASS"}
+{"index": 11, "operation": "QUERY_BRANCH", "polarity": "negative", "status": "PASS"}
+{"index": 12, "operation": "QUERY_BRANCH", "polarity": "negative", "status": "PASS"}
+{"index": 13, "operation": "SEARCH_WEB", "polarity": "positive", "status": "PASS"}
+{"index": 14, "operation": "SEARCH_WEB", "polarity": "positive", "status": "PASS"}
+{"index": 15, "operation": "SEARCH_WEB", "polarity": "negative", "status": "PASS"}
+{"index": 16, "operation": "SEARCH_WEB", "polarity": "negative", "status": "PASS"}
+{"index": 17, "operation": "SEARCH_GITHUB", "polarity": "positive", "status": "PASS"}
+{"index": 18, "operation": "SEARCH_GITHUB", "polarity": "positive", "status": "PASS"}
+{"index": 19, "operation": "SEARCH_GITHUB", "polarity": "negative", "status": "PASS"}
+{"index": 20, "operation": "SEARCH_GITHUB", "polarity": "negative", "status": "PASS"}
+WIC semantic validation failed request=272a01bb-75e4-42d1-ac88-918c89b6c422 model=deepseek-flash status=completed stage=payload_validation issue=root:json_invalid fields=['invalid_json'] length=2800 repair=started
+{"index": 21, "operation": "REQUEST_PREVIEW", "polarity": "positive", "status": "PASS"}
+{"index": 22, "operation": "REQUEST_PREVIEW", "polarity": "positive", "status": "PASS"}
+{"index": 23, "operation": "REQUEST_PREVIEW", "polarity": "negative", "status": "PASS"}
+{"index": 24, "operation": "REQUEST_PREVIEW", "polarity": "negative", "status": "PASS"}
+{"index": 25, "operation": "REQUEST_DELIVERY", "polarity": "positive", "status": "PASS"}
+{"index": 26, "operation": "REQUEST_DELIVERY", "polarity": "positive", "status": "PASS"}
+{"index": 27, "operation": "REQUEST_DELIVERY", "polarity": "negative", "status": "PASS"}
+{"index": 28, "operation": "REQUEST_DELIVERY", "polarity": "negative", "status": "PASS"}

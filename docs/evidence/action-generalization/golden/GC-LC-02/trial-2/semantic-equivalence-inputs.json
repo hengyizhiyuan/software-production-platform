@@ -1,0 +1,21 @@
+{
+  "positives": [
+    "切一个 feat_semantic_2_0 分支",
+    "切个 feat_semantic_2_1 分支",
+    "切个新分支 feat_semantic_2_2",
+    "切个新分支：feat_semantic_2_3",
+    "新建一个 feat_semantic_2_4 分支并切过去",
+    "建个 feat_semantic_2_5 分支",
+    "创建并切换到 feat_semantic_2_6",
+    "从当前代码切个 feat_semantic_2_7 出来"
+  ],
+  "negatives": [
+    "我在考虑建个新分支",
+    "要不要切个分支？",
+    "feat_absent_2 这个分支怎么样？",
+    "看看有没有 feat_absent_2 分支",
+    "切回之前的代码",
+    "checkout 这个文件",
+    "换个主题分支聊"
+  ]
+}

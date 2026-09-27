@@ -1,0 +1,107 @@
+........................................................................ [  7%]
+........................................................................ [ 15%]
+........................................................................ [ 22%]
+........................................................................ [ 30%]
+........................................................................ [ 38%]
+........................................................................ [ 45%]
+........................................................................ [ 53%]
+........................................................................ [ 61%]
+...F.............s..................F................................... [ 68%]
+........................................................................ [ 76%]
+........................................................................ [ 83%]
+........................................................................ [ 91%]
+........................................................................ [ 99%]
+........                                                                 [100%]
+=================================== FAILURES ===================================
+______________ test_alembic_environment_has_native_executor_head _______________
+
+    def test_alembic_environment_has_native_executor_head() -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        config = Config(project_root / "alembic.ini")
+        scripts = ScriptDirectory.from_config(config)
+    
+>       assert scripts.get_heads() == ["20260927_58"]
+E       AssertionError: assert ['20260927_60'] == ['20260927_58']
+E         
+E         At index 0 diff: '20260927_60' != '20260927_58'
+E         Use -v to get more diff
+
+tests/test_persistence_foundation.py:116: AssertionError
+______ test_failed_bounded_wic_repair_is_observable_without_raw_candidate ______
+
+    def test_failed_bounded_wic_repair_is_observable_without_raw_candidate() -> None:
+>       failure = _classify_turn_failure(
+            StructuredResponseSchemaViolation(
+                "bounded schema repair exhausted", validation_issue="missing field",
+                repair_attempted=True,
+            ),
+            datetime.now(UTC),
+        )
+
+tests/test_refinement_contract.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+error = StructuredResponseSchemaViolation('bounded schema repair exhausted')
+failed_at = datetime.datetime(2026, 9, 27, 8, 22, 57, 842826, tzinfo=datetime.timezone.utc)
+
+    def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailure:
+        if (
+            isinstance(error, ModelProviderError)
+            and error.kind is ModelFailureKind.INCOMPLETE_RESPONSE
+        ):
+            return _TurnFailure(
+                code="INCOMPLETE_RESPONSE",
+                message=(
+                    "The model response was incomplete. Your message was saved and this "
+                    "Turn can be retried."
+                ),
+                metadata={
+                    "failure_class": "INCOMPLETE_RESPONSE",
+                    "provider_status": error.provider_status,
+                    "termination_reason": error.termination_reason,
+                    "request_id": error.request_id,
+                    "timestamp": error.occurred_at.isoformat(),
+                    "retryable": error.retryable,
+                    "provisional_is_not_final": True,
+                },
+            )
+        if isinstance(error, StructuredResponseSchemaViolation):
+            return _TurnFailure(
+                code="SCHEMA_VIOLATION",
+                message=(
+                    "The model result did not satisfy Watt's governed response contract "
+                    "after one bounded repair attempt. Your message was saved and this Turn "
+                    "can be retried."
+                ),
+                metadata={
+                    "failure_class": "SCHEMA_VIOLATION",
+                    "provider_status": "completed",
+                    "validation_issue": error.validation_issue,
+                    "request_id": error.request_id,
+                    "repair_attempted": error.repair_attempted,
+                    "refinement_observation": (
+                        {
+                            "semantic_version": 2,
+                            "refinement_class": "SYSTEMIC_OR_NON_CONVERGING_INCIDENT",
+                            "signal_kind": ((evidence.get("semantic_action_repair_signal")
+>               if isinstance(evidence, dict) else getattr(evidence, "semantic_action_repair_signal", None))
+                              ^^^^^^^^
+                or "SCHEMA_INVALID"),
+                            "component": "wic/semantic-provider",
+                            "attempt_count": 2,
+                            "converged": False,
+                            "human_escalation": False,
+                        } if error.repair_attempted else None
+                    ),
+                    "timestamp": failed_at.isoformat(),
+                    "retryable": True,
+                    "provisional_is_not_final": True,
+                },
+            )
+E           NameError: name 'evidence' is not defined
+
+src/spg/application/interaction.py:552: NameError
+=========================== short test summary info ============================
+FAILED tests/test_persistence_foundation.py::test_alembic_environment_has_native_executor_head
+FAILED tests/test_refinement_contract.py::test_failed_bounded_wic_repair_is_observable_without_raw_candidate
+2 failed, 941 passed, 1 skipped in 235.28s (0:03:55)

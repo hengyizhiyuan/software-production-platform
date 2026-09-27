@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/lifecycle.py", line 117, in <module>
+    if __name__=='__main__': main()
+                             ~~~~^^
+  File "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/lifecycle.py", line 88, in main
+    checks['positive_semantic_equivalence']=all(
+                                            ~~~^
+     any(a['operation']=='CREATE_AND_SWITCH_BRANCH' and a['speech_act']=='EXPLICIT_REQUEST'
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+     and state['repository_observation']['repository_ref']==f'refs/heads/feat_semantic_{args.trial}_{i}'
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     for i,state in enumerate(states[1:9])) and len(states)>=9
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yu/Documents/dev/software-production-platform/benchmarks/golden/runtime/lifecycle.py", line 91, in <genexpr>
+    for a in state['latest_assessment']['action_candidates'])
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable

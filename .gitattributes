@@ -4,3 +4,7 @@ docs/evidence/open-wic-baseline-runs/2026-09-15-deepseek-flash-low.json text eol
 docs/evidence/lifecycle/browser-sse/*.sse -whitespace
 docs/evidence/lifecycle/verification-logs/*.log -whitespace
 docs/evidence/lifecycle/verification-logs/*.xml -whitespace
+# Preserve intermediate checkpoint diagnostic bytes, including failed runs.
+docs/evidence/action-generalization/**/*.log -whitespace
+docs/evidence/action-generalization/**/*.xml -whitespace
+docs/evidence/action-generalization/**/*.sse -whitespace

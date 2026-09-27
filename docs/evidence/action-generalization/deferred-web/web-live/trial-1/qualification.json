@@ -1,0 +1,9 @@
+{
+  "scope": "web-live",
+  "trial": 1,
+  "status": "BLOCKED_EXTERNAL",
+  "external_dependency": "SPG_WEB_SEARCH_API_KEY",
+  "retrieval_attempted": false,
+  "recorded_at": "2026-09-27T08:35:16.169379+00:00",
+  "human_acceptance": "PENDING"
+}

@@ -1,0 +1,526 @@
+............................................................FFF....FFF.. [ 97%]
+..                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta _
+
+self = <spg.providers.deepseek_interaction.DeepSeekInteractionSemanticCapability object at 0x10e7afc50>
+basis = InteractionInterpretationInput(interaction=Interaction(id=UUID('00000000-0000-0000-0000-000000000001'), condition=<Int...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', recent_conversation_messages=(), previous_response_contract=None)
+on_stage = <built-in method append of list object at 0x10e9fccc0>
+
+    def interpret_semantics(
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_stage: Callable[[str], None] | None = None,
+    ) -> InteractionSemanticCandidate:
+        instruction = InteractionSemanticContract.instruction(basis)
+        self.last_prompt_characters = len(instruction)
+        result = self.runtime.generate(
+            purpose=ModelPurpose.WIC_SEMANTIC,
+            instructions=instruction,
+            input_text="Return the WIC semantic result for the exact supplied basis.",
+            output_schema=InteractionSemanticContract.output_schema(),
+            on_stage=on_stage,
+        )
+        self.last_action_repair_signal = None
+        self.last_structured_repair_count = 0
+        schema = InteractionSemanticContract.output_schema()
+        try:
+>           payload = _InteractionSemanticProviderPayload.model_validate_json(
+                _structured_json_text(result.output_text)
+            )
+E           pydantic_core._pydantic_core.ValidationError: 1 validation error for _InteractionSemanticProviderPayload
+E             Invalid JSON: EOF while parsing a string at line 1 column 30 [type=json_invalid, input_value='{"interpreted_motive":"partial', input_type=str]
+E               For further information visit https://errors.pydantic.dev/2.13/v/json_invalid
+
+src/spg/providers/deepseek_interaction.py:156: ValidationError
+
+During handling of the above exception, another exception occurred:
+
+    def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta() -> None:
+        adapter = _Adapter(['{"interpreted_motive":"partial', _semantics()])
+        runtime, adapter = _runtime(adapter)
+        capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+        visible_deltas: list[str] = []
+        stages: list[str] = []
+    
+>       result = capability.interpret_controlled_stream_observed(
+            _basis(),
+            on_response_delta=visible_deltas.append,
+            on_pipeline_stage=stages.append,
+        )
+
+tests/test_deepseek_wic_provider.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/providers/deepseek_interaction.py:505: in interpret_controlled_stream_observed
+    return self._interpret(
+src/spg/providers/deepseek_interaction.py:534: in _interpret
+    semantic = self.semantic_capability.interpret_semantics(
+src/spg/providers/deepseek_interaction.py:186: in interpret_semantics
+    self._validate_action_semantics(payload, basis)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = _InteractionSemanticProviderPayload(response_intent=None, interpreted_motive='开发 Watt 运营管理后台', desired_outcome='支持 Wat...ogression_guidance_appropriate=True, detailed_explanation_requested=False, response_language='zh-CN', policy_hints=()))
+basis = InteractionInterpretationInput(interaction=Interaction(id=UUID('00000000-0000-0000-0000-000000000001'), condition=<Int...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', recent_conversation_messages=(), previous_response_contract=None)
+
+    @staticmethod
+    def _validate_action_semantics(payload, basis) -> None:
+        from spg.domain.interaction_actions import validate_action_binding
+        latest = next(record for record in reversed(basis.records)
+            if str(record.actor) == "HUMAN")
+>       if (payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST
+                                                 ^^^^^^^^^^^^^^^^^^^^^^
+                and not payload.action_candidates):
+E               NameError: name 'ConversationTurnIntent' is not defined
+
+src/spg/providers/deepseek_interaction.py:210: NameError
+------------------------------ Captured log call -------------------------------
+WARNING  spg.providers.deepseek_interaction:deepseek_interaction.py:165 WIC semantic validation failed request=response-1 model=deepseek-flash status=completed stage=payload_validation issue=root:json_invalid fields=['invalid_json'] length=30 repair=started
+____ test_controlled_pre_work_uses_semantics_then_governed_realizer_stream _____
+
+    def test_controlled_pre_work_uses_semantics_then_governed_realizer_stream() -> None:
+        runtime, adapter = _runtime()
+        capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+        semantic_deltas: list[str] = []
+    
+        stages: list[str] = []
+>       candidate = capability.interpret_controlled_stream_observed(
+            _basis(),
+            on_response_delta=semantic_deltas.append,
+            on_pipeline_stage=stages.append,
+        )
+
+tests/test_deepseek_wic_provider.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/providers/deepseek_interaction.py:505: in interpret_controlled_stream_observed
+    return self._interpret(
+src/spg/providers/deepseek_interaction.py:534: in _interpret
+    semantic = self.semantic_capability.interpret_semantics(
+src/spg/providers/deepseek_interaction.py:159: in interpret_semantics
+    self._validate_action_semantics(payload, basis)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = _InteractionSemanticProviderPayload(response_intent=None, interpreted_motive='开发 Watt 运营管理后台', desired_outcome='支持 Wat...ogression_guidance_appropriate=True, detailed_explanation_requested=False, response_language='zh-CN', policy_hints=()))
+basis = InteractionInterpretationInput(interaction=Interaction(id=UUID('00000000-0000-0000-0000-000000000001'), condition=<Int...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', recent_conversation_messages=(), previous_response_contract=None)
+
+    @staticmethod
+    def _validate_action_semantics(payload, basis) -> None:
+        from spg.domain.interaction_actions import validate_action_binding
+        latest = next(record for record in reversed(basis.records)
+            if str(record.actor) == "HUMAN")
+>       if (payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST
+                                                 ^^^^^^^^^^^^^^^^^^^^^^
+                and not payload.action_candidates):
+E               NameError: name 'ConversationTurnIntent' is not defined
+
+src/spg/providers/deepseek_interaction.py:210: NameError
+________ test_controlled_pre_work_repairs_valid_json_with_schema_errors ________
+
+self = <spg.providers.deepseek_interaction.DeepSeekInteractionSemanticCapability object at 0x10e8ca2c0>
+basis = InteractionInterpretationInput(interaction=Interaction(id=UUID('00000000-0000-0000-0000-000000000001'), condition=<Int...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', recent_conversation_messages=(), previous_response_contract=None)
+on_stage = <function test_controlled_pre_work_repairs_valid_json_with_schema_errors.<locals>.<lambda> at 0x10e91f880>
+
+    def interpret_semantics(
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_stage: Callable[[str], None] | None = None,
+    ) -> InteractionSemanticCandidate:
+        instruction = InteractionSemanticContract.instruction(basis)
+        self.last_prompt_characters = len(instruction)
+        result = self.runtime.generate(
+            purpose=ModelPurpose.WIC_SEMANTIC,
+            instructions=instruction,
+            input_text="Return the WIC semantic result for the exact supplied basis.",
+            output_schema=InteractionSemanticContract.output_schema(),
+            on_stage=on_stage,
+        )
+        self.last_action_repair_signal = None
+        self.last_structured_repair_count = 0
+        schema = InteractionSemanticContract.output_schema()
+        try:
+>           payload = _InteractionSemanticProviderPayload.model_validate_json(
+                _structured_json_text(result.output_text)
+            )
+E           pydantic_core._pydantic_core.ValidationError: 10 validation errors for _InteractionSemanticProviderPayload
+E           desired_outcome
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           candidate_context
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           candidate_constraints
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           current_requests
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           unresolved_material_questions
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           meanings
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           focus_classification
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           impact_disposition
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           supporting_references
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration
+E             Field required [type=missing, input_value={'interpreted_motive': '缺少其余字段'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+
+src/spg/providers/deepseek_interaction.py:156: ValidationError
+
+During handling of the above exception, another exception occurred:
+
+    def test_controlled_pre_work_repairs_valid_json_with_schema_errors() -> None:
+        adapter = _Adapter(['{"interpreted_motive":"缺少其余字段"}', _semantics()])
+        runtime, adapter = _runtime(adapter)
+        capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    
+>       result = capability.interpret_controlled_stream_observed(
+            _basis(),
+            on_response_delta=lambda _delta: None,
+            on_pipeline_stage=lambda _stage: None,
+        )
+
+tests/test_deepseek_wic_provider.py:274: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/providers/deepseek_interaction.py:505: in interpret_controlled_stream_observed
+    return self._interpret(
+src/spg/providers/deepseek_interaction.py:534: in _interpret
+    semantic = self.semantic_capability.interpret_semantics(
+src/spg/providers/deepseek_interaction.py:186: in interpret_semantics
+    self._validate_action_semantics(payload, basis)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = _InteractionSemanticProviderPayload(response_intent=None, interpreted_motive='开发 Watt 运营管理后台', desired_outcome='支持 Wat...ogression_guidance_appropriate=True, detailed_explanation_requested=False, response_language='zh-CN', policy_hints=()))
+basis = InteractionInterpretationInput(interaction=Interaction(id=UUID('00000000-0000-0000-0000-000000000001'), condition=<Int...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', recent_conversation_messages=(), previous_response_contract=None)
+
+    @staticmethod
+    def _validate_action_semantics(payload, basis) -> None:
+        from spg.domain.interaction_actions import validate_action_binding
+        latest = next(record for record in reversed(basis.records)
+            if str(record.actor) == "HUMAN")
+>       if (payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST
+                                                 ^^^^^^^^^^^^^^^^^^^^^^
+                and not payload.action_candidates):
+E               NameError: name 'ConversationTurnIntent' is not defined
+
+src/spg/providers/deepseek_interaction.py:210: NameError
+------------------------------ Captured log call -------------------------------
+WARNING  spg.providers.deepseek_interaction:deepseek_interaction.py:165 WIC semantic validation failed request=response-1 model=deepseek-flash status=completed stage=payload_validation issue=desired_outcome:missing, candidate_context:missing, candidate_constraints:missing, current_requests:missing, unresolved_material_questions:missing fields=['interpreted_motive'] length=31 repair=started
+____ test_controlled_active_work_question_skips_discarded_conversation_call ____
+
+    def test_controlled_active_work_question_skips_discarded_conversation_call() -> None:
+        basis = _basis()
+        revision = WorkRealityRevision(
+            id=UUID(int=10), work_id=UUID(int=11), revision_number=1,
+            basis_fingerprint="a" * 64, revision_fingerprint="c" * 64,
+            source_interaction_id=basis.interaction.id, source_assessment_id=UUID(int=12),
+            source_record_ids=(basis.records[0].id,), motive="开发三栏页面",
+            desired_outcome="可使用的三栏页面", context_facts=(), constraints=(), requests=(),
+            engineering_scope_id=UUID(int=13), engineering_resource_id=None,
+            scope_basis_fingerprint="d" * 64, source_baseline_id=None,
+            governance_record_id=UUID(int=16), supporting_references=(),
+            change_set=("initial",), rationale="Admitted Work", admitted_by="human",
+            schema_version="v1", created_at=basis.interaction.created_at,
+        )
+        basis = basis.model_copy(update={
+            "active_work_context": ActiveWorkInterpretationContext(
+                work_revision=revision, engineering_scope_fingerprint="e" * 64,
+            ),
+            "records": (basis.records[0].model_copy(update={"content": "有淡入淡出了吗"}),),
+        })
+        semantics = InteractionSemanticCandidate(
+            interpreted_motive=revision.motive,
+            desired_outcome=revision.desired_outcome,
+            collaboration=StructuredCollaborationResult(
+                turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
+                direct_answer="当前资料无法确认是否已有淡入淡出效果。",
+                response_language="zh-CN",
+            ),
+            provider_identity="test",
+        ).model_dump_json(exclude={"provider_identity", "model_identity"})
+        adapter = _Adapter([semantics, "invalid unused response"])
+        runtime, adapter = _runtime(adapter)
+        capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+        visible: list[str] = []
+    
+>       candidate = capability.interpret_controlled_stream_observed(
+            basis, on_response_delta=visible.append, on_pipeline_stage=lambda _stage: None,
+        )
+
+tests/test_deepseek_wic_provider.py:398: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/providers/deepseek_interaction.py:505: in interpret_controlled_stream_observed
+    return self._interpret(
+src/spg/providers/deepseek_interaction.py:534: in _interpret
+    semantic = self.semantic_capability.interpret_semantics(
+src/spg/providers/deepseek_interaction.py:159: in interpret_semantics
+    self._validate_action_semantics(payload, basis)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = _InteractionSemanticProviderPayload(response_intent=None, interpreted_motive='开发三栏页面', desired_outcome='可使用的三栏页面', can...ogression_guidance_appropriate=True, detailed_explanation_requested=False, response_language='zh-CN', policy_hints=()))
+basis = InteractionInterpretationInput(interaction=Interaction(id=UUID('00000000-0000-0000-0000-000000000001'), condition=<Int...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', recent_conversation_messages=(), previous_response_contract=None)
+
+    @staticmethod
+    def _validate_action_semantics(payload, basis) -> None:
+        from spg.domain.interaction_actions import validate_action_binding
+        latest = next(record for record in reversed(basis.records)
+            if str(record.actor) == "HUMAN")
+>       if (payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST
+                                                 ^^^^^^^^^^^^^^^^^^^^^^
+                and not payload.action_candidates):
+E               NameError: name 'ConversationTurnIntent' is not defined
+
+src/spg/providers/deepseek_interaction.py:210: NameError
+_______ test_controlled_active_work_repairs_one_semantic_schema_failure ________
+
+self = <spg.providers.deepseek_interaction.DeepSeekInteractionSemanticCapability object at 0x10eaa4a50>
+basis = InteractionInterpretationInput(interaction=Interaction(id=UUID('00000000-0000-0000-0000-000000000001'), condition=<Int...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', recent_conversation_messages=(), previous_response_contract=None)
+on_stage = <built-in method append of list object at 0x10ec24040>
+
+    def interpret_semantics(
+        self,
+        basis: InteractionInterpretationInput,
+        *,
+        on_stage: Callable[[str], None] | None = None,
+    ) -> InteractionSemanticCandidate:
+        instruction = InteractionSemanticContract.instruction(basis)
+        self.last_prompt_characters = len(instruction)
+        result = self.runtime.generate(
+            purpose=ModelPurpose.WIC_SEMANTIC,
+            instructions=instruction,
+            input_text="Return the WIC semantic result for the exact supplied basis.",
+            output_schema=InteractionSemanticContract.output_schema(),
+            on_stage=on_stage,
+        )
+        self.last_action_repair_signal = None
+        self.last_structured_repair_count = 0
+        schema = InteractionSemanticContract.output_schema()
+        try:
+>           payload = _InteractionSemanticProviderPayload.model_validate_json(
+                _structured_json_text(result.output_text)
+            )
+E           pydantic_core._pydantic_core.ValidationError: 24 validation errors for _InteractionSemanticProviderPayload
+E           interpreted_motive
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           desired_outcome
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           candidate_context
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           candidate_constraints
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           current_requests
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           unresolved_material_questions
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           meanings
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           focus_classification
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           impact_disposition
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           supporting_references
+E             Field required [type=missing, input_value={'collaboration': {'turn_...nt': 'DIRECT_QUESTION'}}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.direct_answer
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.known_relevant_facts
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.current_objective
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.current_collaboration_focus
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.design_intent_frame
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.recommended_next_action
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.concise_basis
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.unresolved_human_decision
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.alternatives
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.attention_level
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.progression_guidance_appropriate
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.detailed_explanation_requested
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.response_language
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+E           collaboration.policy_hints
+E             Field required [type=missing, input_value={'turn_intent': 'DIRECT_QUESTION'}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/missing
+
+src/spg/providers/deepseek_interaction.py:156: ValidationError
+
+During handling of the above exception, another exception occurred:
+
+    def test_controlled_active_work_repairs_one_semantic_schema_failure() -> None:
+        basis = _basis()
+        revision = WorkRealityRevision(
+            id=UUID(int=20), work_id=UUID(int=21), revision_number=1,
+            basis_fingerprint="a" * 64, revision_fingerprint="c" * 64,
+            source_interaction_id=basis.interaction.id, source_assessment_id=UUID(int=22),
+            source_record_ids=(basis.records[0].id,), motive="开发瀑布流页面",
+            desired_outcome="图片可正常显示", context_facts=(), constraints=(), requests=(),
+            engineering_scope_id=UUID(int=23), engineering_resource_id=None,
+            scope_basis_fingerprint="d" * 64, source_baseline_id=None,
+            governance_record_id=UUID(int=24), supporting_references=(),
+            change_set=("initial",), rationale="Admitted Work", admitted_by="human",
+            schema_version="v1", created_at=basis.interaction.created_at,
+        )
+        basis = basis.model_copy(update={
+            "active_work_context": ActiveWorkInterpretationContext(
+                work_revision=revision, engineering_scope_fingerprint="e" * 64,
+            ),
+        })
+        valid = InteractionSemanticCandidate(
+            interpreted_motive=revision.motive,
+            desired_outcome=revision.desired_outcome,
+            collaboration=StructuredCollaborationResult(
+                turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
+                direct_answer="会检查图片地址并继续当前工作。",
+                response_language="zh-CN",
+            ),
+            provider_identity="test",
+        ).model_dump_json(exclude={"provider_identity", "model_identity"})
+        runtime, adapter = _runtime(_Adapter([
+            '{"collaboration":{"turn_intent":"DIRECT_QUESTION"}}',
+            valid,
+        ]))
+        stages: list[str] = []
+    
+        candidate = DeepSeekWorkInteractionCapability(
+            runtime=runtime
+>       ).interpret_controlled_stream_observed(
+            basis,
+            on_response_delta=lambda _delta: None,
+            on_pipeline_stage=stages.append,
+        )
+
+tests/test_deepseek_wic_provider.py:448: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/providers/deepseek_interaction.py:505: in interpret_controlled_stream_observed
+    return self._interpret(
+src/spg/providers/deepseek_interaction.py:534: in _interpret
+    semantic = self.semantic_capability.interpret_semantics(
+src/spg/providers/deepseek_interaction.py:186: in interpret_semantics
+    self._validate_action_semantics(payload, basis)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = _InteractionSemanticProviderPayload(response_intent=None, interpreted_motive='开发瀑布流页面', desired_outcome='图片可正常显示', can...ogression_guidance_appropriate=True, detailed_explanation_requested=False, response_language='zh-CN', policy_hints=()))
+basis = InteractionInterpretationInput(interaction=Interaction(id=UUID('00000000-0000-0000-0000-000000000001'), condition=<Int...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', recent_conversation_messages=(), previous_response_contract=None)
+
+    @staticmethod
+    def _validate_action_semantics(payload, basis) -> None:
+        from spg.domain.interaction_actions import validate_action_binding
+        latest = next(record for record in reversed(basis.records)
+            if str(record.actor) == "HUMAN")
+>       if (payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST
+                                                 ^^^^^^^^^^^^^^^^^^^^^^
+                and not payload.action_candidates):
+E               NameError: name 'ConversationTurnIntent' is not defined
+
+src/spg/providers/deepseek_interaction.py:210: NameError
+------------------------------ Captured log call -------------------------------
+WARNING  spg.providers.deepseek_interaction:deepseek_interaction.py:165 WIC semantic validation failed request=response-1 model=deepseek-flash status=completed stage=payload_validation issue=interpreted_motive:missing, desired_outcome:missing, candidate_context:missing, candidate_constraints:missing, current_requests:missing fields=['collaboration'] length=51 repair=started
+____ test_shadow_active_work_bad_expression_uses_validated_semantic_answer _____
+
+    def test_shadow_active_work_bad_expression_uses_validated_semantic_answer() -> None:
+        basis = _basis()
+        revision = WorkRealityRevision(
+            id=UUID(int=10), work_id=UUID(int=11), revision_number=1,
+            basis_fingerprint="a" * 64, revision_fingerprint="c" * 64,
+            source_interaction_id=basis.interaction.id, source_assessment_id=UUID(int=12),
+            source_record_ids=(basis.records[0].id,), motive="开发课程表",
+            desired_outcome="可使用的页面", context_facts=(), constraints=(), requests=(),
+            engineering_scope_id=UUID(int=13), engineering_resource_id=None,
+            scope_basis_fingerprint="d" * 64, source_baseline_id=None,
+            governance_record_id=UUID(int=16), supporting_references=(),
+            change_set=("initial",), rationale="Admitted Work", admitted_by="human",
+            schema_version="v1", created_at=basis.interaction.created_at,
+        )
+        basis = basis.model_copy(update={"active_work_context": ActiveWorkInterpretationContext(
+            work_revision=revision, engineering_scope_fingerprint="e" * 64,
+        )})
+        semantic = InteractionSemanticCandidate(
+            interpreted_motive=revision.motive, desired_outcome=revision.desired_outcome,
+            collaboration=StructuredCollaborationResult(
+                turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
+                direct_answer="当前还没有开始执行。", response_language="zh-CN",
+            ), provider_identity="test",
+        ).model_dump_json(exclude={"provider_identity", "model_identity"})
+        runtime, adapter = _runtime(_Adapter([semantic, "not valid JSON"]))
+>       result = DeepSeekWorkInteractionCapability(runtime=runtime).interpret_stream_observed(
+            basis, on_response_delta=lambda _delta: None,
+            on_pipeline_stage=lambda _stage: None,
+        )
+
+tests/test_deepseek_wic_provider.py:485: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/providers/deepseek_interaction.py:479: in interpret_stream_observed
+    return super().interpret_stream_observed(
+src/spg/providers/interaction_contract.py:788: in interpret_stream_observed
+    return self._interpret(
+src/spg/providers/deepseek_interaction.py:522: in _interpret
+    return super()._interpret(
+src/spg/providers/interaction_contract.py:825: in _interpret
+    semantic = self.semantic_capability.interpret_semantics(basis)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/deepseek_interaction.py:159: in interpret_semantics
+    self._validate_action_semantics(payload, basis)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = _InteractionSemanticProviderPayload(response_intent=None, interpreted_motive='开发课程表', desired_outcome='可使用的页面', candid...ogression_guidance_appropriate=True, detailed_explanation_requested=False, response_language='zh-CN', policy_hints=()))
+basis = InteractionInterpretationInput(interaction=Interaction(id=UUID('00000000-0000-0000-0000-000000000001'), condition=<Int...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', recent_conversation_messages=(), previous_response_contract=None)
+
+    @staticmethod
+    def _validate_action_semantics(payload, basis) -> None:
+        from spg.domain.interaction_actions import validate_action_binding
+        latest = next(record for record in reversed(basis.records)
+            if str(record.actor) == "HUMAN")
+>       if (payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST
+                                                 ^^^^^^^^^^^^^^^^^^^^^^
+                and not payload.action_candidates):
+E               NameError: name 'ConversationTurnIntent' is not defined
+
+src/spg/providers/deepseek_interaction.py:210: NameError
+=========================== short test summary info ============================
+FAILED tests/test_deepseek_wic_provider.py::test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta
+FAILED tests/test_deepseek_wic_provider.py::test_controlled_pre_work_uses_semantics_then_governed_realizer_stream
+FAILED tests/test_deepseek_wic_provider.py::test_controlled_pre_work_repairs_valid_json_with_schema_errors
+FAILED tests/test_deepseek_wic_provider.py::test_controlled_active_work_question_skips_discarded_conversation_call
+FAILED tests/test_deepseek_wic_provider.py::test_controlled_active_work_repairs_one_semantic_schema_failure
+FAILED tests/test_deepseek_wic_provider.py::test_shadow_active_work_bad_expression_uses_validated_semantic_answer
+6 failed, 68 passed in 2.53s

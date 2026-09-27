@@ -1,0 +1,5 @@
+...
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/Users/yu/Documents/dev/software-production-platform/.venv/lib/python3.13/site-packages/psycopg/cursor.py:117: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+3 passed in 92.86s (0:01:32)

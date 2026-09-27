@@ -1,0 +1,97 @@
+............................................F..................INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+
+=================================== FAILURES ===================================
+___ test_multi_pwu_plan_persists_three_units_and_blocks_join_before_parents ____
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_test), session_factory=sessionmaker(class...on', bind=Engine(postgresql+psycopg://postgres:***@127.0.0.1:55438/spg_test), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-993/test_multi_pwu_plan_persists_t0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11550e890>
+
+    def test_multi_pwu_plan_persists_three_units_and_blocks_join_before_parents(postgres_database, tmp_path, monkeypatch):
+        monkeypatch.setenv("SPG_DATABASE_URL", os.environ["SPG_TEST_DATABASE_URL"])
+        command.upgrade(Config(Path(__file__).resolve().parents[2] / "alembic.ini"), "head")
+        repository = tmp_path / "repository"
+        repository.mkdir()
+        _git(repository, "init", "-b", "main")
+        _git(repository, "config", "user.name", "SPG Test")
+        _git(repository, "config", "user.email", "spg-test@example.invalid")
+        (repository / "README.md").write_text("initial\n")
+        _git(repository, "add", "README.md")
+        _git(repository, "commit", "-m", "initial")
+        runtime = RuntimeService(postgres_database)
+        identity = f"test://multi-pwu/{uuid4()}"
+        baseline = runtime.bootstrap_trusted_baseline(BootstrapRequest(
+            repository_path=repository, repository_identity=identity,
+            repository_ref="refs/heads/main", authority_identity="human:test",
+        )).snapshot
+        targets = tuple(ProductionPlanArtifactTarget(path=f"docs/{stem}.md", operation=PlannedArtifactOperation.CREATE)
+                        for stem in ("auth", "billing"))
+        plan = RuleBasedProductionPlanner().propose(ProductionPlanningRequest(
+            work_id=uuid4(), admitted_requirement="Implement independent auth and billing guides",
+            desired_outcome="Both guides exist", production_objective="Produce two guides",
+            artifact_targets=targets, verification_expectation="Verify both guides",
+            engineering_scope_summary="one repository", engineering_resource_id=uuid4(),
+            repository_identity=identity, source_baseline_id=baseline.id,
+            source_revision=baseline.repository_revision,
+        ))
+        assert plan.graph is not None
+        spine = runtime.create_initial_runtime_spine(InitialRunRequest(
+            intent_ref="work:multi", goal="Both guides exist",
+            production_horizon=ProductionHorizon.DOCUMENTATION,
+            initial_work_unit_objective="Produce two guides",
+            completion_contract=CompletionContract(
+                required_outputs=tuple(item.path for item in targets),
+                required_changes=tuple(item.path for item in targets),
+                verification_obligations=("Verify both guides",),
+                production_plan=plan,
+            ),
+        ))
+        with postgres_database.unit_of_work() as uow:
+            store = RuntimeStore(uow.session)
+            units = store.work_units_for_plan(spine.plan_revision.id)
+            join = store.work_unit_for_node(spine.plan_revision.id, "pwu:join")
+        assert len(units) == 3
+        assert {unit.source_baseline_id for unit in units if unit.node_id != "pwu:join"} == {baseline.id}
+        assert join is not None and join.source_baseline_id is None
+        assert spine.run.integrated_baseline_id == baseline.id
+        with pytest.raises(RuntimeInvariantViolation, match="unresolved"):
+            runtime.create_initial_attempt(join.id)
+        assert runtime.create_initial_attempt(spine.work_unit.id).source_baseline_id == baseline.id
+        with pytest.raises(RuntimeError, match="Cannot downgrade versioned multi-PWU"):
+            command.downgrade(Config(Path(__file__).resolve().parents[2] / "alembic.ini"), "20260925_49")
+        with postgres_database.engine.connect() as connection:
+>           assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "20260927_58"
+E           AssertionError: assert '20260927_60' == '20260927_58'
+E             
+E             - 20260927_58
+E             ?          ^^
+E             + 20260927_60
+E             ?          ^^
+
+tests/integration/test_multi_pwu_runtime.py:113: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+----------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running downgrade 20260927_60 -> 20260927_59, Distinguish unrecorded legacy action interpretation from interpreted no-action.
+INFO  [alembic.runtime.migration] Running downgrade 20260927_59 -> 20260927_58, Persist WIC canonical action candidates with their immutable assessment basis.
+INFO  [alembic.runtime.migration] Running downgrade 20260927_58 -> 20260926_57, Durable Work convergence lineage within the existing refinement capability.
+INFO  [alembic.runtime.migration] Running downgrade 20260926_57 -> 20260926_56, Persist qualified evaluation reports and baseline lineage.
+INFO  [alembic.runtime.migration] Running downgrade 20260926_56 -> 20260926_55, Add connector controls and credential audit without storing secrets.
+INFO  [alembic.runtime.migration] Running downgrade 20260926_55 -> 20260926_54, Introduce long-lived Products without assigning unknown historical Works.
+INFO  [alembic.runtime.migration] Running downgrade 20260926_54 -> 20260926_53, Persist access grants and exact remote delivery authority/effects.
+INFO  [alembic.runtime.migration] Running downgrade 20260926_53 -> 20260926_52, Persist managed Git source independently of execution workspaces.
+INFO  [alembic.runtime.migration] Running downgrade 20260926_52 -> 20260926_51, Persist actor, organization membership and resource access.
+INFO  [alembic.runtime.migration] Running downgrade 20260926_51 -> 20260926_50, Record exact Git tree identity alongside versioned baseline revision.
+INFO  [alembic.runtime.migration] Running downgrade 20260926_50 -> 20260925_49, Persist versioned Production Plan DAG and per-PWU baseline lineage.
+=========================== short test summary info ============================
+FAILED tests/integration/test_multi_pwu_runtime.py::test_multi_pwu_plan_persists_three_units_and_blocks_join_before_parents
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/Users/yu/.local/share/uv/python/cpython-3.13.15-macos-x86_64-none/lib/python3.13/threading.py:363: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+1 failed, 62 passed in 389.50s (0:06:29)

@@ -1,0 +1,84 @@
+{
+  "source_commit": "767dcff54902d073db596b1bf7182a3d83525ec0",
+  "partitions": [
+    {
+      "index": 0,
+      "database": "spg_test",
+      "files": [
+        "tests/integration/test_wic_governed_work_admission.py",
+        "tests/integration/test_mvp_plan_steering_truth.py",
+        "tests/integration/test_s4b_runtime_commit.py",
+        "tests/integration/test_s3b_verification_satisfaction.py",
+        "tests/integration/test_brownfield_native_production_flow.py",
+        "tests/integration/test_s3a_completion_evaluation.py",
+        "tests/integration/test_s2b_execution_observation.py",
+        "tests/integration/test_s2a_preparation.py",
+        "tests/integration/test_wic_pre_work_interaction.py",
+        "tests/integration/test_managed_git_source.py",
+        "tests/integration/test_p1_brownfield_product.py",
+        "tests/integration/test_authenticated_authority.py",
+        "tests/integration/test_postgresql_persistence.py",
+        "tests/integration/test_work_convergence.py",
+        "tests/integration/test_wic_response_contract.py"
+      ],
+      "historical_seconds": 1108.5910000000001
+    },
+    {
+      "index": 1,
+      "database": "spg_lifecycle_integration",
+      "files": [
+        "tests/integration/test_software_delivery.py",
+        "tests/integration/test_multi_pwu_runtime.py",
+        "tests/integration/test_s4a_repository_integration.py",
+        "tests/integration/test_mvp_api.py",
+        "tests/integration/test_native_executor_runtime.py",
+        "tests/integration/test_lifecycle_repository_actions.py",
+        "tests/integration/test_mvp_semantic_step_execution.py",
+        "tests/integration/test_mvp_long_lived_work_admission.py",
+        "tests/integration/test_dcp2_production_measurement.py",
+        "tests/integration/test_p1_schema_hygiene.py",
+        "tests/integration/test_preview_namespace.py",
+        "tests/integration/test_owner_default_wiring.py",
+        "tests/integration/test_control_room_agreements.py"
+      ],
+      "historical_seconds": 1108.753
+    },
+    {
+      "index": 2,
+      "database": "watt_stability_final_schema",
+      "files": [
+        "tests/integration/test_mvp_app_work_flow.py",
+        "tests/integration/test_s5b_recovery_reconciliation.py",
+        "tests/integration/test_s3c_candidate_governance.py",
+        "tests/integration/test_s5c_attempt_recovery.py",
+        "tests/integration/test_s5a_recovery_assessment.py",
+        "tests/integration/test_s6c2_r4b_maintenance_recovery.py",
+        "tests/integration/test_work_delivery.py",
+        "tests/integration/test_runtime_spine.py",
+        "tests/integration/test_external_search_interaction.py",
+        "tests/integration/test_connector_capabilities.py",
+        "tests/integration/test_conversation_context_continuity.py",
+        "tests/integration/test_github_governed_delivery.py"
+      ],
+      "historical_seconds": 1108.8899999999999
+    }
+  ],
+  "same_database_parallelism": false,
+  "remaining_source_changes": [
+    {
+      "commit": "3640b1b",
+      "files": [
+        "src/spg/application/interaction.py"
+      ],
+      "scope": "One semantic-port presence gate; final root unit and real semantic runtime qualification cover this delta."
+    },
+    {
+      "commit": "d56a5ce",
+      "files": [
+        "src/spg/application/external_research.py",
+        "tests/test_external_research.py"
+      ],
+      "scope": "Recorded empty/non-executable canonical set terminates legacy research routing; final root, owner runtime and final Release Evaluation cover this delta."
+    }
+  ]
+}

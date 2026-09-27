@@ -1,0 +1,3311 @@
+[
+  {
+    "operation": "ACQUIRE_REPOSITORY",
+    "polarity": "positive",
+    "human_text": "把 https://github.com/acme/example.git 拿到本地",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "人类直接要求把指定 Git 仓库取到本地，属于有明确目标的受管动作请求，而非设计讨论或提问。",
+        "judgment_stance": "FACT",
+        "judgment_subject": "repository-acquisition",
+        "judgment_proposition": "请求获取的仓库源为 https://github.com/acme/example.git，目标位置为本地。",
+        "judgment_basis": [
+          "d455e10f-9e3c-4c07-8a07-9c1899870899"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": true
+      },
+      "interpreted_motive": "获得指定 GitHub 仓库的本地副本以进行后续使用。",
+      "desired_outcome": "该仓库在本地可用（本地检出副本）。",
+      "candidate_context": [],
+      "candidate_constraints": [
+        "获取目标是本地副本，而非远端或部署环境。"
+      ],
+      "current_requests": [
+        "把 https://github.com/acme/example.git 拿到本地"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "ACQUIRE_REPOSITORY",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "d455e10f-9e3c-4c07-8a07-9c1899870899",
+          "source_text": "把 https://github.com/acme/example.git 拿到本地",
+          "target_branch": null,
+          "repository_source": "https://github.com/acme/example.git",
+          "confidence": 0.95
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne1",
+          "kind": "REFERENCE",
+          "values": [
+            "https://github.com/acme/example.git"
+          ],
+          "unit": null,
+          "source_record_id": "d455e10f-9e3c-4c07-8a07-9c1899870899",
+          "source_text": "https://github.com/acme/example.git",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "sf1",
+          "operation": "UPSERT",
+          "subject": "repository.source",
+          "relation": "REFERENCE",
+          "value": "https://github.com/acme/example.git",
+          "unit": null,
+          "scope": "repository-acquisition",
+          "qualifiers": {
+            "protocol": "https"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "d455e10f-9e3c-4c07-8a07-9c1899870899"
+          ],
+          "source_text": "https://github.com/acme/example.git",
+          "source_extraction_ids": [
+            "ne1"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "请求把指定 GitHub 仓库获取到本地。",
+          "source_record_ids": [
+            "d455e10f-9e3c-4c07-8a07-9c1899870899"
+          ],
+          "confidence": 0.95,
+          "rationale": "原文为祈使式动作请求，含明确仓库地址与目标位置“本地”。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "仓库来源地址为 https://github.com/acme/example.git",
+          "目标位置为本地环境"
+        ],
+        "current_objective": "在本地获得该仓库的可用副本。",
+        "current_collaboration_focus": "执行仓库获取",
+        "design_intent_frame": null,
+        "recommended_next_action": "按受管的仓库获取流程把 https://github.com/acme/example.git 取到本地工作区，并把实际检出路径回报给你。",
+        "concise_basis": "请求的目标与来源都已明确，缺的只是本地路径等实现细节，可在执行中以可逆默认值处理。",
+        "unresolved_human_decision": null,
+        "alternatives": [
+          {
+            "option": "直接获取默认分支到本地工作区",
+            "trade_off": "最快得到可用副本，但具体目录名与分支在结果中才确定。"
+          },
+          {
+            "option": "先指定本地目录/分支再获取",
+            "trade_off": "放置位置与分支更可控，但需要你多提供一项信息。"
+          }
+        ],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:353d8576-99f8-427a-9dc6-1dfdd587d46b",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "353d8576-99f8-427a-9dc6-1dfdd587d46b",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "ACQUIRE_REPOSITORY",
+    "polarity": "positive",
+    "human_text": "给我获取 https://github.com/acme/example.git 的工作副本",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "The Human explicitly asks to obtain a working copy of a named Git repository URL; this is a bounded action request, not a design or question turn.",
+        "judgment_stance": "FACT",
+        "judgment_subject": null,
+        "judgment_proposition": null,
+        "judgment_basis": [],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": true
+      },
+      "interpreted_motive": "Obtain a working copy of the repository at https://github.com/acme/example.git.",
+      "desired_outcome": "A local working copy of https://github.com/acme/example.git is available for subsequent work.",
+      "candidate_context": [
+        "No active Work context exists yet.",
+        "The Human supplied an explicit repository URL, so repository binding is part of this request."
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "获取 https://github.com/acme/example.git 的工作副本"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "ACQUIRE_REPOSITORY",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "f55d142f-086c-4c56-8235-80116822951c",
+          "source_text": "给我获取 https://github.com/acme/example.git 的工作副本",
+          "target_branch": null,
+          "repository_source": "https://github.com/acme/example.git",
+          "confidence": 0.95
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ext-repo-url-1",
+          "kind": "REFERENCE",
+          "values": [
+            "https://github.com/acme/example.git"
+          ],
+          "unit": null,
+          "source_record_id": "f55d142f-086c-4c56-8235-80116822951c",
+          "source_text": "https://github.com/acme/example.git",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "fact-repository-source-1",
+          "operation": "UPSERT",
+          "subject": "repository.source",
+          "relation": "REFERENCE",
+          "value": "https://github.com/acme/example.git",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "f55d142f-086c-4c56-8235-80116822951c"
+          ],
+          "source_text": "https://github.com/acme/example.git",
+          "source_extraction_ids": [
+            "ext-repo-url-1"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "The Human asks Watt to obtain a working copy of the Git repository at https://github.com/acme/example.git.",
+          "source_record_ids": [
+            "f55d142f-086c-4c56-8235-80116822951c"
+          ],
+          "confidence": 0.95,
+          "rationale": "The utterance is an imperative request naming a concrete repository URL.",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "The Human supplied the repository URL https://github.com/acme/example.git.",
+          "No branch was specified."
+        ],
+        "current_objective": "Obtain a working copy of https://github.com/acme/example.git.",
+        "current_collaboration_focus": "Repository acquisition for the named URL.",
+        "design_intent_frame": null,
+        "recommended_next_action": "Proceed with governed repository acquisition of https://github.com/acme/example.git into a working copy; if that source is not reachable or accessible, report it directly rather than substituting another source.",
+        "concise_basis": "The Human gave an explicit repository URL and asked for a working copy, which is a bounded, reversible acquisition step requiring no further choices from the Human.",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh-CN",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:3fd1a9a8-c5de-4207-b82f-6ee46b2896dd",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "3fd1a9a8-c5de-4207-b82f-6ee46b2896dd",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "ACQUIRE_REPOSITORY",
+    "polarity": "negative",
+    "human_text": "这个仓库地址先留着：https://github.com/acme/example.git",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "The Human only supplied and parked a repository address for later use; no acquisition, inspection, binding or production action is requested, so the turn is a context retention acknowledgement rather than design or execution.",
+        "judgment_stance": "FACT",
+        "judgment_subject": "repository-address-retention",
+        "judgment_proposition": "The GitHub URL was supplied by the Human as a reference to keep, not as a request to acquire or bind a repository.",
+        "judgment_basis": [
+          "9928398f-8bc5-467b-8d90-f3acaa3ff464"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [
+        "Human parked a GitHub repository address for later use: https://github.com/acme/example.git",
+        "No repository acquisition, inspection or binding is requested at this time"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "nse-repo-url-1",
+          "kind": "REFERENCE",
+          "values": [
+            "https://github.com/acme/example.git"
+          ],
+          "unit": null,
+          "source_record_id": "9928398f-8bc5-467b-8d90-f3acaa3ff464",
+          "source_text": "https://github.com/acme/example.git",
+          "explicit_roles": [
+            "repository_address"
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "sfc-repo-source-1",
+          "operation": "UPSERT",
+          "subject": "repository.source",
+          "relation": "REFERENCE",
+          "value": "https://github.com/acme/example.git",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {
+            "retention": "for_later_use"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "9928398f-8bc5-467b-8d90-f3acaa3ff464"
+          ],
+          "source_text": "https://github.com/acme/example.git",
+          "source_extraction_ids": [
+            "nse-repo-url-1"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONTEXT",
+          "statement": "Human supplied a GitHub repository address and asked for it to be held for later use rather than acted on now.",
+          "source_record_ids": [
+            "9928398f-8bc5-467b-8d90-f3acaa3ff464"
+          ],
+          "confidence": 0.9,
+          "rationale": "The wording 先留着 marks the URL as a parked reference; no operational verb such as 拉取/查看/绑定 appears.",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "CONTEXT_ADDITION",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "Human-supplied repository address: https://github.com/acme/example.git",
+          "The address is to be kept for later, without acquisition or binding now"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "Retaining a repository address for later use",
+        "design_intent_frame": null,
+        "recommended_next_action": "先说明你想要做的产品或功能目标，等目标清晰后再决定何时把这个仓库接入为生产基础。",
+        "concise_basis": "仓库地址已记下；它只是一个待用参考，真正有用的下一步是确定要构建什么，而不是现在就去动这个仓库。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:764b1b9d-19c5-4690-b187-47352cbc7961",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "764b1b9d-19c5-4690-b187-47352cbc7961",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "ACQUIRE_REPOSITORY",
+    "polarity": "negative",
+    "human_text": "如何把仓库拿到本地？",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "Human asks how to obtain a repository locally; this is a how-to question about a software-production object, answered with the domain method rather than a production command.",
+        "judgment_stance": "FACT",
+        "judgment_subject": "获取仓库到本地的方式",
+        "judgment_proposition": "使用 git clone 拉取仓库，或在托管页面下载压缩包后解压，即可得到本地副本",
+        "judgment_basis": [],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [
+        "尚无进行中的 Work，本次是围绕仓库获取方式的一般性询问"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "了解如何把仓库取到本地"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "ACQUIRE_REPOSITORY",
+          "speech_act": "DISCUSSION",
+          "source_record_id": "8741b723-9989-40e0-a026-c3ee66217aed",
+          "source_text": "如何把仓库拿到本地？",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.4
+        }
+      ],
+      "neutral_semantic_extractions": [],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "QUESTION",
+          "statement": "Human 询问将仓库取到本地的做法",
+          "source_record_ids": [
+            "8741b723-9989-40e0-a026-c3ee66217aed"
+          ],
+          "confidence": 0.92,
+          "rationale": "以“如何……”形式提出的操作性疑问，未指定具体仓库或托管平台。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "HOW_TO",
+        "direct_answer": "如果仓库托管在 Git 平台（如 GitHub、GitLab），最直接的做法是克隆：在本地终端运行 git clone <仓库地址>，它会在当前目录下生成一个包含完整版本历史的本地副本，之后用 cd 进入该目录即可。私有仓库需要先配置访问权限（SSH 密钥或访问令牌）。如果不方便用 Git，也可以在仓库网页上选择“Download ZIP”下载压缩包再解压，但这样没有版本历史，也不便于后续同步更新。若仓库放在内部服务器上，还需要具备对应的网络访问权限。",
+        "known_relevant_facts": [
+          "当前没有进行中的 Work 或已选定的设计模式",
+          "Human 尚未说明仓库所在平台或地址"
+        ],
+        "current_objective": "把仓库取到本地以便在本地环境使用",
+        "current_collaboration_focus": "仓库获取到本地的方法",
+        "design_intent_frame": null,
+        "recommended_next_action": "先确认仓库所在平台（GitHub/GitLab/内部服务器）与是否可访问，然后用 git clone 克隆；私有仓库提前配好 SSH 密钥或访问令牌。",
+        "concise_basis": "克隆能完整保留版本历史并便于后续同步，压缩包下载只适合一次性查看代码。",
+        "unresolved_human_decision": null,
+        "alternatives": [
+          {
+            "option": "git clone 克隆仓库",
+            "trade_off": "获得完整历史、分支和后续拉取能力，但需要本地安装 Git 并配置私有仓库访问权限。"
+          },
+          {
+            "option": "在托管页面下载 ZIP 压缩包并解压",
+            "trade_off": "无需安装 Git、上手最快，但没有版本历史，后续更新需重新下载。"
+          }
+        ],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:a3ce72cf-cabb-4e26-998c-1b1e7e7718be",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "a3ce72cf-cabb-4e26-998c-1b1e7e7718be",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "INSPECT_REPOSITORY",
+    "polarity": "positive",
+    "human_text": "帮我读读当前项目用的技术栈",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "用户在请求 Watt 去读取当前项目使用的技术栈，这是一个边界明确的只读仓库检查动作，而非设计或修改请求。",
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": "当前项目的技术栈",
+        "judgment_proposition": "当前项目所用技术栈尚未在既有记录中确立，需要通过仓库检查来获取。",
+        "judgment_basis": [
+          "fb2b33b8-ddba-4ef0-8abc-d09da61686ca"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": true
+      },
+      "interpreted_motive": "了解当前项目实际采用的技术栈。",
+      "desired_outcome": "获取当前项目所用技术栈的准确信息。",
+      "candidate_context": [
+        "存在一个‘当前项目’，但其仓库绑定与技术栈细节尚未在本次输入中给出。"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "读取当前项目所用的技术栈"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "INSPECT_REPOSITORY",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "fb2b33b8-ddba-4ef0-8abc-d09da61686ca",
+          "source_text": "帮我读读当前项目用的技术栈",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.86
+        }
+      ],
+      "neutral_semantic_extractions": [],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "用户请求查看当前项目所使用的技术栈。",
+          "source_record_ids": [
+            "fb2b33b8-ddba-4ef0-8abc-d09da61686ca"
+          ],
+          "confidence": 0.9,
+          "rationale": "‘帮我读读’是明确的执行请求，‘当前项目用的技术栈’是其对象。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "存在一个被称为‘当前项目’的代码库，但其技术栈内容尚未在本次输入中披露。"
+        ],
+        "current_objective": "读取并说明当前项目使用的技术栈。",
+        "current_collaboration_focus": "对当前项目技术栈的仓库级检查。",
+        "design_intent_frame": null,
+        "recommended_next_action": "按受治理的仓库准备路径绑定并读取当前项目，列出其语言、框架、构建工具与依赖清单，再据此汇报技术栈；若无法定位到唯一项目，请指出需要确认的具体仓库。",
+        "concise_basis": "这是一个可执行的只读检查动作，其产出依赖对实际仓库的读取，而仓库绑定属于生产前置条件，不需要用户先做决定。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:06c84c72-3641-49c8-8f74-c8469766d8ca",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "06c84c72-3641-49c8-8f74-c8469766d8ca",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "INSPECT_REPOSITORY",
+    "polarity": "positive",
+    "human_text": "检查这份代码的框架和依赖",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANALYZE",
+        "design_collaboration_mode": null,
+        "rationale": "输入是要求对现有代码做框架与依赖检查，属于对既有产物的事实性分析请求，而非设计新对象。",
+        "judgment_stance": "INFERENCE",
+        "judgment_subject": "对现有代码框架与依赖的检查",
+        "judgment_proposition": "在“这份代码”所对应的仓库被绑定并读取之前，无法给出框架与依赖的结论。",
+        "judgment_basis": [
+          "6fcd7bba-46e9-4f0c-b84c-bcea7faf8c99"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": "弄清现有代码使用的是什么框架、依赖了哪些库。",
+      "desired_outcome": "得到对该代码框架与依赖的检查结论。",
+      "candidate_context": [
+        "“这份代码”在本次交互中尚未指向任何已绑定或已标识的仓库。"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "检查这份代码的框架和依赖"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "INSPECT_REPOSITORY",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "6fcd7bba-46e9-4f0c-b84c-bcea7faf8c99",
+          "source_text": "检查这份代码的框架和依赖",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.8
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "n1",
+          "kind": "ORDERED_VALUES",
+          "values": [
+            "框架",
+            "依赖"
+          ],
+          "unit": null,
+          "source_record_id": "6fcd7bba-46e9-4f0c-b84c-bcea7faf8c99",
+          "source_text": "框架和依赖",
+          "explicit_roles": [
+            null,
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "f1",
+          "operation": "UPSERT",
+          "subject": "code.review_scope",
+          "relation": "SCOPE",
+          "value": [
+            "框架",
+            "依赖"
+          ],
+          "unit": null,
+          "scope": "这份代码",
+          "qualifiers": {},
+          "authority": "SYSTEM_INFERRED",
+          "epistemic_status": "WORKING_ASSUMPTION",
+          "source_record_ids": [
+            "6fcd7bba-46e9-4f0c-b84c-bcea7faf8c99"
+          ],
+          "source_text": "检查这份代码的框架和依赖",
+          "source_extraction_ids": [
+            "n1"
+          ],
+          "role_origin": "INFERRED",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "请求检查“这份代码”使用的框架及其依赖。",
+          "source_record_ids": [
+            "6fcd7bba-46e9-4f0c-b84c-bcea7faf8c99"
+          ],
+          "confidence": 0.9,
+          "rationale": "输入是明确的祈使请求，指向代码框架与依赖的检查动作。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "当前交互尚未绑定任何代码仓库或代码来源。",
+          "请求的检查对象是代码的框架与依赖。"
+        ],
+        "current_objective": "检查这份代码的框架与依赖",
+        "current_collaboration_focus": "让“这份代码”指向可读取的具体代码来源，然后读取依赖清单与入口文件。",
+        "design_intent_frame": {
+          "design_subject": "现有代码的框架与依赖检查",
+          "object_type": "REVIEW_ANALYSIS",
+          "business_context": null,
+          "desired_outcome": "得到框架与依赖的检查结论",
+          "scope_level": "implementation",
+          "collaboration_mode": "review",
+          "candidate_assumptions": [
+            "“这份代码”是一个已存在的项目，可直接在其工作目录中检查依赖清单文件（如 package.json、requirements.txt、pom.xml）与入口文件。"
+          ],
+          "ambiguities": [
+            "“这份代码”的指代不明确：未指明具体仓库或其位置。",
+            "检查粒度未定：只要框架与依赖清单，还是要包含版本、过时/安全风险的判断。"
+          ],
+          "confidence": 0.5
+        },
+        "recommended_next_action": "先把“这份代码”落到一个可读取的具体代码来源（例如指定仓库），随后以只读方式读取依赖清单文件与入口文件，给出所使用的框架与依赖清单。",
+        "concise_basis": "框架与依赖只能从真实代码内容读出，而当前交互里还没有指向任何具体代码来源；先确定来源再读取，可以避免凭猜测给结论。",
+        "unresolved_human_decision": null,
+        "alternatives": [
+          {
+            "option": "在已有仓库上做只读检查",
+            "trade_off": "结论基于真实代码，但需要该仓库可被访问。"
+          },
+          {
+            "option": "先把代码导入/放入一个仓库再检查",
+            "trade_off": "多一步准备动作，但检查对象可追溯、结果可复用。"
+          }
+        ],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:ca5bd1fc-eef5-40d3-b966-20c872766087",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "ca5bd1fc-eef5-40d3-b966-20c872766087",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "INSPECT_REPOSITORY",
+    "polarity": "negative",
+    "human_text": "我以后想研究项目的框架",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXPLORE",
+        "design_collaboration_mode": "DESIGN_EXPLORE",
+        "rationale": "Human 表达的是将来想研究项目框架的意向，用「以后想」标记为远期、非即时执行；没有具体项目、仓库或可执行操作，因此是探索性的意图陈述而非构建或动作请求。",
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": "将来研究项目框架的意图",
+        "judgment_proposition": null,
+        "judgment_basis": [
+          "76d17581-60e3-4010-a257-c6c0fb00e3fc"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": "将来研究某个项目的框架",
+      "desired_outcome": null,
+      "candidate_context": [
+        "Human 计划在将来研究项目的框架",
+        "当前没有绑定任何项目、仓库或代码库"
+      ],
+      "candidate_constraints": [
+        "时间上属于将来（以后），不是当前立即执行"
+      ],
+      "current_requests": [],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "OBJECTIVE_OR_SCOPE_CHANGE",
+          "statement": "Human 提出将来想研究项目的框架，这是一个远期研究意向，尚未构成可执行目标。",
+          "source_record_ids": [
+            "76d17581-60e3-4010-a257-c6c0fb00e3fc"
+          ],
+          "confidence": 0.7,
+          "rationale": "「以后想研究」表明是未来的探索愿望，没有指定具体项目、交付物或立即行动。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "EXPLORE",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "Human 说以后想研究项目的框架",
+          "目前没有指定是哪个项目或哪个仓库"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "弄清「研究项目框架」具体指哪个项目、想了解框架的哪个层面",
+        "design_intent_frame": null,
+        "recommended_next_action": "先从一个你手头真实存在、能访问到的项目入手，明确你想研究它的哪一层框架（例如整体架构分层、模块依赖、还是某个具体技术的用法），这样可以把「将来想研究」变成一件现在就能开始做的事。",
+        "concise_basis": "含糊之处不在内容本身，而在于既没有指定项目也没有指定框架的观察角度；这两点决定了研究从哪里开始、产出是什么。",
+        "unresolved_human_decision": null,
+        "alternatives": [
+          {
+            "option": "从自己已有的一个项目/仓库开始，梳理它的目录与依赖结构",
+            "trade_off": "结论具体、可马上动手，但受限于该项目本身的复杂度与可读性"
+          },
+          {
+            "option": "挑一个开源项目作为研究对象，通读它的架构文档与代码组织",
+            "trade_off": "样本质量可控、参考价值高，但需要时间熟悉陌生代码库"
+          }
+        ],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:a905988a-9f52-4fd7-b6f8-167b003a601b",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "a905988a-9f52-4fd7-b6f8-167b003a601b",
+    "repair_count": 1,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "INSPECT_REPOSITORY",
+    "polarity": "negative",
+    "human_text": "不要检查仓库",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "CORRECT",
+        "design_collaboration_mode": null,
+        "rationale": "该输入为一条流程边界约束：要求 Watt 不得检查仓库，并非设计/构建请求，也无既有计划可修正，故以约束确认模式处理。",
+        "judgment_stance": "FACT",
+        "judgment_subject": "repository.inspection",
+        "judgment_proposition": "本次交互中不得进行仓库检查。",
+        "judgment_basis": [
+          "6309c4d6-9bf9-43ff-97a6-ee286f1f0cc4"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [],
+      "candidate_constraints": [
+        "不得检查仓库"
+      ],
+      "current_requests": [
+        "不要检查仓库"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "INSPECT_REPOSITORY",
+          "speech_act": "DISCUSSION",
+          "source_record_id": "6309c4d6-9bf9-43ff-97a6-ee286f1f0cc4",
+          "source_text": "不要检查仓库",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.4
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne1",
+          "kind": "SCOPE",
+          "values": [
+            "仓库"
+          ],
+          "unit": null,
+          "source_record_id": "6309c4d6-9bf9-43ff-97a6-ee286f1f0cc4",
+          "source_text": "不要检查仓库",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "sf1",
+          "operation": "UPSERT",
+          "subject": "repository.inspection",
+          "relation": "BEHAVIOR",
+          "value": "prohibited",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "6309c4d6-9bf9-43ff-97a6-ee286f1f0cc4"
+          ],
+          "source_text": "不要检查仓库",
+          "source_extraction_ids": [
+            "ne1"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONSTRAINT",
+          "statement": "Human 明确要求不进行仓库检查，该边界在当前交互中有效。",
+          "source_record_ids": [
+            "6309c4d6-9bf9-43ff-97a6-ee286f1f0cc4"
+          ],
+          "confidence": 0.95,
+          "rationale": "输入以否定式直接给出对仓库检查动作的限制。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "CONTEXT_ADDITION",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "Human 指示不要检查仓库"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "接受并遵守“不检查仓库”的约束",
+        "design_intent_frame": null,
+        "recommended_next_action": "在遵守不检查仓库的前提下，说明你想推进的目标或对象，我再据此给出可执行的下一步。",
+        "concise_basis": "当前没有已登记的 Work 或设计对象，只有一条流程约束；先确认约束，再等待具体目标。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ACKNOWLEDGE_CORRECTION"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:e13345d4-3060-44fe-97a4-a1a0e8f35386",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "e13345d4-3060-44fe-97a4-a1a0e8f35386",
+    "repair_count": 1,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "QUERY_BRANCH",
+    "polarity": "positive",
+    "human_text": "咱们现在工作在哪条分支上？",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "Human asks a factual branch-status question with no branch target named and no bound repository, so this is a read-only query answered with known status rather than a change request.",
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": "current_branch_of_active_work",
+        "judgment_proposition": "The current branch cannot be determined because no repository or work context is bound in this conversation.",
+        "judgment_basis": [
+          "97c47ff4-97e4-492d-bf87-4f4a800cb28e"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [],
+      "candidate_constraints": [],
+      "current_requests": [
+        "确认当前工作所在分支"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "QUERY_BRANCH",
+          "speech_act": "READ_ONLY_QUERY",
+          "source_record_id": "97c47ff4-97e4-492d-bf87-4f4a800cb28e",
+          "source_text": "咱们现在工作在哪条分支上？",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.9
+        }
+      ],
+      "neutral_semantic_extractions": [],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "QUESTION",
+          "statement": "Human asks which branch the current work is on.",
+          "source_record_ids": [
+            "97c47ff4-97e4-492d-bf87-4f4a800cb28e"
+          ],
+          "confidence": 0.9,
+          "rationale": "The utterance is an interrogative about branch state and requests no action.",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": "SIDE_QUESTION",
+      "impact_disposition": "NO_GOVERNED_CHANGE",
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "DIRECT_QUESTION",
+        "direct_answer": "目前这条对话里还没有绑定任何代码仓库，也没有在具体分支上进行中的工作，所以无法确定当前所在分支——这个状态现在是未知的。等你确定要用的仓库后，可以直接查它当前所在的分支。",
+        "known_relevant_facts": [
+          "没有绑定仓库或工作上下文",
+          "没有进行中的分支相关改动"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "确认当前所处的分支",
+        "design_intent_frame": null,
+        "recommended_next_action": null,
+        "concise_basis": null,
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:92fd61bd-931c-4703-8d43-a392970e7170",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "92fd61bd-931c-4703-8d43-a392970e7170",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "QUERY_BRANCH",
+    "polarity": "positive",
+    "human_text": "分支创建好了吗",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "最新输入是询问分支是否已创建的事实性问题，属于只读的状态查询，直接回答当前状态即可。",
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": "branch-creation-status",
+        "judgment_proposition": "当前上下文中没有可确认的分支创建记录，分支状态未知。",
+        "judgment_basis": [
+          "92a30e9f-c36d-43aa-b717-196a1e4d44d9"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [],
+      "candidate_constraints": [],
+      "current_requests": [
+        "确认分支是否已创建"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "QUERY_BRANCH",
+          "speech_act": "READ_ONLY_QUERY",
+          "source_record_id": "92a30e9f-c36d-43aa-b717-196a1e4d44d9",
+          "source_text": "分支创建好了吗",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.95
+        }
+      ],
+      "neutral_semantic_extractions": [],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "QUESTION",
+          "statement": "询问某个分支是否已经创建完成。",
+          "source_record_ids": [
+            "92a30e9f-c36d-43aa-b717-196a1e4d44d9"
+          ],
+          "confidence": 0.95,
+          "rationale": "反问式疑问句，针对分支创建状态，无请求创建或修改的动作。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "DIRECT_QUESTION",
+        "direct_answer": "目前无法确认——在本次对话中没有任何分支已被创建或切换的记录，所以分支是否创建好还处于未知状态。如果你需要，我可以在你给出目标仓库后先查询当前分支情况，再按需要创建分支。",
+        "known_relevant_facts": [
+          "本次交互中没有已批准的工作或仓库绑定",
+          "没有已记录的分支创建或切换动作"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "确认分支创建状态",
+        "design_intent_frame": null,
+        "recommended_next_action": "给出目标仓库并说明期望的分支名，我可以先查询现有分支再创建。",
+        "concise_basis": "分支状态属于仓库事实，需要仓库来源与查询/创建动作才能确认。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh-CN",
+        "policy_hints": [
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:f28c2e57-b21b-4771-b146-b68a91f6f073",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "f28c2e57-b21b-4771-b146-b68a91f6f073",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "QUERY_BRANCH",
+    "polarity": "negative",
+    "human_text": "哪个分支名听起来好？",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "DECIDE",
+        "design_collaboration_mode": null,
+        "rationale": "人类请求对分支名给出判断/推荐，但未给出任何候选名，因此按“在缺少候选项的情况下给出可用的命名判断”作答。",
+        "judgment_stance": "RECOMMENDATION",
+        "judgment_subject": "分支命名",
+        "judgment_proposition": "没有候选分支名可供比较，最稳妥的做法是先按“类型/作用域-简短描述”的惯例生成候选，再由改动内容确定最终名称。",
+        "judgment_basis": [],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [
+        "分支命名"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "推荐一个合适的分支名"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "QUESTION",
+          "statement": "人类询问哪个分支名更好听，属于对命名方案的判断请求。",
+          "source_record_ids": [
+            "822e09e5-2985-4eee-aed5-ee9e5f872939"
+          ],
+          "confidence": 0.85,
+          "rationale": "最新输入为“哪个分支名听起来好？”，是请求推荐/判断，而非执行命令。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "REQUEST_RECOMMENDATION",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "本次输入中没有给出任何候选分支名",
+          "目前没有绑定仓库、分支或已确定的分支用途"
+        ],
+        "current_objective": "为新分支选定一个名称",
+        "current_collaboration_focus": "分支命名建议",
+        "design_intent_frame": null,
+        "recommended_next_action": "先按“类型/作用域-简短描述”的惯例拟 2-3 个候选名（例如 feature/branch-naming、fix/login-timeout、chore/cleanup-deps），再按该分支实际承载的改动定名；告诉我这个分支打算做什么，我可以直接给出最终名字。",
+        "concise_basis": "分支名是低成本、可随时重命名的细节，因此无需先定仓库或流程，先给出可复用的命名模式即可推进。",
+        "unresolved_human_decision": null,
+        "alternatives": [
+          {
+            "option": "描述性命名（feature/add-course-table、fix/login-timeout）",
+            "trade_off": "可读性高、一眼看懂改动目的，但名称较长且改动范围变化时可能需要重命名"
+          },
+          {
+            "option": "任务编号命名（feature/1234、fix/JIRA-88）",
+            "trade_off": "便于与工单系统对应、名称稳定，但脱离工单系统后不易理解其含义"
+          }
+        ],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:87d1cfc3-394e-44e3-a6c8-a5d6ef801424",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "87d1cfc3-394e-44e3-a6c8-a5d6ef801424",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "QUERY_BRANCH",
+    "polarity": "negative",
+    "human_text": "以后可能再问分支状态",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "STATUS",
+        "design_collaboration_mode": null,
+        "rationale": "The Human only notes a possible future inquiry about branch status; no question is asked now and no software-production object is being designed, changed or executed.",
+        "judgment_stance": "WORKING_ASSUMPTION",
+        "judgment_subject": "future branch status inquiry",
+        "judgment_proposition": "The Human may later ask about branch status; no repository or branch context is currently bound, so any such answer will depend on discovery at that time.",
+        "judgment_basis": [
+          "f6ae8257-39e5-4187-83b8-a038c756215e"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [
+        "Human signals that they may ask about branch status at a later time",
+        "No repository, branch or active Work is bound in the current basis"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ext-branch-status-ref",
+          "kind": "REFERENCE",
+          "values": [
+            "分支状态"
+          ],
+          "unit": null,
+          "source_record_id": "f6ae8257-39e5-4187-83b8-a038c756215e",
+          "source_text": "以后可能再问分支状态",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "CONTEXT",
+          "statement": "The Human may later ask about branch status; this is a forward-looking note, not a current request or Work.",
+          "source_record_ids": [
+            "f6ae8257-39e5-4187-83b8-a038c756215e"
+          ],
+          "confidence": 0.9,
+          "rationale": "The utterance contains a future possibility marker and no imperative or question aimed at immediate action.",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "CONTEXT_ADDITION",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "The Human says they may ask about branch status later",
+          "No repository or branch is currently bound in this interaction"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "Noted future branch-status inquiry; nothing pending now",
+        "design_intent_frame": null,
+        "recommended_next_action": "Take no action now; when the Human actually asks about branch status, check the real repository state and report what is known versus unknown.",
+        "concise_basis": "Stated only as a possible future question, and no repository or branch exists in the current basis, so there is nothing to inspect or change yet.",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:43e581f8-b143-4f47-b964-07ab443ad808",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "43e581f8-b143-4f47-b964-07ab443ad808",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "SEARCH_WEB",
+    "polarity": "positive",
+    "human_text": "请查阅网上关于 Python 版本的最新公开资料",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "人类明确要求联网查阅 Python 版本的最新公开资料，属于意图清晰、范围有界的检索动作，不涉及软件产品设计或变更。",
+        "judgment_stance": "FACT",
+        "judgment_subject": "Python 版本公开资料检索",
+        "judgment_proposition": "需要通过联网检索获取 Python 版本的最新公开资料",
+        "judgment_basis": [
+          "80cdc1b8-99ab-4672-886a-5c0b3ed521a6"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": true
+      },
+      "interpreted_motive": "获取 Python 版本相关的最新公开资料",
+      "desired_outcome": "得到 Python 版本的最新公开权威信息",
+      "candidate_context": [
+        "当前没有活跃的生产 Work",
+        "请求为联网检索公开资料，而非软件生产或仓库操作"
+      ],
+      "candidate_constraints": [
+        "资料须来自公开来源"
+      ],
+      "current_requests": [
+        "请查阅网上关于 Python 版本的最新公开资料"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "SEARCH_WEB",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "80cdc1b8-99ab-4672-886a-5c0b3ed521a6",
+          "source_text": "请查阅网上关于 Python 版本的最新公开资料",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.9
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "n1",
+          "kind": "REFERENCE",
+          "values": [
+            "Python 版本"
+          ],
+          "unit": null,
+          "source_record_id": "80cdc1b8-99ab-4672-886a-5c0b3ed521a6",
+          "source_text": "Python 版本的最新公开资料",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "f1",
+          "operation": "UPSERT",
+          "subject": "python.version",
+          "relation": "REFERENCE",
+          "value": "latest public information",
+          "unit": null,
+          "scope": "在线公开资料",
+          "qualifiers": {},
+          "authority": "SYSTEM_INFERRED",
+          "epistemic_status": "WORKING_ASSUMPTION",
+          "source_record_ids": [
+            "80cdc1b8-99ab-4672-886a-5c0b3ed521a6"
+          ],
+          "source_text": "Python 版本的最新公开资料",
+          "source_extraction_ids": [
+            "n1"
+          ],
+          "role_origin": "INFERRED",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "人类要求 Watt 联网查阅关于 Python 版本的最新公开资料",
+          "source_record_ids": [
+            "80cdc1b8-99ab-4672-886a-5c0b3ed521a6"
+          ],
+          "confidence": 0.92,
+          "rationale": "话语使用祈使式「请查阅」，并指明网上、最新、公开资料等检索条件",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [],
+        "current_objective": "查阅并汇整 Python 版本的最新公开资料",
+        "current_collaboration_focus": "联网检索 Python 版本最新公开信息",
+        "design_intent_frame": null,
+        "recommended_next_action": "直接检索并汇整 Python 版本的最新公开信息，至少覆盖当前最新稳定版本号、发布时间与支持周期，并标注来源与检索时间。",
+        "concise_basis": "请求指向明确对象（Python 版本）与明确来源范围（网上公开资料），属于可立即执行的有界检索，无需先确认额外决策。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:c6a90879-3850-4efd-808c-e386eaf08c8a",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "c6a90879-3850-4efd-808c-e386eaf08c8a",
+    "repair_count": 0,
+    "real_web_search": "BLOCKED_EXTERNAL",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "SEARCH_WEB",
+    "polarity": "positive",
+    "human_text": "上网找一下当前 Python 的版本信息",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "人类明确要求 Watt 上网查找当前 Python 的版本信息，属于可直接执行的受限检索动作，意图清晰、无需设计讨论。",
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": "python.version",
+        "judgment_proposition": "当前 Python 的版本信息需要联网检索确认，既有对话中没有任何已确认的版本事实。",
+        "judgment_basis": [],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": true
+      },
+      "interpreted_motive": "获取当前 Python 的版本信息",
+      "desired_outcome": "得到当前 Python 版本信息（例如当前稳定版本号及其来源）",
+      "candidate_context": [],
+      "candidate_constraints": [],
+      "current_requests": [
+        "上网查找当前 Python 的版本信息"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "SEARCH_WEB",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "0f806f24-91eb-4d56-869c-064471a5b950",
+          "source_text": "上网找一下当前 Python 的版本信息",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.92
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne-1",
+          "kind": "REFERENCE",
+          "values": [
+            "Python"
+          ],
+          "unit": null,
+          "source_record_id": "0f806f24-91eb-4d56-869c-064471a5b950",
+          "source_text": "Python",
+          "explicit_roles": [
+            null
+          ]
+        },
+        {
+          "extraction_id": "ne-2",
+          "kind": "SCOPE",
+          "values": [
+            "当前"
+          ],
+          "unit": null,
+          "source_record_id": "0f806f24-91eb-4d56-869c-064471a5b950",
+          "source_text": "当前",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "人类要求 Watt 联网检索当前 Python 的版本信息。",
+          "source_record_ids": [
+            "0f806f24-91eb-4d56-869c-064471a5b950"
+          ],
+          "confidence": 0.9,
+          "rationale": "“上网找一下”是明确的检索动作指令，检索对象为“当前 Python 的版本信息”。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [],
+        "current_objective": "取得当前 Python 的版本信息",
+        "current_collaboration_focus": "联网检索并汇报当前 Python 版本信息",
+        "design_intent_frame": null,
+        "recommended_next_action": "先以 Python 官方渠道（python.org 下载页与发布说明）为准检索当前稳定版本号，并同时标明检索时间，因为“当前”会随时间变化。",
+        "concise_basis": "这是唯一一句人类输入，明确要求联网查找版本信息；官方发布页比第三方博客更可靠，且版本号具有时效性，需要标注获取时间。",
+        "unresolved_human_decision": null,
+        "alternatives": [
+          {
+            "option": "只报告当前最新稳定版本号",
+            "trade_off": "最简洁、最常用，但不覆盖仍在使用旧版本分支的人可能关心的补丁版本情况。"
+          },
+          {
+            "option": "同时列出最新稳定版与官方仍在维护的各系列最新补丁版本",
+            "trade_off": "信息更全、对不同使用者更有用，但结果更长，需要区分“最新”与“仍在维护”。"
+          }
+        ],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:03fed6d3-d948-4223-9f5d-e3367c37324c",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "03fed6d3-d948-4223-9f5d-e3367c37324c",
+    "repair_count": 0,
+    "real_web_search": "BLOCKED_EXTERNAL",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "SEARCH_WEB",
+    "polarity": "negative",
+    "human_text": "不要检索网络",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "最新人类记录仅声明一项约束：不得检索网络（禁止使用网络搜索）。这是需要保留并适用于后续协作的显式限制，而非生产执行请求。",
+        "judgment_stance": "FACT",
+        "judgment_subject": "网络检索是否被允许",
+        "judgment_proposition": "本轮协作中不得使用网络检索。",
+        "judgment_basis": [
+          "de2ea9dd-e436-486f-a642-8984efa9b9b9"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [],
+      "candidate_constraints": [
+        "不得检索网络"
+      ],
+      "current_requests": [],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "nse-1",
+          "kind": "SCOPE",
+          "values": [
+            "网络"
+          ],
+          "unit": null,
+          "source_record_id": "de2ea9dd-e436-486f-a642-8984efa9b9b9",
+          "source_text": "不要检索网络",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "sf-1",
+          "operation": "UPSERT",
+          "subject": "web_search",
+          "relation": "BOUND",
+          "value": "prohibited",
+          "unit": null,
+          "scope": "current collaboration",
+          "qualifiers": {
+            "actor": "watt"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "de2ea9dd-e436-486f-a642-8984efa9b9b9"
+          ],
+          "source_text": "不要检索网络",
+          "source_extraction_ids": [
+            "nse-1"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONSTRAINT",
+          "statement": "人类明确禁止使用网络检索。",
+          "source_record_ids": [
+            "de2ea9dd-e436-486f-a642-8984efa9b9b9"
+          ],
+          "confidence": 0.95,
+          "rationale": "记录为直接的否定式指令，限制一种工具行为，而非请求执行某项操作。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "CONTEXT_ADDITION",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "当前没有进行中的工作或已提交的设计目标。"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "记录不检索网络的约束",
+        "design_intent_frame": null,
+        "recommended_next_action": "先说明你希望达成的目标或要构建的东西，我会在不使用网络检索的前提下推进。",
+        "concise_basis": "约束已记录，但尚未有目标或产品上下文可供推进，给出目标即可形成下一步工作。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST",
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:a88b41bd-969d-4d38-a11d-bc5d422da5e3",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "a88b41bd-969d-4d38-a11d-bc5d422da5e3",
+    "repair_count": 0,
+    "real_web_search": "BLOCKED_EXTERNAL",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "SEARCH_WEB",
+    "polarity": "negative",
+    "human_text": "网上资料可能不准，先聊聊",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXPLORE",
+        "design_collaboration_mode": null,
+        "rationale": "Human 说明网络资料可能不准，并提出先聊聊，属于开放讨论而非构建或修改请求。",
+        "judgment_stance": "PREFERENCE",
+        "judgment_subject": "是否以网络资料作为当前讨论的依据",
+        "judgment_proposition": "网络资料可能不准，先通过讨论澄清，而不是直接采信网上资料。",
+        "judgment_basis": [
+          "613700a6-788a-408f-b011-2a6f501f88ef"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": "在缺乏可靠资料的前提下，先通过对话澄清想法，而不是直接依赖网络资料推进。",
+      "desired_outcome": null,
+      "candidate_context": [
+        "Human 认为网上资料可能不准",
+        "Human 希望先聊聊，暂不进入产出"
+      ],
+      "candidate_constraints": [
+        "不应把网络检索结果当作可信依据直接采用，除非经过讨论或验证"
+      ],
+      "current_requests": [
+        "先聊聊，暂不需要产出或执行"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne-1",
+          "kind": "REFERENCE",
+          "values": [
+            "网上资料"
+          ],
+          "unit": null,
+          "source_record_id": "613700a6-788a-408f-b011-2a6f501f88ef",
+          "source_text": "网上资料",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "PREFERENCE",
+          "statement": "Human 倾向于先讨论来澄清认识，而不是以网络资料为准。",
+          "source_record_ids": [
+            "613700a6-788a-408f-b011-2a6f501f88ef"
+          ],
+          "confidence": 0.8,
+          "rationale": "原文直接表达了资料可信度顾虑与先聊的意愿。",
+          "clarification_required": false
+        },
+        {
+          "kind": "CONTEXT",
+          "statement": "当前话题尚未确定具体对象，处于开放讨论阶段。",
+          "source_record_ids": [
+            "613700a6-788a-408f-b011-2a6f501f88ef"
+          ],
+          "confidence": 0.6,
+          "rationale": "输入只有资料可信度顾虑与讨论意愿，未给出对象或目标。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "EXPLORE",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "Human 认为网上资料可能不准",
+          "Human 希望先聊聊"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "先通过讨论厘清想法的方向，而不是急于依赖外部资料",
+        "design_intent_frame": null,
+        "recommended_next_action": "先请你用自己的话讲讲想做的事：要解决谁的问题、做成什么样算满意；网络资料只作为后续可验证的参考，而不是现在的基础。",
+        "concise_basis": "没有对象、目标与约束的情况下，最有价值的下一步是拿到你自己的目标与判断标准，避免被可能不准的资料带偏。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY",
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:362e356b-b54e-4761-a503-9c5bc42ede2e",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "362e356b-b54e-4761-a503-9c5bc42ede2e",
+    "repair_count": 0,
+    "real_web_search": "BLOCKED_EXTERNAL",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "SEARCH_GITHUB",
+    "polarity": "positive",
+    "human_text": "到 GitHub 给我找几个任务调度库",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "人类明确要求到 GitHub 上查找若干个任务调度库，属于可执行的检索动作，而非设计或讨论。",
+        "judgment_stance": "FACT",
+        "judgment_subject": "github-task-scheduler-library-search",
+        "judgment_proposition": "该请求是一个指向 GitHub 的有界检索动作，范围足以直接开始检索，无需先确定语言或生态。",
+        "judgment_basis": [
+          "到 GitHub 给我找几个任务调度库"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": true
+      },
+      "interpreted_motive": "在 GitHub 上检索若干个任务调度库，作为后续选型的候选。",
+      "desired_outcome": "获得一组来自 GitHub 的任务调度库候选（含各自定位与基本特征）以供比较和取舍。",
+      "candidate_context": [
+        "当前无绑定的仓库、Work 或设计框架，这是进入任何生产步骤之前的检索请求。",
+        "任务调度库的具体语言、生态与运行环境尚未说明，可在检索结果中体现。"
+      ],
+      "candidate_constraints": [
+        "检索来源限定为 GitHub",
+        "期望得到多个（而非单个）候选库"
+      ],
+      "current_requests": [
+        "到 GitHub 给我找几个任务调度库"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "SEARCH_GITHUB",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "80d5ddc7-ecfe-40c0-8f7c-64294588a095",
+          "source_text": "到 GitHub 给我找几个任务调度库",
+          "target_branch": null,
+          "repository_source": "GitHub",
+          "confidence": 0.95
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "n1",
+          "kind": "REFERENCE",
+          "values": [
+            "GitHub"
+          ],
+          "unit": null,
+          "source_record_id": "80d5ddc7-ecfe-40c0-8f7c-64294588a095",
+          "source_text": "到 GitHub 给我找几个任务调度库",
+          "explicit_roles": [
+            null
+          ]
+        },
+        {
+          "extraction_id": "n2",
+          "kind": "QUANTITY",
+          "values": [
+            "几个"
+          ],
+          "unit": null,
+          "source_record_id": "80d5ddc7-ecfe-40c0-8f7c-64294588a095",
+          "source_text": "到 GitHub 给我找几个任务调度库",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "f1",
+          "operation": "UPSERT",
+          "subject": "library_search.source",
+          "relation": "EQUALITY",
+          "value": "GitHub",
+          "unit": null,
+          "scope": "task scheduling library search",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "80d5ddc7-ecfe-40c0-8f7c-64294588a095"
+          ],
+          "source_text": "到 GitHub 给我找几个任务调度库",
+          "source_extraction_ids": [
+            "n1"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "请求在 GitHub 上检索若干个任务调度库。",
+          "source_record_ids": [
+            "80d5ddc7-ecfe-40c0-8f7c-64294588a095"
+          ],
+          "confidence": 0.95,
+          "rationale": "该记录以祈使语气明确要求执行一次针对 GitHub 的检索动作。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "当前没有绑定的仓库或进行中的 Work。",
+          "请求的检索目标是 GitHub 上的任务调度库，且希望得到多个候选。"
+        ],
+        "current_objective": "在 GitHub 上找出若干任务调度库，作为后续选型的候选集合。",
+        "current_collaboration_focus": "GitHub 上任务调度库的检索与初步筛选",
+        "design_intent_frame": null,
+        "recommended_next_action": "直接在 GitHub 上做一次任务调度库检索，返回若干候选并逐条给出定位说明、主要调度模型、活跃度与许可证，便于你按语言生态快速取舍。",
+        "concise_basis": "请求是一个边界清晰的检索动作，缺少语言/生态限定不构成阻塞，可在结果里并列呈现不同生态的候选。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:a587c71a-75a4-4725-8b85-185d5089dd5b",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "a587c71a-75a4-4725-8b85-185d5089dd5b",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "SEARCH_GITHUB",
+    "polarity": "positive",
+    "human_text": "请检索 GitHub 上的开源任务队列项目",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "The Human explicitly asks Watt to search GitHub for open-source task-queue projects; this is a bounded, non-mutating action request rather than a design or question turn.",
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": null,
+        "judgment_proposition": null,
+        "judgment_basis": [],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": true
+      },
+      "interpreted_motive": "找到可用于后续选型的开源任务队列项目，先在 GitHub 上获得候选清单",
+      "desired_outcome": "获得 GitHub 上开源任务队列项目的检索结果与候选列表",
+      "candidate_context": [
+        "检索平台明确为 GitHub",
+        "检索对象为开源任务队列类项目",
+        "尚未说明该任务队列将服务于什么系统、语言或技术栈"
+      ],
+      "candidate_constraints": [
+        "检索范围限定在 GitHub",
+        "结果限定为开源项目",
+        "主题限定为任务队列（task queue）"
+      ],
+      "current_requests": [
+        "请检索 GitHub 上的开源任务队列项目"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "SEARCH_GITHUB",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "e7e590dc-4226-4bbc-9524-c0ca146a8e34",
+          "source_text": "请检索 GitHub 上的开源任务队列项目",
+          "target_branch": null,
+          "repository_source": "GitHub",
+          "confidence": 0.95
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "nsx-github-scope",
+          "kind": "SCOPE",
+          "values": [
+            "GitHub",
+            "开源任务队列项目"
+          ],
+          "unit": null,
+          "source_record_id": "e7e590dc-4226-4bbc-9524-c0ca146a8e34",
+          "source_text": "请检索 GitHub 上的开源任务队列项目",
+          "explicit_roles": [
+            null,
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "sf-github-search-scope",
+          "operation": "UPSERT",
+          "subject": "github_search.scope",
+          "relation": "SCOPE",
+          "value": [
+            "GitHub",
+            "开源任务队列项目"
+          ],
+          "unit": null,
+          "scope": "GitHub 开源任务队列检索",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "e7e590dc-4226-4bbc-9524-c0ca146a8e34"
+          ],
+          "source_text": "请检索 GitHub 上的开源任务队列项目",
+          "source_extraction_ids": [
+            "nsx-github-scope"
+          ],
+          "role_origin": "INFERRED",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "Human asks Watt to search GitHub for open-source task-queue projects.",
+          "source_record_ids": [
+            "e7e590dc-4226-4bbc-9524-c0ca146a8e34"
+          ],
+          "confidence": 0.95,
+          "rationale": "The utterance is an imperative directed at Watt with an explicit retrieval target and platform, with no repository binding or design authorization attached.",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "GitHub 检索属于只读获取行为，不产生外部提交、部署或账户操作",
+          "当前没有已存在的仓库绑定或活跃 Work"
+        ],
+        "current_objective": "在 GitHub 上检索开源任务队列项目并给出可用候选",
+        "current_collaboration_focus": "GitHub 开源任务队列项目的检索与候选梳理",
+        "design_intent_frame": null,
+        "recommended_next_action": "执行 GitHub 检索并返回一份候选短名单，每项标注语言、最近活跃时间、维护状态与典型集成方式，并优先列出仍活跃维护的项目",
+        "concise_basis": "目标是选型前的候选发现，维护活跃度与技术栈契合度通常比星标数更能决定后续可维护性，因此先按活跃度与生态给出可比清单",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST",
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:3695d564-6ca3-4aa7-b9a9-2977558cda09",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "3695d564-6ca3-4aa7-b9a9-2977558cda09",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "SEARCH_GITHUB",
+    "polarity": "negative",
+    "human_text": "我们以后可能参考 GitHub 项目",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXPLORE",
+        "design_collaboration_mode": null,
+        "rationale": "人类仅表示未来可能参考 GitHub 项目，未提出构建、修改或查询请求，属于可能性铺垫而非执行意图。",
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": "未来参考来源",
+        "judgment_proposition": "未来可能参考 GitHub 项目作为来源，但尚未指定具体项目或用途。",
+        "judgment_basis": [
+          "507b87cb-c721-40cc-b925-72b9d7dd148b"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [
+        "未来可能参考 GitHub 上的项目"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "未来可能参考 GitHub 项目作为参考来源（尚未指定具体项目或用途）"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ext-github-ref",
+          "kind": "REFERENCE",
+          "values": [
+            "GitHub 项目"
+          ],
+          "unit": null,
+          "source_record_id": "507b87cb-c721-40cc-b925-72b9d7dd148b",
+          "source_text": "GitHub 项目",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "fact-ref-github",
+          "operation": "UPSERT",
+          "subject": "reference.source",
+          "relation": "REFERENCE",
+          "value": "GitHub 项目",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {
+            "possibility": "possible",
+            "timing": "future"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "WORKING_ASSUMPTION",
+          "source_record_ids": [
+            "507b87cb-c721-40cc-b925-72b9d7dd148b"
+          ],
+          "source_text": "我们以后可能参考 GitHub 项目",
+          "source_extraction_ids": [
+            "ext-github-ref"
+          ],
+          "role_origin": "INFERRED",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONTEXT",
+          "statement": "人类提示未来可能参考 GitHub 项目，作为潜在来源上下文，未指定具体项目与用途。",
+          "source_record_ids": [
+            "507b87cb-c721-40cc-b925-72b9d7dd148b"
+          ],
+          "confidence": 0.8,
+          "rationale": "语句使用“以后可能”，为未来可能性陈述，不含具体请求或目标。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "CONTEXT_ADDITION",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "目前没有进行中的工作，也没有指定要参考的 GitHub 项目或用途。"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "记录未来可能参考 GitHub 项目这一来源意向",
+        "design_intent_frame": null,
+        "recommended_next_action": "等有具体产品目标时，指明想参考的那个 GitHub 项目以及想借鉴的部分（例如信息结构、页面布局或交互方式），这样可以给出更贴合的方案建议。",
+        "concise_basis": "当前只有“未来可能参考 GitHub 项目”的来源意向，缺少具体项目与用途，因此先保留为上下文，待目标明确后再推进。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:979a587e-d81f-48f3-a1d4-1a79464bd4e9",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "979a587e-d81f-48f3-a1d4-1a79464bd4e9",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "SEARCH_GITHUB",
+    "polarity": "negative",
+    "human_text": "别搜索 GitHub",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "人类输入是一条否定的行为约束（不得搜索 GitHub），既非执行请求也非问题；当前无活动 Work，只需记录并遵守该限制。",
+        "judgment_stance": "FACT",
+        "judgment_subject": "是否允许搜索 GitHub",
+        "judgment_proposition": "本次协作中不应执行 GitHub 搜索。",
+        "judgment_basis": [
+          "f5dc7b76-8f0d-4a75-92ac-9d9e05d1bbd4"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [],
+      "candidate_constraints": [
+        "不要搜索 GitHub"
+      ],
+      "current_requests": [],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "SEARCH_GITHUB",
+          "speech_act": "DISCUSSION",
+          "source_record_id": "f5dc7b76-8f0d-4a75-92ac-9d9e05d1bbd4",
+          "source_text": "别搜索 GitHub",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.6
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "nse-github-ref",
+          "kind": "REFERENCE",
+          "values": [
+            "GitHub"
+          ],
+          "unit": null,
+          "source_record_id": "f5dc7b76-8f0d-4a75-92ac-9d9e05d1bbd4",
+          "source_text": "别搜索 GitHub",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "sf-github-search-excluded",
+          "operation": "UPSERT",
+          "subject": "search_scope.github",
+          "relation": "SCOPE",
+          "value": "excluded",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "f5dc7b76-8f0d-4a75-92ac-9d9e05d1bbd4"
+          ],
+          "source_text": "别搜索 GitHub",
+          "source_extraction_ids": [
+            "nse-github-ref"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONSTRAINT",
+          "statement": "人类明确要求不进行 GitHub 搜索。",
+          "source_record_ids": [
+            "f5dc7b76-8f0d-4a75-92ac-9d9e05d1bbd4"
+          ],
+          "confidence": 0.95,
+          "rationale": "输入是否定祈使句，限定可用手段而非请求执行。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "CONTEXT_ADDITION",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "人类明确禁止搜索 GitHub"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": null,
+        "design_intent_frame": null,
+        "recommended_next_action": "保留该限制；待你说明要构建或修改的对象后，在不搜索 GitHub 的前提下推进。",
+        "concise_basis": "当前没有活动 Work，这条输入只建立了一条手段限制。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "PRESERVE_HUMAN_DECISION"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:e784e876-cbad-45a8-96dd-dafc96400c34",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "e784e876-cbad-45a8-96dd-dafc96400c34",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "REQUEST_PREVIEW",
+    "polarity": "positive",
+    "human_text": "把这个候选的预览打开给我看",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "The Human explicitly asks Watt to open and display the preview of a candidate object; this is a bounded action request, not a design or build request.",
+        "judgment_stance": "UNCERTAINTY",
+        "judgment_subject": "preview target candidate",
+        "judgment_proposition": "The candidate whose preview is requested cannot be resolved from the persisted basis because no antecedent or active Work context is present.",
+        "judgment_basis": [
+          "e63b5517-6e8c-498b-a72d-7aeb6f379f82"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": true
+      },
+      "interpreted_motive": "查看被引用候选的预览",
+      "desired_outcome": "该候选的预览被打开并呈现给 Human",
+      "candidate_context": [
+        "本次输入是唯一记录，没有任何 active Work、设计对象或先前候选定义",
+        "Human 使用指示词“这个候选”指代一个当前 basis 中未出现的对象"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "把这个候选的预览打开给我看"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "REQUEST_PREVIEW",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "e63b5517-6e8c-498b-a72d-7aeb6f379f82",
+          "source_text": "把这个候选的预览打开给我看",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.9
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ref-candidate",
+          "kind": "REFERENCE",
+          "values": [
+            "这个候选"
+          ],
+          "unit": null,
+          "source_record_id": "e63b5517-6e8c-498b-a72d-7aeb6f379f82",
+          "source_text": "这个候选",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "preview-target-ref",
+          "operation": "UPSERT",
+          "subject": "preview.target",
+          "relation": "REFERENCE",
+          "value": "这个候选",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "SYSTEM_INFERRED",
+          "epistemic_status": "UNRESOLVED",
+          "source_record_ids": [
+            "e63b5517-6e8c-498b-a72d-7aeb6f379f82"
+          ],
+          "source_text": "这个候选",
+          "source_extraction_ids": [
+            "ref-candidate"
+          ],
+          "role_origin": "INFERRED",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "Human 要求把某个候选的预览打开并展示。",
+          "source_record_ids": [
+            "e63b5517-6e8c-498b-a72d-7aeb6f379f82"
+          ],
+          "confidence": 0.9,
+          "rationale": "输入是明确的祈使句，请求打开预览这一具体动作。",
+          "clarification_required": true
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "当前 basis 中不存在 active Work 或设计上下文",
+          "“这个候选”在 basis 中没有可解析的先行指代对象"
+        ],
+        "current_objective": "打开并展示被引用候选的预览",
+        "current_collaboration_focus": "预览请求的候选对象指代",
+        "design_intent_frame": null,
+        "recommended_next_action": "依据当前界面/会话上下文打开该候选的预览；若无法确定所指候选，请 Human 指明是哪一个候选。",
+        "concise_basis": "这是对既有候选的查看动作，不改变任何产品设计或 Work 范围。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:bef9b3bd-6ce8-4b04-b819-25dc4ad050bf",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "bef9b3bd-6ce8-4b04-b819-25dc4ad050bf",
+    "repair_count": 1,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "REQUEST_PREVIEW",
+    "polarity": "positive",
+    "human_text": "我想现在查看这个候选的运行效果",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "Human asks to observe the running result of a candidate; this is a bounded preview request rather than a design-shaping or question turn.",
+        "judgment_stance": "WORKING_ASSUMPTION",
+        "judgment_subject": "candidate runtime preview",
+        "judgment_proposition": "Human wants to see the running effect of a candidate now, but no candidate is identified in the persisted basis.",
+        "judgment_basis": [
+          "6a0faa9b-c566-4f8b-add7-f3d834a8be22"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": "查看某个候选的实际运行效果",
+      "desired_outcome": "看到候选的运行效果",
+      "candidate_context": [
+        "当前没有已绑定的 Work 或已标识的候选产物"
+      ],
+      "candidate_constraints": [],
+      "current_requests": [
+        "现在查看这个候选的运行效果"
+      ],
+      "unresolved_material_questions": [
+        "需要指明要查看运行效果的具体候选（对应哪个产物或工作）"
+      ],
+      "action_candidates": [
+        {
+          "operation": "REQUEST_PREVIEW",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "6a0faa9b-c566-4f8b-add7-f3d834a8be22",
+          "source_text": "我想现在查看这个候选的运行效果",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.8
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne1",
+          "kind": "REFERENCE",
+          "values": [
+            "这个候选"
+          ],
+          "unit": null,
+          "source_record_id": "6a0faa9b-c566-4f8b-add7-f3d834a8be22",
+          "source_text": "这个候选",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "sf1",
+          "operation": "UPSERT",
+          "subject": "candidate",
+          "relation": "REFERENCE",
+          "value": "这个候选",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "UNRESOLVED",
+          "source_record_ids": [
+            "6a0faa9b-c566-4f8b-add7-f3d834a8be22"
+          ],
+          "source_text": "这个候选",
+          "source_extraction_ids": [
+            "ne1"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "Human requests to view the running effect of a candidate now.",
+          "source_record_ids": [
+            "6a0faa9b-c566-4f8b-add7-f3d834a8be22"
+          ],
+          "confidence": 0.9,
+          "rationale": "The utterance expresses a present desire to observe runtime behavior of an already-referenced candidate.",
+          "clarification_required": true
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "Human refers to an existing candidate in their context",
+          "No active Work or identified candidate exists in the persisted basis"
+        ],
+        "current_objective": "查看候选的运行效果",
+        "current_collaboration_focus": "确认要查看运行效果的具体候选并触发预览",
+        "design_intent_frame": null,
+        "recommended_next_action": "指明要查看运行效果的候选（对应哪个产物或工作），随后发起该候选的运行预览",
+        "concise_basis": "预览请求明确，但当前依据中没有绑定的候选，缺少可直接预览的对象。",
+        "unresolved_human_decision": "要查看运行效果的具体候选是哪一个",
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY",
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:0b132068-16ee-4173-bc18-7f9d9192ec44",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "0b132068-16ee-4173-bc18-7f9d9192ec44",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "REQUEST_PREVIEW",
+    "polarity": "negative",
+    "human_text": "以后再看预览",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "The Human only states a timing preference to defer looking at the preview; there is no design, build, change, or execution request to act on now.",
+        "judgment_stance": "PREFERENCE",
+        "judgment_subject": "预览查看时机",
+        "judgment_proposition": "预览查看推迟到以后进行，而不是当前。",
+        "judgment_basis": [
+          "78211a42-a432-49a8-9494-add64ac40914"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [
+        "Human 表示以后再看预览"
+      ],
+      "candidate_constraints": [
+        "预览查看安排在以后，而非当前这一步"
+      ],
+      "current_requests": [
+        "以后再看预览"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "REQUEST_PREVIEW",
+          "speech_act": "DISCUSSION",
+          "source_record_id": "78211a42-a432-49a8-9494-add64ac40914",
+          "source_text": "以后再看预览",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.3
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne1",
+          "kind": "SCOPE",
+          "values": [
+            "预览"
+          ],
+          "unit": null,
+          "source_record_id": "78211a42-a432-49a8-9494-add64ac40914",
+          "source_text": "以后再看预览",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "sf1",
+          "operation": "UPSERT",
+          "subject": "preview.viewing_time",
+          "relation": "PRECEDENCE",
+          "value": "later",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "SYSTEM_INFERRED",
+          "epistemic_status": "WORKING_ASSUMPTION",
+          "source_record_ids": [
+            "78211a42-a432-49a8-9494-add64ac40914"
+          ],
+          "source_text": "以后再看预览",
+          "source_extraction_ids": [
+            "ne1"
+          ],
+          "role_origin": "INFERRED",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "PREFERENCE",
+          "statement": "Human 希望把预览查看推迟到以后，而不是现在进行。",
+          "source_record_ids": [
+            "78211a42-a432-49a8-9494-add64ac40914"
+          ],
+          "confidence": 0.85,
+          "rationale": "The utterance 以后再看预览 states a timing preference about preview viewing.",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "CONTEXT_ADDITION",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "Human 表示预览留到以后再看"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "预览查看的时机安排",
+        "design_intent_frame": null,
+        "recommended_next_action": "先不做预览，等 Human 主动提出下一步需求或表示可以看预览时再推进",
+        "concise_basis": "当前只有一条推迟预览的时序偏好，没有新的产品目标或变更请求，因此无需立即产出预览或修改产物。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "PRESERVE_HUMAN_DECISION",
+          "RETURN_TO_CURRENT_FOCUS"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:049273bf-d863-43b4-ab03-a88298ef33a1",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "049273bf-d863-43b4-ab03-a88298ef33a1",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "REQUEST_PREVIEW",
+    "polarity": "negative",
+    "human_text": "预览是什么意思？",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "最新输入是询问“预览”一词的含义，属于边界清晰的知识性提问，不涉及创建、修改或执行任何生产对象。",
+        "judgment_stance": "FACT",
+        "judgment_subject": "preview.meaning",
+        "judgment_proposition": "预览是在正式产出或交付前先临时生成可查看效果的做法，本身不等于最终交付，也不产生外部发布或部署效果。",
+        "judgment_basis": [
+          "f97a5061-cce9-44b0-88e1-ba2e636e4158"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [],
+      "candidate_constraints": [],
+      "current_requests": [],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "QUESTION",
+          "statement": "人类询问“预览”是什么意思，希望得到该术语在软件生产语境下的解释。",
+          "source_record_ids": [
+            "f97a5061-cce9-44b0-88e1-ba2e636e4158"
+          ],
+          "confidence": 0.96,
+          "rationale": "输入为对“预览”含义的直接提问，未包含任何执行、创建或修改请求。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "DIRECT_QUESTION",
+        "direct_answer": "“预览”是指在正式产出或交付之前，先临时生成一份可查看的效果，让你确认它的外观、内容和交互是否符合预期。它只是供你检查的临时呈现，本身不等于最终成果，也不会自动带来发布、部署或对外发布的效果；如果预览中发现不合适，可以继续调整后再确定。",
+        "known_relevant_facts": [
+          "当前没有正在进行的工作，也没有绑定任何产品或代码库目标。",
+          "这次输入只是询问‘预览’一词的意思，没有要求生成预览或执行其他动作。"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "解释“预览”在软件生产语境下的含义",
+        "design_intent_frame": null,
+        "recommended_next_action": null,
+        "concise_basis": null,
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "ANSWER_FIRST"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:e36fcc12-1b30-434f-bae6-45e8ee5fd1e4",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "e36fcc12-1b30-434f-bae6-45e8ee5fd1e4",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "REQUEST_DELIVERY",
+    "polarity": "positive",
+    "human_text": "验收这个候选后把它交付到指定仓库",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "本轮明确要求先验收候选、随后将其交付到指定仓库，属于对既有候选产物的有界执行请求；候选标识与目标仓库未在本轮记录中给出，交付属于外部写入，仍需具体目的地与授权确认。",
+        "judgment_stance": "WORKING_ASSUMPTION",
+        "judgment_subject": "candidate-acceptance-then-delivery",
+        "judgment_proposition": "验收应先于交付，且交付对象应是刚刚通过验收的那个候选版本。",
+        "judgment_basis": [
+          "356dc9b9-bae4-4c85-b92a-b0a7375fbd61"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": "把一个已存在的候选产物先通过验收，再交付到事先指定的仓库。",
+      "desired_outcome": "候选通过验收结论后，交付到指定仓库。",
+      "candidate_context": [
+        "本轮仅有一条人类记录，没有保留的先前上下文，“这个候选”与“指定仓库”均指向未被本轮提供的既有对象。",
+        "当前没有进行中的 Work。",
+        "验收与交付的顺序由人类明确给出：先验收，后交付。"
+      ],
+      "candidate_constraints": [
+        "验收须在交付之前完成",
+        "交付目的地是“指定仓库”，即一个既定的仓库位置，而非任意新建位置"
+      ],
+      "current_requests": [
+        "验收这个候选",
+        "把它交付到指定仓库"
+      ],
+      "unresolved_material_questions": [
+        "“指定仓库”具体是哪一个仓库（本轮记录未给出仓库位置，而交付是对该仓库的外部写入）"
+      ],
+      "action_candidates": [
+        {
+          "operation": "OTHER",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "356dc9b9-bae4-4c85-b92a-b0a7375fbd61",
+          "source_text": "验收这个候选",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.72
+        },
+        {
+          "operation": "REQUEST_DELIVERY",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "356dc9b9-bae4-4c85-b92a-b0a7375fbd61",
+          "source_text": "把它交付到指定仓库",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.86
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ext-1",
+          "kind": "ORDERED_VALUES",
+          "values": [
+            "验收这个候选",
+            "把它交付到指定仓库"
+          ],
+          "unit": null,
+          "source_record_id": "356dc9b9-bae4-4c85-b92a-b0a7375fbd61",
+          "source_text": "验收这个候选后把它交付到指定仓库",
+          "explicit_roles": [
+            null,
+            null
+          ]
+        },
+        {
+          "extraction_id": "ext-2",
+          "kind": "REFERENCE",
+          "values": [
+            "这个候选",
+            "指定仓库"
+          ],
+          "unit": null,
+          "source_record_id": "356dc9b9-bae4-4c85-b92a-b0a7375fbd61",
+          "source_text": "验收这个候选后把它交付到指定仓库",
+          "explicit_roles": [
+            null,
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "fact-delivery-precedence",
+          "operation": "UPSERT",
+          "subject": "delivery.precedence",
+          "relation": "PRECEDENCE",
+          "value": "验收先于交付",
+          "unit": null,
+          "scope": "candidate-acceptance-then-delivery",
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "356dc9b9-bae4-4c85-b92a-b0a7375fbd61"
+          ],
+          "source_text": "验收这个候选后把它交付到指定仓库",
+          "source_extraction_ids": [
+            "ext-1"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        },
+        {
+          "candidate_id": "fact-delivery-target",
+          "operation": "UPSERT",
+          "subject": "delivery.target_repository",
+          "relation": "REFERENCE",
+          "value": "指定仓库",
+          "unit": null,
+          "scope": "candidate-acceptance-then-delivery",
+          "qualifiers": {
+            "resolved": false
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "UNRESOLVED",
+          "source_record_ids": [
+            "356dc9b9-bae4-4c85-b92a-b0a7375fbd61"
+          ],
+          "source_text": "指定仓库",
+          "source_extraction_ids": [
+            "ext-2"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        },
+        {
+          "candidate_id": "fact-candidate-subject",
+          "operation": "UPSERT",
+          "subject": "acceptance.subject",
+          "relation": "REFERENCE",
+          "value": "这个候选",
+          "unit": null,
+          "scope": "candidate-acceptance-then-delivery",
+          "qualifiers": {
+            "resolved": false
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "UNRESOLVED",
+          "source_record_ids": [
+            "356dc9b9-bae4-4c85-b92a-b0a7375fbd61"
+          ],
+          "source_text": "这个候选",
+          "source_extraction_ids": [
+            "ext-2"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "人类要求对该候选完成验收，并在通过后将其交付到指定仓库。",
+          "source_record_ids": [
+            "356dc9b9-bae4-4c85-b92a-b0a7375fbd61"
+          ],
+          "confidence": 0.87,
+          "rationale": "句子以两个连续的祈使动作表达，先验收后交付，并明确交付目的地是既定仓库。",
+          "clarification_required": true
+        },
+        {
+          "kind": "CONSTRAINT",
+          "statement": "交付必须发生在验收之后，交付对象为通过验收的那个候选版本。",
+          "source_record_ids": [
+            "356dc9b9-bae4-4c85-b92a-b0a7375fbd61"
+          ],
+          "confidence": 0.8,
+          "rationale": "“后”明确给出先后关系，且交付代词“它”指回被验收的候选。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "人类提出先验收候选、后交付到指定仓库",
+          "当前没有进行中的 Work",
+          "本轮未给出候选标识与目标仓库的具体位置",
+          "交付属于对目标仓库的外部写入"
+        ],
+        "current_objective": "先完成候选验收，再把它交付到指定仓库。",
+        "current_collaboration_focus": "确定“验收哪个候选”以及“交付到哪个仓库”，使验收结论与交付目的地一一对应。",
+        "design_intent_frame": null,
+        "recommended_next_action": "先把验收结论固定在被交付的那个候选版本上，再以该版本向指定仓库发起交付；请补充候选的标识和“指定仓库”的实际位置。",
+        "concise_basis": "验收与交付的对象必须一致，否则交付的可能是与验收结论不同的版本；仓库位置未知时无法完成外部写入。",
+        "unresolved_human_decision": "“指定仓库”具体是哪一个仓库，以及以哪个候选版本作为交付对象。",
+        "alternatives": [
+          {
+            "option": "先验收、后交付（人类所述顺序）",
+            "trade_off": "交付物有验收依据，但交付时间取决于验收结论何时给出。"
+          },
+          {
+            "option": "先交付、再补验收",
+            "trade_off": "交付更快，但仓库中会出现尚无验收结论的版本，风险更高。"
+          }
+        ],
+        "attention_level": "IMPORTANT",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "GUIDE_PROACTIVELY",
+          "EXPLAIN_TRADE_OFFS"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:b398ea34-d71d-4c3f-a325-a1287d715e5f",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "b398ea34-d71d-4c3f-a325-a1287d715e5f",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "REQUEST_DELIVERY",
+    "polarity": "positive",
+    "human_text": "我授权将已验收候选提交交付",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "EXECUTE",
+        "design_collaboration_mode": null,
+        "rationale": "人类明确授权将已验收候选提交交付，属可执行的边界动作请求，非设计或探索。",
+        "judgment_stance": "FACT",
+        "judgment_subject": "delivery authorization",
+        "judgment_proposition": "人类授权将已验收候选提交交付",
+        "judgment_basis": [
+          "a5ff11f1-4875-4faf-a20f-4d0cb145c637"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": true
+      },
+      "interpreted_motive": "将已验收的候选成果提交交付",
+      "desired_outcome": "已验收候选被提交交付",
+      "candidate_context": [
+        "当前无活跃 Work 上下文",
+        "授权对象为已验收候选"
+      ],
+      "candidate_constraints": [
+        "交付对象须为已验收候选"
+      ],
+      "current_requests": [
+        "授权将已验收候选提交交付"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [
+        {
+          "operation": "REQUEST_DELIVERY",
+          "speech_act": "EXPLICIT_REQUEST",
+          "source_record_id": "a5ff11f1-4875-4faf-a20f-4d0cb145c637",
+          "source_text": "我授权将已验收候选提交交付",
+          "target_branch": null,
+          "repository_source": null,
+          "confidence": 0.85
+        }
+      ],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "e1",
+          "kind": "REFERENCE",
+          "values": [
+            "已验收候选"
+          ],
+          "unit": null,
+          "source_record_id": "a5ff11f1-4875-4faf-a20f-4d0cb145c637",
+          "source_text": "已验收候选",
+          "explicit_roles": [
+            null
+          ]
+        },
+        {
+          "extraction_id": "e2",
+          "kind": "BEHAVIOR",
+          "values": [
+            "提交交付"
+          ],
+          "unit": null,
+          "source_record_id": "a5ff11f1-4875-4faf-a20f-4d0cb145c637",
+          "source_text": "提交交付",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "f1",
+          "operation": "UPSERT",
+          "subject": "delivery.candidate",
+          "relation": "REFERENCE",
+          "value": "已验收候选",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {},
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "a5ff11f1-4875-4faf-a20f-4d0cb145c637"
+          ],
+          "source_text": "已验收候选",
+          "source_extraction_ids": [
+            "e1"
+          ],
+          "role_origin": "EXPLICIT",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "REQUEST",
+          "statement": "人类授权将已验收候选提交交付",
+          "source_record_ids": [
+            "a5ff11f1-4875-4faf-a20f-4d0cb145c637"
+          ],
+          "confidence": 0.9,
+          "rationale": "语句为显式授权动作，指向交付提交。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "ACTION_REQUEST",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "人类授权提交已验收候选用于交付",
+          "当前无活跃 Work 上下文"
+        ],
+        "current_objective": "将已验收候选提交交付",
+        "current_collaboration_focus": "交付授权与执行",
+        "design_intent_frame": null,
+        "recommended_next_action": "按已验收候选推进交付提交，并确认交付目标与可用集成通道",
+        "concise_basis": "已获显式交付授权，可直接进入交付执行前的通道核实与提交。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "IMPORTANT",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh",
+        "policy_hints": [
+          "PRESERVE_HUMAN_DECISION",
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:6c9ea719-84aa-4612-9001-a65f2e299e2c",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "6c9ea719-84aa-4612-9001-a65f2e299e2c",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "REQUEST_DELIVERY",
+    "polarity": "negative",
+    "human_text": "交付这个词是什么意思？",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "Human asks for the meaning of the word “交付”; this is a bounded terminology question with no design, build or change intent.",
+        "judgment_stance": "FACT",
+        "judgment_subject": "“交付”一词的含义",
+        "judgment_proposition": "“交付”指把完成的成果正式交给接收方并使其可被使用或验收，而不只是自己完成后放在本地。",
+        "judgment_basis": [
+          "9fffa881-0012-40b0-8869-c551e345993a"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": "理解“交付”一词的含义",
+      "candidate_context": [],
+      "candidate_constraints": [],
+      "current_requests": [
+        "解释“交付”一词是什么意思"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [],
+      "semantic_fact_candidates": [],
+      "meanings": [
+        {
+          "kind": "QUESTION",
+          "statement": "Human 询问“交付”这个词的含义。",
+          "source_record_ids": [
+            "9fffa881-0012-40b0-8869-c551e345993a"
+          ],
+          "confidence": 0.97,
+          "rationale": "Latest Human record is a plain terminology question with no requested action or change.",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "DIRECT_QUESTION",
+        "direct_answer": "“交付”就是把已经完成的成果正式交给对方、并让对方可以接收和使用——在软件生产里，通常指把做好的东西（代码、页面、文档、可运行版本等）交给提出需求的一方，使其能够使用或验收。它和“做完了”不完全一样：重点在于“交出去、被接收”，而不只是成果停在你自己手里。",
+        "known_relevant_facts": [
+          "当前没有进行中的工作，也没有既定产品目标",
+          "Human 提出的唯一内容是询问“交付”一词的意思"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "解释“交付”一词的含义",
+        "design_intent_frame": null,
+        "recommended_next_action": "如果你其实是想交付某个具体东西，直接说明要交付的是什么（哪个产物、交给谁），我可以据此帮你确定交付的形态。",
+        "concise_basis": "该问题只涉及词义，不涉及任何产品对象或改动，因此先给出词义解释即可。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": true,
+        "detailed_explanation_requested": false,
+        "response_language": "zh-CN",
+        "policy_hints": [
+          "ANSWER_FIRST",
+          "GUIDE_PROACTIVELY"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:db770240-2a85-4b7b-bd4e-6be563972f36",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "db770240-2a85-4b7b-bd4e-6be563972f36",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  },
+  {
+    "operation": "REQUEST_DELIVERY",
+    "polarity": "negative",
+    "human_text": "暂时别交付",
+    "status": "PASS",
+    "semantic": {
+      "response_intent": {
+        "interaction_mode": "ANSWER",
+        "design_collaboration_mode": null,
+        "rationale": "Human 只给出一个暂缓交付的指令性偏好，没有提问、没有设计/构建意图，也没有活动 Work 可供变更；此处只需以偏好/约束确认并保留该状态。",
+        "judgment_stance": "PREFERENCE",
+        "judgment_subject": "delivery-hold",
+        "judgment_proposition": "Human 要求目前暂不进行交付",
+        "judgment_basis": [
+          "c638736b-0d01-4ee1-aa06-4608e49b521f"
+        ],
+        "judgment_basis_changed": false,
+        "judgment_change_reason": null,
+        "repeated_failure_signature": null,
+        "prior_strategy_failed": false,
+        "executable_context": false
+      },
+      "interpreted_motive": null,
+      "desired_outcome": null,
+      "candidate_context": [],
+      "candidate_constraints": [
+        "暂时不进行交付，保持不交付状态，直至 Human 另有指示"
+      ],
+      "current_requests": [
+        "暂时别交付"
+      ],
+      "unresolved_material_questions": [],
+      "action_candidates": [],
+      "neutral_semantic_extractions": [
+        {
+          "extraction_id": "ne1",
+          "kind": "BEHAVIOR",
+          "values": [
+            "交付"
+          ],
+          "unit": null,
+          "source_record_id": "c638736b-0d01-4ee1-aa06-4608e49b521f",
+          "source_text": "暂时别交付",
+          "explicit_roles": [
+            null
+          ]
+        }
+      ],
+      "semantic_fact_candidates": [
+        {
+          "candidate_id": "sf1",
+          "operation": "UPSERT",
+          "subject": "delivery.timing",
+          "relation": "BOUND",
+          "value": "hold",
+          "unit": null,
+          "scope": null,
+          "qualifiers": {
+            "temporal": "暂时",
+            "polarity": "negative"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "c638736b-0d01-4ee1-aa06-4608e49b521f"
+          ],
+          "source_text": "暂时别交付",
+          "source_extraction_ids": [
+            "ne1"
+          ],
+          "role_origin": "INFERRED",
+          "supersedes_fact_ids": []
+        }
+      ],
+      "meanings": [
+        {
+          "kind": "CONSTRAINT",
+          "statement": "Human 指示暂时不要交付。",
+          "source_record_ids": [
+            "c638736b-0d01-4ee1-aa06-4608e49b521f"
+          ],
+          "confidence": 0.9,
+          "rationale": "『别交付』是对交付动作的明确否定，并带『暂时』的时间限定。",
+          "clarification_required": false
+        }
+      ],
+      "focus_classification": null,
+      "impact_disposition": null,
+      "supporting_references": [],
+      "collaboration": {
+        "turn_intent": "CONTEXT_ADDITION",
+        "direct_answer": null,
+        "known_relevant_facts": [
+          "当前没有活动 Work",
+          "本回合只有一条 Human 记录：暂时别交付"
+        ],
+        "current_objective": null,
+        "current_collaboration_focus": "交付时机：暂缓交付",
+        "design_intent_frame": null,
+        "recommended_next_action": "先不触发任何交付动作；等 Human 指明要推进或交付的对象与范围后再继续。",
+        "concise_basis": "Human 明确要求暂时不交付，且当前没有活动 Work 需要调整，保持待命是代价最低且符合意图的选择。",
+        "unresolved_human_decision": null,
+        "alternatives": [],
+        "attention_level": "NORMAL",
+        "progression_guidance_appropriate": false,
+        "detailed_explanation_requested": false,
+        "response_language": "中文",
+        "policy_hints": [
+          "PRESERVE_HUMAN_DECISION"
+        ]
+      },
+      "provider_identity": "deepseek-responses:semantic:request:5b16a77d-95cd-411d-8fb5-432613fde51c",
+      "model_identity": "deepseek-flash"
+    },
+    "provider_request_id": "5b16a77d-95cd-411d-8fb5-432613fde51c",
+    "repair_count": 0,
+    "real_web_search": "NOT_REQUESTED",
+    "effects": "NONE: semantic port only; owner effects qualified separately"
+  }
+]
