@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from uuid import NAMESPACE_URL, uuid5
 
 from spg.domain.conversation import ConversationTurnIntent
@@ -11,7 +10,6 @@ from spg.domain.interaction import (
     InteractionAssessmentCandidate, InteractionRecord,
     WorkFocusClassification, WorkImpactDisposition,
 )
-from spg.domain.response_contract import production_intent_evidence
 from spg.domain.wic_intelligence import (
     GovernanceCandidateKind, InferenceDisposition, PatternSignal,
     ProgressiveSemanticStructure, QuestionDisposition, QuestionEvaluation,
@@ -20,45 +18,7 @@ from spg.domain.wic_intelligence import (
 )
 
 
-_HUMAN_AUTHORITY = re.compile(
-    r"(客户数据|个人信息|隐私|外部模型|删除|销毁|不可逆|迁移|付费|预算|权限|保留期|留存)"
-)
-_SAFE_REVERSIBLE = re.compile(r"(沿用现有规范|现有样式|文案|可撤销|可逆)")
-_CORRECTION = re.compile(r"(?:不对|不是|纠正|改口)[，,:：\s]*(.+)")
-_NEW_OBJECT = re.compile(r"(?:另外|还有).*(?:我想|我要).*(?:开发|做|创建).*(?:系统|平台|网站|应用)")
-_GENERAL_INFORMATION_QUESTION = re.compile(
-    r"(?:一般|通常|常见|是什么|有哪些|包括哪些|区别|为什么|怎么理解|需要哪些|"
-    r"\bwhat\b|\bwhich\b|\bwhy\b|\bhow\b|\busually\b|\btypically\b|\bcommon\b)",
-    re.IGNORECASE,
-)
-_WORK_INTENT = re.compile(
-    r"(?:我想|我要|我们想|我们要|请帮|帮我|开发|创建|搭建|建设|改造|实现|"
-    r"\bi want\b|\bwe want\b|\bhelp me\b|\bbuild\b|\bcreate\b|\bimplement\b)",
-    re.IGNORECASE,
-)
-_DEFERABLE_FEATURE_REFINEMENT = re.compile(
-    r"(?:feature|functionality|scope|requirement|what.+(?:add|change|implement)|"
-    r"功能|需求|范围|改什么|实现什么|字段|数据模型|接口|存储|保存在哪里|"
-    r"schema|data model|fields?|columns?|existing.+(?:api|storage))",
-    re.IGNORECASE,
-)
-_RUNTIME_PREREQUISITE = re.compile(r"(?:startup|runtime|deploy|启动|运行|部署)", re.IGNORECASE)
-_EXTERNAL_CREDENTIAL = re.compile(r"(?:secret|credential|api.?key|密钥|凭据)", re.IGNORECASE)
-_REPOSITORY_RUNTIME_FACT = re.compile(
-    r"(?:技术栈|启动命令|运行入口|启动入口|(?:本地|现有|仓库).{0,24}预览(?:方式|命令)|"
-    r"(?:repository|existing|local).{0,40}(?:stack|entrypoint|startup command|preview command|preview mechanism))",
-    re.IGNORECASE,
-)
-
 _QUESTION_COST_RANK = {"LOW": 2, "MEDIUM": 1, "HIGH": 0}
-
-
-def _correction_target(value: str) -> str:
-    reversed_object = re.search(r"不是.+?[，,]是(.+)", value)
-    if reversed_object:
-        return reversed_object.group(1).strip("。 ")
-    positive = re.split(r"[,，]不是", value, maxsplit=1)[0].strip()
-    return positive or value.strip("。 ")
 
 
 def _delta_id(basis: str, category: SemanticCategory, operation: SemanticDeltaOperation, value: str | None):
@@ -76,13 +36,6 @@ def _delta(category, operation, value, record, basis, *, prior=None, prior_asses
     )
 
 
-def _explicit_constraints(text: str) -> tuple[str, ...]:
-    if "新增约束" not in text and not any(term in text for term in ("必须", "不得", "不要")):
-        return ()
-    tail = text.split("：", 1)[-1]
-    return tuple(part.strip(" ，。") for part in re.split(r"[；;]", tail) if part.strip(" ，。"))
-
-
 def build_progressive_semantics(
     *,
     candidate: InteractionAssessmentCandidate,
@@ -92,131 +45,92 @@ def build_progressive_semantics(
     active_context: ActiveWorkInterpretationContext | None,
     focus: WorkFocusClassification | None,
     impact: WorkImpactDisposition | None,
+    semantic_ir=None,
 ) -> ProgressiveSemanticStructure:
-    latest = records[-1]; text = latest.content.strip(); signals: list[PatternSignal] = []
-    deltas: list[SemanticDelta] = []; contradictions: list[str] = []
+    from spg.domain.intent_realization import SemanticKind
+    latest = records[-1]
+    semantic_ir = semantic_ir or getattr(candidate, "semantic_intent", None)
+    items = () if semantic_ir is None else semantic_ir.items
+    signals: list[PatternSignal] = []
+    deltas: list[SemanticDelta] = []
+    contradictions: list[str] = []
     base_motive = active_context.work_revision.motive if active_context else (prior_assessment.interpreted_motive if prior_assessment else None)
     base_constraints = active_context.work_revision.constraints if active_context else (prior_assessment.candidate_constraints if prior_assessment else ())
     base_facts = active_context.work_revision.context_facts if active_context else (prior_assessment.candidate_context if prior_assessment else ())
-    # Challenging Watt's judgment is not a correction of the Human's Motive.
-    # Preserve the semantic distinction before the legacy lexical fallback;
-    # e.g. a trailing "不对。" must not manufacture an empty Motive supersession.
-    disagreement = candidate.turn_intent is ConversationTurnIntent.DISAGREEMENT
-    working_motive = base_motive if disagreement and base_motive else candidate.interpreted_motive
-    correction = None if disagreement else _CORRECTION.search(text)
-    explicit = correction.group(1).strip("。 ") if correction else None
-    if explicit:
+    correction = next((item for item in items if item.kind is SemanticKind.CORRECTION
+        and any(source.origin.value in {"HUMAN_EXPLICIT", "HUMAN_CORRECTION"} for source in item.provenance)), None)
+    working_motive = candidate.interpreted_motive or base_motive
+    if correction is not None:
+        working_motive = correction.statement
+    if candidate.turn_intent is ConversationTurnIntent.DISAGREEMENT:
+        working_motive = base_motive or working_motive
+    if correction:
         signals.append(PatternSignal.EXPLICIT_CORRECTION)
-        working_motive = _correction_target(explicit)
-        deltas.append(_delta(
-            SemanticCategory.MOTIVE, SemanticDeltaOperation.SUPERSEDED,
-            working_motive, latest, basis_fingerprint, prior=base_motive,
-            prior_assessment=prior_assessment,
-            rationale="The latest Human Turn explicitly corrects the prior interpretation.",
-        ))
-    elif working_motive and working_motive != base_motive:
-        deltas.append(_delta(
-            SemanticCategory.MOTIVE,
+    if working_motive and working_motive != base_motive:
+        deltas.append(_delta(SemanticCategory.MOTIVE,
+            SemanticDeltaOperation.SUPERSEDED if correction else
             SemanticDeltaOperation.ADDED if base_motive is None else SemanticDeltaOperation.REVISED,
             working_motive, latest, basis_fingerprint, prior=base_motive,
-            prior_assessment=prior_assessment,
-            rationale="Deep WIC proposed a Motive candidate on the current exact basis.",
-        ))
-
-    explicit_constraints = _explicit_constraints(text)
+            prior_assessment=prior_assessment, rationale="Consume the governed IRK meaning on the exact current basis."))
+    explicit_constraints = tuple(item.statement for item in items if item.kind is SemanticKind.CONSTRAINT)
     if explicit_constraints:
         signals.append(PatternSignal.CONSTRAINT_ADDITION)
     constraints = tuple(dict.fromkeys((*base_constraints, *candidate.candidate_constraints, *explicit_constraints)))
     for value in constraints:
         if value not in base_constraints:
-            deltas.append(_delta(
-                SemanticCategory.CONSTRAINT, SemanticDeltaOperation.ADDED, value,
-                latest, basis_fingerprint,
-                rationale="Constraint is explicit in the Human Turn or current candidate.",
-            ))
-
-    if re.search(r"把.+(?:改成|改为)", text): signals.append(PatternSignal.BOUNDED_CHANGE)
-    if text.endswith(("?", "？")): signals.append(PatternSignal.DIRECT_QUESTION)
-    if "建议" in text: signals.append(PatternSignal.RECOMMENDATION_REQUEST)
-    if _NEW_OBJECT.search(text): signals.append(PatternSignal.NEW_LONG_LIVED_OBJECT)
-    production_evidence = production_intent_evidence(text)
-    if production_evidence.production_request:
+            deltas.append(_delta(SemanticCategory.CONSTRAINT, SemanticDeltaOperation.ADDED, value,
+                latest, basis_fingerprint, rationale="IRK-governed constraint; no downstream prose interpretation."))
+    production = tuple(item.production for item in items if item.production is not None and item.production.current)
+    if production:
         signals.append(PatternSignal.PRODUCTION_REQUEST)
-    if production_evidence.repository_relevant:
+    if any(goal.bounded_change for goal in production):
+        signals.append(PatternSignal.BOUNDED_CHANGE)
+    if semantic_ir is not None and semantic_ir.repository_source:
         signals.append(PatternSignal.REPOSITORY_SOURCE)
-
-    human_owned = bool(_HUMAN_AUTHORITY.search(text))
-    safe_inference = bool(_SAFE_REVERSIBLE.search(text)) and not human_owned
-    decisions: list[str] = []
+    if any(item.kind in {SemanticKind.QUESTION, SemanticKind.ANALYSIS, SemanticKind.STATUS_QUERY} for item in items):
+        signals.append(PatternSignal.DIRECT_QUESTION)
+    if focus is WorkFocusClassification.UNRELATED_NEW_DEMAND:
+        signals.append(PatternSignal.NEW_LONG_LIVED_OBJECT)
+    from spg.application.intent_realization import current_step_semantic_items
+    current_items = current_step_semantic_items(semantic_ir)
+    human_owned = any(item.requires_human for item in current_items)
+    # Reversibility never derives authority from a lexical phrase.
+    safe_inference = bool(semantic_ir and any(q.safe_reversible_assumption
+        for q in semantic_ir.questions)) and not human_owned
+    decisions = [item.statement for item in current_items if item.requires_human]
     if human_owned:
         signals.append(PatternSignal.HIGH_IMPACT_AMBIGUITY)
-        decisions.append("Human must decide the material privacy, authority, cost, destructive, or irreversible boundary.")
-        deltas.append(_delta(
-            SemanticCategory.HUMAN_DECISION, SemanticDeltaOperation.ADDED,
-            decisions[0], latest, basis_fingerprint,
-            authority=SemanticAuthority.HUMAN_OWNED,
-            rationale="Governance-critical policy reserves this decision for the Human.",
-        ))
-
-    lower_facts = " ".join(base_facts).casefold()
-    if "mysql" in text.casefold() and "postgresql" in lower_facts:
-        signals.append(PatternSignal.BROWNFIELD_REALITY_CONFLICT)
-        contradictions.append("Human premise says MySQL; governed repository Reality says PostgreSQL.")
-        deltas.append(_delta(
-            SemanticCategory.FACT, SemanticDeltaOperation.SUPERSEDED,
-            "Current persistence uses PostgreSQL.", latest, basis_fingerprint,
-            prior="Current persistence uses MySQL.",
-            authority=SemanticAuthority.GOVERNED_REALITY,
-            rationale="Repository Reality corrects a factual premise without changing Human Motive.",
-        ))
-
+        for decision in decisions:
+            deltas.append(_delta(SemanticCategory.HUMAN_DECISION, SemanticDeltaOperation.ADDED,
+                decision, latest, basis_fingerprint, authority=SemanticAuthority.HUMAN_OWNED,
+                rationale="The governed semantic item retains an unresolved Human-owned decision."))
     questions: list[QuestionEvaluation] = []
-    if human_owned:
-        q = "哪些数据可以外发，以及权限和保留期分别由谁批准？" if "客户数据" in text else "请确认这项高影响决定的权限和边界。"
-        questions.append(QuestionEvaluation(
-            question=q, affected_dimensions=("SAFETY_PRIVACY", "AUTHORITY"),
-            answer_already_available=False, safe_reversible_assumption_available=False,
-            watt_authorized_to_choose=False, blocks_next_governed_step=True,
-            cognitive_cost="MEDIUM", decision_value=100,
-            disposition=QuestionDisposition.DEFER_UNTIL_RELEVANT,
-            rationale="The answer changes a Human-owned high-impact boundary.",
-        ))
-    for question in candidate.unresolved_material_questions:
-        defer_for_repository_preparation = bool(
-            production_evidence.production_request
-            and production_evidence.repository_relevant
-            and not human_owned
-            and (
-                _DEFERABLE_FEATURE_REFINEMENT.search(question)
-                or (active_context is None and _REPOSITORY_RUNTIME_FACT.search(question))
-                or (active_context is None
-                    and (_RUNTIME_PREREQUISITE.search(question) or _RUNTIME_PREREQUISITE.search(text))
-                    and _EXTERNAL_CREDENTIAL.search(question)
-                    and not re.search(r"(?:repository|git|仓库).*(?:access|auth|private|权限|授权|私有)|"
-                        r"(?:access|auth|private|权限|授权|私有).*(?:repository|git|仓库)", question, re.IGNORECASE))
-            )
-        )
-        questions.append(QuestionEvaluation(
-            question=question, affected_dimensions=("SCOPE",),
-            answer_already_available=False,
-            safe_reversible_assumption_available=safe_inference,
-            watt_authorized_to_choose=safe_inference,
-            blocks_next_governed_step=(
-                not safe_inference and not defer_for_repository_preparation
-            ),
-            cognitive_cost="LOW", decision_value=20 if safe_inference else 70,
-            disposition=(
-                QuestionDisposition.INFER_REVERSIBLY
-                if safe_inference
-                else QuestionDisposition.DEFER_UNTIL_RELEVANT
-            ),
-            rationale=(
-                "Repository discovery can proceed before feature refinement; the "
-                "question remains explicit but does not block Work formation."
-                if defer_for_repository_preparation
-                else "Question policy ranks unresolved decisions by decision impact and cognitive cost."
-            ),
-        ))
+    typed_questions = {} if semantic_ir is None else {q.question: q for q in semantic_ir.questions}
+    for question in tuple(dict.fromkeys((*candidate.unresolved_material_questions,
+            *typed_questions, *decisions))):
+        typed = typed_questions.get(question)
+        reversible = bool(typed and typed.safe_reversible_assumption) and not human_owned
+        blocking = True if typed is None else typed.blocks_current_step and not reversible
+        human_decision = question in decisions or bool(typed and typed.requires_human)
+        questions.append(QuestionEvaluation(question=question, affected_dimensions=("SCOPE", "AUTHORITY"),
+            answer_already_available=False, safe_reversible_assumption_available=reversible,
+            watt_authorized_to_choose=reversible, blocks_next_governed_step=blocking,
+            cognitive_cost="LOW", decision_value=100 if human_decision else 70 if typed is None else typed.decision_value,
+            disposition=QuestionDisposition.INFER_REVERSIBLY if reversible else QuestionDisposition.DEFER_UNTIL_RELEVANT,
+            rationale="Consume the compiler's structured question boundary; inference never grants operational authority."))
+    for item in items:
+        if item.kind is SemanticKind.CORRECTION and any(source.origin.value == "REPOSITORY_OBSERVED" for source in item.provenance):
+            contradictions.append(item.statement)
+            signals.append(PatternSignal.BROWNFIELD_REALITY_CONFLICT)
+            if item.observed_facts:
+                value = "; ".join(f"{key}: {claim.value}" for key, claim in item.observed_facts.items())
+                deltas.append(_delta(SemanticCategory.FACT, SemanticDeltaOperation.SUPERSEDED,
+                    value, latest, basis_fingerprint, authority=SemanticAuthority.GOVERNED_REALITY,
+                    rationale="IRK validated every structured fact against the exact referenced owner observation."))
+            else:
+                deltas.append(_delta(SemanticCategory.FACT, SemanticDeltaOperation.SUPERSEDED,
+                    item.statement, latest, basis_fingerprint, authority=SemanticAuthority.ADVISORY,
+                    rationale="Compiler wording alone does not replace owner-observed facts."))
     askable = [
         (index, item)
         for index, item in enumerate(questions)
@@ -247,13 +161,10 @@ def build_progressive_semantics(
     )
     unresolved = tuple(dict.fromkeys((*decisions, *((selected,) if selected else ()))))
 
-    conversation_only = (
-        active_context is None
-        and prior_assessment is None
-        and PatternSignal.DIRECT_QUESTION in signals
-        and bool(_GENERAL_INFORMATION_QUESTION.search(text))
-        and not bool(_WORK_INTENT.search(text))
-    )
+    conversation_only = active_context is None and not production and bool(items) and all(
+        item.kind in {SemanticKind.QUESTION, SemanticKind.ANALYSIS, SemanticKind.STATUS_QUERY,
+            SemanticKind.FACT, SemanticKind.CONSTRAINT, SemanticKind.OPERATIONAL_ACTION}
+        for item in items)
     if PatternSignal.NEW_LONG_LIVED_OBJECT in signals:
         governance = GovernanceCandidateKind.NEW_MOTIVE_CANDIDATE
     elif human_owned:

@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "corpus_version": "irk-developer-v1",
+  "purpose": "Developer metamorphic corpus, not production phrase rules",
+  "cases": [
+    {
+      "id": "DEV-001",
+      "group": "branch-positive",
+      "text": "切个新分支：feat_feedback",
+      "context": [],
+      "expected_operations": [
+        "CREATE_AND_SWITCH_BRANCH"
+      ],
+      "expected_branch": "feat_feedback",
+      "current_production": false
+    },
+    {
+      "id": "DEV-002",
+      "group": "branch-positive",
+      "text": "从当前版本建立 feat_feedback 并切过去",
+      "context": [],
+      "expected_operations": [
+        "CREATE_AND_SWITCH_BRANCH"
+      ],
+      "expected_branch": "feat_feedback",
+      "current_production": false
+    },
+    {
+      "id": "DEV-003",
+      "group": "branch-positive",
+      "text": "new branch feat_feedback, checkout it please",
+      "context": [],
+      "expected_operations": [
+        "CREATE_AND_SWITCH_BRANCH"
+      ],
+      "expected_branch": "feat_feedback",
+      "current_production": false
+    },
+    {
+      "id": "DEV-004",
+      "group": "branch-positive",
+      "text": "创建并切换到 feat_feedback",
+      "context": [],
+      "expected_operations": [
+        "CREATE_AND_SWITCH_BRANCH"
+      ],
+      "expected_branch": "feat_feedback",
+      "current_production": false
+    },
+    {
+      "id": "DEV-005",
+      "group": "branch-positive",
+      "text": "给我开一条 feat_feedback 开发线，当前工作转到那里",
+      "context": [],
+      "expected_operations": [
+        "CREATE_AND_SWITCH_BRANCH"
+      ],
+      "expected_branch": "feat_feedback",
+      "current_production": false
+    },
+    {
+      "id": "DEV-006",
+      "group": "branch-distinction",
+      "text": "只新建 feat_feedback，不要改变当前分支",
+      "context": [],
+      "expected_operations": [
+        "CREATE_BRANCH"
+      ],
+      "expected_branch": "feat_feedback",
+      "current_production": false
+    },
+    {
+      "id": "DEV-007",
+      "group": "branch-distinction",
+      "text": "feat_existing 已经存在，切过去，不要创建新的",
+      "context": [],
+      "expected_operations": [
+        "SWITCH_BRANCH"
+      ],
+      "expected_branch": "feat_existing",
+      "current_production": false
+    },
+    {
+      "id": "DEV-008",
+      "group": "status",
+      "text": "现在我在哪个分支？",
+      "context": [],
+      "expected_operations": [
+        "QUERY_CURRENT_BRANCH"
+      ],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-009",
+      "group": "hard-negative",
+      "text": "不要创建 feat_feedback",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-010",
+      "group": "hard-negative",
+      "text": "文档里写着“切个新分支 feat_feedback”，解释下",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-011",
+      "group": "hard-negative",
+      "text": "能创建分支吗？",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-012",
+      "group": "hard-negative",
+      "text": "如果评审通过了才切 feat_feedback",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-013",
+      "group": "hard-negative",
+      "text": "feat_feedback 可能以后会建",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-014",
+      "group": "hard-negative",
+      "text": "我是在举例：创建并切换 feat_feedback",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-015",
+      "group": "hard-negative",
+      "text": "先别切，解释一下 checkout",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-016",
+      "group": "hard-negative",
+      "text": "这次只讨论怎样创建 feat_feedback",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-017",
+      "group": "search-negative",
+      "text": "不要搜索 GitHub，直接解释事件循环的原理",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-018",
+      "group": "search-negative",
+      "text": "别去 GitHub 查了，从原理说说就行",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-019",
+      "group": "search-negative",
+      "text": "GitHub search is unnecessary; explain locally",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-020",
+      "group": "search-negative",
+      "text": "“搜索 GitHub”是例子，别真的执行",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-021",
+      "group": "search-negative",
+      "text": "我想知道你是否能搜索 Web？",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-022",
+      "group": "search-positive",
+      "text": "搜索 GitHub 的成熟表单校验库",
+      "context": [],
+      "expected_operations": [
+        "SEARCH_GITHUB"
+      ],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-023",
+      "group": "search-positive",
+      "text": "查一下 Web 上关于表单验证的资料",
+      "context": [],
+      "expected_operations": [
+        "SEARCH_WEB"
+      ],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-024",
+      "group": "production-positive",
+      "text": "我想做个用户资料收集页面",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": true
+    },
+    {
+      "id": "DEV-025",
+      "group": "production-positive",
+      "text": "给网站增加用户反馈",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": true
+    },
+    {
+      "id": "DEV-026",
+      "group": "production-positive",
+      "text": "修复取消按钮点了没反应的问题",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": true
+    },
+    {
+      "id": "DEV-027",
+      "group": "production-positive",
+      "text": "增加客户信息录入和管理能力",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": true
+    },
+    {
+      "id": "DEV-028",
+      "group": "production-positive",
+      "text": "在用户中心加入资料编辑",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": true
+    },
+    {
+      "id": "DEV-029",
+      "group": "production-positive",
+      "text": "给后台加一个订单管理页",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": true
+    },
+    {
+      "id": "DEV-030",
+      "group": "production-positive",
+      "text": "做一个简单的业务概览",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": true
+    },
+    {
+      "id": "DEV-031",
+      "group": "production-positive",
+      "text": "增加一个关于我们页面",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": true
+    },
+    {
+      "id": "DEV-032",
+      "group": "production-negative",
+      "text": "以后也许做个用户收集表单",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-033",
+      "group": "production-negative",
+      "text": "用户资料页应该如何设计？",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-034",
+      "group": "production-negative",
+      "text": "解释为什么取消按钮可能失效",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-035",
+      "group": "production-negative",
+      "text": "假如有订单管理模块会怎样？",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-036",
+      "group": "mixed",
+      "text": "创建并切换 feat_feedback，先不要推送；然后解释当前分支和远程分支的区别",
+      "context": [],
+      "expected_operations": [
+        "CREATE_AND_SWITCH_BRANCH"
+      ],
+      "expected_branch": "feat_feedback",
+      "current_production": false
+    },
+    {
+      "id": "DEV-037",
+      "group": "mixed",
+      "text": "把 https://github.com/acme/irk-fixture.git 拉下来；改什么我稍后再说",
+      "context": [],
+      "expected_operations": [
+        "ACQUIRE_REPOSITORY"
+      ],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-038",
+      "group": "mixed",
+      "text": "给我做一个反馈表单，完成后要可查看预览；推送另等我授权",
+      "context": [],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": true
+    },
+    {
+      "id": "DEV-039",
+      "group": "context",
+      "text": "那就按刚才说的建一个，并切过去",
+      "context": [
+        "新的分支名称是 feat_feedback，暂时先讨论。"
+      ],
+      "expected_operations": [
+        "CREATE_AND_SWITCH_BRANCH"
+      ],
+      "expected_branch": "feat_feedback",
+      "current_production": false
+    },
+    {
+      "id": "DEV-040",
+      "group": "context",
+      "text": "不对，不要搜了，解释原理就行",
+      "context": [
+        "我们讨论过搜索 GitHub 的表单实现。"
+      ],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    },
+    {
+      "id": "DEV-041",
+      "group": "context",
+      "text": "先别推，我再看看",
+      "context": [
+        "我刚刚查看了一个 Candidate 预览。"
+      ],
+      "expected_operations": [],
+      "expected_branch": null,
+      "current_production": false
+    }
+  ]
+}

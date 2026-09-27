@@ -223,93 +223,42 @@ class GovernedExternalResearch:
         self.model = model
         self.budget = budget or SearchBudget()
 
-    def requests_for_turn(self, text: str, assessment_response: str, *, action_candidates=None) -> tuple[SearchRequest, ...]:
-        if action_candidates is not None:
-            from spg.domain.interaction_actions import CanonicalOperation as O, ActionSpeechAct as S
-            kinds = {O.SEARCH_WEB: SearchIntent.SEARCH_WEB,
-                O.SEARCH_GITHUB: SearchIntent.SEARCH_GITHUB_REPOSITORIES}
-            explicit = tuple(dict.fromkeys(kinds[item.operation]
-                for item in action_candidates if item.operation in kinds
-                and item.speech_act in {S.EXPLICIT_REQUEST, S.READ_ONLY_QUERY}
-                and item.confidence >= .8))
-            if explicit:
-                decision = self._model_decision(text, assessment_response, explicit=True)
-                query = decision.query if decision is not None and decision.needed else _fallback_query(text)
-                return tuple(SearchRequest(intent=kind, query=query,
-                    reason="Current Human semantic request for public external retrieval",
-                    origin="HUMAN_EXPLICIT") for kind in explicit)
-            # A recorded semantic decision is authoritative, including an empty
-            # action set after withdrawal. Do not reinterpret it as an explicit
-            # request through the legacy keyword or information-gap route.
-            return ()
-        if production_intent_evidence(text).production_request and not _SEARCH_VERB.search(text):
-            return ()
-        url_match = _PUBLIC_URL.search(text)
-        if url_match is not None and _FETCH_VERB.search(text):
-            url = url_match.group(0).rstrip(".,;:!?)]}，。；：！？")
-            host = urlsplit(url).hostname
-            return (SearchRequest(
-                intent=(SearchIntent.FETCH_GITHUB_RESOURCE if host == "github.com"
-                        else SearchIntent.FETCH_WEB_RESOURCE),
-                query=url, reason="Human explicitly requested public resource inspection",
-                origin="HUMAN_EXPLICIT",
-            ),)
-        explicit = explicit_search_intents(text)
-        if not explicit and not potential_external_research(text):
-            return ()
-        decision = self._model_decision(text, assessment_response, explicit=bool(explicit))
-        if explicit:
-            kinds = explicit
-            origin = "HUMAN_EXPLICIT"
-        elif decision is not None and decision.needed:
-            kinds = tuple(
-                SearchIntent.SEARCH_GITHUB_REPOSITORIES if item == "GITHUB"
-                else SearchIntent.SEARCH_WEB
-                for item in decision.sources if item in {"GITHUB", "WEB"}
-            )
-            origin = "MODEL_INFORMATION_GAP"
-        else:
-            return ()
-        query = decision.query if decision is not None and decision.needed else _fallback_query(text)
-        reason = (
-            "Human explicitly requested public external retrieval"
-            if explicit else decision.information_gap
-        )
-        return tuple(SearchRequest(intent=kind, query=query, reason=reason, origin=origin)
-                     for kind in dict.fromkeys(kinds))
-
-    def _model_decision(self, text: str, assessment_response: str, *, explicit: bool) -> _SearchDecision | None:
-        if self.model is None:
-            return None
-        try:
-            result = self.model.generate(
-                purpose=ModelPurpose.EXTERNAL_RESEARCH,
-                instructions=(
-                    "Identify a genuine information gap requiring public external retrieval. "
-                    "For explicit search, needed must be true and translate the technical topic "
-                    "into concise search keywords, preferably English for GitHub. "
-                    "For an implicit request, search only when current external facts are needed; "
-                    "do not search merely because the topic is technical. Sources may be GITHUB, WEB. "
-                    "Return the exact JSON schema. No tool calls or factual search claims."
-                ),
-                input_text=json.dumps({
-                    "human": text[:1000], "wic_assessment": assessment_response[:1200],
-                    "explicit_search": explicit,
-                }, ensure_ascii=False),
-                output_schema=_DECISION_SCHEMA,
-            )
-            return _SearchDecision.model_validate_json(result.output_text)
-        except (ValueError, ValidationError, RuntimeError):
-            return None
+    def requests_for_turn(self, text: str = "", assessment_response: str = "", *,
+            semantic_ir=None, action_candidates=None) -> tuple[SearchRequest, ...]:
+        """Search consumes IRK arguments; Human prose is never routed here."""
+        from spg.application.intent_realization import executable_semantic_actions
+        from spg.domain.interaction_actions import CanonicalOperation as O
+        kinds = {O.SEARCH_WEB: SearchIntent.SEARCH_WEB,
+            O.SEARCH_GITHUB: SearchIntent.SEARCH_GITHUB_REPOSITORIES,
+            O.FETCH_PUBLIC_RESOURCE: SearchIntent.INSPECT_SEARCH_RESULT}
+        requests = []
+        for item in executable_semantic_actions(semantic_ir, operations=set(kinds)):
+            query = item.action.arguments.get("query") or item.action.arguments.get("url")
+            if query is None:
+                continue
+            operation = O(item.action.operation)
+            kind = kinds[operation]
+            subtype = item.action.arguments.get("search_kind")
+            if operation is O.SEARCH_GITHUB and subtype is not None:
+                proposed = SearchIntent(subtype.value)
+                if proposed not in {SearchIntent.SEARCH_GITHUB_REPOSITORIES,
+                        SearchIntent.SEARCH_GITHUB_CODE, SearchIntent.SEARCH_GITHUB_ISSUES}:
+                    continue
+                kind = proposed
+            if operation is O.FETCH_PUBLIC_RESOURCE:
+                kind = SearchIntent.FETCH_GITHUB_RESOURCE if urlsplit(query.value).hostname == "github.com" else SearchIntent.FETCH_WEB_RESOURCE
+            requests.append(SearchRequest(intent=kind, query=query.value,
+                reason="Governed current Turn research obligation", origin="HUMAN_EXPLICIT"))
+        return tuple(dict.fromkeys(requests))
 
     def _contract(self, turn_id: UUID, interaction_id: UUID, text: str,
-                  requests: tuple[SearchRequest, ...], steering_step_id: UUID | None = None):
+                  requests: tuple[SearchRequest, ...], steering_step_id: UUID | None = None, repository_source: str | None = None):
         capabilities = tuple(dict.fromkeys((
             *(item.capability_id for item in requests),
             *("github.resource.fetch" if item.capability_id.startswith("github.")
               else "web.resource.fetch" for item in requests),
             *(('git.repository.acquire', 'filesystem.read')
-              if production_intent_evidence(text).repository_source else ()),
+              if repository_source else ()),
         )))
         return default_task_contract_builder().build(TaskContractRequest(
             activity=EngineeringActivity.DISCOVERY,
@@ -333,13 +282,13 @@ class GovernedExternalResearch:
     def run(
         self, *, turn_id: UUID, interaction_id: UUID, work_id: UUID | None,
         user_id: str, text: str, requests: tuple[SearchRequest, ...],
-        on_event=None, steering_step_id: UUID | None = None,
+        on_event=None, steering_step_id: UUID | None = None, repository_source: str | None = None,
     ) -> ResearchResult:
         started = monotonic()
         contract = self._contract(turn_id, interaction_id, text, requests,
-                                  steering_step_id=steering_step_id)
+                                  steering_step_id=steering_step_id, repository_source=repository_source)
         project_context = None
-        source = production_intent_evidence(text).repository_source
+        source = repository_source
         if source is not None and self.project_repository is not None:
             resolution = self.resolver.resolve(CapabilityRequirement(
                 capability_id="git.repository.acquire", work_id=work_id or interaction_id,

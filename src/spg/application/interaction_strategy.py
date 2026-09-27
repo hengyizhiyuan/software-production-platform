@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 
 from spg.domain.conversation import (
     CognitiveMaturity,
@@ -19,43 +18,6 @@ from spg.domain.wic_intelligence import (
 )
 
 
-_UNCERTAIN = re.compile(r"(不知道|没想好|不确定|拿不准|没有概念|not sure|don't know|do not know)", re.I)
-_IMPLEMENTATION = re.compile(
-    r"(API|接口|数据库|PostgreSQL|MySQL|表结构|字段|迁移|部署|容器|代码|组件|CSS|SDK|schema|endpoint)",
-    re.I,
-)
-_SPECIFIC = re.compile(r"(\d|必须|不得|只要|比例|期限|预算|优先|具体|exact|must|percent|%)", re.I)
-_CORRECTION = re.compile(r"(不对|不是|纠正|改口|我说的是|rather than|correction)", re.I)
-_BROAD_GOAL = re.compile(
-    r"^(?:我想|我要|希望|打算)(?:做|开发|创建|搭建|建设|设计)|^(?:i want|we want|i'd like)\b",
-    re.I,
-)
-_FORMED_RELATION = re.compile(
-    r"(面向|用于|帮助|支持|解决|针对|供.{0,16}使用|\bfor\b|\bhelps?\b|\bused by\b)",
-    re.I,
-)
-
-
-def _altitude(text: str) -> HumanAbstractionLevel:
-    if _IMPLEMENTATION.search(text):
-        return HumanAbstractionLevel.IMPLEMENTATION
-    if _BROAD_GOAL.search(text) and not _SPECIFIC.search(text):
-        return (
-            HumanAbstractionLevel.SOLUTION
-            if _FORMED_RELATION.search(text)
-            else HumanAbstractionLevel.VISION
-        )
-    if (
-        _SPECIFIC.search(text)
-        or _CORRECTION.search(text)
-        or text.endswith(("?", "？"))
-    ):
-        return HumanAbstractionLevel.SOLUTION
-    if _UNCERTAIN.search(text):
-        return HumanAbstractionLevel.VISION
-    return HumanAbstractionLevel.DOMAIN
-
-
 def select_interaction_strategy(
     assessment: InteractionAssessment,
     *,
@@ -66,13 +28,13 @@ def select_interaction_strategy(
     semantics = assessment.progressive_semantics
     if semantics is None:
         raise ValueError("Interaction Strategy requires progressive semantics")
-    text = latest_human_input.strip()
     signals = set(semantics.pattern_signals)
     intent = getattr(
         semantics, "turn_intent", ConversationTurnIntent.EXPLORE
     )
-    altitude = _altitude(text)
-    uncertain = bool(_UNCERTAIN.search(text))
+    ir = getattr(assessment, "semantic_ir", None)
+    altitude = HumanAbstractionLevel.DOMAIN if ir is None else HumanAbstractionLevel(ir.human_abstraction_level)
+    uncertain = False if ir is None else ir.uncertain
     correcting = (
         intent in {
             ConversationTurnIntent.CORRECTION,
@@ -107,7 +69,7 @@ def select_interaction_strategy(
     }
     specifying = (
         intent in action_intents
-        or bool(_SPECIFIC.search(text))
+        or bool(ir and any(item.kind.value == "CONSTRAINT" for item in ir.items))
         or altitude is HumanAbstractionLevel.IMPLEMENTATION
     )
 

@@ -272,6 +272,9 @@ class SemanticStepInput(BaseModel):
     work_context_facts: tuple[str, ...] = ()
     work_requests: tuple[str, ...] = ()
     human_explicit_requests: tuple[str, ...] = ()
+    governed_semantic_ir_id: UUID | None = None
+    canonical_explicit_targets: tuple[str, ...] = ()
+    canonical_allowed_areas: tuple[str, ...] = ()
     steering_plan_revision_id: UUID
     step: "SteeringStepRecord"
     basis_fingerprint: str = Field(min_length=64, max_length=64)

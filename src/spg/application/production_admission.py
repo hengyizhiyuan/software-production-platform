@@ -30,16 +30,14 @@ from spg.domain.interaction import (
     WorkAdmissionReadinessStatus,
 )
 from spg.domain.product import AttentionAction
-from spg.domain.response_contract import (
-    production_intent_evidence,
-    repository_acquisition_recovery_requested,
-)
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.domain.steering import SteeringStepType, SteeringAttentionReason
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.domain.refinement_contract import RefinementSignalKind
+from spg.domain.interaction_actions import CanonicalOperation
+from spg.application.intent_realization import executable_semantic_actions, current_step_semantic_items, latest_assessment_revision
 
 
 class ProductionAdmissionTrigger:
@@ -126,9 +124,13 @@ class ProductionAdmissionTrigger:
         if state is RepositoryAcquisitionState.READY:
             with self.work.database.unit_of_work() as uow:
                 selected = ProductStore(uow.session).resource_for_work(work_id)
+                revision = ProductStore(uow.session).current_work_reality_revision(work_id)
             if (
                 selected is None
                 or str(selected.id) != observation.get("resource_id")
+                or revision is None or revision.repository_identity != selected.repository_identity
+                or revision.repository_ref != observation.get("repository_ref")
+                or revision.source_revision != observation.get("revision")
             ):
                 state = RepositoryAcquisitionState.RUNNING
                 next_step = "Bind acquired repository Reality to this Work."
@@ -231,7 +233,11 @@ class ProductionAdmissionTrigger:
             current = self.work.get_work(work_id)
             with self.work.database.unit_of_work() as uow:
                 selected = ProductStore(uow.session).resource_for_work(work_id)
-            if selected is None or str(selected.id) != observation["resource_id"]:
+                revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+            if (selected is None or str(selected.id) != observation["resource_id"]
+                    or revision is None or revision.repository_identity != selected.repository_identity
+                    or revision.repository_ref != observation.get("repository_ref")
+                    or revision.source_revision != observation.get("revision")):
                 current = self.work.admit_asset_scope(
                     work_id,
                     AssetScopeAdmissionRequest(
@@ -342,14 +348,66 @@ class ProductionAdmissionTrigger:
 
     def execute_governed_turn(self, interaction_id: UUID,
         assessment: InteractionAssessment, request_record: InteractionRecord) -> str | None:
+        branch_items = tuple(item for item in executable_semantic_actions(assessment.semantic_ir)
+            if item.action.operation in {CanonicalOperation.CREATE_BRANCH.value, CanonicalOperation.SWITCH_BRANCH.value,
+                CanonicalOperation.CREATE_AND_SWITCH_BRANCH.value, CanonicalOperation.ACQUIRE_REPOSITORY.value})
+        if branch_items:
+            # The Asset owner realizes Git; the Work owner decides whether its
+            # exact observed branch can become the current engineering scope.
+            with self.work.database.unit_of_work() as uow:
+                interaction = InteractionStore(uow.session).interaction(interaction_id)
+                work_id = None if interaction is None else interaction.current_work_id
+                current = None if work_id is None else ProductStore(uow.session).current_work_reality_revision(work_id)
+            if (assessment.candidate_change is not None and current is not None
+                    and assessment.basis_work_revision_id == current.id):
+                self.work.decide_interaction_work_revision(interaction_id, assessment_id=assessment.id,
+                    basis_fingerprint=assessment.basis_fingerprint, expected_previous_revision_id=current.id,
+                    action=AttentionAction.APPROVE, authority_identity=request_record.source,
+                    rationale=f"Current typed operational intent: semantic-ir:{assessment.semantic_ir.id}")
+            if not callable(getattr(self.assets, "execute_interaction_actions", None)):
+                # Historical adapter ports still use their qualified acquisition
+                # lifecycle; they never interpret the current Human wording.
+                self.prepare(interaction_id, assessment, request_record)
+                self.execute(interaction_id, assessment, request_record)
+                return None
+            answer = self.assets.execute_interaction_actions(interaction_id, assessment, request_record, work_id=work_id)
+            if any(item.action.operation in {CanonicalOperation.CREATE_BRANCH.value, CanonicalOperation.SWITCH_BRANCH.value,
+                    CanonicalOperation.CREATE_AND_SWITCH_BRANCH.value, CanonicalOperation.ACQUIRE_REPOSITORY.value} for item in branch_items):
+                observation = self.assets.interaction_observation(interaction_id)
+                if work_id is not None and observation is not None:
+                    bound = self._bind_and_activate(work_id=work_id, observation=observation,
+                        authority_identity=request_record.source,
+                        rationale=f"Bind the observed current branch without adding a switch: semantic-ir:{assessment.semantic_ir.id}")
+                    if bound.get("condition") != "READY":
+                        return "分支已由 Git owner 检查，但当前 Work 尚未完成精确绑定。"
+            return answer
         branch_answer = self.execute_explicit_branch_turn(interaction_id, assessment, request_record)
         if branch_answer is not None:
             return branch_answer
+        ir = assessment.semantic_ir
+        explicit_goals = () if ir is None else ir.current_production
+        if (explicit_goals and assessment.candidate_change is not None
+                and assessment.basis_work_revision_id is not None
+                and assessment.focus_classification is WorkFocusClassification.ON_TOPIC
+                and request_record.id == ir.source_record_id
+                and request_record.actor is InteractionActor.HUMAN
+                and all(goal.bounded_change and not goal.systemic_design for goal in explicit_goals)
+                and not any(item.requires_human for item in current_step_semantic_items(ir))):
+            # The current Human Turn is the decision; exact basis, scope and
+            # immutable active-cycle checks remain in the existing Work owner.
+            updated = self.work.decide_interaction_work_revision(interaction_id,
+                assessment_id=assessment.id, basis_fingerprint=assessment.basis_fingerprint,
+                expected_previous_revision_id=assessment.basis_work_revision_id,
+                action=AttentionAction.APPROVE, authority_identity=request_record.source,
+                rationale=f"Explicit current bounded production intent: semantic-ir:{ir.id}")
+            self.post_admission.steering_bootstrap.bootstrap(updated.work_id)
+            self.post_admission.steering_driver.schedule(updated.work_id)
+            return "当前请求已准入 Work，并保留原有范围与交付权限边界。"
         if (request_record.actor is not InteractionActor.HUMAN
             or assessment.candidate_change is None
             or assessment.basis_work_revision_id is None
             or assessment.focus_classification is not WorkFocusClassification.ON_TOPIC
-            or request_record.content.strip() not in assessment.current_requests
+            or assessment.semantic_ir is None or assessment.semantic_ir.source_record_id != request_record.id
             or not any(meaning.kind is InterpretationMeaningKind.DECISION_INPUT
                 and request_record.id in meaning.source_record_ids for meaning in assessment.meanings)):
             return None
@@ -404,6 +462,8 @@ class ProductionAdmissionTrigger:
             )
             if revision is None or target is None:
                 return None
+            admitted_revision = latest_assessment_revision(revision,product.work_reality_revision)
+            resumed = admitted_revision is not None and admitted_revision.source_assessment_id == assessment.id
             prior_ids = {fact.id for fact in revision.engineering_semantic_facts}
             branch_facts = tuple(
                 fact for fact in assessment.engineering_semantic_facts
@@ -413,21 +473,22 @@ class ProductionAdmissionTrigger:
                 and request_record.id in fact.provenance.source_record_ids
             )
             if (
-                assessment.basis_work_revision_id != revision.id
+                not resumed and (assessment.basis_work_revision_id != revision.id
                 or revision.repository_ref == f"refs/heads/{target}"
-                or len(branch_facts) != 1
+                or len(branch_facts) != 1)
             ):
                 return None
-        self.work.decide_interaction_work_revision(
-            interaction_id,
-            assessment_id=assessment.id,
-            basis_fingerprint=assessment.basis_fingerprint,
-            expected_previous_revision_id=assessment.basis_work_revision_id,
-            action=AttentionAction.APPROVE,
-            authority_identity=request_record.source,
-            rationale="The Human explicitly requested creation of this exact branch.",
-            branch_only=True,
-        )
+        if not resumed:
+            self.work.decide_interaction_work_revision(
+                interaction_id,
+                assessment_id=assessment.id,
+                basis_fingerprint=assessment.basis_fingerprint,
+                expected_previous_revision_id=assessment.basis_work_revision_id,
+                action=AttentionAction.APPROVE,
+                authority_identity=request_record.source,
+                rationale="The Human explicitly requested creation of this exact branch.",
+                branch_only=True,
+            )
         self.post_admission.steering_bootstrap.bootstrap(work_id)
         observation = self.reconcile_governed_branch(
             work_id,
@@ -476,13 +537,13 @@ class ProductionAdmissionTrigger:
     ) -> None:
         """Persist Work and operation Reality before Human-facing action claims."""
 
-        evidence = production_intent_evidence(request_record.content)
+        from spg.application.intent_realization import production_evidence, executable_semantic_actions
+        evidence = production_evidence(assessment.semantic_ir)
         projection = self.interactions.get_shared_understanding(interaction_id)
         if projection.governed_work_id is not None:
             latest = self.assets.latest_attempt_for_work(projection.governed_work_id)
-            recovery_requested = repository_acquisition_recovery_requested(
-                request_record.content
-            )
+            recovery_requested = any(item.action.operation == "ACQUIRE_REPOSITORY"
+                for item in executable_semantic_actions(assessment.semantic_ir))
             if not recovery_requested:
                 return
             if latest is not None and self._repository_state(latest) not in {
@@ -500,17 +561,6 @@ class ProductionAdmissionTrigger:
                 if latest is not None
                 else (
                     projection.repository_source
-                    or next(
-                        (
-                            established.repository_source
-                            for content in reversed(projection.human_said)
-                            if (
-                                established := production_intent_evidence(content)
-                            ).repository_source
-                            is not None
-                        ),
-                        None,
-                    )
                 )
             )
             if not source:
@@ -570,6 +620,15 @@ class ProductionAdmissionTrigger:
                 "remain separately governed."
             ),
         )
+        if evidence.repository_source is None and not any(
+                goal.repository_reference or goal.repository_required for goal in assessment.semantic_ir.current_production):
+            self.assets.ensure_managed_execution_workspace(self.work, admitted.work_id)
+            self.post_admission.activate(admitted.work_id)
+            self.interactions.record_production_admission_progress(interaction_id,
+                admission_state=ProductionAdmissionExecutionState.WORK_CREATED,
+                repository_state=RepositoryAcquisitionState.READY,
+                next_step="Continue Steering in the admitted managed workspace.")
+            return
         if evidence.repository_source is None:
             request = RepositoryIntakeRequest(
                 request_id=uuid5(

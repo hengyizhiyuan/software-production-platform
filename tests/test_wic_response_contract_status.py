@@ -78,9 +78,10 @@ def projection(monkeypatch):
             enqueued_at=now + timedelta(seconds=later_by),
         )
 
-    def project(question="现在做到哪了？"):
+    def project(question="现在做到哪了？", *, subject="WORK_CURRENT"):
         basis.records[0].content = question
-        return WorkInteractionService._work_reality_status_candidate(service, basis)
+        ir = SimpleNamespace(items=(SimpleNamespace(subject=subject),))
+        return WorkInteractionService._work_reality_status_candidate(service, basis, semantic_ir=ir)
 
     return state, entry, project
 
@@ -122,7 +123,7 @@ def test_diagnosis_reports_missing_current_queue_instead_of_reusing_old_cause(pr
     state, entry, project = projection
     state.queue = [entry(old_attempt=True, condition=QueueCondition.WAITING_RESOURCE,
                          reason="stale-capacity-shortage")]
-    candidate = project("为什么一直卡在 QUEUED？")
+    candidate = project("为什么一直卡在 QUEUED？", subject="WORK_DIAGNOSTIC")
     assert "当前生产周期没有对应的执行队列记录" in candidate.natural_response
     assert "证据不足" in candidate.natural_response
     assert "stale-capacity-shortage" not in candidate.natural_response

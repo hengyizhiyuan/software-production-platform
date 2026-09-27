@@ -120,22 +120,14 @@ def _capability_alignment(
     design_frame = getattr(assessment, "design_intent_frame", None)
     object_type = None if design_frame is None else design_frame.object_type
     object_match = object_type in set(reality.production_object_types)
-    explicit_capability_question = bool(
-        source_records
-        and is_system_capability_question(source_records[-1].content)
-    )
+    ir = getattr(assessment, "semantic_ir", None)
+    explicit_capability_question = bool(ir and any(
+        item.subject == "SYSTEM_CAPABILITY" for item in ir.items))
     latest_input = source_records[-1].content if source_records else ""
-    production_evidence = production_intent_evidence(latest_input)
-    direct_goal = (
-        production_evidence.production_request
-        or (
-            intent in _DIRECT_PRODUCTION_INTENTS
-            and intent not in {
-                ConversationTurnIntent.BUILD,
-                ConversationTurnIntent.NEW_GOAL,
-            }
-        )
-    )
+    from spg.application.intent_realization import production_evidence as governed_production_evidence
+    production_evidence = governed_production_evidence(ir)
+    direct_goal = production_evidence.production_request or (
+        ir is None and intent in _DIRECT_PRODUCTION_INTENTS)
     advisory_goal = intent in _PRODUCTION_ADVISORY_INTENTS and object_match
     capability_match = (
         direct_goal or advisory_goal or current_work or explicit_capability_question
@@ -394,9 +386,8 @@ def build_response_contract(
     intent = semantics.turn_intent if semantics else ConversationTurnIntent.EXPLORE
     capability_alignment = _capability_alignment(assessment, intent, source_records)
     mode = interpretation.interaction_mode if interpretation else _LEGACY_MODES[intent]
-    production_evidence = production_intent_evidence(
-        source_records[-1].content if source_records else ""
-    )
+    from spg.application.intent_realization import production_evidence as governed_production_evidence
+    production_evidence = governed_production_evidence(getattr(assessment, "semantic_ir", None))
     if capability_alignment.response_mode is CapabilityAlignmentMode.PRODUCTION_ADVISORY:
         mode = Mode.ANSWER
     elif capability_alignment.response_mode in {

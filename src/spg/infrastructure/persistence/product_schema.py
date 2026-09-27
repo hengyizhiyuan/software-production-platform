@@ -19,6 +19,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
 from spg.infrastructure.persistence.metadata import metadata
+from spg.infrastructure.persistence.intent_realization_schema import intent_realization_tables
 from spg.infrastructure.persistence.delivery_schema import delivery_tables
 from spg.infrastructure.persistence.asset_schema import repository_intakes
 from spg.infrastructure.persistence.steering_schema import steering_tables
@@ -386,6 +387,7 @@ interaction_assessments = Table(
     Column("current_requests", JSONB, nullable=False),
     Column("unresolved_material_questions", JSONB, nullable=False),
     Column("action_candidates", JSONB, nullable=True),
+    Column("semantic_ir", JSONB, nullable=True),
     Column("neutral_semantic_extractions", JSONB, nullable=False),
     Column("engineering_semantic_facts", JSONB, nullable=False),
     Column("meanings", JSONB, nullable=False),
@@ -763,4 +765,5 @@ product_tables = (
     *guided_design_tables,
     repository_intakes,
     *delivery_tables,
+    *intent_realization_tables,
 )

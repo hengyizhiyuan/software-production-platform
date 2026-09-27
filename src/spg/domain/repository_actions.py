@@ -24,6 +24,7 @@ class RepositoryAction:
     source: str | None = None
     branch: str | None = None
     target_ambiguous: bool = False
+    operation: str | None = None
 
 
 def repository_actions(text: str) -> tuple[RepositoryAction, ...]:

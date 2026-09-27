@@ -121,7 +121,7 @@ def test_envelope_projects_contract_allowance_without_changing_semantic_truth() 
     )
 
     assert envelope.response_contract == contract
-    assert envelope.latest_human_input == "按刚才的设计开始。"
+    assert envelope.latest_human_input is None  # Raw language is provenance, not expression authority.
     assert envelope.recent_relevant_messages == recent
     assert envelope.interaction_strategy.primary_move is ConversationalMove.CONFIRM
     assert envelope.interaction_strategy.max_questions == 0

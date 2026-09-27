@@ -10,6 +10,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from spg.domain.interaction_actions import InteractionActionCandidate
+from spg.domain.intent_realization import GovernedSemanticIR, TurnSemanticCandidate, ObservedEffect
 from spg.domain.response_contract import ResponseContract, ResponseIntent
 from spg.domain.conversation import (
     ConversationContextMessage,
@@ -247,6 +248,7 @@ class InteractionInterpretationInput(BaseModel):
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     recent_conversation_messages: tuple[ConversationContextMessage, ...] = ()
     previous_response_contract: ResponseContract | None = None
+    observed_reality: tuple[ObservedEffect, ...] = ()
 
 
 class ActiveWorkInterpretationContext(BaseModel):
@@ -298,6 +300,7 @@ class InteractionAssessmentCandidate(BaseModel):
     current_requests: tuple[str, ...] = ()
     unresolved_material_questions: tuple[str, ...] = ()
     action_candidates: tuple[InteractionActionCandidate, ...] | None = None
+    semantic_intent: TurnSemanticCandidate | None = None
     neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
     semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[InterpretationMeaning, ...] = ()
@@ -322,6 +325,7 @@ class InteractionSemanticCandidate(BaseModel):
     current_requests: tuple[str, ...] = ()
     unresolved_material_questions: tuple[str, ...] = ()
     action_candidates: tuple[InteractionActionCandidate, ...] = ()
+    semantic_intent: TurnSemanticCandidate | None = None
     neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
     semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[InterpretationMeaning, ...] = ()
@@ -348,6 +352,7 @@ class InteractionAssessment(BaseModel):
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
     action_candidates: tuple[InteractionActionCandidate, ...] | None = None
+    semantic_ir: GovernedSemanticIR | None = None
     neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
     engineering_semantic_facts: tuple[EngineeringSemanticFact, ...] = ()
     meanings: tuple[InterpretationMeaning, ...]

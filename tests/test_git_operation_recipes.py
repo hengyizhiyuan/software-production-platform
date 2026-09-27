@@ -120,6 +120,14 @@ def test_connector_resolved_native_git_operation_changes_isolated_workspace(tmp_
     unauthorized = request.model_copy(update={"capability_grants": ()})
     with pytest.raises(NativeExecutionConflict, match="not granted"):
         asyncio.run(host.registry().execute(unauthorized))
+    create_only = request.model_copy(update={"delivery_id":uuid4(),"proposal":ToolCallProposal(
+        proposal_index=0,tool_identity="git.operation",
+        arguments={"operation":"branch.create","branch":"parked","checkout":False})})
+    parked = asyncio.run(host.registry().execute(create_only))
+    assert parked.condition is EffectCondition.SETTLED
+    assert parked.output["resulting_branch"] == "main"
+    assert parked.output["resulting_revision"] == original
+    assert subprocess.run(("git","rev-parse","parked"),cwd=repository,check=True,capture_output=True,text=True).stdout.strip() == original
     result = asyncio.run(host.registry().execute(request))
     assert result.condition is EffectCondition.SETTLED
     assert result.output["resulting_branch"] == "test"

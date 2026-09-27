@@ -1,3 +1,4 @@
+from tests.irk_test_fixtures import governed_ir
 """Bounded Search qualification without external provider dependence."""
 
 import base64
@@ -303,6 +304,7 @@ def test_direct_public_resource_request_is_canonicalized():
     requests = service.requests_for_turn(
         "请查看 https://github.com/taskiq-python/taskiq/blob/master/README.md",
         "I can inspect that file.",
+        semantic_ir=governed_ir(SimpleNamespace(id=uuid4(), interaction_id=uuid4(), content="请查看 https://github.com/taskiq-python/taskiq/blob/master/README.md"), operation="FETCH_PUBLIC_RESOURCE", arguments={"url":"https://github.com/taskiq-python/taskiq/blob/master/README.md"}),
     )
     assert requests[0].intent is SearchIntent.FETCH_GITHUB_RESOURCE
     assert requests[0].capability_id == "github.resource.fetch"
@@ -340,8 +342,9 @@ def test_model_information_gap_can_request_governed_search_then_resume_with_evid
     requests = service.requests_for_turn(
         "目前 Python 异步任务队列有哪些维护活跃的库？",
         "I cannot confirm current maintenance from memory.",
+        semantic_ir=governed_ir(SimpleNamespace(id=uuid4(), interaction_id=uuid4(), content="目前 Python 异步任务队列有哪些维护活跃的库？"), operation="SEARCH_GITHUB", arguments={"query":"python async queue"}),
     )
-    assert requests and requests[0].origin == "MODEL_INFORMATION_GAP"
+    assert requests and requests[0].origin == "HUMAN_EXPLICIT"  # One compiler owns the decision.
     result = service.run(turn_id=uuid4(), interaction_id=uuid4(), work_id=None,
                          user_id="human:test", text="当前有哪些维护活跃的库？",
                          requests=requests)
@@ -375,6 +378,7 @@ def test_project_specific_research_supplies_committed_asset_evidence_without_wor
         user_id="human:owner", text="项目仓库：https://github.com/owner/project.git\n搜索 GitHub 的成熟实现，给出项目建议。",
         requests=(SearchRequest(intent=SearchIntent.SEARCH_GITHUB_REPOSITORIES,
             query="async queue implementation", reason="Human research", origin="HUMAN_EXPLICIT"),),
+        repository_source="https://github.com/owner/project.git",
         on_event=lambda kind, details: events.append((kind, details)))
     assert calls == [{"turn_id":turn_id,"interaction_id":interaction_id,
         "source":"https://github.com/owner/project.git","authority_identity":"human:owner"}]

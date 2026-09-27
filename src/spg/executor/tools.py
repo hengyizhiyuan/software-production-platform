@@ -109,6 +109,7 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
             "properties": {
                 "operation": {"type": "string"},
                 "branch": {"type": "string"},
+                "checkout": {"type": "boolean"},
                 "revision": {"type": "string"},
                 "ancestor": {"type": "string"},
                 "descendant": {"type": "string"},

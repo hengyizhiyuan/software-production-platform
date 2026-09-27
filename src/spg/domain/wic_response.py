@@ -126,6 +126,8 @@ class GovernedResponseEnvelope(BaseModel):
     production_next_step: str | None = None
     execution_operation_kind: str | None = None
     execution_operation_reference: str | None = None
+    semantic_ir: dict[str, Any] | None = None
+    obligation_ledger: tuple[dict[str, Any], ...] = ()
 
 
 class GovernedResponseRealization(BaseModel):

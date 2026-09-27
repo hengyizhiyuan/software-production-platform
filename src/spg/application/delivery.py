@@ -193,7 +193,8 @@ class DeliveryApplicationService:
                         or any(path.endswith(".html") for path in artifacts)) else None,
                     "artifacts": list(artifacts),
                     "verification": [f"{item.obligation}: {item.result.value}" for item in verification if item is not None],
-                    "authorization_pending": summary.authorization_id is None}
+                    "authorization_pending": summary.authorization_id is None,
+                    "human_authorization_id": None if summary.authorization_id is None else str(summary.authorization_id)}
 
     @staticmethod
     def _derived_target(work, summary, commit=None, resource=None) -> DeliveryTargetRequest | None:

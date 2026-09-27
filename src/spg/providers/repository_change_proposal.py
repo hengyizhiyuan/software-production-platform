@@ -77,7 +77,8 @@ class RepositoryAwareChangeProposalProvider:
             source = subprocess.run(["git", "-C", str(repository), "show",
                 f"{request.source_revision}:{proof.source_path}"], capture_output=True,
                 text=True, timeout=15, check=True).stdout
-            if (proof.repository_quote not in source or proof.human_clause not in request.refined_code_intent
+            if (proof.repository_quote not in source or (request.governed_semantic_ir_id is None
+                    and proof.human_clause not in request.refined_code_intent)
                     or proof.human_clause not in (request.human_authority_text or "")):
                 raise ValueError("Scope necessity proof has no exact repository/Human witness")
             targets.append(self._target(path=proof.path, paths=path_set,
@@ -86,7 +87,7 @@ class RepositoryAwareChangeProposalProvider:
                 evidence=f"Exact {request.source_revision}:{proof.source_path} witness: {proof.repository_quote}",
                 confidence=ProposalConfidence.HIGH))
 
-        if not targets and not request.explicit_allowed_areas:
+        if not targets and not request.explicit_allowed_areas and request.governed_semantic_ir_id is None:
             discovered, discovery_questions = self._discover(
                 repository,
                 request.source_revision,
@@ -150,7 +151,7 @@ class RepositoryAwareChangeProposalProvider:
             source_revision=request.source_revision,
             proposed_targets=tuple(targets),
             allowed_areas=request.explicit_allowed_areas,
-            forbidden_areas=self._forbidden_areas(
+            forbidden_areas=request.explicit_forbidden_areas if request.governed_semantic_ir_id is not None else self._forbidden_areas(
                 paths,
                 request.refined_code_intent,
                 request.constraints,

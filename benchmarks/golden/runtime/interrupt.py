@@ -13,7 +13,10 @@ import subprocess
 import time
 from uuid import UUID
 
-from journey import ProductClient
+if __package__:
+    from .journey import ProductClient
+else:
+    from journey import ProductClient
 
 
 def main():

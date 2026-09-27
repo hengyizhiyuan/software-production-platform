@@ -1,6 +1,10 @@
 # Lifecycle and Action Admission Semantics
 
-Canonical contract, version `lifecycle-action-admission-v1`, 2026-09-27.
+Lifecycle/authority contract, version `lifecycle-action-admission-v1`, 2026-09-27.
+Human-language compilation, positive action binding and Search routing are now
+owned by the [Intent Realization Kernel](intent-realization-kernel/README.md).
+Historical raw-text routes in this document are non-canonical; the lifecycle and
+authority validators below remain the qualified downstream owners.
 
 Lifecycle state is evidence about one subject; it does not grant or prohibit every action. An existing owner admits each proposed action using explicit intent, current resource authority, capability, required credential, side-effect class, and observed Reality. Work admission is required for production planning and mutation; independently authorized repository acquisition and inspection do not manufacture production Work. Incomplete future Product Intent must not erase a present explicit command.
 

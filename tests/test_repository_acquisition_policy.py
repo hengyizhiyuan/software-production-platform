@@ -77,9 +77,10 @@ def repository_with_branches(root: Path, name: str = "source") -> tuple[Path, di
 
 
 def ecf_runtime(root: Path):
+    from tests.qualification_owner_sources import owner_source_root
     workspace_root = Path(__file__).resolve().parents[2]
-    ecf_src = workspace_root / "engineering-context-fabric" / "src"
-    if not ecf_src.is_dir():
+    ecf_src = owner_source_root("ecf",workspace_root / "engineering-context-fabric" / "src")
+    if not any(path.is_file() for path in (ecf_src / "ecf" / "runtime.py", ecf_src / "ecf" / "runtime" / "__init__.py")):
         pytest.skip("sibling ECF repository is unavailable")
     if str(ecf_src) not in sys.path:
         sys.path.insert(0, str(ecf_src))

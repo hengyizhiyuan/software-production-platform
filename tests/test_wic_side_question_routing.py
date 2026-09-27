@@ -1,6 +1,8 @@
 from types import SimpleNamespace
 from uuid import uuid4
 
+from tests.irk_test_fixtures import governed_ir
+from spg.domain.intent_realization import ProductionIntent
 from spg.application.interaction import (
     WorkInteractionService,
     _declares_distinct_long_lived_object,
@@ -97,6 +99,7 @@ def test_explicit_feature_request_survives_design_response_posture() -> None:
     latest_record_id = uuid4()
     candidate = InteractionAssessmentCandidate(
         turn_intent=ConversationTurnIntent.MODIFY,
+        semantic_intent=governed_ir(SimpleNamespace(id=latest_record_id, content=request, interaction_id=uuid4()), production=ProductionIntent(objective="Add the requested documentation link", primary_change="Add the requested documentation link", current=True, bounded_change=True)),
         response_intent=ResponseIntent(
             interaction_mode=InteractionMode.DESIGN,
             rationale="Discuss the bounded implementation.",
@@ -146,6 +149,7 @@ def test_explicit_feature_request_survives_design_response_posture() -> None:
 
     advisory = candidate.model_copy(update={
         "turn_intent": ConversationTurnIntent.DIRECT_QUESTION,
+        "semantic_intent": None,
     })
     _, advisory_impact, advisory_change = WorkInteractionService._normalize_active_candidate(
         advisory, active, latest_human_input=request,

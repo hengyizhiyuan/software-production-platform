@@ -164,9 +164,13 @@ class DeepSeekInteractionSemanticCapability:
             self._validate_action_semantics(payload, basis)
         except (ValidationError, ValueError, TypeError) as first_error:
             first_issue = _safe_validation_summary(first_error)
-            if isinstance(first_error, ValueError) and str(first_error).startswith(('ACTION_', 'SEMANTIC_')):
-                if str(first_error).startswith('ACTION_'):
-                    self.last_action_repair_signal = "EXPLICIT_ACTION_LOST_BEFORE_EXECUTION"
+            if isinstance(first_error, ValueError) and str(first_error).startswith(('ACTION_', 'SEMANTIC_', 'PRIMARY_', 'EXPLICIT_', 'PRODUCTION_')):
+                from spg.domain.refinement_contract import RefinementSignalKind
+                signal = str(first_error).split(":", 1)[0]
+                try:
+                    self.last_action_repair_signal = RefinementSignalKind(signal).value
+                except ValueError:
+                    self.last_action_repair_signal = "SCHEMA_INVALID"
                 first_issue = str(first_error)
             LOGGER.warning(
                 "WIC semantic validation failed request=%s model=%s status=completed "
@@ -210,14 +214,11 @@ class DeepSeekInteractionSemanticCapability:
 
     @staticmethod
     def _validate_action_semantics(payload, basis) -> None:
-        from spg.domain.interaction_actions import validate_action_binding
-        latest = next(record for record in reversed(basis.records)
-            if str(record.actor) == "HUMAN")
-        if (payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST
-                and not payload.action_candidates):
-            raise ValueError("ACTION_REQUEST_MISSING_CANONICAL_BINDING")
-        for candidate in payload.action_candidates:
-            validate_action_binding(candidate, latest)
+        from spg.application.intent_realization import validate_semantic_candidate
+        if payload.semantic_intent is None:
+            signal = "EXPLICIT_ACTION_LOST_BEFORE_EXECUTION" if payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST else "SEMANTIC_TYPE_MISMATCH"
+            raise ValueError(f"{signal}: IRK compiler omitted semantic_intent")
+        validate_semantic_candidate(payload.semantic_intent, basis)
         # Cross-reference validity belongs to the same bounded structured-result
         # repair. Do not discover a broken fact/extraction link after admission.
         from spg.application.engineering_semantics import bind_engineering_semantic_facts

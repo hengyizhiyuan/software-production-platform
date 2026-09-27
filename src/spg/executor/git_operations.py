@@ -55,6 +55,11 @@ def git_operation_commands(arguments: dict[str, object]) -> tuple[tuple[str, ...
     if operation == "branch.current":
         return (("git", "branch", "--show-current"),)
     if operation == "branch.create":
+        checkout = arguments.get("checkout", True)
+        if not isinstance(checkout, bool):
+            raise ValueError("Branch checkout must be a typed boolean")
+        if not checkout:
+            return (("git", "-c", "core.hooksPath=/dev/null", "branch", _ref(arguments.get("branch"))),)
         return (("git", "-c", "core.hooksPath=/dev/null", "switch", "-c", _ref(arguments.get("branch"))),)
     if operation == "checkout":
         return (("git", "-c", "core.hooksPath=/dev/null", "switch", _ref(arguments.get("branch"))),)

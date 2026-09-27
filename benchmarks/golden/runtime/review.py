@@ -9,7 +9,10 @@ from pathlib import Path
 import subprocess
 import time
 
-from journey import ProductClient
+if __package__:
+    from .journey import ProductClient
+else:
+    from journey import ProductClient
 
 
 def main():

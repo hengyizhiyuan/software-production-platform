@@ -9,7 +9,10 @@ from datetime import UTC, datetime
 import json
 from pathlib import Path
 import time
-from journey import ProductClient
+if __package__:
+ from .journey import ProductClient
+else:
+ from journey import ProductClient
 
 PUBLIC = 'https://github.com/hengyizhiyuan/software-production-platform.git'
 INTENTS = {
@@ -69,6 +72,8 @@ def main():
     previous=state
    if turns and turns[-1]['status'] in {'COMPLETED','FAILED'}: break
    time.sleep(1)
+  if turns:
+   save(f'realization-{index+1}.json',client.request(f"/api/interactions/{identity}/turns/{turns[-1]['turn_id']}/realization"))
   states.append(state)
   if not turns or turns[-1]['status']!='COMPLETED': break
  save('latest.json',states[-1])
@@ -89,7 +94,7 @@ def main():
     any(a['operation']=='CREATE_AND_SWITCH_BRANCH' and a['speech_act']=='EXPLICIT_REQUEST'
         and a['target_branch']==f'feat_semantic_{args.trial}_{i}'
         for a in (state.get('latest_assessment') or {}).get('action_candidates', []))
-    and state['repository_observation']['repository_ref']==f'refs/heads/feat_semantic_{args.trial}_{i}'
+    and (state.get('repository_observation') or {}).get('repository_ref')==f'refs/heads/feat_semantic_{args.trial}_{i}'
     for i,state in enumerate(states[1:9])) and len(states)>=9
    last=states[8]['repository_observation'] if len(states)>=9 else {}
    checks['negative_no_git_effect']=all(

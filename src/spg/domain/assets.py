@@ -52,7 +52,7 @@ class RepositoryIntakeRequest(BaseModel):
         if self.operation_kind == "ACQUIRE":
             if self.base_resource_id is not None or self.target_branch is not None:
                 raise ValueError("Acquisition cannot contain branch creation fields")
-        elif self.operation_kind == "CREATE_BRANCH":
+        elif self.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
             if (
                 (self.work_id is None and (self.interaction_id is None or self.source_record_id is None))
                 or self.base_resource_id is None

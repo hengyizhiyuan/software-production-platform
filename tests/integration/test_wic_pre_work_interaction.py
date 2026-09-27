@@ -17,6 +17,8 @@ from sqlalchemy import func, select, text
 
 from spg.api import create_http_application
 from spg.api.dto import SharedUnderstandingResponse
+from tests.irk_test_fixtures import semantic_candidate, question as typed_question
+from spg.domain.intent_realization import SemanticKind, SemanticProvenance, SemanticOrigin, SemanticArgument
 from spg.domain.conversation import ConversationTurnIntent
 from spg.domain.design_intent import (
     DesignCollaborationMode,
@@ -162,6 +164,15 @@ class _FramingCorrectionCapability:
             ),
             provider_identity="test:design-intent-framing",
         )
+
+
+class _DeclaredSystemDesignCapability:
+    def interpret(self,basis):
+        frame=DesignIntentFrame(design_subject="运营管理平台",object_type=DesignObjectType.PRODUCT_SYSTEM,
+            scope_level=DesignScopeLevel.PRODUCT,collaboration_mode=DesignCollaborationMode.DESIGN,confidence=1)
+        return InteractionAssessmentCandidate(interpreted_motive=frame.design_subject,
+            natural_response="已记录设计方向，先澄清主要用户与问题。",provider_identity="fixture:system-design",
+            semantic_intent=semantic_candidate(basis.records[-1],kind=SemanticKind.DESIGN,design_frame=frame))
 
 
 class _BlockingStreamingCapability:
@@ -633,7 +644,7 @@ def test_design_intent_correction_reframes_schema_and_reconstructs_history(
     )
     assert corrected.design_stage == "Motive, users, and problem"
     assert corrected.latest_assessment is not None
-    assert corrected.latest_assessment.schema_version == "wic-assessment-v6"
+    assert corrected.latest_assessment.schema_version == "wic-assessment-v8"
 
     history = service.assessment_history(interaction.id)
     assert tuple(item.design_intent_frame.object_type for item in history) == (
@@ -766,7 +777,7 @@ def test_async_turn_persists_history_schema_guidance_and_restarts(
 ) -> None:
     service = WorkInteractionService(
         postgres_database,
-        capability=DeterministicWorkInteractionCapability(),
+        capability=_DeclaredSystemDesignCapability(),
     )
     interaction = service.create_interaction(human_identity="human:test")
     turn = service.submit_turn(
@@ -808,7 +819,7 @@ def test_async_turn_persists_history_schema_guidance_and_restarts(
 
     restarted = WorkInteractionService(
         postgres_database,
-        capability=DeterministicWorkInteractionCapability(),
+        capability=_DeclaredSystemDesignCapability(),
     )
     reconstructed = restarted.get_shared_understanding(interaction.id)
     assert reconstructed.conversation_messages == projection.conversation_messages
@@ -835,8 +846,8 @@ def test_async_turn_projects_real_delta_before_completion_and_persists_final_mes
     processing = service.get_turn(submitted.id)
     delta, offset = service.turn_response_delta(submitted.id, 0)
     assert processing.status is InteractionTurnStatus.PROCESSING
-    assert delta == "I am mapping the design path now. "
-    assert offset == len(delta)
+    assert delta == ""  # Compilation wording is not admitted conversation truth.
+    assert offset == 0
 
     capability.release.set()
     completed = _wait_for_turn(service, submitted.id)
@@ -872,21 +883,9 @@ def test_controlled_vnext_exposes_fast_and_settles_one_policy_governed_response(
         human_identity="human:test",
     )
     assert capability.delta_published.wait(timeout=2)
-    deadline = time.monotonic() + 2
-    events = ()
-    while time.monotonic() < deadline:
-        events = service.response_events(submitted.id)
-        if any(item.event_type is WicResponseEventType.PROVISIONAL_RESPONSE for item in events):
-            break
-        time.sleep(0.01)
-    provisional = next(
-        item for item in events
-        if item.event_type is WicResponseEventType.PROVISIONAL_RESPONSE
-    )
-    streamed, _ = service.turn_response_delta(submitted.id, 0)
-    assert streamed == provisional.content
-    assert "mapping the design path" not in streamed
-    assert provisional.response_id == submitted.id
+    assert not any(event.event_type is WicResponseEventType.PROVISIONAL_RESPONSE
+        for event in service.response_events(submitted.id))
+    assert service.turn_response_delta(submitted.id,0)[0] == ""
 
     capability.release.set()
     completed = _wait_for_turn(service, submitted.id)
@@ -897,13 +896,11 @@ def test_controlled_vnext_exposes_fast_and_settles_one_policy_governed_response(
     ]
     assert len(watt_messages) == 1
     assert watt_messages[0].turn_id == submitted.id
-    assert watt_messages[0].content.startswith(provisional.content)
     settled_events = service.response_events(submitted.id)
     assert [item.sequence for item in settled_events] == list(
         range(1, len(settled_events) + 1)
     )
     assert all(item.response_id == submitted.id for item in settled_events)
-    assert any(item.event_type is WicResponseEventType.RESPONSE_REFINEMENT for item in settled_events)
     stream_started = next(
         item
         for item in settled_events
@@ -915,8 +912,8 @@ def test_controlled_vnext_exposes_fast_and_settles_one_policy_governed_response(
         for item in settled_events
         if item.event_type is WicResponseEventType.RESPONSE_DELTA
     ]
-    assert len(deltas) >= 2
-    assert watt_messages[0].content == (provisional.content or "") + "".join(deltas)
+    assert len(deltas) >= 1
+    assert watt_messages[0].content == "".join(deltas)
     assert settled_events[-2].event_type is WicResponseEventType.FINAL_RESPONSE
     assert settled_events[-1].event_type is WicResponseEventType.TURN_COMPLETED
     timing = service.turn_timing(submitted.id)
@@ -1056,6 +1053,9 @@ def test_controlled_vnext_blocks_unsafe_provider_prose_in_actual_response_path(
                 current_requests=(basis.records[-1].content,),
                 natural_response="我会默认开放全部客户数据，并设定保留 90 天。",
                 provider_identity="test:unsafe-raw-prose",
+                semantic_intent=semantic_candidate(basis.records[-1],kind=SemanticKind.CONSTRAINT,
+                    statement="客户数据权限与保留期",requires_human=True,
+                    questions=(typed_question("请明确客户数据权限与保留期",human=True),)),
             )
 
     class AuthorityDriftingRealizer:
@@ -1117,7 +1117,7 @@ def test_controlled_vnext_blocks_unsafe_provider_prose_in_actual_response_path(
         for event in service.response_events(submitted.id)
         if event.event_type is WicResponseEventType.RESPONSE_STREAM_STARTED
     )
-    assert stream_started.reconciliation.value == "CONFIRM"
+    assert stream_started.reconciliation.value == "REFINE"
     assert stream_started.metadata["provider"] == "watt:governed-response-realizer"
     service.shutdown()
 
@@ -1143,6 +1143,13 @@ def test_controlled_vnext_corrects_brownfield_premise_in_actual_response_path(
                 current_requests=(basis.records[-1].content,),
                 natural_response="既然当前系统使用 MySQL，我会直接修改 MySQL 表。",
                 provider_identity="test:unsafe-brownfield-prose",
+                semantic_intent=semantic_candidate(basis.records[-1],kind=SemanticKind.CORRECTION,
+                    statement="现有持久化事实与当前前提冲突",
+                    provenance=SemanticProvenance(origin=SemanticOrigin.REPOSITORY_OBSERVED,
+                        evidence_reference=basis.observed_reality[0].evidence_references[0]),
+                    observed_facts={"context_facts":SemanticArgument(value=str(basis.observed_reality[0].facts["context_facts"]),
+                        provenance=SemanticProvenance(origin=SemanticOrigin.REPOSITORY_OBSERVED,
+                            evidence_reference=basis.observed_reality[0].evidence_references[0]))}),
             )
 
     service = WorkInteractionService(
@@ -1603,7 +1610,8 @@ def test_controlled_http_stream_replays_one_response_without_duplicate_identity(
             f"/api/interactions/{created['interaction_id']}/turns/{turn_id}/events"
         )
         assert streamed.status_code == 200
-        assert "event: response.provisional" in streamed.text
+        assert "event: response.provisional" not in streamed.text
+        assert "event: response.stream.started" in streamed.text
         assert "event: response.refinement" in streamed.text
         assert "event: response.stream.started" in streamed.text
         assert "event: response.delta" in streamed.text

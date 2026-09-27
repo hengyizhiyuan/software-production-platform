@@ -5,6 +5,7 @@ import json
 from uuid import UUID
 
 import pytest
+from irk_test_fixtures import semantic_candidate
 
 from spg.domain.conversation import (
     CognitiveMaturity,
@@ -69,6 +70,7 @@ def _envelope() -> str:
     return json.dumps({
         "natural_response": "可以。先把它理解为帮助 Watt 推广工作的运营后台。",
         "semantics": {
+            "semantic_intent": semantic_candidate(_basis().records[-1]).model_dump(mode="json"),
             "interpreted_motive": "开发 Watt 运营管理后台",
             "desired_outcome": "支持 Watt 推广工作",
             "candidate_context": [],
@@ -96,6 +98,7 @@ def _envelope() -> str:
 
 def _semantics() -> str:
     return InteractionSemanticCandidate(
+        semantic_intent=semantic_candidate(_basis().records[-1]),
         interpreted_motive="开发 Watt 运营管理后台",
         desired_outcome="支持 Watt 推广工作",
         current_requests=("设计运营管理平台",),
@@ -381,6 +384,7 @@ def test_controlled_active_work_question_skips_discarded_conversation_call() -> 
         "records": (basis.records[0].model_copy(update={"content": "有淡入淡出了吗"}),),
     })
     semantics = InteractionSemanticCandidate(
+        semantic_intent=semantic_candidate(basis.records[-1], kind="QUESTION"),
         interpreted_motive=revision.motive,
         desired_outcome=revision.desired_outcome,
         collaboration=StructuredCollaborationResult(
@@ -428,6 +432,7 @@ def test_controlled_active_work_repairs_one_semantic_schema_failure() -> None:
         ),
     })
     valid = InteractionSemanticCandidate(
+        semantic_intent=semantic_candidate(basis.records[-1], kind="QUESTION"),
         interpreted_motive=revision.motive,
         desired_outcome=revision.desired_outcome,
         collaboration=StructuredCollaborationResult(
@@ -475,6 +480,7 @@ def test_shadow_active_work_bad_expression_uses_validated_semantic_answer() -> N
         work_revision=revision, engineering_scope_fingerprint="e" * 64,
     )})
     semantic = InteractionSemanticCandidate(
+        semantic_intent=semantic_candidate(basis.records[-1], kind="QUESTION"),
         interpreted_motive=revision.motive, desired_outcome=revision.desired_outcome,
         collaboration=StructuredCollaborationResult(
             turn_intent=ConversationTurnIntent.DIRECT_QUESTION,
@@ -598,19 +604,18 @@ def test_explicit_action_missing_binding_is_repaired_in_same_turn_without_visibl
     basis = basis.model_copy(update={'records': (human,)})
     missing = json.loads(_semantics())
     missing['collaboration']['turn_intent'] = 'ACTION_REQUEST'
+    missing['semantic_intent'] = None
     missing['collaboration']['recommended_next_action'] = '我将推进创建'
     repaired = dict(missing)
-    repaired['action_candidates'] = [InteractionActionCandidate(
-        operation='CREATE_AND_SWITCH_BRANCH', speech_act='EXPLICIT_REQUEST',
-        source_record_id=human.id, source_text=human.content,
-        target_branch='feature/semantic', confidence=.99).model_dump(mode='json')]
+    repaired['semantic_intent'] = semantic_candidate(human, operation='CREATE_AND_SWITCH_BRANCH',
+        arguments={'target_branch': 'feature/semantic'}).model_dump(mode='json')
     runtime, adapter = _runtime(_Adapter([json.dumps(missing), json.dumps(repaired)]))
     capability = DeepSeekWorkInteractionCapability(runtime=runtime)
     visible = []
     result = capability.interpret_controlled_stream_observed(basis,
         on_response_delta=visible.append, on_pipeline_stage=lambda _: None)
     assert adapter.calls == 2 and visible == []
-    assert result.action_candidates[0].target_branch == 'feature/semantic'
+    assert result.semantic_intent.items[0].action.arguments['target_branch'].value == 'feature/semantic'
     assert capability.last_pipeline_evidence.semantic_action_repair_signal == 'EXPLICIT_ACTION_LOST_BEFORE_EXECUTION'
     assert 'original exact latest Human record' in adapter.requests[1]['instructions']
 
@@ -619,6 +624,7 @@ def test_action_binding_repair_is_bounded_and_does_not_invent_human_argument():
     from spg.domain.interaction import StructuredResponseSchemaViolation
     missing = json.loads(_semantics())
     missing['collaboration']['turn_intent'] = 'ACTION_REQUEST'
+    missing['semantic_intent'] = None
     runtime, adapter = _runtime(_Adapter([json.dumps(missing), json.dumps(missing)]))
     capability = DeepSeekWorkInteractionCapability(runtime=runtime)
     visible = []

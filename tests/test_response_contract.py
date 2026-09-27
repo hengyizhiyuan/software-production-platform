@@ -7,6 +7,8 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
+from tests.irk_test_fixtures import governed_ir
+from spg.domain.intent_realization import ProductionIntent
 from spg.application.response_contract import build_response_contract
 from spg.application.response_contract_expression import response_contract_expression_guidance
 from spg.domain.conversation import ConversationTurnIntent as Intent
@@ -221,6 +223,7 @@ def test_repository_change_request_overrides_provider_how_to_downgrade():
     contract = build_response_contract(
         _assessment(
             Intent.HOW_TO,
+            semantic_ir=governed_ir(_record('Please use https://github.com/acme/shop and add a login feature.'), production=ProductionIntent(objective="Modify the existing repository", primary_change="Implement the requested change", current=True, bounded_change=True)),
             design_intent_frame=_software_frame("existing repository"),
         ),
         source_records=(
@@ -261,7 +264,8 @@ def test_repository_how_to_question_remains_advisory():
 def test_uncommitted_product_idea_does_not_start_production():
     contract = build_response_contract(
         _assessment(
-            Intent.BUILD,
+            Intent.EXPLORE,
+            semantic_ir=governed_ir(_record("I want to build an app like Airbnb.")),
             design_intent_frame=_software_frame("Airbnb-like application"),
         ),
         source_records=(_record("I want to build an app like Airbnb."),),
@@ -276,6 +280,7 @@ def test_imperative_repo_bug_fix_is_a_production_request():
     contract = build_response_contract(
         _assessment(
             Intent.HOW_TO,
+            semantic_ir=governed_ir(_record('Fix this bug in my repo.'), production=ProductionIntent(objective="Modify the existing repository", primary_change="Implement the requested change", current=True, bounded_change=True)),
             design_intent_frame=_software_frame("existing repository"),
         ),
         source_records=(_record("Fix this bug in my repo."),),

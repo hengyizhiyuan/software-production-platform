@@ -18,7 +18,8 @@ from spg.application.conversation import (
     conversation_response_policy,
 )
 from spg.application.guided_design import design_schema_by_identity, design_schema_registry
-from spg.domain.interaction_actions import InteractionActionCandidate
+from spg.domain.interaction_actions import InteractionActionCandidate, CanonicalOperation
+from spg.domain.intent_realization import TurnSemanticCandidate
 from spg.domain.response_contract import ResponseIntent
 from spg.application.production_intelligence import default_system_capability_reality
 from spg.application.response_contract_expression import (
@@ -59,7 +60,7 @@ def _safe_validation_summary(error: BaseException) -> str:
     """Expose schema locations/types without echoing Provider input or secrets."""
 
     if not isinstance(error, ValidationError):
-        if isinstance(error, ValueError) and str(error).startswith(('ACTION_', 'SEMANTIC_BINDING_INVALID:')):
+        if isinstance(error, ValueError) and str(error).startswith(('ACTION_', 'SEMANTIC_', 'PRIMARY_', 'EXPLICIT_', 'PRODUCTION_', 'EXPECTED_', 'RESPONSE_', 'TURN_')):
             return str(error)[:300]
         return type(error).__name__
     issues = []
@@ -143,6 +144,7 @@ class _InteractionSemanticProviderPayload(BaseModel):
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
     action_candidates: tuple[InteractionActionCandidate, ...] = ()
+    semantic_intent: TurnSemanticCandidate | None = None
     neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
     semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[_InteractionProviderMeaning, ...]
@@ -533,22 +535,74 @@ class InteractionSemanticContract:
             "behavior, state change, or scope; it must not assign contextual roles that "
             "the Human did not explicitly name. Return exactly one explicit_roles entry "
             "for each values entry, using null when the Human named no role. "
-            "action_candidates interprets the latest Human speech act into canonical operations, "
-            "independently of surface wording. An explicit request to create a local branch "
-            "and make it current is CREATE_AND_SWITCH_BRANCH with the literal Human-supplied "
-            "target_branch. Repository acquisition/inspection, branch queries, Web/GitHub "
-            "search, Preview and delivery requests use their respective canonical operations. "
-            "Cite only the latest Human record and a verbatim source_text containing literal "
-            "arguments. Interpret the whole utterance: discussion, hypothetical suggestions, "
-            "quoted commands, negation, file checkout and topic changes are not execution "
-            "requests. Use DISCUSSION or UNRESOLVED, never EXPLICIT_REQUEST, for them. "
-            "A factual branch-status/existence/completion question is QUERY_BRANCH and "
-            "READ_ONLY_QUERY. Missing targets remain UNRESOLVED. Preserve multiple independently "
-            "requested operations in order. ACTION_REQUEST must have at least one action "
-            "candidate (OTHER for unsupported actions); never acknowledge future execution "
-            "without representing the requested action. Candidates are advisory: current "
-            "Human authority, resource Reality, acceptance and connector admission remain "
-            "owned by the application. Never infer delivery permission from credentials. "
+            "IRK is the only Human-language interpreter. semantic_intent is mandatory and "
+            "contains one or more typed items plus exact current-Human clause spans covering "
+            "the entire utterance, including punctuation. Preserve EVERY independently meaningful "
+            "clause, primary change, restriction, correction and future intent. Use OPERATIONAL_ACTION "
+            "only for bounded operations, PRODUCTION_INTENT for product changes, QUESTION/ANALYSIS "
+            "for answers, STATUS_QUERY for observed progress, EXPLORE/DESIGN for advisory ideas, "
+            "CONSTRAINT/FACT/CORRECTION for their respective meanings. observed_facts may contain "
+            "only exact key/value pairs from observed_reality with REPOSITORY_OBSERVED provenance; "
+            "a citation alone cannot turn your prose into observed fact. Do not compress a mixed "
+            "acquisition plus unresolved future modification into one item. Production.current "
+            "is true only for a present request to make a product change; broad current goals remain "
+            "production goals. unresolved describes open details; only typed questions with "
+            "blocks_current_step=true or item.requires_human can prevent current admission. "
+            "Repository inspection and choosing safe implementation details belong to existing owners, "
+            "not a Human questionnaire. primary_change retains the actual primary requested outcome. "
+            "scope contains business scope summaries; it must not invent adjacent features. "
+            "repository_required is true when an existing repository is necessary even if its source is "
+            "currently unknown; do not replace that missing repository with a greenfield workspace. "
+            "Advisory DESIGN items can carry design_frame as their canonical structured frame. "
+            "A parallel Root design_intent_frame cannot override the IR or turn a question into systemic design. "
+            "target_paths contains only literal Human-requested repository-relative file paths. "
+            "allowed_areas contains only literal Human-requested filesystem patterns ending in /**. "
+            "Natural business areas belong in scope. Discovered implementation paths remain owner hypotheses. "
+            "bounded_change and systemic_design distinguish a "
+            "bounded feature/maintenance task from explicitly requested system-wide design. new_work "
+            "is true only for an explicitly independent new long-lived goal; current bounded continuation "
+            "preserves the existing Work motive. Parallel legacy fields cannot override these IR semantics. "
+            "For QUESTION and ANALYSIS items, answer contains the answer to that specific item, "
+            "without claiming execution of a separate operational item. Keep mixed answers "
+            "separate so actual owner results cannot erase an independently asked question. "
+            "Each operational action uses the canonical operation enum, speech_act, structured "
+            "arguments, conditional flag and unresolved uncertainty. unresolved_arguments names "
+            "only blocking argument keys; optional uncertainty prose in unresolved does not require "
+            "Human intervention. Existing owners choose workspace paths and bind one observed exact "
+            "baseline. Missing consent, multiple targets and irreversible decisions remain Human-owned. "
+            "Supported operations are "
+            + ", ".join(operation.value for operation in CanonicalOperation) + ". "
+            "FETCH_PUBLIC_RESOURCE uses a url argument; SEARCH_GITHUB can use a typed "
+            "search_kind argument for repository, code or issue retrieval. Negated, hypothetical, quoted "
+            "or discussed commands do not authorize execution. Questions about capabilities are "
+            "questions, not effects. Current explicit action consent must cite an exact span in "
+            "the current Human record. Arguments may cite earlier Human evidence for contextual "
+            "follow-ups, but old commands never confer new consent. target_branch, repository_source "
+            "and candidate_revision must be bound to actual supplied or observed evidence. Include "
+            "query as a structured search argument; do not require a downstream model to reinterpret "
+            "the Human question. Queries may be MODEL_CANDIDATE with evidence_reference compiler:query "
+            "and grant only bounded read-only retrieval. Mark unbound arguments unresolved. "
+            "All operational/prod items and arguments retain provenance. Human provenance requires "
+            "source_record_id and verbatim source_text. Non-Human origins need a real basis evidence "
+            "reference, never a fabricated observation. Inferred facts never become Human authority. "
+            "Production intent never grants delivery_authorized; explicit acceptance, delivery consent, "
+            "push and PR are distinct operational items. Use depends_on item IDs for ordered effects. "
+            "requires_human is true only for genuine unresolved material authority or safety. "
+            "Preserve typed questions with blocks_current_step, requires_human and provenance. "
+            "Repository-observable questions and feature details deferred until discovery must "
+            "have blocks_current_step false; missing external runtime secrets block only the "
+            "owner boundary where actual observation proves necessity, not read-only preparation. "
+            "Cheap reversible details may be explicit candidate assumptions with no operational "
+            "authorization. Record human_abstraction_level and uncertain for expression strategy. "
+            "Operational.current distinguishes current execution from a future request after a "
+            "production outcome. A requested Preview after product completion is part of the "
+            "production acceptance obligation (preview_required true), not a current Preview "
+            "with no Candidate. Current Preview requests must retain a verifiable action obligation. "
+            "For status subjects use WORK_CURRENT, WORK_HISTORY, WORK_DIAGNOSTIC or PREVIEW as "
+            "appropriate; branch status uses QUERY_CURRENT_BRANCH and READ_ONLY_QUERY. "
+            "action_candidates is a deprecated compatibility field: return [] because the application "
+            "projects it from governed semantic_intent. Collaboration/response_intent is an "
+            "interaction directive consuming these same items, never a second interpretation. "
             "semantic_fact_candidates then binds "
             "those observations to small reusable product-semantic relations and "
             "Work-scoped subjects. Use contextual subjects such as image.width or "
@@ -598,7 +652,7 @@ class InteractionSemanticContract:
             "build a product is still BUILD. "
             "Use exactly one turn_intent enum value from the output schema; never invent "
             "a synonym such as CREATE, QUESTION or REQUEST_INFORMATION. "
-            "WIC owns these advisory interpretations. "
+            "IRK owns meaning; WIC consumes it for interaction strategy. "
             "A DIRECT_QUESTION or HOW_TO result must include a concrete, non-empty "
             "direct_answer containing the core answer, even when natural_response already "
             "contains that answer. Never return null for direct_answer on those intents. "
@@ -917,6 +971,7 @@ class WorkInteractionPipeline:
             neutral_semantic_extractions=semantic.neutral_semantic_extractions,
             semantic_fact_candidates=semantic.semantic_fact_candidates,
             action_candidates=semantic.action_candidates,
+            semantic_intent=semantic.semantic_intent,
             meanings=semantic.meanings,
             focus_classification=semantic.focus_classification,
             impact_disposition=semantic.impact_disposition,

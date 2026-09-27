@@ -179,6 +179,27 @@ def test_provider_quote_is_canonicalized_to_exact_cited_human_text() -> None:
     assert facts[0].provenance.source_text == record.content
 
 
+def test_same_compilation_fact_provenance_survives_quote_canonicalization() -> None:
+    from types import SimpleNamespace
+    from uuid import uuid4
+    from spg.domain.interaction import InteractionInvariantViolation
+
+    record = _record("ul下面加个button再")
+    candidate = _fact(record, candidate_id="add-button", subject="list.action",
+        relation=SemanticRelation.BEHAVIOR, value="add_button",
+        source_text="UL 下面加一个 Button")
+    ir = SimpleNamespace(id=uuid4(), items=(), compiler_reference="compiler:receipt",
+        semantic_fact_candidates=(candidate,))
+    facts = bind_engineering_semantic_facts(basis_fingerprint="a" * 64,
+        records=(record,), extractions=(), candidates=(candidate,), semantic_ir=ir)
+    assert facts[0].provenance.semantic_ir_id == ir.id
+    assert facts[0].provenance.governed_provenance[0].source_text == record.content
+    changed = candidate.model_copy(update={"value": "uncompiled_claim"})
+    with pytest.raises(InteractionInvariantViolation, match="no typed compiler provenance"):
+        bind_engineering_semantic_facts(basis_fingerprint="a" * 64,
+            records=(record,), extractions=(), candidates=(changed,), semantic_ir=ir)
+
+
 def test_provider_quote_rebinds_to_the_human_record_that_contains_it() -> None:
     first = _record("做一个 ul li 的 HTML 列表页", sequence=1)
     second = _record("ul下面加个button再", sequence=2)

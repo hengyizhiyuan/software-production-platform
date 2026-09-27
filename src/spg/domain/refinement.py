@@ -166,6 +166,7 @@ class RepositoryChangeProposalRequest(BaseModel):
     candidate_targets: tuple[str, ...] = ()
     necessity_proofs: tuple[RepositoryTargetNecessityProof, ...] = ()
     human_authority_text: str | None = None
+    governed_semantic_ir_id: UUID | None = None
     explicit_allowed_areas: tuple[str, ...] = ()
     explicit_forbidden_areas: tuple[str, ...] = ()
     requested_verification: tuple[CodeVerificationObligation, ...] = ()

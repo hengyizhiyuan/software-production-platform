@@ -80,7 +80,16 @@ class NativeGitOperationRunner:
         source_url: str | None,
         target_branch: str,
         authority_identity: str,
+        operation_kind: str = "CREATE_BRANCH",
     ) -> dict[str, object]:
+        if operation_kind not in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
+            raise ValueError("Unsupported typed local branch operation")
+        operation = "checkout" if operation_kind == "SWITCH_BRANCH" else "branch.create"
+        capability = "git.checkout" if operation_kind == "SWITCH_BRANCH" else "git.branch.create"
+        arguments = {"branch": target_branch}
+        if operation_kind == "CREATE_BRANCH_ONLY":
+            arguments["checkout"] = False
+        expected_branch = source_ref.removeprefix("refs/heads/") if operation_kind == "CREATE_BRANCH_ONLY" else target_branch
         with self.database.unit_of_work() as uow:
             revision = ProductStore(uow.session).current_work_reality_revision(work_id)
             steering = SteeringStore(uow.session)
@@ -96,13 +105,14 @@ class NativeGitOperationRunner:
             raise RuntimeError("Git action authority differs from current Work Reality")
         base_commit = self._git(source_repository, "rev-parse", f"{source_ref}^{{commit}}")
         tree = self._git(source_repository, "rev-parse", f"{base_commit}^{{tree}}")
+        expected_revision = self._git(source_repository, "rev-parse", f"refs/heads/{target_branch}^{{commit}}") if operation_kind == "SWITCH_BRANCH" else base_commit
         session_id = uuid5(NAMESPACE_URL, f"watt:native-git-session:{intake_id}")
         task = default_task_contract_builder().build(TaskContractRequest(
             activity=EngineeringActivity.FEATURE_DELIVERY,
-            objective=f"Create isolated Work branch {target_branch}",
-            scope=(f"git.branch.create:{target_branch}",),
+            objective=f"Realize {operation_kind} for isolated Work branch {target_branch}",
+            scope=(f"{capability}:{target_branch}",),
             acceptance_meaning=(
-                f"The current local branch is {target_branch} at exact commit {base_commit}.",
+                f"The current local branch is {expected_branch} at exact commit {expected_revision}; requested branch is {target_branch}.",
             ),
             out_of_scope=("No remote push or delivery", "Do not alter the source branch"),
             authority_lineage=(
@@ -116,7 +126,7 @@ class NativeGitOperationRunner:
                 f"source-revision:{base_commit}",
             ),
             decision_reference=f"steering-plan-revision:{active_steering.id}",
-            required_capabilities=("git.branch.create",),
+            required_capabilities=(capability,),
         ))
         runtime_reality = RuntimeService(self.database)
         try:
@@ -186,6 +196,13 @@ class NativeGitOperationRunner:
             source_revision=base_commit,
             repository_ref=source_ref,
         )
+        if operation_kind == "CREATE_BRANCH_ONLY":
+            self._git(workspace.workspace_path, "switch", expected_branch)
+        elif operation_kind == "SWITCH_BRANCH":
+            # Copy the already-observed local ref into disposable preparation.
+            # This does not contact a remote or create a new source branch.
+            self._git(workspace.workspace_path, "fetch", "--no-tags", "--no-recurse-submodules",
+                str(source_repository), f"refs/heads/{target_branch}:refs/heads/{target_branch}")
         # External Work keeps its credential-free source URL. Managed Work has
         # no remote dependency: its canonical Git bundle is captured by Watt.
         if source_url is None:
@@ -195,9 +212,10 @@ class NativeGitOperationRunner:
         payload = {
             "task_contract": task.model_dump(mode="json"),
             "git_operation": {
-                "operation": "branch.create",
-                "arguments": {"branch": target_branch},
-                "expected_revision": base_commit,
+                "operation": operation,
+                "arguments": arguments,
+                "expected_current_branch": expected_branch,
+                "expected_revision": expected_revision,
             },
         }
         contract_digest = canonical_digest(payload)
@@ -268,7 +286,7 @@ class NativeGitOperationRunner:
             inference_profile=self.provider_profile,
             capability_grants=(CapabilityGrant(
                 identity="git.operation", version="1",
-                scope={"capabilities": ["git.branch.create"]},
+                scope={"capabilities": [capability]},
             ),),
             resource_envelope=ResourceEnvelope(
                 envelope_id=uuid5(NAMESPACE_URL, f"watt:native-git-envelope:{intake_id}"),
@@ -303,7 +321,9 @@ class NativeGitOperationRunner:
                 target_branch=target_branch, base_commit=base_commit,
                 workspace=workspace, environment=environment, binding=binding,
                 manifest=manifest, session_id=session_id, pwu_id=pwu_id,
-                task=task, source_identity=source_identity,
+                task=task, source_identity=source_identity, operation=operation,
+                arguments=arguments, expected_branch=expected_branch, expected_revision=expected_revision,
+                capability=capability,
             )
         except Exception:
             # Admission already made the Attempt schedulable. A setup/worker
@@ -328,7 +348,7 @@ class NativeGitOperationRunner:
     def _run_admitted_branch_operation(
         self, *, handle, attempt_id, work_id, target_branch, base_commit, workspace,
         environment, binding, manifest, session_id, pwu_id, task,
-        source_identity,
+        source_identity, operation, arguments, expected_branch, expected_revision, capability,
     ) -> dict[str, object]:
         provider = self.production_environment.provider
         storage = ContentAddressedStorage(self.checkpoint_root / "native-git")
@@ -340,9 +360,9 @@ class NativeGitOperationRunner:
             assert tools is not None
             return NativeExecutorKernel(
                 inference=GovernedGitOperationInferenceAdapter(
-                    operation="branch.create",
-                    arguments={"branch": target_branch},
-                    expected_revision=base_commit,
+                    operation=operation,
+                    arguments=arguments,
+                    expected_revision=expected_revision, expected_current_branch=expected_branch,
                 ),
                 tools=tools.registry(),
                 checkpoints=DurableCheckpointPort(
@@ -390,7 +410,8 @@ class NativeGitOperationRunner:
             }
         branch = self._git(workspace.workspace_path, "branch", "--show-current")
         revision_after = self._git(workspace.workspace_path, "rev-parse", "HEAD^{commit}")
-        if branch != target_branch or revision_after != base_commit:
+        target_revision = self._git(workspace.workspace_path, "rev-parse", f"refs/heads/{target_branch}^{{commit}}")
+        if branch != expected_branch or revision_after != expected_revision or target_revision != expected_revision:
             raise RuntimeError("Native Git result differs from Work branch obligation")
         if observed.current_checkpoint_id is None:
             raise RuntimeError("Native Git success has no durable checkpoint")
@@ -405,8 +426,8 @@ class NativeGitOperationRunner:
                 attempt_id=attempt_id,
                 environment_id=environment.environment.id,
                 checkpoint_id=observed.current_checkpoint_id,
-                capability_id="git.branch.create",
-                operation="branch.create",
+                capability_id=capability,
+                operation=operation,
                 repository_identity=source_identity,
                 source_revision=base_commit,
                 resulting_branch=branch,

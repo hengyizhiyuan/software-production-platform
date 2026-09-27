@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from datetime import UTC, datetime
 import os
+import json
 from pathlib import Path
 import subprocess
 from threading import RLock
@@ -47,6 +48,8 @@ from spg.application.steering_decision import (
 from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.steering_production import SteeringProductionService
 from spg.application.work import WorkApplicationService
+from tests.irk_test_fixtures import semantic_candidate, question as typed_question
+from spg.domain.intent_realization import ProductionIntent, SemanticKind, SemanticItem, SemanticProvenance, SemanticOrigin, SemanticArgument
 from spg.domain.change import ProductionTargetKind
 from spg.domain.assets import (
     AssetScopeAdmissionRequest,
@@ -228,6 +231,36 @@ class _ReadyCapability:
         )
 
 
+class _DeclaredRepositoryIntent(_ReadyCapability):
+    """Declared oracle; the test sets each Turn's meaning without phrase routing."""
+    mode = "PRODUCTION"
+    def __init__(self, source=None, *, mode="PRODUCTION"):
+        self.source = source
+        self.mode = mode
+    def interpret(self, basis):
+        candidate = super().interpret(basis)
+        record = basis.records[-1]
+        if self.mode == "BRANCH_QUERY":
+            raw = semantic_candidate(record,operation="QUERY_CURRENT_BRANCH")
+        elif self.mode == "STATUS":
+            raw = semantic_candidate(record, kind=SemanticKind.STATUS_QUERY)
+            raw = raw.model_copy(update={"items": (raw.items[0].model_copy(update={"subject":"WORK_CURRENT"}),)})
+        else:
+            origin = next((r for r in reversed(basis.records) if self.source and self.source in r.content),None)
+            argument = None if origin is None else SemanticArgument(value=self.source,
+                provenance=SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
+                    source_record_id=origin.id,source_text=origin.content))
+            if self.mode == "ACQUIRE":
+                raw = semantic_candidate(record,operation="ACQUIRE_REPOSITORY")
+                raw = raw.model_copy(update={"items": (raw.items[0].model_copy(update={"action":
+                    raw.items[0].action.model_copy(update={"arguments": {} if argument is None else {"repository_source":argument}})}),)})
+            else:
+                raw = semantic_candidate(record,production=ProductionIntent(objective=candidate.interpreted_motive,
+                    primary_change=candidate.desired_outcome,current=True,bounded_change=True,
+                    repository_required=True,repository_reference=argument))
+        return candidate.model_copy(update={"semantic_intent":raw})
+
+
 class _BoundedFeatureExecutionCapability:
     def interpret(
         self, basis: InteractionInterpretationInput
@@ -251,6 +284,12 @@ class _BoundedFeatureExecutionCapability:
             current_requests=(request,),
             natural_response="The bounded change is ready for Work admission.",
             provider_identity="test:bounded-feature-execution",
+            semantic_intent=semantic_candidate(basis.records[-1], production=ProductionIntent(
+                objective="Existing site top navigation link",
+                primary_change="Top navigation has a 关于我们 link to /about and a reviewable preview.",
+                current=True, bounded_change=True, preview_required=True,
+                exclusions=("Only add the top-navigation text link to /about.",
+                    "Do not deliver before Human acceptance."))),
         )
 
 
@@ -433,6 +472,8 @@ class _ExplicitBranchSemanticCapability:
             impact_disposition=WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
             natural_response=f"已记录创建 {self.branch_name} 分支的明确请求，等待 Work Reality 接纳。",
             provider_identity="test:explicit-branch-semantic",
+            semantic_intent=semantic_candidate(latest, operation="CREATE_AND_SWITCH_BRANCH",
+                arguments={"target_branch": self.branch_name}),
         )
 
 
@@ -943,6 +984,13 @@ def test_reversible_detail_does_not_create_work_until_exact_human_admission(
                 unresolved_material_questions=("沿用哪种页面样式？",),
                 natural_response="可以先按当前理解制作可逆的首版。",
                 provider_identity="test:progressive-admission",
+                semantic_intent=semantic_candidate(basis.records[-1], production=ProductionIntent(
+                    objective="制作小学五年级课程表网页", primary_change="交付带 8×5 表格和示例数据的 HTML 页面",
+                    current=True, bounded_change=True), questions=(typed_question(
+                        "沿用哪种页面样式？", blocking=False, reversible=True),), extra_items=(SemanticItem(
+                            item_id="filename-uncertainty",kind=SemanticKind.FACT,statement="具体文件名尚未确定。",
+                            confidence=1,provenance=(SemanticProvenance(origin=SemanticOrigin.MODEL_CANDIDATE,
+                                evidence_reference="compiler:fixture:filename-uncertainty"),)),)),
             )
 
     interactions = WorkInteractionService(postgres_database, capability=_CourseTableCapability())
@@ -953,7 +1001,10 @@ def test_reversible_detail_does_not_create_work_until_exact_human_admission(
         human_identity="human:test",
     )
     assert candidate.readiness.status is WorkAdmissionReadinessStatus.READY
-    assert candidate.latest_assessment.unresolved_material_questions == ("沿用哪种页面样式？",)
+    assert candidate.latest_assessment.unresolved_material_questions == ()
+    question = candidate.latest_assessment.semantic_ir.questions[0]
+    assert question.question == "沿用哪种页面样式？"
+    assert question.safe_reversible_assumption and not question.blocks_current_step
     assert _count(postgres_database, product_works) == 0
     with pytest.raises(ProductInvariantViolation, match="Human authority"):
         work.admit_interaction_work(
@@ -1357,6 +1408,9 @@ def test_bounded_feature_execution_uses_steering_without_product_questionnaire(
             candidate = super().interpret(basis)
             return candidate.model_copy(update={
                 "candidate_constraints": constraints,
+                "semantic_intent": candidate.semantic_intent.model_copy(update={"items": (
+                    candidate.semantic_intent.items[0].model_copy(update={"production":
+                        candidate.semantic_intent.items[0].production.model_copy(update={"exclusions": constraints})}),)}),
                 "design_intent_frame": candidate.design_intent_frame.model_copy(
                     update={"collaboration_mode": mode,
                         "scope_level": DesignScopeLevel(framed_scope),
@@ -1394,11 +1448,18 @@ def test_work_status_question_is_read_only_and_independent_of_provider(
     admitted = _admit(work, ready)
     SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
 
-    class BrokenProvider:
-        def interpret(self, _basis):
-            raise AssertionError("Work Reality status must not call Provider")
+    class StatusCompiler:
+        calls = 0
+        def interpret(self, basis):
+            self.calls += 1
+            return InteractionAssessmentCandidate(natural_response="Status meaning only",
+                provider_identity="fixture:status-compiler", semantic_intent=semantic_candidate(
+                    basis.records[-1], kind=SemanticKind.STATUS_QUERY).model_copy(update={"items": (
+                        semantic_candidate(basis.records[-1], kind=SemanticKind.STATUS_QUERY).items[0].model_copy(
+                            update={"subject": "WORK_HISTORY" if question == "上一次到底改了什么？" else "WORK_CURRENT"}),)}))
 
-    service = WorkInteractionService(postgres_database, capability=BrokenProvider())
+    compiler = StatusCompiler()
+    service = WorkInteractionService(postgres_database, capability=compiler)
     before_revision = _count(postgres_database, work_reality_revisions)
     before_runs = _count(postgres_database, production_runs)
     before_steps = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
@@ -1406,7 +1467,8 @@ def test_work_status_question_is_read_only_and_independent_of_provider(
         ready.interaction.id, question, human_identity="human:test",
     )
     assessment = service.assess_current(ready.interaction.id)
-    assert assessment.provider_identity == "watt-native:work-reality-query"
+    assert assessment.provider_identity == "fixture:status-compiler"
+    assert compiler.calls == 1
     if question.startswith("上一次"):
         assert "现有记录没有独立观察到的文件变更" in assessment.natural_response
         assert "没有创建生产 Work" in assessment.natural_response
@@ -1949,6 +2011,7 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
     with postgres_database.unit_of_work() as uow:
         resource = ProductStore(uow.session).default_resource()
     assert resource is not None
+    interactions.capability = _DeclaredRepositoryIntent(source)
 
     class ExistingRepositoryIntake:
         def __init__(self) -> None:
@@ -2052,6 +2115,17 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
     assert len(assets.requests) == 1
     assert assets.requests[0].authority_identity == "human:requester"
     assert driver.scheduled == [UUID(payload["governed_work_id"])]
+    turn_id = UUID(submitted.json()["turn_id"])
+    deadline = time.monotonic() + 5
+    while interactions.get_turn(turn_id).status.value not in {"COMPLETED", "FAILED"}:
+        assert time.monotonic() < deadline
+        time.sleep(.01)
+    assert interactions.get_turn(turn_id).status.value == "COMPLETED"
+    final = interactions.get_shared_understanding(interaction.id)
+    answer = final.conversation_messages[-1].content
+    assert "当前目标已准入生产 Work" in answer
+    assert "尚未准入" not in answer
+    assert "没有推送" not in answer
 
 
 def test_explicit_pull_recovers_admitted_work_that_has_no_prior_acquisition_attempt(
@@ -2063,6 +2137,7 @@ def test_explicit_pull_recovers_admitted_work_that_has_no_prior_acquisition_atte
     with postgres_database.unit_of_work() as uow:
         resource = ProductStore(uow.session).default_resource()
     assert resource is not None
+    interactions.capability = _DeclaredRepositoryIntent(source)
 
     interaction = interactions.create_interaction(
         human_identity="human:requester",
@@ -2149,6 +2224,7 @@ def test_explicit_pull_recovers_admitted_work_that_has_no_prior_acquisition_atte
         raise_server_exceptions=False,
     )
 
+    interactions.capability.mode = "ACQUIRE"
     with client:
         response = client.post(
             f"/api/interactions/{interaction.id}/turns",
@@ -2207,6 +2283,8 @@ def test_unbound_repository_request_creates_work_without_bypassing_access(
         tmp_path,
         "test://repository-reference-only",
     )
+
+    interactions.capability = _DeclaredRepositoryIntent("https://github.com/acme/private-repository" if expected_intakes else None)
 
     class UnresolvedRepositoryIntake:
         def __init__(self) -> None:
@@ -2333,6 +2411,7 @@ def test_failed_repository_acquisition_reuses_work_and_retries_with_new_attempt(
     with postgres_database.unit_of_work() as uow:
         resource = ProductStore(uow.session).default_resource()
     assert resource is not None
+    interactions.capability = _DeclaredRepositoryIntent(source)
 
     class RecoveringRepositoryAcquisition:
         def __init__(self) -> None:
@@ -2445,6 +2524,7 @@ def test_failed_repository_acquisition_reuses_work_and_retries_with_new_attempt(
         assert first["repository_acquisition_state"] == "WAITING_FOR_AUTHORIZATION"
         assert driver.scheduled == []
 
+        interactions.capability.mode = "STATUS"
         submit("Is it ready?")
         status = client.get(
             f"/api/interactions/{interaction.id}/shared-understanding"
@@ -2454,6 +2534,7 @@ def test_failed_repository_acquisition_reuses_work_and_retries_with_new_attempt(
         assert status["repository_acquisition_state"] == "WAITING_FOR_AUTHORIZATION"
         assert len(assets.requests) == 1
 
+        interactions.capability.mode = "ACQUIRE"
         submit("Retry repository acquisition.")
         deadline = time.monotonic() + 5
         recovered = None
@@ -2466,7 +2547,8 @@ def test_failed_repository_acquisition_reuses_work_and_retries_with_new_attempt(
                 break
             time.sleep(0.01)
 
-    assert recovered is not None
+    final_turn = client.get(f"/api/interactions/{interaction.id}/shared-understanding").json()["turns"][-1]
+    assert recovered is not None, (final_turn.get("status"), final_turn.get("failure_message"), assets.observations[-1], driver.scheduled)
     assert recovered["governed_work_id"] == work_id
     assert recovered["repository_acquisition_state"] == "READY"
     assert len(assets.requests) == 2
@@ -3004,7 +3086,7 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     assert answer is not None and branch_name in answer and branch["revision"] in answer
     shadow = WorkInteractionService(
         postgres_database,
-        capability=_ExplicitBranchSemanticCapability(provider_variant=True),
+        capability=_DeclaredRepositoryIntent(mode="BRANCH_QUERY"),
         runtime_mode=WicRuntimeMode.WIC_VNEXT_SHADOW,
     )
     try:
@@ -3273,6 +3355,9 @@ def test_design_posture_does_not_discard_explicit_current_feature_request(
                 ),),
                 natural_response="I will add the link to this Work.",
                 provider_identity="test:design-posture-current-feature",
+                semantic_intent=semantic_candidate(latest,production=ProductionIntent(
+                    objective=revision.motive,primary_change="The Work navigation includes the requested documentation link.",
+                    current=True,bounded_change=True)),
             )
 
     active = WorkInteractionService(postgres_database, capability=_DesignPostureCapability())
@@ -4577,3 +4662,81 @@ def test_human_answer_to_current_design_question_admits_once_and_schedules(postg
     finally:
         driver.shutdown()
         driver.production_orchestrator.shutdown()
+
+
+
+def test_typed_create_only_then_switch_uses_native_owner_without_losing_local_ref(
+    postgres_database, tmp_path, services, monkeypatch,
+):
+    if subprocess.run(("docker","image","inspect","watt-native-executor-runtime:local"),capture_output=True).returncode:
+        pytest.skip("qualified local Native Executor image is unavailable")
+    work, interactions = services
+    ready = _ready(interactions)
+    actor = "human:test"
+    admitted = _admit(work,ready,authority_identity=actor)
+    with postgres_database.unit_of_work() as uow:
+        original = ProductStore(uow.session).resource_for_work(admitted.work_id)
+    native = NativeGitOperationRunner(postgres_database,
+        production_environment=NativeProductionEnvironmentRuntime(
+            store=JsonProductionEnvironmentStore(tmp_path/"native-variant-pe"),
+            provider=ContainerProductionEnvironmentProvider(DockerCliContainerRuntime()),
+            image_reference="watt-native-executor-runtime:local"),
+        workspace_root=tmp_path/"native-variant-workspaces",
+        checkpoint_root=tmp_path.parent.parent/('nv-'+uuid4().hex[:8]))
+    assets = RepositoryAssetService(postgres_database,tmp_path/"variant-assets",tmp_path,
+        native_git_operations=native)
+    acquired = assets.intake(RepositoryIntakeRequest(request_id=uuid4(),source=original.location_ref,
+        title="Observed source",description="Acquire exact owner fixture",authority_identity=actor,
+        interaction_id=ready.interaction.id,work_id=admitted.work_id))
+    assert acquired["condition"] == "READY"
+    work.admit_asset_scope(admitted.work_id,AssetScopeAdmissionRequest(resource_id=UUID(acquired["resource_id"]),
+        expected_work_revision_id=work.get_work(admitted.work_id).current_work_reality_revision_id,
+        observation_fingerprint=acquired["fingerprint"],authority_identity=actor,rationale="Bind exact fixture baseline"),acquired)
+    bootstrap = SteeringBootstrapService(postgres_database)
+    bootstrap.bootstrap(admitted.work_id)
+    orchestrator = ProductionOrchestrator(work)
+    driver = PlanSteeringDriver(postgres_database,work,orchestrator,repository_assets=assets)
+    monkeypatch.setattr(driver,"schedule",lambda _identity:True)
+    trigger = ProductionAdmissionTrigger(interactions,work,assets,
+        WorkPostAdmissionService(work,bootstrap,driver,orchestrator))
+    class VariantCompiler:
+        operation = "CREATE_BRANCH"
+        def interpret(self,basis):
+            return InteractionAssessmentCandidate(provider_identity="fixture:typed-native-variants",
+                natural_response="The owner owes the declared local operation.",
+                semantic_intent=semantic_candidate(basis.records[-1],operation=self.operation,
+                    arguments={"target_branch":"feat_parked"}))
+    compiler = VariantCompiler()
+    interactions.capability = compiler
+    interactions.configure_repository_actions(assets.execute_interaction_actions,assets.interaction_observation)
+    interactions.configure_governed_branch_handler(trigger.execute_governed_turn)
+    def perform(text):
+        turn = interactions.submit_turn(ready.interaction.id,text,human_identity=actor)
+        deadline = time.monotonic()+150
+        while time.monotonic()<deadline:
+            settled = interactions.get_turn(turn.id)
+            if settled.status.value in {"COMPLETED","FAILED"}:
+                assert settled.status.value == "COMPLETED",settled.failure_message
+                return interactions.realization_projection(turn.id)
+            time.sleep(.1)
+        pytest.fail("Qualified Native branch owner did not settle")
+    try:
+        created = perform("只创建 feat_parked，先留在 main。")
+        assert created["obligations"][0]["state"] == "SATISFIED", json.dumps(assets.latest_attempt_for_work(admitted.work_id),default=str)
+        assert assets.latest_attempt_for_work(admitted.work_id)["repository_ref"] == "refs/heads/main"
+        with postgres_database.unit_of_work() as uow:
+            revision = ProductStore(uow.session).current_work_reality_revision(admitted.work_id)
+            selected = ProductStore(uow.session).resource_for_work(admitted.work_id)
+        assert revision.repository_ref == "refs/heads/main"
+        assert _git(Path(selected.location_ref),"rev-parse","feat_parked") == acquired["revision"]
+        compiler.operation = "SWITCH_BRANCH"
+        switched = perform("现在切换到现有的 feat_parked。")
+        assert switched["obligations"][0]["state"] == "SATISFIED",switched
+        observation = assets.latest_attempt_for_work(admitted.work_id)
+        assert observation["repository_ref"] == "refs/heads/feat_parked"
+        assert observation["revision"] == acquired["revision"]
+        assert _git(Path(original.location_ref),"branch","--show-current") == "main"
+    finally:
+        interactions.shutdown()
+        driver.shutdown()
+        orchestrator.shutdown()

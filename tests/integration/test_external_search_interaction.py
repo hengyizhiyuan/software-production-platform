@@ -25,12 +25,27 @@ from spg.application.wic_reception import (
     DeterministicFastReceptionCapability, ShadowFastReceptionRuntime,
 )
 
+from tests.irk_test_fixtures import semantic_candidate
+from spg.domain.intent_realization import SemanticArgument, SemanticProvenance, SemanticOrigin, SemanticItem, SemanticKind, OperationalIntent
 from tests.test_external_research import _GitHub, _Web, _evidence
 
 
 class _Semantic:
+    def __init__(self, operations=("SEARCH_GITHUB",), repository_source=None):
+        self.operations = operations
+        self.repository_source = repository_source
+
     def interpret(self, basis):
+        record = basis.records[-1]
+        source = SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT, source_record_id=record.id, source_text=record.content)
+        inferred = SemanticProvenance(origin=SemanticOrigin.MODEL_CANDIDATE, evidence_reference="compiler:query")
+        items = tuple(SemanticItem(item_id=f"search-{index}", kind=SemanticKind.OPERATIONAL_ACTION, statement="Declared retrieval request", provenance=(source,), confidence=1, action=OperationalIntent(operation=operation, speech_act="EXPLICIT_REQUEST", arguments={"query": SemanticArgument(value="python async queue", provenance=inferred)})) for index, operation in enumerate(self.operations))
+        ir = semantic_candidate(record, extra_items=items)
+        if self.repository_source:
+            from spg.domain.intent_realization import ProductionIntent
+            ir = semantic_candidate(record, production=ProductionIntent(objective="Later implementation", primary_change="Unresolved", current=False, bounded_change=False, repository_reference=SemanticArgument(value=self.repository_source, provenance=source)), extra_items=items)
         return InteractionAssessmentCandidate(
+            semantic_intent=ir,
             interpreted_motive="Find public async queue implementations",
             current_requests=(basis.records[-1].content,),
             natural_response="I can discuss queue designs from memory.",
@@ -122,7 +137,7 @@ def test_combined_github_web_search_merges_real_provider_shapes_without_duplicat
             http=http,
         )
         service = WorkInteractionService(
-            postgres_database, capability=_Semantic(),
+            postgres_database, capability=_Semantic(("SEARCH_GITHUB", "SEARCH_WEB")),
             runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED,
             external_research=research,
         )
@@ -232,7 +247,7 @@ def test_project_research_observation_survives_real_turn_event_persistence(
     research = GovernedExternalResearch(ConnectorResolver(postgres_database),
         github=_GitHub(((_evidence("one"),_evidence("two",2)),)), web=_Web(),
         http=BoundedPublicHttp(), project_repository=lambda **_: packet, model=model)
-    service = WorkInteractionService(postgres_database, capability=_Semantic(),
+    service = WorkInteractionService(postgres_database, capability=_Semantic(repository_source="https://github.com/owner/project.git"),
         runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED, external_research=research)
     interaction = service.create_interaction(human_identity="human:research-test")
     turn = service.submit_turn(interaction.id,

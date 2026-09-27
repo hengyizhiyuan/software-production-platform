@@ -7,7 +7,10 @@ import argparse
 import json
 from pathlib import Path
 
-from journey import ProductClient
+if __package__:
+    from .journey import ProductClient
+else:
+    from journey import ProductClient
 
 
 def main():

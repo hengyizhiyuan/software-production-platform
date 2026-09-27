@@ -86,7 +86,20 @@ def main():
     while time.monotonic()-started < args.timeout:
         interaction = client.request('/api/interactions/'+interaction_id)
         work_id = interaction.get('governed_work_id')
+        for turn in interaction.get('turns', []):
+            if turn.get('assessment_id'):
+                realization = client.request('/api/interactions/'+interaction_id+'/turns/'+turn['turn_id']+'/realization')
+                (directory/('realization-'+turn['turn_id']+'.json')).write_text(json.dumps(realization,ensure_ascii=False,indent=2))
         state = {'interaction': interaction, 'observed_at': datetime.now(UTC).isoformat()}
+        turns = interaction.get('turns', [])
+        if not work_id and turns and turns[-1].get('status') == 'COMPLETED':
+            projection = client.request('/api/interactions/'+interaction_id+'/turns/'+turns[-1]['turn_id']+'/realization')
+            ir = projection.get('semantic_ir') or {}
+            if any(item.get('production', {}).get('current') for item in ir.get('items', []) if item.get('production')):
+                result.update(status='CURRENT_PRODUCTION_NOT_ADMITTED', interaction_id=interaction_id,
+                    obligations=projection.get('obligations', []), business_oracle='NOT_EVALUATED')
+                (directory/'latest.json').write_text(json.dumps(state, ensure_ascii=False, indent=2))
+                break
         if work_id:
             prefix = '/api/works/'+work_id
             state.update(work=client.request(prefix), steering=client.request(prefix+'/steering'),

@@ -1,5 +1,9 @@
 """Real PostgreSQL + real Git; preparatory actions never fabricate admitted Work."""
 from pathlib import Path
+import re
+from types import SimpleNamespace
+from tests.irk_test_fixtures import governed_ir, semantic_candidate, question
+from tests.integration.test_intent_realization_ledger import DeclaredCompiler
 import subprocess
 import time
 from uuid import UUID, uuid4
@@ -23,7 +27,7 @@ def owner(postgres_database, tmp_path, monkeypatch):
     monkeypatch.setenv('SPG_DATABASE_URL', postgres_database.engine.url.render_as_string(hide_password=False))
     command.upgrade(Config('alembic.ini'), 'head')
     assets = RepositoryAssetService(postgres_database, tmp_path/'assets', tmp_path)
-    interaction = WorkInteractionService(postgres_database, capability=DeterministicWorkInteractionCapability(), runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED)
+    interaction = WorkInteractionService(postgres_database, capability=DeclaredCompiler(), runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED)
     interaction.configure_repository_actions(assets.execute_interaction_actions, assets.interaction_observation)
     source = tmp_path/'source'
     source.mkdir()
@@ -38,7 +42,11 @@ def owner(postgres_database, tmp_path, monkeypatch):
     interaction.shutdown()
 
 
-def turn(service, identity, text):
+def turn(service, identity, text, *, operation=None, branch=None, ambiguous=False):
+    if isinstance(service.capability, DeclaredCompiler):
+        service.capability.operation = operation
+        service.capability.arguments = {"target_branch": branch} if branch else {"repository_source": re.search(r"https://[^，\s]+", text).group(0)} if operation == "ACQUIRE_REPOSITORY" and not ambiguous else {}
+        service.capability.conditional = ambiguous
     receipt = service.submit_turn(identity, text, human_identity='human:owner')
     deadline=time.monotonic()+30
     while time.monotonic()<deadline:
@@ -61,16 +69,16 @@ def test_acquisition_branch_and_query_without_work(owner, monkeypatch, pre_work)
             return real.acquire(root,str(source),destination)
     assets.repository_acquirer=LocalRemote()
     interaction=service.create_interaction(human_identity='human:owner',start_work_context=pre_work)
-    projection=turn(service,interaction.id,f'我有个GitHub仓库：https://github.com/acme/{uuid4().hex}.git，把它clone下来，我要改个需求')
+    projection=turn(service,interaction.id,f'我有个GitHub仓库：https://github.com/acme/{uuid4().hex}.git，把它clone下来，我要改个需求', operation='ACQUIRE_REPOSITORY')
     assert projection.governed_work_id is None
     observation=projection.repository_observation
     assert (observation['condition'],observation['revision'],observation['tree'])==('READY',revision,tree)
     assert observation['repository_ref']=='refs/heads/main'
-    projection=turn(service,interaction.id,'切一个 feat_test 分支')
+    projection=turn(service,interaction.id,'切一个 feat_test 分支', operation='CREATE_AND_SWITCH_BRANCH', branch='feat_test')
     assert projection.repository_observation['repository_ref']=='refs/heads/feat_test'
     assert projection.repository_observation['revision']==revision
     assert projection.repository_observation['tree']==tree
-    projection=turn(service,interaction.id,'我现在在哪个分支？')
+    projection=turn(service,interaction.id,'我现在在哪个分支？', operation='QUERY_CURRENT_BRANCH')
     assert 'feat_test' in projection.conversation_messages[-1].content
     assert projection.governed_work_id is None
     assert len(assets.attempts_for_interaction(interaction.id))==2
@@ -101,7 +109,7 @@ def test_retryable_failure_has_bounded_lineage_and_terminal_does_not_retry(owner
     adapter=Unstable()
     assets.repository_acquirer=adapter
     interaction=service.create_interaction(human_identity='human:owner')
-    projection=turn(service,interaction.id,f'clone https://github.com/acme/{uuid4().hex}.git')
+    projection=turn(service,interaction.id,f'clone https://github.com/acme/{uuid4().hex}.git', operation='ACQUIRE_REPOSITORY')
     assert adapter.calls==attempts
     assert len(assets.attempts_for_interaction(interaction.id))==attempts
     assert projection.governed_work_id is None
@@ -126,10 +134,11 @@ def test_valid_credential_and_capability_do_not_replace_current_resource_authori
             authority_resource_access.c.resource_id == str(interaction.id),
         ))
         uow.commit()
-    projection = turn(service, interaction.id, f'clone https://github.com/acme/{uuid4().hex}.git')
+    projection = turn(service, interaction.id, f'clone https://github.com/acme/{uuid4().hex}.git', operation='ACQUIRE_REPOSITORY')
     assert not assets.attempts_for_interaction(interaction.id)
     assert projection.governed_work_id is None
-    assert '操作被阻止' in projection.conversation_messages[-1].content
+    assert '尚未完成' in projection.conversation_messages[-1].content
+    assert service.realization_projection(projection.turns[-1].id)['obligations'][0]['state'] == 'BLOCKED_WITH_EVIDENCE'
 
 
 def test_exhausted_network_retries_preserve_non_convergence_and_do_not_restart_blindly(owner):
@@ -143,7 +152,7 @@ def test_exhausted_network_retries_preserve_non_convergence_and_do_not_restart_b
     adapter = Unavailable()
     assets.repository_acquirer = adapter
     interaction = service.create_interaction(human_identity='human:owner')
-    projection = turn(service, interaction.id, f'clone https://github.com/acme/{uuid4().hex}.git')
+    projection = turn(service, interaction.id, f'clone https://github.com/acme/{uuid4().hex}.git', operation='ACQUIRE_REPOSITORY')
     assert adapter.calls == 3
     assert projection.repository_observation['condition'] == 'FAILED_RETRYABLE'
     assert projection.governed_work_id is None
@@ -161,9 +170,9 @@ def test_ambiguous_target_asks_once_without_acquisition(owner):
     service, assets, *_ = owner
     interaction = service.create_interaction(human_identity='human:owner')
     projection = turn(service, interaction.id,
-        'clone https://github.com/acme/one.git https://github.com/acme/two.git')
+        'clone https://github.com/acme/one.git https://github.com/acme/two.git', operation='ACQUIRE_REPOSITORY', ambiguous=True)
     assert not assets.attempts_for_interaction(interaction.id)
-    assert '请指定要操作哪一个' in projection.conversation_messages[-1].content
+    assert service.realization_projection(projection.turns[-1].id)['obligations'][0]['state'] == 'REQUIRES_HUMAN'
     assert projection.governed_work_id is None
 
 
@@ -206,7 +215,7 @@ def test_provider_semantic_action_survives_nonmatching_surface_and_persists_auth
             return real.acquire(root, str(source), destination)
     assets.repository_acquirer = LocalRemote()
     interaction = service.create_interaction(human_identity='human:owner')
-    turn(service, interaction.id, f'clone https://github.com/acme/{uuid4().hex}.git')
+    turn(service, interaction.id, f'clone https://github.com/acme/{uuid4().hex}.git', operation='ACQUIRE_REPOSITORY')
     original = service.capability
     class SemanticPort:
         provider_identity = 'deepseek-responses:test'
@@ -215,6 +224,7 @@ def test_provider_semantic_action_survives_nonmatching_surface_and_persists_auth
             value = original.interpret(basis)
             return value.model_copy(update={
                 'provider_identity': self.provider_identity,
+                'semantic_intent': semantic_candidate(human, operation='CREATE_AND_SWITCH_BRANCH', arguments={'target_branch': 'feat_semantic_binding'}),
                 'action_candidates': (InteractionActionCandidate(
                     operation='CREATE_AND_SWITCH_BRANCH', speech_act='EXPLICIT_REQUEST',
                     source_record_id=human.id, source_text=human.content,
@@ -242,6 +252,7 @@ def test_provider_discussion_cannot_fall_back_to_legacy_phrase_mutation(owner):
             human = basis.records[-1]
             return original.interpret(basis).model_copy(update={
                 'provider_identity': self.provider_identity,
+                'semantic_intent': semantic_candidate(human),
                 'action_candidates': (InteractionActionCandidate(
                     operation='CREATE_AND_SWITCH_BRANCH', speech_act='DISCUSSION',
                     source_record_id=human.id, source_text=human.content,

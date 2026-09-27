@@ -20,8 +20,10 @@ def _assessment(
     *signals: PatternSignal,
     governance: GovernanceCandidateKind = GovernanceCandidateKind.CONVERSATION_ONLY,
     intent: ConversationTurnIntent = ConversationTurnIntent.EXPLORE,
+    altitude="DOMAIN", uncertain=False,
 ):
     return SimpleNamespace(
+        semantic_ir=SimpleNamespace(human_abstraction_level=altitude, uncertain=uncertain, items=()),
         progressive_semantics=SimpleNamespace(
             pattern_signals=signals,
             governance_candidate=governance,
@@ -102,7 +104,7 @@ def test_strategy_meets_the_human_at_their_current_altitude(
     text, intent, signals, move, altitude, maturity, mode
 ) -> None:
     strategy = select_interaction_strategy(
-        _assessment(*signals, intent=intent), latest_human_input=text
+        _assessment(*signals, intent=intent, altitude=altitude.value, uncertain=text == "我其实也不知道该做成什么样。"), latest_human_input=text
     )
     assert strategy.primary_move is move
     assert strategy.human_abstraction_level is altitude
@@ -126,7 +128,7 @@ def test_broad_build_offers_a_candidate_before_one_optional_question() -> None:
 
 def test_human_uncertainty_gets_a_proposal_instead_of_a_questionnaire() -> None:
     strategy = select_interaction_strategy(
-        _assessment(intent=ConversationTurnIntent.EXPLORE),
+        _assessment(intent=ConversationTurnIntent.EXPLORE, uncertain=True, altitude="VISION"),
         latest_human_input="我其实也不知道该做成什么样。",
     )
     assert strategy.primary_move is ConversationalMove.PROPOSE
@@ -165,7 +167,7 @@ def test_strategy_preserves_model_selected_object_specific_next_move(
 
 def test_strategy_suppresses_but_never_replaces_a_disallowed_question() -> None:
     strategy = select_interaction_strategy(
-        _assessment(intent=ConversationTurnIntent.EXPLORE),
+        _assessment(intent=ConversationTurnIntent.EXPLORE, uncertain=True, altitude="VISION"),
         latest_human_input="我其实也不知道该做成什么样。",
     )
     content = "可以先比较两种有明确取舍的方向。你更喜欢哪一种？"

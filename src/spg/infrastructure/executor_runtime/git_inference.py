@@ -14,14 +14,20 @@ from spg.domain.native_execution import (
 class GovernedGitOperationInferenceAdapter:
     """Execute the Task Contract's exact Git action; accept only its settled receipt."""
 
-    def __init__(self, *, operation: str, arguments: dict[str, object], expected_revision: str) -> None:
-        if operation != "branch.create":
-            raise ValueError("deterministic Git adapter currently admits branch.create only")
+    def __init__(self, *, operation: str, arguments: dict[str, object], expected_revision: str,
+            expected_current_branch: str | None = None) -> None:
+        if operation not in {"branch.create", "checkout"}:
+            raise ValueError("deterministic Git adapter admits only local branch operations")
         branch = arguments.get("branch")
         if not isinstance(branch, str) or not branch:
             raise ValueError("branch operation must bind an exact requested branch")
         self.operation = operation
         self.arguments = {"operation": operation, "branch": branch}
+        if "checkout" in arguments:
+            if not isinstance(arguments["checkout"], bool):
+                raise ValueError("Branch checkout must be a typed boolean")
+            self.arguments["checkout"] = arguments["checkout"]
+        self.expected_current_branch = expected_current_branch or branch
         self.expected_revision = expected_revision
 
     async def infer(self, request: InferenceRequest) -> InferenceResponse:
@@ -49,7 +55,7 @@ class GovernedGitOperationInferenceAdapter:
             receipt.get("tool_identity") == "git.operation"
             and receipt.get("condition") == "SETTLED"
             and output.get("operation") == self.operation
-            and output.get("resulting_branch") == self.arguments["branch"]
+            and output.get("resulting_branch") == self.expected_current_branch
             and output.get("resulting_revision") == self.expected_revision
         ):
             return InferenceResponse(

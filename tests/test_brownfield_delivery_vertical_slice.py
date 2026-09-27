@@ -46,11 +46,12 @@ def run(*arguments: str, cwd: Path | None = None) -> str:
 
 
 def load_runtime_owners():
+    from tests.qualification_owner_sources import owner_source_root
     workspace_root = Path(__file__).resolve().parents[2]
-    ecf_src = workspace_root / "engineering-context-fabric" / "src"
-    guardian_src = workspace_root / "guardian" / "src"
-    if not ecf_src.is_dir() or not guardian_src.is_dir():
-        pytest.skip("sibling ECF and Guardian repositories are unavailable")
+    ecf_src = owner_source_root("ecf",workspace_root / "engineering-context-fabric" / "src")
+    guardian_src = owner_source_root("guardian",workspace_root / "guardian" / "src")
+    if not any(path.is_file() for path in (ecf_src / "ecf" / "runtime.py", ecf_src / "ecf" / "runtime" / "__init__.py")) or not any(path.is_file() for path in (guardian_src / "guardian" / "runtime.py", guardian_src / "guardian" / "runtime" / "__init__.py")):
+        pytest.skip("BLOCKED_EXTERNAL_DEPENDENCY: sibling ECF/Guardian runtime source is unavailable")
     sys.path[:0] = [str(ecf_src), str(guardian_src)]
     from ecf.runtime import ECFRealityRuntime, JsonRealityStore
     from guardian.runtime import JsonAssuranceIntakeStore

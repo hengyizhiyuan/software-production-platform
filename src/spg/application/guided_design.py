@@ -441,34 +441,9 @@ class GuidedDesignApplicationService:
             assessment = InteractionStore(unit_of_work.session).assessment(
                 admitted.source_assessment_id
             )
-            human_records = tuple(InteractionStore(unit_of_work.session).record(identity)
-                for identity in admitted.source_record_ids)
-            human_text = "\n".join(record.content for record in human_records if record is not None)
-            human_scope = re.sub(r"https?://[^\s<>()，。；]+", "", human_text)
-            bounded_feature = bool(re.search(
-                r"页面|表单|按钮|字段|列表|搜索|链接|功能|能力|"
-                r"(?:网站|应用|系统).{0,12}(?:支持|提供).{1,24}|"
-                r"(?:^|[\n。！？])\s*(?:请\s*)?(?:新增|增加|添加|加(?:一个|一项|个)).{1,32}(?:[，。！？\n]|$)|"
-                r"\b(?:page|form|button|field|list|search|link|feature|capability)\b",
-                human_scope, re.IGNORECASE))
-            bounded_maintenance = bool(re.search(
-                r"(?:修复|排查|解决).{0,48}(?:错误|故障|异常|失败|缺陷)|"
-                r"(?:^|[\n。！？])\s*(?:请\s*)?(?:启动|运行|构建|编译).{0,32}(?:项目|仓库|应用)|"
-                r"\b(?:fix|resolve|repair).{0,48}\b(?:bug|error|failure|defect)\b|"
-                r"\b(?:start|run|build|compile).{0,32}\b(?:project|repository|application)\b",
-                human_scope, re.IGNORECASE))
-            systemic_design = bool(re.search(
-                r"(?:设计|重构|搭建|重新规划).{0,24}(?:系统|平台|架构)|"
-                r"(?:新建|创建|开发|新增|增加).{0,12}(?:系统|平台|网站|应用)(?:[，。！？\n]|$)|"
-                r"(?:完整|整个|整套).{0,12}(?:系统|平台|网站)|"
-                r"\b(?:design|redesign|rearchitect|build|create).{0,32}\b(?:system|platform|architecture)\b",
-                human_scope, re.IGNORECASE))
-            if (assessment is not None and not assessment.readiness.unresolved_material_questions
-                    and production_intent_evidence(human_text).production_request
-                    and (bounded_feature or bounded_maintenance) and not systemic_design):
-                # The Human's admitted bounded feature outranks an advisory
-                # PRODUCT_SYSTEM frame or deferred repository questions. Ordinary
-                # Steering still inspects Reality and may escalate genuine risk.
+            goals = () if assessment is None or assessment.semantic_ir is None else assessment.semantic_ir.current_production
+            if (goals and all(goal.bounded_change and not goal.systemic_design for goal in goals)
+                    and not assessment.readiness.unresolved_material_questions):
                 return False
             frame = None if assessment is None else assessment.design_intent_frame
             return not bool(

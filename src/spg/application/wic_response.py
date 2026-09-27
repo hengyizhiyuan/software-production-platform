@@ -421,7 +421,8 @@ def governed_response_envelope(
     context_candidates.append(
         system_capability_context_candidate(
             required=(
-                is_system_capability_question(latest_human_input)
+                bool(getattr(assessment, "semantic_ir", None) and any(item.subject == "SYSTEM_CAPABILITY"
+                    for item in assessment.semantic_ir.items))
                 or contract.capability_alignment.response_mode
                 is not CapabilityAlignmentMode.KNOWLEDGE
             )
@@ -497,7 +498,8 @@ def governed_response_envelope(
         cognitive_context_package=cognitive_context,
         response_contract=contract,
         previous_response_contract=previous_response_contract,
-        latest_human_input=latest_human_input,
+        latest_human_input=None,
+        semantic_ir=None if getattr(assessment, "semantic_ir", None) is None else assessment.semantic_ir.model_dump(mode="json"),
         recent_relevant_messages=recent_relevant_messages,
         production_admission_state=production_admission_state,
         repository_acquisition_state=repository_acquisition_state,
@@ -644,24 +646,9 @@ def policy_governed_response(
         for delta in semantics.deltas
     )
     if human_owned:
-        if chinese:
-            if not re.search(r"(客户数据|个人信息|隐私|外部模型|权限|保留期|留存)", latest_human_input):
-                return (
-                    "这里涉及必须由你决定的高影响边界。"
-                    "我可以先梳理可回退方案、影响范围和验证办法，但不会替你决定预算、删除、迁移或其他不可逆条件。"
-                    "请确认允许的范围、审批人和回退条件。"
-                )
-            return (
-                "客户数据能否交给外部模型，必须由你决定；我不会替你设定权限、保留期，也不会默认客户已经同意。"
-                "不依赖这项决定的数据分级、最小化传输、隔离和审计可以先继续。"
-                "先确认一件事：哪些数据允许发给外部模型？"
-            )
-        return (
-            "This crosses Human-owned data and authority boundaries: the data allowed outside, "
-            "access scope, and retention period require your decision. I can continue with data "
-            "classification, minimization, isolation, and audit design, but I will not choose "
-            "those boundaries or assume customer consent."
-        )
+        decisions = "; ".join(semantics.unresolved_human_decisions)
+        return (f"这些边界由你决定，我不会替你设定：{decisions}。尚未执行相关操作。"
+            if chinese else f"This request still needs your decision: {decisions}. The affected operation has not executed.")
 
     if PatternSignal.BROWNFIELD_REALITY_CONFLICT in signals:
         governed_fact = next(
@@ -733,9 +720,7 @@ def policy_governed_response(
     # New-Work boundaries are a Human decision even when the Provider sounds decisive.
     if semantics.governance_candidate is GovernanceCandidateKind.NEW_MOTIVE_CANDIDATE:
         motive = (
-            _explicit_new_object(latest_human_input)
-            or candidate.interpreted_motive
-            or latest_human_input.strip()
+            semantics.working_motive or "Unresolved independent goal"
         )
         if chinese:
             return f"这更像另一个独立目标：{motive}。当前目标先保持不变；是否单独立项由你决定。"

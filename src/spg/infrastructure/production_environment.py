@@ -207,6 +207,34 @@ class GitRepositoryAcquirer:
         if GitContinuityInspector._git(destination, "rev-parse", "HEAD^{commit}") != base_revision:
             raise EnvironmentProviderError("Branch creation changed the baseline commit")
 
+    def realize_local_branch(self, root, base_repository, base_branch, source,
+            destination, target_branch, *, operation):
+        """Realize structured branch intent without adding an omitted effect."""
+        if operation == "CREATE_BRANCH":
+            return self.create_work_branch(root, base_repository, base_branch,
+                source, destination, target_branch)
+        GitIsolatedWorkspacePreparer._validate_branch(target_branch)
+        git = GitContinuityInspector._git
+        base_revision = git(base_repository, "rev-parse", "HEAD^{commit}")
+        git(root, "clone", "--no-local", "--", str(base_repository), str(destination))
+        # Clone preserves all branches as remote-tracking refs. Explicit local
+        # refs are copied as observed facts, without contacting a remote host.
+        refs = git(base_repository, "for-each-ref", "--format=%(refname:short) %(objectname)", "refs/heads/")
+        for line in refs.splitlines():
+            name, revision = line.split(" ", 1)
+            if name != base_branch:
+                git(destination, "branch", "--", name, revision)
+        if git(destination, "rev-parse", "HEAD^{commit}") != base_revision:
+            raise EnvironmentProviderError("Branch base differs from the observed owner baseline")
+        if operation == "CREATE_BRANCH_ONLY":
+            git(destination, "branch", "--", target_branch, base_revision)
+        elif operation == "SWITCH_BRANCH":
+            git(destination, "show-ref", "--verify", f"refs/heads/{target_branch}")
+            git(destination, "switch", "--", target_branch)
+        else:
+            raise EnvironmentProviderError("Unsupported structured local branch operation")
+        git(destination, "remote", "set-url", "origin", source)
+
     @staticmethod
     def _bounded(value: str | bytes | None) -> str:
         if value is None:

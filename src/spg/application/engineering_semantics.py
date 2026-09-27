@@ -30,6 +30,7 @@ def bind_engineering_semantic_facts(
     extractions: tuple[NeutralSemanticExtractionCandidate, ...],
     candidates: tuple[EngineeringSemanticFactCandidate, ...],
     prior_facts: tuple[EngineeringSemanticFact, ...] = (),
+    semantic_ir=None,
 ) -> tuple[EngineeringSemanticFact, ...]:
     """Validate extraction evidence and reconcile one current semantic ledger.
 
@@ -61,6 +62,7 @@ def bind_engineering_semantic_facts(
     candidate_ids: set[str] = set()
 
     for candidate in candidates:
+        compiler_candidate = candidate
         if candidate.candidate_id in candidate_ids:
             raise InteractionInvariantViolation("Semantic fact candidate identity is duplicated")
         candidate_ids.add(candidate.candidate_id)
@@ -133,6 +135,31 @@ def bind_engineering_semantic_facts(
             ),
             supersedes_fact_ids=tuple(superseded_ids),
         )
+        if semantic_ir is not None:
+            from spg.domain.intent_realization import SemanticOrigin, SemanticProvenance
+            sources = tuple(dict.fromkeys(source for item in semantic_ir.items
+                if any(witness.source_record_id in candidate.source_record_ids for witness in (
+                    *item.provenance,
+                    *((arg.provenance for arg in item.action.arguments.values()) if item.action else ()),
+                    *((item.production.repository_reference.provenance,) if item.production and item.production.repository_reference else ())))
+                for source in (*item.provenance, *(claim.provenance for claim in item.observed_facts.values()),
+                    *((arg.provenance for arg in item.action.arguments.values()) if item.action else ()),
+                    *((item.production.repository_reference.provenance,) if item.production and item.production.repository_reference else ()))
+                ))
+            if candidate.authority is SemanticFactAuthority.SYSTEM_INFERRED:
+                sources = (SemanticProvenance(origin=SemanticOrigin.SYSTEM_INFERRED,
+                    evidence_reference=semantic_ir.compiler_reference),)
+            if not sources and compiler_candidate in semantic_ir.semantic_fact_candidates:
+                # These are typed proposals from this same compilation and
+                # captured in the immutable IR. Engineering Truth has already
+                # validated/canonicalized the cited records and role assignment.
+                sources = tuple(SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
+                    source_record_id=identity, source_text=fact.provenance.source_text)
+                    for identity in fact.provenance.source_record_ids)
+            if not sources:
+                raise InteractionInvariantViolation("ACTION_ARGUMENT_PROVENANCE_INVALID: semantic fact has no typed compiler provenance")
+            fact = fact.model_copy(update={"provenance": fact.provenance.model_copy(update={
+                "semantic_ir_id": semantic_ir.id, "governed_provenance": sources})})
         ledger.append(fact)
         current[fact.id] = fact
         by_key[fact.semantic_key] = fact

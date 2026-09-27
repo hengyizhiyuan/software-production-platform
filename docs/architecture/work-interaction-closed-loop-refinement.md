@@ -1,5 +1,10 @@
 # Work Interaction & Closed-loop Refinement — Architecture Contract
 
+Interaction language compilation and current-effect realization are now governed
+by the [Intent Realization Kernel](intent-realization-kernel/README.md). Earlier
+raw-language routing descriptions are historical; WIC, Work/Steering governance,
+Semantic Truth, production execution and Human authority retain their ownership.
+
 ## 1. Status and scope
 
 ```text

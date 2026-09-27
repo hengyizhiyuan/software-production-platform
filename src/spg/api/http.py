@@ -332,6 +332,10 @@ def create_http_application(
                 execute_repository_actions, repository_observation,
             )
 
+        from spg.application.intent_owner_adapters import IntentOwnerAdapters
+        IntentOwnerAdapters(selected_interaction, work_service, delivery_service,
+            candidate_runtime_preview, github_delivery, orchestrator=selected_orchestrator).install()
+
         def execution_reality(work_id: UUID) -> tuple[str | None, str | None]:
             projection = work_service.get_work(work_id)
             if (
@@ -766,6 +770,14 @@ def create_http_application(
         if turn.interaction_id != interaction_id:
             raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
         return InteractionTurnResponse.from_turn(turn)
+
+    @api.get("/api/interactions/{interaction_id}/turns/{turn_id}/realization")
+    def get_intent_realization(interaction_id: UUID, turn_id: UUID) -> dict[str, object]:
+        """Operator projection of preserved semantics, obligations and owner proof."""
+        service = required_interaction_service()
+        if service.get_turn(turn_id).interaction_id != interaction_id:
+            raise InteractionRecordNotFound(f"Interaction Turn not found: {turn_id}")
+        return service.realization_projection(turn_id)
 
     @api.get("/api/interactions/{interaction_id}/turns/{turn_id}/external-evidence")
     def get_external_evidence(interaction_id: UUID, turn_id: UUID) -> dict[str, object]:

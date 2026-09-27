@@ -53,6 +53,9 @@ from spg.domain.wic_intelligence import (
 )
 from spg.domain.wic_response import GovernedResponseEnvelope, ResponseReconciliation
 from spg.evaluation.open_wic_baseline import _active_context, load_corpus
+from tests.irk_test_fixtures import governed_ir, question as typed_question
+from spg.domain.intent_realization import ProductionIntent, SemanticArgument, SemanticProvenance, SemanticOrigin, SemanticKind
+from spg.application.intent_realization import project_interaction_candidate
 
 
 def _case(case_id: str):
@@ -116,15 +119,66 @@ def _prior(motive: str) -> InteractionAssessment:
     )
 
 
-def _build(case_id: str, candidate=None, prior=None, text=None):
+def _declared_ir(case_id, record, candidate, *, oracle=None):
+    # These are explicit developer corpus oracles. They are never runtime
+    # language rules or holdout examples.
+    kind = SemanticKind.EXPLORE
+    options = {}
+    if candidate.turn_intent is ConversationTurnIntent.DISAGREEMENT:
+        return governed_ir(record, kind=SemanticKind.ANALYSIS)
+    if oracle == "question":
+        kind = SemanticKind.QUESTION
+    elif case_id == "OW-C":
+        kind = SemanticKind.CORRECTION
+        options["statement"] = oracle or _case(case_id).reference_intent.true_motive
+    elif case_id == "OW-D":
+        kind = SemanticKind.CONSTRAINT
+    elif case_id == "OW-E":
+        options["production"] = ProductionIntent(objective="一个独立的招聘网站",
+            primary_change="开发一个独立的招聘网站", current=True, bounded_change=False)
+    elif case_id == "OW-H":
+        kind = SemanticKind.CORRECTION
+        options.update(statement="Current persistence uses PostgreSQL.",
+            provenance=SemanticProvenance(origin=SemanticOrigin.REPOSITORY_OBSERVED,
+                evidence_reference="fixture:repository-current-persistence"),
+            observed_facts={"database": SemanticArgument(
+                value="PostgreSQL", provenance=SemanticProvenance(origin=SemanticOrigin.REPOSITORY_OBSERVED,
+                    evidence_reference="fixture:repository-current-persistence"))})
+    human_owned = case_id == "OW-F" or oracle == "human-owned"
+    questions = [typed_question(q, reversible=case_id == "OW-G" and not human_owned)
+        for q in candidate.unresolved_material_questions]
+    if human_owned:
+        options.update(requires_human=True,
+            statement="哪些数据可以外发，以及权限和保留期分别由谁批准？")
+        questions.insert(0, typed_question(options["statement"], human=True, decision_value=100))
+    elif case_id == "OW-G" and not questions:
+        questions.append(typed_question("Use the existing component convention.", blocking=False, reversible=True))
+    return governed_ir(record, kind=kind, questions=tuple(questions), **options)
+
+
+def _build(case_id: str, candidate=None, prior=None, text=None, oracle=None):
     record, active, fingerprint = _inputs(case_id, prior=prior, text=text)
+    candidate = candidate or _candidate(case_id)
+    ir = _declared_ir(case_id, record, candidate, oracle=oracle)
+    if ir.current_production:
+        candidate = project_interaction_candidate(candidate, ir)
     return build_progressive_semantics(
-        candidate=candidate or _candidate(case_id), records=(record,),
+        candidate=candidate, records=(record,), semantic_ir=ir,
         basis_fingerprint=fingerprint, prior_assessment=prior,
         active_context=active,
         focus=WorkFocusClassification.UNRELATED_NEW_DEMAND if case_id == "OW-E" else WorkFocusClassification.ON_TOPIC,
         impact=WorkImpactDisposition.NEW_WORK_RECOMMENDED if case_id == "OW-E" else WorkImpactDisposition.HUMAN_GOVERNANCE_REQUIRED,
     )
+
+
+def _declared_repository_goal(record, candidate, question, *, blocker=False):
+    source = SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
+        source_record_id=record.id, source_text=record.content)
+    ir = governed_ir(record, production=ProductionIntent(objective="Implement the requested repository change",
+        primary_change="Acquire the repository and implement the requested change", current=True,
+        bounded_change=True, repository_reference=SemanticArgument(value="https://github.com/acme/shop", provenance=source)),
+        questions=(typed_question(question, blocking=blocker, human=blocker),))
+    return project_interaction_candidate(candidate, ir), ir
 
 
 def test_ordered_values_are_bound_through_generic_semantic_facts() -> None:
@@ -242,12 +296,9 @@ def test_repository_production_request_is_admission_ready_before_feature_refinem
         desired_outcome=None,
         unresolved_material_questions=(question,),
     )
-    candidate = WorkInteractionService._with_production_request_evidence(
-        provider_candidate,
-        latest_human_input=text,
-    )
+    candidate, ir = _declared_repository_goal(record, provider_candidate, question)
     semantics = build_progressive_semantics(
-        candidate=candidate,
+        candidate=candidate, semantic_ir=ir,
         records=(record,),
         basis_fingerprint=fingerprint,
         prior_assessment=None,
@@ -283,12 +334,9 @@ def test_repository_production_request_does_not_defer_authority_blocker(question
         turn_intent=ConversationTurnIntent.HOW_TO,
         unresolved_material_questions=(question,),
     )
-    candidate = WorkInteractionService._with_production_request_evidence(
-        provider_candidate,
-        latest_human_input=text,
-    )
+    candidate, ir = _declared_repository_goal(record, provider_candidate, question, blocker=True)
     semantics = build_progressive_semantics(
-        candidate=candidate,
+        candidate=candidate, semantic_ir=ir,
         records=(record,),
         basis_fingerprint=fingerprint,
         prior_assessment=None,
@@ -310,7 +358,7 @@ def test_repository_production_request_does_not_defer_authority_blocker(question
 
 def test_reversing_correction_creates_a_new_supersession_edge() -> None:
     prior = _prior("开发推广工作的运营后台")
-    result = _build("OW-C", prior=prior, text="纠正：还是策划一次推广活动，不开发后台。")
+    result = _build("OW-C", prior=prior, text="纠正：还是策划一次推广活动，不开发后台。", oracle="策划一次推广活动")
     delta = next(item for item in result.deltas if item.operation is SemanticDeltaOperation.SUPERSEDED)
     assert "策划一次推广活动" in delta.value
     assert delta.prior_value == "开发推广工作的运营后台"
@@ -581,7 +629,7 @@ def test_safe_reversible_detail_is_inferred_without_questionnaire() -> None:
 
 def test_human_owned_decision_blocks_progressive_work_admission() -> None:
     candidate = _candidate("OW-G", unresolved_material_questions=("选择客户数据外发范围？",))
-    result = _build("OW-G", candidate=candidate, text="客户数据能否外发还没决定")
+    result = _build("OW-G", candidate=candidate, text="客户数据能否外发还没决定", oracle="human-owned")
     readiness = WorkInteractionService._evaluate_readiness(
         candidate, result.basis_fingerprint,
         governance_candidate=result.governance_candidate,
@@ -615,7 +663,7 @@ def test_general_information_question_remains_conversation_only() -> None:
     result = _build(
         "OW-A",
         candidate=candidate,
-        text="企业官网一般都需要哪些页面？",
+        text="企业官网一般都需要哪些页面？", oracle="question",
     )
 
     assert result.governance_candidate is GovernanceCandidateKind.CONVERSATION_ONLY
@@ -643,7 +691,7 @@ def test_english_general_information_question_remains_conversation_only() -> Non
     result = _build(
         "OW-A",
         candidate=candidate,
-        text="What pages does a corporate website usually need?",
+        text="What pages does a corporate website usually need?", oracle="question",
     )
 
     assert result.governance_candidate is GovernanceCandidateKind.CONVERSATION_ONLY
@@ -711,7 +759,8 @@ def test_slice2_adversarial_corpus_runs_through_visible_policy_path() -> None:
             unresolved_material_questions=unresolved,
             natural_response="RAW_UNSAFE_PROVIDER_WORDING",
         )
-        semantics = _build(case_id, candidate=candidate, prior=prior, text=case["turn"])
+        oracle = {"multiple_corrections": "长期运营后台", "correction_reversal": "策划一次推广活动"}.get(case["kind"])
+        semantics = _build(case_id, candidate=candidate, prior=prior, text=case["turn"], oracle=oracle)
         response = policy_governed_response(
             candidate,
             semantics,

@@ -62,9 +62,9 @@ from spg.providers.rule_based_planner import RuleBasedProductionPlanner
 
 
 MAX_TREE_PATHS = 1_000
-MAX_CONTEXT_FILES = 16
+MAX_CONTEXT_FILES = 24
 MAX_CONTEXT_CHARS_PER_FILE = 8_000
-MAX_CONTEXT_CHARS_TOTAL = 24_000
+MAX_CONTEXT_CHARS_TOTAL = 64_000
 REFINABLE_ADMISSION_FEEDBACK = (
     "Semantic result references Reality outside its governed input",
     "An intermediate guided design issue cannot form production",
@@ -129,6 +129,19 @@ class SemanticStepApplicationService:
             if work is None or scope is None:
                 raise ProductInvariantViolation("Semantic Work authority is incomplete")
             work_revision = product.current_work_reality_revision(work.id)
+            semantic_ir = None
+            intent_revision = work_revision
+            seen_intent_revisions = set()
+            while intent_revision is not None and intent_revision.id not in seen_intent_revisions:
+                seen_intent_revisions.add(intent_revision.id)
+                source_assessment = (InteractionStore(unit_of_work.session).assessment(intent_revision.source_assessment_id)
+                    if intent_revision.source_assessment_id else None)
+                if source_assessment is not None and source_assessment.semantic_ir is not None:
+                    if semantic_ir is None or source_assessment.semantic_ir.current_production:
+                        semantic_ir = source_assessment.semantic_ir
+                    if semantic_ir.current_production:
+                        break
+                intent_revision = product.work_reality_revision(intent_revision.previous_revision_id) if intent_revision.previous_revision_id else None
             human_records = () if work_revision is None else tuple(
                 record.content for identity in work_revision.source_record_ids
                 if (record := InteractionStore(unit_of_work.session).record(identity)) is not None
@@ -166,8 +179,10 @@ class SemanticStepApplicationService:
             observed_paths = tuple(path for path in paths if Path(path).suffix in {
                 ".py", ".js", ".ts", ".tsx", ".jsx", ".html", ".css", ".sql", ".json", ".toml",
             } or Path(path).name in {"Dockerfile", "Makefile"})
+            explicit_paths = () if semantic_ir is None else tuple(
+                arg.value for goal in semantic_ir.current_production for arg in goal.target_paths)
             materials = self._context_materials(repository, baseline.repository_revision,
-                configured_paths + observed_paths if len(observed_paths) <= MAX_CONTEXT_FILES else configured_paths)
+                self._observation_paths(configured_paths, observed_paths, explicit_paths))
         refs = tuple(item.reference for item in frame.basis.resolved_reality)
         next_step = frame.reconstruction.next_step
         design_context = self.guided_design.semantic_context(work.id, step.id)
@@ -216,6 +231,9 @@ class SemanticStepApplicationService:
                 () if work_revision is None else work_revision.requests
             ),
             human_explicit_requests=human_records or (work.raw_user_requirement,),
+            governed_semantic_ir_id=None if semantic_ir is None or semantic_ir.legacy_typed_projection else semantic_ir.id,
+            canonical_explicit_targets=() if semantic_ir is None else tuple(arg.value for goal in semantic_ir.current_production for arg in goal.target_paths),
+            canonical_allowed_areas=() if semantic_ir is None else tuple(arg.value for goal in semantic_ir.current_production for arg in goal.allowed_areas),
             steering_plan_revision_id=frame.reconstruction.active_revision.revision.id,
             step=step,
             basis_fingerprint=frame.basis.fingerprint,
@@ -634,10 +652,13 @@ class SemanticStepApplicationService:
             # including explicitly requested new files. Otherwise let read-only
             # repository discovery select the minimum required implementation.
             human_text = "\n".join(semantic_input.human_explicit_requests)
-            human_targets = tuple(
-                path for path in WorkApplicationService._explicit_repository_paths(human_text)
-            )
-            human_areas = WorkApplicationService._explicit_repository_areas(human_text)
+            if semantic_input.governed_semantic_ir_id is not None:
+                human_targets = semantic_input.canonical_explicit_targets
+                human_areas = semantic_input.canonical_allowed_areas
+            else:
+                # Historical/manual typed admission does not have an IRK Turn.
+                human_targets = tuple(WorkApplicationService._explicit_repository_paths(human_text))
+                human_areas = WorkApplicationService._explicit_repository_areas(human_text)
             change_proposal = self.change_proposals.propose(
                 RepositoryChangeProposalRequest(
                     work_id=semantic_input.work_id,
@@ -655,6 +676,7 @@ class SemanticStepApplicationService:
                     candidate_targets=proposal.code_targets,
                     necessity_proofs=(() if scope_validation is None else scope_validation.required_targets),
                     human_authority_text="\n".join(semantic_input.human_explicit_requests),
+                    governed_semantic_ir_id=semantic_input.governed_semantic_ir_id,
                     explicit_allowed_areas=human_areas,
                     explicit_forbidden_areas=proposal.forbidden_areas,
                 )
@@ -726,6 +748,22 @@ class SemanticStepApplicationService:
         return plan, change_proposal
 
     @classmethod
+    def _observation_paths(cls, configured, observed, explicit=()):
+        """Sample actual implementation structure; never select Human intent.
+
+        Large repositories must not lose every implementation observation just
+        because their inventory exceeds the read budget. Markup entry points and
+        adjacent assets are read-only evidence, not required change targets.
+        """
+        implementation = tuple(path for path in observed if not path.startswith(
+            ("tests/", "test/", "docs/", "benchmarks/", "node_modules/")))
+        markup = tuple(path for path in implementation if Path(path).suffix == ".html")
+        adjacent = tuple(path for path in implementation if Path(path).suffix in {
+            ".js", ".ts", ".tsx", ".jsx", ".css"} and Path(path).parent in {
+                Path(entry).parent for entry in markup})
+        return tuple(dict.fromkeys((*explicit, *configured, *markup, *adjacent, *implementation)))[:MAX_CONTEXT_FILES]
+
+    @classmethod
     def _context_materials(
         cls,
         repository: Path,
@@ -734,7 +772,8 @@ class SemanticStepApplicationService:
     ) -> tuple[SemanticContextMaterial, ...]:
         results: list[SemanticContextMaterial] = []
         total = 0
-        for path in tuple(dict.fromkeys(paths))[:MAX_CONTEXT_FILES]:
+        selected = tuple(dict.fromkeys(paths))[:MAX_CONTEXT_FILES]
+        for index, path in enumerate(selected):
             completed = subprocess.run(
                 ["git", "-C", str(repository), "show", f"{revision}:{path}"],
                 check=False,
@@ -746,7 +785,8 @@ class SemanticStepApplicationService:
             remaining = MAX_CONTEXT_CHARS_TOTAL - total
             if remaining <= 0:
                 break
-            content = completed.stdout[: min(MAX_CONTEXT_CHARS_PER_FILE, remaining)]
+            allowance = max(1, remaining // (len(selected) - index))
+            content = completed.stdout[: min(MAX_CONTEXT_CHARS_PER_FILE, allowance)]
             total += len(content)
             results.append(
                 SemanticContextMaterial(

@@ -743,7 +743,9 @@ class RuntimeStore:
             values = dict(row)
             values["change_type"] = ArtifactChangeType(values["change_type"])
             records.append(WorkProductReferenceRecord.model_validate(values))
-        return tuple(records)
+        # Match Completion's canonical ordering regardless of database collation.
+        # Exact lineage IDs and contents remain mandatory for Candidate sealing.
+        return tuple(sorted(records, key=lambda record: (record.artifact_path, str(record.id))))
 
     def completion_evaluation_by_basis(
         self,

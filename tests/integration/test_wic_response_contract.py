@@ -17,6 +17,8 @@ import pytest
 from sqlalchemy import func, select, text
 
 from spg.api import create_http_application
+from tests.irk_test_fixtures import semantic_candidate
+from spg.domain.intent_realization import SemanticKind
 from spg.application.interaction import WorkInteractionService
 from spg.application.work import WorkApplicationService
 from spg.domain.conversation import ConversationTurnIntent
@@ -111,6 +113,7 @@ def _candidate(
         InteractionMode.DESIGN: ConversationTurnIntent.BUILD,
         InteractionMode.EXECUTE: ConversationTurnIntent.ACTION_REQUEST,
         InteractionMode.ANSWER: ConversationTurnIntent.DIRECT_QUESTION,
+        InteractionMode.STATUS: ConversationTurnIntent.DIRECT_QUESTION,
         InteractionMode.DIAGNOSE: ConversationTurnIntent.FEEDBACK,
     }[mode]
     return InteractionAssessmentCandidate(
@@ -150,7 +153,12 @@ class _SequenceCapability:
     def interpret(self, basis: InteractionInterpretationInput) -> InteractionAssessmentCandidate:
         self.bases.append(basis)
         assert len(self.bases) <= len(self.candidates), "Unexpected provider request"
-        return self.candidates[len(self.bases) - 1]
+        candidate = self.candidates[len(self.bases) - 1]
+        if candidate.semantic_intent is None and candidate.response_intent and candidate.response_intent.interaction_mode in {InteractionMode.STATUS, InteractionMode.DIAGNOSE}:
+            raw = semantic_candidate(basis.records[-1], kind=SemanticKind.STATUS_QUERY)
+            raw = raw.model_copy(update={"items":(raw.items[0].model_copy(update={"subject":"WORK_DIAGNOSTIC" if candidate.response_intent.interaction_mode is InteractionMode.DIAGNOSE else "WORK_CURRENT"}),)})
+            candidate = candidate.model_copy(update={"semantic_intent":raw})
+        return candidate
 
 
 class _RecordingRealizer:
@@ -316,7 +324,7 @@ def test_active_reality_questions_are_provider_free_and_do_not_mutate_work(
     postgres_database: Database, tmp_path: Path, question: str,
     expected_mode: InteractionMode, expected_fact: str,
 ) -> None:
-    capability = _SequenceCapability(_candidate(InteractionMode.DESIGN))
+    capability = _SequenceCapability(_candidate(InteractionMode.DESIGN),_candidate(expected_mode))
     realizer = _RecordingRealizer()
     service = _service(postgres_database, capability, realizer)
     interaction = service.create_interaction(human_identity=HUMAN, start_work_context=True)
@@ -331,8 +339,9 @@ def test_active_reality_questions_are_provider_free_and_do_not_mutate_work(
         assert contract.interaction_mode is expected_mode
         assert contract.question_budget == 0
         assert contract.advancement_obligation is AdvancementObligation.ANSWER_ONLY
-        assert projection.latest_assessment.provider_identity == "watt-native:work-reality-query"
-        assert len(capability.bases) == len(realizer.envelopes) == 1
+        assert projection.latest_assessment.provider_identity == "test:response-contract-semantic"
+        assert len(capability.bases) == 2  # One compilation per Human Turn.
+        assert len(realizer.envelopes) == 1  # Status wording is owner-grounded.
         human_status = projection.conversation_messages[-1].content
         assert expected_fact in human_status
         assert "当前没有需要你处理的事项" in human_status
@@ -350,7 +359,7 @@ def test_active_reality_questions_are_provider_free_and_do_not_mutate_work(
                 "input": question,
                 "turn_id": str(turn.id),
                 "provider_identity": projection.latest_assessment.provider_identity,
-                "external_provider_requests_for_status_turn": 0,
+                "semantic_compilations_for_status_turn": 1,
                 "response_contract": contract.model_dump(mode="json"),
                 "human_facing_content": projection.conversation_messages[-1].content,
                 "work_projection_unchanged": True,

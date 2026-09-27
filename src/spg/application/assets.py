@@ -32,7 +32,6 @@ from spg.domain.interaction import InteractionActor
 from spg.domain.engineering_semantics import current_semantic_facts
 from spg.domain.preparation import ContextSemanticRole
 from spg.domain.product import EngineeringContextReference, ProductInvariantViolation, ProductRecordNotFound
-from spg.domain.response_contract import production_intent_evidence
 from spg.domain.runtime import BootstrapRequest
 from spg.infrastructure.persistence.asset_schema import repository_intakes
 from spg.infrastructure.persistence.product_schema import engineering_resources
@@ -102,9 +101,9 @@ class RepositoryAssetService:
 
     @staticmethod
     def _identity(source: str | None, request: RepositoryIntakeRequest) -> str:
-        if request.operation_kind == "CREATE_BRANCH":
+        if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
             branch_digest = sha256(
-                f"{source}:{request.target_branch}".encode("utf-8")
+                f"{source}:{request.operation_kind}:{request.target_branch}:{request.base_resource_id}".encode("utf-8")
             ).hexdigest()[:20]
             return f"watt://work-branches/{request.work_id or request.interaction_id}/{branch_digest}"
         return source or f"watt://repositories/{request.request_id}"
@@ -135,7 +134,7 @@ class RepositoryAssetService:
 
         if request.source_record_id is not None:
             self._require_interaction_authority(request)
-        if request.operation_kind == "CREATE_BRANCH":
+        if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
             self._require_current_branch_authority(request)
         source = self._source(request.source)
         identity = self._identity(source, request)
@@ -173,7 +172,7 @@ class RepositoryAssetService:
                     "failure_category": None,
                     "human_message": (
                         f"Local branch {request.target_branch} creation has been requested."
-                        if request.operation_kind == "CREATE_BRANCH"
+                        if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}
                         else "Repository acquisition has been requested."
                     ),
                     "technical_evidence": None,
@@ -210,6 +209,9 @@ class RepositoryAssetService:
             raise ProductInvariantViolation("Branch creation requires the current Work repository")
         if revision.admitted_by != request.authority_identity:
             raise ProductInvariantViolation("Branch creation authority differs from current Work Reality")
+        if request.source_record_id is not None:
+            self._require_interaction_authority(request)
+            return
         if target != request.target_branch:
             raise ProductInvariantViolation("Branch creation requires the current Human-admitted branch action")
 
@@ -225,17 +227,31 @@ class RepositoryAssetService:
         return tuple({**(row["observation"] or {}), "request": row["request"]} for row in rows)
 
     def _bound_interaction_actions(self, interaction_id, record, assessment=None):
-        from spg.domain.interaction_actions import executable_repository_actions
+        from spg.application.intent_realization import executable_semantic_actions
+        from spg.domain.interaction_actions import CanonicalOperation as O
+        from spg.domain.repository_actions import RepositoryAction
         if assessment is None:
             with self.database.unit_of_work() as uow:
                 assessment = next((item for item in reversed(
                     InteractionStore(uow.session).assessments(interaction_id))
                     if item.basis_last_sequence == record.sequence), None)
-        if assessment is not None and assessment.action_candidates is not None:
-            return executable_repository_actions(assessment.action_candidates, record)
-        # Retain the pre-existing deterministic fixture/legacy recovery contract.
-        # Provider-backed production candidates never fall back to phrase matching.
-        return repository_actions(record.content)
+        ir = None if assessment is None else assessment.semantic_ir
+        if ir is None or ir.source_record_id != record.id:
+            return ()
+        families = {O.ACQUIRE_REPOSITORY: ActionFamily.ACQUIRE_REPOSITORY,
+            O.INSPECT_REPOSITORY: ActionFamily.INSPECT,
+            O.SEARCH_REPOSITORY: ActionFamily.INSPECT,
+            O.QUERY_CURRENT_BRANCH: ActionFamily.INSPECT,
+            O.CREATE_AND_SWITCH_BRANCH: ActionFamily.LOCAL_BRANCH,
+            O.CREATE_BRANCH: ActionFamily.LOCAL_BRANCH, O.SWITCH_BRANCH: ActionFamily.LOCAL_BRANCH}
+        actions = []
+        for item in executable_semantic_actions(ir, operations=set(families)):
+            args = item.action.arguments
+            actions.append(RepositoryAction(families[O(item.action.operation)],
+                None if "repository_source" not in args else args["repository_source"].value,
+                None if "target_branch" not in args else args["target_branch"].value,
+                operation=item.action.operation))
+        return tuple(dict.fromkeys(actions))
 
     def _require_interaction_authority(self, request: RepositoryIntakeRequest) -> None:
         with self.database.unit_of_work() as uow:
@@ -243,6 +259,11 @@ class RepositoryAssetService:
             interaction = store.interaction(request.interaction_id)
             record = store.record(request.source_record_id)
             records = store.records(request.interaction_id) if interaction else ()
+            bound_resource = None
+            if request.work_id is not None:
+                if interaction is None or interaction.current_work_id != request.work_id:
+                    raise ProductInvariantViolation("Action Work differs from current Interaction focus")
+                bound_resource = ProductStore(uow.session).resource_for_work(request.work_id)
             if self.github_delivery.settings.auth_mode == 'required':
                 from spg.infrastructure.persistence.auth_schema import authority_memberships, authority_resource_access
                 membership = uow.session.execute(select(authority_memberships.c.role).where(
@@ -264,9 +285,10 @@ class RepositoryAssetService:
                 or interaction.created_by != request.authority_identity):
             raise ProductInvariantViolation("Interaction action requires its Human owner's explicit record")
         actions = self._bound_interaction_actions(request.interaction_id, record)
-        branch = request.operation_kind == "CREATE_BRANCH"
+        branch = request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}
         matching = tuple(action for action in actions if (
             action.family is ActionFamily.LOCAL_BRANCH and action.branch == request.target_branch
+            and {"CREATE_AND_SWITCH_BRANCH": "CREATE_BRANCH", "CREATE_BRANCH": "CREATE_BRANCH_ONLY", "SWITCH_BRANCH": "SWITCH_BRANCH"}.get(action.operation) == request.operation_kind
             if branch else action.family in {ActionFamily.ACQUIRE_REPOSITORY, ActionFamily.INSPECT}
         ))
         if not matching:
@@ -274,18 +296,27 @@ class RepositoryAssetService:
         history = self.attempts_for_interaction(request.interaction_id)
         ready = tuple(item for item in history if item.get("condition") == "READY")
         if branch:
-            if not any(item.get("resource_id") == str(request.base_resource_id) for item in ready):
+            if not any(item.get("resource_id") == str(request.base_resource_id) for item in ready) and not (
+                    bound_resource is not None and bound_resource.id == request.base_resource_id):
                 raise ProductInvariantViolation("Branch source does not belong to this Interaction")
         elif not any(action.source == request.source for action in matching):
             if not any(item.get("source") == request.source for item in ready):
                 raise ProductInvariantViolation("Acquisition source differs from explicit Human authority")
 
-    def execute_interaction_actions(self, interaction_id, assessment, record) -> str | None:
+    def execute_interaction_actions(self, interaction_id, assessment, record, *, work_id=None) -> str | None:
         """Execute independently admitted preparatory actions without forming Work."""
         actions = self._bound_interaction_actions(interaction_id, record, assessment)
         if not actions:
             return None
         previous = self.interaction_observation(interaction_id)
+        if work_id is not None:
+            with self.database.unit_of_work() as uow:
+                store = ProductStore(uow.session)
+                selected = store.resource_for_work(work_id)
+            if selected is not None:
+                previous = {**self.observation(selected.id), "condition": "READY",
+                    "source": (previous or {}).get("source") or selected.repository_identity,
+                    "product_id": (previous or {}).get("product_id")}
         messages = []
         for action in actions:
             if action.target_ambiguous:
@@ -297,13 +328,15 @@ class RepositoryAssetService:
                 if previous is None or previous.get("condition") != "READY":
                     messages.append("尚无已获取的仓库；请指定要操作的仓库。")
                     break
-                operation = "CREATE_BRANCH"
+                operation = {"CREATE_BRANCH": "CREATE_BRANCH_ONLY", "SWITCH_BRANCH": "SWITCH_BRANCH"}.get(action.operation, "CREATE_BRANCH")
                 if previous.get("repository_ref") == f"refs/heads/{action.branch}":
                     messages.append(f"当前本地分支已经是 {action.branch}；没有重复创建或推送。")
                     continue
             elif action.source is None and previous is not None and action.family is ActionFamily.INSPECT:
                 if previous.get("condition") == "READY":
-                    messages.append(self._inspection_answer(previous, branch_only="分支" in record.content or "branch" in record.content.lower()))
+                    messages.append(self._inspection_answer(previous, branch_only=bool(assessment and assessment.semantic_ir and any(
+                        item.action.operation == "QUERY_CURRENT_BRANCH"
+                        for item in assessment.semantic_ir.operational_requests))))
                 else:
                     messages.append(f"仓库尚未就绪：{previous.get('condition')}。")
                 continue
@@ -327,8 +360,8 @@ class RepositoryAssetService:
                     previous = same[-1]
                     break
                 capability = ConnectorResolver(self.database).resolve(CapabilityRequirement(
-                    capability_id="git.branch.create" if operation == "CREATE_BRANCH" else "git.repository.acquire",
-                    work_id=None, user_id=record.source, operation_ref=f"interaction-record:{record.id}",
+                    capability_id="git.checkout" if operation == "SWITCH_BRANCH" else "git.branch.create" if operation in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY"} else "git.repository.acquire",
+                    work_id=work_id, user_id=record.source, operation_ref=f"interaction-record:{record.id}",
                 ))
                 decision = admit_action(action.family, ActionFacts(explicit=True,
                     authority=True, capability=capability.executable,
@@ -347,11 +380,11 @@ class RepositoryAssetService:
                 request = RepositoryIntakeRequest(
                     request_id=uuid5(NAMESPACE_URL, f"interaction-action:{record.id}:{operation}:{action.branch}:{number}"),
                     source=source, title=f"Interaction {operation}", description=record.content[:4000],
-                    authority_identity=record.source, interaction_id=interaction_id,
+                    authority_identity=record.source, interaction_id=interaction_id, work_id=work_id,
                     source_record_id=record.id, attempt_number=number,
                     previous_attempt_id=UUID(same[-1]["intake_request_id"]) if same else None,
                     operation_kind=operation,
-                    base_resource_id=UUID(previous["resource_id"]) if operation == "CREATE_BRANCH" else None,
+                    base_resource_id=UUID(previous["resource_id"]) if operation in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"} else None,
                     target_branch=action.branch,
                 )
                 try:
@@ -391,7 +424,8 @@ class RepositoryAssetService:
                 uow.commit()
             messages.append(self._inspection_answer(previous,
                 branch_only=action.family is not ActionFamily.INSPECT))
-        return "\n".join(messages) + "\n生产 Work 尚未准入；没有修改源码或推送远端。" if messages else None
+        return "\n".join(messages) + ("\n生产 Work 尚未准入；没有修改源码或推送远端。" if work_id is None else
+            "\n本轮操作沿用当前 Work 权限；没有修改源码或推送远端。") if messages else None
 
     def _record_interaction_action_refinement(self, interaction_id, record, observation):
         from spg.domain.wic_response import WicResponseEventType
@@ -522,7 +556,7 @@ class RepositoryAssetService:
         request = RepositoryIntakeRequest.model_validate(row["request"])
         if request.source_record_id is not None:
             self._require_interaction_authority(request)
-        if request.operation_kind == "CREATE_BRANCH":
+        if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
             self._require_current_branch_authority(request)
         observation = row["observation"]
         if observation is None:
@@ -550,7 +584,7 @@ class RepositoryAssetService:
                         "condition": "RUNNING",
                         "human_message": (
                             f"Creating local branch {request.target_branch}."
-                            if request.operation_kind == "CREATE_BRANCH"
+                            if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}
                             else "Repository acquisition is running."
                         ),
                         "observed_at": datetime.now(UTC).isoformat(),
@@ -616,7 +650,7 @@ class RepositoryAssetService:
             connector_capability = None
             native_result = None
             managed_branch = False
-            if request.operation_kind == "CREATE_BRANCH":
+            if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
                 with self.database.unit_of_work() as uow:
                     base_for_source = ProductStore(uow.session).resource(
                         request.base_resource_id)
@@ -625,7 +659,7 @@ class RepositoryAssetService:
                         "watt://repositories/") or self.managed_source.has_source(
                             base_for_source.repository_identity)))
             if not repository.exists():
-                if request.operation_kind == "CREATE_BRANCH" and request.work_id is None:
+                if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"} and request.work_id is None:
                     requirement = CapabilityRequirement(
                         capability_id="git.branch.create", work_id=None,
                         user_id=request.authority_identity,
@@ -640,14 +674,14 @@ class RepositoryAssetService:
                     connector_capability = resolution.capability
                     with self.database.unit_of_work() as uow:
                         base = ProductStore(uow.session).resource(request.base_resource_id)
-                    self.repository_acquirer.create_work_branch(
+                    self.repository_acquirer.realize_local_branch(
                         self.asset_root, Path(base.location_ref),
                         base.authoritative_ref.removeprefix("refs/heads/"),
-                        source, repository, request.target_branch,
+                        source, repository, request.target_branch, operation=request.operation_kind,
                     )
-                elif request.operation_kind == "CREATE_BRANCH":
+                elif request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
                     requirement = CapabilityRequirement(
-                        capability_id="git.branch.create",
+                        capability_id="git.checkout" if request.operation_kind == "SWITCH_BRANCH" else "git.branch.create",
                         work_id=request.work_id,
                         user_id=request.authority_identity,
                         operation_ref=f"repository-intake:{request.request_id}",
@@ -695,6 +729,7 @@ class RepositoryAssetService:
                         source_url=source,
                         target_branch=request.target_branch,
                         authority_identity=request.authority_identity,
+                        operation_kind=request.operation_kind,
                     )
                     if native_result["condition"] == "RUNNING":
                         with self.database.unit_of_work() as uow:
@@ -747,8 +782,17 @@ class RepositoryAssetService:
                         self._git(repository, "remote", "remove", "origin")
                     else:
                         self._git(repository, "remote", "set-url", "origin", source)
+                    expected_current = (base.authoritative_ref.removeprefix("refs/heads/")
+                        if request.operation_kind == "CREATE_BRANCH_ONLY" else request.target_branch)
+                    if request.operation_kind == "CREATE_BRANCH_ONLY":
+                        # A clone retains other local branches as remote tracking
+                        # refs. Materialize the already-produced exact local ref;
+                        # preserve HEAD and do not perform another creation effect.
+                        self._git(repository,"fetch","--no-tags","--no-recurse-submodules",
+                            str(native_result["workspace_path"]),
+                            f"refs/heads/{request.target_branch}:refs/heads/{request.target_branch}")
                     if (
-                        self._git(repository, "branch", "--show-current") != request.target_branch
+                        self._git(repository, "branch", "--show-current") != expected_current
                         or self._git(repository, "rev-parse", "HEAD") != native_result["revision"]
                     ):
                         raise ProductInvariantViolation("Native Git result changed during repository asset materialization")
@@ -868,7 +912,7 @@ class RepositoryAssetService:
                         return candidate
             # Capture complete Git history before exposing a managed checkout.
             # The checkout remains disposable; PostgreSQL owns canonical bytes.
-            if source is None and request.operation_kind != "CREATE_BRANCH":
+            if source is None and request.operation_kind == "ACQUIRE":
                 self.managed_source.sync(identity, repository)
             elif managed_branch:
                 self.managed_source.sync(identity, repository, internal_branch=True)
@@ -909,17 +953,17 @@ class RepositoryAssetService:
                     context_references=(EngineeringContextReference(semantic_role=ContextSemanticRole.PROJECT_CONTEXT, repository_relative_path=context),), is_default=False)
                 resource_id = resource.id
             observation = {"resource_id": str(resource_id), "repository_identity": identity, "repository_ref": ref,
-                "revision": revision, "tree": tree, "paths": paths[:200], "context_path": context,
+                "revision": revision, "tree": tree, "branches": self._git(repository, "for-each-ref", "--format=%(refname:short)", "refs/heads/").splitlines(), "paths": paths[:200], "context_path": context,
                 "observed_at": datetime.now(UTC).isoformat(), "source": source, "title": request.title,
                 "description": request.description, "intake_request_id": str(request.request_id),
                 "condition": "READY", "failure_category": None,
                 "human_message": (
                     f"Local branch {request.target_branch} is ready."
-                    if request.operation_kind == "CREATE_BRANCH"
+                    if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}
                     else "Repository is ready."
                 ), "technical_evidence": None,
                 **self._attempt_metadata(request)}
-            if request.operation_kind == "CREATE_BRANCH":
+            if request.operation_kind in {"CREATE_BRANCH", "CREATE_BRANCH_ONLY", "SWITCH_BRANCH"}:
                 observation["operation_evidence"] = {
                     "capability_id": "git.branch.create",
                     "connector_id": (
@@ -932,7 +976,8 @@ class RepositoryAssetService:
                     "resulting_branch": ref,
                     "resulting_revision": revision,
                     "base_resource_id": str(request.base_resource_id),
-                    "verified": ref == f"refs/heads/{request.target_branch}",
+                    "verified": (request.target_branch in self._git(repository, "for-each-ref", "--format=%(refname:short)", "refs/heads/").splitlines()
+                        if request.operation_kind == "CREATE_BRANCH_ONLY" else ref == f"refs/heads/{request.target_branch}"),
                     "native_attempt_id": None if native_result is None else native_result["native_attempt_id"],
                     "pwu_id": None if native_result is None else native_result["pwu_id"],
                     "task_contract_id": None if native_result is None else native_result["task_contract_id"],
@@ -1048,12 +1093,6 @@ class RepositoryAssetService:
             fact.subject == "repository.url"
             for fact in current_semantic_facts(
                 revision.engineering_semantic_facts
-            )
-        ) or any(
-            production_intent_evidence(value).repository_source is not None
-            for value in (
-                *revision.requests,
-                *revision.context_facts,
             )
         )
         return not repository_required

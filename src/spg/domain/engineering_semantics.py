@@ -6,6 +6,8 @@ from enum import StrEnum
 from typing import TypeAlias
 from uuid import UUID
 
+from spg.domain.semantic_provenance import SemanticProvenance
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -143,6 +145,8 @@ class SemanticFactProvenance(BaseModel):
     source_text: str = Field(min_length=1)
     source_extraction_ids: tuple[str, ...] = ()
     role_origin: SemanticRoleOrigin
+    semantic_ir_id: UUID | None = None
+    governed_provenance: tuple["SemanticProvenance", ...] = ()
 
 
 class EngineeringSemanticFact(BaseModel):
