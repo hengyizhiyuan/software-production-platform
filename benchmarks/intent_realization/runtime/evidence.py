@@ -8,7 +8,8 @@ import subprocess
 def source_receipt(root: Path):
     files = sorted(p for directory in ('src', 'migrations', 'docker')
         for p in (root / directory).rglob('*') if p.is_file()
-        and '__pycache__' not in p.parts and p.suffix != '.pyc')
+        and '__pycache__' not in p.parts and p.suffix != '.pyc'
+        and not any(part.endswith('.egg-info') for part in p.parts))
     hashes = {str(p.relative_to(root)): sha256(p.read_bytes()).hexdigest() for p in files}
     return {'captured_at': datetime.now(UTC).isoformat(),
         'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
