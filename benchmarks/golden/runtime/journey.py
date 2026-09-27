@@ -135,7 +135,7 @@ def main():
             result['status'] = 'CLARIFICATION_REQUIRES_CLASSIFICATION'
             break
         if (interaction.get('repository_acquisition_state') in {'FAILED_RETRYABLE', 'FAILED_TERMINAL'}
-                and time.monotonic()-started > 120 and not state.get('queue')):
+                and time.monotonic()-started > 120 and not state.get('queue') and not pending_turn):
             result['status'] = 'UNRECOVERED_ACQUISITION'
             break
         if (not work_id and status == 'COMPLETED'
