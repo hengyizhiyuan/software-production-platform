@@ -27,7 +27,8 @@ def main():
             if "=" not in line or line.lstrip().startswith("#"):
                 continue
             key, value = line.split("=", 1)
-            if any(marker in key.upper() for marker in ("TOKEN", "KEY", "PASSWORD", "SECRET")):
+            if any(marker in key.upper() for marker in (
+                    "TOKEN", "KEY", "PASSWORD", "SECRET", "DATABASE_URL", "DSN")):
                 value = value.strip().strip("\"'")
                 if len(value) >= 12:
                     credentials.add(value.encode())

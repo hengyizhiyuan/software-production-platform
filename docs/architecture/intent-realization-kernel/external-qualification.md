@@ -5,15 +5,19 @@ that requires actual Web retrieval is `BLOCKED_EXTERNAL`; deterministic provider
 fixtures and available GitHub retrieval may still be tested. A partial pass
 cannot be reported as full GC-EX-12 or Web Search live success.
 
+Current frozen-source test service is at port 8079; the completed predecessor at
+8078 is stopped and its database/workspace volumes are preserved. Verify the
+current runtime source identity before rerunning.
+
 When the credential becomes available through the existing private environment,
 run each entry with a **new** immutable trial number:
 
 ```sh
 .venv/bin/python benchmarks/golden/runtime/qualify_research.py \
-  --scope web-live --trial NEW_TRIAL --base http://127.0.0.1:8078 \
+  --scope web-live --trial NEW_TRIAL --base http://127.0.0.1:8079 \
   --env-file PRIVATE_RUNTIME_ENV --evidence-root NEW_EVIDENCE_ROOT
 .venv/bin/python benchmarks/golden/runtime/qualify_research.py \
-  --scope GC-EX-12 --trial NEW_TRIAL --base http://127.0.0.1:8078 \
+  --scope GC-EX-12 --trial NEW_TRIAL --base http://127.0.0.1:8079 \
   --env-file PRIVATE_RUNTIME_ENV --evidence-root NEW_EVIDENCE_ROOT
 ```
 
