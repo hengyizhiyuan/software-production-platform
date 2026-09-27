@@ -2345,7 +2345,7 @@ class WorkInteractionService:
         branch_name = (
             exact_branch_creation_command(basis.records[-1].content)
             if (basis.active_work_context is not None
-                and not getattr(self.capability, 'provider_identity', '').startswith('deepseek'))
+                and getattr(self.capability, 'semantic_capability', None) is None)
             else None
         )
         if branch_name is not None:
