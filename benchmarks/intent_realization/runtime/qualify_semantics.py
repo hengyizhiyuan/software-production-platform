@@ -19,7 +19,8 @@ from spg.application.bootstrap import bootstrap
 from spg.application.intent_realization import IntentRealizationKernel, executable_semantic_actions, blocking_action_arguments
 from spg.config import Settings
 from spg.domain.intent_realization import ObservedEffect
-from spg.domain.interaction import Interaction, InteractionRecord, InteractionInterpretationInput
+from spg.domain.interaction import (ActiveWorkInterpretationContext, Interaction,
+    InteractionRecord, InteractionInterpretationInput, WorkRealityRevision)
 
 
 class QualificationRuntime:
@@ -91,11 +92,31 @@ def main():
             facts={'condition':'READY','revision':'a'*40,'tree':'b'*40,'repository_ref':'refs/heads/main',
                 'branches':['main','feat_existing'],'source':'https://github.com/acme/irk-fixture.git',
                 'repository_identity':'fixture:irk-semantic-context'})
+        active_work = None
+        if case['group'] == 'work_scope_answer':
+            work_revision = WorkRealityRevision(id=uuid5(identity,'work-revision'),
+                work_id=uuid5(identity,'work'),revision_number=1,previous_revision_id=None,
+                basis_fingerprint='a'*64,revision_fingerprint='b'*64,
+                source_interaction_id=identity,source_assessment_id=uuid5(identity,'assessment'),
+                source_record_ids=(records[0].id,),motive='Add search to the current application',
+                desired_outcome='Search existing business records',context_facts=(),
+                constraints=(),requests=('Add search',),engineering_scope_id=uuid5(identity,'scope'),
+                engineering_resource_id=None,scope_basis_fingerprint='c'*64,
+                repository_identity=None,repository_ref=None,source_baseline_id=None,source_revision=None,
+                governance_record_id=uuid5(identity,'governance'),
+                supporting_references=(),change_set=(),rationale='Qualified owner question fixture',
+                admitted_by='human:qualification',schema_version='work-reality-v1',created_at=now)
+            active_work = ActiveWorkInterpretationContext(work_revision=work_revision,
+                engineering_scope_fingerprint='d'*64,
+                current_steering_step_id=uuid5(identity,'question-step'),
+                current_steering_step_type='HUMAN_QUESTION',
+                pending_human_question='Which existing business domain and fields should search cover?')
         def basis_through(index, semantic_history=()):
             current_records = records[:index+1]
             return InteractionInterpretationInput(interaction=interaction,records=current_records,
                 basis_fingerprint=sha256(''.join(r.content_fingerprint for r in current_records).encode()).hexdigest(),
-                governed_semantic_history=tuple(semantic_history), observed_reality=(observed,))
+                governed_semantic_history=tuple(semantic_history), observed_reality=(observed,),
+                active_work_context=active_work)
         result={'case_id':case['id'],'group':case['group'],'effect_satisfaction':None,
             'effect_observation':'NOT_EXECUTED: compiler-only qualification',
             'input_fingerprint':records[-1].content_fingerprint}

@@ -312,8 +312,8 @@ def test_controlled_pre_work_repairs_valid_json_with_schema_errors() -> None:
     assert adapter.calls == 2
 
 
-def test_controlled_pre_work_stops_after_two_failed_json_repairs() -> None:
-    adapter = _Adapter(["{", "{", "{"])
+def test_controlled_pre_work_stops_after_three_failed_json_repairs() -> None:
+    adapter = _Adapter(["{", "{", "{", "{"])
     runtime, adapter = _runtime(adapter)
     capability = DeepSeekWorkInteractionCapability(runtime=runtime)
 
@@ -327,7 +327,7 @@ def test_controlled_pre_work_stops_after_two_failed_json_repairs() -> None:
             on_pipeline_stage=lambda _stage: None,
         )
 
-    assert adapter.calls == 3
+    assert adapter.calls == 4
 
 
 def test_shadow_pre_work_repairs_one_root_json_failure_without_second_stream() -> None:
@@ -381,14 +381,14 @@ def test_shadow_pre_work_repairs_schema_error_once_without_weakening_contract() 
     assert "".join(visible) == invalid["natural_response"]
 
 
-def test_shadow_pre_work_stops_after_two_failed_structured_repairs() -> None:
-    runtime, adapter = _runtime(_Adapter(["{", "{", "{"]))
+def test_shadow_pre_work_stops_after_three_failed_structured_repairs() -> None:
+    runtime, adapter = _runtime(_Adapter(["{", "{", "{", "{"]))
     with pytest.raises(InteractionInvariantViolation, match="bounded_repair_exhausted"):
         DeepSeekWorkInteractionCapability(runtime=runtime).interpret_stream_observed(
             _basis(), on_response_delta=lambda _delta: None,
             on_pipeline_stage=lambda _stage: None,
         )
-    assert adapter.calls == 3
+    assert adapter.calls == 4
 
 
 def test_controlled_active_work_question_skips_discarded_conversation_call() -> None:
@@ -654,14 +654,14 @@ def test_action_binding_repair_is_bounded_and_does_not_invent_human_argument():
     missing = json.loads(_semantics())
     missing['collaboration']['turn_intent'] = 'ACTION_REQUEST'
     missing['semantic_intent'] = None
-    runtime, adapter = _runtime(_Adapter([json.dumps(missing)] * 3))
+    runtime, adapter = _runtime(_Adapter([json.dumps(missing)] * 4))
     capability = DeepSeekWorkInteractionCapability(runtime=runtime)
     visible = []
     with pytest.raises(StructuredResponseSchemaViolation, match='bounded_repair_exhausted') as failure:
         capability.interpret_controlled_stream_observed(_basis(),
             on_response_delta=visible.append, on_pipeline_stage=lambda _: None)
-    assert failure.value.repair_attempts == 2
-    assert adapter.calls == 3 and visible == []
+    assert failure.value.repair_attempts == 3
+    assert adapter.calls == 4 and visible == []
 
 
 def test_semantic_cross_reference_failure_is_repaired_before_assessment_admission():

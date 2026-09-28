@@ -162,7 +162,9 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
             if item.kind is not SemanticKind.CORRECTION or not any(
                     p.source_record_id == latest.id and p.origin in {
                         SemanticOrigin.HUMAN_EXPLICIT,SemanticOrigin.HUMAN_CORRECTION} for p in item.provenance):
-                raise IntentRealizationViolation("ACTION_SCOPE_INFLATION: supersession needs current Human correction")
+                raise IntentRealizationViolation(
+                    "ACTION_SCOPE_INFLATION: supersession needs current Human correction; "
+                    "FACT and ACTION items must leave supersedes empty")
             for reference in item.supersedes:
                 witness = observations.get(f"obligation:{reference}")
                 if witness is None or witness.owner != "turn-obligation-ledger" or witness.facts.get("state") not in {"PENDING","RUNNING"}:
@@ -334,6 +336,19 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
                                 claim.provenance.source_text, clause.source_text)
                             for clause in candidate.clauses)):
                         raise IntentRealizationViolation("ATOMIC_EFFECT_AUTHORITY_MISSING: effect target or clause differs from governed intent")
+                linked_clauses = tuple(clause for clause in candidate.clauses
+                    if item.item_id in clause.semantic_item_ids)
+                # A requested create-then-switch sequence is an internal
+                # dependency of one atomic operation, not an unfulfilled
+                # external condition. Both effects must already have exact
+                # current Human clauses and no separate gating clause.
+                if (operation is CanonicalOperation.CREATE_AND_SWITCH_BRANCH
+                        and action.conditional and not action.unresolved
+                        and not item.depends_on and linked_clauses
+                        and all(clause in supporting_clauses for clause in linked_clauses)
+                        and not any(clause.modality == "CONDITIONAL"
+                            for clause in candidate.clauses)):
+                    action = action.model_copy(update={"conditional": False})
             if operation in {CanonicalOperation.CREATE_BRANCH, CanonicalOperation.SWITCH_BRANCH,
                     CanonicalOperation.CREATE_AND_SWITCH_BRANCH} and action.speech_act is ActionSpeechAct.EXPLICIT_REQUEST:
                 if "target_branch" not in action.arguments and not action.unresolved:
@@ -378,6 +393,21 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
     done = set()
     for identity in graph:
         visit(identity, set(), done)
+    branch_items = {}
+    for item in normalized:
+        if (item.action is None or not item.action.current
+                or item.action.speech_act is not ActionSpeechAct.EXPLICIT_REQUEST):
+            continue
+        operation = canonical_operation(item.action.operation)
+        if operation not in {CanonicalOperation.CREATE_BRANCH, CanonicalOperation.SWITCH_BRANCH}:
+            continue
+        target = item.action.arguments.get("target_branch")
+        if target is not None:
+            branch_items.setdefault(target.value, set()).add(operation)
+    if any({CanonicalOperation.CREATE_BRANCH, CanonicalOperation.SWITCH_BRANCH} <= operations
+            for operations in branch_items.values()):
+        raise IntentRealizationViolation(
+            "ATOMIC_EFFECT_SPLIT: same-target create and switch in one Turn require one CREATE_AND_SWITCH_BRANCH item")
     current_production = any(item.production and item.production.current for item in normalized)
     if not current_production and any(item.action and item.action.current
             and item.action.speech_act is ActionSpeechAct.EXPLICIT_REQUEST
@@ -673,6 +703,8 @@ def blocking_action_arguments(action):
         CanonicalOperation.SEARCH_GITHUB: {"query"},
         CanonicalOperation.SEARCH_WEB: {"query"},
         CanonicalOperation.FETCH_PUBLIC_RESOURCE: {"url"},
+        CanonicalOperation.REQUEST_PREVIEW: {"candidate_revision"},
+        CanonicalOperation.ACCEPT_CANDIDATE: {"candidate_revision"},
         CanonicalOperation.AUTHORIZE_DELIVERY: {"manifest_id", "candidate_revision", "target_branch"},
         CanonicalOperation.PUSH_BRANCH: {"authorization_id", "candidate_revision"},
         CanonicalOperation.CREATE_PR: {"authorization_id", "candidate_revision", "base_branch", "title", "body"},

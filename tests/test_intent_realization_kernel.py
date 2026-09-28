@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from spg.application.intent_realization import (
     IntentRealizationKernel, IntentRealizationViolation, canonical_operation,
-    executable_semantic_actions, reconcile_obligation, validate_turn_completion,
+    executable_semantic_actions, blocking_action_arguments, reconcile_obligation, validate_turn_completion,
 )
 from spg.application.interaction import (
     _grounded_named_branch_question, _grounded_status_facts, _research_repository_source,
@@ -264,6 +264,39 @@ def test_composite_branch_effect_requires_both_separate_claims():
         "atomic_branch_effects": item.action.atomic_branch_effects[:1]})})
     with pytest.raises(IntentRealizationViolation, match="ATOMIC_EFFECT_AUTHORITY_MISSING"):
         govern(record, (item,))
+
+
+def test_internal_create_then_switch_order_is_not_an_external_condition():
+    record = source("Create feat_kernel, then switch to it")
+    item = action(record)
+    item = item.model_copy(update={"action":item.action.model_copy(update={"conditional":True})})
+    governed = govern(record,(item,))
+    assert governed.items[0].action.conditional is False
+    assert [value.action.operation for value in executable_semantic_actions(governed)] == [
+        O.CREATE_AND_SWITCH_BRANCH.value]
+
+
+def test_same_target_create_and_switch_cannot_be_split_into_partial_writes():
+    record = source("Create feat_kernel, switch to it")
+    create = action(record,op=O.CREATE_BRANCH,identity="create")
+    switch = action(record,op=O.SWITCH_BRANCH,identity="switch")
+    clauses = (SemanticClause(clause_id="create",source_record_id=record.id,
+        source_text="Create feat_kernel",semantic_item_ids=("create",),
+        speech_act=S.EXPLICIT_REQUEST,polarity="AFFIRMATIVE",modality="REQUEST",
+        temporal_scope="CURRENT",requested_effects=("CREATE_BRANCH",)),
+        SemanticClause(clause_id="switch",source_record_id=record.id,
+        source_text="switch to it",semantic_item_ids=("switch",),
+        speech_act=S.EXPLICIT_REQUEST,polarity="AFFIRMATIVE",modality="REQUEST",
+        temporal_scope="CURRENT",requested_effects=("SWITCH_BRANCH",)))
+    with pytest.raises(IntentRealizationViolation,match="ATOMIC_EFFECT_SPLIT"):
+        govern(record,(create,switch),clauses=clauses)
+
+
+def test_candidate_actions_need_exact_candidate_revision_before_execution():
+    record = source("Accept the reviewed Candidate")
+    for operation in (O.REQUEST_PREVIEW,O.ACCEPT_CANDIDATE):
+        assert blocking_action_arguments(action(record,op=operation,branch=None).action) == {
+            "candidate_revision"}
 
 
 def test_atomic_effect_target_cannot_disagree_with_governed_target():

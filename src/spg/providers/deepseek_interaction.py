@@ -160,7 +160,7 @@ class DeepSeekInteractionSemanticCapability:
         self.last_action_repair_signal = None
         self.last_structured_repair_count = 0
         schema = InteractionSemanticContract.output_schema()
-        for attempt in range(3):
+        for attempt in range(4):
             try:
                 payload = _InteractionSemanticProviderPayload.model_validate_json(
                     _structured_json_text(result.output_text)
@@ -178,12 +178,12 @@ class DeepSeekInteractionSemanticCapability:
                     except ValueError:
                         self.last_action_repair_signal = "SCHEMA_INVALID"
                     issue = str(error)
-                if attempt == 2:
+                if attempt == 3:
                     raise StructuredResponseSchemaViolation(
                         "WIC semantic Provider returned an invalid structured result after "
-                        f"two bounded repair attempts ({issue}; bounded_repair_exhausted)",
+                        f"three bounded repair attempts ({issue}; bounded_repair_exhausted)",
                         request_id=result.request_id, validation_issue=issue,
-                        repair_attempted=True, repair_attempts=2,
+                        repair_attempted=True, repair_attempts=3,
                     ) from error
                 LOGGER.warning(
                     "WIC semantic validation failed request=%s model=%s status=completed "
@@ -662,7 +662,7 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
         stage("provider_teardown_completed")
         stage("payload_validation_started")
         repair_count = 0
-        for attempt in range(3):
+        for attempt in range(4):
             try:
                 payload = _CoalescedInteractionProviderPayload.model_validate_json(
                     _structured_json_text(result.output_text)
@@ -678,13 +678,13 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
                 break
             except (ValidationError, ValueError, TypeError) as error:
                 issue = _safe_validation_summary(error)
-                if attempt == 2:
+                if attempt == 3:
                     raise StructuredResponseSchemaViolation(
                         "Coalesced collaboration Provider returned an invalid structured "
-                        f"result after two bounded repair attempts ({issue}; "
+                        f"result after three bounded repair attempts ({issue}; "
                         "bounded_repair_exhausted)",
                         request_id=result.request_id, validation_issue=issue,
-                        repair_attempted=True, repair_attempts=2,
+                        repair_attempted=True, repair_attempts=3,
                     ) from error
                 LOGGER.warning(
                     "Coalesced collaboration validation failed request=%s model=%s "
