@@ -1,13 +1,13 @@
 """Crash-resumable workspace hibernation and retention pin ownership."""
 
 from datetime import datetime, timedelta, timezone
-import os
 from pathlib import Path
 import shutil
-import stat
 from uuid import UUID, uuid4
 
 from sqlalchemy import insert, select, update
+
+from spg.application.git_filesystem import remove_git_tree
 
 from spg.domain.native_execution import (
     ExecutionRecoveryCaseRecord,
@@ -46,17 +46,6 @@ from spg.infrastructure.persistence.delivery_schema import work_delivery_manifes
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
-
-
-def _retry_readonly_file_removal(function, path, error: BaseException) -> None:
-    """Delete archived Git objects on Windows without masking other IO failures."""
-    if not isinstance(error, PermissionError):
-        raise error
-    mode = os.lstat(path).st_mode
-    if not stat.S_ISREG(mode) or mode & stat.S_IWRITE:
-        raise error
-    os.chmod(path, mode | stat.S_IWRITE)
-    function(path)
 
 
 class NativeRetentionService:
@@ -232,7 +221,7 @@ class NativeRetentionService:
                     if not workspace_path.exists():
                         retiring.rename(workspace_path)
                     raise NativeExecutionConflict("retiring workspace is a symbolic link")
-                shutil.rmtree(retiring, onexc=_retry_readonly_file_removal)
+                remove_git_tree(retiring)
             self._advance_action(
                 action.id,
                 RetentionActionCondition.PHYSICAL_COMPLETE,

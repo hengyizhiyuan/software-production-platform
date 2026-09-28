@@ -1,10 +1,11 @@
 from pathlib import Path
-import shutil
 from uuid import uuid4
 
 from alembic import command
 import pytest
 from sqlalchemy import func, inspect, select, update
+
+from spg.application.git_filesystem import remove_git_tree
 
 from spg.application.attempt_recovery import AttemptRecoveryService
 from spg.application.completion import CompletionService
@@ -98,7 +99,7 @@ def _count(database: Database, table) -> int:
 
 
 def _remove_workspace(facts) -> None:
-    shutil.rmtree(facts.prepared.preparation.workspace.workspace_path)
+    remove_git_tree(facts.prepared.preparation.workspace.workspace_path)
 
 
 def test_s5c_migration_downgrade_and_reupgrade(postgres_database: Database) -> None:

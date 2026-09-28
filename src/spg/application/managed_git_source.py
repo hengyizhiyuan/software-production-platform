@@ -11,7 +11,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
-import shutil
 import subprocess
 from tempfile import NamedTemporaryFile
 from uuid import uuid4
@@ -19,6 +18,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
+from spg.application.git_filesystem import remove_git_tree, replace_git_tree
 from spg.domain.product import ProductInvariantViolation
 from spg.infrastructure.persistence.managed_repository_schema import managed_repository_sources
 
@@ -115,7 +115,8 @@ class ManagedGitSource:
             staging = destination.parent / f".{destination.name}.restore-{uuid4().hex}"
             try:
                 with NamedTemporaryFile(prefix="watt-managed-restore-", suffix=".bundle") as temporary:
-                    Path(temporary.name).write_bytes(row["git_bundle"])
+                    temporary.write(bytes(row["git_bundle"]))
+                    temporary.flush()
                     result = subprocess.run(["git", "clone", "--no-checkout", "--",
                         temporary.name, str(staging)], capture_output=True,
                         text=True, timeout=120)
@@ -127,10 +128,10 @@ class ManagedGitSource:
                         _git(staging, "rev-parse", "HEAD^{tree}")) != (
                         row["revision"], row["tree"]):
                     raise ProductInvariantViolation("Restored Git source differs from canonical revision")
-                staging.replace(destination)
+                replace_git_tree(staging, destination)
             finally:
                 if staging.exists():
-                    shutil.rmtree(staging)
+                    remove_git_tree(staging)
         return {"repository_identity": identity,
             "repository_ref": row["repository_ref"],
             "revision": row["revision"], "tree": row["tree"],

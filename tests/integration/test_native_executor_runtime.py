@@ -6,7 +6,6 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 from threading import Barrier
@@ -20,6 +19,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import delete, func, inspect, insert, select, update
 
 from spg.application.executor_runtime import NativeExecutorRuntimeService
+from spg.application.git_filesystem import remove_git_tree
 
 
 def test_malformed_result_claim_terminalizes_attempt_without_crashing_worker_owner(
@@ -971,7 +971,7 @@ def test_lost_workspace_restores_only_from_verified_bundle_into_successor(
     assert retained.bundle_digest is not None
     retention.restore(admission.binding.workspace.workspace_id)
     original_content = (git_repository / "README.md").read_text(encoding="utf-8")
-    shutil.rmtree(git_repository)
+    remove_git_tree(git_repository)
 
     successor_attempt = runtime.retry_attempt(
         admission.binding.attempt_id,
@@ -1030,7 +1030,7 @@ def test_lost_workspace_without_complete_bundle_fails_recovery_promise(
         summary="no complete recovery bundle exists",
         residual_obligations=admission.binding.obligation_references,
     ))
-    shutil.rmtree(git_repository)
+    remove_git_tree(git_repository)
     successor_attempt = runtime.retry_attempt(
         admission.binding.attempt_id,
         AttemptRequest(provider_ref="watt-native:qualification"),

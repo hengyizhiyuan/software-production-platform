@@ -1,10 +1,10 @@
 from pathlib import Path
-import shutil
 import subprocess
 
 import pytest
 
 from spg.application.managed_git_source import ManagedGitSource
+from spg.application.git_filesystem import remove_git_tree
 
 
 pytestmark = pytest.mark.postgresql
@@ -31,7 +31,7 @@ def test_managed_source_survives_checkout_loss_and_preserves_history(
     store = ManagedGitSource(postgres_database)
     observed = store.sync(identity, checkout)
     assert observed["revision"] == first
-    shutil.rmtree(checkout.parent)
+    remove_git_tree(checkout.parent)
 
     recovered = tmp_path / "worker-b" / "repository"
     assert store.recover(identity, recovered)["revision"] == first
@@ -49,7 +49,7 @@ def test_managed_source_survives_checkout_loss_and_preserves_history(
     exported_path.write_bytes(bundle)
     assert subprocess.run(["git", "bundle", "verify", str(exported_path)],
         cwd=recovered, capture_output=True).returncode == 0
-    shutil.rmtree(recovered.parent)
+    remove_git_tree(recovered.parent)
 
     final = tmp_path / "worker-c" / "repository"
     assert store.recover(identity, final)["revision"] == second
@@ -83,8 +83,8 @@ def test_managed_work_branch_has_its_own_recoverable_exact_history(
     revision = _git(branch, "rev-parse", "HEAD")
     identity = "watt://work-branches/test-feature"
     store.sync(identity, branch, internal_branch=True)
-    shutil.rmtree(branch.parent)
-    shutil.rmtree(base)
+    remove_git_tree(branch.parent)
+    remove_git_tree(base)
     recovered = tmp_path / "worker-b" / "branch"
     assert store.recover(identity, recovered)["revision"] == revision
     assert _git(recovered, "branch", "--show-current") == "feature"
