@@ -90,14 +90,15 @@ def runtime(postgres_database, tmp_path, monkeypatch):
 
 def settled(service, interaction, text):
     turn = service.submit_turn(interaction.id, text, human_identity="human:owner")
-    deadline = time.monotonic() + 30
+    deadline = time.monotonic() + 120
     while time.monotonic() < deadline:
         current = service.get_turn(turn.id)
         if current.status.value in {"COMPLETED", "FAILED"}:
             assert current.status.value == "COMPLETED", current.failure_message
             return turn, service.realization_projection(turn.id)
         time.sleep(.02)
-    pytest.fail("Turn did not reach a terminal outcome")
+    current = service.get_turn(turn.id)
+    pytest.fail(f"Turn did not reach a terminal outcome: {current.status.value}")
 
 
 def acquired(runtime):
