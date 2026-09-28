@@ -121,6 +121,13 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
     # owner fact to masquerade as a Human statement. Only typed, non-Human
     # supplemental facts may be outside this map; their exact claims are
     # validated against the supplied owner observations below.
+    for item in candidate.items:
+        if (item.kind is SemanticKind.FACT and item.provenance
+                and all(p.origin is SemanticOrigin.REPOSITORY_OBSERVED for p in item.provenance)
+                and not item.observed_facts):
+            raise IntentRealizationViolation(
+                "ACTION_ARGUMENT_PROVENANCE_INVALID: REPOSITORY_OBSERVED FACT requires "
+                "exact observed_facts key/value; omit an unsupported supplemental FACT")
     supplemental = {item.item_id for item in candidate.items
         if item.kind is SemanticKind.FACT and item.observed_facts
         and all(p.origin is SemanticOrigin.REPOSITORY_OBSERVED for p in item.provenance)}
@@ -344,8 +351,12 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
                 # current Human clauses and no separate gating clause.
                 if (operation is CanonicalOperation.CREATE_AND_SWITCH_BRANCH
                         and action.conditional and not action.unresolved
-                        and not item.depends_on and linked_clauses
+                        and not item.depends_on and len(linked_clauses) >= 2
                         and all(clause in supporting_clauses for clause in linked_clauses)
+                        and any(tuple(clause.requested_effects) == ("CREATE_BRANCH",)
+                            for clause in linked_clauses)
+                        and any(tuple(clause.requested_effects) == ("SWITCH_BRANCH",)
+                            for clause in linked_clauses)
                         and not any(clause.modality == "CONDITIONAL"
                             for clause in candidate.clauses)):
                     action = action.model_copy(update={"conditional": False})

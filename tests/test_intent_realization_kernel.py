@@ -270,10 +270,37 @@ def test_internal_create_then_switch_order_is_not_an_external_condition():
     record = source("Create feat_kernel, then switch to it")
     item = action(record)
     item = item.model_copy(update={"action":item.action.model_copy(update={"conditional":True})})
-    governed = govern(record,(item,))
+    clauses = (SemanticClause(clause_id="create",source_record_id=record.id,
+        source_text="Create feat_kernel",semantic_item_ids=(item.item_id,),
+        speech_act=S.EXPLICIT_REQUEST,polarity="AFFIRMATIVE",modality="REQUEST",
+        temporal_scope="CURRENT",requested_effects=("CREATE_BRANCH",)),
+        SemanticClause(clause_id="switch",source_record_id=record.id,
+        source_text="then switch to it",semantic_item_ids=(item.item_id,),
+        speech_act=S.EXPLICIT_REQUEST,polarity="AFFIRMATIVE",modality="REQUEST",
+        temporal_scope="CURRENT",requested_effects=("SWITCH_BRANCH",)))
+    governed = govern(record,(item,),clauses=clauses)
     assert governed.items[0].action.conditional is False
     assert [value.action.operation for value in executable_semantic_actions(governed)] == [
         O.CREATE_AND_SWITCH_BRANCH.value]
+
+
+def test_single_conditional_clause_cannot_be_normalized_into_execution():
+    record = source("If review is approved, create feat_kernel and switch to it")
+    item = action(record)
+    item = item.model_copy(update={"action":item.action.model_copy(update={"conditional":True})})
+    governed = govern(record,(item,))
+    assert governed.items[0].action.conditional is True
+    assert executable_semantic_actions(governed) == ()
+
+
+def test_repository_observed_fact_requires_exact_structured_claim():
+    record = source("Switch to feat_kernel")
+    fact = SemanticItem(item_id="unsupported-observation",kind=K.FACT,
+        statement="The repository contains feat_kernel",subject="repository.branches",
+        provenance=(SemanticProvenance(origin=Origin.REPOSITORY_OBSERVED,
+            evidence_reference="repository-intake:receipt"),),confidence=.9)
+    with pytest.raises(IntentRealizationViolation,match="REPOSITORY_OBSERVED FACT requires"):
+        govern(record,(action(record,op=O.SWITCH_BRANCH),fact))
 
 
 def test_same_target_create_and_switch_cannot_be_split_into_partial_writes():
