@@ -29,11 +29,15 @@ def test_actual_owner_fact_does_not_need_fabricated_human_clause():
  assert obligations[0].semantic_item_id=='question'
 
 
-@pytest.mark.parametrize('invalid', ['human_fact','owner_question','no_exact_claim'])
-def test_supplemental_exception_cannot_hide_unmapped_human_meaning_or_non_fact(invalid):
+@pytest.mark.parametrize(('invalid', 'failure'), [
+ ('human_fact', 'PRIMARY_INTENT_CLAUSE_LOST'),
+ ('owner_question', 'PRIMARY_INTENT_CLAUSE_LOST'),
+ ('no_exact_claim', 'ACTION_ARGUMENT_PROVENANCE_INVALID'),
+])
+def test_supplemental_exception_cannot_hide_unmapped_human_meaning_or_non_fact(invalid, failure):
  basis,record,question,fact,human,_=basis_and_items()
  changes={'human_fact':{'provenance':(human,)},'owner_question':{'kind':K.QUESTION},'no_exact_claim':{'observed_facts':{}}}[invalid]
- with pytest.raises(IntentRealizationViolation,match='PRIMARY_INTENT_CLAUSE_LOST'):
+ with pytest.raises(IntentRealizationViolation,match=failure):
   govern(basis,record,(question,fact.model_copy(update=changes)))
 
 
