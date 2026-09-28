@@ -54,9 +54,9 @@ def main():
     parser.add_argument('--observation-phase', choices=('initial', 'after-clarification', 'after-reassessment'), default='initial')
     parser.add_argument('--timeout', type=int, default=1800)
     args = parser.parse_args()
-    env = dict(line.split('=', 1) for line in args.env_file.read_text().splitlines() if '=' in line)
+    env = dict(line.split('=', 1) for line in args.env_file.read_text(encoding='utf-8').splitlines() if '=' in line)
     client = ProductClient(args.base, env['SPG_OPERATOR_TOKEN'])
-    corpus = json.loads((ROOT/'benchmarks/golden/tier0-v1.json').read_text())
+    corpus = json.loads((ROOT/'benchmarks/golden/tier0-v1.json').read_text(encoding='utf-8'))
     case = next(item for item in corpus['cases'] if item['id'] == args.case)
     directory = args.evidence_root/args.case/f'trial-{args.trial}'
     directory.mkdir(parents=True, exist_ok=True)
@@ -67,7 +67,7 @@ def main():
     runtime_record = directory/'runtime-activation.json'
     if not runtime_record.exists():
         runtime_record.write_text(json.dumps(client.request('/api/runtime-activation'),
-            ensure_ascii=False, indent=2))
+            ensure_ascii=False, indent=2), encoding='utf-8')
     intent = case['human_request']
     if case['fixture'] != 'public-watt-main':
         intent = f"这是当前项目仓库：{args.fixture_base}/{case['fixture']}.git\n" + intent
@@ -78,17 +78,21 @@ def main():
         interaction_id = interaction['interaction_id']
         receipt = client.request('/api/interactions/'+interaction_id+'/turns', {
             'content': intent, 'human_identity': 'human:golden-operator'})
-        (directory/'submission.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2))
+        (directory/'submission.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2), encoding='utf-8')
     journey_path = directory/'journey.json'
     if journey_path.exists():
-        if json.loads(journey_path.read_text())['interaction_id'] != interaction_id:
+        try:
+            previous_journey = json.loads(journey_path.read_text(encoding='utf-8'))
+        except UnicodeDecodeError:
+            previous_journey = json.loads(journey_path.read_text(encoding='gbk'))
+        if previous_journey['interaction_id'] != interaction_id:
             raise SystemExit('Existing trial belongs to a different interaction')
     else:
         journey_path.write_text(json.dumps({'case': case['id'],
         'corpus_version': corpus['corpus_version'], 'trial': args.trial,
         'interaction_id': interaction_id, 'human_input': intent,
         'tester_implementation': False, 'manual_rescue_actions': [],
-        'human_acceptance': 'PENDING'}, ensure_ascii=False, indent=2))
+        'human_acceptance': 'PENDING'}, ensure_ascii=False, indent=2), encoding='utf-8')
     started = time.monotonic()
     previous = None
     work_id = None
@@ -99,7 +103,7 @@ def main():
         for turn in interaction.get('turns', []):
             if turn.get('assessment_id'):
                 realization = client.request('/api/interactions/'+interaction_id+'/turns/'+turn['turn_id']+'/realization')
-                (directory/('realization-'+turn['turn_id']+'.json')).write_text(json.dumps(realization,ensure_ascii=False,indent=2))
+                (directory/('realization-'+turn['turn_id']+'.json')).write_text(json.dumps(realization,ensure_ascii=False,indent=2), encoding='utf-8')
         state = {'interaction': interaction, 'observed_at': datetime.now(UTC).isoformat()}
         turns = interaction.get('turns', [])
         if not work_id and turns and turns[-1].get('status') == 'COMPLETED':
@@ -108,7 +112,7 @@ def main():
             if any(item.get('production', {}).get('current') for item in ir.get('items', []) if item.get('production')):
                 result.update(status='CURRENT_PRODUCTION_NOT_ADMITTED', interaction_id=interaction_id,
                     obligations=projection.get('obligations', []), business_oracle='NOT_EVALUATED')
-                (directory/'latest.json').write_text(json.dumps(state, ensure_ascii=False, indent=2))
+                (directory/'latest.json').write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
                 break
         if work_id:
             prefix = '/api/works/'+work_id
@@ -121,10 +125,10 @@ def main():
         status = ('PREVIEW_READY' if state.get('preview',{}).get('status') == 'READY' else
             state.get('work',{}).get('status') or
             (interaction.get('turns') or [{}])[-1].get('status', 'UNDERSTANDING'))
-        (directory/'latest.json').write_text(json.dumps(state, ensure_ascii=False, indent=2))
+        (directory/'latest.json').write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
         if status != previous:
             stamp = datetime.now(UTC).strftime('%Y%m%dT%H%M%S%f')
-            (directory/(stamp+'.json')).write_text(json.dumps(state, ensure_ascii=False, indent=2))
+            (directory/(stamp+'.json')).write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
             print(json.dumps({'case': args.case, 'trial': args.trial, 'work': work_id,
                 'status': status, 'elapsed_seconds': int(time.monotonic()-started)}, ensure_ascii=False), flush=True)
             previous = status
@@ -168,7 +172,7 @@ def main():
     result.update(work_id=work_id, elapsed_seconds=int(time.monotonic()-started),
         human_acceptance='PENDING', automatic_delivery_authorization=False,
         business_oracle='NOT_YET_EVALUATED')
-    result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2))
+    result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(result, ensure_ascii=False), flush=True)
 
 

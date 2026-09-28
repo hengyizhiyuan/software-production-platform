@@ -1,7 +1,7 @@
 """Declared semantic oracles for tests; no language routing or phrase grammar."""
 from uuid import UUID
 from spg.domain.intent_realization import (
-    GovernedSemanticIR, OperationalIntent, ProductionIntent, SemanticArgument,
+    AtomicBranchEffect, GovernedSemanticIR, OperationalIntent, ProductionIntent, SemanticArgument,
     SemanticClause, SemanticItem, SemanticKind, SemanticOrigin, SemanticProvenance,
     SemanticQuestion, TurnSemanticCandidate,
 )
@@ -13,9 +13,15 @@ def semantic_candidate(record, *, kind=SemanticKind.EXPLORE, statement=None,
         altitude="DOMAIN", uncertain=False, extra_items=(), provenance=None, observed_facts=None, design_frame=None):
     source = provenance or SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
         source_record_id=record.id, source_text=record.content)
+    branch_effects = {"CREATE_BRANCH": ("CREATE_BRANCH",),
+        "SWITCH_BRANCH": ("SWITCH_BRANCH",),
+        "CREATE_AND_SWITCH_BRANCH": ("CREATE_BRANCH", "SWITCH_BRANCH")}.get(str(operation), ())
     action = None if operation is None else OperationalIntent(operation=operation,
         speech_act=ActionSpeechAct.EXPLICIT_REQUEST,
-        arguments={key: SemanticArgument(value=value, provenance=source) for key, value in (arguments or {}).items()})
+        arguments={key: SemanticArgument(value=value, provenance=source) for key, value in (arguments or {}).items()},
+        atomic_branch_effects=tuple(AtomicBranchEffect(effect=effect,
+            target_branch=(arguments or {})["target_branch"], provenance=source)
+            for effect in branch_effects if "target_branch" in (arguments or {})))
     if action is not None:
         kind = SemanticKind.OPERATIONAL_ACTION
     if production is not None:
@@ -26,7 +32,12 @@ def semantic_candidate(record, *, kind=SemanticKind.EXPLORE, statement=None,
     items = (item, *extra_items)
     return TurnSemanticCandidate(items=items, clauses=(SemanticClause(clause_id="current-source",
         source_record_id=record.id, source_text=record.content,
-        semantic_item_ids=tuple(item.item_id for item in items)),), questions=questions,
+        semantic_item_ids=tuple(item.item_id for item in items),
+        speech_act=ActionSpeechAct.EXPLICIT_REQUEST if branch_effects else None,
+        polarity="AFFIRMATIVE" if branch_effects else "UNRESOLVED",
+        modality="REQUEST" if branch_effects else "UNRESOLVED",
+        temporal_scope="CURRENT" if branch_effects else "UNRESOLVED",
+        requested_effects=branch_effects),), questions=questions,
         human_abstraction_level=altitude, uncertain=uncertain)
 
 

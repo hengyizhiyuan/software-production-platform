@@ -3019,7 +3019,11 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
         if iteration.action is SteeringActionType.REPOSITORY_ACTION:
             break
     if not provider_variant:
-        assert any(item.action is SteeringActionType.REPOSITORY_ACTION for item in iterations)
+        assert any(item.action is SteeringActionType.REPOSITORY_ACTION for item in iterations), [
+            (item.action, item.progressed, item.stop_reason) for item in iterations] + [
+            work_service.get_work(work_id).status,
+            steering_driver.frames.assemble(work_id).open_blocking_reality,
+            steering_driver.steering.reconstruct(work_id).current_step]
     branch = service.latest_attempt_for_work(work_id)
     assert branch is not None
     assert branch["condition"] == "READY", branch.get("technical_evidence")
@@ -4684,6 +4688,92 @@ def test_human_answer_to_current_design_question_admits_once_and_schedules(postg
         assert _count(postgres_database, human_authorizations) == 0
         assert _count(postgres_database, production_runs) == 0
     finally:
+        driver.shutdown()
+        driver.production_orchestrator.shutdown()
+
+
+def test_typed_scope_answer_to_current_question_revises_same_work_once(postgres_database, services):
+    from spg.infrastructure.persistence.interaction_store import InteractionStore
+    from spg.domain.steering import NextStepCandidate, SteeringAuthorityAssessment, SteeringAttentionReason
+    work, interactions = services
+    ready = _ready(interactions)
+    admitted = _admit(work, ready)
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    driver = PlanSteeringDriver(postgres_database, work, ProductionOrchestrator(work))
+    frame = driver.frames.assemble(admitted.work_id)
+    driver.decisions.admit(admitted.work_id, NextStepCandidate(
+        type=SteeringStepType.HUMAN_DECISION, objective="Choose search scope",
+        reason="Which business domain should search cover?", human_required=True,
+        reality_refs=tuple(item.reference for item in frame.basis.resolved_reality),
+        completion_condition="Human specifies domain and fields",
+        proposed_outcome=SteeringOutcome.HUMAN_ATTENTION,
+        basis_fingerprint=frame.basis.fingerprint,
+        authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
+        proposed_engineering_scope_fingerprint=frame.engineering_scope_fingerprint,
+        attention_reason=SteeringAttentionReason.MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION,
+        recommendation="Choose a domain", expected_impact="The decision governs search scope"))
+    class ScopeAnswerCapability:
+        def interpret(self, basis):
+            record = basis.records[-1]
+            active = basis.active_work_context
+            assert active.pending_human_question == "Which business domain should search cover?"
+            return InteractionAssessmentCandidate(
+                semantic_intent=semantic_candidate(record, kind=SemanticKind.CONSTRAINT),
+                interpreted_motive=active.work_revision.motive,
+                desired_outcome=active.work_revision.desired_outcome,
+                candidate_context=active.work_revision.context_facts,
+                candidate_constraints=(*active.work_revision.constraints, "Search users by name and email"),
+                current_requests=active.work_revision.requests,
+                focus_classification=WorkFocusClassification.SIDE_QUESTION,
+                impact_disposition=WorkImpactDisposition.NO_GOVERNED_CHANGE,
+                semantic_fact_candidates=(EngineeringSemanticFactCandidate(
+                    candidate_id="scope-users", subject="search.scope.domains",
+                    relation=SemanticRelation.SCOPE, value=["users"], scope="business-app",
+                    authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                    epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                    source_record_ids=(record.id,), source_text="Search users",
+                    role_origin=SemanticRoleOrigin.EXPLICIT),),
+                natural_response="Scope recorded", provider_identity="test:scope-answer")
+    answering = WorkInteractionService(postgres_database, capability=ScopeAnswerCapability())
+    scheduled = []
+    def schedule(work_id):
+        scheduled.append(work_id)
+        driver.iterate(work_id)
+    post = SimpleNamespace(steering_driver=SimpleNamespace(schedule=schedule))
+    trigger = ProductionAdmissionTrigger(answering, work, None, post)
+    answering.configure_governed_branch_handler(None,
+        work_handler=trigger.execute_governed_work_turn)
+    try:
+        turn = answering.submit_turn(ready.interaction.id,
+            "Search users by name and email; exclude orders", human_identity="human:test")
+        deadline = time.monotonic() + 45
+        while time.monotonic() < deadline:
+            settled = answering.get_turn(turn.id)
+            if settled.status.value in {"COMPLETED", "FAILED"}:
+                break
+            time.sleep(.05)
+        assert settled.status.value == "COMPLETED", settled.failure_message
+        with postgres_database.unit_of_work() as uow:
+            interaction_store = InteractionStore(uow.session)
+            assessment = interaction_store.latest_assessment(ready.interaction.id)
+            record = interaction_store.records(ready.interaction.id)[-1]
+        assert assessment.candidate_change is not None
+        assert "constraints" in assessment.candidate_change.changed_fields
+        projection = answering.realization_projection(turn.id)
+        assert projection["obligations"][0]["state"] == "SATISFIED"
+        assert projection["obligations"][0]["observed_effect"]["owner"] == "work-steering-question"
+        assert scheduled == [admitted.work_id]
+        with postgres_database.unit_of_work() as uow:
+            revised = ProductStore(uow.session).current_work_reality_revision(admitted.work_id)
+            assert "Search users by name and email; exclude orders" in revised.constraints
+        with postgres_database.unit_of_work() as uow:
+            steering = SteeringStore(uow.session)
+            active_plan = steering.active_revision(steering.plan_for_work(admitted.work_id).id)
+            assert active_plan.id != assessment.basis_steering_plan_revision_id
+        assert trigger.execute_governed_turn(ready.interaction.id, assessment, record) is None
+        assert _count(postgres_database, work_reality_revisions) == 2
+    finally:
+        answering.shutdown()
         driver.shutdown()
         driver.production_orchestrator.shutdown()
 

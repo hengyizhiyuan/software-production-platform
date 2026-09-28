@@ -220,6 +220,34 @@ def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta
     assert "我想做一个运营管理平台" in adapter.requests[1]["instructions"]
 
 
+def test_semantic_compiler_repairs_two_structural_candidates_on_the_same_basis() -> None:
+    adapter = _Adapter(['{"incomplete":', '{"still_incomplete":', _semantics()])
+    runtime, adapter = _runtime(adapter)
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    result = capability.interpret_controlled_stream_observed(_basis(),
+        on_response_delta=None, on_pipeline_stage=None)
+    assert result.semantic_intent is not None
+    assert adapter.calls == 3
+    assert capability.last_pipeline_evidence.semantic_structured_repair_count == 2
+    assert "root:json_invalid" in adapter.requests[2]["instructions"]
+
+
+def test_coalesced_retention_validation_repairs_before_accepting_provider_output() -> None:
+    invalid = json.loads(_envelope())
+    invalid["semantics"]["retained_prior_meaning_indexes"] = [0]
+    adapter = _Adapter([json.dumps(invalid, ensure_ascii=False),
+        json.dumps(invalid, ensure_ascii=False), _envelope()])
+    runtime, adapter = _runtime(adapter)
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    result = capability.interpret_stream_observed(_basis(),
+        on_response_delta=None, on_pipeline_stage=None)
+    assert result.semantic_intent is not None
+    assert adapter.calls == 3
+    assert capability.last_pipeline_evidence.provider_call_count == 3
+    assert capability.last_pipeline_evidence.coalesced_structured_repair_count == 2
+    assert "invalid prior meaning index" in adapter.requests[2]["instructions"]
+
+
 def test_controlled_pre_work_uses_semantics_then_governed_realizer_stream() -> None:
     runtime, adapter = _runtime()
     capability = DeepSeekWorkInteractionCapability(runtime=runtime)
@@ -284,8 +312,8 @@ def test_controlled_pre_work_repairs_valid_json_with_schema_errors() -> None:
     assert adapter.calls == 2
 
 
-def test_controlled_pre_work_stops_after_one_failed_json_repair() -> None:
-    adapter = _Adapter(["{", "{"])
+def test_controlled_pre_work_stops_after_two_failed_json_repairs() -> None:
+    adapter = _Adapter(["{", "{", "{"])
     runtime, adapter = _runtime(adapter)
     capability = DeepSeekWorkInteractionCapability(runtime=runtime)
 
@@ -299,7 +327,7 @@ def test_controlled_pre_work_stops_after_one_failed_json_repair() -> None:
             on_pipeline_stage=lambda _stage: None,
         )
 
-    assert adapter.calls == 2
+    assert adapter.calls == 3
 
 
 def test_shadow_pre_work_repairs_one_root_json_failure_without_second_stream() -> None:
@@ -353,14 +381,14 @@ def test_shadow_pre_work_repairs_schema_error_once_without_weakening_contract() 
     assert "".join(visible) == invalid["natural_response"]
 
 
-def test_shadow_pre_work_stops_after_one_failed_structured_repair() -> None:
-    runtime, adapter = _runtime(_Adapter(["{", "{"]))
+def test_shadow_pre_work_stops_after_two_failed_structured_repairs() -> None:
+    runtime, adapter = _runtime(_Adapter(["{", "{", "{"]))
     with pytest.raises(InteractionInvariantViolation, match="bounded_repair_exhausted"):
         DeepSeekWorkInteractionCapability(runtime=runtime).interpret_stream_observed(
             _basis(), on_response_delta=lambda _delta: None,
             on_pipeline_stage=lambda _stage: None,
         )
-    assert adapter.calls == 2
+    assert adapter.calls == 3
 
 
 def test_controlled_active_work_question_skips_discarded_conversation_call() -> None:
@@ -591,8 +619,9 @@ def test_governed_realizer_structural_repair_is_bounded_and_preserves_terminal_f
     invalid = json.dumps({'type':'answer','natural_response':'只搜索用户。'})
     runtime, adapter = _runtime(_Adapter([invalid, invalid]))
     realizer = DeepSeekWorkInteractionCapability(runtime=runtime).governed_response_realizer
-    with pytest.raises(StructuredResponseSchemaViolation, match='bounded_repair_exhausted'):
+    with pytest.raises(StructuredResponseSchemaViolation, match='bounded_repair_exhausted') as failure:
         realizer.realize_stream(_realizer_envelope(), on_response_delta=lambda _:None)
+    assert failure.value.repair_attempts == 1
     assert adapter.calls == 2
     assert realizer.last_structured_repair_count == 1
 
@@ -625,13 +654,14 @@ def test_action_binding_repair_is_bounded_and_does_not_invent_human_argument():
     missing = json.loads(_semantics())
     missing['collaboration']['turn_intent'] = 'ACTION_REQUEST'
     missing['semantic_intent'] = None
-    runtime, adapter = _runtime(_Adapter([json.dumps(missing), json.dumps(missing)]))
+    runtime, adapter = _runtime(_Adapter([json.dumps(missing)] * 3))
     capability = DeepSeekWorkInteractionCapability(runtime=runtime)
     visible = []
-    with pytest.raises(StructuredResponseSchemaViolation, match='bounded_repair_exhausted'):
+    with pytest.raises(StructuredResponseSchemaViolation, match='bounded_repair_exhausted') as failure:
         capability.interpret_controlled_stream_observed(_basis(),
             on_response_delta=visible.append, on_pipeline_stage=lambda _: None)
-    assert adapter.calls == 2 and visible == []
+    assert failure.value.repair_attempts == 2
+    assert adapter.calls == 3 and visible == []
 
 
 def test_semantic_cross_reference_failure_is_repaired_before_assessment_admission():

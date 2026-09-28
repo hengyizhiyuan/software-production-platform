@@ -240,7 +240,21 @@ class GovernedExternalResearch:
             kind = kinds[operation]
             subtype = item.action.arguments.get("search_kind")
             if operation is O.SEARCH_GITHUB and subtype is not None:
-                proposed = SearchIntent(subtype.value)
+                # The compiler may use a typed family label rather than the
+                # connector's fully qualified enum. Keep this a closed
+                # structural mapping; unknown values grant no search effect.
+                proposed = {
+                    "repository": SearchIntent.SEARCH_GITHUB_REPOSITORIES,
+                    "repositories": SearchIntent.SEARCH_GITHUB_REPOSITORIES,
+                    "code": SearchIntent.SEARCH_GITHUB_CODE,
+                    "issue": SearchIntent.SEARCH_GITHUB_ISSUES,
+                    "issues": SearchIntent.SEARCH_GITHUB_ISSUES,
+                }.get(subtype.value.strip().lower())
+                if proposed is None:
+                    try:
+                        proposed = SearchIntent(subtype.value)
+                    except ValueError:
+                        continue
                 if proposed not in {SearchIntent.SEARCH_GITHUB_REPOSITORIES,
                         SearchIntent.SEARCH_GITHUB_CODE, SearchIntent.SEARCH_GITHUB_ISSUES}:
                     continue

@@ -1316,8 +1316,9 @@ def test_admitted_process_compilation_produces_real_failure_and_success_receipts
 def test_file_write_exact_replace_preserves_unseen_large_file_content(tmp_path: Path) -> None:
     page = tmp_path / "src" / "page.html"
     page.parent.mkdir(parents=True)
-    page.write_text('<nav><a href="/delivery">Deliveries</a></nav>' + "x" * 40000,
-                    encoding="utf-8")
+    original = ('<nav><a href="/delivery">Deliveries</a></nav>\r\n'
+                + "x" * 40000 + "\r\n").encode("utf-8")
+    page.write_bytes(original)
     binding, _ = _binding()
     workspace = binding.workspace.model_copy(update={
         "host_storage_id": str(tmp_path),
@@ -1350,7 +1351,9 @@ def test_file_write_exact_replace_preserves_unseen_large_file_content(tmp_path: 
     updated = page.read_text(encoding="utf-8")
     assert updated.startswith('<nav><a href="/delivery">Deliveries</a>'
                               '<a href="/about">关于我们</a>')
-    assert updated.endswith("x" * 40000)
+    assert updated.endswith("x" * 40000 + "\n")
+    assert page.read_bytes() == original.replace(b"</nav>",
+        '<a href="/about">关于我们</a>'.encode("utf-8"), 1)
     with pytest.raises(ValueError, match="match exactly once"):
         asyncio.run(host.registry().execute(request("not present")))
     assert page.read_text(encoding="utf-8") == updated

@@ -64,9 +64,19 @@ def _safe_validation_summary(error: BaseException) -> str:
             return str(error)[:300]
         return type(error).__name__
     issues = []
+    safe_item_errors = {
+        "SEMANTIC_TYPE_MISMATCH: operational items require an action",
+        "SEMANTIC_TYPE_MISMATCH: only read-only questions may carry an action",
+        "SEMANTIC_TYPE_MISMATCH: production items require structured production intent",
+        "SEMANTIC_TYPE_MISMATCH: design frames belong to typed design or goal items",
+    }
     for issue in error.errors(include_url=False, include_input=False)[:5]:
         location = ".".join(str(part) for part in issue.get("loc", ())) or "root"
-        issues.append(f"{location}:{issue.get('type', 'validation_error')}")
+        detail = str(issue.get("ctx", {}).get("error", ""))
+        if detail in safe_item_errors:
+            issues.append(f"{location}:{detail}")
+        else:
+            issues.append(f"{location}:{issue.get('type', 'validation_error')}")
     return ", ".join(issues) or "ValidationError"
 
 
@@ -251,6 +261,19 @@ def _compact_interaction_basis(
     """Remove transport-only duplication without truncating interpretation evidence."""
 
     payload = basis.model_dump(mode="json")
+    payload["governed_semantic_history"] = [
+        {"ir_id": prior["id"], "source_record_id": prior["source_record_id"],
+         "items": [{"identity": f"{prior['id']}:{item['item_id']}",
+                    "kind": item["kind"], "statement": item["statement"],
+                    "action": None if item.get("action") is None else {
+                        "operation": item["action"]["operation"],
+                        "arguments": {key: value["value"] for key, value
+                            in item["action"].get("arguments", {}).items()}},
+                    "production": None if item.get("production") is None else {
+                        "objective": item["production"]["objective"],
+                        "current": item["production"]["current"]}}
+                   for item in prior["items"]]}
+        for prior in payload.get("governed_semantic_history", ())]
     for key in ("created_by", "updated_by", "created_at", "updated_at"):
         payload.get("interaction", {}).pop(key, None)
     for record in payload.get("records", ()):
@@ -558,7 +581,9 @@ class InteractionSemanticContract:
             "scope contains business scope summaries; it must not invent adjacent features. "
             "repository_required is true when an existing repository is necessary even if its source is "
             "currently unknown; do not replace that missing repository with a greenfield workspace. "
-            "Advisory DESIGN items can carry design_frame as their canonical structured frame. "
+            "Advisory DESIGN or EXPLORE items may carry design_frame. A PRODUCTION_INTENT "
+            "item may carry a proposed design_frame, but only its production field can authorize "
+            "the current goal; design assumptions never expand scope. "
             "A parallel Root design_intent_frame cannot override the IR or turn a question into systemic design. "
             "target_paths contains only literal Human-requested repository-relative file paths. "
             "allowed_areas contains only literal Human-requested filesystem patterns ending in /**. "
@@ -573,20 +598,67 @@ class InteractionSemanticContract:
             "Each operational action uses the canonical operation enum, speech_act, structured "
             "arguments, conditional flag and unresolved uncertainty. Use only the argument keys "
             "consumed by that qualified operation; never supply parallel alternatives or ignored keys. "
+            "First preserve each independent Human clause and its speech act, polarity, current or future "
+            "scope, requested effect, correction and source span. Then bind canonical operations. "
+            "Fill each SemanticClause speech_act, polarity, modality, temporal_scope, requested_effects, "
+            "refers_to and supersedes from governed meaning. For a contextual reference, use the "
+            "exact identity IR_UUID:item_id from governed_semantic_history in clause.refers_to; "
+            "an older Human target argument is valid only when that referenced governed item binds "
+            "the same target, while the current clause supplies fresh action consent. Do not copy "
+            "earlier Human statements into new semantic items or current-source clauses; use "
+            "governed history references for earlier meaning. "
+            "A current effect must be supported by an "
+            "affirmative current request clause; negative, future, hypothetical and question clauses carry "
+            "no current write authority. Resolve contextual references to exact governed item identities. "
+            "For every current branch action, atomic_branch_effects lists each physical effect separately "
+            "with its exact target_branch and current Human clause provenance. CREATE_BRANCH authorizes "
+            "only CREATE_BRANCH; SWITCH_BRANCH authorizes only SWITCH_BRANCH; "
+            "CREATE_AND_SWITCH_BRANCH requires both CREATE_BRANCH and SWITCH_BRANCH claims. "
+            "In clause.requested_effects use operation tokens such as CREATE_BRANCH and SWITCH_BRANCH; "
+            "put the branch name in action.arguments.target_branch and each atomic effect target_branch. "
+            "Judge the Human's requested checkout state, not just whether a branch name should exist. "
+            "A single current clause may direct both creation of a new branch and movement of the "
+            "current checkout to it; bind both effects when its meaning entails both. A request "
+            "only to make a branch exist authorizes creation alone, and moving to an already "
+            "existing branch authorizes switching alone. Audit these distinctions before output. "
+            "When a same-Turn action refers to a target literally named in another current Human "
+            "clause, link the action to that FACT item with depends_on and cite the exact target "
+            "literal as argument provenance; the effect itself cites the current action clause. "
+            "Do not infer a switch merely from creation, or creation merely from switching. "
+            "When the exact requested effect is uncertain, declare it unresolved instead of adding an effect. "
             "Branch operations use target_branch as a local branch name (without refs/heads/). "
             "A new branch name requires literal current or earlier Human provenance; an observed "
             "existing branch cannot invent authority to create a new target. unresolved_arguments names "
             "only blocking argument keys; optional uncertainty prose in unresolved does not require "
             "Human intervention. Existing owners choose workspace paths and bind one observed exact "
             "baseline. Missing consent, multiple targets and irreversible decisions remain Human-owned. "
+            "One Interaction binds one repository asset owner. When a current acquisition "
+            "clause supplies distinct repository sources without selecting one target, "
+            "keep repository_source unresolved and ask which source this Interaction should use; "
+            "do not emit two executable acquisitions from one ambiguous clause. "
             "Supported operations are "
             + ", ".join(operation.value for operation in CanonicalOperation if operation is not CanonicalOperation.OTHER) + ". "
+            "When an explicit imperative has no supported canonical operation or lacks a required "
+            "target, preserve its current Human clause and emit a nonexecutable semantic item "
+            "with the unresolved limitation and genuine Human dependency. Do not output OTHER, "
+            "an empty semantic item list, or a different supported Action just to fit the schema. "
+            "A file-level request must not acquire a branch effect through overlapping tooling vocabulary. "
             "FETCH_PUBLIC_RESOURCE uses a url argument; SEARCH_GITHUB can use a typed "
             "search_kind argument for repository, code or issue retrieval. Negated, hypothetical, quoted "
+            "For public search query arguments, compile concise indexable technical keywords in "
+            "the source's likely indexing language while preserving the Human's exact topic and "
+            "scope; translating query terms is allowed, inventing a framework or product domain is not. "
             "or discussed commands do not authorize execution. Questions about capabilities are "
             "questions, not effects. Current explicit action consent must cite an exact span in "
-            "the current Human record. Arguments may cite earlier Human evidence for contextual "
-            "follow-ups, but old commands never confer new consent. target_branch, repository_source "
+            "the current Human record. "
+            "A production goal can require preparatory inspection by its Work owner without "
+            "making inspection a separately requested Human Action. Compile a current operational "
+            "Action only when the Human clause actually asks for that operation; do not add an "
+            "INSPECT_REPOSITORY action merely because an implementation goal needs code discovery. "
+            "For any affirmative current operation or read-only query, set action.current true; "
+            "only future or hypothetical clauses may describe noncurrent actions. "
+            "Arguments may cite earlier Human evidence for contextual follow-ups, but old "
+            "commands never confer new consent. target_branch, repository_source "
             "and candidate_revision must be bound to actual supplied or observed evidence. Include "
             "query as a structured search argument; do not require a downstream model to reinterpret "
             "the Human question. Queries may be MODEL_CANDIDATE with evidence_reference compiler:query "
@@ -598,6 +670,11 @@ class InteractionSemanticContract:
             "push and PR are distinct operational items. Use depends_on item IDs for ordered effects. "
             "requires_human is true only for genuine unresolved material authority or safety. "
             "Preserve typed questions with blocks_current_step, requires_human and provenance. "
+            "For a question you infer rather than quote from the Human, use MODEL_CANDIDATE "
+            "provenance with evidence_reference compiler:question and no Human source identity. "
+            "Never set both requires_human and safe_reversible_assumption true: a required "
+            "Human decision has no inferred answer. A nonblocking optional question may "
+            "use a reversible working assumption without requiring Human input now. "
             "Repository-observable questions and feature details deferred until discovery must "
             "have blocks_current_step false; missing external runtime secrets block only the "
             "owner boundary where actual observation proves necessity, not read-only preparation. "
@@ -607,8 +684,21 @@ class InteractionSemanticContract:
             "production outcome. A requested Preview after product completion is part of the "
             "production acceptance obligation (preview_required true), not a current Preview "
             "with no Candidate. Current Preview requests must retain a verifiable action obligation. "
+            "Actually preparing or starting an existing project so that its running Preview can be reviewed "
+            "is a current production goal even when no source edit is requested. The runtime owner must inspect "
+            "the exact source and reach any genuine missing-credential boundary; do not claim the credential "
+            "is already present or omit the production goal because startup may require a secret. "
             "For status subjects use WORK_CURRENT, WORK_HISTORY, WORK_DIAGNOSTIC or PREVIEW as "
-            "appropriate; branch status uses QUERY_CURRENT_BRANCH and READ_ONLY_QUERY. "
+            "appropriate; a branch QUESTION or STATUS_QUERY may carry QUERY_CURRENT_BRANCH "
+            "with READ_ONLY_QUERY, which remains strictly read-only. QUERY_CURRENT_BRANCH "
+            "asks for the currently checked-out branch and accepts no target_branch argument. "
+            "A question about whether a separately named branch exists is a read-only QUESTION "
+            "about that named branch, not a request to create or switch it and not a query "
+            "for the current checkout. Set its typed subject to branch:<exact local branch name> "
+            "and omit QUERY_CURRENT_BRANCH; that Action reports only the checked-out branch. "
+            "Cite the branch name from the current Human clause; "
+            "answer existence only from actual owner evidence, and retain uncertainty when "
+            "the supplied observation does not establish that fact. "
             "action_candidates is a deprecated compatibility field: return [] because the application "
             "projects it from governed semantic_intent. Collaboration/response_intent is an "
             "interaction directive consuming these same items, never a second interpretation. "

@@ -34,6 +34,8 @@ from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.domain.steering import SteeringStepType, SteeringAttentionReason
+from spg.domain.intent_realization import SemanticKind
+from spg.domain.engineering_semantics import SemanticRelation, current_semantic_facts
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.domain.refinement_contract import RefinementSignalKind
 from spg.domain.interaction_actions import CanonicalOperation
@@ -424,13 +426,27 @@ class ProductionAdmissionTrigger:
             self.post_admission.steering_bootstrap.bootstrap(updated.work_id)
             self.post_admission.steering_driver.schedule(updated.work_id)
             return "当前请求已准入 Work，并保留原有范围与交付权限边界。"
+        decision_input = any(meaning.kind is InterpretationMeaningKind.DECISION_INPUT
+            and request_record.id in meaning.source_record_ids for meaning in assessment.meanings)
+        typed_scope_answer = bool(assessment.candidate_change is not None
+            and assessment.semantic_ir
+            and assessment.semantic_ir.items
+            and all(item.kind in {SemanticKind.CONSTRAINT, SemanticKind.FACT}
+                for item in assessment.semantic_ir.items)
+            and any(item.kind is SemanticKind.CONSTRAINT and any(
+                source.source_record_id == request_record.id for source in item.provenance)
+                for item in assessment.semantic_ir.items)
+            and (any(fact.relation is SemanticRelation.SCOPE
+                and request_record.id in fact.provenance.source_record_ids
+                for fact in current_semantic_facts(assessment.engineering_semantic_facts))
+                or assessment.semantic_ir.work_question_step_id is not None)
+            and "constraints" in assessment.candidate_change.changed_fields)
         if (request_record.actor is not InteractionActor.HUMAN
             or assessment.candidate_change is None
             or assessment.basis_work_revision_id is None
             or assessment.focus_classification is not WorkFocusClassification.ON_TOPIC
             or assessment.semantic_ir is None or assessment.semantic_ir.source_record_id != request_record.id
-            or not any(meaning.kind is InterpretationMeaningKind.DECISION_INPUT
-                and request_record.id in meaning.source_record_ids for meaning in assessment.meanings)):
+            or not (decision_input or typed_scope_answer)):
             return None
         with self.work.database.unit_of_work() as uow:
             interaction = InteractionStore(uow.session).interaction(interaction_id)
@@ -449,6 +465,9 @@ class ProductionAdmissionTrigger:
                 or decision.current_step_id != step.id
                 or step.type not in {SteeringStepType.DESIGN, SteeringStepType.REFINE}
                 or decision.attention_reason is not SteeringAttentionReason.MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION):
+                return None
+            if (assessment.semantic_ir.work_question_step_id is not None
+                    and assessment.semantic_ir.work_question_step_id != step.id):
                 return None
         self.work.decide_interaction_work_revision(interaction_id,
             assessment_id=assessment.id, basis_fingerprint=assessment.basis_fingerprint,

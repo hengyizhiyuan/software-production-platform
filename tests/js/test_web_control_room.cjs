@@ -67,6 +67,20 @@ test("early Workspace projects a candidate without fabricating Work or productio
   assert.match(app, /IDLE · Production has not started/);
 });
 
+test("entering PRE-WORK invalidates the previous Work source and Preview projection", () => {
+  const selection = app.slice(app.indexOf("async function selectWork(workId)"),
+    app.indexOf("async function discardPreWork(work)"));
+  assert.match(selection, /clearSelectedWorkState\(\);[\s\S]*?if \(selected\?\.status === "PRE_WORK"\)/);
+  assert.match(selection, /if \(selected\?\.status === "PRE_WORK"\) \{[\s\S]*?renderSelectedWork\(\);/);
+  const clear = app.slice(app.indexOf("function clearSelectedWorkState()"),
+    app.indexOf("function goalTitle("));
+  for (const field of ["selectedWork", "candidatePreview", "functionalPreview", "sources"])
+    assert.match(clear, new RegExp(`state\\.${field} = null`));
+  const result = app.slice(app.indexOf("function renderResult()"),
+    app.indexOf("async function openCandidatePreview()"));
+  assert.match(result, /if \(!result\) \{[\s\S]*?functionalPreviewPanel\.hidden = true/);
+});
+
 test("first Send opens provisional Workspace and a confirmed Motive latches it", () => {
   assert.match(app, /provisionalWorkspace: false/);
   assert.match(app, /workspaceEngaged: false/);

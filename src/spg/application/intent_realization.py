@@ -13,7 +13,7 @@ from spg.domain.interaction_actions import ActionSpeechAct, CanonicalOperation
 from spg.domain.intent_realization import (
     EffectPredicate as P, ExpectedEffect, GovernedSemanticIR, ObligationPlane,
     ObligationState, ObservedEffect, OperationalIntent, ProductionIntent,
-    SemanticArgument, SemanticClause, SemanticItem, SemanticKind,
+    SemanticArgument, SemanticClause, SemanticItem, SemanticKind, SemanticQuestion,
     SemanticOrigin, SemanticProvenance, TERMINAL_OBLIGATION_STATES,
     TurnObligation, TurnSemanticCandidate,
 )
@@ -64,6 +64,24 @@ def canonical_operation(value: str) -> CanonicalOperation:
         raise IntentRealizationViolation("SEMANTIC_TYPE_MISMATCH: unsupported structured operation") from error
 
 
+def _branch_clause_effect(value: str, target: str) -> str | None:
+    """Read a structured effect token with an optional exact target argument."""
+    if value in {"CREATE_BRANCH", "SWITCH_BRANCH"}:
+        return value
+    match = re.fullmatch(r"(CREATE_BRANCH|SWITCH_BRANCH)(?::\s*|\s+)(\S+)", value)
+    if match is None:
+        return None
+    if match.group(2) != target:
+        raise IntentRealizationViolation(
+            "ATOMIC_EFFECT_AUTHORITY_MISSING: clause effect target conflicts with governed branch")
+    return match.group(1)
+
+
+def _effect_span_covers_clause(effect_span: str, clause_span: str) -> bool:
+    core = clause_span.strip(" \t\r\n,，;；、。")
+    return bool(core) and (effect_span in clause_span or core in effect_span)
+
+
 def _validate_provenance(provenance, records, *, current_record=None):
     if provenance.origin in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
         record = records.get(provenance.source_record_id)
@@ -77,6 +95,9 @@ def _validate_provenance(provenance, records, *, current_record=None):
 def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tuple[SemanticItem, ...]:
     records = {r.id: r for r in basis.records}
     latest = next(r for r in reversed(basis.records) if str(r.actor) == "HUMAN")
+    historical_items = {f"{prior.id}:{item.item_id}": item
+        for prior in getattr(basis, "governed_semantic_history", ())
+        for item in prior.items}
     ids = {i.item_id for i in candidate.items}
     if len(ids) != len(candidate.items):
         raise IntentRealizationViolation("SEMANTIC_TYPE_MISMATCH: duplicate semantic identities")
@@ -87,6 +108,9 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
             raise IntentRealizationViolation("ACTION_ARGUMENT_PROVENANCE_INVALID: clause is outside the current Human Turn")
         if not set(clause.semantic_item_ids) <= ids:
             raise IntentRealizationViolation("PRIMARY_INTENT_CLAUSE_LOST: clause has no semantic realization")
+        if not set(clause.refers_to) <= historical_items.keys():
+            raise IntentRealizationViolation(
+                "ACTION_ARGUMENT_PROVENANCE_INVALID: contextual reference is outside governed semantic history")
         represented.update(clause.semantic_item_ids)
         # Coverage is syntax validation, not interpretation of clause meaning.
         start = latest.content.find(clause.source_text)
@@ -100,8 +124,12 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
     supplemental = {item.item_id for item in candidate.items
         if item.kind is SemanticKind.FACT and item.observed_facts
         and all(p.origin is SemanticOrigin.REPOSITORY_OBSERVED for p in item.provenance)}
+    # Separators between exact clause spans carry no independent effect. Keep
+    # question, conditional and path punctuation covered by a cited clause.
+    separators = frozenset(",，;；、。")
     if (ids - represented - supplemental
-            or any(not c.isspace() and n not in covered for n, c in enumerate(latest.content))):
+            or any(not c.isspace() and c not in separators and n not in covered
+                for n, c in enumerate(latest.content))):
         raise IntentRealizationViolation("PRIMARY_INTENT_CLAUSE_LOST: compiler must account for the entire current source")
     normalized = []
     observations = {reference: observation for observation in getattr(basis, "observed_reality", ())
@@ -152,6 +180,14 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
         if item.action is not None:
             action = item.action
             operation = canonical_operation(action.operation)
+            if (not action.current and any(clause.temporal_scope == "CURRENT"
+                    and clause.polarity == "AFFIRMATIVE"
+                    and clause.speech_act in {ActionSpeechAct.EXPLICIT_REQUEST,
+                        ActionSpeechAct.READ_ONLY_QUERY}
+                    and item.item_id in clause.semantic_item_ids
+                    for clause in candidate.clauses)):
+                raise IntentRealizationViolation(
+                    "SEMANTIC_TYPE_MISMATCH: current Human operation cannot be marked noncurrent")
             unsupported = (set(action.arguments) | set(action.unresolved_arguments)) - _OPERATION_ARGUMENTS[operation]
             if unsupported:
                 raise IntentRealizationViolation("SEMANTIC_TYPE_MISMATCH: unconsumed operational argument keys: " + ", ".join(sorted(unsupported)))
@@ -169,13 +205,90 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
                 raise IntentRealizationViolation("ACTION_SCOPE_INFLATION: read-only meaning cannot authorize a write")
             if action.speech_act is ActionSpeechAct.EXPLICIT_REQUEST:
                 current = [s for s in item.provenance if s.origin in {
-                    SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}]
+                    SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
+                    and s.source_record_id == latest.id]
                 if not current:
+                    if any(s.origin in {SemanticOrigin.HUMAN_EXPLICIT,
+                            SemanticOrigin.HUMAN_CORRECTION} for s in item.provenance):
+                        raise IntentRealizationViolation(
+                            "ACTION_ARGUMENT_PROVENANCE_INVALID: an old request cannot authorize a new effect")
                     raise IntentRealizationViolation("ACTION_SCOPE_INFLATION: model inference is not Human authority")
                 for source in current:
                     _validate_provenance(source, records, current_record=latest)
+                for source in item.provenance:
+                    if (source.origin in {SemanticOrigin.HUMAN_EXPLICIT,
+                            SemanticOrigin.HUMAN_CORRECTION}
+                            and source.source_record_id != latest.id
+                            and not any(argument.provenance.source_record_id == source.source_record_id
+                                and argument.provenance.source_text == source.source_text
+                                for key, argument in action.arguments.items()
+                                if key in {"target_branch", "repository_source"})):
+                        raise IntentRealizationViolation(
+                            "ACTION_ARGUMENT_PROVENANCE_INVALID: old Human item evidence is not a bound target")
+            bound_arguments = dict(action.arguments)
             for key, argument in action.arguments.items():
+                if (key in {"target_branch", "repository_source"}
+                        and argument.provenance.origin in {
+                            SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
+                        and argument.provenance.source_record_id == latest.id
+                        and argument.value not in argument.provenance.source_text):
+                    # A same-Turn anaphor may cite the action clause while its
+                    # exact target literal is in an affirmative fact dependency.
+                    # Rebind provenance to that unique governed Human span; a
+                    # conflicting or unlinked model target remains invalid.
+                    supports = tuple(dict.fromkeys(source for fact in candidate.items
+                        if fact.item_id in item.depends_on and fact.kind is SemanticKind.FACT
+                        and any(clause.polarity == "AFFIRMATIVE"
+                            and clause.modality == "ASSERTION"
+                            and fact.item_id in clause.semantic_item_ids
+                            for clause in candidate.clauses)
+                        for source in fact.provenance
+                        if source.origin in {SemanticOrigin.HUMAN_EXPLICIT,
+                            SemanticOrigin.HUMAN_CORRECTION}
+                        and source.source_record_id == latest.id
+                        and argument.value in source.source_text))
+                    if len(supports) == 1:
+                        argument = argument.model_copy(update={"provenance": supports[0]})
+                        bound_arguments[key] = argument
                 validate_source(argument.provenance, argument=argument, key=key)
+                if (key in {"target_branch", "repository_source"}
+                        and argument.provenance.origin in {
+                            SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
+                        and argument.provenance.source_record_id != latest.id):
+                    referenced = (historical_items[reference]
+                        for clause in candidate.clauses
+                        if item.item_id in clause.semantic_item_ids
+                        for reference in clause.refers_to)
+                    explicitly_referenced = any((prior.action is not None
+                            and key in prior.action.arguments
+                            and prior.action.arguments[key].value == argument.value
+                            and prior.action.arguments[key].provenance.source_record_id
+                                == argument.provenance.source_record_id)
+                            or (prior.kind is SemanticKind.FACT
+                                and argument.value in prior.statement
+                                and any(source.source_record_id == argument.provenance.source_record_id
+                                    for source in prior.provenance))
+                            for prior in referenced)
+                    # An admitted Work revision is also a governed reference
+                    # to its source Turn. This supports an explicit recovery
+                    # request after admission, even when a legacy compiler has
+                    # no clause-level refers_to edge for the old URL.
+                    active_revision = (None if active is None else active.work_revision)
+                    admitted_source = (key == "repository_source"
+                        and active_revision is not None
+                        and basis.interaction.current_work_id == active_revision.work_id
+                        and argument.provenance.source_record_id in active_revision.source_record_ids
+                        and any(prior.source_record_id == argument.provenance.source_record_id
+                            and any(prior_item.production is not None
+                                and prior_item.production.repository_reference is not None
+                                and prior_item.production.repository_reference.value == argument.value
+                                and prior_item.production.repository_reference.provenance.source_record_id
+                                    == argument.provenance.source_record_id
+                                for prior_item in prior.items)
+                            for prior in getattr(basis, "governed_semantic_history", ())))
+                    if not explicitly_referenced and not admitted_source:
+                        raise IntentRealizationViolation(
+                            "ACTION_ARGUMENT_PROVENANCE_INVALID: old Human target lacks an exact governed reference")
                 if argument.provenance.origin in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
                     if argument.value not in argument.provenance.source_text:
                         raise IntentRealizationViolation("ACTION_ARGUMENT_PROVENANCE_INVALID: argument differs from literal source")
@@ -185,11 +298,48 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
                         raise IntentRealizationViolation("ACTION_ARGUMENT_PROVENANCE_INVALID: incomplete literal branch")
                 if key in {"target_branch", "repository_source"} and argument.provenance.origin is SemanticOrigin.MODEL_CANDIDATE:
                     raise IntentRealizationViolation("ACTION_ARGUMENT_PROVENANCE_INVALID: inferred effect target is unbound")
+            branch_effects = {
+                CanonicalOperation.CREATE_BRANCH: {"CREATE_BRANCH"},
+                CanonicalOperation.SWITCH_BRANCH: {"SWITCH_BRANCH"},
+                CanonicalOperation.CREATE_AND_SWITCH_BRANCH: {"CREATE_BRANCH", "SWITCH_BRANCH"},
+            }
+            required_effects = branch_effects.get(operation, set())
+            if action.atomic_branch_effects and not required_effects:
+                raise IntentRealizationViolation("ACTION_SCOPE_INFLATION: branch effects on another operation")
+            if (required_effects and action.current
+                    and action.speech_act is ActionSpeechAct.EXPLICIT_REQUEST and target is not None):
+                claims = action.atomic_branch_effects
+                if len(claims) != len(required_effects) or {claim.effect for claim in claims} != required_effects:
+                    raise IntentRealizationViolation("ATOMIC_EFFECT_AUTHORITY_MISSING: branch effects need exact separate Human claims")
+                supporting_clauses = tuple(clause for clause in candidate.clauses
+                    if item.item_id in clause.semantic_item_ids
+                    and clause.speech_act is ActionSpeechAct.EXPLICIT_REQUEST
+                    and clause.polarity == "AFFIRMATIVE"
+                    and clause.modality == "REQUEST"
+                    and clause.temporal_scope == "CURRENT")
+                if {effect for clause in supporting_clauses
+                        for value in clause.requested_effects
+                        if (effect := _branch_clause_effect(value, target.value)) is not None} != required_effects:
+                    raise IntentRealizationViolation(
+                        "ATOMIC_EFFECT_AUTHORITY_MISSING: atomic effects lack an affirmative current clause")
+                for claim in claims:
+                    if claim.provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
+                        raise IntentRealizationViolation("ATOMIC_EFFECT_AUTHORITY_MISSING: model or owner evidence is not current Human consent")
+                    _validate_provenance(claim.provenance, records, current_record=latest)
+                    if (claim.target_branch != target.value or not any(
+                            clause in supporting_clauses
+                            and any(_branch_clause_effect(value, target.value) == claim.effect
+                                for value in clause.requested_effects)
+                            and _effect_span_covers_clause(
+                                claim.provenance.source_text, clause.source_text)
+                            for clause in candidate.clauses)):
+                        raise IntentRealizationViolation("ATOMIC_EFFECT_AUTHORITY_MISSING: effect target or clause differs from governed intent")
             if operation in {CanonicalOperation.CREATE_BRANCH, CanonicalOperation.SWITCH_BRANCH,
                     CanonicalOperation.CREATE_AND_SWITCH_BRANCH} and action.speech_act is ActionSpeechAct.EXPLICIT_REQUEST:
                 if "target_branch" not in action.arguments and not action.unresolved:
                     raise IntentRealizationViolation("EXPLICIT_ACTION_LOST_BEFORE_EXECUTION: missing branch target or explicit uncertainty")
-            item = item.model_copy(update={"action": action.model_copy(update={"operation": operation.value})})
+            item = item.model_copy(update={"action": action.model_copy(update={
+                "operation": operation.value, "arguments": bound_arguments})})
         if item.production is not None:
             production = item.production
             if production.current and production.unresolved_arguments:
@@ -228,6 +378,14 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
     done = set()
     for identity in graph:
         visit(identity, set(), done)
+    current_production = any(item.production and item.production.current for item in normalized)
+    if not current_production and any(item.action and item.action.current
+            and item.action.speech_act is ActionSpeechAct.EXPLICIT_REQUEST
+            and canonical_operation(item.action.operation) is CanonicalOperation.REQUEST_PREVIEW
+            and "candidate_revision" not in item.action.arguments
+            for item in normalized):
+        raise IntentRealizationViolation(
+            "PRIMARY_INTENT_CLAUSE_LOST: Preview without an exact existing Candidate requires a current production goal")
     effect_ids = {item.item_id for item in normalized if (
         item.action and item.action.current and item.action.speech_act in {
             ActionSpeechAct.EXPLICIT_REQUEST, ActionSpeechAct.READ_ONLY_QUERY}) or (
@@ -279,6 +437,30 @@ class IntentRealizationKernel:
         legacy = raw is None
         raw = legacy_typed_candidate(candidate, basis) if legacy else raw
         items = validate_semantic_candidate(raw, basis)
+        # One Interaction has one repository asset owner. Two distinct source
+        # targets cannot both be authorized by the same acquisition Turn, even
+        # when each literal independently has sound Human provenance.
+        acquisitions = tuple(item for item in items if item.action is not None
+            and item.action.current and item.action.speech_act is ActionSpeechAct.EXPLICIT_REQUEST
+            and canonical_operation(item.action.operation) is CanonicalOperation.ACQUIRE_REPOSITORY)
+        sources = {item.action.arguments["repository_source"].value for item in acquisitions
+            if "repository_source" in item.action.arguments}
+        if len(sources) > 1:
+            blocked = {item.item_id for item in acquisitions}
+            items = tuple(item.model_copy(update={"requires_human": True,
+                "action": item.action.model_copy(update={
+                    "unresolved_arguments": tuple(dict.fromkeys(
+                        (*item.action.unresolved_arguments, "repository_source"))),
+                    "unresolved": (*item.action.unresolved,
+                        "Multiple repository sources need one Human-selected Interaction target.")})})
+                if item.item_id in blocked else item for item in items)
+            if not any(question.blocks_current_step and question.requires_human
+                    for question in raw.questions):
+                raw = raw.model_copy(update={"questions": (*raw.questions, SemanticQuestion(
+                    question="Which repository source should this Interaction use?",
+                    blocks_current_step=True, requires_human=True,
+                    provenance=SemanticProvenance(origin=SemanticOrigin.MODEL_CANDIDATE,
+                        evidence_reference="compiler:question")))})
         ready = [observation for observation in getattr(basis, "observed_reality", ())
             if observation.facts.get("condition") == "READY"]
         if len(ready) == 1:
@@ -318,13 +500,16 @@ class IntentRealizationKernel:
             semantic_fact_candidates=getattr(candidate,"semantic_fact_candidates",()),
             compiler_reference=candidate.provider_identity, legacy_typed_projection=legacy)
 
-    def obligations(self, ir: GovernedSemanticIR, turn_id: UUID) -> tuple[TurnObligation, ...]:
+    def obligations(self, ir: GovernedSemanticIR, turn_id: UUID,
+            *, work_question_step_id: UUID | None = None) -> tuple[TurnObligation, ...]:
+        work_question_step_id = work_question_step_id or ir.work_question_step_id
         identities = {i.item_id: uuid5(turn_id, f"irk-obligation:{i.item_id}") for i in ir.items}
         obligations = []
         effect_ids = {item.item_id for item in ir.items if (
             item.action and item.action.current and item.action.speech_act in {
                 ActionSpeechAct.EXPLICIT_REQUEST, ActionSpeechAct.READ_ONLY_QUERY}) or (
-            item.production and item.production.current) or (item.kind is SemanticKind.CORRECTION and item.supersedes) or item.kind in {
+            item.production and item.production.current) or (work_question_step_id is not None
+            and item.kind is SemanticKind.CONSTRAINT) or (item.kind is SemanticKind.CORRECTION and item.supersedes) or item.kind in {
                 SemanticKind.QUESTION, SemanticKind.ANALYSIS, SemanticKind.STATUS_QUERY}}
         by_id = {item.item_id: item for item in ir.items}
         def unresolved_dependency(item):
@@ -339,6 +524,11 @@ class IntentRealizationKernel:
                 plane = ObligationPlane.ACTION
             elif item.production is not None and item.production.current:
                 effects = (ExpectedEffect(predicate=P.WORK_ADMITTED),)
+                plane = ObligationPlane.WORK
+            elif work_question_step_id is not None and item.kind is SemanticKind.CONSTRAINT:
+                effects = (ExpectedEffect(predicate=P.WORK_QUESTION_RESOLVED,
+                    target=str(work_question_step_id),
+                    parameters={"constraint": item.statement}),)
                 plane = ObligationPlane.WORK
             elif item.kind in {SemanticKind.QUESTION, SemanticKind.ANALYSIS, SemanticKind.STATUS_QUERY}:
                 effects = (ExpectedEffect(predicate=P.QUESTION_ANSWERED),)
@@ -416,6 +606,11 @@ def effect_matches(expected: ExpectedEffect, observed: ObservedEffect) -> bool:
         P.REMOTE_REF: lambda: bool(expected.exact_revision) and facts.get("remote_revision") == expected.exact_revision and (expected.target is None or facts.get("target_branch") == expected.target),
         P.PULL_REQUEST_OBSERVED: lambda: bool(facts.get("pull_request_url")) and bool(facts.get("candidate_revision")),
         P.WORK_ADMITTED: lambda: bool(facts.get("work_id")) and bool(facts.get("work_revision_id")),
+        P.WORK_QUESTION_RESOLVED: lambda: observed.owner == "work-steering-question"
+            and facts.get("question_step_id") == expected.target
+            and facts.get("question_retired") is True
+            and bool(facts.get("work_revision_id"))
+            and expected.parameters.get("constraint") in facts.get("constraints", ()),
         P.QUESTION_ANSWERED: lambda: facts.get("answer_governed") is True,
         P.OBLIGATION_SUPERSEDED: lambda: observed.owner == "turn-obligation-ledger" and
             expected.target in facts.get("superseded_obligation_ids",()),

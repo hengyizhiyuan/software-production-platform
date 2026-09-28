@@ -8,6 +8,7 @@ import argparse
 from html.parser import HTMLParser
 import json
 import re
+import subprocess
 from pathlib import Path
 import urllib.request
 
@@ -48,6 +49,7 @@ def main():
     parser.add_argument('--base',required=True)
     parser.add_argument('--browser-record', default='browser-oracle.json')
     parser.add_argument('--database-record', default='persistence-oracle.json')
+    parser.add_argument('--native-attempt-record', default='native-attempt.json')
     parser.add_argument('--historical-runtime', action='store_true',
         help='Reconcile retained evidence after explicit runtime retirement; never restart Preview')
     parser.add_argument('--env-file',type=Path,required=True)
@@ -55,13 +57,17 @@ def main():
         help='A new evidence identity; existing oracle records are never replaced')
     args=parser.parse_args()
     root=args.directory
-    if any(Path(value).name != value for value in (args.record_name, args.browser_record, args.database_record)):
+    if any(Path(value).name != value for value in (args.record_name, args.browser_record, args.database_record, args.native_attempt_record)):
         raise SystemExit('Evidence record name must be a single filename')
     output=root/args.record_name
     if output.exists(): raise SystemExit('Oracle record already exists; do not rewrite historical results')
-    state=json.loads((root/'latest.json').read_text())
-    journey=json.loads((root/'journey.json').read_text())
-    env=dict(line.split('=',1) for line in args.env_file.read_text().splitlines() if '=' in line)
+    state=json.loads((root/'latest.json').read_text(encoding='utf-8'))
+    journey_path=root/'journey.json'
+    try:
+        journey=json.loads(journey_path.read_text(encoding='utf-8'))
+    except UnicodeDecodeError:
+        journey=json.loads(journey_path.read_text(encoding='gbk'))
+    env=dict(line.split('=',1) for line in args.env_file.read_text(encoding='utf-8').splitlines() if '=' in line)
     def read(path,payload=None):
         request=urllib.request.Request(args.base+path,
             data=None if payload is None else json.dumps(payload).encode(),headers={
@@ -69,8 +75,8 @@ def main():
         return urllib.request.urlopen(request,timeout=20).read().decode()
     work_id=state['work']['work_id']; prefix='/api/works/'+work_id
     if args.historical_runtime:
-        retired=json.loads((root/'runtime-retirement.json').read_text())
-        prior=json.loads((root/'business-oracle.json').read_text())
+        retired=json.loads((root/'runtime-retirement.json').read_text(encoding='utf-8'))
+        prior=json.loads((root/'business-oracle.json').read_text(encoding='utf-8'))
         preview=state['preview']
         session=preview['session']
         if (retired['prior_status'] != 'READY' or retired['preview_id'] != session['id']
@@ -78,15 +84,15 @@ def main():
                 or prior['candidate_tree'] != session['repository_tree']):
             raise SystemExit('Historical source/runtime identity does not agree')
         meta={'repository_revision':prior['candidate_revision'], 'tree':prior['candidate_tree']}
-        diff=(root/'candidate.diff').read_text()
-        body=(root/'served.html').read_text()
+        diff=(root/'candidate.diff').read_text(encoding='utf-8')
+        body=(root/'served.html').read_text(encoding='utf-8')
     else:
         meta=json.loads(read(prefix+'/candidate-preview',{}))
         diff=read(prefix+'/candidate-code-diff/'+meta['candidate_fingerprint'])
-        (root/'candidate.diff').write_text(diff)
+        (root/'candidate.diff').write_text(diff,encoding='utf-8')
         preview=json.loads(read(prefix+'/functional-preview'))
         body=urllib.request.urlopen(preview['session']['endpoint'],timeout=20).read().decode()
-        (root/'served.html').write_text(body)
+        (root/'served.html').write_text(body,encoding='utf-8')
     paths=[line.split(' b/',1)[1] for line in diff.splitlines() if line.startswith('diff --git')]
     added=[line[1:] for line in diff.splitlines() if line.startswith('+') and not line.startswith('+++')]
     removed=[line[1:] for line in diff.splitlines() if line.startswith('-') and not line.startswith('---')]
@@ -119,20 +125,23 @@ def main():
             turns = state.get('interaction', {}).get('turns', [])
             if owner_rows.exists() and len(turns) == 1:
                 checks['automatic_acquisition_recovery'] |= observed_acquisition_recovery(
-                    json.loads(owner_rows.read_text()),
+                    json.loads(owner_rows.read_text(encoding='utf-8')),
                     interaction_id=journey['interaction_id'],
                     source_record_id=turns[0]['request_record_id'])
         if identity == 'GC-EX-15':
-            review = json.loads((root/'review-authority-oracle.json').read_text())
+            try:
+                review = json.loads((root/'review-authority-oracle.json').read_text(encoding='utf-8'))
+            except UnicodeDecodeError:
+                review = json.loads((root/'review-authority-oracle.json').read_text(encoding='gbk'))
             checks.update(exact_candidate_accepted=review.get('candidate_accepted') is True,
                 local_runtime_commit_only=review.get('local_runtime_commit_observed') is True,
                 remote_refs_unchanged=review.get('remote_unchanged') is True,
                 no_delivery_after_acceptance=review.get('no_delivery_authorization') is True)
         if identity == 'GC-EX-14':
             fault_path = root/'worker-interruption.json'
-            fault = json.loads(fault_path.read_text()) if fault_path.exists() else {}
-            attempt_path = root/'native-attempt.json'
-            attempt = json.loads(attempt_path.read_text()) if attempt_path.exists() else {}
+            fault = json.loads(fault_path.read_text(encoding='utf-8')) if fault_path.exists() else {}
+            attempt_path = root/args.native_attempt_record
+            attempt = json.loads(attempt_path.read_text(encoding='utf-8')) if attempt_path.exists() else {}
             effects = attempt.get('effects', [])
             writes = [item for item in effects if item['tool_identity'] == 'file.write']
             checks.update(actual_worker_interruption=fault.get('fault') == 'DECLARED_WORKER_PROCESS_LOSS'
@@ -148,10 +157,15 @@ def main():
                     and item.get('final_result') == 'LOCAL_OBLIGATION_RECOVERED'
                     for item in state.get('refinement',{}).get('events',[])))
         if identity == 'GC-EX-04':
-            baseline = (Path(__file__).resolve().parents[3]/'.spg/stability-runtime'
-                /'fixture-sources/large-file/web/index.html').read_bytes()
-            attempt_record = root/'native-attempt.json'
-            attempt = json.loads(attempt_record.read_text()) if attempt_record.exists() else {}
+            # Compare with the source Git object actually acquired by Watt.
+            # Windows may checkout the fixture with CRLF even though its Git
+            # object and the Linux production workspace contain LF bytes.
+            fixture = (Path(__file__).resolve().parents[3]/'.spg/stability-runtime'
+                /'fixture-sources/large-file')
+            baseline = subprocess.check_output((
+                'git', '-C', str(fixture), 'show', 'HEAD:web/index.html'))
+            attempt_record = root/args.native_attempt_record
+            attempt = json.loads(attempt_record.read_text(encoding='utf-8')) if attempt_record.exists() else {}
             writes = [effect for effect in attempt.get('effects', [])
                 if effect['tool_identity'] == 'file.write' and effect['condition'] == 'SETTLED']
             checks.update(source_exceeds_32k=len(baseline) > 32768,
@@ -162,9 +176,9 @@ def main():
     elif identity in {'GC-EX-03','GC-EX-05'}:
         checks.update(browser_dialog_oracle=(root/args.browser_record).exists())
         if checks['browser_dialog_oracle']:
-            checks['actual_cancel_closes_dialog']=json.loads((root/args.browser_record).read_text()).get('cancel_closes') is True
+            checks['actual_cancel_closes_dialog']=json.loads((root/args.browser_record).read_text(encoding='utf-8')).get('cancel_closes') is True
         if identity == 'GC-EX-05':
-            attempt = json.loads((root/'native-attempt.json').read_text())
+            attempt = json.loads((root/args.native_attempt_record).read_text(encoding='utf-8'))
             receipts = {item['delivery_id']: item for step in attempt.get('steps', [])
                 for item in step.get('request_payload', {}).get('previous_results', [])}
             checks.update(actual_no_effect_tool_failure=any(item['condition'] == 'FAILED'
@@ -176,8 +190,8 @@ def main():
                     and event.get('observed_reality', {}).get('failure_code') == 'CAPABILITY_PATH_INVALID'
                     for event in state.get('refinement', {}).get('events', [])))
     elif identity == 'GC-EX-08':
-        browser = json.loads((root/args.browser_record).read_text())
-        choice = json.loads((root/'human-clarification.json').read_text())
+        browser = json.loads((root/args.browser_record).read_text(encoding='utf-8'))
+        choice = json.loads((root/'human-clarification.json').read_text(encoding='utf-8'))
         # Comments carry no CSS selector or style authority. Inspect the actual
         # added rules, keeping every historical oracle result immutable.
         added_css = re.sub(r'/\*.*?\*/', '', '\n'.join(added), flags=re.S)
@@ -190,15 +204,15 @@ def main():
                     for selector in block.split(','))
                     for block in re.findall(r'([^{}]+)\{[^{}]*\}', added_css)))
     elif identity == 'GC-IP-06':
-        browser = json.loads((root/args.browser_record).read_text())
-        database = json.loads((root/args.database_record).read_text())
+        browser = json.loads((root/args.browser_record).read_text(encoding='utf-8'))
+        database = json.loads((root/args.database_record).read_text(encoding='utf-8'))
         checks.update(dynamic_metrics_match_actual_records=browser.get('dynamic_metrics_after_new_business_records') is True,
             api_and_database_agree=database.get('api_and_database_agree') is True,
             only_available_domains=set(database.get('expected_metrics', {})) == {'users','customers','orders','total'})
     elif identity == 'GC-IP-07':
-        browser = json.loads((root/args.browser_record).read_text())
-        database = json.loads((root/args.database_record).read_text())
-        choice = json.loads((root/'human-clarification.json').read_text())
+        browser = json.loads((root/args.browser_record).read_text(encoding='utf-8'))
+        database = json.loads((root/args.database_record).read_text(encoding='utf-8'))
+        choice = json.loads((root/'human-clarification.json').read_text(encoding='utf-8'))
         checks.update(one_genuine_domain_choice=choice.get('question_count') == 1,
             name_and_email_search=browser.get('name_search_selected_user_only') is True
                 and browser.get('email_search_selected_user_only') is True,
@@ -209,8 +223,8 @@ def main():
                 and database.get('empty_search_has_no_results') is True,
             no_unrequested_product_surfaces=all(path in {'server.py','web/index.html','web/app.js','web/styles.css'} for path in paths))
     elif identity in {'GC-IP-05','GC-IP-08'}:
-        browser = json.loads((root/args.browser_record).read_text())
-        database = json.loads((root/args.database_record).read_text())
+        browser = json.loads((root/args.browser_record).read_text(encoding='utf-8'))
+        database = json.loads((root/args.database_record).read_text(encoding='utf-8'))
         checks['api_and_database_agree'] = database.get('api_and_database_agree') is True
         if identity == 'GC-IP-05':
             checks.update(feedback_form_submitted=browser.get('feedback_form_submitted') is True,
@@ -227,8 +241,8 @@ def main():
         checks['no_extra_product_surfaces'] = all(path in {'server.py','web/index.html','web/app.js','web/styles.css'}
             or (path.startswith('migrations/') and path.endswith('.sql')) for path in paths)
     elif identity == 'GC-IP-03':
-        browser = json.loads((root/args.browser_record).read_text())
-        database = json.loads((root/args.database_record).read_text())
+        browser = json.loads((root/args.browser_record).read_text(encoding='utf-8'))
+        database = json.loads((root/args.database_record).read_text(encoding='utf-8'))
         checks.update(actual_order_fields=browser.get('actual_order_fields') == ['customer_id','total','status'],
             grounded_status_model=browser.get('open_status_input_preserved') is True,
             no_invented_logistics_refunds=browser.get('no_logistics_or_refunds') is True,
@@ -239,8 +253,8 @@ def main():
                 and row.get('status') == 'open' for row in database.get('sqlite_rows', [])),
             no_extra_product_surfaces=all(path in {'server.py','web/index.html','web/app.js','web/styles.css'} for path in paths))
     elif identity == 'GC-EX-10':
-        attempt_record = root/'native-attempt.json'
-        attempt = json.loads(attempt_record.read_text()) if attempt_record.exists() else {}
+        attempt_record = root/args.native_attempt_record
+        attempt = json.loads(attempt_record.read_text(encoding='utf-8')) if attempt_record.exists() else {}
         results = {result['delivery_id']: result for step in attempt.get('steps', [])
             for result in step.get('request_payload', {}).get('previous_results', [])}
         compilation = [result for result in results.values()
@@ -254,8 +268,8 @@ def main():
     elif identity in {'GC-EX-09', 'GC-IP-04'}:
         browser_record = root/args.browser_record
         database_record = root/args.database_record
-        browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}
-        database = json.loads(database_record.read_text()) if database_record.exists() else {}
+        browser = json.loads(browser_record.read_text(encoding='utf-8')) if browser_record.exists() else {}
+        database = json.loads(database_record.read_text(encoding='utf-8')) if database_record.exists() else {}
         checks['api_and_real_database_agree'] = database.get('api_and_database_agree') is True
         if identity == 'GC-EX-09':
             checks.update(real_active_and_inactive_rows_visible=browser.get('actual_active_and_inactive_rows') is True,
@@ -276,14 +290,14 @@ def main():
                 existing_identity_boundary_preserved=all(path in {'web/app.js', 'web/index.html', 'web/styles.css'} for path in paths))
     elif identity == 'GC-IP-01':
         browser_record = root/args.browser_record
-        browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}
+        browser = json.loads(browser_record.read_text(encoding='utf-8')) if browser_record.exists() else {}
         checks.update(about_page_observed=browser.get('about_page_reachable') is True,
             no_unsupported_content_claims=browser.get('unsupported_contact_reference') is False)
     elif identity in {'GC-EX-13', 'GC-IP-02'}:
         browser_record = root/args.browser_record
         database_record = root/args.database_record
-        browser = json.loads(browser_record.read_text()) if browser_record.exists() else {}
-        database = json.loads(database_record.read_text()) if database_record.exists() else {}
+        browser = json.loads(browser_record.read_text(encoding='utf-8')) if browser_record.exists() else {}
+        database = json.loads(database_record.read_text(encoding='utf-8')) if database_record.exists() else {}
         checks['api_and_real_database_agree'] = database.get('api_and_database_agree') is True
         rows = database.get('sqlite_rows', [])
         if identity == 'GC-EX-13':
@@ -313,7 +327,7 @@ def main():
         'browser_evidence_record':args.browser_record,'persistence_evidence_record':args.database_record,'historical_runtime_evidence':args.historical_runtime,
         'changed_paths':paths,'preview_endpoint':preview['session']['endpoint'],
         'human_acceptance':'PENDING','manual_rescue_actions':[]}
-    output.write_text(json.dumps(result,ensure_ascii=False,indent=2))
+    output.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(result,ensure_ascii=False))
 
 

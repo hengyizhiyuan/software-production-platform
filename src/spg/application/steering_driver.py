@@ -184,7 +184,7 @@ class PlanSteeringDriver:
                 for reference in frame.reconstruction.active_revision.revision.reality_refs
             )
         )
-        # A newly admitted Human request can supersede a broad design agenda
+        # A newly admitted Human request or scope answer can supersede a broad design agenda
         # without first producing a stale Candidate or an active Runtime binding.
         # Reuse the existing governed plan-revision path rather than continuing
         # to ask questions from a plan that predates the current Work request.
@@ -845,7 +845,7 @@ class PlanSteeringDriver:
             revision is not None
             and revision.id == frame.work_reality_revision_id
             and revision.source_kind == "INTERACTION_ASSESSMENT"
-            and "requests" in revision.change_set
+            and bool({"requests", "constraints"} & set(revision.change_set))
         )
 
     def project(self, work_id: UUID) -> SteeringPlanProjection:

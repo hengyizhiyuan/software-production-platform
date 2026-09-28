@@ -1,4 +1,5 @@
 """Durable IRK ledger; owner reconciliation is required for satisfaction."""
+from datetime import UTC, datetime
 from sqlalchemy import insert, select, update
 
 from spg.application.intent_realization import (
@@ -12,12 +13,56 @@ from spg.domain.intent_realization import (
 )
 from spg.infrastructure.persistence.intent_realization_schema import (
     realization_refinements, turn_obligations, turn_realizations,
+    turn_semantic_envelopes,
 )
 
 
 class IntentRealizationStore:
     def __init__(self, session):
         self.session = session
+
+    def create_envelope(self, *, turn_id, source_record_id, human_content_hash,
+            provenance_basis):
+        self.session.execute(insert(turn_semantic_envelopes).values(
+            turn_id=turn_id, source_record_id=source_record_id,
+            human_content_hash=human_content_hash,
+            provenance_basis=provenance_basis, state="COMPILING", attempt=0,
+            basis_fingerprint=None, semantic_ir_id=None, blocker=None,
+            history=[]))
+
+    def begin_compilation(self, turn_id):
+        row = self.session.execute(select(turn_semantic_envelopes).where(
+            turn_semantic_envelopes.c.turn_id == turn_id).with_for_update()).mappings().one_or_none()
+        if row is None or row["state"] == "GOVERNED":
+            return
+        attempt = row["attempt"] + 1
+        self.session.execute(update(turn_semantic_envelopes).where(
+            turn_semantic_envelopes.c.turn_id == turn_id).values(
+                state="COMPILING", attempt=attempt, blocker=None,
+                history=[*row["history"], {"state": "COMPILING", "attempt": attempt,
+                    "at": datetime.now(UTC).isoformat()}]))
+
+    def compilation_failed(self, turn_id, *, code, evidence):
+        row = self.session.execute(select(turn_semantic_envelopes).where(
+            turn_semantic_envelopes.c.turn_id == turn_id).with_for_update()).mappings().one_or_none()
+        if row is None or row["state"] == "GOVERNED":
+            return
+        blocker = {"code": code, "evidence": evidence}
+        self.session.execute(update(turn_semantic_envelopes).where(
+            turn_semantic_envelopes.c.turn_id == turn_id).values(
+                state="SEMANTIC_COMPILATION_FAILED", blocker=blocker,
+                history=[*row["history"], {"state": "SEMANTIC_COMPILATION_FAILED",
+                    "attempt": row["attempt"], "at": datetime.now(UTC).isoformat(),
+                    "blocker": blocker}]))
+
+    def semantic_envelope(self, turn_id):
+        row = self.session.execute(select(turn_semantic_envelopes).where(
+            turn_semantic_envelopes.c.turn_id == turn_id)).mappings().one_or_none()
+        if row is None:
+            return None
+        return {**dict(row), "turn_id": str(row["turn_id"]),
+            "source_record_id": str(row["source_record_id"]),
+            "semantic_ir_id": None if row["semantic_ir_id"] is None else str(row["semantic_ir_id"])}
 
     def semantic_ir(self, turn_id):
         row = self.session.execute(select(turn_realizations.c.payload).where(
@@ -28,7 +73,7 @@ class IntentRealizationStore:
         return self.session.execute(select(turn_realizations.c.assessment_id).where(
             turn_realizations.c.turn_id == turn_id)).scalar_one_or_none()
 
-    def initialize(self, turn_id, assessment_id, ir):
+    def initialize(self, turn_id, assessment_id, ir, *, work_question_step_id=None):
         existing = self.semantic_ir(turn_id)
         if existing is not None:
             if existing != ir:
@@ -36,7 +81,18 @@ class IntentRealizationStore:
             return self.obligations(turn_id)
         self.session.execute(insert(turn_realizations).values(turn_id=turn_id,
             semantic_ir_id=ir.id, assessment_id=assessment_id, payload=ir.model_dump(mode="json")))
-        obligations = IntentRealizationKernel().obligations(ir, turn_id)
+        envelope = self.session.execute(select(turn_semantic_envelopes).where(
+            turn_semantic_envelopes.c.turn_id == turn_id).with_for_update()).mappings().one_or_none()
+        if envelope is not None:
+            self.session.execute(update(turn_semantic_envelopes).where(
+                turn_semantic_envelopes.c.turn_id == turn_id).values(
+                    state="GOVERNED", semantic_ir_id=ir.id,
+                    basis_fingerprint=ir.basis_fingerprint, blocker=None,
+                    history=[*envelope["history"], {"state": "GOVERNED",
+                        "attempt": envelope["attempt"], "at": datetime.now(UTC).isoformat(),
+                        "semantic_ir_id": str(ir.id)}]))
+        obligations = IntentRealizationKernel().obligations(ir, turn_id,
+            work_question_step_id=work_question_step_id)
         for obligation in obligations:
             self.session.execute(insert(turn_obligations).values(id=obligation.id,
                 turn_id=turn_id, semantic_item_id=obligation.semantic_item_id,
@@ -143,7 +199,9 @@ class IntentRealizationStore:
 
     def projection(self, turn_id):
         ir = self.semantic_ir(turn_id)
+        envelope = self.semantic_envelope(turn_id)
         return {"semantic_ir": None if ir is None else ir.model_dump(mode="json"),
+            "semantic_envelope": envelope,
             "obligations": [o.model_dump(mode="json") for o in self.obligations(turn_id)],
             "refinements": [r.model_dump(mode="json") for r in self.refinements(turn_id)],
-            "historical_without_ir": ir is None}
+            "historical_without_ir": ir is None and envelope is None}

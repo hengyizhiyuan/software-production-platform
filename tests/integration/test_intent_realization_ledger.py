@@ -14,7 +14,7 @@ from spg.application.assets import RepositoryAssetService
 from spg.application.interaction import WorkInteractionService
 from spg.application.intent_realization import IntentRealizationViolation
 from spg.domain.intent_realization import (
-    OperationalIntent, SemanticArgument, SemanticClause, SemanticItem, SemanticKind,
+    AtomicBranchEffect, OperationalIntent, SemanticArgument, SemanticClause, SemanticItem, SemanticKind,
     SemanticOrigin, SemanticProvenance, TurnSemanticCandidate, ObligationState,
 )
 from spg.domain.interaction import InteractionAssessmentCandidate
@@ -37,16 +37,27 @@ class DeclaredCompiler:
         record = basis.records[-1]
         provenance = SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
             source_record_id=record.id, source_text=record.content)
+        branch_effects = {"CREATE_BRANCH": ("CREATE_BRANCH",),
+            "SWITCH_BRANCH": ("SWITCH_BRANCH",),
+            "CREATE_AND_SWITCH_BRANCH": ("CREATE_BRANCH", "SWITCH_BRANCH")}.get(str(self.operation), ())
         action = None if self.operation is None else OperationalIntent(operation=self.operation,
             arguments={key: SemanticArgument(value=value, provenance=provenance)
                 for key, value in self.arguments.items()}, speech_act=self.speech_act,
-            conditional=self.conditional)
+            conditional=self.conditional,
+            atomic_branch_effects=tuple(AtomicBranchEffect(effect=effect,
+                target_branch=self.arguments["target_branch"], provenance=provenance)
+                for effect in branch_effects if "target_branch" in self.arguments))
         item = SemanticItem(item_id="current", kind=SemanticKind.EXPLORE if action is None
             else SemanticKind.OPERATIONAL_ACTION, statement="Declared compiler meaning",
             provenance=(provenance,), confidence=1, action=action)
         return InteractionAssessmentCandidate(semantic_intent=TurnSemanticCandidate(items=(item,),
             clauses=(SemanticClause(clause_id="full-turn", source_record_id=record.id,
-                source_text=record.content, semantic_item_ids=(item.item_id,)),)),
+                source_text=record.content, semantic_item_ids=(item.item_id,),
+                speech_act=self.speech_act if branch_effects else None,
+                polarity="AFFIRMATIVE" if branch_effects else "UNRESOLVED",
+                modality="REQUEST" if branch_effects else "UNRESOLVED",
+                temporal_scope="CURRENT" if branch_effects else "UNRESOLVED",
+                requested_effects=branch_effects),)),
             natural_response="可以讨论这项想法。", provider_identity="fixture:declared-irk")
 
 
@@ -120,6 +131,29 @@ def test_actual_branch_effect_and_single_compiler_call(runtime):
         restored = IntentRealizationStore(uow.session)
         restored.validate_completion(turn.id)
         assert restored.projection(turn.id) == projection
+
+
+def test_failed_compilation_keeps_a_governed_nonexecutable_turn_envelope(runtime, monkeypatch):
+    service, _assets, compiler, interaction, _revision = runtime
+    def invalid_candidate(_basis):
+        raise ValueError("Compiler did not establish a valid semantic candidate")
+    monkeypatch.setattr(compiler, "interpret", invalid_candidate)
+    turn = service.submit_turn(interaction.id, "Create a feature from this request",
+        human_identity="human:owner")
+    deadline = time.monotonic() + 30
+    while time.monotonic() < deadline:
+        if service.get_turn(turn.id).status.value == "FAILED":
+            break
+        time.sleep(.02)
+    projection = service.realization_projection(turn.id)
+    envelope = projection["semantic_envelope"]
+    assert envelope["state"] == "SEMANTIC_COMPILATION_FAILED"
+    assert envelope["source_record_id"] == str(turn.request_record_id)
+    assert envelope["attempt"] == 1
+    assert envelope["blocker"]["code"]
+    assert projection["semantic_ir"] is None
+    assert projection["obligations"] == []
+    assert projection["historical_without_ir"] is False
 
 
 @pytest.mark.parametrize("operation", ["CREATE_BRANCH", "CREATE_AND_SWITCH_BRANCH", "SWITCH_BRANCH"])
@@ -307,7 +341,8 @@ def test_additive_migration_preserves_historical_turn_without_ir_backfill(runtim
     assert historical_rows() == before
     assert service.get_shared_understanding(interaction.id).records == records
     projection = service.realization_projection(turn.id)
-    assert projection == {"semantic_ir":None,"obligations":[],"refinements":[],"historical_without_ir":True}
+    assert projection == {"semantic_ir":None,"semantic_envelope":None,
+        "obligations":[],"refinements":[],"historical_without_ir":True}
 
 
 def test_create_only_then_switch_preserves_omitted_effects(runtime):

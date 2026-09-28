@@ -128,10 +128,10 @@ def remote_branches(repository: Path) -> set[str]:
         for item in git(
             repository,
             "for-each-ref",
-            "--format=%(refname:short)",
+            "--format=%(refname)",
             "refs/remotes/origin",
         ).splitlines()
-        if item and item != "origin/HEAD"
+        if item and item != "refs/remotes/origin/HEAD"
     }
 
 
@@ -150,7 +150,7 @@ def test_default_repository_reality_acquires_only_default_branch(tmp_path):
     assert reality.selected_branch == "main"
     assert reality.selected_revision == revisions["main"]
     assert git(acquired, "rev-parse", "HEAD") == revisions["main"]
-    assert remote_branches(acquired) == {"origin/main"}
+    assert remote_branches(acquired) == {"refs/remotes/origin/main"}
     assert git(acquired, "rev-parse", "--is-shallow-repository") == "false"
 
 
@@ -170,7 +170,7 @@ def test_human_requested_branch_is_exact_and_preserves_full_history(tmp_path):
     assert reality.requested_branch == "develop"
     assert reality.selected_revision == revisions["develop"]
     assert git(acquired, "rev-parse", "HEAD") == revisions["develop"]
-    assert remote_branches(acquired) == {"origin/develop"}
+    assert remote_branches(acquired) == {"refs/remotes/origin/develop"}
     assert git(acquired, "cat-file", "-t", parent) == "commit"
     git(acquired, "merge-base", "--is-ancestor", parent, revisions["develop"])
 
@@ -241,11 +241,11 @@ def test_multi_repository_workspace_keeps_independent_reality_and_acquisition(tm
     assert git(acquired["repo:frontend"], "rev-parse", "HEAD") == frontend_revisions[
         "develop"
     ]
-    assert remote_branches(acquired["repo:frontend"]) == {"origin/develop"}
+    assert remote_branches(acquired["repo:frontend"]) == {"refs/remotes/origin/develop"}
     assert git(acquired["repo:backend"], "rev-parse", "HEAD") == backend_revisions[
         "main"
     ]
-    assert remote_branches(acquired["repo:backend"]) == {"origin/main"}
+    assert remote_branches(acquired["repo:backend"]) == {"refs/remotes/origin/main"}
     assert {
         item["repository_identity"] for item in admitted["repository_bindings"]
     } == {"repo:frontend", "repo:backend"}

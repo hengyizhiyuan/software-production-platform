@@ -104,6 +104,11 @@ class DeepSeekSemanticStepCapability:
                 "page or route. Reject unrequested behavior, refactors, fictional business facts and permissions. "
                 "New files require a witness in the existing implementation and an explicit requested new behavior. "
                 "Check that required targets cover EVERY explicitly requested source behavior. Preview availability, "
+                "A Human capability or page goal may leave ordinary, reversible implementation details to "
+                "the Work owner. Use observed repository conventions to choose the minimum viable behavior; "
+                "do not require Human acceptance criteria merely because individual controls or editable "
+                "fields were not listed. Reserve missing_acceptance_requirements for a genuinely absent "
+                "requested behavior or a material decision the owner cannot safely make. "
                 "served-runtime verification, Human review and Delivery Authorization belong to downstream lifecycle "
                 "owners; they never require invented repository files and must not be reported as missing source scope. "
                 "If the proposal omits a necessary "
@@ -145,6 +150,8 @@ class DeepSeekSemanticStepCapability:
             input_text="Return the governed semantic Steering result for this exact Step.",
             output_schema=schema,
         )
+        self.last_result = result
+        self.last_usage = asdict(result.usage)
         try:
             payload = SemanticStepWireContract._parse_payload_ignoring_annotations(
                 result.output_text

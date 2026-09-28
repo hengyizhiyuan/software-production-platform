@@ -244,6 +244,7 @@ class InteractionInterpretationInput(BaseModel):
     interaction: Interaction
     records: tuple[InteractionRecord, ...] = Field(min_length=1)
     prior_assessment: "InteractionAssessment | None" = None
+    governed_semantic_history: tuple[GovernedSemanticIR, ...] = ()
     active_work_context: "ActiveWorkInterpretationContext | None" = None
     basis_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     recent_conversation_messages: tuple[ConversationContextMessage, ...] = ()
@@ -528,11 +529,13 @@ class StructuredResponseSchemaViolation(InteractionInvariantViolation):
         request_id: str | None = None,
         validation_issue: str | None = None,
         repair_attempted: bool = False,
+        repair_attempts: int | None = None,
     ) -> None:
         super().__init__(message)
         self.request_id = request_id
         self.validation_issue = validation_issue
         self.repair_attempted = repair_attempted
+        self.repair_attempts = repair_attempts
 
 
 class InteractionRecordNotFound(LookupError):

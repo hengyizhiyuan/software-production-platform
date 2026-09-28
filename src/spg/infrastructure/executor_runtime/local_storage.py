@@ -18,6 +18,18 @@ from uuid import UUID
 from spg.infrastructure.content_identity import tree_fingerprint
 
 
+def _sync_directory(path: Path) -> None:
+    # Windows does not expose O_DIRECTORY; the file itself is flushed before
+    # its atomic rename. POSIX additionally persists the directory entry.
+    if os.name == "nt":
+        return
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 class ContentAddressedStorage:
     """Write immutable UTF-8 JSON blobs atomically under a bounded root."""
 
@@ -141,11 +153,7 @@ class DeliveryReceiptSpool:
                     stream.flush()
                     os.fsync(stream.fileno())
                 os.replace(temporary, target)
-                directory = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY)
-                try:
-                    os.fsync(directory)
-                finally:
-                    os.close(directory)
+                _sync_directory(target.parent)
             finally:
                 if os.path.exists(temporary):
                     os.unlink(temporary)
@@ -203,7 +211,7 @@ class WorkspaceArchiveStore:
                         info.size = details.st_size
                         with path.open("rb") as stream:
                             archive.addfile(info, stream)
-            with temporary.open("rb") as stream:
+            with temporary.open("r+b") as stream:
                 os.fsync(stream.fileno())
             digest = sha256(temporary.read_bytes()).hexdigest()
             target = self.root / digest[:2] / f"{digest}.tar"
@@ -214,11 +222,7 @@ class WorkspaceArchiveStore:
                 temporary.unlink()
             else:
                 os.replace(temporary, target)
-                directory = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY)
-                try:
-                    os.fsync(directory)
-                finally:
-                    os.close(directory)
+                _sync_directory(target.parent)
             self.verify(digest, target)
             return digest, target
         finally:

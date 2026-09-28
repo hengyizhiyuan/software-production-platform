@@ -476,6 +476,8 @@
     state.sources = null;
     state.agreements = [];
     state.selectedAgreementId = null;
+    state.selfRefineEvents = [];
+    state.selfRefineMetrics = null;
     if (state.pollTimer) globalThis.clearTimeout(state.pollTimer);
     state.pollTimer = null;
   }
@@ -1612,6 +1614,10 @@
       elements.repositoryState.textContent = "No repository result yet.";
       elements.remainingRisk.textContent = "This Work has not completed.";
       elements.candidatePreviewPanel.hidden = true;
+      elements.functionalPreviewPanel.hidden = true;
+      elements.functionalPreviewStatus.textContent = "";
+      elements.functionalPreviewRevision.textContent = "";
+      elements.openFunctionalPreview.href = "#";
       elements.candidateArtifactActions.replaceChildren();
       return;
     }
@@ -2535,6 +2541,11 @@
     }
     const selected = state.works.find((item) => item.work_id === workId);
     const associated = state.interactions.find((item) => item.current_work_id === workId);
+    if (state.selectedWorkId !== workId || (associated
+        && associated.interaction_id !== state.selectedInteractionId)) {
+      clearSelectedWorkState();
+      setSurface("loading");
+    }
     if (associated && associated.interaction_id !== state.selectedInteractionId) {
       saveDraft();
       pauseOutbox(state.selectedInteractionId);
@@ -2554,10 +2565,13 @@
       renderInteraction();
     }
     if (selected?.status === "PRE_WORK") {
-      state.selectedWorkId = "";
-      state.selectedWork = null;
+      if (!associated) {
+        state.selectedInteractionId = "";
+        state.sharedUnderstanding = null;
+      }
       renderWorkList();
       renderInteraction();
+      renderSelectedWork();
       return;
     }
     state.selectedWorkId = workId;

@@ -9,6 +9,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import insert, select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
 from spg.domain.steering import (
@@ -98,8 +99,11 @@ class SteeringStore:
     def insert_decision(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(steering_decisions).values(**values))
 
-    def insert_semantic_result(self, values: Mapping[str, Any]) -> None:
-        self.session.execute(insert(semantic_step_results).values(**values))
+    def insert_semantic_result(self, values: Mapping[str, Any]) -> bool:
+        inserted = self.session.execute(pg_insert(semantic_step_results).values(**values)
+            .on_conflict_do_nothing(constraint="uq_semantic_step_results_step_basis")
+            .returning(semantic_step_results.c.id)).scalar_one_or_none()
+        return inserted is not None
 
     def insert_history(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(steering_history_events).values(**values))

@@ -1125,6 +1125,18 @@ class NativeExecutionStore:
         ).mappings().all()
         return tuple(SelfRefineEventRecord.model_validate(dict(row)) for row in rows)
 
+    def self_refine_events_for_operation(
+        self, operation_id: UUID, *, failure_family: str | None = None,
+    ) -> tuple[SelfRefineEventRecord, ...]:
+        query = select(self_refine_events).where(
+            self_refine_events.c.operation_id == operation_id)
+        if failure_family is not None:
+            query = query.where(self_refine_events.c.failure_family == failure_family)
+        rows = self.session.execute(
+            query.order_by(self_refine_events.c.created_at)
+        ).mappings().all()
+        return tuple(SelfRefineEventRecord.model_validate(dict(row)) for row in rows)
+
     def self_refine_event(self, event_id: UUID) -> SelfRefineEventRecord:
         row = self.session.execute(
             select(self_refine_events).where(self_refine_events.c.id == event_id)

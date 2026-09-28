@@ -293,7 +293,27 @@ class SemanticStepApplicationService:
                 "No Semantic Step capability is configured for DESIGN/REFINE"
             )
         started = monotonic()
-        candidate = self.capability.execute(semantic_input)
+        try:
+            candidate = self.capability.execute(semantic_input)
+        except SteeringInvariantViolation as error:
+            # A provider's malformed typed candidate is a same-basis
+            # stochastic defect. The strict parser remains fail-closed; the
+            # existing Semantic owner gets one bounded correction opportunity.
+            refine = getattr(self.capability, "refine", None)
+            if not isinstance(error.__cause__, ValueError) or not callable(refine):
+                raise
+            feedback = "Semantic provider candidate failed strict schema or repository path validation: " + str(error)
+            first_usage = getattr(self.capability, "last_usage", None)
+            try:
+                revised = refine(semantic_input, validation_feedback=feedback)
+                admitted = self.admit(semantic_input, revised)
+            except Exception as second_error:
+                self._record_semantic_refinement(semantic_input, feedback, started,
+                    first_usage, converged=False, second_error=second_error)
+                raise SemanticStepRefinementExhausted(str(second_error)) from second_error
+            self._record_semantic_refinement(semantic_input, feedback, started,
+                first_usage, converged=True)
+            return admitted
         first_usage = getattr(self.capability, "last_usage", None)
         try:
             return self.admit(semantic_input, candidate)
@@ -527,7 +547,7 @@ class SemanticStepApplicationService:
                     raise SteeringInvariantViolation(
                         "Semantic result evidence reference no longer exists"
                     )
-            store.insert_semantic_result(
+            inserted = store.insert_semantic_result(
                 {
                     "id": result_id,
                     "work_id": fresh.work_id,
@@ -563,6 +583,16 @@ class SemanticStepApplicationService:
                     "created_at": timestamp,
                 }
             )
+            if not inserted:
+                # A concurrent run settled this same Step/basis while this
+                # candidate was being prepared. It owns the single semantic
+                # result and its Work update; this run must not apply a second
+                # production proposal.
+                existing = store.latest_semantic_result_for_step(fresh.step.id)
+                if existing is None or existing.basis_fingerprint != fresh.basis_fingerprint:
+                    raise StaleSemanticStepCandidate(
+                        "Concurrent semantic result did not match the current Step basis")
+                return existing
             if production_plan is not None:
                 proposal = candidate.proposed_production
                 assert proposal is not None

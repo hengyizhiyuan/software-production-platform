@@ -19,16 +19,23 @@ def main():
     parser.add_argument('--directory', type=Path, required=True)
     args = parser.parse_args()
     output = args.directory/'runtime-retirement.json'
+    pending = args.directory/'runtime-retirement.pending.json'
     if output.exists():
         raise SystemExit('Already retired; evidence is immutable')
-    state = json.loads((args.directory/'latest.json').read_text())
+    latest = args.directory/'latest.json'
+    try:
+        state = json.loads(latest.read_text(encoding='utf-8'))
+    except UnicodeDecodeError:
+        state = json.loads(latest.read_text(encoding='gbk'))
     session = state.get('preview', {}).get('session') or {}
     if session.get('status') not in {'READY', 'FAILED'}:
         raise SystemExit('Only completed qualification runtimes may be retired')
     identity = uuid.UUID(session['id']).hex
     prefix = 'watt-candidate-preview-'+identity
     containers = docker('ps', '-a', '--format', '{{.Names}}').splitlines()
-    selected = [name for name in containers if name.startswith(prefix+'-')]
+    selected = [name for name in containers if name.startswith(prefix+'-')
+        and docker('inspect', '--format',
+            '{{index .Config.Labels "watt.candidate-preview"}}', name).strip() == session['id']]
     inventory = []
     for name in selected:
         details = docker('inspect', '--format',
@@ -39,13 +46,22 @@ def main():
         'prior_status': session['status'], 'preserve_all_volumes': True,
         'work_or_database_changes': False, 'containers': inventory,
         'endpoint_available_after_retirement': False}
-    output.write_text(json.dumps(record, ensure_ascii=False, indent=2)+'\n')
+    if pending.exists():
+        original = json.loads(pending.read_text(encoding='utf-8'))
+        if original.get('preview_id') != session['id']:
+            raise SystemExit('Pending retirement evidence belongs to another Preview')
+    else:
+        pending.write_text(json.dumps(record, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     if selected:
         docker('stop', '--time', '3', *selected)
         docker('rm', *selected)
     for name in docker('network', 'ls', '--format', '{{.Name}}').splitlines():
         if name.startswith(prefix+'-'):
-            docker('network', 'rm', name)
+            label = docker('network', 'inspect', '--format',
+                '{{index .Labels "watt.candidate-preview"}}', name).strip()
+            if label == session['id']:
+                docker('network', 'rm', name)
+    pending.replace(output)
     print(json.dumps({'preview_id': session['id'], 'retired': True, 'volumes_preserved': True}))
 
 

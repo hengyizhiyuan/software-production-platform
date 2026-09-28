@@ -10,6 +10,16 @@
     "创建并切换到 {branch}",
     "从当前代码切个 {branch} 出来"
   ],
+  "branch_positive_expected_operations": [
+    "CREATE_AND_SWITCH_BRANCH",
+    "CREATE_AND_SWITCH_BRANCH",
+    "CREATE_AND_SWITCH_BRANCH",
+    "CREATE_AND_SWITCH_BRANCH",
+    "CREATE_AND_SWITCH_BRANCH",
+    "CREATE_BRANCH",
+    "CREATE_AND_SWITCH_BRANCH",
+    "CREATE_AND_SWITCH_BRANCH"
+  ],
   "branch_negative": [
     "我在考虑建个新分支",
     "要不要切个分支？",

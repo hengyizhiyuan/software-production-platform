@@ -283,16 +283,17 @@ for part in relative.parts:
     if path.is_symlink(): raise ValueError('file.write target contains a symlink')
 if not path.is_file() or path.stat().st_nlink != 1:
     raise ValueError('file.write exact edit requires one regular unlinked file')
-old = base64.b64decode(sys.argv[2]).decode('utf-8')
-new = base64.b64decode(sys.argv[3]).decode('utf-8')
-original = path.read_text(encoding='utf-8')
+old = base64.b64decode(sys.argv[2])
+new = base64.b64decode(sys.argv[3])
+original = path.read_bytes()
+original.decode('utf-8')
 if original.count(old) != 1:
     raise ValueError('file.write old_text must match exactly once')
 updated = original.replace(old, new, 1)
 temporary = path.with_name('.' + path.name + '.' + sys.argv[4] + '.tmp')
-temporary.write_text(updated, encoding='utf-8')
+temporary.write_bytes(updated)
 os.replace(temporary, path)
-print(len(updated.encode('utf-8')))
+print(len(updated))
 """
             arguments = (
                 relative,

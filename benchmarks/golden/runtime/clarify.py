@@ -24,12 +24,16 @@ def main():
     output = directory/'human-clarification.json'
     if output.exists():
         raise SystemExit('The allowed Human choice has already been recorded')
-    journey = json.loads((directory/'journey.json').read_text())
-    corpus = json.loads((Path(__file__).resolve().parents[1]/'tier0-v1.json').read_text())
+    journey_path = directory/'journey.json'
+    try:
+        journey = json.loads(journey_path.read_text(encoding='utf-8'))
+    except UnicodeDecodeError:
+        journey = json.loads(journey_path.read_text(encoding='gbk'))
+    corpus = json.loads((Path(__file__).resolve().parents[1]/'tier0-v1.json').read_text(encoding='utf-8'))
     case = next(item for item in corpus['cases'] if item['id'] == journey['case'])
     if 'answer one genuine high-impact clarification' not in case['allowed_human_actions']:
         raise SystemExit('This case does not allow a clarification choice')
-    env = dict(line.split('=', 1) for line in args.env_file.read_text().splitlines() if '=' in line)
+    env = dict(line.split('=', 1) for line in args.env_file.read_text(encoding='utf-8').splitlines() if '=' in line)
     client = ProductClient(args.base, env['SPG_OPERATOR_TOKEN'])
     interaction = client.request('/api/interactions/'+journey['interaction_id'])
     work_id = interaction.get('governed_work_id')
@@ -42,11 +46,11 @@ def main():
         'question': questions[0], 'answer': args.answer,
         'classification': 'LEGITIMATE_PRODUCT_SCOPE_CHOICE', 'question_count': 1,
         'implementation_assistance': False, 'human_acceptance': 'PENDING'}
-    output.write_text(json.dumps(evidence, ensure_ascii=False, indent=2)+'\n')
+    output.write_text(json.dumps(evidence, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     receipt = client.request('/api/interactions/'+journey['interaction_id']+'/turns', {
         'content': args.answer, 'human_identity': 'human:golden-operator'})
     (directory/'clarification-submission.json').write_text(
-        json.dumps(receipt, ensure_ascii=False, indent=2)+'\n')
+        json.dumps(receipt, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({'case': journey['case'], 'classification': evidence['classification'],
         'receipt': receipt}, ensure_ascii=False))
 

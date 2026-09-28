@@ -15,9 +15,10 @@ from time import monotonic, sleep
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from spg.application.intent_realization import (
-    IntentRealizationKernel, executable_semantic_actions, legacy_action_projection, production_evidence, project_interaction_candidate,
+    IntentRealizationKernel, executable_semantic_actions, latest_assessment_revision,
+    legacy_action_projection, production_evidence, project_interaction_candidate,
 )
-from spg.domain.intent_realization import SemanticKind, ObligationPlane, ObligationState, ObservedEffect, TERMINAL_OBLIGATION_STATES
+from spg.domain.intent_realization import EffectPredicate, SemanticKind, SemanticOrigin, ObligationPlane, ObligationState, ObservedEffect, TERMINAL_OBLIGATION_STATES
 from spg.infrastructure.persistence.intent_realization_store import IntentRealizationStore
 
 from spg.application.guided_design import (
@@ -132,6 +133,93 @@ from spg.infrastructure.persistence.steering_store import SteeringStore
 ASSESSMENT_SCHEMA_VERSION = "wic-assessment-v8"
 READINESS_PROFILE = "LONG_LIVED_STEERING"
 READINESS_PROFILE_VERSION = "v0"
+
+
+def _grounded_status_facts(item, observations):
+    """Render typed owner facts only while their cited observation is current.
+
+    The returned identities are the coverage receipt. Generated answer prose is
+    never compared with an earlier model sentence to decide completion.
+    """
+    if not item.observed_facts:
+        return None
+    by_reference = {reference: observation for observation in observations
+        for reference in observation.evidence_references}
+    facts = []
+    identities = []
+    for key, claim in item.observed_facts.items():
+        reference = claim.provenance.evidence_reference
+        observation = by_reference.get(reference)
+        if observation is None or str(observation.facts.get(key)) != claim.value:
+            return None
+        facts.append(f"{key}={claim.value}")
+        identities.append(f"{reference}:{key}")
+    return "已核对当前状态：" + "；".join(facts) + "。", tuple(identities)
+
+
+def _grounded_named_branch_question(item, observation, source_record_id):
+    """Answer a typed branch existence question from the current repository owner."""
+    if (item.kind is not SemanticKind.QUESTION or not item.subject
+            or not item.subject.startswith("branch:") or observation is None
+            or observation.facts.get("condition") != "READY"
+            or not isinstance(observation.facts.get("branches"), (list, tuple))):
+        return None
+    branch = item.subject.removeprefix("branch:")
+    if (not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]{0,127}", branch)
+            or not any(source.origin in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
+                and source.source_record_id == source_record_id
+                and source.source_text is not None
+                and re.search(rf"(?<![A-Za-z0-9._/-]){re.escape(branch)}(?![A-Za-z0-9._/-])",
+                    source.source_text) for source in item.provenance)):
+        return None
+    branches = observation.facts["branches"]
+    if not all(isinstance(value, str) for value in branches):
+        return None
+    answer = (f"已核对当前仓库：本地分支 {branch} "
+        + ("存在。" if branch in branches else "不存在。"))
+    return answer, tuple(f"{reference}:branches:{branch}"
+        for reference in observation.evidence_references)
+
+
+def _research_repository_source(assessment):
+    """Select one confirmed, Human-owned repository fact for project research."""
+    from urllib.parse import urlsplit
+    def supported_url(value):
+        try:
+            parsed = urlsplit(value)
+            return parsed.scheme in {"http", "https"} and bool(parsed.hostname)
+        except ValueError:
+            return False
+    direct = assessment.semantic_ir.repository_source
+    if direct is not None:
+        return direct
+    def repository_reference_subject(subject):
+        parts = set(re.split(r"[._]", subject.lower()))
+        return (bool(parts & {"repository", "repo"})
+            and bool(parts & {"url", "source", "reference"}))
+    sources = {fact.value for fact in assessment.engineering_semantic_facts
+        if fact.is_current and repository_reference_subject(fact.subject)
+        and fact.relation is SemanticRelation.REFERENCE
+        and fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
+        and fact.epistemic_status is SemanticEpistemicStatus.CONFIRMED
+        and fact.provenance.role_origin is SemanticRoleOrigin.EXPLICIT
+        and isinstance(fact.value, str)
+        and fact.value in fact.provenance.source_text
+        and supported_url(fact.value)}
+    for item in getattr(assessment.semantic_ir, "items", ()):
+        if item.kind is not SemanticKind.FACT or not item.subject:
+            continue
+        if "repository" not in set(re.split(r"[._]", item.subject.lower())):
+            continue
+        for provenance in item.provenance:
+            if (provenance.origin is not SemanticOrigin.HUMAN_EXPLICIT
+                    or not provenance.source_text):
+                continue
+            for value in re.findall(r"https?://[^\s，。]+", provenance.source_text):
+                value = value.rstrip(".,;:!?)]}、")
+                if supported_url(value):
+                    sources.add(value)
+    return next(iter(sources)) if len(sources) == 1 else None
 
 
 def _repository_branch_status_question(content: str) -> bool:
@@ -539,7 +627,7 @@ def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailur
             code="SCHEMA_VIOLATION",
             message=(
                 "The model result did not satisfy Watt's governed response contract "
-                "after one bounded repair attempt. Your message was saved and this Turn "
+                "after bounded repair attempts. Your message was saved and this Turn "
                 "can be retried."
             ),
             metadata={
@@ -556,7 +644,7 @@ def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailur
                             if (error.validation_issue or '').startswith('ACTION_')
                             else "SCHEMA_INVALID"),
                         "component": "wic/semantic-provider",
-                        "attempt_count": 2,
+                        "attempt_count": 1 + (error.repair_attempts or 1),
                         "converged": False,
                         "human_escalation": False,
                     } if error.repair_attempted else None
@@ -1152,6 +1240,14 @@ class WorkInteractionService:
                     "updated_at": now,
                 }
             )
+            IntentRealizationStore(uow.session).create_envelope(
+                turn_id=turn_id, source_record_id=record_id,
+                human_content_hash=hashlib.sha256(value.encode()).hexdigest(),
+                provenance_basis={"interaction_id": str(interaction_id),
+                    "source_record_id": str(record_id),
+                    "work_focus_id": None if interaction.current_work_id is None
+                        else str(interaction.current_work_id),
+                    "supporting_references": list(references)})
             store.insert_message(
                 {
                     "id": uuid4(),
@@ -2090,14 +2186,49 @@ class WorkInteractionService:
         with self.database.unit_of_work() as uow:
             obligations = IntentRealizationStore(uow.session).obligations(turn_id)
         for obligation in obligations:
+            work_question = any(effect.predicate is EffectPredicate.WORK_QUESTION_RESOLVED
+                for effect in obligation.expected_effects)
             if (obligation.state in TERMINAL_OBLIGATION_STATES or obligation.plane is ObligationPlane.INTERACTION
                     or obligation.operation in self._operational_owner_handlers or (
+                        not work_question and
                         obligation.state is ObligationState.RUNNING and obligation.observed_effect is not None
                         and obligation.observed_effect.facts.get("owner_running"))):
                 continue
             observed = None
-            if obligation.plane is ObligationPlane.WORK and projection.governed_revision is not None:
-                from spg.application.intent_realization import latest_assessment_revision
+            if work_question and projection.governed_revision is not None:
+                target_step_id = obligation.expected_effects[0].target
+                with self.database.unit_of_work() as uow:
+                    product = ProductStore(uow.session)
+                    steering = SteeringStore(uow.session)
+                    admission = latest_assessment_revision(projection.governed_revision,
+                        product.work_reality_revision)
+                    plan = steering.plan_for_work(projection.governed_work_id)
+                    active_plan = None if plan is None else steering.active_revision(plan.id)
+                    current_step = None if active_plan is None else next((step
+                        for step in steering.steps(active_plan.id)
+                        if step.state.value == "CURRENT"), None)
+                if admission is not None and admission.source_assessment_id == assessment.id:
+                    retired = active_plan is not None and (
+                        active_plan.id != assessment.basis_steering_plan_revision_id
+                        or current_step is None or str(current_step.id) != target_step_id)
+                    observed = ObservedEffect(owner="work-steering-question",
+                        evidence_references=(f"work-reality-revision:{admission.id}",
+                            f"steering-step:{target_step_id}"),
+                        facts={"work_id": str(projection.governed_work_id),
+                            "work_revision_id": str(projection.governed_revision.id),
+                            "question_step_id": target_step_id,
+                            "question_retired": retired,
+                            "constraints": list(projection.governed_revision.constraints),
+                            "owner_running": not retired})
+                    if not retired:
+                        if obligation.state is ObligationState.PENDING:
+                            with self.database.unit_of_work() as uow:
+                                IntentRealizationStore(uow.session).transition(
+                                    obligation, state=ObligationState.RUNNING,
+                                    running_evidence=observed)
+                                uow.commit()
+                        continue
+            elif obligation.plane is ObligationPlane.WORK and projection.governed_revision is not None:
                 with self.database.unit_of_work() as uow:
                     admission = latest_assessment_revision(projection.governed_revision,
                         ProductStore(uow.session).work_reality_revision)
@@ -2166,6 +2297,7 @@ class WorkInteractionService:
                 status=InteractionTurnStatus.PROCESSING,
                 updated_at=now,
             )
+            IntentRealizationStore(uow.session).begin_compilation(turn_id)
             uow.commit()
         self._mark_turn_timing(turn_id, "processing_started")
         recovery_events = tuple(event for event in self.response_events(turn_id)
@@ -2187,7 +2319,9 @@ class WorkInteractionService:
             )
             independent_action_answer = self._dispatch_repository_obligations(turn, assessment, request_record)
             branch_action_answer = None
-            if assessment.semantic_ir.current_production and self._governed_work_handler is not None:
+            if (self._governed_work_handler is not None
+                    and (assessment.semantic_ir.current_production
+                        or assessment.candidate_change is not None)):
                 branch_action_answer = self._governed_work_handler(turn.interaction_id, assessment, request_record)
             admission_prepared = self._prepare_production_admission_if_ready(
                 turn.interaction_id, assessment, request_record)
@@ -2241,12 +2375,14 @@ class WorkInteractionService:
                         requests=requests,
                         on_event=record_search_event,
                         steering_step_id=assessment.basis_steering_step_id,
-                        repository_source=assessment.semantic_ir.repository_source,
+                        repository_source=_research_repository_source(assessment),
                     )
                     response_content = research_result.answer
             registered_answer = self._dispatch_registered_obligations(turn, assessment, request_record)
             independent_action_answer = "\n".join(answer for answer in (independent_action_answer, registered_answer) if answer) or None
             status_answers = {}
+            status_fact_coverage = {}
+            self._settle_turn_obligations(turn_id, assessment, research_result=research_result)
             status_items = tuple(item for item in assessment.semantic_ir.items
                 if item.kind is SemanticKind.STATUS_QUERY
                 and item.subject in {"WORK_CURRENT", "WORK_HISTORY", "WORK_DIAGNOSTIC"})
@@ -2257,9 +2393,29 @@ class WorkInteractionService:
                         status_ir = assessment.semantic_ir.model_copy(update={"items": (item,)})
                         status_answers[item.item_id] = self._work_reality_status_candidate(
                             status_basis, semantic_ir=status_ir).natural_response
-            self._settle_turn_obligations(turn_id, assessment, research_result=research_result)
+                        status_fact_coverage[item.item_id] = (
+                            f"work-reality-revision:{status_basis.active_work_context.work_revision.id}",)
+            status_basis = self._basis(turn.interaction_id)
+            for item in assessment.semantic_ir.items:
+                if item.kind is not SemanticKind.STATUS_QUERY or item.item_id in status_answers:
+                    continue
+                grounded = _grounded_status_facts(item, status_basis.observed_reality)
+                if grounded is not None:
+                    status_answers[item.item_id], status_fact_coverage[item.item_id] = grounded
+            named_branch_answers = {}
+            named_branch_questions = tuple(item for item in assessment.semantic_ir.items
+                if item.kind is SemanticKind.QUESTION and item.subject
+                and item.subject.startswith("branch:"))
+            repository_observation = (self._repository_effect(turn.interaction_id)
+                if named_branch_questions else None)
+            for item in named_branch_questions:
+                grounded = _grounded_named_branch_question(
+                    item, repository_observation, request_record.id)
+                if grounded is not None:
+                    named_branch_answers[item.item_id] = grounded[0]
+                    status_fact_coverage[item.item_id] = grounded[1]
             ledger_projection = self.realization_projection(turn_id)
-            if (assessment.semantic_ir.items
+            if (branch_action_answer is None and assessment.semantic_ir.items
                     and any(item.kind is SemanticKind.CONSTRAINT for item in assessment.semantic_ir.items)
                     and all(item.kind in {SemanticKind.CONSTRAINT, SemanticKind.FACT} for item in assessment.semantic_ir.items)
                     and not any(item.requires_human for item in assessment.semantic_ir.items)
@@ -2350,11 +2506,48 @@ class WorkInteractionService:
                 response_content = independent_action_answer
             answer_items = tuple(item for item in assessment.semantic_ir.items
                 if item.kind in {SemanticKind.QUESTION, SemanticKind.ANALYSIS} and item.answer)
+            direct_answer_coverage = set()
             if independent_action_answer is not None or research_result is not None:
                 response_content = "\n".join(dict.fromkeys((response_content,
                     *(item.answer for item in answer_items))))
+                direct_answer_coverage.update(item.item_id for item in answer_items)
             if status_answers:
                 response_content = "\n".join(dict.fromkeys((response_content, *status_answers.values())))
+            if named_branch_answers:
+                # The exact owner branch list supersedes an earlier model
+                # sentence about existence. Its receipt, not prose, closes the
+                # question obligation.
+                response_content = "\n".join(filter(None, (
+                    independent_action_answer or branch_action_answer,
+                    *named_branch_answers.values(),
+                    *(answer for item_id, answer in status_answers.items()
+                        if item_id not in named_branch_answers),
+                    *(item.answer for item in answer_items
+                        if item.item_id not in named_branch_answers))))
+            final_response_basis = self._basis(turn.interaction_id)
+            if (final_response_basis.active_work_context is not None
+                    and final_response_basis.active_work_context != status_basis.active_work_context):
+                # The realizer may have taken longer than a concurrent owner
+                # reconciliation. Discard its earlier Work-state prose and
+                # render from the newly observed owner revision.
+                current_work = self.get_shared_understanding(turn.interaction_id)
+                response_content = "\n".join(filter(None, (
+                    _repository_branch_status_answer("", current_work),
+                    self._work_reality_status_candidate(final_response_basis).natural_response,
+                    *(item.answer for item in answer_items),
+                )))
+                for item in status_items:
+                    status_fact_coverage[item.item_id] = (
+                        f"work-reality-revision:{final_response_basis.active_work_context.work_revision.id}",)
+                realization = None
+                reconciliation = None
+                self._record_response_event(turn_id, WicResponseEventType.RESPONSE_REFINEMENT,
+                    basis_fingerprint=final_response_basis.basis_fingerprint,
+                    metadata={"component": "irk/response-freshness",
+                        "signal": "RESPONSE_BASIS_REFRESHED",
+                        "previous_basis_fingerprint": status_basis.basis_fingerprint,
+                        "work_revision_id": str(final_response_basis.active_work_context.work_revision.id)},
+                    only_while_processing=True)
             self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
             with self.database.unit_of_work() as uow:
@@ -2438,14 +2631,17 @@ class WorkInteractionService:
                         item = next(item for item in assessment.semantic_ir.items
                             if item.item_id == obligation.semantic_item_id)
                         mixed = bool(assessment.semantic_ir.operational_requests or assessment.semantic_ir.current_production)
-                        question_observed = bool(status_answers.get(item.item_id)
-                            and status_answers[item.item_id] in response_content) or (
+                        question_observed = bool(status_fact_coverage.get(item.item_id)) or (
+                            item.item_id in direct_answer_coverage) or (
                             item.kind is not SemanticKind.STATUS_QUERY and not mixed
-                            and bool(response_content.strip())) or bool(item.answer and item.answer in response_content)
+                            and bool(response_content.strip()))
                         if question_observed:
                             ledger.transition(obligation, observation=ObservedEffect(owner="interaction-response",
-                                evidence_references=(f"interaction-turn:{turn_id}:final-response",),
-                                facts={"answer_governed": True, "semantic_item_id": item.item_id}))
+                                evidence_references=(f"interaction-turn:{turn_id}:final-response",
+                                    *status_fact_coverage.get(item.item_id, ())),
+                                facts={"answer_governed": True, "semantic_item_id": item.item_id,
+                                    "covered_fact_ids": status_fact_coverage.get(item.item_id, ()),
+                                    "direct_semantic_answer": item.item_id in direct_answer_coverage}))
                         else:
                             ledger.transition(obligation, state=ObligationState.BLOCKED_WITH_EVIDENCE,
                                 blocker_reference=f"interaction-turn:{turn_id}:question-not-realized:{item.item_id}")
@@ -2503,6 +2699,10 @@ class WorkInteractionService:
                     failure.metadata.update(automatic_recovery_pending=automatic_recovery,
                         automatic_attempt_budget=3, model_usage_unknown=(
                             error.usage_unknown if isinstance(error, ModelProviderError) else None))
+                IntentRealizationStore(uow.session).compilation_failed(turn_id,
+                    code=failure.code, evidence={"turn_id": str(turn_id),
+                        "failure_message": failure.message,
+                        "automatic_recovery_pending": automatic_recovery})
                 store.update_turn(
                     turn_id,
                     status=InteractionTurnStatus.FAILED,
@@ -2694,8 +2894,11 @@ class WorkInteractionService:
             )
             latest_human_input = latest_human_record.content
             prior_assessment = store.latest_assessment(interaction_id)
+            semantic_history = tuple(assessment.semantic_ir for assessment in
+                store.assessments(interaction_id) if assessment.semantic_ir is not None)[-8:]
             semantic_basis = InteractionInterpretationInput(interaction=interaction,
                 records=records, prior_assessment=prior_assessment,
+                governed_semantic_history=semantic_history,
                 active_work_context=active_context, basis_fingerprint=current_basis,
                 observed_reality=(*self._semantic_owner_observations(interaction_id),
                     *(observation for provider in self._intent_observation_providers for observation in provider(interaction_id))))
@@ -2757,7 +2960,30 @@ class WorkInteractionService:
                 engineering_semantic_facts,
                 latest_human_input=latest_human_input,
                 latest_human_record_id=latest_human_record.id,
+                prior_production_references=tuple(
+                    f"{prior.id}:{item.item_id}"
+                    for prior in semantic_history for item in prior.items
+                    if item.production is not None and item.production.current),
             )
+            scope_question_step_id = (
+                active_context.current_steering_step_id
+                if active_context is not None
+                and active_context.pending_human_question
+                and candidate_change is not None
+                and "constraints" in candidate_change.changed_fields
+                and any(item.kind is SemanticKind.CONSTRAINT for item in semantic_ir.items)
+                and (any(fact.relation is SemanticRelation.SCOPE
+                    and latest_human_record.id in fact.provenance.source_record_ids
+                    for fact in current_semantic_facts(engineering_semantic_facts))
+                    or self._constraint_refers_to_current_production(
+                        semantic_ir, latest_human_record.id,
+                        tuple(f"{prior.id}:{item.item_id}"
+                            for prior in semantic_history for item in prior.items
+                            if item.production is not None and item.production.current)))
+                else None)
+            if scope_question_step_id is not None:
+                semantic_ir = semantic_ir.model_copy(update={
+                    "work_question_step_id": scope_question_step_id})
             progressive_semantics = build_progressive_semantics(
                 candidate=candidate,
                 records=records,
@@ -2898,7 +3124,8 @@ class WorkInteractionService:
                 if current_turn.request_record_id != semantic_ir.source_record_id:
                     raise InteractionInvariantViolation("IRK basis must belong to the current Turn")
                 ledger = IntentRealizationStore(uow.session)
-                ledger.initialize(current_turn.id, assessment_id, semantic_ir)
+                ledger.initialize(current_turn.id, assessment_id, semantic_ir,
+                    work_question_step_id=scope_question_step_id)
                 if refinement_observation and refinement_observation.get("converged"):
                     from spg.domain.intent_realization import RealizationRefinement, RealizationScope, RealizationSignal
                     signal = RealizationSignal(refinement_observation.get("signal_kind", "SCHEMA_INVALID"))
@@ -3415,6 +3642,8 @@ class WorkInteractionService:
                 or message.processing_status is InteractionTurnStatus.COMPLETED
             )
             prior = store.latest_assessment(interaction_id)
+            semantic_history = tuple(assessment.semantic_ir for assessment in
+                store.assessments(interaction_id) if assessment.semantic_ir is not None)[-8:]
             previous_contract = store.latest_response_contract(interaction_id, completed_only=True)
             active_context = self._active_work_context(uow.session, interaction)
         if not records:
@@ -3430,6 +3659,7 @@ class WorkInteractionService:
             interaction=interaction,
             records=records,
             prior_assessment=prior,
+            governed_semantic_history=semantic_history,
             active_work_context=active_context,
             basis_fingerprint=fingerprint,
             recent_conversation_messages=messages,
@@ -3625,6 +3855,7 @@ class WorkInteractionService:
         *,
         latest_human_input: str | None = None,
         latest_human_record_id: UUID | None = None,
+        prior_production_references: tuple[str, ...] = (),
     ) -> tuple[
         WorkFocusClassification | None,
         WorkImpactDisposition | None,
@@ -3667,15 +3898,31 @@ class WorkInteractionService:
             item.production is not None and item.production.current and (latest_human_record_id is None or any(
                 source.source_record_id == latest_human_record_id for source in item.provenance))
             for item in candidate.semantic_intent.items))
-        governed_question_answer = bool(
-            getattr(active, "pending_human_question", None)
-            and latest_human_input and new_requests
-            and not any(item.kind in {SemanticKind.QUESTION, SemanticKind.STATUS_QUERY}
-                for item in (candidate.semantic_intent.items if candidate.semantic_intent else ()))
-            and candidate.turn_intent is ConversationTurnIntent.HUMAN_DECISION
+        decision_input = bool(new_requests and candidate.turn_intent is ConversationTurnIntent.HUMAN_DECISION
             and any(meaning.kind is InterpretationMeaningKind.DECISION_INPUT
                 and latest_human_record_id in meaning.source_record_ids
-                for meaning in candidate.meanings)
+                for meaning in candidate.meanings))
+        typed_scope_answer = bool(candidate.semantic_intent
+            and candidate.semantic_intent.items
+            and all(item.kind in {SemanticKind.CONSTRAINT, SemanticKind.FACT}
+                for item in candidate.semantic_intent.items)
+            and any(item.kind is SemanticKind.CONSTRAINT and any(
+                source.source_record_id == latest_human_record_id
+                for source in item.provenance)
+                for item in candidate.semantic_intent.items)
+            and (any(fact.relation is SemanticRelation.SCOPE
+                and latest_human_record_id in fact.provenance.source_record_ids
+                for fact in current_semantic_facts(engineering_semantic_facts))
+                or WorkInteractionService._constraint_refers_to_current_production(
+                    candidate.semantic_intent, latest_human_record_id,
+                    prior_production_references))
+            and candidate.candidate_constraints != active.work_revision.constraints
+            and not candidate.unresolved_material_questions)
+        governed_question_answer = bool(
+            getattr(active, "pending_human_question", None)
+            and latest_human_input and (decision_input or typed_scope_answer)
+            and not any(item.kind in {SemanticKind.QUESTION, SemanticKind.STATUS_QUERY}
+                for item in (candidate.semantic_intent.items if candidate.semantic_intent else ()))
         )
         explicit_current_work_change = explicit_current_work_change or governed_question_answer
         if candidate.response_intent is not None and candidate.response_intent.interaction_mode in {
@@ -3766,6 +4013,24 @@ class WorkInteractionService:
                 scope_change_required=scope_change,
             ),
         )
+
+    @staticmethod
+    def _constraint_refers_to_current_production(
+        semantic_ir, latest_human_record_id: UUID | None,
+        prior_production_references: tuple[str, ...],
+    ) -> bool:
+        if semantic_ir is None or latest_human_record_id is None:
+            return False
+        production_refs = set(prior_production_references)
+        constraints = {item.item_id for item in semantic_ir.items
+            if item.kind is SemanticKind.CONSTRAINT and any(
+                source.source_record_id == latest_human_record_id
+                for source in item.provenance)}
+        return bool(production_refs and constraints and any(
+            clause.source_record_id == latest_human_record_id
+            and constraints.intersection(clause.semantic_item_ids)
+            and production_refs.intersection(clause.refers_to)
+            for clause in semantic_ir.clauses))
 
     @staticmethod
     def _normalize_supporting_references(values: tuple[str, ...]) -> tuple[str, ...]:

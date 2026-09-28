@@ -10,7 +10,7 @@ import ipaddress
 import json
 import socket
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urljoin, urlsplit
+from urllib.parse import parse_qsl, quote, urlencode, urljoin, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from spg.domain.external_search import SearchEvidence, SearchFailure, SearchProviderError
@@ -112,7 +112,31 @@ class GitHubPublicSearchProvider:
         headers = {"Accept": "application/vnd.github+json"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
-        body, _ = self.http.get(url, headers=headers)
+        # A search response can exceed the transport's fixed byte ceiling even
+        # when each source is useful. Narrow only the result page, never the
+        # byte ceiling, and retain the same query and public endpoint.
+        parts = urlsplit(url)
+        params = dict(parse_qsl(parts.query, keep_blank_values=True))
+        page_sizes = tuple(size for size in (int(params["per_page"]), 3, 1)
+            if size <= int(params["per_page"])) if (
+            parts.netloc == "api.github.com" and parts.path.startswith("/search/")
+            and params.get("per_page", "").isdigit()) else (None,)
+        body = None
+        for size in dict.fromkeys(page_sizes):
+            narrowed = url
+            if size is not None:
+                params["per_page"] = str(size)
+                narrowed = urlunsplit(parts._replace(query=urlencode(params)))
+            try:
+                body, _ = self.http.get(narrowed, headers=headers)
+                break
+            except SearchProviderError as error:
+                if (error.category is not SearchFailure.FETCH_FAILED
+                        or "bounded fetch size" not in str(error)
+                        or size is None or size == 1):
+                    raise
+        if body is None:
+            raise SearchProviderError(SearchFailure.FETCH_FAILED, "No bounded GitHub response was obtained")
         try:
             result = json.loads(body)
         except ValueError as error:
@@ -176,7 +200,18 @@ class GitHubPublicSearchProvider:
         if not all(name.replace("-", "").replace("_", "").replace(".", "").isalnum() for name in (owner, repo)):
             raise SearchProviderError(SearchFailure.FETCH_FAILED, "Invalid public repository identity")
         root = f"https://api.github.com/repos/{owner}/{repo}"
-        metadata = self._json(root)
+        try:
+            metadata = self._json(root)
+        except SearchProviderError as error:
+            # Repository search already supplied a public identity and default
+            # branch. The metadata API may hit its independent unauthenticated
+            # rate limit; inspect a small raw source instead of discarding the
+            # available result or widening the transport byte ceiling.
+            if (error.category in {SearchFailure.RATE_LIMITED,
+                    SearchFailure.FETCH_FAILED, SearchFailure.PROVIDER_UNAVAILABLE}
+                    and evidence.metadata.get("default_branch")):
+                return self._inspect_repository_raw(evidence, owner, repo, error)
+            raise
         if not isinstance(metadata, dict):
             raise SearchProviderError(SearchFailure.FETCH_FAILED, "GitHub repository returned an unexpected payload")
         if metadata.get("private") is True:
@@ -238,6 +273,31 @@ class GitHubPublicSearchProvider:
             "completeness": "INSPECTED",
             "retrieved_at": datetime.now(UTC),
         })
+
+    def _inspect_repository_raw(self, evidence: SearchEvidence, owner: str,
+                                repo: str, prior_error: SearchProviderError) -> SearchEvidence:
+        branch = evidence.metadata.get("default_branch")
+        if not isinstance(branch, str) or not branch or not all(
+                part.replace("-", "").replace("_", "").replace(".", "").isalnum()
+                for part in branch.split("/")):
+            raise prior_error
+        for path in ("README.md", "README.rst", "README", "pyproject.toml", "package.json"):
+            url = (f"https://raw.githubusercontent.com/{quote(owner)}/{quote(repo)}/"
+                f"{quote(branch, safe='/')}/{path}")
+            try:
+                body, _ = self.http.get(url, headers={"Range": "bytes=0-16383"})
+            except SearchProviderError:
+                continue
+            material = body.decode("utf-8", errors="replace").strip()
+            if not material:
+                continue
+            return evidence.model_copy(update={
+                "inspected_content": f"Bounded public source ({url}):\n{material[:9000]}",
+                "metadata": {**evidence.metadata,"inspected_source_url":url,
+                    "inspection_method":"bounded-raw-source"},
+                "completeness":"INSPECTED", "retrieved_at":datetime.now(UTC),
+            })
+        raise prior_error
 
     def fetch_resource(self, url: str) -> SearchEvidence:
         """Inspect one public repository or exact public file selected by Human."""

@@ -1,9 +1,9 @@
 """Unseen messages through public Interaction, with real qualified Git effects.
 
-Starting repository/branch context is established by ordinary authorized Turns.
+Starting repository/branch/Work context is established by ordinary authorized Turns.
 The tester never clones, creates branches, repairs Work or injects implementation
-hints. The generated messages are submitted unchanged. Compiler-only acquisition
-fixtures and production goals are excluded from this bounded effect cohort.
+hints. Every generated message is submitted unchanged. Physical owner state is
+read independently of the obligation ledger, including after blocked effects.
 """
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
@@ -63,13 +63,7 @@ def main():
         raise SystemExit("Live holdout identity is immutable")
     args.directory.mkdir(parents=True)
     env = dict(line.split("=",1) for line in args.env_file.read_text().splitlines() if "=" in line)
-    negatives = {"hard_negative","search_negation","conditional_negative","delivery_negative"}
-    groups = {"branch_both","branch_create_only","branch_switch_only","contextual_branch"}
-    chosen = []
-    for case in corpus["cases"]:
-        if case["group"] in negatives or case["group"] in groups:
-            chosen.append(case)
-            groups.discard(case["group"])
+    chosen = corpus["cases"]
     (args.directory/"plan.json").write_text(json.dumps({"case_ids":[c["id"] for c in chosen],
         "corpus_sha256":sha256(args.corpus.read_bytes()).hexdigest(),
         "runtime_identity":runtime,"manual_git":False,"implementation_hints":False},indent=2)+"\n")
@@ -116,6 +110,31 @@ def main():
         result = {"case_id":case["id"],"group":case["group"],"interaction_id":identity,
             "status":"FAIL","effect_satisfaction":None,"false_execution":None}
         try:
+            if case["group"] == "acquisition_future_goal":
+                after,projection,status = turn(case["text"],"unseen")
+                actual_after = git_observation(after,"actual-git-after")
+                effects = [o for o in projection.get("obligations",[]) if o["plane"]=="ACTION"]
+                expected_source = case["expected_repository_source"]
+                observation = after.get("repository_observation") or {}
+                semantic_items = ((after.get("latest_assessment") or {}).get("semantic_ir") or {}).get("items",[])
+                checks = {"turn_completed":status=="COMPLETED",
+                    "acquisition_satisfied":any(o["operation"]=="ACQUIRE_REPOSITORY"
+                        and o["state"]=="SATISFIED" for o in effects),
+                    "exact_human_source":after.get("repository_source")==expected_source
+                        and observation.get("source")==expected_source,
+                    "actual_git_observed":actual_after is not None,
+                    "source_ready":observation.get("condition")=="READY",
+                    "future_goal_not_admitted":after.get("governed_work_id") is None,
+                    "action_intents":set(case.get("action_intents",())) <= {
+                        (item.get("action") or {}).get("operation") for item in semantic_items}}
+                result.update(checks=checks,status="PASS" if all(checks.values()) else "FAIL",
+                    false_execution=after.get("governed_work_id") is not None,
+                    actual_git_observation_available=actual_after is not None,
+                    effect_satisfaction=checks["acquisition_satisfied"] and checks["actual_git_observed"],
+                    observed_operations=[o["operation"] for o in effects if o["state"]=="SATISFIED"])
+                save("result",result)
+                print(json.dumps(result,ensure_ascii=False),flush=True)
+                return result
             source = args.source
             if "/trials/" in source:
                 parent, filename = source.rsplit("/",1)
@@ -123,10 +142,50 @@ def main():
             baseline,_,status = turn("先获取这个仓库："+source+"。暂不开始生产。","setup-repository")
             if status!="COMPLETED" or (baseline.get("repository_observation") or {}).get("condition")!="READY":
                 raise RuntimeError("Starting repository was not actually acquired by Watt")
-            if case["group"]=="branch_switch_only":
+            if case["group"] in {"branch_switch_only","colloquial_punctuation"}:
                 baseline,_,status = turn("创建本地分支 feat_existing，保持当前分支，不切换。","setup-existing-branch")
                 if status!="COMPLETED":
                     raise RuntimeError("Existing branch context could not be established")
+            setup_work_id = None
+            setup_attention = None
+            if case["group"] in {"acceptance_without_delivery","explicit_delivery_authorization"}:
+                baseline,_,status = turn("把首页“开始使用”改为“立即体验”，给我预览。我确认以后再决定是否交付。",
+                    "setup-review-candidate")
+                setup_work_id = baseline.get("governed_work_id")
+                if status!="COMPLETED" or not setup_work_id:
+                    raise RuntimeError("Candidate setup did not admit a real Work")
+                deadline=time.monotonic()+args.timeout
+                while time.monotonic()<deadline:
+                    preview=client.request("/api/works/"+setup_work_id+"/functional-preview")
+                    setup_attention=client.request("/api/attention?work_id="+setup_work_id)
+                    if preview.get("status")=="READY" and (setup_attention or {}).get("kind")=="CANDIDATE_AUTHORIZATION":
+                        break
+                    time.sleep(4)
+                save("setup-review-preview",preview)
+                save("setup-review-attention",setup_attention)
+                if preview.get("status")!="READY" or (setup_attention or {}).get("kind")!="CANDIDATE_AUTHORIZATION":
+                    raise RuntimeError("Exact Candidate was not review-ready")
+                if case["group"]=="explicit_delivery_authorization":
+                    baseline,accepted_projection,status=turn(
+                        "我接受当前预览的候选版本，但暂不交付。","setup-accepted-candidate")
+                    save("setup-accepted-realization",accepted_projection)
+                    if status!="COMPLETED" or not any(o["operation"]=="ACCEPT_CANDIDATE"
+                            and o["state"]=="SATISFIED" for o in accepted_projection.get("obligations",[])):
+                        raise RuntimeError("Accepted-Candidate precondition did not settle")
+            if case["group"]=="work_scope_answer":
+                baseline,_,status=turn("给系统增加搜索。","setup-search-work")
+                setup_work_id=baseline.get("governed_work_id")
+                if status!="COMPLETED" or not setup_work_id:
+                    raise RuntimeError("Search Work was not admitted")
+                deadline=time.monotonic()+args.timeout
+                while time.monotonic()<deadline:
+                    setup_attention=client.request("/api/attention?work_id="+setup_work_id)
+                    if (setup_attention or {}).get("kind")=="STEERING_DECISION_REQUIRED":
+                        break
+                    time.sleep(4)
+                save("setup-scope-attention",setup_attention)
+                if (setup_attention or {}).get("kind")!="STEERING_DECISION_REQUIRED":
+                    raise RuntimeError("Current Work did not ask its scope question")
             for index,text in enumerate(case.get("context",[])):
                 baseline,_,status = turn(text,f"prior-context-{index+1}")
                 if status!="COMPLETED":
@@ -139,8 +198,103 @@ def main():
             effects = [o for o in projection.get("obligations",[]) if o["plane"]=="ACTION"]
             actual = [o["operation"] for o in effects if o["state"]=="SATISFIED"]
             expected = case["expected_operations"]
+            semantic_items = ((after.get("latest_assessment") or {}).get("semantic_ir") or {}).get("items",[])
+            observed_kinds = {item.get("kind") for item in semantic_items}
+            observed_action_intents = {(item.get("action") or {}).get("operation")
+                for item in semantic_items if item.get("action")}
             unexpected = unexpected_branch_effect(case, actual_before, actual_after)
             physical_observed = actual_before is not None and actual_after is not None
+            if case["group"] == "search_positive":
+                answer = next((m["content"] for m in reversed(after.get("conversation_messages",[]))
+                    if m["actor"]=="WATT"),"")
+                checks = {"turn_completed":status=="COMPLETED",
+                    "github_owner_satisfied":actual==["SEARCH_GITHUB"],
+                    "source_cited":("https://github.com/" in answer and "external-search:" in answer),
+                    "no_repository_write":actual_before==actual_after,
+                    "no_production_work":after.get("governed_work_id") is None,
+                    "actual_git_observed":physical_observed}
+                result.update(checks=checks,status="PASS" if all(checks.values()) else "FAIL",
+                    false_execution=bool(unexpected or after.get("governed_work_id") is not None),
+                    actual_git_observation_available=physical_observed,
+                    effect_satisfaction=checks["github_owner_satisfied"] and checks["source_cited"],
+                    observed_operations=actual)
+                save("result",result)
+                print(json.dumps(result,ensure_ascii=False),flush=True)
+                return result
+            if case["group"] in {"acceptance_without_delivery","explicit_delivery_authorization"}:
+                delivery=client.request("/api/works/"+setup_work_id+"/delivery")
+                save("review-delivery",delivery)
+                intended=case["action_intents"][0]
+                matching=[o for o in effects if o["operation"]==intended]
+                if case["group"]=="acceptance_without_delivery":
+                    realized=any(o["state"]=="SATISFIED"
+                        and (o.get("observed_effect") or {}).get("owner")=="candidate-human-governance"
+                        for o in matching)
+                else:
+                    realized=bool(matching and all(o["state"] in {
+                        "BLOCKED_WITH_EVIDENCE","REQUIRES_HUMAN"} for o in matching))
+                checks={"turn_completed":status=="COMPLETED",
+                    "declared_intent_compiled":intended in observed_action_intents,
+                    "owner_boundary_reconciled":realized,
+                    "no_delivery":not bool(delivery.get("deliveries")),
+                    "no_repository_write":actual_before==actual_after,
+                    "actual_git_observed":physical_observed}
+                result.update(checks=checks,status="PASS" if all(checks.values()) else "FAIL",
+                    false_execution=bool(unexpected or delivery.get("deliveries")),
+                    actual_git_observation_available=physical_observed,
+                    effect_satisfaction=realized,observed_operations=actual,
+                    setup_work_id=setup_work_id)
+                save("result",result)
+                print(json.dumps(result,ensure_ascii=False),flush=True)
+                return result
+            if case["group"] in {"production_correction","work_scope_answer"}:
+                work_id=after.get("governed_work_id")
+                attention=client.request("/api/attention?work_id="+work_id) if work_id else None
+                save("realization-attention",attention)
+                checks={"turn_completed":status=="COMPLETED",
+                    "required_kinds":set(case.get("required_kinds",())) <= observed_kinds,
+                    "same_real_work":bool(work_id and work_id==baseline.get("governed_work_id")),
+                    "no_repository_write":actual_before==actual_after,
+                    "actual_git_observed":physical_observed}
+                if case["group"]=="work_scope_answer":
+                    checks["work_question_resolved"]=(setup_attention is not None
+                        and not attention or (attention or {}).get("attention_id")!=setup_attention.get("attention_id"))
+                else:
+                    checks["current_production_compiled"]=any((i.get("production") or {}).get("current")
+                        for i in semantic_items)
+                    checks["work_revision_advanced"]=(after.get("governed_revision")!=baseline.get("governed_revision"))
+                result.update(checks=checks,status="PASS" if all(checks.values()) else "FAIL",
+                    false_execution=bool(unexpected),actual_git_observation_available=physical_observed,
+                    effect_satisfaction=checks.get("work_question_resolved",checks.get("work_revision_advanced")),
+                    observed_operations=actual,work_id=work_id)
+                save("result",result)
+                print(json.dumps(result,ensure_ascii=False),flush=True)
+                return result
+            if case["group"] == "production":
+                work_id = after.get("governed_work_id")
+                work = client.request("/api/works/"+work_id) if work_id else None
+                preview = client.request("/api/works/"+work_id+"/functional-preview") if work_id else None
+                save("production-work",work)
+                save("production-preview",preview)
+                checks = {"turn_completed":status=="COMPLETED",
+                    "current_production_compiled":any((i.get("production") or {}).get("current")
+                        for i in semantic_items),
+                    "real_work_admitted":bool(work_id and work and work.get("work_id")==work_id),
+                    "no_branch_write":actual_before==actual_after,
+                    "actual_git_observed":physical_observed,
+                    "no_delivery_authorization":True}
+                if work_id:
+                    delivery = client.request("/api/works/"+work_id+"/delivery")
+                    save("production-delivery",delivery)
+                    checks["no_delivery_authorization"] = not bool(delivery.get("deliveries"))
+                result.update(checks=checks,status="PASS" if all(checks.values()) else "FAIL",
+                    false_execution=bool(unexpected or not checks["no_delivery_authorization"]),
+                    actual_git_observation_available=physical_observed,
+                    effect_satisfaction=checks["real_work_admitted"],
+                    observed_operations=actual,work_id=work_id)
+                save("result",result)
+                print(json.dumps(result,ensure_ascii=False),flush=True)
+                return result
             erroneous_effect = bool(unexpected or after.get("governed_work_id") is not None
                 or (not expected and actual))
             result.update(false_execution=erroneous_effect if physical_observed else None,
@@ -150,7 +304,9 @@ def main():
                 "actual_git_observed":physical_observed,
                 "no_unrequested_branch_effect":unexpected is False,
                 "actual_operations":sorted(actual)==sorted(expected),
-                "all_requested_effects_reconciled":all(o["state"]=="SATISFIED" for o in effects)}
+                "all_requested_effects_reconciled":all(o["state"]=="SATISFIED" for o in effects),
+                "required_kinds":set(case.get("required_kinds",())) <= observed_kinds,
+                "action_intents":set(case.get("action_intents",())) <= observed_action_intents}
             if not expected:
                 checks["no_repository_effect"] = before_repo==after_repo
             else:

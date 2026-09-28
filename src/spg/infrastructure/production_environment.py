@@ -597,12 +597,12 @@ class GitIsolatedWorkspacePreparer:
                     for item in self._git(
                         destination,
                         "for-each-ref",
-                        "--format=%(refname:short)",
+                        "--format=%(refname)",
                         "refs/remotes/origin",
                     ).splitlines()
-                    if item and item != "origin/HEAD"
+                    if item and item != "refs/remotes/origin/HEAD"
                 }
-                if remote_branches != {f"origin/{asset.branch}"}:
+                if remote_branches != {f"refs/remotes/origin/{asset.branch}"}:
                     raise EnvironmentProviderError(
                         "Repository acquisition fetched branches outside selected Reality"
                     )

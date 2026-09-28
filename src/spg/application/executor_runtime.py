@@ -854,22 +854,44 @@ class NativeExecutorRuntimeService:
 
             if event is not None and event.failure_signature != signature:
                 prior_actions = store.self_refine_actions(event.id)
-                store.append_self_refine_action(SelfRefineActionRecord(
-                    id=uuid4(), event_id=event.id, sequence=len(prior_actions) + 1,
-                    created_at=now,
-                    repair_action="Close the prior diagnosis after a distinct runtime failure",
-                    observed_reality={"next_failure_signature": signature},
-                    evidence_references=(f"native-attempt:{allocation.attempt_id}",),
-                    outcome="SUPERSEDED_BY_NEW_FAILURE",
-                ))
-                store.complete_self_refine_event(
-                    event.id, result="FAILED", resume_result="NOT_RESUMED",
-                    status="MITIGATED",
-                    elapsed_seconds=max(0, int((now - event.created_at).total_seconds())),
-                    updated_at=now,
-                    compute_overhead={"tool_effects": len(prior_actions)},
-                )
-                event = None
+                if event.failure_family == "WORKER_LEASE_LOST":
+                    # The original worker has been fenced and the same Attempt
+                    # resumed. A subsequent repairable failure is part of that
+                    # recovery trajectory, not proof that restart failed.
+                    store.append_self_refine_action(SelfRefineActionRecord(
+                        id=uuid4(), event_id=event.id, sequence=len(prior_actions) + 1,
+                        created_at=now,
+                        repair_action="Observe the resumed Attempt's distinct runtime failure",
+                        observed_reality={"next_failure_family": family,
+                                          "next_failure_signature": signature},
+                        evidence_references=(f"native-attempt:{allocation.attempt_id}",),
+                        outcome="RECOVERY_IN_PROGRESS",
+                    ))
+                    self._append_event(store, pwu_id=allocation.pwu_id,
+                        attempt_id=allocation.attempt_id,
+                        event_type="NativeExecutionWorkerRecoveryProgress",
+                        payload={"refinement_event_id": str(event.id),
+                            "resumed_attempt_id": str(allocation.attempt_id),
+                            "next_failure_family": family,
+                            "checkpoint_id": str(result.final_checkpoint_id)
+                                if result.final_checkpoint_id else None})
+                else:
+                    store.append_self_refine_action(SelfRefineActionRecord(
+                        id=uuid4(), event_id=event.id, sequence=len(prior_actions) + 1,
+                        created_at=now,
+                        repair_action="Close the prior diagnosis after a distinct runtime failure",
+                        observed_reality={"next_failure_signature": signature},
+                        evidence_references=(f"native-attempt:{allocation.attempt_id}",),
+                        outcome="SUPERSEDED_BY_NEW_FAILURE",
+                    ))
+                    store.complete_self_refine_event(
+                        event.id, result="FAILED", resume_result="NOT_RESUMED",
+                        status="MITIGATED",
+                        elapsed_seconds=max(0, int((now - event.created_at).total_seconds())),
+                        updated_at=now,
+                        compute_overhead={"tool_effects": len(prior_actions)},
+                    )
+                    event = None
 
             binding = store.attempt_binding(allocation.attempt_id).binding
             contract = store.contract(binding.pwu_contract_version_id)
@@ -1064,7 +1086,103 @@ class NativeExecutorRuntimeService:
                     ),
                 },
             )
+            if recovered and event.failure_family == "WORKER_LEASE_LOST":
+                self._append_event(store, pwu_id=allocation.pwu_id,
+                    attempt_id=allocation.attempt_id,
+                    event_type="NativeExecutionWorkerRecoveryConfirmed",
+                    payload={"refinement_event_id": str(event.id),
+                        "resumed_attempt_id": str(allocation.attempt_id),
+                        "checkpoint_id": str(result.final_checkpoint_id)
+                            if result.final_checkpoint_id else None,
+                        "terminal_outcome": result.terminal_outcome.value})
+        self._confirm_closed_worker_recovery(
+            store, allocation=allocation, queue=queue, result=result)
         return None, confidence
+
+    def _confirm_closed_worker_recovery(self, store, *, allocation, queue,
+        result: KernelRunResult) -> None:
+        """Append recovery after an intervening tool failure closed the lease diagnosis.
+
+        Tool receipt refinement owns its own failure event. It may close an open
+        worker-loss event as historically FAILED while the same Attempt continues.
+        Final Attempt Reality therefore needs a separate positive trajectory;
+        the original failure row remains untouched.
+        """
+        if (result.runtime_mode is not ExecutionMode.FINISHED
+                or result.terminal_outcome is not AttemptTerminalOutcome.RESULT_READY
+                or queue.resume_count < 1):
+            return
+        events = store.self_refine_events_for_operation(
+            allocation.attempt_id, failure_family="WORKER_LEASE_LOST")
+        failed = next((item for item in events if item.final_result == "FAILED"), None)
+        if failed is None or any(item.final_result == "LOCAL_OBLIGATION_RECOVERED"
+                                 for item in events):
+            return
+        state = store.attempt_state(allocation.attempt_id)
+        effects = store.effects_for_attempt(allocation.attempt_id)
+        if (state.effect_uncertainty or any(effect.condition not in {
+                EffectCondition.SETTLED, EffectCondition.FAILED} for effect in effects)):
+            return
+        now = self._now()
+        recovery = SelfRefineEventRecord(
+            id=uuid4(), work_id=failed.work_id, operation_id=allocation.attempt_id,
+            created_at=now, updated_at=now,
+            failure_family="WORKER_LEASE_LOST",
+            failure_signature=sha256(
+                f"WORKER_LEASE_LOST:recovery:{failed.id}".encode("utf-8")
+            ).hexdigest(),
+            signal_kind=RefinementSignalKind.EXECUTION_FAILURE,
+            affected_component="native-executor/lease-recovery",
+            expected_reality=failed.expected_reality,
+            observed_reality={"historical_failure_event_id": str(failed.id),
+                "resumed_attempt_id": str(allocation.attempt_id),
+                "resume_count": queue.resume_count,
+                "terminal_outcome": result.terminal_outcome.value,
+                "effect_uncertainty": False,
+                "settled_effect_count": sum(effect.condition is EffectCondition.SETTLED
+                    for effect in effects)},
+            diagnosis_summary="Same Attempt recovered after Worker loss and a distinct tool failure.",
+            root_cause_classification="WORKER_LEASE_RECOVERY_CONFIRMED",
+            repair_hypothesis="Use durable checkpoint and reconciled effects to resume the same Attempt.",
+            evidence_references=(f"native-attempt:{allocation.attempt_id}",
+                f"self-refine-event:{failed.id}"),
+            repairability=RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+            observation_confidence=ObservationConfidence.OBSERVED_SUCCESS,
+            diagnostic_evidence={"historical_failure_event_id": str(failed.id),
+                "checkpoint_id": str(result.final_checkpoint_id)
+                    if result.final_checkpoint_id else None},
+        )
+        store.insert_self_refine_event(recovery)
+        for sequence, outcome in enumerate(("SAME_ATTEMPT_RESUMED",
+                "EFFECTS_RECONCILED", "VERIFIED_PROGRESS", "RECOVERY_CONFIRMED"), 1):
+            store.append_self_refine_action(SelfRefineActionRecord(
+                id=uuid4(), event_id=recovery.id, sequence=sequence, created_at=now,
+                repair_action=outcome.replace("_", " ").title(),
+                observed_reality={"attempt_id": str(allocation.attempt_id),
+                    "resume_count": queue.resume_count,
+                    "terminal_outcome": result.terminal_outcome.value,
+                    "effect_uncertainty": False},
+                evidence_references=(f"native-attempt:{allocation.attempt_id}",),
+                outcome=outcome,
+            ))
+        store.complete_self_refine_event(
+            recovery.id, result="RECOVERED", resume_result="RESUMED",
+            status="VERIFIED", elapsed_seconds=max(0, int((now - failed.created_at).total_seconds())),
+            updated_at=now,
+            compute_overhead={"inference_submissions": result.inference_submissions,
+                "tool_effects": result.tool_effects},
+            model_token_usage=store.observed_repair_model_usage(
+                allocation.attempt_id, since=failed.created_at),
+        )
+        self._append_event(store, pwu_id=allocation.pwu_id,
+            attempt_id=allocation.attempt_id,
+            event_type="NativeExecutionWorkerRecoveryConfirmed",
+            payload={"refinement_event_id": str(recovery.id),
+                "historical_failure_event_id": str(failed.id),
+                "resumed_attempt_id": str(allocation.attempt_id),
+                "checkpoint_id": str(result.final_checkpoint_id)
+                    if result.final_checkpoint_id else None,
+                "terminal_outcome": result.terminal_outcome.value})
 
     @staticmethod
     def _observation_confidence(

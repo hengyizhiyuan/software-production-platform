@@ -1,8 +1,12 @@
 from types import SimpleNamespace
 from uuid import uuid4
 
-from tests.irk_test_fixtures import governed_ir
-from spg.domain.intent_realization import ProductionIntent
+from tests.irk_test_fixtures import governed_ir, semantic_candidate
+from spg.domain.intent_realization import ProductionIntent, SemanticKind
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFact, SemanticFactProvenance, SemanticRelation,
+    SemanticRoleOrigin, SemanticFactAuthority, SemanticEpistemicStatus,
+)
 from spg.application.interaction import (
     WorkInteractionService,
     _declares_distinct_long_lived_object,
@@ -177,4 +181,72 @@ def test_source_bound_human_answer_is_work_change_only_with_pending_question():
     active.pending_human_question = None
     _, impact, change = WorkInteractionService._normalize_active_candidate(candidate, active,
         latest_human_input=answer, latest_human_record_id=record_id)
+    assert impact is WorkImpactDisposition.NO_GOVERNED_CHANGE and change is None
+
+
+def test_typed_scope_constraints_answer_exact_pending_work_question():
+    record_id = uuid4()
+    record = SimpleNamespace(id=record_id, interaction_id=uuid4(),
+        content="Search users by name and email; exclude orders")
+    active = SimpleNamespace(work_revision=SimpleNamespace(motive="Add search",
+        desired_outcome="Usable search", context_facts=(),
+        constraints=("Search exists",), requests=("Add search",),
+        engineering_semantic_facts=()), active_production_binding_id=None,
+        satisfaction_state=WorkSatisfactionState.IN_PROGRESS,
+        pending_human_question="Which domain and fields should search cover?")
+    fact = EngineeringSemanticFact(id=uuid4(), subject="search.scope.domains",
+        relation=SemanticRelation.SCOPE, value=["users"], scope="business-app",
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        provenance=SemanticFactProvenance(source_record_ids=(record_id,),
+            source_text="Search users", role_origin=SemanticRoleOrigin.EXPLICIT))
+    candidate = InteractionAssessmentCandidate(
+        semantic_intent=governed_ir(record, kind=SemanticKind.CONSTRAINT),
+        candidate_constraints=("Search exists", "Search users by name and email"),
+        current_requests=active.work_revision.requests,
+        focus_classification=WorkFocusClassification.SIDE_QUESTION,
+        impact_disposition=WorkImpactDisposition.NO_GOVERNED_CHANGE,
+        natural_response="Recorded", provider_identity="test")
+    focus, _, change = WorkInteractionService._normalize_active_candidate(
+        candidate, active, (fact,), latest_human_input=record.content,
+        latest_human_record_id=record_id)
+    assert focus is WorkFocusClassification.ON_TOPIC
+    assert change is not None and "constraints" in change.changed_fields
+    active.pending_human_question = None
+    _, impact, change = WorkInteractionService._normalize_active_candidate(
+        candidate, active, (fact,), latest_human_input=record.content,
+        latest_human_record_id=record_id)
+    assert impact is WorkImpactDisposition.NO_GOVERNED_CHANGE and change is None
+
+
+def test_constraint_answer_linked_to_current_production_does_not_require_duplicate_scope_fact():
+    record_id, prior_id = uuid4(), uuid4()
+    record = SimpleNamespace(id=record_id, interaction_id=uuid4(),
+        content="Change the header control only; leave the form control unchanged")
+    reference = f"{prior_id}:current-production"
+    semantic = semantic_candidate(record, kind=SemanticKind.CONSTRAINT)
+    semantic = semantic.model_copy(update={"clauses": (
+        semantic.clauses[0].model_copy(update={"refers_to": (reference,)}),)})
+    active = SimpleNamespace(work_revision=SimpleNamespace(motive="Improve login",
+        desired_outcome="Visible login", context_facts=(), constraints=(),
+        requests=("Improve login",), engineering_semantic_facts=()),
+        active_production_binding_id=None,
+        satisfaction_state=WorkSatisfactionState.IN_PROGRESS,
+        pending_human_question="Which login control should change?")
+    candidate = InteractionAssessmentCandidate(semantic_intent=semantic,
+        candidate_constraints=(record.content,), current_requests=active.work_revision.requests,
+        focus_classification=WorkFocusClassification.SIDE_QUESTION,
+        impact_disposition=WorkImpactDisposition.NO_GOVERNED_CHANGE,
+        natural_response="Recorded", provider_identity="test")
+    kwargs = dict(latest_human_input=record.content, latest_human_record_id=record_id,
+        prior_production_references=(reference,))
+    focus, _, change = WorkInteractionService._normalize_active_candidate(
+        candidate, active, **kwargs)
+    assert focus is WorkFocusClassification.ON_TOPIC
+    assert change is not None and change.changed_fields == ("constraints",)
+    assert WorkInteractionService._constraint_refers_to_current_production(
+        semantic, record_id, (reference,))
+    active.pending_human_question = None
+    _, impact, change = WorkInteractionService._normalize_active_candidate(
+        candidate, active, **kwargs)
     assert impact is WorkImpactDisposition.NO_GOVERNED_CHANGE and change is None

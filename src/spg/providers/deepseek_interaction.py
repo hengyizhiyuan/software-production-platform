@@ -102,6 +102,9 @@ def _repair_structured_result(
             "reuse an older request, invent a target or turn discussion into consent. "
             "Remove forbidden extra fields. Do not infer "
             "new facts, add recommendations, change authority, or create Semantic Truth. "
+            "If a semantic item kind/action mismatch is cited, use a valid nonexecutable "
+            "item for unresolved or unsupported meaning; omit the invalid action. Preserve "
+            "the Human clause and its limitation instead of dropping all semantic items. "
             "Return only the repaired JSON object.\n"
             f"Observed validation locations/types: {validation_feedback}\n"
             "Original governing contract and exact basis follow. Use them only to "
@@ -157,52 +160,44 @@ class DeepSeekInteractionSemanticCapability:
         self.last_action_repair_signal = None
         self.last_structured_repair_count = 0
         schema = InteractionSemanticContract.output_schema()
-        try:
-            payload = _InteractionSemanticProviderPayload.model_validate_json(
-                _structured_json_text(result.output_text)
-            )
-            self._validate_action_semantics(payload, basis)
-        except (ValidationError, ValueError, TypeError) as first_error:
-            first_issue = _safe_validation_summary(first_error)
-            if isinstance(first_error, ValueError) and str(first_error).startswith(('ACTION_', 'SEMANTIC_', 'PRIMARY_', 'EXPLICIT_', 'PRODUCTION_')):
-                from spg.domain.refinement_contract import RefinementSignalKind
-                signal = str(first_error).split(":", 1)[0]
-                try:
-                    self.last_action_repair_signal = RefinementSignalKind(signal).value
-                except ValueError:
-                    self.last_action_repair_signal = "SCHEMA_INVALID"
-                first_issue = str(first_error)
-            LOGGER.warning(
-                "WIC semantic validation failed request=%s model=%s status=completed "
-                "stage=payload_validation issue=%s %s repair=started",
-                result.request_id, result.effective_model or result.requested_model,
-                first_issue, _safe_result_shape(result.output_text),
-            )
-            result = _repair_structured_result(
-                self.runtime,
-                purpose=ModelPurpose.WIC_SEMANTIC,
-                invalid_output=result.output_text,
-                output_schema=schema,
-                on_stage=on_stage,
-                contract_name="WIC semantic",
-                original_instruction=instruction,
-                validation_feedback=first_issue,
-            )
-            self.last_structured_repair_count = 1
+        for attempt in range(3):
             try:
                 payload = _InteractionSemanticProviderPayload.model_validate_json(
                     _structured_json_text(result.output_text)
                 )
                 self._validate_action_semantics(payload, basis)
-            except (ValidationError, ValueError, TypeError) as second_error:
-                issue = _safe_validation_summary(second_error)
-                raise StructuredResponseSchemaViolation(
-                    "WIC semantic Provider returned an invalid structured result after "
-                    f"one bounded repair attempt ({issue}; bounded_repair_exhausted)",
-                    request_id=result.request_id,
-                    validation_issue=issue,
-                    repair_attempted=True,
-                ) from second_error
+                break
+            except (ValidationError, ValueError, TypeError) as error:
+                issue = _safe_validation_summary(error)
+                if isinstance(error, ValueError) and str(error).startswith((
+                        'ACTION_', 'SEMANTIC_', 'PRIMARY_', 'EXPLICIT_', 'PRODUCTION_')):
+                    from spg.domain.refinement_contract import RefinementSignalKind
+                    signal = str(error).split(":", 1)[0]
+                    try:
+                        self.last_action_repair_signal = RefinementSignalKind(signal).value
+                    except ValueError:
+                        self.last_action_repair_signal = "SCHEMA_INVALID"
+                    issue = str(error)
+                if attempt == 2:
+                    raise StructuredResponseSchemaViolation(
+                        "WIC semantic Provider returned an invalid structured result after "
+                        f"two bounded repair attempts ({issue}; bounded_repair_exhausted)",
+                        request_id=result.request_id, validation_issue=issue,
+                        repair_attempted=True, repair_attempts=2,
+                    ) from error
+                LOGGER.warning(
+                    "WIC semantic validation failed request=%s model=%s status=completed "
+                    "stage=payload_validation issue=%s %s repair=started",
+                    result.request_id, result.effective_model or result.requested_model,
+                    issue, _safe_result_shape(result.output_text),
+                )
+                result = _repair_structured_result(
+                    self.runtime, purpose=ModelPurpose.WIC_SEMANTIC,
+                    invalid_output=result.output_text, output_schema=schema,
+                    on_stage=on_stage, contract_name="WIC semantic",
+                    original_instruction=instruction, validation_feedback=issue,
+                )
+                self.last_structured_repair_count += 1
         if on_stage is not None:
             on_stage("semantic_payload_validated")
         self._observe(result)
@@ -446,7 +441,7 @@ class DeepSeekGovernedResponseRealizer:
                     "one bounded structural repair (bounded_repair_exhausted)",
                     request_id=result.request_id,
                     validation_issue=_safe_validation_summary(second_error),
-                    repair_attempted=True,
+                    repair_attempted=True, repair_attempts=1,
                 ) from second_error
             if extractor.complete and extractor.observed_content.strip():
                 # Structural repair may repair the envelope, but cannot rewrite
@@ -667,44 +662,44 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
         stage("provider_teardown_completed")
         stage("payload_validation_started")
         repair_count = 0
-        try:
-            payload = _CoalescedInteractionProviderPayload.model_validate_json(
-                _structured_json_text(result.output_text)
-            )
-            DeepSeekInteractionSemanticCapability._validate_action_semantics(payload.semantics, basis)
-        except (ValidationError, ValueError, TypeError) as first_error:
-            LOGGER.warning(
-                "Coalesced collaboration validation failed request=%s model=%s "
-                "status=completed stage=payload_validation issue=%s %s repair=started",
-                result.request_id, result.effective_model or result.requested_model,
-                _safe_validation_summary(first_error), _safe_result_shape(result.output_text),
-            )
-            result = _repair_structured_result(
-                self.runtime,
-                purpose=ModelPurpose.WIC_SEMANTIC,
-                invalid_output=result.output_text,
-                output_schema=self.coalesced_output_schema(),
-                on_stage=stage,
-                contract_name="coalesced collaboration",
-                original_instruction=instruction,
-                validation_feedback=_safe_validation_summary(first_error),
-            )
-            repair_count = 1
+        for attempt in range(3):
             try:
                 payload = _CoalescedInteractionProviderPayload.model_validate_json(
                     _structured_json_text(result.output_text)
                 )
                 DeepSeekInteractionSemanticCapability._validate_action_semantics(payload.semantics, basis)
-            except (ValidationError, ValueError, TypeError) as second_error:
-                issue = _safe_validation_summary(second_error)
-                raise StructuredResponseSchemaViolation(
-                    "Coalesced collaboration Provider returned an invalid structured "
-                    f"result after one bounded repair attempt ({issue}; "
-                    "bounded_repair_exhausted)",
-                    request_id=result.request_id,
-                    validation_issue=issue,
-                    repair_attempted=True,
-                ) from second_error
+                try:
+                    self._expand_coalesced_meanings(payload.semantics, basis)
+                    self._expand_coalesced_collaboration(payload.semantics, basis)
+                except InteractionInvariantViolation as error:
+                    raise ValueError("SEMANTIC_TYPE_MISMATCH: " + str(error)) from error
+                if not payload.natural_response.strip():
+                    raise ValueError("RESPONSE_EMPTY: coalesced Human response is empty")
+                break
+            except (ValidationError, ValueError, TypeError) as error:
+                issue = _safe_validation_summary(error)
+                if attempt == 2:
+                    raise StructuredResponseSchemaViolation(
+                        "Coalesced collaboration Provider returned an invalid structured "
+                        f"result after two bounded repair attempts ({issue}; "
+                        "bounded_repair_exhausted)",
+                        request_id=result.request_id, validation_issue=issue,
+                        repair_attempted=True, repair_attempts=2,
+                    ) from error
+                LOGGER.warning(
+                    "Coalesced collaboration validation failed request=%s model=%s "
+                    "status=completed stage=payload_validation issue=%s %s repair=started",
+                    result.request_id, result.effective_model or result.requested_model,
+                    issue, _safe_result_shape(result.output_text),
+                )
+                result = _repair_structured_result(
+                    self.runtime, purpose=ModelPurpose.WIC_SEMANTIC,
+                    invalid_output=result.output_text,
+                    output_schema=self.coalesced_output_schema(), on_stage=stage,
+                    contract_name="coalesced collaboration",
+                    original_instruction=instruction, validation_feedback=issue,
+                )
+                repair_count += 1
         content = payload.natural_response.strip()
         if not content:
             raise InteractionInvariantViolation(

@@ -4,14 +4,16 @@ Failures affect transport, never project implementation or model output.
 Independent trials use a fresh server process or a unique readonly URL namespace.
 """
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from threading import Lock
 from urllib.parse import urlsplit
 import os
 import re
 
 
 class Handler(SimpleHTTPRequestHandler):
-    failed = False
-    failed_namespaces = set()
+    failed = 0
+    failed_namespaces = {}
+    fault_lock = Lock()
 
     @staticmethod
     def trial_path(path):
@@ -28,15 +30,21 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = urlsplit(self.path).path
         namespace, translated = self.trial_path(path)
-        failed = namespace in Handler.failed_namespaces if namespace else Handler.failed
-        if ('transient-acquisition.git/info/refs' in translated and not failed
+        budget = int(os.environ.get('GOLDEN_TRANSIENT_ACQUISITION_REQUESTS', '1'))
+        fault_number = None
+        if ('transient-acquisition.git/info/refs' in translated
                 and os.environ.get('GOLDEN_TRANSIENT_ACQUISITION') == 'first-request'):
-            if namespace:
-                Handler.failed_namespaces.add(namespace)
-            else:
-                Handler.failed = True
+            with Handler.fault_lock:
+                failed = Handler.failed_namespaces.get(namespace, 0) if namespace else Handler.failed
+                if failed < budget:
+                    fault_number = failed + 1
+                    if namespace:
+                        Handler.failed_namespaces[namespace] = fault_number
+                    else:
+                        Handler.failed = fault_number
+        if fault_number is not None:
             self.send_error(503, 'Declared transient fixture transport outage')
-            print('DECLARED_TRANSIENT_ACQUISITION injected once; source unchanged', flush=True)
+            print(f'DECLARED_TRANSIENT_ACQUISITION request {fault_number}/{budget}; source unchanged', flush=True)
             return
         super().do_GET()
 

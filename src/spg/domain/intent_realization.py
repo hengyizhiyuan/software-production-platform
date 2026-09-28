@@ -38,10 +38,17 @@ from spg.domain.engineering_semantics import (
 )
 
 
+class AtomicBranchEffect(FrozenContract):
+    effect: Literal["CREATE_BRANCH", "SWITCH_BRANCH"]
+    target_branch: str = Field(min_length=1)
+    provenance: SemanticProvenance
+
+
 class OperationalIntent(FrozenContract):
     # Raw structured operation labels are canonicalized by IRK, never by prose.
     operation: str = Field(min_length=1, max_length=80)
     arguments: dict[str, SemanticArgument] = Field(default_factory=dict)
+    atomic_branch_effects: tuple[AtomicBranchEffect, ...] = ()
     speech_act: ActionSpeechAct
     conditional: bool = False
     current: bool = True
@@ -87,12 +94,17 @@ class SemanticItem(FrozenContract):
 
     @model_validator(mode="after")
     def typed_meaning(self):
-        if (self.kind is SemanticKind.OPERATIONAL_ACTION) != (self.action is not None):
-            raise ValueError("SEMANTIC_TYPE_MISMATCH: operational items require only an action")
+        if self.kind is SemanticKind.OPERATIONAL_ACTION and self.action is None:
+            raise ValueError("SEMANTIC_TYPE_MISMATCH: operational items require an action")
+        if self.action is not None and self.kind is not SemanticKind.OPERATIONAL_ACTION:
+            if (self.kind not in {SemanticKind.STATUS_QUERY, SemanticKind.QUESTION}
+                    or self.action.speech_act is not ActionSpeechAct.READ_ONLY_QUERY):
+                raise ValueError("SEMANTIC_TYPE_MISMATCH: only read-only questions may carry an action")
         if (self.kind is SemanticKind.PRODUCTION_INTENT) != (self.production is not None):
             raise ValueError("SEMANTIC_TYPE_MISMATCH: production items require structured production intent")
-        if self.design_frame is not None and self.kind is not SemanticKind.DESIGN:
-            raise ValueError("SEMANTIC_TYPE_MISMATCH: design frames belong to typed design items")
+        if self.design_frame is not None and self.kind not in {
+                SemanticKind.DESIGN, SemanticKind.EXPLORE, SemanticKind.PRODUCTION_INTENT}:
+            raise ValueError("SEMANTIC_TYPE_MISMATCH: design frames belong to typed design or goal items")
         return self
 
 
@@ -101,6 +113,13 @@ class SemanticClause(FrozenContract):
     source_record_id: UUID
     source_text: str = Field(min_length=1)
     semantic_item_ids: tuple[str, ...] = Field(min_length=1)
+    speech_act: ActionSpeechAct | None = None
+    polarity: Literal["AFFIRMATIVE", "NEGATED", "WITHDRAWN", "UNRESOLVED"] = "UNRESOLVED"
+    modality: Literal["REQUEST", "QUESTION", "ASSERTION", "HYPOTHETICAL", "CONDITIONAL", "UNRESOLVED"] = "UNRESOLVED"
+    temporal_scope: Literal["CURRENT", "FUTURE", "PAST", "UNRESOLVED"] = "UNRESOLVED"
+    requested_effects: tuple[str, ...] = ()
+    refers_to: tuple[str, ...] = ()
+    supersedes: tuple[str, ...] = ()
 
 
 class SemanticQuestion(FrozenContract):
@@ -138,6 +157,7 @@ class GovernedSemanticIR(TurnSemanticCandidate):
     semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     compiler_reference: str
     legacy_typed_projection: bool = False
+    work_question_step_id: UUID | None = None
 
     @property
     def current_production(self) -> tuple[ProductionIntent, ...]:
@@ -194,6 +214,7 @@ class EffectPredicate(StrEnum):
     REMOTE_REF = "REMOTE_REF"
     PULL_REQUEST_OBSERVED = "PULL_REQUEST_OBSERVED"
     WORK_ADMITTED = "WORK_ADMITTED"
+    WORK_QUESTION_RESOLVED = "WORK_QUESTION_RESOLVED"
     QUESTION_ANSWERED = "QUESTION_ANSWERED"
     OWNER_EFFECT_OBSERVED = "OWNER_EFFECT_OBSERVED"
 

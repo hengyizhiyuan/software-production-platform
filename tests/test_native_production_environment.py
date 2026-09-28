@@ -111,7 +111,7 @@ def test_native_executor_runs_tools_through_real_production_environment(tmp_path
     repository = tmp_path / "source"
     repository.mkdir()
     git(repository, "init", "-b", "main")
-    (repository / "index.html").write_text("<h1>baseline</h1>", encoding="utf-8")
+    (repository / "index.html").write_bytes(b"<h1>baseline</h1>\r\n<p>unchanged</p>\r\n")
     git(repository, "add", "index.html")
     git(repository, "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-m", "baseline")
     parent_revision = git(repository, "rev-parse", "HEAD")
@@ -136,11 +136,11 @@ def test_native_executor_runs_tools_through_real_production_environment(tmp_path
         for branch in git(
             workspace.workspace_path,
             "for-each-ref",
-            "--format=%(refname:short)",
+            "--format=%(refname)",
             "refs/remotes/origin",
         ).splitlines()
-        if branch != "origin/HEAD"
-    } == {"origin/main"}
+        if branch != "refs/remotes/origin/HEAD"
+    } == {"refs/remotes/origin/main"}
     assert git(workspace.workspace_path, "cat-file", "-t", parent_revision) == "commit"
     assert git(workspace.workspace_path, "rev-parse", "--is-shallow-repository") == "false"
     execution = PreparedExecutionRequest(
@@ -311,6 +311,9 @@ def test_native_executor_runs_tools_through_real_production_environment(tmp_path
 
     assert result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
     assert "Production Environment" in (workspace.workspace_path / "index.html").read_text(encoding="utf-8")
+    assert (workspace.workspace_path / "index.html").read_bytes() == (
+        b"<h1>Native Executor via Production Environment</h1>\r\n"
+        b"<p>unchanged</p>\r\n")
     receipts = [item for checkpoint in checkpoints.items for item in checkpoint.tool_results]
     assert any(
         evidence.get("environment_reference")

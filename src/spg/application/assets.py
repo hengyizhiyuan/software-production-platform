@@ -269,7 +269,8 @@ class RepositoryAssetService:
                 None if "target_branch" not in args else args["target_branch"].value,
                 operation=item.action.operation,
                 expected_base_revision=None if "base_revision" not in args else args["base_revision"].value,
-                expected_base_tree=None if "base_tree" not in args else args["base_tree"].value))
+                expected_base_tree=None if "base_tree" not in args else args["base_tree"].value,
+                authorized_effects=tuple(effect.effect for effect in item.action.atomic_branch_effects)))
         return tuple(dict.fromkeys(actions))
 
     def _require_interaction_authority(self, request: RepositoryIntakeRequest) -> None:
@@ -312,6 +313,15 @@ class RepositoryAssetService:
         ))
         if not matching:
             raise ProductInvariantViolation("Action is not explicitly authorized by its Human record")
+        if branch:
+            required_effects = {
+                "CREATE_BRANCH": {"CREATE_BRANCH", "SWITCH_BRANCH"},
+                "CREATE_BRANCH_ONLY": {"CREATE_BRANCH"},
+                "SWITCH_BRANCH": {"SWITCH_BRANCH"},
+            }[request.operation_kind]
+            if not any(len(action.authorized_effects) == len(required_effects)
+                    and set(action.authorized_effects) == required_effects for action in matching):
+                raise ProductInvariantViolation("Atomic branch effects lack exact current Human authority")
         if branch and not any((action.expected_base_revision, action.expected_base_tree) ==
                 (request.expected_base_revision, request.expected_base_tree) for action in matching):
             raise ProductInvariantViolation("Action exact baseline differs from governed semantic IR")

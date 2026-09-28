@@ -115,7 +115,8 @@ def test_execution_evidence(output: dict) -> dict:
 def compilation_execution_evidence(output: dict) -> dict:
     """Bind a real Python compilation diagnostic to its invoked source target."""
     argv = output.get("argv") or ()
-    if (len(argv) != 4 or PurePosixPath(str(argv[0])).name not in {"python", "python3"}
+    executable = PurePosixPath(str(argv[0]).replace("\\", "/")).name.casefold() if argv else ""
+    if (len(argv) != 4 or executable not in {"python", "python3", "python.exe", "python3.exe"}
             or list(argv[1:3]) != ["-m", "py_compile"] or not output.get("returncode")):
         return {}
     target = str(argv[3])

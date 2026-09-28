@@ -426,7 +426,7 @@ class LocalNativeToolHost:
                     raise ValueError("native text reads require a regular file")
                 if metadata.st_nlink != 1:
                     raise ValueError("hard-linked workspace files are prohibited")
-                with os.fdopen(descriptor, "r", encoding="utf-8") as stream:
+                with os.fdopen(descriptor, "r", encoding="utf-8", newline="") as stream:
                     descriptor = -1
                     return stream.read()
             finally:
@@ -459,7 +459,7 @@ class LocalNativeToolHost:
                 dir_fd=parent_fd,
             )
             try:
-                with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+                with os.fdopen(descriptor, "w", encoding="utf-8", newline="") as stream:
                     descriptor = -1
                     stream.write(content)
                     stream.flush()

@@ -1,10 +1,12 @@
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 from pathlib import Path
 from types import SimpleNamespace
 import subprocess
 from time import monotonic, sleep
+from threading import Barrier
 
 from alembic import command
 from alembic.config import Config
@@ -58,6 +60,7 @@ from spg.infrastructure.persistence.runtime_schema import (
     runtime_commits,
 )
 from spg.infrastructure.persistence.steering_schema import semantic_step_results
+from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
 from spg.providers.semantic_wire import SemanticStepWireContract
 from spg.domain.refinement_contract import RefinementClass, RefinementSignalKind
@@ -697,6 +700,71 @@ def test_semantic_admission_conflict_refines_once_on_same_basis_and_records_rout
         assert events[0].signal_kind is RefinementSignalKind.CONTRACT_MISMATCH
         assert events[0].final_result == "LOCAL_OBLIGATION_RECOVERED"
         assert events[0].budget_decision["attempt_count"] == 2
+
+
+def test_concurrent_semantic_admission_settles_one_basis_and_one_work_update(
+    postgres_database: Database, product, monkeypatch,
+) -> None:
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+    capability = _SemanticCapability(step_type=SteeringStepType.DESIGN,
+        proposed_production=True)
+    service = SemanticStepApplicationService(postgres_database, capability)
+    semantic_input = service.assemble_input(admitted.work_id)
+    candidate = capability.execute(semantic_input)
+    barrier = Barrier(2)
+    original = SteeringStore.insert_semantic_result
+
+    def concurrent_insert(self, values):
+        barrier.wait(timeout=30)
+        return original(self, values)
+
+    monkeypatch.setattr(SteeringStore, "insert_semantic_result", concurrent_insert)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(SemanticStepApplicationService(
+            postgres_database, capability).admit, semantic_input, candidate)
+            for _ in range(2)]
+        first, second = (future.result(timeout=60) for future in futures)
+    assert first.id == second.id
+    with postgres_database.engine.connect() as connection:
+        assert connection.execute(select(func.count()).select_from(
+            semantic_step_results)).scalar_one() == 1
+
+
+def test_invalid_provider_path_is_refined_on_same_governed_step(
+    postgres_database: Database, product,
+) -> None:
+    works, _repository = product
+    admitted, _plan = _admitted_plan(works)
+
+    class UnsafeFirstCandidate(_SemanticCapability):
+        def __init__(self):
+            super().__init__(step_type=SteeringStepType.DESIGN,
+                proposed_production=True)
+            self.first_input = None
+            self.refine_input = None
+
+        def execute(self, input):
+            self.first_input = input
+            raise SteeringInvariantViolation(
+                "Semantic reasoning Provider returned an invalid structured result") from ValueError(
+                "repository path is unsafe or addresses Git internals")
+
+        def refine(self, input, *, validation_feedback):
+            self.refine_input = input
+            assert "path validation" in validation_feedback
+            return super().execute(input)
+
+    capability = UnsafeFirstCandidate()
+    result = SemanticStepApplicationService(postgres_database, capability).execute(
+        admitted.work_id)
+    assert result.completion_satisfied
+    assert capability.first_input == capability.refine_input
+    with postgres_database.unit_of_work() as uow:
+        events = NativeExecutionStore(uow.session).list_self_refine_events(
+            work_id=admitted.work_id, component="steering/semantic-step")
+        assert len(events) == 1
+        assert events[0].final_result == "LOCAL_OBLIGATION_RECOVERED"
 
 
 def test_semantic_authority_expansion_does_not_receive_automatic_refinement(

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
+from pydantic import ValidationError
 
 from spg.application.executor_runtime import NativeExecutorRuntimeService
 from spg.domain.native_execution import (
@@ -116,6 +117,25 @@ class NativeExecutionWorker:
                     control_probe=lambda: asyncio.to_thread(
                         self._control_action, grant.allocation.attempt_id
                     ),
+                )
+                result = KernelRunResult.model_validate(result)
+            except (ValidationError, TypeError):
+                latest = await asyncio.to_thread(
+                    self._latest_checkpoint, grant.allocation.attempt_id)
+                residual = tuple(binding_record.binding.obligation_references)
+                if latest is not None:
+                    saved = latest.semantic_manifest.get("residual_obligations")
+                    if isinstance(saved, list) and all(isinstance(item, str) for item in saved):
+                        residual = tuple(saved)
+                result = KernelRunResult(
+                    runtime_mode=ExecutionMode.FINISHED,
+                    terminal_outcome=AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
+                    final_checkpoint_id=latest.id if latest else None,
+                    step_count=latest.step_sequence if latest else 0,
+                    inference_submissions=0, tool_effects=0,
+                    summary="Provider returned a malformed native result; settled journal preserved.",
+                    residual_obligations=residual,
+                    failure_family="INVALID_PROVIDER_RESPONSE",
                 )
             except InferenceResourceUnavailable as error:
                 latest = await asyncio.to_thread(

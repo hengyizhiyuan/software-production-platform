@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 import json
 from types import SimpleNamespace
 from urllib.error import HTTPError
+from urllib.parse import parse_qs, urlsplit
 from uuid import uuid4
 
 import pytest
@@ -35,6 +36,26 @@ def _evidence(name: str, rank: int = 1, inspected: bool = False) -> SearchEviden
         inspected_content="Documented queue API" if inspected else None,
         completeness="INSPECTED" if inspected else "SEARCH_RESULT",
     )
+
+
+def test_github_search_narrows_oversized_result_page_without_raising_byte_limit():
+    class BoundedHttp:
+        max_bytes = 250_000
+        def __init__(self):
+            self.pages = []
+        def get(self, url, *, headers=None):
+            page = int(parse_qs(urlsplit(url).query)["per_page"][0])
+            self.pages.append(page)
+            if page > 1:
+                raise SearchProviderError(SearchFailure.FETCH_FAILED,
+                    "Source exceeds bounded fetch size")
+            return json.dumps({"items": [{"html_url": "https://github.com/owner/project",
+                "full_name": "owner/project", "private": False}]}).encode(), "application/json"
+    http = BoundedHttp()
+    results = GitHubPublicSearchProvider(http).search("bounded evidence", limit=6)
+    assert http.pages == [6, 3, 1]
+    assert http.max_bytes == 250_000
+    assert len(results) == 1 and results[0].url == "https://github.com/owner/project"
 
 
 class _Resolver:
@@ -266,6 +287,28 @@ def test_public_repository_inspection_includes_readme_root_paths_and_package_met
     assert inspected.metadata["package_manifest"] == "pyproject.toml"
 
 
+def test_public_repository_inspection_recovers_from_metadata_rate_limit_with_bounded_raw_source():
+    class Transport:
+        max_bytes = 250_000
+        def __init__(self):
+            self.calls = []
+        def get(self, url, *, headers=None):
+            self.calls.append((url, headers))
+            if url.startswith("https://api.github.com/"):
+                raise SearchProviderError(SearchFailure.RATE_LIMITED, "Public metadata limit")
+            if url == "https://raw.githubusercontent.com/owner/repo/main/README.md":
+                return b"# Repository usage\nValidated source text", "text/plain"
+            raise SearchProviderError(SearchFailure.FETCH_FAILED, "Missing source")
+    transport = Transport()
+    item = _evidence("repo").model_copy(update={"metadata":{"default_branch":"main"}})
+    inspected = GitHubPublicSearchProvider(transport).inspect_repository(item)
+    assert inspected.completeness == "INSPECTED"
+    assert "Validated source text" in inspected.inspected_content
+    assert inspected.metadata["inspection_method"] == "bounded-raw-source"
+    assert transport.max_bytes == 250_000
+    assert all("Authorization" not in (headers or {}) for _,headers in transport.calls)
+
+
 def test_public_fetch_rejects_local_and_non_https_sources_before_network():
     for url in ("http://example.com", "https://127.0.0.1/private", "https://localhost/private"):
         with pytest.raises(SearchProviderError):
@@ -318,6 +361,22 @@ def test_direct_public_resource_request_is_canonicalized():
         query="https://example.com/article", reason="Inspect selected result",
         origin="HUMAN_EXPLICIT",
     ).capability_id == "web.resource.fetch"
+
+
+@pytest.mark.parametrize(("subtype", "expected"), [
+    ("repository", SearchIntent.SEARCH_GITHUB_REPOSITORIES),
+    ("code", SearchIntent.SEARCH_GITHUB_CODE),
+    ("issues", SearchIntent.SEARCH_GITHUB_ISSUES),
+    ("SEARCH_GITHUB_REPOSITORIES", SearchIntent.SEARCH_GITHUB_REPOSITORIES),
+])
+def test_github_structured_search_family_binds_to_closed_owner_intent(subtype, expected):
+    service, _ = _research(_GitHub(()))
+    record = SimpleNamespace(id=uuid4(), interaction_id=uuid4(),
+        content="Search GitHub for form validation implementations")
+    ir = governed_ir(record, operation="SEARCH_GITHUB", arguments={
+        "query": "form validation", "search_kind": subtype})
+    requests = service.requests_for_turn(semantic_ir=ir)
+    assert len(requests) == 1 and requests[0].intent is expected
 
 
 def test_model_information_gap_can_request_governed_search_then_resume_with_evidence():

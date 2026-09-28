@@ -399,6 +399,7 @@ class BrownfieldFeatureDeliveryService:
         refreshed_repository = self.reality.discover_repository_payload(
             repository_path,
             repository_identity=session.repository_identity,
+            requested_branch=session.target_branch,
         )
         change = self.reality.admit_change_payload(
             change_reality_v1_payload(

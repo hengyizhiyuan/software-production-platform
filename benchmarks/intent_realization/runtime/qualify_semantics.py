@@ -43,9 +43,9 @@ class QualificationRuntime:
         try:
             result = self.runtime.generate(**options)
         except Exception as error:
-            record.write_text(json.dumps({"purpose":purpose,"error_type":type(error).__name__})+"\n")
+            record.write_text(json.dumps({"purpose":purpose,"error_type":type(error).__name__})+"\n", encoding='utf-8')
             raise
-        record.write_text(json.dumps({"purpose":purpose,"result":asdict(result)},default=str,indent=2)+"\n")
+        record.write_text(json.dumps({"purpose":purpose,"result":asdict(result)},default=str,indent=2)+"\n", encoding='utf-8')
         return result
 
     def metadata(self):
@@ -65,17 +65,17 @@ def main():
     p.add_argument('--workers',type=int,default=2)
     args=p.parse_args()
     if args.evidence.exists(): raise SystemExit('Evidence identity exists; choose a new trial')
-    corpus=json.loads(args.corpus.read_text())
+    corpus=json.loads(args.corpus.read_text(encoding='utf-8'))
     root=Path(__file__).resolve().parents[3]
     identity=source_receipt(root)
     if corpus.get('holdout'):
         if not args.freeze: raise SystemExit('Holdout requires implementation freeze receipt')
-        frozen=json.loads(args.freeze.read_text())
+        frozen=json.loads(args.freeze.read_text(encoding='utf-8'))
         verify_freeze(root,frozen)
         if corpus['generated_at'] <= frozen['frozen_at']: raise SystemExit('Holdout must be generated after freeze')
     args.evidence.mkdir(parents=True)
-    (args.evidence/'source-identity.json').write_text(json.dumps(identity,indent=2)+'\n')
-    env=dict(line.split('=',1) for line in args.env_file.read_text().splitlines() if '=' in line)
+    (args.evidence/'source-identity.json').write_text(json.dumps(identity,indent=2)+'\n', encoding='utf-8')
+    env=dict(line.split('=',1) for line in args.env_file.read_text(encoding='utf-8').splitlines() if '=' in line)
     for key,value in env.items():
         if key.startswith('SPG_'): os.environ[key]=value
     now=datetime.now(UTC)
@@ -91,20 +91,37 @@ def main():
             facts={'condition':'READY','revision':'a'*40,'tree':'b'*40,'repository_ref':'refs/heads/main',
                 'branches':['main','feat_existing'],'source':'https://github.com/acme/irk-fixture.git',
                 'repository_identity':'fixture:irk-semantic-context'})
-        basis=InteractionInterpretationInput(interaction=interaction,records=records,
-            basis_fingerprint=sha256(''.join(r.content_fingerprint for r in records).encode()).hexdigest(),
-            observed_reality=(observed,))
+        def basis_through(index, semantic_history=()):
+            current_records = records[:index+1]
+            return InteractionInterpretationInput(interaction=interaction,records=current_records,
+                basis_fingerprint=sha256(''.join(r.content_fingerprint for r in current_records).encode()).hexdigest(),
+                governed_semantic_history=tuple(semantic_history), observed_reality=(observed,))
         result={'case_id':case['id'],'group':case['group'],'effect_satisfaction':None,
             'effect_observation':'NOT_EXECUTED: compiler-only qualification',
             'input_fingerprint':records[-1].content_fingerprint}
         try:
             capability=bootstrap(Settings()).interaction_capability()
-            recorder=QualificationRuntime(capability.runtime,args.evidence,case['id'])
+            base_runtime=capability.runtime
+            semantic_history=[]
+            for index in range(len(records)-1):
+                context_recorder=QualificationRuntime(base_runtime,args.evidence,
+                    f"{case['id']}-context-{index+1}")
+                capability.runtime=context_recorder
+                capability.semantic_capability.runtime=context_recorder
+                capability.conversation_provider.runtime=context_recorder
+                context_basis=basis_through(index,semantic_history)
+                context_candidate=capability.interpret(context_basis)
+                context_ir=IntentRealizationKernel().govern(context_candidate,context_basis)
+                semantic_history.append(context_ir)
+                (args.evidence/f"{case['id']}-context-{index+1}-ir.json").write_text(
+                    context_ir.model_dump_json(indent=2)+'\n', encoding='utf-8')
+            basis=basis_through(len(records)-1,semantic_history)
+            recorder=QualificationRuntime(base_runtime,args.evidence,case['id'])
             capability.runtime=recorder
             capability.semantic_capability.runtime=recorder
             capability.conversation_provider.runtime=recorder
             candidate=capability.interpret(basis)
-            (args.evidence/(case['id']+'-candidate.json')).write_text(candidate.model_dump_json(indent=2)+'\n')
+            (args.evidence/(case['id']+'-candidate.json')).write_text(candidate.model_dump_json(indent=2)+'\n', encoding='utf-8')
             metadata = asdict(capability.last_pipeline_evidence) if capability.last_pipeline_evidence else {}
             metadata.update(recorder.metadata())
             ir=IntentRealizationKernel().govern(candidate,basis)
@@ -113,9 +130,14 @@ def main():
                 and not i.requires_human]
             target=[i.action.arguments.get('target_branch').value for i in actions
                 if i.action.arguments.get('target_branch')]
+            observed_kinds={item.kind.value for item in ir.items}
+            observed_action_intents={item.action.operation for item in ir.items
+                if item.action is not None}
             checks={'operations':sorted(operations)==sorted(case['expected_operations']),
                 'branch_arguments':case.get('expected_branch') is None or target==[case['expected_branch']],
-                'current_production':bool(ir.current_production)==case['current_production']}
+                'current_production':bool(ir.current_production)==case['current_production'],
+                'required_kinds':set(case.get('required_kinds',())) <= observed_kinds,
+                'action_intents':set(case.get('action_intents',())) <= observed_action_intents}
             result.update(status='PASS' if all(checks.values()) else 'FAIL',checks=checks,
                 observed_operations=operations,observed_branches=target,
                 governed_ir=ir.model_dump(mode='json'),provider_metadata=metadata,
@@ -130,14 +152,14 @@ def main():
             if 'recorder' in locals():
                 result.setdefault('provider_metadata',{}).update(recorder.metadata())
             result.update(status='FAIL',error_type=type(error).__name__,error_code=str(error)[:600])
-        (args.evidence/(case['id']+'.json')).write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+        (args.evidence/(case['id']+'.json')).write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n', encoding='utf-8')
         print(json.dumps({k:result[k] for k in ['case_id','status']},ensure_ascii=False),flush=True)
         return result
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         results=list(executor.map(evaluate,corpus['cases']))
     if corpus.get('holdout'):
         (args.evidence/'source-identity-after.json').write_text(json.dumps(
-            verify_freeze(root,frozen),indent=2)+'\n')
+            verify_freeze(root,frozen),indent=2)+'\n', encoding='utf-8')
     n=len(results)
     report=dict(corpus_version=corpus['corpus_version'],corpus_sha256=sha256(args.corpus.read_bytes()).hexdigest(),
         completed_at=datetime.now(UTC).isoformat(),cases=n,passed=sum(r['status']=='PASS' for r in results),
@@ -153,7 +175,7 @@ def main():
         semantic_compile_calls=sum(r.get('provider_metadata',{}).get('qualification_semantic_compile_calls',0) for r in results),
         effect_satisfaction=None,effect_qualification='Separate live owner receipts required',
         failures=[r['case_id'] for r in results if r['status']!='PASS'])
-    (args.evidence/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+    (args.evidence/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n', encoding='utf-8')
     print(json.dumps(report,ensure_ascii=False),flush=True)
 
 if __name__=='__main__': main()

@@ -257,12 +257,12 @@ class GitCloneAttemptWorkspace(GitAttemptWorkspace):
             for item in GitExactReality._git(
                 workspace,
                 "for-each-ref",
-                "--format=%(refname:short)",
+                "--format=%(refname)",
                 "refs/remotes/origin",
             ).splitlines()
-            if item and item != "origin/HEAD"
+            if item and item != "refs/remotes/origin/HEAD"
         }
-        if remote_branches != {f"origin/{branch}"}:
+        if remote_branches != {f"refs/remotes/origin/{branch}"}:
             raise RepositoryRealityError(
                 "Attempt acquisition fetched branches outside selected Reality"
             )

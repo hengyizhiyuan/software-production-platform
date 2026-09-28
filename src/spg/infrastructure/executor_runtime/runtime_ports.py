@@ -364,12 +364,59 @@ class DurableKernelAudit:
                     request, condition, output, digest,
                 )
             elif condition is EffectCondition.SETTLED and request.proposal.tool_identity == "file.read":
+                self._reconcile_recovered_read(
+                    store, effect_id=effect_id, receipt_id=receipt_id,
+                    request=request, output=output, evidence_ids=tuple(evidence_ids),
+                )
                 repairability = self._confirm_build_diagnostic(
                     store, receipt_id=receipt_id, output=output,
                     evidence_ids=tuple(evidence_ids),
                 )
             uow.commit()
         return repairability
+
+    def _reconcile_recovered_read(
+        self, store: NativeExecutionStore, *, effect_id: UUID, receipt_id: UUID,
+        request: ToolExecutionRequest, output: dict, evidence_ids: tuple[UUID, ...],
+    ) -> None:
+        """Close only an exact earlier no-effect read that was actually repeated."""
+
+        event = store.open_self_refine_event(self.attempt_id)
+        path = request.proposal.arguments.get("path")
+        if (event is None or event.affected_component != "native-tool-host/file.read"
+                or event.repairability is not RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+                or event.observed_reality.get("failure_code") != "CAPABILITY_PATH_INVALID"
+                or not isinstance(path, str) or output.get("exists") is not True
+                or not isinstance(output.get("content"), str)):
+            return
+        failed = next((prior for prior in store.effects_for_attempt(self.attempt_id)
+            if prior.condition is EffectCondition.FAILED
+            and prior.tool_identity == "file.read"
+            and prior.semantic_input.get("path") == path
+            and f"native-effect:{prior.id}" in event.evidence_references), None)
+        if failed is None:
+            return
+        now = _utcnow()
+        actions = store.self_refine_actions(event.id)
+        store.append_self_refine_action(SelfRefineActionRecord(
+            id=uuid4(), event_id=event.id, sequence=len(actions) + 1,
+            created_at=now,
+            repair_action="Verify the exact failed read through a settled owner receipt",
+            observed_reality={"path": path, "failed_effect_id": str(failed.id),
+                "settled_effect_id": str(effect_id), "effect_condition": "SETTLED",
+                "source_content_digest": canonical_digest(output["content"])},
+            evidence_references=(f"native-effect:{effect_id}",
+                f"native-receipt:{receipt_id}",
+                *(f"native-evidence:{identity}" for identity in evidence_ids)),
+            outcome="RECOVERED",
+        ))
+        store.complete_self_refine_event(
+            event.id, result="RECOVERED", resume_result="RESUMED",
+            status="VERIFIED", elapsed_seconds=max(0, int((now - event.created_at).total_seconds())),
+            updated_at=now, compute_overhead={"tool_effects": len(actions) + 1},
+            model_token_usage=store.observed_repair_model_usage(
+                self.attempt_id, since=event.created_at),
+        )
 
     def _confirm_build_diagnostic(
         self, store: NativeExecutionStore, *, receipt_id: UUID,

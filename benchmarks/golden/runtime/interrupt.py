@@ -29,15 +29,15 @@ def main():
     output = args.directory/'worker-interruption.json'
     if output.exists():
         raise SystemExit('Existing fault evidence is immutable')
-    env = dict(line.split('=', 1) for line in args.env_file.read_text().splitlines() if '=' in line)
+    env = dict(line.split('=', 1) for line in args.env_file.read_text(encoding='utf-8').splitlines() if '=' in line)
     client = ProductClient(args.base, env['SPG_OPERATOR_TOKEN'])
     started = time.monotonic()
     while time.monotonic()-started < 1200:
         if not (args.directory/'journey.json').exists():
             time.sleep(.5)
             continue
-        journey = json.loads((args.directory/'journey.json').read_text())
-        corpus = json.loads((Path(__file__).resolve().parents[1]/'tier0-v1.json').read_text())
+        journey = json.loads((args.directory/'journey.json').read_text(encoding='utf-8'))
+        corpus = json.loads((Path(__file__).resolve().parents[1]/'tier0-v1.json').read_text(encoding='utf-8'))
         case = next(item for item in corpus['cases'] if item['id'] == journey['case'])
         if 'worker interrupted mid-production' not in case['acceptance_oracle']:
             raise SystemExit('Case does not authorize Worker loss qualification')
@@ -65,7 +65,14 @@ def main():
             lease = json.loads(lease_text)
             # Inspect only the declared project's Worker configuration internally;
             # output/evidence never include environment values or credentials.
-            workers = [args.project+'-native-worker-1', args.project+'-native-worker-secondary-1']
+            workers = subprocess.check_output(['docker', 'ps',
+                '--filter', f'label=com.docker.compose.project={args.project}',
+                '--filter', 'label=com.docker.compose.service=native-worker',
+                '--format', '{{.Names}}'], text=True).splitlines()
+            workers += subprocess.check_output(['docker', 'ps',
+                '--filter', f'label=com.docker.compose.project={args.project}',
+                '--filter', 'label=com.docker.compose.service=native-worker-secondary',
+                '--format', '{{.Names}}'], text=True).splitlines()
             selected = []
             for worker in workers:
                 details = json.loads(subprocess.check_output(['docker','inspect',worker],text=True))[0]
@@ -96,7 +103,7 @@ def main():
                     'fault':'DECLARED_WORKER_PROCESS_LOSS','in_flight_tool_effect':False,
                     'frozen_frontier_verified':True,
                     'database_or_source_mutation':False,'human_work_rescue':False,'human_acceptance':'PENDING'}
-                output.write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\n')
+                output.write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
                 subprocess.run(['docker','kill','--signal','KILL',selected[0]],
                     check=True,capture_output=True)
                 frozen = False

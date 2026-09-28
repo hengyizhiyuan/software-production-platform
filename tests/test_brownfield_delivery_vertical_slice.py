@@ -150,12 +150,12 @@ def test_real_repository_container_preview_delivery_and_reality_refresh(tmp_path
         for branch in run(
             "git",
             "for-each-ref",
-            "--format=%(refname:short)",
+            "--format=%(refname)",
             "refs/remotes/origin",
             cwd=acquired_repository,
         ).splitlines()
-        if branch != "origin/HEAD"
-    } == {"origin/main"}
+        if branch != "refs/remotes/origin/HEAD"
+    } == {"refs/remotes/origin/main"}
     assert session.environment.lifecycle_state is EnvironmentLifecycleState.ACTIVE
     assert session.delivery_intent.state is ProductionDeliveryState.READY_FOR_HUMAN_ACCEPTANCE
     assert urlopen(session.preview.endpoint, timeout=5).read().decode("utf-8").endswith(
