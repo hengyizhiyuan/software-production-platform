@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from hashlib import sha256
 import argparse
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import subprocess
 import time
 
@@ -57,6 +57,7 @@ def main():
     if runtime["source_fingerprint"] != freeze["source_fingerprint"]:
         raise SystemExit("Live image identity does not match the implementation freeze")
     corpus = json.loads(args.corpus.read_text(encoding="utf-8"))
+    corpus_digest = sha256(args.corpus.read_bytes()).hexdigest()
     if not corpus.get("holdout") or corpus["generated_at"] <= freeze["frozen_at"]:
         raise SystemExit("Only unseen post-freeze wording is qualified here")
     if args.directory.exists():
@@ -65,7 +66,7 @@ def main():
     env = dict(line.split("=",1) for line in args.env_file.read_text(encoding="utf-8").splitlines() if "=" in line)
     chosen = corpus["cases"]
     (args.directory/"plan.json").write_text(json.dumps({"case_ids":[c["id"] for c in chosen],
-        "corpus_sha256":sha256(args.corpus.read_bytes()).hexdigest(),
+        "corpus_sha256":corpus_digest,
         "runtime_identity":runtime,"manual_git":False,"implementation_hints":False},indent=2)+"\n",encoding="utf-8")
 
     def run(case):
@@ -78,12 +79,17 @@ def main():
             intake_id = observation.get("intake_request_id")
             if not intake_id:
                 return None
+            workspace = (observation.get("operation_evidence") or {}).get("workspace_reference")
+            target = PurePosixPath(workspace or args.asset_root+"/"+intake_id)
+            if not target.is_relative_to(PurePosixPath(args.asset_root)):
+                raise RuntimeError("Owner workspace reference is outside repository assets")
             # Read actual owner storage even if an obligation blocked after a
             # partial write. A blocked ledger is not proof that no write occurred.
             code = "import json,subprocess,sys; p=sys.argv[1]; g=lambda *a:subprocess.check_output(['git','-C',p,*a],text=True).strip(); print(json.dumps({'revision':g('rev-parse','HEAD'),'tree':g('rev-parse','HEAD^{tree}'),'repository_ref':g('symbolic-ref','HEAD'),'branches':g('for-each-ref','--format=%(refname:short)','refs/heads/').splitlines()}))"
             result = subprocess.run(["docker", "exec", args.git_owner_container, "python", "-c", code,
-                args.asset_root+"/"+intake_id], capture_output=True, text=True, timeout=30)
+                str(target)], capture_output=True, text=True, timeout=30)
             value = {"read_only":True,"owner_storage_intake_id":intake_id,"exit_code":result.returncode,
+                "owner_storage_path":str(target),
                 "facts":json.loads(result.stdout) if result.returncode==0 else None}
             save(name,value)
             return value["facts"]
@@ -138,7 +144,7 @@ def main():
             source = args.source
             if "/trials/" in source:
                 parent, filename = source.rsplit("/",1)
-                source = parent+"-"+case["id"]+"/"+filename
+                source = parent+"-"+corpus_digest[:12]+"-"+case["id"]+"/"+filename
             baseline,_,status = turn("先获取这个仓库："+source+"。暂不开始生产。","setup-repository")
             if status!="COMPLETED" or (baseline.get("repository_observation") or {}).get("condition")!="READY":
                 raise RuntimeError("Starting repository was not actually acquired by Watt")
