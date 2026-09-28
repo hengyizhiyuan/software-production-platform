@@ -229,7 +229,8 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
                             SemanticOrigin.HUMAN_CORRECTION}
                             and source.source_record_id != latest.id
                             and not any(argument.provenance.source_record_id == source.source_record_id
-                                and argument.provenance.source_text == source.source_text
+                            and argument.provenance.source_text in source.source_text
+                            and argument.value in source.source_text
                                 for key, argument in action.arguments.items()
                                 if key in {"target_branch", "repository_source"})):
                         raise IntentRealizationViolation(

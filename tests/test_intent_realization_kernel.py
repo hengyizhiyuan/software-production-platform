@@ -206,7 +206,9 @@ def test_contextual_old_target_requires_exact_governed_item_reference():
         clauses=(clause,), history=(prior_ir,)).operational_requests
 
 
-def test_contextual_fact_target_keeps_old_evidence_but_needs_fresh_effect_consent():
+@pytest.mark.parametrize("old_item_span", ("feat_kernel",
+    "The branch name is feat_kernel; just discussing it for now"))
+def test_contextual_fact_target_keeps_old_evidence_but_needs_fresh_effect_consent(old_item_span):
     prior_record = source("The branch name is feat_kernel; just discussing it for now")
     fact = SemanticItem(item_id="name", kind=K.FACT,
         statement="The proposed branch name is feat_kernel", subject="branch.name",
@@ -216,7 +218,8 @@ def test_contextual_fact_target_keeps_old_evidence_but_needs_fresh_effect_consen
     item = action(current, op=O.CREATE_BRANCH)
     old_target = SemanticArgument(value="feat_kernel",
         provenance=provenance(prior_record, "feat_kernel"))
-    item = item.model_copy(update={"provenance": (*item.provenance, old_target.provenance),
+    item = item.model_copy(update={"provenance": (*item.provenance,
+        provenance(prior_record, old_item_span)),
         "action": item.action.model_copy(update={
             "arguments": {"target_branch": old_target}})})
     clause = SemanticClause(clause_id="current", source_record_id=current.id,
