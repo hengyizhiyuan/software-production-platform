@@ -29,6 +29,10 @@ from spg.domain.interaction import (
     InteractionSemanticCandidate,
     StructuredResponseSchemaViolation,
 )
+from spg.domain.intent_realization import SemanticKind, TurnSemanticCandidate
+from spg.domain.engineering_semantics import (
+    EngineeringSemanticFactCandidate, current_semantic_facts,
+)
 from spg.domain.model_runtime import ModelPurpose, StructuredModelResult, WattModelRuntime
 from spg.domain.wic_response import (
     GovernedResponseEnvelope,
@@ -48,6 +52,44 @@ from spg.providers.interaction_contract import (
 
 
 LOGGER = logging.getLogger(__name__)
+
+
+def _discard_unbound_supersession(
+    semantic: TurnSemanticCandidate,
+    facts: tuple[EngineeringSemanticFactCandidate, ...],
+    basis: InteractionInterpretationInput,
+) -> tuple[TurnSemanticCandidate, tuple[EngineeringSemanticFactCandidate, ...], int]:
+    """Drop only revocations unsupported by current owner Reality."""
+    allowed_obligations = {
+        reference.removeprefix("obligation:")
+        for observation in basis.observed_reality
+        if observation.owner == "turn-obligation-ledger"
+        and observation.facts.get("state") in {"PENDING", "RUNNING"}
+        for reference in observation.evidence_references
+        if reference.startswith("obligation:")
+    }
+    prior_facts = (basis.active_work_context.work_revision.engineering_semantic_facts
+        if basis.active_work_context is not None else
+        (() if basis.prior_assessment is None else basis.prior_assessment.engineering_semantic_facts))
+    current_fact_ids = {fact.id for fact in current_semantic_facts(prior_facts)}
+    removed = 0
+    items = []
+    for item in semantic.items:
+        supported = (tuple(ref for ref in item.supersedes if ref in allowed_obligations)
+            if item.kind is SemanticKind.CORRECTION else ())
+        removed += len(item.supersedes) - len(supported)
+        items.append(item if supported == item.supersedes else
+            item.model_copy(update={"supersedes": supported}))
+    supported_facts = []
+    for fact in facts:
+        if set(fact.supersedes_fact_ids) <= current_fact_ids:
+            supported_facts.append(fact)
+        else:
+            removed += 1
+    if removed:
+        LOGGER.warning("WIC compiler discarded %s unbound supersession claims", removed)
+    return (semantic.model_copy(update={"items": tuple(items)}),
+        tuple(supported_facts), removed)
 
 
 def _safe_result_shape(value: str) -> str:
@@ -102,6 +144,18 @@ def _repair_structured_result(
             "assert SUPERSEDED; SYSTEM_INFERRED cannot assert CONFIRMED; REMOVE requires "
             "exact prior fact UUIDs in supersedes_fact_ids. If those facts are unavailable, "
             "omit that ungrounded fact candidate while preserving semantic_intent. "
+        )
+    if "supersession target is outside current owner basis" in validation_feedback:
+        repair_guidance += (
+            "Cite only exact pending or running obligation IDs present in current owner "
+            "observations. If none is available, set item supersedes to []; preserve "
+            "the current Work correction in structured Production Intent. "
+        )
+    if "non-Human evidence is outside the governed basis" in validation_feedback:
+        repair_guidance += (
+            "Remove optional claims that cite unobserved evidence references. Never "
+            "replace an effect target with model inference; retain source-grounded "
+            "current Human intent and ask only if a required target remains unresolved. "
         )
     if on_stage is not None:
         on_stage("structured_output_repair_started")
@@ -181,6 +235,12 @@ class DeepSeekInteractionSemanticCapability:
                 payload = _InteractionSemanticProviderPayload.model_validate_json(
                     _structured_json_text(result.output_text)
                 )
+                if payload.semantic_intent is not None:
+                    semantic, facts, removed = _discard_unbound_supersession(
+                        payload.semantic_intent, payload.semantic_fact_candidates, basis)
+                    payload = payload.model_copy(update={
+                        "semantic_intent": semantic, "semantic_fact_candidates": facts})
+                    self.last_structured_repair_count += int(bool(removed))
                 self._validate_action_semantics(payload, basis)
                 break
             except (ValidationError, ValueError, TypeError) as error:
@@ -683,6 +743,14 @@ class DeepSeekWorkInteractionCapability(WorkInteractionPipeline):
                 payload = _CoalescedInteractionProviderPayload.model_validate_json(
                     _structured_json_text(result.output_text)
                 )
+                if payload.semantics.semantic_intent is not None:
+                    semantic, facts, removed = _discard_unbound_supersession(
+                        payload.semantics.semantic_intent,
+                        payload.semantics.semantic_fact_candidates, basis)
+                    payload = payload.model_copy(update={"semantics": payload.semantics.model_copy(
+                        update={"semantic_intent": semantic,
+                            "semantic_fact_candidates": facts})})
+                    repair_count += int(bool(removed))
                 DeepSeekInteractionSemanticCapability._validate_action_semantics(payload.semantics, basis)
                 try:
                     self._expand_coalesced_meanings(payload.semantics, basis)

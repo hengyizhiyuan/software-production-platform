@@ -24,6 +24,7 @@ from spg.domain.intent_realization import (
     RealizationRefinement, RealizationScope, RealizationSignal,
 )
 from spg.providers.interaction_contract import _safe_validation_summary
+from spg.providers.deepseek_interaction import _discard_unbound_supersession
 
 
 def source(text, *, identity=None):
@@ -112,6 +113,36 @@ def test_structural_repair_feedback_explains_fact_authority_without_echoing_sour
     summary = _safe_validation_summary(error.value)
     assert "System inference cannot assert Human-confirmed truth" in summary
     assert "private human wording" not in summary
+
+
+def test_compiler_discard_of_unbound_revocation_preserves_action_and_current_owner_claim():
+    record = source("Switch to feat_kernel; revise current goal")
+    requested = action(record, op=O.SWITCH_BRANCH).model_copy(update={
+        "supersedes": ("invented-obligation",)})
+    correction = SemanticItem(item_id="correction", kind=K.CORRECTION,
+        statement="Revise current goal", provenance=(provenance(record),),
+        supersedes=("invented-obligation", "current-obligation"), confidence=.95)
+    semantic = TurnSemanticCandidate(items=(requested, correction), clauses=(SemanticClause(
+        clause_id="source", source_record_id=record.id, source_text=record.content,
+        semantic_item_ids=(requested.item_id, correction.item_id)),))
+    guessed_fact = EngineeringSemanticFactCandidate(candidate_id="guess",
+        subject="goal.scope", relation=SemanticRelation.SCOPE, value="revised",
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        source_record_ids=(record.id,), source_text=record.content,
+        role_origin=SemanticRoleOrigin.EXPLICIT,
+        supersedes_fact_ids=(uuid4(),))
+    basis = SimpleNamespace(observed_reality=(ObservedEffect(
+        owner="turn-obligation-ledger", evidence_references=(
+            "obligation:current-obligation",), facts={"state": "PENDING"}),),
+        active_work_context=None, prior_assessment=None)
+    repaired, facts, removed = _discard_unbound_supersession(
+        semantic, (guessed_fact,), basis)
+    assert repaired.items[0].supersedes == ()
+    assert repaired.items[0].action == requested.action
+    assert repaired.items[1].supersedes == ("current-obligation",)
+    assert facts == ()
+    assert removed == 3
 
 
 def action(record, *, op=O.CREATE_AND_SWITCH_BRANCH, act=S.EXPLICIT_REQUEST, identity="action", branch="feat_kernel", depends=()):
