@@ -38,12 +38,12 @@ def main():
     parser.add_argument("--directory",type=Path,required=True)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
-    frozen = json.loads(args.freeze.read_text())
+    frozen = json.loads(args.freeze.read_text(encoding="utf-8"))
     verify_freeze(root,frozen)
     if args.directory.exists():
         raise SystemExit("Holdout identity already exists; never overwrite unseen generation")
     args.directory.mkdir(parents=True)
-    for line in args.env_file.read_text().splitlines():
+    for line in args.env_file.read_text(encoding="utf-8").splitlines():
         if "=" in line:
             key,value = line.split("=",1)
             if key.startswith("SPG_"):
@@ -97,7 +97,7 @@ def main():
         action_intents=("CREATE_BRANCH",))
     declare("colloquial_punctuation", "In colloquial mixed Chinese and English with unusual punctuation, ask to switch to existing feat_existing only",
         ["SWITCH_BRANCH"], branch="feat_existing", action_intents=("SWITCH_BRANCH",))
-    (args.directory/"declared-oracles.json").write_text(json.dumps(specifications,ensure_ascii=False,indent=2)+"\n")
+    (args.directory/"declared-oracles.json").write_text(json.dumps(specifications,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     runtime = bootstrap(Settings()).interaction_capability().runtime
     result = runtime.generate(purpose=ModelPurpose.WIC_SEMANTIC,
         instructions=("Generate unseen natural Human developer messages for the declared intentions. "
@@ -111,10 +111,10 @@ def main():
             "Do not include JSON Schema definitions, $defs, properties or any schema metadata."),
         input_text=json.dumps(specifications,ensure_ascii=False),
         output_schema=WordingBatch.model_json_schema())
-    (args.directory/"original-provider-output.json").write_text(result.output_text)
+    (args.directory/"original-provider-output.json").write_text(result.output_text,encoding="utf-8")
     metadata = asdict(result)
     metadata.pop("output_text")
-    (args.directory/"provider-receipt.json").write_text(json.dumps(metadata,default=str,indent=2)+"\n")
+    (args.directory/"provider-receipt.json").write_text(json.dumps(metadata,default=str,indent=2)+"\n",encoding="utf-8")
     wording = WordingBatch.model_validate_json(result.output_text)
     by_id = {case.id:case.text for case in wording.cases}
     if len(by_id) != len(wording.cases) or set(by_id) != {case["id"] for case in specifications}:
@@ -125,7 +125,7 @@ def main():
         generation_method="Fixed independent intentions; generated wording only; no implementation/developer corpus supplied",
         cases=[{**{key:value for key,value in case.items() if key != "meaning"},"text":by_id[case["id"]]}
             for case in specifications])
-    (args.directory/"corpus.json").write_text(json.dumps(corpus,ensure_ascii=False,indent=2)+"\n")
+    (args.directory/"corpus.json").write_text(json.dumps(corpus,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"cases":len(specifications),"generated_after_freeze":True,"directory":str(args.directory)}))
 
 

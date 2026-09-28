@@ -51,28 +51,28 @@ def main():
     parser.add_argument("--asset-root",default="/var/lib/spg/repository-assets")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
-    freeze = json.loads(args.freeze.read_text())
+    freeze = json.loads(args.freeze.read_text(encoding="utf-8"))
     verify_freeze(root,freeze)
-    runtime = json.loads((args.runtime_identity/"source.json").read_text())
+    runtime = json.loads((args.runtime_identity/"source.json").read_text(encoding="utf-8"))
     if runtime["source_fingerprint"] != freeze["source_fingerprint"]:
         raise SystemExit("Live image identity does not match the implementation freeze")
-    corpus = json.loads(args.corpus.read_text())
+    corpus = json.loads(args.corpus.read_text(encoding="utf-8"))
     if not corpus.get("holdout") or corpus["generated_at"] <= freeze["frozen_at"]:
         raise SystemExit("Only unseen post-freeze wording is qualified here")
     if args.directory.exists():
         raise SystemExit("Live holdout identity is immutable")
     args.directory.mkdir(parents=True)
-    env = dict(line.split("=",1) for line in args.env_file.read_text().splitlines() if "=" in line)
+    env = dict(line.split("=",1) for line in args.env_file.read_text(encoding="utf-8").splitlines() if "=" in line)
     chosen = corpus["cases"]
     (args.directory/"plan.json").write_text(json.dumps({"case_ids":[c["id"] for c in chosen],
         "corpus_sha256":sha256(args.corpus.read_bytes()).hexdigest(),
-        "runtime_identity":runtime,"manual_git":False,"implementation_hints":False},indent=2)+"\n")
+        "runtime_identity":runtime,"manual_git":False,"implementation_hints":False},indent=2)+"\n",encoding="utf-8")
 
     def run(case):
         directory = args.directory/case["id"]
         directory.mkdir()
         def save(name,value):
-            (directory/(name+".json")).write_text(json.dumps(value,ensure_ascii=False,indent=2)+"\n")
+            (directory/(name+".json")).write_text(json.dumps(value,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
         def git_observation(state, name):
             observation = state.get("repository_observation") or {}
             intake_id = observation.get("intake_request_id")
@@ -334,7 +334,7 @@ def main():
         "false_execution":sum(bool(r["false_execution"]) for r in observed),
         "unobserved_cases":len(results)-len(observed),"failed_cases":[r["case_id"] for r in results if r["status"]!="PASS"],
         "source_fingerprint":freeze["source_fingerprint"],"human_acceptance":"PENDING"}
-    (args.directory/"report.json").write_text(json.dumps(report,indent=2)+"\n")
+    (args.directory/"report.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(report))
 
 
