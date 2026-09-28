@@ -88,10 +88,10 @@ def main():
     if directory.exists():
         raise SystemExit('Trial identity already exists; preserve it and choose a new trial')
     directory.mkdir(parents=True)
-    env = dict(line.split('=', 1) for line in args.env_file.read_text().splitlines() if '=' in line)
+    env = dict(line.split('=', 1) for line in args.env_file.read_text(encoding='utf-8').splitlines() if '=' in line)
 
     def save(name, value):
-        (directory / name).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+        (directory / name).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
     if not env.get('SPG_WEB_SEARCH_API_KEY', '').strip() and not args.allow_partial:
         receipt = {'scope': args.scope, 'trial': args.trial, 'status': 'BLOCKED_EXTERNAL',
@@ -103,7 +103,7 @@ def main():
     client = ProductClient(args.base, env['SPG_OPERATOR_TOKEN'])
     activation = client.request('/api/runtime-activation')
     save('runtime-activation.json', activation)
-    corpus = json.loads((ROOT / 'benchmarks/golden/tier0-v1.json').read_text())
+    corpus = json.loads((ROOT / 'benchmarks/golden/tier0-v1.json').read_text(encoding='utf-8'))
     case = next(item for item in corpus['cases'] if item['id'] == 'GC-EX-12')
     intent = (f"这是当前项目仓库：{args.fixture_base}/{case['fixture']}.git\n" + case['human_request']
         if args.scope == 'GC-EX-12' else '搜索 Web 中成熟的表单验证实现，检查实际页面，比较并给出真实来源。')
