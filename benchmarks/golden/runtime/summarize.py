@@ -12,7 +12,12 @@ from pathlib import Path
 
 
 def read(path, default=None):
-    return json.loads(path.read_text()) if path.exists() else default
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text(encoding='utf-8'))
+    except UnicodeDecodeError:
+        return json.loads(path.read_text(encoding='gbk'))
 
 
 def qualification_status(value):
@@ -156,7 +161,7 @@ def main():
         'human_acceptance': 'PENDING', 'cases': cases,
         'note': 'Closure requires every mandatory oracle and qualified repeated semantic outcomes; no aggregate quality score is inferred.'}
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+    args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({'cases': len(cases), 'cases_with_passed_oracle': sum(case['status']=='PASS' for case in cases),
         'tier_0_gate': tier_status, 'core_repeat_stability':core_status, 'human_acceptance': 'PENDING'}))
 
