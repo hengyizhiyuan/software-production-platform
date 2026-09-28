@@ -60,6 +60,7 @@ def main():
         raise SystemExit("Live image identity does not match the implementation freeze")
     corpus = json.loads(args.corpus.read_text(encoding="utf-8"))
     corpus_digest = sha256(args.corpus.read_bytes()).hexdigest()
+    trial_digest = sha256((corpus_digest + str(args.directory.resolve())).encode()).hexdigest()[:12]
     if args.seen_regression:
         if corpus.get("holdout"):
             raise SystemExit("Seen regression must be explicitly labelled holdout=false")
@@ -71,7 +72,7 @@ def main():
     env = dict(line.split("=",1) for line in args.env_file.read_text(encoding="utf-8").splitlines() if "=" in line)
     chosen = corpus["cases"]
     (args.directory/"plan.json").write_text(json.dumps({"case_ids":[c["id"] for c in chosen],
-        "corpus_sha256":corpus_digest,
+        "corpus_sha256":corpus_digest,"trial_source_id":trial_digest,
         "runtime_identity":runtime,"manual_git":False,"implementation_hints":False,
         "seen_regression":args.seen_regression},indent=2)+"\n",encoding="utf-8")
 
@@ -157,7 +158,7 @@ def main():
             source = args.source
             if "/trials/" in source:
                 parent, filename = source.rsplit("/",1)
-                source = parent+"-"+corpus_digest[:12]+"-"+case["id"]+"/"+filename
+                source = parent+"-"+trial_digest+"-"+case["id"]+"/"+filename
             baseline,_,status = turn("先获取这个仓库："+source+"。暂不开始生产。","setup-repository")
             if status!="COMPLETED" or (baseline.get("repository_observation") or {}).get("condition")!="READY":
                 raise RuntimeError("Starting repository was not actually acquired by Watt")
