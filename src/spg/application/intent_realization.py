@@ -798,6 +798,14 @@ def project_interaction_candidate(candidate, ir):
         "semantic_fact_candidates": ir.semantic_fact_candidates,
         "unresolved_material_questions": tuple(dict.fromkeys(
             q.question for q in ir.questions if q.blocks_current_step and not q.safe_reversible_assumption))}
+    current_request_ids = {item_id for clause in ir.clauses
+        if clause.source_record_id == ir.source_record_id
+        and clause.speech_act is ActionSpeechAct.EXPLICIT_REQUEST
+        and clause.polarity == "AFFIRMATIVE" and clause.modality == "REQUEST"
+        and clause.temporal_scope == "CURRENT" for item_id in clause.semantic_item_ids}
+    requested_analysis = tuple(item.statement for item in ir.items
+        if item.item_id in current_request_ids and item.kind is SemanticKind.ANALYSIS
+        and item.answer is None)
     constraints = tuple(item.statement for item in ir.items if item.kind is SemanticKind.CONSTRAINT)
     updates["candidate_constraints"] = tuple(dict.fromkeys((
         *((candidate.candidate_constraints) if ir.legacy_typed_projection else ()), *constraints,
@@ -846,7 +854,8 @@ def project_interaction_candidate(candidate, ir):
             outcomes.append("Provide an independently verified Preview of the exact produced Candidate for Human review.")
         updates.update(interpreted_motive="; ".join(goal.objective for goal in goals),
             desired_outcome="; ".join(outcomes),
-            current_requests=tuple(goal.primary_change for goal in goals),
+            current_requests=tuple(dict.fromkeys((
+                *(goal.primary_change for goal in goals), *requested_analysis))),
             turn_intent=candidate.turn_intent if candidate.turn_intent in {I.BUILD, I.MODIFY, I.CONTINUE_CURRENT_WORK}
                 else I.ACTION_REQUEST)
     elif ir.operational_requests:

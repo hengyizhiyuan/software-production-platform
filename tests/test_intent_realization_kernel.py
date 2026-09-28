@@ -686,6 +686,41 @@ def test_future_human_delivery_decision_does_not_block_current_production():
     assert IntentRealizationKernel().obligations(blocked_ir, uuid4())[0].state is ObligationState.REQUIRES_HUMAN
 
 
+def test_explicit_dependent_analysis_survives_work_projection():
+    from spg.application.intent_realization import project_interaction_candidate
+    from spg.application.guided_design import has_current_production_analysis_request
+    from spg.domain.interaction import InteractionAssessmentCandidate
+    record = source("Add search. Inspect the repository and identify which coverage choice I must make.")
+    goal = SemanticItem(item_id="search", kind=K.PRODUCTION_INTENT,
+        statement="Add search", provenance=(provenance(record),), confidence=.9,
+        production=ProductionIntent(objective="Search", primary_change="Add search",
+            current=True, bounded_change=True))
+    analysis = SemanticItem(item_id="scope", kind=K.ANALYSIS,
+        statement="Inspect the repository and identify the coverage choice for Human",
+        provenance=(provenance(record),), confidence=.9, depends_on=(goal.item_id,))
+    clauses = (SemanticClause(clause_id="goal", source_record_id=record.id,
+        source_text="Add search.", semantic_item_ids=(goal.item_id,),
+        speech_act=S.EXPLICIT_REQUEST, polarity="AFFIRMATIVE", modality="REQUEST",
+        temporal_scope="CURRENT"),
+        SemanticClause(clause_id="analysis", source_record_id=record.id,
+            source_text=" Inspect the repository and identify which coverage choice I must make.",
+            semantic_item_ids=(analysis.item_id,), speech_act=S.EXPLICIT_REQUEST,
+            polarity="AFFIRMATIVE", modality="REQUEST", temporal_scope="CURRENT"))
+    raw = TurnSemanticCandidate(items=(goal, analysis), clauses=clauses)
+    basis = SimpleNamespace(records=(record,), interaction=SimpleNamespace(id=uuid4()),
+        basis_fingerprint="a" * 64, observed_reality=())
+    ir = IntentRealizationKernel().govern(SimpleNamespace(semantic_intent=raw,
+        provider_identity="fixture"), basis)
+    candidate = InteractionAssessmentCandidate(natural_response="advisory",
+        provider_identity="fixture")
+    projected = project_interaction_candidate(candidate, ir)
+    assert projected.current_requests == ("Add search", analysis.statement)
+    assert has_current_production_analysis_request(SimpleNamespace(semantic_ir=ir))
+    future = clauses[1].model_copy(update={"temporal_scope": "FUTURE"})
+    future_ir = ir.model_copy(update={"clauses": (clauses[0], future)})
+    assert not has_current_production_analysis_request(SimpleNamespace(semantic_ir=future_ir))
+
+
 def test_cited_model_prose_cannot_be_promoted_to_owner_observed_fact():
     record = source("检查仓库的实际版本。")
     witness = SemanticProvenance(origin=Origin.REPOSITORY_OBSERVED, evidence_reference="owner:repository")

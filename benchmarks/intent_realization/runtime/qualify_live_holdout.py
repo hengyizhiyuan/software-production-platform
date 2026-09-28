@@ -204,6 +204,13 @@ def main():
                     setup_attention=attention_for(setup_work_id,"STEERING_DECISION_REQUIRED")
                     if (setup_attention or {}).get("kind")=="STEERING_DECISION_REQUIRED":
                         break
+                    # A sealed Candidate means production passed the decision
+                    # boundary. Waiting longer cannot make this setup valid.
+                    if attention_for(setup_work_id,"CANDIDATE_AUTHORIZATION"):
+                        save("failed-setup-observation",{"work_id":setup_work_id,
+                            "reason":"Candidate reached before required scope decision",
+                            "attention":client.request("/api/attention?work_id="+setup_work_id)})
+                        break
                     time.sleep(4)
                 save("setup-scope-attention",setup_attention)
                 if (setup_attention or {}).get("kind")!="STEERING_DECISION_REQUIRED":
