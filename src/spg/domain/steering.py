@@ -271,6 +271,7 @@ class SemanticStepInput(BaseModel):
     constraints: tuple[str, ...]
     work_context_facts: tuple[str, ...] = ()
     work_requests: tuple[str, ...] = ()
+    dependent_analysis_requests: tuple[str, ...] = ()
     human_explicit_requests: tuple[str, ...] = ()
     governed_semantic_ir_id: UUID | None = None
     canonical_explicit_targets: tuple[str, ...] = ()
@@ -305,6 +306,8 @@ class SemanticStepInput(BaseModel):
             raise ValueError("Semantic Step input supports only DESIGN and REFINE")
         if self.step.steering_plan_revision_id != self.steering_plan_revision_id:
             raise ValueError("Semantic Step input revision and Step do not match")
+        if set(self.dependent_analysis_requests) - set(self.work_requests):
+            raise ValueError("Dependent analysis must remain within admitted Work requests")
         return self
 
 

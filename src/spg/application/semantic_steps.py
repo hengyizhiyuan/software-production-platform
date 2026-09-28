@@ -12,6 +12,7 @@ from uuid import UUID, uuid4
 from spg.application.planning import ProductionPlanningService
 from spg.application.assets import RepositoryAssetService
 from spg.application.guided_design import GuidedDesignApplicationService
+from spg.application.intent_realization import current_dependent_analysis_requests
 from spg.application.refinement import RepositoryChangeProposalService
 from spg.application.runtime import RuntimeService
 from spg.application.steering_decision import PlanFrameAssembler
@@ -229,6 +230,13 @@ class SemanticStepApplicationService:
             ),
             work_requests=(
                 () if work_revision is None else work_revision.requests
+            ),
+            dependent_analysis_requests=(
+                current_dependent_analysis_requests(semantic_ir)
+                if work_revision is not None and semantic_ir is not None
+                and source_assessment is not None
+                and work_revision.source_assessment_id == source_assessment.id
+                else ()
             ),
             human_explicit_requests=human_records or (work.raw_user_requirement,),
             governed_semantic_ir_id=None if semantic_ir is None or semantic_ir.legacy_typed_projection else semantic_ir.id,

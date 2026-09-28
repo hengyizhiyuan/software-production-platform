@@ -687,7 +687,9 @@ def test_future_human_delivery_decision_does_not_block_current_production():
 
 
 def test_explicit_dependent_analysis_survives_work_projection():
-    from spg.application.intent_realization import project_interaction_candidate
+    from spg.application.intent_realization import (
+        current_dependent_analysis_requests, project_interaction_candidate,
+    )
     from spg.application.guided_design import has_current_production_analysis_request
     from spg.domain.interaction import InteractionAssessmentCandidate
     record = source("Add search. Inspect the repository and identify which coverage choice I must make.")
@@ -715,9 +717,11 @@ def test_explicit_dependent_analysis_survives_work_projection():
         provider_identity="fixture")
     projected = project_interaction_candidate(candidate, ir)
     assert projected.current_requests == ("Add search", analysis.statement)
+    assert current_dependent_analysis_requests(ir) == (analysis.statement,)
     assert has_current_production_analysis_request(SimpleNamespace(semantic_ir=ir))
     future = clauses[1].model_copy(update={"temporal_scope": "FUTURE"})
     future_ir = ir.model_copy(update={"clauses": (clauses[0], future)})
+    assert current_dependent_analysis_requests(future_ir) == ()
     assert not has_current_production_analysis_request(SimpleNamespace(semantic_ir=future_ir))
 
 

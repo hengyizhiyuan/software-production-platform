@@ -36,6 +36,17 @@ def unexpected_branch_effect(case, before, after):
         or any(after[key] != before[key] for key in ("revision", "tree")))
 
 
+def is_search_scope_question(attention):
+    """The precondition is the requested coverage decision, not any Attention."""
+    if not attention or attention.get("kind") != "STEERING_DECISION_REQUIRED":
+        return False
+    text = " ".join(str(attention.get(key) or "") for key in
+        ("reason", "conversation_prompt", "recommendation")).casefold()
+    return (any(word in text for word in ("scope", "coverage", "domain", "范围", "覆盖", "业务域"))
+        and any(word in text for word in ("search", "搜索", "user", "customer", "order",
+            "用户", "客户", "订单")))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--corpus",type=Path,required=True)
@@ -202,7 +213,11 @@ def main():
                 deadline=time.monotonic()+args.timeout
                 while time.monotonic()<deadline:
                     setup_attention=attention_for(setup_work_id,"STEERING_DECISION_REQUIRED")
-                    if (setup_attention or {}).get("kind")=="STEERING_DECISION_REQUIRED":
+                    if setup_attention is not None:
+                        if not is_search_scope_question(setup_attention):
+                            save("failed-setup-observation",{"work_id":setup_work_id,
+                                "reason":"Attention did not ask the requested search coverage decision",
+                                "attention":setup_attention})
                         break
                     # A sealed Candidate means production passed the decision
                     # boundary. Waiting longer cannot make this setup valid.
@@ -213,8 +228,8 @@ def main():
                         break
                     time.sleep(4)
                 save("setup-scope-attention",setup_attention)
-                if (setup_attention or {}).get("kind")!="STEERING_DECISION_REQUIRED":
-                    raise RuntimeError("Current Work did not ask its scope question")
+                if not is_search_scope_question(setup_attention):
+                    raise RuntimeError("Current Work did not ask its search coverage question")
             for index,text in enumerate(case.get("context",[])):
                 baseline,_,status = turn(text,f"prior-context-{index+1}")
                 if status!="COMPLETED":
@@ -297,7 +312,7 @@ def main():
                     "no_repository_write":actual_before==actual_after,
                     "actual_git_observed":physical_observed}
                 if case["group"]=="work_scope_answer":
-                    checks["question_pending_before_answer"]=(setup_attention is not None
+                    checks["question_pending_before_answer"]=(is_search_scope_question(setup_attention)
                         and pre_answer_attention is not None
                         and pre_answer_attention.get("attention_id")==setup_attention.get("attention_id"))
                     checks["work_question_resolved"]=(checks["question_pending_before_answer"]

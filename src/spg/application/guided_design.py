@@ -29,8 +29,7 @@ from spg.domain.guided_design import (
     GuidedDesignProjection,
 )
 from spg.domain.product import WorkMode, WorkRecord
-from spg.domain.intent_realization import SemanticKind
-from spg.domain.interaction_actions import ActionSpeechAct
+from spg.application.intent_realization import current_dependent_analysis_requests
 from spg.domain.response_contract import production_intent_evidence
 from spg.domain.steering import (
     RealityReference,
@@ -340,20 +339,9 @@ def design_schema_for_work(work: WorkRecord) -> tuple[DesignSchemaDefinition, st
 
 
 def has_current_production_analysis_request(assessment) -> bool:
-    """Keep an explicit dependent analysis request in the guided Work path."""
+    """Recognize explicit analysis for the bounded Work DESIGN step."""
     ir = None if assessment is None else assessment.semantic_ir
-    if ir is None:
-        return False
-    current_goals = {item.item_id for item in ir.items
-        if item.production is not None and item.production.current}
-    requested = {item_id for clause in ir.clauses
-        if clause.source_record_id == ir.source_record_id
-        and clause.speech_act is ActionSpeechAct.EXPLICIT_REQUEST
-        and clause.polarity == "AFFIRMATIVE" and clause.modality == "REQUEST"
-        and clause.temporal_scope == "CURRENT" for item_id in clause.semantic_item_ids}
-    return any(item.kind is SemanticKind.ANALYSIS and item.answer is None
-        and item.item_id in requested and bool(current_goals.intersection(item.depends_on))
-        for item in ir.items)
+    return bool(current_dependent_analysis_requests(ir))
 
 
 def guided_design_step_specs(

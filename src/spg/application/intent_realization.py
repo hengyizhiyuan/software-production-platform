@@ -790,6 +790,22 @@ def production_evidence(ir):
         action_requested=current, repository_source=source)
 
 
+def current_dependent_analysis_requests(ir) -> tuple[str, ...]:
+    """Current Human analysis requests that depend on the current product goal."""
+    if ir is None:
+        return ()
+    goals = {item.item_id for item in ir.items
+        if item.production is not None and item.production.current}
+    requested = {item_id for clause in ir.clauses
+        if clause.source_record_id == ir.source_record_id
+        and clause.speech_act is ActionSpeechAct.EXPLICIT_REQUEST
+        and clause.polarity == "AFFIRMATIVE" and clause.modality == "REQUEST"
+        and clause.temporal_scope == "CURRENT" for item_id in clause.semantic_item_ids}
+    return tuple(dict.fromkeys(item.statement for item in ir.items
+        if item.kind is SemanticKind.ANALYSIS and item.answer is None
+        and item.item_id in requested and goals.intersection(item.depends_on)))
+
+
 def project_interaction_candidate(candidate, ir):
     """WIC consumes canonical IR; all compatibility values have one source."""
     from spg.domain.conversation import ConversationTurnIntent as I
