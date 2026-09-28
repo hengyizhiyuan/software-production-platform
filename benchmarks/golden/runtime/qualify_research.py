@@ -141,7 +141,7 @@ def main():
             stream_failure = type(error).__name__
         except (OSError, urllib.error.URLError) as error:
             stream_failure = type(error).__name__
-    (directory / 'response-stream.txt').write_text(stream)
+    (directory / 'response-stream.txt').write_text(stream, encoding='utf-8')
     save('response-stream.json', {'raw_stream_record': 'response-stream.txt',
         'sha256': sha256(stream.encode()).hexdigest(),
         'event_names': [line.removeprefix('event: ') for line in stream.splitlines()

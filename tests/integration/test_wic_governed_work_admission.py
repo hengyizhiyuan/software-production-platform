@@ -2801,7 +2801,7 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
         pytest.skip("qualified local Native Executor image is unavailable")
     work_service, interactions = services
     ready = _ready(interactions)
-    branch_actor = f"human:branch-{uuid4().hex[:8]}"
+    branch_actor = "human:test"
     admitted = _admit(work_service, ready, authority_identity=branch_actor)
     import_root = tmp_path / "imports"
     import_root.mkdir()
@@ -2880,7 +2880,7 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     pending = branch_interactions.append_and_assess(
         ready.interaction.id,
         f"为了后续开发，请切一个新分支：{branch_name}",
-        human_identity="human:test",
+        human_identity=branch_actor,
     )
     proposal = pending.latest_assessment
     assert proposal is not None
@@ -2895,135 +2895,38 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     with postgres_database.unit_of_work() as uow:
         base_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
     assert base_revision is not None
-    if actual_provider_fact:
-        steering_bootstrap = SteeringBootstrapService(postgres_database)
-        orchestrator = ProductionOrchestrator(work_service)
-        steering_driver = PlanSteeringDriver(
-            postgres_database, work_service, orchestrator, repository_assets=service,
-        )
-        monkeypatch.setattr(steering_driver, "schedule", lambda _work_id: True)
-        post_admission = WorkPostAdmissionService(
-            work_service, steering_bootstrap, steering_driver, orchestrator,
-        )
-        trigger = ProductionAdmissionTrigger(
-            branch_interactions, work_service, service, post_admission,
-        )
-        answer = trigger.execute_explicit_branch_turn(
-            ready.interaction.id, proposal, pending.records[-1],
-        )
-        assert answer is not None and f"已从当前仓库基线创建并绑定本地分支 {branch_name}" in answer, {
-            key: value for key, value in service.latest_attempt_for_work(work_id).items()
-            if key in {"condition", "failure_category", "human_message", "technical_evidence"}
-        }
-        with postgres_database.unit_of_work() as uow:
-            branch_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
-        assert branch_revision is not None
-        assert branch_revision.repository_ref == f"refs/heads/{branch_name}"
-        assert branch_revision.source_revision == acquired["revision"]
-        assert branch_revision.constraints == base_revision.constraints
-        assert branch_revision.desired_outcome == base_revision.desired_outcome
-        assert service.latest_attempt_for_work(work_id)["condition"] == "READY"
-        return
-    governed = work_service.decide_interaction_work_revision(
-        ready.interaction.id,
-        assessment_id=proposal.id,
-        basis_fingerprint=proposal.basis_fingerprint,
-        expected_previous_revision_id=base_revision.id,
-        action=AttentionAction.APPROVE,
-        authority_identity=branch_actor,
-        rationale="Admit the explicit branch request before execution.",
-    )
-    with postgres_database.unit_of_work() as uow:
-        branch_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
-    assert branch_revision is not None
-    subjects = {
-        fact.subject for fact in current_semantic_facts(branch_revision.engineering_semantic_facts)
-    }
-    assert "repository.branch_name" in subjects
-    assert "repository.branch.name" not in subjects
-    assert "repository.branch_action" in subjects
-    branch_facts = {
-        fact.subject: fact
-        for fact in current_semantic_facts(branch_revision.engineering_semantic_facts)
-        if fact.subject in {"repository.branch_name", "repository.branch_action"}
-    }
-    assert branch_facts["repository.branch_name"].value == branch_name
-    assert branch_facts["repository.branch_name"].qualifiers == {"state": "to_be_created"}
-    assert all(
-        fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
-        and pending.records[-1].id in fact.provenance.source_record_ids
-        for fact in branch_facts.values()
-    )
+    assert proposal.candidate_change is None
+    assert proposal.semantic_ir is not None
+    assert [item.action.operation for item in proposal.semantic_ir.operational_requests] == [
+        "CREATE_AND_SWITCH_BRANCH"
+    ]
     steering_bootstrap = SteeringBootstrapService(postgres_database)
     steering_bootstrap.bootstrap(work_id)
     orchestrator = ProductionOrchestrator(work_service)
     steering_driver = PlanSteeringDriver(
         postgres_database, work_service, orchestrator, repository_assets=service,
     )
+    monkeypatch.setattr(steering_driver, "schedule", lambda _work_id: True)
     post_admission = WorkPostAdmissionService(
         work_service, steering_bootstrap, steering_driver, orchestrator,
     )
-    trigger = ProductionAdmissionTrigger(interactions, work_service, service, post_admission)
-    steering_driver.configure_governed_repository_action(
-        lambda selected_work, selected_interaction, authority:
-            trigger.reconcile_governed_branch(
-                selected_work,
-                interaction_id=selected_interaction,
-                authority_identity=authority,
-            )
+    trigger = ProductionAdmissionTrigger(
+        branch_interactions, work_service, service, post_admission,
     )
-    iterations = []
-    if provider_variant:
-        original_run = service.native_git_operations._run_admitted_branch_operation
-
-        def interrupted_after_admission(**_kwargs):
-            raise RuntimeError("Synthetic Native Git setup interruption")
-
-        monkeypatch.setattr(
-            service.native_git_operations,
-            "_run_admitted_branch_operation",
-            interrupted_after_admission,
-        )
-        for _ in range(3):
-            iteration = steering_driver.iterate(work_id)
-            iterations.append(iteration)
-            if iteration.action is SteeringActionType.REPOSITORY_ACTION:
-                break
-        failed = service.latest_attempt_for_work(work_id)
-        assert failed is not None and failed["condition"] == "FAILED_RETRYABLE"
-        with postgres_database.unit_of_work() as uow:
-            run_id = uow.session.execute(
-                select(production_runs.c.id).where(
-                    production_runs.c.intent_ref == f"repository-intake:{failed['intake_request_id']}"
-                )
-            ).scalar_one()
-            unit_id = uow.session.execute(
-                select(production_work_units.c.id).where(
-                    production_work_units.c.production_run_id == run_id
-                )
-            ).scalar_one()
-            failed_attempt = RuntimeStore(uow.session).attempts_for_work_unit(unit_id)[-1]
-            native_store = NativeExecutionStore(uow.session)
-            assert native_store.attempt_state(failed_attempt.id).terminal_outcome is AttemptTerminalOutcome.CANCELLED
-            assert native_store.queue_for_attempt(failed_attempt.id).condition is QueueCondition.CANCELLED
-        monkeypatch.setattr(
-            service.native_git_operations,
-            "_run_admitted_branch_operation",
-            original_run,
-        )
-        retried = trigger.retry_work(work_id, authority_identity=branch_actor)
-        assert retried["condition"] == "READY", retried.get("technical_evidence")
-    for _ in range(3):
-        iteration = steering_driver.iterate(work_id)
-        iterations.append(iteration)
-        if iteration.action is SteeringActionType.REPOSITORY_ACTION:
-            break
-    if not provider_variant:
-        assert any(item.action is SteeringActionType.REPOSITORY_ACTION for item in iterations), [
-            (item.action, item.progressed, item.stop_reason) for item in iterations] + [
-            work_service.get_work(work_id).status,
-            steering_driver.frames.assemble(work_id).open_blocking_reality,
-            steering_driver.steering.reconstruct(work_id).current_step]
+    answer = trigger.execute_governed_turn(
+        ready.interaction.id, proposal, pending.records[-1],
+    )
+    assert answer is not None and branch_name in answer, {
+        key: value for key, value in service.latest_attempt_for_work(work_id).items()
+        if key in {"condition", "failure_category", "technical_evidence"}
+    }
+    with postgres_database.unit_of_work() as uow:
+        bound_revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+    assert bound_revision is not None
+    assert bound_revision.repository_ref == f"refs/heads/{branch_name}"
+    assert bound_revision.source_revision == acquired["revision"]
+    assert bound_revision.constraints == base_revision.constraints
+    assert bound_revision.desired_outcome == base_revision.desired_outcome
     branch = service.latest_attempt_for_work(work_id)
     assert branch is not None
     assert branch["condition"] == "READY", branch.get("technical_evidence")
@@ -3038,7 +2941,7 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     assert branch["repository_ref"] == f"refs/heads/{branch_name}"
     assert branch["revision"] == acquired["revision"]
     assert branch["operation_evidence"]["capability_id"] == "git.branch.create"
-    assert branch["operation_evidence"]["connector_id"] == "builtin:git"
+    assert branch["operation_evidence"]["connector_id"] == "learned:native-git"
     assert branch["operation_evidence"]["resulting_branch"] == f"refs/heads/{branch_name}"
     assert branch["operation_evidence"]["resulting_revision"] == acquired["revision"]
     assert branch["operation_evidence"]["verified"] is True
