@@ -19,6 +19,22 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
+requires_posix_dir_fd = pytest.mark.skipif(
+    not hasattr(os, "O_DIRECTORY"), reason="POSIX directory descriptors are required"
+)
+requires_posix_process_group = pytest.mark.skipif(
+    not hasattr(os, "killpg"), reason="POSIX process groups are required"
+)
+
+
+def _symlink_or_skip(link: Path, target: Path | str, *, target_is_directory: bool = False) -> None:
+    try:
+        link.symlink_to(target, target_is_directory=target_is_directory)
+    except OSError as error:
+        if getattr(error, "winerror", None) == 1314:
+            pytest.skip("Windows symlinks require a privilege unavailable to this runner")
+        raise
+
 
 @pytest.mark.parametrize("claim", [
     {"evidence_ids": ["web/app.js"]},
@@ -158,7 +174,7 @@ def test_workspace_archive_rejects_links_and_detects_tampering(tmp_path: Path) -
     source.write_text("recoverable\n", encoding="utf-8")
     archives = WorkspaceArchiveStore(tmp_path / "archives")
 
-    (workspace / "escape").symlink_to("/etc/passwd")
+    _symlink_or_skip(workspace / "escape", "/etc/passwd")
     with pytest.raises(RuntimeError, match="refuses links"):
         archives.archive(workspace)
     (workspace / "escape").unlink()
@@ -1313,6 +1329,7 @@ def test_admitted_process_compilation_produces_real_failure_and_success_receipts
     assert "diagnostic_code" not in passed.output
 
 
+@requires_posix_dir_fd
 def test_file_write_exact_replace_preserves_unseen_large_file_content(tmp_path: Path) -> None:
     page = tmp_path / "src" / "page.html"
     page.parent.mkdir(parents=True)
@@ -1359,6 +1376,7 @@ def test_file_write_exact_replace_preserves_unseen_large_file_content(tmp_path: 
     assert page.read_text(encoding="utf-8") == updated
 
 
+@requires_posix_dir_fd
 def test_tool_host_observes_missing_file_without_ambiguous_failure(tmp_path: Path) -> None:
     binding, _ = _binding()
     workspace = binding.workspace.model_copy(
@@ -1577,12 +1595,16 @@ def test_process_tool_routes_through_current_attempt_sandbox(
 
     sandbox = Sandbox()
     result = asyncio.run(
-        LocalNativeToolHost(second, process_sandbox=sandbox).registry().execute(request)
+        LocalNativeToolHost(
+            second,
+            process_sandbox=sandbox,
+            process_allowlist=(Path(sys.executable).name,),
+        ).registry().execute(request)
     )
 
     assert result.condition is EffectCondition.SETTLED
     assert result.output["isolation"] == "landlock-per-delivery"
-    assert result.output["stdout"] == "sandboxed\n"
+    assert result.output["stdout"].replace("\r\n", "\n") == "sandboxed\n"
     assert sandbox.invocation == (
         request.delivery_id, second, second, [sys.executable, "check.py"]
     )
@@ -1598,7 +1620,7 @@ def test_tool_host_rejects_hardlink_and_symlink_file_attacks(tmp_path: Path) -> 
     secret = outside / "secret.txt"
     secret.write_text("must not cross", encoding="utf-8")
     os.link(secret, workspace / "hardlink.txt")
-    (workspace / "escape").symlink_to(outside, target_is_directory=True)
+    _symlink_or_skip(workspace / "escape", outside, target_is_directory=True)
     binding, _ = _binding()
     manifest = binding.workspace.model_copy(
         update={
@@ -1631,6 +1653,7 @@ def test_tool_host_rejects_hardlink_and_symlink_file_attacks(tmp_path: Path) -> 
     assert secret.read_text(encoding="utf-8") == "must not cross"
 
 
+@requires_posix_dir_fd
 def test_tool_host_write_is_descriptor_anchored_across_symlink_race(
     tmp_path: Path,
 ) -> None:
@@ -1670,7 +1693,7 @@ def test_tool_host_write_is_descriptor_anchored_across_symlink_race(
     def race(relative: str, *, create: bool):
         with original(relative, create=create) as opened:
             inside.rename(held)
-            inside.symlink_to(outside, target_is_directory=True)
+            _symlink_or_skip(inside, outside, target_is_directory=True)
             yield opened
 
     host._parent_directory = race
@@ -1681,6 +1704,7 @@ def test_tool_host_write_is_descriptor_anchored_across_symlink_race(
     assert (held / "value.txt").read_text(encoding="utf-8") == "inside"
 
 
+@requires_posix_dir_fd
 def test_tool_host_api_accepts_multiple_mounts_under_one_workspace(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -1734,6 +1758,7 @@ def test_tool_host_api_accepts_multiple_mounts_under_one_workspace(
     assert response.json()["output"]["content"] == "client"
 
 
+@requires_posix_dir_fd
 def test_tool_host_spools_receipt_across_restart_and_rejects_delivery_collision(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -1807,6 +1832,7 @@ def test_tool_host_spools_receipt_across_restart_and_rejects_delivery_collision(
     assert (workspace / "result.txt").read_text(encoding="utf-8") == "durable"
 
 
+@requires_posix_dir_fd
 def test_tool_host_backpressures_before_effect_when_receipt_spool_is_full(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -2037,6 +2063,7 @@ def test_native_queue_and_controls_are_human_visible_without_claiming_trust() ->
     assert "Verification" not in queue_projection
 
 
+@requires_posix_process_group
 def test_process_timeout_terminates_owned_process_group_and_bounds_output(
     tmp_path: Path,
 ) -> None:
@@ -2075,7 +2102,11 @@ def test_process_timeout_terminates_owned_process_group_and_bounds_output(
     )
 
     result = asyncio.run(
-        LocalNativeToolHost(tmp_path, timeout_seconds=1).registry().execute(request)
+        LocalNativeToolHost(
+            tmp_path,
+            timeout_seconds=1,
+            process_allowlist=(Path(sys.executable).name,),
+        ).registry().execute(request)
     )
 
     assert result.condition is EffectCondition.FAILED
@@ -2086,6 +2117,7 @@ def test_process_timeout_terminates_owned_process_group_and_bounds_output(
     assert len(result.output["stdout"].encode("utf-8")) == 32 * 1024
 
 
+@requires_posix_process_group
 def test_mid_tool_pause_cancels_process_before_checkpoint() -> None:
     binding, contract = _binding()
     binding = binding.model_copy(
