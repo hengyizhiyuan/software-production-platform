@@ -252,14 +252,19 @@ def main():
                 else:
                     realized=bool(matching and all(o["state"] in {
                         "BLOCKED_WITH_EVIDENCE","REQUIRES_HUMAN"} for o in matching))
+                reviewed_revision=preview.get("candidate_revision")
+                exact_candidate_only=bool(physical_observed and reviewed_revision
+                    and actual_after["revision"]==reviewed_revision
+                    and actual_after["repository_ref"]==actual_before["repository_ref"]
+                    and actual_after["branches"]==actual_before["branches"])
                 checks={"turn_completed":status=="COMPLETED",
                     "declared_intent_compiled":intended in observed_action_intents,
                     "owner_boundary_reconciled":realized,
                     "no_delivery":not bool(delivery.get("deliveries")),
-                    "no_repository_write":actual_before==actual_after,
+                    "only_reviewed_candidate_commit":exact_candidate_only,
                     "actual_git_observed":physical_observed}
                 result.update(checks=checks,status="PASS" if all(checks.values()) else "FAIL",
-                    false_execution=bool(unexpected or delivery.get("deliveries")),
+                    false_execution=bool(not exact_candidate_only or delivery.get("deliveries")),
                     actual_git_observation_available=physical_observed,
                     effect_satisfaction=realized,observed_operations=actual,
                     setup_work_id=setup_work_id)

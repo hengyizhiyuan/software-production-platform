@@ -616,6 +616,10 @@ class _TurnFailure:
     metadata: dict[str, object]
 
 
+class _AssessmentBasisStale(InteractionInvariantViolation):
+    """Owner Reality advanced while this Turn's interpretation was in flight."""
+
+
 def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailure:
     if (
         isinstance(error, ModelProviderError)
@@ -2703,10 +2707,11 @@ class WorkInteractionService:
                 records = store.records(turn.interaction_id)
                 automatic_recovery = bool(
                     turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED
-                    and isinstance(error, ModelProviderError) and error.retryable
-                    and error.kind in {ModelFailureKind.INCOMPLETE_RESPONSE,
-                        ModelFailureKind.TIMEOUT_OR_NETWORK,
-                        ModelFailureKind.CAPACITY_OR_RATE_LIMIT}
+                    and (isinstance(error, _AssessmentBasisStale)
+                        or (isinstance(error, ModelProviderError) and error.retryable
+                            and error.kind in {ModelFailureKind.INCOMPLETE_RESPONSE,
+                                ModelFailureKind.TIMEOUT_OR_NETWORK,
+                                ModelFailureKind.CAPACITY_OR_RATE_LIMIT}))
                     and recoveries < 2 and records
                     and records[-1].id == turn.request_record_id
                     and store.message_for_turn(turn_id, InteractionActor.WATT) is None)
@@ -2885,7 +2890,7 @@ class WorkInteractionService:
                 active_context,
             )
             if current_basis != basis_fingerprint:
-                raise InteractionInvariantViolation(
+                raise _AssessmentBasisStale(
                     "Interaction assessment basis is stale and cannot become current"
                 )
             existing = store.assessment_for_basis(interaction_id, current_basis)

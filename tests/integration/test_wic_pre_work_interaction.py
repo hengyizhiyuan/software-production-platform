@@ -29,6 +29,7 @@ from spg.domain.design_intent import (
 from spg.application.interaction import (
     DeterministicWorkInteractionCapability,
     WorkInteractionService,
+    _AssessmentBasisStale,
 )
 from spg.application.work import WorkApplicationService
 from spg.application.wic_reception import (
@@ -1438,6 +1439,43 @@ def test_controlled_turn_automatically_recovers_preserved_input_and_sse(
         assert failed[0].metadata["termination_reason"] == "max_output_tokens"
         assert events[-1].metadata["automatic_recovery_attempts"] == 1
         assert events[-1].metadata["work_converged"] is False
+
+
+def test_controlled_turn_reassesses_when_owner_basis_advances(
+    postgres_database: Database, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    capability = _IncompleteOnceCapability()
+    capability.calls = 1
+    service = WorkInteractionService(postgres_database, capability=capability,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED)
+    original_admit = service.admit_candidate
+    stale_once = True
+
+    def admit_after_owner_advance(*args, **kwargs):
+        nonlocal stale_once
+        if stale_once:
+            stale_once = False
+            raise _AssessmentBasisStale(
+                "Interaction assessment basis is stale and cannot become current")
+        return original_admit(*args, **kwargs)
+
+    monkeypatch.setattr(service, "admit_candidate", admit_after_owner_advance)
+    try:
+        interaction = service.create_interaction(human_identity="human:test")
+        turn = service.submit_turn(interaction.id, "你是谁？", human_identity="human:test")
+        assert _wait_for_turn(service, turn.id, timeout=10).status is InteractionTurnStatus.COMPLETED
+        assert capability.calls == 3
+        projection = service.get_shared_understanding(interaction.id)
+        assert len(projection.records) == 1
+        assert len(projection.conversation_messages) == 2
+        events = service.response_events(turn.id)
+        failures = [event for event in events if event.event_type is WicResponseEventType.TURN_FAILED]
+        recoveries = [event for event in events if event.event_type is WicResponseEventType.TURN_RECOVERY_STARTED]
+        assert len(failures) == len(recoveries) == 1
+        assert failures[0].metadata["automatic_recovery_pending"] is True
+        assert recoveries[0].metadata["human_input_reused"] is True
+    finally:
+        service.shutdown()
 
 
 def test_controlled_turn_recovery_budget_survives_restart(
