@@ -265,7 +265,8 @@ def main():
                     "only_reviewed_candidate_commit":exact_candidate_only,
                     "actual_git_observed":physical_observed}
                 result.update(checks=checks,status="PASS" if all(checks.values()) else "FAIL",
-                    false_execution=bool(not exact_candidate_only or delivery.get("deliveries")),
+                    false_execution=bool((actual_before != actual_after and not exact_candidate_only)
+                        or delivery.get("deliveries")),
                     actual_git_observation_available=physical_observed,
                     effect_satisfaction=realized,observed_operations=actual,
                     setup_work_id=setup_work_id)

@@ -36,6 +36,11 @@ def test_delivery_constraint_with_candidate_action_is_not_work_scope() -> None:
             source_record_id=record.id, source_text=record.content),), confidence=1)
     lifecycle = action.model_copy(update={"items": (*action.items, delivery)})
     assert _is_candidate_or_delivery_lifecycle_turn(lifecycle)
+    assert _is_candidate_or_delivery_lifecycle_turn(lifecycle.model_copy(update={
+        "items": (action.items[0], delivery.model_copy(update={"subject": "delivery"}))}))
+    assert _is_candidate_or_delivery_lifecycle_turn(lifecycle.model_copy(update={
+        "items": (action.items[0], delivery.model_copy(update={
+            "subject": "work.delivery_authorization"}))}))
     work_scope = delivery.model_copy(update={"subject": "profile.search.scope"})
     assert not _is_candidate_or_delivery_lifecycle_turn(
         lifecycle.model_copy(update={"items": (action.items[0], work_scope)}))

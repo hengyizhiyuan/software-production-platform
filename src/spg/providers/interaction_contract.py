@@ -69,6 +69,10 @@ def _safe_validation_summary(error: BaseException) -> str:
         "SEMANTIC_TYPE_MISMATCH: only read-only questions may carry an action",
         "SEMANTIC_TYPE_MISMATCH: production items require structured production intent",
         "SEMANTIC_TYPE_MISMATCH: design frames belong to typed design or goal items",
+        "Provider candidates cannot directly assert SUPERSEDED status",
+        "System inference cannot assert Human-confirmed truth",
+        "Semantic removal must identify the facts it supersedes",
+        "Neutral extraction roles must align with ordered values",
     }
     for issue in error.errors(include_url=False, include_input=False)[:5]:
         location = ".".join(str(part) for part in issue.get("loc", ())) or "root"

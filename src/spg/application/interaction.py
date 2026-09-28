@@ -392,14 +392,18 @@ def _work_reality_status_question(value: str) -> bool:
 
 def _is_candidate_or_delivery_lifecycle_turn(semantic_ir: GovernedSemanticIR) -> bool:
     """Keep lifecycle authority out of the long-lived Work objective."""
+    def lifecycle_subject(subject: str | None) -> bool:
+        # Subject is a compiler supplied structured key, never Human prose.
+        return bool(subject and {"candidate", "delivery"}
+            & set(re.split(r"[^a-z0-9]+", subject.lower())))
+
     return bool(
         any(item.kind is SemanticKind.OPERATIONAL_ACTION and item.action is not None
             and item.action.current for item in semantic_ir.items)
         and all(
             item.kind is SemanticKind.OPERATIONAL_ACTION
             or (item.kind is SemanticKind.CONSTRAINT
-                and item.subject is not None
-                and item.subject.startswith(("candidate.", "delivery.")))
+                and lifecycle_subject(item.subject))
             for item in semantic_ir.items
         )
     )
@@ -621,6 +625,14 @@ class _AssessmentBasisStale(InteractionInvariantViolation):
 
 
 def _classify_turn_failure(error: Exception, failed_at: datetime) -> _TurnFailure:
+    if isinstance(error, _AssessmentBasisStale):
+        return _TurnFailure(
+            code="ASSESSMENT_BASIS_STALE",
+            message="Owner Reality advanced during interpretation. The saved Turn can be reassessed.",
+            metadata={"failure_class": "ASSESSMENT_BASIS_STALE",
+                "timestamp": failed_at.isoformat(), "retryable": True,
+                "provisional_is_not_final": True},
+        )
     if (
         isinstance(error, ModelProviderError)
         and error.kind is ModelFailureKind.INCOMPLETE_RESPONSE
@@ -2707,7 +2719,8 @@ class WorkInteractionService:
                 records = store.records(turn.interaction_id)
                 automatic_recovery = bool(
                     turn.wic_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED
-                    and (isinstance(error, _AssessmentBasisStale)
+                    and (isinstance(error, (_AssessmentBasisStale,
+                        StructuredResponseSchemaViolation))
                         or (isinstance(error, ModelProviderError) and error.retryable
                             and error.kind in {ModelFailureKind.INCOMPLETE_RESPONSE,
                                 ModelFailureKind.TIMEOUT_OR_NETWORK,

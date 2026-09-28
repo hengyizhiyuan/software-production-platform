@@ -88,6 +88,21 @@ def _repair_structured_result(
 ) -> StructuredModelResult:
     """Run one structure-only repair without exposing a second provisional stream."""
 
+    repair_guidance = ""
+    if "supersession needs current Human correction" in validation_feedback:
+        repair_guidance += (
+            "Set supersedes to [] on every FACT and OPERATIONAL_ACTION item. "
+            "These items cannot revoke earlier effects; keep the current action and "
+            "its exact arguments, and keep separate constraints as separate items. "
+            "Do not invent a CORRECTION item. "
+        )
+    if "semantic_fact_candidates." in validation_feedback and "value_error" in validation_feedback:
+        repair_guidance += (
+            "Repair semantic_fact_candidates authority and lineage: a candidate cannot "
+            "assert SUPERSEDED; SYSTEM_INFERRED cannot assert CONFIRMED; REMOVE requires "
+            "exact prior fact UUIDs in supersedes_fact_ids. If those facts are unavailable, "
+            "omit that ungrounded fact candidate while preserving semantic_intent. "
+        )
     if on_stage is not None:
         on_stage("structured_output_repair_started")
     result = runtime.generate(
@@ -107,6 +122,7 @@ def _repair_structured_result(
             "the Human clause and its limitation instead of dropping all semantic items. "
             "Return only the repaired JSON object.\n"
             f"Observed validation locations/types: {validation_feedback}\n"
+            f"{repair_guidance}\n"
             "Original governing contract and exact basis follow. Use them only to "
             "satisfy the rejected contract, including cross-field authority constraints "
             "that JSON Schema cannot express; do not regenerate valid business meaning.\n"

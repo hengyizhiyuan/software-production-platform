@@ -1473,6 +1473,32 @@ def test_controlled_turn_reassesses_when_owner_basis_advances(
         recoveries = [event for event in events if event.event_type is WicResponseEventType.TURN_RECOVERY_STARTED]
         assert len(failures) == len(recoveries) == 1
         assert failures[0].metadata["automatic_recovery_pending"] is True
+        assert failures[0].metadata["retryable"] is True
+        assert recoveries[0].metadata["human_input_reused"] is True
+    finally:
+        service.shutdown()
+
+
+def test_controlled_turn_retries_exhausted_structural_repair_once(
+    postgres_database: Database,
+) -> None:
+    capability = _SchemaFailsOnceCapability()
+    service = WorkInteractionService(postgres_database, capability=capability,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED)
+    try:
+        interaction = service.create_interaction(human_identity="human:test")
+        turn = service.submit_turn(interaction.id, "如何开发微信小程序？",
+            human_identity="human:test")
+        assert _wait_for_turn(service, turn.id, timeout=10).status is InteractionTurnStatus.COMPLETED
+        assert capability.calls == 2
+        projection = service.get_shared_understanding(interaction.id)
+        assert len(projection.records) == 1
+        assert len(projection.conversation_messages) == 2
+        events = service.response_events(turn.id)
+        failures = [event for event in events if event.event_type is WicResponseEventType.TURN_FAILED]
+        recoveries = [event for event in events if event.event_type is WicResponseEventType.TURN_RECOVERY_STARTED]
+        assert len(failures) == len(recoveries) == 1
+        assert failures[0].metadata["automatic_recovery_pending"] is True
         assert recoveries[0].metadata["human_input_reused"] is True
     finally:
         service.shutdown()

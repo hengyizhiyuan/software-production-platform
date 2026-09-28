@@ -13,7 +13,8 @@ from spg.application.interaction import (
     _grounded_named_branch_question, _grounded_status_facts, _research_repository_source,
 )
 from spg.domain.engineering_semantics import (
-    SemanticEpistemicStatus, SemanticFactAuthority, SemanticRelation, SemanticRoleOrigin,
+    EngineeringSemanticFactCandidate, SemanticEpistemicStatus, SemanticFactAuthority,
+    SemanticRelation, SemanticRoleOrigin,
 )
 from spg.domain.interaction_actions import CanonicalOperation as O, ActionSpeechAct as S
 from spg.domain.intent_realization import (
@@ -97,6 +98,19 @@ def test_structural_repair_feedback_identifies_typed_item_error_without_echoing_
             confidence=.95)
     summary = _safe_validation_summary(error.value)
     assert "SEMANTIC_TYPE_MISMATCH: operational items require an action" in summary
+    assert "private human wording" not in summary
+
+
+def test_structural_repair_feedback_explains_fact_authority_without_echoing_source():
+    with pytest.raises(ValidationError) as error:
+        EngineeringSemanticFactCandidate(candidate_id="invalid", subject="private.fact",
+            relation=SemanticRelation.BEHAVIOR, value="private human wording",
+            authority=SemanticFactAuthority.SYSTEM_INFERRED,
+            epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+            source_record_ids=(uuid4(),), source_text="private human wording",
+            role_origin=SemanticRoleOrigin.EXPLICIT)
+    summary = _safe_validation_summary(error.value)
+    assert "System inference cannot assert Human-confirmed truth" in summary
     assert "private human wording" not in summary
 
 
