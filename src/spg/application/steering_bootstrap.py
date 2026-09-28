@@ -16,6 +16,7 @@ from spg.domain.planning import OnePwuFitClassification
 from spg.domain.product import ProductInvariantViolation, WorkCondition, WorkMode, WorkRecord
 from spg.domain.steering import (
     CreateSteeringPlanRequest,
+    ReviseSteeringPlanRequest,
     RealityReference,
     RealityReferenceKind,
     SteeringPlanReconstruction,
@@ -175,6 +176,34 @@ class SteeringBootstrapService:
             existing = steering.plan_for_work(work_id)
             if existing is not None:
                 reconstruction = self.steering.reconstruct(work_id)
+                if (self.guided_design.eligible(work)
+                        and self.guided_design.get_optional(work_id) is None):
+                    schema, _ = design_schema_for_work(work)
+                    current_keys = {
+                        step.design_issue_key
+                        for step in reconstruction.active_revision.steps
+                        if step.design_issue_key is not None
+                    }
+                    required_keys = {issue.key for issue in schema.issues}
+                    if not required_keys.issubset(current_keys):
+                        work_ref = RealityReference(
+                            kind=(RealityReferenceKind.WORK_REALITY_REVISION
+                                if work.current_work_reality_revision_id is not None
+                                else RealityReferenceKind.WORK),
+                            identity=(work.current_work_reality_revision_id or work.id),
+                        )
+                        reconstruction = self.steering.revise_plan(
+                            ReviseSteeringPlanRequest(
+                                steering_plan_id=reconstruction.steering_plan_id,
+                                superseded_revision_id=reconstruction.active_revision.revision.id,
+                                rationale=(
+                                    "Align the active Steering Plan with the newly eligible "
+                                    "guided design agenda for this Work Reality."
+                                ),
+                                reality_refs=(work_ref,),
+                                steps=guided_design_step_specs(schema.issues),
+                            )
+                        )
                 self.guided_design.bootstrap(work, reconstruction)
                 return reconstruction
             resource = product.resource_for_work(work_id)

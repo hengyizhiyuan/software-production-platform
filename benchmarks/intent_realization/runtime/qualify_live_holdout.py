@@ -193,7 +193,9 @@ def main():
                             and o["state"]=="SATISFIED" for o in accepted_projection.get("obligations",[])):
                         raise RuntimeError("Accepted-Candidate precondition did not settle")
             if case["group"]=="work_scope_answer":
-                baseline,_,status=turn("给系统增加搜索。","setup-search-work")
+                baseline,_,status=turn(
+                    "给系统增加搜索。需要尽快完成；搜索范围涉及用户、客户、订单，请根据现有仓库确认需要我决定的覆盖范围。",
+                    "setup-search-work")
                 setup_work_id=baseline.get("governed_work_id")
                 if status!="COMPLETED" or not setup_work_id:
                     raise RuntimeError("Search Work was not admitted")
@@ -210,6 +212,10 @@ def main():
                 baseline,_,status = turn(text,f"prior-context-{index+1}")
                 if status!="COMPLETED":
                     raise RuntimeError("Declared prior Human context did not settle")
+            pre_answer_attention=(attention_for(setup_work_id,"STEERING_DECISION_REQUIRED")
+                if case["group"]=="work_scope_answer" else None)
+            if case["group"]=="work_scope_answer":
+                save("pre-answer-attention",pre_answer_attention)
             save("before",baseline)
             actual_before = git_observation(baseline,"actual-git-before")
             after,projection,status = turn(case["text"],"unseen")
@@ -284,8 +290,11 @@ def main():
                     "no_repository_write":actual_before==actual_after,
                     "actual_git_observed":physical_observed}
                 if case["group"]=="work_scope_answer":
-                    checks["work_question_resolved"]=(setup_attention is not None
-                        and not attention or (attention or {}).get("attention_id")!=setup_attention.get("attention_id"))
+                    checks["question_pending_before_answer"]=(setup_attention is not None
+                        and pre_answer_attention is not None
+                        and pre_answer_attention.get("attention_id")==setup_attention.get("attention_id"))
+                    checks["work_question_resolved"]=(checks["question_pending_before_answer"]
+                        and (not attention or attention.get("attention_id")!=setup_attention.get("attention_id")))
                 else:
                     checks["current_production_compiled"]=any((i.get("production") or {}).get("current")
                         for i in semantic_items)

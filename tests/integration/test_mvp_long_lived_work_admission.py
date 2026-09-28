@@ -13,6 +13,7 @@ from sqlalchemy import func, select
 
 from spg.api import create_http_application
 from spg.application.post_admission import WorkPostAdmissionService
+from spg.application.guided_design import GuidedDesignApplicationService, design_schema_for_work
 from spg.application.runtime import RuntimeService
 from spg.application.steering_bootstrap import SteeringBootstrapService
 from spg.application.steering_driver import PlanSteeringDriver
@@ -286,6 +287,36 @@ def test_steer_admit_01_02_03_04_06_08_12_15_dogfood_envelope_admission(
     assert projection.steering_enabled is True
     assert projection.current_steering_step_type == "DESIGN"
     assert projection.what_happens_next == "Steering evaluates the current governed Plan Step"
+
+
+def test_existing_plan_gains_guided_design_steps_when_work_becomes_eligible(
+    admission_facts: AdmissionFacts,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    draft = _long_lived_draft(admission_facts)
+    admission_facts.service.approve_work(draft.work_id, authority_identity="human:test")
+    monkeypatch.setattr(GuidedDesignApplicationService, "eligible", lambda self, work: False)
+    bootstrap = SteeringBootstrapService(admission_facts.database)
+    initial = bootstrap.bootstrap(draft.work_id)
+    assert all(step.design_issue_key is None for step in initial.active_revision.steps)
+
+    monkeypatch.setattr(GuidedDesignApplicationService, "eligible", lambda self, work: True)
+    def assert_agenda_bound(self, work, reconstruction):
+        required = {issue.key for issue in design_schema_for_work(work)[0].issues}
+        actual = {step.design_issue_key for step in reconstruction.active_revision.steps}
+        assert required <= actual
+
+    monkeypatch.setattr(GuidedDesignApplicationService, "bootstrap", assert_agenda_bound)
+    revised = bootstrap.bootstrap(draft.work_id)
+    with admission_facts.database.unit_of_work() as unit_of_work:
+        work = ProductStore(unit_of_work.session).work(draft.work_id)
+    assert work is not None
+    required = {issue.key for issue in design_schema_for_work(work)[0].issues}
+    actual = {step.design_issue_key for step in revised.active_revision.steps}
+    assert required <= actual
+    assert revised.active_revision.revision.supersedes_revision_id == initial.active_revision.revision.id
+    repeated = bootstrap.bootstrap(draft.work_id)
+    assert repeated.active_revision.revision.id == revised.active_revision.revision.id
 
 
 @pytest.mark.parametrize(
