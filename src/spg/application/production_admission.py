@@ -431,7 +431,8 @@ class ProductionAdmissionTrigger:
         typed_scope_answer = bool(assessment.candidate_change is not None
             and assessment.semantic_ir
             and assessment.semantic_ir.items
-            and all(item.kind in {SemanticKind.CONSTRAINT, SemanticKind.FACT}
+            and all(item.kind in {SemanticKind.CONSTRAINT, SemanticKind.FACT,
+                SemanticKind.CORRECTION}
                 for item in assessment.semantic_ir.items)
             and any(item.kind is SemanticKind.CONSTRAINT and any(
                 source.source_record_id == request_record.id for source in item.provenance)

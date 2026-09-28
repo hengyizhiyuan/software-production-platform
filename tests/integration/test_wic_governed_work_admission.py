@@ -4692,7 +4692,10 @@ def test_human_answer_to_current_design_question_admits_once_and_schedules(postg
         driver.production_orchestrator.shutdown()
 
 
-def test_typed_scope_answer_to_current_question_revises_same_work_once(postgres_database, services):
+@pytest.mark.parametrize("include_correction", (False, True))
+def test_typed_scope_answer_to_current_question_revises_same_work_once(
+    postgres_database, services, include_correction,
+):
     from spg.infrastructure.persistence.interaction_store import InteractionStore
     from spg.domain.steering import NextStepCandidate, SteeringAuthorityAssessment, SteeringAttentionReason
     work, interactions = services
@@ -4717,8 +4720,14 @@ def test_typed_scope_answer_to_current_question_revises_same_work_once(postgres_
             record = basis.records[-1]
             active = basis.active_work_context
             assert active.pending_human_question == "Which business domain should search cover?"
+            correction = (SemanticItem(item_id="scope-correction", kind=SemanticKind.CORRECTION,
+                statement="Replace the earlier search scope with users only",
+                provenance=(SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
+                    source_record_id=record.id, source_text=record.content),),
+                confidence=1),) if include_correction else ()
             return InteractionAssessmentCandidate(
-                semantic_intent=semantic_candidate(record, kind=SemanticKind.CONSTRAINT),
+                semantic_intent=semantic_candidate(record, kind=SemanticKind.CONSTRAINT,
+                    extra_items=correction),
                 interpreted_motive=active.work_revision.motive,
                 desired_outcome=active.work_revision.desired_outcome,
                 candidate_context=active.work_revision.context_facts,
@@ -4760,7 +4769,8 @@ def test_typed_scope_answer_to_current_question_revises_same_work_once(postgres_
         assert assessment.candidate_change is not None
         assert "constraints" in assessment.candidate_change.changed_fields
         projection = answering.realization_projection(turn.id)
-        assert projection["obligations"][0]["state"] == "SATISFIED"
+        assert projection["obligations"][0]["state"] == "SATISFIED", json.dumps(
+            projection["obligations"], ensure_ascii=True, indent=2)
         assert projection["obligations"][0]["observed_effect"]["owner"] == "work-steering-question"
         assert scheduled == [admitted.work_id]
         with postgres_database.unit_of_work() as uow:

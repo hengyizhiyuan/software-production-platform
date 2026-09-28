@@ -3948,7 +3948,8 @@ class WorkInteractionService:
                 for meaning in candidate.meanings))
         typed_scope_answer = bool(candidate.semantic_intent
             and candidate.semantic_intent.items
-            and all(item.kind in {SemanticKind.CONSTRAINT, SemanticKind.FACT}
+            and all(item.kind in {SemanticKind.CONSTRAINT, SemanticKind.FACT,
+                SemanticKind.CORRECTION}
                 for item in candidate.semantic_intent.items)
             and any(item.kind is SemanticKind.CONSTRAINT and any(
                 source.source_record_id == latest_human_record_id

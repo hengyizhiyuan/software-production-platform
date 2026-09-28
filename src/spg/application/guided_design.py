@@ -448,7 +448,7 @@ class GuidedDesignApplicationService:
                  if item.id == work.current_work_reality_revision_id),
                 None,
             )
-            if current is None or current.engineering_resource_id is None:
+            if current is None:
                 return True
             admitted = next(
                 (item for item in reversed(revisions)
@@ -460,16 +460,21 @@ class GuidedDesignApplicationService:
             assessment = InteractionStore(unit_of_work.session).assessment(
                 admitted.source_assessment_id
             )
+            # The Human already asked for one bounded repository analysis.
+            # Let the ordinary DESIGN step answer that exact request before a
+            # general product-discovery agenda can ask unrelated questions.
+            if has_current_production_analysis_request(assessment):
+                return False
+            if current.engineering_resource_id is None:
+                return True
             goals = () if assessment is None or assessment.semantic_ir is None else assessment.semantic_ir.current_production
             if (goals and all(goal.bounded_change and not goal.systemic_design for goal in goals)
-                    and not assessment.readiness.unresolved_material_questions
-                    and not has_current_production_analysis_request(assessment)):
+                    and not assessment.readiness.unresolved_material_questions):
                 return False
             frame = None if assessment is None else assessment.design_intent_frame
             return not bool(
                 assessment is not None
                 and not assessment.unresolved_material_questions
-                and not has_current_production_analysis_request(assessment)
                 and frame is not None
                 and frame.object_type is DesignObjectType.FEATURE
                 and frame.scope_level is DesignScopeLevel.IMPLEMENTATION
