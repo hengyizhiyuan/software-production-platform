@@ -826,7 +826,9 @@ def project_interaction_candidate(candidate, ir):
     constraints = tuple(item.statement for item in ir.items if item.kind is SemanticKind.CONSTRAINT)
     updates["candidate_constraints"] = tuple(dict.fromkeys((
         *((candidate.candidate_constraints) if ir.legacy_typed_projection else ()), *constraints,
-        *(value for goal in ir.current_production for value in (*goal.scope, *goal.exclusions)))))
+        *(value for goal in ir.current_production for value in goal.scope),
+        *(f"Excluded from this Work: {value}" for goal in ir.current_production
+            for value in goal.exclusions))))
     if not ir.legacy_typed_projection:
         from spg.domain.interaction import InterpretationMeaning, InterpretationMeaningKind as M, WorkFocusClassification as F
         mapping = {SemanticKind.OPERATIONAL_ACTION: M.REQUEST, SemanticKind.PRODUCTION_INTENT: M.OBJECTIVE_OR_SCOPE_CHANGE,

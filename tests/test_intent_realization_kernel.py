@@ -689,6 +689,29 @@ def test_future_human_delivery_decision_does_not_block_current_production():
     assert IntentRealizationKernel().obligations(blocked_ir, uuid4())[0].state is ObligationState.REQUIRES_HUMAN
 
 
+def test_production_exclusion_keeps_negative_polarity_in_work_constraints():
+    from spg.application.intent_realization import project_interaction_candidate
+    from spg.domain.interaction import InteractionAssessmentCandidate
+
+    record = source("Add customer notes to forms, but do not show notes in the list.")
+    goal = SemanticItem(item_id="notes", kind=K.PRODUCTION_INTENT,
+        statement="Add customer notes without list display",
+        provenance=(provenance(record),), confidence=1,
+        production=ProductionIntent(objective="Persistent customer notes",
+            primary_change="Add customer notes to forms",
+            scope=("Add notes to create and edit forms",),
+            exclusions=("Show customer notes in the list",),
+            current=True, bounded_change=True))
+    ir = govern(record, (goal,))
+    candidate = InteractionAssessmentCandidate(natural_response="advisory", provider_identity="fixture")
+
+    projected = project_interaction_candidate(candidate, ir)
+
+    assert "Add notes to create and edit forms" in projected.candidate_constraints
+    assert "Show customer notes in the list" not in projected.candidate_constraints
+    assert "Excluded from this Work: Show customer notes in the list" in projected.candidate_constraints
+
+
 def test_explicit_dependent_analysis_survives_work_projection():
     from spg.application.intent_realization import (
         current_dependent_analysis_requests, project_interaction_candidate,
