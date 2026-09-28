@@ -25,7 +25,12 @@ def test_work_sources_are_relevant_pinned_read_only_and_exclude_symlinks(tmp_pat
     (root / "docs" / "plan.md").write_text("# Plan\n- Keep this source", encoding="utf-8")
     (root / "src" / "main.py").write_text("def produce():\n    return True\n", encoding="utf-8")
     (root / "src" / "other.py").write_text("pass\n", encoding="utf-8")
-    (root / "src" / "alias.py").symlink_to("main.py")
+    try:
+        (root / "src" / "alias.py").symlink_to("main.py")
+    except OSError as error:
+        if getattr(error, "winerror", None) == 1314:
+            pytest.skip("Windows file symlinks require a privilege unavailable to this runner")
+        raise
     _git(root, "add", ".")
     _git(root, "commit", "-m", "baseline")
     revision = _git(root, "rev-parse", "HEAD")
