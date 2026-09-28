@@ -49,6 +49,8 @@ def main():
     parser.add_argument("--timeout",type=int,default=1800)
     parser.add_argument("--git-owner-container",default="watt-irk-qualification-app-1")
     parser.add_argument("--asset-root",default="/var/lib/spg/repository-assets")
+    parser.add_argument("--seen-regression",action="store_true",
+        help="Run previously exposed cases as diagnostic regression, never as unseen qualification")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
     freeze = json.loads(args.freeze.read_text(encoding="utf-8"))
@@ -58,7 +60,10 @@ def main():
         raise SystemExit("Live image identity does not match the implementation freeze")
     corpus = json.loads(args.corpus.read_text(encoding="utf-8"))
     corpus_digest = sha256(args.corpus.read_bytes()).hexdigest()
-    if not corpus.get("holdout") or corpus["generated_at"] <= freeze["frozen_at"]:
+    if args.seen_regression:
+        if corpus.get("holdout"):
+            raise SystemExit("Seen regression must be explicitly labelled holdout=false")
+    elif not corpus.get("holdout") or corpus["generated_at"] <= freeze["frozen_at"]:
         raise SystemExit("Only unseen post-freeze wording is qualified here")
     if args.directory.exists():
         raise SystemExit("Live holdout identity is immutable")
@@ -67,7 +72,8 @@ def main():
     chosen = corpus["cases"]
     (args.directory/"plan.json").write_text(json.dumps({"case_ids":[c["id"] for c in chosen],
         "corpus_sha256":corpus_digest,
-        "runtime_identity":runtime,"manual_git":False,"implementation_hints":False},indent=2)+"\n",encoding="utf-8")
+        "runtime_identity":runtime,"manual_git":False,"implementation_hints":False,
+        "seen_regression":args.seen_regression},indent=2)+"\n",encoding="utf-8")
 
     def run(case):
         directory = args.directory/case["id"]
@@ -94,6 +100,13 @@ def main():
             save(name,value)
             return value["facts"]
         client = ProductClient(args.base,env["SPG_OPERATOR_TOKEN"])
+        def attention_for(work_id, kind):
+            entries = client.request("/api/attention?work_id="+work_id)
+            if isinstance(entries, dict):
+                entries = [entries]
+            if not isinstance(entries, list):
+                raise RuntimeError("Attention owner returned an invalid projection")
+            return next((entry for entry in entries if entry.get("kind")==kind), None)
         creation = client.request("/api/interactions",{"human_identity":"human:holdout-operator"})
         identity = creation["interaction_id"]
         save("creation",creation)
@@ -163,7 +176,7 @@ def main():
                 deadline=time.monotonic()+args.timeout
                 while time.monotonic()<deadline:
                     preview=client.request("/api/works/"+setup_work_id+"/functional-preview")
-                    setup_attention=client.request("/api/attention?work_id="+setup_work_id)
+                    setup_attention=attention_for(setup_work_id,"CANDIDATE_AUTHORIZATION")
                     if preview.get("status")=="READY" and (setup_attention or {}).get("kind")=="CANDIDATE_AUTHORIZATION":
                         break
                     time.sleep(4)
@@ -185,7 +198,7 @@ def main():
                     raise RuntimeError("Search Work was not admitted")
                 deadline=time.monotonic()+args.timeout
                 while time.monotonic()<deadline:
-                    setup_attention=client.request("/api/attention?work_id="+setup_work_id)
+                    setup_attention=attention_for(setup_work_id,"STEERING_DECISION_REQUIRED")
                     if (setup_attention or {}).get("kind")=="STEERING_DECISION_REQUIRED":
                         break
                     time.sleep(4)
@@ -255,7 +268,8 @@ def main():
                 return result
             if case["group"] in {"production_correction","work_scope_answer"}:
                 work_id=after.get("governed_work_id")
-                attention=client.request("/api/attention?work_id="+work_id) if work_id else None
+                attention=(attention_for(work_id,"STEERING_DECISION_REQUIRED")
+                    if work_id and case["group"]=="work_scope_answer" else None)
                 save("realization-attention",attention)
                 checks={"turn_completed":status=="COMPLETED",
                     "required_kinds":set(case.get("required_kinds",())) <= observed_kinds,
@@ -339,7 +353,8 @@ def main():
         "passed":sum(r["status"]=="PASS" for r in results),"cases_with_observed_effects":len(observed),
         "false_execution":sum(bool(r["false_execution"]) for r in observed),
         "unobserved_cases":len(results)-len(observed),"failed_cases":[r["case_id"] for r in results if r["status"]!="PASS"],
-        "source_fingerprint":freeze["source_fingerprint"],"human_acceptance":"PENDING"}
+        "source_fingerprint":freeze["source_fingerprint"],"human_acceptance":"PENDING",
+        "seen_regression":args.seen_regression}
     (args.directory/"report.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(report))
 

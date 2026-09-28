@@ -18,7 +18,7 @@ from spg.application.intent_realization import (
     IntentRealizationKernel, executable_semantic_actions, latest_assessment_revision,
     legacy_action_projection, production_evidence, project_interaction_candidate,
 )
-from spg.domain.intent_realization import EffectPredicate, SemanticKind, SemanticOrigin, ObligationPlane, ObligationState, ObservedEffect, TERMINAL_OBLIGATION_STATES
+from spg.domain.intent_realization import EffectPredicate, GovernedSemanticIR, SemanticKind, SemanticOrigin, ObligationPlane, ObligationState, ObservedEffect, TERMINAL_OBLIGATION_STATES
 from spg.infrastructure.persistence.intent_realization_store import IntentRealizationStore
 
 from spg.application.guided_design import (
@@ -388,6 +388,21 @@ def _work_reality_status_question(value: str) -> bool:
         r".*(?:状态|进度|做到|执行|等待|卡住|哪里|哪了|了吗|什么|how|why|running|progress|status)"
         r"|(?:为什么|怎么|why|how).*(?:等待|执行|进度|卡住|卡在|queued|waiting|running|progress)", text,
     ))
+
+
+def _is_candidate_or_delivery_lifecycle_turn(semantic_ir: GovernedSemanticIR) -> bool:
+    """Keep lifecycle authority out of the long-lived Work objective."""
+    return bool(
+        any(item.kind is SemanticKind.OPERATIONAL_ACTION and item.action is not None
+            and item.action.current for item in semantic_ir.items)
+        and all(
+            item.kind is SemanticKind.OPERATIONAL_ACTION
+            or (item.kind is SemanticKind.CONSTRAINT
+                and item.subject is not None
+                and item.subject.startswith(("candidate.", "delivery.")))
+            for item in semantic_ir.items
+        )
+    )
 
 
 def _provider_supplied_human_wording(evidence: object) -> bool:
@@ -2924,6 +2939,14 @@ class WorkInteractionService:
                     "desired_outcome": revision.desired_outcome, "current_requests": revision.requests,
                     "candidate_context": tuple(dict.fromkeys((*revision.context_facts,*candidate.candidate_context))),
                     "candidate_constraints": tuple(dict.fromkeys((*revision.constraints,*candidate.candidate_constraints)))})
+                if _is_candidate_or_delivery_lifecycle_turn(semantic_ir):
+                    # Candidate acceptance and delivery authority belong to their
+                    # lifecycle owners. Coalesced provider fields cannot turn them
+                    # into a new Work Reality revision and hide Candidate attention.
+                    candidate = candidate.model_copy(update={
+                        "candidate_context": revision.context_facts,
+                        "candidate_constraints": revision.constraints,
+                    })
             if active_context is not None and not semantic_ir.current_production and any(
                     item.kind in {SemanticKind.STATUS_QUERY, SemanticKind.QUESTION, SemanticKind.ANALYSIS}
                     for item in semantic_ir.items):
@@ -2957,7 +2980,10 @@ class WorkInteractionService:
             focus, impact, candidate_change = self._normalize_active_candidate(
                 candidate,
                 active_context,
-                engineering_semantic_facts,
+                (active_context.work_revision.engineering_semantic_facts
+                    if active_context is not None
+                    and _is_candidate_or_delivery_lifecycle_turn(semantic_ir)
+                    else engineering_semantic_facts),
                 latest_human_input=latest_human_input,
                 latest_human_record_id=latest_human_record.id,
                 prior_production_references=tuple(

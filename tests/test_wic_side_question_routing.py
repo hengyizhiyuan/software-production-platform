@@ -2,7 +2,7 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 from tests.irk_test_fixtures import governed_ir, semantic_candidate
-from spg.domain.intent_realization import ProductionIntent, SemanticKind
+from spg.domain.intent_realization import ProductionIntent, SemanticItem, SemanticKind, SemanticProvenance, SemanticOrigin
 from spg.domain.engineering_semantics import (
     EngineeringSemanticFact, SemanticFactProvenance, SemanticRelation,
     SemanticRoleOrigin, SemanticFactAuthority, SemanticEpistemicStatus,
@@ -12,6 +12,7 @@ from spg.application.interaction import (
     _declares_distinct_long_lived_object,
     _nonmutating_question,
     _provider_supplied_human_wording,
+    _is_candidate_or_delivery_lifecycle_turn,
 )
 from spg.domain.conversation import ConversationTurnIntent
 from spg.domain.interaction import (
@@ -23,6 +24,21 @@ from spg.domain.interaction import (
     WorkSatisfactionState,
 )
 from spg.domain.response_contract import InteractionMode, ResponseIntent
+
+
+def test_delivery_constraint_with_candidate_action_is_not_work_scope() -> None:
+    record = SimpleNamespace(id=uuid4(), interaction_id=uuid4(),
+        content="Accept this reviewed Candidate, but do not deliver it")
+    action = governed_ir(record, operation="ACCEPT_CANDIDATE")
+    delivery = SemanticItem(item_id="delivery-boundary", kind=SemanticKind.CONSTRAINT,
+        statement="Delivery remains unauthorized", subject="delivery.authorized",
+        provenance=(SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
+            source_record_id=record.id, source_text=record.content),), confidence=1)
+    lifecycle = action.model_copy(update={"items": (*action.items, delivery)})
+    assert _is_candidate_or_delivery_lifecycle_turn(lifecycle)
+    work_scope = delivery.model_copy(update={"subject": "profile.search.scope"})
+    assert not _is_candidate_or_delivery_lifecycle_turn(
+        lifecycle.model_copy(update={"items": (action.items[0], work_scope)}))
 
 
 def test_side_question_new_motive_and_current_feature_edit_remain_distinct() -> None:
