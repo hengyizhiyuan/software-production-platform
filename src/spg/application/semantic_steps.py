@@ -9,6 +9,8 @@ import subprocess
 from time import monotonic
 from uuid import UUID, uuid4
 
+from pydantic import ValidationError
+
 from spg.application.planning import ProductionPlanningService
 from spg.application.assets import RepositoryAssetService
 from spg.application.guided_design import GuidedDesignApplicationService
@@ -311,6 +313,14 @@ class SemanticStepApplicationService:
             if not isinstance(error.__cause__, ValueError) or not callable(refine):
                 raise
             feedback = "Semantic provider candidate failed strict schema or repository path validation: " + str(error)
+            if isinstance(error.__cause__, ValidationError):
+                # Return only typed field locations and validation messages to the
+                # same-basis repair. Raw provider values may contain untrusted text.
+                issues = error.__cause__.errors(include_input=False)
+                feedback += "; " + "; ".join(
+                    f"{'.'.join(str(part) for part in issue['loc'])}: {issue['msg']}"
+                    for issue in issues
+                )
             first_usage = getattr(self.capability, "last_usage", None)
             try:
                 revised = refine(semantic_input, validation_feedback=feedback)

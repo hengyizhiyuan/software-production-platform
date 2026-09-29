@@ -58,7 +58,8 @@ class _SemanticProviderProductionProposal(SemanticProductionProposal):
     )
     forbidden_areas: tuple[str, ...] = Field(
         description=(
-            "Repository-relative exact paths or bounded areas ending with /**."
+            "Repository-relative exact paths or bounded areas ending with /**; "
+            "never Git internals such as .git or .git/**. Empty is valid."
         ),
     )
 
@@ -368,7 +369,16 @@ class SemanticStepWireContract:
             "root-wide fallback "
             "areas such as src/** and tests/** and natural-language area descriptions are "
             "invalid. Use exact code_targets, narrower nested areas, or an unresolved "
-            "disposition instead. DESIGN may "
+            "disposition instead. forbidden_areas may be empty; never list Git internals "
+            "such as .git/** because they are outside the production target contract. "
+            "Before returning CODE_WORK, check every canonical constraint against the "
+            "proposed exact code_targets. Include the source surfaces needed for each "
+            "requested behavior, including both storage/API and user interface when "
+            "the request explicitly requires editable forms. Where observed migrations "
+            "are applied only once, updating an already-applied migration cannot evolve "
+            "an existing database; propose a new bounded migration path if needed. "
+            "Do not omit a necessary target merely because it does not yet exist in the tree. "
+            "DESIGN may "
             "propose production but never authorizes it. If an exact target or bounded area "
             "is not supported by the supplied Reality, record the uncertainty instead of "
             "fabricating a path. "
