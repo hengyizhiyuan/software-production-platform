@@ -327,7 +327,9 @@ def main():
     elif identity == 'GC-IP-01':
         browser_record = root/args.browser_record
         browser = json.loads(browser_record.read_text(encoding='utf-8')) if browser_record.exists() else {}
-        checks.update(about_page_observed=browser.get('about_page_reachable') is True,
+        checks.update(about_page_reachable=browser.get('about_page_reachable') is True,
+            distinct_about_page=browser.get('distinct_about_page') is True,
+            home_content_preserved=browser.get('home_unrelated_content_unchanged') is True,
             no_unsupported_content_claims=browser.get('unsupported_contact_reference') is False)
     elif identity in {'GC-EX-13', 'GC-IP-02'}:
         browser_record = root/args.browser_record
