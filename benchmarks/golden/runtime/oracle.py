@@ -250,10 +250,10 @@ def main():
         database = json.loads((root/args.database_record).read_text(encoding='utf-8'))
         choice = json.loads((root/'human-clarification.json').read_text(encoding='utf-8'))
         checks.update(one_genuine_domain_choice=choice.get('question_count') == 1,
-            name_and_email_search=browser.get('name_search_selected_user_only') is True
-                and browser.get('email_search_selected_user_only') is True,
+            name_and_email_search=browser.get('name_search_selected_customer_only') is True
+                and browser.get('email_search_selected_customer_only') is True,
             empty_result=browser.get('no_matches_empty') is True,
-            unrelated_domain_unchanged=browser.get('customer_domain_unchanged') is True,
+            unrelated_domain_unchanged=browser.get('unrelated_users_orders_api_unchanged') is True,
             api_search_matches_actual_database=database.get('api_and_database_agree') is True
                 and database.get('api_name_and_email_search') is True
                 and database.get('empty_search_has_no_results') is True,
