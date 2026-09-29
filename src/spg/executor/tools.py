@@ -90,6 +90,8 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
         "description": (
             "Run one allowlisted argv process without a shell. Do not use sed, tail, or wc; "
             "they are not allowlisted. Edit files with file.write, including its exact old_text/new_text mode. "
+            "The command must terminate on its own. Do not start a web server, daemon, "
+            "watch mode, or any other persistent process through process.run. "
             "Inline code flags such as python -c are rejected. For a Python import check, use "
             "['python', '-m', 'package.module'] with cwd='src', or use test.run with "
             "pytest --collect-only."
@@ -137,14 +139,14 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
     {
         "identity": "test.run",
         "version": "1",
-        "description": "Run an admitted Python or Node test recipe. Use explicit test paths; direct argv does not expand shell globs. cwd is workspace-relative (for example '.', 'client', or 'server'), never '/workspace'.",
+        "description": "Run an admitted Python or Node test recipe that exits on its own. Do not use a watch mode or persistent server. Use explicit test paths; direct argv does not expand shell globs. cwd is workspace-relative (for example '.', 'client', or 'server'), never '/workspace'.",
         "input_schema": {"type": "object", "properties": {"argv": {"type": "array", "items": {"type": "string"}}, "cwd": {"type": "string"}}, "required": ["argv", "cwd"], "additionalProperties": False},
         "effect_classification": "PROCESS",
     },
     {
         "identity": "build.run",
         "version": "1",
-        "description": "Run an admitted project-native build recipe, for example npm run build or python -m build. For Python syntax compilation use process.run with ['python', '-m', 'py_compile', source_path].",
+        "description": "Run an admitted project-native build recipe that exits on its own, for example npm run build or python -m build. Do not use a watch mode or persistent server. For Python syntax compilation use process.run with ['python', '-m', 'py_compile', source_path].",
         "input_schema": {"type": "object", "properties": {"argv": {"type": "array", "items": {"type": "string"}}, "cwd": {"type": "string"}}, "required": ["argv", "cwd"], "additionalProperties": False},
         "effect_classification": "PROCESS",
     },
