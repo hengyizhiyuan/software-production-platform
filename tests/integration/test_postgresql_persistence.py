@@ -28,7 +28,7 @@ def _record(database: Database, table: Table, record_id: int):
 def test_db_01_connectivity(postgres_database: Database) -> None:
     health = postgres_database.check()
 
-    assert health.database_name == "spg_test"
+    assert health.database_name == postgres_database.engine.url.database
     assert health.server_version_num > 0
 
 

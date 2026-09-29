@@ -1,9 +1,10 @@
-# IRK behavioral convergence: starting failure map
+# IRK behavioral convergence: failure map and later discoveries
 
-This map is based on the preserved `388662d` checkpoint, `REPORT.md`, the
+The starting map is based on the preserved `388662d` checkpoint, `REPORT.md`, the
 frozen fourth receipts archive, Tier0 matrix r290, lifecycle matrix r247,
-language metrics r259, and scope-owner receipt r282. It is a diagnosis, not a
-new qualification result. Historical receipts remain unchanged.
+language metrics r259, and scope-owner receipt r282. Later diagnostic findings
+are called out in their rows. This is a diagnosis, not a final qualification
+result. Historical receipts remain unchanged.
 
 ## Shared owners and first divergence
 
@@ -20,6 +21,10 @@ new qualification result. Historical receipts remain unchanged.
 | Steering basis persistence | Observed duplicate basis insert in `REPORT.md` | Concurrent or retried basis insertion did not establish idempotent identity before the uniqueness boundary. The database error alone is not a semantic resolution. |
 | Frontend Work projection | Preserved PRE_WORK DOM observation | Previous Work source/Preview details remained visible briefly while current focus changed. Projection identity and data invalidation were not atomic. |
 | Qualification infrastructure | Preserved Docker address-pool exhaustion | Disposable runtime network lifecycle exceeded host capacity. Cleanup must target only owned disposable resources, retaining historical volumes and frozen evidence. |
+| Production exclusion projection | Candidate-17 GC-EX-13/4 reached a Steering question that treated “不在列表显示” and “列表显示客户备注字段” as contradictory | `project_interaction_candidate` flattened `ProductionIntent.exclusions` into Work constraints without negative polarity. Commit `6abc247` marks each exclusion explicitly; Candidate-18 GC-EX-13/5, /7 and /8 each reached an independent Preview and passed the live browser/API/SQLite oracle. |
+| Qualification Preview retention | Candidate-18 GC-EX-13/6 completed four PWUs but all Preview retries hit Docker address-pool exhaustion at 32 networks | Old completed synthetic holdout Works had started 10 retained Preview runtimes (20 networks) and the qualification harness never retired those asynchronous runtimes. The bounded holdout-retirement helper now checks a PASS result, exact Work/session identity, minimum age and Docker ownership labels before retiring containers/networks while preserving volumes and receipts. Five old PASS Previews were retired with retained evidence, reducing the network count from 32 to 22. Trial 6 remains a failed diagnostic receipt. |
+| Release connector provenance assertion | Candidate-18 clean-database Release GJ-SR-01 and SR-Q1 failed on the same branch test | The first test variant executed with `builtin:git` before registering `learned:native-git` from its verified checkpoint. Its fixture cleared product/runtime tables but left connector overlays behind, so later variants saw the learned connector. The fixture now clears the four mutable connector tables as well while preserving migration-seeded authority actors; the first-execution assertion checks `builtin:git`, and post-registration retention remains separately checked. |
+| Integration database identity assertion | Candidate-18 integration shard C stopped at `test_db_01_connectivity` on an independently named test database | The assertion hard-coded `spg_test` despite the fixture using the configured database URL. It now verifies the health-reported database name against that URL; the targeted test passes and the full shard is rerunning on a fresh migrated database. |
 
 ## Finite failed slots to close
 

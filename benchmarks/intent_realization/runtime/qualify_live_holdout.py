@@ -12,6 +12,7 @@ import argparse
 import json
 from pathlib import Path, PurePosixPath
 import subprocess
+import sys
 import time
 
 from benchmarks.golden.runtime.journey import ProductClient
@@ -383,8 +384,22 @@ def main():
         save("result",result)
         print(json.dumps(result,ensure_ascii=False),flush=True)
         return result
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        results = list(pool.map(run,chosen))
+    if args.workers == 1:
+        # Earlier synthetic Works may reach READY after their case result was
+        # written. Retire only completed PASS cases between sequential trials
+        # so Docker's finite network pool remains available for later cases.
+        results = []
+        for case in chosen:
+            if results:
+                subprocess.run([sys.executable, "-m",
+                    "benchmarks.golden.runtime.retire_completed_holdout",
+                    "--root", str(args.directory),
+                    "--owner-container", args.git_owner_container,
+                    "--max-previews", "4"], cwd=root, check=True)
+            results.append(run(case))
+    else:
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            results = list(pool.map(run,chosen))
     verify_freeze(root,freeze)
     observed = [r for r in results if r["false_execution"] is not None]
     report = {"completed_at":datetime.now(UTC).isoformat(),"cases":len(results),

@@ -147,6 +147,9 @@ from spg.domain.steering import (
     SteeringInvariantViolation,
 )
 from spg.infrastructure.persistence import Database, product_tables, runtime_tables
+from spg.infrastructure.persistence.connector_schema import (
+    capability_gaps, connector_audit_events, connector_capabilities, connector_controls,
+)
 from spg.infrastructure.persistence.product_schema import (
     engineering_resource_bindings,
     engineering_scopes,
@@ -197,7 +200,13 @@ from spg.domain.verification import (
 
 pytestmark = pytest.mark.postgresql
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-ALL_TABLE_NAMES = {table.name for table in (*product_tables, *runtime_tables)}
+# Connector overlays can change the next test's chosen executor. Preserve the
+# seeded authority actors while clearing the mutable product, runtime and
+# connector records between parameter variants.
+ALL_TABLE_NAMES = {table.name for table in (
+    *product_tables, *runtime_tables, capability_gaps, connector_audit_events,
+    connector_capabilities, connector_controls,
+)}
 PRODUCTION_TABLES = (
     production_runs,
     production_work_units,
@@ -2941,7 +2950,9 @@ def test_governed_branch_operation_preserves_main_and_binds_exact_commit(
     assert branch["repository_ref"] == f"refs/heads/{branch_name}"
     assert branch["revision"] == acquired["revision"]
     assert branch["operation_evidence"]["capability_id"] == "git.branch.create"
-    assert branch["operation_evidence"]["connector_id"] == "learned:native-git"
+    # This first execution uses the builtin connector. The learned connector
+    # is registered from its verified checkpoint below, after the effect.
+    assert branch["operation_evidence"]["connector_id"] == "builtin:git"
     assert branch["operation_evidence"]["resulting_branch"] == f"refs/heads/{branch_name}"
     assert branch["operation_evidence"]["resulting_revision"] == acquired["revision"]
     assert branch["operation_evidence"]["verified"] is True
