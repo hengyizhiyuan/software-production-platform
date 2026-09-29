@@ -267,6 +267,40 @@ def test_native_tool_command_binds_workspace_python_imports() -> None:
     assert commands[0].python_source_path == "/workspace/primary/src"
 
 
+def test_native_test_command_rejects_unexpanded_targets_before_execution() -> None:
+    commands = []
+
+    class RecordingProvider:
+        def execute_observed(self, _handle, command):
+            commands.append(command)
+            return EnvironmentCommandObservation(
+                result=EnvironmentCommandResult(command=command, exit_code=0),
+                stdout="passed", stderr="",
+            )
+
+    host = ProductionEnvironmentNativeToolHost(
+        provider=RecordingProvider(),
+        handle=ProviderEnvironmentHandle(
+            provider_identity="test:production-environment",
+            environment_id=uuid4(), opaque_reference="test-environment",
+        ),
+        environment_reference="production-environment:test",
+        workspace_reference="production-workspace:test",
+    )
+    request = SimpleNamespace(delivery_id=uuid4(), proposal=SimpleNamespace(arguments={
+        "cwd": ".", "argv": ["node", "--test", "tests/*.cjs"],
+    }))
+    with pytest.raises(ValueError, match="direct argv does not expand shell globs"):
+        asyncio.run(host.run_test(request))
+    assert commands == []
+
+    request.proposal.arguments["argv"] = ["node", "--test", "tests/application.cjs"]
+    result = asyncio.run(host.run_test(request))
+    assert result.output["returncode"] == 0
+    assert len(commands) == 1
+    assert commands[0].argv == ("node", "--test", "tests/application.cjs")
+
+
 def test_docker_execution_passes_bounded_workspace_python_environment() -> None:
     class RecordingRuntime(DockerCliContainerRuntime):
         def __init__(self):

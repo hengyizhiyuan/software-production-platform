@@ -17,6 +17,17 @@ from spg.domain.native_execution import (
 ToolHandler = Callable[[ToolExecutionRequest], Awaitable[ToolExecutionResult]]
 
 
+def validate_direct_test_argv(argv: list[str]) -> None:
+    """Reject shell glob targets before a direct argv test command can run."""
+
+    if any(any(character in argument for character in "*?[]")
+            for argument in argv[1:] if not argument.startswith("-")):
+        raise ValueError(
+            "test.run requires a supported project-native test recipe: "
+            "use explicit test paths; direct argv does not expand shell globs"
+        )
+
+
 def validate_generic_git_process(argv: list[str]) -> None:
     """Generic process grants never authorize Git delivery or ref mutations."""
 
@@ -126,7 +137,7 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
     {
         "identity": "test.run",
         "version": "1",
-        "description": "Run an admitted Python or Node test recipe. cwd is workspace-relative (for example '.', 'client', or 'server'), never '/workspace'.",
+        "description": "Run an admitted Python or Node test recipe. Use explicit test paths; direct argv does not expand shell globs. cwd is workspace-relative (for example '.', 'client', or 'server'), never '/workspace'.",
         "input_schema": {"type": "object", "properties": {"argv": {"type": "array", "items": {"type": "string"}}, "cwd": {"type": "string"}}, "required": ["argv", "cwd"], "additionalProperties": False},
         "effect_classification": "PROCESS",
     },

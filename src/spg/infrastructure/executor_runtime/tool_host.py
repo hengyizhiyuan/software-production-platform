@@ -17,6 +17,7 @@ from spg.executor.tools import (
     PUBLIC_NATIVE_TOOL_CONTRACTS,
     NativeToolRegistry,
     ToolDefinition,
+    validate_direct_test_argv,
     validate_generic_git_process,
 )
 from spg.executor.git_operations import git_operation_commands, git_operation_is_read_only
@@ -251,6 +252,7 @@ class LocalNativeToolHost:
         )
         if not allowed:
             raise ValueError("test.run accepts only pytest, node, or npm test recipes")
+        validate_direct_test_argv(argv)
         return await self._run_argv(request, "test.run", argv=argv)
 
     async def run_build(self, request: ToolExecutionRequest) -> ToolExecutionResult:
