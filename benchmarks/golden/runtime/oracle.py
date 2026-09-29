@@ -283,11 +283,14 @@ def main():
             grounded_status_model=browser.get('open_status_input_preserved') is True,
             no_invented_logistics_refunds=browser.get('no_logistics_or_refunds') is True,
             actual_management_loop=browser.get('create_form_submitted') is True
-                and browser.get('reload_restores_order') is True,
+                and browser.get('reload_restores_order') is True
+                and browser.get('edit_form_submitted') is True
+                and browser.get('reload_restores_edit') is True,
             api_and_database_agree=database.get('api_and_database_agree') is True,
             real_created_order=any(row.get('customer_id') == 1 and row.get('total') == 75
                 and row.get('status') == 'open' for row in database.get('sqlite_rows', [])),
-            no_extra_product_surfaces=all(path in {'server.py','web/index.html','web/app.js','web/styles.css'} for path in paths))
+            no_extra_product_surfaces=all(path in {'server.py','web/index.html','web/app.js',
+                'web/styles.css','web/orders.html','web/orders.js'} for path in paths))
     elif identity == 'GC-EX-10':
         attempt_record = root/args.native_attempt_record
         attempt = json.loads(attempt_record.read_text(encoding='utf-8')) if attempt_record.exists() else {}
