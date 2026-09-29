@@ -134,9 +134,13 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
     # Separators between exact clause spans carry no independent effect. Keep
     # question, conditional and path punctuation covered by a cited clause.
     separators = frozenset(",，;；、。")
-    if (ids - represented - supplemental
-            or any(not c.isspace() and c not in separators and n not in covered
-                for n, c in enumerate(latest.content))):
+    unlinked = ids - represented - supplemental
+    if unlinked:
+        raise IntentRealizationViolation(
+            "PRIMARY_INTENT_CLAUSE_LOST: semantic items lack current-clause linkage: "
+            + ", ".join(sorted(unlinked)))
+    if any(not c.isspace() and c not in separators and n not in covered
+            for n, c in enumerate(latest.content)):
         raise IntentRealizationViolation("PRIMARY_INTENT_CLAUSE_LOST: compiler must account for the entire current source")
     normalized = []
     observations = {reference: observation for observation in getattr(basis, "observed_reality", ())

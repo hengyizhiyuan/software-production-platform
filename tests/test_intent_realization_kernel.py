@@ -572,6 +572,21 @@ def test_primary_clause_cannot_disappear_from_compiler_coverage():
         govern(record, (item,), clauses=(clause,))
 
 
+def test_inferred_clarification_needs_a_current_clause_link():
+    record = source("Explain locally")
+    requested = SemanticItem(item_id="request", kind=K.QUESTION,
+        statement="Explain locally", provenance=(provenance(record),), confidence=.9)
+    clarification = SemanticItem(item_id="clarification", kind=K.QUESTION,
+        statement="Which topic?", provenance=(SemanticProvenance(
+            origin=Origin.MODEL_CANDIDATE, evidence_reference="compiler:question"),),
+        confidence=.7)
+    clause = SemanticClause(clause_id="request", source_record_id=record.id,
+        source_text=record.content, semantic_item_ids=(requested.item_id,))
+    with pytest.raises(IntentRealizationViolation,
+            match="PRIMARY_INTENT_CLAUSE_LOST: semantic items lack current-clause linkage: clarification"):
+        govern(record, (requested, clarification), clauses=(clause,))
+
+
 def test_production_goal_cannot_grant_delivery():
     record = source("Add a form; I will decide delivery later")
     item = SemanticItem(item_id="product", kind=K.PRODUCTION_INTENT, statement="Form",
