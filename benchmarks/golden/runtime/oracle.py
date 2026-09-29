@@ -330,6 +330,7 @@ def main():
         checks.update(about_page_reachable=browser.get('about_page_reachable') is True,
             distinct_about_page=browser.get('distinct_about_page') is True,
             home_content_preserved=browser.get('home_unrelated_content_unchanged') is True,
+            home_navigation_to_page=browser.get('home_has_about_navigation') is True,
             no_unsupported_content_claims=browser.get('unsupported_contact_reference') is False)
     elif identity in {'GC-EX-13', 'GC-IP-02'}:
         browser_record = root/args.browser_record
