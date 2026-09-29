@@ -91,8 +91,11 @@ def main():
         diff=read(prefix+'/candidate-code-diff/'+meta['candidate_fingerprint'])
         (root/'candidate.diff').write_text(diff,encoding='utf-8')
         preview=json.loads(read(prefix+'/functional-preview'))
-        body=urllib.request.urlopen(preview['session']['endpoint'],timeout=20).read().decode()
-        (root/'served.html').write_text(body,encoding='utf-8')
+        served_bytes=urllib.request.urlopen(preview['session']['endpoint'],timeout=20).read()
+        body=served_bytes.decode()
+        # Preserve the served bytes exactly. Text-mode writes on Windows can
+        # change LF to CRLF and invalidate byte-for-byte source comparisons.
+        (root/'served.html').write_bytes(served_bytes)
     paths=[line.split(' b/',1)[1] for line in diff.splitlines() if line.startswith('diff --git')]
     added=[line[1:] for line in diff.splitlines() if line.startswith('+') and not line.startswith('+++')]
     removed=[line[1:] for line in diff.splitlines() if line.startswith('-') and not line.startswith('---')]

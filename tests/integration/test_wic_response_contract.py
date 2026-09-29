@@ -15,6 +15,7 @@ from alembic.config import Config
 from fastapi.testclient import TestClient
 import pytest
 from sqlalchemy import func, select, text
+from sqlalchemy.engine import make_url
 
 from spg.api import create_http_application
 from tests.irk_test_fixtures import semantic_candidate
@@ -76,7 +77,10 @@ OUTCOME = "A working sign-in form shows validation and submission feedback."
 def clean_response_contract_schema(postgres_database: Database) -> Iterator[None]:
     # Never use the Human Review database: the shared PostgreSQL fixture points
     # at the explicitly configured disposable test database.
-    assert postgres_database.engine.url.database == "spg_test"
+    configured_test_url = make_url(os.environ["SPG_TEST_DATABASE_URL"])
+    assert postgres_database.engine.url == configured_test_url
+    test_database_name = configured_test_url.database or ""
+    assert test_database_name == "spg_test" or test_database_name.startswith("spg_int_")
     previous = os.environ.get("SPG_DATABASE_URL")
     os.environ["SPG_DATABASE_URL"] = postgres_database.engine.url.render_as_string(
         hide_password=False
