@@ -396,6 +396,27 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
         normalized.append(item)
     for question in candidate.questions:
         validate_source(question.provenance)
+    # An otherwise executable current effect cannot be silently converted into
+    # a Human decision by the confidence gate after the compiler has finished.
+    # Return this inconsistency to the same bounded semantic repair loop. A
+    # genuinely unresolved target remains blocked by its typed argument or
+    # requires_human marker instead of being promoted by a confidence bump.
+    for item in normalized:
+        if item.confidence >= .8 or item.requires_human:
+            continue
+        if (item.action is not None and item.action.current
+                and item.action.speech_act in {
+                    ActionSpeechAct.EXPLICIT_REQUEST, ActionSpeechAct.READ_ONLY_QUERY}
+                and not item.action.conditional
+                and not blocking_action_arguments(item.action)):
+            raise IntentRealizationViolation(
+                "LOW_CONFIDENCE: current action is below the execution gate; "
+                "ground it in the exact current Human clause or retain a typed blocker")
+        if (item.production is not None and item.production.current
+                and not item.production.unresolved_arguments):
+            raise IntentRealizationViolation(
+                "LOW_CONFIDENCE: current production goal is below the admission gate; "
+                "ground it in the exact current Human clause or retain a typed blocker")
     # Detect cycles in the compiler's structured graph before dispatch.
     graph = {i.item_id: i.depends_on for i in normalized}
     def visit(identity, active, done):

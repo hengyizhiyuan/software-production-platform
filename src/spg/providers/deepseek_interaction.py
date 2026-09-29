@@ -157,6 +157,14 @@ def _repair_structured_result(
             "replace an effect target with model inference; retain source-grounded "
             "current Human intent and ask only if a required target remains unresolved. "
         )
+    if "LOW_CONFIDENCE" in validation_feedback:
+        repair_guidance += (
+            "Reassess the cited current effect against the exact Human clause and "
+            "typed dependencies. Give it execution-level confidence only when the "
+            "current request and target are actually supported; otherwise preserve "
+            "the uncertainty as a specific typed unresolved argument or genuine "
+            "Human-owned decision. Never raise confidence merely to pass validation. "
+        )
     if on_stage is not None:
         on_stage("structured_output_repair_started")
     result = runtime.generate(
@@ -246,7 +254,7 @@ class DeepSeekInteractionSemanticCapability:
             except (ValidationError, ValueError, TypeError) as error:
                 issue = _safe_validation_summary(error)
                 if isinstance(error, ValueError) and str(error).startswith((
-                        'ACTION_', 'SEMANTIC_', 'PRIMARY_', 'EXPLICIT_', 'PRODUCTION_')):
+                        'ACTION_', 'SEMANTIC_', 'PRIMARY_', 'EXPLICIT_', 'PRODUCTION_', 'LOW_')):
                     from spg.domain.refinement_contract import RefinementSignalKind
                     signal = str(error).split(":", 1)[0]
                     try:

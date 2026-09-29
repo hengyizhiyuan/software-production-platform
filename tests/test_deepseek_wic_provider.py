@@ -232,6 +232,33 @@ def test_semantic_compiler_repairs_two_structural_candidates_on_the_same_basis()
     assert "root:json_invalid" in adapter.requests[2]["instructions"]
 
 
+def test_current_action_below_execution_confidence_gets_bounded_semantic_repair() -> None:
+    url = "https://github.com/acme/example.git"
+    basis = _basis()
+    record = basis.records[-1].model_copy(update={
+        "content": f"Inspect {url} to identify its framework."})
+    basis = basis.model_copy(update={"records": (record,)})
+    grounded = semantic_candidate(record, operation="ACQUIRE_REPOSITORY",
+        arguments={"repository_source": url})
+    low = grounded.model_copy(update={"items": (
+        grounded.items[0].model_copy(update={"confidence": .7}),)})
+    first = json.loads(_semantics())
+    first["semantic_intent"] = low.model_dump(mode="json")
+    repaired = {**first, "semantic_intent": grounded.model_dump(mode="json")}
+    runtime, adapter = _runtime(_Adapter([
+        json.dumps(first, ensure_ascii=False), json.dumps(repaired, ensure_ascii=False)]))
+
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    result = capability.interpret_controlled_stream_observed(
+        basis, on_response_delta=None, on_pipeline_stage=None)
+
+    assert result.semantic_intent.items[0].confidence == 1
+    assert adapter.calls == 2
+    assert capability.last_pipeline_evidence.semantic_structured_repair_count == 1
+    assert "LOW_CONFIDENCE" in adapter.requests[1]["instructions"]
+    assert "Never raise confidence merely to pass validation" in adapter.requests[1]["instructions"]
+
+
 def test_coalesced_retention_validation_repairs_before_accepting_provider_output() -> None:
     invalid = json.loads(_envelope())
     invalid["semantics"]["retained_prior_meaning_indexes"] = [0]

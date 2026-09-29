@@ -816,6 +816,25 @@ def test_optional_uncertainty_does_not_become_a_new_human_owned_target():
     assert IntentRealizationKernel().obligations(blocked,uuid4())[0].state is ObligationState.REQUIRES_HUMAN
 
 
+def test_low_confidence_current_effect_is_repaired_before_owner_admission():
+    record = source("Inspect https://github.com/acme/example.git to identify its framework.")
+    requested = action(record, op=O.ACQUIRE_REPOSITORY, branch=None).model_copy(update={
+        "confidence": .7,
+        "action": OperationalIntent(operation=O.ACQUIRE_REPOSITORY,
+            arguments={"repository_source": SemanticArgument(
+                value="https://github.com/acme/example.git", provenance=provenance(record))},
+            speech_act=S.EXPLICIT_REQUEST),
+    })
+    with pytest.raises(IntentRealizationViolation, match="LOW_CONFIDENCE"):
+        govern(record, (requested,))
+    blocked = govern(record, (requested.model_copy(update={"requires_human": True}),))
+    assert executable_semantic_actions(blocked) == ()
+    assert IntentRealizationKernel().obligations(blocked, uuid4())[0].state is ObligationState.REQUIRES_HUMAN
+    grounded = govern(record, (requested.model_copy(update={"confidence": .8}),))
+    assert executable_semantic_actions(grounded) == grounded.operational_requests
+    assert IntentRealizationKernel().obligations(grounded, uuid4())[0].state is ObligationState.PENDING
+
+
 def test_routine_discovery_uncertainty_does_not_become_a_human_question():
     from spg.application.intent_realization import project_interaction_candidate
     from spg.domain.interaction import InteractionAssessmentCandidate
