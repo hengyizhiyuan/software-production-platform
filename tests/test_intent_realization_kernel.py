@@ -835,6 +835,30 @@ def test_low_confidence_current_effect_is_repaired_before_owner_admission():
     assert IntentRealizationKernel().obligations(grounded, uuid4())[0].state is ObligationState.PENDING
 
 
+def test_repository_source_question_requires_read_obligation_after_acquisition():
+    url = "https://github.com/acme/example.git"
+    record = source(f"Inspect {url} to identify its framework.")
+    acquired = action(record, op=O.ACQUIRE_REPOSITORY, branch=None).model_copy(update={
+        "action": OperationalIntent(operation=O.ACQUIRE_REPOSITORY,
+            arguments={"repository_source": SemanticArgument(value=url,
+                provenance=provenance(record))}, speech_act=S.EXPLICIT_REQUEST)})
+    question = SemanticItem(item_id="framework-question", kind=K.QUESTION,
+        statement="Identify the repository framework", subject="repository.tech_stack",
+        provenance=(provenance(record),), confidence=.95,
+        depends_on=(acquired.item_id,))
+    with pytest.raises(IntentRealizationViolation, match="source-derived repository question"):
+        govern(record, (acquired, question))
+    inspected = question.model_copy(update={"action": OperationalIntent(
+        operation=O.INSPECT_REPOSITORY, speech_act=S.READ_ONLY_QUERY,
+        arguments={"repository_source": SemanticArgument(value=url,
+            provenance=provenance(record))})})
+    ir = govern(record, (acquired, inspected))
+    obligations = IntentRealizationKernel().obligations(ir, uuid4())
+    assert [o.operation for o in obligations] == [O.ACQUIRE_REPOSITORY, O.INSPECT_REPOSITORY]
+    assert obligations[1].depends_on == (obligations[0].id,)
+    assert all(o.state is ObligationState.PENDING for o in obligations)
+
+
 def test_routine_discovery_uncertainty_does_not_become_a_human_question():
     from spg.application.intent_realization import project_interaction_candidate
     from spg.domain.interaction import InteractionAssessmentCandidate

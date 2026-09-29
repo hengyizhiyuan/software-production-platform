@@ -430,6 +430,31 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
     done = set()
     for identity in graph:
         visit(identity, set(), done)
+    by_id = {item.item_id: item for item in normalized}
+    repository_metadata = {"source", "url", "identity", "repository_identity",
+        "revision", "tree", "branch", "current_branch", "repository_ref",
+        "branches", "condition", "status", "ready", "paths", "product_id"}
+    def has_read_obligation(identity, seen=frozenset()):
+        if identity in seen:
+            return False
+        item = by_id[identity]
+        if (item.action is not None and item.action.current
+                and item.action.speech_act in {
+                    ActionSpeechAct.EXPLICIT_REQUEST, ActionSpeechAct.READ_ONLY_QUERY}
+                and canonical_operation(item.action.operation) in {
+                    CanonicalOperation.INSPECT_REPOSITORY, CanonicalOperation.SEARCH_REPOSITORY}):
+            return True
+        return any(has_read_obligation(parent, seen | {identity}) for parent in item.depends_on)
+    for item in normalized:
+        subject = item.subject or ""
+        if (item.kind in {SemanticKind.QUESTION, SemanticKind.ANALYSIS}
+                and not item.requires_human and not item.answer and not item.observed_facts
+                and (subject.startswith("repository.") or subject.startswith("repository:") and "#" in subject)
+                and re.split(r"[.#]", subject)[-1] not in repository_metadata
+                and not has_read_obligation(item.item_id)):
+            raise IntentRealizationViolation(
+                "PRIMARY_INTENT_CLAUSE_LOST: source-derived repository question "
+                "needs a governed read obligation; acquisition metadata alone cannot answer it")
     branch_items = {}
     for item in normalized:
         if (item.action is None or not item.action.current

@@ -165,6 +165,14 @@ def _repair_structured_result(
             "the uncertainty as a specific typed unresolved argument or genuine "
             "Human-owned decision. Never raise confidence merely to pass validation. "
         )
+    if "source-derived repository question" in validation_feedback:
+        repair_guidance += (
+            "Keep the exact current repository question and its Human provenance. "
+            "Bind a current READ_ONLY_QUERY INSPECT_REPOSITORY operation to that "
+            "question, or add one ordered dependency, so the repository owner can "
+            "read source evidence at the acquired revision before answering. "
+            "Do not claim source-derived facts from acquisition metadata alone. "
+        )
     if on_stage is not None:
         on_stage("structured_output_repair_started")
     result = runtime.generate(
