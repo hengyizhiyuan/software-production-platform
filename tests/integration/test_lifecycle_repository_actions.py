@@ -48,7 +48,10 @@ def turn(service, identity, text, *, operation=None, branch=None, ambiguous=Fals
         service.capability.arguments = {"target_branch": branch} if branch else {"repository_source": re.search(r"https://[^，\s]+", text).group(0)} if operation == "ACQUIRE_REPOSITORY" and not ambiguous else {}
         service.capability.conditional = ambiguous
     receipt = service.submit_turn(identity, text, human_identity='human:owner')
-    deadline=time.monotonic()+30
+    # Real Git and PostgreSQL work can settle just after 30 seconds when the
+    # independent integration shards run concurrently. Keep the terminal-state
+    # assertion and a bounded wait without misclassifying a completed effect.
+    deadline=time.monotonic()+90
     while time.monotonic()<deadline:
         current=service.get_turn(receipt.id)
         if current.status.value in {'COMPLETED','FAILED'}:
