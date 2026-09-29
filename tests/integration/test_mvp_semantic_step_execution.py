@@ -85,7 +85,8 @@ class _SemanticCapability:
             repository_quote="const status = 'ready';",
             human_clause="状态可观测性",
             necessity="The existing frontend status module owns the requested observability behavior.",
-        ),), rejected_behaviors=(), explanation="Exact baseline witness establishes the existing frontend change surface.")
+        ),), rejected_behaviors=(), requirement_coverage=(),
+            explanation="Exact baseline witness establishes the existing frontend change surface.")
 
     def __init__(
         self,

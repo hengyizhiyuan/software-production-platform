@@ -193,7 +193,7 @@ def test_incomplete_persistence_proposal_cannot_admit_without_requested_form():
     from spg.domain.refinement import RepositoryScopeValidation
     service = object.__new__(SemanticStepApplicationService)
     service.capability = SimpleNamespace(validate_production_scope=lambda *_:
-        RepositoryScopeValidation(required_targets=(), rejected_behaviors=(),
+        RepositoryScopeValidation(required_targets=(), rejected_behaviors=(), requirement_coverage=(),
             explanation="Backend-only scope cannot fulfill an editable form request",
             missing_acceptance_requirements=(
             "The requested editable form is absent from the proposed implementation",)))
@@ -206,3 +206,41 @@ def test_incomplete_persistence_proposal_cannot_admit_without_requested_form():
             code_targets=("server.py",), verification_expectation="Real write/read"))
     with pytest.raises(ValueError, match="INTENT_COMPLETENESS_MISMATCH"):
         service._materialize_production_plan(intent, candidate)
+
+
+def test_scope_validation_accounts_for_each_atomic_form_requirement():
+    from spg.domain.refinement import (
+        RepositoryScopeValidation, RepositoryTargetNecessityProof,
+        ScopeRequirementCoverage,
+    )
+    from spg.providers.deepseek_semantic import _scope_coverage_issues
+
+    constraints = ("Persist the customer note", "Edit the note in the customer form")
+    proof = RepositoryTargetNecessityProof(
+        path="web/app.js", source_path="web/app.js",
+        repository_quote="document.querySelector('#customer-form')",
+        human_clause="Edit the note in the customer form",
+        necessity="The existing form handler must submit and restore the note field.",
+    )
+    validation = RepositoryScopeValidation(
+        required_targets=(proof,), rejected_behaviors=(),
+        explanation="The form handler is a necessary observed implementation surface.",
+        requirement_coverage=(ScopeRequirementCoverage(
+            requirement=constraints[0], disposition="ALREADY_PRESENT",
+            source_path="server.py", repository_quote="notes TEXT",
+            explanation="The schema already persists notes.",
+        ),),
+    )
+    assert _scope_coverage_issues(constraints, validation,
+        {"server.py": "notes TEXT", "web/app.js": proof.repository_quote})
+
+    complete = validation.model_copy(update={"requirement_coverage": (
+        ScopeRequirementCoverage(requirement=constraints[0],
+            disposition="ALREADY_PRESENT", source_path="server.py",
+            repository_quote="notes TEXT", explanation="The schema already persists notes."),
+        ScopeRequirementCoverage(requirement=constraints[1],
+            disposition="REQUIRED_TARGET", target_paths=("web/app.js",),
+            explanation="The form handler must write and restore the note."),
+    )})
+    assert _scope_coverage_issues(constraints, complete,
+        {"server.py": "notes TEXT", "web/app.js": proof.repository_quote}) == ()

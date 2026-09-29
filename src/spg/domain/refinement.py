@@ -3,7 +3,7 @@
 from enum import StrEnum
 from hashlib import sha256
 import json
-from typing import Protocol
+from typing import Literal, Protocol
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -142,11 +142,34 @@ class RepositoryTargetNecessityProof(BaseModel):
         return safe_repository_path(value)
 
 
+class ScopeRequirementCoverage(BaseModel):
+    """How one governed requirement is discharged by the proposed scope."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    requirement: str = Field(min_length=1)
+    disposition: Literal["REQUIRED_TARGET", "ALREADY_PRESENT", "DOWNSTREAM", "MISSING"]
+    target_paths: tuple[str, ...] = ()
+    source_path: str | None = None
+    repository_quote: str | None = None
+    explanation: str = Field(min_length=10)
+
+    @field_validator("target_paths")
+    @classmethod
+    def normalize_target_paths(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        return tuple(safe_repository_path(path) for path in value)
+
+    @field_validator("source_path")
+    @classmethod
+    def normalize_source_path(cls, value: str | None) -> str | None:
+        return None if value is None else safe_repository_path(value)
+
+
 class RepositoryScopeValidation(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     required_targets: tuple[RepositoryTargetNecessityProof, ...]
     rejected_behaviors: tuple[str, ...]
     explanation: str = Field(min_length=10)
+    requirement_coverage: tuple[ScopeRequirementCoverage, ...]
     missing_acceptance_requirements: tuple[str, ...] = ()
 
 
