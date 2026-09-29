@@ -222,7 +222,10 @@ class CandidatePreviewApplicationService:
                         "Preview runtime cannot currently be inspected; authorization is unavailable"
                     ) from exc
                 if not ready:
-                    cleanup = self.provider.stop(session.id) or {}
+                    # A missing runtime is not a retention decision. In
+                    # particular, a qualification harness may have retired
+                    # containers while keeping its review source volume.
+                    cleanup = {"resource_cleanup": "DEFERRED_FOR_REVIEW_RETENTION"}
                     failed = self._fail(session, "RUNTIME_LOST",
                         "Preview services or exact revision are no longer ready", cleanup=cleanup)
                     self._record_refinement(failed, converged=False)
@@ -260,6 +263,9 @@ class CandidatePreviewApplicationService:
                         raise CandidatePreviewUnavailable(
                             "Preview runtime cannot currently be inspected; retry when runtime control is available"
                         ) from exc
+                    previous = self._fail(previous, "RUNTIME_LOST",
+                        "Preview services or exact revision are no longer ready",
+                        cleanup={"resource_cleanup": "DEFERRED_FOR_REVIEW_RETENTION"})
                 if previous.status not in {PreviewRuntimeStatus.STOPPED, PreviewRuntimeStatus.STALE, PreviewRuntimeStatus.FAILED}:
                     cleanup = self.provider.stop(previous.id) or {}
                     previous = self._advance(previous, PreviewRuntimeStatus.STALE if previous.candidate_fingerprint != context["candidate_fingerprint"]
@@ -420,7 +426,10 @@ class CandidatePreviewApplicationService:
                     session.id, session.repository_revision, session.repository_tree, mode=session.mode,
                 ):
                     continue
-                cleanup = self.provider.stop(session.id) or {}
+                # A stopped runtime after a host restart is not authorization to
+                # destroy its Candidate source or database volumes. Keep the
+                # evidence for the review/retention owner to release explicitly.
+                cleanup = {"resource_cleanup": "DEFERRED_FOR_REVIEW_RETENTION"}
                 failed = self._fail(session, "RESTART_RECONCILIATION",
                     "Preview runtime was not READY after service restart", cleanup=cleanup)
                 self._record_refinement(failed, converged=False)

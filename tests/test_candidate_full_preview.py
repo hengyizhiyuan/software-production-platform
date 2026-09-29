@@ -321,8 +321,30 @@ def test_restart_reconciles_missing_runtime_without_claiming_ready(tmp_path: Pat
     assert after.status is PreviewRuntimeStatus.FAILED
     assert after.endpoint is None
     assert after.failure_code == "RESTART_RECONCILIATION"
+    assert provider.stopped == []
+    assert after.evidence[-1]["resource_cleanup"] == "DEFERRED_FOR_REVIEW_RETENTION"
     with pytest.raises(CandidatePreviewUnavailable):
         recovered.require_ready(work_id, ready.candidate_id)
+
+
+def test_polling_missing_runtime_retains_review_resources(tmp_path: Path):
+    repository, revision, tree = candidate_repository(tmp_path)
+    source = CandidateSource(context(repository, revision, tree))
+    provider = RuntimeProvider()
+    store = JsonProductionEnvironmentStore(tmp_path / "production-environments")
+    service = CandidatePreviewApplicationService(source, store, provider)
+    work_id = uuid4()
+    service.request(work_id)
+    ready = await_ready(service, work_id)
+    provider.alive = False
+
+    after = service.current(work_id)
+
+    assert after.status is PreviewRuntimeStatus.FAILED
+    assert after.failure_code == "RUNTIME_LOST"
+    assert after.endpoint is None
+    assert after.evidence[-1]["resource_cleanup"] == "DEFERRED_FOR_REVIEW_RETENTION"
+    assert provider.stopped == []
 
 
 def test_unhealthy_runtime_never_becomes_ready_and_cleanup_is_recorded(tmp_path: Path):
