@@ -2014,6 +2014,7 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
     blocked_independent_action: bool,
 ) -> None:
     source = "https://github.com/acme/automatic-admission"
+    separate_source = "https://github.com/acme/independent-acquisition"
     work, interactions = _services_for_resource(
         postgres_database,
         tmp_path,
@@ -2029,14 +2030,14 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
                 return candidate
             record = basis.records[-1]
             separate = semantic_candidate(record, operation="ACQUIRE_REPOSITORY",
-                arguments={"repository_source": source}).items[0].model_copy(update={
+                arguments={"repository_source": separate_source}).items[0].model_copy(update={
                     "item_id": "independent-acquire", "statement": "Separate repository acquisition",
-                    "confidence": .7})
+                    "confidence": .7, "requires_human": True})
             raw = candidate.semantic_intent
             clause = raw.clauses[0].model_copy(update={
-                "semantic_item_ids": (*raw.clauses[0].semantic_item_ids, separate.item_id)})
+                "clause_id": "independent-source", "semantic_item_ids": (separate.item_id,)})
             return candidate.model_copy(update={"semantic_intent": raw.model_copy(update={
-                "items": (*raw.items, separate), "clauses": (clause,)})})
+                "items": (*raw.items, separate), "clauses": (*raw.clauses, clause)})})
     interactions.capability = MixedCompiler(source)
 
     class ExistingRepositoryIntake:
@@ -2114,7 +2115,8 @@ def test_explicit_repository_action_automatically_executes_governed_admission(
         submitted = client.post(
             f"/api/interactions/{interaction.id}/turns",
             json={
-                "content": f"Please pull {source} and add a login feature.",
+                "content": (f"Please pull {source} and add a login feature."
+                    + (f" Separately acquire {separate_source}." if blocked_independent_action else "")),
                 "human_identity": "human:requester",
             },
         )

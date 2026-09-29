@@ -94,10 +94,26 @@ def build_progressive_semantics(
     from spg.application.intent_realization import current_step_semantic_items
     current_items = current_step_semantic_items(semantic_ir)
     human_owned = any(item.requires_human for item in current_items)
+    # An independent Action retains its own Human dependency. Only decisions
+    # on the production goal or its declared prerequisites block Work admission.
+    work_dependencies: set[str] = set()
+    if production and semantic_ir is not None:
+        by_id = {item.item_id: item for item in items}
+        def include_work_dependency(identity):
+            if identity in work_dependencies:
+                return
+            work_dependencies.add(identity)
+            for parent in by_id[identity].depends_on:
+                include_work_dependency(parent)
+        for item in items:
+            if item.production is not None and item.production.current:
+                include_work_dependency(item.item_id)
     # Reversibility never derives authority from a lexical phrase.
     safe_inference = bool(semantic_ir and any(q.safe_reversible_assumption
         for q in semantic_ir.questions)) and not human_owned
     decisions = [item.statement for item in current_items if item.requires_human]
+    work_decisions = [item.statement for item in current_items
+        if item.requires_human and (not production or item.item_id in work_dependencies)]
     if human_owned:
         signals.append(PatternSignal.HIGH_IMPACT_AMBIGUITY)
         for decision in decisions:
@@ -110,7 +126,10 @@ def build_progressive_semantics(
             *typed_questions, *decisions))):
         typed = typed_questions.get(question)
         reversible = bool(typed and typed.safe_reversible_assumption) and not human_owned
-        blocking = True if typed is None else typed.blocks_current_step and not reversible
+        if question in decisions and production:
+            blocking = question in work_decisions
+        else:
+            blocking = True if typed is None else typed.blocks_current_step and not reversible
         human_decision = question in decisions or bool(typed and typed.requires_human)
         questions.append(QuestionEvaluation(question=question, affected_dimensions=("SCOPE", "AUTHORITY"),
             answer_already_available=False, safe_reversible_assumption_available=reversible,
@@ -160,6 +179,7 @@ def build_progressive_semantics(
         None,
     )
     unresolved = tuple(dict.fromkeys((*decisions, *((selected,) if selected else ()))))
+    work_unresolved = tuple(dict.fromkeys((*work_decisions, *((selected,) if selected else ()))))
 
     conversation_only = active_context is None and not production and bool(items) and all(
         item.kind in {SemanticKind.QUESTION, SemanticKind.ANALYSIS, SemanticKind.STATUS_QUERY,
@@ -167,7 +187,7 @@ def build_progressive_semantics(
         for item in items)
     if PatternSignal.NEW_LONG_LIVED_OBJECT in signals:
         governance = GovernanceCandidateKind.NEW_MOTIVE_CANDIDATE
-    elif human_owned:
+    elif work_decisions:
         governance = GovernanceCandidateKind.HUMAN_DECISION_REQUIRED
     elif conversation_only:
         governance = GovernanceCandidateKind.CONVERSATION_ONLY
@@ -180,7 +200,7 @@ def build_progressive_semantics(
 
     motive_ok = bool(working_motive and working_motive.strip())
     outcome_ok = bool(candidate.desired_outcome and candidate.desired_outcome.strip())
-    blocked = bool(unresolved)
+    blocked = bool(work_unresolved)
     readiness = (
         TransitionReadiness(
             target=ReadinessTarget.WORK_FORMATION,
@@ -192,15 +212,15 @@ def build_progressive_semantics(
                 else tuple(x for x, ok in (("MOTIVE", motive_ok), ("DESIRED_OUTCOME", outcome_ok)) if not ok)
                 + (("HIGHEST_VALUE_QUESTION_ANSWER",) if selected else ())
             ),
-            unresolved_human_decisions=unresolved, material_risks=("HIGH_IMPACT_AUTHORITY",) if decisions else (),
+            unresolved_human_decisions=work_unresolved, material_risks=("HIGH_IMPACT_AUTHORITY",) if work_decisions else (),
             useful_work_may_continue=True, basis_fingerprint=basis_fingerprint,
         ),
         TransitionReadiness(
             target=ReadinessTarget.WORK_REVISION,
             status=TransitionReadinessStatus.READY if active_context is not None and not blocked and governance is GovernanceCandidateKind.WORK_REVISION_PROPOSAL else TransitionReadinessStatus.NOT_READY if active_context is not None else TransitionReadinessStatus.NOT_APPLICABLE,
             satisfied_evidence=("ACTIVE_WORK_BASIS",) if active_context else (),
-            missing_material_evidence=("HIGHEST_VALUE_QUESTION_ANSWER",) if selected else (), unresolved_human_decisions=unresolved,
-            material_risks=("HIGH_IMPACT_AUTHORITY",) if decisions else (), useful_work_may_continue=True,
+            missing_material_evidence=("HIGHEST_VALUE_QUESTION_ANSWER",) if selected else (), unresolved_human_decisions=work_unresolved,
+            material_risks=("HIGH_IMPACT_AUTHORITY",) if work_decisions else (), useful_work_may_continue=True,
             basis_fingerprint=basis_fingerprint,
         ),
         TransitionReadiness(

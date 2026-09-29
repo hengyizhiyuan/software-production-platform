@@ -53,7 +53,7 @@ from spg.domain.wic_intelligence import (
 )
 from spg.domain.wic_response import GovernedResponseEnvelope, ResponseReconciliation
 from spg.evaluation.open_wic_baseline import _active_context, load_corpus
-from tests.irk_test_fixtures import governed_ir, question as typed_question
+from tests.irk_test_fixtures import governed_ir, question as typed_question, semantic_candidate
 from spg.domain.intent_realization import ProductionIntent, SemanticArgument, SemanticProvenance, SemanticOrigin, SemanticKind
 from spg.application.intent_realization import project_interaction_candidate
 
@@ -582,6 +582,33 @@ def test_ow_f_blocks_unsafe_inference_asks_one_high_value_question_and_allows_de
     assert formation.unresolved_human_decisions
     assert design.status is TransitionReadinessStatus.READY
     assert design.useful_work_may_continue
+
+
+@pytest.mark.parametrize("dependent", (False, True))
+def test_human_action_blocks_work_only_when_it_is_a_goal_prerequisite(dependent: bool) -> None:
+    record, active, fingerprint = _inputs("OW-F", text="Build a login feature and review another repository.")
+    assert active is None
+    goal = governed_ir(record, production=ProductionIntent(
+        objective="Build a login feature", primary_change="Login works",
+        current=True, bounded_change=True))
+    action = semantic_candidate(record, operation="ACQUIRE_REPOSITORY",
+        statement="Review another repository", requires_human=True).items[0].model_copy(
+            update={"item_id": "other-repository", "confidence": .7})
+    goal_item = goal.items[0].model_copy(update={
+        "depends_on": (action.item_id,) if dependent else ()})
+    clause = goal.clauses[0].model_copy(update={
+        "semantic_item_ids": (goal_item.item_id, action.item_id)})
+    ir = goal.model_copy(update={"items": (goal_item, action), "clauses": (clause,)})
+    candidate = project_interaction_candidate(_candidate("OW-F"), ir)
+    result = build_progressive_semantics(candidate=candidate, records=(record,),
+        semantic_ir=ir, basis_fingerprint=fingerprint, prior_assessment=None,
+        active_context=None, focus=WorkFocusClassification.ON_TOPIC,
+        impact=WorkImpactDisposition.NO_GOVERNED_CHANGE)
+    formation = next(x for x in result.readiness if x.target is ReadinessTarget.WORK_FORMATION)
+    assert formation.status is (TransitionReadinessStatus.NOT_READY if dependent
+        else TransitionReadinessStatus.READY)
+    assert result.questions[0].blocks_next_governed_step is dependent
+    assert "Review another repository" in result.unresolved_human_decisions
 
 
 def test_question_policy_ranks_high_impact_boundary_above_lower_value_scope_detail() -> None:
