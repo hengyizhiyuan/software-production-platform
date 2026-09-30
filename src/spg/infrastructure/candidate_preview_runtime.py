@@ -334,6 +334,8 @@ with response:
         config = workspace.parent / "proxy.conf"
         config.write_text("server { listen 80; server_name _; location / { "
             f"proxy_pass http://app:{port}; proxy_http_version 1.1; "
+            f"add_header X-Candidate-Revision {revision} always; "
+            f"add_header X-Candidate-Tree {tree} always; "
             "proxy_set_header Host $host; proxy_buffering off; "
             "proxy_read_timeout 3600s; } }\n", encoding="utf-8")
         self._docker("create", "--name", names["proxy"], "--label", label,

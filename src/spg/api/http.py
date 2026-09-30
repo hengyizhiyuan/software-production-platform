@@ -222,6 +222,7 @@ def create_http_application(
     github_delivery = GitHubDeliveryService(selected_database,
         settings or Settings(), delivery=delivery_service)
     candidate_runtime_preview = None
+    guardian_assurance_client = None
     if getattr(settings, "native_executor_enabled", False):
         pe_root = settings.native_executor_production_environment_store_root
         candidate_runtime_preview = CandidatePreviewApplicationService(
@@ -230,6 +231,15 @@ def create_http_application(
             DockerCandidatePreviewRuntime(pe_root / "candidate-preview-runtime",
                 verification_image=settings.native_executor_production_environment_image),
         )
+        if getattr(settings, "owner_runtime_mode", "OFF") == "REQUIRED":
+            from guardian.runtime import JsonSoftwareAssuranceStore
+            from spg.application.guardian_assurance import GuardianAssuranceClient
+            guardian_assurance_client = GuardianAssuranceClient(
+                delivery_service, candidate_runtime_preview.store,
+                JsonSoftwareAssuranceStore(settings.owner_runtime_store_root / "guardian"),
+            )
+            candidate_runtime_preview.assurance_client = guardian_assurance_client
+            delivery_service.guardian_assurance_client = guardian_assurance_client
         delivery_service.full_application_runtime_probe = (
             candidate_runtime_preview.require_served_for_delivery)
         work_service.configure_candidate_review(candidate_runtime_preview.prepare_review,
@@ -263,6 +273,9 @@ def create_http_application(
     )
     if candidate_runtime_preview is not None:
         candidate_runtime_preview.outcome_listener = selected_steering_driver.preview_outcome
+        if guardian_assurance_client is not None:
+            candidate_runtime_preview.assurance_outcome_listener = (
+                selected_steering_driver.guardian_assurance_outcome)
     selected_runtime_activation = runtime_activation or container.runtime_activation(
         selected_database
     )
@@ -2043,6 +2056,20 @@ def create_http_application(
         if candidate_runtime_preview is None:
             raise CandidatePreviewUnavailable("Full-application Preview Runtime is not configured")
         return candidate_runtime_preview.stop(work_id).model_dump(mode="json")
+
+    @api.post("/api/works/{work_id}/guardian-assurance/requirements")
+    def bind_guardian_requirements(work_id: UUID, request: dict):
+        if guardian_assurance_client is None:
+            raise CandidatePreviewUnavailable("Guardian owner runtime is unavailable")
+        return guardian_assurance_client.bind_requirements(
+            work_id, request.get("required_effects", []),
+            authority_identity=request.get("authority_identity", ""))
+
+    @api.get("/api/works/{work_id}/guardian-assurance")
+    def guardian_assurance_view(work_id: UUID):
+        if guardian_assurance_client is None:
+            return {"status": "NOT_STARTED", "gate": None, "finding_count": 0}
+        return guardian_assurance_client.projection(work_id)
 
     @api.get("/api/works/{work_id}/candidate-code-diff/{candidate_fingerprint}")
     def candidate_code_diff(work_id: UUID, candidate_fingerprint: str):

@@ -2,6 +2,7 @@
 from hashlib import sha256
 from io import BytesIO
 import json
+import os
 from pathlib import Path
 import socket
 import subprocess
@@ -11,6 +12,7 @@ from uuid import UUID, uuid4
 from zipfile import ZipFile
 from fastapi.testclient import TestClient
 import pytest
+from sqlalchemy import func, select
 
 from test_work_delivery import (clean_schema, create_asset, bind, _GuidedDesignSemanticCapability,
     _SchedulingOrchestrator, _GeneralProductDesignCapability)
@@ -35,6 +37,7 @@ from spg.providers.contract_verifier import ContractDrivenRepositoryVerifier
 from spg.providers.deterministic_executor import (DeterministicTestExecutor, DeterministicExecutionSpecification,
     DeterministicFileOperation, DeterministicFileOperationType)
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.github_delivery_schema import remote_delivery_authorizations
 
 pytestmark = pytest.mark.postgresql
 SOURCE = {
@@ -365,9 +368,23 @@ def test_full_application_delivery_uses_exact_served_candidate_for_acceptance(
         delivery.decide(work_id, manifest.id, acceptance)
     calls = []
     delivery.full_application_runtime_probe = lambda *args: calls.append(args)
-    assert delivery.decide(work_id, manifest.id, acceptance).decision.value == 'ACCEPT'
+    decision = delivery.decide(work_id, manifest.id, acceptance)
+    assert decision.decision.value == 'ACCEPT'
     assert calls[0][0] == work_id
     assert calls[0][2] == manifest.repository_revision
+    with postgres_database.unit_of_work() as uow:
+        remote_count = uow.session.execute(select(func.count()).select_from(
+            remote_delivery_authorizations)).scalar_one()
+    assert remote_count == 0
+    if receipt_path := os.environ.get('WATT_GUARDIAN_QUALIFICATION_RECEIPT'):
+        destination = Path(receipt_path).with_name('Q4-acceptance-delivery-boundary.json')
+        destination.write_text(json.dumps({
+            'work_id': str(work_id), 'manifest_id': str(manifest.id),
+            'candidate_revision': manifest.repository_revision,
+            'human_acceptance_id': str(decision.id), 'human_acceptance': 'ACCEPT',
+            'remote_delivery_authorization_count': remote_count,
+            'guardian_pass_receipt': str(Path(receipt_path).name),
+        }, indent=2) + '\n', encoding='utf-8')
 
 def test_failing_behavior_test_cannot_publish_software(postgres_database, tmp_path):
     service, work_id, delivery, _ = produce(postgres_database, tmp_path, failing=True)

@@ -360,6 +360,13 @@ class Application:
                 DockerCandidatePreviewRuntime(pe_root / "candidate-preview-runtime",
                     verification_image=self.settings.native_executor_production_environment_image),
             )
+            if self.settings.owner_runtime_mode == "REQUIRED":
+                from guardian.runtime import JsonSoftwareAssuranceStore
+                from spg.application.guardian_assurance import GuardianAssuranceClient
+                preview.assurance_client = GuardianAssuranceClient(
+                    preview.delivery, preview.store,
+                    JsonSoftwareAssuranceStore(self.settings.owner_runtime_store_root / "guardian"),
+                )
 
             def require_functional_preview(work_id, candidate_id):
                 context = preview.delivery.candidate_context(work_id)
@@ -368,6 +375,9 @@ class Application:
                     CandidatePreviewMode.FRONTEND_RUNTIME,
                 }:
                     preview.require_ready(work_id, candidate_id)
+                    if preview.assurance_client is not None and not preview.assurance_client.passed(
+                        work_id, candidate_id):
+                        raise RuntimeError("Guardian PASS is required for exact Candidate authorization")
 
             service.configure_candidate_authorization_guard(require_functional_preview)
             service.configure_candidate_review(preview.prepare_review, preview.review_ready)

@@ -39,3 +39,32 @@ Evidence for the governed Work/PWU; it does not own a Project lifecycle, Work,
 Plan, or attached Assets.
 
 This document does not design Guardian Core.
+
+## Bounded software assurance station
+
+The `REQUIRED` owner-runtime profile uses Guardian's canonical
+`watt-guardian-software-assurance-v1` contract. Watt binds explicit business
+effects to the current governed Work basis before Candidate sealing
+through `POST /api/works/{work_id}/guardian-assurance/requirements`. The payload
+contains `authority_identity` and `required_effects` using Guardian's
+`EffectRequirement` contract. A long-lived Work uses its Work Reality revision;
+a short Work uses its Human-approved Engineering Scope. The binding is immutable
+for that admitted basis.
+Watt sends the governed objective and constraints, exact Candidate commit/tree,
+Preview identity, and Verification references. It does not send raw Human
+conversation for Guardian interpretation.
+
+After the exact Candidate Preview reaches READY, Watt calls the Guardian owner
+runtime. `GET /api/works/{work_id}/guardian-assurance` exposes the current gate,
+Finding count, summary, and result/evidence references. Watt stores only that
+projection; Guardian owns the request, Findings, evidence, and result. The
+Candidate authorization and Human Acceptance paths require Guardian PASS.
+Neither PASS nor Human Acceptance creates Delivery Authorization.
+
+For an admitted long-lived Work, `FAIL_REPAIRABLE` enters the existing Steering
+production path under the same Work scope. The Steering revision names the
+Guardian result and Finding evidence; Watt produces a successor Candidate and
+submits it again. Work convergence history bounds repeated no-progress
+outcomes. A short Work creates a successor Run/Plan/PWU under the same approved
+scope and Completion Contract. `BLOCKED` never creates repair authority or a
+PASS. A missing governed effect scope also blocks readiness.

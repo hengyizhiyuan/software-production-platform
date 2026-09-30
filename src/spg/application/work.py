@@ -2188,6 +2188,84 @@ class WorkApplicationService:
         self.runtime.retry_attempt(facts.attempt_id)
         return self.get_work(work.id)
 
+    def start_guardian_repair_cycle(self, work_id: UUID, *,
+        failed_candidate_id: UUID, result_ref: str, finding_summary: str) -> WorkProjection:
+        """Reproduce a failed sealed Candidate under unchanged Work authority.
+
+        The satisfied PWU and sealed Candidate remain historical facts. A new
+        Run/Plan/PWU receives the same Completion Contract and Source Baseline.
+        """
+        if not result_ref.startswith("guardian:assurance-result:") or not finding_summary.strip():
+            raise ProductInvariantViolation("Guardian repair needs an exact Finding result")
+        with self.database.unit_of_work() as uow:
+            product, runtime = ProductStore(uow.session), RuntimeStore(uow.session)
+            work = self._required_work(product, work_id)
+            binding = self._runtime_binding_for_current_context(product, work_id)
+            if binding is None or binding.work_reality_revision_id != work.current_work_reality_revision_id:
+                raise ProductInvariantViolation("Guardian repair lost the governed Work revision")
+            summary = product.runtime_summary(binding)
+            if summary.candidate_id != failed_candidate_id or summary.authorization_id is not None:
+                raise ProductInvariantViolation("Guardian repair requires the current unauthorized Candidate")
+            if summary.runtime_commit_id is not None or summary.integration_effect_id is not None:
+                raise ProductInvariantViolation("Guardian repair cannot rewrite integrated Reality")
+            old_unit, old_run = runtime.work_unit(binding.work_unit_id), runtime.run(binding.production_run_id)
+            if old_unit is None or old_run is None:
+                raise ProductInvariantViolation("Guardian repair lacks the exact PWU lineage")
+            previous_binding_id = binding.id
+            previous_cycle_number = binding.cycle_number
+            completion_contract = old_unit.completion_contract
+            source_baseline_id = old_run.source_baseline_id
+            horizon = old_run.production_horizon
+            work_revision_id = work.current_work_reality_revision_id
+            scope_id, resource_id = binding.engineering_scope_id, binding.resource_id
+            admitted_by = binding.admitted_by
+            goal = work.desired_outcome or work.refined_title or "Governed Work"
+        spine = self.runtime.create_initial_runtime_spine(InitialRunRequest(
+            source_baseline_id=source_baseline_id,
+            intent_ref=f"work:{work_id}:guardian-repair:{failed_candidate_id}",
+            goal=goal, production_horizon=horizon,
+            initial_work_unit_objective=(
+                f"Repair the same governed Work result. Guardian Finding: "
+                f"{finding_summary[:800]}. Evidence: {result_ref}"),
+            completion_contract=completion_contract,
+        ))
+        now = datetime.now(UTC)
+        governance_id = uuid5(NAMESPACE_URL,
+            f"watt:guardian-repair:{work_id}:{failed_candidate_id}:{result_ref}")
+        with self.database.unit_of_work() as uow:
+            product, runtime = ProductStore(uow.session), RuntimeStore(uow.session)
+            current = product.work(work_id, for_update=True)
+            latest = product.runtime_binding(work_id)
+            if (current is None or current.current_work_reality_revision_id != work_revision_id
+                    or latest is None or latest.id != previous_binding_id):
+                raise ProductInvariantViolation("Work changed before Guardian repair admission")
+            runtime.insert_governance({"id": governance_id,
+                "decision_type": "GUARDIAN_ARTIFACT_REPAIR_CYCLE",
+                "authority_identity": "watt:self-refine-under-work-authority",
+                "subject_type": "PRODUCT_WORK", "subject_identity": str(work_id),
+                "scope": {"work_reality_revision_id": str(work_revision_id),
+                    "engineering_scope_id": str(scope_id),
+                    "source_baseline_id": str(source_baseline_id),
+                    "failed_candidate_id": str(failed_candidate_id),
+                    "guardian_result_ref": result_ref,
+                    "successor_run_id": str(spine.run.id)},
+                "rationale": "Guardian Finding is repairable within the admitted Work authority",
+                "created_at": now})
+            product.insert_runtime_binding({"id": uuid4(), "work_id": work_id,
+                "cycle_number": previous_cycle_number + 1,
+                "steering_step_id": None, "steering_decision_id": None,
+                "work_reality_revision_id": work_revision_id,
+                "engineering_scope_id": scope_id, "resource_id": resource_id,
+                "production_run_id": spine.run.id,
+                "plan_revision_id": spine.plan_revision.id,
+                "work_unit_id": spine.work_unit.id,
+                "governance_record_id": governance_id,
+                "admitted_by": admitted_by,
+                "condition": ProductionCycleBindingCondition.ADMITTED.value,
+                "created_at": now})
+            uow.commit()
+        return self.get_work(work_id)
+
     def orchestration_reality_fingerprint(self, work_id: UUID) -> str:
         """Fingerprint persisted facts used only to detect actual step progress."""
 
@@ -3135,6 +3213,10 @@ class WorkApplicationService:
                 summary = product.runtime_summary(binding)
             if summary.candidate_id is None:
                 raise ProductInvariantViolation("Candidate Attention lost its subject")
+            if (self.candidate_review_readiness is not None
+                    and not self.candidate_review_readiness(attention.work_id, summary.candidate_id)):
+                raise ProductInvariantViolation(
+                    "Exact Candidate is not ready for Human authorization")
             if self.candidate_authorization_guard is not None:
                 self.candidate_authorization_guard(attention.work_id, summary.candidate_id)
             candidate = self.governance.candidate(summary.candidate_id)

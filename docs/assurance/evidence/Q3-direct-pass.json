@@ -1,0 +1,104 @@
+{
+  "request": {
+    "contract_version": "watt-guardian-software-assurance-v1",
+    "request_id": "8b4c141a-e5ee-462c-a018-943ef5b32ed2",
+    "product_ref": "product:one",
+    "work_ref": "work:one",
+    "governed_intent_ref": "work-reality:one",
+    "objective": "Reach and persist details",
+    "constraints": [],
+    "exclusions": [],
+    "authority_ref": "work-scope:one",
+    "candidate_id": "80cefcf9-9070-45a0-a51e-787ac4d81eaf",
+    "candidate_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "artifact_refs": [
+      "artifact:one"
+    ],
+    "runtime_ref": "candidate-preview:c57fc05d-37b1-4cd4-bc9d-c29963806b20",
+    "runtime_url": "http://127.0.0.1:56944",
+    "disposable_preview": true,
+    "verification_refs": [
+      "verification:one"
+    ],
+    "acceptance_state": "PENDING",
+    "delivery_authorization_state": "NOT_AUTHORIZED",
+    "required_effects": [
+      {
+        "obligation_ref": "navigation",
+        "kind": "BROWSER_LINK",
+        "expected_behavior": "Details link opens",
+        "path": "/",
+        "expected_status": 200,
+        "content_contains": null,
+        "link_href": "/details",
+        "create_path": null,
+        "read_path": null,
+        "create_body": null,
+        "expected_json_field": null,
+        "expected_json_value": null,
+        "dependency_owner": null
+      },
+      {
+        "obligation_ref": "persistence",
+        "kind": "API_PERSISTENCE",
+        "expected_behavior": "Item survives a fresh read",
+        "path": "/",
+        "expected_status": 201,
+        "content_contains": null,
+        "link_href": null,
+        "create_path": "/api/item",
+        "read_path": "/api/item",
+        "create_body": {
+          "name": "Alice"
+        },
+        "expected_json_field": "name",
+        "expected_json_value": "Alice",
+        "dependency_owner": null
+      }
+    ],
+    "prior_finding_ids": [],
+    "submitted_at": "2026-09-30T18:39:24.220823Z"
+  },
+  "result": {
+    "contract_version": "watt-guardian-software-assurance-v1",
+    "result_id": "2f82df1c-336a-45a2-87b7-caeda85d7d1c",
+    "request_id": "8b4c141a-e5ee-462c-a018-943ef5b32ed2",
+    "candidate_id": "80cefcf9-9070-45a0-a51e-787ac4d81eaf",
+    "candidate_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "runtime_ref": "candidate-preview:c57fc05d-37b1-4cd4-bc9d-c29963806b20",
+    "gate": "PASS",
+    "coverage_obligation_refs": [
+      "navigation",
+      "persistence"
+    ],
+    "evidence": [
+      {
+        "evidence_id": "d832dc59-62c3-4866-bb9d-715cb78f2994",
+        "obligation_ref": "navigation",
+        "observation": "served page sha256=f13cbf4a437beaa8c91f7d37dceebf03ee6dcebdc20c7e2ec487a4ad064a39fd links to reachable /details",
+        "status_code": 200,
+        "response_sha256": "45989de49fb7f66dfe17a8fc26f3a02c7abcd74f7e8e6cf9f39fa0e3775780df",
+        "runtime_ref": "candidate-preview:c57fc05d-37b1-4cd4-bc9d-c29963806b20",
+        "observed_at": "2026-09-30T18:39:24.223881Z"
+      },
+      {
+        "evidence_id": "17a2b985-6dd7-4456-8132-c6f0d3b0e030",
+        "obligation_ref": "persistence",
+        "observation": "API create/read persisted 'name'='Alice'",
+        "status_code": 200,
+        "response_sha256": "6d4a333838d0ef96756cccc680af2531075c512502fb68c5503c63d93de859b3",
+        "runtime_ref": "candidate-preview:c57fc05d-37b1-4cd4-bc9d-c29963806b20",
+        "observed_at": "2026-09-30T18:39:24.227060Z"
+      }
+    ],
+    "findings": [],
+    "supersedes_finding_ids": [],
+    "acceptance_state": "PENDING",
+    "delivery_authorization_state": "NOT_AUTHORIZED",
+    "assessed_at": "2026-09-30T18:39:24.227094Z"
+  }
+}

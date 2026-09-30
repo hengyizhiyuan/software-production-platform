@@ -53,6 +53,8 @@ class CandidatePreviewApplicationService:
         self._lifecycle = ProductionEnvironmentLifecycle()
         self._retry_timers: dict[UUID, Timer] = {}
         self.outcome_listener: Callable[[UUID, bool], None] | None = None
+        self.assurance_client = None
+        self.assurance_outcome_listener: Callable[[UUID, dict], None] | None = None
 
     def shutdown(self) -> None:
         with self._lock:
@@ -115,11 +117,13 @@ class CandidatePreviewApplicationService:
         }:
             return True
         session = self.store.current_candidate_preview(work_id)
-        return bool(session is not None and session.status is PreviewRuntimeStatus.READY
+        ready = bool(session is not None and session.status is PreviewRuntimeStatus.READY
             and session.candidate_id == candidate_id
             and session.candidate_fingerprint == context["candidate_fingerprint"]
             and any(item.get("kind") == "SERVED_VERIFICATION" and item.get("result") == "PASS"
                 for item in session.evidence))
+        return ready and (self.assurance_client is None
+            or self.assurance_client.passed(work_id, candidate_id))
 
     def retention_decision(self, work_id: UUID, *,
                            hot_retention: timedelta = timedelta(days=30),
@@ -502,7 +506,23 @@ class CandidatePreviewApplicationService:
                             "digest": record.content_digest},
                     ))
             self._record_refinement(ready, converged=True)
-            if self.outcome_listener is not None:
+            assurance = None
+            if self.assurance_client is not None:
+                try:
+                    assurance = self.assurance_client.assess_ready_preview(ready)
+                except Exception as error:
+                    assurance = {"status": "BLOCKED", "gate": "BLOCKED",
+                        "candidate_id": str(ready.candidate_id), "finding_count": 0,
+                        "summary": f"Guardian assurance unavailable: {type(error).__name__}: {error}",
+                        "failure_attribution": "GUARDIAN_PLATFORM_DEFECT",
+                        "result_ref": None, "evidence_ref": None}
+                    self.store.save_guardian_projection(ready.id, assurance)
+            if assurance is not None and self.assurance_outcome_listener is not None:
+                try:
+                    self.assurance_outcome_listener(ready.work_id, assurance)
+                except Exception:
+                    self.store.save_guardian_feedback_error(ready.id, traceback.format_exc())
+            elif self.outcome_listener is not None:
                 self.outcome_listener(ready.work_id, False)
         except Exception as exc:
             cleanup = {}
@@ -666,7 +686,9 @@ class CandidatePreviewApplicationService:
                 )),
             delivery_result=DeliveryResultReference(
                 reference=f"candidate-preview:{session.id}",
-                state=ProductionDeliveryState.READY_FOR_HUMAN_ACCEPTANCE),
+                state=(ProductionDeliveryState.CANDIDATE_ASSURANCE_PENDING
+                    if self.assurance_client is not None
+                    else ProductionDeliveryState.READY_FOR_HUMAN_ACCEPTANCE)),
             created_at=now,
         )
         record = self.store.save_production_record(record)

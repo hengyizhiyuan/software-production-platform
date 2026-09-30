@@ -56,6 +56,7 @@ from spg.domain.steering import (
     SteeringDriverStopReason,
     SteeringHistoryEventType,
     SteeringInvariantViolation,
+    SteeringRecordNotFound,
     SteeringIterationResult,
     SteeringOutcome,
     SteeringPlanProjection,
@@ -775,6 +776,111 @@ class PlanSteeringDriver:
             failure_signature=canonical_digest({"signal": "PREVIEW_NOT_READY"}) if failed else None)
         if observation.condition not in {"NON_CONVERGING", "ESCALATED"} and not failed:
             self.schedule(work_id)
+
+    def guardian_assurance_outcome(self, work_id: UUID, projection: dict) -> None:
+        """Feed Guardian-owned Findings into the current governed Work repair path."""
+        gate = projection.get("gate")
+        if gate == "PASS":
+            with self.database.unit_of_work() as uow:
+                store = NativeExecutionStore(uow.session)
+                earlier = store.list_self_refine_events(work_id=work_id,
+                    component="guardian/artifact", limit=100)
+                if earlier:
+                    store.record_bounded_refinement(work_id=work_id,
+                        operation_id=UUID(projection["candidate_id"]),
+                        component="guardian/artifact",
+                        signal_kind=RefinementSignalKind.REALITY_MISMATCH,
+                        signature_basis="GUARDIAN_ASSURANCE_REVERIFIED",
+                        evidence_references=tuple(dict.fromkeys((
+                            *(ref for event in earlier for ref in event.evidence_references),
+                            projection["result_ref"],
+                        ))), converged=True, attempt_count=len(earlier) + 1,
+                        diagnostic_evidence={"new_candidate_id": projection["candidate_id"],
+                            "guardian_gate": "PASS", "human_acceptance": "PENDING",
+                            "delivery_authorized": False})
+                    uow.commit()
+            self._observe_convergence(work_id, failed=False, boundary="GUARDIAN")
+            if self.work_service.get_work(work_id).steering_enabled:
+                self.schedule(work_id)
+            return
+        signature = canonical_digest({"gate": gate,
+            "summary": projection.get("summary")})
+        observation = self._observe_convergence(work_id, failed=True,
+            boundary="GUARDIAN", failure_signature=signature)
+        if gate != "FAIL_REPAIRABLE" or observation.condition in {"NON_CONVERGING", "ESCALATED"}:
+            return
+        try:
+            frame = self.frames.assemble(work_id)
+        except (SteeringInvariantViolation, SteeringRecordNotFound):
+            self.work_service.start_guardian_repair_cycle(work_id,
+                failed_candidate_id=UUID(projection["candidate_id"]),
+                result_ref=projection["result_ref"],
+                finding_summary=str(projection.get("summary") or "Guardian Finding"))
+            with self.database.unit_of_work() as uow:
+                store = NativeExecutionStore(uow.session)
+                earlier = store.list_self_refine_events(work_id=work_id,
+                    component="guardian/artifact", limit=100)
+                store.record_bounded_refinement(work_id=work_id,
+                    operation_id=UUID(projection["candidate_id"]),
+                    component="guardian/artifact",
+                    signal_kind=RefinementSignalKind.REALITY_MISMATCH,
+                    signature_basis=str(projection.get("summary") or "Guardian Finding"),
+                    evidence_references=tuple(dict.fromkeys((
+                        projection["result_ref"],
+                        *(f"guardian:finding:{identity}" for identity in projection.get("finding_ids", ())),
+                    ))), converged=False, superseded=True,
+                    attempt_count=len(earlier) + 1,
+                    diagnostic_evidence={"failed_candidate_id": projection["candidate_id"],
+                        "repair_owner": "WATT_WORK_RECOVERY", "human_acceptance": "PENDING",
+                        "delivery_authorized": False})
+                uow.commit()
+            self.production_orchestrator.schedule(work_id)
+            return
+        current = frame.reconstruction.current_step
+        if current is None or current.type is not SteeringStepType.PRODUCE:
+            return
+        summary = str(projection.get("summary") or "")[:800]
+        reference = str(projection.get("result_ref") or "")
+        revised = self.steering.revise_plan(ReviseSteeringPlanRequest(
+            steering_plan_id=frame.reconstruction.steering_plan_id,
+            superseded_revision_id=frame.reconstruction.active_revision.revision.id,
+            rationale=(f"Guardian FAIL_REPAIRABLE on Candidate {projection['candidate_id']}; "
+                f"Finding evidence {reference}. The same Work scope and authority remain in force."),
+            reality_refs=tuple(item.reference for item in frame.basis.resolved_reality),
+            steps=(
+                SteeringStepSpec(type=SteeringStepType.PRODUCE,
+                    objective=f"Repair the governed Work result. Guardian Finding: {summary}. Evidence: {reference}",
+                    completion_condition="A new exact Candidate passes Verification and Guardian assurance",
+                    state=SteeringStepState.CURRENT),
+                SteeringStepSpec(type=SteeringStepType.VERIFY_ACCEPT,
+                    objective="Verify the repaired Candidate",
+                    completion_condition="Guardian PASS supports Human review"),
+                SteeringStepSpec(type=SteeringStepType.COMPLETE,
+                    objective="Complete the governed Work outcome",
+                    completion_condition="The requested effect is truthfully realized"),
+            ),
+        ))
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            earlier = store.list_self_refine_events(work_id=work_id,
+                component="guardian/artifact", limit=100)
+            store.record_bounded_refinement(work_id=work_id,
+                operation_id=UUID(projection["candidate_id"]),
+                component="guardian/artifact",
+                signal_kind=RefinementSignalKind.REALITY_MISMATCH,
+                signature_basis=summary,
+                evidence_references=tuple(dict.fromkeys((
+                    projection["result_ref"],
+                    *(f"guardian:finding:{identity}" for identity in projection.get("finding_ids", ())),
+                    f"steering-plan-revision:{revised.active_revision.revision.id}",
+                ))), converged=False, superseded=True,
+                attempt_count=len(earlier) + 1,
+                diagnostic_evidence={"failed_candidate_id": projection["candidate_id"],
+                    "finding_ids": projection.get("finding_ids", []),
+                    "repair_owner": "WATT_STEERING_PRODUCTION",
+                    "human_acceptance": "PENDING", "delivery_authorized": False})
+            uow.commit()
+        self.schedule(work_id)
 
     def schedule(self, work_id: UUID) -> bool:
         """Schedule one bounded activation; duplicate wakeups are coalesced."""

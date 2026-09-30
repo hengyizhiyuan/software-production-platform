@@ -7,6 +7,8 @@ store/lock is deliberately outside this first vertical slice.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+import fcntl
 import json
 from hashlib import sha256
 import os
@@ -42,6 +44,76 @@ class JsonProductionEnvironmentStore:
         self.root = root.resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         self._lock = RLock()
+
+    @contextmanager
+    def _guardian_lock(self):
+        with (self.root / ".guardian-projection.lock").open("a+b") as stream:
+            fcntl.flock(stream, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(stream, fcntl.LOCK_UN)
+
+    def admit_guardian_requirements(self, work_id: UUID, revision_id: UUID,
+        payload: dict) -> dict:
+        """Freeze Watt-governed oracles against one admitted Work basis."""
+        path = self.root / "guardian-requirements" / f"{work_id}-{revision_id}.json"
+        with self._lock, self._guardian_lock():
+            if path.exists():
+                existing = json.loads(path.read_text(encoding="utf-8"))
+                if existing != payload:
+                    raise ProductionEnvironmentStoreConflict(
+                        "Guardian requirements for this Work revision are immutable")
+                return existing
+            path.parent.mkdir(parents=True, exist_ok=True)
+            self._atomic_json(path, payload)
+            return payload
+
+    def guardian_requirements(self, work_id: UUID, revision_id: UUID) -> dict | None:
+        path = self.root / "guardian-requirements" / f"{work_id}-{revision_id}.json"
+        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+    def save_guardian_projection(self, preview_id: UUID, payload: dict) -> dict:
+        """Cache only an exact Guardian result reference and gate projection."""
+        path = self.root / "guardian-projections" / f"{preview_id}.json"
+        with self._lock, self._guardian_lock():
+            if path.exists():
+                existing = json.loads(path.read_text(encoding="utf-8"))
+                if existing != payload:
+                    raise ProductionEnvironmentStoreConflict(
+                        "Guardian projection for this Preview cannot be rewritten")
+                return existing
+            path.parent.mkdir(parents=True, exist_ok=True)
+            self._atomic_json(path, payload)
+            return payload
+
+    def guardian_projection(self, preview_id: UUID) -> dict | None:
+        path = self.root / "guardian-projections" / f"{preview_id}.json"
+        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+    def save_guardian_feedback_error(self, preview_id: UUID, detail: str) -> dict:
+        """Keep Watt feedback failure separate from Guardian and Preview truth."""
+        path = self.root / "guardian-feedback-errors" / f"{preview_id}.json"
+        payload = {"category": "WATT_PLATFORM_DEFECT", "preview_id": str(preview_id),
+            "detail": detail[-10_000:]}
+        with self._lock, self._guardian_lock():
+            if not path.exists():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                self._atomic_json(path, payload)
+        return {"category": payload["category"], "reference": str(path)}
+
+    def guardian_feedback_error(self, preview_id: UUID) -> dict | None:
+        path = self.root / "guardian-feedback-errors" / f"{preview_id}.json"
+        if not path.exists():
+            return None
+        return {"category": "WATT_PLATFORM_DEFECT", "reference": str(path)}
+
+    @staticmethod
+    def _atomic_json(path: Path, payload: dict) -> None:
+        temporary = path.with_suffix(f".{uuid4().hex}.tmp")
+        temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2),
+            encoding="utf-8", newline="\n")
+        os.replace(temporary, path)
 
     def create_workspace(self, workspace: ProductionWorkspaceV1) -> ProductionWorkspaceV1:
         path = self.root / "workspaces" / f"{workspace.id}.json"

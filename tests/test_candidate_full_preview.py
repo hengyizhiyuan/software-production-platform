@@ -115,6 +115,35 @@ def test_review_preparation_is_automatic_and_waits_for_served_evidence(tmp_path)
     assert not any(item["kind"] == "HUMAN_CANDIDATE_AUTHORIZATION" for item in ready.evidence)
 
 
+def test_guardian_feedback_failure_preserves_ready_preview_and_records_platform_error(tmp_path):
+    repository, revision, tree = candidate_repository(tmp_path)
+    source = CandidateSource(context(repository, revision, tree))
+    provider = RuntimeProvider()
+    store = JsonProductionEnvironmentStore(tmp_path / "feedback-preview")
+    service = CandidatePreviewApplicationService(source, store, provider)
+    service.assurance_client = SimpleNamespace(assess_ready_preview=lambda ready: {
+        "status": "FAIL_REPAIRABLE", "gate": "FAIL_REPAIRABLE",
+        "candidate_id": str(ready.candidate_id), "finding_count": 1,
+        "result_ref": "guardian:assurance-result:test"})
+
+    def fail_feedback(_work_id, _projection):
+        raise RuntimeError("Watt repair scheduling failed")
+
+    service.assurance_outcome_listener = fail_feedback
+    work_id = uuid4()
+    service.request(work_id)
+    ready = await_ready(service, work_id)
+    deadline = time.monotonic() + 5
+    while store.guardian_feedback_error(ready.id) is None and time.monotonic() < deadline:
+        time.sleep(0.02)
+    service.shutdown()
+    assert store.get_candidate_preview(ready.id).status is PreviewRuntimeStatus.READY
+    assert not provider.stopped
+    error = store.guardian_feedback_error(ready.id)
+    assert error["category"] == "WATT_PLATFORM_DEFECT"
+    assert "Watt repair scheduling failed" in Path(error["reference"]).read_text()
+
+
 def test_preview_transient_failure_retries_with_preserved_lineage(tmp_path):
     repository, revision, tree = candidate_repository(tmp_path)
     source = CandidateSource(context(repository, revision, tree))

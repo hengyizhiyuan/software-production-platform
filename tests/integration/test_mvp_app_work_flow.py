@@ -1559,3 +1559,259 @@ def _git(repository: Path, *arguments: str) -> str:
         text=True,
     )
     return result.stdout.strip()
+
+
+def test_guardian_finding_drives_watt_candidate_repair_and_reverification(
+    app_facts: AppFacts, tmp_path: Path, monkeypatch,
+) -> None:
+    """A false technical completion enters Watt repair, never Human Acceptance."""
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    from threading import Thread
+    import json
+    import time
+    import urllib.request
+
+    from guardian.contracts.software_assurance import Gate
+    from guardian.runtime import JsonSoftwareAssuranceStore
+    from spg.application.candidate_preview import CandidatePreviewApplicationService
+    from spg.application.delivery import DeliveryApplicationService
+    from spg.application.guardian_assurance import GuardianAssuranceClient
+    from spg.application.steering_driver import PlanSteeringDriver
+    from spg.domain.production_environment import CandidatePreviewMode, PreviewRuntimeStatus
+    from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+
+    submitted = app_facts.service.submit_work(
+        "Modify src/spg_example.py and tests/test_spg_example.py")
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        desired_outcome="Details navigation reaches its page and item creation persists"))
+    app_facts.service.approve_work(draft.work_id, authority_identity="human:guardian-fixture")
+    work_id = draft.work_id
+    preview_store = JsonProductionEnvironmentStore(tmp_path / "previews")
+    guardian = JsonSoftwareAssuranceStore(tmp_path / "guardian")
+    delivery = DeliveryApplicationService(app_facts.database)
+    client = GuardianAssuranceClient(delivery, preview_store, guardian)
+    client.bind_requirements(work_id, [
+        {"obligation_ref": "details-navigation", "kind": "BROWSER_LINK",
+         "expected_behavior": "Details navigation reaches the required route",
+         "path": "/", "link_href": "/details"},
+        {"obligation_ref": "item-persistence", "kind": "API_PERSISTENCE",
+         "expected_behavior": "Item create survives a fresh API read",
+         "create_path": "/api/item", "read_path": "/api/item",
+         "create_body": {"name": "Alice"}, "expected_status": 201,
+         "expected_json_field": "name", "expected_json_value": "Alice"},
+    ], authority_identity="human:guardian-fixture")
+
+    class FindingAwareExecutor:
+        calls = 0
+
+        def dispatch(self, request):
+            with app_facts.database.unit_of_work() as uow:
+                unit = RuntimeStore(uow.session).work_unit(request.execution.work_unit_id)
+            assert unit is not None
+            repaired = "Guardian Finding" in unit.objective
+            route_status = 200 if repaired else 404
+            self.calls += 1
+            executor = DeterministicTestExecutor(DeterministicExecutionSpecification(
+                operations=(
+                    DeterministicFileOperation(operation=DeterministicFileOperationType.MODIFY,
+                        repository_relative_path="src/spg_example.py",
+                        content=("def details_status() -> int:\n"
+                            f"    return {route_status}\n")),
+                    DeterministicFileOperation(operation=DeterministicFileOperationType.MODIFY,
+                        repository_relative_path="tests/test_spg_example.py",
+                        content=("from spg_example import details_status\n\n\n"
+                            f"def test_details_status() -> None:\n    assert details_status() == {route_status}\n")),
+                ), reported_outcome=ProviderReportedOutcome.SUCCESS,
+                summary="Watt deterministic Candidate fixture execution"))
+            return executor.dispatch(request)
+
+    executor = FindingAwareExecutor()
+    service = WorkApplicationService(app_facts.database,
+        workspace_root=app_facts.workspace_root, executor=executor,
+        verifier=ContractDrivenRepositoryVerifier(app_facts.database))
+
+    class SourceBackedPreview:
+        definition_version = "source-backed-disposable-v1"
+
+        def __init__(self):
+            self.runtimes = {}
+
+        def prepare(self, _id, repository, revision, tree, *, mode=None):
+            assert _git(repository, "rev-parse", revision + "^{tree}") == tree
+            return {"revision": revision, "tree": tree}
+
+        def build(self, _id, revision, tree, *, mode=None):
+            return {"image_id": "sha256:" + "a" * 64, "build_log": "fixture:source-backed"}
+
+        def start(self, preview_id, revision, tree, *, mode=None):
+            source = _git(app_facts.repository, "show", revision + ":src/spg_example.py")
+            candidate_module = {}
+            exec(compile(source, f"candidate:{revision}:spg_example.py", "exec"),
+                candidate_module)
+            details_status = candidate_module["details_status"]
+            stored = {"name": None}
+
+            class Handler(BaseHTTPRequestHandler):
+                def log_message(self, *_):
+                    pass
+
+                def respond(self, status, body, content_type="text/html"):
+                    data = body.encode()
+                    self.send_response(status)
+                    self.send_header("X-Candidate-Revision", revision)
+                    self.send_header("X-Candidate-Tree", tree)
+                    self.send_header("Content-Type", content_type)
+                    self.send_header("Content-Length", str(len(data)))
+                    self.end_headers()
+                    self.wfile.write(data)
+
+                def do_GET(self):
+                    if self.path == "/":
+                        self.respond(200, '<a href="/details">Details</a>')
+                    elif self.path == "/details":
+                        status = details_status()
+                        self.respond(status, "Details" if status == 200 else "missing")
+                    elif self.path == "/api/item":
+                        self.respond(200, json.dumps(stored), "application/json")
+                    else:
+                        self.respond(404, "missing")
+
+                def do_POST(self):
+                    if self.path != "/api/item":
+                        self.respond(404, "missing")
+                        return
+                    stored.update(json.loads(self.rfile.read(int(self.headers["Content-Length"]))))
+                    self.respond(201, "{}", "application/json")
+
+            server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+            thread = Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            self.runtimes[preview_id] = (server, thread, revision, tree)
+            return {"endpoint": f"http://127.0.0.1:{server.server_port}/",
+                "services": ("fixture-app",), "resources": ("fixture-runtime",),
+                "health": {"repository_revision": revision, "repository_tree": tree}}
+
+        def probe(self, preview_id, revision, tree, *, mode=None):
+            runtime = self.runtimes.get(preview_id)
+            return runtime is not None and runtime[2:] == (revision, tree)
+
+        def verify_served(self, preview_id, revision, tree, *, mode=None):
+            server = self.runtimes[preview_id][0]
+            with urllib.request.urlopen(f"http://127.0.0.1:{server.server_port}/") as response:
+                assert response.headers["X-Candidate-Revision"] == revision
+                assert response.headers["X-Candidate-Tree"] == tree
+            return {"result": "PASS", "candidate_revision": revision,
+                "candidate_tree": tree}
+
+        def stop(self, preview_id):
+            runtime = self.runtimes.pop(preview_id, None)
+            if runtime is not None:
+                runtime[0].shutdown()
+                runtime[1].join(timeout=2)
+            return {"stopped": True}
+
+    provider = SourceBackedPreview()
+    preview = CandidatePreviewApplicationService(delivery, preview_store, provider)
+    monkeypatch.setattr(preview, "mode_for", lambda _: CandidatePreviewMode.FULL_APPLICATION_RUNTIME)
+    preview.assurance_client = client
+    service.configure_candidate_review(preview.prepare_review, preview.review_ready)
+
+    class ScheduledProduction:
+        def __init__(self):
+            self.works = []
+
+        def schedule(self, identity):
+            self.works.append(identity)
+            return True
+
+    scheduled = ScheduledProduction()
+    driver = PlanSteeringDriver(app_facts.database, service, scheduled)
+    preview.assurance_outcome_listener = driver.guardian_assurance_outcome
+
+    def wait_for_projection(gate):
+        until = time.monotonic() + 45
+        while time.monotonic() < until:
+            state = client.projection(work_id)
+            if state.get("gate") == gate:
+                return state
+            time.sleep(0.05)
+        raise AssertionError(f"Guardian did not reach {gate}: {client.projection(work_id)}")
+
+    try:
+        for _ in range(25):
+            service.advance_work(work_id)
+            context = delivery.candidate_context(work_id)
+            if context is not None:
+                break
+        else:
+            raise AssertionError("Watt did not seal initial Candidate")
+        failed_candidate = context["candidate_id"]
+        failed_revision = context["repository_revision"]
+        failed = wait_for_projection("FAIL_REPAIRABLE")
+        assert failed["finding_count"] == 1
+        assert not client.passed(work_id, UUID(failed_candidate))
+        assert not service.list_attention(work_id=work_id)
+        with app_facts.database.unit_of_work() as uow:
+            bindings = ProductStore(uow.session).runtime_bindings(work_id)
+        assert len(bindings) == 2
+        assert bindings[0].work_reality_revision_id == bindings[1].work_reality_revision_id
+        assert bindings[0].engineering_scope_id == bindings[1].engineering_scope_id
+        until = time.monotonic() + 10
+        while not scheduled.works and time.monotonic() < until:
+            time.sleep(0.05)
+        assert scheduled.works == [work_id]
+        for _ in range(25):
+            service.advance_work(work_id)
+            context = delivery.candidate_context(work_id)
+            if context is not None and context["candidate_id"] != failed_candidate:
+                break
+        else:
+            raise AssertionError("Watt did not seal repaired Candidate")
+        assert context["repository_revision"] != failed_revision
+        passed = wait_for_projection("PASS")
+        assert passed["candidate_id"] == context["candidate_id"]
+        assert client.passed(work_id, UUID(context["candidate_id"]))
+        original = guardian.get_result(UUID(failed["request_id"]))
+        repaired = guardian.get_result(UUID(passed["request_id"]))
+        assert original.gate is Gate.FAIL_REPAIRABLE
+        assert repaired.gate is Gate.PASS
+        assert tuple(original.findings[0].finding_id for _ in (1,)) == repaired.supersedes_finding_ids
+        assert executor.calls == 2
+        assert any(item.kind is AttentionKind.CANDIDATE_AUTHORIZATION
+            for item in service.list_attention(work_id=work_id))
+        with app_facts.database.unit_of_work() as uow:
+            summary = ProductStore(uow.session).runtime_summary(bindings[1])
+        assert summary.authorization_id is None
+        assert summary.runtime_commit_id is None
+        if receipt_path := os.environ.get("WATT_GUARDIAN_QUALIFICATION_RECEIPT"):
+            history = preview_store.candidate_preview_history(work_id)
+            receipt = {"qualification": "Q1_Q2_Q4", "contract_version": "watt-guardian-software-assurance-v1",
+                "work_id": str(work_id),
+                "governed_basis_ref": preview_store.guardian_requirements(
+                    work_id, bindings[0].engineering_scope_id)["governed_basis_ref"],
+                "failed_candidate": {"candidate_id": failed_candidate,
+                    "revision": failed_revision,
+                    "preview_id": str(history[0].id), "runtime_url": history[0].endpoint,
+                    "request": json.loads((tmp_path / "guardian" / "requests" /
+                        f"{failed['request_id']}.json").read_text()),
+                    "result": original.model_dump(mode="json")},
+                "repaired_candidate": {"candidate_id": context["candidate_id"],
+                    "revision": context["repository_revision"], "tree": context["tree"],
+                    "preview_id": str(history[-1].id), "runtime_url": history[-1].endpoint,
+                    "request": json.loads((tmp_path / "guardian" / "requests" /
+                        f"{passed['request_id']}.json").read_text()),
+                    "result": repaired.model_dump(mode="json")},
+                "watt_repair_lineage": {"old_run_id": str(bindings[0].production_run_id),
+                    "new_run_id": str(bindings[1].production_run_id),
+                    "same_work_reality_revision": bindings[0].work_reality_revision_id == bindings[1].work_reality_revision_id,
+                    "same_engineering_scope": bindings[0].engineering_scope_id == bindings[1].engineering_scope_id,
+                    "executor_dispatches": executor.calls},
+                "human_acceptance": "PENDING", "delivery_authorization": "NOT_AUTHORIZED"}
+            destination = Path(receipt_path)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(json.dumps(receipt, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8")
+    finally:
+        driver.shutdown()
+        for preview_id in tuple(provider.runtimes):
+            provider.stop(preview_id)

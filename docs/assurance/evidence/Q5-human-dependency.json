@@ -1,0 +1,93 @@
+{
+  "request": {
+    "contract_version": "watt-guardian-software-assurance-v1",
+    "request_id": "694631fd-fbdb-4859-96dc-a14603e24f30",
+    "product_ref": "product:one",
+    "work_ref": "work:one",
+    "governed_intent_ref": "work-reality:one",
+    "objective": "Reach and persist details",
+    "constraints": [],
+    "exclusions": [],
+    "authority_ref": "work-scope:one",
+    "candidate_id": "d0adde49-a00f-4df0-9422-fb104eb6827b",
+    "candidate_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "artifact_refs": [
+      "artifact:one"
+    ],
+    "runtime_ref": "candidate-preview:e53f40ec-8dd8-4aa1-9cd7-34c6cf9f5a41",
+    "runtime_url": "http://127.0.0.1:1",
+    "disposable_preview": true,
+    "verification_refs": [
+      "verification:one"
+    ],
+    "acceptance_state": "PENDING",
+    "delivery_authorization_state": "NOT_AUTHORIZED",
+    "required_effects": [
+      {
+        "obligation_ref": "external-auth",
+        "kind": "UNAVAILABLE_DEPENDENCY",
+        "expected_behavior": "External authority is available",
+        "path": "/",
+        "expected_status": 200,
+        "content_contains": null,
+        "link_href": null,
+        "create_path": null,
+        "read_path": null,
+        "create_body": null,
+        "expected_json_field": null,
+        "expected_json_value": null,
+        "dependency_owner": "HUMAN"
+      }
+    ],
+    "prior_finding_ids": [],
+    "submitted_at": "2026-09-30T18:39:24.730231Z"
+  },
+  "result": {
+    "contract_version": "watt-guardian-software-assurance-v1",
+    "result_id": "f14b4f11-69e1-41fe-8ada-b5b8c3cc51e3",
+    "request_id": "694631fd-fbdb-4859-96dc-a14603e24f30",
+    "candidate_id": "d0adde49-a00f-4df0-9422-fb104eb6827b",
+    "candidate_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "runtime_ref": "candidate-preview:e53f40ec-8dd8-4aa1-9cd7-34c6cf9f5a41",
+    "gate": "BLOCKED",
+    "coverage_obligation_refs": [
+      "external-auth"
+    ],
+    "evidence": [
+      {
+        "evidence_id": "5576827e-971f-4e54-9e4e-5be1a6f04467",
+        "obligation_ref": "external-auth",
+        "observation": "required HUMAN dependency unavailable",
+        "status_code": null,
+        "response_sha256": null,
+        "runtime_ref": "candidate-preview:e53f40ec-8dd8-4aa1-9cd7-34c6cf9f5a41",
+        "observed_at": "2026-09-30T18:39:24.745747Z"
+      }
+    ],
+    "findings": [
+      {
+        "finding_id": "3905ccb3-9fe7-40e7-b4ee-a501a2b23501",
+        "request_id": "694631fd-fbdb-4859-96dc-a14603e24f30",
+        "candidate_id": "d0adde49-a00f-4df0-9422-fb104eb6827b",
+        "category": "HUMAN_DEPENDENCY",
+        "severity": "BLOCKER",
+        "obligation_ref": "external-auth",
+        "expected_behavior": "External authority is available",
+        "observed_reality": "required HUMAN dependency unavailable",
+        "evidence_ids": [
+          "5576827e-971f-4e54-9e4e-5be1a6f04467"
+        ],
+        "repairable": false,
+        "lifecycle": "OPEN"
+      }
+    ],
+    "supersedes_finding_ids": [],
+    "acceptance_state": "PENDING",
+    "delivery_authorization_state": "NOT_AUTHORIZED",
+    "assessed_at": "2026-09-30T18:39:24.745811Z"
+  }
+}

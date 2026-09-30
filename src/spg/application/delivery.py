@@ -121,6 +121,7 @@ class DeliveryApplicationService:
         self.database = database
         self.runtime_probe = None
         self.full_application_runtime_probe = None
+        self.guardian_assurance_client = None
 
     @staticmethod
     def _work(session, work_id: UUID):
@@ -558,6 +559,10 @@ class DeliveryApplicationService:
                     return record
                 raise ProductInvariantViolation("This exact delivery already has an immutable Human decision")
             if manifest.software is not None and request.decision.value == "ACCEPT":
+                if (self.guardian_assurance_client is not None
+                        and not self.guardian_assurance_client.passed(work_id, commit.candidate_id)):
+                    raise ProductInvariantViolation(
+                        "Exact Candidate requires Guardian PASS before Human Acceptance")
                 if manifest.software.runtime_recipe.adapter == "FULL_APPLICATION_RUNTIME":
                     if self.full_application_runtime_probe is None:
                         raise ProductInvariantViolation(
