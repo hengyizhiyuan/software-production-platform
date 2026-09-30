@@ -78,6 +78,7 @@ from spg.application.candidate_preview import CandidatePreviewApplicationService
 from spg.application.control_room import ControlRoomError, ControlRoomService
 from spg.application.connectors import ConnectorResolver, ConnectorManagement
 from spg.application.product_assets import ProductAssetService
+from spg.infrastructure.managed_source_provider import ManagedSourceError
 from spg.application.measurement import ProductionMeasurementService, MeasurementSubjectNotFound
 from spg.application.native_retention import NativeRetentionService
 from spg.infrastructure.executor_runtime.local_storage import WorkspaceArchiveStore
@@ -135,6 +136,7 @@ class ProductHttpError(RuntimeError):
 class SoftwareProductCreateRequest(BaseModel):
     name: str = Field(min_length=1)
     description: str | None = None
+    source_mode: str = "managed"
 
 
 class SoftwareProductAssetRequest(BaseModel):
@@ -214,8 +216,8 @@ def create_http_application(
             configured_workspace.parent / "repository-imports",
         )
     )
-    delivery_service = DeliveryApplicationService(selected_database)
-    software_products = ProductAssetService(selected_database)
+    delivery_service = DeliveryApplicationService(selected_database, runtime_settings)
+    software_products = ProductAssetService(selected_database, runtime_settings)
     connector_management = ConnectorManagement(selected_database)
     production_measurement = ProductionMeasurementService(selected_database)
     settings = getattr(container, "settings", None)
@@ -620,6 +622,14 @@ def create_http_application(
         error: ProductHttpError,
     ) -> JSONResponse:
         return _error(error.status_code, error.code, str(error))
+
+    @api.exception_handler(ManagedSourceError)
+    async def managed_source_error_handler(_request: Request, error: ManagedSourceError) -> JSONResponse:
+        status = 401 if error.category == "AUTHENTICATION_FAILURE" else \
+            404 if error.category == "REPOSITORY_MISSING" else \
+            503 if error.category in {"PROVIDER_UNAVAILABLE", "PERSISTENT_STORAGE_UNAVAILABLE",
+                                     "EXTERNAL_ORIGIN_UNAVAILABLE"} else 409
+        return _error(status, error.category, str(error))
 
     @api.exception_handler(GitHubDeliveryError)
     async def github_delivery_error_handler(
@@ -1235,7 +1245,11 @@ def create_http_application(
 
     @api.post("/api/products", status_code=201)
     def create_software_product(request: SoftwareProductCreateRequest, http_request: Request):
-        return software_products.create(getattr(http_request.state, "actor_id", ACTOR_ID), request.name, request.description)
+        if request.source_mode not in {"managed", "import"}:
+            raise ProductHttpError(422, "SOURCE_MODE_INVALID", "Source mode must be managed or import")
+        return software_products.create(getattr(http_request.state, "actor_id", ACTOR_ID),
+            request.name, request.description,
+            provision_source=request.source_mode == "managed")
 
     @api.get("/api/products")
     def list_software_products(http_request: Request):
@@ -1248,6 +1262,38 @@ def create_http_application(
     @api.get("/api/products/{product_id}/history")
     def product_history(product_id: UUID, http_request: Request):
         return software_products.history(product_id, getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.get("/api/products/{product_id}/code-assets")
+    def product_code_assets(product_id: UUID, http_request: Request):
+        from spg.application.product_managed_source import ProductManagedSourceService
+        return ProductManagedSourceService(selected_database, settings or Settings()).describe(
+            product_id, getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.post("/api/products/{product_id}/code-assets/provision")
+    def provision_product_code(product_id: UUID, http_request: Request):
+        actor = getattr(http_request.state, "actor_id", ACTOR_ID)
+        product = software_products.get(product_id, actor)
+        if product["managed_source"] is not None:
+            return product
+        from spg.application.product_managed_source import ProductManagedSourceService
+        ProductManagedSourceService(selected_database, settings or Settings()).provision(
+            product_id, actor, product["name"])
+        return software_products.get(product_id, actor)
+
+    @api.get("/api/products/{product_id}/code-assets/files")
+    def product_code_files(product_id: UUID, http_request: Request, revision: str | None = None):
+        from spg.application.product_managed_source import ProductManagedSourceService
+        return ProductManagedSourceService(selected_database, settings or Settings()).inspect_files(
+            product_id, getattr(http_request.state, "actor_id", ACTOR_ID), revision)
+
+    @api.get("/api/products/{product_id}/code-assets/export")
+    def export_product_code(product_id: UUID, http_request: Request, revision: str | None = None):
+        from spg.application.product_managed_source import ProductManagedSourceService
+        data, exact = ProductManagedSourceService(selected_database, settings or Settings()).export_archive(
+            product_id, getattr(http_request.state, "actor_id", ACTOR_ID), revision)
+        return Response(data, media_type="application/zip", headers={
+            "Content-Disposition": f'attachment; filename="product-source-{exact}.zip"',
+            "X-Watt-Source-Revision": exact})
 
     @api.get("/api/products/{product_id}/economics")
     def product_economics(product_id: UUID, http_request: Request):

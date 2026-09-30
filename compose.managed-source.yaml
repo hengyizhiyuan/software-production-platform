@@ -1,0 +1,38 @@
+# Add with: docker compose -f compose.yaml -f compose.managed-source.yaml up -d
+services:
+  gitea:
+    image: docker.gitea.com/gitea:1.27.3-rootless
+    restart: unless-stopped
+    environment:
+      GITEA__database__DB_TYPE: sqlite3
+      GITEA__server__ROOT_URL: ${WATT_GITEA_PUBLIC_URL:-http://127.0.0.1:3001/}
+      GITEA__server__HTTP_PORT: "3000"
+      GITEA__security__INSTALL_LOCK: "true"
+      GITEA__service__DISABLE_REGISTRATION: "true"
+    ports:
+      - "127.0.0.1:${WATT_GITEA_HOST_PORT:-3001}:3000"
+    volumes:
+      - watt-gitea-data:/var/lib/gitea
+      - watt-gitea-config:/etc/gitea
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    depends_on:
+      gitea:
+        condition: service_healthy
+    environment:
+      SPG_MANAGED_SOURCE_PROVIDER: gitea
+      SPG_MANAGED_SOURCE_ENDPOINT: http://gitea:3000
+      SPG_MANAGED_SOURCE_PUBLIC_ENDPOINT: ${WATT_GITEA_PUBLIC_URL:-http://127.0.0.1:3001}
+      SPG_MANAGED_SOURCE_USERNAME: ${WATT_GITEA_USER:-watt-managed}
+      SPG_MANAGED_SOURCE_PASSWORD: ${WATT_GITEA_PASSWORD:?Set a dedicated Gitea managed-source credential}
+      SPG_MANAGED_SOURCE_NAMESPACE: ${WATT_GITEA_USER:-watt-managed}
+      SPG_MANAGED_SOURCE_WORKSPACE_ROOT: /var/lib/spg/managed-source
+
+volumes:
+  watt-gitea-data:
+  watt-gitea-config:

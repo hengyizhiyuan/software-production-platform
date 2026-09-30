@@ -27,6 +27,13 @@ class Settings(BaseSettings):
         pattern=r"^postgresql(?:\+psycopg)?://\S+$",
         description="PostgreSQL URL supplied through SPG_DATABASE_URL",
     )
+    managed_source_provider: Literal["disabled", "gitea"] = "disabled"
+    managed_source_endpoint: str | None = None
+    managed_source_public_endpoint: str | None = None
+    managed_source_username: str | None = None
+    managed_source_password: SecretStr | None = None
+    managed_source_namespace: str = "watt-managed"
+    managed_source_workspace_root: Path = Path(".watt/managed-source")
     delivery_runtime_enabled: bool = False
     delivery_runtime_bind_host: str = "127.0.0.1"
     delivery_runtime_first_port: int = Field(default=8010, ge=1024, le=65000)

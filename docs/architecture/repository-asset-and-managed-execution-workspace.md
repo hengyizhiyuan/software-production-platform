@@ -2,10 +2,12 @@
 
 ## Status
 
-Local optional-repository admission is implemented. The P0 extension adds a
-PostgreSQL-backed canonical Git bundle for Watt-managed source and a bounded
-GitHub grant/push/PR path. Live GitHub write qualification is pending an
-authorized credential; deployment durability is pending off-host PostgreSQL.
+Local optional-repository admission and Product-owned Managed Source are
+implemented. New Product source uses an independent Gitea Community Edition
+service as the first replaceable provider. The older repository-optional Work
+allocation path still keeps checked Git bundles in PostgreSQL for its legacy
+continuity. A bounded GitHub grant/push/PR path remains separate; live GitHub
+write qualification is pending an authorized credential.
 
 ## Principle
 
@@ -35,8 +37,70 @@ own Watt-internal identity and bundle, so later commits on that branch also
 survive loss of an execution checkout.
 The checkout is not canonical source. This is infrastructure inside the
 existing Work authority envelope and implies no external repository authority.
-Machine-loss survival requires PostgreSQL hosted and backed up off the worker
-host. Managed bundles are bounded to 128 MiB in this first profile.
+Machine-loss survival for that older bundle path requires PostgreSQL hosted and
+backed up off the worker host. Bundles are bounded to 128 MiB in this profile.
+
+## Product Managed Source
+
+**Watt Managed Source != Gitea. Gitea is the initial reference provider.**
+Git is the current source technology, not the Product ontology. Watt owns the
+Product source identity, accepted source revision and tree, Work source basis,
+Candidate lineage, Human Acceptance and external mappings. The Gitea adapter
+owns repository creation, exact Git materialization, Candidate persistence,
+accepted-ref synchronization and access metadata. No Product, Work or Candidate
+uses a Gitea repository ID as its identity. Watt never queries Gitea's database.
+
+New Product creation provisions a private provider repository with a first
+tracked file and records Product source version 0. Brownfield creation uses
+`source_mode: import`; the existing repository is observed first, then imported
+at its exact revision/tree with its origin recorded. No external Git provider
+is required after import. A Work created for that Product receives an isolated
+Git branch and Engineering Resource based on the **exact Watt accepted
+revision**, not provider HEAD. Its source version, revision and tree are stored
+as Work lineage. The existing production owners create a verified Candidate and
+Runtime Commit. Runtime Commit persists that Candidate in the provider under
+the Work ref. Only an exact Human Acceptance advances the Product's accepted
+version. A later Work reads that version. If Product acceptance advanced since
+the Work began, promotion fails closed; this slice does not reconcile competing
+branches.
+
+The Runtime Trusted Baseline may advance at Runtime Commit before Product Human
+Acceptance. It therefore does not determine the Product's accepted source.
+Existing legacy Products without a managed source row retain their previous
+repository asset metadata; no migration guesses an acceptance decision from
+historical Runtime Commits.
+
+The Product Code Assets API/UI shows accepted and Candidate versions, file
+tree, changed files, a bounded diff, origin and clone access metadata. A ZIP
+export is generated from an explicitly named exact revision. Internal provider
+credentials are not returned. Provider unavailability or a missing revision
+blocks Work source preparation; the Product's accepted version remains intact.
+Human Acceptance does not grant GitHub push, PR or remote delivery authority.
+
+### Provider deployment evolution
+
+1. **Single ECS/host:** Watt and Gitea are separate services. Gitea 1.27.3
+   rootless uses a dedicated persistent source volume and a separate SQLite
+   database in its data volume for local/single-host use. The Watt database is
+   a different application database. Recreating the Gitea container must keep
+   both Gitea volumes. The local Compose network uses an internal HTTP endpoint.
+2. **Dedicated Managed Source host:** point Watt's provider endpoint and
+   public clone endpoint to the new host and mount the Gitea volumes on its
+   dedicated persistent disk. Use HTTPS for the remote credential transport.
+   Product identities and lineage do not change.
+3. **Future provider/storage scale-out:** replace the provider adapter and
+   deployment storage while preserving Watt's accepted source records and
+   exact source contract. Distributed Git storage and HA are outside this slice.
+
+`compose.managed-source.yaml` supplies the reference service. Configure
+`SPG_MANAGED_SOURCE_PROVIDER`, `SPG_MANAGED_SOURCE_ENDPOINT`,
+`SPG_MANAGED_SOURCE_PUBLIC_ENDPOINT`, `SPG_MANAGED_SOURCE_USERNAME`,
+`SPG_MANAGED_SOURCE_PASSWORD`, `SPG_MANAGED_SOURCE_NAMESPACE` and
+`SPG_MANAGED_SOURCE_WORKSPACE_ROOT` for Watt. The provider endpoint is a
+service URL, the workspace root is disposable Watt-local materialization, and
+Gitea's persistent data/config volumes are independent of both. Use a governed
+runtime secret for the credential. The first owner account is bootstrapped by
+the Gitea administrator, not hard-coded into an image or Product row.
 
 Allocation happens only at production readiness. Work admission and
 intermediate Guided Design remain valid with an empty asset scope. Human review

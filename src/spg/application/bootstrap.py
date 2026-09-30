@@ -313,6 +313,7 @@ class Application:
 
         options = {
             "workspace_root": workspace_root or self.settings.workspace_root,
+            "settings": self.settings,
             "executor": selected_executor,
             "verifier": selected_verifier,
             "planner": planner,

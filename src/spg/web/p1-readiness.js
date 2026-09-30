@@ -52,6 +52,7 @@
     }
     const current = currentProduct();
     $("p1-product-detail").hidden = !current;
+    $("p1-repository-form").hidden = Boolean(current?.managed_source);
     $("p1-product-summary").textContent = current
       ? `${current.lifecycle} · ${current.assets.length} assets · ${current.works.length} Works · ${current.current_sources.length} repository sources`
       : "";
@@ -67,6 +68,7 @@
         assets.append(node("p", `${asset.asset_kind} · ${asset.reference}`));
       }
     }
+    void renderCodeAssets(current);
     const select = $("p1-work-product");
     select.replaceChildren();
     select.append(new Option("Select Product", ""));
@@ -79,6 +81,75 @@
       : selected.dataset.repositoryProductId
         ? `Repository belongs to ${state.products.find((item) => item.id === selected.dataset.repositoryProductId)?.name || selected.dataset.repositoryProductId}. Production Work is not admitted.`
         : "This Work is not yet assigned to a long-lived Product.";
+  }
+  async function renderCodeAssets(product) {
+    const status = $("p1-code-assets-status");
+    const versions = $("p1-code-assets-versions");
+    const files = $("p1-code-assets-files");
+    const diff = $("p1-code-assets-diff");
+    const access = $("p1-code-assets-access");
+    versions.replaceChildren(); files.replaceChildren(); access.replaceChildren();
+    diff.hidden = true; diff.textContent = "";
+    if (!product?.managed_source) {
+      status.textContent = "No managed source is attached. Import an existing repository below, or create new Code Assets.";
+      if (product) {
+        const create = node("button", "Create new Code Assets");
+        create.type = "button";
+        create.addEventListener("click", async () => {
+          try {
+            await api(`/api/products/${product.id}/code-assets/provision`, "POST");
+            await loadProducts();
+          } catch (error) { report(error, status); }
+        });
+        access.append(create);
+      }
+      return;
+    }
+    const productId = product.id;
+    status.textContent = "Loading accepted source…";
+    try {
+      const source = await api(`/api/products/${productId}/code-assets`);
+      if (state.productId !== productId) return;
+      status.textContent = `Accepted Version ${source.accepted.version} · ${source.accepted.revision.slice(0, 12)}`
+        + (source.current_candidate ? ` · Current Candidate ${source.current_candidate.revision.slice(0, 12)}` : "");
+      if (source.origin?.repository_identity) access.append(node("p", `Imported from ${source.origin.repository_identity} at ${source.origin.revision}`));
+      const download = document.createElement("a");
+      download.href = `/api/products/${productId}/code-assets/export?revision=${encodeURIComponent(source.accepted.revision)}`;
+      download.textContent = "Export accepted source";
+      download.download = `product-source-${source.accepted.revision}.zip`;
+      access.append(download);
+      const advanced = document.createElement("details");
+      advanced.append(node("summary", "Advanced Git access"), node("p", source.access.url));
+      access.append(advanced);
+      const heading = node("h4", "Change History"); versions.append(heading);
+      for (const item of source.versions) {
+        const button = node("button", `Version ${item.version} · ${item.revision.slice(0, 12)}`);
+        button.type = "button";
+        button.addEventListener("click", () => void inspectCodeVersion(productId, item.revision));
+        versions.append(button);
+      }
+      for (const item of source.candidates.filter((candidate) => candidate.revision !== source.accepted.revision)) {
+        const button = node("button", `Candidate · ${item.revision.slice(0, 12)}`);
+        button.type = "button";
+        button.addEventListener("click", () => void inspectCodeVersion(productId, item.revision));
+        versions.append(button);
+      }
+      await inspectCodeVersion(productId, source.accepted.revision);
+    } catch (error) {
+      if (state.productId === productId) status.textContent = error.message || String(error);
+    }
+  }
+  async function inspectCodeVersion(productId, revision) {
+    const inspected = await api(`/api/products/${productId}/code-assets/files?revision=${encodeURIComponent(revision)}`);
+    if (state.productId !== productId) return;
+    const files = $("p1-code-assets-files");
+    files.replaceChildren(node("h4", `Files · ${inspected.revision.slice(0, 12)}`));
+    for (const path of inspected.files) files.append(node("p", path));
+    files.append(node("h4", "Changed Files"));
+    for (const path of inspected.changed_files) files.append(node("p", path));
+    const diff = $("p1-code-assets-diff");
+    diff.textContent = inspected.diff || "No parent diff for the initial version.";
+    diff.hidden = false;
   }
   async function refreshWorkContext(force = false) {
     const id = selected.dataset.workId || "";
@@ -140,10 +211,28 @@
   $("p1-product-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     try {
-      const product = await api("/api/products", "POST", { name: $("p1-product-name").value.trim() });
+      const product = await api("/api/products", "POST", {
+        name: $("p1-product-name").value.trim(),
+        source_mode: $("p1-product-source-mode").value,
+      });
       state.productId = product.id;
       $("p1-product-name").value = "";
       await loadProducts();
+    } catch (error) { report(error, $("p1-product-summary")); }
+  });
+  $("p1-product-work-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const current = currentProduct();
+    if (!current) return;
+    try {
+      const work = await api("/api/works", "POST", {
+        requirement: $("p1-product-work-requirement").value.trim(),
+        product_id: current.id,
+      });
+      $("p1-product-work-requirement").value = "";
+      $("refresh-control")?.click();
+      await loadProducts();
+      $("p1-product-summary").textContent = `Work ${work.work_id} created from this Product's accepted source. Select it in the Work list to continue.`;
     } catch (error) { report(error, $("p1-product-summary")); }
   });
   $("p1-repository-form").addEventListener("submit", async (event) => {

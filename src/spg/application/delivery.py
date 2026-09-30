@@ -117,8 +117,10 @@ def candidate_change_diff(repository: str, revision: str, artifacts: tuple[str, 
 
 class DeliveryApplicationService:
     """Product acceptance never authorizes a Candidate or advances a PWU."""
-    def __init__(self, database: Database):
+    def __init__(self, database: Database, settings=None):
         self.database = database
+        from spg.config import Settings
+        self.settings = settings or Settings()
         self.runtime_probe = None
         self.full_application_runtime_probe = None
         self.guardian_assurance_client = None
@@ -577,5 +579,13 @@ class DeliveryApplicationService:
             uow.session.execute(insert(work_delivery_acceptances).values(
                 id=record.id, manifest_id=manifest_id, payload=record.model_dump(mode="json"), created_at=record.created_at,
             ))
+            if request.decision.value == "ACCEPT":
+                from spg.infrastructure.persistence.product_schema import work_source_bases
+                managed = uow.session.execute(select(work_source_bases.c.work_id).where(
+                    work_source_bases.c.work_id == work_id)).scalar_one_or_none()
+                if managed is not None:
+                    from spg.application.product_managed_source import ProductManagedSourceService
+                    ProductManagedSourceService(self.database, self.settings).promote_acceptance(
+                        uow.session, work_id, commit, record)
             uow.commit()
         return record

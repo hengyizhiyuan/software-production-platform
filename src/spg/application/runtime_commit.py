@@ -65,8 +65,11 @@ class RuntimeCommitService:
         database: Database,
         git: GitRepositoryIntegrationAdapter | None = None,
         checkout_synchronizer: GitTrustedCheckoutSynchronizer | None = None,
+        settings=None,
     ) -> None:
         self.database = database
+        from spg.config import Settings
+        self.settings = settings or Settings()
         self.git = git or GitRepositoryIntegrationAdapter()
         self.checkout_synchronizer = (
             checkout_synchronizer
@@ -127,6 +130,7 @@ class RuntimeCommitService:
                     managed_source.sync(
                         basis.candidate.repository_identity, basis.repository_path,
                         session=unit_of_work.session)
+                self._persist_product_candidate(unit_of_work.session, basis)
                 unit_of_work.commit()
                 self._synchronize_checkout(basis, result)
                 return result
@@ -243,9 +247,27 @@ class RuntimeCommitService:
                 managed_source.sync(
                     candidate.repository_identity, basis.repository_path,
                     session=unit_of_work.session)
+            self._persist_product_candidate(unit_of_work.session, basis)
             unit_of_work.commit()
         self._synchronize_checkout(basis, result)
         return result
+
+    def _persist_product_candidate(self, session, basis: _CommitBasis) -> None:
+        from sqlalchemy import select
+        from spg.infrastructure.persistence.product_schema import work_source_bases, work_runtime_bindings
+        managed = session.execute(select(work_source_bases.c.work_id)
+            .join(work_runtime_bindings,
+                  work_runtime_bindings.c.work_id == work_source_bases.c.work_id)
+            .where(work_runtime_bindings.c.production_run_id == basis.candidate.production_run_id)
+        ).scalar_one_or_none()
+        if managed is None:
+            return
+        from spg.application.product_managed_source import ProductManagedSourceService
+        candidate = basis.candidate
+        ProductManagedSourceService(self.database, self.settings).persist_candidate(
+            session, candidate.production_run_id,
+            candidate.repository_identity, candidate.proposed_commit_identity,
+            candidate.proposed_tree_identity, basis.repository_path)
 
     def _synchronize_checkout(
         self,

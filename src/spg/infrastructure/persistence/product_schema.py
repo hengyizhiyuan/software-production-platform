@@ -62,6 +62,49 @@ software_product_assets = Table(
     UniqueConstraint("product_id", "asset_kind", "reference", name="uq_software_product_asset_ref"),
 )
 
+# Watt owns accepted source truth; provider references are subordinate metadata.
+product_managed_sources = Table(
+    "product_managed_sources", metadata,
+    Column("product_id", Uuid(as_uuid=True), ForeignKey("software_products.id"), primary_key=True),
+    Column("repository_identity", String(255), nullable=False, unique=True),
+    Column("provider_kind", String(32), nullable=False),
+    Column("provider_reference", Text, nullable=False),
+    Column("accepted_ref", String(512), nullable=False),
+    Column("accepted_revision", String(64), nullable=False),
+    Column("accepted_tree", String(64), nullable=False),
+    Column("origin", JSONB, nullable=False, server_default=text("'{}'::jsonb")),
+    Column("version", Integer, nullable=False, server_default=text("0")),
+    Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)
+
+product_source_versions = Table(
+    "product_source_versions", metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("product_id", Uuid(as_uuid=True), ForeignKey("software_products.id"), nullable=False),
+    Column("version", Integer, nullable=False),
+    Column("revision", String(64), nullable=False),
+    Column("tree", String(64), nullable=False),
+    Column("work_id", Uuid(as_uuid=True), ForeignKey("product_works.id"), nullable=True),
+    Column("candidate_id", Uuid(as_uuid=True), nullable=True),
+    Column("acceptance_id", Uuid(as_uuid=True), nullable=True),
+    Column("authority_identity", String(255), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    UniqueConstraint("product_id", "version", name="uq_product_source_version"),
+    UniqueConstraint("acceptance_id", name="uq_product_source_acceptance"),
+)
+
+work_source_bases = Table(
+    "work_source_bases", metadata,
+    Column("work_id", Uuid(as_uuid=True), ForeignKey("product_works.id"), primary_key=True),
+    Column("product_id", Uuid(as_uuid=True), ForeignKey("software_products.id"), nullable=False),
+    Column("resource_id", Uuid(as_uuid=True), ForeignKey("engineering_resources.id"), nullable=False),
+    Column("source_version", Integer, nullable=False),
+    Column("source_revision", String(64), nullable=False),
+    Column("source_tree", String(64), nullable=False),
+    Column("work_ref", String(512), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)
+
 engineering_resources = Table(
     "engineering_resources",
     metadata,
@@ -749,6 +792,9 @@ product_tables = (
     engineering_resources,
     software_products,
     software_product_assets,
+    product_managed_sources,
+    product_source_versions,
+    work_source_bases,
     product_works,
     engineering_scopes,
     engineering_resource_bindings,

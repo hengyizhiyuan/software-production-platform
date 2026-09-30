@@ -59,11 +59,23 @@
           <div id="p1-product-list" class="work-list" aria-live="polite"></div>
           <form id="p1-product-form" class="inline-form">
             <label for="p1-product-name">New Product</label>
-            <div class="inline-form-row"><input id="p1-product-name" maxlength="255" required placeholder="Finance Management"><button class="primary-button compact" type="submit">Create</button></div>
+            <div class="inline-form-row"><input id="p1-product-name" maxlength="255" required placeholder="Finance Management"><select id="p1-product-source-mode" aria-label="Source start"><option value="managed">New code assets</option><option value="import">Import existing code</option></select><button class="primary-button compact" type="submit">Create</button></div>
           </form>
           <div id="p1-product-detail" hidden>
             <p id="p1-product-summary" class="empty-copy"></p>
             <div id="p1-product-assets" class="p1-fact-list"></div>
+            <section id="p1-code-assets" aria-label="Code Assets">
+              <h3>Code Assets</h3>
+              <p id="p1-code-assets-status" class="empty-copy">Select a Product to inspect its source.</p>
+              <div id="p1-code-assets-versions"></div>
+              <div id="p1-code-assets-files"></div>
+              <pre id="p1-code-assets-diff" hidden></pre>
+              <div id="p1-code-assets-access"></div>
+            </section>
+            <form id="p1-product-work-form" class="inline-form">
+              <label for="p1-product-work-requirement">New Work for this Product</label>
+              <div class="inline-form-row"><input id="p1-product-work-requirement" required placeholder="Describe the change"><button class="secondary-button compact" type="submit">Create Work</button></div>
+            </form>
             <form id="p1-repository-form" class="inline-form">
               <label for="p1-repository-url">Import an existing Git HTTPS repository</label>
               <input id="p1-repository-url" type="url" placeholder="https://github.com/owner/repo.git" required>

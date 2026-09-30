@@ -1,7 +1,7 @@
 """Long-lived software Product ownership over Works and engineering assets."""
 
 from datetime import UTC, datetime
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from urllib.parse import urlparse
 from uuid import UUID, uuid4
 
@@ -10,7 +10,8 @@ from sqlalchemy import insert, select, update
 from spg.domain.product import ProductInvariantViolation, ProductRecordNotFound
 from spg.infrastructure.persistence.product_schema import (
     engineering_resources, product_works, software_product_assets, software_products,
-    work_reality_revisions, work_runtime_bindings,
+    work_reality_revisions, work_runtime_bindings, product_managed_sources,
+    product_source_versions,
 )
 from spg.infrastructure.persistence.runtime_schema import (
     production_work_units, baseline_candidates, verification_records, runtime_commits,
@@ -21,10 +22,13 @@ from spg.application.measurement import ProductionMeasurementService
 
 
 class ProductAssetService:
-    def __init__(self, database):
+    def __init__(self, database, settings=None):
         self.database = database
+        from spg.config import Settings
+        self.settings = settings or Settings()
 
-    def create(self, owner_id: str, name: str, description: str | None = None) -> dict:
+    def create(self, owner_id: str, name: str, description: str | None = None,
+               *, provision_source: bool = True) -> dict:
         if not name.strip():
             raise ProductInvariantViolation("Product name is required")
         product_id = uuid4()
@@ -36,6 +40,9 @@ class ProductAssetService:
                 updated_at=now,
             ))
             uow.commit()
+        if provision_source and self.settings.managed_source_provider == "gitea":
+            from spg.application.product_managed_source import ProductManagedSourceService
+            ProductManagedSourceService(self.database, self.settings).provision(product_id, owner_id, name.strip())
         return self.get(product_id, owner_id)
 
     def list(self, owner_id: str) -> list[dict]:
@@ -57,29 +64,20 @@ class ProductAssetService:
             ).where(product_works.c.product_id == product_id).order_by(
                 product_works.c.created_at, product_works.c.id,
             )).mappings().all()
-            work_ids = [item["id"] for item in works]
-            bindings = [] if not work_ids else uow.session.execute(select(
-                work_runtime_bindings.c.work_id, work_runtime_bindings.c.production_run_id,
-            ).where(work_runtime_bindings.c.work_id.in_(work_ids))).mappings().all()
-            run_to_work = {item["production_run_id"]: item["work_id"] for item in bindings}
-            commits = [] if not run_to_work else uow.session.execute(select(runtime_commits).where(
-                runtime_commits.c.production_run_id.in_(tuple(run_to_work)),
-            ).order_by(runtime_commits.c.committed_at, runtime_commits.c.id)).mappings().all()
-            latest_by_repository = {}
-            for commit in commits:
-                latest_by_repository[commit["repository_identity"]] = commit
+            managed = uow.session.execute(select(product_managed_sources).where(
+                product_managed_sources.c.product_id == product_id)).mappings().one_or_none()
             current_sources = []
             for asset in assets:
                 if asset["asset_kind"] != "REPOSITORY":
                     continue
                 source = self._asset(asset)
-                committed = latest_by_repository.get(asset["reference"])
-                if committed is not None:
+                if managed is not None and asset["reference"] == managed["repository_identity"]:
                     source["metadata"] = {**source["metadata"],
-                        "revision": committed["repository_revision"],
-                        "repository_ref": committed["target_authoritative_ref"],
-                        "revision_evidence_ref": f"runtime-commit:{committed['id']}",
-                        "last_work_id": str(run_to_work[committed["production_run_id"]])}
+                        "revision": managed["accepted_revision"],
+                        "tree": managed["accepted_tree"],
+                        "repository_ref": managed["accepted_ref"],
+                        "accepted_version": managed["version"],
+                        "revision_evidence_ref": f"product-source:{product_id}:{managed['version']}"}
                 current_sources.append(source)
             return {
                 "id": str(row["id"]), "owner_id": row["owner_id"],
@@ -91,6 +89,14 @@ class ProductAssetService:
                            "condition": item["condition"],
                            "created_at": item["created_at"].isoformat()} for item in works],
                 "current_sources": current_sources,
+                "managed_source": None if managed is None else {
+                    "repository_identity": managed["repository_identity"],
+                    "provider_kind": managed["provider_kind"],
+                    "accepted_revision": managed["accepted_revision"],
+                    "accepted_tree": managed["accepted_tree"],
+                    "accepted_version": managed["version"],
+                    "origin": managed["origin"],
+                },
             }
 
     def bind_work(self, product_id: UUID, work_id: UUID, owner_id: str) -> dict:
@@ -109,7 +115,27 @@ class ProductAssetService:
                 uow.session.execute(update(product_works).where(
                     product_works.c.id == work_id,
                 ).values(product_id=product_id))
+            managed = uow.session.execute(select(product_managed_sources.c.product_id).where(
+                product_managed_sources.c.product_id == product_id)).scalar_one_or_none()
+            if managed is None and self.settings.managed_source_provider == "gitea":
+                repository_asset = uow.session.execute(select(software_product_assets.c.id).where(
+                    software_product_assets.c.product_id == product_id,
+                    software_product_assets.c.asset_kind == "REPOSITORY").limit(1)).scalar_one_or_none()
+                if repository_asset is None:
+                    raise ProductInvariantViolation("Product source must be provisioned or imported before Work binding")
+            if managed is not None:
+                condition = uow.session.execute(select(product_works.c.condition).where(
+                    product_works.c.id == work_id)).scalar_one()
+                if condition != "DRAFT":
+                    from spg.infrastructure.persistence.product_schema import work_source_bases
+                    basis = uow.session.execute(select(work_source_bases.c.work_id).where(
+                        work_source_bases.c.work_id == work_id)).scalar_one_or_none()
+                    if basis is None:
+                        raise ProductInvariantViolation("Managed Product requires source binding before Work refinement")
             uow.commit()
+        if managed is not None and condition == "DRAFT":
+            from spg.application.product_managed_source import ProductManagedSourceService
+            ProductManagedSourceService(self.database, self.settings).prepare_work(work_id, product_id)
         return self.get(product_id, owner_id)
 
     def ensure_repository_work(
@@ -192,6 +218,15 @@ class ProductAssetService:
         timeline: list[dict] = []
         with self.database.unit_of_work() as uow:
             session = uow.session
+            for source_version in session.execute(select(product_source_versions).where(
+                product_source_versions.c.product_id == product_id)).mappings():
+                timeline.append({"at": source_version["created_at"].isoformat(),
+                    "kind": "PRODUCT_SOURCE_ACCEPTED" if source_version["version"] else "PRODUCT_SOURCE_INITIALIZED",
+                    "version": source_version["version"],
+                    "revision": source_version["revision"], "tree": source_version["tree"],
+                    "work_id": str(source_version["work_id"]) if source_version["work_id"] else None,
+                    "candidate_id": str(source_version["candidate_id"]) if source_version["candidate_id"] else None,
+                    "acceptance_id": str(source_version["acceptance_id"]) if source_version["acceptance_id"] else None})
             works = session.execute(select(product_works).where(
                 product_works.c.product_id == product_id,
             )).mappings().all()
@@ -310,6 +345,26 @@ class ProductAssetService:
             raise ProductInvariantViolation("Unsupported Product asset kind")
         if not reference.strip():
             raise ProductInvariantViolation("Product asset reference is required")
+        if kind == "REPOSITORY" and self.settings.managed_source_provider == "gitea":
+            with self.database.unit_of_work() as uow:
+                self._owned(uow.session, product_id, owner_id)
+                managed = uow.session.execute(select(product_managed_sources.c.repository_identity).where(
+                    product_managed_sources.c.product_id == product_id)).scalar_one_or_none()
+                resource = None if resource_id is None else uow.session.execute(
+                    select(engineering_resources).where(engineering_resources.c.id == resource_id)
+                ).mappings().one_or_none()
+            if managed is not None:
+                if (reference != managed or resource is None
+                        or resource["repository_identity"] != reference):
+                    raise ProductInvariantViolation("Product already owns a managed source")
+                return self.get(product_id, owner_id)
+            elif resource is not None and resource["repository_identity"] == reference:
+                from spg.application.product_managed_source import ProductManagedSourceService
+                observed = metadata or {}
+                ProductManagedSourceService(self.database, self.settings).import_existing(
+                    product_id, owner_id, reference, Path(resource["location_ref"]),
+                    observed.get("revision") or "", observed.get("tree") or "")
+                return self.get(product_id, owner_id)
         with self.database.unit_of_work() as uow:
             self._owned(uow.session, product_id, owner_id)
             if kind == "REPOSITORY":

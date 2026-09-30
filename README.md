@@ -34,6 +34,30 @@ uses `spg_dev`; automated tests use the separate `spg_test`; historical
 committed database password is an intentionally non-secret local-development
 value and must not be reused outside this local environment.
 
+### Product Managed Source (reference provider)
+
+Set a dedicated `WATT_GITEA_PASSWORD` and the required `SPG_OPERATOR_TOKEN` in
+the local environment or a secret manager. Start Watt with the independent,
+pinned Gitea Community Edition service:
+
+    docker compose -f compose.yaml -f compose.managed-source.yaml up -d --build
+
+After its first start, create the `watt-managed` service account once using
+Gitea's administrator CLI. Use a dedicated non-admin account that owns the
+managed repositories. Supply its password through the runtime environment;
+do not commit it. For example:
+
+    docker compose -f compose.yaml -f compose.managed-source.yaml exec -e GITEA_BOOTSTRAP_PASSWORD="$WATT_GITEA_PASSWORD" gitea sh -c 'gitea admin user create --username watt-managed --password "$GITEA_BOOTSTRAP_PASSWORD" --email watt-managed@example.invalid --must-change-password=false'
+
+Gitea stores repositories and its single-host SQLite database
+in `watt-gitea-data`, with configuration in `watt-gitea-config`. Both volumes
+survive normal container replacement. Do not use `down --volumes` when source
+must be retained. `WATT_GITEA_PUBLIC_URL` and `WATT_GITEA_HOST_PORT` configure
+local clone access; the app reaches Gitea over the Compose service network.
+For a dedicated source host, change the provider and public endpoints and move
+the persistent Gitea storage; Product identities and accepted revisions remain
+Watt-owned. See the [source architecture](docs/architecture/repository-asset-and-managed-execution-workspace.md).
+
 The default WIC and Conversation path uses the DeepSeek Responses API with
 `deepseek-flash` at low reasoning effort. Configure `SPG_DEEPSEEK_API_KEY` in the
 ignored local environment. Human-facing realization remains independently

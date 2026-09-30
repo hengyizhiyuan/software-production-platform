@@ -10,7 +10,9 @@ from typing import Callable, Protocol
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from sqlalchemy import insert, select
-from spg.infrastructure.persistence.product_schema import product_works, software_product_assets
+from spg.infrastructure.persistence.product_schema import (
+    product_works, software_product_assets, product_managed_sources, work_source_bases,
+)
 
 from spg.application.completion import CompletionService
 from spg.application.execution import ExecutionService
@@ -215,8 +217,11 @@ class WorkApplicationService:
         executor_binding: ExecutorBinding = DEFAULT_BINDING,
         preparation: PreparationService | None = None,
         production_recorder: AuthorizedProductionRecorder | None = None,
+        settings=None,
     ) -> None:
         self.database = database
+        from spg.config import Settings
+        self.settings = settings or Settings()
         self.workspace_root = (workspace_root or Path(".spg/workspaces")).resolve()
         self.executor = executor
         self.verifier = verifier
@@ -241,7 +246,7 @@ class WorkApplicationService:
         self.candidate_review_preparer: Callable[[UUID], None] | None = None
         self.candidate_review_readiness: Callable[[UUID, UUID], bool] | None = None
         self.integration = RepositoryIntegrationService(database)
-        self.runtime_commit = RuntimeCommitService(database)
+        self.runtime_commit = RuntimeCommitService(database, settings=self.settings)
 
     def configure_candidate_authorization_guard(
         self, guard: Callable[[UUID, UUID], None],
@@ -360,6 +365,17 @@ class WorkApplicationService:
                     )
                 ).scalar_one_or_none() is None:
                     raise ProductRecordNotFound(f"Active Product not found: {product_id}")
+                if self.settings.managed_source_provider == "gitea":
+                    managed = unit_of_work.session.execute(select(
+                        product_managed_sources.c.product_id).where(
+                            product_managed_sources.c.product_id == product_id)).scalar_one_or_none()
+                    repository_asset = unit_of_work.session.execute(select(
+                        software_product_assets.c.id).where(
+                            software_product_assets.c.product_id == product_id,
+                            software_product_assets.c.asset_kind == "REPOSITORY").limit(1)
+                    ).scalar_one_or_none()
+                    if managed is None and repository_asset is None:
+                        raise ProductInvariantViolation("Product source must be provisioned or imported before Work begins")
             normalized_tags = tuple(
                 sorted({item.strip() for item in tags if item.strip()})
             )
@@ -391,6 +407,14 @@ class WorkApplicationService:
                 }
             )
             unit_of_work.commit()
+        if product_id is not None:
+            with self.database.unit_of_work() as uow:
+                has_managed_source = uow.session.execute(select(
+                    product_managed_sources.c.product_id).where(
+                        product_managed_sources.c.product_id == product_id)).scalar_one_or_none()
+            if has_managed_source is not None:
+                from spg.application.product_managed_source import ProductManagedSourceService
+                ProductManagedSourceService(self.database, self.settings).prepare_work(work_id, product_id)
         return self.get_work(work_id)
 
     def admit_interaction_work(
@@ -1306,7 +1330,21 @@ class WorkApplicationService:
                     software_product_assets.c.product_id == product_id,
                     software_product_assets.c.asset_kind == "REPOSITORY",
                 )).scalars())
-            if request.engineering_resource_id is not None:
+            managed_work_resource = unit_of_work.session.execute(select(
+                work_source_bases.c.resource_id).where(
+                    work_source_bases.c.work_id == work_id)).scalar_one_or_none()
+            if product_id is not None and managed_work_resource is None:
+                managed_product = unit_of_work.session.execute(select(
+                    product_managed_sources.c.product_id).where(
+                        product_managed_sources.c.product_id == product_id)).scalar_one_or_none()
+                if managed_product is not None:
+                    raise ProductInvariantViolation("Managed Work has no exact Product accepted source basis")
+            if managed_work_resource is not None:
+                if (request.engineering_resource_id is not None
+                        and request.engineering_resource_id != managed_work_resource):
+                    raise ProductInvariantViolation("Managed Work must use its exact accepted source basis")
+                resource = store.resource(managed_work_resource)
+            elif request.engineering_resource_id is not None:
                 if product_id is not None and product_resources and \
                         request.engineering_resource_id not in product_resources:
                     raise ProductInvariantViolation("Selected repository is not attached to this Product")
