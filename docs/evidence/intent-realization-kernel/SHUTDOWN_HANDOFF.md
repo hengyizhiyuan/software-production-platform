@@ -82,11 +82,11 @@ Codex source repair means code changed between trials. The source37→38 Work-hi
 
 ## N. Infrastructure cleanup
 
-[shutdown-cleanup.json](shutdown-cleanup.json) names the exact dedicated QA, idle test, fixture, native runtime, Preview and image resources retired. Final Docker state had zero running containers, 48 exited containers, 10 networks, and 307 preserved volumes. The current `qa/source39` image remained. The source27 runtime tag remained because an exited failed-attempt container references it; removal was not forced. C: free space measured 6,759,751,680 bytes before and 6,478,495,744 bytes after bounded cleanup. Host free space **decreased**, so no disk-space recovery is claimed; Docker Desktop's shared storage was not compacted and broad builder/volume prune was not run. Current QA and Preview endpoints are unavailable after shutdown.
+[shutdown-cleanup.json](shutdown-cleanup.json) names the exact dedicated QA, idle test, fixture, native runtime, Preview and image resources retired. Final Docker state had zero running containers, 48 exited containers, 10 networks, and 307 preserved volumes. The current `qa/source39` image remained. The source27 runtime tag remained because an exited failed-attempt container references it; removal was not forced. C: free space measured 6,759,751,680 bytes before cleanup and 6,478,495,744 bytes immediately afterward. A later independent measurement after Docker Desktop reclaimed storage showed 15,284,813,824 bytes free, a net gain of 8,525,062,144 bytes from the starting snapshot. Broad builder/volume prune was not run. Current QA and Preview endpoints are unavailable after shutdown.
 
 ## O. Repository and runtime final state
 
-The pre-existing six-file diff was committed as the labelled partial-qualification shutdown checkpoint. This report, source identity, cleanup and matrix are the handoff artifacts. Raw `.spg` receipts are ignored by Git and preserved in one private, hashed shutdown archive at `D:\hy\software-production-platform\.spg\irk-shutdown\irk-source39-shutdown-2026-09-30.zip`; its SHA-256 is in the adjacent `.sha256` sidecar. No credential or private environment file is included. The branch was not pushed. Working-tree cleanliness must be checked after the handoff commit; the source fingerprint is unchanged by evidence/doc commits.
+The pre-existing six-file diff was committed as the labelled partial-qualification shutdown checkpoint. This report, source identity, cleanup and matrix are the handoff artifacts. Raw `.spg` receipts are ignored by Git and preserved in one private, hashed shutdown archive at `D:\hy\software-production-platform\.spg\irk-shutdown\irk-source39-shutdown-2026-09-30-final.zip`; its SHA-256 is in the adjacent `.sha256` sidecar. No credential or private environment file is included. The branch was not pushed. Working-tree cleanliness must be checked after the handoff commit; the source fingerprint is unchanged by evidence/doc commits.
 
 ## P. Backlog by responsibility owner
 
@@ -104,4 +104,4 @@ Use the local `b119c29` source checkpoint, exact fingerprint and retained `qa/so
 
 ## R. Claims excluded
 
-Do not claim all-PASS IRK closure, universal language understanding, zero false effects across unrun cases, production readiness, completed Human Acceptance, successful Web/Stripe integration, a fresh unseen Holdout, a clean historical record without failures, or recovered C: disk space. This campaign is stopped by Human decision.
+Do not claim all-PASS IRK closure, universal language understanding, zero false effects across unrun cases, production readiness, completed Human Acceptance, successful Web/Stripe integration, a fresh unseen Holdout, or a clean historical record without failures. The measured C: free-space gain is a storage observation, not a qualification result. This campaign is stopped by Human decision.

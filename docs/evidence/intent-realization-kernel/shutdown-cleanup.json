@@ -5,8 +5,9 @@
   "docker_networks_at_end": 10,
   "docker_containers_including_exited_at_end": 48,
   "c_drive_free_bytes_before": 6759751680,
-  "c_drive_free_bytes_after": 6478495744,
-  "c_drive_result": "Free space fell by 281255936 bytes despite Docker object retirement; Docker Desktop storage did not return host free space. No unrelated cache or evidence was pruned.",
+  "c_drive_free_bytes_immediate_after_cleanup": 6478495744,
+  "c_drive_free_bytes_after_delayed_reclamation": 15284813824,
+  "c_drive_result": "Immediately after Docker object retirement free space was 281255936 bytes below the starting snapshot; a later independent measurement showed 8525062144 more free bytes than the starting snapshot. No unrelated cache or evidence was pruned.",
   "qa_compose_down_attempt": "Configuration interpolation failed because SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN was absent; the attempt removed nothing. Exact named containers were then stopped and removed.",
   "qa_containers_removed": [
     "watt-irk-convergence-qa-native-coordinator-1",
