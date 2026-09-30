@@ -1,0 +1,111 @@
+{
+  "principle": "Artifact failure does not imply Platform failure; produced-software defects first enter Candidate -> Verification -> Guardian -> Watt Self-Refine.",
+  "current_source_confirmed_platform_defects": 0,
+  "findings": [
+    {
+      "finding": "Create-only branch request caused an unrequested branch switch in an old Lifecycle trial",
+      "domain": "WATT_PLATFORM_DEFECT",
+      "source_scope": "historical fourth freeze",
+      "current_state": "Current source39 LC02 trials23-25 each PASS; no promotion of the old failed receipt",
+      "evidence": "docs/evidence/intent-realization-kernel/convergence-root-cause-map.md"
+    },
+    {
+      "finding": "Work-history question used an unsupported answer instead of persisted Work Reality",
+      "domain": "WATT_PLATFORM_DEFECT",
+      "source_scope": "source37",
+      "current_state": "Code repair at source38; source39 LC09 trial22 PASS",
+      "evidence": ".spg/irk-convergence/lifecycle-source39/GC-LC-09/trial-22/historical-query-oracle-source39.json"
+    },
+    {
+      "finding": "Source-bound read-only branch inspection reacquired the repository and reset observed branch",
+      "domain": "WATT_PLATFORM_DEFECT",
+      "source_scope": "source38",
+      "current_state": "Code repair at source39; source39 LC02 trials23-25 PASS",
+      "evidence": ".spg/irk-convergence/lifecycle-source38/GC-LC-02/trial-22/result.json"
+    },
+    {
+      "finding": "FSI Candidate link to /about resolves to HTTP 404",
+      "domain": "ARTIFACT_DEFECT",
+      "source_scope": "source39 Candidate, narrow FSI link oracle PASS",
+      "current_state": "Normal future Candidate/Verification/Guardian refinement; no platform violation inferred from this observation alone",
+      "evidence": ".spg/irk-convergence/fsi-source39/GC-EX-01/trial-5/business-oracle-source39.json"
+    },
+    {
+      "finding": "About page not discoverable from existing navigation",
+      "domain": "ARTIFACT_DEFECT",
+      "source_scope": "historical source26 Candidate",
+      "current_state": "Historical failed Artifact receipt retained",
+      "evidence": "docs/evidence/intent-realization-kernel/convergence-root-cause-map.md"
+    },
+    {
+      "finding": "Customer notes migration, API and form field identities disagreed; subsequent Candidate lacked create/edit form",
+      "domain": "ARTIFACT_DEFECT",
+      "source_scope": "historical source27/source28 Candidates",
+      "current_state": "Historical failed Artifact receipts retained",
+      "evidence": "docs/evidence/intent-realization-kernel/convergence-root-cause-map.md"
+    },
+    {
+      "finding": "EX02 trial21 reused shared Product identity whose baseline already had target text",
+      "domain": "QUALIFICATION_HARNESS_DEFECT",
+      "source_scope": "source39",
+      "current_state": "Original attempt PARTIAL; unique readonly namespace trial22 PASS",
+      "evidence": ".spg/irk-convergence/tier0-source39/GC-EX-02/trial-21/posthoc-classification.json"
+    },
+    {
+      "finding": "EX11 original oracle required exact words in separate Decision/attention fields",
+      "domain": "QUALIFICATION_HARNESS_DEFECT",
+      "source_scope": "source39",
+      "current_state": "Original FAIL preserved; same persisted facts satisfy corrected semantic oracle without production replay",
+      "evidence": ".spg/irk-convergence/tier0-source39/GC-EX-11/trial-20/semantic-oracle-reconciliation.json"
+    },
+    {
+      "finding": "LC09 original oracle compared volatile capacity_observed_at timestamp",
+      "domain": "QUALIFICATION_HARNESS_DEFECT",
+      "source_scope": "source39 trial21",
+      "current_state": "Original FAIL preserved; independent trial22 PASS with predeclared semantic queue equality",
+      "evidence": ".spg/irk-convergence/lifecycle-source39/GC-LC-09/trial-21/posthoc-queue-diff.json"
+    },
+    {
+      "finding": "Integration attempts 1-4 had UID, writable mount, Docker socket or database-name setup errors",
+      "domain": "QUALIFICATION_HARNESS_DEFECT",
+      "source_scope": "source39",
+      "current_state": "Original stopped/failed logs preserved; corrected fifth attempt PASS 788/788",
+      "evidence": ".spg/irk-convergence/resume-source38.json"
+    },
+    {
+      "finding": "Preview retirement manifest transcribed one historical UUID incorrectly",
+      "domain": "QUALIFICATION_HARNESS_DEFECT",
+      "source_scope": "shutdown cleanup",
+      "current_state": "Original zero-selection row retained; exact-label manual retirement and separate correction receipt",
+      "evidence": ".spg/irk-convergence/shutdown/partial-preview-retirement-correction.json"
+    },
+    {
+      "finding": "Real Web Search credential is withheld",
+      "domain": "EXTERNAL_BLOCKER",
+      "source_scope": "source39 EX12 Web portion",
+      "current_state": "BLOCKED_EXTERNAL; available GitHub portion qualified separately",
+      "evidence": ".spg/irk-convergence/research-source39/GC-EX-12/trial-23/business-oracle.json"
+    },
+    {
+      "finding": "Externally issued Stripe secret is unavailable",
+      "domain": "EXTERNAL_BLOCKER",
+      "source_scope": "source39 EX11",
+      "current_state": "Correct governed Human boundary; no fabricated secret or Preview",
+      "evidence": ".spg/irk-convergence/tier0-source39/GC-EX-11/trial-20/qualification.json"
+    },
+    {
+      "finding": "Tier0 and Lifecycle minimum physical slots, IP02 browser oracle and full business journeys incomplete",
+      "domain": "QUALIFICATION_DEBT / NOT_RUN",
+      "source_scope": "source39",
+      "current_state": "Human intentionally terminated campaign; see finite matrix",
+      "evidence": "docs/evidence/intent-realization-kernel/shutdown-current-source-matrix.json"
+    },
+    {
+      "finding": "Fresh post-freeze Holdout and complete 38-invariant audit not performed",
+      "domain": "QUALIFICATION_DEBT / NOT_RUN",
+      "source_scope": "source39",
+      "current_state": "No all-PASS or zero-false-effect claim",
+      "evidence": "docs/evidence/intent-realization-kernel/shutdown-current-source-matrix.json"
+    }
+  ]
+}

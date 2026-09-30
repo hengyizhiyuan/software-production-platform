@@ -1,0 +1,498 @@
+{
+  "matrix_version": "irk-shutdown-source39-v1",
+  "production_source_fingerprint": "cc44098163e2676ec0c6b04b9d3126fb0719ac635ef5335e1f2b7ba8f4ba8c01",
+  "source_checkpoint_commit": "b119c29e1068e6e2c1ab1ba8ca3a73b7d7993c4d",
+  "unit_of_count": "47 finite requirement groups; historical and diagnostic attempt receipts are separate",
+  "counts": {
+    "BLOCKED_EXTERNAL": 2,
+    "FAIL_CURRENT_SOURCE": 0,
+    "HISTORICAL_FAIL_ONLY": 0,
+    "HISTORICAL_PASS_ONLY": 17,
+    "NOT_RUN_CURRENT_SOURCE": 1,
+    "PARTIAL_CURRENT_SOURCE": 9,
+    "PASS_CURRENT_SOURCE": 18
+  },
+  "rows": [
+    {
+      "group": "TIER0",
+      "item": "GC-EX-01",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/fsi-source39/GC-EX-01/trial-5/business-oracle-source39.json"
+      ],
+      "note": "minimum_independent_trials=3. One current-source physical PASS; corpus requires three independent trials."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-02",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source39/GC-EX-02/trial-22/business-oracle-source39.json"
+      ],
+      "note": "minimum_independent_trials=1. Trial 21 shared-Product fixture contamination is retained separately."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-03",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-03"
+      ],
+      "note": "minimum_independent_trials=3. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-04",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-04"
+      ],
+      "note": "minimum_independent_trials=1. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-05",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-05"
+      ],
+      "note": "minimum_independent_trials=3. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-06",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-06"
+      ],
+      "note": "minimum_independent_trials=3. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-07",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-07"
+      ],
+      "note": "minimum_independent_trials=3. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-08",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-08"
+      ],
+      "note": "minimum_independent_trials=1. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-09",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-09"
+      ],
+      "note": "minimum_independent_trials=1. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-10",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-10"
+      ],
+      "note": "minimum_independent_trials=3. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-11",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source39/GC-EX-11/trial-20/business-oracle-source39-semantic.json"
+      ],
+      "note": "minimum_independent_trials=1. Credential boundary PASS; real STRIPE_SECRET_KEY remains unavailable. Original wording-oracle FAIL retained."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-12",
+      "status": "BLOCKED_EXTERNAL",
+      "evidence": [
+        ".spg/irk-convergence/research-source39/GC-EX-12/trial-23/business-oracle.json"
+      ],
+      "note": "minimum_independent_trials=1. Available GitHub research PASS; real Web Search requires withheld credential."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-13",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-13"
+      ],
+      "note": "minimum_independent_trials=3. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-14",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-14"
+      ],
+      "note": "minimum_independent_trials=1. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-EX-15",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-EX-15"
+      ],
+      "note": "minimum_independent_trials=1. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-IP-01",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source39/GC-IP-01/trial-20/business-oracle-source39.json"
+      ],
+      "note": "minimum_independent_trials=1. "
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-IP-02",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source39/GC-IP-02/trial-22/result.json"
+      ],
+      "note": "minimum_independent_trials=3. Automatic Preview READY; no browser/API/SQLite business oracle after Human shutdown; corpus requires three trials."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-IP-03",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source39/GC-IP-03/trial-23/business-oracle-source39.json"
+      ],
+      "note": "minimum_independent_trials=1. "
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-IP-04",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source39/GC-IP-04/trial-20/shutdown-observation-oracle.json"
+      ],
+      "note": "minimum_independent_trials=1. Browser and persistence actions predated shutdown; later read-only evidence reconciliation."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-IP-05",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-IP-05"
+      ],
+      "note": "minimum_independent_trials=1. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-IP-06",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-IP-06"
+      ],
+      "note": "minimum_independent_trials=1. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-IP-07",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-IP-07"
+      ],
+      "note": "minimum_independent_trials=3. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "TIER0",
+      "item": "GC-IP-08",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/tier0-source37/GC-IP-08"
+      ],
+      "note": "minimum_independent_trials=3. Earlier-source result only; current source not rerun."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-01",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-01/trial-25/result.json",
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-01/trial-26/result.json",
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-01/trial-27/result.json"
+      ],
+      "note": ""
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-02",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-02/trial-23/result.json",
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-02/trial-24/result.json",
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-02/trial-25/result.json"
+      ],
+      "note": ""
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-03",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-03/trial-25/result.json",
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-03/trial-26/result.json",
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-03/trial-27/result.json"
+      ],
+      "note": ""
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-04",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-04/trial-25/result.json",
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-04/trial-26/result.json",
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-04/trial-27/result.json"
+      ],
+      "note": ""
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-05",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/backend-integration-source39-linux-full5.log",
+        "docs/evidence/intent-realization-kernel/lifecycle-final-matrix-r247.json"
+      ],
+      "note": "Current-source formal neighbor coverage; physical Golden slot not rerun."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-06",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/backend-integration-source39-linux-full5.log",
+        "docs/evidence/intent-realization-kernel/lifecycle-final-matrix-r247.json"
+      ],
+      "note": "Current-source formal neighbor coverage; physical Golden slot not rerun."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-07",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/backend-integration-source39-linux-full5.log",
+        "docs/evidence/intent-realization-kernel/lifecycle-final-matrix-r247.json"
+      ],
+      "note": "Current-source formal neighbor coverage; physical Golden slot not rerun."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-08",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        ".spg/irk-convergence/lifecycle-source37/GC-LC-08"
+      ],
+      "note": "Earlier-source physical supplement only."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-09",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-09/trial-22/historical-query-oracle-source39.json"
+      ],
+      "note": "Original LC09 trial21 false negative retained."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-10",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/backend-integration-source39-linux-full5.log",
+        "docs/evidence/intent-realization-kernel/lifecycle-final-matrix-r247.json"
+      ],
+      "note": "Current-source formal neighbor coverage; physical Golden slot not rerun."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-11",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/backend-integration-source39-linux-full5.log",
+        "docs/evidence/intent-realization-kernel/lifecycle-final-matrix-r247.json"
+      ],
+      "note": "Current-source formal neighbor coverage; physical Golden slot not rerun."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-12",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/backend-integration-source39-linux-full5.log",
+        "docs/evidence/intent-realization-kernel/lifecycle-final-matrix-r247.json"
+      ],
+      "note": "Current-source formal neighbor coverage; physical Golden slot not rerun."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-13",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/lifecycle-source39/GC-LC-13/trial-23/result.json"
+      ],
+      "note": ""
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-14",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/backend-integration-source39-linux-full5.log",
+        "docs/evidence/intent-realization-kernel/lifecycle-final-matrix-r247.json"
+      ],
+      "note": "Current-source formal neighbor coverage; physical Golden slot not rerun."
+    },
+    {
+      "group": "LIFECYCLE",
+      "item": "GC-LC-15",
+      "status": "HISTORICAL_PASS_ONLY",
+      "evidence": [
+        "docs/evidence/intent-realization-kernel/lifecycle-final-matrix-r247.json"
+      ],
+      "note": "Earlier-source physical supplement only."
+    },
+    {
+      "group": "FORMAL",
+      "item": "BACKEND_UNIT",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/backend-unit-source39.log"
+      ],
+      "note": "Exit 0; log includes expected skips."
+    },
+    {
+      "group": "FORMAL",
+      "item": "BACKEND_INTEGRATION",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/backend-integration-source39-linux-full5.log"
+      ],
+      "note": "788 tests, zero fail/error/skip, fresh PostgreSQL."
+    },
+    {
+      "group": "FORMAL",
+      "item": "FRONTEND_NODE",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/frontend-source39.log"
+      ],
+      "note": "78/78."
+    },
+    {
+      "group": "FORMAL",
+      "item": "PROTOTYPE_TEST_BUILD",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/prototype-source39.log",
+        ".spg/irk-convergence/prototype-build-source39.log"
+      ],
+      "note": "21/21 and Vite build."
+    },
+    {
+      "group": "FORMAL",
+      "item": "MIGRATION_ROUNDTRIP",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/migration-source39-roundtrip.log"
+      ],
+      "note": "Upgrade, downgrade/reupgrade, alembic check to 20260928_62."
+    },
+    {
+      "group": "FORMAL",
+      "item": "RELEASE_EVALUATION",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/release-source39-linux-complete.json"
+      ],
+      "note": "56/56 selected cases."
+    },
+    {
+      "group": "SEMANTIC",
+      "item": "VISIBLE_41",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/visible-source39"
+      ],
+      "note": "41/41; compiler-level only."
+    },
+    {
+      "group": "SEMANTIC",
+      "item": "FRESH_POST_FREEZE_HOLDOUT",
+      "status": "NOT_RUN_CURRENT_SOURCE",
+      "evidence": [],
+      "note": "No final clean-source freeze followed by a newly generated unseen cohort."
+    },
+    {
+      "group": "FSI",
+      "item": "FSI-HD-01",
+      "status": "PASS_CURRENT_SOURCE",
+      "evidence": [
+        ".spg/irk-convergence/fsi-source39/GC-EX-01/trial-5/business-oracle-source39.json"
+      ],
+      "note": "One physical journey PASS 7/7; Human Acceptance remains PENDING."
+    }
+  ],
+  "diagnostic_failures_retained": [
+    {
+      "item": "GC-EX-02/trial-21",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "responsibility": "QUALIFICATION_HARNESS_DEFECT",
+      "evidence": ".spg/irk-convergence/tier0-source39/GC-EX-02/trial-21/posthoc-classification.json"
+    },
+    {
+      "item": "GC-EX-11/trial-20/original-oracle",
+      "status": "FAIL_CURRENT_SOURCE",
+      "responsibility": "QUALIFICATION_HARNESS_DEFECT",
+      "evidence": ".spg/irk-convergence/tier0-source39/GC-EX-11/trial-20/business-oracle-source39.json"
+    },
+    {
+      "item": "GC-LC-09/trial-21/original-oracle",
+      "status": "FAIL_CURRENT_SOURCE",
+      "responsibility": "QUALIFICATION_HARNESS_DEFECT",
+      "evidence": ".spg/irk-convergence/lifecycle-source39/GC-LC-09/trial-21/historical-query-oracle-source39.json"
+    },
+    {
+      "item": "source39 integration attempt 1",
+      "status": "PARTIAL_CURRENT_SOURCE",
+      "responsibility": "QUALIFICATION_HARNESS_DEFECT",
+      "evidence": ".spg/irk-convergence/backend-integration-source39-linux.log"
+    },
+    {
+      "item": "source39 integration attempt 2",
+      "status": "FAIL_CURRENT_SOURCE",
+      "responsibility": "QUALIFICATION_HARNESS_DEFECT",
+      "evidence": ".spg/irk-convergence/backend-integration-source39-linux-full2.log"
+    },
+    {
+      "item": "source39 integration attempt 3",
+      "status": "FAIL_CURRENT_SOURCE",
+      "responsibility": "QUALIFICATION_HARNESS_DEFECT",
+      "evidence": ".spg/irk-convergence/backend-integration-source39-linux-full3.log"
+    },
+    {
+      "item": "source39 integration attempt 4",
+      "status": "FAIL_CURRENT_SOURCE",
+      "responsibility": "QUALIFICATION_HARNESS_DEFECT",
+      "evidence": ".spg/irk-convergence/backend-integration-source39-linux-full4.log"
+    }
+  ]
+}

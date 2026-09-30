@@ -1,0 +1,75 @@
+{
+  "decision": "Human terminated the IRK campaign; no new qualification was started after shutdown instruction",
+  "running_at_end": 0,
+  "docker_volumes_at_end": 307,
+  "docker_networks_at_end": 10,
+  "docker_containers_including_exited_at_end": 48,
+  "c_drive_free_bytes_before": 6759751680,
+  "c_drive_free_bytes_after": 6478495744,
+  "c_drive_result": "Free space fell by 281255936 bytes despite Docker object retirement; Docker Desktop storage did not return host free space. No unrelated cache or evidence was pruned.",
+  "qa_compose_down_attempt": "Configuration interpolation failed because SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN was absent; the attempt removed nothing. Exact named containers were then stopped and removed.",
+  "qa_containers_removed": [
+    "watt-irk-convergence-qa-native-coordinator-1",
+    "watt-irk-convergence-qa-native-worker-1",
+    "watt-irk-convergence-qa-native-worker-secondary-1",
+    "watt-irk-convergence-qa-native-tool-host-1",
+    "watt-irk-convergence-qa-app-1",
+    "watt-irk-convergence-qa-postgres-1"
+  ],
+  "qa_networks_removed": [
+    "watt-irk-convergence-qa_control",
+    "watt-irk-convergence-qa_executor"
+  ],
+  "old_idle_test_containers_removed": [
+    "watt-irk-source37-integration-full-linux",
+    "watt-irk-source37-targeted-linux",
+    "watt-irk-source36-release-linux",
+    "watt-irk-source36-integration-full-linux",
+    "watt-irk-source34-release-linux",
+    "watt-irk-source34-integration-full-linux",
+    "watt-irk-source33-integration-full-linux",
+    "watt-irk-source31-integration-full-linux",
+    "watt-irk-source30-integration-full-linux",
+    "watt-irk-source28-integration-full-linux",
+    "watt-irk-source28-integration-probe",
+    "watt-irk-source27-integration-corrected-linux",
+    "watt-irk-source27-integration-linux",
+    "watt-irk-source21-regression-db"
+  ],
+  "fixture_and_proxy_containers_removed": [
+    "watt-irk-qualified-git-fault",
+    "watt-irk-qualified-git",
+    "watt-irk-convergence-fault-fixtures",
+    "watt-irk-convergence-tool-proxy"
+  ],
+  "abandoned_source38_integration_native_containers_removed": [
+    "watt-pe-cdee0bbd-4e15-4b97-86d7-0b37f885b9f4",
+    "watt-pe-f6dfb492-30de-4594-83c4-92c0989d0a2b",
+    "watt-pe-9c3ac277-e780-4ab2-94d6-be8bcefd6bb9",
+    "watt-pe-b871eec6-4346-420e-bd02-b06cd61e0c11",
+    "watt-pe-11f600e8-8489-439f-a361-7c8a80f5f8b2"
+  ],
+  "preview_retirement_receipts": [
+    ".spg/irk-convergence/fsi-source39/GC-EX-01/trial-5/runtime-retirement.json",
+    ".spg/irk-convergence/tier0-source39/GC-IP-03/trial-23/runtime-retirement.json",
+    ".spg/irk-convergence/tier0-source39/GC-IP-04/trial-20/runtime-retirement.json",
+    ".spg/irk-convergence/shutdown/partial-preview-retirement.json",
+    ".spg/irk-convergence/shutdown/partial-preview-retirement-correction.json"
+  ],
+  "preview_image_tags_removed": 78,
+  "preview_image_receipt": ".spg/irk-convergence/shutdown/preview-image-retirement.json",
+  "old_runtime_tags_removed": [
+    "source38", "source37", "source36", "source35", "source34",
+    "source33", "source32", "source31", "source28-stage", "source26"
+  ],
+  "old_runtime_tag_retained": "source27 is still referenced by an exited failed-attempt container; removal was not forced",
+  "current_runtime_image_tags_retained": ["qa", "source39"],
+  "volumes_removed": 0,
+  "volumes_explicitly_retained": [
+    "watt-irk-convergence-qa_native-postgres-data",
+    "watt-irk-convergence-qa_native-app-data",
+    "watt-irk-convergence-workspaces",
+    "watt-irk-integration-shared-tmp"
+  ],
+  "other_resources_retained": "48 exited containers, 307 volumes, shared Docker build cache, unrelated project networks and images; no broad prune"
+}
