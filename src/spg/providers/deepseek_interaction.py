@@ -173,6 +173,13 @@ def _repair_structured_result(
             "read source evidence at the acquired revision before answering. "
             "Do not claim source-derived facts from acquisition metadata alone. "
         )
+    if "current branch query needs its read-only owner action" in validation_feedback:
+        repair_guidance += (
+            "Preserve the current Human branch-status question and any exact owner "
+            "fact already observed. Attach a current READ_ONLY_QUERY "
+            "QUERY_CURRENT_BRANCH action to that question, with no target_branch; "
+            "this operation only reads the checked-out branch. "
+        )
     if on_stage is not None:
         on_stage("structured_output_repair_started")
     result = runtime.generate(

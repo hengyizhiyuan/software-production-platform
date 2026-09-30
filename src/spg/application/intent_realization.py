@@ -447,6 +447,21 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
         return any(has_read_obligation(parent, seen | {identity}) for parent in item.depends_on)
     for item in normalized:
         subject = item.subject or ""
+        if (item.kind in {SemanticKind.QUESTION, SemanticKind.STATUS_QUERY}
+                and subject == "branch:current"
+                and any(clause.source_record_id == latest.id
+                    and item.item_id in clause.semantic_item_ids
+                    and clause.speech_act is ActionSpeechAct.READ_ONLY_QUERY
+                    and clause.polarity == "AFFIRMATIVE"
+                    and clause.temporal_scope == "CURRENT"
+                    for clause in candidate.clauses)
+                and not (item.action is not None and item.action.current
+                    and item.action.speech_act is ActionSpeechAct.READ_ONLY_QUERY
+                    and canonical_operation(item.action.operation)
+                    is CanonicalOperation.QUERY_CURRENT_BRANCH)):
+            raise IntentRealizationViolation(
+                "PRIMARY_INTENT_CLAUSE_LOST: current branch query needs its "
+                "read-only owner action even when a prior observation can answer it")
         if (item.kind in {SemanticKind.QUESTION, SemanticKind.ANALYSIS}
                 and not item.requires_human and not item.answer and not item.observed_facts
                 and (subject.startswith("repository.") or subject.startswith("repository:") and "#" in subject)

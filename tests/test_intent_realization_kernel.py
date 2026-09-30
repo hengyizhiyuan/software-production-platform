@@ -426,6 +426,22 @@ def test_current_read_only_clause_cannot_hide_its_owner_action_as_noncurrent():
         govern(record, (item,), clauses=(clause,))
 
 
+def test_current_branch_status_question_retains_read_only_owner_action():
+    record = source("Which branch is current?")
+    item = SemanticItem(item_id="status", kind=K.QUESTION,
+        statement="Question about the current branch", subject="branch:current",
+        answer="main", provenance=(provenance(record),), confidence=1)
+    clause = SemanticClause(clause_id="current", source_record_id=record.id,
+        source_text=record.content, semantic_item_ids=(item.item_id,),
+        speech_act=S.READ_ONLY_QUERY, polarity="AFFIRMATIVE", modality="QUESTION",
+        temporal_scope="CURRENT")
+    with pytest.raises(IntentRealizationViolation, match="current branch query needs"):
+        govern(record, (item,), clauses=(clause,))
+    queried = item.model_copy(update={"action": OperationalIntent(
+        operation=O.QUERY_CURRENT_BRANCH, speech_act=S.READ_ONLY_QUERY)})
+    assert govern(record, (queried,), clauses=(clause,)).operational_requests
+
+
 def test_observed_existing_branch_cannot_authorize_a_new_branch_target():
     record = source("Create a new branch")
     item = action(record, branch=None)

@@ -731,7 +731,7 @@ class InteractionSemanticContract:
             "the exact source and reach any genuine missing-credential boundary; do not claim the credential "
             "is already present or omit the production goal because startup may require a secret. "
             "For status subjects use WORK_CURRENT, WORK_HISTORY, WORK_DIAGNOSTIC or PREVIEW as "
-            "appropriate; a branch QUESTION or STATUS_QUERY may carry QUERY_CURRENT_BRANCH "
+            "appropriate; a current checked-out branch QUESTION or STATUS_QUERY must carry QUERY_CURRENT_BRANCH "
             "with READ_ONLY_QUERY, which remains strictly read-only. QUERY_CURRENT_BRANCH "
             "asks for the currently checked-out branch and accepts no target_branch argument. "
             "A question about whether a separately named branch exists is a read-only QUESTION "
