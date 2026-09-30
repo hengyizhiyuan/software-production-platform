@@ -180,6 +180,14 @@ def _repair_structured_result(
             "QUERY_CURRENT_BRANCH action to that question, with no target_branch; "
             "this operation only reads the checked-out branch. "
         )
+    if "READ_RESULT_PREMATURE" in validation_feedback:
+        repair_guidance += (
+            "Separate an explanatory answer from an actual repository read. "
+            "If the Human requested general possibilities and no current source fact, "
+            "keep the advisory answer and remove the current read action. If the "
+            "Human requested a source-grounded finding, retain the read action "
+            "and leave the answer pending until owner evidence is observed. "
+        )
     if on_stage is not None:
         on_stage("structured_output_repair_started")
     result = runtime.generate(

@@ -447,6 +447,19 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
         return any(has_read_obligation(parent, seen | {identity}) for parent in item.depends_on)
     for item in normalized:
         subject = item.subject or ""
+        if (item.kind in {SemanticKind.QUESTION, SemanticKind.ANALYSIS}
+                and item.action is not None and item.action.current
+                and item.action.speech_act is ActionSpeechAct.READ_ONLY_QUERY
+                and canonical_operation(item.action.operation) in {
+                    CanonicalOperation.INSPECT_REPOSITORY,
+                    CanonicalOperation.SEARCH_REPOSITORY}
+                and item.answer and not item.observed_facts
+                and not item.depends_on
+                and not any(source.origin is SemanticOrigin.REPOSITORY_OBSERVED
+                    for source in item.provenance)):
+            raise IntentRealizationViolation(
+                "READ_RESULT_PREMATURE: a current repository read cannot also "
+                "claim a completed answer without owner evidence or a read dependency")
         if (item.kind in {SemanticKind.QUESTION, SemanticKind.STATUS_QUERY}
                 and subject == "branch:current"
                 and any(clause.source_record_id == latest.id

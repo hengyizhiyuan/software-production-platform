@@ -442,6 +442,20 @@ def test_current_branch_status_question_retains_read_only_owner_action():
     assert govern(record, (queried,), clauses=(clause,)).operational_requests
 
 
+def test_repository_read_cannot_claim_unobserved_answer_before_dispatch():
+    record = source("Explain a possible failure or inspect this repository")
+    item = SemanticItem(item_id="explanation", kind=K.QUESTION,
+        statement="Explain the possible failure", answer="Possible causes are wiring or state.",
+        provenance=(provenance(record),), confidence=1,
+        action=OperationalIntent(operation=O.INSPECT_REPOSITORY,
+            speech_act=S.READ_ONLY_QUERY))
+    with pytest.raises(IntentRealizationViolation, match="READ_RESULT_PREMATURE"):
+        govern(record, (item,))
+    assert govern(record, (item.model_copy(update={"action": None}),)).operational_requests == ()
+    pending = item.model_copy(update={"answer": None})
+    assert govern(record, (pending,)).operational_requests
+
+
 def test_observed_existing_branch_cannot_authorize_a_new_branch_target():
     record = source("Create a new branch")
     item = action(record, branch=None)
