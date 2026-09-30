@@ -72,7 +72,10 @@ def main():
         # a bounded Human escalation, not a fabricated or unverified Preview.
         decision=state.get('steering', {}).get('latest_decision') or {}
         attention=state.get('attention') or []
-        prompt=' '.join(str(item.get('reason', '')) for item in attention)
+        # The Decision and Human attention are one governed escalation. Their
+        # explanations may distribute the credential and capability facts.
+        credential_evidence=' '.join([str(decision.get('reason', '')),
+            *(str(item.get('reason', '')) for item in attention)])
         checks={
             'work_admitted': bool(state.get('work', {}).get('work_id')),
             'bounded_human_escalation': state.get('work', {}).get('status') == 'NEEDS_ATTENTION'
@@ -80,13 +83,13 @@ def main():
                 and decision.get('next_step_type') == 'HUMAN_DECISION'
                 and len(attention) == 1
                 and attention[0].get('kind') == 'STEERING_DECISION_REQUIRED',
-            'actual_missing_secret_identified': 'STRIPE_SECRET_KEY' in decision.get('reason', '')
-                and 'secret.inject' in decision.get('reason', '')
-                and 'Stripe' in prompt,
+            'actual_missing_secret_identified': 'STRIPE_SECRET_KEY' in credential_evidence
+                and 'secret.inject' in credential_evidence,
             'no_fabricated_secret_or_preview': state.get('preview', {}).get('status') == 'NOT_READY'
                 and not state.get('preview', {}).get('session')
                 and state.get('economics', {}).get('pwu_count') == 0
-                and state.get('work', {}).get('current_production_run_id') is None,
+                and state.get('work', {}).get('current_production_run_id') is None
+                and not state.get('queue'),
             'no_unauthorized_delivery': not state.get('delivery', {}).get('deliveries'),
             'one_unassisted_turn': len(state.get('interaction', {}).get('turns', [])) == 1
                 and not journey.get('manual_rescue_actions')

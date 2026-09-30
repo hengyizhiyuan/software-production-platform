@@ -17,6 +17,7 @@ from spg.application.assets import RepositoryAssetService
 from spg.application.interaction import WorkInteractionService, DeterministicWorkInteractionCapability
 from spg.domain.assets import RepositoryAcquisitionFailure, RepositoryAcquisitionFailureCategory as F, RepositoryIntakeRequest
 from spg.domain.interaction import InteractionActor
+from spg.domain.interaction_actions import ActionSpeechAct
 from spg.domain.wic_response import WicRuntimeMode
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.product_schema import work_reality_revisions
@@ -84,6 +85,26 @@ def test_acquisition_branch_and_query_without_work(owner, monkeypatch, pre_work)
     projection=turn(service,interaction.id,'我现在在哪个分支？', operation='QUERY_CURRENT_BRANCH')
     assert 'feat_test' in projection.conversation_messages[-1].content
     assert projection.governed_work_id is None
+    assert len(assets.attempts_for_interaction(interaction.id))==2
+
+    # A compiler may carry the observed repository source on a read-only query.
+    # It must inspect the current checkout, not acquire the remote again.
+    service.capability.operation='QUERY_CURRENT_BRANCH'
+    service.capability.speech_act=ActionSpeechAct.READ_ONLY_QUERY
+    service.capability.arguments={'repository_source': observation['source']}
+    receipt=service.submit_turn(interaction.id,
+        f"查看 {observation['source']} 当前在哪个分支？", human_identity='human:owner')
+    deadline=time.monotonic()+90
+    while time.monotonic()<deadline:
+        current=service.get_turn(receipt.id)
+        if current.status.value in {'COMPLETED','FAILED'}:
+            assert current.status.value=='COMPLETED', current.failure_message
+            break
+        time.sleep(.05)
+    else:
+        pytest.fail('Source-bound branch query did not settle')
+    projection=service.get_shared_understanding(interaction.id)
+    assert projection.repository_observation['repository_ref']=='refs/heads/feat_test'
     assert len(assets.attempts_for_interaction(interaction.id))==2
 
 @pytest.mark.parametrize('text',[

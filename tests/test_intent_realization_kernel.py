@@ -175,6 +175,18 @@ def govern(record, items, *, records=None, clauses=None, history=()):
     return IntentRealizationKernel().govern(candidate, basis)
 
 
+def test_work_history_question_uses_persisted_status_owner():
+    record = source("上一次到底改了什么？")
+    history = SemanticItem(item_id="history", kind=K.QUESTION,
+        statement=record.content, subject="WORK_HISTORY",
+        answer="Compiler's unsupported guess", provenance=(provenance(record),),
+        confidence=.95)
+    ir = govern(record, (history,))
+    assert ir.items[0].kind is K.STATUS_QUERY
+    assert ir.items[0].subject == "WORK_HISTORY"
+    assert ir.items[0].answer is None
+
+
 @pytest.mark.parametrize("raw", ["CREATE_AND_SWITCH_BRANCH", "CREATE_BRANCH_AND_CHECKOUT", "CREATE_NEW_BRANCH_AND_SWITCH", "NEW_BRANCH_AND_SWITCH"])
 def test_structured_ontology_equivalence(raw):
     assert canonical_operation(raw) is O.CREATE_AND_SWITCH_BRANCH

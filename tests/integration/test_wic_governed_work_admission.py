@@ -1448,9 +1448,13 @@ def test_bounded_feature_execution_uses_steering_without_product_questionnaire(
     assert _count(postgres_database, steering_plans) == 1
 
 
-@pytest.mark.parametrize("question", ["目前执行到什么状态了？", "上一次到底改了什么？"])
+@pytest.mark.parametrize("question,kind", [
+    ("目前执行到什么状态了？", SemanticKind.STATUS_QUERY),
+    ("上一次到底改了什么？", SemanticKind.STATUS_QUERY),
+    ("上一次到底改了什么？", SemanticKind.QUESTION),
+])
 def test_work_status_question_is_read_only_and_independent_of_provider(
-    postgres_database: Database, services, question,
+    postgres_database: Database, services, question, kind,
 ) -> None:
     work, interactions = services
     ready = _ready(interactions)
@@ -1463,8 +1467,8 @@ def test_work_status_question_is_read_only_and_independent_of_provider(
             self.calls += 1
             return InteractionAssessmentCandidate(natural_response="Status meaning only",
                 provider_identity="fixture:status-compiler", semantic_intent=semantic_candidate(
-                    basis.records[-1], kind=SemanticKind.STATUS_QUERY).model_copy(update={"items": (
-                        semantic_candidate(basis.records[-1], kind=SemanticKind.STATUS_QUERY).items[0].model_copy(
+                    basis.records[-1], kind=kind).model_copy(update={"items": (
+                        semantic_candidate(basis.records[-1], kind=kind).items[0].model_copy(
                             update={"subject": "WORK_HISTORY" if question == "上一次到底改了什么？" else "WORK_CURRENT"}),)}))
 
     compiler = StatusCompiler()
@@ -1481,6 +1485,7 @@ def test_work_status_question_is_read_only_and_independent_of_provider(
     if question.startswith("上一次"):
         assert "现有记录没有独立观察到的文件变更" in assessment.natural_response
         assert "没有创建生产 Work" in assessment.natural_response
+        assert assessment.semantic_ir.items[0].kind is SemanticKind.STATUS_QUERY
     else:
         assert "当前 Work 尚未进入生产执行" in assessment.natural_response
         assert "下一步由 Watt 按当前步骤继续推进" in assessment.natural_response

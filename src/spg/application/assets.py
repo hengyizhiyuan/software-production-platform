@@ -364,7 +364,8 @@ class RepositoryAssetService:
                 if previous.get("repository_ref") == f"refs/heads/{action.branch}":
                     messages.append(f"当前本地分支已经是 {action.branch}；没有重复创建或推送。")
                     continue
-            elif action.source is None and previous is not None and action.family is ActionFamily.INSPECT:
+            elif (previous is not None and action.family is ActionFamily.INSPECT
+                    and (action.source is None or action.source == previous.get("source"))):
                 if previous.get("condition") == "READY":
                     messages.append(self._inspection_answer(previous, branch_only=bool(assessment and assessment.semantic_ir and any(
                         item.action.operation == "QUERY_CURRENT_BRANCH"

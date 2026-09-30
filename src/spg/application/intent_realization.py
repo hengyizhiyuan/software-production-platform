@@ -557,6 +557,15 @@ class IntentRealizationKernel:
         legacy = raw is None
         raw = legacy_typed_candidate(candidate, basis) if legacy else raw
         items = validate_semantic_candidate(raw, basis)
+        # A read-only Work Reality question has a single owner even when the
+        # semantic compiler calls it QUESTION instead of STATUS_QUERY. Route it
+        # through the persisted Work/Runtime projection, not a model answer.
+        items = tuple(item.model_copy(update={"kind": SemanticKind.STATUS_QUERY,
+            "answer": None})
+            if item.kind is SemanticKind.QUESTION and item.subject in {
+                "WORK_CURRENT", "WORK_HISTORY", "WORK_DIAGNOSTIC"}
+            and (item.action is None or item.action.speech_act is ActionSpeechAct.READ_ONLY_QUERY)
+            else item for item in items)
         # One Interaction has one repository asset owner. Two distinct source
         # targets cannot both be authorized by the same acquisition Turn, even
         # when each literal independently has sound Human provenance.
