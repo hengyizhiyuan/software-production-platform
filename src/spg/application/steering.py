@@ -163,7 +163,7 @@ class SteeringApplicationService:
                 request.next_step_type,
                 request.human_required,
             )
-            store.insert_decision(
+            admitted_decision_id = store.insert_decision(
                 {
                     "id": decision_id,
                     "steering_plan_revision_id": revision.id,
@@ -197,7 +197,15 @@ class SteeringApplicationService:
                     "created_at": timestamp,
                 }
             )
-            result = store.decision(decision_id)
+            result = store.decision(admitted_decision_id)
+            if (result is not None and (
+                result.steering_plan_revision_id != revision.id
+                or result.current_step_id != step.id
+                or result.reality_refs != refs
+            )):
+                raise SteeringInvariantViolation(
+                    "Existing Steering Decision basis belongs to different governed Reality"
+                )
             unit_of_work.commit()
         if result is None:
             raise SteeringInvariantViolation("Steering Decision was not constructed")

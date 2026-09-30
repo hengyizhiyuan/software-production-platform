@@ -96,8 +96,22 @@ class SteeringStore:
     def insert_step(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(steering_steps).values(**values))
 
-    def insert_decision(self, values: Mapping[str, Any]) -> None:
-        self.session.execute(insert(steering_decisions).values(**values))
+    def insert_decision(self, values: Mapping[str, Any]) -> UUID:
+        inserted = self.session.execute(
+            pg_insert(steering_decisions).values(**values)
+            .on_conflict_do_nothing(index_elements=[steering_decisions.c.basis_fingerprint])
+            .returning(steering_decisions.c.id)
+        ).scalar_one_or_none()
+        if inserted is not None:
+            return inserted
+        existing = self.session.execute(
+            select(steering_decisions.c.id).where(
+                steering_decisions.c.basis_fingerprint == values["basis_fingerprint"]
+            )
+        ).scalar_one_or_none()
+        if existing is None:
+            raise RuntimeError("Conflicting Steering Decision basis has no committed owner")
+        return existing
 
     def insert_semantic_result(self, values: Mapping[str, Any]) -> bool:
         inserted = self.session.execute(pg_insert(semantic_step_results).values(**values)

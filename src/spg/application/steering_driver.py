@@ -733,7 +733,14 @@ class PlanSteeringDriver:
                 f"Missing acceptance: {', '.join(observation.missing_acceptance)}. "
                 "Evidence is preserved; restarting or changing candidate IDs does not reset this budget.")
             current = fresh.reconstruction.latest_decision
-            if current is None or current.reason != reason:
+            if not (
+                current is not None
+                and current.current_step_id == fresh.reconstruction.current_step.id
+                and current.basis_fingerprint == fresh.basis.fingerprint
+                and current.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
+                and current.attention_reason
+                is SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION
+            ):
                 self.decisions.admit(work_id, NextStepCandidate(
                     type=SteeringStepType.HUMAN_DECISION,
                     objective="Resolve the bounded Work convergence incident",

@@ -4,13 +4,15 @@ import os
 from pathlib import Path
 import subprocess
 from time import monotonic, sleep
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 from uuid import uuid4
 
 from alembic import command
 from alembic.config import Config
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 from sqlalchemy.exc import IntegrityError
 
 from spg.application.runtime import RuntimeService
@@ -215,6 +217,59 @@ def _steps(*, coarse: bool = False) -> tuple[SteeringStepSpec, ...]:
             completion_condition="The Work outcome is satisfied",
         ),
     )
+
+
+def test_same_steering_basis_admits_one_decision_under_concurrency(
+    postgres_database: Database,
+    admitted_work,
+) -> None:
+    _works, work, baseline = admitted_work
+    service = SteeringApplicationService(postgres_database)
+    work_ref = RealityReference(kind=RealityReferenceKind.WORK, identity=work.work_id)
+    baseline_ref = RealityReference(
+        kind=RealityReferenceKind.TRUSTED_BASELINE, identity=baseline.id,
+    )
+    plan = service.create_plan(CreateSteeringPlanRequest(
+        work_id=work.work_id,
+        rationale="One decision for each governed basis",
+        reality_refs=(baseline_ref,),
+        steps=_steps(),
+    ))
+    current = plan.current_step
+    following = plan.next_step
+    assert current is not None and following is not None
+    revision_id = plan.active_revision.revision.id
+    refs = (work_ref, baseline_ref)
+    fingerprint = service.decision_basis_fingerprint(revision_id, current.id, refs)
+    request = AdmitSteeringDecisionRequest(
+        steering_plan_revision_id=revision_id,
+        current_step_id=current.id,
+        next_step_type=following.type,
+        objective=following.objective,
+        reason="The first observed basis assessment",
+        reality_refs=refs,
+        human_required=False,
+        completion_condition=following.completion_condition,
+        steering_outcome=SteeringOutcome.AUTO_CONTINUE,
+        expected_basis_fingerprint=fingerprint,
+    )
+    barrier = Barrier(4)
+
+    def admit(index: int):
+        barrier.wait(timeout=15)
+        return service.admit_decision(request.model_copy(update={
+            "reason": f"Same basis, observation {index}",
+        }))
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        decisions = list(pool.map(admit, range(4)))
+    assert len({decision.id for decision in decisions}) == 1
+    assert service.admit_decision(request).id == decisions[0].id
+    with postgres_database.engine.connect() as connection:
+        count = connection.execute(text(
+            "SELECT count(*) FROM steering_decisions WHERE basis_fingerprint = :basis"
+        ), {"basis": fingerprint}).scalar_one()
+    assert count == 1
 
 
 def test_steer_truth_03_through_14_and_reconstruction(

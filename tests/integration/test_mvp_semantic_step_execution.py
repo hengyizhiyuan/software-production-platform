@@ -1043,6 +1043,11 @@ def test_work_nonconvergence_is_durable_human_attention_not_idle(product, postgr
     history = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
     assert "Missing acceptance" in history.latest_decision.reason
     assert "does not reset" in history.latest_decision.reason
+    decision_id = history.latest_decision.id
+    driver._observe_convergence(admitted.work_id, failed=True,
+        boundary="reobserved-boundary", failure_signature="f" * 64)
+    repeated = SteeringApplicationService(postgres_database).reconstruct(admitted.work_id)
+    assert repeated.latest_decision.id == decision_id
 
 
 @pytest.mark.parametrize("same_candidate", [True, False])
