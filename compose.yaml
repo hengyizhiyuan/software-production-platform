@@ -33,6 +33,10 @@ services:
       SPG_GITHUB_WRITE_TOKEN: ${SPG_GITHUB_WRITE_TOKEN:-}
       SPG_WEB_SEARCH_API_KEY: ${SPG_WEB_SEARCH_API_KEY:-}
       SPG_WORKSPACE_ROOT: /var/lib/spg/workspaces
+      SPG_OWNER_RUNTIME_STORE_ROOT: /var/lib/spg/owner-runtime
+      SPG_NATIVE_EXECUTOR_STORAGE_ROOT: /var/lib/spg/native-executor
+      SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT: /var/lib/spg/native-executor/workspaces
+      SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_STORE_ROOT: /var/lib/spg/production-environments
     init: true
     ports:
       - "127.0.0.1:8000:8000"

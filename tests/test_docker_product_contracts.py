@@ -57,6 +57,28 @@ def test_docker_13_14_18_19_20_configuration_preserves_boundaries() -> None:
     assert "tests" in ignore
 
 
+def test_docker_runtime_state_uses_persistent_volume() -> None:
+    compose = (PROJECT_ROOT / "compose.yaml").read_text(encoding="utf-8")
+    managed_source = (PROJECT_ROOT / "compose.managed-source.yaml").read_text(
+        encoding="utf-8"
+    )
+    for setting, path in (
+        ("SPG_WORKSPACE_ROOT", "workspaces"),
+        ("SPG_OWNER_RUNTIME_STORE_ROOT", "owner-runtime"),
+        ("SPG_NATIVE_EXECUTOR_STORAGE_ROOT", "native-executor"),
+        ("SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT", "native-executor/workspaces"),
+        (
+            "SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_STORE_ROOT",
+            "production-environments",
+        ),
+    ):
+        assert f"{setting}: /var/lib/spg/{path}" in compose
+    assert "SPG_MANAGED_SOURCE_WORKSPACE_ROOT: /var/lib/spg/managed-source" in (
+        managed_source
+    )
+    assert "source: spg-runtime-data\n        target: /var/lib/spg" in compose
+
+
 def test_docker_07_08_image_contains_server_migrations_and_packaged_ui() -> None:
     dockerfile = (PROJECT_ROOT / "Dockerfile").read_text(encoding="utf-8")
     project = (PROJECT_ROOT / "pyproject.toml").read_text(encoding="utf-8")
