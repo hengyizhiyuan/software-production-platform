@@ -21,6 +21,7 @@ from spg.infrastructure.persistence.delivery_schema import (
     work_delivery_manifests, work_delivery_acceptances, work_delivery_runtimes,
 )
 from spg.infrastructure.persistence.interaction_store import InteractionStore
+from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.domain.product import ProductInvariantViolation
 
 
@@ -279,9 +280,16 @@ class ProductExperienceProjection:
             "id": str(work.work_id), "product_id": str(product_id),
             "product_name": product["name"], "title": work.title or work.raw_user_requirement,
         }) for item in self.work.list_attention(work_id=work.work_id)]
-        steps = [] if work is None or work.production_plan is None else [
-            {"title": step.instruction, "state": "current" if index == 0 else "upcoming"}
-            for index, step in enumerate(work.production_plan.ordered_steps[:8])]
+        steps = []
+        if work is not None:
+            with self.database.unit_of_work() as uow:
+                steering = SteeringStore(uow.session)
+                plan = steering.plan_for_work(work.work_id)
+                revision = None if plan is None else steering.active_revision(plan.id)
+                if revision is not None:
+                    steps = [{"title": step.objective, "state": step.state.value.lower()}
+                        for step in steering.steps(revision.id)
+                        if step.state.value != "SUPERSEDED"][:8]
         focus = None if work is None else {
             "title": work.title or work.raw_user_requirement,
             "status": work.current_production_step,
@@ -293,7 +301,7 @@ class ProductExperienceProjection:
             ("candidate_id", "candidate_fingerprint", "repository_revision", "tree",
              "entrypoint", "preview_kind", "artifacts", "verification", "authorization_pending")}
         return {"revision": _fingerprint(product["revision"], work_data, delivery,
-                                         candidate_view, guardian, attention),
+                                         candidate_view, guardian, attention, steps),
                 "product": product, "work": work_data, "historical": bool(
                     work_id is not None and product["current_work"] is not None and
                     str(work_id) != product["current_work"]["id"]),

@@ -7,7 +7,10 @@ Document type
     AUTHORITATIVE PRODUCT PRINCIPLE
 
 Workspace-first product direction
-    FUTURE DIRECTION / NOT IMPLEMENTED
+    IMPLEMENTED IN PRODUCT EXPERIENCE / FURTHER EVOLUTION OPEN
+
+Workspace four-quadrant structure
+    HUMAN-APPROVED / IMMUTABLE WITHOUT EXPLICIT HUMAN GOVERNOR APPROVAL
 
 WIC Core
     CLOSED / PASS
@@ -20,8 +23,9 @@ the [Watt Product North Star](../architecture/watt-product-north-star.md) and
 projects the closed
 [Work Interaction & Closed-loop Refinement Core](../architecture/work-interaction-closed-loop-refinement.md).
 
-It does not define UI components, API behavior, persistence, database entities,
-or an implementation roadmap.
+Apart from the approved Workspace structural invariant below, it does not
+define UI components, API behavior, persistence, database entities, or an
+implementation roadmap.
 
 ## 2. Core product thesis
 
@@ -253,8 +257,9 @@ These are Product Experience improvements, not WIC Core failures. WIC remains
 
 ## 10. Current boundary
 
-This document defines principles only. A future implementation should begin
-with minimal projections over existing Reality.
+This document defines product principles and the approved Workspace structural
+invariant below. Further implementation should use minimal projections over
+existing Reality.
 
 It does not introduce:
 
@@ -265,6 +270,34 @@ It does not introduce:
 - Work graph;
 - a project-management model.
 
-Those remain future product and architecture decisions. This document creates
-no implementation commitment and does not change WIC, Plan Steering, SPG,
-Executor, Verification, Runtime, API, UI, schema, or migration behavior.
+Those remain future product and architecture decisions. The invariant does not
+change WIC, Plan Steering, SPG, Executor, Verification, Runtime, schema, or
+migration ownership.
+
+## 11. Workspace Four-Quadrant Invariant
+
+`WORKSPACE_FOUR_QUADRANT_LAYOUT_IMMUTABLE = TRUE` is a permanent Human Governor
+product decision. The primary desktop Workspace is one two-by-two structure in
+this exact semantic and spatial order:
+
+| | Human intention and control | System truth and execution |
+|---|---|---|
+| Top | **Agenda** — Human-visible governed direction | **Reality** — current canonical facts |
+| Bottom | **Actions** — canonical Human Attention and review | **Production** — Human-readable Watt activity |
+
+Agenda remains above Actions; Reality remains above Production. Guardian
+assurance belongs in Reality, its repair progress in Production, and any real
+Human decision in Actions. Candidate readiness belongs in Production; review,
+Preview and Acceptance controls belong in Actions. Code Assets remains its
+Product-scoped page, linked from Workspace. None becomes a fifth peer quadrant
+or replaces one. Conversation is a subordinate interaction surface outside the
+grid; advanced evidence stays behind progressive disclosure.
+
+Internal content, typography, spacing, colors, responsive sizing and emphasis
+may evolve. Only physically narrow screens may stack the four surfaces, in the
+same Agenda → Reality → Actions → Production sequence. Removing, merging,
+swapping, tabbing, demoting, or otherwise changing the existence, identity,
+order, desktop placement, or primary status of any quadrant requires **explicit
+Human Governor approval**. Silence or a feature integration request is not
+approval. This constraint applies to future refactors, themes, integrations,
+responsive work and framework migrations.
