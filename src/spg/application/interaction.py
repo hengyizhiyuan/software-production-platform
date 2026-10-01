@@ -2982,6 +2982,7 @@ class WorkInteractionService:
                     else engineering_semantic_facts),
                 latest_human_input=latest_human_input,
                 latest_human_record_id=latest_human_record.id,
+                latest_human_references=latest_human_record.supporting_references,
                 prior_production_references=tuple(
                     f"{prior.id}:{item.item_id}"
                     for prior in semantic_history for item in prior.items
@@ -2994,7 +2995,10 @@ class WorkInteractionService:
                 and candidate_change is not None
                 and "constraints" in candidate_change.changed_fields
                 and any(item.kind is SemanticKind.CONSTRAINT for item in semantic_ir.items)
-                and (any(fact.relation is SemanticRelation.SCOPE
+                and (active_context.pending_human_question_decision_id is not None
+                    and f"STEERING_DECISION:{active_context.pending_human_question_decision_id}"
+                    in latest_human_record.supporting_references
+                    or any(fact.relation is SemanticRelation.SCOPE
                     and latest_human_record.id in fact.provenance.source_record_ids
                     for fact in current_semantic_facts(engineering_semantic_facts))
                     or self._constraint_refers_to_current_production(
@@ -3817,6 +3821,12 @@ class WorkInteractionService:
                 and latest_decision.current_step_id == current_step.id
                 and current_step.type in {SteeringStepType.DESIGN, SteeringStepType.REFINE}
                 else None),
+            pending_human_question_decision_id=(latest_decision.id
+                if latest_decision is not None and latest_decision.human_required
+                and current_step is not None
+                and latest_decision.current_step_id == current_step.id
+                and current_step.type in {SteeringStepType.DESIGN, SteeringStepType.REFINE}
+                else None),
             active_production_binding_id=(
                 None if active_binding is None else active_binding.id
             ),
@@ -3878,6 +3888,7 @@ class WorkInteractionService:
         *,
         latest_human_input: str | None = None,
         latest_human_record_id: UUID | None = None,
+        latest_human_references: tuple[str, ...] = (),
         prior_production_references: tuple[str, ...] = (),
     ) -> tuple[
         WorkFocusClassification | None,
@@ -3934,7 +3945,10 @@ class WorkInteractionService:
                 source.source_record_id == latest_human_record_id
                 for source in item.provenance)
                 for item in candidate.semantic_intent.items)
-            and (any(fact.relation is SemanticRelation.SCOPE
+            and (active.pending_human_question_decision_id is not None
+                and f"STEERING_DECISION:{active.pending_human_question_decision_id}"
+                in latest_human_references
+                or any(fact.relation is SemanticRelation.SCOPE
                 and latest_human_record_id in fact.provenance.source_record_ids
                 for fact in current_semantic_facts(engineering_semantic_facts))
                 or WorkInteractionService._constraint_refers_to_current_production(
@@ -4058,7 +4072,8 @@ class WorkInteractionService:
 
     @staticmethod
     def _normalize_supporting_references(values: tuple[str, ...]) -> tuple[str, ...]:
-        allowed = {"VERIFICATION", "RUNTIME_FACT", "COMPLETION", "ENGINEERING_FINDING"}
+        allowed = {"VERIFICATION", "RUNTIME_FACT", "COMPLETION", "ENGINEERING_FINDING",
+                   "STEERING_DECISION"}
         normalized: list[str] = []
         for raw in values:
             value = raw.strip()

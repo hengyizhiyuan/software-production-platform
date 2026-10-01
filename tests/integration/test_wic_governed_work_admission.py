@@ -4613,9 +4613,10 @@ def test_human_answer_to_current_design_question_admits_once_and_schedules(postg
         driver.production_orchestrator.shutdown()
 
 
-@pytest.mark.parametrize("include_correction", (False, True))
+@pytest.mark.parametrize(("include_correction", "exact_question_reference"), (
+    (False, False), (True, False), (False, True)))
 def test_typed_scope_answer_to_current_question_revises_same_work_once(
-    postgres_database, services, include_correction,
+    postgres_database, services, include_correction, exact_question_reference,
 ):
     from spg.infrastructure.persistence.interaction_store import InteractionStore
     from spg.domain.steering import NextStepCandidate, SteeringAuthorityAssessment, SteeringAttentionReason
@@ -4625,7 +4626,7 @@ def test_typed_scope_answer_to_current_question_revises_same_work_once(
     SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
     driver = PlanSteeringDriver(postgres_database, work, ProductionOrchestrator(work))
     frame = driver.frames.assemble(admitted.work_id)
-    driver.decisions.admit(admitted.work_id, NextStepCandidate(
+    decision = driver.decisions.admit(admitted.work_id, NextStepCandidate(
         type=SteeringStepType.HUMAN_DECISION, objective="Choose search scope",
         reason="Which business domain should search cover?", human_required=True,
         reality_refs=tuple(item.reference for item in frame.basis.resolved_reality),
@@ -4656,7 +4657,7 @@ def test_typed_scope_answer_to_current_question_revises_same_work_once(
                 current_requests=active.work_revision.requests,
                 focus_classification=WorkFocusClassification.SIDE_QUESTION,
                 impact_disposition=WorkImpactDisposition.NO_GOVERNED_CHANGE,
-                semantic_fact_candidates=(EngineeringSemanticFactCandidate(
+                semantic_fact_candidates=() if exact_question_reference else (EngineeringSemanticFactCandidate(
                     candidate_id="scope-users", subject="search.scope.domains",
                     relation=SemanticRelation.SCOPE, value=["users"], scope="business-app",
                     authority=SemanticFactAuthority.HUMAN_EXPLICIT,
@@ -4675,7 +4676,9 @@ def test_typed_scope_answer_to_current_question_revises_same_work_once(
         work_handler=trigger.execute_governed_work_turn)
     try:
         turn = answering.submit_turn(ready.interaction.id,
-            "Search users by name and email; exclude orders", human_identity="human:test")
+            "Search users by name and email; exclude orders", human_identity="human:test",
+            supporting_references=(f"STEERING_DECISION:{decision.id}",)
+                if exact_question_reference else ())
         deadline = time.monotonic() + 45
         while time.monotonic() < deadline:
             settled = answering.get_turn(turn.id)

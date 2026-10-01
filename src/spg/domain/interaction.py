@@ -264,6 +264,7 @@ class ActiveWorkInterpretationContext(BaseModel):
     current_steering_step_id: UUID | None = None
     current_steering_step_type: str | None = None
     pending_human_question: str | None = None
+    pending_human_question_decision_id: UUID | None = None
     active_production_binding_id: UUID | None = None
     active_cycle_work_revision_id: UUID | None = None
     active_cycle_number: int | None = Field(default=None, ge=1)

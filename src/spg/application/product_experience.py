@@ -20,6 +20,7 @@ from spg.infrastructure.persistence.product_schema import (
 from spg.infrastructure.persistence.delivery_schema import (
     work_delivery_manifests, work_delivery_acceptances, work_delivery_runtimes,
 )
+from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.domain.product import ProductInvariantViolation
 
 
@@ -123,6 +124,38 @@ class ProductExperienceProjection:
         self.delivery = delivery
         self.guardian = guardian
 
+    def _attention_row(self, item, work: dict) -> dict:
+        """Present canonical Human Attention without reclassifying it by buttons."""
+        with self.database.unit_of_work() as uow:
+            interactions = InteractionStore(uow.session)
+            interaction = (interactions.interaction(item.interaction_id)
+                           if item.interaction_id is not None else
+                           interactions.interaction_for_work(item.work_id))
+            interaction_id = (str(interaction.id) if interaction is not None and
+                              interactions.product_context(interaction.id) ==
+                              UUID(work["product_id"]) else None)
+        return {"id": str(item.id), "work_id": work["id"],
+            "product_id": work["product_id"], "product_name": work["product_name"],
+            "work_title": work["title"], "kind": item.kind.value,
+            "decision": item.decision, "reason": item.reason,
+            "actions": [action.value for action in item.available_actions],
+            "conversation_prompt": item.conversation_prompt,
+            "recommended_action": None if item.recommended_action is None else
+                item.recommended_action.value,
+            "recommendation": item.recommendation,
+            "expected_impact": item.expected_impact,
+            "governed_subject_ref": item.governed_subject_ref,
+            "interaction_id": interaction_id,
+            "interaction_assessment_id": None if item.interaction_assessment_id is None
+                else str(item.interaction_assessment_id),
+            "expected_work_reality_revision_id": None if
+                item.expected_work_reality_revision_id is None else
+                str(item.expected_work_reality_revision_id),
+            "steering_plan_revision_id": None if item.steering_plan_revision_id is None
+                else str(item.steering_plan_revision_id),
+            "steering_step_id": None if item.steering_step_id is None else
+                str(item.steering_step_id)}
+
     def collections(self, owner_id: str) -> dict:
         with self.database.unit_of_work() as uow:
             session = uow.session
@@ -157,7 +190,8 @@ class ProductExperienceProjection:
                       "product_name": product_by_id[row["product_id"]]["name"],
                       "title": row["refined_title"] or row["raw_user_requirement"] or "待明确的事项",
                       "requirement": row["raw_user_requirement"],
-                      "status": row["condition"], "created_at": _iso(row["created_at"]),
+                      "status": self.work.get_work(row["id"]).status.value,
+                      "created_at": _iso(row["created_at"]),
                       "updated_at": _iso(row["updated_at"]),
                       "reality_revision_id": str(row["current_work_reality_revision_id"])
                           if row["current_work_reality_revision_id"] else None}
@@ -197,13 +231,9 @@ class ProductExperienceProjection:
         work_index = {row["id"]: row for row in work_rows}
         for item in self.work.list_attention():
             work = work_index.get(str(item.work_id))
-            if work is None or not item.available_actions:
+            if work is None:
                 continue
-            attention.append({"id": str(item.id), "work_id": work["id"],
-                "product_id": work["product_id"], "product_name": work["product_name"],
-                "work_title": work["title"], "kind": item.kind.value,
-                "reason": item.reason, "decision": item.decision,
-                "actions": [action.value for action in item.available_actions]})
+            attention.append(self._attention_row(item, work))
             if len(attention) >= 30:
                 break
         return {"revision": _fingerprint(product_rows, work_rows, deliveries, attention),
@@ -245,11 +275,10 @@ class ProductExperienceProjection:
         guardian = ({"status": "NOT_STARTED", "finding_count": 0}
                     if work is None or self.guardian is None else
                     self.guardian.projection(work.work_id))
-        attention = [] if work is None else [{"id": str(item.id),
-            "kind": item.kind.value, "reason": item.reason,
-            "actions": [action.value for action in item.available_actions]}
-            for item in self.work.list_attention(work_id=work.work_id)
-            if item.available_actions]
+        attention = [] if work is None else [self._attention_row(item, {
+            "id": str(work.work_id), "product_id": str(product_id),
+            "product_name": product["name"], "title": work.title or work.raw_user_requirement,
+        }) for item in self.work.list_attention(work_id=work.work_id)]
         steps = [] if work is None or work.production_plan is None else [
             {"title": step.instruction, "state": "current" if index == 0 else "upcoming"}
             for index, step in enumerate(work.production_plan.ordered_steps[:8])]

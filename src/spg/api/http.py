@@ -163,6 +163,7 @@ class ExperienceQueryRequest(BaseModel):
 class WorkspaceTurnRequest(BaseModel):
     text: str = Field(min_length=1, max_length=4000)
     interaction_id: UUID | None = None
+    attention_id: UUID | None = None
 
 
 class ConnectorControlRequest(BaseModel):
@@ -1392,8 +1393,10 @@ def create_http_application(
                     "Conversation is not in this Product Workspace")
             result["interaction_id"] = str(interaction)
         else:
-            result["interaction_id"] = experience.latest_interaction(
-                getattr(http_request.state, "actor_id", ACTOR_ID), product_id)
+            result["interaction_id"] = next((item["interaction_id"] for item in
+                result["actions"] if item["interaction_id"] is not None), None) or \
+                experience.latest_interaction(
+                    getattr(http_request.state, "actor_id", ACTOR_ID), product_id)
         return result
 
     @api.get("/api/experience/deliverables/{manifest_id}")
@@ -1478,6 +1481,9 @@ def create_http_application(
         actor = getattr(http_request.state, "actor_id", ACTOR_ID)
         experience.product(actor, product_id)
         interaction_id = request.interaction_id
+        if request.attention_id is not None and interaction_id is None:
+            raise ProductHttpError(409, "ATTENTION_STALE",
+                "This question needs its current Product conversation")
         if interaction_id is None:
             interaction = required_interaction_service().create_interaction(
                 human_identity=actor, start_work_context=False,
@@ -1486,8 +1492,33 @@ def create_http_application(
         elif experience.interaction_product(actor, interaction_id) != str(product_id):
             raise ProductHttpError(404, "INTERACTION_NOT_FOUND",
                 "Conversation is not in this Product Workspace")
+        references = ()
+        if request.attention_id is not None:
+            focused = required_interaction_service().get_interaction(interaction_id)
+            work_id = focused.current_work_id
+            if work_id is not None:
+                from sqlalchemy import select
+                from spg.infrastructure.persistence.product_schema import product_works
+                with work_service.database.unit_of_work() as uow:
+                    owning_product_id = uow.session.execute(select(
+                        product_works.c.product_id).where(
+                        product_works.c.id == work_id)).scalar_one_or_none()
+                if owning_product_id != product_id:
+                    raise ProductHttpError(409, "ATTENTION_STALE",
+                        "This question does not belong to the Product")
+            attention = None if work_id is None else next((item for item in
+                work_service.list_attention(work_id=work_id)
+                if item.id == request.attention_id), None)
+            if (attention is None or attention.available_actions
+                    or not attention.governed_subject_ref.startswith("steering-decision:")
+                    or attention.interaction_id not in {None, interaction_id}):
+                raise ProductHttpError(409, "ATTENTION_STALE",
+                    "This question is no longer current for the conversation")
+            references = ("STEERING_DECISION:" +
+                attention.governed_subject_ref.removeprefix("steering-decision:"),)
         turn = required_interaction_service().submit_turn(interaction_id,
-            request.text.strip(), human_identity=actor)
+            request.text.strip(), human_identity=actor,
+            supporting_references=references)
         return {"interaction_id": str(interaction_id), "turn_id": str(turn.id)}
 
     @api.post("/api/products/{product_id}/works/{work_id}")
