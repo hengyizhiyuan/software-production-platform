@@ -318,6 +318,31 @@ class ProductManagedSourceService:
             return {"revision": selected, "tree": observed.tree, "files": paths,
                     "changed_files": changed[:200], "diff": diff}
 
+    def inspect_file(self, product_id: UUID, owner_id: str, path: str,
+                     revision: str | None = None) -> dict:
+        """Read one exact, bounded text blob from an admitted Product version."""
+        listing = self.inspect_files(product_id, owner_id, revision)
+        if path not in listing["files"]:
+            raise ProductInvariantViolation("File is outside this Product source version")
+        with self.database.unit_of_work() as uow:
+            source = self._source(uow.session, product_id)
+        from tempfile import TemporaryDirectory
+        with TemporaryDirectory(prefix="watt-code-file-") as temporary:
+            repo = Path(temporary) / "source"
+            self.provider.materialize(source["provider_reference"], listing["revision"],
+                                      repo, "inspection")
+            blob = subprocess.run(["git", "-C", str(repo), "show",
+                f"{listing['revision']}:{path}"], capture_output=True, timeout=30)
+            if blob.returncode or len(blob.stdout) > 256 * 1024 or b"\x00" in blob.stdout:
+                raise ProductInvariantViolation("File is not safely displayable as text")
+            try:
+                content = blob.stdout.decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise ProductInvariantViolation(
+                    "File is not safely displayable as text") from error
+            return {"revision": listing["revision"], "path": path,
+                    "content": content}
+
     def export_archive(self, product_id: UUID, owner_id: str, revision: str | None = None) -> tuple[bytes, str]:
         details = self.describe(product_id, owner_id)
         selected = revision or details["accepted"]["revision"]

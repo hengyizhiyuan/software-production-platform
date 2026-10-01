@@ -78,6 +78,10 @@ from spg.application.candidate_preview import CandidatePreviewApplicationService
 from spg.application.control_room import ControlRoomError, ControlRoomService
 from spg.application.connectors import ConnectorResolver, ConnectorManagement
 from spg.application.product_assets import ProductAssetService
+from spg.application.product_experience import (
+    ProductExperienceProjection, QueryIntent, SemanticExperienceCompiler,
+)
+from spg.infrastructure.model_runtime import ModelProviderError
 from spg.infrastructure.managed_source_provider import ManagedSourceError
 from spg.application.measurement import ProductionMeasurementService, MeasurementSubjectNotFound
 from spg.application.native_retention import NativeRetentionService
@@ -146,6 +150,21 @@ class SoftwareProductAssetRequest(BaseModel):
     metadata: dict = Field(default_factory=dict)
 
 
+class ExperienceIntentRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=4000)
+    selected_product_id: UUID | None = None
+
+
+class ExperienceQueryRequest(BaseModel):
+    kind: str
+    text: str = Field(default="", max_length=1000)
+
+
+class WorkspaceTurnRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=4000)
+    interaction_id: UUID | None = None
+
+
 class ConnectorControlRequest(BaseModel):
     enabled: bool | None = None
     deprecated: bool | None = None
@@ -189,6 +208,7 @@ def create_http_application(
     guided_design_service: GuidedDesignApplicationService | None = None,
     native_executor_runtime: NativeExecutorRuntimeService | None = None,
     repository_asset_service: RepositoryAssetService | None = None,
+    experience_compiler: SemanticExperienceCompiler | None = None,
 ) -> FastAPI:
     """Compose one ASGI application over the existing application bootstrap path."""
 
@@ -425,6 +445,10 @@ def create_http_application(
     api.state.native_executor_runtime = selected_native_executor
     api.state.native_candidate_vectors = selected_native_vectors
     api.state.repository_asset_service = asset_service
+    experience = ProductExperienceProjection(selected_database, software_products,
+        work_service, delivery_service, guardian_assurance_client)
+    experience_semantic = experience_compiler or SemanticExperienceCompiler(settings or Settings())
+    api.state.product_experience = experience
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
@@ -686,11 +710,28 @@ def create_http_application(
         )
 
     @api.get("/", include_in_schema=False)
-    def root() -> RedirectResponse:
-        return RedirectResponse(url="/app", status_code=307)
+    def root() -> FileResponse:
+        return FileResponse(web_root / "index.html", media_type="text/html")
 
     @api.get("/app", include_in_schema=False)
     def product_ui() -> FileResponse:
+        return FileResponse(web_root / "advanced.html", media_type="text/html")
+
+    @api.get("/advanced", include_in_schema=False)
+    def advanced_production_view() -> FileResponse:
+        return FileResponse(web_root / "advanced.html", media_type="text/html")
+
+    @api.get("/register", include_in_schema=False)
+    @api.get("/products", include_in_schema=False)
+    @api.get("/products/{product_id}", include_in_schema=False)
+    @api.get("/products/{product_id}/workspace", include_in_schema=False)
+    @api.get("/products/{product_id}/code", include_in_schema=False)
+    @api.get("/works", include_in_schema=False)
+    @api.get("/deliverables", include_in_schema=False)
+    @api.get("/deliverables/{manifest_id}", include_in_schema=False)
+    @api.get("/user", include_in_schema=False)
+    @api.get("/settings", include_in_schema=False)
+    def experience_page() -> FileResponse:
         return FileResponse(web_root / "index.html", media_type="text/html")
 
     def required_interaction_service() -> WorkInteractionService:
@@ -1286,6 +1327,13 @@ def create_http_application(
         return ProductManagedSourceService(selected_database, settings or Settings()).inspect_files(
             product_id, getattr(http_request.state, "actor_id", ACTOR_ID), revision)
 
+    @api.get("/api/products/{product_id}/code-assets/file")
+    def product_code_file(product_id: UUID, path: str, http_request: Request,
+                          revision: str | None = None):
+        from spg.application.product_managed_source import ProductManagedSourceService
+        return ProductManagedSourceService(selected_database, settings or Settings()).inspect_file(
+            product_id, getattr(http_request.state, "actor_id", ACTOR_ID), path, revision)
+
     @api.get("/api/products/{product_id}/code-assets/export")
     def export_product_code(product_id: UUID, http_request: Request, revision: str | None = None):
         from spg.application.product_managed_source import ProductManagedSourceService
@@ -1298,6 +1346,150 @@ def create_http_application(
     @api.get("/api/products/{product_id}/economics")
     def product_economics(product_id: UUID, http_request: Request):
         return software_products.economics(product_id, getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.get("/api/experience/home")
+    def experience_home(http_request: Request):
+        return experience.home(getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.get("/api/experience/collections/{kind}")
+    def experience_collection(kind: str, http_request: Request):
+        if kind not in {"products", "works", "deliverables"}:
+            raise ProductHttpError(404, "COLLECTION_NOT_FOUND", "Collection is unavailable")
+        return experience.query(getattr(http_request.state, "actor_id", ACTOR_ID), QueryIntent(kind=kind))
+
+    @api.post("/api/experience/collections/query")
+    def experience_query(request: ExperienceQueryRequest, http_request: Request):
+        if request.kind not in {"products", "works", "deliverables"}:
+            raise ProductHttpError(422, "QUERY_KIND_INVALID", "Choose Products, Works or Deliverables")
+        if not request.text.strip():
+            intent = QueryIntent(kind=request.kind)
+        else:
+            try:
+                intent = experience_semantic.query(request.text, request.kind,
+                    experience.collections(getattr(http_request.state, "actor_id", ACTOR_ID))["products"])
+            except (ValueError, ModelProviderError) as error:
+                raise ProductHttpError(503, "SEMANTIC_QUERY_UNAVAILABLE",
+                    "Watt cannot interpret this collection query right now") from error
+            if intent.kind != request.kind:
+                raise ProductHttpError(422, "QUERY_KIND_MISMATCH",
+                    "The interpreted collection does not match this page")
+        try:
+            return experience.query(getattr(http_request.state, "actor_id", ACTOR_ID), intent)
+        except ValueError as error:
+            raise ProductHttpError(422, "QUERY_UNSUPPORTED", str(error)) from error
+
+    @api.get("/api/experience/products/{product_id}")
+    def experience_product(product_id: UUID, http_request: Request):
+        return experience.product(getattr(http_request.state, "actor_id", ACTOR_ID), product_id)
+
+    @api.get("/api/experience/products/{product_id}/workspace")
+    def experience_workspace(product_id: UUID, http_request: Request,
+                             work: UUID | None = None, interaction: UUID | None = None):
+        result = experience.workspace(getattr(http_request.state, "actor_id", ACTOR_ID), product_id, work)
+        if interaction is not None:
+            if experience.interaction_product(getattr(http_request.state, "actor_id", ACTOR_ID), interaction) != str(product_id):
+                raise ProductHttpError(404, "INTERACTION_NOT_FOUND",
+                    "Conversation is not in this Product Workspace")
+            result["interaction_id"] = str(interaction)
+        else:
+            result["interaction_id"] = experience.latest_interaction(
+                getattr(http_request.state, "actor_id", ACTOR_ID), product_id)
+        return result
+
+    @api.get("/api/experience/deliverables/{manifest_id}")
+    def experience_deliverable(manifest_id: UUID, http_request: Request):
+        return experience.deliverable(getattr(http_request.state, "actor_id", ACTOR_ID), manifest_id)
+
+    @api.get("/api/experience/interactions/{interaction_id}")
+    def experience_interaction(interaction_id: UUID, http_request: Request):
+        observed = required_interaction_service().get_shared_understanding(interaction_id)
+        current = observed.latest_assessment if observed.latest_assessment_current else None
+        return {"interaction_id": str(interaction_id),
+            "product_id": experience.interaction_product(getattr(http_request.state, "actor_id", ACTOR_ID),
+                interaction_id),
+            "current_work_id": None if observed.interaction.current_work_id is None else
+                str(observed.interaction.current_work_id),
+            "updated_at": observed.interaction.updated_at.isoformat(),
+            "messages": [{"actor": item.actor.value, "content": item.content,
+                          "status": item.processing_status.value}
+                         for item in observed.conversation_messages[-16:]],
+            "turns": [{"id": str(item.id), "status": item.status.value}
+                      for item in observed.turns[-5:]],
+            "response": None if current is None else current.natural_response,
+            "readiness": None if observed.readiness is None else
+                observed.readiness.state.value}
+
+    @api.post("/api/experience/intent")
+    def experience_intent(request: ExperienceIntentRequest, http_request: Request):
+        actor = getattr(http_request.state, "actor_id", ACTOR_ID)
+        catalog = experience.collections(actor)["products"]
+        if request.selected_product_id is not None:
+            if str(request.selected_product_id) not in {item["id"] for item in catalog}:
+                raise ProductHttpError(404, "PRODUCT_NOT_FOUND",
+                    "Selected Product is unavailable")
+            from spg.application.product_experience import RouteIntent
+            route = RouteIntent(kind="EXISTING", product_id=request.selected_product_id,
+                                confidence=1.0)
+        else:
+            try:
+                route = experience_semantic.route(request.text.strip(), catalog)
+            except (ValueError, ModelProviderError) as error:
+                raise ProductHttpError(503, "INTENT_ROUTING_UNAVAILABLE",
+                    "Watt cannot resolve this intent right now; your text remains in this browser") from error
+        product_id = None
+        if route.kind == "EXISTING":
+            known = {item["id"] for item in catalog}
+            if (route.product_id is None or str(route.product_id) not in known
+                    or route.confidence < 0.75):
+                return {"kind": "CLARIFY", "question": route.clarification or
+                    "你想继续哪个产品？", "options": [
+                    {"id": item["id"], "name": item["name"]} for item in catalog[:8]]}
+            product_id = route.product_id
+        elif route.kind == "NEW":
+            name = (route.product_name or "").strip()
+            if not route.persistent_outcome or route.confidence < 0.75 or not name:
+                return {"kind": "CLARIFY", "question": route.clarification or
+                    "你希望把这件事作为一个长期产品继续吗？", "options": []}
+            duplicate = next((item for item in catalog
+                              if item["name"].casefold() == name.casefold()), None)
+            if duplicate is not None:
+                product_id = UUID(duplicate["id"])
+            else:
+                product_id = UUID(software_products.create(actor, name,
+                    request.text.strip())["id"])
+        elif route.kind == "CLARIFY":
+            return {"kind": "CLARIFY", "question": route.clarification or
+                "你想继续哪个产品？", "options": [
+                {"id": item["id"], "name": item["name"]} for item in catalog[:8]]}
+        interaction = required_interaction_service().create_interaction(
+            human_identity=actor, start_work_context=False)
+        if product_id is not None:
+            experience.bind_interaction(actor, product_id, interaction.id)
+        turn = required_interaction_service().submit_turn(interaction.id,
+            request.text.strip(), human_identity=actor)
+        product = None if product_id is None else experience.product(actor, product_id)
+        return {"kind": "ADVISORY" if product_id is None else "PRODUCT",
+                "product": product, "interaction_id": str(interaction.id),
+                "turn_id": str(turn.id), "transition": None if product is None else
+                f"正在继续：{product['name']}"}
+
+    @api.post("/api/experience/products/{product_id}/turns")
+    def experience_product_turn(product_id: UUID, request: WorkspaceTurnRequest,
+                                http_request: Request):
+        actor = getattr(http_request.state, "actor_id", ACTOR_ID)
+        experience.product(actor, product_id)
+        interaction_id = request.interaction_id
+        if interaction_id is None:
+            interaction = required_interaction_service().create_interaction(
+                human_identity=actor, start_work_context=False)
+            interaction_id = interaction.id
+            experience.bind_interaction(actor, product_id, interaction_id)
+        elif experience.interaction_product(actor, interaction_id) != str(product_id):
+            raise ProductHttpError(404, "INTERACTION_NOT_FOUND",
+                "Conversation is not in this Product Workspace")
+        turn = required_interaction_service().submit_turn(interaction_id,
+            request.text.strip(), human_identity=actor)
+        return {"interaction_id": str(interaction_id), "turn_id": str(turn.id)}
 
     @api.post("/api/products/{product_id}/works/{work_id}")
     def bind_product_work(product_id: UUID, work_id: UUID, http_request: Request):

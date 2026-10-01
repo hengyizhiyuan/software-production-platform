@@ -20,7 +20,10 @@ class Element {
 test("P1 Product/Work history and operator health render from persisted API facts", async () => {
   const ids = ["selected-work", "refresh-control", "p1-product-list", "p1-product-detail", "p1-product-summary", "p1-product-assets",
     "p1-work-product", "p1-bind-work", "p1-work-product-summary", "p1-diagnosis", "p1-economics",
-    "p1-history", "p1-product-form", "p1-product-name", "p1-repository-form", "p1-repository-url",
+    "p1-history", "p1-product-form", "p1-product-name", "p1-product-source-mode",
+    "p1-product-work-form", "p1-product-work-requirement", "p1-repository-form", "p1-repository-url",
+    "p1-code-assets", "p1-code-assets-status", "p1-code-assets-versions",
+    "p1-code-assets-files", "p1-code-assets-diff", "p1-code-assets-access",
     "p1-platform-status", "p1-connector-list", "p1-credential-list", "p1-evaluation-list",
     "p1-operator-panel", "p1-github-grant-form", "p1-github-repository", "p1-github-permission"];
   const elements = Object.fromEntries(ids.map((id) => [id, new Element()]));

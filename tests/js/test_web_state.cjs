@@ -612,7 +612,7 @@ test("WIC Slice 4 exposes Human-governed Work transition controls only", () => {
 
 test("explicit New Work entry clears restored context without creating Work authority", () => {
   const htmlSource = fs.readFileSync(
-    path.join(repositoryRoot, "src", "spg", "web", "index.html"),
+    path.join(repositoryRoot, "src", "spg", "web", "advanced.html"),
     "utf8",
   );
   const deliverySource = fs.readFileSync(

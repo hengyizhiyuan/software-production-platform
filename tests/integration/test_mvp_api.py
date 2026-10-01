@@ -302,6 +302,89 @@ def test_p1_q1_product_continues_across_three_distinct_works(api_facts: ApiFacts
                for work_id in work_ids)
 
 
+def test_product_experience_projects_canonical_product_work_and_freshness(
+    api_facts: ApiFacts,
+) -> None:
+    client = api_facts.client
+    empty = client.get("/api/experience/home")
+    assert empty.status_code == 200, empty.text
+    assert empty.json()["recent_products"] == []
+    product = client.post("/api/products", json={"name": "Expense Workspace",
+        "description": "A lasting expense product"}).json()
+    product_id = product["id"]
+    before = client.get("/api/experience/home").json()
+    assert before["recent_products"][0]["id"] == product_id
+    work = client.post("/api/works", json={"requirement": "Export expense PDF",
+        "product_id": product_id}).json()
+    after = client.get("/api/experience/home").json()
+    assert after["revision"] != before["revision"]
+    assert after["active_works"][0]["id"] == work["work_id"]
+    detail = client.get(f"/api/experience/products/{product_id}")
+    assert detail.status_code == 200, detail.text
+    assert detail.json()["current_work"]["id"] == work["work_id"]
+    workspace = client.get(f"/api/experience/products/{product_id}/workspace",
+        params={"work": work["work_id"]})
+    assert workspace.status_code == 200, workspace.text
+    assert workspace.json()["work"]["work_id"] == work["work_id"]
+    assert workspace.json()["reality"]["accepted_version"] is None
+    queried = client.post("/api/experience/collections/query",
+        json={"kind": "works", "text": ""})
+    assert queried.status_code == 200, queried.text
+    assert queried.json()["items"][0]["product_id"] == product_id
+    assert client.get(f"/api/experience/deliverables/{uuid4()}").status_code == 409
+
+
+def test_home_intent_preserves_context_without_manufacturing_advisory_work(
+    api_facts: ApiFacts,
+) -> None:
+    from spg.application.product_experience import RouteIntent, QueryIntent
+
+    class Compiler:
+        next_route = RouteIntent(kind="ADVISORY", confidence=1)
+
+        def route(self, _text, _products):
+            return self.next_route
+
+        def query(self, _text, kind, _products):
+            return QueryIntent(kind=kind, unsupported=("unsupported dimension",))
+
+    compiler = Compiler()
+    app = create_http_application(database=api_facts.database,
+        work_service=api_facts.service, orchestrator=_ManualOnlyOrchestrator(),
+        experience_compiler=compiler)
+    with TestClient(app, raise_server_exceptions=False) as client:
+        advisory = client.post("/api/experience/intent",
+            json={"text": "Please analyze the idea, without starting development"})
+        assert advisory.status_code == 200, advisory.text
+        assert advisory.json()["kind"] == "ADVISORY"
+        assert client.get("/api/experience/collections/products").json()["total"] == 0
+        assert client.get("/api/experience/collections/works").json()["total"] == 0
+
+        compiler.next_route = RouteIntent(kind="NEW", product_name="Expense Portal",
+            persistent_outcome=True, confidence=0.95)
+        created = client.post("/api/experience/intent",
+            json={"text": "Build an expense portal"})
+        assert created.status_code == 200, created.text
+        product_id = created.json()["product"]["id"]
+        interaction_id = created.json()["interaction_id"]
+        workspace = client.get(f"/api/experience/products/{product_id}/workspace",
+            params={"interaction": interaction_id})
+        assert workspace.status_code == 200, workspace.text
+        assert workspace.json()["interaction_id"] == interaction_id
+        assert workspace.json()["work"] is None
+        assert client.get(f"/api/experience/interactions/{interaction_id}").json()[
+            "product_id"] == product_id
+
+        selected = client.post("/api/experience/intent", json={
+            "text": "Continue the expense portal", "selected_product_id": product_id})
+        assert selected.status_code == 200, selected.text
+        assert selected.json()["product"]["id"] == product_id
+        assert client.get("/api/experience/collections/products").json()["total"] == 1
+        unsupported = client.post("/api/experience/collections/query",
+            json={"kind": "works", "text": "unsupported query"})
+        assert unsupported.status_code == 422
+
+
 def test_p1_q6_operator_diagnosis_identifies_capability_blocker(api_facts: ApiFacts) -> None:
     from spg.application.connectors import ConnectorResolver
     from spg.domain.connectors import CapabilityRequirement

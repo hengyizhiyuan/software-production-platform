@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+from importlib.resources import files
 import json
 import os
 import secrets
@@ -16,7 +17,7 @@ from time import time
 from uuid import UUID
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy import select
 
 from spg.infrastructure.persistence.auth_schema import (
@@ -105,27 +106,29 @@ def install_authority_boundary(api: FastAPI, *, database, settings) -> None:
 
     @api.get("/login", include_in_schema=False)
     async def login_page():
-        return HTMLResponse("""<!doctype html><html lang="en"><meta charset="utf-8">
-<title>Watt sign in</title><main><h1>Watt sign in</h1>
-<form id="login"><label>Operator token <input name="token" type="password"
-autocomplete="current-password" required></label><button>Sign in</button></form>
-<p id="error" role="alert"></p></main><script>
-document.getElementById('login').addEventListener('submit', async event => {
-  event.preventDefault(); const token = new FormData(event.target).get('token');
-  const response = await fetch('/auth/session', {method:'POST',
-    headers:{'Content-Type':'application/json'}, body:JSON.stringify({token})});
-  if (response.ok) location.assign('/app');
-  else document.getElementById('error').textContent = 'Sign in failed';
-});</script></html>""")
+        return FileResponse(files("spg.web").joinpath("index.html"),
+                            media_type="text/html")
 
     @api.get("/auth/session", include_in_schema=False)
     async def current_actor():
         return {"actor_id": ACTOR_ID, "organization_id": ORGANIZATION_ID}
 
+    @api.post("/auth/logout", include_in_schema=False)
+    async def logout():
+        response = JSONResponse({"signed_out": True})
+        response.delete_cookie("watt_session", path="/")
+        return response
+
     @api.middleware("http")
     async def authority_middleware(request: Request, call_next):
         path = request.url.path
-        if path in {"/health", "/login"} or path.startswith("/assets/") or (
+        public_pages = (path in {"/", "/app", "/login", "/register",
+                                "/products", "/works", "/deliverables",
+                                "/user", "/settings"}
+            or path.startswith(("/products/", "/deliverables/")))
+        if path == "/health" or path.startswith("/assets/") or (
+            public_pages and request.method in {"GET", "HEAD"}
+        ) or (
             path == "/auth/session" and request.method == "POST"
         ):
             return await call_next(request)

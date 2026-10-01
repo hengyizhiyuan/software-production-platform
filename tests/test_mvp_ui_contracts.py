@@ -71,8 +71,8 @@ def _client() -> TestClient:
 def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
     with _client() as client:
         root = client.get("/", follow_redirects=False)
-        assert root.status_code == 307
-        assert root.headers["location"] == "/app"
+        assert root.status_code == 200
+        assert '/assets/experience.js?v=1' in root.text
 
         page = client.get("/app")
         assert page.status_code == 200
@@ -125,14 +125,14 @@ def test_human_review_runtime_supports_the_software_acceptance_path_it_displays(
 
 
 def test_work_plan_projection_uses_fresh_control_room_assets() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     assert "/assets/appearance.css?v=work-plan-projection-1" in html
     assert "/assets/control-room.js?v=work-revision-state-2" in html
     assert "/assets/app.js?v=lifecycle-projection-2" in html
 
 
 def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
     state_javascript = (WEB_ROOT / "state.js").read_text(encoding="utf-8")
     combined = f"{html}\n{javascript}".lower()
@@ -283,7 +283,7 @@ def test_ui_03_through_ui_18_product_surface_contract_is_bounded() -> None:
 
 
 def test_planb_composer_has_explicit_bounded_collapse_control() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
     css = (WEB_ROOT / "appearance.css").read_text(encoding="utf-8")
 
@@ -298,7 +298,7 @@ def test_planb_composer_has_explicit_bounded_collapse_control() -> None:
 
 
 def test_formal_workspace_has_stable_spatial_slots_collapse_and_overlay_focus() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
     appearance = (WEB_ROOT / "appearance.js").read_text(encoding="utf-8")
     css = (WEB_ROOT / "appearance.css").read_text(encoding="utf-8")
@@ -332,7 +332,7 @@ def test_formal_workspace_has_stable_spatial_slots_collapse_and_overlay_focus() 
 
 
 def test_control_room_slice_1_is_a_read_only_projection_over_existing_reality() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
     state_javascript = (WEB_ROOT / "state.js").read_text(encoding="utf-8")
 
@@ -370,7 +370,7 @@ def test_control_room_slice_1_is_a_read_only_projection_over_existing_reality() 
 
 
 def test_control_room_slice_2_preserves_wic_truth_layers_without_mutation() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
     state_javascript = (WEB_ROOT / "state.js").read_text(encoding="utf-8")
 
@@ -411,7 +411,7 @@ def test_control_room_slice_2_preserves_wic_truth_layers_without_mutation() -> N
 
 
 def test_control_room_slice_3_projects_plan_and_trust_reality_without_mutation() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
     state_javascript = (WEB_ROOT / "state.js").read_text(encoding="utf-8")
 
@@ -468,7 +468,7 @@ def test_control_room_slice_3_projects_plan_and_trust_reality_without_mutation()
 
 
 def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     # Repository URL examples in form placeholders are user input hints, not
     # frontend runtime dependencies. Asset-bearing tags must remain local.
     assert re.search(r'<(?:script|link)\b[^>]*\b(?:src|href)="https?://', html, re.I) is None
@@ -479,7 +479,7 @@ def test_ui_20_contains_no_frontend_build_or_remote_runtime_dependency() -> None
 
 
 def test_formal_ui_phase_1_preserves_stable_workspace_and_appearance_boundaries() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     delivery_html = (WEB_ROOT / "delivery.html").read_text(encoding="utf-8")
     appearance = (WEB_ROOT / "appearance.js").read_text(encoding="utf-8")
 
@@ -517,7 +517,7 @@ def test_formal_ui_phase_1_removes_current_tnga_product_branding() -> None:
 
 
 def test_delivery_preview_and_context_assembly_are_human_visible() -> None:
-    html = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
+    html = (WEB_ROOT / "advanced.html").read_text(encoding="utf-8")
     javascript = (WEB_ROOT / "app.js").read_text(encoding="utf-8")
     delivery_html = (WEB_ROOT / "delivery.html").read_text(encoding="utf-8")
     delivery_javascript = (WEB_ROOT / "delivery.js").read_text(encoding="utf-8")
@@ -539,7 +539,7 @@ def test_self_refine_work_and_platform_views_are_wired_to_durable_api() -> None:
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[1]
-    html = (root / "src/spg/web/index.html").read_text(encoding="utf-8")
+    html = (root / "src/spg/web/advanced.html").read_text(encoding="utf-8")
     javascript = (root / "src/spg/web/app.js").read_text(encoding="utf-8")
     api = (root / "src/spg/api/http.py").read_text(encoding="utf-8")
     for identifier in (

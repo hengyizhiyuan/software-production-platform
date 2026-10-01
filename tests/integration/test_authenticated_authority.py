@@ -62,3 +62,32 @@ def test_session_cookie_requires_same_origin_for_governed_post(postgres_database
         headers={"Origin": "http://testserver"})
     assert allowed.status_code == 200
     assert allowed.json()["actor"] == "human:owner"
+
+
+def test_public_home_real_login_logout_and_registration_truth(postgres_database):
+    app = FastAPI()
+
+    @app.get("/")
+    def home():
+        return {"home": "public"}
+
+    @app.get("/register")
+    def register():
+        return {"self_service_registration": False}
+
+    @app.get("/api/experience/home")
+    def private_home(request: Request):
+        return {"actor": request.state.actor_id}
+
+    install_authority_boundary(app, database=postgres_database,
+        settings=Settings(auth_mode="required", operator_token=TOKEN))
+    client = TestClient(app)
+    assert client.get("/").status_code == 200
+    assert client.get("/register").json()["self_service_registration"] is False
+    assert client.get("/login").status_code == 200
+    assert client.get("/api/experience/home").status_code == 401
+    assert client.post("/auth/session", json={"token": TOKEN}).status_code == 200
+    assert client.get("/api/experience/home").json()["actor"] == "human:owner"
+    assert client.post("/auth/logout").status_code == 403
+    assert client.post("/auth/logout", headers={"Origin": "http://testserver"}).status_code == 200
+    assert client.get("/api/experience/home").status_code == 401

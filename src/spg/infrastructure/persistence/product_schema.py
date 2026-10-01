@@ -257,6 +257,19 @@ product_interactions = Table(
     ),
 )
 
+# Product Workspace context is durable navigation context for WIC conversations.
+# It grants no Work, source, or production authority.
+product_workspace_interactions = Table(
+    "product_workspace_interactions", metadata,
+    Column("interaction_id", Uuid(as_uuid=True),
+           ForeignKey("product_interactions.id"), primary_key=True),
+    Column("product_id", Uuid(as_uuid=True),
+           ForeignKey("software_products.id"), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False,
+           server_default=func.now()),
+    Index("ix_product_workspace_interactions_product", "product_id"),
+)
+
 interaction_records = Table(
     "interaction_records",
     metadata,
@@ -799,6 +812,7 @@ product_tables = (
     engineering_scopes,
     engineering_resource_bindings,
     product_interactions,
+    product_workspace_interactions,
     interaction_records,
     interaction_turns,
     interaction_response_events,
