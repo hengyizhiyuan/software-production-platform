@@ -257,8 +257,8 @@ product_interactions = Table(
     ),
 )
 
-# Product Workspace context is durable navigation context for WIC conversations.
-# It grants no Work, source, or production authority.
+# Explicit Product scope is owned by Interaction. Work formation consumes it;
+# source and production authority still require their own exact admission.
 product_workspace_interactions = Table(
     "product_workspace_interactions", metadata,
     Column("interaction_id", Uuid(as_uuid=True),

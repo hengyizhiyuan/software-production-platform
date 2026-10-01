@@ -294,14 +294,6 @@ class ProductExperienceProjection:
                 "acceptance": exact["acceptance"], "current": exact["current"],
                 "guardian": guardian}
 
-    def bind_interaction(self, owner_id: str, product_id: UUID,
-                         interaction_id: UUID) -> None:
-        self.product(owner_id, product_id)
-        with self.database.unit_of_work() as uow:
-            uow.session.execute(product_workspace_interactions.insert().values(
-                interaction_id=interaction_id, product_id=product_id))
-            uow.commit()
-
     def interaction_product(self, owner_id: str, interaction_id: UUID) -> str | None:
         with self.database.unit_of_work() as uow:
             product_id = uow.session.execute(select(

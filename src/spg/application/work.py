@@ -12,6 +12,7 @@ from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 from sqlalchemy import insert, select
 from spg.infrastructure.persistence.product_schema import (
     product_works, software_product_assets, product_managed_sources, work_source_bases,
+    software_products,
 )
 
 from spg.application.completion import CompletionService
@@ -417,6 +418,71 @@ class WorkApplicationService:
                 ProductManagedSourceService(self.database, self.settings).prepare_work(work_id, product_id)
         return self.get_work(work_id)
 
+    def _prepare_product_interaction_work(
+        self, interaction_id: UUID, assessment_id: UUID,
+        basis_fingerprint: str, timestamp: datetime,
+    ) -> None:
+        """Form Product-owned PRE_WORK and its exact source before READY admission.
+
+        The provider effect runs after the provisional Work commits. A failed
+        source preparation leaves PRE_WORK recoverable, never an unbased READY Work.
+        """
+        with self.database.unit_of_work() as uow:
+            interactions = InteractionStore(uow.session)
+            product_id = interactions.product_context(interaction_id)
+            if product_id is None:
+                return
+            interaction = interactions.interaction(interaction_id, for_update=True)
+            if interaction is None or interaction.condition is not InteractionCondition.OPEN:
+                return  # The governed admission below reports the exact error.
+            records = interactions.records(interaction_id)
+            assessment = interactions.assessment(assessment_id)
+            latest = interactions.latest_assessment(interaction_id)
+            if (not records or assessment is None or latest is None
+                    or latest.id != assessment.id
+                    or assessment.interaction_id != interaction_id
+                    or interaction_basis_fingerprint(interaction, records) != basis_fingerprint
+                    or assessment.basis_fingerprint != basis_fingerprint
+                    or assessment.basis_last_sequence != records[-1].sequence
+                    or assessment.readiness.status is not WorkAdmissionReadinessStatus.READY
+                    or assessment.readiness.basis_fingerprint != basis_fingerprint
+                    or assessment.readiness.profile != WorkMode.LONG_LIVED_STEERING.value):
+                return  # Invalid admission must not manufacture provisional Work.
+            owned = uow.session.execute(select(software_products.c.id).where(
+                software_products.c.id == product_id,
+                software_products.c.owner_id == interaction.created_by,
+                software_products.c.lifecycle != "ARCHIVED",
+            )).scalar_one_or_none()
+            if owned is None:
+                raise ProductInvariantViolation("Product context is no longer active or owned")
+            work_id = interaction.current_work_id or uuid5(
+                NAMESPACE_URL,
+                f"spg:wic-work:{interaction_id}:{assessment_id}:{basis_fingerprint}",
+            )
+            work_row = uow.session.execute(select(
+                product_works.c.product_id, product_works.c.condition).where(
+                product_works.c.id == work_id).with_for_update()).first()
+            if work_row is not None and work_row.product_id != product_id:
+                raise ProductInvariantViolation(
+                    "Product-scoped Interaction Work has a different Product")
+            managed = uow.session.execute(select(
+                product_managed_sources.c.product_id).where(
+                product_managed_sources.c.product_id == product_id
+            )).scalar_one_or_none()
+            if managed is None and self.settings.managed_source_provider == "gitea":
+                raise ProductInvariantViolation(
+                    "Product accepted source is unavailable before Work formation")
+            if work_row is None:
+                ProductStore(uow.session).insert_pre_work(
+                    work_id, timestamp, product_id=product_id)
+            uow.commit()
+            needs_source = managed is not None and (
+                work_row is None or work_row.condition == WorkCondition.PRE_WORK.value)
+        if needs_source:
+            from spg.application.product_managed_source import ProductManagedSourceService
+            ProductManagedSourceService(self.database, self.settings).prepare_work(
+                work_id, product_id)
+
     def admit_interaction_work(
         self,
         interaction_id: UUID,
@@ -434,6 +500,8 @@ class WorkApplicationService:
         if not identity:
             raise ProductInvariantViolation("Human authority identity is required")
         timestamp = datetime.now(UTC)
+        self._prepare_product_interaction_work(
+            interaction_id, assessment_id, basis_fingerprint, timestamp)
         with self.database.unit_of_work() as unit_of_work:
             interactions = InteractionStore(unit_of_work.session)
             product = ProductStore(unit_of_work.session)
@@ -447,6 +515,7 @@ class WorkApplicationService:
                 raise InteractionInvariantViolation(
                     "Only an open Interaction can admit governed Work"
                 )
+            product_id = interactions.product_context(interaction_id)
             records = interactions.records(interaction_id)
             if not records:
                 raise InteractionInvariantViolation(
@@ -529,6 +598,46 @@ class WorkApplicationService:
                     "READY assessment lacks a valid Motive or desired outcome"
                 )
 
+            source_basis = None
+            if product_id is not None:
+                owned = unit_of_work.session.execute(select(software_products.c.id).where(
+                    software_products.c.id == product_id,
+                    software_products.c.owner_id == interaction.created_by,
+                    software_products.c.lifecycle != "ARCHIVED",
+                )).scalar_one_or_none()
+                if owned is None:
+                    raise ProductInvariantViolation("Product context is no longer active or owned")
+                existing_work = unit_of_work.session.execute(select(
+                    product_works.c.id, product_works.c.product_id).where(
+                    product_works.c.id == work_id)).first()
+                if existing_work is None or existing_work.product_id != product_id:
+                    raise ProductInvariantViolation(
+                        "Product-scoped Interaction Work has a different Product")
+                managed = unit_of_work.session.execute(select(
+                    product_managed_sources).where(
+                    product_managed_sources.c.product_id == product_id
+                )).mappings().one_or_none()
+                if managed is None and self.settings.managed_source_provider == "gitea":
+                    raise ProductInvariantViolation(
+                        "Product accepted source is unavailable before Work admission")
+                if managed is not None:
+                    source_basis = unit_of_work.session.execute(select(
+                        work_source_bases).where(
+                        work_source_bases.c.work_id == work_id,
+                        work_source_bases.c.product_id == product_id,
+                    )).mappings().one_or_none()
+                    if (source_basis is None
+                            or source_basis["source_version"] != managed["version"]
+                            or source_basis["source_revision"] != managed["accepted_revision"]
+                            or source_basis["source_tree"] != managed["accepted_tree"]):
+                        raise ProductInvariantViolation(
+                            "Product Work requires its exact current accepted source basis")
+                    if (engineering_resource_id is not None
+                            and engineering_resource_id != source_basis["resource_id"]):
+                        raise ProductInvariantViolation(
+                            "Product Work cannot select a different source resource")
+                    engineering_resource_id = source_basis["resource_id"]
+
             resource = (product.resource(engineering_resource_id) if engineering_resource_id else
                         product.default_resource() if use_default_resource else None)
             if engineering_resource_id is not None and resource is None:
@@ -540,6 +649,14 @@ class WorkApplicationService:
             baseline = None if pointer is None else runtime.snapshot(pointer.snapshot_id)
             if resource is not None and baseline is None:
                 raise ProductInvariantViolation("Selected Repository Asset requires its own Trusted Baseline")
+            if source_basis is not None and (
+                    resource is None or baseline is None
+                    or resource.repository_identity != f"watt://work-branches/{work_id}"
+                    or resource.authoritative_ref != source_basis["work_ref"]
+                    or baseline.repository_revision != source_basis["source_revision"]
+                    or baseline.repository_tree_identity != source_basis["source_tree"]):
+                raise ProductInvariantViolation(
+                    "Product Work source resource differs from the exact accepted basis")
 
             scope_id = uuid5(NAMESPACE_URL, f"spg:wic-scope:{work_id}")
             governance_id = uuid5(NAMESPACE_URL, f"spg:wic-governance:{work_id}")
@@ -614,6 +731,7 @@ class WorkApplicationService:
             existing = product.work(work_id)
             admitted_values = {
                         "id": work_id,
+                        "product_id": product_id,
                         "goal_id": None,
                         "work_mode": WorkMode.LONG_LIVED_STEERING.value,
                         "raw_user_requirement": motive,

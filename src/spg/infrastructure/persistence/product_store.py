@@ -1,6 +1,7 @@
 """Persistence adapter for product-owned Goal, Work, and Engineering Scope facts."""
 
 from collections.abc import Mapping
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -91,6 +92,37 @@ class ProductStore:
 
     def insert_work(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(product_works).values(**values))
+
+    def insert_pre_work(self, work_id: UUID, timestamp: datetime,
+                        *, product_id: UUID | None = None) -> None:
+        """Form a provisional Work without admitting production authority."""
+        self.insert_work({
+            "id": work_id,
+            "product_id": product_id,
+            "goal_id": None,
+            "work_mode": WorkMode.LONG_LIVED_STEERING.value,
+            "raw_user_requirement": "",
+            "refined_title": "New Work",
+            "desired_outcome": None,
+            "constraints": [],
+            "tags": [],
+            "condition": WorkCondition.PRE_WORK.value,
+            "scope_summary": None,
+            "production_objective": None,
+            "expected_artifact_path": None,
+            "artifact_operation": None,
+            "artifact_placement_rationale": None,
+            "artifact_target_confidence": None,
+            "artifact_source_baseline_id": None,
+            "artifact_source_revision": None,
+            "verification_expectation": None,
+            "code_change_proposal": None,
+            "production_plan_proposal": None,
+            "current_work_reality_revision_id": None,
+            "current_engineering_scope_id": None,
+            "created_at": timestamp,
+            "updated_at": timestamp,
+        })
 
     def update_work(self, work_id: UUID, values: Mapping[str, Any]) -> None:
         result = self.session.execute(

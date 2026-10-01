@@ -1462,9 +1462,8 @@ def create_http_application(
                 "你想继续哪个产品？", "options": [
                 {"id": item["id"], "name": item["name"]} for item in catalog[:8]]}
         interaction = required_interaction_service().create_interaction(
-            human_identity=actor, start_work_context=False)
-        if product_id is not None:
-            experience.bind_interaction(actor, product_id, interaction.id)
+            human_identity=actor, start_work_context=False,
+            product_id=product_id)
         turn = required_interaction_service().submit_turn(interaction.id,
             request.text.strip(), human_identity=actor)
         product = None if product_id is None else experience.product(actor, product_id)
@@ -1481,9 +1480,9 @@ def create_http_application(
         interaction_id = request.interaction_id
         if interaction_id is None:
             interaction = required_interaction_service().create_interaction(
-                human_identity=actor, start_work_context=False)
+                human_identity=actor, start_work_context=False,
+                product_id=product_id)
             interaction_id = interaction.id
-            experience.bind_interaction(actor, product_id, interaction_id)
         elif experience.interaction_product(actor, interaction_id) != str(product_id):
             raise ProductHttpError(404, "INTERACTION_NOT_FOUND",
                 "Conversation is not in this Product Workspace")

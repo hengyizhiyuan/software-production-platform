@@ -50,6 +50,8 @@ from spg.infrastructure.persistence.product_schema import (
     interaction_turns,
     interaction_work_transitions,
     product_interactions,
+    product_workspace_interactions,
+    software_products,
 )
 
 
@@ -59,6 +61,26 @@ class InteractionStore:
 
     def insert_interaction(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(product_interactions).values(**values))
+
+    def bind_product_context(self, interaction_id: UUID, product_id: UUID,
+                             owner_id: str) -> None:
+        """Record the explicit Product scope before this Interaction forms Work."""
+        product = self.session.execute(select(
+            software_products.c.lifecycle).where(
+            software_products.c.id == product_id,
+            software_products.c.owner_id == owner_id,
+        ).with_for_update()).scalar_one_or_none()
+        if product is None or product == "ARCHIVED":
+            raise InteractionInvariantViolation(
+                "Product context is unavailable to this Human")
+        self.session.execute(insert(product_workspace_interactions).values(
+            interaction_id=interaction_id, product_id=product_id))
+
+    def product_context(self, interaction_id: UUID) -> UUID | None:
+        return self.session.execute(select(
+            product_workspace_interactions.c.product_id).where(
+            product_workspace_interactions.c.interaction_id == interaction_id
+        )).scalar_one_or_none()
 
     def interaction(self, interaction_id: UUID, *, for_update: bool = False) -> Interaction | None:
         statement = select(product_interactions).where(

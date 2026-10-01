@@ -1057,6 +1057,7 @@ class WorkInteractionService:
         *,
         human_identity: str,
         start_work_context: bool = False,
+        product_id: UUID | None = None,
     ) -> Interaction:
         identity = human_identity.strip()
         if not identity:
@@ -1071,6 +1072,7 @@ class WorkInteractionService:
                     ProductStore(uow.session),
                     work_id=work_id,
                     timestamp=now,
+                    product_id=product_id,
                 )
             store.insert_interaction(
                 {
@@ -1083,6 +1085,8 @@ class WorkInteractionService:
                     "updated_at": now,
                 }
             )
+            if product_id is not None:
+                store.bind_product_context(interaction_id, product_id, identity)
             uow.commit()
         return self.get_interaction(interaction_id)
 
@@ -1092,35 +1096,9 @@ class WorkInteractionService:
         *,
         work_id: UUID,
         timestamp: datetime,
+        product_id: UUID | None = None,
     ) -> None:
-        product.insert_work(
-            {
-                "id": work_id,
-                "goal_id": None,
-                "work_mode": WorkMode.LONG_LIVED_STEERING.value,
-                "raw_user_requirement": "",
-                "refined_title": "New Work",
-                "desired_outcome": None,
-                "constraints": [],
-                "tags": [],
-                "condition": WorkCondition.PRE_WORK.value,
-                "scope_summary": None,
-                "production_objective": None,
-                "expected_artifact_path": None,
-                "artifact_operation": None,
-                "artifact_placement_rationale": None,
-                "artifact_target_confidence": None,
-                "artifact_source_baseline_id": None,
-                "artifact_source_revision": None,
-                "verification_expectation": None,
-                "code_change_proposal": None,
-                "production_plan_proposal": None,
-                "current_work_reality_revision_id": None,
-                "current_engineering_scope_id": None,
-                "created_at": timestamp,
-                "updated_at": timestamp,
-            }
-        )
+        product.insert_pre_work(work_id, timestamp, product_id=product_id)
 
     def list_interactions(self) -> tuple[SharedUnderstanding, ...]:
         with self.database.unit_of_work() as uow:
@@ -3303,6 +3281,7 @@ class WorkInteractionService:
                     ProductStore(uow.session),
                     work_id=new_work_id,
                     timestamp=now,
+                    product_id=store.product_context(interaction_id),
                 )
                 store.replace_current_work(
                     interaction_id,

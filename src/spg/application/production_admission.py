@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from uuid import NAMESPACE_URL, UUID, uuid5
 from time import monotonic, sleep
+from sqlalchemy import select
 
 from spg.application.assets import RepositoryAssetService
 from spg.application.product_assets import ProductAssetService
@@ -31,6 +32,7 @@ from spg.domain.interaction import (
 )
 from spg.domain.product import AttentionAction
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.product_schema import work_source_bases
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.domain.steering import SteeringStepType, SteeringAttentionReason
@@ -61,6 +63,12 @@ class ProductionAdmissionTrigger:
         self.work = work
         self.assets = assets
         self.post_admission = post_admission
+
+    def _has_product_source_basis(self, work_id: UUID) -> bool:
+        with self.work.database.unit_of_work() as uow:
+            return uow.session.execute(select(work_source_bases.c.work_id).where(
+                work_source_bases.c.work_id == work_id
+            )).scalar_one_or_none() is not None
 
     @staticmethod
     def _repository_state(observation: dict | None) -> RepositoryAcquisitionState:
@@ -582,6 +590,8 @@ class ProductionAdmissionTrigger:
         evidence = production_evidence(assessment.semantic_ir)
         projection = self.interactions.get_shared_understanding(interaction_id)
         if projection.governed_work_id is not None:
+            if self._has_product_source_basis(projection.governed_work_id):
+                return
             latest = self.assets.latest_attempt_for_work(projection.governed_work_id)
             recovery_requested = any(item.action.operation == "ACQUIRE_REPOSITORY"
                 for item in executable_semantic_actions(assessment.semantic_ir))
@@ -661,6 +671,16 @@ class ProductionAdmissionTrigger:
                 "remain separately governed."
             ),
         )
+        if self._has_product_source_basis(admitted.work_id):
+            # Work formation already bound the exact Product accepted source.
+            # A generic source-acquisition Attempt would replace that basis.
+            self.post_admission.activate(admitted.work_id)
+            self.interactions.record_production_admission_progress(
+                interaction_id,
+                admission_state=ProductionAdmissionExecutionState.WORK_CREATED,
+                repository_state=RepositoryAcquisitionState.READY,
+                next_step="Continue Steering from the Product accepted source.")
+            return
         if evidence.repository_source is None and not any(
                 goal.repository_reference or goal.repository_required for goal in assessment.semantic_ir.current_production):
             self.assets.ensure_managed_execution_workspace(self.work, admitted.work_id)

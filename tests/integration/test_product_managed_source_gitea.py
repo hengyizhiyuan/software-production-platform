@@ -12,7 +12,7 @@ from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 
 from spg.api.http import create_http_application
 from spg.application.bootstrap import Application
@@ -21,6 +21,8 @@ from spg.application.product_assets import ProductAssetService
 from spg.application.assets import RepositoryAssetService
 from spg.application.product_managed_source import ProductManagedSourceService, _git
 from spg.application.work import WorkApplicationService
+from spg.application.interaction import WorkInteractionService
+from spg.application.production_admission import ProductionAdmissionTrigger
 from spg.config import Settings
 from spg.domain.delivery import (
     DeliveryTargetKind, DeliveryTargetRequest, HumanAcceptanceDecision,
@@ -36,6 +38,11 @@ from spg.infrastructure.managed_source_provider import GiteaManagedSourceProvide
 from spg.infrastructure.persistence import product_tables, runtime_tables
 from spg.infrastructure.persistence.github_delivery_schema import remote_delivery_authorizations, remote_delivery_receipts
 from spg.infrastructure.persistence.product_schema import product_works, work_source_bases
+from spg.infrastructure.persistence.product_schema import product_workspace_interactions
+from spg.domain.interaction import WorkTransitionChoice, WorkFocusClassification, WorkImpactDisposition
+from tests.integration.test_wic_governed_work_admission import (
+    _ReadyCapability, _ActiveCapability, _DeclaredRepositoryIntent,
+)
 from spg.providers.contract_verifier import ContractDrivenRepositoryVerifier
 from spg.providers.deterministic_executor import (
     DeterministicExecutionSpecification, DeterministicFileOperation,
@@ -68,6 +75,203 @@ def _basis(database, work_id):
     with database.unit_of_work() as uow:
         return dict(uow.session.execute(select(work_source_bases).where(
             work_source_bases.c.work_id == work_id)).mappings().one())
+
+
+def _scoped_ready(database, product_id):
+    interactions = WorkInteractionService(database, capability=_ReadyCapability())
+    interaction = interactions.create_interaction(
+        human_identity="human:owner", product_id=product_id)
+    assessment = interactions.append_and_assess(
+        interaction.id, "Build the next bounded Product improvement",
+        human_identity="human:owner")
+    assert assessment.latest_assessment is not None
+    return interactions, assessment
+
+
+def _admit_scoped(database, assessment):
+    return WorkApplicationService(database).admit_interaction_work(
+        assessment.interaction.id,
+        assessment_id=assessment.latest_assessment.id,
+        basis_fingerprint=assessment.latest_assessment.basis_fingerprint,
+        authority_identity="human:owner")
+
+
+def test_product_interaction_forms_exact_v0_work_before_ready(postgres_database):
+    product = ProductAssetService(postgres_database).create("human:owner", "Scoped V0")
+    product_id = UUID(product["id"])
+    accepted = ProductManagedSourceService(postgres_database).describe(
+        product_id, "human:owner")["accepted"]
+    interactions, assessment = _scoped_ready(postgres_database, product_id)
+    with postgres_database.unit_of_work() as uow:
+        assert uow.session.execute(select(product_workspace_interactions.c.product_id).where(
+            product_workspace_interactions.c.interaction_id == assessment.interaction.id
+        )).scalar_one() == product_id
+    admitted = _admit_scoped(postgres_database, assessment)
+    with postgres_database.unit_of_work() as uow:
+        row = uow.session.execute(select(product_works).where(
+            product_works.c.id == admitted.work_id)).mappings().one()
+    basis = _basis(postgres_database, admitted.work_id)
+    assert row["product_id"] == product_id and row["condition"] == "READY"
+    assert (basis["product_id"], basis["source_version"],
+            basis["source_revision"], basis["source_tree"]) == (
+        product_id, 0, accepted["revision"], accepted["tree"])
+    assert admitted.engineering_scope is not None
+    assert admitted.engineering_scope.bindings[0].resource_id == basis["resource_id"]
+    assert interactions.get_shared_understanding(assessment.interaction.id).governed_work_id == admitted.work_id
+
+
+def test_product_scoped_prework_inherits_context_before_admission(postgres_database):
+    product = ProductAssetService(postgres_database).create("human:owner", "Scoped Prework")
+    product_id = UUID(product["id"])
+    interactions = WorkInteractionService(postgres_database, capability=_ReadyCapability())
+    interaction = interactions.create_interaction(human_identity="human:owner",
+        product_id=product_id, start_work_context=True)
+    with postgres_database.unit_of_work() as uow:
+        pre = uow.session.execute(select(product_works).where(
+            product_works.c.id == interaction.current_work_id)).mappings().one()
+    assert pre["condition"] == "PRE_WORK" and pre["product_id"] == product_id
+    ready = interactions.append_and_assess(interaction.id,
+        "Build a Product feature", human_identity="human:owner")
+    admitted = _admit_scoped(postgres_database, ready)
+    assert admitted.work_id == interaction.current_work_id
+    assert _basis(postgres_database, admitted.work_id)["product_id"] == product_id
+
+
+@pytest.mark.parametrize("declared_source", [None, "https://example.invalid/other.git"])
+def test_product_source_activates_without_generic_acquisition(postgres_database, declared_source):
+    product = ProductAssetService(postgres_database).create("human:owner", "Scoped Activation")
+    product_id = UUID(product["id"])
+    interactions = WorkInteractionService(postgres_database,
+        capability=_DeclaredRepositoryIntent(source=declared_source))
+    interaction = interactions.create_interaction(
+        human_identity="human:owner", product_id=product_id)
+    ready = interactions.append_and_assess(interaction.id,
+        "Build a Product improvement using its accepted source. " + (declared_source or ""),
+        human_identity="human:owner")
+    assert ready.latest_assessment is not None
+
+    class NoGenericAcquisition:
+        def latest_attempt_for_work(self, _work_id):
+            return None
+
+        def ensure_managed_execution_workspace(self, *_args):
+            pytest.fail("Product Work must not acquire an unrelated workspace")
+
+        def record_waiting_source(self, *_args):
+            pytest.fail("Product accepted source is already available")
+
+    class Activation:
+        work_id = None
+
+        def activate(self, work_id):
+            self.work_id = work_id
+
+    activation = Activation()
+    ProductionAdmissionTrigger(interactions, WorkApplicationService(postgres_database),
+        NoGenericAcquisition(), activation).prepare(
+            interaction.id, ready.latest_assessment, ready.records[-1])
+    assert activation.work_id is not None
+    basis = _basis(postgres_database, activation.work_id)
+    assert basis["product_id"] == product_id
+
+
+def test_product_interaction_uses_current_accepted_vn(postgres_database, tmp_path):
+    product = ProductAssetService(postgres_database).create("human:owner", "Scoped Vn")
+    product_id = UUID(product["id"])
+    _, _, _, accepted = _run_and_accept(postgres_database, product_id,
+        "# Scoped Vn\n\nAccepted V1.\n", tmp_path)
+    _, assessment = _scoped_ready(postgres_database, product_id)
+    admitted = _admit_scoped(postgres_database, assessment)
+    basis = _basis(postgres_database, admitted.work_id)
+    assert (basis["source_version"], basis["source_revision"], basis["source_tree"]) == (
+        1, accepted["accepted"]["revision"], accepted["accepted"]["tree"])
+
+
+def test_product_transition_retains_scope_and_source(postgres_database):
+    product = ProductAssetService(postgres_database).create("human:owner", "Scoped Transition")
+    product_id = UUID(product["id"])
+    accepted = ProductManagedSourceService(postgres_database).describe(
+        product_id, "human:owner")["accepted"]
+    _, assessment = _scoped_ready(postgres_database, product_id)
+    first = _admit_scoped(postgres_database, assessment)
+    active = WorkInteractionService(postgres_database, capability=_ActiveCapability(
+        focus=WorkFocusClassification.UNRELATED_NEW_DEMAND,
+        impact=WorkImpactDisposition.NEW_WORK_RECOMMENDED,
+        motive="Build a separate feature within this Product."))
+    pending = active.append_and_assess(assessment.interaction.id,
+        "Build a separate feature within this Product.", human_identity="human:owner")
+    transition = pending.latest_work_transition
+    assert transition is not None
+    switched = active.decide_work_transition(assessment.interaction.id,
+        transition_id=transition.id, expected_originating_work_id=first.work_id,
+        choice=WorkTransitionChoice.START_NEW_WORK,
+        authority_identity="human:owner")
+    next_id = switched.interaction.current_work_id
+    assert next_id is not None and next_id != first.work_id
+    with postgres_database.unit_of_work() as uow:
+        pre = uow.session.execute(select(product_works).where(
+            product_works.c.id == next_id)).mappings().one()
+    assert pre["condition"] == "PRE_WORK" and pre["product_id"] == product_id
+    restarted = WorkInteractionService(postgres_database, capability=_ReadyCapability())
+    next_assessment = restarted.append_and_assess(assessment.interaction.id,
+        "Please implement the separate Product feature.", human_identity="human:owner")
+    second = _admit_scoped(postgres_database, next_assessment)
+    assert second.work_id == next_id
+    basis = _basis(postgres_database, second.work_id)
+    assert (basis["product_id"], basis["source_version"],
+            basis["source_revision"], basis["source_tree"]) == (
+        product_id, 0, accepted["revision"], accepted["tree"])
+
+
+def test_product_source_unavailable_cannot_form_ready_orphan(postgres_database, monkeypatch):
+    product = ProductAssetService(postgres_database).create(
+        "human:owner", "Unprovisioned Scoped Product", provision_source=False)
+    product_id = UUID(product["id"])
+    _, assessment = _scoped_ready(postgres_database, product_id)
+    with pytest.raises(ProductInvariantViolation, match="accepted source is unavailable"):
+        _admit_scoped(postgres_database, assessment)
+    with postgres_database.unit_of_work() as uow:
+        rows = uow.session.execute(select(product_works.c.condition,
+            product_works.c.product_id)).all()
+    assert not any(condition == "READY" for condition, _ in rows)
+    assert all(owner in {None, product_id} for _, owner in rows)
+
+    provisioned = ProductAssetService(postgres_database).create(
+        "human:owner", "Provider Outage Scoped Product")
+    _, ready = _scoped_ready(postgres_database, UUID(provisioned["id"]))
+    monkeypatch.setenv("SPG_MANAGED_SOURCE_ENDPOINT", "http://127.0.0.1:9")
+    with pytest.raises(ManagedSourceError):
+        _admit_scoped(postgres_database, ready)
+    with postgres_database.unit_of_work() as uow:
+        orphan = uow.session.execute(select(product_works.c.id).where(
+            product_works.c.condition == "READY",
+            product_works.c.product_id.is_(None))).all()
+        provisional = uow.session.execute(select(product_works.c.condition).where(
+            product_works.c.product_id == UUID(provisioned["id"]))).scalar_one()
+    assert orphan == []
+    assert provisional == "PRE_WORK"
+
+
+def test_global_advisory_and_late_binding_protection(postgres_database):
+    interaction = WorkInteractionService(postgres_database,
+        capability=_ReadyCapability()).create_interaction(human_identity="human:owner")
+    with postgres_database.unit_of_work() as uow:
+        assert uow.session.execute(select(product_workspace_interactions.c.product_id).where(
+            product_workspace_interactions.c.interaction_id == interaction.id
+        )).scalar_one_or_none() is None
+        assert uow.session.execute(select(func.count()).select_from(product_works)).scalar_one() == 0
+    product = ProductAssetService(postgres_database).create("human:owner", "Late Binding Guard")
+    legacy = WorkApplicationService(postgres_database).submit_work("Legacy unbound Work")
+    with postgres_database.unit_of_work() as uow:
+        uow.session.execute(update(product_works).where(
+            product_works.c.id == legacy.work_id).values(condition="READY"))
+        uow.commit()
+    with pytest.raises(ProductInvariantViolation, match="source binding before Work refinement"):
+        ProductAssetService(postgres_database).bind_work(
+            UUID(product["id"]), legacy.work_id, "human:owner")
+    with postgres_database.unit_of_work() as uow:
+        assert uow.session.execute(select(product_works.c.product_id).where(
+            product_works.c.id == legacy.work_id)).scalar_one_or_none() is None
 
 
 def _run_and_accept(database, product_id, content, tmp_path):
