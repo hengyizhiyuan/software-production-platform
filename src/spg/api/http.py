@@ -1417,7 +1417,7 @@ def create_http_application(
                       for item in observed.turns[-5:]],
             "response": None if current is None else current.natural_response,
             "readiness": None if observed.readiness is None else
-                observed.readiness.state.value}
+                observed.readiness.status.value}
 
     @api.post("/api/experience/intent")
     def experience_intent(request: ExperienceIntentRequest, http_request: Request):

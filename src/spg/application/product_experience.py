@@ -68,7 +68,7 @@ class SemanticExperienceCompiler:
                 model=self.settings.wic_provider_model or "deepseek-flash",
                 reasoning_effort=self.settings.wic_provider_reasoning_effort,
                 timeout_seconds=min(self.settings.collaboration_provider_timeout_seconds, 30),
-                max_output_tokens=500,
+                max_output_tokens=2048,
             )
             result = adapter.generate(
                 profile=profile,
@@ -325,6 +325,12 @@ class ProductExperienceProjection:
         collection = self.collections(owner_id)
         if intent.unsupported:
             raise ValueError("UNSUPPORTED_QUERY_DIMENSIONS: " + ", ".join(intent.unsupported))
+        if intent.kind != "deliverables" and (
+            intent.acceptance != "ANY" or intent.deployed != "ANY"
+        ):
+            raise ValueError("UNSUPPORTED_QUERY_DIMENSIONS: acceptance, deployed")
+        if intent.kind == "deliverables" and intent.state != "ANY":
+            raise ValueError("UNSUPPORTED_QUERY_DIMENSIONS: state")
         if intent.product_id is not None and str(intent.product_id) not in {
                 row["id"] for row in collection["products"]}:
             raise ValueError("UNKNOWN_PRODUCT")
