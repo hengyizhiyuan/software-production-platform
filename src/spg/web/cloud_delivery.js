@@ -52,10 +52,13 @@
     state.connections=await request('/api/cloud-connections/aliyun');
     await renderFlow();
   }
-  async function open() {
+  async function open(preferredConnectionId=null) {
     state.open=true;
     state.connections=await request('/api/cloud-connections/aliyun');
-    if(state.connections.length)await loadConnection(state.connections[0].id);
+    const selected=preferredConnectionId?
+      state.connections.find(item=>item.id===preferredConnectionId):state.connections[0];
+    if(preferredConnectionId&&!selected)throw new Error('原云连接已不在当前可用列表中');
+    if(selected)await loadConnection(selected.id);
     else await renderFlow();
     box()?.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
@@ -67,7 +70,7 @@
     state.open=false;state.connection=null;
     const current=state.deployments[0];
     const panel=document.createElement('section');panel.className='detail-panel';
-    panel.innerHTML=`<h2>阿里云部署</h2><p>${current?escape({SUCCEEDED:'部署成功',NEEDS_HUMAN_ATTENTION:'需要你处理',ROLLED_BACK:'已回滚',FAILED:'部署失败'}[current.state]||'正在部署'):'这个已验收成果尚未部署到阿里云。'}</p>${current?.blocker?`<p class="muted">${escape(blockerCopy(current))}</p>`:''}<button class="button" type="button" data-cloud-open>部署到阿里云</button><div id="cloud-delivery-flow"></div>`;
+    panel.innerHTML=`<h2>阿里云部署</h2><p>${current?escape({SUCCEEDED:'部署成功',NEEDS_HUMAN_ATTENTION:'需要你处理',ROLLED_BACK:'已回滚',FAILED:'部署失败'}[current.state]||'正在部署'):'这个已验收成果尚未部署到阿里云。'}</p>${current?.blocker?`<p class="muted">${escape(blockerCopy(current))}</p>`:''}${current?.connection_id?'<button class="button secondary" type="button" data-cloud-reselect>重新选择 ECS（不部署）</button>':''}<button class="button" type="button" data-cloud-open>部署到阿里云</button><div id="cloud-delivery-flow"></div>`;
     document.getElementById('content')?.append(panel);
   }};
   document.addEventListener('click',async event=>{
@@ -75,7 +78,7 @@
     if(!button)return;
     button.disabled=true;
     try{
-      if(button.hasAttribute('data-cloud-open'))await open();
+      if(button.hasAttribute('data-cloud-open'))await open(state.deployments[0]?.connection_id);
       else if(button.hasAttribute('data-cloud-create')){
         const result=await request('/api/cloud-connections/aliyun','POST');
         await loadConnection(result.id);
@@ -83,6 +86,8 @@
         const result=await request(`/api/cloud-connections/aliyun/${state.connection.id}/verify`,'POST');
         await loadConnection(result.id);
       }else if(button.hasAttribute('data-cloud-reselect')){
+        if(!state.connection)await open(state.deployments[0]?.connection_id);
+        if(!state.connection?.target)throw new Error('当前云连接没有可更换的目标 ECS');
         const result=await request(`/api/cloud-connections/aliyun/${state.connection.id}/verify`,'POST');
         await loadConnection(result.id);
       }else if(button.dataset.cloudSelect){

@@ -75,8 +75,9 @@ test('existing connection can rediscover targets without creating a connection o
   const target={name:'旧 CentOS ECS',region_id:'cn-beijing',instance_id:'i-oldtarget'};
   const base={id,state:'READY',role_arn:'acs:ram::1234567890123456:role/wattecsdelivery',
     target,discovered_targets:[]};
-  const {flow,listeners,calls}=surface((url,method)=>{
-    if(url==='/api/cloud-connections/aliyun'&&method==='GET')return [base];
+  const {content,flow,window,listeners,calls}=surface((url,method)=>{
+    if(url==='/api/cloud-connections/aliyun'&&method==='GET')return [
+      {id:'other-connection',state:'READY',target:{name:'别的 ECS'}},base];
     if(url===`/api/cloud-connections/aliyun/${id}/deployments`)return [];
     if(url===`/api/cloud-connections/aliyun/${id}/verify`&&method==='POST'){
       rediscovered=true;return {id};
@@ -89,12 +90,18 @@ test('existing connection can rediscover targets without creating a connection o
     }:base;
     throw Error(`unexpected request ${method} ${url}`);
   });
+  window.WattCloudDelivery.render({
+    manifest:{id:'manifest',software:{runtime_recipe:{adapter:'STATIC_WEB'}},
+      fingerprint:'a'.repeat(64)},
+    acceptance:{decision:'ACCEPT'},current:true,summary:{work_id:'work'},
+    cloud_deployments:[{id:'old-failure',connection_id:id,state:'FAILED',
+      blocker:'DEPLOYMENT_USER_NOT_FOUND',operations:[]}],
+  });
+  assert.match(content.children[0].innerHTML,/重新选择 ECS（不部署）/);
   const button=attribute=>({disabled:false,hasAttribute(name){return name===attribute;}});
-  await listeners.click({target:{closest(){return button('data-cloud-open');}}});
-  assert.match(flow.innerHTML,/重新选择 ECS/);
-  assert.match(flow.innerHTML,/现有云连接和历史部署记录会保留/);
   await listeners.click({target:{closest(){return button('data-cloud-reselect');}}});
   assert.match(flow.innerHTML,/新 Alibaba Cloud Linux ECS/);
+  assert.ok(!calls.some(([url])=>url.includes('other-connection')));
   assert.ok(calls.some(([url,method])=>url===`/api/cloud-connections/aliyun/${id}/verify`&&method==='POST'));
   assert.ok(!calls.some(([url,method])=>url==='/api/cloud-connections/aliyun'&&method==='POST'));
   assert.ok(!calls.some(([url,method])=>url.endsWith('/select')&&method==='POST'));

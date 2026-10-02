@@ -73,7 +73,7 @@ def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
         root = client.get("/", follow_redirects=False)
         assert root.status_code == 200
         assert '/assets/experience.js?v=2' in root.text
-        assert '/assets/cloud_delivery.js?v=3' in root.text
+        assert '/assets/cloud_delivery.js?v=4' in root.text
 
         page = client.get("/app")
         assert page.status_code == 200
