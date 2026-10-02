@@ -3,7 +3,8 @@
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const state = {work:null, manifest:null, fingerprint:null, deployments:[],
-    targetDeployments:[], connections:[], connection:null, open:false};
+    targetDeployments:[], connections:[], connection:null, open:false,
+    deployIntent:false};
   async function request(path, method='GET', body) {
     const response = await fetch(path,{method,credentials:'same-origin',
       headers:body===undefined?{}:{'Content-Type':'application/json'},
@@ -42,11 +43,18 @@
     else if(c.state!=='READY') step=`<h3>授权这台 ECS</h3><p>目标：${escape(c.target.name)} · ${escape(c.target.region_id)}。Watt 需要只对这台 ECS 执行受限部署；不会获得通用服务器管理权限。</p><a href="https://ram.console.aliyun.com/roles" target="_blank" rel="noopener" class="button secondary">前往阿里云授权此主机</a><details class="advanced-disclosure"><summary>查看精确目标策略</summary><pre class="code-view">${escape(JSON.stringify(c.target_policy,null,2))}</pre></details><button class="button" type="button" data-cloud-verify-target>验证目标授权</button>`;
     else {
       const prior=state.targetDeployments.find(d=>d.state==='SUCCEEDED'&&d.target.account_id===c.target.account_id&&d.target.region_id===c.target.region_id&&d.target.instance_id===c.target.instance_id);
-      step=`<h3>确认本次部署</h3><div class="facts"><div class="fact"><span class="fact-label">成果版本</span><span>${escape(state.fingerprint?.slice(0,16))}</span></div><div class="fact"><span class="fact-label">目标 ECS</span><span>${escape(c.target.name)} · ${escape(c.target.region_id)}</span></div><div class="fact"><span class="fact-label">运行方式</span><span>Watt 管理的独立容器</span></div>${prior?`<div class="fact"><span class="fact-label">当前 Watt 部署</span><span>${escape(prior.manifest_id.slice(0,12))} · 端口 ${escape(prior.port)}。将先验证新版本，再替换此精确运行版本。</span></div>`:''}</div><form id="cloud-deploy-form"><div class="field"><label for="cloud-port">对外端口</label><input id="cloud-port" name="port" type="number" min="1024" max="65535" value="${prior?.port||8080}" required></div><div class="field"><label for="cloud-rationale">本次授权依据</label><input id="cloud-rationale" name="rationale" required placeholder="确认把这个已验收版本部署到所选 ECS"></div><p class="muted">Watt 会先检查服务器条件和端口归属。若需要安装软件或提升权限，部署会停止并说明原因。</p><button class="button" type="submit">授权并部署</button></form>`;
+      const latest=state.targetDeployments.find(d=>d.target.account_id===c.target.account_id&&d.target.region_id===c.target.region_id&&d.target.instance_id===c.target.instance_id);
+      const targetLabel=`${escape(c.target.name)} · ${escape(c.target.region_id)} · ${escape(c.target.instance_id)}`;
+      if(!state.deployIntent) {
+        step=`<h3>目标授权已验证</h3><p>当前目标：${targetLabel}。这一步只确认精确目标授权，尚未授权或执行新的部署。</p>${latest?.blocker?`<p class="notice-error">最近一次针对这台 ECS 的检查：${escape(blockerCopy(latest))}</p>`:''}<p class="muted">请先完成目标主机的前置条件。只有你另行决定部署时，才进入部署授权。</p><button class="button secondary" type="button" data-cloud-show-deploy>我决定准备部署</button>`;
+      } else {
+        step=`<h3>确认本次部署</h3><div class="facts"><div class="fact"><span class="fact-label">成果版本</span><span>${escape(state.fingerprint?.slice(0,16))}</span></div><div class="fact"><span class="fact-label">目标 ECS</span><span>${targetLabel}</span></div><div class="fact"><span class="fact-label">运行方式</span><span>Watt 管理的独立容器</span></div>${prior?`<div class="fact"><span class="fact-label">当前 Watt 部署</span><span>${escape(prior.manifest_id.slice(0,12))} · 端口 ${escape(prior.port)}。将先验证新版本，再替换此精确运行版本。</span></div>`:''}</div><form id="cloud-deploy-form"><div class="field"><label for="cloud-port">对外端口</label><input id="cloud-port" name="port" type="number" min="1024" max="65535" value="${prior?.port||8080}" required></div><div class="field"><label for="cloud-rationale">本次授权依据</label><input id="cloud-rationale" name="rationale" required placeholder="确认把这个已验收版本部署到所选 ECS"></div><p class="muted">Watt 会先检查服务器条件和端口归属。若需要安装软件或提升权限，部署会停止并说明原因。</p><button class="button" type="submit">授权并部署</button></form>`;
+      }
     }
     node.innerHTML=`${choose}${reselect}<div class="link-row"><button class="button quiet" type="button" data-cloud-create>添加云连接</button></div>${step}<p id="cloud-delivery-message" class="muted" role="status"></p>`;
   }
   async function loadConnection(id) {
+    state.deployIntent=false;
     state.connection=await request(`/api/cloud-connections/aliyun/${encodeURIComponent(id)}`);
     state.targetDeployments=await request(`/api/cloud-connections/aliyun/${encodeURIComponent(id)}/deployments`);
     state.connections=await request('/api/cloud-connections/aliyun');
@@ -67,14 +75,14 @@
     if(!m.software||!a||a.decision!=='ACCEPT'||!detail.current)return;
     state.work=s.work_id;state.manifest=m.id;state.fingerprint=m.fingerprint;
     state.deployments=detail.cloud_deployments||[];state.targetDeployments=[];
-    state.open=false;state.connection=null;
+    state.open=false;state.connection=null;state.deployIntent=false;
     const current=state.deployments[0];
     const panel=document.createElement('section');panel.className='detail-panel';
-    panel.innerHTML=`<h2>阿里云部署</h2><p>${current?escape({SUCCEEDED:'部署成功',NEEDS_HUMAN_ATTENTION:'需要你处理',ROLLED_BACK:'已回滚',FAILED:'部署失败'}[current.state]||'正在部署'):'这个已验收成果尚未部署到阿里云。'}</p>${current?.blocker?`<p class="muted">${escape(blockerCopy(current))}</p>`:''}${current?.connection_id?'<button class="button secondary" type="button" data-cloud-reselect>重新选择 ECS（不部署）</button>':''}<button class="button" type="button" data-cloud-open>部署到阿里云</button><div id="cloud-delivery-flow"></div>`;
+    panel.innerHTML=`<h2>阿里云部署</h2><p>${current?`${escape({SUCCEEDED:'部署成功',NEEDS_HUMAN_ATTENTION:'需要你处理',ROLLED_BACK:'已回滚',FAILED:'部署失败'}[current.state]||'正在部署')} · ${escape(current.target.name)} · ${escape(current.target.region_id)} · ${escape(current.target.instance_id)}`:'这个已验收成果尚未部署到阿里云。'}</p>${current?.blocker?`<p class="muted">${escape(blockerCopy(current))}</p>`:''}${current?.connection_id?'<button class="button secondary" type="button" data-cloud-reselect>重新选择 ECS（不部署）</button>':''}<button class="button" type="button" data-cloud-open>查看云连接与目标</button><div id="cloud-delivery-flow"></div>`;
     document.getElementById('content')?.append(panel);
   }};
   document.addEventListener('click',async event=>{
-    const button=event.target.closest('[data-cloud-open],[data-cloud-create],[data-cloud-verify],[data-cloud-reselect],[data-cloud-select],[data-cloud-verify-target]');
+    const button=event.target.closest('[data-cloud-open],[data-cloud-create],[data-cloud-verify],[data-cloud-reselect],[data-cloud-select],[data-cloud-verify-target],[data-cloud-show-deploy]');
     if(!button)return;
     button.disabled=true;
     try{
@@ -97,6 +105,9 @@
       }else if(button.hasAttribute('data-cloud-verify-target')){
         const result=await request(`/api/cloud-connections/aliyun/${state.connection.id}/verify-target`,'POST');
         await loadConnection(result.id);
+      }else if(button.hasAttribute('data-cloud-show-deploy')){
+        state.deployIntent=true;
+        await renderFlow();
       }
     }catch(error){message(error.message,true);}finally{button.disabled=false;}
   });

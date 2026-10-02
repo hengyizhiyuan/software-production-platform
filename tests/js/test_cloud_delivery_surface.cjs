@@ -36,7 +36,7 @@ test('qualified Deliverable gets a cloud deployment action without a remote term
   });
   assert.equal(content.children.length,1);
   const html=content.children[0].innerHTML;
-  assert.match(html,/部署到阿里云/);
+  assert.match(html,/查看云连接与目标/);
   assert.doesNotMatch(html,/SSH|Terminal|命令输入|shell/i);
 });
 
@@ -58,6 +58,7 @@ test('missing deployment user is explained without exposing provider text',()=>{
       fingerprint:'a'.repeat(64)},
     acceptance:{decision:'ACCEPT'},current:true,summary:{work_id:'work'},
     cloud_deployments:[{state:'FAILED',blocker:'DEPLOYMENT_USER_NOT_FOUND',
+      target:{name:'新 ECS',region_id:'cn-hongkong',instance_id:'i-newtarget'},
       operations:[{output_summary:'DEPLOYMENT_USER_NOT_FOUND',
         deployment_user:'wattdeploy',provider_error_code:'AccountNotExists'}]}],
   });
@@ -94,15 +95,48 @@ test('existing connection can rediscover targets without creating a connection o
     manifest:{id:'manifest',software:{runtime_recipe:{adapter:'STATIC_WEB'}},
       fingerprint:'a'.repeat(64)},
     acceptance:{decision:'ACCEPT'},current:true,summary:{work_id:'work'},
-    cloud_deployments:[{id:'old-failure',connection_id:id,state:'FAILED',
+    cloud_deployments:[{id:'old-failure',connection_id:id,state:'FAILED',target,
       blocker:'DEPLOYMENT_USER_NOT_FOUND',operations:[]}],
   });
   assert.match(content.children[0].innerHTML,/重新选择 ECS（不部署）/);
-  const button=attribute=>({disabled:false,hasAttribute(name){return name===attribute;}});
+  const button=attribute=>({disabled:false,dataset:{},hasAttribute(name){return name===attribute;}});
   await listeners.click({target:{closest(){return button('data-cloud-reselect');}}});
   assert.match(flow.innerHTML,/新 Alibaba Cloud Linux ECS/);
   assert.ok(!calls.some(([url])=>url.includes('other-connection')));
   assert.ok(calls.some(([url,method])=>url===`/api/cloud-connections/aliyun/${id}/verify`&&method==='POST'));
   assert.ok(!calls.some(([url,method])=>url==='/api/cloud-connections/aliyun'&&method==='POST'));
   assert.ok(!calls.some(([url,method])=>url.endsWith('/select')&&method==='POST'));
+});
+
+test('verified target remains in inspection mode until a separate deploy decision',async()=>{
+  const id='existing-connection';
+  const target={account_id:'1234567890123456',name:'新 Alibaba Cloud Linux ECS',
+    region_id:'cn-hongkong',instance_id:'i-newtarget'};
+  const deployment={id:'failed-new-target',connection_id:id,state:'FAILED',
+    target,blocker:'DEPLOYMENT_USER_NOT_FOUND',operations:[{
+      output_summary:'DEPLOYMENT_USER_NOT_FOUND',deployment_user:'wattdeploy'}]};
+  const connection={id,state:'READY',target,
+    role_arn:'acs:ram::1234567890123456:role/wattecsdelivery'};
+  const {content,flow,window,listeners,calls}=surface((url,method)=>{
+    if(url==='/api/cloud-connections/aliyun')return [connection];
+    if(url===`/api/cloud-connections/aliyun/${id}`)return connection;
+    if(url===`/api/cloud-connections/aliyun/${id}/deployments`)return [deployment];
+    throw Error(`unexpected request ${method} ${url}`);
+  });
+  window.WattCloudDelivery.render({
+    manifest:{id:'manifest',software:{runtime_recipe:{adapter:'STATIC_WEB'}},
+      fingerprint:'a'.repeat(64)},
+    acceptance:{decision:'ACCEPT'},current:true,summary:{work_id:'work'},
+    cloud_deployments:[deployment],
+  });
+  assert.match(content.children[0].innerHTML,/新 Alibaba Cloud Linux ECS/);
+  const button=attribute=>({disabled:false,dataset:{},hasAttribute(name){return name===attribute;}});
+  await listeners.click({target:{closest(){return button('data-cloud-open');}}});
+  assert.match(flow.innerHTML,/目标授权已验证/);
+  assert.match(flow.innerHTML,/目标 ECS 缺少 Watt 部署用户 wattdeploy/);
+  assert.doesNotMatch(flow.innerHTML,/cloud-deploy-form|授权并部署/);
+  assert.ok(!calls.some(([,method])=>method==='POST'));
+  await listeners.click({target:{closest(){return button('data-cloud-show-deploy');}}});
+  assert.match(flow.innerHTML,/cloud-deploy-form|授权并部署/);
+  assert.ok(!calls.some(([,method])=>method==='POST'));
 });
