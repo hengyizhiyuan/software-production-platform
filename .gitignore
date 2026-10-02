@@ -4,6 +4,7 @@
 .venv/
 .uv-temp/
 .spg/
+.watt/
 __pycache__/
 *.py[cod]
 *.egg-info/
